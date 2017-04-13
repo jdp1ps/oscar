@@ -1,0 +1,64 @@
+<article class="card xs" >
+    <div class="card-title">
+        <i class="picto icon-doc" :class="'doc' + document.extension"></i>
+
+        <template v-if="document.editmode">
+            <select @change="changeTypeDocument(document, $event)" @blur="document.editmode = false">
+                <option :value="key" v-for="(documentType, key) in documentTypes" :selected="document.categoryText == documentType">{{ documentType }}</option>
+            </select>
+        </template>
+        <template v-else>
+            <small class="text-light" @dblclick="document.editmode = true">{{ document.categoryText }} ~ </small>
+        </template>
+
+
+        <strong>{{document.fileName}}</strong>
+        <small class="text-light" :title="document.fileSize + ' octet(s)'">&nbsp;({{document.fileSize | filesize}})</small>
+    </div>
+    <p>
+        {{ document.information }}
+    </p>
+    <div class="card-content">
+        <p class="text-highlight">
+            Fichier <strong>{{ document.extension}}</strong>
+            version {{ document.version }},
+            téléversé le <time>{{ document.dateUpload | dateFull }}</time>
+            par <person v-bind:person="document.uploader"></person>
+        </p>
+        <div class="exploder" v-if="document.previous.length" @click="document.explode = !document.explode">
+            Versions précédentes <i class="icon-angle-down" v-show="!document.explode"></i>
+            <i class="icon-angle-up" v-show="document.explode"></i>
+        </div>
+        <div v-if="document.previous.length" v-show="document.explode">
+            <article v-for="sub in document.previous" class="subdoc text-highlight">
+                <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
+
+                <strong>{{ sub.fileName }}</strong>
+                version <em>{{ sub.version }} </em>,
+                téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>,
+                par <person v-bind:person="sub.uploader"></person>
+
+                <a :href="sub.urlDownload">
+                    <i class="icon-download-outline"></i>
+                    Télécharger cette version
+                </a>
+            </article>
+        </div>
+        <nav class="text-right show-over">
+            <a class="btn btn-default btn-xs" :href="document.urlDownload">
+                <i class="icon-download-outline"></i>
+                Télécharger le fichier
+            </a>
+
+            <a class="btn btn-default btn-xs" :href="document.urlReupload">
+                <i class="icon-download-outline"></i>
+                Nouvelle version
+            </a>
+
+            <a class="btn btn-default btn-xs" data-confirm="Êtes-vous sûr de vouloir supprimer ce document ?" :data-href="document.urlDelete">
+                <i class="icon-trash"></i>
+                supprimer le fichier
+            </a>
+        </nav>
+    </div>
+</article>

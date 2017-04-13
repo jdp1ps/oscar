@@ -1,0 +1,38 @@
+{
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://dev.unicaen.fr/packagist"
+    }
+  ],
+  "name": "unicaen/oscar",
+  "license": "proprietary",
+  "description": "",
+  "require": {
+    "unicaen/unicaen-app": "dev-trunk",
+    "unicaen/unicaen-auth": "dev-master",
+    "unicaen/unicaen-ldap": "dev-trunk",
+    "unicaen/unicaen-code": "dev-trunk",
+    "enlitepro/enlite-monolog": "~1.1.0",
+    "kmelia/monolog-stdout-handler": "1.2.0",
+    "zendframework/zend-developer-tools": "dev-master",
+    "zf1/zend-search-lucene": "dev-master",
+    "tomphp/tjo-annotation-router": "dev-master",
+    "fightbulc/moment": "dev-master",
+    "zendframework/zftool": "dev-master",
+    "cocur/slugify": "dev-master",
+    "erusev/parsedown": "dev-master",
+    "oro/doctrine-extensions": "dev-master",
+    "jacksay/php-file-extension": "dev-master",
+    "swiftmailer/swiftmailer": "^6.0@dev"
+  },
+  "require-dev": {
+    "phpmd/phpmd": "@stable",
+    "phpunit/phpunit": "4.8.*",
+    "twig/twig": "^2.0@dev"
+  },
+  "minimum-stability": "dev",
+  "config": {
+    "github-protocols": ["https", "ssh"]
+  }
+}

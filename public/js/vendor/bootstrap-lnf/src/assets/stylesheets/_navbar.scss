@@ -1,0 +1,36 @@
+// Customize Bootstrap navbar colors
+.navbar {
+  border-radius: 0;
+  box-shadow: 0 1em 1em rgba(0,0,0,.2), inset 0 -1em 1em rgba(255,255,255,.1);
+  border-bottom: solid 1px;
+
+  @for $i from 1 through length($colors){
+    &.navbar-#{nth($colorsName,$i)} {
+      border-color: darken(nth($colors, $i), 10%);
+      background-color: nth($colors, $i);
+      color: lighten(nth($colors, $i), 50%);
+      a, h1, h2, h3, h4, h5, h6, strong, em {
+        color: lighten(nth($colors, $i), 60%);;
+      }
+      .active a {
+        background-color: lighten(nth($colors, $i), 20%);
+      }
+      a {
+        transition: all .3s;
+        color: lighten(nth($colors, $i), 50%);
+        &:focus {
+          background-color: lighten(nth($colors, $i), 20%);
+        }
+        &:hover {
+          background-color: lighten(nth($colors, $i), 10%);
+        }
+      }
+      .dropdown-menu a {
+        color: nth($colors, $i);
+        &:hover {
+          background-color: lighten(nth($colors, $i), 50%);
+        }
+      }
+    }
+  }
+}

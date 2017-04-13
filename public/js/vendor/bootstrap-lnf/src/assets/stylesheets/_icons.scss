@@ -1,0 +1,25 @@
+
+[class^="icon-"], [class*=" icon-"] {
+  &.inverse {
+    &:before {
+      display: inline-block;
+      padding: .25em;
+      width: 1.5em;
+      @include border-radius(1em);
+      background: black;
+      color: white;
+    }
+    &.green:before {
+      background: $brand-success;
+    }
+    &.blue:before {
+      background: $brand-info;
+    }
+    &.orange:before {
+      background: $brand-warning;
+    }
+    &.red:before {
+      background: $brand-danger;
+    }
+  }
+}

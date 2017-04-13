@@ -1,0 +1,48 @@
+@function ultralight($color){
+  @return lighten($color, 42%);
+}
+@function light($color){
+  @return lighten($color, 33%);
+}
+@function dark($color){
+  @return darken($color, 25%);
+}
+@function hard($color){
+  @return saturate($color, 25%);
+}
+@function grey($color){
+  @return desaturate($color, 25%);
+}
+
+@for $i from 1 through length($colors){
+  .bg-#{nth($colorsName,$i)},
+  .bg-#{nth($colorsName,$i)}-standard,
+  .bg-#{nth($colorsName,$i)}-grey,
+  .bg-#{nth($colorsName,$i)}-dark,
+  .bg-#{nth($colorsName,$i)}-hard {
+    text-shadow: -1px 1px 1px rgba(0,0,0,.3);
+    color: lighten(nth($colors, $i), 50%);
+    a, h1, h2, h3, h4, h5, h6, strong, em {
+      color: lighten(nth($colors, $i), 60%);;
+    }
+  }
+
+  .bg-#{nth($colorsName,$i)}, .bg-#{nth($colorsName,$i)}-standard {
+    background-color: nth($colors, $i);
+  }
+  .bg-#{nth($colorsName,$i)}-grey {
+    background-color: grey(nth($colors, $i));
+  }
+  .bg-#{nth($colorsName,$i)}-ultralight {
+    background-color: ultralight(nth($colors, $i));
+  }
+  .bg-#{nth($colorsName,$i)}-light {
+    background-color: lighten(nth($colors, $i), 33%);
+  }
+  .bg-#{nth($colorsName,$i)}-dark {
+    background-color: darken(nth($colors, $i), 25%);
+  }
+  .bg-#{nth($colorsName,$i)}-hard {
+    background-color: saturate(nth($colors, $i), 25%);
+  }
+}

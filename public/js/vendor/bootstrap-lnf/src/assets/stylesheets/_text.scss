@@ -1,0 +1,90 @@
+
+$colorLink: lighten(saturate($brand-primary, 50%), 25%);
+
+body {
+  background-color: $greyLight;
+  background-image: url(../images/bg-25.png);
+}
+
+
+
+h1, h2, h3, h4, h5, h6, strong, em {
+  color: $brand-primary;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 100;
+}
+
+strong {
+  font-weight: 600;
+}
+
+abbr {
+  color: lighten($brand-primary, 10%);
+  font-weight: 100;
+  &:before  { content: '['; }
+  &:after   { content: ']'; }
+}
+/*
+a {
+  color: $colorLink;
+  &:hover {
+    color: lighten($colorLink, 25%);
+  }
+}*/
+
+.site-header {
+  font-size: 1.25em;
+  padding: 2em 0;
+}
+
+.site-footer {
+  font-size: .8em;
+  padding: 2em 0;
+}
+
+.mention {
+  font-size: .8em;
+  padding: 1em 0;
+  color: hard($brand-primary);
+}
+
+.page-header {
+  border: none;
+  font-weight: lighter;
+  box-shadow: inset 0 3em 6em rgba(255,255,255,.1);
+
+  .baseline {
+    font-size: 1.5em;
+    font-weight: 100;
+    font-style: italic;
+    margin: 0;
+  }
+
+  &.hudge {
+    padding: 6em 0 1em;
+    h1 {
+      font-size: 4em;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.rounded {
+  border-radius: .5em;
+}
+
+// ALERT
+.alert {
+  border-radius: .5em;
+  padding: .5em .75em;
+}
+
+@for $i from 1 through length($colors){
+  .alert-#{nth($colorsName,$i)} {
+    @extend .alert;
+    background-color: nth($colors, $i);
+  }
+}

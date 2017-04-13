@@ -1,0 +1,90 @@
+// Fonction utilisée pour automatiser les couleurs
+@mixin cardColor($color){
+  background: $color;
+  color:  lighten($color, 50%);
+  .card-title {
+    border-color: darken($color, 5%);
+    color:  lighten($color, 75%);
+    [class*="icon"] {
+      &.inverse:before{
+        background-color:  lighten($color, 20%);
+        color: $color;
+      }
+    }
+  }
+  .card-content {
+    background-color:  lighten($color, 5%);
+  }
+  .card-footer {
+    border-color: darken($color, 5%);
+    color:  lighten($color, 30%);
+  }
+}
+
+// élément de base
+.card {
+
+  &.xs { font-size: .8em; }
+  &.big { font-size: 1.25em; }
+  &.huge { font-size: 1.5em; }
+
+  @include border-radius(2px);
+  @include box-shadow(.5em);
+
+  @for $i from 1 through length($colors){
+    &.card-#{nth($colorsName,$i)} {
+      @include cardColor(nth($colors, $i));
+    }
+  }
+
+  background-color: rgba(255,255,255,1);
+
+  padding: .25em;
+
+  .card-title {
+    margin: 0;
+    padding: 0 .5em;
+    border-bottom-width: thin;
+    border-bottom-style: solid;
+    border-color: darken(white, 5%);
+    font-size: 1.25em;
+    line-height: 2em;
+    font-weight: lighter;
+  }
+
+  &.openable {
+    .card-title { border-bottom-width: 0; }
+    &.open {
+        .card-title { border-bottom-width: thin; }
+    }
+  }
+
+  .card-content {
+    padding: .5em;
+  }
+
+  .card-footer {
+    font-size: .8em;
+    border-top: $border;
+    font-weight: lighter;
+  }
+
+  >header {
+    margin: 0;
+    position: relative;
+    .menu {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+  }
+
+  .content {
+    padding: 0;
+    min-height: 2em;
+  }
+
+  >footer {
+    margin: 0 .5em;
+  }
+}

@@ -1,0 +1,18 @@
+<article class="card xs jalon {{ type.facet }} {{css}}">
+
+    <time datetime="{{ dateStart.date }}">
+    {{dateFormat dateStart.date}}
+    </time>
+    <strong class="card-title">{{ type.label }}</strong>
+    <p class="details">{{ comment }}</p>
+    {{#if deletable }}
+    <nav>
+        <a href="#" class="btn-delete">
+            <i class="icon-trash"></i>
+        </a>
+        <a href="#" class="btn-edit">
+            <i class="icon-edit"></i>
+        </a>
+    </nav>
+    {{/if}}
+</article>

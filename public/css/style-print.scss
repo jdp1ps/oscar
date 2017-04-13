@@ -1,0 +1,13 @@
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ */
+
+
+$fontSize: 16px;
+
+body {
+  font-size: $fontSize;
+  h1 {
+    font-size: 10em;
+  }
+}

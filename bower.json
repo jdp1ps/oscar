@@ -1,0 +1,43 @@
+{
+  "name": "oscar",
+  "version": "1",
+  "authors": [
+    "Stéphane Bouvry <stephane.bouvry@unicaen.fr>"
+  ],
+  "license": "???",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/js/vendor",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "open-sans-fontface": "~1.4.0",
+    "select2": "~4.0.0",
+    "jquery": "~2.1.4",
+    "handlebars": "~3.0.3",
+    "underscore": "~1.8.3",
+    "Chart.js": "~1.0.2",
+    "bootstrap-lnf": "https://github.com/Jacksay/bootstrap-lnf.git",
+    "backbone": "~1.2.1",
+    "momentjs": "~2.10.6",
+    "bootstrap-datepicker": "~1.4.0",
+    "requirejs": "~2.1.20",
+    "timewalker": "*",
+    "requirejs-text": "~2.0.14",
+    "requirejs-domready": "~2.0.1",
+    "jqueryui": "~1.11.4",
+    "vis": "~4.16.1",
+    "vue": "~2.1.4",
+    "vue-resource": "~1.0.3",
+    "vue-router": "~2.1.1",
+    "ical.js": "~1.2.2",
+    "moment-timezone": "~0.5.11",
+    "in-the-box": "*",
+    "papa-parse": "~4.1.4",
+    "bootstrapcolorpicker": "~2.5.1",
+    "bootstrap-timepicker": "~0.5.2"
+  }
+}

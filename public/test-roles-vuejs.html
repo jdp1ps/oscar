@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <style>
+  body {
+    font-family: Arial;
+  }
+    .stack {
+      text-shadow: -1px 1px 0 #fff;
+      background:  #eee;
+      padding: 4px;
+      margin: 1em;
+      border-radius: 4px;
+      box-shadow: 0 0 8px rgba(0,0,0,.1);
+      display: inline-block;
+    }
+    .stacker {
+      font-weight: 600;}
+      .stacker:after {
+        content: ' : ';}
+    .list-stacked { display: inline; margin: 0; padding: 0}
+    .stacked {
+      display: inline;
+      margin: 0 0;
+      padding: 4px;
+      background: #ccc;
+      border-radius: 4px;
+      font-size: .9em;}
+  </style>
+  <div id="app">
+    <article v-for="item in aggregated">
+      <h3>{{item.label}}</h3>
+    </article>
+  </div>
+
+  <script src="js/vendor/jquery/dist/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.4/vue.js"></script>
+  <script>
+    $.getJSON('http://127.0.0.1:4000/activites-de-recherche/persons/7217', function(datas){
+      var v = new Vue({
+        el: '#app',
+
+        data: {
+          aggregator: 'enrolled',
+          aggregated: 'role',
+          personActivities : datas
+        },
+
+        computed: {
+          aggregated: function(){
+
+            // Résultat
+            var aggregat = [];
+
+            this.personActivities.forEach(function(data){
+               var idAggregat = data[this.aggregator];
+              if( !aggregat[idAggregat] ){
+                aggregat[idAggregat] = {
+                  label: data[this.aggregator+'Label'],
+                  aggregat: []
+                };
+              }
+              aggregat[idAggregat].aggregat.push({ label: data[this.aggregated] });
+            }.bind(this));
+            console.log(aggregat);
+            return aggregat;
+          }
+        }
+      });
+
+    });
+  </script>
+</body>
+</html>

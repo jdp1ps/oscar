@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Theme Template for Bootstrap</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="icon" href="../../favicon.ico" />
+
+
+    <!-- Bootstrap  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/github.min.css" media="screen" title="no title" charset="utf-8">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <link href='../fontello/css/fontello.css' rel='stylesheet' type='text/css'>
+    <link href="../css/bootstrap-lnf.css" rel="stylesheet" />
+
+<style media="screen">
+.result{
+  background-color: #F5F5F5;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+  padding: 9.5px;
+  margin: 0px 0px 10px;
+}
+
+.i-name, .i-code {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 10px;
+  color: #444;
+}
+.i-code { display: none;}
+.the-icons {
+  text-align: center;
+}
+.demo-icon {
+  font-size: 200%;
+}
+.nuancier > div {
+  text-align: center;
+  line-height: 90px;
+  margin-bottom: 1em;
+  font-size: .75em;
+}
+</style>
+
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <nav class="navbar navbar-primary navbar-fixed-top">
+      <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Brand</a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+          <li><a href="#">Link</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Action</a></li>
+              <li><a href="#">Another action</a></li>
+              <li><a href="#">Something else here</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="#">Separated link</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="#">One more separated link</a></li>
+            </ul>
+          </li>
+        </ul>
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+          </div>
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#">Link</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Action</a></li>
+              <li><a href="#">Another action</a></li>
+              <li><a href="#">Something else here</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="#">Separated link</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+
+    <nav class="menu-icon onleft compl" style="top: 25%; position: fixed ">
+      <span class="heading">Components</span>
+      <a class="item" href="#cartouche">
+        <i class="icon-tag"></i><span class="item-label">Cartouche</span>
+      </a>
+      <a class="item" href="#card">
+        <i class="icon-popup"></i><span class="item-label">Card</span>
+      </a>
+      <a class="item" href="#icon-menu">
+        <i class="icon-bookmark"></i><span class="item-label">Menu (icons)</span>
+      </a>
+      <a class="item" href="#block">
+        <i class="icon-pin-outline"></i><span class="item-label">Block</span>
+      </a>
+      <span class="heading">Utils</span>
+      <a class="item" href="#openable">
+        <i class="icon-tag"></i><span class="item-label">Openable</span>
+      </a>
+      <a class="item" href="#colors">
+        <i class="icon-tag"></i><span class="item-label">Color</span>
+      </a>
+      <a class="item" href="#icons">
+        <i class="icon-picture-outline"></i><span class="item-label">Icons</span>
+      </a>
+      <span class="divider"></span>
+      <a class="item" href="#">
+        <i class="icon-home-outline"></i>
+        <span class="item-label">Top</span>
+      </a>
+    </nav>
+
+
+
+
+    <div class="container">
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <h1>Theme example</h1>
+        <p>This is a template showcasing the optional theme stylesheet included in Bootstrap. Use it as a starting point to create something more unique by building on or modifying it.</p>
+      </div>
+    </div>
+
+
+    <!-- fonts -->
+    <section id="fonts">
+      <header class="page-header hudge bg-primary">
+        <h1 class="container">Texte</h1>
+      </header>
+      <div class="container">
+        <div class="col-md-6">
+          <h2>Titres</h2>
+          <div class="result">
+            <h1>h1</h1>
+            <h2>h2</h2>
+            <h3>h3</h3>
+            <h4>h4</h4>
+            <h5>h5</h5>
+            <h6>h6</h6>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h2>Texte</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. <strong>Texte STRONG</strong> doloremque necessitatibus natus sit maxime rerum provident dolore rem voluptatem iure nisi animi adipisci soluta ipsa facilis ratione ipsam, vel cum accusamus!</p>
+          <p>Lorem ipsum dolor sit amet, <em>texte EM</em> consectetur adipisicing elit. Aliquam facilis asperiores, distinctio ullam, iure expedita doloremque, tenetur voluptate molestias nam perspiciatis. Aspernatur eveniet voluptatem similique iste illo, sit eius tempore.</p>
+          <p>Lorem ipsum dolor sit amet, consectetur <a href="#">exemple de lien</a> adipisicing elit. Soluta nam expedita laboriosam, eius doloremque atque recusandae, odit, <abbr title="Exemple">ABBR</abbr> adipisci accusantium voluptatem, eum excepturi? Dolore dolorem debitis, excepturi explicabo optio nobis fuga.</p>
+        </div>
+      </div>
+    </section><!-- /fonts -->
+
+      <div class="page-header hudge bg-primary" id="colors">
+        <h1 class="container">Colors</h1>
+      </div>
+
+      <div class="container">
+
+        <p>
+          Color are calculated and normalized in <strong>sass</strong> with functions :
+        </p>
+        <ul>
+          <li><code>ultraligh($color)</code></li>
+          <li><code>light($color)</code></li>
+          <li><code>hard($color)</code> (more saturate)</li>
+          <li><code>grey($color)</code></li>
+          <li><code>dark($color)</code></li>
+        </ul>
+
+          <div class="nuancier row">
+            <div class="col-md-2">
+              <div class="bg-primary-ultralight">.bg-primary-ultralight</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-primary-light">.bg-primary-light</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-primary-standard">.bg-primary-standard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-primary-hard">.bg-primary-hard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-primary-dark">.bg-primary-dark</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-primary-grey">.bg-primary-grey</div>
+            </div>
+          </div>
+          <div class="nuancier row">
+            <div class="col-md-2">
+              <div class="bg-secondary1-ultralight">.bg-secondary1-ultralight</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary1-light">.bg-secondary1-light</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary1-standard">.bg-secondary1-standard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary1-hard">.bg-secondary1-hard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary1-dark">.bg-secondary1-dark</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary1-grey">.bg-secondary1-grey</div>
+            </div>
+          </div>
+          <div class="nuancier row">
+            <div class="col-md-2">
+              <div class="bg-secondary2-ultralight">.bg-secondary2-ultralight</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary2-light">.bg-secondary2-light</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary2-standard">.bg-secondary2-standard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary2-hard">.bg-secondary2-hard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary2-dark">.bg-secondary2-dark</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-secondary2-grey">.bg-secondary2-grey</div>
+            </div>
+          </div>
+          <div class="nuancier row">
+            <div class="col-md-2">
+              <div class="bg-complementary-ultralight">.bg-complementary-ultralight</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-complementary-light">.bg-complementary-light</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-complementary-standard">.bg-complementary-standard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-complementary-hard">.bg-complementary-hard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-complementary-dark">.bg-complementary-dark</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-complementary-grey">.bg-complementary-grey</div>
+            </div>
+          </div>
+          <div class="nuancier row">
+            <div class="col-md-2">
+              <div class="bg-success-ultralight">.bg-success-ultralight</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-success-light">.bg-success-light</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-success-standard">.bg-success-standard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-success-hard">.bg-success-hard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-success-dark">.bg-success-dark</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-success-grey">.bg-success-grey</div>
+            </div>
+          </div>
+          <div class="nuancier row">
+            <div class="col-md-2">
+              <div class="bg-info-ultralight">.bg-info-ultralight</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-info-light">.bg-info-light</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-info-standard">.bg-info-standard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-info-hard">.bg-info-hard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-info-dark">.bg-info-dark</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-info-grey">.bg-info-grey</div>
+            </div>
+          </div>
+          <div class="nuancier row">
+            <div class="col-md-2">
+              <div class="bg-danger-ultralight">.bg-danger-ultralight</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-danger-light">.bg-danger-light</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-danger-standard">.bg-danger-standard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-danger-hard">.bg-danger-hard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-danger-dark">.bg-danger-dark</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-danger-grey">.bg-danger-grey</div>
+            </div>
+          </div>
+          <div class="nuancier row">
+            <div class="col-md-2">
+              <div class="bg-warning-ultralight">.bg-warning-ultralight</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-warning-light">.bg-warning-light</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-warning-standard">.bg-warning-standard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-warning-hard">.bg-warning-hard</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-warning-dark">.bg-warning-dark</div>
+            </div>
+            <div class="col-md-2">
+              <div class="bg-warning-grey">.bg-warning-grey</div>
+            </div>
+          </div>
+      </div>
+
+      <div class="page-header hudge bg-secondary1" id="cartouche">
+        <h1 class="container">Cartouche</h1>
+      </div>
+
+      <div class="container">
+          <h2>Core</h2>
+
+          <div class="row">
+
+            <div class="col-md-6">
+              <h3><abbr title="Exemple Minimum Fonctionnel">EMF</abbr></h3>
+  <pre>
+  &lt;span class="<strong>cartouche</strong>">
+    John Doe
+  &lt;/span>
+  </pre>
+            </div>
+            <div class="col-md-6">
+              <h3>Result</h3>
+              <div class="result">
+                <span class="cartouche">
+                  John Doe
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <h2>Color</h2>
+
+          <p>
+            Color sample, just add <code>colorName</code> to CSS attribute like this
+            <code>class="cartouche prim"</code>
+          </p>
+          <div class="row">
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche primary">.cartouche.primary</span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche primary">
+  .cartouche.primary
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche secondary1">.cartouche.secondary1</span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche secondary1">
+  .cartouche.secondary1
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche secondary2">.cartouche.secondary2</span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche secondary2">
+  .cartouche.secondary2
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche complementary">.cartouche.complementary</span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche complementary">
+  .cartouche.complementary
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche success">.cartouche.success</span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche success">
+  .cartouche.success
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche info">.cartouche.info</span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche info">
+  .cartouche.info
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche danger">.cartouche.danger</span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche danger">
+  .cartouche.danger
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche warning">.cartouche.warning</span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche warning">
+  .cartouche.warning
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+          </div>
+          <hr>
+
+          <h2>Addon</h2>
+
+          <div class="row">
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche primary">
+                  .cartouche.primary
+                  <span class="addon">Addon</span>
+                </span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche primary">
+  .cartouche.primary
+  &lt;span>Addon&lt;/span>
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche secondary1">
+                  .cartouche.secondary1
+                  <span class="addon">Addon</span>
+                </span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche secondary1">
+  .cartouche.secondary1
+  &lt;span>Addon&lt;/span>
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche secondary2">
+                  .cartouche.secondary2
+                  <span class="addon">Addon</span>
+                </span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche secondary2">
+  .cartouche.secondary2
+  &lt;span>Addon&lt;/span>
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche complementary">
+                  .cartouche.complementary
+                  <span class="addon">Addon</span>
+                </span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche complementary">
+  .cartouche.complementary
+  &lt;span>Addon&lt;/span>
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche success">
+                  .cartouche.success
+                  <span class="addon">Addon</span>
+                </span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche success">
+  .cartouche.success
+  &lt;span>Addon&lt;/span>
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche info">
+                  .cartouche.info
+                  <span class="addon">Addon</span>
+                </span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche info">
+  .cartouche.info
+  &lt;span>Addon&lt;/span>
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche danger">
+                  .cartouche.danger
+                  <span class="addon">Addon</span>
+                </span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche danger">
+  .cartouche.danger
+  &lt;span>Addon&lt;/span>
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <span class="cartouche warning">
+                  .cartouche.warning
+                  <span class="addon">Addon</span>
+                </span>
+              </div>
+              <div class="col-md-8"><pre><code>&lt;span class="cartouche warning">
+  .cartouche.warning
+  &lt;span>Addon&lt;/span>
+&lt;/span>
+</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <h2>Content inside</h2>
+
+          <div class="row">
+            <div class="col-md-4">
+                <span class="cartouche primary">
+                  <a href="#">Link inside</a>
+                  <span class="addon">Addon</span>
+                </span>
+            </div>
+          </div>
+
+          <h2>Bordered</h2>
+          <p>
+            <code>bordered</code> CSS class display a border :
+          </p>
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <span class="cartouche bordered primary">.cartouche.primary</span><br/>
+              <span class="cartouche bordered primary">.cartouche.primary<span class="addon">With Addon</span></span>
+            </div>
+            <div class="col-md-4 text-center">
+              <span class="cartouche bordered secondary1">.cartouche.secondary1</span><br/>
+              <span class="cartouche bordered secondary1">.cartouche.secondary1<span class="addon">With Addon</span></span>
+            </div>
+            <div class="col-md-4 text-center">
+              <span class="cartouche bordered secondary2">.cartouche.secondary2</span><br/>
+              <span class="cartouche bordered secondary2">.cartouche.secondary2<span class="addon">With Addon</span></span>
+            </div>
+            <div class="col-md-4 text-center">
+              <span class="cartouche bordered complementary">.cartouche.complementary</span><br/>
+              <span class="cartouche bordered complementary">.cartouche.complementary<span class="addon">With Addon</span></span>
+            </div>
+            <div class="col-md-4 text-center">
+              <span class="cartouche bordered success">.cartouche.success</span><br/>
+              <span class="cartouche bordered success">.cartouche.success<span class="addon">With Addon</span></span>
+            </div>
+            <div class="col-md-4 text-center">
+              <span class="cartouche bordered info">.cartouche.info</span><br/>
+              <span class="cartouche bordered info">.cartouche.info<span class="addon">With Addon</span></span>
+            </div>
+            <div class="col-md-4 text-center">
+              <span class="cartouche bordered danger">.cartouche.danger</span><br/>
+              <span class="cartouche bordered danger">.cartouche.danger<span class="addon">With Addon</span></span>
+            </div>
+            <div class="col-md-4 text-center">
+              <span class="cartouche bordered warning">.cartouche.warning</span><br/>
+              <span class="cartouche bordered warning">.cartouche.warning<span class="addon">With Addon</span></span>
+            </div>
+          </div>
+
+      <h2>Size</h2>
+      <p>
+        <em>sizing</em> class
+      </p>
+      <div class="row">
+        <div class="col-md-3 text-right">
+            <code>.xs</code>
+        </div>
+        <div class="col-md-9">
+          <span class="cartouche prim xs">
+            cartouche
+          </span>
+          <span class="cartouche prim xs">
+            cartouche
+            <span class="addon">
+              .addon
+            </span>
+          </span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3 text-right">
+            <code>.normal</code>
+        </div>
+        <div class="col-md-9">
+          <span class="cartouche prim normal">
+            cartouche
+          </span>
+          <span class="cartouche prim normal">
+            cartouche
+            <span class="addon">
+              .addon
+            </span>
+          </span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3 text-right">
+            <code>.big</code>
+        </div>
+        <div class="col-md-9">
+          <span class="cartouche prim big">
+            cartouche
+          </span>
+          <span class="cartouche prim big">
+            cartouche
+            <span class="addon">
+              .addon
+            </span>
+          </span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3 text-right">
+            <code>.hudge</code>
+        </div>
+        <div class="col-md-9">
+          <span class="cartouche prim hudge">
+            cartouche
+          </span>
+          <span class="cartouche prim hudge">
+            cartouche
+            <span class="addon">
+              .addon
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="page-header bg-primary hudge" id="icons">
+      <h1 class="container">Icons</h1>
+    </div>
+
+    <div class="container">
+
+        <p>
+          Based on fontello
+        </p>
+        <h2>Usage</h2>
+        <div class="row">
+          <div class="col-xs-6">
+        <h3>Code sample</h3>
+<pre>
+&lt;div class="icon-link-outline">
+  Some content here
+&lt;/div>
+
+&lt;!-- or -->
+
+&lt;p>
+  Use icon
+  &lt;i class="icon-link-outline">&lt;/i>
+  anywhere.
+&lt;/p>
+</pre>
+          </div>
+          <div class="col-xs-6">
+              <h3>Result</h3>
+              <div class="result">
+                <p class="icon-link-outline">
+                  Some content here
+                </p>
+                <p>
+                  Use icon
+                  <i class="icon-link-outline"></i>
+                  anywhere.
+                </p>
+              </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-6">
+        <h3>Code sample</h3>
+<pre>
+&lt;div class="icon-pin-outline <strong>inverse</strong>">
+  Some content here
+&lt;/div>
+</pre>
+          </div>
+          <div class="col-xs-6">
+              <h3>Result</h3>
+              <div class="result">
+                <p class="icon-pin-outline inverse">
+                  Some content here
+                </p>
+              </div>
+
+          </div>
+        </div>
+
+          <h3>Color</h3>
+        <div class="row">
+          <div class="col-xs-6">
+        <h4>Code sample</h4>
+<pre>
+&lt;div class="icon-tag inverse<strong> green</strong>">Icon&lt;/div>
+&lt;div class="icon-tag inverse<strong> orange</strong>">Icon&lt;/div>
+&lt;div class="icon-tag inverse<strong> blue</strong>">Icon&lt;/div>
+&lt;div class="icon-tag inverse<strong> purple</strong>">Icon&lt;/div>
+&lt;div class="icon-tag inverse<strong> red</strong>">Icon&lt;/div>
+</pre>
+          </div>
+          <div class="col-xs-6">
+              <h4>Result</h4>
+              <div class="result">
+                <p class="icon-tag inverse green">
+                  Icon
+                </p>
+                <p class="icon-tag inverse orange">
+                  Icon
+                </p>
+                <p class="icon-tag inverse blue">
+                  Icon
+                </p>
+                <p class="icon-tag inverse purple">
+                  Icon
+                </p>
+                <p class="icon-tag inverse red">
+                  Icon
+                </p>
+              </div>
+
+          </div>
+        </div>
+
+
+
+          <div class="row">
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-link-outline"></i><span class="i-name">icon-link-outline</span><span class="i-code">0xe800</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-home-outline"></i><span class="i-name">icon-home-outline</span><span class="i-code">0xe801</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-attach-outline"></i><span class="i-name">icon-attach-outline</span><span class="i-code">0xe802</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-cancel-alt"></i><span class="i-name">icon-cancel-alt</span><span class="i-code">0xe803</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-lock-open"></i><span class="i-name">icon-lock-open</span><span class="i-code">0xe804</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-pin-outline"></i><span class="i-name">icon-pin-outline</span><span class="i-code">0xe805</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-picture-outline"></i><span class="i-name">icon-picture-outline</span><span class="i-code">0xe806</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-search-outline"></i><span class="i-name">icon-search-outline</span><span class="i-code">0xe807</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-mail"></i><span class="i-name">icon-mail</span><span class="i-code">0xe808</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-user-outline"></i><span class="i-name">icon-user-outline</span><span class="i-code">0xe809</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-users-outline"></i><span class="i-name">icon-users-outline</span><span class="i-code">0xe80a</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-tags"></i><span class="i-name">icon-tags</span><span class="i-code">0xe80b</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-tag"></i><span class="i-name">icon-tag</span><span class="i-code">0xe80c</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-bookmark"></i><span class="i-name">icon-bookmark</span><span class="i-code">0xe80d</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-pencil"></i><span class="i-name">icon-pencil</span><span class="i-code">0xe80e</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-attention"></i><span class="i-name">icon-attention</span><span class="i-code">0xe80f</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-warning-empty"></i><span class="i-name">icon-warning-empty</span><span class="i-code">0xe810</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-trash"></i><span class="i-name">icon-trash</span><span class="i-code">0xe811</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-cog-outline"></i><span class="i-name">icon-cog-outline</span><span class="i-code">0xe812</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-block-outline"></i><span class="i-name">icon-block-outline</span><span class="i-code">0xe813</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-stopwatch"></i><span class="i-name">icon-stopwatch</span><span class="i-code">0xe814</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-bell"></i><span class="i-name">icon-bell</span><span class="i-code">0xe815</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-contacts"></i><span class="i-name">icon-contacts</span><span class="i-code">0xe816</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-news"></i><span class="i-name">icon-news</span><span class="i-code">0xe817</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-zoom-in-outline"></i><span class="i-name">icon-zoom-in-outline</span><span class="i-code">0xe818</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-lightbulb"></i><span class="i-name">icon-lightbulb</span><span class="i-code">0xe819</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-rss-outline"></i><span class="i-name">icon-rss-outline</span><span class="i-code">0xe81a</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-folder"></i><span class="i-name">icon-folder</span><span class="i-code">0xe81b</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-wrench-outline"></i><span class="i-name">icon-wrench-outline</span><span class="i-code">0xe81c</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-lock"></i><span class="i-name">icon-lock</span><span class="i-code">0xe81d</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-download-outline"></i><span class="i-name">icon-download-outline</span><span class="i-code">0xe81e</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-upload-outline"></i><span class="i-name">icon-upload-outline</span><span class="i-code">0xe81f</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-export-outline"></i><span class="i-name">icon-export-outline</span><span class="i-code">0xe820</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-edit"></i><span class="i-name">icon-edit</span><span class="i-code">0xe821</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-location-outline"></i><span class="i-name">icon-location-outline</span><span class="i-code">0xe822</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-direction-outline"></i><span class="i-name">icon-direction-outline</span><span class="i-code">0xe823</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-calendar-outlilne"></i><span class="i-name">icon-calendar-outlilne</span><span class="i-code">0xe824</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-database"></i><span class="i-name">icon-database</span><span class="i-code">0xe825</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-power-outline"></i><span class="i-name">icon-power-outline</span><span class="i-code">0xe826</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-flow-split"></i><span class="i-name">icon-flow-split</span><span class="i-code">0xe827</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-chart-bar-outline"></i><span class="i-name">icon-chart-bar-outline</span><span class="i-code">0xe828</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-chart-alt-outline"></i><span class="i-name">icon-chart-alt-outline</span><span class="i-code">0xe829</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-temperatire"></i><span class="i-name">icon-temperatire</span><span class="i-code">0xe82a</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-arrows-cw-outline"></i><span class="i-name">icon-arrows-cw-outline</span><span class="i-code">0xe82b</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-wifi-outline"></i><span class="i-name">icon-wifi-outline</span><span class="i-code">0xe82c</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-globe-outline"></i><span class="i-name">icon-globe-outline</span><span class="i-code">0xe82d</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-lifebuoy"></i><span class="i-name">icon-lifebuoy</span><span class="i-code">0xe82e</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-info-outline"></i><span class="i-name">icon-info-outline</span><span class="i-code">0xe82f</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-cancel-outline"></i><span class="i-name">icon-cancel-outline</span><span class="i-code">0xe830</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-cancel-circled-outline"></i><span class="i-name">icon-cancel-circled-outline</span><span class="i-code">0xe831</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-print"></i><span class="i-name">icon-print</span><span class="i-code">0xe832</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-chat-alt"></i><span class="i-name">icon-chat-alt</span><span class="i-code">0xe833</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-comment"></i><span class="i-name">icon-comment</span><span class="i-code">0xe834</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-doc"></i><span class="i-name">icon-doc</span><span class="i-code">0xe835</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-doc-add"></i><span class="i-name">icon-doc-add</span><span class="i-code">0xe836</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-doc-remove"></i><span class="i-name">icon-doc-remove</span><span class="i-code">0xe837</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-folder-add"></i><span class="i-name">icon-folder-add</span><span class="i-code">0xe838</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-folder-delete"></i><span class="i-name">icon-folder-delete</span><span class="i-code">0xe839</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-phone-outline"></i><span class="i-name">icon-phone-outline</span><span class="i-code">0xe83a</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-clock"></i><span class="i-name">icon-clock</span><span class="i-code">0xe83b</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-wristwatch"></i><span class="i-name">icon-wristwatch</span><span class="i-code">0xe83c</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-popup"></i><span class="i-name">icon-popup</span><span class="i-code">0xe83d</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-left-open-outline"></i><span class="i-name">icon-left-open-outline</span><span class="i-code">0xe83e</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-right-open-outline"></i><span class="i-name">icon-right-open-outline</span><span class="i-code">0xe83f</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-down-outline"></i><span class="i-name">icon-down-outline</span><span class="i-code">0xe840</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-left-outline"></i><span class="i-name">icon-left-outline</span><span class="i-code">0xe841</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-right-outline"></i><span class="i-name">icon-right-outline</span><span class="i-code">0xe842</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-up-outline"></i><span class="i-name">icon-up-outline</span><span class="i-code">0xe843</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-cw-outline"></i><span class="i-name">icon-cw-outline</span><span class="i-code">0xe844</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-loop-outline"></i><span class="i-name">icon-loop-outline</span><span class="i-code">0xe845</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-loop-alt-outline"></i><span class="i-name">icon-loop-alt-outline</span><span class="i-code">0xe846</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-pause-outline"></i><span class="i-name">icon-pause-outline</span><span class="i-code">0xe847</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-fast-fw-outline"></i><span class="i-name">icon-fast-fw-outline</span><span class="i-code">0xe848</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-rewind-outline"></i><span class="i-name">icon-rewind-outline</span><span class="i-code">0xe849</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-eject-outline"></i><span class="i-name">icon-eject-outline</span><span class="i-code">0xe84a</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-eject-alt-outline"></i><span class="i-name">icon-eject-alt-outline</span><span class="i-code">0xe84b</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-target-outline"></i><span class="i-name">icon-target-outline</span><span class="i-code">0xe84c</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-plug"></i><span class="i-name">icon-plug</span><span class="i-code">0xe84d</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-leaf"></i><span class="i-name">icon-leaf</span><span class="i-code">0xe84e</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-scissors-outline"></i><span class="i-name">icon-scissors-outline</span><span class="i-code">0xe84f</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-puzzle-outline"></i><span class="i-name">icon-puzzle-outline</span><span class="i-code">0xe850</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-calculator"></i><span class="i-name">icon-calculator</span><span class="i-code">0xe851</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-pi-outline"></i><span class="i-name">icon-pi-outline</span><span class="i-code">0xe852</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-infinity-outline"></i><span class="i-name">icon-infinity-outline</span><span class="i-code">0xe853</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-looped-square-outline"></i><span class="i-name">icon-looped-square-outline</span><span class="i-code">0xe854</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-sort-alphabet-outline"></i><span class="i-name">icon-sort-alphabet-outline</span><span class="i-code">0xe855</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-sort-numeric-outline"></i><span class="i-name">icon-sort-numeric-outline</span><span class="i-code">0xe856</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-anchor-outline"></i><span class="i-name">icon-anchor-outline</span><span class="i-code">0xe857</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-chart-pie-outline"></i><span class="i-name">icon-chart-pie-outline</span><span class="i-code">0xe858</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-waves-outline"></i><span class="i-name">icon-waves-outline</span><span class="i-code">0xe859</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-attention-circled"></i><span class="i-name">icon-attention-circled</span><span class="i-code">0xe85a</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-ok-circled"></i><span class="i-name">icon-ok-circled</span><span class="i-code">0xe85b</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-plus-circled"></i><span class="i-name">icon-plus-circled</span><span class="i-code">0xe85c</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-minus-circled"></i><span class="i-name">icon-minus-circled</span><span class="i-code">0xe85d</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-help-circled"></i><span class="i-name">icon-help-circled</span><span class="i-code">0xe85e</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-right-dir"></i><span class="i-name">icon-right-dir</span><span class="i-code">0xe85f</span></div>
+            <div class="the-icons col-xs-1"><i class="demo-icon icon-down-dir"></i><span class="i-name">icon-down-dir</span><span class="i-code">0xe860</span></div>
+        </div>
+      </div>
+
+      <div class="page-header bg-primary hudge" id="card">
+        <h1 class="container">Card</h1>
+      </div>
+      <div class="container">
+
+      <h2>Sizing</h2>
+
+      <div class="row">
+        <div class="col-md-3">
+          <article class="card xs">
+            <header class="card-title">XS Card</header>
+            <div class="card-content">
+              <p>Use <code>.xs</code> CSS class.</p>
+            </div>
+          </article>
+        </div>
+        <div class="col-md-3">
+          <article class="card">
+            <header class="card-title">Standard Card</header>
+            <div class="card-content">
+              <p>Only use <code>.card</code> CSS class.</p>
+            </div>
+          </article>
+        </div>
+        <div class="col-md-3">
+          <article class="card big">
+            <header class="card-title">Big Card</header>
+            <div class="card-content">
+              <p>Add <code>.big</code> CSS class.</p>
+            </div>
+          </article>
+        </div>
+        <div class="col-md-3">
+          <article class="card huge">
+            <header class="card-title">Huge Card</header>
+            <div class="card-content">
+              <p>Add <code>.huge</code> CSS class.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <h2>Footer Addon</h2>
+      <div class="row">
+        <div class="col-md-3">
+          <article class="card xs">
+            <header class="card-title">XS Card</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, ea, dicta. Magnam est eligendi, placeat cum assumenda esse minima incidunt odit nulla magni et commodi tempore vitae aliquid ratione! Illum.</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-3">
+          <article class="card">
+            <header class="card-title">Standard Card</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-3">
+          <article class="card big">
+            <header class="card-title">Big Card</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloribus perferendis, quos blanditiis impedit fuga a ab. Omnis expedita minus, a consectetur explicabo.</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-3">
+          <article class="card huge">
+            <header class="card-title">Huge Card</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Obcaecati quia fuga nihil asperiores laboriosam.</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+      </div>
+
+      <h2>Coloring</h2>
+
+      <div class="row">
+        <div class="col-md-4">
+          <article class="card card-primary" style="margin-bottom: 1em">
+            <header class="card-title">.color-primary</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-4">
+          <article class="card card-secondary1" style="margin-bottom: 1em">
+            <header class="card-title">.color-secondary1</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-4">
+          <article class="card card-secondary2" style="margin-bottom: 1em">
+            <header class="card-title">.color-secondary2</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-4">
+          <article class="card card-complementary" style="margin-bottom: 1em">
+            <header class="card-title">.color-complementary</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-4">
+          <article class="card card-success" style="margin-bottom: 1em">
+            <header class="card-title">.color-success</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-4">
+          <article class="card card-info" style="margin-bottom: 1em">
+            <header class="card-title">.color-info</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-4">
+          <article class="card card-danger" style="margin-bottom: 1em">
+            <header class="card-title">.color-danger</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+        <div class="col-md-4">
+          <article class="card card-warning" style="margin-bottom: 1em">
+            <header class="card-title">.color-warning</header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+      </div>
+
+      <h2>Icons</h2>
+
+      <div class="row">
+
+        <div class="col-md-4">
+          <article class="card" style="margin-bottom: 1em">
+            <header class="card-title">
+              <i class="icon-tag"></i>
+              example
+            </header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+
+        <div class="col-md-4">
+          <article class="card card-prim" style="margin-bottom: 1em">
+            <header class="card-title">
+              <i class="icon-mail"></i>
+              example
+            </header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+
+        <div class="col-md-4">
+          <article class="card card-comp" style="margin-bottom: 1em">
+            <header class="card-title">
+              <i class="icon-link-outline"></i>
+              example
+            </header>
+            <div class="card-content">
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure eveniet, nam quam sit recusandae earum velit blanditiis cumque ratione quia ad saepe doloremque, harum eligendi aspernatur libero odit optio culpa!</p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+
+      </div>
+    </div>
+
+
+      <section id="openable">
+        <header class="page-header hudge bg-secondary2">
+          <div class="container">
+            <h1>Openable</h1>
+            <p class="baseline">
+              Le module <strong>Openable</strong> permet avec des classes CSS des zones cachées/affichées.
+            </p>
+          </div>
+        </header>
+
+<div class="container">
+      <div class="row">
+
+        <div class="col-md-4">
+          <p>
+            Openable API provide show/hide behavior with CSS :
+            <ul>
+              <li><code>.openable</code> : Element with begavior.</li>
+              <li><code>.handler</code> : Handler to open/close content.</li>
+              <li><code>.openable-content</code> : Content show/hide.</li>
+            </ul>
+          </p>
+
+          <p class="alert-seca">
+            By default, <code>.openable-content</code> is hide.
+          </p>
+
+        </div>
+
+        <div class="col-md-8">
+          <p>
+            exemple with Card:
+          </p>
+          <pre>
+&lt;article class="card openable" style="margin-bottom: 1em">
+  &lt;header class="card-title">
+    &lt;i class="icon-openable handler">&lt;/i>
+    example
+  &lt;/header>
+  &lt;div class="card-content openable-content">
+    &lt;p>
+      Lorem ipsum dolor sit amet, consectetur
+      adipisicing elit. Iure eveniet, nam quam
+      sit recusandae.
+    &lt;/p>
+  &lt;/div>
+  &lt;footer class="card-footer">.card-footer example&lt;/footer>
+&lt;/article>
+</pre>
+
+          <article class="card openable">
+            <header class="card-title">
+              <i class="icon-openable handler"></i>
+              example
+            </header>
+            <div class="card-content openable-content">
+              <p>
+                Close by default.
+              </p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+      </div>
+
+      <h3>open/close</h3>
+      <div class="row">
+
+        <div class="col-md-4">
+          <p>
+            Card with <code>.openable</code> class are close (<code>.openable-content</code> is hide).
+          </p>
+          <article class="card openable xs" style="margin-bottom: 1em">
+            <header class="card-title">
+              <i class="icon-openable handler"></i>
+              example
+            </header>
+            <div class="card-content openable-content">
+              <p>
+                Close by default.
+              </p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+
+          <article class="card openable open" style="margin-bottom: 1em">
+            <header class="card-title">
+              <i class="icon-openable handler"></i>
+              example
+            </header>
+            <div class="card-content openable-content">
+              <p>
+                Add <code>.open</code> CSS class to <em>card</em>.
+              </p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+
+          <article class="card openable open" style="margin-bottom: 1em">
+            <header class="card-title handler">
+              Header as handler
+            </header>
+            <div class="card-content openable-content">
+              <p>
+                Add <code>.open</code> CSS class to <em>card</em>.
+              </p>
+            </div>
+            <footer class="card-footer">.card-footer example</footer>
+          </article>
+        </div>
+
+        <div class="col-md-8">
+          <p>
+            exemple :
+          </p>
+<pre>
+&lt;article class="card openable" style="margin-bottom: 1em">
+  &lt;header class="card-title">
+    &lt;i class="icon-openable handler">&lt;/i>
+    example
+  &lt;/header>
+  &lt;div class="card-content openable-content">
+    &lt;p>
+      Lorem ipsum dolor sit amet, consectetur
+      adipisicing elit. Iure eveniet, nam quam
+      sit recusandae.
+    &lt;/p>
+  &lt;/div>
+  &lt;footer class="card-footer">.card-footer example&lt;/footer>
+&lt;/article></pre>
+        </div>
+      </div>
+
+
+      <h3>Nested</h3>
+      <div class="row">
+        <article class="card openable open" style="margin-bottom: 1em">
+          <header class="card-title handler">
+            <i class="icon-openable"></i>
+            First level openable
+          </header>
+          <div class="card-content openable-content openable">
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+            </p>
+            <aside class="card card-success">
+              <header class="card-header handler">
+                <i class="icon-openable"></i>
+                Details
+              </header>
+              <div class="card-content openable-content">
+                Second level
+              </div>
+            </div>
+          </div>
+          <footer class="card-footer">.card-footer example</footer>
+        </article>
+      </div>
+    </section>
+
+
+      <section id="icon-menu">
+
+        <header class="page-header hudge bg-secondary1" id="block">
+          <div class="container">
+            <h1>Icon Menu</h1>
+            <p class="baseline">
+              Le module <strong>icon-menu</strong> permet de créer des menus à base d'icône pour optimiser l'affichage.
+            </p>
+          </div>
+        </header>
+
+        <article class="container">
+          <p>put a compact css menu on the left or right</p>
+          <div class="result" style="position: relative; padding: 1em 5em">
+            <h2>Fake content</h2>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </p>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </p>
+            <nav class="menu-icon onleft neutral" style="top: 1em; left: .5em">
+              <a class="item" href="#">
+                <i class="icon-tag"></i>
+                <span class="item-label">An option</span>
+              </a>
+              <a class="item" href="#">
+                <i class="icon-link-outline"></i>
+                <span class="item-label">An other option</span>
+              </a>
+              <span class="divider"></span>
+              <a class="item" href="#">
+                <i class="icon-edit"></i>
+                <span class="item-label">An other option</span>
+              </a>
+            </nav>
+
+            <nav class="menu-icon onright compl" style="top: 1em; right: .5em">
+              <a class="item" href="#">
+                <i class="icon-tag"></i>
+                <span class="item-label">An option</span>
+              </a>
+              <a class="item" href="#">
+                <i class="icon-link-outline"></i>
+                <span class="item-label">An other option</span>
+              </a>
+              <span class="divider"></span>
+              <a class="item" href="#">
+                <i class="icon-edit"></i>
+                <span class="item-label">An other option</span>
+              </a>
+            </nav>
+          </div>
+        </article>
+      </section><!-- /#icon-menu -->
+
+
+      <section class="">
+        <header class="page-header hudge bg-primary" id="block">
+          <div class="container">
+            <h1>Block</h1>
+            <p class="baseline">
+              Le module <strong>block</strong> propose en encadrement sémantique des informations.
+            </p>
+          </div>
+        </header>
+
+        <div class="container">
+          <div class="col-md-4">
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+            <div class="block-note">
+              With <code>.block-note</code> class.
+            </div>
+            <p>
+               consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
+            </p>
+            <div class="block-primary">
+              <p>
+                With <code>.block-primary</code> class.
+              </p>
+            </div>
+            <p>
+              Baliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+            </p>
+            <div class="block-success">
+              <p>
+                Congratulation ! You successfully use the <strong>Succes Block</strong> using <code>.block-success</code> CSS class.
+              </p>
+            </div>
+            <p>
+              Baliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.
+            </p>
+          </div>
+          <div class="col-md-4">
+            <p>
+               consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
+            </p>
+            <div class="block-complementary">
+              <p>
+                With <code>.block-complementary</code> class.
+              </p>
+            </div>
+            <p>
+              aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </p>
+            <div class="block-danger">
+              <p>
+                Create an <strong>Danger Block</strong> using <code>.block-danger</code> CSS class.
+              </p>
+            </div>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.
+            </p>
+
+            <div class="block-secondary1">
+              <p>
+                With <code>.block-secondary1</code> class.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut.</p>
+            <div class="block-warning">
+              <p>Use <code>.block-warning</code> class for <q cite="">Keep yours eyes open guy !</q> block.
+            </div>
+            <p>Aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <div class="block-info">
+              <p>Finaly, <code>.block-info</code> supplies an amazing <strong>Info Box</strong> for vitals informations like this one.
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+
+      <section id="bootstrap-native" class="container">
+
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">
+                            Bootstrap Elements
+                        </h1>
+                        <ol class="breadcrumb">
+                            <li>
+                                <i class="fa fa-dashboard"></i>  <a href="index.html">Dashboard</a>
+                            </li>
+                            <li class="active">
+                                <i class="fa fa-desktop"></i> Bootstrap Elements
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <!-- Main jumbotron for a primary marketing message or call to action -->
+                <div class="jumbotron">
+                    <h1>Hello, world!</h1>
+                    <p>This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
+                    <p><a href="#" class="btn btn-primary btn-lg" role="button">Learn more »</a>
+                    </p>
+                </div>
+
+                <div class="page-header">
+                    <h1>Buttons</h1>
+                </div>
+                <p>
+                    <button type="button" class="btn btn-lg btn-default">Default</button>
+                    <button type="button" class="btn btn-lg btn-primary">Primary</button>
+                    <button type="button" class="btn btn-lg btn-success">Success</button>
+                    <button type="button" class="btn btn-lg btn-info">Info</button>
+                    <button type="button" class="btn btn-lg btn-warning">Warning</button>
+                    <button type="button" class="btn btn-lg btn-danger">Danger</button>
+                    <button type="button" class="btn btn-lg btn-link">Link</button>
+                </p>
+                <p>
+                    <button type="button" class="btn btn-default">Default</button>
+                    <button type="button" class="btn btn-primary">Primary</button>
+                    <button type="button" class="btn btn-success">Success</button>
+                    <button type="button" class="btn btn-info">Info</button>
+                    <button type="button" class="btn btn-warning">Warning</button>
+                    <button type="button" class="btn btn-danger">Danger</button>
+                    <button type="button" class="btn btn-link">Link</button>
+                </p>
+                <p>
+                    <button type="button" class="btn btn-sm btn-default">Default</button>
+                    <button type="button" class="btn btn-sm btn-primary">Primary</button>
+                    <button type="button" class="btn btn-sm btn-success">Success</button>
+                    <button type="button" class="btn btn-sm btn-info">Info</button>
+                    <button type="button" class="btn btn-sm btn-warning">Warning</button>
+                    <button type="button" class="btn btn-sm btn-danger">Danger</button>
+                    <button type="button" class="btn btn-sm btn-link">Link</button>
+                </p>
+                <p>
+                    <button type="button" class="btn btn-xs btn-default">Default</button>
+                    <button type="button" class="btn btn-xs btn-primary">Primary</button>
+                    <button type="button" class="btn btn-xs btn-success">Success</button>
+                    <button type="button" class="btn btn-xs btn-info">Info</button>
+                    <button type="button" class="btn btn-xs btn-warning">Warning</button>
+                    <button type="button" class="btn btn-xs btn-danger">Danger</button>
+                    <button type="button" class="btn btn-xs btn-link">Link</button>
+                </p>
+
+                <div class="page-header">
+                    <h1>Thumbnails</h1>
+                </div>
+                <img class="img-thumbnail" src="http://placehold.it/400x400" alt="">
+
+                <div class="page-header">
+                    <h1>Dropdown menus</h1>
+                </div>
+                <div class="dropdown theme-dropdown clearfix">
+                    <a id="dropdownMenu1" href="#" role="button" class="sr-only dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                        <li class="active" role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a>
+                        </li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a>
+                        </li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a>
+                        </li>
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="page-header">
+                    <h1>Navbars</h1>
+                </div>
+
+                <div class="navbar navbar-default">
+                    <div class="container">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="#">Project name</a>
+                        </div>
+                        <div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="active"><a href="#">Home</a>
+                                </li>
+                                <li><a href="#about">About</a>
+                                </li>
+                                <li><a href="#contact">Contact</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li class="dropdown-header">Nav header</li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                        <li><a href="#">One more separated link</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <!--/.nav-collapse -->
+                    </div>
+                </div>
+
+                <div class="navbar navbar-inverse">
+                    <div class="container">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="#">Project name</a>
+                        </div>
+                        <div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="active"><a href="#">Home</a>
+                                </li>
+                                <li><a href="#about">About</a>
+                                </li>
+                                <li><a href="#contact">Contact</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a aria-expanded="false" href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li class="dropdown-header">Nav header</li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                        <li><a href="#">One more separated link</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <!--/.nav-collapse -->
+                    </div>
+                </div>
+
+                <div class="page-header">
+                    <h1>Alerts</h1>
+                </div>
+                <div class="alert alert-success">
+                    <strong>Well done!</strong> You successfully read this important alert message.
+                </div>
+                <div class="alert alert-info">
+                    <strong>Heads up!</strong> This alert needs your attention, but it's not super important.
+                </div>
+                <div class="alert alert-warning">
+                    <strong>Warning!</strong> Best check yo self, you're not looking too good.
+                </div>
+                <div class="alert alert-danger">
+                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+                </div>
+
+                <div class="page-header">
+                    <h1>Progress bars</h1>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"><span class="sr-only">60% Complete</span>
+                    </div>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%"><span class="sr-only">40% Complete (success)</span>
+                    </div>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%"><span class="sr-only">20% Complete</span>
+                    </div>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%"><span class="sr-only">60% Complete (warning)</span>
+                    </div>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%"><span class="sr-only">80% Complete (danger)</span>
+                    </div>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" style="width: 35%"><span class="sr-only">35% Complete (success)</span>
+                    </div>
+                    <div class="progress-bar progress-bar-warning" style="width: 20%"><span class="sr-only">20% Complete (warning)</span>
+                    </div>
+                    <div class="progress-bar progress-bar-danger" style="width: 10%"><span class="sr-only">10% Complete (danger)</span>
+                    </div>
+                </div>
+
+                <div class="page-header">
+                    <h1>List groups</h1>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <ul class="list-group">
+                            <li class="list-group-item">Cras justo odio</li>
+                            <li class="list-group-item">Dapibus ac facilisis in</li>
+                            <li class="list-group-item">Morbi leo risus</li>
+                            <li class="list-group-item">Porta ac consectetur ac</li>
+                            <li class="list-group-item">Vestibulum at eros</li>
+                        </ul>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                    <div class="col-sm-4">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item active">Cras justo odio</a>
+                            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+                            <a href="#" class="list-group-item">Morbi leo risus</a>
+                            <a href="#" class="list-group-item">Porta ac consectetur ac</a>
+                            <a href="#" class="list-group-item">Vestibulum at eros</a>
+                        </div>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                    <div class="col-sm-4">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item active">
+                                <h4 class="list-group-item-heading">List group item heading</h4>
+                                <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
+                            </a>
+                            <a href="#" class="list-group-item">
+                                <h4 class="list-group-item-heading">List group item heading</h4>
+                                <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
+                            </a>
+                            <a href="#" class="list-group-item">
+                                <h4 class="list-group-item-heading">List group item heading</h4>
+                                <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                </div>
+
+                <div class="page-header">
+                    <h1>Panels</h1>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                    <div class="col-sm-4">
+                        <div class="panel panel-success">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                    <div class="col-sm-4">
+                        <div class="panel panel-warning">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                        <div class="panel panel-danger">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                    <div class="col-sm-4">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                    <div class="col-sm-4">
+                        <div class="panel panel-yellow">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                    <div class="col-sm-4">
+                        <div class="panel panel-red">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Panel title</h3>
+                            </div>
+                            <div class="panel-body">
+                                Panel content
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.col-sm-4 -->
+                </div>
+
+                <div class="page-header">
+                    <h1>Wells</h1>
+                </div>
+                <div class="well">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sed diam eget risus varius blandit sit amet non magna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cras mattis consectetur purus sit amet fermentum. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Aenean lacinia bibendum nulla sed consectetur.</p>
+                </div>
+
+
+      </section>
+
+
+
+    </div>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="../js/bootstrap-lnf.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+
+    <script type="text/javascript">
+      // Activate Syntaxhighlight
+      $(document).ready(function() {
+        $('pre').each(function(i, block) {
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,27 @@
+<article class="card xs payment status-{{ status }} {{past .}}">
+    <div class="heading">
+        <strong class="amount">
+            {{currency amount}} {{ currency.symbol }}
+        </strong>
+
+        <div class="date">
+        {{#equal status 1}}
+            <i class="icon-calendar"></i> <time datetime="{{datePredicted.date}}" class="date">{{dateFormat datePredicted.date}}</time>
+        {{else}}
+
+                <i class="icon-ok-circled"></i> <time datetime="{{datePayment.date}}" class="date">{{dateFormat datePayment.date}}</time>
+        {{/equal}}
+        <br>
+         N° <strong>{{ codeTransaction }}</strong>
+        </div>
+        <nav>
+            <a href="#" class="btn-delete">
+                <i class="icon-trash"></i>
+            </a>
+            <a href="#" class="btn-edit">
+                <i class="icon-pencil"></i>
+            </a>
+        </nav>
+    </div>
+    <p class="comment">{{ comment }}</p>
+</article>

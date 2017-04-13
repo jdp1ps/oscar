@@ -1,0 +1,21 @@
+// Border Radius
+@mixin border-radius($taille: 5px){
+    -webkit-border-radius: $taille;
+       -moz-border-radius: $taille;
+            border-radius: $taille;
+}
+
+@mixin box-shadow($taille: 2em, $x: 0, $y: 0, $color: rgba(0,0,0,.1)){
+  box-shadow: $x $y $taille $color;
+}
+
+@mixin addon-effect($color){
+  background-color: $color;
+  color: darken($color, 30%);
+  .addon {
+    background-color: lighten($color, 30%);
+    &:before {
+      background-color: lighten($color, 30%);;
+    }
+  }
+}
