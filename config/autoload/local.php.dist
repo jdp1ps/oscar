@@ -1,0 +1,197 @@
+<?php
+
+return array(
+    // Impossible de me souvenir de l'utilité de ces paramètres
+    'view_manager' => array(
+        'display_not_found_reason' => getenv('APPLICATION_ENV') == 'development',
+        'display_exceptions'       => getenv('APPLICATION_ENV') == 'development',
+    ),
+
+    // Oscar
+    'oscar' => [
+        'paths' => [
+            // Emplacement des documents issus de centaure (ne sera plus
+            // necessaire une fois la synchro centaure suspendue).
+            'document_centaure' => '/chemin/ou/sont/les/documents/centaure/',
+
+            // Emplacement où sont stoqués les documents Oscar
+            'document_oscar' => '/chemin/ou/sont/les/documents/oscar/',
+
+            // Emplacement où sont stoqués les documents administratifs Oscar
+            'document_admin_oscar' => '/chemin/ou/sont/les/documents/administratifs/',
+
+            // Emplacement de l'index de recherche (emplacement où Lucene écrit
+            // sont index de recherche - un DOSSIER).
+            'search_activity' => '/chemin/vers/index/lucene',
+        ],
+
+        'connectors' => [
+            'person' => [
+                'harpege' => function(){
+                    $connector = new \Oscar\Connector\ConnectorPersonHarpege(
+                        [
+                            // Configuration de l'accès à la BDD
+                            'host'     => 'XXXXX.unicaen.fr',
+                            'port'     => '1525',
+                            'user'     => '<USER>',
+                            'password' => '<XXXX>',
+                            'dbname'   => '<BASE>',
+                            'charset'  => 'AL32UTF8',
+
+                            // Requète utilisée pour obtenir l'ensemble des données à synchroniser
+                            'queryPersons' => 'SELECT * FROM table',
+
+                            // Requète utilisée pour obtenir les informations à partir de l'identifiant côté source
+                            'queryPerson' => 'SELECT * FROM table WHERE IDCONNECTORNAME = %s',
+
+                            // Champs de référence pour la date de mise à jour
+                            'dateUpdatedField' => [
+                                'name' => 'DATEUPDATED',
+                                'format' => 'y-M-d',
+                            ]
+                        ],
+
+                        // Description des champs importés
+                        [
+                            'firstname' => [
+                                'remoteName' => 'PRENOM',
+                                'cleanupFunction' => null,
+                                'required' => true
+                            ],
+                            'lastname' => [
+                                'remoteName' => 'NOM',
+                                'cleanupFunction' => null,
+                                'required' => true
+                            ],
+                            'email' => [
+                                'remoteName' => 'EMAIL_PRO',
+                                'cleanupFunction' => null,
+                                'required' => true
+                            ],
+                            'emailPrive' => [
+                                'remoteName' => 'EMAIL_PERSO',
+                                'cleanupFunction' => null,
+                                'required' => true
+                            ],
+                            'harpegeINM' => [
+                                'remoteName' => 'INM',
+                                'cleanupFunction' => null,
+                                'required' => false
+                            ],
+                            'ldapAffectation' => [
+                                'remoteName' => 'AFFECTATION_PRINCIPALE',
+                                'cleanupFunction' => null,
+                                'required' => false
+                            ],
+                        ]
+                    );
+                    return $connector;
+                }
+            ]
+        ],
+
+        // Système d'envoi des mails
+        'mailer' => [
+            // Assure la distribution
+            'transport' => [
+                'host' => 'smtp.host.tld',
+                'port' => 465,
+                'username' => 'jean-claude.dus@unicaen.fr',
+                'password' => 'XXXXXXXXXX',
+                'security' => 'ssl',
+            ],
+            // Use for FROM email, same as transport maybe
+            'from' => [ 'oscar-bot@unicaen.fr' => 'Oscar Bot'],
+
+            // Envoi d'une copy
+            'copy' => ['stephane.bouvry@unicaen.fr'],
+
+            // Envoi activé
+            'send' => false,
+
+            // Préfixe ajouté dans les sujets
+            'subjectPrefix' => '[OSCAR DEV]'
+        ]
+    ],
+
+    // Accès BDD
+    'doctrine' => array(
+        'connection' => array(
+            'orm_default' => array(
+                //////////////////////////////////////////////////////// DRIVERS
+                // MySQL
+                //'driverClass' => '\Doctrine\DBAL\Driver\PDOMySql\Driver',
+                // Postgresql
+                'driverClass' => '\Doctrine\DBAL\Driver\PDOPgSql\Driver',
+                ////////////////////////////////////////////////////////////////
+
+                'doctrine_type_mappings' => array(
+                    'enum' => 'string'
+                ),
+
+                ////////////////////////////////////////////////////// CONNEXION
+                // Exemple (MySQL)
+                'params' => array(
+                    'host'     => 'localhost',
+                    'port'     => '5432',
+                    'user'     => 'oscar_dev',
+                    'password' => 'azerty',
+                    'dbname'   => 'oscar_dev',
+                    'charset'  => 'utf8'
+                ),
+
+                // Exemple (POSGRESQL)
+//                'params' => array(
+//                    'host'     => 'sub.domain.tld',
+//                    'port'     => '5432',
+//                    'user'     => 'jeanclaude',
+//                    'password' => 'jvéconclure',
+//                    'dbname'   => 'ma_base_preprod',
+//                    'charset'  => 'utf8'
+//                ),
+            ),
+
+            ////////////////////////////////////////////////////// SYNCHRO TIERS
+
+            // -- CENTAURE
+            // Utilisé pendant la cohabitation Oscar <> Centaure
+            'centaure'  => array(
+                'params' => array(
+                    'host'     => 'XXXX.XXXXX.XX',
+                    'port'     => '1521',
+                    'user'     => 'username',
+                    'password' => 'superpass',
+                    'dbname'   => 'database',
+                    'charset'  => 'utf8'
+                )
+            ),
+
+            // -- SIFAC
+            // Utilisé pour effectuer la synchro des organizations (partenaires
+            // et clients de l'Université).
+            'sifac'  => array(
+                'params' => array(
+                    'host'     => 'XXXXX.unicaen.fr',
+                    'port'     => '1527',
+                    'user'     => 'username',
+                    'password' => 'p@$$W0rD',
+                    'dbname'   => 'database',
+                    'charset'  => 'AL32UTF8'
+                )
+            ),
+
+            // -- HARPÉGE
+            // Utilisé pour récupérer l'INM des personnes.
+            'harpege'  => array(
+                'params' => array(
+                    'host'     => 'XXXXX.unicaen.fr',
+                    'port'     => '1527',
+                    'user'     => 'username',
+                    'password' => 'p@$$W0rD',
+                    'dbname'   => 'database',
+                    'charset'  => 'AL32UTF8'
+                )
+            ),
+        ),
+    ),
+);
