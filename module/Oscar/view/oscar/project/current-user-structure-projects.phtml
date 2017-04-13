@@ -1,0 +1,13 @@
+<div class="container">
+    <h1><i class="icon-cubes"></i> En tant que responsable de structure</h1>
+    <?php if (count($projects)): ?>
+    <?php foreach( $projects as $organisationId=>$data ): ?>
+        <section>
+            <h2><i class="icon-building-filled"></i> <?= $data['organization'] ?></h2>
+            <?php foreach( $data['projects'] as $project ): ?>
+                <?= $this->partial('/oscar/project/project-item-openable.phtml', ['project' => $project]); ?>
+            <?php endforeach; ?>
+        </section>
+    <?php endforeach;?>
+    <?php endif; ?>
+</div>

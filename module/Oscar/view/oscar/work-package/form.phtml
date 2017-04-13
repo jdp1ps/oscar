@@ -1,0 +1,67 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: stephane
+ * Date: 04/04/16
+ * Time: 14:31
+ */
+?>
+<div class="container">
+    <h1>
+        <small>
+            <?= $this->link()->activity($entity->getActivity()) ?> /
+        </small>
+    <?php if( !$entity->getId() ): ?>
+        Nouveau lot de travail
+    <?php else: ?>
+        Modification du lot <?= $entity ?>
+        <?php endif; ?>
+    </h1>
+    <?= $this->form()->openTag($form->prepare()); ?>
+
+    <?= $this->formControlGroup($form->get('id')); ?>
+    <?= $this->formControlGroup($form->get('secure')); ?>
+
+    <div class="row">
+        <div class="col-md-2">
+            <?= $this->formControlGroup($form->get('code')); ?>
+            <?php echo $this->formElementErrors($form->get('code')); ?>
+        </div>
+        <div class="col-md-10">
+            <?= $this->formControlGroup($form->get('label')); ?>
+            <?php echo $this->formElementErrors($form->get('label')); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <?= $this->formControlGroup($form->get('dateStart')); ?>
+            <?php echo $this->formElementErrors($form->get('dateStart')); ?>
+        </div>
+        <div class="col-md-6">
+            <?= $this->formControlGroup($form->get('dateEnd')); ?>
+            <?php echo $this->formElementErrors($form->get('dateEnd')); ?>
+        </div>
+    </div>
+    <?= $this->formControlGroup($form->get('description')); ?>
+    <?php echo $this->formElementErrors($form->get('description')); ?>
+
+    <nav>
+        <a href="<?= $this->url('contract/show', ['id'=>$entity->getActivity()->getId()]) ?>#workpackage" class="btn btn-default">Annuler</a>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </nav>
+
+    <?= $this->form()->closeTag() ?>
+</div>
+<script>
+    require(['datepicker', 'select2'], function () {
+        $('.datepicker').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            clearBtn: true,
+            language: "fr",
+            autoclose: true,
+            toggleActive: true
+        });
+    });
+</script>

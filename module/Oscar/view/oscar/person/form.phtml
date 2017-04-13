@@ -1,0 +1,35 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 12/10/15 13:14
+ * @copyright Certic (c) 2015
+ */
+?>
+<style>
+    label {
+        display: block;
+    }
+
+</style>
+<div class="container">
+    <?= $this->form()->openTag($form->prepare()); ?>
+    <?php /*$this->formControlGroup($form->get('firstname')); ?>
+    <?= $this->formControlGroup($form->get('lastname')); ?>
+    <?= $this->formControlGroup($form->get('email')); ?>
+    <?= $this->formControlGroup($form->get('phone')); ?>
+    <?= $this->formControlGroup($form->get('codeHarpege')); ?>
+    <?= $this->formControlGroup($form->get('codeLdap')); ?>
+    <?= $this->formControlGroup($form->get('codeLdap'));*/ ?>
+    <?= $this->formCollection($form); ?>
+    <?php /*
+    <?= $this->formControlGroup($form->get('ldapSiteLocation')); ?>
+    <?= $this->formControlGroup($form->get('ldapAffectation')); ?>
+    */ ?>
+    <?= $this->formHidden($form->get('id')); ?>
+    <!--<nav class="btn-group">
+        <a href="javascript:history.back()" class="btn btn-default">Annuler</a>
+        <?= $this->formRow($form->get('submit')); ?>
+    </nav>-->
+
+    <?= $this->form()->closeTag() ?>
+</div>

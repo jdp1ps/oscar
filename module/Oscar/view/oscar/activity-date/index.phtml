@@ -1,0 +1,42 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: stephane
+ * Date: 12/04/16
+ * Time: 16:58
+ */
+
+?>
+<section class="container">
+    <h1><i class="icon-calendar-outlilne"></i> Jalons</h1>
+    <?php /** @var Oscar\Entity\ActivityDate $milestone */
+    $annee = $mois = '';
+    foreach( $milestones as $milestone ):
+        $dateRef = $milestone->getDateStart();
+
+        if( $annee != $dateRef->format('Y') ){
+            $annee = $dateRef->format('Y');
+            $mois = '';
+            echo "<h2>$annee</h2>";
+        }
+
+        $currentMois = ucfirst($this->moment($dateRef, 'F'));
+        if( $mois != $currentMois ){
+            $mois = $currentMois;
+            echo "<h3>$mois</h3>";
+        }
+        ?>
+        <article class="card">
+            <h3 class="card-title">
+                <span>
+                <?= $milestone->getType() ?>
+                </span>
+                <nav class="menu text-highlight">
+                le <time><?= $this->moment($milestone->getDateStart()) ?></time>
+                </nav>
+            </h3>
+            <p><?= $this->link($milestone->getActivity()) ?></p>
+            <p><?= $milestone->getComment() ?></p>
+        </article>
+    <?php endforeach; ?>
+</section>

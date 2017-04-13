@@ -1,0 +1,205 @@
+<section class="container">
+    <h1><i class="icon-bank"></i> Versements</h1>
+
+    <form action="<?= $this->url() ?>" method="get" class="form" id="search">
+        <div class="input-group input-group-lg">
+            <input placeholder="Rechercher dans l'intitulé, code PFI, N°Oscar..."
+                   type="search"
+                   class="form-control input-lg"
+                   name="q"
+                   value="<?= isset($search) ? htmlentities($search) : "" ?>"/>
+
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                </span>
+        </div>
+    </form>
+
+
+    <?php if( count($payments) ): ?>
+        <?php
+        $annee = '';
+        $mois = '';
+        /** @var \Oscar\Entity\ActivityPayment $payment */
+        foreach ($payments as $payment):
+
+            $dateRef = $payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_REALISE ? $payment->getDatePayment() : $payment->getDatePredicted();
+
+            if( $annee != $dateRef->format('Y') ){
+                $annee = $dateRef->format('Y');
+                $mois = '';
+                echo "<h2>$annee</h2>";
+            }
+
+            $currentMois = ucfirst($this->moment($dateRef, 'F'));
+            if( $mois != $currentMois ){
+                $mois = $currentMois;
+                echo "<h3>$mois</h3>";
+            }
+
+
+            ?>
+
+            <?php if( $payment->getActivity() ): ?>
+            <?= $this->partial('/oscar/activity-payment/payment-item.phtml', ['payment' => $payment ]) ?>
+        <?php endif; ?>
+        <?php endforeach; ?>
+        <?= $this->pager($payments, preg_replace("/\\??&page=[0-9]*/", '', $_SERVER['REQUEST_URI']) . '?&page=%s') ?>
+
+    <?php else: ?>
+        <div class="alert alert-info">
+            Aucun versement prévu pour le mois à venir
+        </div>
+    <?php endif; ?>
+</section>
+<script>
+
+            require(['bootbox','modalform'], function(bootbox, ModalForm) {
+                $('.payment-delete-btn').on('click', function (e) {
+                    e.preventDefault();
+                    var   url = $(this).attr('href')
+                        , modal = ModalForm.modal()
+                        , modalContent = modal.content;
+
+                    modalContent.empty().unbind();
+
+                    bootbox.confirm("Supprimer le versement ?", function(response){
+                        if( response ){
+                            var jqxhr = $.ajax({
+                                'type': 'DELETE',
+                                'url': url
+                            }).done(function(content) {
+                                document.location.reload();
+                            }).fail(function(){
+                                Oscar.waitScreen('Erreur lors du traitement des données', 'error');
+                            });
+                        }
+                    });
+                });
+
+                $('.payment-edit-btn').on('click', function (e) {
+                        e.preventDefault();
+                        var   url = $(this).attr('href')
+                            , modal = ModalForm.modal()
+                            , modalContent = modal.content;
+
+                        modalContent.empty().unbind();
+
+                        var jqxhr = $.ajax({
+                            'type': 'GET',
+                            'url': url
+                        }).done(function(content){
+                            var title = "Modification"
+                                , $title
+                                , modalContent = $(content);
+
+                            if(modalContent && ($title = modalContent.find('h1')) ){
+                                title = $title.html();
+                                //modalContent.find('h1').remove();
+                            }
+
+                            ModalForm.show(title, modalContent);
+
+                            modalContent.on('click', '.button-back', function(e){
+                                e.preventDefault();
+                                ModalForm.hide();
+                            });
+
+                            modalContent.on('click', '[type="submit"]', function(e){
+                                e.preventDefault();
+                                var form = $('form', modalContent)
+                                    , formMethod = (form.attr('method') || 'get')
+                                    , urlPost = (form.attr('action') || url) ;
+
+                                require(['jquery-serialize'], function(){
+                                    var datas = $('form', modalContent).serializeObject();
+                                    $.ajax({
+                                        'url': urlPost,
+                                        'method': formMethod,
+                                        'data': datas
+                                    }, datas).done(function(content){
+                                        modalContent.html(content);
+                                        document.location.reload();
+                                    }).fail(function(){
+                                        Oscar.waitScreen('Erreur lors du traitement des données', 'error');
+                                    });
+                                });
+                            });
+                        }).fail(function( xhr, status, response){
+                            var title = 'Erreur Oscar',
+                                content = 'Le serveur à retourné une erreur non-identifiée';
+                            if( xhr.status === 400 ){
+                                title = 'Erreur de saisie';
+                                content = "Votre requète n'a pas été traitée !";
+                            }
+                            if( xhr.responseJSON && xhr.responseJSON.error ){ content = xhr.responseJSON.error;}
+                            Oscar.waitScreen('<h1><i class="icon-attention-1"></i>' + title + '</h1>' + content, 'error');
+                        });
+                        jqxhr.always(function(){console.log('always()', arguments)});
+                    });
+                });
+                /*// Données
+                var url = this.model.collection.urlEdit +this.model.get('id')
+                    , modal = ModalForm.modal()
+                    , modalContainer = modal.container
+                    , modalTitle = modal.title
+                    , modalContent = modal.content;
+
+                // On supprime l'ancien contenu de la modale
+                modalContent.empty().unbind();
+
+                var jqxhr = $.ajax({
+                    'type': 'GET',
+                    'url': url
+                }).done(function(content){
+                    var title = "Modification"
+                        , $title
+                        , modalContent = $(content);
+
+                    if(modalContent && ($title = modalContent.find('h1')) ){
+                        title = $title.html();
+                        //modalContent.find('h1').remove();
+                    }
+
+                    ModalForm.show(title, modalContent);
+
+                    modalContent.on('click', '.button-back', function(e){
+                        e.preventDefault();
+                        ModalForm.hide();
+                    });
+
+                    modalContent.on('click', '[type="submit"]', function(e){
+                        e.preventDefault();
+                        var form = $('form', modalContent)
+                            , formMethod = (form.attr('method') || 'get')
+                            , urlPost = (form.attr('action') || url) ;
+
+                        require(['jquery-serialize'], function(){
+                            var datas = $('form', modalContent).serializeObject();
+                            console.log('Send', datas, 'to', urlPost);
+                            $.ajax({
+                                'url': urlPost,
+                                'method': formMethod,
+                                'data': datas
+                            }, datas).done(function(content){
+                                modalContent.html(content);
+                                model.collection.fetch();
+                            }).fail(function(){
+                                Oscar.waitScreen('Erreur lors du traitement des données', 'error');
+                            });
+                        });
+                    });
+                }).fail(function( xhr, status, response){
+                    var title = 'Erreur Oscar',
+                        content = 'Le serveur à retourné une erreur non-identifiée';
+                    if( xhr.status === 400 ){
+                        title = 'Erreur de saisie';
+                        content = "Votre requète n'a pas été traitée !";
+                    }
+                    if( xhr.responseJSON && xhr.responseJSON.error ){ content = xhr.responseJSON.error;}
+                    Oscar.waitScreen('<h1><i class="icon-attention-1"></i>' + title + '</h1>' + content, 'error');
+                });
+                jqxhr.always(function(){console.log('always()', arguments)});
+            });*/
+
+</script>

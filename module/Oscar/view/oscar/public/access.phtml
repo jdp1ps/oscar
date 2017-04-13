@@ -1,0 +1,35 @@
+<div class="container">
+    <h1>Accès</h1>
+    <table class="table table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+            <?php foreach( $roles as $role ): ?>
+                <th style="width: 2.6em; position: relative;">
+                    <div style="position: absolute; bottom: 0; transform-origin: 0% 100%; transform: translate(1.3em, 0) rotate(-45deg); display: block; text-align: left; white-space: nowrap">
+                        <?= $role ?>
+                        &nbsp;
+                    </div>
+                </th>
+            <?php endforeach; ?>
+            </tr>
+        </thead>
+        <tbody>
+        <?php $context = null; foreach( $actions as $action ):
+            if( $context !== $action->getContext() ){
+                $context = $action->getContext();
+                ?><tr><th colspan="<?= count($roles) ?>">
+                    <h3><?= \Oscar\Entity\Contexts::getContextsLabeled()[$action->getContext()] ?></h3>
+                </th></tr><?php
+            }
+            ?>
+            <tr>
+                <th><?= $action ?></th>
+                <?php foreach( $roles as $role ): ?>
+                    <td class="text-center">x</td>
+                <?php endforeach; ?>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>

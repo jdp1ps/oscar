@@ -1,0 +1,104 @@
+<header class="page-header">
+    <h1 class="container">
+        Liste des personnes
+        <?php if( $search !== "" ): ?>
+            pour la recherche <q><?= htmlentities($search) ?></q>
+        <?php endif; ?>
+    </h1>
+</header>
+
+<div class="container">
+    <form action="<?= $this->url() ?>" method="get" class="form">
+        <div class="input-group input-group-lg">
+            <input placeholder="Rechercher dans le nom ou le prénom&hellip;"
+                   type="search"
+                   class="form-control input-lg"
+                   name="q"
+                   value="<?= htmlentities($search) ?>"/>
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                </span>
+        </div>
+        <h4>Filtres</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Rôle dans les activités de recherche</h5>
+                <select placeholder="Choississez un ou plusieurs rôle" name="filter_roles[]" class="select2" id="filter_roles" multiple="multiple">
+                    <?php foreach( $this->grant()->getAllRoleIdPerson() as $role ):?>
+                        <option value="<?= $role ?>"<?= (in_array($role, $filter_roles) ? ' selected="selected"' : '') ?>><?= $role ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+
+<?php
+// Mise en surbrillance du texte recherché
+$markText = function( $text, $search ){
+    if( !$search ){
+        return $text;
+    }
+    return preg_replace('/('.$search.')/i', '<mark>$1</mark>', $text);
+};
+?>
+
+<section data-context="#ddm" class="container">
+
+    <h3 class="text-center"><?= count($persons) ?> résultat(s) - page <?= $persons->getCurrentPage() ?> / <?= $persons->getCountPage() ?></h3>
+    <?php foreach( $persons as $person ): ?>
+        <?= $this->partial('/oscar/person/item-list.phtml', ['person' => $person, 'markText' => $markText, 'search' => $search, 'ldapFilters' => $roles]) ?>
+    <?php endforeach; ?>
+
+        <script>
+            Initer.ready(function(){
+                require(['select2'], function(){
+                    $('.select2').select2();
+                });
+            })
+
+        </script>
+
+
+    <?= $this->pager($persons, preg_replace("/&page=[0-9]*/", '', $_SERVER['REQUEST_URI']).'&page=%s') ?>
+</section>
+
+<?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
+<button id="btnFusion" class="btn btn-primary" style="display: none">
+    FUSIONNER
+</button>
+<script>
+    require(['jquery'], function($){
+
+        var selectedPersons = [],
+            buttonActivated,
+            $btnFusion = $('#btnFusion'),
+            updateSelection = function(){
+                var persons = $('article.person.selected');
+                if( persons.length > 1 ){
+                    $btnFusion.show();
+                } else {
+                    $btnFusion.hide();
+                }
+            };
+
+        $btnFusion.on('click', function(){
+            var ids = [];
+            $('article.person.selected').each(function(i, el){
+               ids.push($(el).data('id'));
+            });
+            if( ids.length > 1 ){
+                document.location = "<?= $this->url('person/merge') ?>?ids=" + ids.join(',');
+            }
+        });
+
+        $('article.person').on('click', function(e){
+            var $person = $(this);
+            $person.toggleClass('selected');
+            clearTimeout(buttonActivated);
+            buttonActivated = setTimeout(updateSelection, 1000);
+        });
+
+    });
+</script>
+<?php endif; ?>

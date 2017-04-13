@@ -1,0 +1,67 @@
+<?php // Rôle
+
+if( $affectation && $affectation instanceof \Oscar\Entity\ProjectPartner ){
+    $function = $affectation->getRole();
+
+    $classCSS = '';
+
+    if( $affectation->isMain() ){
+        $classCSS = 'prim';
+    }
+
+    if( $affectation->isOutOfDate() ){
+        $classCSS = 'outofdate';
+    }
+
+    switch( $function ){
+        case \Oscar\Entity\Organization::ROLE_LABORATORY :
+            $classCSS = 'primary';
+            break;
+
+        case \Oscar\Entity\Organization::ROLE_COMPOSANTE_RESPONSABLE :
+            $classCSS = 'secb';
+            break;
+    }
+
+
+} else {
+    $function = $affectation ? $affectation : "N.D.";
+    $classCSS = 'default';
+}
+if( !isset($size) ) $size = ''; 
+?>
+<span class="cartouche <?= $classCSS ?> <?= $size ?>">
+    <a href="<?= $this->url('organization/show', ['id' => $organisation->getId()]) ?>">
+        <span class="sn"><?= $organisation ?></span>
+    </a>
+    <?php if( $function ): ?>
+    <span class="addon">
+        <?= $function ?>
+    </span>
+    <?php endif; ?>
+    <span class="tooltip-area">
+        <a class="icon-help-circled"></a>
+        <div class="tooltip-content">
+            <h3>
+                <?php if( $organisation->getCode() ): ?>
+                    <abbr><?= $organisation->getCode() ?></abbr>
+                <?php endif; ?>
+                <?= $organisation->getShortName() ?> <?= $organisation->getFullName() ?>
+            </h3>
+            <address>
+                Adresse :
+                <?= $organisation->getStreet1() ?> <?= $organisation->getStreet2() ?> <?= $organisation->getStreet3() ?><br/>
+                <?= $organisation->getZipCode() ?> <?= $organisation->getCity() ?>
+            </address>
+            <?php if($organisation->getEmail()): ?>
+                <p class="email"><i class="icon-mail"></i><?= $organisation->getEmail() ?></p>
+            <?php endif; ?>
+            <?php if($organisation->getPhone()): ?>
+                <p class="tel"><i class="icon-phone-outline"></i><?= $organisation->getPhone() ?></p>
+            <?php endif; ?>
+            <?php if($organisation->getUrl()): ?>
+                <p class="site"><i class="icon-link-outline"></i><?= $organisation->getUrl() ?></p>
+            <?php endif; ?>
+        </div>
+    </span>
+</span>

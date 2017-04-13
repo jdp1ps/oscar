@@ -1,0 +1,60 @@
+
+<section class="project-container container">
+
+    <h1>Liste des projets</h1>
+
+    <form action="<?= $this->url() ?>" method="get" class="form">
+        <div class="input-group input-group-lg">
+            <input placeholder="Rechercher dans les projets&hellip;"
+                   type="search"
+                   class="form-control input-lg"
+                   name="q"
+                   value="<?= htmlentities($search) ?>"/>
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+            </span>
+        </div>
+    </form>
+
+    <h3 class="text-center"><?= count($projects) ?> Résultat(s)</h3>
+
+    <?php foreach( $projects as $project): ?>
+        <?= $this->partial('/oscar/project/project-item-openable.phtml', array(
+        'project'    => $project,
+    )); ?>
+    <?php endforeach;?>
+    <?= $this->pager($projects) ?>
+    <?php /*
+    <div class="col-md-9">
+
+<?php $disc = ""; $annee = "";
+$navDiscipline = "<ul>";
+foreach( $projects as $project):
+
+    if( $disc !== $project->getDiscipline() ){
+        $annee = "";
+        $id = uniqid("disc_");
+        $disc = $project->getDiscipline();
+        $navDiscipline .= '<li><a href="#'.$id.'">'.($disc ? $disc : "Sans discipline").'</a></li>';
+        ?><h2 id="<?= $id ?>"><?= $disc ? $disc : "<i>Sans discipline</i>" ?></h2>
+    <?php
+    }
+    if( $annee !== $project->getDateCreated()->format('Y')){
+        $annee = $project->getDateCreated()->format('Y');
+        ?><h3 class="timefeed"><?= $annee ?></h3><?php
+    }
+
+    ?>
+    <?= $this->partial('/oscar/project/project-item-openable.phtml', array(
+        'project'    => $project,
+    )); ?>
+<?php endforeach;
+
+?>
+    </div>
+    <div class="col-md-3">
+        <?= $navDiscipline.'</ul>' ?>
+    </div>
+</section>
+*/ ?>
+<script src="<?= $this->basePath() . '/js/vendor/requirejs/require.js' ?>" data-main="<?= $this->basePath() . '/js/oscar-config.js' ?>"></script>

@@ -1,0 +1,443 @@
+<div class="container">
+    <h2>
+        <i class="icon-info-outline"></i>Information sur le projet</h2>
+
+    <div class="row">
+        <div class="col-sm-3">
+            <input type="text" class="form-control input-lg"
+                   placeholder="Acronyme..."/>
+
+            <div class="help-block">
+                Acronyme du projet
+            </div>
+        </div>
+        <div class="col-sm-9">
+            <input type="text" class="form-control input-lg"
+                   placeholder="Nom usuel du projet..."/>
+
+            <div class="help-block">
+                Indiquer un nom d'usage
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <input type="text" class="form-control" placeholder="Code&hellip;"/>
+
+            <div class="help-block">
+                Code d'enregistrement
+            </div>
+        </div>
+        <div class="col-md-4 col-md-push-2">
+            <input type="text" class="form-control"
+                   placeholder="Laboratoire..."/>
+
+            <div class="help-block">
+                Laboratoire de rattachement
+            </div>
+        </div>
+        <div class="col-md-4 col-md-push-2">
+            <input type="text" class="form-control"
+                   placeholder="Responsable..."/>
+
+            <div class="help-block">
+                Référent administratif
+            </div>
+        </div>
+    </div>
+    <h2><i class="icon-users-outline"></i> équipe</h2>
+
+    <p class="help-block">
+        Utiliser l'auto-compléteur pour cliquer sur <i>ajouter</i>.
+    </p>
+
+    <div class="row">
+        <div class="col-md-10">
+            <select class="js-data-example-ajax form-control">
+                <option value=""></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary btn-sm disabled" id="btn-add-user">
+                <i class="glyphicon glyphicon-user"></i>
+                Ajouter au projet
+            </button>
+        </div>
+    </div>
+    <hr/>
+
+    <div class="row" id="staff">
+        <div class="col-md-6">
+            <div class="member">
+                <h3><strong>BOUVRY</strong> Stéphane</h3>
+
+                <p>Lorem ipsum dolor sit amet</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="member">
+                <h3><strong>BOUVRY</strong> Stéphane</h3>
+
+                <p>Lorem ipsum dolor sit amet</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="<?= $this->basePath('/js/vendor/jquery/dist/js/jquery.min.js') ?>"></script>
+<script src="<?= $this->basePath('/js/vendor/select2/dist/js/select2.full.min.js') ?>"></script>
+<script src="<?= $this->basePath('/js/vendor/handlebars/handlebars.min.js') ?>"></script>
+
+
+
+<link href="<?= $this->basePath('/js/vendor/select2/dist/css/select2.min.css') ?>" rel="stylesheet"/>
+<link href="<?= $this->basePath('/css/select2-bootstrap.css') ?>" rel="stylesheet"/>
+<link href="<?= $this->basePath('/css/fontello/css/fontello.css') ?>" rel="stylesheet"/>
+
+
+<script id="template-person" type="text/x-handlebars">
+    <div class="col-md-6 member-container">
+        <div class="member">
+
+            <header class="row no-gutter">
+                <div class="col-xs-2">
+                    <img
+                        src="http://www.gravatar.com/avatar/{{mailMd5}}?s=150&d=mm"
+                        alt="" class="img-rounded trombi"/>
+                </div>
+                <div class="col-xs-10">
+                    <h3><strong>{{ nom }}</strong> {{ prenom }}</h3>
+
+                    <p>Status : {{ ucbnStatus }}</p>
+
+                    <p>Loc : {{ ucbnSiteLocalisation }}</p>
+
+                    <p>
+                        <a href="mailto:{{mail}}"
+                           class="btn btn-xs btn-default">
+                            <i class="icon-mail"></i>
+                            {{mail}}
+                        </a>
+                    </p>
+                </div>
+
+
+            </header>
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title" data-toggle="collapse"
+                        href="#details{{id}}" aria-expanded="false">
+                        <i class="icon-zoom-in-outline"></i>
+                        Détails
+                    </h3>
+                </div>
+                <div class="panel-body collapse" id="details{{id}}">
+                    <form action="" class="form">
+                        <label for="">Fonction principale</label>
+                        <select class="form-control">
+                            <option value="LEAD">Responsable scientifique
+                            </option>
+                            <option value="LEAD">Responsable administratif
+                            </option>
+                            <option value="LEAD">Consultant</option>
+                            <option value="LEAD">Ingénieur R&D</option>
+                            <option value="LEAD">Autre</option>
+                        </select>
+
+                        <label for="">Volume horaire prévu</label>
+                        <input type="text" class="form-control"
+                               placeholder="ex: 350 heures"/>
+                    </form>
+                </div>
+            </div>
+
+            <h4><i class="icon-calendar-outlilne"></i>Heures renseignées</h4>
+
+            <div class="row">
+                <div class="col-xs-1">
+                    Janvier
+                </div>
+                <div class="col-xs-8">
+                    <div class="progress">
+                        <div class="progress-bar text-left progress-bar-success"
+                             role="progressbar" aria-valuenow="100"
+                             aria-valuemin="0" aria-valuemax="100"
+                             style="width: 100%;">
+                            <span class="">Validée</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="btn-group">
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-zoom-in-outline"></i>
+                        </a>
+                        <a class="btn btn-default btn-xs disabled">
+                            <i class="icon-edit"></i>
+                        </a>
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-export-outline"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-1">
+                    Février
+                </div>
+                <div class="col-xs-8">
+                    <div class="progress">
+                        <div class="progress-bar text-left progress-bar-warning"
+                             role="progressbar" aria-valuenow="100"
+                             aria-valuemin="0" aria-valuemax="100"
+                             style="width: 100%;">
+                            <span class=""><strong>Non-validée</strong></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="btn-group">
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-zoom-in-outline"></i>
+                        </a>
+                        <a class="btn btn-default btn-xs disabled">
+                            <i class="icon-edit"></i>
+                        </a>
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-export-outline"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="row">
+                <div class="col-xs-1">
+                    Mars
+                </div>
+                <div class="col-xs-8">
+                    <div class="progress">
+                        <div class="progress-bar text-left progress-bar-danger"
+                             role="progressbar" aria-valuenow="100"
+                             aria-valuemin="0" aria-valuemax="100"
+                             style="width: 100%;">
+                            <span class=""><i class="icon-warning-empty"></i><strong>Incohérence détéctée</strong></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="btn-group">
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-zoom-in-outline"></i>
+                        </a>
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-edit"></i>
+                        </a>
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-bell"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-1">
+                    Avril
+                </div>
+                <div class="col-xs-8">
+                    <div class="progress">
+                        <div class="progress-bar text-left progress-bar-info"
+                             role="progressbar" aria-valuenow="100"
+                             aria-valuemin="0" aria-valuemax="100"
+                             style="width: 34%;">
+                            <span class=""><strong>En cours</strong></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="btn-group">
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-zoom-in-outline"></i>
+                        </a>
+                        <a class="btn btn-default btn-xs">
+                            <i class="icon-edit"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <nav class="btn-group" role="group" aria-label="rôle">
+                <button class="btn btn-default btn-xs delete-member">
+                    <i class="icon-trash"></i>
+                    Supprimer du projet
+                </button>
+
+                <button class="btn btn-default btn-xs delete-member">
+                    <i class="icon-calendar-outlilne"></i>
+                    Afficher le calendrier
+                </button>
+
+                <div class="btn-group" role="group">
+                    <button type="button"
+                            class="btn btn-default btn-xs dropdown-toggle"
+                            data-toggle="dropdown" aria-expanded="false">
+                        <i class="icon-cog-outline"></i>
+                        Options avancées
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#">Dropdown link</a></li>
+                        <li><a href="#">Dropdown link</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+</script>
+
+<script>
+    var templatePerson = Handlebars.compile($('#template-person').html());
+    /**
+     * Fake Datas
+     * @param repo
+     * @returns {*}
+     */
+    var fakeData = [/* {
+        "id": "p00066819",
+        "nom": "Bouvry",
+        "mailMd5": "2ea755e287228f79e5f6dd32d539a937",
+        "prenom": "Stephane",
+        "displayname": "BOUVRY Stephane",
+        "mail": "stephane.bouvry@unicaen.fr",
+        "affectation": ["supannCodeEntite=HS_I13,ou=structures,dc=unicaen,dc=fr", "supannCodeEntite=HS_I131,ou=structures,dc=unicaen,dc=fr", "supannCodeEntite=HS_C68,ou=structures,dc=unicaen,dc=fr"],
+        "ucbnFonctionStructurelle": null,
+        "ucbnSousStructure": "I131;IUT de Caen, antenne d\u0027Ifs",
+        "ucbnStatus": "CONTRACTUEL",
+        "ucbnSiteLocalisation": "11;CAMPUS 1",
+        "ucbnStructureRecherche": null
+    }*/];
+
+
+    var affectations = [
+        {id: 1, text: "Responsable scientifique"},
+        {id: 2, text: "Ingénieur"},
+        {id: 3, text: "Doctorant"},
+        {id: 4, text: "Tutu"}
+    ];
+
+    function buildView(data) {
+
+    }
+
+
+    function formatRepo(repo) {
+        if (repo.loading) return repo.text;
+
+        var markup = '<div class="clearfix">';
+
+        if (repo.displayname) {
+            markup += '<div class="col-md-2">';
+            markup += '<img src="http://www.gravatar.com/avatar/' + repo.mailMd5 + ' alt="" class="img-rounded trombi pull-left"/>';
+            markup += '</div>';
+            markup += '<div class="col-md-10">';
+            markup += '<h6>' + repo.displayname + '</h5>';
+            markup += '<div class="small"><i class="glyphicon glyphicon-screenshot"></i> ' + repo.ucbnSiteLocalisation + '</div>';
+            markup += '<div class="small"><i class="glyphicon glyphicon-envelope"></i> ' + repo.mail + '</div><hr/>';
+            markup += '</div>';
+
+
+        } else {
+            markup = '<h5>' + repo.text + '</h5>';
+        }
+
+        markup += '</div>';
+
+        return markup;
+
+        markup += '</div></div>';
+
+        return markup;
+    }
+
+    function formatRepoSelection(repo) {
+        return repo.displayname || repo.text;
+    }
+
+    $(function () {
+        var $selector = $(".js-data-example-ajax"),
+            $staff = $('#staff'),
+            $button = $("#btn-add-user");
+
+        $staff.html('');
+        fakeData.forEach(function (person) {
+            $staff.append(templatePerson(person));
+        });
+
+
+        $selector.on('change', function (e) {
+            if ($selector.val() == "") {
+                $button.addClass('disabled');
+            } else {
+                $button.removeClass('disabled');
+                $button.trigger("click");
+            }
+        });
+
+        $selector.select2({
+            placeholder: 'Saisissez le nom à ajouter...',
+            allowClear: true,
+            ajax: {
+                url: "<?= $url_api_staff ?>",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term, // search term
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return {results: data};
+                },
+                cache: true
+            },
+            escapeMarkup: function (markup) {
+                return markup;
+            },
+            minimumInputLength: 4,
+            id: function (dt) {
+                return dt.uid;
+            },
+            templateResult: formatRepo, // omitted for brevity, see the source of this page
+            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+        });
+
+        $staff.on('click', '.delete-member', function () {
+            console.log($(this).closest('.member-container'));
+            $(this).closest('.member-container').fadeOut(300, function () {
+                $(this).remove();
+            });
+        });
+
+        $button.on('click', function (e) {
+            var selection = $selector.select2('data');
+
+            if (selection.length > 0) {
+                selection.forEach(function (person) {
+                    var fiche = $(templatePerson(person)).hide().fadeIn();
+                    fiche.find('.panel-body').removeClass('collapse');
+                    $staff.append(fiche);
+                });
+                $selector.val(null).trigger('change').select2('open');
+            }
+        });
+    });
+
+</script>

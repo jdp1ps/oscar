@@ -1,0 +1,298 @@
+<link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css">
+<style>.tv-title {display: none}
+h2.tv-serie-label { border-bottom: none; }
+</style>
+<?php
+
+/** @var \Oscar\Entity\Project $project */ ?>
+<nav class="container">
+    <a href="javascript:history.back()">
+        <i class=" icon-angle-left"></i>Retour</a>
+</nav>
+
+<article class="project-full container">
+    <section class="informations">
+        <header class="jumbotron oscar-header has-btn">
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_EDIT, $project) ): ?>
+            <div class="dropdown pull-right btn-area">
+                <a class="smoke dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class=" icon-down-dir"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                    <li class="dropdown-header">Administration</li>
+                    <li><a href="<?= $this->url('project/edit', ['id'=>$project->getId()]) ?>"><i class="icon-tag"></i> Modifier les informations</a></li>
+                    <li><a href="<?= $this->url('contract/new', ['projectid' => $project->getId()]) ?>"><i class="icon-cube"></i>Ajouter une activité</a></li>
+                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
+                        <li>
+                            <a href="<?= $this->url('project/delete', ['id' => $project->getId()]) ?>"><i
+                                    class="icon-trash"></i> Supprimer
+                                définitivement ce projet</a></li>
+                    <?php endif; ?>
+                    <li><a href="#"><i class="icon-group"></i> Ajouter un membre</a></li>
+                    <li class="dropdown-header">Consolidation des données</li>
+                    <li><a href="<?= $this->url('project/simplify-partners', ['id'=>$project->getId()]) ?>"><i class="icon-building-filled"></i> Simplifier les partenaires</a></li>
+                    <li><a href="<?= $this->url('project/simplify-members', ['id'=>$project->getId()]) ?>"><i class="icon-group"></i> Simplifier les membres</a></li>
+                </ul>
+            </div>
+            <?php endif; ?>
+
+            <h1>
+                <small>
+                    <i class="icon-cubes"></i> Projet
+                </small><br/>
+                <?php if ($project->getAcronym()): ?>
+                    <abbr title="<?= htmlentities($project->getLabel()) ?>">
+                        <?= $project->getAcronym() ?>
+                    </abbr>
+                <?php endif; ?>
+                <?= $project->getLabel() ?>
+            </h1>
+
+
+        </header>
+
+        <h2>
+            <i class="icon-tag"></i>
+            Informations
+        </h2>
+        <div class="row card has-btn">
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_EDIT, $project)): ?>
+            <nav class="btn-area">
+                <a href="<?= $this->url('project/edit', ['id' => $project->getId()]) ?>" class="smoke">
+                    <i class="icon-pencil-1"></i> Modifier
+                </a>
+            </nav>
+            <?php endif; ?>
+
+            <div class="col-md-7">
+                <h3>Description</h3>
+                <p><?= $project->getDescription() ?></p>
+
+                <h3>Codes</h3>
+                <ul class="text-highlight">
+                    <li>N°PFI : <strong><?= implode(', ', $project->getEotp()) ?></strong></li>
+                </ul>
+            </div>
+
+            <div class="col-md-5 dates">
+                <h3>Dates</h3>
+                <ul class="text-highlight">
+                    <li>Créé le <time><?= $this->moment($project->getDateCreated()) ?></time></li>
+                    <li>MAJ le <time><?= $this->moment($project->getDateUpdated()) ?></time></li>
+                    <li>Validation <time><?= $this->moment($project->getDateValidated()) ?></time></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+    <!--                 ACTIVITÉS de RECHERCHE                              -->
+    <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_SHOW, $project)): ?>
+    <section id="activities" class="has-btn">
+
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ACTIVITY_ADD, $project)): ?>
+        <div class="btn-area">
+            <a href="<?= $this->url('contract/new', ['projectid' => $project->getId()]) ?>" class="smoke">
+                <i class="icon-cube"></i>
+                Ajouter une activité</a>
+        </div>
+        <?php endif; ?>
+
+        <h2><i class="icon-cube"></i> Activités de recherche</h2>
+        <?php
+        $year = null; $totalYear = 0.0; $totalProject = 0.0; $nbrContratYear = 0;
+        /** @var \Oscar\Entity\Activity $contract */
+        foreach ($project->getGrants() as $contract):
+
+            // En-tête de regroupement
+            $projectYear = $contract->getDateCreated()->format('Y');
+            if($year != $projectYear ){
+                echo '<div class="list-separator"><h3 class="list-separator-label">'.$projectYear.'</h3></div>';
+                $year = $projectYear;
+                $totalYear = 0.0;
+                $nbrContratYear = 0.0;
+            } // En-tête de regroupement [fin]
+
+            $rate = $contract->getCurrency() ? $contract->getCurrency()->getRate() : 1;
+            $totalYear += $contract->getAmount() * $rate;
+            $totalProject += $contract->getAmount()  * $rate;
+            $nbrContratYear++;
+
+            echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $contract, 'hideProject'=> true, 'deepMembers' => false])
+            ?>
+        <?php endforeach; ?>
+
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT) ): ?>
+            <form action="<?= $this->url('project/add-activities', ['id' => $project->getId() ]) ?>" method="post">
+                Ajouter des activités existantes dans ce projet :
+                <div class="row">
+                    <div class="col-md-10">
+                        <select name="activities_ids[]" id="activities-choose" data-url="<?= $this->url('contract') ?>" multiple></select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary" style="display: block">
+                            Envoyer
+                        </button>
+                    </div>
+                </div>
+                <div id="activities-toadd">
+
+                </div>
+            </form>
+            <script>
+                require(['jquery','select2'], function($) {
+                    console.log('Chargement OK.');
+                    var formatRepo, formatRepoSelection;
+
+                    formatRepo = function (repo) {
+                        console.log('Format');
+                        if (repo.loading) return repo.text;
+
+                        var markup = '<div class="clearfix">';
+                        markup += ( (repo.num?'<strong>['+repo.num+']</strong> ':'') + repo.label) || repo.text;
+                        markup += '</div>';
+
+                        return markup;
+                    };
+
+                    formatRepoSelection = function (repo) {
+                        return ( (repo.num?'<strong>['+repo.num+']</strong> ':'') + repo.label) || repo.text;
+                    };
+
+                    $('#activities-choose').select2({
+                        placeholder: 'Rechercher une activité...',
+                        width: '100%',
+                        allowClear: true,
+                        ajax: {
+                            url: $('#activities-choose').data('url'),
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                console.log(params);
+                                return {
+                                    q: params.term, // search term
+                                    page: params.page
+                                };
+                            },
+                            processResults: function (data, page) {
+                                console.log('Données', data);
+                                return {results: data.datas};
+                            },
+                            cache: true
+                        },
+                        escapeMarkup: function (markup) {
+                            return markup;
+                        },
+                        minimumInputLength: 4,
+                        templateResult: formatRepo, // omitted for brevity, see the source of this page
+                        templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                    });
+                });
+            </script>
+        <?php endif; ?>
+
+        <?php endif; ?>
+    </section>
+
+    <section>
+        <h2><i class="icon-group"></i> Participants</h2>
+
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_SHOW, $project)): ?>
+            <section class="subsection has-btn">
+                <h3 class="h4">Membres du projet</h3>
+                <?php if (count($project->getMembers()/*getPersonsDeep()*/)): ?>
+                    <?= $this->partial('/partials/timewalker-pack.phtml', [
+                        'enroler' => $project,
+                        'type' => 'Person',
+                        'deep' => true,
+                        'manage' => $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project)
+                    ]); ?>
+                <?php else: ?>
+                    <p>Aucun membre sur ce projet</p>
+                <?php endif; ?>
+
+                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project)): ?>
+            <div class="btn-area">
+                <a href="<?= $this->url('personproject/new', ['idenroller' => $project->getId()]) ?>"
+                   class="smoke" data-modalform>
+                    <i class="icon-user"></i>
+                    Ajouter un membre
+                </a>
+            </div>
+                <?php endif; ?>
+            </section>
+        <?php else: ?>
+            <p class="credential-msg">Vous n'avez pas les droits pour voir les
+                membres de ce projet</p>
+        <?php endif; ?>
+
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_SHOW, $project)): ?>
+            <section id="partners" class="subsection has-btn">
+                <h3 class="h4">
+                    <!--<i class="icon-building-filled">--></i> Partenaires
+                </h3>
+                <?php if (count($project->getPartners())): ?>
+                    <?= $this->partial('/partials/timewalker-pack.phtml', [
+                        'enroler' => $project,
+                        'type' => 'Organization',
+                        'deep' => true,
+                        'manage' => $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE, $project)
+                    ]); ?>
+                <?php else: ?>
+                    <p>Aucun partenaire sur ce projet</p>
+                <?php endif; ?>
+
+                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE, $project)): ?>
+                    <div class="btn-area">
+                        <a href="<?= $this->url('organizationproject/new', ['idenroller' => $project->getId()]) ?>"
+                           class="smoke" data-modalform>
+                            <i class="icon-building-filled"></i>
+                            Ajouter un partenaire
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </section>
+        <?php else: ?>
+            <p class="credential-msg">Vous n'avez pas les droits pour voir les
+                partenaires de ce projet</p>
+        <?php endif; ?>
+    </section>
+
+    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_DOCUMENT_SHOW, $project)): ?>
+    <section id="documents" class="">
+        <h2><i class="icon-book"></i>Documents</h2>
+
+        <p class="help-block">Les documents ci-dessous sont issus des activités de recherche</p>
+        <?php if( count($documents) ): ?>
+            <?php
+            /** @var \Oscar\Entity\ContractDocument $document */
+            foreach( $documents as $document ): ?>
+                <?= $this->partial('oscar/contract-document/list-item.phtml', ['document' => $document, 'showActivity'=>true]) ?>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="no-data">Aucun document pour les activités de recherche de ce projet</p>
+        <?php endif; ?>
+    </section>
+    <?php endif; ?>
+
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ): ?>
+    <section id="documents" class="">
+        <h2>
+            <i class="icon-signal"></i>
+            Logs
+        </h2>
+        <?= $this->partial('oscar/activity-log/frag-list.phtml', ['entities' => $logs]) ?>
+    </section>
+    <?php endif; ?>
+
+    <script>
+        Initer.ready(function(){
+            require(['modalform'], function(modalform){
+               modalform($('body'));
+            });
+        });
+    </script>
+</article>
+

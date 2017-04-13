@@ -1,0 +1,26 @@
+<?php if( isset($project) ): $id = $project->getId(); ?>
+<header>
+    <h2>
+        <abbr title=""><?= $project->getAcronym() ?></abbr>
+        <?= $project->getLabel() ?>
+        <a href="<?= $this->url('project/show', ['id' => $project->getId()]) ?>#<?= $active ?>"
+           class="more">
+            Retour à la fiche
+        </a>
+    </h2>
+</header>
+<?php endif; ?>
+<ul class="nav nav-pills">
+    <li role="presentation" <?= $active === 'identification' ? 'class="active"' : '' ?>">
+        <a href="<?= $this->url('project/edit', ['id'=>$id]) ?>">Identification</a>
+    </li>
+    <li role="presentation" <?= $active === 'members' ? 'class="active"' : '' ?>">
+        <a href="<?= $this->url('project/edit-members', ['id'=>$id]) ?>">Membres</a>
+    </li>
+    <li role="presentation" <?= $active === 'partners' ? 'class="active"' : '' ?>">
+        <a href="<?= $this->url('project/edit-partners', ['id'=>$id]) ?>">Partenaires</a>
+    </li>
+    <li role="presentation"<?= $active === 'contracts' ? 'class="active"' : '' ?>>
+        <a href="<?= $this->url('project/edit-contracts', ['id'=>$id]) ?>">Contrats</a>
+    </li>
+</ul>

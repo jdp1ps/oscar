@@ -1,0 +1,120 @@
+<?php
+// Récupération des informations utilisateur
+
+
+
+?>
+<div class="bg-white banner">
+    <div class="container">
+
+        <div class="col-md-3">
+
+            <svg
+                xmlns:svg="http://www.w3.org/2000/svg"
+                xmlns="http://www.w3.org/2000/svg"
+                width="100%"
+                height="100%"
+                id="svg2"
+                version="1.1"
+                viewBox="0 0 100 100">
+                <defs
+                    id="defs4"/>
+                <g
+                    id="layer1"
+                    transform="translate(-153.96966,-376.65716)">
+                    <path
+                        style="fill:#0b0b28;fill-opacity:0.03980099;fill-rule:nonzero"
+                        clip-path="none"
+                        d="m 206.59896,377.89804 -2.07215,21.87042 c 21.98902,5.58418 37.8924,26.99564 38.26032,51.38078 1.85864,-4.69526 3.10587,-9.78049 3.61583,-15.16293 2.61334,-27.58243 -14.98966,-52.83758 -39.804,-58.08827 z"
+                        id="path2985-78"
+                    <path
+                        style="fill:#0b0b28;fill-opacity:0.03980099;fill-rule:nonzero"
+                        clip-path="none"
+                        d="m 245.06847,457.92753 -16.42866,-13.2969 c -15.01387,17.82509 -39.71348,21.7057 -59.31798,9.40384 2.84771,4.18695 6.29989,8 10.34308,11.27244 20.71941,16.76973 49.29791,13.28116 65.40356,-7.37939 z"
+                        id="path2985-7-3"/>
+                    <path
+                        style="fill:#0b0b28;fill-opacity:0.03980099;fill-rule:nonzero"
+                        clip-path="none"
+                        d="m 158.19677,456.67923 18.49108,-8.57484 c -6.97739,-23.39778 1.8095,-48.68173 21.03528,-60.76507 -4.70426,0.50933 -9.4014,1.78222 -13.95216,3.89254 -23.32049,10.81436 -34.28495,39.54911 -25.5742,65.44738 z"
+                        id="path2985-7-7-0"/>
+                    <path
+                        style="fill:#685895;fill-opacity:1;fill-rule:nonzero"
+                        clip-path="none"
+                        d="m 219.40862,377.19287 -5.29381,21.08959 c 21.16642,8.70621 33.91574,31.99819 30.69156,55.90776 2.55029,-4.31909 4.5466,-9.10987 5.84944,-14.30014 6.67642,-26.59766 -7.20631,-53.9005 -31.24719,-62.69721 z"
+                        id="path2985"
+                        class="logo-primary"/>
+                    <path
+                        style="fill:#4c5d94;fill-opacity:1;fill-rule:nonzero"
+                        clip-path="none"
+                        d="m 246.08922,461.15773 -14.46993,-15.4312 c -17.63964,15.22326 -42.91088,15.37638 -60.70324,0.45016 2.23095,4.51602 5.12144,8.75541 8.68258,12.55312 18.2491,19.46145 47.3415,20.26399 66.4906,2.42791 z"
+                        class="logo-secondary"
+                        id="path2985-7"/>
+                    <path
+                        style="fill:#9198a1;fill-opacity:1;fill-rule:nonzero"
+                        clip-path="none"
+                        class="logo-grey"
+                        d="m 159.40141,447.12305 19.75421,-5.66111 c -3.53073,-23.91856 8.98067,-47.35709 29.9864,-56.3421 -4.77929,-0.19561 -9.66393,0.3568 -14.52556,1.75003 -24.91352,7.13964 -40.11081,33.63279 -35.21505,60.25319 z"
+                        id="path2985-7-7"/>
+                </g>
+            </svg>
+
+
+        </div>
+
+        <div class="col-md-9">
+
+            <h1 style="font-size: 8em">OSCAR</h1>
+
+            <p><?= $this->appInfos()->desc ?><p>
+                <?php if( !$this->hasRole('user') ): ?>
+                    <a href="<?= $this->url('zfcuser/login') ?>" class="btn btn-success btn-large">
+                        <i class="glyphicon glyphicon-user"></i>
+                        Se connecter
+                    </a>
+                <?php else: ?>
+
+                    Bienvenue
+
+                    <?php if( $user ): ?>
+                        <strong><?= $user->getDisplayname() ?></strong>,
+                    <?php else: ?>
+                    <div class="alert alert-warning">
+                        <p>Votre compte n'est associé à aucun projet/activité de recherche</p>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="<?= $this->url('project/mine') ?>" class="btn btn-primary"><i class="icon-cubes"></i> Voir mes projets</a>
+                            <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
+                                <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>">
+                                    Déclarations
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-md-9">
+                            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX) ): ?>
+                                <form action="<?= $this->url('contract/advancedsearch') ?>"
+                                      method="get" class="form">
+                                <div class="input-group input-group">
+                                    <input
+                                        placeholder="Rechercher dans les activités un PFI, un N°Oscar, la vie, l'univers ou le reste&hellip;"
+                                        type="search"
+                                        class="form-control input"
+                                        name="q"
+                                        value=""/>
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn btn-primary">Rechercher</button>
+                                    </span>
+                                </div>
+                            </form>
+                            <?php endif; ?>
+                        </div>
+
+                    </div>
+                <?php endif; ?>
+            </p>
+
+        </div>
+    </div>
+</div>

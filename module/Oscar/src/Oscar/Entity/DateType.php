@@ -1,0 +1,106 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 19/11/15 10:09
+ * @copyright Certic (c) 2015
+ */
+
+namespace Oscar\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Class DateType
+ * @package Oscar\Entity
+ * @ORM\Entity
+ */
+class DateType implements ITrackable
+{
+    use TraitTrackable;
+
+    /**
+     * Intitulé du type
+     *
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $label;
+
+    /**
+     * Permet juste de filtre les dates (OscarFacet)
+     * @var
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $facet;
+
+    /**
+     * Description.
+     *
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $description;
+
+    /**
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFacet()
+    {
+        return $this->facet;
+    }
+
+    /**
+     * @param mixed $facet
+     */
+    public function setFacet($facet)
+    {
+        $this->facet = $facet;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    function __toString()
+    {
+        return $this->getLabel();
+    }
+
+    function trac(){
+        return sprintf("%s (%s)", $this->getLabel(), $this->getDescription());
+    }
+}

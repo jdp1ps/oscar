@@ -1,0 +1,37 @@
+<?php
+$showDelete = isset($showDelete) && $showDelete === true ? true : false;
+
+/** @var \Oscar\Entity\ContractDocument $document */ ?>
+<article class="card xs" data-openable>
+    <div class="card-title">
+        <i class="picto icon-doc doc-<?= $document->getExtension() ?>"></i>
+        <small class="text-light"><?= $document->getTypeDocument() ?> ~ </small>
+        <strong><?= $document->getFileName() ?></strong>
+        <small class="text-light">&nbsp;(<?= $this->fileSize($document->getFileSize()) ?>)</small>
+    </div>
+    <div class="card-content">
+        <p class="text-highlight">
+            Fichier <strong><?= $document->getExtension() ?></strong> version <?= $document->getVersion()?>, téléversé le <time><?= $this->moment($document->getDateUpdoad())->full() ?></time>
+            par <?= $this->link()->person($document->getPerson()) ?>
+        </p>
+        <?php if( $document->getGrant() && (isset($showActivity) && $showActivity == true) ): ?>
+        <p class="text-highlight">
+            Pour l'activité <?= $this->link()->activity($document->getGrant()) ?>
+        </p>
+        <?php endif; ?>
+        <nav class="text-right show-over">
+            <a class="btn btn-default btn-xs" href="<?= $this->url('contractdocument/download',
+                ['id' => $document->getId()]) ?>">
+                <i class="icon-download-outline"></i>
+                Télécharger le fichier
+            </a>
+            <?php if($showDelete): ?>
+            <a class="btn btn-default btn-xs" data-confirm="Êtes-vous sûr de vouloir supprimer ce document ?" data-href="<?= $this->url('contractdocument/delete',
+                ['id' => $document->getId()]) ?>">
+                <i class="icon-trash"></i>
+                supprimer le fichier
+            </a>
+            <?php endif; ?>
+        </nav>
+    </div>
+</article>

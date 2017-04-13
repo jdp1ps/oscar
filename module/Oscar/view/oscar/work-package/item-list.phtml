@@ -1,0 +1,16 @@
+<?php  /** @var \Oscar\Entity\WorkPackage $wp */ ?>
+<article class="card">
+    <h3 class="card-title">
+        <?php if( $wp->getCode()): ?>
+            [<?= $wp->getCode() ?>]
+        <?php endif; ?>
+        <?= $wp->getLabel() ?>
+    </h3>
+    <p class="text-highlight">
+        Du <time><?= $this->moment($wp->getDateStart()) ?></time>
+        au <time><?= $this->moment($wp->getDateEnd()) ?></time>
+    </p>
+    <p>
+        <?= $wp->getDescription() ?>
+    </p>
+</article>

@@ -1,0 +1,77 @@
+
+<div class="container">
+    <header class="jumbotron oscar-header">
+        <h1>
+            <?php if( isset($id) ): ?>
+                <span class="text-light">Modification du projet</span><br/>
+                <strong><?= $project ?></strong>
+            <?php else: ?>
+                <h2>Nouveau projet</h2>
+            <?php endif; ?>
+
+        </h1>
+    </header>
+    <div class="tab-content">
+        <?= $this->form()->openTag($form); ?>
+
+
+        <?= $this->formControlGroup($form->get('id')); ?>
+        <?= $this->formControlGroup($form->get('secure')); ?>
+
+        <div class="clearfix">
+            <div class="form-group">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Acronyme</span>
+                    <?= $this->formInput($form->get('acronym')) ?>
+                    <?php echo $this->formElementErrors($form->get('acronym')); ?>
+                </div>
+            </div>
+            <?php /*<div class="form-group">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Code SAIC</span>
+                    <?= $this->formInput($form->get('code')) ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Code PFI</span>
+                    <?= $this->formInput($form->get('eotp')) ?>
+                </div>
+            </div> */ ?>
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Nom</span>
+                    <?= $this->formInput($form->get('label')) ?>
+                </div>
+                <?= $this->formElementErrors($form->get('label')); ?>
+            </div>
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Description</span>
+                    <?= $this->formTextarea($form->get('description')) ?>
+                    <?php echo $this->formElementErrors($form->get('description')); ?>
+                </div>
+            </div>
+        </div>
+        <hr/>
+        <nav class="text-center">
+            <div class="btn-group">
+                <?php if( isset($id) ): ?>
+                <a class="btn btn-default" href="<?= $this->url('project/show', ['id' => $id]) ?>">
+                    <i class="icon-cancel-alt"></i>
+                    Retour à la fiche
+                </a>
+                <?php else: ?>
+                <a class="btn btn-default" href="<?= $this->url('project') ?>">
+                    <i class="icon-cancel-alt"></i>
+                    Retour à la liste
+                </a>
+                <?php endif; ?>
+                <button type="submit" class="btn btn-primary">
+                    Enregistrer
+                </button>
+            </div>
+        </nav>
+        <?= $this->form()->closeTag(); ?>
+    </div>
+</div>

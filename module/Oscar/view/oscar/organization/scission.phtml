@@ -1,0 +1,186 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 16-10-21 16:49
+ * @copyright Certic (c) 2016
+ */
+?>
+<link rel="stylesheet" type="text/css"
+      href="<?= $this->basePath() . '/js/vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css' ?>" />
+<div class="container">
+<?php if( $etape == 1 ): ?>
+    <form action="" method="post">
+        <h1>
+            <i class="icon-fork"></i>
+            Scission d'organisation (Étape 1/3)
+        </h1>
+
+        <hr>
+
+        <h2>
+            <i class=" icon-building-filled"></i>
+            Organisation à scinder
+        </h2>
+        <p>Les rôles de l'organisation scindée pourront être distribués aux organisations cibles.</p>
+        <div class="form">
+            <select class="select2" name="from" data-url="<?= $this->url('organization/search') ?>"></select>
+        </div>
+
+        <h2>
+            <i class="icon-building-filled"></i>
+            Organisations de destination
+        </h2>
+        <div class="form">
+            <select class="select2" name="to[]" data-url="<?= $this->url('organization/search') ?>" multiple="true"></select>
+        </div>
+
+
+
+        <h2>
+            <i class=" icon-calendar"></i>
+            Date de scission
+        </h2>
+        <div class="form">
+            <input type="date" class="datepicker form-control" name="dateFusion">
+        </div>
+
+        <hr>
+        <nav>
+            <button class="btn btn-primary" type="submit" name="etape" value="2">Suivant</button>
+        </nav>
+
+    </form>
+<?php elseif( $etape == 2 ): ?>
+    <form action="" method="post">
+        <h1>
+            <i class="icon-fork"></i>
+            Scission d'organisation (Étape 2/3)
+        </h1>
+
+        <input type="hidden" name="etape" value="3" />
+        <input type="hidden" name="hash" value="<?= $hash ?>" />
+
+    <?php
+    /** @var \Oscar\Entity\ActivityOrganization $activity */
+    foreach( $activities as $activity ): ?>
+        <div class="row" style="border-bottom: thin #333 solid; padding-top: 8px">
+            <div class="col-md-8">
+                <?= $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity->getActivity()]) ?>
+            </div>
+            <div class="col-md-4">
+                <?php foreach( $organizationsTo as $dest ): $id = "dest_" . $activity->getActivity()->getId() . '_' . $dest->getId(); ?>
+                    <div>
+                        <label for="<?= $id ?>">
+                            <input id="<?= $id ?>" type="checkbox" name="destinations[<?= $activity->getActivity()->getId() ?>][]" value="<?= $dest->getId() ?>" />
+                            <?= $dest ?>
+                        </label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+        </div>
+
+    <?php endforeach; ?>
+    <hr>
+    <nav>
+        <button class="btn btn-primary" type="submit">Valider le scission</button>
+    </nav>
+    </form>
+<?php else: ?>
+SUITE
+<?php endif; ?>
+</div>
+<style>
+    .select2-close-mask{
+        z-index: 2099;
+    }
+    .select2-dropdown{
+        z-index: 3051;
+    }
+</style>
+<script>
+    (function(){
+        require(['domReady', 'jquery', 'datepicker', 'select2'], function(domready, $) {
+            domready(function () {
+
+                $('.activity .card-content').toggle();
+
+                $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
+                $('.datepicker').datepicker({
+                    format: "yyyy-mm-dd",
+                    todayBtn: "linked",
+                    clearBtn: true,
+                    language: "fr",
+                    autoclose: true,
+                    toggleActive: true
+                });
+
+                if( $('.select2').length === 0 ){
+                    return;
+                }
+
+                $('.select2').select2({
+                    placeholder: 'Rechercher une organisation...',
+                    width: '100%',
+                    allowClear: true,
+                    ajax: {
+                        url: $('.select2').data('url'),
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                q: params.term, // search term
+                                page: params.page
+                            };
+                        },
+                        processResults: function (data, page) {
+                            console.log(data);
+                            return {results: data.datas};
+                        },
+                        cache: true
+                    },
+                    escapeMarkup: function (markup) {
+                        return markup;
+                    },
+                    minimumInputLength: 3,
+                    id: function (dt) {
+                        return dt.uid;
+                    },
+                    templateResult: formatRepo, // omitted for brevity, see the source of this page
+                    templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                })
+
+            });
+        });
+
+        /**
+         * Fonction de mise en forme du choix proposé dans l'auto-compléteur.
+         *
+         * @param repo
+         * @returns {*}
+         */
+        formatRepo = function (repo) {
+            if (repo.loading) return repo.text;
+
+            var markup = '<div class="clearfix">';
+            markup += repo.label || repo.text;
+            markup += '</div>';
+
+            return markup;
+        };
+
+        /**
+         * Fonction de mise en forme de la donnée choisie.
+         *
+         * @param repo
+         * @returns {*}
+         */
+        formatRepoSelection = function (repo) {
+            return repo.label || repo.text;
+        };
+
+
+    })()
+
+</script>

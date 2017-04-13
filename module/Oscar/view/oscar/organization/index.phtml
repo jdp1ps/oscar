@@ -1,0 +1,158 @@
+<?php
+// Mise en surbrillance du texte recherché
+$markText = function( $text, $search ){
+    if( !$search ){
+        return $text;
+    }
+    return preg_replace('/('.$search.')/i', '<mark>$1</mark>', $text);
+};
+?>
+<section class="container">
+    <h1 class="container">Liste des organisations</h1>
+    <form action="<?= $this->url() ?>" method="get" class="form">
+        <div class="row">
+            <div class="col-md-6">
+                <input placeholder="Rechercher un partenaires ou une organisation&hellip;"
+                       type="search"
+                       class="form-control"
+                       name="q"
+                       value="<?= htmlentities($search) ?>"/>
+
+            </div>
+            <div class="col-md-5">
+                <select class="form-control" name="t[]" id="" multiple="true" placeholder="Type d'organisation">
+                    <option value="">Tous</option>
+                    <?php foreach(\Oscar\Entity\Organization::getTypes() as $key=>$label ): ?>
+                        <option value="<?= $key ?>" <?= in_array($key, $type) ? ' selected="selected"' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+            </div>
+        </div>
+
+    </form>
+
+    <h3 class="text-center"><?= count($entities) ?> Résultat(s)</h3>
+
+    <?php /** @var \Oscar\Entity\Organization $entity */
+    foreach( $entities as $entity ):
+        $nbrProjects = count($entity->getProjects());
+        $nbrActivities = count($entity->getActivities()) ?>
+
+
+        <article class="card xs organization <?= $entity->isClose() ? "closed" : "" ?> type-<?= strtolower($entity->getType()) ?> <?= $entity->getCode() ? 'interne' : '' ?>">
+          <h2 class="card-title  layout-row">
+              <span>
+              <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
+                  <input type="checkbox" name="organisation_ids[]" class="ids" value="<?= $entity->getId() ?>" />
+              <?php endif; ?>
+
+            <a href="<?= $this->url('organization/show', ['id' => $entity->getId()]); ?>">
+            <?php if($entity->getCode()):?>
+                <abbr><?= $entity->getCode() ?></abbr>
+            <?php endif ?>
+
+            <?php if($entity->getShortName()):?>
+                <small><?= $markText($entity->getShortName(), $search) ?></small>
+            <?php endif ?>
+
+            <?php if($entity->getFullName()):?>
+                <i><?= $markText($entity->getFullName(), $search) ?></i>
+            <?php endif ?>
+
+            <?php if($entity->getCity()):?>
+                 (<?= $markText($entity->getCity(), $search) ?>)
+            <?php endif ?>
+                </a>
+
+            <span class="label <?= ($nbrProjects + $nbrActivities) ? ' label-primary' : 'label-default' ?>">
+                <?= $nbrProjects + $nbrActivities ?>
+            </span>
+
+                  <div class="dropdown" style="position: absolute; right: 8px; top: 4px">
+                      <a class="dropdown-toggle"
+                              data-toggle="dropdown"
+                              aria-haspopup="true" aria-expanded="true">
+                          <span class="icon-cog"></span>
+                      </a>
+                      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                          <li>
+                              <a href="<?= $this->url('organization/show', ['id' => $entity->getId()]); ?>">
+                                  <i class="icon-search-outline"></i>
+                                  fiche
+                              </a>
+                          </li>
+                          <li>
+                              <a href="<?= $this->url('organization/show', ['id' => $entity->getId()]); ?>#persons">
+                                  <i class="icon-group"></i>
+                                  Gérer les membres
+                              </a>
+                          </li>
+                          <li>
+                              <a href="<?= $this->url('organization/edit', ['id' => $entity->getId()]); ?>">
+                                  <i class="icon-pencil"></i> Modifier les informations
+                              </a>
+                          </li>
+                          <?php if( !$entity->isClose() ): ?>
+                              <li>
+                                  <a href="<?= $this->url('organization/close', ['id' => $entity->getId()]); ?>">
+                                      <i class="icon-cancel-outline"></i> Cloturer
+                                  </a>
+                              </li>
+                          <?php endif; ?>
+                      </ul>
+                  </div>
+
+            </span>
+          </h2>
+            <?php if ($entity->getDateEnd()): ?>
+                <p class="text-highlight">
+                    <?php if( $entity->isClose() ): ?>Fermé depuis le
+                    <?php else: ?>Fermera le
+                    <?php endif; ?>
+                    <strong><?= $this->moment($entity->getDateEnd()) ?></strong>
+                </p>
+            <?php endif; ?>
+
+            <?php if(count($entity->getPersons())): ?>
+                <?php foreach( $entity->getPersons() as $person ): ?>
+                    <?= $this->link()->organisationPerson($person) ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
+
+        </article>
+    <?php endforeach; ?>
+    <?php
+    $types = [];
+    foreach( $type as $t ){
+        $types[] = 't[]=' . $t;
+    }
+    ?>
+    <?= $this->pager($entities, $this->url().'?q='.urlencode($search).'&'.(implode('&', $types)).'&page=%s') ?>
+</section>
+<?php if($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
+<div style="position: fixed; bottom: 3em; right: 1em">
+    <button id="fuzzion">FUSIONNER les organisations selectionnées</button>
+</div>
+<script>
+    require(['jquery', 'select2'], function($){
+        $('select').select2({placeholder:"Type d'organisation"});
+        $('#fuzzion').on('click', function(){
+            var checked = $('.ids:checked'),
+                ids = [];
+
+            checked.each(function(i, input){
+               ids.push($(input).val());
+            });
+            // TOFIX
+            document.location = '<?= $this->url('organization/merge') ?>?ids=' + ids.join(',');
+
+            console.log(ids);
+        });
+    })
+</script>
+<?php endif; ?>
+
+

@@ -1,0 +1,207 @@
+<?php
+function displayDate( $dateTime, $previous="" ){
+    if( $dateTime instanceof DateTime ){
+        return $previous . ' ' . $dateTime->format('M Y');
+    } else {
+        return "";
+    }
+}
+?>
+<section class="project-container container">
+    <div class="row">
+        <?php if( isset($organization) ): ?>
+            <p>
+                <i class="icon-tag">Partenaire</i>
+            </p>
+        <header class="header jumbotron">
+            <h1 class="">
+                <?php if( $organization->getCode() ): ?>
+                <abbr><?= $organization->getCode() ?></abbr>
+                <?php endif; ?>
+
+                <?= $organization->getShortName() ? $organization->getShortName().', ' : '' ?>
+                <?= $organization->getFullname() ?>
+            </h1>
+            <div class="details row">
+                <dl class="col-xs-8">
+                    <dt>Code</dt>
+                    <dd><?= $organization->getCode() ? $organization->getCode() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                    <dt>Nom d'usage (nom court)</dt>
+                    <dd><?= $organization->getShortName() ? $organization->getShortName() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                    <dt>Nom complet</dt>
+                    <dd><?= $organization->getFullname() ? $organization->getFullname() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                    <dt>Email</dt>
+                    <dd><?= $organization->getEmail() ? $organization->getEmail() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                    <dt>url</dt>
+                    <dd><?= $organization->getUrl() ? $organization->getUrl() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                    <dt>Adresse</dt>
+                    <dd>
+                        <address>
+                            <?=   $organization->getStreet1() . ' '
+                                . $organization->getStreet2() . ' '
+                                . $organization->getStreet3() . '<br/>'
+                                . $organization->getZipcode() . ' '
+                                . $organization->getCity()
+                            ?>
+                        </address>
+                    </dd>
+                </dl>
+                <div class="col-xs-4">
+                    <h5>Description</h5>
+                    <?= $organization->getDescription() ? $organization->getDescription() : '<i class="missing-data">Aucun</i>' ?>
+                </div>
+            </div>
+            <nav>
+                <a href="<?= $this->url('organization_edit', array('id' => $organization->getId())) ?>" class="btn btn-default btn-sm">
+                    Éditer les informations
+                </a>
+            </nav>
+            <p><span class="label label-info">
+                    <?= count($projects) ?>
+            </span> projet(s)</p>
+        </header>
+        <?php elseif( isset($person) ): ?>
+        <header>
+            <h1>
+                <?= $person ?>
+                <span>comme membre</span>
+
+            </h1>
+            <p><span class="label label-info">
+                    <?= count($projects) ?>
+                </span> projet(s)</p>
+        </header>
+        <?php else: ?>
+        <form action="<?= $this->url('project_search') ?>" method="get" class="form col-xs-10 col-xs-push-1 global-search">
+            <div class="input-group input-group-lg">
+                <input placeholder="Rechercher un projet&hellip;" type="search" class="form-control input-lg"  name="q" value="<?= htmlentities($search) ?>"/>
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                </span>
+            </div>
+        </form>
+        <p class="text-info col-xs-12 text-center">
+            <?= count($projects) ?> résultats pour la recherche <q><?= $search ?></q>
+        </p>
+        <?php endif; ?>
+    </div>
+
+    <?php if($error): ?>
+    <div class="alert alert-danger">
+        <?= $error ?>
+    </div>
+    <?php endif; ?>
+    <div class="col-md-9">
+<?php
+$disc = "";
+$annee = "";
+
+$group = array(
+    'discipline' => array(),
+    'annee' => array(),
+);
+$navDiscipline = "<ul>";
+foreach( $projects as $project):
+    if( $project instanceof \Oscar\Entity\ProjectPartner || $project instanceof \Oscar\Entity\ProjectMember ){
+        $project = $project->getProject();
+    }
+
+    /*if( $disc !== $project->getDiscipline() ){
+        $annee = "";
+        $id = uniqid("disc_");
+        $disc = $project->getDiscipline();
+        $navDiscipline .= '<li><a href="#'.$id.'">'.($disc ? $disc : "Sans discipline").'</a></li>';
+        ?><div class="separator-discipline">&nbsp;</div><h2 id="<?= $id ?>" class="titlefeed"><?= $disc ? $disc : "<i>Sans discipline</i>" ?></h2>
+    <?php
+    }*/
+    $discipline = $project->getDiscipline() ? (string)$project->getDiscipline() : 'Sans discipline';
+
+    if( !isset($group['discipline'][$discipline]) ){
+        $group['discipline'][$discipline] = 0;
+    }
+    $group['discipline'][$discipline]++;
+
+
+
+    if( $annee !== $project->getDateCreated()->format('Y')){
+        $annee = $project->getDateCreated()->format('Y');
+        ?><div class="separator-date">&nbsp;</div> <h3 class="timefeed"><?= $annee ?></h3><?php
+    }
+    if( !isset($group['annee'][$annee]) ){
+        $group['annee'][$annee] = 0;
+    }
+    $group['annee'][$annee]++;
+
+    echo $this->partial('/oscar/project/project-item.phtml', array(
+        'project'    => $project,
+    )); ?>
+<?php endforeach;
+
+?>
+    </div>
+    <div class="col-md-3">
+        <h3>par discipline</h3>
+        <p><i>Répartition des projets par discipline.</i></p>
+        <canvas id="myChart" width="250" height="250"></canvas>
+        <h3>par année</h3>
+        <p><i>Répartition des projets par année.</i></p>
+        <canvas id="myChart2" width="250" height="250"></canvas>
+        <?php
+        function random_color_part() {
+            return str_pad( dechex( mt_rand( 0, 255 ) ), 2, '0', STR_PAD_LEFT);
+        }
+
+        function random_color() {
+            return random_color_part() . random_color_part() . random_color_part();
+        }
+
+
+        $data = array();
+        foreach($group['discipline'] as $annee=>$qtt){
+            $data[] = array(
+                'value' => $qtt,
+                'color' => '#'.random_color(),
+                'label' => $annee
+            );
+        }
+
+        $data2 = array();
+        foreach($group['annee'] as $annee=>$qtt){
+            $data2[] = array(
+                'value' => $qtt,
+                'color' => '#'.random_color(),
+                'label' => $annee
+            );
+        }
+
+        ?>
+        <script>
+            var data = <?= json_encode($data) ?>;
+            var data2 = <?= json_encode($data2) ?>;
+            // Get the context of the canvas element we want to select
+            var ctx = document.getElementById("myChart").getContext("2d");
+            var myNewChart = new Chart(ctx).Doughnut(data,{
+                segmentShowStroke : false
+            });
+
+            var ctx2 = document.getElementById("myChart2").getContext("2d");
+            var myNewChart2 = new Chart(ctx2).Doughnut(data2,{
+                segmentShowStroke : false
+            });
+        </script>
+
+
+    </div>
+</section>
+<script>
+    (function($){
+        $('.project-compact').on('click', '.ui-openable-opener', function(){
+            $(this).closest('.ui-openable').toggleClass('open');
+        });
+    })(jQuery);
+</script>

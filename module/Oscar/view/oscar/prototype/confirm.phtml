@@ -1,0 +1,18 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 10/12/15 11:17
+ * @copyright Certic (c) 2015
+ */
+?>
+<div class="container">
+    <h1><i class="icon-floppy"></i>Confirmer l'opération</h1>
+    <form action="" method="post">
+        <input type="hidden" name="<?= $tokenName ?>" value="<?= $tokenValue ?>" />
+        <div class="message alert alert-danger">
+            <?= $message ?>
+        </div>
+        <a href="<?= $urlCancel ?>" class="btn btn-primary">Annuler</a>
+        <button class="btn btn-primary" type="submit">Confirmer</button>
+    </form>
+</div>

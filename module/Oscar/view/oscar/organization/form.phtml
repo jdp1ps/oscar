@@ -1,0 +1,363 @@
+<?= $this->form()->openTag($form); ?>
+<div class="container">
+    <?php if( $id ): ?>
+    <h1>Modification de <strong><?= $organization ?></strong></h1>
+    <?php else: ?>
+    <h1>Nouvelle organisation</h1>
+    <?php endif; ?>
+
+    <div class="form-group">
+        <div class="input-group input-group-lg">
+            <span class="input-group-addon">shortName</span>
+            <?= $this->formInput($form->get('shortName')) ?>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group input-group-lg">
+            <span class="input-group-addon">Code interne</span>
+            <?= $this->formInput($form->get('code')) ?>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group input-group-lg">
+            <span class="input-group-addon">Type </span>
+            <?= $this->formSelect($form->get('type')) ?>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <span class="input-group-addon">SIRET</span>
+            <?= $this->formInput($form->get('siret')) ?>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">fullName</span>
+            <?= $this->formInput($form->get('fullName')) ?>
+        </div>
+        <?= $this->formElementErrors($form->get('fullName')); ?>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">Date de début (ouverture)</span>
+            <?= $this->formInput($form->get('dateStart')) ?>
+        </div>
+        <?= $this->formElementErrors($form->get('dateStart')); ?>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">Date de fin (fermeture)</span>
+            <?= $this->formInput($form->get('dateEnd')) ?>
+        </div>
+        <?= $this->formElementErrors($form->get('dateEnd')); ?>
+    </div>
+
+    <h3>Adresse</h3>
+
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">street1</span>
+            <?= $this->formInput($form->get('street1')) ?>
+        </div>
+        <?= $this->formElementErrors($form->get('street1')); ?>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">street2</span>
+            <?= $this->formInput($form->get('street2')) ?>
+        </div>
+        <?= $this->formElementErrors($form->get('street2')); ?>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">street3</span>
+            <?= $this->formInput($form->get('street3')) ?>
+        </div>
+        <?= $this->formElementErrors($form->get('street3')); ?>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3">
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">zipCode</span>
+                    <?= $this->formInput($form->get('zipCode')) ?>
+                </div>
+                <?= $this->formElementErrors($form->get('zipCode')); ?>
+            </div>
+        </div>
+        <div class="col-xs-5">
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">city</span>
+                    <?= $this->formInput($form->get('city')) ?>
+                </div>
+                <?= $this->formElementErrors($form->get('city')); ?>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Pays</span>
+                    <?= $this->formInput($form->get('country')) ?>
+                </div>
+                <?= $this->formElementErrors($form->get('country')); ?>
+            </div>
+        </div>
+    </div>
+
+    <h3>Informations numériques</h3>
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">email</span>
+            <?= $this->formInput($form->get('email')) ?>
+        </div>
+        <?= $this->formElementErrors($form->get('email')); ?>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">url</span>
+            <?= $this->formInput($form->get('url')) ?>
+        </div>
+        <?= $this->formElementErrors($form->get('url')); ?>
+    </div>
+
+
+    <div class="form-group">
+        <div class="input-group input-group-sm">
+            <span class="input-group-addon">Description</span>
+            <?= $this->formTextarea($form->get('description')) ?>
+        </div>
+    </div>
+</div>
+<hr/>
+<nav class="text-center">
+    <div class="btn-group">
+        <?php if( $id ): ?>
+        <a class="btn btn-default" href="<?= $this->url('organization/show', ['id' => $id]) ?>">
+            <i class="icon-cancel-alt"></i>
+            Annuler
+        </a>
+        <?php else: /*?>
+            <a class="btn btn-default" href="<?= $this->url('organization') ?>">
+                <i class="icon-cancel-alt"></i>
+                Annuler
+            </a>
+        <?php*/ endif; ?>
+        <button type="submit" class="btn btn-primary">
+            Enregistrer
+        </button>
+    </div>
+</nav>
+<?= $this->form()->closeTag(); ?>
+
+    <script>
+        require(['select2'], function(select2){
+            $('select').select2();
+        });
+    </script>
+<?php
+
+
+/*
+?>
+<?= $this->form()->openTag($form); ?>
+
+<?= $this->formHidden($form->get('id')); ?>
+
+<div class="form-group">
+    <?= $this->formLabel($form->get('label')) ?>
+
+</div>
+
+
+<div class="form-group clearfix">
+    <div class="col-sm-4">
+        <div class="input-group input-group-lg">
+            <span class="input-group-addon">Acronyme</span>
+            <?= $this->formInput($form->get('acronym')) ?>
+        </div>
+    </div>
+    <div class="col-sm-8">
+        <div class="input-group input-group-lg">
+            <span class="input-group-addon">Nom</span>
+            <?= $this->formInput($form->get('label')) ?>
+        </div>
+    </div>
+</div>
+
+<div class="form-group clearfix">
+    <div class="col-sm-12">
+        <?= $this->formInput($form->get('description')) ?>
+    </div>
+</div>
+
+
+<div class="form-group">
+    <label for="">Financement</label>
+    <nav>
+    <button id="btn-add-grant" class="btn btn-primary">
+        <i class="icon-database"></i>
+        Ajouter un source de financement
+    </button>
+    </nav>
+    <div id="grants" class="clearfix">
+
+    </div>
+
+</div>
+
+<hr/>
+
+<nav class=" text-center">
+    <div class="btn-group-hudge btn-group">
+        <a class="btn btn-default" href="<?= $this->url('grantsource_index') ?>">
+            Annuler
+        </a>
+        <?php if( $entity->getId() > 0 ): ?>
+            <button class="btn btn-primary" type="submit">
+                <i class="icon-pencil"></i>
+                Enregistrer
+            </button>
+        <?php else: ?>
+            <button class="btn btn-primary" type="submit">
+                <i class="icon-doc-add"></i>
+                Créer
+            </button>
+        <?php endif; ?>
+    </div>
+</nav>
+
+<?= $this->form()->closeTag(); ?>
+<hr />
+
+
+<script type="text/x-handlebars-template" id="grant-tpl">
+    <div class="col-md-6">
+        <div class="grant-item form-horizontal" id="grant_{{id}}">
+            <nav>
+                <button class="btn btn-default btn-xs btn-remove">
+                    <i class="icon-trash"></i>
+                </button>
+            </nav>
+            <input type="hidden" name="grants[{{ key }}][id]" value="{{id}}" id="grant_{{key}}_id"/>
+            <div class="form-group clearfix">
+                <label for="" class="col-xs-2 control-label">Source</label>
+                <div class="col-sm-10">
+                    <select placeholder="Selectionnez une source&hellip;" name="grants[{{ key }}][source]" id="grant_{{key}}_source" class="form-control select-source">
+                        <?php foreach ($grantSources as $grantSource): ?>
+                        <option value="<?= $grantSource->getId() ?>">
+                            <?= $grantSource->getLabel() ?>
+                            <?php if( $grantSource->getDescription() ): ?>
+                                (<?= $grantSource->getDescription() ?>)</option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group clearfix">
+                <label for="" class="col-xs-2 control-label">Montant</label>
+                <div class="col-sm-10">
+                    <div class="input-group">
+
+                        <input type="text" class="form-control"  name="grants[{{ key }}][amount]" value="{{amount}}" id="grant_{{key}}_amount" placeholder="Début" />
+                        <span class="input-group-addon">.00 €</span>
+
+                    </div>
+                </div>
+            </div>
+            <div class="form-group clearfix">
+                <label for="" class="col-xs-2 control-label">Status</label>
+                <div class="col-sm-10"><!--10 - D : Draft,     En cours de rédaction
+         * - S : Send,      Soumise (en attente de réponse)
+         * - A : Accept,    Acceptée
+         * - R : Reject,    Refusée
+         * - C : Cancel,    Annulée-->
+                    <select placeholder="Selectionnez une source&hellip;" name="grants[{{ key }}][status]" id="grant_{{key}}_status" class="form-control select-status input-sm">
+                        <option value="D">En cours de rédaction</option>
+                        <option value="S">Soumise (en attente de réponse)</option>
+                        <option value="A">Acceptée</option>
+                        <option value="R">Rejetée</option>
+                        <option value="C">Annulée</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group clearfix form-group-xm">
+                <label for="" class="col-xs-2 control-label">Nature</label>
+                <div class="col-sm-10"><!--10 - D : Draft,     En cours de rédaction
+         * - S : Send,      Soumise (en attente de réponse)
+         * - A : Accept,    Acceptée
+         * - R : Reject,    Refusée
+         * - C : Cancel,    Annulée-->
+                    <select name="grants[{{ key }}][nature]" id="grant_{{key}}_nature" class="form-control select-status">
+                        <option value="D">Prolongation</option>
+                        <option value="S">Soumise (en attente de réponse)</option>
+                        <option value="A">Acceptée</option>
+                        <option value="R">Rejetée</option>
+                        <option value="C">Annulée</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group clearfix">
+                <label for="" class="col-xs-2 control-label">Date d'effet</label>
+                <div class="col-sm-10">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="icon-calendar-outlilne"></i> du</span>
+                        <input type="text" class="form-control"  name="grants[{{ key }}][dateStart]" value="{{dateStart}}" id="grant_{{key}}_dateStart" placeholder="Début" />
+                        <span class="input-group-addon">au</span>
+                        <input type="text" class="form-control"  name="grants[{{ key }}][dateEnd]" value="{{dateEnd}}" id="grant_{{key}}_dateEnd" placeholder="Fin">
+                    </div>
+                </div>
+            </div>
+            <h4><i class="icon-doc"></i> Documents</h4>
+            <div class="form-group clearfix">
+                <p class="help-block">Aucun document uploadé</p>
+            </div>
+            <p class="text-right">
+                <button class="btn btn-default btn-xs"><i class="icon-upload-outline"></i> Uploader un document</button>
+            </p>
+        </div>
+    </div>
+</script>
+<pre>
+<?php echo json_encode($grants) ?>
+    </pre>
+<script>
+    (function(root, $){
+        var tpl = Handlebars.compile($('#grant-tpl').html()),
+            $grants   = $('#grants'),
+            createGrant = function( datas ){
+                datas.key = _.uniqueId();
+                var dom = $(tpl(datas));
+                dom.find('.select-source').val(datas.source);
+                $grants.append(dom);
+            },
+            grants = <?= json_encode($grants) ?>; //
+        console.log(grants);
+
+        $('#btn-add-grant').on('click', function(e){
+            createGrant({amount: 0, source: null, id: null});
+            e.preventDefault()
+        });
+
+        $grants.on('click', '.btn-remove', function(e){
+            $(this).closest('.grant-item').parent().remove();
+            e.preventDefault();
+        });
+
+        _.each(grants, function(item){
+            createGrant(item);
+        });
+
+
+    })(this, jQuery)
+</script>
+*/ ?>

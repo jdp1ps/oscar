@@ -1,0 +1,152 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 16/10/15 13:41
+ * @copyright Certic (c) 2015
+ */
+?>
+<link rel="stylesheet" type="text/css"
+      href="<?= $this->basePath() . '/js/vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css' ?>" />
+<div class="container">
+    <h1>
+        <?php if($activity->getProject()): ?>
+            <small class="text-light">
+                <i class="icon-cubes"></i>
+                <?= $activity->getProject() ?>
+            </small><br/>
+        <?php endif; ?>
+        <?php if( $activity->getId() ): ?>
+            <strong><i class="icon-cube"></i> <?= $activity->getLabel() ?></strong> (Modification)
+        <?php else: ?>
+        <strong><i class="icon-cube"></i> Nouvelle activité de recherche</strong>
+        <?php endif; ?>
+
+    </h1>
+    <div class="form">
+        <h3>Informations</h3>
+        <?= $this->form()->openTag($form->prepare()); ?>
+        <?= $this->formControlGroup($form->get('label')); ?>
+        <?= $this->formControlGroup($form->get('description')); ?>
+
+
+        <h3>Feuille de temps</h3>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <?php echo $this->formLabel($form->get('timesheetFormat'));?>
+                <?php echo $this->formSelect($form->get('timesheetFormat'));?>
+                <?php echo $this->formElementErrors($form->get('timesheetFormat')); ?>
+            </div>
+        </div>
+
+        <h3>Données administratives</h3>
+
+        <div class="row">
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('codeEOTP'));?>
+                <?php echo $this->formInput($form->get('codeEOTP'));?>
+                <?php echo $this->formElementErrors($form->get('codeEOTP')); ?>
+            </div>
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('status'));?>
+                <?php echo $this->formSelect($form->get('status'));?>
+                <?php echo $this->formElementErrors($form->get('status')); ?>
+            </div>
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('activityType'));?>
+                <?php echo $this->formSelect($form->get('activityType'));?>
+                <?php echo $this->formElementErrors($form->get('activityType')); ?>
+            </div>
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('disciplines'));?>
+                <?php echo $this->formSelect($form->get('disciplines'));?>
+                <?php echo $this->formElementErrors($form->get('disciplines')); ?>
+            </div>
+        </div>
+
+        <h3>Informations financières</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <?= $this->formControlGroup($form->get('financialImpact')); ?>
+            </div>
+            <div class="col-md-3">
+                <?= $this->formControlGroup($form->get('amount')); ?>
+            </div>
+            <div class="col-md-3">
+                <?= $this->formControlGroup($form->get('currency')); ?>
+            </div>
+            <div class="col-md-3">
+                <?= $this->formControlGroup($form->get('tva')); ?>
+            </div>
+        </div>
+
+        <h3>Dates clefs</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('dateStart'));?>
+                <?php echo $this->formInput($form->get('dateStart'));?>
+                <?php echo $this->formElementErrors($form->get('dateStart')); ?>
+
+            </div>
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('dateEnd'));?>
+                <?php echo $this->formInput($form->get('dateEnd')); ?>
+                <?php echo $this->formElementErrors($form->get('dateEnd')); ?>
+            </div>
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('dateSigned'));?>
+                <?php echo $this->formInput($form->get('dateSigned')); ?>
+                <?php echo $this->formElementErrors($form->get('dateSigned')); ?>
+            </div>
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('dateOpened'));?>
+                <?php echo $this->formInput($form->get('dateOpened'));?>
+                <?php echo $this->formElementErrors($form->get('dateOpened')); ?>
+            </div>
+        </div>
+
+        <h3>Numérotation</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <?php echo $this->formLabel($form->get('centaureNumConvention'));?>
+                <?php echo $this->formInput($form->get('centaureNumConvention'));?>
+                <?php echo $this->formElementErrors($form->get('centaureNumConvention')); ?>
+            </div>
+            <div class="col-md-6">
+                <h4>Autres Numérotations</h4>
+                <?php echo $this->keyvalue($form->get('numbers'));?>
+                <?php echo $this->formElementErrors($form->get('numbers')); ?>
+            </div>
+        </div>
+
+        <?= $this->formHidden($form->get('id')); ?>
+        <hr>
+        <div class="text-center">
+            <nav class="btn-group">
+                <a class="btn btn-default" href="javascript:history.back()">
+                    <i class="icon-angle-left"></i>
+                    Retour
+                </a>
+                <button class="btn btn-primary" type="submit">Enregistrer</button>
+            </nav>
+        </div>
+        <datalist id="keyvalue_list">
+            <?php foreach($numbers_keys as $key ): ?>
+            <option value="<?= $key ?>">
+            <?php endforeach; ?>
+        </datalist>
+        <?= $this->form()->closeTag() ?>
+
+    </div>
+</div>
+<script>
+    Initer.ready(function(){
+        require(['select2'], function(){
+            $('[name="activityType"], .select2').select2();
+        });
+
+        require(['Keyvalue'], function(KeyValue){
+            console.log(KeyValue);
+        });
+    })
+</script>

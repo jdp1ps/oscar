@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="<?= $this->basePath(). '/css/privileges.css' ?>">
+<div class="container">
+    <h1>
+        <i class="icon-building-filled"></i>
+        Rôles des organisations dans les activités de recherche
+    </h1>
+    <div class="oscar-help">
+        <p>Liste des <strong>rôles pour les structures</strong> affectées à une activité.</p>
+        <p><strong> <i class="icon-asterisk"></i>Rôle principal</strong> : Les rôles qualifiés avec l'option <strong>principal</strong> activent les droits aux personnes nommées au sein de ces structures. Par exemple, une personne définit comme <em>Responsable</em> dans la structure aura les droits du rôle <em>Responsable</em> sur les activités où la structure est affectée avec un rôle principal.
+    </div>
+    <div id="roles"></div>
+    <script>
+        require(['vue', 'vue-resource', 'organizationrole'], function(Vue, VueResource, OrganizationRole){
+
+            Vue.use(VueResource);
+
+            var organisationrole = new OrganizationRole.default({
+                http: {
+                    root: '<?= $this->url('administration/organizationrole/api') ?>'
+                },
+                data: {
+                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_ROLEORGA_EDITION) ? 'true' : 'false' ?>
+                },
+                el: '#roles'
+            });
+        })
+    </script>
+</div>

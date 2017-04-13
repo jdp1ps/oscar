@@ -1,0 +1,54 @@
+<div class="container">
+
+    <form action="" method="get">
+        <div class="form-group">
+            <input type="search"
+                   class="form-control"
+                   value="<?= isset($query) ? htmlentities($query) : '' ?>"
+                   name="q"
+                   placeholder="Recherche&hellip;" />
+        </div>
+    </form>
+
+    <?php if( isset($query) && count($datas) == 0 ): ?>
+    <div class="alert-info">
+        Aucun résultat
+    </div>
+    <?php elseif( isset($query) && count($datas) > 0 ): ?>
+        <p class="text-info">Il y'a <?= count($datas) ?> résultat(s) : </p>
+        <?php foreach($datas as $organization): ?>
+            <article class="card">
+                <h2 class="card-title">
+                    <?php if( $organization->getCode() ): ?>
+                    <abbr><?= $organization->getCode() ?></abbr>
+                    <?php endif; ?>
+
+                    <?php if( $organization->getShortName() ): ?>
+                        <strong><?= $organization->getShortName() ?></strong>
+                    <?php endif; ?>
+
+                    <?= $organization->getFullName() ?>
+
+                    <?php if( $organization->getCity() ): ?>
+                     , <i><?= $organization->getCity() ?></i>
+                    <?php endif; ?>
+
+                    <span class="badge <?= count($organization->getProjects()) ? 'bg-primary' : 'badge-default'  ?>">
+                        <?= count($organization->getProjects()) ?>
+                    </span>
+                </h2>
+                <div class="card-content">
+                    <a class="btn btn-default btn-xs" href="<?= $this->url('organisation/show', ['id'=>$organization->getId()]) ?>">
+                        <i class="icon-doc"></i>
+                        Fiche
+                    </a>
+                    <a class="btn btn-default btn-xs" href="<?= $this->url('organisation/edit', ['id'=>$organization->getId()]) ?>">
+                        <i class="icon-pencil"></i>
+                        Éditer
+                    </a>
+                </div>
+            </article>
+            <?php endforeach; ?>
+    <?php endif; ?>
+
+</div>

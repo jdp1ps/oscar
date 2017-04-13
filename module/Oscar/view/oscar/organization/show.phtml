@@ -1,0 +1,138 @@
+<?php /** @var \Oscar\Entity\Organization $organization */ ?>
+<div class="container organization-full">
+    <div class="breadcrumbs">
+        <a href="javascript:history.back()" class="link">Retour</a>
+    </div>
+    <header class="header jumbotron organization type-<?= $organization->getType() ?>">
+        <?php if( $organization->getType() ): ?>
+        <h2> <?= \Oscar\Entity\Organization::getTypes()[$organization->getType()] ?></h2>
+        <?php endif; ?>
+        <h1>
+            <?php if( $organization->getCode() ): ?>
+                <abbr><?= $organization->getCode() ?></abbr>
+            <?php endif; ?>
+
+            <?= $organization->getShortName() ? $organization->getShortName().', ' : '' ?>
+            <?= $organization->getFullname() ?>
+        </h1>
+        <div class="details row">
+            <dl class="col-xs-8">
+                <dt>Code</dt>
+                <dd><?= $organization->getCode() ? $organization->getCode() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                <dt>Nom d'usage (nom court)</dt>
+                <dd><?= $organization->getShortName() ? $organization->getShortName() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                <dt>Nom complet</dt>
+                <dd><?= $organization->getFullname() ? $organization->getFullname() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                <dt>Email</dt>
+                <dd><?= $organization->getEmail() ? $organization->getEmail() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                <dt>url</dt>
+                <dd><?= $organization->getUrl() ? $organization->getUrl() : '<i class="missing-data">Aucun</i>' ?></dd>
+
+                <dt>Adresse</dt>
+                <dd>
+                    <address>
+                        <?=   $organization->getStreet1() . ' '
+                        . $organization->getStreet2() . ' '
+                        . $organization->getStreet3() . '<br/>'
+                        . $organization->getZipcode() . ' '
+                        . $organization->getCity()
+                        . ' (' . $organization->getCountry() . ')'
+                        ?>
+                    </address>
+                </dd>
+            </dl>
+            <div class="col-xs-4">
+                <h5>Description</h5>
+                <?= $organization->getDescription() ? $organization->getDescription() : '<i class="missing-data">Aucun</i>' ?>
+
+                <h5>Synchronisation</h5>
+                <dl>
+                    <dt>Identifiant LDAP</dt>
+                    <dd><?= $organization->getLdapSupannCodeEntite() ?> </dd>
+                </dl>
+                <dl>
+                    <dt>Identifiant SIFAC</dt>
+                    <dd>
+                        <?= $organization->getSifacId() ?>
+                        <?php if( $organization->getSifacGroup() ): ?>
+                            <small class="text-light"> (group : <?= $organization->getSifacGroup() ?>)</small>
+                        <?php endif; ?>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>SIRET</dt>
+                    <dd><?= $organization->getSiret() ?> </dd>
+                </dl>
+                <dl>
+                    <dt>CONNECTOR</dt>
+                    <dd>
+                        <?php if( count($organization->getConnectors()) ): ?>
+                            <ul>
+                            <?php foreach($organization->getConnectors() as $connector=>$value): ?>
+                                <a href="<?= $this->url('organization/synchronize', ['id' => $organization->getId(), 'connector' => $connector]) ?>">Synchroniser</a>
+                                <li><?= $connector ?> : <strong><?= $value ?></strong></li>
+                            <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                </dl>
+            </div>
+        </div>
+        <nav>
+            <a href="<?= $this->url('organization/edit', array('id' => $organization->getId())) ?>" class="btn btn-default btn-sm">
+                Éditer les informations
+            </a>
+        </nav>
+
+    </header>
+    <section class="content">
+
+        <div id="persons">
+            <h2><i class="icon-user"></i>Personnes</h2>
+            <?php
+            /** @var \Oscar\Entity\OrganizationPerson $person */
+            foreach($organization->getPersons() as $person): ?>
+                <?= $this->partial('/partials/person-enrolled-card.phtml', array(
+                    'enroll'    => $person,
+                    'urlDelete' => $this->url('organizationperson/delete', ['idenroll' => $person->getId()]),
+                )); ?>
+            <?php endforeach; ?>
+            <hr>
+            <a href="<?= $this->url('organizationperson/new', ['idenroller' => $organization->getId()]) ?>" class="btn btn-primary">
+                <i class="icon-plus-circled"></i> Lié une personne
+            </a>
+        </div>
+
+        <h2>Projet <span class="label <?= count($projects)>0?'label-info':'label-default' ?>"><?= count($projects) ?></span></h2>
+        <?php foreach($projects as $project): ?>
+            <?= $this->partial('/oscar/project/project-item-openable.phtml', array(
+                'project'    => $project,
+            )); ?>
+        <?php endforeach; ?>
+
+
+        <?= $this->pager($projects, preg_replace("/\\??&page=[0-9]*/", '', $_SERVER['REQUEST_URI']) . '?&page=%s') ?>
+
+        <?php /*
+        <section class="activities">
+            <h2>Activités (sans projet) <span class="label <?= count($activities)>0?'label-info':'label-default' ?>"><?= count($activities) ?></span></h2>
+            <?php $currentYear=null; foreach( $activities as $activity ):
+
+                $year = $activity->getDateCreated()->format('Y');
+                if( $currentYear != $year ){
+                    $year = $currentYear;
+                    echo "<h3>$year</h3>";
+                }
+                ?>
+                <?= $this->partial('/oscar/project-grant/item-list.phtml', array(
+                'activity'    => $activity
+            )); ?>
+            <?php endforeach; ?>
+        </section>
+ */ ?>
+    </section>
+</div>
+

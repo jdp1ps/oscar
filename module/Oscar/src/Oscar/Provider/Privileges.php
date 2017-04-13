@@ -1,0 +1,90 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: stephane
+ * Date: 03/03/16
+ * Time: 10:40
+ */
+
+namespace Oscar\Provider;
+
+
+
+
+class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
+{
+
+    const ACTIVITY_EXPORT               = 'ACTIVITY-EXPORT';
+    const ACTIVITY_PAYMENT_MANAGE       = 'ACTIVITY-PAYMENT_MANAGE';
+    const ACTIVITY_ORGANIZATION_MANAGE  = 'ACTIVITY-ORGANIZATION_MANAGE';
+    const ACTIVITY_EDIT                 = 'ACTIVITY-EDIT';
+    const ACTIVITY_INDEX                = 'ACTIVITY-INDEX';
+    const ACTIVITY_SHOW                 = 'ACTIVITY-SHOW';
+    const ACTIVITY_NUMBER               = 'ACTIVITY-NUMBER';
+    const ACTIVITY_PAYMENT_SHOW         = 'ACTIVITY-PAYMENT_SHOW';
+    const ACTIVITY_MILESTONE_SHOW       = 'ACTIVITY-MILESTONE_SHOW';
+    const ACTIVITY_MILESTONE_MANAGE     = 'ACTIVITY-MILESTONE_MANAGE';
+    const ACTIVITY_DOCUMENT_SHOW        = 'ACTIVITY-DOCUMENT_SHOW';
+    const ACTIVITY_DOCUMENT_MANAGE      = 'ACTIVITY-DOCUMENT_MANAGE';
+    const ACTIVITY_DUPLICATE            = 'ACTIVITY-DUPLICATE';
+    const ACTIVITY_CHANGE_PROJECT       = 'ACTIVITY-CHANGE_PROJECT';
+    const ACTIVITY_DELETE               = 'ACTIVITY-DELETE';
+    const ACTIVITY_STATUS_OFF           = 'ACTIVITY-STATUS_OFF';
+    const ACTIVITY_PERSON_SHOW          = 'ACTIVITY-PERSON_SHOW';
+    const ACTIVITY_ORGANIZATION_SHOW    = 'ACTIVITY-ORGANIZATION_SHOW';
+    const ACTIVITY_PERSON_MANAGE        = 'ACTIVITY-PERSON_MANAGE';
+    const ACTIVITY_WORKPACKAGE_SHOW     = 'ACTIVITY-WORKPACKAGE_SHOW';
+    const ACTIVITY_WORKPACKAGE_MANAGE   = 'ACTIVITY-WORKPACKAGE_MANAGE';
+    const ACTIVITY_WORKPACKAGE_COMMIT   = 'ACTIVITY-WORKPACKAGE_COMMIT';
+    const ACTIVITY_WORKPACKAGE_VALIDATE = 'ACTIVITY-WORKPACKAGE_VALIDATE';
+
+    const PROJECT_CREATE                = 'PROJECT-CREATE';
+    const PROJECT_EDIT                  = 'PROJECT-EDIT';
+    const PROJECT_ACTIVITY_ADD          = 'PROJECT-ACTIVITY-ADD';
+    const PROJECT_PERSON_MANAGE         = 'PROJECT-PERSON_MANAGE';
+    const PROJECT_ORGANIZATION_MANAGE   = 'PROJECT-ORGANIZATION_MANAGE';
+    const PROJECT_DASHBOARD             = 'PROJECT-DASHBOARD';
+    const PROJECT_INDEX                 = 'PROJECT-INDEX';
+    const PROJECT_SHOW                  = 'PROJECT-SHOW';
+    const PROJECT_PERSON_SHOW           = 'PROJECT-PERSON_SHOW';
+    const PROJECT_ORGANIZATION_SHOW     = 'PROJECT-ORGANIZATION_SHOW';
+    const PROJECT_DOCUMENT_SHOW         = 'PROJECT-DOCUMENT_SHOW';
+    const PROJECT_ACTIVITY_SHOW         = 'PROJECT-ACTIVITY_SHOW';
+
+    const PERSON_SHOW                   = 'PERSON-SHOW';
+    const PERSON_EDIT                   = 'PERSON-EDIT';
+    const PERSON_SYNC_LDAP              = 'PERSON-SYNC_LDAP';
+    const PERSON_PROJECTS               = 'PERSON-PROJECTS';
+    const PERSON_INFOS_RH               = 'PERSON-INFOS_RH';
+    const PERSON_INDEX                  = 'PERSON-INDEX';
+
+    const ORGANIZATION_SHOW             = 'ORGANIZATION-SHOW';
+    const ORGANIZATION_EDIT             = 'ORGANIZATION-EDIT';
+    const ORGANIZATION_SYNC_LDAP        = 'ORGANIZATION-SYNC_LDAP';
+    const ORGANIZATION_INDEX            = 'ORGANIZATION-INDEX';
+
+    const ADMINISTRATIVE_DOCUMENT_INDEX    = 'ADMINISTRATIVE-DOCUMENT_INDEX';
+    const ADMINISTRATIVE_DOCUMENT_DELETE   = 'ADMINISTRATIVE-DOCUMENT_DELETE';
+    const ADMINISTRATIVE_DOCUMENT_DOWNLOAD = 'ADMINISTRATIVE-DOCUMENT_DOWNLOAD';
+    const ADMINISTRATIVE_DOCUMENT_NEW      = 'ADMINISTRATIVE-DOCUMENT_NEW';
+
+    const MAINTENANCE_MENU_ADMIN = 'MAINTENANCE-MENU_ADMIN';
+    const ORGANIZATION_TEST = 'ORGANIZATION-TEST';
+
+    const DROIT_USER_VISUALISATION         = 'droit-USER_VISUALISATION';
+    const DROIT_USER_EDITION               = 'droit-USER_EDITION';
+    const DROIT_ROLEORGA_VISUALISATION     = 'droit-ROLEORGA_VISUALISATION';
+    const DROIT_ROLEORGA_EDITION           = 'droit-ROLEORGA_EDITION';
+
+    const DEPENSE_SHOW = 'DEPENSE-SHOW';
+
+    public static function getResourceId( $privilege )
+    {
+        if ($privilege instanceof Privilege){
+            $privilege = $privilege->getFullCode();
+        }
+        return 'privilege/'.$privilege;
+    }
+
+}
+

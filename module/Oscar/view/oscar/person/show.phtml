@@ -1,0 +1,228 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 28/09/15 15:47
+ * @copyright Certic (c) 2015
+ */
+
+/** @var \Oscar\Entity\Person $entity */
+?>
+
+<section class="container">
+    <div class="row">
+        <h1 class="">
+            <?= $entity->getFirstname() ?>
+            <strong class="lastname"><?= $entity->getLastname() ?></strong>
+            <?php if($entity->getLdapAffectation() ):?>
+            <span><?= $entity->getLdapAffectation() ?></span>
+            <?php endif; ?>
+        </h1>
+        <p><i class="icon-mail"></i> <?= $entity->getEmail() ?></p>
+        <div class="col-xs-2">
+            <h2>&nbsp;</h2>
+            <img src="http://www.gravatar.com/avatar/<?= md5($entity->getEmail()) ?>?s=250"
+                 style="border-radius: 20px; width: 100%"
+                 alt="" />
+            <p>
+                Impliqué dans <a href="#projects"><?= count($projects) ?> projet(s)</a>
+            </p>
+            <h2><i class="icon-building-filled"></i>Structure</h2>
+            <section id="structures">
+                <?php
+                /** @var \Oscar\Entity\OrganizationPerson $organizationPerson */
+                foreach( $entity->getOrganizations() as $organizationPerson ): ?>
+                    <article class="card xs">
+                        <p class="text-highlight">
+                            <strong><?= $organizationPerson->getRole() ? $organizationPerson->getRole() : '<em>impliqué</em>' ?></strong>
+                        dans
+                        <?= $this->link()->organization($organizationPerson->getOrganization()); ?>
+                        </p>
+                    </article>
+                <?php endforeach; ?>
+
+                <a href="<?= $this->url('person/synchronize', ['id' => $entity->getId()]) ?>" class="btn btn-primary">
+                    <i class="icon-plug"></i> Synchronizer les structures
+                </a>
+
+                <?php /**<a href="<?= $this->url('organizationperson/neworganization', ['idenrolled' => $entity->getId()]) ?>" class="btn btn-primary">
+                    <i class="icon-plus-circled"></i> Ajouter
+                </a>*/ ?>
+            </section>
+        </div>
+        <div class="col-xs-10">
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
+            <h2><i class="icon-tag"></i> Informations administratives</h2>
+            <div class="card">
+                    <p class="text-highlight text-small">
+                        Synchro LDap :
+                        <?php if($entity->getDateSyncLdap()): ?>
+                            <strong class="text-success">
+                                <i class="icon-ok-circled"></i>
+                                <?= $this->moment($entity->getDateSyncLdap()) ?>
+                                <span class="text-light">(<?= $this->moment($entity->getDateSyncLdap())->since() ?>)</span>
+                            </strong>
+                        <?php else: ?>
+                            <i class="icon-cancel-circled-outline"></i>
+                            <em>Jamais</em>
+                        <?php endif; ?>
+                        <br/>
+                        Créé le <time><?= $this->moment($entity->getDateCreated())->full() ?></time>
+                        <br/>
+                        Dernière mise à jour le <time><?= $this->moment($entity->getDateUpdated())->full() ?></time>
+                    </p>
+                    <?php if($auth): ?>
+                        <div class="alert alert-info">
+                            <p><?= $entity ?> est actif sur Oscar (Dernière connexion <strong><?= $this->moment($auth->getDateLogin())->full() ?></strong>).</p>
+                        </div>
+                    <?php endif; ?>
+                    <style>th { text-align: right }</style>
+                    <table class="table table-bordered small">
+                        <tbody>
+                        <tr>
+                            <th>#ID</th>
+                            <td><?= $entity->getId() ?></td>
+                        </tr>
+                        <tr>
+                            <th>displayname</th>
+                            <td><?= $entity->getDisplayName() ?></td>
+                        </tr>
+                        <tr>
+                            <th>Prénom</th>
+                            <td><?= $entity->getFirstName() ?></td>
+                        </tr>
+                        <tr>
+                            <th>Nom</th>
+                            <td><?= $entity->getLastname() ?></td>
+                        </tr>
+                        <tr>
+                            <th>email</th>
+                            <td><?= $entity->getEmail() ?></td>
+                        </tr>
+                        <tr>
+                            <th>Groupes (LDAP)</th>
+                            <td>
+                                <?php if( $entity->getLdapMemberOf() ): ?>
+                                <ul>
+                                <?php foreach( $entity->getLdapMemberOf() as $memberOf ): ?>
+                                    <li><code><?= $memberOf ?></code></li>
+                                <?php endforeach; ?>
+                                </ul>
+                                <?php else: ?>
+                                <div class="alert alert-info">
+                                    Aucun groupe LDAP
+                                </div>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>codeHarpege</th>
+                            <td><?= $entity->getCodeharpege() ?></td>
+                        </tr>
+                        <tr>
+                            <th>ldapStatus</th>
+                            <td><?= $entity->getLdapStatus() ?></td>
+                        </tr>
+                        <?php /*
+                         <tr>
+                            <th>INM</th>
+                            <td><?= $entity->getHarpegeINM() ?></td>
+                        </tr>  */ ?>
+                        <tr>
+                            <th>LDAP (identifiant)</th>
+                            <td><?= $entity->getCodeLdap() ?></td>
+                        </tr>
+                        <tr>
+                            <th>Localisation (LDAP)</th>
+                            <td><?= $entity->getLdapSiteLocation() ?></td>
+                        </tr>
+                        <tr>
+                            <th>Affectation (LDAP)</th>
+                            <td><?= $entity->getLdapAffectation() ?></td>
+                        </tr>
+                        <tr>
+                            <th>ldapDisabled</th>
+                            <td><?= $entity->getLdapDisabled() ?></td>
+                        </tr>
+                        <tr>
+                            <th>ldapDateFinInscription</th>
+                            <td><?= $entity->getLdapFinInscription() ?></td>
+                        </tr>
+                        <tr>
+                            <th>ladapLogin</th>
+                            <td><?= $entity->getLadapLogin() ?></td>
+                        </tr>
+                        <tr>
+                            <th>phone</th>
+                            <td><?= $entity->getPhone() ?></td>
+                        </tr>
+                        <tr>
+                            <th>Connecteur(s)</th>
+                            <td>
+                                <ul>
+                                <?php foreach( $entity->getConnectors() as $connector=>$value ): ?>
+                                    <li>
+                                        <?= $connector ?> : <strong><?= $value ?></strong>
+                                        <a href="<?= $this->url('connector/person') ?>?c=<?= $connector ?>&v=<?= $value ?>">synchroniser</a>
+                                    </li>
+                                <?php endforeach; ?>
+                                </ul>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <nav class="admin-bar text-center">
+                        <div class="btn-group">
+                            <a class="btn btn-default btn-xs" href="<?= $this->url('person/edit', ['id'=>$entity->getId()]) ?>">
+                                <i class="icon-pencil"></i>
+                                Éditer les informations
+                            </a>
+                        </div>
+                    </nav>
+                    <hr>
+
+
+            </div>
+            <?php endif; ?>
+            <section id="projects">
+                <h2><i class="icon-cubes"></i> Projets</h2>
+                <?php foreach( $projects as $project ): ?>
+                    <?= $this->partial('/oscar/project/project-item-openable.phtml', ['project'    => $project]); ?>
+                <?php endforeach; ?>
+                <?= $this->pager($projects, preg_replace("/\\??&page=[0-9]*/", '', $_SERVER['REQUEST_URI']) . '?&page=%s') ?>
+            </section>
+
+            <section id="activites">
+                <h2>Activités de recherche (Sans projet)</h2>
+                <?php
+                $year = null;
+                $discipline = null;
+                foreach( $activities as $activity ):
+                    if( $activity->getProject() !== null ) continue;
+                    $activityYear = $activity->getDateCreated()->format('Y');
+                    if( $activityYear != $year ){
+                        echo "<div class='list-separator'><h3 class='list-separator-label'>$activityYear</h3></div>";
+                        $year = $activityYear;
+                    }
+                    ?>
+                    <?= $this->partial('/oscar/project-grant/item-list.phtml', [
+                    'activity'    => $activity,
+                ]); ?>
+                <?php endforeach; ?>
+            </section>
+
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_EDITION)): ?>
+                <section>
+                    <h2>Activités récentes</h2>
+                    <?= $this->partial('oscar/activity-log/frag-list.phtml',
+                        ['entities' => $traces]) ?>
+                </section>
+            <?php endif; ?>
+
+        </div>
+    </div>
+</section>
+
+<script src="<?= $this->basePath() . '/js/vendor/requirejs/require.js' ?>"></script>
+<script src="<?= $this->basePath() . '/js/oscar-config.js' ?>"></script>
+

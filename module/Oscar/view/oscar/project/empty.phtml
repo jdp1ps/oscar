@@ -1,0 +1,15 @@
+
+<section class="project-container container">
+
+    <h1><i class="icon-cubes"></i>Projets sans activité</h1>
+
+
+    <h3 class="text-center"><?= count($projects) ?> Résultat(s)</h3>
+
+    <?php foreach( $projects as $project): ?>
+        <?= $this->partial('/oscar/project/project-item-openable.phtml', array(
+        'project'    => $project,
+    )); ?>
+    <?php endforeach;?>
+</section>
+<script src="<?= $this->basePath() . '/js/vendor/requirejs/require.js' ?>" data-main="<?= $this->basePath() . '/js/oscar-config.js' ?>"></script>

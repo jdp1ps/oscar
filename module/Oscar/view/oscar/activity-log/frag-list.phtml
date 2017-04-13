@@ -1,0 +1,47 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 07/10/15 16:13
+ * @copyright Certic (c) 2015
+ */
+$currentDay = null;
+?>
+<?php if (isset($entities)): ?>
+<section class="activities timeline">
+<?php
+/** @var \Oscar\Entity\LogActivity $entity */
+foreach( $entities as  $entity ):
+    // ON test le jour courant
+    if( $currentDay != $entity->getDateCreated()->format('Y-m-d') ){
+        if( !is_null($currentDay) ){
+            echo "</div> <!-- /card -->";
+        }
+        $currentDay = $entity->getDateCreated()->format('Y-m-d');?>
+
+
+        <h4 class="timeline-title">
+            <i class="icon-calendar-outlilne"></i>
+            <?php if( $currentDay == date('Y-m-d')): ?>
+            Aujourd'hui
+            <?php else: ?>
+            le <?= $this->moment($currentDay)->full() ?>
+            <?php endif; ?>
+        </h4>
+        <div class="card">
+        <?php
+    }
+    ?>
+    <article class="timeline-item type-<?= $entity->getType() ?>">
+        <time datetime="<?= $entity->getDateCreated()->format('Y-m-d H:i:s') ?>">
+            <strong><?= $entity->getDateCreated()->format('H:i') ?></strong>
+            <div class="duration"><?= $this->moment($entity->getDateCreated())->since() ?></div>
+        </time>
+
+        <div class="content">
+            <?= $this->activity($entity->getMessage()) ?>
+        </div>
+    </article>
+<?php endforeach; ?>
+</div>
+</section>
+<?php endif; ?>

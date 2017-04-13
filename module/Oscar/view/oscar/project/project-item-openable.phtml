@@ -1,0 +1,39 @@
+<?php
+   $openable = $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_SHOW, $project);
+?>
+<?php if($project): ?>
+<article class="card xs <?= $openable ? 'openable' : ''?> project"
+    <?php if($openable): ?> data-projectid="<?= $project->getId() ?>"
+  data-lazy="<?= $this->url('project/show', ['id'=>$project->getId()]) ?>"<?php endif; ?>>
+    <div class="loader">&nbsp;</div>
+    <header class="card-title handler clearfix">
+        <i class="icon-openable picto"></i>
+        <?php if($project->getAcronym()): ?>
+            <abbr><?= $project->getAcronym() ?></abbr>
+        <?php endif; ?>
+        <span>
+            <?= $project->getLabel() ? $project->getLabel() : '<i>Sans nom</i>' ?>
+            <span class="counter<?= (count($project->getActivities()) ? ' filled' : '') ?>">
+                <?= count($project->getActivities()) ?>
+            </span>
+            <?php if($openable): ?>
+            <a href="<?= $this->url('project/show', ['id'=>$project->getId()]) ?>" class="more">Fiche</a>
+            <?php endif; ?>
+
+        </span>
+
+        <?php if( $project->getPFI() ): ?>
+            <span class="eotp on-right">
+            <?= $project->getPFI() ?>
+        </span>
+        <?php endif; ?>
+    </header>
+    <div class="openable-content card-content content details">
+
+    </div>
+</article>
+<?php else: ?>
+<div class="alert alert-danger">
+    PROJET null ??!
+</div>
+<?php endif; ?>

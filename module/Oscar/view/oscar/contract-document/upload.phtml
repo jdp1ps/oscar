@@ -1,0 +1,67 @@
+<div class="container">
+    <h1>Téléversement d'un document
+        <div><small>pour l'activité <strong><?= $activity ?></strong></small></div>
+    </h1>
+
+    <?php if( $data['error'] ):?>
+        <div class="alert alert-danger">
+            <?= $data['error'] ?>
+        </div>
+    <?php endif; ?>
+
+    <form action="" method="post" enctype="multipart/form-data">
+        <div class="row">
+
+            <div class="col-md-6">
+                <label for="file">Fichier</label>
+                <input type="file" class="form-control" name="file" id="file" />
+            </div>
+
+            <div class="col-md-6">
+                <label for="type">Type de document</label>
+                <select name="type" id="type" class="form-control">
+                    <?php foreach( $types as $type ): $selected = (key_exists('type', $data) && $data['type'] == $type->getId() ? ' selected="selected"' : '')?>
+                        <option value="<?= $type->getId() ?>" <?= $selected ?>><?= $type ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-6">
+                <label for="dateDeposit">Date de dépôt</label>
+                <p class="help">Date à laquelle le fichier a été reçu</p>
+                <input type="text" class="input-date form-control" name="dateDeposit" id="dateDeposit" class="datetime"
+                       value="<?= (array_key_exists('dateDeposit', $data) ? $data['dateDeposit'] :  '') ?>"/>
+            </div>
+
+            <div class="col-md-6">
+                <label for="dateSend">Date d'envoi</label>
+                <p class="help">Date à laquelle le fichier a été envoyé</p>
+                <input type="text" class="input-date form-control" name="dateSend" id="dateSend"
+                    value="<?= (array_key_exists('dateSend',$data) ? $data['dateSend'] : '') ?>"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <label for="informations">Note</label>
+                <textarea name="informations" id="informations" class="form-control" id="" cols="30" rows="10"><?= (array_key_exists('informations',$data) ? $data['informations'] :'') ?></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8 col-md-push-4">
+                <div class="btn-group">
+                    <a href="javascript: history.back()" class="btn btn-default">Retour à l'activité</a>
+                    <button type="submit" class="btn btn-primary">Envoyer</button>
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    </form>
+</div>
+

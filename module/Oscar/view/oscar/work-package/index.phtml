@@ -1,0 +1,17 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: stephane
+ * Date: 04/04/16
+ * Time: 14:31
+ */
+?>
+<div class="container">
+    <h1><i class="icon-archive"></i>Lot de travail</h1>
+    <section>
+        <?php foreach( $entities as $entity ):
+            echo $this->partial('/oscar/work-package/item-list.phtml', ['wp' => $entity]);
+        endforeach; ?>
+    </section>
+
+</div>

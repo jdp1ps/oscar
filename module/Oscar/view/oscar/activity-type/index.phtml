@@ -1,0 +1,224 @@
+<?php /** @var $entity \Oscar\Entity\ActivityType */ ?>
+<section id="activity-types" class="container">
+    <h1>Types d'activités de recherche</h1>
+    <?php if( count($entities) <= 0 ): ?>
+    <div class="alert alert-danger">
+        Aucun type d'activité trouvé
+    </div>
+    <?php else: ?>
+    <section class="tree" style="position: relative">
+    <?php $level = 0; $opened = [];
+    foreach( $entities as $entity ):
+        if( $entity->getLabel() === 'ROOT' ) { continue; }
+
+        ?>
+
+
+    <?php
+    foreach( $opened as $index=>$open ){
+        if( $open < $entity->getLft() ){
+            unset($opened[$index]);
+            echo '</article>';
+        }
+    }
+    ?>
+    <article class="level node" data-id="<?= $entity->getId() ?>" data-openable="true" data-openable-content="">
+
+        <div class="handler">
+            <?php if($entity->hasChild()): ?>
+                <i class="icon-angle-down" data-opener=""></i>
+            <?php else: ?>
+                <i class="icon-angle-right" data-opener=""></i>
+            <?php endif; ?>
+
+        <small>[<?= $entity->getId() ?>]</small>
+        <?= $entity->getLabel() ?>
+
+        <span class="label label-info">
+            <?= $distribution[$entity->getId()] ?>
+        </span>
+
+        <nav class="btn-group" aria-label="Administration" role="group">
+
+            <input data-mergesource type="checkbox" value="<?= $entity->getId() ?>">
+
+            <a href="<?= $this->url('activitytype/new', ['idparent' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
+                <i class="icon-doc-add"></i>
+            </a>
+            <a href="<?= $this->url('activitytype/delete', ['id' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
+                <i class="icon-trash"></i>
+            </a>
+            <a href="<?= $this->url('activitytype/edit', ['id' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
+                <i class="icon-pencil"></i>
+            </a>
+            <a data-mergeto href="<?= $this->url('activitytype/merge', ['id' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
+                <i class="icon-down-outline"></i>
+            </a>
+        </nav>
+
+        </div>
+        <section class="content">
+        <?php
+        if( $entity->hasChild() ){
+            $opened[] = $entity->getRgt();
+        } else {
+            echo '</section></article>';
+        }
+        ?>
+
+    <?php endforeach; ?>
+        </article>
+    <?php endif; ?>
+    <nav class="admin-bar text-right">
+        <a href="<?= $this->url('activitytype/new') ?>" class="btn btn-default btn-xs">
+            Nouveau
+        </a>
+    </nav>
+    </section>
+</section>
+
+<script>
+    Initer.ready(function(){
+        var mouseDown = false,
+            $nodeOver = null,
+            $nodeDrag = null;
+
+
+        $('[data-mergeto]').on('click', function(e){
+            e.preventDefault();
+
+            var idMerged = [];
+            $('[data-mergesource]:checked').each(function(i, elem){
+                idMerged.push($(elem).val());
+            });
+            if( idMerged.length ){
+                var url = $(this).attr('href') +'?merged=' + idMerged.join(',');
+                document.location = url;
+            }
+        });
+
+       $('.node').each(function(i, node){
+           var $node = $(node);
+           $node.on('mousedown', '>.handler', function(e){
+               $nodeDrag = $node;
+               mouseDown = true;
+               $node.addClass('moving');
+           });
+           $node.on('mouseenter', '>.handler', function(e){
+
+               if(mouseDown && !$node.hasClass('moving') && $node.parents('.moving').length === 0){
+                   if( $nodeOver != $node ) {
+                       if( $nodeOver ){
+                           $nodeOver.removeClass('maydrop');
+                           $nodeOver.off('mousemove');
+                       }
+                       $nodeOver = $node;
+                       $nodeOver.addClass('maydrop');
+
+                       var $handler = $node.find('>.handler'),
+                           handlerTop = $handler.offset().top,
+                           handlerHeight = $handler.height(),
+                           beforeLimit = handlerTop + handlerHeight/ 3,
+                           afterLimit = handlerTop + handlerHeight/3*2;
+
+
+                       $nodeOver.on('mousemove', function(e){
+                           if( e.pageY < beforeLimit ){
+                               $node.addClass('before').removeClass('in after');
+                           }
+                           else if( e.pageY > afterLimit ){
+                               $node.addClass('after').removeClass('in before');
+                           } else {
+                               $node.addClass('in').removeClass('after before');
+                           }
+
+                       });
+                   }
+               } else {
+                   if( $nodeOver ){
+                       $nodeOver.removeClass('maydrop');
+                       $nodeOver.off('mousemove');
+                       $nodeOver = null;
+                   }
+               }
+           });
+       });
+
+        $(document).on('mouseup', function(){
+
+            if( mouseDown ){
+                mouseDown = false;
+
+                if( $nodeDrag && $nodeOver ){
+                    var position = 'in';
+                    if( $nodeOver.hasClass('after') ){
+                        position = 'after';
+                    }
+                    if( $nodeOver.hasClass('before') ){
+                        position = 'before';
+                    }
+                    console.log('DEPLACEMENT de ', $nodeDrag.data('id'), position, $nodeOver.data('id'));
+                    document.location = '/activity-type/move/'
+                        + $nodeDrag.data('id')
+                        + '/'
+                        + position
+                        + '/'
+                        + $nodeOver.data('id');
+                }
+
+                if( $nodeDrag ){
+                    $nodeDrag.removeClass('moving');
+                    $nodeDrag = null;
+                }
+                if( $nodeOver ){
+                    $nodeOver.removeClass('maydrop');
+                    $nodeOver = null;
+                }
+            }
+
+        });
+    });
+</script>
+
+<style>
+    .tree {
+        font-weight: 900;
+        font-size: 1.6em;
+        position: relative;
+    }
+    .handler {
+        cursor: move;
+    }
+    .maydrop {
+        border: none;
+        border-top: 4px cornflowerblue solid;
+        }
+    .maydrop.after {
+        border: none;
+        border-bottom: 4px cornflowerblue solid;
+        }
+    .maydrop.in {
+        border: none;
+        }
+    .maydrop.in > .handler {
+        background-color: cornflowerblue;
+        }
+    .maydrop.in > .handler [class*='icon-'] {
+        color: white;
+    }
+    .moving {
+        box-shadow: -4px 4px 8px rgba(0,0,0,.25);
+        background-color: rgba(255,255,255,.25);
+        opacity: .7;
+
+        }
+    .node {
+        position: relative;
+        font-size: .9em;
+        font-weight: lighter;
+        margin-left: 20px;
+        }
+
+
+
+</style>

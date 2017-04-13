@@ -1,0 +1,50 @@
+<header class="jumbotron">
+
+    <?php if( $entity->getId() > 0 ): ?>
+    <h1>Modification de <q><?= $entity->getLabel() ?></q>
+    <p>SUB <?= $entity->getDescription() ?></p>
+    <?php else: ?>
+    <h1>Nouvelle source de financement</h1>
+    <?php endif; ?>
+
+</header>
+<?= $this->form()->openTag($form); ?>
+
+<?= $this->formHidden($form->get('id')); ?>
+
+<div class="form-group">
+    <?= $this->formLabel($form->get('label')) ?>
+    <?= $this->formInput($form->get('label')) ?>
+</div>
+
+<div class="form-group">
+    <?= $this->formLabel($form->get('description')) ?>
+    <?= $this->formInput($form->get('description')) ?>
+</div>
+
+<div class="form-group">
+    <?= $this->formLabel($form->get('informations')) ?>
+    <?= $this->formInput($form->get('informations')) ?>
+</div>
+
+<nav class="btn-group-sm">
+    <a class="btn btn-default btn-sm" href="<?= $this->url('grantsource_index') ?>">
+        Annuler
+    </a>
+    <?php if( $entity->getId() > 0 ): ?>
+    <button class="btn btn-primary btn-sm" type="submit">
+        <i class="icon-pencil"></i>
+        Enregistrer
+    </button>
+    <?php else: ?>
+    <button class="btn btn-primary btn-sm" type="submit">
+        <i class="icon-doc-add"></i>
+        Créer
+    </button>
+    <?php endif; ?>
+
+</nav>
+
+<?= $this->form()->closeTag(); ?>
+<hr />
+

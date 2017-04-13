@@ -1,0 +1,242 @@
+<?php
+/**
+ * Vue permettant d'afficher les informations des personnes/organisations.
+ *
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 10/11/15 10:40
+ * @copyright Certic (c) 2015
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+
+$componentId = uniqid('tw');
+$deep = isset($deep) ? $deep : false;
+$manage = isset($manage) ? $manage : false;
+
+$conf = [
+    \Oscar\Entity\Project::class => [
+        'method' => 'getMembers',
+        ''
+    ]
+];
+
+if( $enroler instanceof \Oscar\Entity\Project ){
+    if( $type == 'Person' ){
+        $entities = $enroler->getPersons($deep);
+        $method = 'getPerson';
+        $url = 'personproject';
+        $urlEnrolled = 'person/show';
+    }
+    elseif( $type == 'Organization' ){
+        $entities = $enroler->getOrganizations($deep);
+        $method = 'getOrganization';
+        $url = 'organizationproject';
+        $urlEnrolled = 'organization/show';
+    }
+    else {
+        throw new Exception('Not implemented');
+    }
+} else if ($enroler instanceof \Oscar\Entity\Activity ){
+    if( $type == 'Person' ){
+        $entities = $enroler->getPersons();
+        $method = 'getPerson';
+        $url = 'personactivity';
+        $urlEnrolled = 'person/show';
+    }
+    elseif( $type == 'Organization' ){
+        $urlEnrolled = 'organization/show';
+        $entities = $enroler->getOrganizations();
+        $method = 'getOrganization';
+        $url = 'organizationactivity';
+    }
+    else {
+        throw new Exception('Not implemented');
+    }
+} else {
+    throw new Exception('Bad usage');
+}
+
+$urlAdd = $this->url($url.'/new', ['idenroller' => $enroler->getId()]);
+
+$datas = [];
+$relations = [];
+foreach ( $entities as $relation) {
+
+    $entity = $relation->$method();
+    //echo "<pre>".($relation->getId() . " : " . $relation->getRole() . " - " . $relation->getEnrolled()->getId() . ' ' . $relation->getEnrolled())."</pre>";
+    if( !$entity ) continue;
+    if( !isset($datas[$entity->getId()]) ){
+        $datas[$entity->getId()] = [
+            'label' => (string)$entity,
+            'id' => $entity->getId(),
+            'urlAdd' => $urlAdd,
+            'urlShow' => $this->url($urlEnrolled, ['id' => $entity->getId()]),
+            'datas' => []
+        ];
+    }
+
+    $start = $relation->getDateStart(true) ? $relation->getDateStart(true)->format('Y-m-d') : null;
+    $end = $relation->getDateEnd(true) ? $relation->getDateEnd(true)->format('Y-m-d') : null;
+    $description = null;
+
+    if( $start === null && $end === null ){
+        $time = 'Rôle permanent';
+    }
+    elseif ($start === null ){
+        $time = "Jusqu'au " . $this->moment($end);
+    }
+    elseif ($end === null ){
+        $time = "Depuis le " . $this->moment($start);
+    }
+    else {
+        $time = "Du " . $this->moment($start) . ' au ' . $this->moment($end);
+    }
+
+    $time = '<h5>' . $relation->getRole() . '</h5> ' . $time;
+
+    if( $relation->getEnroller() instanceof \Oscar\Entity\Project ){
+        $context = ' sur le <strong><i class="icon-cubes"></i> projet complet</strong>';
+        $scope = 'project';
+        if( $type == 'Person' ){
+            $url = 'personproject';
+        }
+        elseif( $type == 'Organization' ){
+            $url = 'organizationproject';
+        }
+    }
+    else {
+        $scope = 'activity';
+        if( $type == 'Person' ){
+            $url = 'personactivity';
+        }
+        elseif( $type == 'Organization' ){
+            $url = 'organizationactivity';
+        }
+        $context = ' sur l\'activité <strong><i class="icon-cube"></i> '.((string)$relation->getEnroller()).'</strong>';
+    }
+
+
+
+    $dateKey = $entity->getId() . '-' . $this->moment($start).'/'.$this->moment($end).'/'.$relation->getRole();
+    if( !isset($relations[$dateKey]) ){
+        $relations[$dateKey] = [
+            'time' => $time,
+            'enrollers' => [$context],
+            'description' => $time . $context
+        ];
+    } else {
+        $relations[$dateKey]['enrollers'][] = $context;
+        $relations[$dateKey]['description'] = $relations[$dateKey]['time'] . '<ul>';
+        foreach( $relations[$dateKey]['enrollers'] as $desc ){
+            $relations[$dateKey]['description'] .= '<li>' . $desc . '</li>';
+        }
+        $relations[$dateKey]['description'] .= '<ul>';
+
+    }
+
+
+
+    $classCss = $scope === 'project' ? 'icon-cubes' : 'icon-cube';
+    $data = [
+        'id' => $relation->getId(),
+        'label' => '<i class="'.$classCss.'"></i> ' . $this->strEmpty($relation->getRole(), 'Rôle non-qualifié'),
+        'ood' => $relation->isOutOfDate() ? ($relation->isPast() ? 'Caduc' : 'A venir') : 'Actif',
+        'key' => $this->strEmpty($relation->getRole(), 'Rôle non-qualifié'),
+        'description' => &$relations[$dateKey]['description'],
+        'start' => $start,
+        'end' => $end,
+        'urlDelete' => $this->url($url.'/delete', ['idenroll' => $relation->getId()]),
+        'urlEdit' => $this->url($url.'/edit', ['idenroll' => $relation->getId()]),
+    ];
+    $datas[$entity->getId()]['datas'][] = $data;
+}
+
+?>
+
+<div id="<?= $componentId ?>"></div>
+<script>
+
+    Initer.ready(function(){
+        require(['timewalker', 'bootbox'], function (TimeViewer, bootbox) {
+
+            TimeViewer.Templates.renderSerie = _.template('<h2 class="tv-serie-label">'+
+                '{{label}}<br>' +
+                <?php if($manage): ?>
+                '<a href="{{urlAdd}}?idenrolled={{id}}" data-modalform class="small-link"><i class="icon-plus-circled"></i> Ajouter un rôle</a><br>' +
+                '<a href="{{urlShow}}" class="small-link"><i class="icon-search-outline"></i> Fiche</a>' +
+                <?php endif; ?>
+                '</h2>' +
+                '<section class="tv-serie-datas">' +
+                '<div class="tv-serie-datas-view tv-view"></div>' +
+                '</section>');
+
+            TimeViewer.Templates.renderData = _.template('<strong class="tv-data-label {{ood}}">{{label}}</strong> {{ ood }}'<?php if($manage): ?> +
+                '<a href="#" class="" data-action="delete-data"><i class="icon-trash"></i></a>' +
+                '<a href="#" class="" data-action="edit-data"><i class="icon-edit"></i></a>'<?php endif; ?>
+            );
+
+
+
+            var series = [];
+            <?php foreach($datas as $data ): $id = uniqid('serie_'); ?>
+
+            var <?= $id ?> = new TimeViewer.Model.Serie({
+                id: <?= $data['id'] ?>,
+                urlShow: '<?= $data['urlShow'] ?>',
+                urlAdd: '<?= $data['urlAdd'] ?>',
+                label: <?= json_encode($data['label']) ?>
+            });
+            <?= $id ?>.add(<?= json_encode($data['datas']) ?>);
+            series.push(<?= $id ?>);
+            <?php
+            $endItem = $data['datas'][0]['end'];
+            $startItem = $data['datas'][0]['start'];
+            if( $endItem > $end ){
+                $end = $endItem;
+            }
+            if( $startItem > $end ){
+                $end = $startItem;
+            }
+
+            ?>
+
+            <?php endforeach; ?>
+            var members = new TimeViewer.Model.TimeViewer(series);
+            var membersView = new TimeViewer.View.Main({model: members}, {
+                title: "Partenaires",
+                dataDeletable: true,
+                dataSelectable: true,
+                forceBegining: <?= json_encode($enroler->getDateStart() ? $enroler->getDateStart()->format('Y-m-d') : null) ?>,
+                forceEnding: <?= isset($end) ? json_encode($end) : 'null' ?>,
+
+                labelClass : {
+                    'Responsable': 'tv-responsable',
+                    'Chargé de valorisation': 'tv-valo',
+                    'Laboratoire': 'tv-valo',
+                    'Composante responsable': 'tv-responsable',
+                }
+            });
+            $('#<?= $componentId ?>').append(membersView.render().$el);
+            <?php if( $manage ): ?>
+            membersView.on('delete-data', function(role, e){
+                bootbox.confirm('Êtes-vous sûr de vouloir supprimer ?', function( response ){
+                    if( response ){
+                        $.ajax({ url: role.model.get('urlDelete')})
+                            .done(function(){
+                                role.model.collection.remove(role.model);
+                                membersView.render();
+                            });
+                    }
+                });
+            });
+
+            membersView.on('edit-data', function(role){
+                require(['modalform'], function(ModalForm){
+                    ModalForm.ajaxModal(role.model.get('urlEdit'));
+                });
+            });
+            <?php endif; ?>
+        });
+    });
+
+</script>

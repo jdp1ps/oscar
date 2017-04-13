@@ -1,0 +1,87 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 28/09/15 15:47
+ * @copyright Certic (c) 2015
+ */
+
+/** @var \Oscar\Entity\Person $entity */
+?>
+
+<section class="container">
+    <div class="row">
+        <h1 class="">
+            <?= $entity->getFirstname() ?>
+            <strong class="lastname"><?= $entity->getLastname() ?></strong>
+            <?php if($entity->getLdapAffectation() ):?>
+            <span><?= $entity->getLdapAffectation() ?></span>
+            <?php endif; ?>
+        </h1>
+        <p><i class="icon-mail"></i> <?= $entity->getEmail() ?></p>
+        <div class="col-xs-2">
+            <h2>&nbsp;</h2>
+            <img src="http://www.gravatar.com/avatar/<?= md5($entity->getEmail()) ?>?s=250"
+                 style="border-radius: 20px; width: 100%"
+                 alt="" />
+        </div>
+        <div class="col-xs-10">
+            <h2><i class="icon-building-filled"></i> Structures</h2>
+
+            <div class="roles" id="list">
+            <?php
+            /** @var \Oscar\Entity\OrganizationPerson $organizationPerson */
+            foreach( $entity->getOrganizations() as $organizationPerson ): ?>
+
+            <?php endforeach; ?>
+            </div>
+            <h2>More...</h2>
+        </div>
+    </div>
+</section>
+
+<script type="text/x-handlebars-template" id="role">
+    <div class="card">
+        <h4>
+            {{#if outOfDate}}<em>INACTIF</em>{{/if}}
+            <strong>{{ role }}</strong>
+            <span data-organization_id="{{ organization_di }}">{{ organization }}</span>
+        </h4>
+        <p class="text-highlight">
+            Du <strong><?= $this->moment($organizationPerson->getDateStart()) ?></strong>
+            au <strong><?= $this->moment($organizationPerson->getDateEnd()) ?></strong>
+        </p>
+    </div>
+</script>
+
+<script>
+    require(['PersonRole'], function(PersonRole){
+       console.log(PersonRole);
+
+        var all = new PersonRole.Collection();
+        all.on('all', function(e){
+            console.log(e);
+        });
+
+        var view = new PersonRole.ListView({
+            collection: all,
+            el: "#list"
+        });
+
+        <?php
+        $data = [];
+        /** @var \Oscar\Entity\OrganizationPerson $organizationPerson */
+        foreach( $entity->getOrganizations() as $organizationPerson ){
+            $data[] = [
+                "start" => $organizationPerson->getDateStart(),
+                "end" => $organizationPerson->getDateEnd(),
+                "role" => $organizationPerson->getRole(),
+                "organization" => $organizationPerson->getOrganization()->__toString(),
+                "organization_id" => $organizationPerson->getOrganization()->getId()
+            ];
+        }
+        echo "all.add(" . json_encode($data) .");\n"; ?>
+
+
+    });
+</script>
+

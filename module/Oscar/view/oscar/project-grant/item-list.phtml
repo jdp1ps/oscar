@@ -1,0 +1,211 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 06/11/15 16:22
+ * @copyright Certic (c) 2015
+ */
+if( $activity instanceof \Oscar\Entity\ActivityPerson ){
+    $activity = $activity->getActivity();
+}
+if( !isset($size) ){
+    $size = '';
+}
+/** @var \Oscar\Entity\Activity $activity */
+
+$persons = $activity->getPersonsDeep();
+$organizations = $activity->getOrganizationsDeep();
+
+$show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $activity);
+
+?>
+
+<article
+    class="card card-openable <?= $size ?> activity <?= $show ? '' : 'lock' ?> <?= strtolower($activity->getFinancialImpact()) ?>"
+    data-selectable data-id="<?= $activity->getId() ?>">
+    <h3 class="card-title">
+        <?php if ($show): ?>
+        <span class="picto status-<?= $activity->getStatus() ?>">
+            <i class="icon"></i>
+            <span class="text"><?= $activity->getStatusLabel() ?></span>
+        </span>
+            <small>
+                <?= $activity->getActivityType() /*$this->activityTypeHlp()->chain($activity->getActivityType())*/ ?>
+            </small>
+
+        <?php else: ?>
+            <i class="icon-lock picto"></i>
+        <?php endif; ?>
+
+        <span>
+            <?php if( $activity->getProject() && $activity->getProject()->getAcronym()): ?>
+                <strong class="text-light">[<?= $activity->getProject()->getAcronym() ?>] / </strong>
+            <?php endif; ?>
+
+            <?php if ($activity->getOscarNum()): ?>
+                <strong><?= $activity->getOscarNum() ?></strong> :
+            <?php endif; ?>
+
+            <?= $activity->getLabel() ?>
+            <?php if ($show): ?>
+            <a href="<?= $this->url('contract/show', ['id'=>$activity->getId()]) ?>" class="more">Fiche</a>
+            <?php endif; ?>
+
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DELETE, $activity)): ?>
+            <a data-confirm="Supprimer définitivement cette activité ?" data-href="<?= $this->url('contract/delete', ['id'=>$activity->getId()]) ?>" class="del">Supprimer</a>
+            <?php endif; ?>
+        </span>
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $activity)): ?>
+            <?php if( $activity->getFinancialImpact() == \Oscar\Entity\Activity::FINANCIAL_IMPACT_TAKE ): ?>
+            <span class="montant recette"><?= $this->currency($activity) ?></span>
+            <?php elseif ($activity->getFinancialImpact() == \Oscar\Entity\Activity::FINANCIAL_IMPACT_COST ): ?>
+            <span class="montant depense">
+                <i class="icon-calculator"></i>
+                <?= $this->currency($activity) ?>
+            </span>
+            <?php elseif ($activity->getFinancialImpact() == \Oscar\Entity\Activity::FINANCIAL_IMPACT_NONE ): ?>
+            <span class="montant sans-incidence"><i>Sans incidence</i></span>
+            <?php endif; ?>
+        <?php endif; ?>
+    </h3>
+
+    <div class="card-content">
+        <?php if( $show ): ?>
+        <div class="row metas">
+            <div class="col-sm-4">
+                <?php if ($activity->getDateSigned()): ?>
+                    Signé le
+                    <time><?= $this->moment($activity->getDateSigned()) ?></time>
+                <?php else: ?>
+                    <strong>Non signé</strong>
+                <?php endif; ?>
+                <br/>
+
+                Active du
+                <time><?= $this->moment($activity->getDateStart()) ?></time>
+                au
+                <time><?= $this->moment($activity->getDateEnd()) ?></time>
+
+                <?php if ($activity->getDisciplines()->count()): ?>
+                    <div>
+                        <i class="icon-tags"></i>
+                        <?php foreach ($activity->getDisciplines() as $discipline): ?>
+                            <span
+                                class="discipline tag"><?= $discipline ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+                <div>
+                <?php if ($activity->getCodeEOTP()): ?>
+                    PFI <strong><?= $activity->getCodeEOTP() ?></strong>
+                    ( Ouverture le
+                    <time><?= $this->moment($activity->getDateOpened()) ?></time>)
+                <?php elseif ($activity->getDateOpened()): ?>
+                    <i class="icon-warning-empty"></i> Ouverture
+                    <time><?= $this->moment($activity->getDateOpened()) ?></time> SANS PFI
+                <?php endif; ?>
+
+
+                <?php if ($activity->getCentaureNumConvention()): ?>
+                    N°
+                    <strong><?= $activity->getCentaureNumConvention() ?></strong>
+                <?php endif; ?>
+                <?php foreach( $activity->getNumbers() as $key=>$value ): ?>
+                    <span class="number">
+                        <span class="key"><?= $key ?></span>
+                        <span class="value"><?= $value ?></span>
+                    </span>
+                <?php endforeach; ?>
+                </div>
+                Dernière mise à jour : <time><?= $this->moment($activity->getDateUpdated())->full() ?></time>
+            </div>
+
+            <div class="col-sm-4">
+                <?php
+                foreach( $this->grant()->getRolesPrincipauxPersonForActivity() as $roleLeader ){
+                    $persons = $activity->getPersonsWithRole($roleLeader);
+                    if( $persons ){
+                        echo '<i class="icon-'.$this->slugify($roleLeader).'"></i>'
+                            . "$roleLeader : "
+                            . $this->link()->persons($persons) . '<br>';
+                    }
+                }
+                ?>
+            </div>
+            <div class="col-sm-4">
+                <?php
+                foreach( $this->grant()->getRolesPrincipauxOrganization() as $roleLeader ){
+                    $organizations = $activity->getOrganizationsWithRole($roleLeader);
+                    if( $organizations ){
+                        echo '<i class="icon-'.$this->slugify($roleLeader).'"></i>'
+                            . "$roleLeader : "
+                            . $this->link()->organizations($organizations) . '<br>';
+                    }
+                }
+                ?>
+            </div>
+        </div>
+
+        <?php if (count($activity->getPersonsDeep()) && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_SHOW, $activity)): ?>
+                <p class="text-highlight"><i class="icon-user grey"></i>Membres :
+                <?php foreach($activity->getPersonsDeep() as $activityperson ) {
+                    if ($activityperson->getRoleObj() && $activityperson->getRoleObj()->isPrincipal()) {
+                        continue;
+                    }
+                    echo $this->link()->personsRoled($activityperson);
+                }?>
+                </p>
+        <?php endif; ?>
+
+        <?php if (count($activity->getOrganizationsDeep()) && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity)): ?>
+            <p class="text-highlight"><i class="icon-building-filled grey"></i>Partenaires :
+                <?php foreach($activity->getOrganizationsDeep() as $activityorganization ):
+                    if( $activityorganization->getRoleObj() && $activityorganization->getRoleObj()->isPrincipal()) continue; ?>
+                    <?= $this->link()->partner($activityorganization) ?>
+                <?php endforeach; ?>
+            </p>
+        <?php endif; ?>
+
+        <?php if (count($activity->getDocuments()) && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW)): ?>
+        <div class="documents">
+            <p class="text-highlight"><i class="icon-book grey"></i>Documents :</p>
+            <ul>
+            <?php
+            /** @var \Oscar\Entity\ContractDocument $document */
+            foreach( $activity->getDocuments() as $document ): ?>
+                <li>
+                    <a href="<?= $this->url('contractdocument/download', ['id' => $document->getId()]) ?>">
+                    <i class="picto icon-doc doc-<?= $document->getExtension() ?>"></i>
+                    <?= $document->getFileName() ?> (<?= $this->fileSize($document->getFileSize()) ?>)
+                    </a>
+                    <span class="addon">
+                        <?= $document->getTypeDocument() ?>
+                    </span>
+                </li>
+            <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php endif; ?>
+
+        <?php /*
+        $labs = $activity->getLaboratories();
+        $conposantes = $activity->getComposanteResponsable();
+        if( count($labs) || count($conposantes) ): ?>
+        <div class="text-highlight">
+            <?php if( count($labs) ): ?>
+            Laboratoire <span><?= $this->link()->organizations($labs) ?></span>
+            <?php endif; ?>
+            <?php if( count($conposantes) ): ?>
+                Composante <span><?= $this->link()->organizations($conposantes) ?></span>
+            <?php endif; ?>
+        </div>
+        <?php endif;*/ ?>
+        <?php if( !(isset($hideProject) && $hideProject === true) ): ?>
+        <div class="text-highlight">
+            Project <span><?= $this->link()->project($activity->getProject()) ?></span>
+        </div>
+        <?php endif; ?>
+    <?php else: ?>
+            <p><i>Activité verrouillée</i></p>
+    <?php endif; ?>
+    </div>
+</article>

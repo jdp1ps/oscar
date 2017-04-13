@@ -1,0 +1,66 @@
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/vuejs-calendar/build/css/icons/css/fontello.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/vuejs-calendar/build/css/calendar.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/vuesjs-components/dist/css/datepicker.css' ?>" />
+
+<div class="container">
+    <h1 class="title-with-small">
+        <small>Déclaration pour </small>
+        <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
+            <?= $activity->getProject()->getAcronym() ?>
+            / <?= $activity ?>
+        </a>
+    </h1>
+
+    <?php
+    // Intitulés et données pour les crénaux
+    $prefix = $activity->getProject()->getAcronym() . '/'
+        . $activity->getOscarNum();
+    $color = 0;
+    $crenaux = [];
+
+    /** @var \Oscar\Entity\WorkPackage $wpd */
+    foreach( $wpDeclarants as $wpd ){
+        $crenaux[((string)$wpd)] = [
+            'label'         => (string)$wpd,
+            'idactivity'    => $wpd->getActivity()->getId(),
+            'idworkpackage' => $wpd->getId(),
+            'color' => $color++
+        ];
+    }
+    ?>
+    <div id="app">
+        <calendar :create-new="true"></calendar>
+    </div>
+</div>
+
+<script>
+    require(['vue', 'vue-resource', 'calendar'], function(Vue, VueResource, Calendar){
+
+        Vue.use(VueResource);
+
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true
+
+        var mixins = {
+            methods: {
+                restUrl(){
+                    return '<?= $this->url('timesheet/activity', ['idactivity' => $activity->getId()]) ?>'
+                },
+                customDatas(){
+                    return <?= json_encode($crenaux) ?>
+                }
+            }
+        }
+
+        Calendar.mixins = [
+            mixins
+        ];
+
+        var vue = new Vue({
+            el: "#app",
+            components: {
+                'calendar': Calendar
+            }
+        });
+    })
+</script>

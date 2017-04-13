@@ -1,0 +1,28 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 27/01/16 14:59
+ * @copyright Certic (c) 2016
+ */
+?>
+<div class="container-fluid">
+    <h1>Type de date</h1>
+    <p class="info">
+        <?= count($entities) ?> type(s)
+    </p>
+
+    <?php foreach( $entities as $entity ): ?>
+    <article class="card xs">
+        <h2 class="card-title">
+            <small class="id">[<?= $entity->getId() ?>]</small>
+            <strong><?= $entity->getLabel() ?></strong>
+            <i><?= $entity->getFacet() ?></i>
+            <span class="description"><?= $entity->getDescription() ?></span>
+        </h2>
+    </article>
+    <?php endforeach; ?>
+
+    <footer>
+        <a href="<?= $this->url('datetype/new') ?>" class="btn btn-primary">créer</a>
+    </footer>
+</div>

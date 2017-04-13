@@ -1,0 +1,64 @@
+<?php
+/** @var \Oscar\Entity\Person $person */
+?>
+<article class="card xs openable selectable person <?= $person->isLeader() ? "leader" : "" ?>" data-id="<?= $person->getId() ?>">
+    <h2 class="card-title" style="display: flex">
+        <?php if($person->getEmail()): ?>
+            <img class="thumb32"
+                 src="//www.gravatar.com/avatar/<?= md5($person->getEmail()) ?>?s=30"
+                 alt="">
+        <?php endif; ?>
+
+
+        <span class="fn">
+
+                    <span class="family-name">
+                        <?= $markText($person->getLastName(), $search) ?>
+                    </span>
+                    <span class="given-name">
+                        <?= $markText($person->getFirstname(), $search) ?>
+                    </span>
+                    <span class="counter <?= count($person->getProjectAffectations()) ? ' filled' : 'empty' ?>">
+                        <?= count($person->getProjectAffectations()) ?>
+                    </span>
+
+                    <a href="<?= $this->url('person/show', ['id'=>$person->getId()]) ?>" class="more">Fiche</a>
+                </span>
+    </h2>
+    <div class="card-content text-highlight">
+        <i class="icon-phone-outline"></i><strong class="addon"><?= $person->getPhone() ?></strong> |
+        Affectation LDAP : <strong class="addon"><?= $person->getLdapSiteLocation() ?> > <?= $person->getLdapAffectation() ?></strong> |
+        <i class="icon-mail"></i><strong class="addon"><?= $person->getEmail() ?></strong>
+    </div>
+
+    <?php if( count($person->getOrganizations()) ): ?>
+        <?php /** @var \Oscar\Entity\OrganizationPerson $affectation */
+        foreach( $person->getOrganizations() as $affectation ): ?>
+            <?= $this->link()->affectationPerson($affectation) ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    <?php if( $person->getLdapMemberOf() != null ): ?>
+        <?php foreach( $person->getLdapMemberOf() as $ldapFilter ): ?>
+            <?php if( array_key_exists($ldapFilter, $ldapFilters )) : ?>
+                <?php foreach($ldapFilters[$ldapFilter] as $roles ): ?>
+                    <span class="cartouche <?= $roles['principal'] ? 'primary' : 'cartouche-default' ?>" title="Droit obtenu via LDAP">
+                        <i class="icon-database"></i>
+                        <?= $roles['label'] ?>
+                    </span>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+
+    <!--
+            <div class="card-content text-highlight">
+                codeHarpege : <strong class="addon"><?= $person->getCodeharpege() ?></strong> |
+                ldapStatus : <strong class="addon"><?= $person->getLdapStatus() ?></strong> |
+                ldapAffectation : <strong class="addon"><?= $person->getLdapAffectation() ?></strong> |
+                ldapDisabled : <strong class="addon"><?= $person->getLdapDisabled() ?></strong> |
+                ldapDateFinInscription : <strong class="addon"><?= $person->getLdapFinInscription() ?></strong> |
+                ladapLogin : <strong class="addon"><?= $person->getLadapLogin() ?></strong> |
+                phone : <strong class="addon"><?= $person->getPhone() ?></strong> |
+            </div>-->
+</article>

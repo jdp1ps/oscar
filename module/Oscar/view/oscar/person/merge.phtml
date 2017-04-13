@@ -1,0 +1,25 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 13/10/15 16:05
+ * @copyright Certic (c) 2015
+ */
+?>
+<div class="container">
+    <h1>Fusion des personnes</h1>
+    <div class="alert alert-danger">
+        La fusion des données est une opération de maintenance qui ne pourra PAS être annulée.
+    </div>
+
+    <?php $form->prepare(); echo  $this->form()->openTag($form); ?>
+
+    <?php
+    /** @var \Zend\Form\Element\Select $field */
+    foreach( $form as $field): ?>
+        <?= $this->formControlGroup($field) ?>
+    <?php endforeach; ?>
+
+    <button type="submit" class="btn btn-primary">Fusionner</button>
+
+    <?php echo $this->form()->closeTag() ?>
+</div>

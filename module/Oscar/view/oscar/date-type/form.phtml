@@ -1,0 +1,27 @@
+<section class="container">
+
+        <h1>
+           <?= ($entity->getId()) ? $entity : "Nouveau type d'activité" ?>
+        </h1>
+        <div class="form">
+
+            <?= $this->form()->openTag($form->prepare()); ?>
+            <?= $this->formControlGroup($form->get('label')); ?>
+            <?= $this->formControlGroup($form->get('facet')); ?>
+            <?= $this->formControlGroup($form->get('description')); ?>
+
+            <?= $this->formHidden($form->get('id')); ?>
+            <?= $this->formHidden($form->get('secure')); ?>
+            <hr>
+            <div class="text-center">
+                <nav class="btn-group">
+                    <a class="btn btn-default" href="<?= $this->url('datetype') ?>">Retour à la liste</a>
+                    <button class="btn btn-primary" type="submit">Enregistrer</button>
+                </nav>
+            </div>
+            <?= $this->form()->closeTag() ?>
+
+        </div>
+    </div>
+
+</section>

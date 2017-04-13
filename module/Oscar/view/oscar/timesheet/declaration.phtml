@@ -1,0 +1,289 @@
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/vuejs-calendar/build/css/icons/css/fontello.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/vuejs-calendar/build/css/calendar.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/vuesjs-components/dist/css/datepicker.css' ?>" />
+
+<div class="container">
+    <h1 class="title-with-small">
+        <small>Vos déclarations</small>
+    </h1>
+
+    <?php
+    $crenaux = [];
+    $color = 0;
+
+    /** @var \Oscar\Entity\WorkPackage $wpd */
+    foreach( $wpDeclarants as $wpd ){
+        $crenaux[((string)$wpd)] = [
+            'label'         => (string)$wpd,
+            'idactivity'    => $wpd->getActivity()->getId(),
+            'idworkpackage' => $wpd->getId(),
+            'color' => $color++
+        ];
+    }
+    ?>
+    <div id="app">
+        <calendar :create-new="true"></calendar>
+    </div>
+</div>
+
+<script>
+    require(['vue', 'vue-resource', 'calendar'], function(Vue, VueResource, Calendar){
+
+        Vue.use(VueResource);
+
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true
+
+        var mixins = {
+            methods: {
+                restUrl(){
+                    return '<?= $this->url('timesheet/api') ?>'
+                },
+                customDatas(){
+                    return <?= json_encode($crenaux) ?>
+                }
+            }
+        }
+
+        Calendar.mixins = [
+            mixins
+        ];
+
+        var vue = new Vue({
+            el: "#app",
+            components: {
+                'calendar': Calendar
+            }
+        });
+    })
+</script>
+
+
+<?php /*
+<link rel="stylesheet" type="text/css" href="<?= $this->basePath() . '/js/vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath(). '/css/privileges.css' ?>">
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/vendor/bootstrapcolorpicker/dist/css/bootstrap-colorpicker.min.css' ?>" />
+<style>
+    .legende {
+        display: flex}
+    .legende header {
+        flex: 2; font-weight: 700}
+    .legende span {
+        flex: 3;}
+    .legende .colorselector {
+        flex: 1;}
+
+    .recursive, .exception {
+        background: rgba(255,255,255,.8);
+        border-radius: 8px;
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        color: #000;
+        text-align: center;
+        line-height: 16px;
+        text-shadow: none;
+    }
+    .exception {
+        color: #990000;
+    }
+
+    .cal-day {
+        margin-bottom: 2px;
+        display: flex;
+        }
+        .cal-day .plages{
+            position: relative;
+            height: 30px;
+            background: #fff;
+            padding: 4px 0;
+            flex: 7;
+            }
+            .cal-day .plages .plage {
+                position: absolute;
+                background: rgba(160, 173, 44, 0.6);
+                height: 20px;
+                border-radius: 4px;
+                font-size: 10px;
+                padding: 4px;
+                color: #fff;
+                text-shadow: -1px 1px 0 rgba(0,0,0,.5);
+                opacity: .5;
+                }
+    .cal-day .plages .plage .intitule {
+        display: flex;
+        white-space: nowrap;
+    }
+    .cal-day .plages .plage .intitule small {
+        flex: 1
+    }
+                .cal-day .plages .plage .details {
+                    position: absolute;
+                    background: #000;
+                    border-radius: 4px;
+                    font-size: 10px;
+                    padding: 4px;
+                    color: #fff;
+                    text-shadow: -1px 1px 0 rgba(0,0,0,.5);
+                    box-shadow: -8px 8px 1px rgba(0,0,0,.25);
+                    width: 250px;
+                    right: 0;
+                    display: none;
+                    font-weight: 100;
+                }
+    .cal-day .plages .plage .details:before {
+        content: ' ';
+        background: #000;
+        width: 8px;
+        height: 8px;
+        display: block;
+        position: absolute;
+        top: -4px;
+        right: 10px;
+        transform: rotate(45deg);
+    }
+    .cal-day .plages .plage .details h3 {
+        margin: 0 0 4px 0;
+        font-weight: 100;
+    }
+    .cal-day .plages .plage .details strong {
+        margin: 0 0 4px 0;
+        font-weight: bolder;
+    }
+                .cal-day .plages .plage:hover {
+                    opacity: 1;
+                    z-index: 10;
+
+                    box-shadow: -2px 2px 2px rgba(0,0,0,.3);
+                }
+                .cal-day .plages .plage:hover .details {
+                    display: block;
+                }
+        .cal-day .label {
+            flex: 1;
+        }
+</style>
+<div class="container">
+    <div id="timesheet">ICI</div>
+
+    <script>
+        require(['jquery', 'vue', 'vue-resource', 'timesheet'], function($, Vue, VueResource, Timesheet){
+            Vue.use(VueResource);
+            new Timesheet.default({
+                el: '#timesheet',
+                http: {
+
+                },
+                data: {
+                    workPackages: []
+                }
+            })
+        })
+    </script>
+<?php /*
+for( $year = $yearStart; $year<=$yearEnd; $year++ ){
+    $monthStart = $year == $yearStart ? $monthStartLimit : 1;
+    $monthEnd = $year == $yearEnd ? $monthEndLimit : 12;
+    ?>
+
+    <div class="card">
+
+
+        <form action="?" method="post">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th><h3 class='card-title'><?= $year ?></h3></th>
+                    <?php foreach( $activity->getWorkPackages() as $workPackage ): ?>
+                    <th>
+                        <h3><?= $workPackage->getCode() ?></h3>
+                        <p class="text-light"><?= $workPackage->getLabel() ?></p>
+                    </th>
+                    <?php endforeach; ?>
+                    <th>Sous-total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php for( $month = $monthStart; $month<=$monthEnd; $month++ ){
+                $period = sprintf('period-%s-%s', $year, $month);
+        ?>
+        <tr id="timesheet-<?= $month ?>-<?= $year ?>">
+            <td>
+                <strong><?= $months[$month] ?></strong> <?= $year ?>
+            </td>
+            <?php
+
+            foreach( $activity->getWorkPackages() as $workPackage ):
+                $commentId = uniqid('comment_');
+                if( isset($declarations[$period]) && isset($declarations[$period][$workPackage->getId()]) ){
+                    $value = $declarations[$period][$workPackage->getId()]['time'];
+                    $status = $declarations[$period][$workPackage->getId()]['ts']->getStatus();
+                    $comment = $declarations[$period][$workPackage->getId()]['ts']->getComment();
+
+                } else {
+                    $value = '';
+                    $status = '';
+                    $comment = "";
+                }
+                ?>
+            <td class="declaration status-<?= $status ?>">
+                <?php if(!in_array($status, [\Oscar\Entity\TimeSheet::STATUS_DRAFT, ''])): ?>
+                <strong><?= $value ?></strong> heure(s)
+                    <?= \Oscar\Entity\TimeSheet::getStatusLabel($status) ?>
+                    <?php if( $comment ): ?>
+                        <i class="icon-comment" title="<?= htmlentities($comment) ?>"></i>
+                    <?php endif; ?>
+                <?php else: ?>
+
+                <input type="text"
+                       value="<?= $value ?>"
+                       name="time[<?= $period ?>][<?= $workPackage->getId() ?>][time]"
+                       size="3" /> heure(s)
+
+
+                <!-- Button trigger modal -->
+                <button type="button" class="btn <?php if($comment): ?>btn-primary<?php else: ?>btn-default<?php endif; ?> btn-xs" data-toggle="modal" data-target="#<?= $commentId ?>">
+                    <i class="icon-comment" title="<?= '' ?>"></i> Commentaire
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="<?= $commentId ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                            </div>
+                            <div class="modal-body">
+                                <textarea class="form-control" name="time[<?= $period ?>][<?= $workPackage->getId() ?>][comment]"><?= htmlentities($comment) ?></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+            </td>
+            <?php endforeach; ?>
+            <td>TOTAL</td>
+            <td>
+                <label for="">
+                    <input type="checkbox" name="time[<?= $period ?>][submit]" />
+                    Soumettre
+                </label>
+            </td>
+        </tr>
+        <?php
+    }
+    echo '</tbody>';
+
+}?>
+</table>
+            <button class="btn btn-primary">Envoyer</button>
+        </form>
+    </div>
+</div>
+ */ ?>

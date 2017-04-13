@@ -1,0 +1,73 @@
+<div class="container">
+    <h2>
+        <i class="icon-leaf"></i> TEST
+    </h2>
+    <select>
+        <optgroup label="Level One">
+            <option> A.1 </option>
+            <optgroup label="&nbsp;&nbsp;&nbsp;&nbsp;Level Two">
+                <option>&nbsp;&nbsp;&nbsp;&nbsp; A.B.1 </option>
+            </optgroup>
+            <option> A.2 </option>
+        </optgroup>
+    </select>
+    <?php
+    /** @var WORK */
+        $previous = 1;
+        $lft = null;
+        $rgt = null;
+        $index = [];
+        $tpl = '%s/%s';
+
+        foreach($tree as $node):
+            if( $node->getLft() == 1 ){
+                //$index[] = $node->getRgt();
+                $lft = $node->getLft();
+                $rgt = $node->getRgt();
+                continue;
+            }
+
+            $tpl = '';
+            $indent = '';
+
+            $close = count($index);
+            while( $close > 0 ){
+                if( $index[count($index)-1] < $node->getLft() ){
+                    echo "</ul></li>";
+                    array_pop($index);
+                }
+                $close--;
+            }
+
+            if( $node->getLft()+1 === $node->getRgt() ){
+                echo "<li>F:$node</li>";
+
+            } else {
+
+
+                $index[] = $node->getRgt();
+                echo "<li>N:$node<ul>";
+            }
+
+
+            $lft = $node->getLft();
+            $rgt = $node->getRgt();
+            ?>
+
+    <?php endforeach; ?>
+
+</div>
+
+<style>
+
+</style>
+
+<script src="<?= $this->basePath('/js/vendor/jquery/dist/js/jquery.min.js') ?>"></script>
+<script src="<?= $this->basePath('/js/vendor/select2/dist/js/select2.full.min.js') ?>"></script>
+<script src="<?= $this->basePath('/js/vendor/handlebars/handlebars.min.js') ?>"></script>
+
+
+
+<link href="<?= $this->basePath('/js/vendor/select2/dist/css/select2.min.css') ?>" rel="stylesheet"/>
+<link href="<?= $this->basePath('/css/select2-bootstrap.css') ?>" rel="stylesheet"/>
+<link href="<?= $this->basePath('/css/fontello/css/fontello.css') ?>" rel="stylesheet"/>

@@ -1,0 +1,113 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 16-06-17 14:56
+ * @copyright Certic (c) 2016
+ */
+// Organisation des données pour la vue
+
+$docsOrganized = [];
+/** @var \Oscar\Entity\AdministrativeDocument $document */
+foreach( $documents as $document ) {
+    if( !isset($docsOrganized[$document->getFileName()]) ) {
+        $docsOrganized[$document->getFileName()] = [
+            'main' => $document,
+            'older' => []
+        ];
+        continue;
+    }
+    $currentDoc = &$docsOrganized[$document->getFileName()];
+
+    if( $document->getVersion() > $currentDoc['main']->getVersion() ){
+        $currentDoc['older'][] = $currentDoc['main'];
+        $currentDoc['main'] = $document;
+    } else {
+        $currentDoc['older'][] = $document;
+    }
+}
+?>
+
+
+
+<div class="container">
+    <h1>
+        <i class="icon-book"></i> Documents administratifs
+    </h1>
+    <?php
+    $downloadable =  $this->grant()->connected();
+    foreach( $docsOrganized as $document ): ?>
+    <article class="card">
+        <h3 class="card-title">
+            <i class="picto icon-doc doc-<?= $document['main']->getExtension() ?>"></i>
+            <?= $document['main']->getFileName() ?>
+            <small>
+                version <?= $document['main']->getVersion() ?>,
+                <?= $this->fileSize($document['main']->getFileSize()) ?>
+            </small>
+        </h3>
+        <nav class="text-right show-over">
+            <?php if($downloadable): ?>
+            <a class="btn btn-default btn-xs" href="<?= $this->url('administrativedocument/download', ['id' => $document['main']->getId()]) ?>">
+                <i class="icon-download-outline"></i>
+                Télécharger le fichier
+            </a>
+            <?php endif; ?>
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_NEW)): ?>
+            <a class="btn btn-default btn-xs" href="<?= $this->url('administrativedocument/upload', ['id' => $document['main']->getId()]) ?>?id=<?= $document['main']->getId() ?>">
+                <i class="icon-attach-1"></i>
+                Téléverser un nouvelle version
+            </a>
+            <?php endif; ?>
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_DELETE)): ?>
+                <a class="btn btn-default btn-xs" href="<?= $this->url('administrativedocument/delete', ['id' => $document['main']->getId()]) ?>?id=<?= $document['main']->getId() ?>">
+                    <i class="icon-trash"></i>
+                    Supprimer
+                </a>
+            <?php endif; ?>
+        </nav>
+        <p class="text-highlight">
+            Téléversé le <time><?= $this->moment($document['main']->getDateUpdoad())->full() ?></time>
+            par <?= $document['main']->getPerson() ? $this->person($document['main']->getPerson()) : '<span class="no-data">Inconnu</span>' ?>
+        </p>
+
+        <div class="card-content versions">
+            <?php if( count($document['older']) > 0 ):?>
+                <h4 class="opener"><i class="icon-opener"></i> Versions précédentes</h4>
+                <div class="details" style="display: none">
+                <?php foreach( $document['older'] as $subdoc ): ?>
+                <article class="subdoc text-highlight">
+                    <?php if($downloadable): ?>
+                    <a href="<?= $this->url('administrativedocument/download', ['id' => $subdoc->getId()]) ?>" download="true" >
+                    <?php endif; ?>
+                    <i class="picto icon-doc doc-<?= $subdoc->getExtension() ?>"></i>
+                    <strong>
+                        <?= $subdoc->getFileName() ?>,
+                        version <?= $subdoc->getVersion() ?></small></strong>,
+                        téléversé <time><?= $this->moment($subdoc->getDateUpdoad())->since() ?></time>
+                        par <span class="owner"><?= $subdoc->getPerson() ? $this->person($subdoc->getPerson()) : 'Anonymous' ?></span>
+                    <?php if($downloadable): ?>
+                    </a>
+                    <?php endif; ?>
+
+                </article>
+                <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </article>
+    <?php endforeach; ?>
+    <hr>
+    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_NEW)): ?>
+    <nav>
+        <a href="<?= $this->url('administrativedocument/upload') ?>" class="btn btn-primary">Téléverser un document</a>
+    </nav>
+    <?php endif; ?>
+</div>
+<script>
+    require(['jquery'], function($){
+        console.log('toto');
+        $('.versions').on('click', '.opener', function(e){
+            $(this).parent().toggleClass('open').find('.details').toggle();
+        });
+    });
+</script>

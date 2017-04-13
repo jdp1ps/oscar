@@ -1,0 +1,68 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 12/10/15 14:21
+ * @copyright Certic (c) 2015
+ */
+
+namespace Oscar\Hydrator;
+
+
+use Oscar\Entity\Person;
+use Zend\Stdlib\Hydrator\HydrationInterface;
+use Zend\Stdlib\Hydrator\HydratorInterface;
+
+class PersonFormHydrator implements HydratorInterface
+{
+    private $connectorsName;
+
+    public function __construct( $connectorsName )
+    {
+        $this->connectorsName = $connectorsName;
+    }
+
+
+    /**
+     * @param array $data
+     * @param Person $object
+     */
+    public function hydrate(array $data, $object)
+    {
+        $object->setFirstname($data['firstname'])
+            ->setLastname($data['lastname'])
+            ->setCodeHarpege($data['codeHarpege'])
+            ->setCodeLdap($data['codeLdap'])
+            ->setCodeHarpege($data['codeHarpege'])
+            ->setEmail($data['email'])
+            ->setPhone($data['phone']);
+
+        foreach( $this->connectorsName as $connector ){
+            $object->setConnectorID($connector, $data['connector_'.$connector]);
+        }
+
+        return $object;
+    }
+
+    /**
+     * @param Person $object
+     * @return array
+     */
+    public function extract( $object )
+    {
+        $d = [
+            'id'        => $object->getId(),
+            'firstname' => $object->getFirstname(),
+            'lastname' => $object->getLastname(),
+            'codeLdap' => $object->getCodeLdap(),
+            'phone' => $object->getPhone(),
+            'codeHarpege' => $object->getCodeHarpege(),
+            'email' => $object->getEmail(),
+        ];
+
+        foreach( $this->connectorsName as $connector ){
+            $d['connector_'.$connector] = $object->getConnectors()[$connector];
+        }
+        return $d;
+
+    }
+}

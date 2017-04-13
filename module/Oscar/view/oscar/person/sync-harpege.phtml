@@ -1,0 +1,47 @@
+<!--<h2>Ajoutées depuis Harpège <sup>©</sup></h2>-->
+<?php /*foreach( $create as $harpegeId=>$data ): ?>
+<article class="card xs">
+
+    <h3><i class="icon-plus-circled"></i>
+        <small>[<?= $harpegeId ?> ]</small> <?= $data['PRENOM'] ?> <strong><?= $data['NOM'] ?></strong></h3>
+    <pre>
+        <?php var_dump($data) ?>
+    </pre>
+</article>
+<?php endforeach;*/ ?>
+
+<div class="container">
+    <h2>Mis à jour depuis Harpège<sup>©</sup></h2>
+
+    <section>
+        <h3>Mise à jour</h3>
+        <?php if( count($updated) ): ?>
+        <?php foreach( $updated as $data ): ?>
+            <article class="card xs">
+                <i class="icon-history"></i>
+                <?= $data ?>
+            </article>
+        <?php endforeach; ?>
+        <?php else: ?>
+        <div class="alert alert-info">
+            Les informations sont à jour.
+        </div>
+        <?php endif; ?>
+    </section>
+
+    <section>
+        <h3>Créé</h3>
+        <?php if( count($created) ): ?>
+        <?php foreach( $created as $data ): ?>
+            <article class="card xs">
+                <i class="icon-plus-circled"></i>
+                <?= $this->activity($data) ?>
+            </article>
+        <?php endforeach; ?>
+        <?php else: ?>
+            <div class="alert alert-info">
+                Les informations sont à jour.
+            </div>
+        <?php endif; ?>
+    </section>
+</div>

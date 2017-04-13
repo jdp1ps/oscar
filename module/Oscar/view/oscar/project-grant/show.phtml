@@ -1,0 +1,592 @@
+<?php /** @var $entity Oscar\Entity\Activity */ ?>
+<link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css">
+<style>.tv-title {display: none}
+    h2.tv-serie-label { border-bottom: none; }
+</style>
+<div class="container activity-full">
+
+    <nav>
+        <a href="javascript:history.back()">
+            <i class=" icon-angle-left"></i>Retour</a>
+    </nav>
+
+    <header class="activity-header oscar-header jumbotron has-btn">
+        <h2>
+            <?php if( $entity->getProject() ): $labelBtn = "Modifier le projet"; ?>
+                <small class="text-light">
+                    <?= $this->link()->project($entity->getProject()) ?> : </small>
+            <?php else: $labelBtn = "Affecter un projet existant"; ?>
+                <small>Sans projet</small>
+            <?php endif; ?>
+        </h2>
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT) ): ?>
+            <div class="dropdown" style="position: absolute; right: 12px; top: 12px">
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                        data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="true">
+                    <i class="icon-cog"></i>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT)): ?>
+                        <li class="dropdown-header"><i class="icon-cubes"></i> Projet</li>
+                        <li>
+                            <a href="<?= $this->url('contract/moveToProject', ['id'=>$entity->getId()]) ?>">
+                                <?= $labelBtn ?>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?= $this->url('contract/createProject', ['id'=>$entity->getId()]) ?>">
+                                Créer un nouveau projet à partir de cette activité
+                            </a>
+                        </li>
+
+                    <?php endif; ?>
+                    <li class="dropdown-header">
+                        <i class="icon-cube"></i>
+                        Données de l'activité
+                    </li>
+                    <li>
+                        <a href="<?= $this->url('contract/edit', ['id'=>$entity->getId()]) ?>" class="smoke">
+                            Modifier les informations
+                        </a>
+                    </li>
+                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DUPLICATE, $entity)): ?>
+                        <li>
+                            <a href="<?= $this->url('contract/duplicate', ['id'=>$entity->getId()]) ?>" class="smoke">
+                                Dupliquer cette activité
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+
+        <div>
+            <small>
+                 <span class="picto status-<?= $entity->getStatus() ?>">
+                    <i class="icon"></i>
+                    <?= $entity->getStatusLabel() ?>
+                 </span>
+                :::
+                 <span>
+                    <i class="<?= $entity->getTypeSlug() ?>"></i>
+                    <span class="text-light"><?= $this->activityTypeHlp()->chain($entity->getActivityType()) ?></span>
+                 </span>
+            </small>
+        </div>
+
+        <h1>
+
+        </span>
+            <span> <i class="icon-cube"></i> <?= $entity->getLabel() ?></span>
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW)): ?>
+            <div class="budget">
+                <em>Budget</em>
+                <strong><?= $this->currency($entity) ?></strong>
+            </div>
+            <?php endif; ?>
+        </h1>
+
+        <?php if( $entity->getDescription() ): ?>
+        <p class="baseline">
+            <small><?= $entity->getDescription() ?></small>
+        </p>
+        <?php endif; ?>
+
+        <p class="dates text-highlight baseline">
+            Début : <time><?= $this->moment($entity->getDateStart()) ?></time> /
+            Fin : <time><?= $this->moment($entity->getDateEnd()) ?></time> -
+            Signé le <time><?= $this->moment($entity->getDateSigned()) ?></time>
+        </p>
+
+        <p class="texthighlight baseline">
+            N° Oscar : <strong><?= $entity->getOscarNum() ?></strong><br/>
+            N° : <strong><?= $entity->getCentaureNumConvention() ?></strong><br/>
+            PFI :
+            <?php if( $entity->getCodeEOTP() ): ?>
+                <strong><?= $entity->getCodeEOTP() ?></strong> -
+            <?php endif; ?>
+            <?php if( $entity->getDateOpened() ): ?>
+                ouvert le <time><?= $this->moment($entity->getDateOpened()) ?></time>
+            <?php else: ?>
+                non daté
+            <?php endif; ?><br/>
+            Autre numérotation :
+            <?php foreach( $entity->getNumbers() as $key=>$value ): ?>
+                <span class="number">
+                        <span class="key"><?= $key ?></span>
+                        <span class="value"><?= $value ?></span>
+                    </span>
+            <?php endforeach; ?>
+        </p>
+    </header>
+
+    <div class="row">
+        <div class="col-md-8">
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_SHOW, $entity)): ?>
+
+            <section id="members-activity" class="has-btn">
+                <h2><i class="icon-group"></i> Membres</h2>
+
+
+                <div class="subsection">
+
+                    <div id="persons-activity" class="enrollerPack"></div>
+
+                    <script>
+                        require(['EnrollerPack'], function(EnrollerPack){
+                            EnrollerPack({
+                                label: "personne",
+                                urlDatas: '<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>',
+                                lsname: "activity_persons",
+                                el: '#persons-activity'
+                            });
+                        });
+                    </script>
+
+
+                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE, $entity)): ?>
+                        <div class="btn-area">
+                            <a href="<?= $this->url('personactivity/new', ['idenroller'=>$entity->getId()]) ?>" class="smoke" data-modalform>
+                                <i class="icon-user"></i>
+                                Ajouter un membre pour cette activité
+                            </a>
+                        </div>
+                    <?php endif; ?>
+
+                </div>
+            </section>
+            <hr />
+            <?php endif; ?>
+
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
+            <section id="partners" class="has-btn">
+                <h2><i class="icon-group"></i> Partenaires</h2>
+
+                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE, $entity)): ?>
+                    <div class="btn-area">
+                        <a href="<?= $this->url('organizationactivity/new', ['idenroller'=>$entity->getId()]) ?>" class="smoke" data-modalform>
+                            <i class="icon-user"></i>
+                            Ajouter un partenaire pour cette activité
+                        </a>
+                    </div>
+                <?php endif; ?>
+                <div class="subsection">
+                    <div id="organizations-activity" class="enrollerPack"></div>
+                </div>
+                <script>
+                    require(['EnrollerPack'], function(EnrollerPack){
+                        EnrollerPack({
+                            label: "organisation",
+                            urlDatas: '<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>',
+                            lsname: "activity_organizations",
+                            el: '#organizations-activity'
+                        });
+                    });
+                </script>
+            </section>
+            <?php endif; ?>
+
+            <?php
+            $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE, $entity);
+
+            if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity) ): ?>
+                <section id="documents" class="has-btn">
+                    <h2><i class="icon-book"></i> Documents</h2>
+
+                    <?php if( $manage ): ?>
+                        <div class="btn-area">
+                            <a href="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId() ]) ?>" class="smoke">
+                                <i class="icon-book"></i>
+                                Téléverser un document
+                            </a>
+                        </div>
+                    <?php endif; ?>
+
+                    <script id="document-template" type="text/x-template">
+                    TOTO
+                    </script>
+
+                    <script id="documents-list-template" type="text/x-template">
+                        <div>
+                            <div class="oscar-sorter">
+                                <i class=" icon-sort"></i>
+                                Tier les résultats par :
+                                <a @click.prevent="order('dateUpload')" href="#" v-bind:class="cssSort('dateUpload')" class="oscar-sorter-item">
+                                    Date d'upload
+                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
+                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
+                                </a>
+                                <a @click.prevent="order('fileName')" href="#" v-bind:class="cssSort('fileName')" class="oscar-sorter-item">
+                                    Nom du fichier
+                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
+                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
+                                </a>
+                                <a @click.prevent="order('categoryText')" href="#" v-bind:class="cssSort('categoryText')" class="oscar-sorter-item">
+                                    Type de document
+                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
+                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
+                                </a>
+                            </div>
+                            <document v-for="document in sortedDocument" v-bind:document="document" v-bind:documentTypes="documentTypes"></document>
+                        </div>
+                    </script>
+
+                    <section id="documents-list" class="lc pending">
+                        <div class="lc-mask">
+                            <div class="lc-alert">
+                                Error message
+                            </div>
+                            <div class="lc-loader">
+                                <span class="text">Chargement</span>
+                            </div>
+                            <div class="lc-content">
+
+                            </div>
+                        </div>
+                    </section>
+
+                    <script>
+                        require(['Documents'], function(OscarDocument) {
+                            OscarDocument({
+                                urlDocumentType: '<?= $this->url('contractdocument/document-change-type') ?>',
+                                el: '#documents-list',
+                                documentTypes: <?= $documentTypes ?>,
+                                template: "#documents-list-template",
+                                url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>'
+                            });
+                        });
+                    </script>
+
+
+                </section>
+            <?php endif; ?>
+
+        </div>
+        <div class="col-md-4">
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
+            <div id="jalons-area" class="has-btn">
+                <h2><i class="icon-calendar-outlilne"></i>Jalons</h2>
+                <?php if( $this->grant()->privileges(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_MANAGE, $entity) ): ?>
+                <nav class="btn-area">
+                    <a data-activitydate-add href="<?= $this->url('activitydate/new', ['idactivity'=>$entity->getId()]) ?>" class="smoke">Ajouter</a>
+                </nav>
+                <?php endif; ?>
+                <div id="milestones" class="lc">
+                    <div class="lc-mask">
+                        <div class="lc-alert">
+                            Error message
+                        </div>
+                        <div class="lc-loader">
+                            <span class="text">Chargement</span>
+                        </div>
+                    </div>
+                    <div class="lc-content"></div>
+                </div>
+            </div>
+            <script>
+                var milestones;
+
+                require(['Milestone'], function(Milestone){
+                    milestones = new Milestone.Collection();
+                    milestones.url = '<?= $this->url("activitydate", ['idactivity' => $entity->getId()]) ?>';
+                    milestones.urlEdit = '<?= $this->url('activitydate/edit', ['idactivity'=>$entity->getId(), 'id'=>'']) ?>';
+                    var view = new Milestone.View({
+                        model: milestones,
+                        el: '#milestones'
+                    });
+
+                    milestones.fetch();
+                });
+            </script>
+            <?php endif; ?>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
+                <div id="depenses-area" class="has-btn lc"></div>
+                <script>
+                    require(['OscarDepenses'], function(OscarDepense){
+                        var depenses = new OscarDepense({
+                            el: '#depenses-area',
+                            data: { url: '<?= $this->url('depense/activity', ['idactivity' => $entity->getId()]) ?>' }
+                        });
+                    })
+                </script>
+            <?php endif ?>
+
+            <?php /* if( DEBUG_OSCAR ): ?>
+                <div id="TEST" class="has-btn lc">TEST</div>
+                <script>
+                    require(['components/build/versements'], function(OscarVersements){
+                        var v = new OscarVersements.default({
+                            el: "#TEST",
+                            data: {
+                                url: '<?= $this->url("activitypayment_rest", ['idactivity' => $entity->getId()]) ?>'
+                            }
+                        });
+                        v.$on('notifications', function(type, message, err){
+                            flashMessage(type, message + ' (' +err.status +' : ' +err.statusText +')');
+                        });
+                    })
+                </script>
+            <?php endif*/ ?>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
+            <div id="payments-area" class="has-btn">
+                <h2><i class="icon-bank"></i>Versements</h2>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE, $entity) ): ?>
+                <nav class="btn-area">
+                    <a data-activitypayment-add href="<?= $this->url('activitypayment/new', ['idactivity'=>$entity->getId()]) ?>"  class="smoke">
+                        <i class="icon icon-plus"></i>
+                        Ajouter</a>
+                </nav>
+                <?php endif; ?>
+                <!--<h4 class="help">
+                    Montant prévu : <strong><?= $entity->getAmount() ?> <strong><?= $entity->getCurrency()->getSymbol() ?></strong>
+                </h4>-->
+                <div id="payments" class="lc">
+                    <div class="lc-mask">
+                        <div class="lc-alert">
+                            Error message
+                        </div>
+                        <div class="lc-loader">
+                            <span class="text">Chargement</span>
+                        </div>
+                    </div>
+                    <div class="lc-content"></div>
+                    <article class="payment total">
+                        <div class="heading">
+                            <strong class="amount">
+                                0
+                            </strong>
+                            <span class="date">/<strong><?= $this->currency($entity->getAmount()) ?></strong></span>
+                        </div>
+                    </article>
+                    <div class="alert alert-danger alertAmount">
+                        <p><i class="icon-attention-1"></i>
+                        Le total des versements prévus et réalisés ne
+                        semble pas correspondre avec le montant prévu
+                        initialement, Somme des versements :</p>
+                        <ul>
+                            <li><strong class="amountPrevu">?</strong> en versement,</li>
+                            <li><strong title="Valeur exacte : <?= $entity->getAmount() ?>"><?= $this->currency($entity->getAmount()) ?></strong> prévu</li>
+                        </ul>
+
+                    </div>
+                </div>
+
+            </div>
+                <script>
+                    var payments;
+
+                    require(['Payments'], function(Payments){
+
+                        payments = new Payments.Collection();
+                        payments.urlEdit = '<?= $this->url('activitypayment/edit', ['idactivity'=>$entity->getId(), 'id'=>'']) ?>';
+                        payments.urlNew = '<?= $this->url('activitypayment/new', ['idactivity'=>$entity->getId()]) ?>';
+                        payments.url = '<?= $this->url("activitypayment", ['idactivity' => $entity->getId()]) ?>';
+
+                        var view = new Payments.View({
+                            model: payments,
+                            el: '#payments'
+                        });
+
+                        payments.on('update destroy sync', function(){
+                            var total = 0.0,
+                                totalPrevu = 0.0;
+
+                            payments.each(function(payment){
+                                if( payment.get('status') == 2 ){
+                                    total += Math.round(payment.get('amount')*1000);
+                                }
+                                totalPrevu += Math.round(payment.get('amount')*1000);
+                            });
+
+                            $('#payments .total .amount').text(formatCurrency((total/1000))+' €');
+                            $('#payments .amountPrevu').text(formatCurrency((totalPrevu/1000))+' €');
+
+                            if ( total === <?= $entity->getAmount() ?> ){
+                                $('#payments .total .amount').addClass('accountOK');
+                            } else {
+                                $('#payments .total .amount').removeClass('accountOK');
+                            }
+
+                            if ( totalPrevu/1000 === <?= $entity->getAmount() ?> ){
+                                $('#payments .alertAmount').hide();
+                            } else {
+                                $('#payments .alertAmount').show();
+                            }
+                        });
+
+                        $('[data-activitypayment-add]').on('click', function(e){
+                            e.preventDefault();
+                            view.formNew();
+                        });
+
+                        payments.fetch();
+                    });
+
+                </script>
+            <?php endif; ?>
+        </div>
+
+    </div>
+    <hr>
+
+
+    <?php /*
+    if( DEBUG_OSCAR && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
+    <section id="statements">
+        <h2><i class="icon-clock"></i> Déclarer mes heures</h2>
+        <?= $this->partial('oscar/timesheet/declarations.phtml', ['activity' => $entity, 'timesheets' => [] ]) ?>
+    </section>
+    <?php endif; /****/ ?>
+
+
+<?php
+$manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
+
+if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
+    <section id="workpackages">
+
+    </section>
+    <script>
+        require(['workpackageperson'], function(Workpackageperson){
+            var wp = new Workpackageperson.default({
+                http: {
+                    root: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>'
+                },
+                el: '#workpackages'
+            });
+            wp.$on('valider', function(){
+                window.location = '<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>';
+            });
+            wp.$on('declarer', function(){
+                window.location = '<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>';
+            });
+        })
+    </script>
+    <?php /*<section id="workpackage">
+        <h2><i class="icon-archive"></i> Lot de travail</h2>
+        <section class="workpackages">
+            <?php foreach( $entity->getWorkPackages() as $wp ): ?>
+            <article class="workpackage-item">
+                <h3>
+                    <span class="code"><?= $wp->getCode() ?></span>
+                    <span class="label"><?= $wp->getLabel() ?></span>
+                </h3>
+                <p><?= $wp->getDescription() ?></p>
+                <nav>
+                    <?php if( $manage ): ?>
+                        <span class="dropdown">
+                            <a class="dropdown-toggle"
+                                    type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="true">
+                                Gérer <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                <li>
+                                    <a href="<?= $this->url('workpackage/edit', ['id'=>$wp->getId()]) ?>" class="">
+                                        <i class="icon-edit"></i>&nbsp;Modifier
+                                    </a>
+                                </li>
+                                <li>
+                                    <a data-confirm="Supprimer ce lot de travail ?" data-href="<?= $this->url('workpackage/delete', ['id'=>$wp->getId()]) ?>" class="">
+                                        <i class="icon-trash"></i>&nbsp;Supprimer
+                                    </a>
+                                </li>
+                            </ul>
+                        </span>
+                    <?php endif; ?>
+                    <a href="" class="disabled">
+                        <i class="icon-clock"></i>&nbsp;Déclarer mes heures
+                    </a>
+                </nav>
+            </article>
+            <?php endforeach; ?>
+        </section>
+
+        <nav class="btn-bar">
+            <?php if( $manage ): ?>
+            <a href="<?= $this->url('workpackage/new', ['idactivity' => $entity->getId() ]) ?>" class="btn btn-primary">Nouveau lot</a>
+            <?php endif; ?>
+        <?php if( DEBUG_OSCAR && $this->grant()->getCurrentPerson() ): ?>
+            <nav>
+                <a href="<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>"  class="btn btn-primary">
+                    Déclarer mes heures pour cette activités
+                </a>
+
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_VALIDATE,['idactivity' => $entity->getId()])): ?>
+
+                    <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>"
+                       class="btn btn-primary">
+                        Valider les déclarations
+                    </a>
+                <?php endif; ?>
+            </nav>
+        <?php endif; ?>
+    </section>
+ <?php */ ?>
+    <?php endif; ?>
+
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ): ?>
+        <hr/>
+    <section id="logs">
+        <h2><i class="icon-signal"></i> Log</h2>
+            <?= $this->partial('oscar/activity-log/frag-list.phtml',
+                ['entities' => $traces]) ?>
+    </section>
+    <?php endif; ?>
+
+    <script id="enrollTpl" type="template" >
+        <article class="stack">
+            <span class="stacker">{{ label }}</span>
+        <ul class="list-stacked">
+            {{#each roles}}
+        <li class="stacked">{{ label }}</li>
+        {{/each}}
+        </ul>
+        </article>
+    </script>
+
+    <style>
+        .stack {
+            text-shadow: -1px 1px 0 #fff;
+            background:  #eee;
+            padding: 4px;
+            margin: 1em;
+            border-radius: 4px;
+            box-shadow: 0 0 8px rgba(0,0,0,.1);
+            display: inline-block;
+        }
+        .stacker {
+            font-weight: 600;}
+        .stacker:after {
+            content: ' : ';}
+        .list-stacked { display: inline; margin: 0; padding: 0}
+        .stacked {
+            display: inline;
+            margin: 0 0;
+            padding: 4px;
+            background: #ccc;
+            border-radius: 4px;
+            font-size: .9em;}
+    </style>
+
+    <script>
+       var view;
+        Initer.ready(function(){
+
+           require(['modalform'], function(modalform){
+                modalform($('body'));
+                modalform.modalify('[data-activitydate-add]',
+                    function(){
+                        milestones.fetch();
+                    }
+                );
+            });
+        });
+    </script>
+</div>
+

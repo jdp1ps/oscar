@@ -1,0 +1,70 @@
+<div class="container">
+    <header>
+        <h1>q</h1>
+    </header>
+    <section>
+        <?php
+        $month = "";
+        /** @var \Oscar\Entity\Activity $contract */
+        foreach( $contracts as $contract ):
+            if( $contract->getDateStart() && $contract->getDateStart()->format('M') != $month){
+                $month = $contract->getDateStart()->format('M');
+                echo '<div class="list-separator"><div class="list-separator-label calendar-style">
+                    <div class="month">'.$month.'</div>
+                    <strong class="year">'. $year.'</strong>
+                    </div></div>';
+            }
+            ?>
+            <article class="card">
+                <h3 class="card-title aligned">
+                    <span><?= $contract->getType() ?></span>
+                    <strong class="on-right w20"><?= money_format('%+n €',$contract->getAmount()) ?></strong>
+                </h3>
+                <p>
+                    <?php if( $contract->getProject()->getAcronym() ): ?>
+                        <abbr title=""><?= $contract->getProject()->getAcronym() ?></abbr>
+                    <?php endif; ?>
+                    <?= $contract->getProject()->getLabel() ?>
+                </p>
+            </article>
+        <?php endforeach; ?>
+    </section>
+</div>
+<?php /*<header class="jumbotron">
+    <h1>Sources de financement</h1>
+</header>
+<table class="table table-bordered table-responsive">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>description</th>
+            <th>logo</th>
+            <th>Administration</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach( $entities as $entity ): ?>
+            <tr>
+                <td><?= $entity->getLabel() ?></td>
+                <td><?= $entity->getDescription() ?></td>
+                <td><?= $entity->getLogo() ?></td>
+
+                <td>
+                    <nav class="btn-group">
+                        <a href="<?= $this->url('grantsource_delete', array('id'=>$entity->getID())) ?>" class="btn btn-default btn-xs">
+                            <i class="icon-trash"></i> Supprimer
+                        </a>
+                        <a href="<?= $this->url('grantsource_edit', array('id'=>$entity->getID())) ?>" class="btn btn-default btn-xs"><i class="icon-edit"></i> Editer</a>
+                    </nav>
+
+                </td>
+            </tr>
+        <?php endforeach; ?>
+
+    </tbody>
+</table>
+<nav class="btn-group-sm">
+    <a class="btn btn-default btn-sm" href="<?= $this->url('grantsource_new') ?>">
+        NOUVEAU
+    </a>
+</nav>*/ ?>

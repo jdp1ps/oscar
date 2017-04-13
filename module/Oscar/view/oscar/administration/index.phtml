@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="<?= $this->basePath(). '/css/privileges.css' ?>">
+<div class="container">
+    <div class="col-md-8">
+        <h1><i class="icon-shield"></i>Gestion des privilèges</h1>
+        <div id="privileges"></div>
+    </div>
+    <div class="col-md-4">
+        <h1><i class="icon-group"></i>Rôles</h1>
+        <div id="roles"></div>
+        <script>
+            require(['vue', 'vue-resource', 'privileges', 'roles'], function(Vue, VueResource, Privilege, Roles){
+                Vue.use(VueResource);
+
+                var privileges = new Privilege.default({
+                    http: {
+                        root: '<?= $this->url('administration/privileges') ?>'
+                    },
+                    el: '#privileges'
+                });
+
+
+                var roles = new Roles.default({
+                    http: {
+                      root: '<?= $this->url('administration/roles') ?>'
+                    },
+                    data (){
+                        return {
+                            common: privileges.$data,
+                            form: null
+                        }
+                    },
+                    el: '#roles'
+                });
+            })
+        </script>
+    </div>
+
+</div>

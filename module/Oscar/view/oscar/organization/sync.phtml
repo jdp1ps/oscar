@@ -1,0 +1,25 @@
+
+<section class="container">
+    <h1 class="container">Rapport de synchronisation</h1>
+
+    <h3 class="text-center"><?= count($repport) ?> opération(s)</h3>
+
+    <!--
+    <article class="card xs repport repport-error">
+        <p><i class="icon icon-repport"></i> Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    </article>
+
+    <article class="card xs repport repport-update">
+        <p><i class="icon icon-repport"></i> Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    </article>
+
+    <article class="card xs repport repport-notice">
+        <p><i class="icon icon-repport"></i> Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    </article>
+-->
+    <?php foreach( $repport as $r ): ?>
+        <article class="card xs repport repport-<?= $r['type'] ?>">
+            <p><i class="icon icon-repport"></i> <?= $r['message'] ?></p>
+        </article>
+    <?php endforeach; ?>
+</section>

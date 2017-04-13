@@ -1,0 +1,14 @@
+<section class="container">
+    <h1>
+        <i class="icon-bank"></i>
+        Versements en retard</h1>
+    <div class="alert-info alert">
+        <p>Les versements qui suivent n'ont pas été marqués comme <strong>réalisés</strong></p>
+    </div>
+    <?php
+    /** @var \Oscar\Entity\ActivityPayment $payment */
+    foreach ($payments as $payment): ?>
+        <?= $this->partial('/oscar/activity-payment/payment-item.phtml', ['payment' => $payment]) ?>
+
+    <?php endforeach; ?>
+</section>

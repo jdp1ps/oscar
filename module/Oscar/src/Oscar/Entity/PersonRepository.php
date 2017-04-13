@@ -1,0 +1,136 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @copyright Certic (c) 2015
+ */
+
+namespace Oscar\Entity;
+
+
+use Doctrine\ORM\EntityRepository;
+use Oscar\Connector\IConnectedRepository;
+
+/**
+ * Class ProjectGrantRepository
+ * @package Oscar\Entity
+ */
+class PersonRepository extends EntityRepository implements IConnectedRepository
+{
+
+    public function flush($mixed){
+        $this->getEntityManager()->flush($mixed);
+    }
+
+    public function newPersistantPerson(){
+        $person = new Person();
+        $this->getEntityManager()->persist($person);
+        return $person;
+    }
+
+    /**
+     * @param $email
+     * @return Person[]
+     */
+    public function getPersonByEmail( $email ){
+        static $personByEmail;
+        if( $personByEmail == null ){
+            $personByEmail = $this->getBaseQuery()->where('p.email = :email');
+        }
+        return $personByEmail->setParameter('email', $email)->getQuery()->getResult();
+    }
+
+
+    /**
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    public function getBaseQuery()
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder();
+
+        $qb->select('pm, p, pj')
+            ->from('Oscar\Entity\Person', 'p')
+            ->leftJoin('p.projectAffectations', 'pm')
+            ->leftJoin('pm.project', 'pj');
+
+        return $qb;
+    }
+
+    public function search($search){
+        $query = $this->getBaseQuery();
+        $query->orWhere('p.firstname LIKE :search')
+            ->orWhere('p.lastname LIKE :search');
+        return $query->getQuery()->execute(['search' => '%'.$search.'%']);
+    }
+
+    /**
+     * Retourne la personne en fonction du connecteur.
+     *
+     * @param $connector
+     * @param $value
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getPersonByConnectorID( $connector, $value ){
+        return $this->getPersonByConnectorQuery($connector, $value)->getQuery()->getSingleResult();
+    }
+
+    /**
+     * @param $connector
+     * @param $value
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getPersonsByConnectorID( $connector, $value ){
+        return $this->getPersonByConnectorQuery($connector, $value)->getQuery()->getResult();
+    }
+
+    /**
+     * @param $connector
+     * @param $value
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    private function getPersonByConnectorQuery( $connector, $value ){
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('p')
+            ->from(Person::class, 'p')
+            ->where('p.connectors LIKE :search')
+            ->setParameter('search', '%"'.$connector.'";s:%:"'.$value.'";%');
+        return $qb;
+    }
+
+
+
+    public function getRolesLdapUsed(){
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT DISTINCT r.ldapFilter, r.roleId, r.principal FROM '.Role::class.' r WHERE r.ldapFilter IS NOT NULL');
+        $filtersUsed = [];
+        foreach( $query->getResult() as $row ){
+            $ldapFilter = preg_replace('/\(memberOf=(.*)\)/i', '$1', $row['ldapFilter']);
+            $roleId = $row['roleId'];
+
+            if( !array_key_exists($ldapFilter, $filtersUsed) ){
+                $filtersUsed[$ldapFilter] = [];
+            }
+            $filtersUsed[$ldapFilter][] = [
+                'label' => $roleId,
+                'principal' => $row['principal']
+            ];
+        }
+        return $filtersUsed;
+
+    }
+
+    public function getObjectByConnectorID($connectorName, $connectorID)
+    {
+        return $this->getPersonByConnectorID($connectorName, $connectorID);
+    }
+
+    public function newPersistantObject()
+    {
+        return $this->newPersistantPerson();
+    }
+
+
+}

@@ -1,0 +1,820 @@
+<?php
+
+use Monolog\Handler\StdoutHandler;
+use Oscar\Controller\PersonController;
+use Oscar\Service\AccessResolverService;
+use Oscar\Service\LoggerStdoutColor;
+use Oscar\Service\OrganizationService;
+use Oscar\Service\PersonnelService;
+use Oscar\Service\PersonService;
+use Oscar\Service\ProjectService;
+use Oscar\Service\SearchService;
+use Oscar\View\Helpers\DateRenderer;
+use Oscar\View\Helpers\UnicaenDoctrinePaginatorHelper;
+
+$conf = new Symfony\Component\Yaml\Parser();
+
+//$dumper = new Symfony\Component\Yaml\Dumper();
+//echo \Symfony\Component\Yaml\Yaml::dump($oldroutes, 6);
+
+
+return array(
+    'oscar' => [
+        'documents' => [
+            'contract' => '/home/jacksay/Projets/oscar/trunk/documents/'
+        ],
+    ],
+
+    'oscar-access' => $conf->parse(file_get_contents(__DIR__ . '/oscar-access.yml')),
+
+    'bjyauthorize' => [
+
+        'role_providers' => [
+            'RoleProvider' => []
+        ],
+
+        ////////////////////////////////////////////////////////////// Resources
+        /* 'resource_providers' => [
+            \BjyAuthorize\Provider\Resource\Config::class => [
+                'Project' => [],
+                'Activity' => [],
+                'Organization' => [],
+                'Person' => [],
+            ]
+        ],*/
+        /*
+        'rule_providers' => [
+            \UnicaenAuth\Provider\Rule\PrivilegeRuleProvider::class => [
+                'allow' => [
+                    ['privileges' => \Oscar\Provider\Privileges::PROJECT_PROJECT_SHOW,
+                    'resources' => 'Project',
+                    'assertion' => 'ProjectShowAssertion']
+                ]
+            ]
+        ],*/
+
+        'guards' => [
+            UnicaenAuth\Guard\PrivilegeController::class => [
+                ////////////////////////////////////////////////////////////////////////
+                // PUBLIC
+                [ 'controller' =>  'Public',
+                    'action' => ['index'],
+                    'roles' => [],
+                ],
+                [ 'controller' =>  'Public',
+                    'action' => ['documentation'],
+                    'roles' => ['user'],
+                ],
+
+                [ 'controller' =>  'Administration',
+                    'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'organizationRole', 'organizationRoleApi'],
+                    'roles' => ['user']
+                ],
+
+                [ 'controller' =>  'Connector',
+                    'action' => ['person', 'persons', 'organization', "organizations"],
+                    'roles' => ['user']
+                ],
+
+                ////////////////////////////////////////////////////////////////
+                // PROJET
+                ////////////////////////////////////////////////////////////////
+                [   'controller' =>   'Project',
+                    'action' => ['show'],
+                    'roles' => ['user'],
+                ],
+                [   'controller' =>   'Project',
+                    'action' => ['currentUserProjects', 'currentUserStructureProjects'],
+                    'privileges' => \Oscar\Provider\Privileges::PROJECT_DASHBOARD,
+                    'roles' => ['user'],
+                ],
+                [   'controller' =>   'Project',
+                    'action' => ['index', 'new', 'edit', 'rebuildIndex', 'simplifyPartners', 'simplifyMembers', 'fusion', 'search'],
+                    'privileges' => \Oscar\Provider\Privileges::PROJECT_INDEX
+                ],
+                [   'controller' =>   'Project',
+                    'action' => ['addActivities'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
+                ],
+                ['controller' => 'Project',
+                    'action' => ['delete', 'empty'],
+                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
+                ],
+                // Membres (Person)
+                [ 'controller' =>   'Enroll',
+                    'action' => ['personProjectNew', 'personProjectDelete', 'personProjectEdit'],
+                    'privileges' => \Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE
+                ],
+                // Partenaires (Orgnaization)
+                [ 'controller' =>   'Enroll',
+                    'action' => ['organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit'],
+                    'privileges' => \Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE
+                ],
+
+                ////////////////////////////////////////////////////////////////
+                // ACTIVITÉS
+                ////////////////////////////////////////////////////////////////
+                [   'controller' =>   'Activity',
+                    'action' => ['show', 'edit', 'new', 'duplicate', 'delete', 'visualization', 'documentsJson', 'activitiesOrganizations'],
+                    'roles' => ['user'],
+                ],
+                [ 'controller' =>   'Activity',
+                    'action' => ['index', 'advancedSearch'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
+                ],
+                [ 'controller' =>   'Activity',
+                    'action' => ['makeProject', 'changeProject', 'orphans'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
+                ],
+                [ 'controller' =>   'Activity',
+                    'action' => ['almostDone', 'almostStart'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
+                ],
+                [ 'controller' =>   'Activity',
+                    'action' => ['persons', 'organizations'],
+                    'roles' => ['user']
+                ],
+
+                // DEPENSES
+                // --- VERSEMENTS
+                [ 'controller' =>   'Depense',
+                    'action' => ['activity'],
+                    'roles' => ['user'],
+                ],
+
+                // --- VERSEMENTS
+                [ 'controller' =>   'ActivityPayment',
+                    'action' => ['index', 'indexRest', 'rest'],
+                    'roles' => ['user'],
+                ],
+                [ 'controller' =>   'ActivityPayment',
+                    'action' => ['change', 'new', 'income', 'late', 'difference'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE
+                ],
+
+                // --- DATES CLEFS
+                [ 'controller' =>   'ActivityDate',
+                    'action' => ['index'],
+                    'roles' => ['user'],
+                ],
+                [ 'controller' =>   'ActivityDate',
+                    'action' => ['change', 'new'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_MILESTONE_MANAGE
+                ],
+
+                // --- WorkPackage
+                [
+                    'controller' => 'WorkPackage',
+                    'action' => ['index', 'new', 'edit', 'delete'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_MILESTONE_MANAGE
+                ],
+                // --- WorkPackage
+                [
+                    'controller' => 'WorkPackage',
+                    'action' => ['rest'],
+                    'roles' => ['user']
+                ],
+
+                // ---  MEMBRES
+                // Persons
+                [ 'controller' =>   'Enroll',
+                    'action' => ['personActivityNew', 'personActivityDelete', 'personActivityEdit'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE,
+                ],
+                // Organization
+                [ 'controller' =>   'Enroll',
+                    'action' => ['organizationActivityNew', 'organizationActivityDelete', 'organizationActivityEdit'],
+                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+                ],
+
+                // --- Type d'activités - { controller: ActivityType, action: [new, delete, edit, index, move, merge], roles: [user] }
+                ['controller' => 'ActivityType',
+                    'action' => ['new', 'delete', 'edit', 'index', 'move', 'merge'],
+                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN,
+                ],
+
+                // ---   - { controller: ActivityDate, action: [index, change, new], roles: [user] }
+                ['controller' => 'DateType',
+                    'action' => ['index', 'change', 'new'],
+                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN,
+                ],
+
+                // DOCUMENTS
+                ['controller' => 'ContractDocument', // --- Upload
+                    'action' => ['upload', 'delete', 'changeType'],
+                    'roles' => ['user']
+                ],
+                ['controller' => 'ContractDocument',
+                    'action' => ['index','show','download'],
+                    'roles' => ['user']
+                ],
+
+                // EXPORT
+                ['controller' => 'Activity',
+                    'action' => ['csv', 'csvPayments'],
+                    'roles' => ['user'],
+                ],
+
+                // TIMESHEET
+                ['controller' => 'Timesheet',
+                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet"],
+                    'roles' => ['user']
+                ],
+
+                ////////////////////////////////////////////////////////////////
+                // PERSON
+                ////////////////////////////////////////////////////////////////
+                [ 'controller' =>   'Person',
+                    'action' => ['search', 'synchronize'],
+                    'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
+                ],
+                [ 'controller' =>   'Person',
+                    'action' => ['syncHarpege', 'syncLdap2'],
+                    'privileges' => \Oscar\Provider\Privileges::PERSON_SYNC_LDAP,
+                ],
+                [ 'controller' =>   'Person',
+                    'action' => ['index', 'boss'],
+                    'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
+                ],
+                [ 'controller' =>   'Person',
+                    'action' => ['show'],
+                    'privileges' => \Oscar\Provider\Privileges::PERSON_SHOW
+                ],
+                [ 'controller' =>   'Person',
+                    'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole'],
+                    'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
+                ],
+                // Membre
+                [ 'controller' =>   'Enroll',
+                    'action' => ['personProjectNew', 'personProjectDelete', 'personProjectEdit'],
+                    'privileges' => \Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE
+                ],
+
+                // Membre des organization
+                [ 'controller' =>   'Enroll',
+                    'action' => ['organizationPersonNew', 'organizationPersonDelete', 'organizationPersonEdit'],
+                    'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
+                ],
+
+                ////////////////////////////////////////////////////////////////
+                // ORGANIZATION
+                ////////////////////////////////////////////////////////////////
+                /*
+                [ 'controller' =>   'Organization',
+                    'action' => ['search'],
+                    'roles' => ['user']
+                ],
+                */
+                [ 'controller' =>   'Organization',
+                    'action' => ['index', 'search'],
+                    'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_INDEX
+                ],
+                [ 'controller' =>   'Organization',
+                    'action' => ['show'],
+                    'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_SHOW
+                ],
+                [ 'controller' =>   'Organization',
+                    'action' => ['edit', 'new', 'syncLdap', 'merge', 'close'],
+                    'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_EDIT
+                ],
+                [ 'controller' =>   'Organization',
+                    'action' => ['merge'],
+                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
+                ],
+                [ 'controller' =>   'Organization',
+                    'action' => ['sync'],
+                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
+                ],
+                [ 'controller' =>   'Organization',
+                    'action' => ['fusion', 'scission', 'exportCsv'],
+                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
+                ],
+                [ 'controller' =>   'Organization',
+                    'action' => ['synchronizeConnector', 'sync'],
+                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
+                ],
+
+                ////////////////////////////////////////////////////////////////
+                // DOCUMENTS ADMINISTRATIFS
+                ////////////////////////////////////////////////////////////////
+                [ 'controller' =>   'AdministrativeDocument',
+                    'action' => ['index', 'download'],
+                    'roles' => ['user']
+                ],
+                [ 'controller' =>   'AdministrativeDocument',
+                    'action' => ['upload'],
+                    'privileges' => \Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_NEW
+                ],
+                [ 'controller' =>   'AdministrativeDocument',
+                    'action' => ['delete'],
+                    'privileges' => \Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_DELETE
+                ],
+
+
+                ////////////////////////////////////////////////////////////////
+                // PUBLIC
+                ////////////////////////////////////////////////////////////////
+                [ 'controller' =>   'Public',
+                    'action' => ['changelog'],
+                    'roles' => ['user'],
+                ],
+                [ 'controller' =>   'Console',
+/*                    'action' => ['privilege', 'syncOrganisation', 'buildSearchActivity',
+                        'harpegeINM', 'harpegePersons', 'evalHarpegeLdapPersons',
+                        'syncLdap', 'syncPersons', 'recalculateStatus',
+                        'authAdd', 'authPass', 'authPromote', 'scriptFixFinanceur',
+                        'scriptFixPartnerMoveToActivites', 'personSync', 'personsSync',
+                        'patch', 'personsSearchConnector','personsOrganizationSync',
+                        'organizationSync'],*/
+                    'roles' => [],
+                ],
+
+                ////////////////////////////////////////////////////////////////
+                // LOGS
+                ////////////////////////////////////////////////////////////////
+                [ 'controller' =>   'LogActivity',
+                    'action' => ['index'],
+                    'roles' => ['Administrateur'],
+                ],
+
+                ////////////////////////////////////////////////////////////////
+                // DROITS
+                ////////////////////////////////////////////////////////////////
+                [
+                    'controller' => 'UnicaenAuth\Controller\Droits',
+                    'action' => ['index'],
+                    'privileges' => [
+                        \UnicaenAuth\Provider\Privilege\Privileges::DROIT_ROLE_VISUALISATION,
+                        \UnicaenAuth\Provider\Privilege\Privileges::DROIT_PRIVILEGE_VISUALISATION,
+                    ],
+                ],
+                [
+                    'controller' => 'UnicaenAuth\Controller\Droits',
+                    'action' => ['roles'],
+                    'privileges' => [\Oscar\Provider\Privileges::DROIT_ROLE_VISUALISATION],
+                ],
+
+                [
+                    'controller' => 'UnicaenAuth\Controller\Droits',
+                    'action' => ['privileges'],
+                    'privileges' => [\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION],
+                ],
+                [
+                    'controller' => 'UnicaenAuth\Controller\Droits',
+                    'action' => ['role-edition', 'role-suppression'],
+                    'privileges' => [\Oscar\Provider\Privileges::DROIT_ROLE_EDITION],
+                ],
+                [
+                    'controller' => 'UnicaenAuth\Controller\Droits',
+                    'action' => ['privileges-modifier'],
+                    'privileges' => [\Oscar\Provider\Privileges::DROIT_PRIVILEGE_EDITION],
+                ],
+            ]
+        ],
+    ],
+
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Configuration des utilitaires en mode console.
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    'console' => array(
+        'router' => array(
+            'routes' => array(
+
+                'oscar_console_patch' => array(
+                    'options' => array(
+                        'route' => 'oscar patch <patchname>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'patch',
+                        ),
+                    ),
+                ),
+
+                // -------------------------------------------------------------
+                //////////////// PERSON(S)
+                'oscar_persons_search_by_connector' => array(
+                    'options' => array(
+                        'route' => 'oscar persons:search:connector <connector> <value>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'personsSearchConnector',
+                        ),
+                    ),
+                ),
+
+                'oscar_personsorganizations_sync' => [
+                    'options' => [
+                        'route' => 'oscar personsorganizations:sync',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'personsOrganizationSync',
+                        ],
+                    ],
+                ],
+
+                'oscar_organizations_sync' => [
+                    'options' => [
+                        'route' => 'oscar organizations:sync [--force|-f]',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'organizationSync',
+                        ],
+                    ],
+                ],
+
+
+                // PERSONS Version definitive
+                'oscar_sync_persons' => array(
+                    'options' => array(
+                        'route' => 'sync persons',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'syncLdap',
+                        ),
+                    ),
+                ),
+                'oscar_fix_financeur' => array(
+                    'options' => array(
+                        'route' => 'fix:financeur',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'scriptFixFinanceur',
+                        ),
+                    ),
+                ),
+                'oscar_fix_actorsproject' => array(
+                    'options' => array(
+                        'route' => 'fix:actorstoactivities',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'scriptFixPartnerMoveToActivites',
+                        ),
+                    ),
+                ),
+
+                // -------------------------------------------------------------
+
+                'oscar_search_update' => array(
+                    'options' => array(
+                        'route' => 'oscar search:update <id>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'updateIndex',
+                        ),
+                    ),
+                ),
+
+                'oscar_status_update' => array(
+                    'options' => array(
+                        'route' => 'oscar activity:status',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'recalculateStatus',
+                        ),
+                    ),
+                ),
+
+                'oscar_person_sync' => [
+                    'options' => array(
+                        'route' => 'oscar person:sync <id>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'personSync',
+                        ),
+                    ),
+                ],
+                'oscar_persons_sync' => [
+                    'options' => array(
+                        'route' => 'oscar persons:sync [-f|--force]',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'personsSync',
+                        ),
+                    ),
+                ],
+                'oscar_patch' => [
+                    'options' => array(
+                        'route' => 'oscar patch',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'patch',
+                        ),
+                    ),
+                ],
+
+                /////////////////////////////////////////////// Authentification
+                'oscar_auth_add' => [
+                    'options' => array(
+                        'route' => 'oscar auth:add <login> <email> <pass> <displayname>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'authAdd',
+                        ),
+                    ),
+                ],
+                'oscar_auth_pass' => [
+                    'options' => array(
+                        'route' => 'oscar auth:pass <login> <newpass>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'authPass',
+                        ),
+                    ),
+                ],
+                'oscar_auth_promote' => [
+                    'options' => array(
+                        'route' => 'oscar auth:promote <login> <role>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'authPromote',
+                        ),
+                    ),
+                ],
+
+                'oscar_search_delete' => array(
+                    'options' => array(
+                        'route' => 'oscar search:delete <id>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'deleteIndex',
+                        ),
+                    ),
+                ),
+
+                'oscar_search' => array(
+                    'options' => array(
+                        'route' => 'oscar activity:search <exp> <obj>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'searchActivity',
+                        ),
+                    ),
+                ),
+
+                'oscar_search_rebuild' => array(
+                    'options' => array(
+                        'route' => 'oscar activity:search:build',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'buildSearchActivity',
+                        ),
+                    ),
+                ),
+                //////////////////////////////////////////////////////// HARPÉGE
+                'console_harpege_inm' => [
+                    'options' => array(
+                        'route' => 'oscar harpege:inm',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'harpegeINM',
+                        ),
+                    ),
+                ],
+                'console_harpege_persons' => [
+                    'options' => array(
+                        'route' => 'oscar harpege:persons',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'harpegePersons',
+                        ),
+                    ),
+                ],
+
+                'console_check_persons' => [
+                    'options' => array(
+                        'route' => 'oscar persons:check',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'evalHarpegeLdapPersons',
+                        ),
+                    ),
+                ],
+
+                ////////////////////////////////////////////////////////////////
+                'console_syncldap' => array(
+                    'options' => array(
+                        'route' => 'oscar sync:ldap',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'syncLdap',
+                        ),
+                    ),
+                ),
+                'oscar_search_find' => array(
+                    'options' => array(
+                        'route' => 'oscar search:find <search>',
+                        'defaults' => array(
+                            'controller' => 'Oscar\Controller\Search',
+                            'action' => 'find',
+                        ),
+                    ),
+                ),
+                'oscar_conf_dump' => array(
+                    'options' => array(
+                        'route' => 'oscar conf <what>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'conf',
+                        ),
+                    ),
+                ),
+
+                'oscar_privilege' => array(
+                    'options' => array(
+                        'route' => 'oscar privilege <what>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'privilege',
+                        ),
+                    ),
+                ),
+
+
+                'oscar_sync_organization' => array(
+                    'options' => array(
+                        'route' => 'oscar sync:organization',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'syncOrganisation',
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    ),
+
+    ////////////////////////////////////////////////////////////////////////////
+    // ROUTES
+    'router' => array(
+        'routes' => $conf->parse(file_get_contents(__DIR__ . '/routes.yml'))
+    ),
+    // Service (métier)
+    'service_manager' => array(
+        'invokables' => [
+            'OrganizationService' => OrganizationService::class,
+            'ProjectService' => ProjectService::class,
+            'PersonService' => PersonService::class,
+            'AccessResolverService' => AccessResolverService::class,
+            'ActivityLogService' => \Oscar\Service\ActivityLogService::class,
+            'ProjectGrantService' => \Oscar\Service\ProjectGrantService::class,
+            'ActivityService' => \Oscar\Service\ProjectGrantService::class,
+            'ContractDocumentService' => \Oscar\Service\ContractDocumentService::class,
+            'ActivityTypeService' => \Oscar\Service\ActivityTypeService::class,
+            'OscarUserContext' => \Oscar\Service\OscarUserContext::class,
+
+            // Droits
+            //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
+
+            ///////////////////////////////////////////////////////// ASSERTIONS
+            //'ProjectShowAssertion' => \Oscar\Assertion\ProjectShowAssertion::class,
+            //'Tutu' => 'Oscar\Assertion\TutuAssertion',
+        ],
+
+       /* 'aliases' => [
+            'zfcuser_zend_db_adapter' => 'Zend\Db\Adapter\Adapter',
+        ],*/
+
+        'factories' => array(
+            'RoleProvider' => function (\Zend\ServiceManager\ServiceManager $sm){
+                return new \Oscar\Provider\RoleProvider( $sm->get('doctrine.entitymanager.orm_default') );
+            },
+
+            'PersonnelService' => function ($sm) {
+                $service = new PersonnelService();
+                return $service->setServiceManager($sm);
+            },
+
+            'Logger' => function ($sm) {
+                $logger = new \Monolog\Logger('main');
+                $logger->pushHandler(new StdoutHandler());
+                $logger->pushHandler(new \Monolog\Handler\StreamHandler(realpath(dirname(__FILE__).'/../../../logs').'/oscar.log'));
+                return $logger;
+            },
+
+            'Search' => function ($sm) {
+                $service = new SearchService(
+                    realpath(__DIR__ . '/../../../data/search')
+                );
+                return $service;
+            },
+
+            'Sifac' => function( $sm ){
+                $sifac = new \Oscar\Provider\SifacBridge();
+                $sifac->configure($sm->get('Config')['doctrine']['connection']['sifac']['params']);
+                return $sifac;
+            },
+
+            'harpege' => function( $sm ){
+                $harpege = new Oscar\Provider\Person\SyncPersonHarpege();
+                $harpege->configure($sm->get('Config')['doctrine']['connection']['harpege']['params']);
+                return $harpege;
+            },
+
+            /** Système de distribution des mails */
+            'MailTransport' => function( $sm ){
+                $conf = $sm->get('Config')['oscar']['mailer']['transport'];
+                $sm->get('Logger')->debug(print_r($conf, true));
+                $transport = new Swift_SmtpTransport($conf['host'], $conf['port'], $conf['security'] );
+                $transport->setUsername($conf['username'])
+                    ->setPassword($conf['password']);
+                return $transport;
+
+
+            },
+
+            'Mailer' => function( $sm ){
+                return new Swift_Mailer($sm->get('MailTransport'));
+            },
+
+            'OscarMailer' => function( $sm ){
+                $mailer = new \Oscar\Service\OscarMailerService(
+                    $sm->get('Mailer'), $sm->get('Config')['oscar']['mailer']
+                );
+                return $mailer;
+            },
+        ),
+    ),
+
+    'translator' => array(
+        'locale' => 'fr_FR', // en_US
+        'translation_file_patterns' => array(
+            array(
+                'type' => 'gettext',
+                'base_dir' => __DIR__ . '/../language',
+                'pattern' => '%s.mo',
+            ),
+        ),
+    ),
+
+    // On doit déclaré ici les Controlleurs 'invoquables'
+    'controllers' => array(
+        'invokables' => array(
+            'Public' => \Oscar\Controller\PublicController::class,
+            'Administration' => \Oscar\Controller\AdministrationController::class,
+            'Project' => \Oscar\Controller\ProjectController::class,
+            'Person' => \Oscar\Controller\PersonController::class,
+            'Organization' => \Oscar\Controller\OrganizationController::class,
+            'LogActivity' => \Oscar\Controller\ActivityLogController::class,
+            'CentaureSync' => \Oscar\Controller\CentaureSyncController::class,
+            'Contract' => \Oscar\Controller\ContractController::class,
+            'Activity' => \Oscar\Controller\ProjectGrantController::class,
+            'Sync' => CentaureSync\Controller\SyncController::class,
+            'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
+            'Console' => \Oscar\Controller\ConsoleController::class,
+            'Enroll' => \Oscar\Controller\EnrollController::class,
+            'ActivityType' => \Oscar\Controller\ActivityTypeController::class,
+            'DateType' => \Oscar\Controller\DateTypeController::class,
+            'ActivityDate' => \Oscar\Controller\ActivityDateController::class,
+            'ActivityPayment' => \Oscar\Controller\ActivityPaymentController::class,
+            'WorkPackage' => \Oscar\Controller\WorkPackageController::class,
+            'Timesheet' => \Oscar\Controller\TimesheetController::class,
+            'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentController::class,
+            'Depense' => \Oscar\Controller\DepenseController::class,
+            'Connector' => \Oscar\Controller\ConnectorController::class,
+        ),
+    ),
+
+    // Emplacement des templates
+    'view_manager' => array(
+        'template_map' => array(
+            'layout/layout' => __DIR__ . '/../view/layout/layout.phtml',
+            'unicaen-auth/droits/privileges' => __DIR__ . '/../view/unicaen-auth/droits/privileges.phtml',
+            'unicaen-auth/tbl-link' => __DIR__ . '/../view/unicaen-auth/droits/partials/tbl-link.phtml',
+        ),
+        'template_path_stack' => array(
+            __DIR__ . '/../view',
+        ),
+    ),
+
+    // Aide de vue (Helper)
+    'view_helpers' => [
+        'invokables' => [
+            'pager' => UnicaenDoctrinePaginatorHelper::class,
+            'dater' => DateRenderer::class,
+            'unAllowed' => \Oscar\View\Helpers\UnAllowed::class,
+            'hasAccess' => \Oscar\View\Helpers\Access::class,
+            'moment' => \Oscar\View\Helpers\Moment::class,
+            'activity' => \Oscar\View\Helpers\ActivityHtml::class,
+            'strEmpty' => \Oscar\View\Helpers\StrEmpty::class,
+            'fileSize' => \Oscar\View\Helpers\Filesize::class,
+            'link' => \Oscar\View\Helpers\Links::class,
+            'activityTypeHlp' => \Oscar\View\Helpers\ActivityTypeHelper::class,
+            'userUI' => \Oscar\View\Helpers\UserUIHelper::class,
+            'Currency' => \Oscar\View\Helpers\Currency::class,
+            'hasRole' => \Oscar\View\Helpers\HasRole::class,
+            'hasPrivilege' => \Oscar\View\Helpers\HasPrivilege::class,
+            'grant' => \Oscar\View\Helpers\Grant::class,
+            'keyvalue' => \Oscar\View\Helpers\KeyValueHelper::class,
+            'slugify' => \Oscar\View\Helpers\Slugify::class,
+        ],
+    ],
+
+    // Formulaires
+    'form_elements' => [
+        'invokables' => [
+            'ActivityPayment'   => \Oscar\Form\ActivityPaymentForm::class
+        ]
+    ]
+);

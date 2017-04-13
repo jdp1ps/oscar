@@ -1,0 +1,74 @@
+<?php
+$css = 'payment';
+$icon = '';
+if ($payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_REALISE){
+    $css = 'valid';
+    $icon = '<i class="icon-ok-circled" style="color: #009900"></i>';
+}
+elseif($payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_PREVISIONNEL){
+    if( $payment->getDatePredicted() < new DateTime() ){
+        $icon = '<i class=" icon-attention-1" style="color: #990000"></i>';
+    } else {
+        $icon = '<i class="icon-history"></i>';
+    }
+    $css = 'valid';
+}
+else {
+
+}
+?>
+<article class="card">
+    <h3 class="card-title">
+                    <span>
+                        <?= $icon ?>
+                        <?php if ($payment->getActivity()->getProject()): ?>
+                            <i class="icon-cubes"></i>
+                            <small>
+                            <a href="<?= $this->url('project/show',
+                                ['id' => $payment->getActivity()->getProject()->getId()]) ?>" style="font-weight: 100">
+                                [<?= $payment->getActivity()->getProject()->getAcronym() ?
+                                    $payment->getActivity()->getProject()->getAcronym() :
+                                    $payment->getActivity()->getProject()->getLabel() ?>]</a> /</small><br>
+                        <?php endif; ?>
+                        <i class="icon-cube"></i>
+                        <a href="<?= $this->url('contract/show',
+                            ['id' => $payment->getActivity()->getId()]) ?>" style="font-weight: 400">
+                            [<?= $payment->getActivity()->getOscarNum() ?> - <?= $payment->getActivity()->getCodeEOTP() ?>]
+                            <em class="text-light">
+                                <?= $payment->getActivity()->getLabel() ?>
+                            </em>
+                        </a>
+                    </span>
+        <nav class="menu">
+            <a href="<?= $this->url('activitypayment/edit', ['idactivity'=>$payment->getActivity()->getId(),'id'=>$payment->getId()]) ?>" class="payment-edit-btn">
+                <i class="icon-edit"></i>
+            </a>
+        </nav>
+    </h3>
+    <p class="text-highlight">
+        Montant :
+        <strong>
+            <?= $this->currency($payment->getAmount(), $payment->getCurrency()->getSymbol()) ?>
+        </strong>
+        <?php if ($payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_REALISE): ?>
+            effectué le
+            <time
+                datetime="<?= $payment->getDatePayment()->format('Y-m-d') ?>">
+                <?= $this->moment($payment->getDatePayment())->full() ?>
+            </time>
+        <?php endif; ?>
+        <?php if ($payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_PREVISIONNEL): ?>
+            prévu le
+            <time
+                datetime="<?= $payment->getDatePredicted()->format('Y-m-d') ?>">
+                <?= $this->moment($payment->getDatePredicted())->full() ?>
+            </time>
+        <?php endif; ?>
+
+
+    </p>
+    <?php if( $payment->getComment() ): ?>
+        <p><?= $payment->getComment() ?></p>
+    <?php endif; ?>
+    <p>N° de pièce <?= $payment->getCodeTransaction() ?></p>
+</article>

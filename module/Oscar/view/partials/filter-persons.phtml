@@ -1,0 +1,94 @@
+<?php
+
+?>
+<select class="form-control input input-lg"
+        placeholder="Personne dans le projet..." name="persons[]"
+        id="persons" data-url="<?= $this->url('person/search') ?>"
+        multiple>
+    <?php foreach ($selectedPersons as $person): ?>
+        <option value="<?= $person->getId() ?>" selected><?= $person ?></option>
+    <?php endforeach; ?>
+</select>
+
+<script>
+    /**
+     * Fonction de mise en forme du choix proposé dans l'auto-compléteur.
+     *
+     * @param repo
+     * @returns {*}
+     */
+    formatRepo = function (repo) {
+        if (repo.loading) return repo.text;
+
+        var markup = '<div class="clearfix">';
+        markup += repo.label || repo.text;
+        markup += '</div>';
+
+        return markup;
+    };
+
+    /**
+     * Fonction de mise en forme de la donnée choisie.
+     *
+     * @param repo
+     * @returns {*}
+     */
+    formatRepoSelection = function (repo) {
+        return repo.label || repo.text;
+    };
+
+    Initer.ready(function(){
+        require(['select2'], function(){
+
+
+            $('#direction').on('click', function(e){
+                e.preventDefault();
+                if($(this).hasClass('direction-desc')){
+                    $(this).addClass('direction-asc').removeClass('direction-desc');
+                    $('#directionInput').val('asc');
+                } else {
+                    $(this).addClass('direction-desc').removeClass('direction-asc');
+                    $('#directionInput').val('desc');
+                }
+            });
+            $('.select2').select2();
+            $('#filter_year').select2({
+                tags: true
+            })
+
+            // Compéteur de person
+            $('#persons').select2({
+                placeholder: 'Rechercher...',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: $('#persons').data('url'),
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term, // search term
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        console.log(data);
+                        return {results: data.datas};
+                    },
+                    cache: true
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                },
+                minimumInputLength: 3,
+                id: function (dt) {
+                    return dt.uid;
+                },
+                templateResult: formatRepo, // omitted for brevity, see the source of this page
+                templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+            });
+
+            //$('#persons').val([{'id': '3059', label: 'James Bond'}]).trigger("change")
+        });
+    });
+</script>

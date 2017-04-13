@@ -1,0 +1,16 @@
+<section class="container">
+    <h1><i class="icon-bank"></i> Versements à venir (sur le mois à venir)</h1>
+
+
+    <?php if( count($payments) ): ?>
+        <?php
+        /** @var \Oscar\Entity\ActivityPayment $payment */
+        foreach ($payments as $payment): ?>
+           <?= $this->partial('/oscar/activity-payment/payment-item.phtml', ['payment' => $payment]) ?>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="alert alert-info">
+            Aucun versement prévu pour le mois à venir
+        </div>
+    <?php endif; ?>
+</section>

@@ -1,0 +1,31 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 16-04-27 11:46
+ * @copyright Certic (c) 2016
+ */
+/** @var Person $person */
+$person = $enroll->getPerson();
+?>
+<article class="card person-card">
+
+    <span class="intitule">
+        <?php if($person->getEmail()): ?>
+            <img class="portrait"
+                 src="http://www.gravatar.com/avatar/<?= md5($person->getEmail()) ?>?s=75"
+                 alt="">
+        <?php endif; ?>
+        <span class="fullname">
+            <span class="firstname"><?= $person->getFirstname() ?></span>
+            <span class="lastname"><?= $person->getLastname() ?></span>
+            <span class="affectation">(<?= $person->getLdapAffectation() ?>)</span>
+            <div class="role"><?= $enroll->getRole() ?></div>
+        </span>
+
+    </span>
+    <span class="email"><?= $person->getEmail() ?></span>
+    <nav>
+        <a href="<?= $this->url('person/show', ['id' => $person->getId()]) ?>" class="link-show"><i class="icon-zoom-in-outline"></i> Fiche</a>
+        <a href="<?= $urlDelete ?>" class="link-show"><i class="icon-trash"></i> Supprimer ce rôle</a>
+    </nav>
+</article>

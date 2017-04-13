@@ -1,0 +1,178 @@
+<?php
+function selectRole($name, $selectedRole)
+{ ?>
+    <select name="<?= $name ?>">
+        <?php foreach ($this->grant()->getAllRoleIdPerson() as $role): $selected = $role == $selectedRole ? ' selected="selected"' : ''; ?>
+            <option value="<?= $role ?>" <?= $selected ?>><?= $role ?></option>
+        <?php endforeach; ?>
+    </select>
+<?php
+}
+
+?>
+
+<div class="container">
+    <?= $this->partial('/oscar/project/menu-fiche.phtml', ['project'=>$project, 'active'=>'members']); ?>
+</div>
+<div class="container">
+    <section class="members" id="members">
+
+    </section>
+    <div class="text-center">
+        <nav class="btn-group">
+            <a href="#" class="btn btn-default btn-lg addOrganization">
+                <i class="icon-plus-circled"></i>
+                Nouveau membre
+            </a>
+        </nav>
+    </div>
+</div>
+
+<script type="text/x-handlebars-template" id="tplModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="<?= $this->url('project/edit-members', ['id'=>$project->getId()]) ?>" method="post">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">{{{label}}} dans
+                        le projet <strong><?= $project->getAcronym() ?>
+                            , <?= $project->getLabel() ?></strong></h4>
+                </div>
+                <div class="modal-body">
+                    {{#unless id}}
+                    <div class="enrol-field">
+                        <select class="js-data-example-ajax form-control">
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    {{/unless}}
+                    <div class="person-role form-group">
+                        <label for="">Rôle</label>
+                        <select name="role" class="form-control">
+                            <?php foreach ($this->grant()->getAllRoleIdPerson() as $role): ?>
+                                <option
+                                    value="<?= $role ?>"><?= $role ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">A partir du</label>
+                        <div class="input-group date">
+                            <input type="text" name="role-from"
+                               class="form-control"/>
+                            <div class="input-group-addon">
+                                <i class="icon-calendar-outlilne"></i>
+                            </div>
+                        </div>
+
+                        <p class="form-help help-block">Laisser vide si depuis
+                            le début du projet.</p>
+                    </div>
+                    <div class="person-role-to">
+                        <label for="">Jusqu'au</label>
+                        <div class="input-group date">
+                            <input type="text" name="role-to"
+                                   class="form-control"/>
+                            <div class="input-group-addon">
+                                <i class="icon-calendar-outlilne"></i>
+                            </div>
+                        </div>
+
+
+                        <p class="form-help help-block">Laisser vide si jusqu'à
+                            la fin du projet.</p>
+                    </div>
+                </div>
+                <div class="modal-footer text-center">
+                    <div class="btn-group">
+
+                        <button type="button" class="btn btn-default"
+                                data-dismiss="modal">
+                            <i class="icon-cancel-circled-outline"></i>
+                            Annuler
+                        </button>
+                        <button type="button" class="btn btn-success save">
+                            <i class="icon-plus-circled"></i>
+                            Enregistrer
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</script>
+
+
+
+<script type="text/x-handlebars-template" id="enrolTpl">
+    <article class="card margin-bottom">
+        <h3 class="card-title">
+            {{ firstName }} {{ lastName }}
+            <span class="text-light">{{mail}}</span>
+        </h3>
+
+        <div class="card-content">
+            {{#each roles}}
+            <div class="role-line">
+                <strong>{{ role }}</strong>
+                {{#if dateStart}}
+                <span class="dateStart">
+                    depuis le <time>{{dateFormat dateStart }}</time>
+                </span>
+                {{/if}}
+
+                {{#if dateEnd}}
+                <span class="dateEnd">
+                    jusqu'au <time>{{dateFormat dateEnd }}</time>
+                </span>
+                {{/if}}
+                <nav class="controls btn-group">
+                    <button class="btn btn-xs btn-danger btnDelete"
+                            data-id="{{id}}">
+                        <i class="icon-trash"></i>
+                        Supprimer
+                    </button>
+
+                </nav>
+
+            </div>
+
+            {{/each}}
+        </div>
+        <button class="btn btn-xs btn-default btnAddRole">
+            <i class="icon-plus-circled"></i>
+            Ajouter un rôle
+        </button>
+    </article>
+</script>
+
+<link rel="stylesheet" type="text/css"
+      href="<?= $this->basePath() . '/js/vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css' ?>" />
+<script>
+    requirejs.config({
+        'baseUrl': '<?= $this->basePath() ?>/js/'
+    });
+    require([
+        'collections/EnrolCollection',
+        'views/EnrolCollectionView'
+    ], function(EnrolCollection, EnrolCollectionView){
+        var model = new EnrolCollection();
+        model.url = '<?= $this->url('member', ['id'=>$project->getId()]) ?>';
+        model.urlInsert = '<?= $this->url("member/manage", ["id"=>$project->getId()]) ?>';
+        model.urlDelete = '<?= $this->url("member/delete", ["id"=>$project->getId(), "memberid"=>""]) ?>';
+        model.urlSearch = '<?= $this->url('person/search') ?>';
+        model.ownerId = <?= $project->getId() ?>;
+
+        var view = new EnrolCollectionView({
+            el: '#members',
+            text: 'membre(s)',
+            model: model,
+            modalTpl: $('#tplModal').html()
+        });
+
+        model.fetch();
+
+    });
+</script>

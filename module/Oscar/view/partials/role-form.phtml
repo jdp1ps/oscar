@@ -1,0 +1,128 @@
+<link rel="stylesheet" type="text/css"
+      href="<?= $this->basePath() . '/js/vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css' ?>" />
+
+<div class="container-fluid" id="<?= ($id = uniqid('enrole_')) ?>">
+    <h1>
+        <?= $title ?>
+    </h1>
+    <div class="form">
+        <?= $this->form()->openTag($form->prepare()); ?>
+        <?php if( $enrolled ): ?>
+            <strong>Personne : <?= $enrolled ?></strong>
+            <div style="display: none">
+            <?= $this->formHidden($form->get('enroled')); ?>
+            </div>
+        <?php else: ?>
+            <?= $this->formControlGroup($form->get('enroled')); ?>
+        <?php endif; ?>
+        <?= $this->formControlGroup($form->get('role')); ?>
+        <?= $this->formControlGroup($form->get('dateStart')); ?>
+        <?= $this->formControlGroup($form->get('dateEnd')); ?>
+        <?= $this->formHidden($form->get('secure')); ?>
+        <nav class="btn-group">
+            <a class="btn btn-default button-back"  href="javascript:history.back()">
+                <i class="icon-angle-left"></i>
+                Retour
+            </a>
+            <?php /*<a class="btn btn-default" href="javascript:history.back()">
+                <i class="icon-angle-left"></i>
+                Retour
+            </a>*/ ?>
+            <button class="btn btn-primary" type="submit">
+                <i class="icon-floppy"></i>
+                Enregistrer
+            </button>
+        </nav>
+        <?= $this->form()->closeTag() ?>
+    </div>
+</div>
+<style>
+    .select2-close-mask{
+        z-index: 2099;
+    }
+    .select2-dropdown{
+        z-index: 3051;
+    }
+</style>
+<script>
+    (function(){
+        console.log('SCRIPT EXEC');
+        /**
+         * Fonction de mise en forme du choix proposé dans l'auto-compléteur.
+         *
+         * @param repo
+         * @returns {*}
+         */
+        formatRepo = function (repo) {
+            if (repo.loading) return repo.text;
+
+            var markup = '<div class="clearfix">';
+            markup += repo.label || repo.text;
+            markup += '</div>';
+
+            return markup;
+        };
+
+        /**
+         * Fonction de mise en forme de la donnée choisie.
+         *
+         * @param repo
+         * @returns {*}
+         */
+        formatRepoSelection = function (repo) {
+            return repo.label || repo.text;
+        };
+
+        Initer.ready(function(){
+            require(['datepicker', 'select2'], function () {
+                $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+                console.log('Chargement OK.',$('#<?= $id ?> .select2'));
+                $('.datepicker').datepicker({
+                    format: "yyyy-mm-dd",
+                    todayBtn: "linked",
+                    clearBtn: true,
+                    language: "fr",
+                    autoclose: true,
+                    toggleActive: true
+                });
+
+                if( $('.select2').length === 0 ){
+                    return;
+                }
+
+                $('#<?= $id ?> .select2').select2({
+                    placeholder: 'Rechercher une personne...',
+                    width: '100%',
+                    allowClear: true,
+                    ajax: {
+                        url: $('#<?= $id ?> .select2').data('url'),
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                q: params.term, // search term
+                                page: params.page
+                            };
+                        },
+                        processResults: function (data, page) {
+                            console.log(data);
+                            return {results: data.datas};
+                        },
+                        cache: true
+                    },
+                    escapeMarkup: function (markup) {
+                        return markup;
+                    },
+                    minimumInputLength: 3,
+                    id: function (dt) {
+                        return dt.uid;
+                    },
+                    templateResult: formatRepo, // omitted for brevity, see the source of this page
+                    templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                })
+
+            })
+        });
+    })('<?= $id ?>')
+
+</script>

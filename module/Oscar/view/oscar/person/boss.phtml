@@ -1,0 +1,30 @@
+<header class="page-header">
+    <h1 class="container">
+        Liste des responsables
+    </h1>
+</header>
+
+<div class="container">
+</div>
+
+<?php
+// Mise en surbrillance du texte recherché
+$markText = function( $text, $search ){
+    if( !$search ){
+        return $text;
+    }
+    return preg_replace('/('.$search.')/i', '<mark>$1</mark>', $text);
+};
+$search = "";
+?>
+
+<section data-context="#ddm" class="container">
+
+    <h3 class="text-center"><?= count($persons) ?> résultat(s) - page <?= $persons->getCurrentPage() ?> / <?= $persons->getCountPage() ?></h3>
+    <?php foreach( $persons as $person ): ?>
+        <?= $this->partial('/oscar/person/item-list.phtml', ['person' => $person, 'markText' => $markText, 'search' => $search]) ?>
+    <?php endforeach; ?>
+
+
+    <?= $this->pager($persons, preg_replace("/&page=[0-9]*/", '', $_SERVER['REQUEST_URI']).'?&page=%s') ?>
+</section>

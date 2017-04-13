@@ -1,0 +1,37 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 07/10/15 11:55
+ * @copyright Certic (c) 2015
+ */
+?>
+<section class="container">
+    <h1 class="section-title">Activité</h1>
+    <table class="table small table-striped">
+        <thead>
+            <th>Date</th>
+            <th>Message</th>
+            <th>Type</th>
+            <th>Level</th>
+            <th>Context</th>
+            <th>ContextID</th>
+            <th>userId</th>
+            <th>IP source</th>
+        </thead>
+<?php foreach( $entities as $entity ): ?>
+    <tr>
+        <td style="white-space: nowrap"><?= $entity->getDateCreated()->format('Y:m:d H:i:s') ?><br>
+            <small><?= $this->moment($entity->getDateCreated())->since() ?></small>
+        </td>
+        <td><?= $this->activity($entity->getMessage()) ?></td>
+        <td><?= $entity->getType() ?></td>
+        <td><?= $entity->getLevel() ?></td>
+        <td><?= $entity->getContext() ?></td>
+        <td><?= $entity->getContextId() ?></td>
+        <td><?= $entity->getUserId() ?></td>
+        <td><?= $entity->getIp() ?></td>
+    </tr>
+<?php endforeach; ?>
+</table>
+    <?= $this->pager($entities, $this->url().'?page=%s&debug='.$debug.'&level='.$level) ?>
+</section>

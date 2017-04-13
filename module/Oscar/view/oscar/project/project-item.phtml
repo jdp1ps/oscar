@@ -1,0 +1,147 @@
+<article class="card xs openable project">
+
+    <header class="card-title handler clearfix">
+        <i class="icon-openable"></i>
+        <?php if($project->getAcronym()): ?>
+            <abbr><?= $project->getAcronym() ?></abbr>
+        <?php endif; ?>
+        <span><?= $project->getLabel() ? $project->getLabel() : '<i>Sans nom</i>' ?></span>
+        <?php if( $project->getEotp() ): ?>
+            <span class="eotp on-right">
+            <?= $project->getEotp() ?>
+        </span>
+        <?php endif; ?>
+    </header>
+
+    <div class="card-content openable-content">
+
+        <div class="metas row">
+            <div class="col-md-6">
+                <i class="icon-flow-split"></i>
+                <?= $project->getComposantePrincipal() ?> /
+                <?= count($project->getComposantesResponsables()) ?
+                    '<a class="sn" href="' . $this->url('organization/show', ['id' => $project->getComposantesResponsables()[0]->getOrganization()->getId()]) . '">'
+                    . $project->getComposantesResponsables()[0]->getOrganization()
+                    .'</a>'
+                    : '' ?>
+            </div>
+            <div class="text-center col-md-3">
+                <div class="discipline"><i class="icon-tag"></i> <?= $project->getDiscipline() ? $project->getDiscipline() : "<i>Sans discipline</i>" ?></div>
+            </div>
+
+            <div class="text-right code-saic col-md-3">
+                <?= $project->getCode() ?>
+            </div>
+        </div>
+        </div>
+
+        <p class="description"><?= $project->getDescription() ?></p>
+
+        <div class="margin-bottom xs">
+            <?php /*foreach( $project->getComposantesResponsables() as $member): ?>
+                <?= $this->partial('/partials/organization-cartridge.phtml', array(
+                    'organisation'  => $member->getOrganization(),
+                    'affectation'   => $member
+                )); ?>
+            <?php endforeach; */ ?>
+            <?php foreach( $project->getComposantesGestionnaires() as $member): ?>
+                <?= $this->partial('/partials/organization-cartridge.phtml', array(
+                    'organisation'  => $member->getOrganization(),
+                    'affectation'   => $member
+                )); ?>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="members xs">
+            <em class=""><i class="icon-users-outline"></i> <?= count($project->getMembers()) ?> membre(s) : </em>
+            <?php foreach( $project->getMembers() as $member): ?>
+                <?= $this->partial('/partials/person-cartridge.phtml', array(
+                    'person'    => $member->getPerson(),
+                    'function'  => $member
+                )); ?>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="laboratories">
+            <em class=""><i class="icon-calculator"></i> <?= count($project->getLaboratories()) ?> laboratoires(s) : </em>
+            <?php foreach( $project->getLaboratories() as $lab): ?>
+                <?=
+                $this->partial('/partials/organization-cartridge.phtml', array(
+                    'organisation'  => $lab->getOrganization(),
+                    'affectation'   => $lab
+                ));
+                ?>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="partners">
+            <em class=""><i class="icon-contacts"></i> <?= count($project->getPartners(false)) ?> partenaires(s) : </em>
+            <?php foreach( $project->getPartners(false) as $partner): ?>
+                <?=
+                $this->partial('/partials/organization-cartridge.phtml', array(
+                    'organisation'  => $partner->getOrganization(),
+                    'affectation'   => $partner
+                ));
+                ?>
+            <?php endforeach; ?>
+
+        </div>
+        <hr/>
+        <div class="metas separated">
+            <span class="date-created">
+                <i class="icon-down-outline"></i>
+                <span class="head">Créé le</span>
+                <time datetime="<?= $project->getDateCreated()->format('Y-m-d') ?>"><?= $project->getDateCreated()->format('d M Y') ?></time>
+            </span>
+            <span class="date-update">
+                <i class="icon-cw-outline"></i>
+                <span class="head">Mis à jour</span>
+                <time datetime="<?= $project->getDateUpdated()->format('Y-m-d') ?>"><?= $project->getDateUpdated()->format('d M Y') ?></time>
+            </span>
+
+        </div>
+
+
+        <div class="openable open">
+            <h4>
+                <i class="icon-openable handler"></i>
+                <?= count($project->getGrants()) ?> contrat(s)
+            </h4>
+            <div class="openable-content contracts">
+                <?php $total = 0; foreach( $project->getGrants() as $grant): $total += $grant->getAmount(); ?>
+                    <div class="contract contract-<?= $grant->getStatus() ?>">
+                    <span class="saic">
+                        <?= $grant->getCentaureNumConvention() ? $grant->getCentaureNumConvention() : '<span class="missing-data">Aucun</span>'  ?>
+                    </span>
+                    <span class="details">
+                        <strong><?= $grant->getType() ? $grant->getType() : '<i>Type inconnue</i>' ?></strong>
+                        <?= $this->dater($grant->getDateStart()) ?> - <?= $this->dater($grant->getDateEnd()) ?>
+                    </span>
+                        <span class="montant"><span><?= number_format($grant->getAmount(), 2, ',', ' ') ?> €</span></span>
+                    </div>
+                <?php endforeach; ?>
+
+                <?php if(count($project->getGrants()) > 1): ?>
+                    <div class="contract">
+                        <span class="montant"><?= number_format($total, 2, ',', ' ') ?> €</span>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <nav class="btn-group btn-group-xs admin-bar">
+            <a href="<?= $this->url('project/show', array('id'=>$project->getId())) ?>" class="btn btn-xs btn-default">
+                <i class="icon-pencil"></i>
+                Détails
+            </a>
+            <a href="<?= $this->url('project/edit', array('id'=>$project->getId())) ?>" class="btn btn-xs btn-default">
+                <i class="icon-pencil"></i>
+                Modifier
+            </a>
+            <a href="" class="btn btn-xs btn-default">
+                <i class="icon-users-outline"></i>
+                Gestion des membres
+            </a>
+        </nav>
+    </div>
+</article>

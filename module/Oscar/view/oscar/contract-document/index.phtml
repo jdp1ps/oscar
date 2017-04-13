@@ -1,0 +1,43 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 26/10/15 14:12
+ * @copyright Certic (c) 2015
+ */
+
+$showDelete = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE);
+?>
+<section class="container">
+    <h1>
+        <i class="icon-book"></i>
+        Documents téléversés
+    </h1>
+<?php
+$year = null;
+$month = null;
+/** @var \Oscar\Entity\ContractDocument $document */
+foreach( $documents as $document ):
+    $cYear = $document->getDateUpdoad()->format('Y');
+    $cMonth = $document->getDateUpdoad()->format('m');
+
+    if( $year !== $cYear ){
+        $year = $cYear;
+        $month = null;
+        ?>
+        <div class="list-separator">
+            <h3 class="list-separator-label"><?= $year ?></h3>
+        </div>
+        <?php
+    }
+
+    if( $month !== $cMonth ){
+        $month = $cMonth;
+        ?>
+        <h4><?= ucfirst($this->moment($document->getDateUpdoad(), 'F')).' '.$year ?></h4>
+        <?php
+    }
+    ?>
+    <?= $this->partial('oscar/contract-document/list-item.phtml', ['document' => $document, 'showActivity'=>true, 'showDelete' => $showDelete]) ?>
+<?php endforeach; ?>
+<?= $this->pager($documents) ?>
+</section>

@@ -1,0 +1,78 @@
+<div class="container">
+    <h1>Changement de projet</h1>
+    <p>Pour l'activité <?= $activity ?></p>
+    <form action="" method="post">
+        <label for="project_id">Affectation d'un projet</label>
+        <select name="project_id" id="project_id" class="select2" data-url="<?= $this->url('project/search') ?>">
+
+        </select>
+        <hr>
+        <button type="submit" class="btn btn-primary">Valider</button>
+        <a href="javascript:history.back()" class="btn btn-primary">Annuler</a>
+    </form>
+</div>
+<script>
+    /**
+     * Fonction de mise en forme du choix proposé dans l'auto-compléteur.
+     *
+     * @param repo
+     * @returns {*}
+     */
+    formatRepo = function (repo) {
+        if (repo.loading) return repo.text;
+
+        var markup = '<div class="clearfix">';
+        markup += ( (repo.acronym?'<strong>['+repo.acronym+']</strong> ':'') + repo.label) || repo.text;
+        markup += '</div>';
+
+        return markup;
+    };
+
+    /**
+     * Fonction de mise en forme de la donnée choisie.
+     *
+     * @param repo
+     * @returns {*}
+     */
+    formatRepoSelection = function (repo) {
+        return repo.label || repo.text;
+    };
+
+    Initer.ready(function(){
+        require(['select2'], function () {
+            console.log('Chargement OK.');
+
+            $('.select2').select2({
+                placeholder: 'Rechercher...',
+                width: '100%',
+                allowClear: true,
+                ajax: {
+                    url: $('.select2').data('url'),
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term, // search term
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        console.log(data);
+                        return {results: data.datas};
+                    },
+                    cache: true
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                },
+                minimumInputLength: 2,
+                id: function (dt) {
+                    return dt.uid;
+                },
+                templateResult: formatRepo, // omitted for brevity, see the source of this page
+                templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+            })
+
+        })
+    });
+</script>

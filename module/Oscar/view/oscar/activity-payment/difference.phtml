@@ -1,0 +1,11 @@
+<section class="container">
+    <h1>
+        <i class="icon-bank"></i>
+        Écarts</h1>
+    <?php
+    /** @var \Oscar\Entity\ActivityPayment $payment */
+    foreach ($payments as $payment): ?>
+        <?= $this->partial('/oscar/activity-payment/payment-item.phtml', ['payment' => $payment]) ?>
+
+    <?php endforeach; ?>
+</section>

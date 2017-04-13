@@ -1,0 +1,1631 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 01/06/15 12:44
+ * @copyright Certic (c) 2015
+ */
+
+namespace Oscar\Entity;
+
+use Cocur\Slugify\Slugify;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
+use Oscar\Service\ActivityTypeService;
+use Zend\Permissions\Acl\Resource\ResourceInterface;
+
+/**
+ * ProjectGrant, correspond aux conventions (Contrats).
+ *
+ * @package Oscar\Entity
+ * @ORM\Entity
+ */
+class Activity implements ResourceInterface
+{
+    use TraitTrackable;
+
+    ///////////////////////////////////////////////////////////////////// STATUS
+    // 100 Statuts actifs
+    const STATUS_ACTIVE = 101;
+
+    const STATUS_PROGRESS = 102;
+    /** Activité en cours de réalisation (dossier) */
+
+    const STATUS_DEPOSIT = 103;
+
+    // 200 : Terminées / Abandonnées
+
+    // Activité fermée
+    const STATUS_CLOSED = 200;
+
+    // Activité terminée
+    const STATUS_TERMINATED = 201;
+
+    // Activité abandonnée
+    const STATUS_ABORDED = 250;
+
+    // Activité refusée
+    const STATUS_REFUSED = 210;
+
+    ///////////////////////////////////////////////////////////////////
+    // Incidence financière
+    const FINANCIAL_IMPACT_TAKE = 'Recette';
+    const FINANCIAL_IMPACT_COST = 'Dépense';
+    const FINANCIAL_IMPACT_NONE = 'Aucune';
+
+    /**
+     * Retourne la liste des incidences financières possible.
+     *
+     * @return array|null
+     */
+    public static function getFinancialImpactValues()
+    {
+        static $finacialImpctValues;
+        if ($finacialImpctValues === null) {
+            $finacialImpctValues = [
+                self::FINANCIAL_IMPACT_TAKE,
+                self::FINANCIAL_IMPACT_COST,
+                self::FINANCIAL_IMPACT_NONE,
+            ];
+        }
+
+        return $finacialImpctValues;
+    }
+
+    // 400 : Conflits
+    const STATUS_DISPUTE = 400; // Litige
+    const STATUS_ERROR_STATUS = 404; // Pas de status (suite à l'import)
+
+    public static function getStatusSelect()
+    {
+        static $statusSelect;
+        if ($statusSelect === null) {
+            $statusSelect = [
+                self::STATUS_PROGRESS => 'Brouillon',
+                self::STATUS_ACTIVE => 'Actif',
+                self::STATUS_CLOSED => 'Terminé',
+                self::STATUS_TERMINATED => 'Résilié',
+                self::STATUS_ABORDED => 'Dossier abandonné',
+                self::STATUS_DISPUTE => 'Litige',
+                self::STATUS_ERROR_STATUS => 'Conflit : pas de statut',
+                self::STATUS_DEPOSIT => 'Déposé',
+                self::STATUS_REFUSED => 'Refusé',
+            ];
+        }
+
+        return $statusSelect;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////// FEUILLE DE TEMPS (FORMAT)
+    const TIMESHEET_FORMAT_NONE             = 0;
+    const TIMESHEET_FORMAT_HOURS_BY_YEAR    = 10;
+    const TIMESHEET_FORMAT_HOURS_BY_MONTH   = 20;
+    const TIMESHEET_FORMAT_HOURS_BY_WEEK    = 30;
+    const TIMESHEET_FORMAT_HOURS_BY_DAY     = 40;
+    const TIMESHEET_FORMAT_FREE             = 50;
+
+    public static function getTimesheetFormatSelect()
+    {
+        static $timesheetFormatSelect;
+        if ($timesheetFormatSelect === null) {
+            $timesheetFormatSelect = [
+                self::TIMESHEET_FORMAT_NONE             => 'Aucun',
+                self::TIMESHEET_FORMAT_HOURS_BY_MONTH   => 'Heures par mois',
+                self::TIMESHEET_FORMAT_HOURS_BY_WEEK    => 'Heures par semaine',
+                self::TIMESHEET_FORMAT_HOURS_BY_DAY     => 'Heures par jour',
+                self::TIMESHEET_FORMAT_FREE             => 'Heures détaillées',
+            ];
+        }
+
+        return $timesheetFormatSelect;
+    }
+
+
+
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $oscarId;
+
+
+    /**
+     * => CONV_CLEUNIK
+     * @ORM\Column(type="string", length=10, nullable=true)
+     */
+    private $centaureId;
+
+    /**
+     * => CONV_CLEUNIK
+     * @ORM\Column(type="string", length=12, nullable=true)
+     */
+    private $oscarNum;
+
+    /**
+     * => NUM_CONVENTION
+     * @ORM\Column(type="string", length=64, nullable=true)
+     */
+    private $centaureNumConvention;
+
+    /**
+     * Nature de la subvension.
+     *
+     * @var GrantSource
+     * @ORM\ManyToOne(targetEntity="GrantSource")
+     */
+    private $source;
+
+    /**
+     * Type d'activité
+     *
+     * @var ActivityType
+     * @ORM\ManyToOne(targetEntity="ActivityType")
+     */
+    private $activityType;
+
+
+    /**
+     * Code EOTP (Code utilisé en interne entre les différents services pour
+     * identifier un contrat de recherche).
+     * @ORM\Column(type="string", length=64, nullable=true)
+     */
+    private $codeEOTP;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $label = '';
+
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $description = '';
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $hasSheet = false;
+
+    /**
+     * @var integer
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $duration = false;
+
+    /**
+     * @var integer
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $justifyWorkingTime = 0;
+
+    /**
+     * @var integer
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $justifyCost = 0;
+
+    /**
+     * Montant de la subvension.
+     *
+     * @var integer
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $amount = 0;
+
+    /**
+     * Date de début de la subvension.
+     *
+     * @var datetime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $dateStart;
+
+    /**
+     * Date de fin de la subvension.
+     *
+     * @var datetime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $dateEnd;
+
+    /**
+     * Date de signature
+     *
+     * @var datetime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $dateSigned;
+
+    /**
+     * Date d'ouverture du dossier : Jour de la création
+     * MAJ : Cette date peut correspondre à la date de création du PFI
+     *
+     * @var datetime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $dateOpened;
+
+
+    /**
+     * Incidence financière.
+     *
+     * @var string
+     * @ORM\Column(type="string", length=32, nullable=false, options={"default" : "Recette"})
+     */
+    private $financialImpact = self::FINANCIAL_IMPACT_TAKE;
+
+    /**
+     * Date de dépôt du dossier (envoi à l'autorité de type de demande de financement)
+     *
+     * @var datetime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    // private $dateDépôt;
+
+    /**
+     * @var
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="grants")
+     */
+    private $project;
+
+    /**
+     * Discipline
+     *
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Discipline")
+     */
+    protected $disciplines;
+
+    /**
+     * Liste des personnes impliquées dans cette activité
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityPerson", mappedBy="activity", cascade={"remove"})
+     */
+    protected $persons;
+
+    /**
+     * Liste des jalons (dates clefs).
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityDate", mappedBy="activity", cascade={"remove"})
+     */
+    protected $milestones;
+
+    /**
+     * Liste des versements (dates clefs).
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityPayment", mappedBy="activity", cascade={"remove"})
+     */
+    protected $payments;
+
+    /**
+     * Liste des partenaires du projet.
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityOrganization", mappedBy="activity", cascade={"remove"})
+     */
+    protected $organizations;
+
+    /**
+     * Lots de travail
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="WorkPackage", mappedBy="activity", cascade={"remove"})
+     * @ORM\OrderBy({"code" = "ASC"})
+     */
+    protected $workPackages;
+
+    /**
+     * @var
+     * @ORM\ManyToOne(targetEntity="ContractType")
+     */
+    private $type = null;
+
+    /**
+     * @var
+     * @ORM\ManyToOne(targetEntity="Currency", fetch="EAGER")
+     */
+    private $currency = null;
+
+    /**
+     * @var
+     * @ORM\ManyToOne(targetEntity="TVA")
+     */
+    private $tva = null;
+
+    /**
+     * Liste des documents.
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ContractDocument", mappedBy="grant", cascade={"remove"})
+     */
+    private $documents;
+
+    /**
+     * @var String
+     * @ORM\Column(type="string", options={"default":"none"}, nullable=false)
+     */
+    private $timesheetFormat;
+
+    private $_cachePersonsByRole;
+
+    /**
+     * @var string
+     * @ORM\Column(type="object", nullable=true)
+     */
+    protected $numbers = [];
+
+    /**
+     * @return string
+     */
+    public function getNumbers()
+    {
+        if( $this->numbers == null )
+            $this->numbers = [];
+        return $this->numbers;
+    }
+
+    /**
+     * @param string $numbers
+     */
+    public function setNumbers($numbers)
+    {
+        $this->numbers = $numbers;
+
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function addNumber( $key, $value ){
+        $this->numbers[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return $this
+     */
+    public function removeNumber( $key ){
+        if( key_exists($key, $this->numbers) ){
+            unset($this->numbers[$key]);
+        }
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return null
+     */
+    public function getNumber( $key ){
+        if( $this->numbers && key_exists($key, $this->numbers) ){
+            return $this->numbers[$key];
+        }
+        return null;
+    }
+
+    /**
+     * @return String
+     */
+    public function getTimesheetFormat()
+    {
+        return $this->timesheetFormat;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFinancialImpact()
+    {
+        return $this->financialImpact;
+    }
+
+    /**
+     * @param string $financialImpact
+     * @return Activity
+     */
+    public function setFinancialImpact($financialImpact)
+    {
+        $this->financialImpact = $financialImpact;
+        return $this;
+    }
+
+    /**
+     * @param String $timesheetFormat
+     */
+    public function setTimesheetFormat($timesheetFormat)
+    {
+        $this->timesheetFormat = $timesheetFormat;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOscarNum()
+    {
+        return $this->oscarNum;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCentaureId()
+    {
+        return $this->centaureId;
+    }
+
+    /**
+     * @param mixed $centaureId
+     */
+    public function setCentaureId($centaureId)
+    {
+        $this->centaureId = $centaureId;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOscarId()
+    {
+        return $this->oscarId;
+    }
+
+    /**
+     * @return ActivityType
+     */
+    public function getActivityType()
+    {
+        return $this->activityType;
+    }
+
+    public function addActivityDate(ActivityDate $activityDate)
+    {
+        if (!$this->milestones->contains($activityDate)) {
+            $this->milestones->add($activityDate);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getMilestones()
+    {
+        return $this->milestones;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getPayments()
+    {
+        return $this->payments;
+    }
+
+    /**
+     * @param ActivityType $activityType
+     */
+    public function setActivityType($activityType)
+    {
+        $this->activityType = $activityType;
+
+        return $this;
+    }
+
+    /**
+     * @return Currency
+     */
+    public function getCurrency()
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTva()
+    {
+        return $this->tva;
+    }
+
+    /**
+     * @param mixed $tva
+     */
+    public function setTva($tva)
+    {
+        $this->tva = $tva;
+
+        return $this;
+    }
+
+    /**
+     * @param mixed $currency
+     */
+    public function setCurrency($currency)
+    {
+        $this->currency = $currency;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCodeEOTP()
+    {
+        return $this->codeEOTP;
+    }
+
+    /**
+     * @param mixed $codeEOTP
+     */
+    public function setCodeEOTP($codeEOTP)
+    {
+        $this->codeEOTP = $codeEOTP;
+
+        return $this;
+    }
+
+    public function getActivityTypeChain(
+        ActivityTypeService $activityTypeService
+    ) {
+        return $activityTypeService->getActivityTypeChain($this->getActivityType());
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCentaureNumConvention()
+    {
+        return $this->centaureNumConvention;
+    }
+
+    /**
+     * @param mixed $centaureNumConvention
+     */
+    public function setCentaureNumConvention($centaureNumConvention)
+    {
+        $this->centaureNumConvention = $centaureNumConvention;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param mixed $type
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getWorkPackages()
+    {
+        return $this->workPackages;
+    }
+
+    /**
+     * @param ArrayCollection $workPackages
+     */
+    public function setWorkPackages($workPackages)
+    {
+        $this->workPackages = $workPackages;
+    }
+
+    /**
+     * @param ArrayCollection $workPackages
+     */
+    public function addWorkPackages(WorkPackage $workPackage)
+    {
+        if( !$this->workPackages->contains($workPackage) ){
+            $this->workPackages->add($workPackage);
+            $workPackage->setActivity($this);
+        }
+    }
+
+    /**
+     * @param ArrayCollection $workPackages
+     */
+    public function removeWorkPackages(WorkPackage $workPackage)
+    {
+        if( !$this->workPackages->contains($workPackage) ){
+            $this->workPackages->removeElement($workPackage);
+            $workPackage->setActivity(null);
+        }
+    }
+
+    /**
+     * @return GrantSource
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
+     * @param GrantSource $source
+     */
+    public function setSource($source)
+    {
+        $this->source = $source;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @param int $amount
+     */
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDateStart($deep = false)
+    {
+        return $this->dateStart;
+    }
+
+    /**
+     * @param datetime $dateStart
+     */
+    public function setDateStart($dateStart)
+    {
+        $this->dateStart = $dateStart;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDateEnd()
+    {
+        return $this->dateEnd;
+    }
+
+    /**
+     * @param datetime $dateEnd
+     */
+    public function setDateEnd($dateEnd)
+    {
+        $this->dateEnd = $dateEnd;
+
+        return $this;
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getDateOpened()
+    {
+        return $this->dateOpened;
+    }
+
+    /**
+     * @param datetime $dateOpened
+     */
+    public function setDateOpened($dateOpened)
+    {
+        $this->dateOpened = $dateOpened;
+
+        return $this;
+    }
+
+    /**
+     * @return Project
+     */
+    public function getProject()
+    {
+        return $this->project;
+    }
+
+    /**
+     * @param mixed $project
+     */
+    public function setProject($project)
+    {
+        $this->project = $project;
+        if ($project instanceof Project && !$project->getGrants()->contains($this)) {
+            $project->getGrants()->add($this);
+        }
+
+        return $this;
+    }
+
+    public function touch()
+    {
+        $this->setDateUpdated(new \DateTime());
+        if( $this->getProject() ){
+            $this->getProject()->touch();
+        }
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getDateSigned()
+    {
+        return $this->dateSigned;
+    }
+
+    /**
+     * @param datetime $dateSigned
+     */
+    public function setDateSigned($dateSigned)
+    {
+        $this->dateSigned = $dateSigned;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isHasSheet()
+    {
+        return $this->hasSheet;
+    }
+
+    /**
+     * @param boolean $hasSheet
+     */
+    public function setHasSheet($hasSheet)
+    {
+        $this->hasSheet = $hasSheet;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDuration()
+    {
+        return $this->duration;
+    }
+
+    /**
+     * @param int $duration
+     */
+    public function setDuration($duration)
+    {
+        $this->duration = $duration;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getJustifyWorkingTime()
+    {
+        return $this->justifyWorkingTime;
+    }
+
+    /**
+     * @param int $justifyWorkingTime
+     */
+    public function setJustifyWorkingTime($justifyWorkingTime)
+    {
+        $this->justifyWorkingTime = $justifyWorkingTime;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getJustifyCost()
+    {
+        return $this->justifyCost;
+    }
+
+    /**
+     * @param int $justifyCost
+     */
+    public function setJustifyCost($justifyCost)
+    {
+        $this->justifyCost = $justifyCost;
+
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->setDateCreated(new \DateTime());
+        $this->setDateUpdated(new \DateTime());
+        $this->documents = new ArrayCollection();
+        $this->persons = new ArrayCollection();
+        $this->organizations = new ArrayCollection();
+        $this->milestones = new ArrayCollection();
+        $this->payments = new ArrayCollection();
+        $this->disciplines = new ArrayCollection();
+        $this->timesheetFormat = TimeSheet::TIMESHEET_FORMAT_NONE;
+    }
+
+    /**
+     * @param Discipline $discipline
+     * @return bool
+     */
+    public function hasDiscipline(Discipline $discipline)
+    {
+        return $this->disciplines->contains($discipline);
+    }
+
+    /**
+     * @param Discipline $discipline
+     * @return $this
+     */
+    public function addDiscipline(Discipline $discipline)
+    {
+        if (!$this->hasDiscipline($discipline)) {
+            $this->disciplines->add($discipline);
+        }
+        return $this;
+    }
+
+    /**
+     * @param Discipline $discipline
+     * @return $this
+     */
+    public function removeDiscipline(Discipline $discipline)
+    {
+        if ($this->hasDiscipline($discipline)) {
+            $this->disciplines->remove($discipline);
+        }
+        return $this;
+    }
+
+    /**
+     * @return Discipline[]
+     */
+    public function getDisciplines()
+    {
+        return $this->disciplines;
+    }
+
+    /**
+     * @return Discipline[]
+     */
+    public function setDisciplines( $disciplines )
+    {
+        $this->disciplines = new ArrayCollection();
+        foreach( $disciplines as $d ){
+            $this->addDiscipline($d);
+        }
+        return $this;
+    }
+
+    public function newPerson(Person $person, $role, $start = null, $to = null)
+    {
+        if (!$this->hasPerson($person, $role)) {
+            $member = new ActivityPerson();
+            $member->setPerson($person)
+                ->setRole($role)
+                ->setDateStart($start)
+                ->setDateEnd($to);
+            $this->persons->add($member);
+
+            return $member;
+        }
+    }
+
+    /**
+     * @return integer[]
+     */
+    public function getDisciplinesIds()
+    {
+        $ids = [];
+        foreach( $this->getDisciplines() as $discipline ){
+            $ids[] = $discipline->getId();
+        }
+        return $ids;
+    }
+
+    public function newOrganization(
+        Organization $organization,
+        $role,
+        $start = null,
+        $to = null
+    ) {
+        if (!$this->hasOrganization($organization, $role)) {
+            $partner = new ActivityOrganization();
+            $partner->setOrganization($organization)
+                ->setRole($role)
+                ->setDateStart($start)
+                ->setDateEnd($to);
+            $this->organizations->add($partner);
+
+            return $partner;
+        }
+    }
+
+    /**
+     * Retourne la liste des rôles endossés par la personne pour cette activités.
+     *
+     * @param Person $person
+     * @return string[]
+     */
+    public function getPersonRoles(Person $person)
+    {
+        $roles = [];
+        if ($this->getProject()) {
+            $roles = array_merge($roles, $this->getProject()->getPersonRoles($person));
+        }
+
+        $today = new \DateTime();
+        /** @var ActivityPerson $member */
+        foreach ($this->getPersons() as $member) {
+		if(!$member->getPerson()){continue;}
+            if ($member->getPerson()->getId() === $person->getId()) {
+                // Date de début non-nulle et suppérieur à ajourd'hui
+                if( $member->getDateStart() !== null && $member->getDateStart() > $today ){
+                    continue;
+                }
+                // Date de début non-nulle et suppérieur à ajourd'hui
+                if( $member->getDateEnd() !== null && $member->getDateEnd() < $today ){
+                    continue;
+                }
+                $roles[] = $member->getRole();
+            }
+        }
+
+        return array_unique($roles);
+    }
+
+    private $_personsActives;
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getPersons($includeInactives = true)
+    {
+        if ($includeInactives === false) {
+            if ($this->_personsActives == null) {
+                $this->_personsActives = [];
+                /** @var ActivityPerson $member */
+                foreach ($this->getPersons() as $member) {
+                    if (!$member->isOutOfDate()) {
+                        $this->_personsActives[] = $member;
+                    }
+                }
+            }
+
+            return $this->_personsActives;
+        }
+
+        return $this->persons;
+    }
+
+    /**
+     * Retourne la liste des personnes ayant le rôle.
+     * @param string $role
+     */
+    public function getPersonsRoled( array $roles )
+    {
+        $persons = [];
+        foreach( $this->getPersons() as $p ){
+            if( in_array($p->getRole(), $roles ) ) {
+                $persons[] = $p;
+            }
+        }
+        return $persons;
+    }
+
+    /**
+     * Retourne la liste des personnes ayant le rôle.
+     * @param string $role
+     */
+    public function getPersonsRoledDeep( array $roles )
+    {
+        $persons = $this->getPersonsRoled($roles);
+        if( $this->getProject() ){
+            foreach( $this->getProject()->getPersonsRoled($roles) as $p ){
+                $persons[] = $p;
+            }
+        }
+        return $persons;
+    }
+
+    public function getPersonJson(){
+        $json = [];
+        /** @var ActivityPerson $activityPerson */
+        foreach ($this->getPersonsDeep() as $activityPerson ){
+            $json[] = [
+                'id'                => $activityPerson->getId(),
+                'end'               => $activityPerson->getDateEnd(),
+                'start'               => $activityPerson->getDateStart(),
+                'enrolled'          => $activityPerson->getPerson()->getId(),
+                'enrolledLabel'     => $activityPerson->getPerson()->__toString(),
+                'enroller'          => $activityPerson->getEnroller()->getId(),
+                'enrollerLabel'     => $activityPerson->getEnroller()->__toString(),
+                'role'              => $activityPerson->getRole(),
+                'roleLabel'         => $activityPerson->getRole(),
+
+
+            ];
+        }
+        return $json;
+    }
+
+    public function getPersonsDeep( $ignoreMain = false )
+    {
+        $persons = [];
+
+        if ($this->getProject()) {
+            /** @var ProjectMember $member */
+            foreach ($this->getProject()->getMembers() as $member) {
+                $persons[] = $member;
+            }
+        }
+        foreach ($this->getPersons() as $member) {
+            $persons[] = $member;
+        }
+
+        return $persons;
+    }
+
+    public function getOrganizationsDeep( $ignoreMain = false )
+    {
+        $partners = [];
+        if ($this->getProject()) {
+            foreach ($this->getProject()->getPartners() as $partner) {
+                $partners[] = $partner;
+            }
+        }
+
+        foreach ($this->getOrganizations() as $partner) {
+            $partners[] = $partner;
+        }
+
+        return $partners;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    public function getTypeSlug()
+    {
+        static $slugify, $sluged;
+
+        if ($slugify === null) {
+            $slugify = new Slugify();
+        }
+
+        if ($sluged === null) {
+            $sluged = [];
+        }
+
+        if ($this->getActivityType() == null) {
+            return 'icon-acttype-none';
+        }
+
+        if (!isset($sluged[$this->getActivityType()->getNature()])) {
+            $sluged[$this->getActivityType()->getNature()] = 'icon-acttype-' . $slugify->slugify($this->getActivityType()->getNatureStr());
+        }
+
+        return $sluged[$this->getActivityType()->getNature()];
+    }
+
+    /**
+     * @param ArrayCollection $persons
+     */
+    public function setPersons($persons)
+    {
+        $this->persons = $persons;
+        return $this;
+    }
+
+    public function addActivityPerson(ActivityPerson $activityPerson)
+    {
+        $this->getPersons()->add($activityPerson);
+    }
+
+    public function hasPerson(
+        Person $person,
+        $role = null,
+        \DateTime $dateStart = null,
+        \DateTime $dateEnd = null,
+        $deep = true
+    ) {
+        $found = false;
+        /** @var ActivityPerson $activityPerson */
+        foreach ($this->persons as $activityPerson) {
+            if ($person == $activityPerson->getPerson()) {
+                if ($role !== null && $activityPerson->getRole() !== $role) {
+                    continue;
+                } else {
+                    $found = true;
+                }
+            }
+        }
+        if ($deep === true && $found === false && $this->getProject()) {
+            $found = $this->getProject()->hasPerson($person, $role);
+        }
+
+        return $found;
+    }
+
+    private $_organizationsActives;
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getOrganizations($includeInactives = true)
+    {
+        if ($includeInactives === false) {
+            if ($this->_organizationsActives == null) {
+                $this->_organizationsActives = [];
+                /** @var ActivityOrganization $partner */
+                foreach ($this->getOrganizations() as $partner) {
+                    if (!$partner->isOutOfDate()) {
+                        $this->_organizationsActives[] = $partner;
+                    }
+                }
+            }
+
+            return $this->_organizationsActives;
+        }
+
+        return $this->organizations;
+    }
+
+    /**
+     * @param ArrayCollection $organizations
+     */
+    public function setOrganizations($organizations)
+    {
+        $this->organizations = $organizations;
+
+        return $this;
+    }
+
+
+    public function getPersonsWithRole($role, $deep = true)
+    {
+        if ($this->_cachePersonsByRole === null) {
+            $this->_cachePersonsByRole = [];
+            /** @var ActivityPerson $activityPerson */
+            foreach ($this->getPersons() as $activityPerson) {
+                if (!isset($this->_cachePersonsByRole[$activityPerson->getRole()])) {
+                    $this->_cachePersonsByRole[$activityPerson->getRole()] = [];
+                }
+                $this->_cachePersonsByRole[$activityPerson->getRole()][] = $activityPerson;
+            }
+            if ($this->getProject()) {
+                foreach ($this->getProject()->getPersons() as $member) {
+                    $this->_cachePersonsByRole[$member->getRole()][] = $member;
+                }
+            }
+        }
+        if (isset($this->_cachePersonsByRole[$role])) {
+            return $this->_cachePersonsByRole[$role];
+        } else {
+            return [];
+        }
+    }
+
+    private $_cacheOrganizationsByRole;
+
+    public function getOrganizationsWithRole($role, $deep = true)
+    {
+        if ($this->_cacheOrganizationsByRole === null) {
+            $this->_cacheOrganizationsByRole = [];
+            /** @var ActivityPerson $activityPerson */
+            foreach ($this->getOrganizations() as $relation) {
+                if (!isset($this->_cacheOrganizationsByRole[$relation->getRole()])) {
+                    $this->_cacheOrganizationsByRole[$relation->getRole()] = [];
+                }
+                $this->_cacheOrganizationsByRole[$relation->getRole()][] = $relation;
+            }
+            if ($this->getProject()) {
+                foreach ($this->getProject()->getOrganizations() as $partner) {
+                    $this->_cacheOrganizationsByRole[$partner->getRole()][] = $partner;
+                }
+            }
+        }
+        if (isset($this->_cacheOrganizationsByRole[$role])) {
+            return $this->_cacheOrganizationsByRole[$role];
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * @param ContractDocument $document
+     * @return $this
+     */
+    public function addDocument(ContractDocument $document)
+    {
+        $this->documents->add($document);
+
+        return $this;
+    }
+
+    /**
+     * @param ContractDocument $document
+     * @return $this
+     */
+    public function removeDocument(ContractDocument $document)
+    {
+        $this->documents->removeElement($document);
+
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getDocuments()
+    {
+        return $this->documents;
+    }
+
+    /**
+     * @param ArrayCollection $documents
+     */
+    public function setDocuments($documents)
+    {
+        $this->documents = $documents;
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return sprintf("[%s%s] %s", $this->getOscarNum(),
+            $this->getCodeEOTP() ? ' ~ ' . $this->getCodeEOTP() : '', $this->getLabel());
+    }
+
+    public function log()
+    {
+        return sprintf('[Activity:%s:%s]', $this->getId(), $this->getLabel());
+    }
+
+    /**
+     * Retourne le chargé de valorisation
+     * @return Person|null
+     */
+    public function getPersonValo()
+    {
+        $valos = [];
+        if ($this->getProject()) {
+            $valos[] = $this->getProject()->getPersonValo();
+        }
+
+        foreach ($this->getPersonsWithRole(ProjectMember::ROLE_VALO) as $valo) {
+            $valos[] = $valo;
+        }
+
+        return $valos;
+    }
+
+    /**
+     * Retourne le/les responsable(s) pour cette activité.
+     * @return Person[]
+     */
+    public function getPersonsInCharge()
+    {
+        $inCharge = [];
+        if ($this->getProject()) {
+            //            $inCharge = $this->getProject()->getPersonValo();
+            // todo Retourner les responsable du projet
+        }
+
+        foreach ($this->getPersonsWithRole(ProjectMember::ROLE_RESPONSABLE) as $person) {
+            $inCharge[] = $person;
+        }
+
+        return $inCharge;
+    }
+
+    /**
+     * Test si l'organisation est présente sur l'activité de recherche.
+     *
+     * @param Organization $organization
+     * @param null $role
+     * @return bool
+     */
+    public function hasOrganization(
+        Organization $organization,
+        $role = null,
+        $deep = true
+    ) {
+        $found = false;
+        /** @var ActivityOrganization $relation */
+        foreach ($this->organizations as $relation) {
+            if ($organization == $relation->getOrganization()) {
+                if ($role !== null && $relation->getRole() !== $role) {
+                    continue;
+                }
+                $found = true;
+            }
+        }
+        if ($found === false && $deep === true && $this->getProject()) {
+            $found = $this->getProject()->hasPartner($organization, $role);
+        }
+
+        return $found;
+    }
+
+    public function getOrganizationsNonPrimary()
+    {
+        $bc = $this->getOrganizationsWithRole("cache");
+
+        return [];
+    }
+
+    public function getLaboratories($deep = true)
+    {
+        return $this->getOrganizationsWithRole(Organization::ROLE_LABORATORY, $deep);
+    }
+
+    public function getComposanteResponsable($deep = true)
+    {
+        return $this->getOrganizationsWithRole(Organization::ROLE_COMPOSANTE_RESPONSABLE, $deep);
+    }
+
+    public function getComposanteGestion($deep = true)
+    {
+        return $this->getOrganizationsWithRole(Organization::ROLE_COMPOSANTE_GESTION, $deep);
+    }
+
+    public function getStatusLabel()
+    {
+        return (isset(self::getStatusSelect()[$this->getStatus()]) ?
+            self::getStatusSelect()[$this->getStatus()]
+            :
+            self::getStatusSelect()[self::STATUS_ERROR_STATUS]);
+    }
+
+    /**
+     * Retourne les données pour la constitution d'un index de recherche.
+     */
+    public function getCorpus()
+    {
+
+
+    }
+
+    public function csv()
+    {
+
+
+        $fat = [];
+
+        $persons = [];
+        $persons_responsable = [];
+        $persons_valo = [];
+
+        $organizations = [];
+        $organizations_lablo = [];
+        $organizations_cr = [];
+        $organizations_cg = [];
+        $organizations_fin = [];
+        $payments = [];
+
+        $currencyFields = ['amount', 'paymentReceived', 'paymentProvided'];
+
+        foreach ($this->toArray() as $key => $value) {
+            if( in_array($key, $currencyFields) ){
+                $value = number_format($value, 2, ',', ' ');
+            }
+            $fat[] = $value;
+        }
+
+        if ($this->getProject()) {
+            /** @var ProjectMember $p */
+            foreach ($this->getProject()->getPersons() as $p) {
+                $persons[] = (string)$p->getPerson();
+            }
+
+            //die("total: " .count($this->getProject()->getOrganizations()));
+            foreach ($this->getProject()->getOrganizations() as $p) {
+                $organizations[] = (string)$p->getOrganization();
+            }
+        }
+
+
+        /** @var ActivityPerson $p *
+        foreach ($this->getPersons() as $p) {
+            $persons[] = (string)$p->getPerson();
+        }
+
+        $organizations_pack = [];
+        foreach ($this->getOrganizations() as $p) {
+            $index = array_keys($rolesOrganisations, $p->getRole());
+            $organizations_pack[$index] = (string)$p->getOrganization();
+        }
+
+        $fat[] = $persons_responsable ? implode('|', array_unique($persons_responsable)) : ' ';
+        $fat[] = $persons_valo ? implode('|', array_unique($persons_valo)) : ' ';
+        $fat[] = $persons ? implode('|', array_unique($persons)) : ' ';
+
+        /*$fat[] = ($organizations_cr ? implode('|', array_unique($organizations_cr)) : ' ');
+        $fat[] = ($organizations_cg ? implode('|', array_unique($organizations_cg)) : ' ');
+        $fat[] = ($organizations_lablo ? implode('|', array_unique($organizations_lablo)) : ' ');
+        $fat[] = ($organizations_fin ? implode('|', array_unique($organizations_fin)) : ' ');
+        $fat[] = ($organizations ? implode('|', array_unique($organizations)) : ' ');*/
+
+        return $fat;
+    }
+
+    public static function csvHeaders()
+    {
+        return array(
+            'id',
+            'project acronym',
+            'project',
+            'intitulé',
+            'PFI',
+            'Date du PFI',
+            'amount',
+            'numéro SAIC',
+            'numéro oscar',
+            'Type',
+            'Statut',
+            'Début',
+            'Fin',
+            'Date de signature',
+            'source',
+            'versement effectué',
+            'versement prévu',
+        );
+    }
+
+    private $totalPaymentReceived;
+
+    /**
+     * Retourne le total des versements perçus.
+     *
+     * @return number
+     */
+    public function getTotalPaymentReceived()
+    {
+        if ($this->totalPaymentReceived === null) {
+            $this->totalPaymentReceived = 0.0;
+            /** @var ActivityPayment $payment */
+            foreach ($this->getPayments() as $payment) {
+                if ($payment->getStatus() === ActivityPayment::STATUS_REALISE) {
+                    $this->totalPaymentReceived += $payment->getAmount();
+                }
+            }
+        }
+
+        return $this->totalPaymentReceived;
+    }
+
+    private $totalPaymentProvided;
+
+    /**
+     * Retourne le total des versements prévisionnels.
+     *
+     * @return float
+     */
+    public function getTotalPaymentProvided()
+    {
+        if ($this->totalPaymentProvided === null) {
+            $this->totalPaymentProvided = 0.0;
+            /** @var ActivityPayment $payment */
+            foreach ($this->getPayments() as $payment) {
+                if ($payment->getStatus() === ActivityPayment::STATUS_PREVISIONNEL) {
+                    $this->totalPaymentProvided += $payment->getAmount();
+                }
+            }
+        }
+
+        return $this->totalPaymentProvided;
+    }
+
+
+    public function toArray()
+    {
+        return array(
+            'id' => $this->getId(),
+            'projectacronym' => $this->getProject() ? $this->getProject()->getAcronym() : '',
+            'project' => $this->getProject() ? $this->getProject()->getLabel() : '',
+            'label' => $this->getLabel(),
+            'PFI' => $this->getCodeEOTP(),
+            'dateInit' => $this->getDateOpened() ? $this->getDateOpened()->format('Y-m-d') : '',
+            'amount' => $this->getAmount(),
+            'numero' => $this->getCentaureNumConvention(),
+            'numOscar' => $this->getOscarNum(),
+            'typeOscar' => $this->getActivityType() ? (string)$this->getActivityType() : '',
+            'statut' => Activity::getStatusLabel(),
+            'dateStart' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
+            'dateEnd' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
+            'dateSigned' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
+            'source' => $this->getSource() ? (string)$this->getSource() : "",
+            'paymentReceived' => $this->getTotalPaymentReceived(),
+            'paymentProvided' => $this->getTotalPaymentProvided(),
+        );
+    }
+
+    public function getResourceId()
+    {
+        return self::class;
+    }
+
+    public function toJson()
+    {
+        return [
+            'id' => $this->getId(),
+            'text' => sprintf("[%s] %s", $this->getOscarNum(), $this->getLabel()),
+            'num' => $this->getOscarNum(),
+            'label' => $this->getLabel(),
+        ];
+    }
+}

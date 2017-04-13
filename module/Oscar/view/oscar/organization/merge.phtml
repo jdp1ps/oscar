@@ -1,0 +1,57 @@
+<div class="container">
+    <h1>Fusion d'organisation</h1>
+    <div class="card card-danger">
+        <h3 class="card-title">
+            Avertissement
+        </h3>
+        <div class="card-content">
+            <p>
+            Vous allez fusionner les organisations :
+                </p>
+            <ul>
+                <?php foreach( $organizations as $organization): ?>
+                <li><?= $organization ?></li>
+                <?php endforeach; ?>
+            </ul>
+            <p>&hellip; en
+            une seule, cette opération déstinée à la consolidation des données
+            est <strong>irréversible<sup>*</sup></strong>.
+            </p>
+            <p class="small">
+                <sup>*</sup> Une mauvaise manipulation de votre part fera
+                s'abattre sur vous une malédiction sur 5 générations.
+                (inutile d'envoyer ce message à votre carnet
+                d'adresse complet, vous serez maudit quand même).
+
+            </p>
+            <button class="btn btn-danger" onclick="$('#content').fadeIn()">
+                J'ai compris
+            </button>
+        </div>
+    </div>
+
+    <div id="content" style="display: none">
+        <form action="" method="POST">
+        <h1>Selectionnez les données à conserver : </h1>
+        <?php foreach( $datas as $property=>$values): ?>
+            <h2><?= $property ?></h2>
+            <label class="merge-data" style="display: block">
+                <input type="radio" name="<?= $property ?>" value="" />
+                <i>Vider ce champ</i>
+            </label>
+            <?php foreach($values as $value): ?>
+                <label class="merge-data" style="display: block">
+                    <input type="radio" name="<?= $property ?>" value="<?= htmlentities($value) ?>" />
+                    Utiliser <q><?= $value ?></q>
+                </label>
+            <?php endforeach; ?>
+
+        <?php endforeach; ?>
+            <nav class="btn-group center-block">
+                <button type="submit" class="btn btn-primary">
+                    Fusionner
+                </button>
+            </nav>
+        </form>
+    </div>
+</div>

@@ -1,3 +1,4 @@
 config/autoload/local.php
 config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
+logs/**/*

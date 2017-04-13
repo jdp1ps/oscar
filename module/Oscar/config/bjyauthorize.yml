@@ -1,0 +1,40 @@
+role_providers:
+    'Oscar\Provider\RoleProvider': []
+
+#identity_provider: 'Oscar\Provider\IdentityProvider'
+
+guards:
+    'UnicaenAuth\Guard\PrivilegeController':
+        # Accès au projet
+        #- { controller: ActivityPerson, action: [new, delete], roles: [admin] }
+        - { controller: DateType, action: [new, delete, edit, index], roles: [user] }
+        - { controller: ActivityDate, action: [index, change, new], roles: [user] }
+        - { controller: ActivityPayment, action: [index, change, new], roles: [user] }
+        - { controller: ActivityType, action: [new, delete, edit, index, move, merge], roles: [user] }
+        - { controller: ActivityOrganization, action: [new, delete], roles: [user] }
+        - { controller: Enroll, action: [personProjectNew, personProjectDelete, personProjectEdit, organizationProjectNew, organizationProjectDelete, organizationProjectEdit, personActivityNew, personActivityDelete, personActivityEdit, organizationActivityNew, organizationActivityDelete, organizationActivityEdit], roles: [user] }
+        - { controller: CentaureSync, action: [], roles: [guest] }
+        - { controller: Console, action: [syncLdap, searchActivity, buildSearchActivity, updateIndex, deleteIndex, conf], roles: [] }
+        - { controller: Contract, action: [index], roles: [user] }
+        - { controller: ContractDocument, action: [index, download, upload], roles: [user] }
+
+        - { controller: Activity, action: [index, generate, changeProject, number, duplicate, delete], roles: [admin] }
+        - { controller: Activity, action: [show, new, edit], roles: [user], privileges: 'activity_edit'}
+        - { controller: Activity, action: [csv], roles: [user]}
+
+        - { controller: Project, action: [index, new, edit, rebuildIndex, simplifyPartners, simplifyMembers, fusion, search], roles: [admin] }
+        - { controller: Project, action: [currentUserProjects], roles: [user] }
+
+        - { controller: Person, action: [index, show, edit, new, syncLdap, merge], roles: [user] }
+        - { controller: Person, action: [search, synchronize], roles: [user] }
+
+        - { controller: Organization, action: [index, show, edit, new, syncLdap], roles: [maurice] }
+        - { controller: Organization, action: [search], roles: [user] }
+
+        - { controller: LogActivity,     action: [index],              roles: [user] }
+        - { controller: Member,     action: [index, manage, delete],    roles: [user] }
+        - { controller: Partner,    action: [index, manage, delete],    roles: [user] }
+        - {controller: Public, action: [],              roles: [user]} # Par défaut personne
+        - {controller: Public, action: [changelog], roles: [user]}
+        - {controller: Public, action: [access], roles: [user]}
+        - {controller: Public, action: [index], roles: []}

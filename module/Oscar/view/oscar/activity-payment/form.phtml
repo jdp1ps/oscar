@@ -1,0 +1,73 @@
+<section class="container-fluid">
+    <h1 style="display: none">
+        <?php if (isset($payment)): ?>
+        Modification de l'encaissement
+        <?php else: ?>
+        Nouvel enchaissement
+        <?php endif; ?>
+        pour l'activité <strong><?= $activity ?></strong>
+    </h1>
+    <div class="form" id="<?= ($id = uniqid('payment')) ?>">
+        <?= $this->form()->openTag($form->prepare()); ?>
+            <div class="row">
+                <div class="col-xs-6">
+                    <?= $this->formControlGroup($form->get('amount')); ?>
+                </div>
+                <div class="col-xs-3">
+                    <?= $this->formControlGroup($form->get('currency')); ?>
+                </div>
+                <div class="col-xs-3">
+                    <?= $this->formControlGroup($form->get('rate')); ?>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-6">
+                    <?= $this->formControlGroup($form->get('datePredicted')); ?>
+                </div>
+                <div class="col-xs-6">
+                    <?= $this->formControlGroup($form->get('status')); ?>
+                </div>
+            </div>
+
+            <div class="done">
+                <h2>Informations sur le versement effectif</h2>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <?= $this->formControlGroup($form->get('datePayment')); ?>
+                    </div>
+                    <div class="col-xs-6">
+                        <?= $this->formControlGroup($form->get('codeTransaction')); ?>
+                        <p class="help">Numéro permettant d'identifier l'opération auprès des services comptables.</p>
+                    </div>
+                </div>
+            </div>
+
+            <?= $this->formControlGroup($form->get('comment')); ?>
+
+            <?= $this->formHidden($form->get('id')); ?>
+            <?= $this->formHidden($form->get('secure')); ?>
+            <hr>
+            <div class="text-center">
+                <nav class="btn-group">
+                    <a class="btn btn-default button-back" href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">Retour à la liste</a>
+                    <button class="btn btn-primary" type="submit">Enregistrer</button>
+                </nav>
+            </div>
+        <?= $this->form()->closeTag() ?>
+    </div>
+    <script>
+        Initer.ready(function(){
+            require(['datepicker'], function () {
+                $('#<?= $id ?> .datepicker').datepicker({
+                    format: "yyyy-mm-dd",
+                    todayBtn: "linked",
+                    clearBtn: true,
+                    language: "fr",
+                    autoclose: true,
+                    toggleActive: true
+                });
+            });
+        });
+    </script>
+</section>

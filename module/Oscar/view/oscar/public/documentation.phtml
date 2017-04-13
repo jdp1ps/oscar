@@ -1,0 +1,22 @@
+<div class="container">
+    <h1>Aide oscar</h1>
+    <div class="row">
+        <div class="col-md-3">
+            <h3>Sommaire</h3>
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ): ?>
+                <h4>Administration dans Oscar</h4>
+            <?php endif; ?>
+
+
+            <h4>Gérer mes projets</h4>
+
+        </div>
+        <div class="col-md-9">
+            <?php if( $contenu ): ?>
+            <?= $contenu ?>
+            <?php else: ?>
+            <p>...</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>

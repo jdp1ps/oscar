@@ -1,0 +1,105 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 16-06-30 11:29
+ * @copyright Certic (c) 2016
+ */
+/**
+ * @var $entity \Oscar\Entity\Activity
+ */
+?>
+<link rel="stylesheet" href="/js/vendor/vis/dist/vis.min.css" />
+<style>
+    #visualization {
+        background: white;
+        border-radius: 4px;
+        box-shadow: 0 0 1em rgba(0,0,0,.25);
+    }
+</style>
+<section class="container">
+    <h1>Data Visualization Lab</h1>
+    <div id="visualization"></div>
+</section>
+<script>
+    require(['vis'], function(vis){
+        var dateStart = <?= json_encode($entity->getDateStart()->format('Y-m-d') ) ?>,
+            dateEnd = <?= json_encode($entity->getDateEnd()->format('Y-m-d') ) ?>;
+
+        var items = new vis.DataSet([
+            /*{id: 'A', content: 'Period A', start: '2014-01-16', end: '2014-01-22', type: 'background', group: 1},
+            {id: 'B', content: 'Period B', start: '2014-01-23', end: '2014-01-26', type: 'background', group: 2},
+            {id: 'C', content: 'Period C', start: '2014-01-27', end: '2014-02-03', type: 'background'}, // no group
+            {id: 'D', content: 'Period D', start: '2014-01-14', end: '2014-01-20', type: 'background', group: 'non-existing'},
+
+
+*/
+            <?php
+            $id = 1;
+            /** @var \Oscar\Entity\ActivityPerson $partner */
+            foreach( $entity->getPersonsDeep() as $member ): ?>
+            {id: 'PER<?= $id++ ?>',
+                content: <?= json_encode($member->getPerson() . '(' . $member->getRole() . ')') ?>,
+                start: <?= json_encode($member->getDateStart(true)->format('Y-m-d')) ?>,
+                end: <?= json_encode($member->getDateEnd(true)->format('Y-m-d')) ?>,
+                group: 3},
+            <?php endforeach; ?>
+
+            <?php
+            $id = 1;
+            /** @var \Oscar\Entity\ActivityOrganization $partner */
+            foreach( $entity->getOrganizationsDeep() as $partner ): ?>
+            {id: 'ORG<?= $id++ ?>',
+                content: <?= json_encode($partner->getOrganization() . '(' . $partner->getRole() . ')') ?>,
+                start: <?= json_encode($partner->getDateStart(true)->format('Y-m-d')) ?>,
+                end: <?= json_encode($partner->getDateEnd(true)->format('Y-m-d')) ?>,
+                group: 4},
+            <?php endforeach; ?>
+
+            <?php /** @var $milestone \Oscar\Entity\ActivityDate */
+            $id = 1; foreach( $entity->getMilestones() as $milestone ): ?>
+            {id: <?= $id++ ?>, content: <?= json_encode($milestone->getType()->getLabel()) ?>, start: <?= json_encode($milestone->getDateStart()->format('Y-m-d')) ?>, group: 1},
+            <?php endforeach; ?>
+            <?php /** @var $payment \Oscar\Entity\ActivityPayment */
+            $statuts = \Oscar\Entity\ActivityPayment::getStatusPayments();
+            $id = 1; foreach( $entity->getPayments() as $payment ):
+                switch( $payment->getStatus() ){
+                    case \Oscar\Entity\ActivityPayment::STATUS_REALISE:
+                        $date = $payment->getDatePayment();
+                        break;
+                    case \Oscar\Entity\ActivityPayment::STATUS_PREVISIONNEL:
+                        $date = $payment->getDatePredicted();
+                        break;
+                    case \Oscar\Entity\ActivityPayment::STATUS_ECART:
+                        $date = $payment->getDateCreated();
+                        break;
+
+                    default :
+                        continue;
+                }
+                $status = $statuts[$payment->getStatus()];
+
+            ?>
+            {id: 'Py<?= $id++ ?>', content: <?= json_encode($status .' de '. $this->currency($payment->getAmount())) ?>, start: <?= json_encode($date->format('Y-m-d')) ?>, group: 2},
+            <?php endforeach; ?>
+            {id: 'START<?= $id++ ?>', content: 'Début de l\'activité', start: dateStart, group: 1},
+            {id: 'END<?= $id++ ?>', content: 'Fin de l\'activité', start: dateEnd, group: 1}
+
+        ]);
+
+        var groups = new vis.DataSet([
+            {id: 1, content: 'Jalons'},
+            {id: 2, content: 'Versements'},
+            {id: 3, content: 'Membres'},
+            {id: 4, content: 'Organisations'}
+        ]);
+
+        var container = document.getElementById('visualization');
+        var options = {
+            start: dateStart,
+            end: dateEnd,
+            editable: false
+        };
+
+        var timeline = new vis.Timeline(container, items, groups, options);
+    });
+</script>

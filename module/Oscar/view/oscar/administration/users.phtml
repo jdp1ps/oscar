@@ -1,0 +1,234 @@
+<style>
+.ui-user {
+    display: flex;
+    justify-content: space-between;  }
+    .ui-user .logs, .ui-user .users {
+        max-height: 75vh;
+        overflow-y: scroll;
+    }
+    .ui-user .logs {
+        flex: 2;
+        padding-left: .5em;;
+    }
+.ui-user .users {
+    flex: 1;
+    padding-right: .5em;;
+}
+    .users article {
+        cursor: pointer;
+    }
+</style>
+<div class="container">
+
+
+        <section id="authentifications">
+            <div class="vue-loader" v-if="loading">
+                <span>Chargement</span>
+            </div>
+            <h1>
+                <i class="icon-group"></i>
+                Comptes
+            </h1>
+
+            <p class="oscar-help">
+                Seul les personnes qui se sont authentifiées au moins une fois et les comptes spéciaux sont affichés.
+            </p>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <nav class="oscar-sorter row">
+                        <i class="icon-sort"></i>
+                        Trie :
+                        <a href="#" class="oscar-sorter-item" :class="{ active: orderby == 'lastLogin'}" @click="updateOrderBy('lastLogin')">Dernière connexion</a>
+                        <a href="#" class="oscar-sorter-item" :class="{ active: orderby == 'email'}" @click="updateOrderBy('email')">Email</a>
+                        <a href="#" class="oscar-sorter-item" :class="{ active: orderby == 'displayName'}" @click="updateOrderBy('displayName')">Nom</a>
+                    </nav>
+                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1"><i class="icon-zoom-in-outline"></i></span>
+                        <input type="search" v-model="search" class="form-control" placeholder="Recherche dans les authentification"/>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    &nbsp;
+                </div>
+            </div>
+
+
+
+            <div class="ui-user">
+
+            <section class="users">
+
+                <hr>
+                <article v-for="(user,i) in usersFiltered" class="card xs" @click="handlerClick(user)" :class="{'selected': selectedUser == user}">
+                    <h3 class="card-title">
+                        {{ user.displayName }} ({{ user.username }})
+                    </h3>
+                    <div class="card-content">
+                        <small class="text-highlight">
+                           <i class="icon-mail"></i><small>{{user.email}}</small><br>
+                            Dernière connexion :
+                            <span v-if="user.lastLogin">
+                                {{ user.lastLogin | sinceFull }}
+                            </span>
+                            <span v-else>
+                                Jamais
+                            </span>
+                            <br>
+                            <template v-if="user.person">
+                                Dans les activités oscar : <strong>{{ user.person.displayname }}</strong>
+                            </template>
+                        </small>
+
+                        <div class="roles" v-if="user.roles.length">
+                            Rôles (implicites) :
+                            <span class="cartouche" v-for="role in user.roles">{{ role }}</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+            <section v-if="logs" class="logs">
+                <h2>
+                    <i class="icon-signal"></i>
+                    Activités du compte
+                </h2>
+
+                <template v-if="logsFiltered.length">
+                    <section v-for="stack in logsFiltered">
+                        <h3>{{ stack.day }}</h3>
+                        <article class="card" v-for="log in stack.logs">
+                            <div class="text-highlight">
+                                <small>{{ log.dateCreated.date | sinceFull }}</small>
+                                 - depuis l'IP <strong>{{ log.ip }}</strong>
+                            </div>
+                            <p>{{ log.message | logMessage }}</p>
+                        </article>
+                    </section>
+                </template>
+                <section v-else>
+                    <p class="alert alert-info">Aucune donnée</p>
+                </section>
+            </section>
+            </div>
+        </section>
+    </div>
+
+</div>
+
+
+
+<script>
+    require(['vue', 'vue-resource', 'mm'], function(Vue, VueResource, moment){
+        "use strict";
+        const regex = /\[\w*:[0-9]*:([^\]]*)\]/g;
+
+        Vue.use(VueResource);
+
+        var users = <?= json_encode($users) ?>,
+            roles = <?= json_encode($roles) ?>;
+
+        new Vue({
+            el: '#authentifications',
+            http: {
+
+            },
+            data: {
+                users: users,
+                orderby: "lastLogin",
+                orderbyDirection: -1,
+                search: "",
+                logs: null,
+                selectedUser: null,
+                loading: false,
+                urlLogs: '<?= $this->url('administration/users/logs') ?>'
+            },
+            filters: {
+                logMessage: function( message ){
+                    return message.replace(regex, "$1");
+                },
+                sinceFull: function( date ) {
+                    var m = moment(date);
+                    return "le " + m.format('dddd D MMMM YYYY') + ', ' + m.fromNow();
+                },
+            },
+
+            methods: {
+
+                updateOrderBy: function(order){
+                    if( order == this.orderby ){
+                        this.orderbyDirection *= -1;
+                    } else {
+                        this.orderbyDirection = -1;
+                        this.orderby = order;
+                    }
+                },
+                handlerClick: function(user){
+                    this.selectedUser = user;
+                    this.loading=true;
+                    this.$http.get(this.urlLogs + user.id).then(
+                        function(res){
+                            this.logs = res.body;
+                            $(this.$el).find('.logs').scrollTop(0);
+
+                        }.bind(this),
+                        function(err){
+                            console.log(err)
+                        }.bind(this)
+                    ).then(function(){this.loading=false;}.bind(this));
+                }
+            },
+
+            created: function(){
+                //this.handlerClick({id:3});
+            },
+
+            computed: {
+                usersFiltered:function() {
+
+                    var users = [];
+
+                    if( this.search != "" ){
+                        this.users.forEach(function(u){
+                            var corpus = u.displayName + u.email + u.username;
+                            if(corpus.indexOf(this.search) > -1 ){
+                                users.push(u);
+                            }
+                        }.bind(this));
+                    } else {
+                        users = this.users;
+                    }
+
+                    users.sort(function (a, b) {
+                        if (a[this.orderby] == b[this.orderby]) return 0
+                        if (a[this.orderby] < b[this.orderby]) {
+                            return -this.orderbyDirection;
+                        } else {
+                            return this.orderbyDirection;
+                        }
+                    }.bind(this));
+                    return users;
+                },
+                logsFiltered:function(){
+                    var logsGroup = [];
+                    if( this.logs ){
+                        var dayStack = null;
+                        this.logs.forEach(function(log){
+                            var m = moment(log.dateCreated.date);
+                           var currentDay = m.format('dddd D MMMM YYYY') +', ' + m.fromNow();
+                            if( dayStack == null || dayStack.day != currentDay ){
+                                dayStack = {
+                                    day: currentDay,
+                                    logs: []
+                                };
+                                logsGroup.push(dayStack);
+                            }
+                            dayStack.logs.push(log);
+                        });
+                    }
+                    return logsGroup;
+                }
+            }
+        });
+    })
+</script>
+</div>

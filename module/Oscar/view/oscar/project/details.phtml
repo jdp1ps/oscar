@@ -1,0 +1,112 @@
+<?php $size = 'xs' ?>
+
+<!-- /////////////////////////////////////////////////////////////////////// -->
+<!-- INFORMATIONS                                                            -->
+<!-- /////////////////////////////////////////////////////////////////////// -->
+<section class="informations">
+    <div class="metas row">
+        <div class="col-md-6">
+            <i class="icon-flow-split"></i>
+            <?= $project->getComposantePrincipal() ?> /
+            <?= count($project->getComposantesResponsables()) ?
+                '<a class="sn" href="' . $this->url('organization/show',
+                    ['id' => $project->getComposantesResponsables()[0]->getOrganization()->getId()]) . '">'
+                . $project->getComposantesResponsables()[0]->getOrganization()
+                . '</a>'
+                : '' ?>
+        </div>
+        <div class="text-center col-md-3">
+            <div class="discipline"><i
+                    class="icon-tag"></i> <?= $project->getDiscipline() ? $project->getDiscipline() : "<i>Sans discipline</i>" ?>
+            </div>
+        </div>
+
+        <div class="text-right code-saic col-md-3">
+            <?= $project->getCode() ?>
+        </div>
+    </div>
+    <div class="subsection informations">
+        <h3 class="subsection-title"><i class="icon-info-outline"></i>Informations</h3>
+
+        <p class="description"><?= $project->getDescription() ?></p>
+
+        <p class="text-highlight text-small">
+            Date de création
+            <time datetime="<?= $this->moment($project->getDateCreated()->format('Y-m-d')) ?>"><?= $this->moment($project->getDateCreated())->full() ?></time>
+
+            Dernière mise à jour
+            <time datetime="<?= $this->moment($project->getDateCreated()->format('Y-m-d')) ?>"><?= $this->moment($project->getDateUpdated())->full() ?></time>
+        </p>
+    </div>
+</section>
+
+<div class="divider zigzag xs">
+    &nbsp;
+</div>
+<?php if (
+    $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_SHOW, $project) ||
+    $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_SHOW, $project)
+): ?>
+<div class="owners subsection">
+    <h3 class="subsection-title">
+        <i class="icon-group"></i>
+        Participants
+    </h3>
+    <!-- /////////////////////////////////////////////////////////////////////// -->
+    <!-- MEMBRES                                                                 -->
+    <!-- /////////////////////////////////////////////////////////////////////// -->
+    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_SHOW, $project)): ?>
+        <div class="members xs">
+            <em class=""><i class="icon-users-outline"></i> <?= count($project->getPersonsDeep()) ?>
+                membre(s) actif(s) :
+            </em>
+            <?= $this->link()->members($project->getPersonsDeep()) ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- /////////////////////////////////////////////////////////////////////// -->
+    <!-- LABORATOIRES                                                            -->
+    <!-- /////////////////////////////////////////////////////////////////////// -->
+    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_SHOW, $project)): ?>
+        <div class="laboratories">
+            <em class=""><i class="icon-beaker"></i> <?= count($project->getLaboratories(true)) ?>
+                laboratoires(s) :
+            </em>
+            <?= $this->link()->partners($project->getLaboratories(true), 'xs ') ?>
+        </div>
+
+        <!-- /////////////////////////////////////////////////////////////////////// -->
+        <!-- PARTENAIRES                                                             -->
+        <!-- /////////////////////////////////////////////////////////////////////// -->
+        <div class="partners">
+            <em class=""><i
+                    class="icon-contacts"></i> <?= count($project->getPartners(false)) ?>
+                partenaires(s) : </em>
+            <?= $this->link()->partners($project->getPartners(false), 'xs') ?>
+        </div>
+    <?php endif; ?>
+</div>
+
+<div class="divider zigzag xs">
+    &nbsp;
+</div>
+<?php endif; ?>
+
+<?php /*if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ACTIVITY_SHOW, $project)): */?>
+<div class="contracts">
+    <?php if (count($project->getActivities()) == 0): ?>
+        <p class="no-data">
+            Aucun contrat
+        </p>
+    <?php else: ?>
+        <section class="content contracts-table subsection">
+            <h3 class="subsection-title">
+                <i class="icon-cube"></i>
+                Activités de recherche
+            </h3>
+        <?php foreach ($project->getGrants() as $grant): ?>
+            <?= $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $grant, 'hideProject' => true]) ?>
+        <?php endforeach; ?>
+        </section>
+    <?php endif; ?>
+</div>

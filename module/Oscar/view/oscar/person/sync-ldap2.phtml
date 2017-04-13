@@ -1,0 +1,55 @@
+<div class="container">
+    <h2>
+        <i class="icon-group"></i>
+        Mis à jour des personnes depuis LDAP</h2>
+
+    <?php if( count($errors) ): ?>
+    <section>
+        <h3>
+            <i class="icon-attention"></i>
+            Erreurs</h3>
+        <?php foreach( $errors as $error ): ?>
+            <article class="card xs">
+                <i class="icon-attention-1"></i>
+                <?= $this->activity($error) ?>
+            </article>
+        <?php endforeach; ?>
+    </section>
+    <?php endif; ?>
+
+    <section>
+        <h3>
+            <i class="icon-cw-outline"></i>
+            Mise à jour</h3>
+        <?php if( count($updated) ): ?>
+        <?php foreach( $updated as $data ): ?>
+            <article class="card xs">
+                <i class="icon-history"></i>
+                <?= $this->activity($data) ?>
+            </article>
+        <?php endforeach; ?>
+        <?php else: ?>
+        <div class="alert alert-info">
+            Les informations sont à jour.
+        </div>
+        <?php endif; ?>
+    </section>
+
+    <section>
+        <h3>
+            <i class="icon-doc-add"></i>
+            Créé</h3>
+        <?php if( count($created) ): ?>
+        <?php foreach( $created as $data ): ?>
+            <article class="card xs">
+                <i class="icon-plus-circled"></i>
+                <?= $this->activity($data) ?>
+            </article>
+        <?php endforeach; ?>
+        <?php else: ?>
+            <div class="alert alert-info">
+                Les informations sont à jour.
+            </div>
+        <?php endif; ?>
+    </section>
+</div>

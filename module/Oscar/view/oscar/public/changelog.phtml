@@ -1,0 +1,18 @@
+<?php
+// Récupération des informations utilisateur
+
+
+
+?>
+<div class="bg-white">
+    <div class="jumbotron container">
+        <h1><?= $this->appInfos()->nom ?>, changelog</h1>
+        <p><?= $this->appInfos()->desc ?><p>
+            <a href="https://redmine.unicaen.fr/Etablissement/projects/developpement-de-l-outil/issues" class="btn btn-default">
+                Suivre le développement
+            </a>
+    </div>
+    <section class="container">
+        <?= $content ?>
+    </section>
+</div>

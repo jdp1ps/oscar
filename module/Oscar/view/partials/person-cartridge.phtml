@@ -1,0 +1,53 @@
+<?php
+// Rôle textuel
+$classCSS = '';
+$textFunction = 'N.D.';
+$size = isset($size) ? $size : "";
+
+if( $function && $function instanceof \Oscar\Entity\ProjectMember ){
+    $classCSS = '';
+    $textFunction = $function->getRole();
+    switch($function->getRole()){
+        case \Oscar\Entity\ProjectMember::ROLE_VALO :
+            $classCSS = "complementary";
+            break;
+        case \Oscar\Entity\ProjectMember::ROLE_RESPONSABLE :
+            $classCSS = "primary";
+            break;
+    }
+
+    if( $function->isObsolete() ){
+        $classCSS = ' obsolete';
+    }
+    elseif( $function->isFuture() ){
+        $classCSS = ' future';
+    }
+}
+?>
+<span class="cartouche <?= $classCSS ?> <?= $size ?>">
+    <?php if( $function && $function->isObsolete() ): ?>
+        <i class="icon-fast-fw-outline"></i>
+    <?php endif; ?>
+    <?php if( $function && $function->isFuture() ): ?>
+        <i class="icon-fast-rewind-outline"></i>
+    <?php endif; ?>
+    <a class="sn" href="<?= $this->url('person/show', ['id' => $person->getId()]) ?>">
+        <?= $person ?>
+    </a>
+    <span class="addon"><?= $textFunction ?></span>
+    <?php if($person->getEmail() || $person->getPhone()): ?>
+        <a class="tooltip-area">
+            <i class="icon-help-circled"></i>
+            <span class="tooltip-content">
+                <h3>Informations</h3>
+                <?php if($person->getEmail()): ?>
+                    <p class="email"><i class="icon-mail"></i><?= $person->getEmail() ?></p>
+                <?php endif; ?>
+
+                <?php if($person->getPhone()): ?>
+                    <p class="tel"><i class="icon-phone-outline"></i><?= $person->getPhone() ?></p>
+                <?php endif; ?>
+            </span>
+        </a>
+    <?php endif; ?>
+</span>
