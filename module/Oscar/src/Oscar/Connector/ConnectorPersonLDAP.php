@@ -185,6 +185,7 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
             }
 
             else {
+                var_dump($persons);
                 echo "# DOUBLONS : \n";
                 continue;
             }

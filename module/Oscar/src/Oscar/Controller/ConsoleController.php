@@ -718,8 +718,8 @@ die();
         //$this->patchData_fieldsToConnectorAction();
         // $this->patchData_organisationType();
         // $this->autoMerge();
-        //$this->patchData_OrganisationConnector();
         //$this->patchData_PersonneConnectorID();
+        $this->patchData_OrganisationConnector();
         $this->patchData_OrganisationDoublon();
     }
 
@@ -859,7 +859,7 @@ die();
         /** @var Organization $organization */
         foreach( $this->getEntityManager()->getRepository(Organization::class)->findAll() as $organization ){
             if( $organization->getCode() ){
-                $organization->setConnectorID('ldap', $organization->getCode());
+                $organization->setConnectorID('ldap', $organization->getLdapSupannCodeEntite());
                 $this->getEntityManager()->flush($organization);
             }
         }
@@ -996,6 +996,8 @@ die();
 //                $person = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorID('toto', $person->getConnectorID($key));
                 /** @var ConnectorPersonHarpege $connector */
                 $connector = $getConnector();
+
+                $connector->setServiceLocator($this->getServiceLocator());
 
                 $connector->syncPerson($person);
 
