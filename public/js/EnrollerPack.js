@@ -7,9 +7,9 @@ define('EnrollerPack', ['jquery', 'vue', 'LocalDB', 'text!templates/enrollerpack
 
     var EnrollerPack = function( opt ){
 
-        var conf = new LocalDB(opt.lsname || 'enroller_pack', {
-            packerKey: "enrolled",
-            packedKey: "role"
+        var conf = new LocalDB(opt.lsname || 'enroller_pack2', {
+            packerKey: "role",
+            packedKey: "enrolled"
         });
 
         $.getJSON(opt.urlDatas, function(datas){
