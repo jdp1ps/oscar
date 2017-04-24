@@ -1,0 +1,31 @@
+<?php if ($this->url): ?>
+
+    <?php
+    $this->form
+            ->setAttribute('class', "upload-form")
+            ->setAttribute('action', $this->url)
+            ->prepare(); // The correct enctype is set here 
+    
+    $fileElement = $this->form->get('files')
+            ->setAttribute('class', "choose-file pull-left ");
+    
+    // indication de la taille maximum autorisée par fichier déposé
+    $appendToLabel = sprintf(" (<abbr title=\"%s octets au maximum par fichier\">%s max.</abbr>)", 
+            (new \NumberFormatter(\Locale::getDefault(), \NumberFormatter::DEFAULT_STYLE))->format($this->form->getUploadMaxFilesize()),
+            $this->form->getUploadMaxFilesizeFormatted());
+    ?>
+
+    <!-- formulaire de dépôt -->
+    <?php echo $this->form()->openTag($this->form); ?>
+        <div>
+            <?php echo $this->formLabel($fileElement) . $appendToLabel; ?>
+        </div>
+        <?php echo $this->formFile($fileElement); ?>
+        <?php echo $this->formElementErrors($fileElement); ?>
+    
+        <button type="submit" class="upload-file btn btn-primary btn-xs pull-right" data-loading-text="Patientez..." style="display: none;">
+            <span class="glyphicon glyphicon-upload"></span> Envoyer
+        </button>
+    <?php echo $this->form()->closeTag(); ?>
+
+<?php endif;

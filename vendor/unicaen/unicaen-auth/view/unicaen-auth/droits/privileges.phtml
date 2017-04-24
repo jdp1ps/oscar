@@ -1,0 +1,152 @@
+<?php
+
+/* @var $privileges UnicaenAuth\Entity\Db\Privilege[] */
+/* @var $roles UnicaenAuth\Entity\Db\Role[] */
+
+?>
+<h1 class="page-header">Gestion des privilèges</h1>
+
+<table class="droits-tbl table table-hover table-bordered table-condensed table-extra-condensed table-header-rotated" data-modifier-url="<?php echo $this->url('droits/privileges/modifier'); ?>">
+<thead>
+    <tr>
+        <th class="separator"></th>
+    <?php $first = true; foreach( $roles as $role ):?>
+        <th class="rotate-45" title="<?php echo $role; ?>"><div<?php if ($first) echo ' class="first"'; ?>><span><?php echo $role; ?></span></div></th>
+    <?php $first = false; endforeach; ?>
+    </tr>
+    <tr>
+        <th>Privilèges</th>
+        <th colspan="<?php echo count($roles); ?>">Rôles</th>
+        <th style="border:none;min-width:166px">&nbsp;</th>
+    </tr>
+</thead>
+<tbody>
+<?php foreach( $privileges as $cat ): ?>
+    <tr>
+        <th class="separator">&nbsp;</th>
+        <th class="separator" colspan="<?php echo 1 + count($roles); ?>"><?php echo $cat['categorie'] ?></th>
+    </tr>
+    <?php foreach( $cat['privileges'] as $privilege ): ?>
+    <tr>
+        <th class="privilege"><?php echo $privilege ?></th>
+        <?php $statut=null; foreach( $roles as $role ): ?>
+            <td class="modifier" data-role="<?php echo $role->getId() ?>" data-privilege="<?php echo $privilege->getId() ?>">
+            <?php echo $this->partial( '/unicaen-auth/droits/partial/tbl-link', compact('role','privilege')) ?>
+            </td>
+        <?php endforeach; ?>
+    </tr>
+    <?php endforeach; ?>
+<?php endforeach; ?>
+</tbody>
+</table>
+<script>
+    $(function ()
+    {
+        $.widget("ose.droitsTbl", {
+
+            modifier: function (td, action)
+            {
+                var that = this;
+                td.html("<div class=\"loading\">&nbsp;</div>");
+                td.load(this.element.data('modifier-url'), {
+                    role: td.data("role"),
+                    statut: td.data("statut"),
+                    privilege: td.data("privilege"),
+                    action: action
+                }, function ()
+                {
+                    that.initModifierClick(td); // pour reconnecter l'action du lien...
+                });
+
+            },
+
+
+            initModifierClick: function (td)
+            {
+                var that = this;
+                td.find("a").on("click", function ()
+                {
+                    that.modifier(td, $(this).data("action"));
+                });
+            },
+
+            _create: function ()
+            {
+                var that = this;
+                this.element.find("td.modifier").each(function ()
+                {
+                    that.initModifierClick($(this));
+                });
+            }
+        });
+
+        WidgetInitializer.add('droits-tbl', 'droitsTbl');
+    });
+
+</script>
+<style>
+
+    .table-header-rotated th.row-header {
+        width: auto;
+
+    }
+
+    .table-header-rotated td {
+        width: 40px;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .table-header-rotated th.rotate-45 {
+        border: none;
+        height: 200px;
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+        position: relative;
+        vertical-align: bottom;
+        padding: 0;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .table-header-rotated th.rotate-45 > div {
+        position: relative;
+        top: 0px;
+        left: 83px;
+        height: 100%;
+        transform: skew(-40deg, 0deg);
+        overflow: hidden;
+        border-right: 1px solid #ddd;
+    }
+
+    .table-header-rotated th.rotate-45 > div.first {
+        border-left: 1px solid #ddd;
+    }
+
+    .table-header-rotated th.rotate-45 span {
+        transform: skew(40deg, 0deg) rotate(310deg);
+        position: absolute;
+        bottom: 40px;
+        left: -30px;
+        display: inline-block;
+        width: 100px;
+        text-align: left;
+    }
+
+    .table-header-rotated .separator {
+        border: none;
+    }
+
+    .droits-tbl th.privilege {
+        min-width: 200px;
+        max-width: 200px;
+        width: 200px;
+    }
+
+    .droits-tbl td span.refuse {
+        opacity: 0.5;
+    }
+
+
+</style>

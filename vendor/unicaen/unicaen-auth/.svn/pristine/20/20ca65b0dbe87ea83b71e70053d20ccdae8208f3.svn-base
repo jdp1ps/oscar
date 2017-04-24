@@ -1,0 +1,12 @@
+<?php
+if (isset($errors) && $errors) {
+    echo $this->messenger()->setMessages([UnicaenApp\View\Helper\Messenger::ERROR => $errors]);
+}
+else {
+    echo '<p class="lead text-danger"><strong>Attention!</strong> Confirmez-vous la suppression du rôle '.$role.' ?</p>';
+
+    echo $this->form()->openTag($form);
+    echo $this->formHidden($form->get('id'));
+    echo $this->formSubmit($form->get('submit')->setAttribute('class', 'btn btn-primary'));
+    echo $this->form()->closeTag();
+}

@@ -1,0 +1,7 @@
+<a class="navbar-link" 
+   id="user-current-info" 
+   title="Auth user" 
+   data-placement="bottom" 
+   data-toggle="popover" 
+   data-content="None" 
+   href="#">User Status Helper Markup</a>

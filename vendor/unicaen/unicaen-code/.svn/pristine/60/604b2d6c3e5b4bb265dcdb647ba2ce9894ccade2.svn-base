@@ -1,0 +1,26 @@
+{
+    "name"        : "unicaen/unicaen-code",
+    "description" : "Boite à outils pour la programmation avec la bibliothèque Unicaen",
+    "repositories": [
+        {
+            "type": "composer",
+            "url" : "http://dev.unicaen.fr/packagist"
+        }
+    ],
+    "require"     : {
+        "zendframework/zend-developer-tools": "dev-master"
+    },
+    "require-dev" : {
+        "phpunit/PHPUnit"                   : ">=3.7",
+        "zendframework/zend-test"           : ">=2.2"
+    },
+    "autoload"    : {
+        "psr-0"   : {
+            "UnicaenCode"    : "src/",
+            "UnicaenCodeTest": "tests/"
+        },
+        "classmap": [
+            "./Module.php"
+        ]
+    }
+}

@@ -1,0 +1,13 @@
+<ul class="menu-footer">
+    <li>
+        <a href="home">Accueil</a>
+        <ul>
+            <li>
+                <a href="http://www.unicaen.fr/">UCBN</a>
+            </li>
+            <li>
+                <a href="home/apropos">À propos</a>
+            </li>
+        </ul>
+    </li>
+</ul>

@@ -1,0 +1,10 @@
+<p class="messenger alert alert-danger" >
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <!--<i class="icon-exclamation-sign"></i>-->
+    Error message.
+</p>
+<p class="messenger alert alert-danger" >
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <!--<i class="icon-exclamation-sign"></i>-->
+    Another error message.
+</p>

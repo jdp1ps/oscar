@@ -1,0 +1,14 @@
+<?php
+
+return array(
+   'unicaen-ldap' => array(
+         'host'                => 'host.domain.fr',
+         'port'                => 389,
+         'version'             => 3,
+         'baseDn'              => "ou=xxxxxxxxxxx,dc=domain,dc=fr",
+         'bindRequiresDn'      => true,
+         'username'            => "uid=xxxxxxxxx,ou=xxxxxxxxxx,dc=domain,dc=fr",
+         'password'            => "xxxxxxxxxxxx",
+         'accountFilterFormat' => "(&(objectClass=posixAccount)(supannAliasLogin=%s))",
+     )
+);

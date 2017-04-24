@@ -1,0 +1,8 @@
+<ul class="nav navbar-nav menu-principal">
+    <li>
+        <a href="/apropos">À propos</a>
+    </li>
+    <li class="active">
+        <a href="/contact">Liste des messages</a>
+    </li>
+</ul>
