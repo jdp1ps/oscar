@@ -11,10 +11,12 @@ use Zend\Form\Element;
  */
 class OrganizationIdentificationForm extends \Zend\Form\Form
 {
+    private $connectors = [];
 
-    function __construct()
+    function __construct($connectors = [])
     {
         parent::__construct('project');
+        $this->connectors = $connectors;
 
         $this->add(array(
             'name'  => 'id',
@@ -50,7 +52,6 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
         ]);
         $this->add($fullName);
 
-
         // Source
         $this->add([
             'name'   => 'type',
@@ -75,6 +76,23 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
             ],
             'type'=>'Date'
         ]);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Connectors (Ajout dynamique des champs pour les valeurs des connectors)
+        foreach( $this->connectors as $connector ){
+            $this->add([
+                'name'   => 'connector_' . $connector,
+                'options' => [
+                    'label' => 'N° ' . $connector
+                ],
+                'attributes' => [
+                    'class' => 'form-control',
+                    'placeholder'   => 'N° ' . $connector
+                ],
+                'type'=>'Text'
+            ]);
+        }
+
         // DateStart
         $this->add([
             'name'   => 'dateStart',

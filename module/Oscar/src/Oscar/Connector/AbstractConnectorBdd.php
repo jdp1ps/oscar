@@ -92,6 +92,7 @@ abstract class AbstractConnectorBdd
     }
 
     protected function hydrateObjectWithRemote( $object, $data ){
+
         // Date de mise à jour
         if( $this->getUpdateField() ) {
             $dataUpdated = \DateTime::createFromFormat($this->getUpdateFieldFormat(),
@@ -115,7 +116,7 @@ abstract class AbstractConnectorBdd
                 throw new \Exception(sprintf('Un champ %s est attendu dans les résultats du connecteur !',$this->getRemoteFieldname($oscar)));
             }
 
-            $value = $data[$this->getRemoteFieldname($oscar)];
+            //$value = $data[$this->getRemoteFieldname($oscar)];
             $object->$setter($value);
         }
         if( $this->hydratationPostProcess ){
@@ -196,7 +197,11 @@ abstract class AbstractConnectorBdd
 
     protected function syncOne($object, $id){
         $stid = $this->query(sprintf($this->queryOne, $id));
-        $this->hydrateObjectWithRemote($object, oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS));
+        $datas = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS);
+        if( $datas === false ){
+            throw new \Exception('Pas de donnés disponibles dans le connecteur.');
+        }
+        $this->hydrateObjectWithRemote($object, $datas);
         return $object;
     }
 

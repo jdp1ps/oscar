@@ -250,6 +250,7 @@ class OrganizationController extends AbstractOscarController
                         $newPartner->setDateStart(new \DateTime())
                             ->setDateEnd($activityPartner->getDateEnd())
                             ->setMain($activityPartner->isMain())
+                            ->setMain($activityPartner->isMain())
                             ->setRoleObj($activityPartner->getRoleObj())
                             ->setOrganization($newOrganization)
                             ->setActivity($activityPartner->getActivity());
@@ -323,7 +324,7 @@ class OrganizationController extends AbstractOscarController
 
     public function newAction()
     {
-        $form = new OrganizationIdentificationForm();
+        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList());
 
         if ($this->getRequest()->isPost()) {
             $posted = $this->getRequest()->getPost();
@@ -335,7 +336,13 @@ class OrganizationController extends AbstractOscarController
 
             // HYDRATATION
             $hydrator = new EntityHydrator();
-            $hydrator->hydrateAuto($posted->toArray(), $entity);
+
+            $connectorsFields = [];
+            foreach( $this->getOrganizationService()->getConnectorsList() as $connector ){
+                $connectorsFields[] = 'connector_' . $connector;
+                $entity->setConnectorID($connector, $posted['connector_' . $connector]);
+            }
+            $hydrator->hydrateAuto($posted->toArray(), $entity, $connectorsFields);
 
             $this->getEntityManager()->flush($entity);
             $this->redirect()->toRoute('organization/show', ['id'=>$entity->getId()]);
@@ -343,7 +350,8 @@ class OrganizationController extends AbstractOscarController
 
         $view = new ViewModel(array(
             'form' => $form,
-            'id' => null
+            'id' => null,
+            'connectors' => $this->getOrganizationService()->getConnectorsList(),
         ));
         $view->setTemplate('oscar/organization/form');
 
@@ -381,15 +389,21 @@ class OrganizationController extends AbstractOscarController
         if( array_key_exists($connector, $config) ){
             /** @var IConnector, IConnectorOrganization $connector */
             $connector = $config[$connector]();
-            $connector->setServiceLocator($this->getServiceLocator());
-            $organization = $connector->syncOrganization($organization);
-            $this->getEntityManager()->flush($organization);
-            return $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
+            try {
+                if ($connector instanceof ServiceLocatorAwareInterface) {
+                    $connector->setServiceLocator($this->getServiceLocator());
+                }
+                $organization = $connector->syncOrganization($organization);
+                $this->getEntityManager()->flush($organization);
+
+                return $this->redirect()->toRoute('organization/show',
+                    ['id' => $organization->getId()]);
+            } catch( \Exception $e ){
+                die($e->getMessage());
+            }
         }
         die('Bad connector ' . $connector);
-
     }
-
 
     public function scissionAction()
     {
@@ -669,7 +683,6 @@ class OrganizationController extends AbstractOscarController
         ];
     }
 
-
     public function closeAction()
     {
         $id = $this->params()->fromRoute('id', 0);
@@ -702,21 +715,27 @@ class OrganizationController extends AbstractOscarController
 
         $entity = null;
         if( $id ){
+            /** @var Organization $entity */
             $entity = $result->getQuery()->getSingleResult();
         }
 
-        $form = new OrganizationIdentificationForm();
+        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList());
 
         if ($this->getRequest()->isPost()) {
             $posted = $this->getRequest()->getPost();
-            $form->setData($posted);
 
+            $form->setData($posted);
 
             // VALIDATION
 
             // HYDRATATION
             $hydrator = new EntityHydrator();
-            $hydrator->hydrateAuto($posted->toArray(), $entity);
+            $connectorsFields = [];
+            foreach( $this->getOrganizationService()->getConnectorsList() as $connector ){
+                $connectorsFields[] = 'connector_' . $connector;
+                $entity->setConnectorID($connector, $posted['connector_' . $connector]);
+            }
+            $hydrator->hydrateAuto($posted->toArray(), $entity, $connectorsFields);
 
             $em->flush($entity);
 
@@ -726,6 +745,9 @@ class OrganizationController extends AbstractOscarController
         } // Affichage
         else {
             $datas = $result->getQuery()->getResult(Query::HYDRATE_ARRAY)[0];
+            foreach( $this->getOrganizationService()->getConnectorsList() as $connector ){
+                $datas['connector_' . $connector] = $entity->getConnectorID($connector);
+            }
             $form->setData($datas);
         }
 
@@ -736,6 +758,7 @@ class OrganizationController extends AbstractOscarController
             'id' => $id,
             'organization' => $entity,
             'form' => $form,
+            'connectors' => $this->getOrganizationService()->getConnectorsList()
         ));
         $view->setTemplate('oscar/organization/form');
 

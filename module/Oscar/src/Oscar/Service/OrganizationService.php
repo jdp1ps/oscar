@@ -33,6 +33,27 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
     private $cacheCountries = null;
+    private $cacheConnectors = null;
+
+    public function getConnectorsList()
+    {
+        if( $this->cacheConnectors == null ){
+            $this->cacheConnectors = [];
+
+            $config = $this->getServiceLocator()->get('Config');
+
+            $paths = explode('.', 'oscar.connectors.organization');
+            foreach ($paths as $path) {
+                if( !isset($config[$path]) ){
+                    throw new \Exception("Clef $path absente dans la configuration");
+                }
+                $config = $config[$path];
+            }
+            var_dump($config);
+            $this->cacheConnectors = array_keys($config);
+        }
+        return $this->cacheConnectors;
+    }
 
     public function getCountriesList()
     {

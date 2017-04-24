@@ -14,8 +14,9 @@ class EntityHydrator {
         $this->map = $map;
     }
 
-    public function hydrateAuto( array $datas, $entity ){
+    public function hydrateAuto( array $datas, $entity, $ignore = [] ){
         foreach( $datas as $fieldName=>$value ){
+            if( in_array($fieldName, $ignore) ) continue;
 
             // Setter attendu
             $method = 'set'.ucfirst($fieldName);

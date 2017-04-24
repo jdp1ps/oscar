@@ -29,7 +29,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
         $object
             ->setLabel($data['label'])
             ->setDescription($data['description'])
-            ->setActivityType($this->getActivityType($data['activityType']))
+            ->setActivityType(array_key_exists('activityType', $data) ? $this->getActivityType($data['activityType']) : null)
             ->setCurrency($this->getCurrency($data['currency']))
             ->setCodeEOTP($data['codeEOTP'])
             ->setStatus($data['status'])

@@ -112,6 +112,16 @@
             </div>
         </div>
     </div>
+    
+    <h3>Synchronisation</h3>
+    <?php foreach( $connectors as $connector ): ?>
+        <div class="form-group">
+            <div class="input-group input-group-sm">
+                <span class="input-group-addon">ID dans <strong><?= $connector ?></strong></span>
+                <?= $this->formInput($form->get('connector_' . $connector)) ?>
+            </div>
+        </div>
+    <?php endforeach; ?>
 
     <h3>Informations numériques</h3>
     <div class="form-group">

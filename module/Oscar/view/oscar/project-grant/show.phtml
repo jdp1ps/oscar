@@ -203,11 +203,6 @@
                             </a>
                         </div>
                     <?php endif; ?>
-
-                    <script id="document-template" type="text/x-template">
-                    TOTO
-                    </script>
-
                     <script id="documents-list-template" type="text/x-template">
                         <div>
                             <div class="oscar-sorter">
@@ -241,9 +236,7 @@
                             <div class="lc-loader">
                                 <span class="text">Chargement</span>
                             </div>
-                            <div class="lc-content">
-
-                            </div>
+                            <div class="lc-content"></div>
                         </div>
                     </section>
 
@@ -258,11 +251,8 @@
                             });
                         });
                     </script>
-
-
                 </section>
             <?php endif; ?>
-
         </div>
         <div class="col-md-4">
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
@@ -287,7 +277,6 @@
             </div>
             <script>
                 var milestones;
-
                 require(['Milestone'], function(Milestone){
                     milestones = new Milestone.Collection();
                     milestones.url = '<?= $this->url("activitydate", ['idactivity' => $entity->getId()]) ?>';
@@ -371,10 +360,8 @@
                             <li><strong class="amountPrevu">?</strong> en versement,</li>
                             <li><strong title="Valeur exacte : <?= $entity->getAmount() ?>"><?= $this->currency($entity->getAmount()) ?></strong> prévu</li>
                         </ul>
-
                     </div>
                 </div>
-
             </div>
                 <script>
                     var payments;
@@ -429,27 +416,14 @@
                 </script>
             <?php endif; ?>
         </div>
-
     </div>
     <hr>
-
-
-    <?php /*
-    if( DEBUG_OSCAR && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-    <section id="statements">
-        <h2><i class="icon-clock"></i> Déclarer mes heures</h2>
-        <?= $this->partial('oscar/timesheet/declarations.phtml', ['activity' => $entity, 'timesheets' => [] ]) ?>
-    </section>
-    <?php endif; /****/ ?>
-
-
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-    <section id="workpackages">
-
-    </section>
+    <section id="workpackages"></section>
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW) ): ?>
     <script>
         require(['workpackageperson'], function(Workpackageperson){
             var wp = new Workpackageperson.default({
@@ -466,6 +440,7 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
             });
         })
     </script>
+    <?php endif; ?>
     <?php /*<section id="workpackage">
         <h2><i class="icon-archive"></i> Lot de travail</h2>
         <section class="workpackages">
