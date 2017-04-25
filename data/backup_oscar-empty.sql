@@ -1662,7 +1662,6 @@ CREATE SEQUENCE workpackageperson_id_seq
 --
 
 COPY activity (id, source_id, project_id, type_id, centaureid, centaurenumconvention, codeeotp, label, description, hassheet, duration, justifyworkingtime, justifycost, amount, datestart, dateend, datesigned, dateopened, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activitytype_id, currency_id, tva_id, oscarid, oscarnum, timesheetformat, numbers, financialimpact) FROM stdin;
-9838	\N	8634	\N	\N					f	0	0	0	0	\N	\N	\N	\N	102	2017-04-24 12:32:05	2017-04-24 12:32:05	\N	\N	\N	\N	411	1	1	\N	2017DRI00001	none	a:0:{}	Recette
 \.
 
 
@@ -1678,7 +1677,7 @@ COPY activity_discipline (activity_id, discipline_id) FROM stdin;
 -- Name: activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activity_id_seq', 9838, true);
+SELECT pg_catalog.setval('activity_id_seq', 9839, true);
 
 
 --
@@ -1738,7 +1737,7 @@ COPY activityperson (id, person_id, activity_id, main, role, status, datecreated
 -- Name: activityperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityperson_id_seq', 20983, true);
+SELECT pg_catalog.setval('activityperson_id_seq', 20984, true);
 
 
 --
@@ -1781,7 +1780,7 @@ SELECT pg_catalog.setval('administrativedocument_id_seq', 14, true);
 
 COPY authentification (id, username, email, display_name, password, state, datelogin, settings, secret) FROM stdin;
 119	Administrateur	stephaneb@unicaen.fr	Administrateur	$2y$14$vOzuulzsUXsNX2lnUpUjrOxL2/387miSWWfuVEJiidMRnvxPQjwOC	0	\N	N;	\N
-118	bouvry	stephane.bouvry@unicaen.fr	Stephane Bouvry	ldap	1	2017-04-14 12:23:12	N;	4dc05dea1a051ee9b695e163d557f8f2
+118	bouvry	stephane.bouvry@unicaen.fr	Stephane Bouvry	ldap	1	2017-04-25 13:59:09	N;	050376951aaa6a80c87b9fe17b3c0eb6
 \.
 
 
@@ -2231,15 +2230,6 @@ SELECT pg_catalog.setval('grantsource_id_seq', 33, true);
 --
 
 COPY logactivity (id, datecreated, message, context, contextid, userid, level, type, ip, datas) FROM stdin;
-29147	2017-04-14 09:54:37	bouvry - DBUSER vient de se connecter à l'application.	Application	-1	\N	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:15:"/auth/connexion";}
-29148	2017-04-14 10:02:09	119:Administrateur a créé le projet [Project:8633:OSCAR Organisation et Suivi des Contracts et des Activités de Recherche]	Project	8633	119	200	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:12:"/project/new";}
-29149	2017-04-14 10:03:11	119:Administrateur a ajouté [Person:11691:Stéphane Bouvry] à la liste des personnes	Person:new	11691	119	200	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:11:"/person/new";}
-29150	2017-04-14 10:06:01	119:Administrateur a ajouté [Person:11691:Stéphane Bouvry] (Responsable scientifique) dans [Activity:9837:Version 1]	Activity	9837	119	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:25:"/personnactivity/new/9837";}
-29151	2017-04-14 10:06:27	bouvry - DBUSER vient de se connecter à l'application.	Application	-1	118	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:15:"/auth/connexion";}
-29152	2017-04-14 10:09:50	bouvry - DBUSER vient de se connecter à l'application.	Application	-1	118	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:15:"/auth/connexion";}
-29153	2017-04-14 12:23:12	[Person:11691:Stéphane Bouvry] vient de se connecter à l'application.	Application	-1	118	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:15:"/auth/connexion";}
-29154	2017-04-24 12:14:24	119:Administrateur a supprimé le projet [Project::OSCAR Organisation et Suivi des Contracts et des Activités de Recherche]	Application	-1	119	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:23:"/project/supprimer/8633";}
-29155	2017-04-24 12:35:00	119:Administrateur a mis à jour les informations du projet [Project:8634:TEST Projet de test].	Project:edit	8634	119	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:18:"/project/edit/8634";}
 \.
 
 
@@ -2247,7 +2237,7 @@ COPY logactivity (id, datecreated, message, context, contextid, userid, level, t
 -- Name: logactivity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('logactivity_id_seq', 29155, true);
+SELECT pg_catalog.setval('logactivity_id_seq', 29163, true);
 
 
 --
@@ -2327,7 +2317,6 @@ SELECT pg_catalog.setval('organizationrole_id_seq', 1, false);
 --
 
 COPY person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, ldapstatus, ldapsitelocation, ldapaffectation, ldapdisabled, ldapfininscription, ladaplogin, phone, datesyncldap, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, emailprive, harpegeinm, connectors, ldapmemberof) FROM stdin;
-11691	Stéphane	Bouvry		\N	\N	stephane.bouvry@unicaen.fr	\N	\N	\N	\N	\N	bouvry		\N	1	2017-04-14 10:03:11	\N	\N	\N	\N	\N	\N	\N	N;	N;
 \.
 
 
@@ -2418,7 +2407,6 @@ SELECT pg_catalog.setval('privilege_id_seq', 1, false);
 --
 
 COPY project (id, discipline_id, centaureid, code, eotp, composanteprincipal, acronym, label, description, datecreated, dateupdated, datevalidated) FROM stdin;
-8634	\N	\N	\N	\N	\N	TEST	Projet de test	Ceci est le projet de test par défaut	2017-04-24 12:34:29	2017-04-24 12:37:51	\N
 \.
 
 
@@ -2872,7 +2860,7 @@ COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status
 -- Name: timesheet_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('timesheet_id_seq', 2, true);
+SELECT pg_catalog.setval('timesheet_id_seq', 11, true);
 
 
 --
@@ -2987,7 +2975,7 @@ COPY workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted
 -- Name: workpackage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackage_id_seq', 21, true);
+SELECT pg_catalog.setval('workpackage_id_seq', 22, true);
 
 
 --
@@ -3002,7 +2990,7 @@ COPY workpackageperson (id, person_id, duration, status, datecreated, dateupdate
 -- Name: workpackageperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackageperson_id_seq', 1, false);
+SELECT pg_catalog.setval('workpackageperson_id_seq', 1, true);
 
 
 --
