@@ -1,6 +1,6 @@
 # OSCAR (Organisation et Suivi des Contrats et des Activités de Recherche)
 
-Oscar est une **application web** développée par l'Université de Normandie, ce document présente les prérequis techniques et la procédure d'installation.
+Oscar est une **application web** développée par l'Université de Caen Normandie. Ce document présente les prérequis techniques et la procédure d'installation.
 
 
 ## Prérequis
@@ -8,10 +8,10 @@ Oscar est une **application web** développée par l'Université de Normandie, c
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
  - PHP 5.6+ (support LDAP, Postgresql)
- - Postresql 9+
+ - Postgresql 9+
  - Annuaire LDAP
  
-Selon les différents connecteurs, des modules PHP peuvent être requis (ex : Connecteur vers une base de données MySQL, necessite le module MySQL de PHP)
+Selon les différents connecteurs, des modules PHP peuvent être requis (ex : Connecteur vers une base de données MySQL, nécessite le module MySQL de PHP)
 
 
 ## Installation
@@ -30,7 +30,7 @@ apt-get upgrade
 ### Logiciels tiers
 
 ```bash
-# Subversion, pour récupérer les sources
+# Subversion, pour obtenir les sources de l'application oscar
 apt-get install Subversion
 
 # Apache2, le serveur web
@@ -86,10 +86,10 @@ svn co https://svn.unicaen.fr/svn/oscar/trunk/developpement --username <username
 cd /var/oscar/developpement
 ```
 
-### Oscar (Base de donnée)
+### Oscar (Base de données)
 
 Copier le fichier de configuration `./config/autoload/local.php.dist`, puis éditer
-la configuration de la base de donnée. **Penser à modifier le drivers selon la bdd
+la configuration de la base de donnée. **Penser à modifier le driver selon la bdd
 utilisée**.
 
 ```bash
@@ -110,12 +110,12 @@ cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.
 vi !$
 ```
 
-Ce fichier permet de configurer l'authentification LDAP utilisé dans Oscar
+Ce fichier permet de configurer l'authentification LDAP utilisée dans Oscar
 
 
 ### Installation des librairies tiers PHP (développement uniquement)
 
-Les librairies PHP sont gérées avec [Composer](https://getcomposer.com), installer le si ça n'est pas déjà fait :
+Les librairies PHP sont gérées avec [Composer](https://getcomposer.com), installez le si ça n'est pas déjà fait :
 
 ```bash
 curl -sS https://getcomposer.org/installer | php
