@@ -272,9 +272,11 @@ var Workpackageperson = Vue.extend({
             persons: [],
             editable: false,
             isDeclarant: false,
-            isValidateur: false
+            isValidateur: false,
+            token: 'DEFAULT_TKN'
         }
     },
+
     watch: {
     },
     computed: {
@@ -387,6 +389,7 @@ var Workpackageperson = Vue.extend({
         },
 
         fetch(){
+            console.log('TOKEN', this.token);
             this.loading = true;
             console.log("Fetching...");
 

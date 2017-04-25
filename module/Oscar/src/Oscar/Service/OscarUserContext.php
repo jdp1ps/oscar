@@ -51,6 +51,14 @@ class OscarUserContext extends UserContext
         return $this->getServiceAuthorize()->getRoles();
     }
 
+    public function getTokenValue(){
+        return 'TOKENVALUE';
+    }
+
+    public function getTokenName(){
+        return 'TOKENNAME';
+    }
+
     public function getAllRoleIdPerson()
     {
         static $_ROLES_IDS;

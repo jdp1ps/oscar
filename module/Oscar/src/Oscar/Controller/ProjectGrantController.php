@@ -485,6 +485,8 @@ class ProjectGrantController extends AbstractOscarController
 
         return [
             'entity' => $this->getProjectGrantService()->getGrant($id),
+            'tokenName' => $this->getOscarUserContext()->getTokenName(),
+            'tokenValue' => $this->getOscarUserContext()->getTokenValue(),
             'documentTypes' => json_encode($documentTypes),
             //'organizations' => $organizations,
             'activityTypeChain' => $activityTypeChain,

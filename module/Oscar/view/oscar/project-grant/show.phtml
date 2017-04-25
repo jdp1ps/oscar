@@ -1,8 +1,13 @@
 <?php /** @var $entity Oscar\Entity\Activity */ ?>
-<link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css">
+<link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css" />
+
 <style>.tv-title {display: none}
     h2.tv-serie-label { border-bottom: none; }
 </style>
+
+
+<input type="hidden" name="<?= $tokenName ?>" value="<?= $tokenValue ?>" id=""/>
+
 <div class="container activity-full">
 
     <nav>
@@ -422,13 +427,16 @@
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-    <section id="workpackages"></section>
+    <section id="workpackages" token="BARBATRUC"></section>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW) ): ?>
     <script>
         require(['workpackageperson'], function(Workpackageperson){
             var wp = new Workpackageperson.default({
                 http: {
                     root: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>'
+                },
+                data:{
+                    token: '<?= $tokenValue ?>'
                 },
                 el: '#workpackages'
             });
@@ -438,6 +446,8 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
             wp.$on('declarer', function(){
                 window.location = '<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>';
             });
+
+            wp.token = 'TOKEN-BARBATRUC';
         })
     </script>
     <?php endif; ?>

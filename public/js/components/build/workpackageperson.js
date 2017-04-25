@@ -168,9 +168,11 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
                 persons: [],
                 editable: false,
                 isDeclarant: false,
-                isValidateur: false
+                isValidateur: false,
+                token: 'DEFAULT_TKN'
             };
         },
+
 
         watch: {},
         computed: {},
@@ -269,6 +271,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
             fetch: function fetch() {
                 var _this8 = this;
 
+                console.log('TOKEN', this.token);
                 this.loading = true;
                 console.log("Fetching...");
 
