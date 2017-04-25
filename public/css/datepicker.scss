@@ -1,0 +1,113 @@
+$color: red;
+$datepickerBorder: thin solid rgba(0,0,0,1);
+
+.datepicker-selector {
+  position: absolute;
+  width: 16em;
+  z-index: 1000;
+  background: white;
+  font-size: .9em;
+  box-shadow: 0 0 1em rgba(0,0,0,.25);
+  border: thin solid rgba(0,0,0,.5);
+
+  .datepicker-wrapper {
+    position: relative;
+    z-index: 900;
+    background: white; padding: 4px; }
+
+  &:before {
+    content: '';
+    position: absolute;
+    background: white;
+    border: thin solid rgba(0,0,0,.5);
+    width: 16px;
+    left: 16px;
+    height: 16px;
+    transform: rotate(45deg);
+    top: -8px;
+    z-index: 800;
+  }
+
+  header nav {
+    display: flex;
+    >span {
+      flex: 0;
+      cursor: pointer;
+      &:hover {
+        background: rgba($color, .5);
+      }
+    }
+    >* {
+      flex: 1;
+    }
+    .heading {
+      white-space: nowrap;
+      text-align: center;
+      .currentMonth, .currentYear{
+        cursor: pointer;
+        &:hover {
+          background: rgba($color, .5);
+        }
+      }
+    }
+  }
+
+  .day-labels {
+    display: flex;
+    align-items: stretch;
+    .day-label {
+      color: rgba(0,0,0,.5);
+      flex: 1;
+    }
+  }
+
+  .months, .years, .week {
+    display: flex;
+    flex-wrap: wrap;
+    cursor: pointer;
+    .month, .year, .week-day {
+      padding: .3em;
+      flex: 1;
+      text-align: center;
+      border-radius: 4px;
+      &:hover {
+        background: rgba($color, .9);
+        color: white;
+      }
+      &.active {
+        background: rgba($color,.4) !important;
+        text-shadow: -1px 1px 0 rgba(0,0,0,.3);
+        color: white;
+      }
+      &.disabled {
+        background: white !important;
+        color: rgba(0,0,0,.2);
+        pointer-events: none;
+      }
+    }
+  }
+
+  .week {
+    .week-label {
+      font-size: .8em;
+      flex: 1;
+      color: rgba(0,0,0,.5);
+    }
+    display: flex;
+    align-items: stretch;
+    line-height: 1em;
+    .week-day {
+      text-align: center;
+      flex: 1;
+      padding: 4px;
+      cursor: pointer;
+      &:hover {
+        background-color: rgba($color,.75) !important;
+        color:white;
+      }
+    }
+    .week-day:nth-child(odd){
+      background: rgba(0,0,0,.05)
+    }
+  }
+}
