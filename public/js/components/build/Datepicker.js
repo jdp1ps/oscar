@@ -261,6 +261,7 @@ var Datepicker = {
     },
 
     created: function created() {
+        console.log('TEST');
         moment.locale(this.i18n);
         this.pickerDayRef = this.value ? this.value : moment().format();
         this.initPickerVar();

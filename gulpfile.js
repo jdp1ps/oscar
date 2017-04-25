@@ -42,10 +42,93 @@ gulp.task('sass', function () {
 });
 
 gulp.task('oscar-components', function(){
-    gulp.src(directories.jsComponents +'src/*.js')
+    gulp.src([
+        directories.jsComponents +'src/*.js',
+        '!' + directories.jsComponents +'src/Datepicker.js',
+        '!' +directories.jsComponents +'src/EventDT.js',
+        '!' +directories.jsComponents +'src/ICalAnalyser.js',
+        '!' +directories.jsComponents +'src/calendar.js'
+    ])
+        .pipe(plumber())
+        .pipe(babel({
+            "plugins": ["transform-es2015-modules-amd"]
+        }))
+        .pipe(gulp.dest(directories.jsComponents+'build'));
+
+    gulp.src([directories.jsComponents +'src/Datepicker.js', directories.jsComponents +'src/EventDT.js'])
         .pipe(plumber())
         .pipe(babel())
+        .pipe(umd({
+            dependencies: function (file) {
+                return [{
+                    name: 'moment',
+                    amd: 'moment',
+                    cjs: 'moment',
+                    global: 'moment',
+                    param: 'moment'
+                }]
+            }
+        }))
         .pipe(gulp.dest(directories.jsComponents+'build'))
+
+    gulp.src([directories.jsComponents +'src/ICalAnalyser.js'])
+        .pipe(plumber())
+        .pipe(babel())
+        .pipe(umd({
+            dependencies: function (file) {
+                return [
+                    {
+                        name: 'moment',
+                        amd: 'moment',
+                        cjs: 'moment',
+                        global: 'moment',
+                        param: 'moment'
+                    },
+                    {
+                        name: 'ical',
+                        amd: 'ical',
+                        cjs: 'ical',
+                        global: 'ical',
+                        param: 'ical'
+                    }
+                ]
+            }
+        }))
+        .pipe(gulp.dest(directories.jsComponents+'build'))
+
+    gulp.src(directories.jsComponents +'src/calendar.js')
+        .pipe(plumber())
+        .pipe(babel())
+        .pipe(umd({
+            dependencies: function (file) {
+                return [
+                    {
+                        name: 'moment',
+                        amd: 'moment',
+                        cjs: 'moment',
+                        global: 'moment',
+                        param: 'moment'
+                    },
+                    {
+                        name: 'ICalAnalyser',
+                        amd: 'ICalAnalyser',
+                        cjs: 'ICalAnalyser',
+                        global: 'ICalAnalyser',
+                        param: 'ICalAnalyser'
+                    },
+                    {
+                        name: 'EventDT',
+                        amd: 'EventDT',
+                        cjs: 'EventDT',
+                        global: 'EventDT',
+                        param: 'EventDT'
+                    }
+                ]
+            }
+        }))
+        .pipe(gulp.dest(directories.jsComponents+'build'))
+
+
 })
 
 gulp.task('oscar-model', function(){

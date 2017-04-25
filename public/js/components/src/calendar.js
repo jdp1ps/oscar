@@ -558,7 +558,7 @@ var WeekView = {
                 <div class="hour houroff" v-for="time in 6">&nbsp;</div>
                 <div class="hour" v-for="time in 16"
                     @mouseup="handlerMouseUp"
-                    @mousedown="handlerMouseDown"
+                    @mousedown="createEvent(day, time+5)"
                     @dblclick="createEvent(day, time+5)">&nbsp;</div>
                 <div class="hour houroff" v-for="time in 2">&nbsp;</div>
               </div>
