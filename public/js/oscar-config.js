@@ -46,10 +46,10 @@ requirejs.config({
         'in-the-box' : 'vendor/in-the-box/build/InTheBox',
         'papa-parse' : 'vendor/papa-parse/papaparse.min',
         'colorpicker' : 'vendor/bootstrapcolorpicker/dist/js/bootstrap-colorpicker.min',
-        'calendar' : 'vuejs-components/dist/js/calendar',
-        'EventDT' : 'vuejs-components/dist/js/EventDT',
-        'ICalAnalyser' : 'vuejs-components/dist/js/ICalAnalyser',
-        'Datepicker' : 'vuejs-components/dist/js/Datepicker'
+        'calendar' : 'components/build/calendar',
+        'EventDT' : 'components/build/EventDT',
+        'ICalAnalyser' : 'components/build/ICalAnalyser',
+        'Datepicker' : 'components/build/Datepicker'
     },
     shim: {
         "bootstrap": {
