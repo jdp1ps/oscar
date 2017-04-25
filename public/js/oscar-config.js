@@ -49,7 +49,7 @@ requirejs.config({
         'calendar' : 'vuejs-calendar/build/js/calendar',
         'EventDT' : 'vuejs-calendar/build/js/EventDT',
         'ICalAnalyser' : 'vuejs-calendar/build/js/ICalAnalyser',
-        'Datepicker' : 'vuesjs-components/dist/Datepicker'
+        'Datepicker' : 'vuesjs-components/dist/js/Datepicker'
     },
     shim: {
         "bootstrap": {
