@@ -27,6 +27,8 @@ use Oscar\Entity\Role;
 use Oscar\Provider\Privileges;
 use UnicaenAuth\Acl\NamedRole;
 use UnicaenAuth\Service\UserContext;
+use Zend\Http\Request;
+use Zend\Json\Server\Exception\HttpException;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -51,8 +53,27 @@ class OscarUserContext extends UserContext
         return $this->getServiceAuthorize()->getRoles();
     }
 
-    public function getTokenValue(){
-        return 'TOKENVALUE';
+    public function getRequestToken(){
+        if( array_key_exists('HTTP_X_CSRF_TOKEN', $_SERVER) ){
+            return $_SERVER['HTTP_X_CSRF_TOKEN'];
+        } else {
+            return "";
+        }
+    }
+
+    public function checkToken(){
+        if( $this->getTokenValue() != $this->getRequestToken() ){
+            throw new HttpException("Jeton de sécurité expiré, ");
+        }
+    }
+
+    public function getTokenValue( $reload = false ){
+
+        if( !$this->getSessionContainer()->offsetGet('OSCAR-TOKEN' ) || $reload === true ) {
+            $this->getSessionContainer()->offsetSet('OSCAR-TOKEN', md5(date('Y-m-d H:i:s')));
+        }
+        $token = $this->getSessionContainer()->offsetGet('OSCAR-TOKEN');
+        return $token;
     }
 
     public function getTokenName(){

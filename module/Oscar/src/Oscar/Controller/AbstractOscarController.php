@@ -51,6 +51,10 @@ class AbstractOscarController extends AbstractActionController
         return $config;
     }
 
+    protected function checkToken(){
+
+    }
+
     protected function getHttpXMethod(){
         /** @var Request $request */
         $request = $this->getRequest();

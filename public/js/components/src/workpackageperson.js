@@ -283,6 +283,12 @@ var Workpackageperson = Vue.extend({
     },
 
     created () {
+        console.log(this.token);
+        Vue.http.interceptors.push((request, next) => {
+           request.headers.set('X-CSRF-TOKEN', this.token);
+           request.headers.set('Authorization', 'OSCAR TOKEN');
+            next();
+        });
         this.fetch();
     },
 

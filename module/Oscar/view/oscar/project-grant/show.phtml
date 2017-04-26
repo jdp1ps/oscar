@@ -5,9 +5,6 @@
     h2.tv-serie-label { border-bottom: none; }
 </style>
 
-
-<input type="hidden" name="<?= $tokenName ?>" value="<?= $tokenValue ?>" id=""/>
-
 <div class="container activity-full">
 
     <nav>
@@ -446,8 +443,6 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
             wp.$on('declarer', function(){
                 window.location = '<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>';
             });
-
-            wp.token = 'TOKEN-BARBATRUC';
         })
     </script>
     <?php endif; ?>

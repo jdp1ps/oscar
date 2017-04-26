@@ -41,6 +41,13 @@ class WorkPackageController extends AbstractOscarController
      *
      */
     public function restAction(){
+
+        try {
+            $this->getOscarUserContext()->checkToken();
+        } catch( \Exception $e ){
+            return $this->getResponseBadRequest($e->getMessage());
+        }
+
         $idactivity = $this->params()->fromRoute('idactivity', null);
         $method = $this->getHttpXMethod();
 

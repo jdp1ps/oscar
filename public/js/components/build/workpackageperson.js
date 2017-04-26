@@ -178,6 +178,14 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
         computed: {},
 
         created: function created() {
+            var _this3 = this;
+
+            console.log(this.token);
+            _vue2.default.http.interceptors.push(function (request, next) {
+                request.headers.set('X-CSRF-TOKEN', _this3.token);
+                request.headers.set('Authorization', 'OSCAR TOKEN');
+                next();
+            });
             this.fetch();
         },
 
@@ -199,25 +207,25 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
                 });
             },
             handlerWorkPackagePersonDelete: function handlerWorkPackagePersonDelete(workpackageperson) {
-                var _this3 = this;
+                var _this4 = this;
 
                 this.$http.delete(this.$http.$options.root + "?workpackagepersonid=" + workpackageperson.id).then(function (res) {
-                    _this3.fetch();
+                    _this4.fetch();
                 }, function (err) {
-                    _this3.errors.push("Impossible de supprimer le déclarant : " + err.body);
+                    _this4.errors.push("Impossible de supprimer le déclarant : " + err.body);
                 });
             },
             handlerWorkPackageDelete: function handlerWorkPackageDelete(workpackage) {
-                var _this4 = this;
+                var _this5 = this;
 
                 this.$http.delete(this.$http.$options.root + "?workpackageid=" + workpackage.id).then(function (res) {
-                    _this4.fetch();
+                    _this5.fetch();
                 }, function (err) {
-                    _this4.errors.push("Impossible de supprimer le lot : " + err.body);
+                    _this5.errors.push("Impossible de supprimer le lot : " + err.body);
                 });
             },
             handlerWorkPackageUpdate: function handlerWorkPackageUpdate(workPackageData) {
-                var _this5 = this;
+                var _this6 = this;
 
                 var datas = new FormData();
                 for (var key in workPackageData) {
@@ -227,21 +235,21 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
                     // Mise à jour
                     datas.append('workpackageid', workPackageData.id);
                     this.$http.post(this.$http.$options.root, datas).then(function (res) {
-                        _this5.fetch();
+                        _this6.fetch();
                     }, function (err) {
-                        _this5.errors.push("Impossible de mettre à jour les heures prévues : " + err.body);
+                        _this6.errors.push("Impossible de mettre à jour les heures prévues : " + err.body);
                     });
                 } else {
                     datas.append('workpackageid', -1);
                     this.$http.put(this.$http.$options.root, datas).then(function (res) {
-                        _this5.fetch();
+                        _this6.fetch();
                     }, function (err) {
-                        _this5.errors.push("Impossible de créer le lot de travail : " + err.body);
+                        _this6.errors.push("Impossible de créer le lot de travail : " + err.body);
                     });
                 }
             },
             handlerUpdateWorkPackagePerson: function handlerUpdateWorkPackagePerson(workpackageperson, duration) {
-                var _this6 = this;
+                var _this7 = this;
 
                 var datas = new FormData();
                 datas.append('workpackagepersonid', workpackageperson.id);
@@ -249,11 +257,11 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
                 this.$http.post(this.$http.$options.root, datas).then(function (res) {
                     workpackageperson.duration = duration;
                 }, function (err) {
-                    _this6.errors.push("Impossible de mettre à jour les heures prévues : " + err.body);
+                    _this7.errors.push("Impossible de mettre à jour les heures prévues : " + err.body);
                 });
             },
             addperson: function addperson(personid, workpackageid) {
-                var _this7 = this;
+                var _this8 = this;
 
                 console.log(arguments);
                 var data = new FormData();
@@ -261,30 +269,30 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
                 data.append('idperson', personid);
 
                 this.$http.put(this.$http.$options.root, data).then(function (res) {
-                    _this7.fetch();
+                    _this8.fetch();
                 }, function (err) {
-                    _this7.errors.push("Impossible d'ajouter le déclarant : " + err.body);
+                    _this8.errors.push("Impossible d'ajouter le déclarant : " + err.body);
                 }).then(function () {
-                    return _this7.loading = false;
+                    return _this8.loading = false;
                 });
             },
             fetch: function fetch() {
-                var _this8 = this;
+                var _this9 = this;
 
                 console.log('TOKEN', this.token);
                 this.loading = true;
                 console.log("Fetching...");
 
                 this.$http.get(this.$http.$options.root).then(function (res) {
-                    _this8.workpackages = res.body.workpackages;
-                    _this8.persons = res.body.persons;
-                    _this8.editable = res.body.editable;
-                    _this8.isDeclarant = res.body.isDeclarant;
-                    _this8.isValidateur = res.body.isValidateur;
+                    _this9.workpackages = res.body.workpackages;
+                    _this9.persons = res.body.persons;
+                    _this9.editable = res.body.editable;
+                    _this9.isDeclarant = res.body.isDeclarant;
+                    _this9.isValidateur = res.body.isValidateur;
                 }, function (err) {
-                    _this8.errors.push("Impossible de charger les lots de travail : " + err.body);
+                    _this9.errors.push("Impossible de charger les lots de travail : " + err.body);
                 }).then(function () {
-                    return _this8.loading = false;
+                    return _this9.loading = false;
                 });
             }
         }
