@@ -189,7 +189,6 @@ define('Oscar', ['Backbone', 'hbs', 'bootbox'], function(Backbone, Handlebars, b
 
                     if(modalContent && ($title = modalContent.find('h1')) ){
                         title = $title.html();
-                        //modalContent.find('h1').remove();
                     }
 
                     ModalForm.show(title, modalContent);
@@ -235,81 +234,9 @@ define('Oscar', ['Backbone', 'hbs', 'bootbox'], function(Backbone, Handlebars, b
 
         form: function(model){
             console.log('Formulaire generic');
-
-
-            /****
-            require(['modalform'], function(ModalForm){
-
-                // Données
-                var url = this.model.collection.urlEdit +this.model.get('id')
-                    , modal = ModalForm.modal()
-                    , modalContainer = modal.container
-                    , modalTitle = modal.title
-                    , modalContent = modal.content;
-
-                // On supprime l'ancien contenu de la modale
-                modalContent.empty().unbind();
-
-                var jqxhr = $.ajax({
-                    'type': 'GET',
-                    'url': url
-                }).done(function(content){
-                    var title = "Modification"
-                        , $title
-                        , modalContent = $(content);
-
-                    if(modalContent && ($title = modalContent.find('h1')) ){
-                        title = $title.html();
-                        //modalContent.find('h1').remove();
-                    }
-
-                    ModalForm.show(title, modalContent);
-
-                    modalContent.on('click', '.button-back', function(e){
-                        e.preventDefault();
-                        ModalForm.hide();
-                    });
-
-                    modalContent.on('click', '[type="submit"]', function(e){
-                        e.preventDefault();
-                        var form = $('form', modalContent)
-                            , formMethod = (form.attr('method') || 'get')
-                            , urlPost = (form.attr('action') || url) ;
-
-                        require(['jquery-serialize'], function(){
-                            var datas = $('form', modalContent).serializeObject();
-                            console.log('Send', datas, 'to', urlPost);
-                            $.ajax({
-                                'url': urlPost,
-                                'method': formMethod,
-                                'data': datas
-                            }, datas).done(function(content){
-                                modalContent.html(content);
-                                model.collection.fetch();
-                            }).fail(function(){
-                                Oscar.waitScreen('Erreur lors du traitement des données', 'error');
-                            });
-                        });
-                    });
-                }).fail(function( xhr, status, response){
-                    var title = 'Erreur Oscar',
-                        content = 'Le serveur à retourné une erreur non-identifiée';
-                    if( xhr.status === 400 ){
-                        title = 'Erreur de saisie';
-                        content = "Votre requète n'a pas été traitée !";
-                    }
-                    if( xhr.responseJSON && xhr.responseJSON.error ){ content = xhr.responseJSON.error;}
-                    Oscar.waitScreen('<h1><i class="icon-attention-1"></i>' + title + '</h1>' + content, 'error');
-                });
-                jqxhr.always(function(){console.log('always()', arguments)});
-            }.bind(this));  /****/
         },
 
         initialize: function(){
-            //this.listenTo(this.model, 'all', function(){
-            //    console.log("GenericCollectionView event", arguments[0]);
-            //}.bind(this));
-
             // Fin de la requête
             this.listenTo(this.model, 'sync update', function(){
                 this.render();

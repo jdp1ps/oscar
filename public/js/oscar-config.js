@@ -48,7 +48,7 @@ requirejs.config({
         'colorpicker' : 'vendor/bootstrapcolorpicker/dist/js/bootstrap-colorpicker.min',
         'calendar' : 'modules/unicaen-vuejs-components/dist/js/calendar',
         'EventDT' : 'modules/unicaen-vuejs-components/dist/js/EventDT',
-        'ICalAnalyser' : 'modules/Timeunicaen-vuejs-components/dist/js/ICalAnalyser',
+        'ICalAnalyser' : 'modules/unicaen-vuejs-components/dist/js/ICalAnalyser',
         'Datepicker' : 'modules/unicaen-vuejs-components/dist/js/Datepicker'
     },
     shim: {

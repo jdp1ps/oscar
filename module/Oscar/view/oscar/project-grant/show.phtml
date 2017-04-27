@@ -1,10 +1,6 @@
 <?php /** @var $entity Oscar\Entity\Activity */ ?>
 <link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css" />
 
-<style>.tv-title {display: none}
-    h2.tv-serie-label { border-bottom: none; }
-</style>
-
 <div class="container activity-full">
 
     <nav>
@@ -371,6 +367,7 @@
                     require(['Payments'], function(Payments){
 
                         payments = new Payments.Collection();
+                        payments.token = '<?= $tokenValue ?>';
                         payments.urlEdit = '<?= $this->url('activitypayment/edit', ['idactivity'=>$entity->getId(), 'id'=>'']) ?>';
                         payments.urlNew = '<?= $this->url('activitypayment/new', ['idactivity'=>$entity->getId()]) ?>';
                         payments.url = '<?= $this->url("activitypayment", ['idactivity' => $entity->getId()]) ?>';

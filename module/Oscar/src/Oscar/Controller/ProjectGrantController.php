@@ -455,6 +455,7 @@ class ProjectGrantController extends AbstractOscarController
      */
     public function showAction()
     {
+        // Identifiant de l'activité
         $id = $this->params()->fromRoute('id');
 
         /** @var Activity $entity */
@@ -485,9 +486,12 @@ class ProjectGrantController extends AbstractOscarController
 
         return [
             'entity' => $this->getProjectGrantService()->getGrant($id),
+
+            // Jeton de sécurité
             'tokenValue' => $this->getOscarUserContext()->getTokenValue(true),
+
+
             'documentTypes' => json_encode($documentTypes),
-            //'organizations' => $organizations,
             'activityTypeChain' => $activityTypeChain,
             'traces' => $this->getActivityLogService()->activityActivities($id)->getQuery()->getResult(),
         ];
