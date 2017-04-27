@@ -1,0 +1,8 @@
+<h1><?php echo $title = $this->translate("Résultat de la création d'un nouveau module"); ?></h1>
+<?php $this->headTitle()->append($title); ?>
+
+<p>
+    Le module a été crée avec succès.<br />
+    <?php $url = $this->url('module/default', array('action' => 'telecharger')); ?>
+    <a href="<?php echo $url ?>"><?php echo $this->translate("Télécharger le module") . " '$this->name'" ?></a>
+</p>

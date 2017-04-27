@@ -1,0 +1,29 @@
+<div id="<?php echo $this->dialogDivId ?>" 
+     class="modal fade" 
+     tabindex="-1" 
+     role="dialog" 
+     aria-labelledby="<?php echo $this->dialogDivId ?>-lam-label" 
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- NB: le contenu sera remplacée via AJAX -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h2 class="modal-title">&nbsp;</h2>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function() {
+        AjaxModalListener.uninstall();
+        AjaxModalListener.install("<?php echo $this->dialogDivId ?>");
+    });
+</script>

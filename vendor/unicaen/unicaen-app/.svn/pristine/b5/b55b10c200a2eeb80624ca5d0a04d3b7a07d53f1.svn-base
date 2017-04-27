@@ -1,0 +1,8 @@
+<ul class="menu-secondaire">
+    <li>
+        <a href="/contact/ajouter">Nouveau message</a>
+    </li>
+    <li>
+        <a href="/contact/modifier">Modifier un message</a>
+    </li>
+</ul>

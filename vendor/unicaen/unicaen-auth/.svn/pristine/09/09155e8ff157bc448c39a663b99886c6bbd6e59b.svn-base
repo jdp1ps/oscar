@@ -1,0 +1,61 @@
+<?php $this->headTitle("Connexion") ?>
+
+<?php
+$form = $this->loginForm;
+$form->prepare();
+$form->setAttributes([
+    'action' => $this->url('zfcuser/login'),
+    'method' => 'post',
+    'class'  => 'form-horizontal',
+    'role'   => 'form']);
+?>
+
+<style>
+    #div-connexion { max-width: 350px; margin: auto; }
+</style>
+
+<div id="div-connexion">
+
+    <h1 class="page-header"><?php echo $this->translate("Connexion"); ?></h1>
+
+    <?php echo $this->form()->openTag($form) ?>
+
+    <?php if (($errors = $this->formErrors($this->loginForm))): ?>
+        <p><?php echo $errors ?></p>
+    <?php endif ?>
+
+    <p>
+        <?php
+        $identity = $form->get($name     = 'identity')->setAttributes(['id' => $name, 'class' => 'form-control']);
+        echo $this->formLabel($identity);
+        echo $this->formInput($identity);
+        ?>
+    </p>
+    <p>
+        <?php
+        $identity = $form->get($name     = 'credential')->setAttributes(['id' => $name, 'class' => 'form-control']);
+        echo $this->formLabel($identity);
+        echo $this->formInput($identity);
+        ?>
+    </p>
+    <?php if ($this->redirect): ?>
+        <input type="hidden" name="redirect" value="<?php echo $this->redirect ?>" />
+    <?php endif ?>
+
+    <p>
+        <?php echo $this->formButton($form->get('submit')->setAttribute('class', 'btn btn-primary btn-block')) ?>
+    </p>
+
+    <?php echo $this->form()->closeTag() ?>
+
+    <?php if ($this->enableRegistration) : ?>
+        <?php echo $this->translate("Not registered?"); ?> <a href="<?php echo $this->url('zfcuser/register') . ($this->redirect ? '?redirect=' . $this->redirect : '') ?>"><?php echo $this->translate("Sign up!"); ?></a>
+    <?php endif; ?>
+
+</div>
+<script type="text/javascript">
+    // focus sur le 1er champ vide
+    $("input").filter(function() {
+        return this.value === "";
+    }).get(0).focus();
+</script>

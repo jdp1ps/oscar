@@ -1,0 +1,49 @@
+<?php
+/**
+ * Configuration locale du module UnicaenApp.
+ *
+ * If you have a ./config/autoload/ directory set up for your project, 
+ * drop this config file in it and change the values as you wish.
+ */
+return array(
+    'unicaen-app' => array(
+        /**
+         * Connexion à l'annuaire LDAP (NB: compte admin requis)
+         */
+        'ldap' => array(
+            'connection' => array(
+                'default' => array(
+                    'params' => array(
+                        'host'                => 'host.domain.fr',
+                        'username'            => "uid=xxxxxxxxx,ou=xxxxxxxxxx,dc=domain,dc=fr",
+                        'password'            => "xxxxxxxxxxxx",
+                        'baseDn'              => "ou=xxxxxxxxxxx,dc=domain,dc=fr",
+                        'bindRequiresDn'      => true,
+                        'accountFilterFormat' => "(&(objectClass=posixAccount)(supannAliasLogin=%s))",
+                    )
+                )
+            )
+        ),
+        /**
+         * Options concernant l'envoi de mail par l'application
+         */
+        'mail' => array(
+            // transport des mails
+            'transport_options' => array(
+                'host' => 'smtp.unicaen.fr',
+                'port' => 25,
+            ),
+            // adresses à substituer à celles des destinataires originaux ('CURRENT_USER' équivaut à l'utilisateur connecté)
+            'redirect_to' => array('dsi.applications@unicaen.fr', /*'CURRENT_USER'*/),
+            // désactivation totale de l'envoi de mail par l'application
+            'do_not_send' => false,
+        ),
+    ),
+    'asset_manager' => array(
+//        'caching' => array( // https://github.com/RWOverdijk/AssetManager/wiki/Caching
+//            'default' => array(
+//                'cache' => 'Apc',
+//            ),
+//        ),
+    ),
+);

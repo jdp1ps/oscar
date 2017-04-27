@@ -1,0 +1,19 @@
+<ul class="menu-secondaire">
+    <li class="active">
+        <a href="/contact/ajouter">Nouveau message</a>
+        <ul>
+            <li>
+                <a href="/contact/ajouter/identite">Votre identité</a>
+            </li>
+            <li>
+                <a href="/contact/ajouter/adresse">Votre adresse</a>
+            </li>
+            <li>
+                <a href="/contact/ajouter/message">Votre message</a>
+            </li>
+        </ul>
+    </li>
+    <li>
+        <a href="/contact/modifier">Modifier un message</a>
+    </li>
+</ul>

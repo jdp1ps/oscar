@@ -1,0 +1,32 @@
+<?php
+/**
+ * Configuration globale du module UnicaenApp.
+ *
+ * If you have a ./config/autoload/ directory set up for your project, 
+ * drop this config file in it and change the values as you wish.
+ */
+$settings = array(
+    /**
+     * Informations concernant cette application
+     */
+    'app_infos' => array(
+        'nom'     => "NomDeVotreApplication",
+        'desc'    => "Description succincte de votre application",
+        'version' => "0.0.1",
+        'date'    => "19/04/2013",
+        'contact' => array('mail' => "dsi.applications@unicaen.fr", /*'tel' => "01 02 03 04 05"*/),
+        'mentionsLegales'        => "http://www.unicaen.fr/outils-portail-institutionnel/mentions-legales/",
+        'informatiqueEtLibertes' => "http://www.unicaen.fr/outils-portail-institutionnel/informatique-et-libertes/",
+    ),
+    /**
+     * Période d'exécution de la requête de rafraîchissement de la session utilisateur, en millisecondes.
+     */
+    'session_refresh_period' => 0, // 0 <=> aucune requête exécutée
+);
+
+/**
+ * You do not need to edit below this line
+ */
+return array(
+    'unicaen-app' => $settings,
+);

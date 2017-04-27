@@ -1,0 +1,1 @@
+../unicaen/unicaen-app/bin/deploy.sh

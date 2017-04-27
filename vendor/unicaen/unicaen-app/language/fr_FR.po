@@ -1,0 +1,458 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Gesnum\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-02-27 13:57+0100\n"
+"PO-Revision-Date: 2014-02-27 13:57+0100\n"
+"Last-Translator: Université de Caen Basse Normandie\n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: translate;setLabel;_\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-Language: French\n"
+"X-Poedit-Country: FRANCE\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../tests/UnicaenAppTest/Form/TestAsset/AdresseFieldset.php:19
+msgid "Votre adresse"
+msgstr "Votre adresse"
+
+#: ../tests/UnicaenAppTest/Form/TestAsset/MessageFieldset.php:18
+msgid "Votre message"
+msgstr "Votre message"
+
+#: ../tests/UnicaenAppTest/Form/TestAsset/IdentiteFieldset.php:21
+msgid "Vous"
+msgstr "Vous"
+
+#: ../tests/UnicaenAppTest/Form/View/Helper/MultipageFormFieldsetTest.php:38
+msgid "Step fieldset"
+msgstr "Étape"
+
+#: ../tests/UnicaenAppTest/Form/View/Helper/FormRowDateInfSupTest.php:63
+#: ../tests/UnicaenAppTest/Form/View/Helper/FormRowDateInfSupTest.php:72
+msgid "Date de début et de fin"
+msgstr "Date de début et de fin"
+
+#: ../src/UnicaenApp/View/Helper/AppInfos.php:84
+msgid "Version"
+msgstr "Version"
+
+#: ../src/UnicaenApp/View/Helper/AppInfos.php:85
+msgid "du"
+msgstr "du"
+
+#: ../src/UnicaenApp/View/Helper/AppInfos.php:90
+msgid "ou"
+msgstr "ou"
+
+#: ../src/UnicaenApp/View/Helper/AppInfos.php:91
+msgid "Contact"
+msgstr "Contact"
+
+#: ../src/UnicaenApp/View/Helper/AppInfos.php:122
+msgid "Contacter par mail"
+msgstr "Contacter par mail"
+
+#: ../src/UnicaenApp/View/Helper/AppLink.php:82
+msgid "Page d'accueil de l'application"
+msgstr "Page d'accueil de l'application"
+
+#: ../src/UnicaenApp/Form/Element/DateInfSupInputFilter.php:140
+msgid "La date inférieure est requise"
+msgstr "La date inférieure est requise"
+
+#: ../src/UnicaenApp/Form/Element/DateInfSupInputFilter.php:145
+msgid "La date supérieure est requise"
+msgstr "La date supérieure est requise"
+
+#: ../src/UnicaenApp/Form/View/Helper/FormDateInfSup.php:190
+#: ../src/UnicaenApp/Form/View/Helper/FormDateInfSup.php:219
+msgid " "
+msgstr " "
+
+#: ../src/UnicaenApp/Form/View/Helper/MultipageFormRecap.php:82
+msgid "Néant"
+msgstr "Néant"
+
+#: ../language/patch.php:2
+msgid "Page not found."
+msgstr "Page introuvable."
+
+#: ../config/module.config.php:211
+msgid "Accueil"
+msgstr "Accueil"
+
+#: ../config/module.config.php:217
+msgid "Université de Caen Normandie"
+msgstr "Université de Caen Normandie"
+
+#: ../config/module.config.php:218
+msgid "Page d'accueil du site de l'Université de Caen Normandie"
+msgstr "Page d'accueil du site de l'Université de Caen Normandie"
+
+#: ../config/module.config.php:226
+msgid "À propos"
+msgstr "À propos"
+
+#: ../config/module.config.php:227
+msgid "À propos de cette application"
+msgstr "À propos de cette application"
+
+#: ../config/module.config.php:237
+msgid "Contact concernant l'application"
+msgstr "Contact concernant l'application"
+
+#: ../config/module.config.php:246
+msgid "Plan de navigation"
+msgstr "Plan de navigation"
+
+#: ../config/module.config.php:247
+msgid "Plan de navigation au sein de l'application"
+msgstr "Page de navigation au sein de l'application"
+
+#: ../config/module.config.php:256
+#: ../config/module.config.php:257
+msgid "Mentions légales"
+msgstr "Mentions légales"
+
+#: ../config/module.config.php:266
+#: ../config/module.config.php:267
+msgid "Informatique et libertés"
+msgstr "Informatique et libertés"
+
+#: ../view/error/404.phtml:1
+msgid "A 404 error occurred"
+msgstr "Une erreur 404 est survenue"
+
+#: ../view/error/404.phtml:14
+msgid "The requested controller was unable to dispatch the request."
+msgstr "Le contrôleur spécifié n'a pas pu dispatcher la requête."
+
+#: ../view/error/404.phtml:17
+msgid "The requested controller could not be mapped to an existing controller class."
+msgstr "Le contrôleur spécifié n'a pas pu être traduit en une classe de contrôleur existante."
+
+#: ../view/error/404.phtml:20
+msgid "The requested controller was not dispatchable."
+msgstr "Le contrôleur spécifié n'est pas dispatchable."
+
+#: ../view/error/404.phtml:23
+msgid "The requested URL could not be matched by routing."
+msgstr "L'URL spécifiée n'a pas pu être résolue par le routeur."
+
+#: ../view/error/404.phtml:26
+msgid "We cannot determine at this time why a 404 was generated."
+msgstr "Impossible de déterminer la cause de l'erreur 404."
+
+#: ../view/error/404.phtml:38
+msgid "Controller"
+msgstr "Contrôleur"
+
+#: ../view/error/404.phtml:45
+#, php-format
+msgid "resolves to %s"
+msgstr "resolves to %s"
+
+#: ../view/error/404.phtml:55
+msgid "Exception"
+msgstr "Exception"
+
+#: ../view/error/404.phtml:59
+#: ../view/error/index.phtml:21
+#: ../view/error/index.phtml:45
+msgid "Stack trace"
+msgstr "Trace"
+
+#: ../view/error/index.phtml:10
+msgid "Additional information"
+msgstr "Information complémentaire"
+
+#: ../view/error/index.phtml:13
+#: ../view/error/index.phtml:37
+msgid "File"
+msgstr "Fichier"
+
+#: ../view/error/index.phtml:17
+#: ../view/error/index.phtml:41
+msgid "Message"
+msgstr "Message"
+
+#: ../view/error/index.phtml:31
+msgid "Previous exceptions"
+msgstr "Exceptions précédentes"
+
+#: ../view/error/index.phtml:60
+msgid "No Exception available"
+msgstr "Aucune exception disponible"
+
+#: ../view/unicaen-app/application/contact.phtml:6
+msgid "Aucun contact pour l'instant."
+msgstr "Aucun contact pour l'instant."
+
+#: ../view/unicaen-app/application/contact.phtml:10
+msgid "Envoyer un mail à cette adresse"
+msgstr "Envoyer un mail à cette adresse"
+
+#: ../view/unicaen-app/application/informatique-et-libertes.phtml:5
+msgid "Reportez-vous à la"
+msgstr "Reportez-vous à la"
+
+#: ../view/unicaen-app/application/informatique-et-libertes.phtml:6
+msgid "rubrique du site de l'Université"
+msgstr "rubrique du site de l'Université"
+
+#: ../view/unicaen-app/application/mentions-legales.phtml:5
+msgid "Reportez-vous aux"
+msgstr "Reportez-vous aux"
+
+#: ../view/unicaen-app/application/mentions-legales.phtml:6
+msgid "mentions légales du site de l'Université"
+msgstr "mentions légales du site de l'Université"
+
+#: ../view/unicaen-app/module/resultat.phtml:1
+msgid "Résultat de la création d'un nouveau module"
+msgstr "Résultat de la création d'un nouveau module"
+
+#: ../view/unicaen-app/module/resultat.phtml:7
+msgid "Télécharger le module"
+msgstr "Télécharger le module"
+
+#: ../view/unicaen-app/module/creer.phtml:1
+msgid "Création d'un nouveau module"
+msgstr "Création d'un nouveau module"
+
+#~ msgid "Username"
+#~ msgstr "Identifiant"
+
+#~ msgid "Vous n'êtes pas connecté(e)"
+#~ msgstr "Vous n'êtes pas connecté(e)"
+
+#~ msgid "Profil utilisateur"
+#~ msgstr "Profil utilisateur"
+
+#~ msgid "Inconnu"
+#~ msgstr "Inconnu"
+
+#~ msgid "Aucun"
+#~ msgstr "Aucun"
+
+#~ msgid "Affectations administratives"
+#~ msgstr "Affectations administratives"
+
+#~ msgid "Affectations recherche"
+#~ msgstr "Affectations recherche"
+
+#~ msgid "Responsabilités"
+#~ msgstr "Responsabilités"
+
+#~ msgid "Aucune affectation trouvée."
+#~ msgstr "Aucune affectation trouvée."
+
+#, fuzzy
+#~ msgid "Aucune information disponible."
+#~ msgstr "Aucune affectation disponible."
+
+#, fuzzy
+#~ msgid "Utilisateur connecté à l'application"
+#~ msgstr "Contact concernant l'application"
+
+#~ msgid "Password"
+#~ msgstr "Mot de passe"
+
+#~ msgid "Email"
+#~ msgstr "Email"
+
+#~ msgid "Display Name"
+#~ msgstr "Nom affiché"
+
+#~ msgid "Password Verify"
+#~ msgstr "Vérification du mot de passe"
+
+#~ msgid "Authentication failed. Please try again."
+#~ msgstr "L'authentification a échoué. Recommencez, svp."
+
+#~ msgid "Se connecter"
+#~ msgstr "Se connecter"
+
+#, fuzzy
+#~ msgid "S'enregistrer"
+#~ msgstr "S'enregistrer"
+
+#~ msgid "Register"
+#~ msgstr "S'enregistrer"
+
+#~ msgid "Registration is disabled"
+#~ msgstr "Création de compte désactivée."
+
+#~ msgid "Sign In"
+#~ msgstr "Se connecter"
+
+#, fuzzy
+#~ msgid "Not registered?"
+#~ msgstr "S'enregistrer"
+
+#, fuzzy
+#~ msgid "Sign up!"
+#~ msgstr "Se connecter"
+
+#~ msgid "Hello,"
+#~ msgstr "Bonjour,"
+
+#~ msgid "Vous n'êtes pas autorisé(e) à accéder à cette page."
+#~ msgstr "Vous n'êtes pas autorisé(e) à accéder à cette page."
+
+#~ msgid "Erreur inattendue."
+#~ msgstr "Erreur inattendue."
+
+#~ msgid "Nom du projet"
+#~ msgstr "Nom du projet"
+
+#~ msgid "Créer"
+#~ msgstr "Créer"
+
+#~ msgid "Le nom est obligatoire"
+#~ msgstr "Le nom est obligatoire"
+
+#~ msgid "Le nom doit être de la forme 'nom-de-mon-module'"
+#~ msgstr "Le nom doit être de la forme 'nom-de-mon-module'"
+
+#~ msgid "Suivant >"
+#~ msgstr "Suivant >"
+
+#~ msgid "Passer à l'étape suivante"
+#~ msgstr "Passer à l'étape suivante"
+
+#~ msgid "< Précédent"
+#~ msgstr "< Précédent"
+
+#~ msgid "Revenir à l'étape précédente"
+#~ msgstr "Revenir à l'étape précédente"
+
+#~ msgid "Annuler"
+#~ msgstr "Annuler"
+
+#~ msgid "Abandonner définitivement la saisie"
+#~ msgstr "Abandonner définitivement la saisie"
+
+#~ msgid "Terminer"
+#~ msgstr "Terminer"
+
+#~ msgid "Terminer la saisie"
+#~ msgstr "Terminer la saisie"
+
+#~ msgid "Confirmer et enregistrer"
+#~ msgstr "Confirmer et enregistrer"
+
+#~ msgid "Confirmer et enregistrer la saisie"
+#~ msgstr "Confirmer et enregistrer la saisie"
+
+#~ msgid "An error occurred"
+#~ msgstr "Une erreur est survenue"
+
+#~ msgid "À propos..."
+#~ msgstr "À propos..."
+
+#~ msgid "Profil"
+#~ msgstr "Profil"
+
+#~ msgid "Connexion"
+#~ msgstr "Connexion"
+
+#~ msgid "Affiche le formulaire d'authentification"
+#~ msgstr "Affiche le formulaire d'authentification"
+
+#~ msgid "Déconnexion"
+#~ msgstr "Déconnexion"
+
+#~ msgid "Submit"
+#~ msgstr "Valider"
+
+#~ msgid "Welcome to %sZend Framework 2%s"
+#~ msgstr "Bienvenue dans le %sZend Framework 2%s"
+
+#~ msgid ""
+#~ "Congratulations! You have successfully installed the %sZF2 Skeleton "
+#~ "Application%s. You are currently running Zend Framework version %s. This "
+#~ "skeleton can serve as a simple starting point for you to begin building "
+#~ "your application on ZF2."
+#~ msgstr ""
+#~ "Bravo! You have successfully installed the %sZF2 Skeleton Application%s. "
+#~ "You are currently running Zend Framework version %s. This skeleton can "
+#~ "serve as a simple starting point for you to begin building your "
+#~ "application on ZF2."
+
+#~ msgid "Fork Zend Framework 2 on GitHub"
+#~ msgstr "Fork Zend Framework 2 on GitHub"
+
+#~ msgid "Follow Development"
+#~ msgstr "Follow Development"
+
+#~ msgid ""
+#~ "Zend Framework 2 is under active development. If you are interested in "
+#~ "following the development of ZF2, there is a special ZF2 portal on the "
+#~ "official Zend Framework website which provides links to the ZF2 %swiki%s, "
+#~ "%sdev blog%s, %sissue tracker%s, and much more. This is a great resource "
+#~ "for staying up to date with the latest developments!"
+#~ msgstr ""
+#~ "Zend Framework 2 is under active development. If you are interested in "
+#~ "following the development of ZF2, there is a special ZF2 portal on the "
+#~ "official Zend Framework website which provides links to the ZF2 %swiki%s, "
+#~ "%sdev blog%s, %sissue tracker%s, and much more. This is a great resource "
+#~ "for staying up to date with the latest developments!"
+
+#~ msgid "ZF2 Development Portal"
+#~ msgstr "ZF2 Development Portal"
+
+#~ msgid "Discover Modules"
+#~ msgstr "Discover Modules"
+
+#~ msgid ""
+#~ "The community is working on developing a community site to serve as a "
+#~ "repository and gallery for ZF2 modules. The project is available %son "
+#~ "GitHub%s. The site is currently live and currently contains a list of "
+#~ "some of the modules already available for ZF2."
+#~ msgstr ""
+#~ "The community is working on developing a community site to serve as a "
+#~ "repository and gallery for ZF2 modules. The project is available %son "
+#~ "GitHub%s. The site is currently live and currently contains a list of "
+#~ "some of the modules already available for ZF2."
+
+#~ msgid "Explore ZF2 Modules"
+#~ msgstr "Explore ZF2 Modules"
+
+#~ msgid "Help &amp; Support"
+#~ msgstr "Help &amp; Support"
+
+#~ msgid ""
+#~ "If you need any help or support while developing with ZF2, you may reach "
+#~ "us via IRC: %s#zftalk.2 on Freenode%s. We'd love to hear any questions or "
+#~ "feedback you may have regarding the beta releases. Alternatively, you may "
+#~ "subscribe and post questions to the %smailing lists%s."
+#~ msgstr ""
+#~ "If you need any help or support while developing with ZF2, you may reach "
+#~ "us via IRC: %s#zftalk.2 on Freenode%s. We'd love to hear any questions or "
+#~ "feedback you may have regarding the beta releases. Alternatively, you may "
+#~ "subscribe and post questions to the %smailing lists%s."
+
+#~ msgid "Ping us on IRC"
+#~ msgstr "Ping us on IRC"
+
+#~ msgid "Skeleton Application"
+#~ msgstr "Squelette d'application"
+
+#~ msgid "Home"
+#~ msgstr "Accueil"
+
+#~ msgid "All rights reserved."
+#~ msgstr "Tous droits réservés."
+
+#~ msgid "Application"
+#~ msgstr "Application"
+
+#~ msgid "Great!"
+#~ msgstr "Extra!"

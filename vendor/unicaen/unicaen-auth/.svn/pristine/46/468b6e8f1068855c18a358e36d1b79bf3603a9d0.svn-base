@@ -1,0 +1,15 @@
+<?php $this->headTitle()->append($title = $this->translate("403 - Accès interdit")) ?>
+
+<div class="jumbotron">
+    <h1><?php echo $title ?></h1>
+
+    <?php $message = $this->translate("Vous n'êtes pas autorisé(e) à accéder à cette page.") ?>
+    <?php if (\BjyAuthorize\Guard\Controller::ERROR === $error || \BjyAuthorize\Guard\Route::ERROR === $error) : ?>
+        <h2 class="text-danger"><?php echo $message ?></h2>
+    <?php elseif ($error == 'error-unauthorized') : ?>
+        <h2 class="text-danger"><?php echo $message ?></h2>
+        <h3><?php echo $this->translate($reason); ?></h3>
+    <?php else : ?>
+        <h2 class="text-danger"><?php echo $this->translate("Erreur inattendue.") ?></h2>
+    <?php endif;?>
+</div>

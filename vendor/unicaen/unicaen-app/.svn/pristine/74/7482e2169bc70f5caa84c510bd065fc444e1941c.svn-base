@@ -1,0 +1,17 @@
+<?php
+$modalCancel = sprintf('<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">%s</button>', "Fermer");
+?>
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <?php if ($this->title): ?>
+        <h2 class="modal-title"><?php echo $this->title ?></h2>
+    <?php else: ?>
+        &nbsp;
+    <?php endif; ?>
+</div>
+<div class="modal-body">
+    <?php echo $this->bodyContent ?>
+</div>
+<div class="modal-footer">
+    <?php echo $modalCancel ?>
+</div>
