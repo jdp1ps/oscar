@@ -73,17 +73,17 @@ mkdir -p /var/oscar
 cd !$
 ```
 
-Faire un *checkout*,
+Obtenir la copie de **Oscar** : 
 
 ```bash
-svn co https://svn.unicaen.fr/svn/oscar/trunk/developpement --username <username>
+git checkout git clone git@git.unicaen.fr:bouvry/oscar.git
 ```
 
 
 ### Configuration d'oscar
 
 ```bash
-cd /var/oscar/developpement
+cd oscar
 ```
 
 ### Oscar (Base de données)
