@@ -1,3 +1,0 @@
-<button type="submit" name="nav[_confirm]" title="Confirmer et enregistrer la saisie" class="multipage-nav confirm" value="">Confirmer et enregistrer</button> 
-<div class="clearer"></div> 
-<button type="submit" name="nav[_cancel]" title="Abandonner définitivement la saisie" class="multipage-nav cancel" onclick="askConfirmation(this)" value="">Annuler</button>

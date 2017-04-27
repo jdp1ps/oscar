@@ -1,1 +1,0 @@
-<p>Bye, <?php echo $this->user ?>.</p>

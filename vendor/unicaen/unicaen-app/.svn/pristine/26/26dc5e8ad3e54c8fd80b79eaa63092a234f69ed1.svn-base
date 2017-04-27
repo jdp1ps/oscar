@@ -1,7 +1,0 @@
-<table width="100%" style="font-size: 90%; border-top: 1px solid black; vertical-align: bottom;">
-    <tr>
-        <td width="33%">{PAGENO}/{nbpg}</td>
-        <td width="33%" align="center"><em><strong><?php echo $this->footerTitle; ?></strong></em></td>
-        <td width="33%" style="text-align: right;">{DATE d/m/Y - H:i:s}</td>
-    </tr>
-</table>

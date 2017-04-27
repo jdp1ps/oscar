@@ -1,9 +1,0 @@
-<?php
-$divId = uniqid('uploaded-files-div-');
-?>
-
-<!-- Liste des fichiers déposés -->
-<label>Fichiers déposés :</label>
-<div class="uploaded-files-div" id="<?php echo $divId ?>" data-url="<?php echo $this->url ?>">
-    <!-- màj via AJAX -->
-</div>

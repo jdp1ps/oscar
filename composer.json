@@ -2,7 +2,7 @@
   "repositories": [
     {
       "type": "composer",
-      "url": "http://dev.unicaen.fr/packagist"
+      "url": "https://dev.unicaen.fr/packagist"
     }
   ],
   "name": "unicaen/oscar",
@@ -33,6 +33,7 @@
   },
   "minimum-stability": "dev",
   "config": {
-    "github-protocols": ["https", "ssh"]
+    "github-protocols": ["https", "ssh"],
+    "secure-http": false
   }
 }
