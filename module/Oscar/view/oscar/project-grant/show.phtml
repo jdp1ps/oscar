@@ -417,11 +417,18 @@
         </div>
     </div>
     <hr>
+    <?php if( $entity->hasDeclarant($this->grant()->getCurrentPerson())  ): ?>
+        <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
+            <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>?activity_id=<?= $entity->getId() ?>">
+                Déclarations
+            </a>
+        <?php endif; ?>
+    <?php endif; ?>
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-    <section id="workpackages" token="BARBATRUC"></section>
+    <section id="workpackages"></section>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW) ): ?>
     <script>
         require(['workpackageperson'], function(Workpackageperson){

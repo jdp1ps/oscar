@@ -1497,29 +1497,6 @@ class Activity implements ResourceInterface
                 $organizations[] = (string)$p->getOrganization();
             }
         }
-
-
-        /** @var ActivityPerson $p *
-        foreach ($this->getPersons() as $p) {
-            $persons[] = (string)$p->getPerson();
-        }
-
-        $organizations_pack = [];
-        foreach ($this->getOrganizations() as $p) {
-            $index = array_keys($rolesOrganisations, $p->getRole());
-            $organizations_pack[$index] = (string)$p->getOrganization();
-        }
-
-        $fat[] = $persons_responsable ? implode('|', array_unique($persons_responsable)) : ' ';
-        $fat[] = $persons_valo ? implode('|', array_unique($persons_valo)) : ' ';
-        $fat[] = $persons ? implode('|', array_unique($persons)) : ' ';
-
-        /*$fat[] = ($organizations_cr ? implode('|', array_unique($organizations_cr)) : ' ');
-        $fat[] = ($organizations_cg ? implode('|', array_unique($organizations_cg)) : ' ');
-        $fat[] = ($organizations_lablo ? implode('|', array_unique($organizations_lablo)) : ' ');
-        $fat[] = ($organizations_fin ? implode('|', array_unique($organizations_fin)) : ' ');
-        $fat[] = ($organizations ? implode('|', array_unique($organizations)) : ' ');*/
-
         return $fat;
     }
 
@@ -1627,5 +1604,17 @@ class Activity implements ResourceInterface
             'num' => $this->getOscarNum(),
             'label' => $this->getLabel(),
         ];
+    }
+
+    public function hasDeclarant( $person ){
+        /** @var WorkPackage $wp */
+        foreach( $this->getWorkPackages() as $wp ){
+            foreach( $wp->getPersons() as $p ){
+                if( $person == $p->getPerson() ){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

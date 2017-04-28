@@ -113,7 +113,6 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
         /** @var Request $request */
         $request = $event->getRequest();
         $sm = $event->getApplication()->getServiceManager();
-        $sm->get('Logger')->info("evt " . $event->getName());
 
         if ($event->getName() === 'route') {
             try {
