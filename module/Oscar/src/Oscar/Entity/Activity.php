@@ -1457,26 +1457,13 @@ class Activity implements ResourceInterface
     public function getCorpus()
     {
 
-
     }
 
     public function csv()
     {
-
-
         $fat = [];
-
         $persons = [];
-        $persons_responsable = [];
-        $persons_valo = [];
-
         $organizations = [];
-        $organizations_lablo = [];
-        $organizations_cr = [];
-        $organizations_cg = [];
-        $organizations_fin = [];
-        $payments = [];
-
         $currencyFields = ['amount', 'paymentReceived', 'paymentProvided'];
 
         foreach ($this->toArray() as $key => $value) {
@@ -1491,8 +1478,6 @@ class Activity implements ResourceInterface
             foreach ($this->getProject()->getPersons() as $p) {
                 $persons[] = (string)$p->getPerson();
             }
-
-            //die("total: " .count($this->getProject()->getOrganizations()));
             foreach ($this->getProject()->getOrganizations() as $p) {
                 $organizations[] = (string)$p->getOrganization();
             }
