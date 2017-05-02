@@ -265,13 +265,17 @@ class ProjectController extends AbstractOscarController
     {
         /** @var UserInterface $currentUser */
         $currentUser = $this->getOscarUserContext()->getDbUser();
+        //var_dump($this->getOscarUserContext()->getDbUser());
+        if( !$currentUser ){
+            $currentUser = $this->getOscarUserContext()->getLdapUser();
+        }
         
 	/** @var Person|null $currentPerson */
         $currentPerson = $this->getOscarUserContext()->getCurrentPerson();
 
 
         if ($currentUser === null) {
-            die("Bad move, checkmate !");
+           // die("Bad move, checkmate !");
         }
 
         $email = $currentPerson ? $currentPerson->getEmail() : $currentUser->getEmail();

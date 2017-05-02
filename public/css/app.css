@@ -6429,6 +6429,9 @@ mark {
   .metas div time, .metas div em, .metas div strong, .metas div a {
     color: #444444;
     font-weight: 600; }
+  .metas div a.btn, .metas div .workpackages a.workpackage-add, .workpackages .metas div a.workpackage-add {
+    font-weight: 100;
+    font-size: 12px; }
 
 .tag.discipline {
   background: #c9c9c9;

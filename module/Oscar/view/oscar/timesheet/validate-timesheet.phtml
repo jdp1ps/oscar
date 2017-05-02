@@ -1,7 +1,67 @@
-<link rel="stylesheet" href="<?= $this->basePath() . '/js/vuejs-calendar/build/css/icons/css/fontello.css' ?>" />
-<link rel="stylesheet" href="<?= $this->basePath() . '/js/vuejs-calendar/build/css/calendar.css' ?>" />
-<link rel="stylesheet" href="css/calendar.css" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/css/icons/css/fontello.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/css/calendar.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/css/datepicker.css' ?>" />
 
+
+<div class="container">
+    <h1 class="title-with-small">
+        <small>Validations des créneaux</small>
+    </h1>
+
+    <nav>
+        Personnes :
+    </nav>
+
+    <?php
+    $crenaux = [];
+    $color = 0;
+
+    /** @var \Oscar\Entity\WorkPackage $wpd */
+    foreach( $wpDeclarants as $wpd ){
+        $crenaux[((string)$wpd)] = [
+            'label'         => (string)$wpd,
+            'idactivity'    => $wpd->getActivity()->getId(),
+            'idworkpackage' => $wpd->getId(),
+            'color' => $color++
+        ];
+    }
+    ?>
+    <div id="app">
+        <calendar :with-owner="true" :createNew="false"></calendar>
+    </div>
+</div>
+
+<script>
+    require(['vue', 'vue-resource', 'calendar'], function(Vue, VueResource, Calendar){
+
+        Vue.use(VueResource);
+
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true
+
+        var mixins = {
+            methods: {
+                restUrl(){
+                    return '<?= $this->url('timesheet/validation', ['idactivity' => $activity->getId() ]) ?>'
+                },
+                useOwner(){ return true }
+            }
+        }
+
+        Calendar.mixins = [
+            mixins
+        ];
+
+        var vue = new Vue({
+            el: "#app",
+            components: {
+                'calendar': Calendar
+            }
+        });
+    })
+</script>
+
+<?php /**
 <div class="test">
     <?php if( $activity ): ?>
         <?php foreach( $activity->getWorkPackages() as $workPackage ): ?>
@@ -53,3 +113,4 @@
         });
     })
 </script>
+<?php /****/ ?>

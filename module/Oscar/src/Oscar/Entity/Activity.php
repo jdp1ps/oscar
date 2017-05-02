@@ -1459,6 +1459,65 @@ class Activity implements ResourceInterface
 
     }
 
+    private $_cachedPercentDone = null;
+    private $_cachedTodo = null;
+    private $_cachedDone = null;
+
+    private $_cachedTodoDone = null;
+
+    protected function getTodoDone(){
+        if( $this->_cachedTodoDone === null ){
+            $todo = 0.0;
+            $tovalidate = 0.0;
+            $done = 0.0;
+            $percent = 0.0;
+            /** @var WorkPackage $workPackage */
+            foreach( $this->getWorkPackages() as $workPackage ){
+                /** @var WorkPackagePerson $workPackagePerson */
+                foreach( $workPackage->getPersons() as $workPackagePerson ){
+                    $todo += $workPackagePerson->getDuration();
+                }
+                /** @var TimeSheet $timeSheet */
+                foreach( $workPackage->getTimesheets() as $timeSheet ){
+                    if( $timeSheet->getStatus() == TimeSheet::STATUS_TOVALIDATE ){
+                        $tovalidate += $timeSheet->getHours();
+                    }
+                    if( $timeSheet->getStatus() == TimeSheet::STATUS_ACTIVE){
+                        $done += $timeSheet->getHours();
+                    }
+                }
+            }
+            $this->_cachedTodoDone = [
+                'todo' => $todo,
+                'tovalidate' => $tovalidate,
+                'done' => $done
+            ];
+            if( $todo > 0 ) {
+
+                $percent = 100 / $todo * $done;
+            }
+            $this->_cachedTodoDone['percent'] = $percent;
+        }
+        return $this->_cachedTodoDone;
+    }
+
+    public function getPercentDone()
+    {
+        return $this->getTodoDone()['percent'];
+    }
+    public function getDone()
+    {
+        return $this->getTodoDone()['done'];
+    }
+    public function getTodo()
+    {
+        return $this->getTodoDone()['todo'];
+    }
+    public function getTovalidate()
+    {
+        return $this->getTodoDone()['tovalidate'];
+    }
+
     public function csv()
     {
         $fat = [];

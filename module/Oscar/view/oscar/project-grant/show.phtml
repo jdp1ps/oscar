@@ -428,8 +428,9 @@
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
+    Effectué : <?= $entity->getPercentDone() ?>
     <section id="workpackages"></section>
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW) ): ?>
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <script>
         require(['workpackageperson'], function(Workpackageperson){
             var wp = new Workpackageperson.default({

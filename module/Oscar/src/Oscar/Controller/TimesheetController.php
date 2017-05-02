@@ -574,7 +574,10 @@ class TimesheetController extends AbstractOscarController
     public function validateTimesheetAction()
     {
         $method = $this->getHttpXMethod();
+
+        /** @var Activity $activity */
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
+
         if( !$activity ){
             return $this->getResponseNotFound(sprintf("L'activité %s n'existe pas", $activity));
         }
@@ -632,9 +635,21 @@ class TimesheetController extends AbstractOscarController
                 return $this->getResponseBadRequest();
             }
         }
+/*
+        $declarants = [];
 
+
+        foreach( $activity->getWorkPackages() as $wp ){
+            foreach( $wp->getPersons() as $person ){
+                if( !array_key_exists($person->getPerson()->getId(), $declarants) ){
+                    $declarants[$person->getPerson()->getId()] = $person->getPerson();
+                }
+            }
+        }
+*/
         return [
-            'activity' => $activity
+            'activity' => $activity,
+            'wpDeclarants' => []
         ];
     }
 

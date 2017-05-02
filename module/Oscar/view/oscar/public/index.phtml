@@ -81,15 +81,16 @@
                     <?php endif; ?>
 
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-12">
                             <a href="<?= $this->url('project/mine') ?>" class="btn btn-primary"><i class="icon-cubes"></i> Voir mes projets</a>
                             <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
                                 <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>">
-                                    Déclarations
+                                    <i class="icon-pencil"></i>
+                                    Déclarer mes heures
                                 </a>
                             <?php endif; ?>
                         </div>
-                        <div class="col-md-9">
+                        <div class="col-md-12">
                             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX) ): ?>
                                 <form action="<?= $this->url('contract/advancedsearch') ?>"
                                       method="get" class="form">
