@@ -1199,10 +1199,12 @@ var Calendar = {
     }), _methods),
 
     mounted: function mounted() {
+        console.log("customdatas");
         if (this.customDatas) {
             var customs = this.customDatas();
             for (var k in customs) {
                 if (customs.hasOwnProperty(k)) {
+                    console.log('customdata', k);
                     colorLabels[k] = colorpool[colorIndex];
                     if (!store.defaultLabel) {
                         store.defaultLabel = k;
@@ -1211,6 +1213,7 @@ var Calendar = {
                 }
             }
             colorIndex++;
+            console.log(colorLabels);
         }
 
         if (this.restUrl) {

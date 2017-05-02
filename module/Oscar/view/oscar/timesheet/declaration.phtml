@@ -10,14 +10,18 @@
     <?php
     $crenaux = [];
     $color = 0;
+    $colorActivity = [];
 
     /** @var \Oscar\Entity\WorkPackage $wpd */
     foreach( $wpDeclarants as $wpd ){
+        if( !array_key_exists($wpd->getActivity()->getId(), $colorActivity) ){
+            $colorActivity[$wpd->getActivity()->getId()] = ++$color;
+        }
         $crenaux[((string)$wpd)] = [
             'label'         => (string)$wpd,
             'idactivity'    => $wpd->getActivity()->getId(),
             'idworkpackage' => $wpd->getId(),
-            'color' => $color++
+            'color' => $colorActivity[$wpd->getActivity()->getId()]
         ];
     }
     ?>
@@ -34,13 +38,14 @@
         Vue.http.options.emulateJSON = true;
         Vue.http.options.emulateHTTP = true
 
+        var customDatas = <?= json_encode($crenaux) ?>;
         var mixins = {
             methods: {
                 restUrl(){
                     return '<?= $this->url('timesheet/api') ?>'
                 },
                 customDatas(){
-                    return <?= json_encode($crenaux) ?>
+                    return customDatas;
                 }
             }
         }
