@@ -46,10 +46,10 @@ requirejs.config({
         'in-the-box' : 'vendor/in-the-box/build/InTheBox',
         'papa-parse' : 'vendor/papa-parse/papaparse.min',
         'colorpicker' : 'vendor/bootstrapcolorpicker/dist/js/bootstrap-colorpicker.min',
-        'calendar' : 'modules/unicaen-vuejs-components/dist/js/calendar',
-        'EventDT' : 'modules/unicaen-vuejs-components/dist/js/EventDT',
-        'ICalAnalyser' : 'modules/unicaen-vuejs-components/dist/js/ICalAnalyser',
-        'Datepicker' : 'modules/unicaen-vuejs-components/dist/js/Datepicker'
+        'calendar' : 'modules/unicaen/dist/js/calendar',
+        'EventDT' : 'modules/unicaen/dist/js/EventDT',
+        'ICalAnalyser' : 'modules/unicaen/dist/js/ICalAnalyser',
+        'Datepicker' : 'modules/unicaen/dist/js/Datepicker'
     },
     shim: {
         "bootstrap": {
