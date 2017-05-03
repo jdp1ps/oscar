@@ -1,3 +1,0 @@
-[submodule "public/js/modules/unicaen-vuejs-components"]
-	path = public/js/modules/unicaen-vuejs-components
-	url = git@git.unicaen.fr:bouvry/unicaen-vuejs-components.git
