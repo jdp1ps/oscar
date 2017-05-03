@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exemple simple</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+  <link rel="stylesheet" href="css/icons/css/fontello.css" />
+  <link rel="stylesheet" href="css/calendar.css" />
+</head>
+<body>
+  <div id="app">
+    <calendar></calendar>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>
+  <script>
+    requirejs.config({
+      paths: {
+        'moment': '../node_modules/moment/min/moment-with-locales.min',
+        'moment-timezone': '../node_modules/moment-timezone/builds/moment-timezone-with-data.min',
+        'vue': '../node_modules/vue/dist/vue',
+        'vue-resource': '../node_modules/vue-resource/dist/vue-resource',
+        'ical': '../node_modules/ical.js/build/ical.min',
+        'EventDT' : 'js/EventDT',
+        'calendar' : 'js/calendar',
+        'Datepicker' : 'js/Datepicker',
+        'ICalAnalyser' : 'js/ICalAnalyser'
+      },
+      shim: {
+        'calendar': {
+          deps: ['EventDT', 'vue', 'moment', 'ICalAnalyser']
+        },
+        'ICalAnalyser': {
+          deps: ['ical']
+        },
+        'ical': {
+          exports: 'ICAL'
+        },
+        'moment-timezone': {
+          exports: 'tz',
+          deps: ['moment']
+        },
+        'moment': {
+          exports: 'moment'
+        },
+        'EventDT': {
+          deps: ['moment'],
+          exports: 'EventDT'
+        }
+      }
+    });
+  </script>
+  <script>
+    require(['vue', 'vue-resource', 'moment-timezone', 'calendar'], function(Vue, VueResource, moment, Calendar){
+      console.log('OK');
+      Vue.use(VueResource);
+
+      var mixins = {
+        methods: {
+          restUrl(){
+            return "http://127.0.0.1:4000/feuille-de-temps/activite/9099"
+          },
+          fetch(){
+            console.log("CUSTOM FETCH")
+          }
+        }
+      }
+
+      Calendar.mixins = [
+        mixins
+      ];
+
+      var vue = new Vue({
+        el: "#app",
+        components: {
+          'calendar': Calendar
+        }
+      });
+
+
+    });
+
+//  require(['vue', 'vue-resource', 'moment', 'calendar'], function(Vue, VueResource, moment, Calendar){
+//    console.log('TEST');
+//
+//
+   /* Vue.use(VueResource);
+
+    var mixins = {
+      methods: {
+        restUrl(){
+          return "http://127.0.0.1:4000/feuille-de-temps/activite/9099"
+        },
+        fetch(){
+          console.log("CUSTOM FETCH")
+        }
+      }
+    }
+
+    Calendar.mixins = [
+      mixins
+    ];
+
+    var vue = new Vue({
+      el: "#app",
+      components: {
+        'calendar': Calendar
+      }
+    });
+//    */
+//  })
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,664 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i');
+
+$color: #ddd;
+$colorMain: #4490c8;
+/*
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-size: 14px;
+  font-family: 'Open Sans';
+  background: #ddd;
+}*/
+
+@keyframes clignote {
+  from {
+    color: black;
+  }
+
+  to {
+    color: $colorMain;
+  }
+}
+
+.calendar {
+  position: relative;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+  background: rgba(255,255,255,.8);
+
+  .calendar-menu {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .views-switcher {
+    a {
+      display: inline-block;
+      font-size: .8em;
+      font-weight: 100;
+      padding: 1em;
+      color: rgba(0,0,0,.5);
+      border-right: thin solid rgba(0,0,0,.1);
+      text-decoration: none;
+      &.active {
+        text-decoration: underline;
+      }
+      &:hover {
+        background: $colorMain;
+        color: white;
+        text-shadow: -1px 1px 0 rgba(0,0,0,.2);
+      }
+    }
+  }
+
+  .transmission {
+    padding: 1em;
+    color: $colorMain;
+    font-size: .8em;
+    font-weight: 100;
+    animation-duration: .5s;
+    animation-name: clignote;
+    animation-iteration-count: infinite;
+  }
+
+  .errors {
+    color: #9a1e1b;
+    animation: none;
+    .fermer {
+      color: darken(#9a1e1b, 15%);
+    }
+  }
+
+  .copy-paste {
+    display: inline;
+    font-weight: normal;
+    font-size: .75em;
+    &:before {
+      content: " ~ "
+    }
+    span {
+      opacity: .3;
+      cursor: pointer;
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+  .importer-ui {
+    border: solid thin rgba(0,0,0,.25);
+    box-shadow: 0 0 1em rgba(0,0,0,.1);
+    padding: 1em;
+    background: white;
+
+    h2 {
+      font-weight: 400;
+      font-size: 1.5em;
+    }
+
+    .buttons {
+      text-align: center;
+      border-top: thin solid rgba(black, .25);
+      margin-top: 1em;
+      padding: .5em 0;
+    }
+
+    .correspondances {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      flex-flow: wrap;
+      article {
+        strong { display: block }
+        flex: 1;
+        padding: .25em .5em;
+        margin: 4px;
+        box-shadow: 0 0 8px rgba(0,0,0,.2);
+      }
+    }
+
+    .square {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      line-height: 12px;
+      margin-right: 4px;
+    }
+
+    .list-item {
+      opacity: .5;
+      white-space: nowrap;
+      time { font-size: .7em}
+      span { flex: 1; padding-left: .5em }
+      &.imported {
+        opacity: 1;
+      }
+    }
+
+    h1 {
+      margin: 0 0 1em;
+      font-size: 2em;
+      font-weight: 100;
+    }
+
+    .steps {
+      line-height: 2em;
+      border-bottom: solid thin rgba(0,0,0,.25);
+      margin-bottom: .5em;
+      span {
+        padding: .25em .5em;
+        font-weight: 100;
+        display: inline-block;
+      }
+      .active {
+        font-weight: 600;
+        background: desaturate($colorMain, 25%);
+        color: white;
+        text-shadow: -1px 1px 0 rgba(0,0,0,.25);
+      }
+    }
+  }
+  .editor, .importer {
+    background: rgba(255,255,255,.9);
+    display: flex;
+    position: fixed;
+    top: 0;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index: 5000;
+    align-items: center;
+    justify-content: center;
+    form {
+      min-width: 450px;
+      max-width: 50vw;
+    }
+    .importer-ui {
+      width: 90vw;
+      .calendar {
+        max-height: 30vh;
+        overflow-y: scroll;
+        border: thin solid rgba(0,0,0,.2);
+        padding: 4px;
+        article {
+          margin: 2px;
+        }
+        article:nth-child(odd){
+          background: rgba(0,0,0,.05);
+        }
+      }
+      .buttons {
+        display: flex;
+      }
+    }
+  }
+
+  .event {
+    border: solid thin rgba(0,0,0,.5);
+    cursor: pointer;
+    padding: 2px;
+    margin: 0 .5%;
+    box-shadow: 0 0 4px rgba(0,0,0,.3);
+    background-color: rgba(255,255,255,.9);
+    //font-size: .7em;
+    .bottom-handler {
+      display: block;
+      position: absolute;
+      bottom: 0;
+      text-align: center;
+      text-shadow: -1px 1px 0 rgba(0,0,0,.3), 1px -1px 0 rgba(255,255,255,.3);
+      border-top: solid thin rgba(0,0,0,.3);
+      opacity: 0;
+      left: 1em;
+      right: 1em;
+      color: rgba(0,0,0,.5);
+      &:hover {
+        background-color: rgba(255,255,255,.25);
+      }
+    }
+
+    nav {
+      font-size: .8em;
+      text-align: center;
+      background: black;
+      line-height: 20px;
+      top: 0px;
+      position: absolute;
+      //left: 0;
+      border: solid thin black;
+      left: 100%;
+      display: none;
+
+      a {
+        opacity: .75;
+        text-decoration: none;
+        color: rgba(255,255,255, 1);
+        display: block;
+        white-space: nowrap;
+        text-align: left;
+        padding: 2px 8px 2px 4px;
+        &:hover {
+          opacity: 1;
+          background: $colorMain;
+        }
+      }
+      &:hover {
+        z-index: 100;
+      }
+    }
+    &:hover {
+      z-index: 100;
+      .bottom-handler { opacity: 1}
+      nav { display: block }
+      .time {
+        background: rgba(0,0,0,.5);
+      }
+    }
+
+    &.event-moving {
+      cursor: move;
+      z-index: 10;
+      border-color: rgba(0,0,0,1);
+      padding: 3px;
+      box-shadow: -2px 2px 8px rgba(0,0,0,.3);
+      .bottom-handler {
+        //transform: scaleY(4);
+        background-color: rgba(255,255,255,0);
+      }
+      time {
+        background: black;
+      }
+      nav {
+        display: none;
+      }
+    }
+
+    &.event-locked {
+      opacity: .75;
+      cursor: not-allowed;
+    }
+
+    &.event-selected {
+
+    }
+
+    .label {
+      font-weight: 400;
+      border-bottom: dotted rgba(0,0,0,.3) thin;
+      line-height: 1.25em;
+      padding: 0;
+      font-weight: 600;
+      margin-bottom: 2px;
+      text-align: left;
+      //text-shadow: 1px -1px 0 rgba(255,255,255,.25);
+      color: black;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      display: block;
+    }
+
+    small {
+      display: block;
+      font-size: .75em;
+    }
+
+    .description {
+      font-size: .8em;
+      font-weight: lighter;
+      color: black;
+      position: absolute;
+      top: 3em;
+      bottom: 2em;
+      overflow: hidden;
+    }
+
+    .time {
+      position: absolute;
+      color: #ffffff;
+      text-shadow: -1px 1px 0 rgba(0,0,0,.7);
+      z-index: 3;
+      font-size: .75em;
+      font-weight: lighter;
+      text-align: right;
+      padding: 1px 2px;
+
+      &.start {
+        top: 0;
+        right: 0;
+        box-shadow: -1px 1px 4px rgba(0,0,0,.3);
+      }
+      &.end {
+        bottom: 0;
+        right: 0;
+        box-shadow: -1px -1px 4px rgba(0,0,0,.3);
+      }
+
+    }
+  }
+
+  .picto:before {
+    color: white;
+    padding: 2px;
+  }
+
+  .list-item {
+    strong {
+      text-shadow: 1px -1px 0 rgba(255,255,255,.5);
+    }
+    strong:before, .picto:before {
+      border-radius: 4px;
+      font-family: "fontello";
+      font-style: normal;
+      font-weight: normal;
+      speak: none;
+
+      display: inline-block;
+      text-decoration: inherit;
+      width: 1em;
+      margin-right: .2em;
+      text-align: center;
+      /* opacity: .8; */
+
+      /* For safety - reset parent styles, that can break glyph codes*/
+      font-variant: normal;
+      text-transform: none;
+
+      /* fix buttons height, for twitter bootstrap */
+      line-height: 1em;
+
+      /* Animation center compensation - margins should be symmetric */
+      /* remove if not needed */
+      margin-left: .2em;
+
+      /* you can be more comfortable with increased icons size */
+      /* font-size: 120%; */
+
+      /* Font smoothing. That was taken from TWBS */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    &.status-draft strong:before, &.status-draft .picto:before {
+      content: '\e882'; }
+    &.status-send strong:before, &.status-send .picto:before{
+      content: '\e88a'; }
+    &.status-valid strong:before, &.status-valid .picto:before {
+      content: '\e85b'; }
+    &.status-reject strong:before, &.status-reject .picto:before {
+      content: '\e865'; }
+    &.status-info strong:before, &.status-info .picto:before {
+      content: '\e85e'; }
+  }
+
+  .status-draft {
+    border-left: solid 4px grey;
+  }
+
+  .status-send {
+    border-left: solid 4px black;
+  }
+
+  .status-valid {
+    border-left: solid 4px green;
+  }
+
+  .status-reject {
+    border-left: solid 4px darkred;
+  }
+    .event {
+
+
+    &.status-draft, &.status-send, &.status-valid, &.status-reject, &.status-info {
+      .label:before, .picto:before {
+        font-family: "fontello";
+        font-style: normal;
+        font-weight: normal;
+        speak: none;
+
+        display: inline-block;
+        text-decoration: inherit;
+        width: 1em;
+        margin-right: .2em;
+        text-align: center;
+        /* opacity: .8; */
+
+        /* For safety - reset parent styles, that can break glyph codes*/
+        font-variant: normal;
+        text-transform: none;
+
+        /* fix buttons height, for twitter bootstrap */
+        line-height: 1em;
+
+        /* Animation center compensation - margins should be symmetric */
+        /* remove if not needed */
+        margin-left: .2em;
+
+        /* you can be more comfortable with increased icons size */
+        /* font-size: 120%; */
+
+        /* Font smoothing. That was taken from TWBS */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        /* Uncomment for 3D effect */
+        /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+      }
+    }
+    &.status-draft .label:before, &.status-draft .picto:before {
+      content: '\e882'; }
+    &.status-send .label:before, &.status-send .picto:before {
+      content: '\e88a'; }
+    &.status-valid .label:before, &.status-valid .picto:before {
+      content: '\e85b'; }
+    &.status-reject .label:before, &.status-reject .picto:before {
+      content: '\e865'; }
+
+    &.status-info .label:before, &.status-info .picto:before {
+      content: '\e85e'; }
+
+  }
+
+  .line {
+    display: block;
+    position: relative;
+    &:after, &:before {
+      content: ' ';
+      display: block;
+      clear: both;
+    }
+  }
+
+  .cell {
+    display: block;
+    width: 14.285%;
+    background: rgba(0,0,0,.05);
+    &.today {
+      background: rgba(#4490c8, .5);
+      font-weight: bold;
+    }
+  }
+  .cell:nth-child(odd) {
+    background: rgba(0,0,0,.1);
+  }
+
+  header .content-full {
+    box-shadow: 0 .5em .5em rgba(0,0,0,.25);
+    line-height: 1.6em;
+    font-weight: 100;
+    text-align: center;
+    text-shadow: -1px 1px 1px rgba(0,0,0,.3);
+    border-bottom: solid thin rgba(0,0,0,.3);
+  }
+
+  header .cell-day {
+    border-left: solid thin rgba(255,255,255,.5);
+    text-align: center;
+    font-weight: 300;
+    text-shadow: 1px -1px 0 rgba(255,255,255,.5);
+    color: rgba(100,100,100,1);
+
+    &:hover {
+      .copy-paste {
+        opacity: 1;
+      }
+    }
+
+    .copy-paste {
+      opacity: 0;
+    }
+  }
+
+  .content-full {
+    display: flex;
+  }
+  .labels-time {
+    width: 50px;
+  }
+  .events {
+    flex: 1;
+    display: flex;
+    position: relative;
+  }
+
+  .meta {
+    display: flex;
+    font-size: 1.25em;
+    a {
+      flex: 0;
+      line-height: 100%;
+      display: block;
+      font-size: .8em;
+      padding: .2em;
+      text-decoration: none;
+      background: rgba(0,0,0,.3);
+      color: white
+    }
+    h3 {
+      flex: 1;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+  }
+
+  .hour {
+    border-bottom: thin solid rgba(0,0,0,.1);
+    transition: background .3s;
+    height: 40px;
+    &:not(.houroff):hover{
+      background: rgba($colorMain,.25);
+    }
+    &.houroff {
+      background-image: url('bg.gif');
+      background-repeat: repeat;
+      opacity: .3;
+    }
+  }
+
+  .content-wrapper {
+    max-height: 70vh;
+    overflow-y: scroll;
+    position: relative;
+    scroll-behavior: smooth;
+  }
+
+  .unit {
+    height: 40px;
+    font-size: .8em;
+    border-top: thin dotted rgba(255,255,255,.9);
+    width: 4em;
+    text-align: center;
+    padding: 4px;
+  }
+}
+
+.calendar-list {
+
+  // Par jour
+  .events {
+    display: flex;
+    border-bottom: thin solid rgba(255,255,255,.5);
+    padding: 2px 0;
+    h3 {
+      flex: 1;
+      margin: 0;
+      padding: 0;
+      font-weight: 100;
+      font-size: 1em;
+    }
+    .total {
+      flex: 1;
+      text-align: right;
+      padding: 4px;
+      font-weight: bold;
+    }
+    .events-list {
+      background: rgba(255,255,255,.5);
+      flex: 7;
+      position: relative;
+      .list-item {
+        display: flex;
+        position: absolute;
+        background: white;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1px 2px;
+
+        time {
+          flex: 0;
+          font-weight: 100;
+          font-size: .9em;
+        }
+        strong {
+          white-space: nowrap;
+          text-align: center;
+          font-weight: normal;
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .details {
+          left: 0;
+          top: 1.25em;
+          position: absolute;
+          display: none;
+          background: white;
+          padding: 10px 1em .5em;
+          box-shadow: 0 0 1em rgba(0,0,0,.5);
+          min-width: 350px;
+          &:before {
+            content: "";
+            background: white;
+            width: 8px;
+            height: 8px;
+            top: -4px;
+            transform: rotate(45deg);
+            display: block;
+            position: absolute;
+          }
+          h4 {
+            margin: 0;
+            padding:0;
+          }
+          .description { font-weight: 100}
+        }
+        .end {
+          text-align: right;
+        }
+        &:hover {
+          .details {
+            z-index: 1000;
+            display: block;
+          }
+        }
+      }
+    }
+  }
+}
