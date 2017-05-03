@@ -347,7 +347,7 @@ class TimesheetController extends AbstractOscarController
         }
 
 
-        $wpDeclarants = $this->getEntityManager()->createQueryBuilder()
+        $workpackages = $this->getEntityManager()->createQueryBuilder()
             ->select('wp')
             ->from(WorkPackage::class, 'wp')
             ->innerJoin('wp.persons', 'wpp')
@@ -358,8 +358,19 @@ class TimesheetController extends AbstractOscarController
             ->getQuery()
             ->getResult();
 
+        $declarants = [];
+        /** @var WorkPackage $workpackage */
+        foreach( $workpackages as $workpackage ){
+            /** @var WorkPackagePerson $workpackageperson */
+            foreach( $workpackage->getPersons() as $workpackageperson ){
+                echo $workpackageperson->getPerson()."<br>";
+                $declarants[$workpackageperson->getPerson()->getId()] = $workpackageperson;
+            }
+        }
+
         $datasView = [
-            'wpDeclarants' => $wpDeclarants,
+            'workpackages' => $workpackages,
+            'declarants' => $declarants,
             'activity' => $activity,
             'message' => sprintf('[%s] Déclaration pour %s par %s', $method, $activity, $person),
             'dataReceived' => $this->getRequest()->getPost(),
@@ -621,8 +632,61 @@ class TimesheetController extends AbstractOscarController
                 return $response;
 
             } else {
+                /** @var Request $request */
+                $request = $this->getRequest();
+
                 if ($method == 'POST') {
-                    return $this->performRestDo();
+                    $events = $request->getPost('events', []);
+                    if( count($events) == 1 && $events[0]['id'] == 'null'  ){
+                        $event = $events[0];
+                        $person = $this->getEntityManager()->getRepository(Person::class)->find($event['owner_id']);
+
+                        /** @var WorkPackage $workpackage */
+                        $workpackage = $this->getEntityManager()->getRepository(WorkPackage::class)->find($event['idworkpackage']);
+
+                        if( !$person ){
+                            return $this->getResponseBadRequest('Personne inconnue !');
+                        }
+
+                        if( !$workpackage ){
+                            return $this->getResponseBadRequest('Lot de travail inconnu !');
+                        }
+
+                        try {
+                            $timesheet = new TimeSheet();
+                            $this->getEntityManager()->persist($timesheet);
+                            $timesheet->setPerson($person)
+                                ->setActivity($activity)
+                                ->setLabel((string)$workpackage)
+                                ->setDateFrom(new \DateTime($event['start']))
+                                ->setDateTo(new \DateTime($event['end']))
+                                ->setStatus(TimeSheet::STATUS_TOVALIDATE)
+                                ->setWorkpackage($workpackage);
+                            $this->getEntityManager()->flush($timesheet);
+                            $json = $timesheet->toJson();
+                            $json['credentials'] = [
+                                'deletable' => true,
+                                'editable' => true,
+                                'sendable' => $timesheet->getStatus() == TimeSheet::STATUS_DRAFT,
+                                'validable' => $timesheet->getStatus() == TimeSheet::STATUS_TOVALIDATE
+                            ];
+                            $response = new JsonModel([
+                                'timesheets' => [$json]
+                            ]);
+                            $response->setTerminal(true);
+                            return $response;
+
+                        } catch( \Exception $e ){
+                            return $this->getResponseBadRequest("Errur " . $e->getMessage());
+                        }
+
+
+
+                    }
+                    else {
+                        return $this->performRestDo();
+                    }
+
                 } else if ($method == 'DELETE') {
                     $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($this->params()->fromQuery('timesheet'));
                     if( $timesheet ){
@@ -635,26 +699,27 @@ class TimesheetController extends AbstractOscarController
                 return $this->getResponseBadRequest();
             }
         }
-/*
+
         $declarants = [];
-
-
-        foreach( $activity->getWorkPackages() as $wp ){
-            foreach( $wp->getPersons() as $person ){
-                if( !array_key_exists($person->getPerson()->getId(), $declarants) ){
-                    $declarants[$person->getPerson()->getId()] = $person->getPerson();
+        /** @var WorkPackage $workpackage */
+        foreach( $activity->getWorkPackages() as $workpackage ){
+            /** @var WorkPackagePerson $workpackageperson */
+            foreach( $workpackage->getPersons() as $workpackageperson ){
+                if( !array_key_exists($workpackageperson->getPerson()->getId(), $declarants) ) {
+                    echo $workpackageperson->getPerson() . "<br>";
+                    $declarants[$workpackageperson->getPerson()->getId()] = $workpackageperson;
                 }
             }
         }
-*/
+
         return [
             'activity' => $activity,
-            'wpDeclarants' => []
+            'declarants' => $declarants
         ];
     }
 
     /**
-     * Cette méthode gère les changements d'état transmis per l'interface.
+     * Cette méthode gère les changements d'état transmis par l'interface.
      */
     protected function performRestDo(){
         $datas = $this->getRequest()->getPost()['events'];

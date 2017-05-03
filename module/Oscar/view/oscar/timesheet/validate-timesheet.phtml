@@ -14,18 +14,38 @@
 
     <?php
     $crenaux = [];
+    $colorPersons = [];
+    $owners = [];
     $color = 0;
 
-    /** @var \Oscar\Entity\WorkPackage $wpd */
-    foreach( $wpDeclarants as $wpd ){
+    /** @var \Oscar\Entity\WorkPackagePerson $wpd */
+    foreach( $declarants as $wpd ){
+        if( !array_key_exists($wpd->getPerson()->getId(), $colorPersons) ){
+            $colorPersons[$wpd->getPerson()->getId()] = $color++;
+        }
+        if( !array_key_exists($wpd->getPerson()->getId(), $owners) ){
+            $owners[$wpd->getPerson()->getId()] = $wpd->getPerson()->toJson();
+        }
+
+        /*$crenaux[((string)$wpd)] = [
+            'label'         => (string)$wpd,
+            'idactivity'    => $wpd->getWorkPackage()->getActivity()->getId(),
+            'idworkpackage' => $wpd->getWorkPackage()->getId(),
+            'color' => $colorPersons[$wpd->getPerson()->getId()]
+        ];*/
+    }
+
+    /** @var \Oscar\Entity\WorkPackage $workpackage */
+    foreach( $activity->getWorkPackages() as $wpd ){
         $crenaux[((string)$wpd)] = [
             'label'         => (string)$wpd,
-            'idactivity'    => $wpd->getActivity()->getId(),
+            'idactivity'    => $activity->getId(),
             'idworkpackage' => $wpd->getId(),
-            'color' => $color++
+            //'color' => $colorPersons[$wpd->getPerson()->getId()]
         ];
     }
     ?>
+
     <div id="app">
         <calendar :with-owner="true" :createNew="false"></calendar>
     </div>
@@ -39,12 +59,21 @@
         Vue.http.options.emulateJSON = true;
         Vue.http.options.emulateHTTP = true
 
+        var owners = <?= json_encode(array_values($owners)) ?>;
+        var customDatas = <?= json_encode($crenaux) ?>;
+        console.log(customDatas);
         var mixins = {
             methods: {
                 restUrl(){
                     return '<?= $this->url('timesheet/validation', ['idactivity' => $activity->getId() ]) ?>'
                 },
-                useOwner(){ return true }
+                useOwner(){ return true },
+                ownersList(){
+                    return owners
+                },
+                customDatas(){
+                    return customDatas;
+                }
             }
         }
 

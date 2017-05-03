@@ -127,7 +127,7 @@ class TimeSheet implements ITrackable
     private $activity;
 
     /**
-     * @var Activity
+     * @var Person
      * @ORM\ManyToOne(targetEntity="Person", inversedBy="timesheets")
      */
     private $person;
@@ -156,7 +156,8 @@ class TimeSheet implements ITrackable
             'start' => $this->getDateFrom()->format('c'),
             'end' => $this->getDateTo()->format('c'),
             'status' => self::getStatusText()[$this->getStatus()],
-            'owner' => $this->getPerson()->getDisplayName()
+            'owner' => $this->getPerson()->getDisplayName(),
+            'owner_id' => $this->getPerson()->getId()
         ];
     }
 
