@@ -1,9 +1,21 @@
+# Configuration
 config/autoload/local.php
 config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
-logs/**/*
+
+# Logs
+/logs/*
+!/logs/.gitkeep
+
+# Data & Cache
+data/*
+!data/backup_oscar-empty.sql
+
+
+
+# Librairies
 vendor
-.idea
-data/DoctrineORMModule
-data/backup_oscar-dev-lasted.sql
 node_modules
+
+# IDE files
+.idea
