@@ -10,7 +10,6 @@ $config = array(
         'BjyAuthorize',
         'UnicaenApp',
         'UnicaenAuth',
-        'UnicaenCode',
         'Oscar',
     ),
 
