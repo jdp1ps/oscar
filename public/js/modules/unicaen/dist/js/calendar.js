@@ -1035,6 +1035,7 @@ var Calendar = {
 
         /** Edition de l'événement de la liste */
         handlerEditEvent: function handlerEditEvent(event) {
+            console.log('handlerEditEvent');
             this.eventEdit = event;
             this.eventEditDataVisible = true;
             this.eventEditData = JSON.parse(JSON.stringify(event));
@@ -1048,6 +1049,7 @@ var Calendar = {
         restSave: function restSave(events) {
             var _this8 = this;
 
+            console.log('restSave');
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
@@ -1091,6 +1093,7 @@ var Calendar = {
         restStep: function restStep(events, action) {
             var _this9 = this;
 
+            console.log('restStep(', events, action, ')');
             if (this.restUrl) {
                 this.transmission = "Enregistrement en cours...";
                 var data = new FormData();
@@ -1132,7 +1135,7 @@ var Calendar = {
             var data = JSON.parse(JSON.stringify(event));
             data.mmStart = moment(data.start);
             data.mmEnd = moment(data.end);;
-            this.restStep([data], 'new');
+            this.restSave([data]);
         },
         handlerSaveEvent: function handlerSaveEvent(event) {
             store.defaultLabel = this.eventEditData.label;
