@@ -1,0 +1,27 @@
+{
+  "name": "bootstrap-lnf",
+  "version": "0.1",
+  "homepage": "https://github.com/Jacksay/bootstrap-lnf",
+  "authors": [
+    "Stéphane Bouvry <stephane.bouvry@unicaen.fr>"
+  ],
+  "description": "Bootstrap visual components",
+  "keywords": [
+    "bootstrap",
+    "ui",
+    "components",
+    "visual"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-sass": "~3.3.5",
+    "highlight.js": "https://github.com/isagalaev/highlight.js.git#~7.0.1"
+  }
+}

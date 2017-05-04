@@ -1,0 +1,19 @@
+{
+  "name": "in-the-box",
+  "version": "0.0.1",
+  "homepage": "https://github.com/Jacksay/in-the-box",
+  "authors": [
+    "Stéphane Bouvry <stephane.bouvry@unicaen.fr>"
+  ],
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

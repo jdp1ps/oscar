@@ -1,0 +1,94 @@
+
+$imSize:           1em !default;
+$imBorderRadius:   .25em !default;
+$imSpacing:        $imBorderRadius;
+$imColor:          $brand-primary !default;
+
+@mixin menuColor( $color ){
+  background-color: rgba(light($color),.9);
+  border: thin solid $color;
+  @include box-shadow(4px);
+  color: dark($color);
+  .item {
+    &:hover {
+      background: $color;
+      color: ultralight($color);
+    }
+  }
+  .divider {
+    background: lighten($color, 20%);
+  }
+}
+
+.menu-icon {
+  @include border-radius($imBorderRadius);
+  @include menuColor($brand-primary);
+
+  &.compl {
+    @include menuColor($brand-complementary);
+  }
+  &.neutral {
+    @include menuColor($grey);
+  }
+
+  padding: $imBorderRadius;
+  position: absolute;
+  z-index: 5;
+
+  &.onleft {
+    left: 0;
+  }
+
+  &.onright {
+    right: 0;
+    .item:after, .item:before {
+      content:' ';
+      display: table;
+    }
+    .item:after {
+      clear: both;
+    }
+    i {
+      float: right;
+    }
+  }
+
+  .heading {
+    width: 2em;
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+  }
+
+  .item {
+    display: block;
+    padding: $imSpacing / 2 $imSpacing;
+    transition: all .3s;
+    @include border-radius($imBorderRadius / 2);
+  }
+  .divider {
+    display: block;
+    height: 1px;
+    width: 75%;
+    margin: .5em .25em;
+  }
+  &:hover {
+    .heading {
+      opacity: 1;
+      width: auto;
+    }
+    .item-label {
+      display: inline-block;
+    }
+  }
+
+  .item-label {
+    display: none;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

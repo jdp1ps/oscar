@@ -1,0 +1,71 @@
+$grey:  #68717A;
+$greyLight: lighten($grey, 42%);
+
+//== Colors (bootstrap inspired)
+//
+//##
+$gray-base:              #111 !default;
+$gray-darker:            lighten($gray-base, 13.5%) !default; // #222
+$gray-dark:              lighten($gray-base, 20%) !default;   // #333
+$gray:                   lighten($gray-base, 33.5%) !default; // #555
+$gray-light:             lighten($gray-base, 46.7%) !default; // #777
+$gray-lighter:           lighten($gray-base, 93.5%) !default; // #eee
+
+$brand-primary:         #48486F !default;
+$brand-complementary:   rgb(255 - red($brand-primary), 255 - green($brand-primary), 255 - blue($brand-primary)) !default;
+$brand-secondary1:      #53446C !default;
+$brand-secondary2:      #9E965E !default;
+
+$brand-success:         #499D1F !default;
+$brand-info:            #30B0D5 !default;
+$brand-warning:         #C69951 !default;
+$brand-danger:          #DD423E !default;
+
+//== Scaffolding
+//
+//## Settings for some of the most global styles.
+
+//** Global textual link color.
+$link-color:            lighten(saturate($brand-primary, 50%), 25%) !default;
+
+//** Link hover color set via `darken()` function.
+$link-hover-color:      darken($link-color, 15%) !default;
+
+//** Link hover decoration.
+$link-hover-decoration: underline !default;
+
+//== Typography
+//
+//##
+$headings-font-weight:    200 !default;
+$font-family-sans-serif:  "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+
+/**
+ * Calcule du pourcentage d'une partie d'une couleur RGB.
+ */
+@function colorAmount( $value, $amount){
+  $ret: $value / 100 * $amount;
+  @if $ret > 255{
+    $ret: 255;
+  }
+  @return $ret;
+}
+
+$ultraLight: lighten($brand-primary, 80%);
+
+//== List
+//
+//## (Generated rules)
+$colorsName: primary secondary1 secondary2 complementary success info danger warning;
+$colors: $brand-primary $brand-secondary1 $brand-secondary2 $brand-complementary $brand-success $brand-info $brand-danger $brand-warning;
+$sizes: xs standard big hudge;
+
+$colorDefault:  $brand-primary;
+$border: solid thin lighten($colorDefault, 50%);
+
+$borderRadius: .25em;
+$padding:      .5em;
+
+// Cartouche
+$cartoucheBorderRadius: $borderRadius;
+$cartouchePadding: $padding;

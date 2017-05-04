@@ -14,7 +14,7 @@ data/*
 
 
 # Librairies
-vendor
+/vendor
 node_modules
 
 # IDE files
