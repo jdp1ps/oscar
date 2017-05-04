@@ -1,4 +1,0 @@
-<?php $this->headTitle()->append($title = "Plan de navigation") ?>
-
-<h1><?php echo $this->translate($title); ?></h1>
-<?php echo $this->navigation('navigation')->plan(); ?>

@@ -1,7 +1,0 @@
-<a class="navbar-link" 
-   id="user-current-info" 
-   title="Utilisateur connecté à l'application" 
-   data-placement="bottom" 
-   data-toggle="popover" 
-   data-content="User Profile Helper MarkupUser Info Helper Markup" 
-   href="#">User Status Helper Markup</a>

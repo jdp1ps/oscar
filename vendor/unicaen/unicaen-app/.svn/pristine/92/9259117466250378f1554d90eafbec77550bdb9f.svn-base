@@ -1,5 +1,0 @@
-<button type="submit" name="nav[_next]" title="Passer à l&#039;étape suivante" class="multipage-nav next" value="">Suivant &gt;</button> 
-<button type="submit" name="nav[_submit]" title="Terminer la saisie" class="multipage-nav submit" value="">Terminer</button> 
-<button type="submit" name="nav[_previous]" title="Revenir à l&#039;étape précédente" class="multipage-nav previous" style="float: left;" value="">&lt; Précédent</button> 
-<div class="clearer"></div> 
-<button type="submit" name="nav[_cancel]" title="Abandonner définitivement la saisie" class="multipage-nav cancel" onclick="askConfirmation(this)" value="">Annuler</button>
