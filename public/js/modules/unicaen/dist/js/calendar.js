@@ -66,6 +66,11 @@ var CalendarDatas = function () {
         this.defaultDescription = "";
         this.labels = [];
         this.owners = [];
+
+        ////
+        this.displayRejectModal = false;
+        this.rejectComment = "";
+        this.rejectedEvents = [];
     }
 
     _createClass(CalendarDatas, [{
@@ -493,7 +498,7 @@ var WeekView = {
         'timeevent': TimeEvent
     },
 
-    template: '<div class="calendar calendar-week">\n    <div class="meta">\n        <a href="#" @click="previousWeek">\n            <i class="icon-left-big"></i>\n        </a>\n        <h3>\n            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}\n            <nav class="copy-paste" v-if="createNew">\n                <span href="#" @click="copyCurrentWeek"><i class="icon-docs"></i></span>\n                <span href="#" @click="pasteWeek"><i class="icon-paste"></i></span>\n                <span href="#" @click="$emit(\'submitall\', \'send\', \'week\')"><i class="icon-right-big"></i></span>\n            </nav>\n        </h3>\n       <a href="#" @click="nextWeek">\n            <i class="icon-right-big"></i>\n       </a>\n    </div>\n\n    <header class="line">\n        <div class="content-full" style="margin-right: 12px">\n            <div class="labels-time">\n                {{currentYear}}\n            </div>\n            <div class="events">\n                <div class="cell cell-day day day-1" :class="{today: isToday(day)}" v-for="day in currentWeekDays">\n                    {{ day.format(\'dddd D\') }}\n                    <nav class="copy-paste" v-if="createNew">\n                        <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>\n                        <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>\n                    </nav>\n                </div>\n            </div>\n        </div>\n    </header>\n\n    <div class="content-wrapper">\n        <div class="content-full">\n          <div class="labels-time">\n            <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>\n          </div>\n          <div class="events">\n\n              <div class="cell cell-day day" v-for="day in 7">\n                <div class="hour houroff" v-for="time in 6">&nbsp;</div>\n                <div class="hour" v-for="time in 16"\n                    @mouseup="handlerMouseUp"\n                    @mousedown="handlerMouseDown"\n                    @dblclick="handlerCreate(day, time+5)">&nbsp;</div>\n                <div class="hour houroff" v-for="time in 2">&nbsp;</div>\n              </div>\n              <div class="content-events">\n                <timeevent v-for="event in weekEvents"\n                    :with-owner="withOwner"\n                    :weekDayRef="currentDay"\n                    v-if="inCurrentWeek(event)"\n                    @deleteevent="$emit(\'deleteevent\', event)"\n                    @editevent="$emit(\'editevent\', event)"\n                    @submitevent="$emit(\'submitevent\', event)"\n                    @validateevent="$emit(\'validateevent\', event)"\n                    @savemoveevent="handlerSaveMove"\n                    :event="event"\n                    :key="event.id"></timeevent>\n              </div>\n          </div>\n        </div>\n    </div>\n\n    <footer class="line">\n      FOOTER\n    </footer>\n    </div>',
+    template: '<div class="calendar calendar-week">\n    <div class="meta">\n        <a href="#" @click="previousWeek">\n            <i class="icon-left-big"></i>\n        </a>\n        <h3>\n            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}\n            <nav class="copy-paste" v-if="createNew">\n                <span href="#" @click="copyCurrentWeek"><i class="icon-docs"></i></span>\n                <span href="#" @click="pasteWeek"><i class="icon-paste"></i></span>\n                <span href="#" @click="$emit(\'submitall\', \'send\', \'week\')"><i class="icon-right-big"></i></span>\n            </nav>\n        </h3>\n       <a href="#" @click="nextWeek">\n            <i class="icon-right-big"></i>\n       </a>\n    </div>\n\n    <header class="line">\n        <div class="content-full" style="margin-right: 12px">\n            <div class="labels-time">\n                {{currentYear}}\n            </div>\n            <div class="events">\n                <div class="cell cell-day day day-1" :class="{today: isToday(day)}" v-for="day in currentWeekDays">\n                    {{ day.format(\'dddd D\') }}\n                    <nav class="copy-paste" v-if="createNew">\n                        <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>\n                        <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>\n                    </nav>\n                </div>\n            </div>\n        </div>\n    </header>\n\n    <div class="content-wrapper">\n        <div class="content-full">\n          <div class="labels-time">\n            <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>\n          </div>\n          <div class="events">\n\n              <div class="cell cell-day day" v-for="day in 7">\n                <div class="hour houroff" v-for="time in 6">&nbsp;</div>\n                <div class="hour" v-for="time in 16"\n                    @mouseup="handlerMouseUp"\n                    @mousedown="handlerMouseDown"\n                    @dblclick="handlerCreate(day, time+5)">&nbsp;</div>\n                <div class="hour houroff" v-for="time in 2">&nbsp;</div>\n              </div>\n              <div class="content-events">\n                <timeevent v-for="event in weekEvents"\n                    :with-owner="withOwner"\n                    :weekDayRef="currentDay"\n                    v-if="inCurrentWeek(event)"\n                    @deleteevent="$emit(\'deleteevent\', event)"\n                    @editevent="$emit(\'editevent\', event)"\n                    @submitevent="$emit(\'submitevent\', event)"\n                    @validateevent="$emit(\'validateevent\', event)"\n                    @rejectevent="$emit(\'rejectevent\', event)"\n                    @savemoveevent="handlerSaveMove"\n                    :event="event"\n                    :key="event.id"></timeevent>\n              </div>\n          </div>\n        </div>\n    </div>\n\n    <footer class="line">\n      FOOTER\n    </footer>\n    </div>',
 
     computed: {
         currentYear: function currentYear() {
@@ -951,7 +956,7 @@ var SelectEditable = {
 
 var Calendar = {
 
-    template: '\n        <div class="calendar">\n\n            <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>\n\n            <div class="editor" v-show="eventEditDataVisible">\n                <form @submit.prevent="editSave">\n                    <div class="form-group">\n                        <label for="">Intitul\xE9</label>\n                        <selecteditable v-model="eventEditData.label" :chooses="labels"></selecteditable>\n                    </div>\n                    <div v-if="withOwner">\n                        {{ eventEditData.owner_id }}\n                        <select v-model="eventEditData.owner_id">\n                            <option :value="o.id" v-for="o in owners">{{ o.displayname }}</option>\n                        </select>\n                        D\xE9clarant LISTE\n                    </div>\n                    <div>\n                        <label for="">Description</label>\n                        <textarea class="form-control" v-model="eventEditData.description"></textarea>\n                    </div>\n                    <hr />\n                    <button type="button" @click="handlerEditCancelEvent" class="btn btn-primary">Annuler</button>\n                    <button type="cancel" @click="handlerSaveEvent" class="btn btn-default">Enregistrer</button>\n                </form>\n            </div>\n\n            <nav class="calendar-menu">\n                <nav class="views-switcher">\n                    <a href="#" @click.prevent="state = \'week\'" :class="{active: state == \'week\'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>\n                    <a href="#" @click.prevent="state = \'list\'" :class="{active: state == \'list\'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>\n                    <a href="#" @click.prevent="importInProgress = true"><i class="icon-columns"></i>Importer un ICS</a>\n                </nav>\n                <section class="transmission errors">\n\n                    <p class="error" v-for="error in errors">\n                        <i class="icon-warning-empty"></i> {{ error }}\n                        <a href="#" @click.prevent="errors.splice(errors.indexOf(error), 1)" class="fermer">[fermer]</a>\n                    </p>\n                </section>\n                <section class="transmission infos" v-show="transmission">\n                    <span>\n                        <i class="icon-signal"></i>\n                        {{ transmission }}\n                    </span>\n                </section>\n            </nav>\n\n            <weekview v-show="state == \'week\'"\n                :create-new="createNew"\n                :with-owner="withOwner"\n                @editevent="handlerEditEvent"\n                @deleteevent="handlerDeleteEvent"\n                @createpack="handlerCreatePack"\n                @submitevent="handlerSubmitEvent"\n                @validateevent="handlerValidateEvent"\n                @rejectevent="handlerRejectEvent"\n                @createevent="handlerCreateEvent"\n                @savemoveevent="handlerSaveMove"\n                @submitall="submitall"\n                @saveevent="restSave"></weekview>\n\n            <listview v-show="state == \'list\'"\n                :with-owner="withOwner"\n                @editevent="handlerEditEvent"\n                @deleteevent="handlerDeleteEvent"\n                @validateevent="handlerValidateEvent"\n                @rejectevent="handlerRejectEvent"\n                @submitevent="handlerSubmitEvent"></listview>\n        </div>\n\n    ',
+    template: '\n        <div class="calendar">\n\n            <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>\n\n            <div class="editor" v-show="eventEditDataVisible">\n                <form @submit.prevent="editSave">\n                    <div class="form-group">\n                        <label for="">Intitul\xE9</label>\n                        <selecteditable v-model="eventEditData.label" :chooses="labels"></selecteditable>\n                    </div>\n                    <div v-if="withOwner">\n                        {{ eventEditData.owner_id }}\n                        <select v-model="eventEditData.owner_id">\n                            <option :value="o.id" v-for="o in owners">{{ o.displayname }}</option>\n                        </select>\n                        D\xE9clarant LISTE\n                    </div>\n                    <div>\n                        <label for="">Description</label>\n                        <textarea class="form-control" v-model="eventEditData.description"></textarea>\n                    </div>\n                    <hr />\n                    <button type="button" @click="handlerEditCancelEvent" class="btn btn-primary">Annuler</button>\n                    <button type="cancel" @click="handlerSaveEvent" class="btn btn-default">Enregistrer</button>\n                </form>\n            </div>\n\n            <div class="editor" v-show="displayRejectModal">\n                <form @submit.prevent="handlerSendReject">\n                    <h3>Refuser des cr\xE9neaux</h3>\n                    <section>\n                       <article v-for="creneau in rejectedEvents" class="event-inline-simple">\n                        <i class="icon-archive"></i><strong>{{ creneau.label }}</strong><br>\n                        <i class="icon-user"></i><strong>{{ creneau.owner }}</strong><br>\n                        <i class="icon-calendar"></i><strong>{{ creneau.dayTime }}</strong>\n                       </article>\n                    </section>\n                    <div class="form-group">\n                        <label for="">Pr\xE9ciser la raison du refus</label>\n                        <textarea class="form-control" v-model="rejectComment" placeholder="Raison du refus"></textarea>\n                    </div>\n                    <hr />\n                    <button type="submit" class="btn btn-primary" :class="{disabled: !rejectComment}">Envoyer</button>\n                    <button type="cancel" class="btn btn-default" @click.prevent="displayRejectModal = false">Annuler</button>\n                </form>\n            </div>\n\n            <nav class="calendar-menu">\n                <nav class="views-switcher">\n                    <a href="#" @click.prevent="state = \'week\'" :class="{active: state == \'week\'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>\n                    <a href="#" @click.prevent="state = \'list\'" :class="{active: state == \'list\'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>\n                    <a href="#" @click.prevent="importInProgress = true"><i class="icon-columns"></i>Importer un ICS</a>\n                </nav>\n                <section class="transmission errors">\n\n                    <p class="error" v-for="error in errors">\n                        <i class="icon-warning-empty"></i> {{ error }}\n                        <a href="#" @click.prevent="errors.splice(errors.indexOf(error), 1)" class="fermer">[fermer]</a>\n                    </p>\n                </section>\n                <section class="transmission infos" v-show="transmission">\n                    <span>\n                        <i class="icon-signal"></i>\n                        {{ transmission }}\n                    </span>\n                </section>\n            </nav>\n\n            <weekview v-show="state == \'week\'"\n                :create-new="createNew"\n                :with-owner="withOwner"\n                @editevent="handlerEditEvent"\n                @deleteevent="handlerDeleteEvent"\n                @createpack="handlerCreatePack"\n                @submitevent="handlerSubmitEvent"\n                @validateevent="handlerValidateEvent"\n                @rejectevent="handlerRejectEvent"\n                @createevent="handlerCreateEvent"\n                @savemoveevent="handlerSaveMove"\n                @submitall="submitall"\n                @saveevent="restSave"></weekview>\n\n            <listview v-show="state == \'list\'"\n                :with-owner="withOwner"\n                @editevent="handlerEditEvent"\n                @deleteevent="handlerDeleteEvent"\n                @validateevent="handlerValidateEvent"\n                @rejectevent="handlerRejectEvent"\n                @submitevent="handlerSubmitEvent"></listview>\n        </div>\n\n    ',
 
     data: function data() {
         return store;
@@ -1043,11 +1048,36 @@ var Calendar = {
         handlerValidateEvent: function handlerValidateEvent(event) {
             this.restValidate([event]);
         },
-        handlerRejectEvent: function handlerRejectEvent(event) {
-            this.restStep([event], 'reject');
-        },
-        restSave: function restSave(events) {
+
+
+        ////////////////////////////////////////////////////////////////////////
+
+        handlerSendReject: function handlerSendReject() {
             var _this8 = this;
+
+            console.log(this.rejectedEvents, this.rejectComment);
+            var events = [];
+            this.rejectedEvents.forEach(function (event) {
+                var e = JSON.parse(JSON.stringify(event));
+                e.rejectedComment = _this8.rejectComment;
+                events.push(e);
+            });
+            this.restStep(events, 'reject');
+        },
+        handlerRejectEvent: function handlerRejectEvent(event) {
+            console.log("Procédure de rejet");
+            this.showRejectModal([event]);
+        },
+        showRejectModal: function showRejectModal(events) {
+            this.displayRejectModal = true;
+            this.rejectedEvents = events;
+        },
+
+
+        ////////////////////////////////////////////////////////////////////////
+
+        restSave: function restSave(events) {
+            var _this9 = this;
 
             console.log('restSave');
             if (this.restUrl) {
@@ -1076,11 +1106,11 @@ var Calendar = {
 
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
-                    _this8.handlerEditCancelEvent();
+                    _this9.handlerEditCancelEvent();
                 }, function (error) {
-                    _this8.errors.push("Impossible d'enregistrer les données : " + error);
+                    _this9.errors.push("Impossible d'enregistrer les données : " + error);
                 }).then(function () {
-                    return _this8.transmission = "";
+                    return _this9.transmission = "";
                 });;
             }
         },
@@ -1091,7 +1121,7 @@ var Calendar = {
             this.restStep(events, 'validate');
         },
         restStep: function restStep(events, action) {
-            var _this9 = this;
+            var _this10 = this;
 
             console.log('restStep(', events, action, ')');
             if (this.restUrl) {
@@ -1100,15 +1130,17 @@ var Calendar = {
                 data.append('do', action);
                 for (var i = 0; i < events.length; i++) {
                     data.append('events[' + i + '][id]', events[i].id || null);
+                    data.append('events[' + i + '][rejectedComment]', events[i].rejectedComment || null);
                 }
 
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
-                    _this9.handlerEditCancelEvent();
+                    _this10.displayRejectModal = false;
+                    _this10.handlerEditCancelEvent();
                 }, function (error) {
-                    _this9.errors.push("Impossible de modifier l'état du créneau : " + error);
+                    _this10.errors.push("Impossible de modifier l'état du créneau : " + error);
                 }).then(function () {
-                    _this9.transmission = "";
+                    _this10.transmission = "";
                 });
             }
         },
@@ -1116,16 +1148,16 @@ var Calendar = {
 
         /** Suppression de l'événement de la liste */
         handlerDeleteEvent: function handlerDeleteEvent(event) {
-            var _this10 = this;
+            var _this11 = this;
 
             if (this.restUrl) {
                 this.transmission = "Suppression...";
                 this.$http.delete(this.restUrl() + "?timesheet=" + event.id).then(function (response) {
-                    _this10.events.splice(_this10.events.indexOf(event), 1);
+                    _this11.events.splice(_this11.events.indexOf(event), 1);
                 }, function (error) {
                     console.log(error);
                 }).then(function () {
-                    _this10.transmission = "";
+                    _this11.transmission = "";
                 });
             } else {
                 this.events.splice(this.events.indexOf(event), 1);
@@ -1167,12 +1199,12 @@ var Calendar = {
 
         /** Charge le fichier ICS depuis l'interface **/
         loadIcsFile: function loadIcsFile(e) {
-            var _this11 = this;
+            var _this12 = this;
 
             this.transmission = "Analyse du fichier ICS...";
             var fr = new FileReader();
             fr.onloadend = function (result) {
-                _this11.parseFileContent(fr.result);
+                _this12.parseFileContent(fr.result);
             };
             fr.readAsText(e.target.files[0]);
         },
@@ -1180,7 +1212,7 @@ var Calendar = {
 
         /** Parse le contenu ICS **/
         parseFileContent: function parseFileContent(content) {
-            var _this12 = this;
+            var _this13 = this;
 
             var analyser = new ICalAnalyser();
             var events = analyser.parse(ICAL.parse(content));
@@ -1192,9 +1224,9 @@ var Calendar = {
 
                 var currentPack = null;
                 var currentLabel = item.mmStart.format('YYYY-MM-D');
-                for (var i = 0; i < _this12.importedData.length && currentPack == null; i++) {
-                    if (_this12.importedData[i].label == currentLabel) {
-                        currentPack = _this12.importedData[i];
+                for (var i = 0; i < _this13.importedData.length && currentPack == null; i++) {
+                    if (_this13.importedData[i].label == currentLabel) {
+                        currentPack = _this13.importedData[i];
                     }
                 }
                 if (!currentPack) {
@@ -1202,7 +1234,7 @@ var Calendar = {
                         label: currentLabel,
                         events: []
                     };
-                    _this12.importedData.push(currentPack);
+                    _this13.importedData.push(currentPack);
                 }
                 currentPack.events.push(item);
             });
@@ -1239,16 +1271,16 @@ var Calendar = {
     }), _defineProperty(_methods, 'editCancel', function editCancel() {
         this.eventEdit = this.eventEditData = null;
     }), _defineProperty(_methods, 'fetch', function fetch() {
-        var _this13 = this;
+        var _this14 = this;
 
         this.transmission = "Chargement des créneaux...";
 
         this.$http.get(this.restUrl()).then(function (ok) {
             store.sync(ok.body.timesheets);
         }, function (ko) {
-            _this13.errors.push("Impossible de charger les données : " + ko);
+            _this14.errors.push("Impossible de charger les données : " + ko);
         }).then(function () {
-            _this13.transmission = "";
+            _this14.transmission = "";
         });
     }), _defineProperty(_methods, 'post', function post(event) {
         console.log("POST", event);

@@ -3,7 +3,11 @@
 moment.locale('fr');
 
 var EventDT = class {
-  constructor(id, label, start, end, description="", actions={}, status='draft', owner="", owner_id = null){
+  constructor(id, label, start, end, description="", actions={}, status='draft', owner="", owner_id = null,
+              rejectedComment="", rejectedAt=null,
+              validatedBy=null, validatedAt=null,
+              confirmedBy=null, confirmedAt=null
+            ){
     this.id = id;
 
     // From ICS format
@@ -20,6 +24,14 @@ var EventDT = class {
     this.owner_id = owner_id;
     this.intersect = 0;
     this.intersectIndex = 0;
+
+    this.rejectedComment = rejectedComment;
+    this.rejectedAt = rejectedAt;
+
+    this.validatedAt = validatedAt;
+    this.validatedBy = validatedBy;
+    this.confirmedAt = confirmedAt;
+    this.confirmedBy = confirmedBy;
 
 
     // OSCAR
@@ -64,6 +76,12 @@ var EventDT = class {
    */
   get duration(){
     return this.durationMinutes / 60;
+  }
+
+  get dayTime(){
+    return "de " + this.mmStart.format('hh:mm')
+        + " à " + this.mmEnd.format('hh:mm')
+        + ", le " + this.mmStart.format('dddd D MMMM YYYY');
   }
 
   /**

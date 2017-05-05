@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i');
-
 $color: #ddd;
 $colorMain: #4490c8;
 /*
@@ -20,6 +18,16 @@ body {
 
   to {
     color: $colorMain;
+  }
+}
+
+.event-inline-simple {
+  border: solid thin rgba(0,0,0,.2);
+  padding: .25em;
+  color: rgba(0,0,0,.8);
+  font-size: .8em;
+  strong {
+    font-weight: 100;
   }
 }
 

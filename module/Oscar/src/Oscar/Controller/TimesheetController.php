@@ -658,7 +658,10 @@ class TimesheetController extends AbstractOscarController
                             $timesheet->setPerson($person)
                                 ->setActivity($activity)
                                 ->setLabel((string)$workpackage)
+                                ->setCreatedBy($this->getCurrentPerson())
                                 ->setDateFrom(new \DateTime($event['start']))
+                                ->setValidatedAt(new \DateTime())
+                                ->setValidatedBy((string)$this->getCurrentPerson())
                                 ->setDateTo(new \DateTime($event['end']))
                                 ->setStatus(TimeSheet::STATUS_TOVALIDATE)
                                 ->setWorkpackage($workpackage);
@@ -733,12 +736,16 @@ class TimesheetController extends AbstractOscarController
         switch( $action ){
             case 'validate' :
                 $newStatus = TimeSheet::STATUS_ACTIVE;
+                $validatedBy = (string)$this->getCurrentPerson();
                 break;
             case 'send' :
                 $newStatus = TimeSheet::STATUS_TOVALIDATE;
+                $sendBy = (string)$this->getCurrentPerson();
                 break;
             case 'reject' :
                 $newStatus = TimeSheet::STATUS_CONFLICT;
+                $rejectBy = (string) $this->getCurrentPerson();
+                $rejectAt = new \DateTime();
                 break;
             default :
                 //return $this->getResponseBadRequest('Opération inconnue !');
@@ -754,6 +761,14 @@ class TimesheetController extends AbstractOscarController
                 } else {
                     $timeSheet->setDateFrom(new \DateTime($data['start']))
                         ->setDateTo(new \DateTime($data['end']));
+                }
+
+                if( isset($rejectBy) ){
+                    $timeSheet->setRejectedBy($rejectBy)->setRejectedAt(new \DateTime())->setRejectedComment($data['rejectedComment']);
+                }
+
+                if( isset($validatedBy) ){
+                    $timeSheet->setValidatedBy($validatedBy)->setValidatedAt(new \DateTime());
                 }
 
                 $json = $timeSheet->toJson();

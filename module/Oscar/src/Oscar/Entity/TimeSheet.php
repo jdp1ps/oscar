@@ -133,10 +133,42 @@ class TimeSheet implements ITrackable
     private $person;
 
     /**
+     * @var
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $sendBy;
+
+    /**
      * @var \DateTime
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $validatedAt;
+
+    /**
+     * @var
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $validatedBy;
+
+    /**
+     * @var
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $rejectedBy;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $rejectedAt;
+
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $rejectedComment;
+
+
 
 
 
@@ -157,9 +189,102 @@ class TimeSheet implements ITrackable
             'end' => $this->getDateTo()->format('c'),
             'status' => self::getStatusText()[$this->getStatus()],
             'owner' => $this->getPerson()->getDisplayName(),
-            'owner_id' => $this->getPerson()->getId()
+            'owner_id' => $this->getPerson()->getId(),
+            'rejectedAt' => $this->getRejectedAt(),
+            'rejectedComment' => $this->getRejectedComment(),
         ];
     }
+
+    /**
+     * @return mixed
+     */
+    public function getSendBy()
+    {
+        return $this->sendBy;
+    }
+
+    /**
+     * @param mixed $sendBy
+     */
+    public function setSendBy($sendBy)
+    {
+        $this->sendBy = $sendBy;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValidatedBy()
+    {
+        return $this->validatedBy;
+    }
+
+    /**
+     * @param mixed $validatedBy
+     */
+    public function setValidatedBy($validatedBy)
+    {
+        $this->validatedBy = $validatedBy;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRejectedBy()
+    {
+        return $this->rejectedBy;
+    }
+
+    /**
+     * @param mixed $rejectedBy
+     */
+    public function setRejectedBy($rejectedBy)
+    {
+        $this->rejectedBy = $rejectedBy;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getRejectedAt()
+    {
+        return $this->rejectedAt;
+    }
+
+    /**
+     * @param \DateTime $rejectedAt
+     */
+    public function setRejectedAt($rejectedAt)
+    {
+        $this->rejectedAt = $rejectedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedComment()
+    {
+        return $this->rejectedComment;
+    }
+
+    /**
+     * @param string $rejectedComment
+     */
+    public function setRejectedComment($rejectedComment)
+    {
+        $this->rejectedComment = $rejectedComment;
+        return $this;
+    }
+
+
 
     public function getHours(){
         return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp())/60/60;

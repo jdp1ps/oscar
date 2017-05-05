@@ -48,6 +48,11 @@ class CalendarDatas {
         this.defaultDescription = "";
         this.labels = [];
         this.owners = [];
+
+        ////
+        this.displayRejectModal = false;
+        this.rejectComment = "";
+        this.rejectedEvents = [];
     }
 
     get listEvents(){
@@ -576,6 +581,7 @@ var WeekView = {
                     @editevent="$emit('editevent', event)"
                     @submitevent="$emit('submitevent', event)"
                     @validateevent="$emit('validateevent', event)"
+                    @rejectevent="$emit('rejectevent', event)"
                     @savemoveevent="handlerSaveMove"
                     :event="event"
                     :key="event.id"></timeevent>
@@ -1221,6 +1227,26 @@ var Calendar = {
                 </form>
             </div>
 
+            <div class="editor" v-show="displayRejectModal">
+                <form @submit.prevent="handlerSendReject">
+                    <h3>Refuser des créneaux</h3>
+                    <section>
+                       <article v-for="creneau in rejectedEvents" class="event-inline-simple">
+                        <i class="icon-archive"></i><strong>{{ creneau.label }}</strong><br>
+                        <i class="icon-user"></i><strong>{{ creneau.owner }}</strong><br>
+                        <i class="icon-calendar"></i><strong>{{ creneau.dayTime }}</strong>
+                       </article>
+                    </section>
+                    <div class="form-group">
+                        <label for="">Préciser la raison du refus</label>
+                        <textarea class="form-control" v-model="rejectComment" placeholder="Raison du refus"></textarea>
+                    </div>
+                    <hr />
+                    <button type="submit" class="btn btn-primary" :class="{disabled: !rejectComment}">Envoyer</button>
+                    <button type="cancel" class="btn btn-default" @click.prevent="displayRejectModal = false">Annuler</button>
+                </form>
+            </div>
+
             <nav class="calendar-menu">
                 <nav class="views-switcher">
                     <a href="#" @click.prevent="state = 'week'" :class="{active: state == 'week'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>
@@ -1361,9 +1387,30 @@ var Calendar = {
             this.restValidate([event])
         },
 
-        handlerRejectEvent(event){
-            this.restStep([event], 'reject');
+        ////////////////////////////////////////////////////////////////////////
+
+        handlerSendReject(){
+            console.log(this.rejectedEvents, this.rejectComment);
+            var events = [];
+            this.rejectedEvents.forEach((event)=> {
+                var e = JSON.parse(JSON.stringify(event));
+                e.rejectedComment = this.rejectComment;
+                events.push(e);
+            });
+            this.restStep(events, 'reject');
         },
+
+        handlerRejectEvent(event){
+            console.log("Procédure de rejet");
+            this.showRejectModal([event]);
+        },
+
+        showRejectModal( events ){
+            this.displayRejectModal = true;
+            this.rejectedEvents = events;
+        },
+
+        ////////////////////////////////////////////////////////////////////////
 
         restSave(events){
             console.log('restSave');
@@ -1419,11 +1466,13 @@ var Calendar = {
                 data.append('do', action);
                 for( var i=0; i<events.length; i++ ){
                     data.append('events['+i+'][id]', events[i].id || null);
+                    data.append('events['+i+'][rejectedComment]', events[i].rejectedComment || null);
                 }
 
                 this.$http.post(this.restUrl(), data).then(
                     response => {
                         store.sync(response.body.timesheets);
+                        this.displayRejectModal = false;
                         this.handlerEditCancelEvent();
                     },
                     error => {

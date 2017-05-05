@@ -24,6 +24,12 @@ var EventDT = function () {
     var status = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 'draft';
     var owner = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "";
     var owner_id = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
+    var rejectedComment = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : "";
+    var rejectedAt = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
+    var validatedBy = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : null;
+    var validatedAt = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : null;
+    var confirmedBy = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : null;
+    var confirmedAt = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
 
     _classCallCheck(this, EventDT);
 
@@ -42,6 +48,14 @@ var EventDT = function () {
     this.owner_id = owner_id;
     this.intersect = 0;
     this.intersectIndex = 0;
+
+    this.rejectedComment = rejectedComment;
+    this.rejectedAt = rejectedAt;
+
+    this.validatedAt = validatedAt;
+    this.validatedBy = validatedBy;
+    this.confirmedAt = confirmedAt;
+    this.confirmedBy = confirmedBy;
 
     // OSCAR
     this.editable = actions.editable || false;
@@ -153,6 +167,11 @@ var EventDT = function () {
     key: 'duration',
     get: function get() {
       return this.durationMinutes / 60;
+    }
+  }, {
+    key: 'dayTime',
+    get: function get() {
+      return "de " + this.mmStart.format('hh:mm') + " à " + this.mmEnd.format('hh:mm') + ", le " + this.mmStart.format('dddd D MMMM YYYY');
     }
   }], [{
     key: 'first',
