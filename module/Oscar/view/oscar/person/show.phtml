@@ -162,7 +162,9 @@
                                 <?php foreach( $entity->getConnectors() as $connector=>$value ): ?>
                                     <li>
                                         <?= $connector ?> : <strong><?= $value ?></strong>
+                                        <?php if( $value && $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SYNC_LDAP) ): ?>
                                         <a href="<?= $this->url('connector/person') ?>?c=<?= $connector ?>&v=<?= $value ?>">synchroniser</a>
+                                        <?php endif; ?>
                                     </li>
                                 <?php endforeach; ?>
                                 </ul>
