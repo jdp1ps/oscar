@@ -31,7 +31,7 @@ class PersonFormHydrator implements HydratorInterface
         $object->setFirstname($data['firstname'])
             ->setLastname($data['lastname'])
             ->setCodeHarpege($data['codeHarpege'])
-            ->setCodeLdap($data['codeLdap'])
+            ->setLadapLogin($data['ladapLogin'])
             ->setCodeHarpege($data['codeHarpege'])
             ->setEmail($data['email'])
             ->setPhone($data['phone']);
@@ -53,7 +53,7 @@ class PersonFormHydrator implements HydratorInterface
             'id'        => $object->getId(),
             'firstname' => $object->getFirstname(),
             'lastname' => $object->getLastname(),
-            'codeLdap' => $object->getCodeLdap(),
+            'ladapLogin' => $object->getLadapLogin(),
             'phone' => $object->getPhone(),
             'codeHarpege' => $object->getCodeHarpege(),
             'email' => $object->getEmail(),

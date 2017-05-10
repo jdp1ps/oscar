@@ -63,12 +63,12 @@ class PersonForm extends Form implements InputFilterProviderInterface
         ]);
 
         $this->add([
-            'name'   => 'codeLdap',
+            'name'   => 'ladapLogin',
             'attributes' => [
                 'class' => 'form-control'
             ],
             'options' => [
-                'label' => 'ID LDAP'
+                'label' => 'Identifiant de connection (LDAP)'
             ],
             'type'=>'Text'
         ]);
