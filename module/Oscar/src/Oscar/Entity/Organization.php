@@ -31,6 +31,7 @@ class Organization implements ResourceInterface, IConnectedObject
     const TYPE_INSTITUTION = 'Institution';
     const TYPE_COMPOSANTE = 'Composante';
     const TYPE_INCONNU = 'Inconnue';
+    const TYPE_PLATEAU_TECHNIQUE = 'Plateau technique';
 
     public static function getTypes(){
         static $types;
@@ -45,6 +46,7 @@ class Organization implements ResourceInterface, IConnectedObject
                 self::TYPE_COLLECTIVITE,
                 self::TYPE_ETABLISSEMENT,
                 self::TYPE_INSTITUTION,
+                self::TYPE_PLATEAU_TECHNIQUE
             ];
         }
         return $types;
