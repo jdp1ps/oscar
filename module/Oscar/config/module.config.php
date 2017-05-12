@@ -71,6 +71,11 @@ return array(
                     'roles' => ['user']
                 ],
 
+                [ 'controller' =>  'Administration',
+                    'action' => ['connectorsConfig'],
+                    'roles' => ['Administrateur']
+                ],
+
                 [ 'controller' =>  'Connector',
                     'action' => ['person', 'persons', 'organization', "organizations"],
                     'roles' => ['user']
@@ -734,6 +739,14 @@ return array(
                 );
                 return $mailer;
             },
+
+            'OscarConfig' => function( $sm ){
+                return new \Oscar\Service\ConfigurationParser($sm->get('Config')['oscar']);
+            },
+
+            'PersonOrganizationConnectors' => function( $sm ){
+                return $sm->get('OscarConfig')->getConfiguration('connector.person_organization');
+            }
         ),
     ),
 

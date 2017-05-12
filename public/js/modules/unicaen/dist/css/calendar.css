@@ -227,7 +227,7 @@ body {
       .calendar .event.event-moving nav {
         display: none; }
     .calendar .event.event-locked {
-      opacity: .75;
+      opacity: .9;
       cursor: not-allowed; }
     .calendar .event .label {
       font-weight: 400;

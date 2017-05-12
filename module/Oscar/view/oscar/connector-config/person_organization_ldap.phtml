@@ -1,0 +1,59 @@
+<section class="card connector <?= $config['type'] ?>">
+    <form action="" method="post">
+    <input type="hidden" type="<?= $config['type'] ?>">
+    <h2><?= $config['label'] ?></h2>
+    <h3>Informations</h3>
+    <p class="text-highlight">
+        Type : <strong><?= $config['type'] ?></strong><br>
+        Classe : <strong><?= $config['class'] ?></strong>
+    </p>
+    <?php if( $config['warnings'] ): ?>
+        <?php foreach( $config['warnings'] as $warning ): ?>
+            <div class="alert alert-danger">
+                <?= $warning ?>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    <h3>Paramètres</h3>
+    <p>Fichier : <strong><?= $config['file'] ?></strong></p>
+    <?php foreach( $config['params'] as $param => $data ): ?>
+        <h4><?= $param ?></h4>
+        <p><?= $data['description'] ?></p>
+
+        <section>
+            <?php $composantId = uniqid('relations_person_organisation_') ?>
+            <div id="<?= $composantId ?>">
+                <keyselecteditor :values="values" :datas="datas" :name="'<?= $config['type'] ?>[<?= $param ?>]'"></keyselecteditor>
+            </div>
+            <?php /* foreach( $data['value'] as $keyLdap => $keyOscar ): ?>
+            <article>
+                <strong><?= $keyLdap ?></strong>
+                <select name="<?= $config['type'] ?>[<?= $param ?>][<?= $keyLdap ?>]">
+                    <option value="">Ignorer</option>
+                    <?php foreach( $config['rolesOscar'] as $key => $value ): ?>
+                        <option value="<?= $key ?>" <?= $keyOscar == $key ? ' selected="selected' : '' ?>><?= $value ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </article>
+            <?php endforeach;*/ ?>
+        </section>
+        <script>
+            require(['vue', 'KeySelectEditor'], function(Vue, KeySelectEditor){
+                new Vue({
+                    el: '#<?= $composantId ?>',
+                    data: {
+                      values: <?= json_encode($data['value']) ?>,
+                        datas: <?= json_encode($config['rolesOscar']) ?>
+                    },
+                    components: {
+                        'keyselecteditor': KeySelectEditor.default
+                    }
+                })
+            })
+        </script>
+    <?php endforeach; ?>
+        <nav>
+            <button type="submit">Enregistrer</button>
+        </nav>
+    </form>
+</section>

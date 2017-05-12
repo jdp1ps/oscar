@@ -1,7 +1,7 @@
-<?php /*
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/modules/unicaen/dist/css/calendar.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/modules/unicaen/dist/css/calendar.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/modules/unicaen/dist/css/datepicker.css' ?>" />
 <link rel="stylesheet" href="<?= $this->basePath() . '/css/icons/css/fontello.css' ?>" />
-<link rel="stylesheet" href="<?= $this->basePath() . '/css/calendar.css' ?>" />
-<link rel="stylesheet" href="<?= $this->basePath() . '/css/datepicker.css' ?>" />
 
 <div class="container">
     <h1 class="title-with-small">
@@ -19,7 +19,7 @@
     $color = 0;
     $crenaux = [];
 
-    foreach( $wpDeclarants as $wpd ){
+    foreach( $workpackages as $wpd ){
         $crenaux[((string)$wpd)] = [
             'label'         => (string)$wpd,
             'idactivity'    => $wpd->getActivity()->getId(),
@@ -63,4 +63,4 @@
             }
         });
     })
-</script>*/ ?>
+</script>

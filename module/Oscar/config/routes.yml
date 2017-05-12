@@ -1120,6 +1120,14 @@ administration:
     may_terminate: true
 
     child_routes:
+        connectors:
+            type: segment
+            may_terminate: true
+            options:
+                route: /connectors-config
+                defaults:
+                    action: connectorsConfig
+
         privileges:
             type: segment
             may_terminate: true

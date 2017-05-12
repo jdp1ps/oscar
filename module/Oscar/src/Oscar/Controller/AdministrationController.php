@@ -11,6 +11,7 @@ namespace Oscar\Controller;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
 use Oscar\Provider\Privileges;
@@ -23,6 +24,36 @@ class AdministrationController extends AbstractOscarController
     {
         $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
         return [];
+    }
+
+    public function connectorsConfigAction()
+    {
+
+
+
+
+        ///////////////////////////////////// Connecteurs PERSON <> ORGANIZATION
+        $personOrganizationConnectors = $this->getServiceLocator()
+            ->get('OscarConfig')
+            ->getConfiguration('connectors.person_organization');
+
+        // Configurations disponibles
+        $configs = [];
+
+
+        foreach($personOrganizationConnectors as $connector ){
+
+            $class  = $connector['class'];
+            $connectorInstance = new $class();
+            $connectorInstance->init($this->getServiceLocator(), $connector['params']);
+            if( $this->getHttpXMethod() == "POST" && $this->getRequest()->getPost($connectorInstance->getType()) ){
+                $connectorInstance->updateParameters($this->getRequest()->getPost($connectorInstance->getType()));
+            }
+            $config = $connectorInstance->getConfigData();
+            $configs[] = $config;
+        }
+
+        return ['configs'=>$configs];
     }
 
     ////////////////////////////////////////////////////////////////////////////

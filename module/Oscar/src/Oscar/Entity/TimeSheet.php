@@ -132,6 +132,37 @@ class TimeSheet implements ITrackable
      */
     private $person;
 
+
+    //////////////////////////////////////////////////// VALIDATION SCIENTIFIQUE
+
+    ////// VALIDATION
+    /** @var string Personne ayant fait la validation scientifique. */
+    private $validateSciBy;
+
+    /** @var int ID de la personne ayant fait la validation scientifique. */
+    private $validateSciById;
+
+    /** @var \DateTime Date de la validation scientifique. */
+    private $validateSciAt;
+
+    ////// REFUS
+    /** @var string Personne ayant refusé la validation scientifique. */
+    private $rejectedSciBy;
+
+    /** @var int ID de la personne ayant refusé la validation scientifique. */
+    private $rejectedSciById;
+
+    /** @var \DateTime Date du refuss de la validation scientifique. */
+    private $rejectedSciAt;
+
+    /** @var string Commentaire laisé par la personne ayant refusé la validation scientifique. */
+    private $rejectedSciComment;
+
+    ////////////////////////////////////////////////////////////////////////////
+
+
+
+
     /**
      * @var
      * @ORM\Column(type="string", nullable=true)

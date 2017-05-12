@@ -49,7 +49,8 @@ requirejs.config({
         'calendar' : 'modules/unicaen/dist/js/calendar',
         'EventDT' : 'modules/unicaen/dist/js/EventDT',
         'ICalAnalyser' : 'modules/unicaen/dist/js/ICalAnalyser',
-        'Datepicker' : 'modules/unicaen/dist/js/Datepicker'
+        'Datepicker' : 'modules/unicaen/dist/js/Datepicker',
+        'KeySelectEditor' : 'components/build/KeySelectEditor',
     },
     shim: {
         "bootstrap": {

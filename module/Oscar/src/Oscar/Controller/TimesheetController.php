@@ -207,6 +207,13 @@ class TimesheetController extends AbstractOscarController
                 $validable = false;
                 break;
 
+            case TimeSheet::STATUS_CONFLICT :
+                $deletable = true;
+                $sendable = true;
+                $editable = true;
+                $validable = false;
+                break;
+
             case TimeSheet::STATUS_TOVALIDATE :
                 $deletable = false;
                 $sendable = false;
@@ -363,14 +370,12 @@ class TimesheetController extends AbstractOscarController
         foreach( $workpackages as $workpackage ){
             /** @var WorkPackagePerson $workpackageperson */
             foreach( $workpackage->getPersons() as $workpackageperson ){
-                echo $workpackageperson->getPerson()."<br>";
                 $declarants[$workpackageperson->getPerson()->getId()] = $workpackageperson;
             }
         }
 
         $datasView = [
             'workpackages' => $workpackages,
-            'declarants' => $declarants,
             'activity' => $activity,
             'message' => sprintf('[%s] Déclaration pour %s par %s', $method, $activity, $person),
             'dataReceived' => $this->getRequest()->getPost(),
@@ -593,7 +598,7 @@ class TimesheetController extends AbstractOscarController
             return $this->getResponseNotFound(sprintf("L'activité %s n'existe pas", $activity));
         }
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_WORKPACKAGE_VALIDATE, $activity);
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
 
         if( $this->getRequest()->isXmlHttpRequest() ) {
             if ($method == 'GET') {
@@ -603,10 +608,10 @@ class TimesheetController extends AbstractOscarController
                     ->select('t')
                     ->from(TimeSheet::class, 't')
                     ->where('t.activity = :activity')
-                    ->andWhere('t.status != :status')
+//                    ->andWhere('t.status != :status')
                     ->setParameters([
                         'activity' => $activity,
-                        'status' => TimeSheet::STATUS_DRAFT
+//                        'status' => TimeSheet::STATUS_DRAFT
                     ])
                     ->getQuery()
                     ->getResult()
@@ -617,9 +622,9 @@ class TimesheetController extends AbstractOscarController
                 foreach ($timesheets as $timesheet) {
                     $json = $timesheet->toJson();
                     $json['credentials'] = [
-                        'deletable' => true,
-                        'editable' => true,
-                        'sendable' => $timesheet->getStatus() == TimeSheet::STATUS_DRAFT,
+                        'deletable' => false,
+                        'editable' => false,
+                        'sendable' => false, //$timesheet->getStatus() == TimeSheet::STATUS_DRAFT,
                         'validable' => $timesheet->getStatus() == TimeSheet::STATUS_TOVALIDATE
                     ];
                     $declaration[] = $json;

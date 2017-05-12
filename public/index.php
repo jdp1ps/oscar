@@ -57,6 +57,8 @@ if( file_exists(__DIR__.'/../MAINTENANCE') ){
     exit;
 }
 
+define('APP_DIR', realpath( __DIR__.'/../' ));
+
 // On test la variable d'environnement issue de apache
 if (function_exists('apache_getenv') && ($apacheEnv = apache_getenv('APPLICATION_ENV'))) {
     putenv('APPLICATION_ENV=' . apache_getenv('APPLICATION_ENV'));

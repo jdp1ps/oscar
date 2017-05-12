@@ -16,6 +16,33 @@ use Oscar\Connector\IConnectedRepository;
  */
 class PersonRepository extends EntityRepository implements IConnectedRepository
 {
+    private $_cacheSelectebleRolesOrganisation;
+    /**
+     * Retourne la liste des rôles dans les organisations pour la création de select.
+     */
+    public function getSelectableRolesOrganization(){
+        if( $this->_cacheSelectebleRolesOrganisation === null ){
+            $this->_cacheSelectebleRolesOrganisation = [];
+            /** @var RoleOrganization $roleOrganization */
+            foreach( $this->getRolesOrganization() as $roleOrganization ){
+                $this->_cacheSelectebleRolesOrganisation[$roleOrganization->getId()] = $roleOrganization->getRoleId();
+            }
+        }
+        return $this->_cacheSelectebleRolesOrganisation;
+    }
+
+    public function getRolesOrganizationArray(){
+        return $this->getEntityManager()->getRepository(Role::class)->getRolesAtOrganizationArray();
+    }
+
+
+    /**
+     * Retourne la liste des rôles dans les organisations.
+     */
+    public function getRolesOrganization(){
+        return $this->getEntityManager()->getRepository(RoleOrganization::class)->findAll();
+    }
+
 
     public function flush($mixed){
         $this->getEntityManager()->flush($mixed);

@@ -428,7 +428,7 @@
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-    Effectué : <?= $entity->getPercentDone() ?>
+
     <section id="workpackages"></section>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <script>
@@ -451,6 +451,14 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
         })
     </script>
     <?php endif; ?>
+
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ): ?>
+        <div class="alert alert-info">VALIDATION SCIENTIFIQUE</div>
+    <?php endif; ?>
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ): ?>
+    <div class="alert alert-info">VALIDATION ADMINISTRATIVE</div>
+<?php endif; ?>
+
     <?php /*<section id="workpackage">
         <h2><i class="icon-archive"></i> Lot de travail</h2>
         <section class="workpackages">

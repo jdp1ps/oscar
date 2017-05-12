@@ -234,8 +234,9 @@ class WorkPackageController extends AbstractOscarController
             ->getQuery()
             ->getResult();
 
-        $declarant = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_COMMIT, $activity);
-        $validateur = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_VALIDATE, $activity);
+        $declarant = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_COMMIT, $activity) && $activity->hasDeclarant($this->getCurrentPerson());
+        $validateur = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)
+                || $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
         /** @var WorkPackage $workPackage */
         foreach( $workPackages as $workPackage){
             $wp = $workPackage->toArray();

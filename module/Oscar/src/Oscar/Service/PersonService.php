@@ -3,9 +3,11 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
+use Oscar\Connector\ConnectorPersonOrganization;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
+use Oscar\Entity\PersonRepository;
 use Oscar\Entity\ProjectMember;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
@@ -201,9 +203,24 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return true;
     }
 
+    public function synchronizeRole( Person $person )
+    {
+        $connector = new ConnectorPersonOrganization('ldap', 'toto',
+            $this->getEntityManager()->getRepository(Person::class),
+            $this->getEntityManager()->getRepository(Organization::class),
+            $this->getServiceLdap(),
+            []);
+
+        //
+
+        var_dump($connector->synchronizePerson($person));
+    }
+
 
     public function synchronize( Person $person )
     {
+        $this->synchronizeRole($person);
+        die("Synchronisation pour $person");
         try {
             /** @var \UnicaenApp\Entity\Ldap\People $ldapDatas */
             $ldapDatas = $this->getFromLdap($person);
@@ -215,13 +232,11 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             return;
         }
 
-
         foreach($ldapDatas->getSupannRolesEntiteToArray('R00') as $role ){
             $structureCode = $role['code'];
             if( stripos($structureCode, 'HS_') === 0 ){
                 $structureCode = substr($structureCode, 3);
             }
-
 
             try {
                 /** @var Organization $structure */
@@ -290,6 +305,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
      */
     protected function getFromLdap(Person $person)
     {
+
         if ($person->getCodeLdap()) {
             return $this->getServiceLdap()->findOneByUid($person->getCodeLdap());
         } else {
@@ -433,6 +449,18 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
     public function convertCodeLdapToCodeHarpege($codeLdap){
         return preg_replace("/p0*([0-9]*)/", "$1", $codeLdap);
+    }
+
+    public function getRolesLdap(){
+        $roles = [];
+        $ldapPersons =  $this->getServiceLdap()->searchSimplifiedEntries(
+            self::LDAP_PERSONS,
+            self::STAFF_ACTIVE_OR_DISABLED,
+            [],
+            'cn'
+        );
+        die('ROLES LDAP');
+
     }
 
 

@@ -1,0 +1,6 @@
+<div class="container">
+    <h1>Configuration</h1>
+    <?php foreach( $configs as $config ): ?>
+        <?= $this->partial('/oscar/connector-config/' . $config['type'] . '.phtml', ['config' => $config]) ?>
+    <?php endforeach; ?>
+</div>
