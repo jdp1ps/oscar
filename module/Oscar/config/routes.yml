@@ -1120,6 +1120,14 @@ administration:
     may_terminate: true
 
     child_routes:
+        connectors_home:
+            type: segment
+            may_terminate: true
+            options:
+                route: /connectors
+                defaults:
+                    action: connectorsHome
+        # Affiche la configuration d'un connecteur
         connectors:
             type: segment
             may_terminate: true
@@ -1127,6 +1135,23 @@ administration:
                 route: /connectors-config
                 defaults:
                     action: connectorsConfig
+
+        # Lance la procédure de test d'un connecteur
+        connector_test:
+            type: segment
+            may_terminate: true
+            options:
+                route: /connector-test/:connector
+                defaults:
+                    action: connectorTest
+         # Lance la procédure de test d'un connecteur
+        connector_execute:
+            type: segment
+            may_terminate: true
+            options:
+                route: /connector-execute/:connectortype/:connectorname
+                defaults:
+                    action: connectorExecute
 
         privileges:
             type: segment

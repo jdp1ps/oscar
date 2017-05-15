@@ -4,7 +4,7 @@
 import Vue from 'vue';
 
 var KeySelectEditor = {
-    props: ['values', 'datas', 'name'],
+    props: ['values', 'datas', 'name', 'autocomplete'],
 
     data(){
         return {
@@ -22,6 +22,12 @@ var KeySelectEditor = {
         </select>
         <button class="btn btn-default" @click="handlerDelete(key)" type="button">Supprimer cette correspondance</button>
     </article>
+    <pre>
+        {{ autocomplete }}
+    </pre>
+    <select v-model="newData">
+        <option value="" v-for="v,l in autocomplete" :value="l">{{ v }}</option>
+    </select>
     <input type="text" v-model="newData" placeholder="Nouvelle clef..." />
     <button class="btn btn-default" type="button" @click="handlerAddKey">Ajouter une correspondance</button>
     </section>
@@ -29,7 +35,6 @@ var KeySelectEditor = {
 
     methods: {
         handlerUpdate(key, event){
-
             this.values[key] = event.target.value;
         },
 

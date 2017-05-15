@@ -15,6 +15,7 @@ use Oscar\Entity\PersonRepository;
 use UnicaenApp\Mapper\Ldap\People;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceManager;
 
 class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterface
 {
@@ -142,6 +143,23 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
 
         return $person;
 
+    }
+
+    public function init( ServiceManager $sm, $configFilePath){
+        $this->setServiceLocator($sm);
+    }
+
+    /**
+     * @return PersonRepository
+     */
+    public function getPersonRepository(){
+        return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Person::class);
+    }
+
+
+    public function execute(){
+        $personRepository = $this->getPersonRepository();
+        return $this->syncPersons($personRepository, true);
     }
 
     function syncPersons(PersonRepository $personRepository, $force)

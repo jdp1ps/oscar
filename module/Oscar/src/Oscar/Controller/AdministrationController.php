@@ -26,16 +26,97 @@ class AdministrationController extends AbstractOscarController
         return [];
     }
 
+    public function connectorsHomeAction(){
+        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+        $configConnectors = $configOscar->getConfiguration('connectors');
+
+        $labels = [
+            'person_organization' => "Affection des personnes aux organisations",
+            'organization' => "Organisations/Strucutres",
+            'person' => "Personnes",
+        ];
+
+        $out = [];
+
+        foreach( $configConnectors as $connectorType=>$connectorsConfig ){
+            if( !array_key_exists($connectorType, $out) ){
+                $out[$connectorType] = [];
+            }
+            foreach( $connectorsConfig as $tag=>$data){
+                if( !array_key_exists($tag, $out[$connectorType]) ){
+                    $out[$connectorType][$tag] = [
+                        'label' => $tag,
+                        'class' => array_key_exists('class', $data) ? $data['class'] : null,
+                        'params' => array_key_exists('params', $data) ? $data['params'] : null,
+                    ];
+                }
+            }
+        }
+        return [
+            'connectors' => $out,
+            'labels' => $labels
+        ];
+    }
+
+    public function connectorExecuteAction()
+    {
+        $connectorType = $this->params()->fromRoute('connectortype');
+        $connectorName = $this->params()->fromRoute('connectorname');
+
+        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+
+        return [
+          'repport' => [
+              'notices' => ['Exemple de notification'],
+              'errors' => ['Exemple erreur'],
+              'warnings' => ['Exemple de warning'],
+              'infos' => ['Exemple de info'],
+          ]
+        ];
+
+        try {
+            $connectorsConfig = $configOscar->getConfiguration('connectors');
+            if( !array_key_exists($connectorType, $connectorsConfig) ){
+                throw new \Exception(sprintf("Aucun connecteur de type %s n'est définit dans la configuration", $connectorType));
+            }
+
+            // Configuration du type de connector
+            $connectorTypeConfig = $connectorsConfig[$connectorType];
+
+            // Configuration du connector donné
+            if( !array_key_exists($connectorName, $connectorTypeConfig) ){
+                throw new \Exception(sprintf("Aucun connecteur %s n'est définit dans la configuration", $connectorName));
+            }
+
+            $connectorConfig = $connectorTypeConfig[$connectorName];
+
+
+            $connector = $this->getServiceLocator()->get("ConnectorService")->getConnector($connectorType.'.'.$connectorName);
+            $repport = $connector->execute();
+            var_dump($repport);
+
+
+        } catch(\Exception $e ){
+            die('ERROR : ' . $e->getMessage());
+        }
+        die("EXECUTE");
+    }
+
+    /**
+     * Affiche l'écran de configuration des connecteurs.
+     *
+     * @return array
+     */
     public function connectorsConfigAction()
     {
-
-
-
 
         ///////////////////////////////////// Connecteurs PERSON <> ORGANIZATION
         $personOrganizationConnectors = $this->getServiceLocator()
             ->get('OscarConfig')
             ->getConfiguration('connectors.person_organization');
+
+
+
 
         // Configurations disponibles
         $configs = [];
@@ -49,11 +130,25 @@ class AdministrationController extends AbstractOscarController
             if( $this->getHttpXMethod() == "POST" && $this->getRequest()->getPost($connectorInstance->getType()) ){
                 $connectorInstance->updateParameters($this->getRequest()->getPost($connectorInstance->getType()));
             }
-            $config = $connectorInstance->getConfigData();
+            $config = $connectorInstance->getConfigData(true);
             $configs[] = $config;
         }
 
         return ['configs'=>$configs];
+    }
+
+    public function connectorTestAction()
+    {
+        $connectorId = $this->params()->fromRoute('connector');
+        $connectors = $this->getServiceLocator()->get('OscarConfig')
+            ->getConfiguration('connectors.' . $connectorId);
+
+
+        $connectorPersonOrganization = $this->getServiceLocator()->get('ConnectorService')->getConnector('person_organization.ldap');
+
+        var_dump($connectorPersonOrganization->getRemoteRolesAvailables());
+
+        die("Test $connectorId");
     }
 
     ////////////////////////////////////////////////////////////////////////////

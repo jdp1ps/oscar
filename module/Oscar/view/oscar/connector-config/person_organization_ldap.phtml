@@ -1,7 +1,8 @@
 <section class="card connector <?= $config['type'] ?>">
     <form action="" method="post">
     <input type="hidden" type="<?= $config['type'] ?>">
-    <h2><?= $config['label'] ?></h2>
+    <h2 class="card-title"><?= $config['label'] ?></h2>
+    <div class="card-content">
     <h3>Informations</h3>
     <p class="text-highlight">
         Type : <strong><?= $config['type'] ?></strong><br>
@@ -23,19 +24,8 @@
         <section>
             <?php $composantId = uniqid('relations_person_organisation_') ?>
             <div id="<?= $composantId ?>">
-                <keyselecteditor :values="values" :datas="datas" :name="'<?= $config['type'] ?>[<?= $param ?>]'"></keyselecteditor>
+                <keyselecteditor :values="values" :datas="datas" :autocomplete="autocomplete" :name="'<?= $config['type'] ?>[<?= $param ?>]'"></keyselecteditor>
             </div>
-            <?php /* foreach( $data['value'] as $keyLdap => $keyOscar ): ?>
-            <article>
-                <strong><?= $keyLdap ?></strong>
-                <select name="<?= $config['type'] ?>[<?= $param ?>][<?= $keyLdap ?>]">
-                    <option value="">Ignorer</option>
-                    <?php foreach( $config['rolesOscar'] as $key => $value ): ?>
-                        <option value="<?= $key ?>" <?= $keyOscar == $key ? ' selected="selected' : '' ?>><?= $value ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </article>
-            <?php endforeach;*/ ?>
         </section>
         <script>
             require(['vue', 'KeySelectEditor'], function(Vue, KeySelectEditor){
@@ -43,6 +33,7 @@
                     el: '#<?= $composantId ?>',
                     data: {
                       values: <?= json_encode($data['value']) ?>,
+                        autocomplete: <?= json_encode($config['rolesRemote']) ?>,
                         datas: <?= json_encode($config['rolesOscar']) ?>
                     },
                     components: {
@@ -53,7 +44,8 @@
         </script>
     <?php endforeach; ?>
         <nav>
-            <button type="submit">Enregistrer</button>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
         </nav>
+    </div>
     </form>
 </section>

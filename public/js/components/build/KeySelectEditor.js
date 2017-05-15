@@ -14,7 +14,7 @@ define(['exports', 'vue'], function (exports, _vue) {
     }
 
     var KeySelectEditor = {
-        props: ['values', 'datas', 'name'],
+        props: ['values', 'datas', 'name', 'autocomplete'],
 
         data: function data() {
             return {
@@ -23,11 +23,10 @@ define(['exports', 'vue'], function (exports, _vue) {
         },
 
 
-        'template': '<section>\n    <hr>\n    <article class="card card-xs" v-for="value, key in values">\n        Clef : {{ key }} = {{ value }}\n        <select v-model="value" @change="handlerUpdate(key, $event)" :name="name+\'[\' +key +\']\'">\n            <option value="">Ignorer</option>\n            <option value="" v-for="v,l in datas" :value="l">{{ v }}</option>\n        </select>\n        <button class="btn btn-default" @click="handlerDelete(key)" type="button">Supprimer cette correspondance</button>\n    </article>\n    <input type="text" v-model="newData" placeholder="Nouvelle clef..." />\n    <button class="btn btn-default" type="button" @click="handlerAddKey">Ajouter une correspondance</button>\n    </section>\n    ',
+        'template': '<section>\n    <hr>\n    <article class="card card-xs" v-for="value, key in values">\n        Clef : {{ key }} = {{ value }}\n        <select v-model="value" @change="handlerUpdate(key, $event)" :name="name+\'[\' +key +\']\'">\n            <option value="">Ignorer</option>\n            <option value="" v-for="v,l in datas" :value="l">{{ v }}</option>\n        </select>\n        <button class="btn btn-default" @click="handlerDelete(key)" type="button">Supprimer cette correspondance</button>\n    </article>\n    <pre>\n        {{ autocomplete }}\n    </pre>\n    <select v-model="newData">\n        <option value="" v-for="v,l in autocomplete" :value="l">{{ v }}</option>\n    </select>\n    <input type="text" v-model="newData" placeholder="Nouvelle clef..." />\n    <button class="btn btn-default" type="button" @click="handlerAddKey">Ajouter une correspondance</button>\n    </section>\n    ',
 
         methods: {
             handlerUpdate: function handlerUpdate(key, event) {
-
                 this.values[key] = event.target.value;
             },
             handlerDelete: function handlerDelete(key) {

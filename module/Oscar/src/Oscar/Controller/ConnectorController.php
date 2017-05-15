@@ -31,11 +31,9 @@ class ConnectorController extends AbstractOscarController
             $person = $this->getEntityManager()->getRepository(Person::class)->getPersonsByConnectorID($connectorName, $personId);
             if( count($person) == 1 ){
                 $person = $person[0];
-                $connector = $this->getConfiguration('oscar.connectors.person')[$connectorName]();
-
-                if( $connector instanceof ServiceLocatorAwareInterface ){
-                    $connector->setServiceLocator($this->getServiceLocator());
-                }
+                $class = $this->getConfiguration('oscar.connectors.person')[$connectorName]['class'];
+                $connector = new $class();
+                $connector->init($this->getServiceLocator(), null);
                 $person = $connector->syncPerson($person);
                 $this->getEntityManager()->flush();
                 //var_dump($person);

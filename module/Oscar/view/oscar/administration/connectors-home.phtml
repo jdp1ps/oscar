@@ -1,0 +1,31 @@
+<section class="container">
+    <?php foreach( $connectors as $type => $connectorsList ): ?>
+        <section>
+            <h1><?= $labels[$type] ?></h1>
+            <?php foreach( $connectorsList as $connectorName=>$datas ): ?>
+            <article class="card">
+                <h2 class="card-title"><?= $connectorName ?></h2>
+                <?php if( $datas['class'] ): ?>
+                    Classe : <code><?= $datas['class'] ?></code><br>
+                <?php endif; ?>
+                <?php if( $datas['params'] ): ?>
+                    Fichier de configuration : <code><?= $datas['params'] ?></code>
+                <?php endif; ?>
+                <hr>
+                <nav>
+                <?php if( $datas['class'] ): ?>
+                    <a class="btn btn-primary" href="<?= $this->url('administration/connector_execute', ['connectortype' => $type, 'connectorname' => $connectorName]) ?>">
+                        Synchronisation des données
+                    </a>
+                <?php endif; ?>
+                <?php if( $datas['params'] ): ?>
+                    <a class="btn btn-default" href="<?= $this->url('administration/connector_execute', ['connectortype' => $type, 'connectorname' => $connectorName]) ?>">
+                        Configurer le connector
+                    </a>
+                <?php endif; ?>
+                </nav>
+            </article>
+            <?php endforeach; ?>
+        </section>
+    <?php endforeach; ?>
+</section>

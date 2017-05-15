@@ -1,0 +1,17 @@
+<section class="container">
+    <p>Rapport de synchronisation du connecteur NAME</p>
+    <?php foreach( $repport as $type=>$data ): ?>
+    <section>
+        <h1>
+            <i class="icon-<?= $type ?>"></i>
+            <?= $type ?> <sup>(<?= count($data) ?>)</sup>
+        </h1>
+        <?php foreach( $data as $message ): ?>
+        <article class="card xs">
+            <?= $message ?>
+        </article>
+        <?php endforeach; ?>
+    </section>
+    <?php endforeach; ?>
+</section>
+

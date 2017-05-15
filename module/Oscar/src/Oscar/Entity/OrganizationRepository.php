@@ -13,6 +13,14 @@ use Oscar\Connector\IConnectedRepository;
 
 class OrganizationRepository extends EntityRepository implements IConnectedRepository
 {
+    public function saveOrganizationPerson(Person $person, Organization $organisation, $roleOscarId) {
+        $personOrganization = new OrganizationPerson();
+        $this->getEntityManager()->persist($personOrganization);
+        $personOrganization->setPerson($person)
+            ->setOrganization($organisation)
+            ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
+        $this->getEntityManager()->flush($personOrganization);
+    }
 
     public function getObjectByConnectorID($connectorName, $connectorID)
     {

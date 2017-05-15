@@ -72,7 +72,7 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['connectorsConfig'],
+                    'action' => ['connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome'],
                     'roles' => ['Administrateur']
                 ],
 
@@ -668,6 +668,7 @@ return array(
             'ContractDocumentService' => \Oscar\Service\ContractDocumentService::class,
             'ActivityTypeService' => \Oscar\Service\ActivityTypeService::class,
             'OscarUserContext' => \Oscar\Service\OscarUserContext::class,
+            'ConnectorService' => \Oscar\Service\ConnectorService::class,
 
             // Droits
             //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
