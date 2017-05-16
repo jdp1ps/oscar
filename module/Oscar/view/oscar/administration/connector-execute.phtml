@@ -1,5 +1,8 @@
 <section class="container">
-    <p>Rapport de synchronisation du connecteur NAME</p>
+    <nav>
+        <a href="<?= $this->url('administration/connectors_home') ?>">Retour à la liste des connecteurs</a>
+    </nav>
+    <h1>Rapport d'exécution du connecteur : <strong><?= $connectorType ?>/<?= $connectorName ?></strong></h1>
     <?php foreach( $repport as $type=>$data ): ?>
     <section>
         <h1>

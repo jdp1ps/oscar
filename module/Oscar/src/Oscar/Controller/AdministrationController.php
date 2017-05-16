@@ -147,7 +147,8 @@ class AdministrationController extends AbstractOscarController
             $repport = $connector->execute();
             return [
                 'repport' => $repport,
-                'connector'
+                'connectorType' => $connectorType,
+                'connectorName' => $connectorName,
             ];
         } catch(\Exception $e ){
             die('ERROR : ' . $e->getMessage());

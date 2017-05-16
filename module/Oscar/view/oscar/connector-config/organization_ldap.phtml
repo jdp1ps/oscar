@@ -22,16 +22,16 @@
             </pre>
             <?php foreach( $config['params'] as $param => $data ): ?>
                 <h4><i class="icon-cog"></i><?= $param ?></h4>
-                <p><?= $data['description'] ?></p>
+                <p class="help"><?= $data['description'] ?></p>
                 <?php if( $data['type'] == 'text' ): ?>
                 <input type="text" value="<?= $data['value'] ?>" name="<?= $config['type'] ?>[<?= $param ?>]"/>
                 <?php elseif( $data['type'] == 'keykey' ): ?>
                     <?php $id = uniqid('val_') ?>
 
                     <section class="config-keykey" id="<?= $id ?>">
-                        <pre>{{ keykey }}</pre>
                         <div v-for="value,key in keykey">
-                            {{ key }} = <input :name="'<?= $config['type'] ?>[<?= $param ?>]['+key+']'" :value="value" />
+                            {{ key }} = <input :name="'<?= $config['type'] ?>[<?= $param ?>]['+key+']'"
+                                               v-model="value" @input="handlerInput(key, $event)"/>
                             <a href="#" @click.prevent="handlerRemoveKey(key)">Supprimer</a>
                         </div>
                     <button @click="handlerAddKey" type="button">Ajouter une correspondance</button>
@@ -44,6 +44,10 @@
                                 keykey: <?= $data['value'] ? json_encode($data['value']) : '{}' ?>
                             },
                             methods: {
+                                handlerInput: function(key, e){
+                                    this.keykey[key] = e.target.value;
+//                                  console.log(key, e.target.value);
+                                },
                                 handlerRemoveKey: function( key ){
                                     var newKeyKey = {};
                                     for (var property in this.keykey) {
