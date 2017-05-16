@@ -19,7 +19,7 @@
                     </a>
                 <?php endif; ?>
                 <?php if( $datas['params'] ): ?>
-                    <a class="btn btn-default" href="<?= $this->url('administration/connector_execute', ['connectortype' => $type, 'connectorname' => $connectorName]) ?>">
+                    <a class="btn btn-default" href="<?= $this->url('administration/connector_configure', ['connectortype' => $type, 'connectorname' => $connectorName]) ?>">
                         Configurer le connector
                     </a>
                 <?php endif; ?>

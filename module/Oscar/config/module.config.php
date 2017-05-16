@@ -72,7 +72,7 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome'],
+                    'action' => ['connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure'],
                     'roles' => ['Administrateur']
                 ],
 

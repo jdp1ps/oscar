@@ -8192,6 +8192,22 @@ time.date-missing {
     border-left-color: #499D1F; }
     .repport.repport-add .icon-repport:before {
       content: '\e85c'; }
+  .repport.repport-warnings {
+    border-left-color: #C69951; }
+    .repport.repport-warnings .icon-repport:before {
+      content: '\e865'; }
+  .repport.repport-infos {
+    border-left-color: #499D1F; }
+    .repport.repport-infos .icon-repport:before {
+      content: '\e85e'; }
+  .repport.repport-notices {
+    border-left-color: #30b0d5; }
+    .repport.repport-notices .icon-repport:before {
+      content: '\e805'; }
+  .repport.repport-errors {
+    border-left-color: #DD423E; }
+    .repport.repport-errors .icon-repport:before {
+      content: '\e88a'; }
   .repport.repport-update {
     border-left-color: #30b0d5; }
     .repport.repport-update .icon-repport:before {

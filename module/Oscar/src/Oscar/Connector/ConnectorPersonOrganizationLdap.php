@@ -140,9 +140,10 @@ class ConnectorPersonOrganizationLdap extends AbstractConnectorPersonOrganizatio
         $config = $this->getConfigData();
         $repport = [
             'errors'    => [],
-            'notices'   => [],
             'warnings'  => [],
-            'infos'     => []
+            'infos'     => [],
+            'traces'   => [],
+            'notices'   => [],
         ];
 
         $correspondance = $this->params['relations']['value'];
@@ -184,13 +185,12 @@ class ConnectorPersonOrganizationLdap extends AbstractConnectorPersonOrganizatio
                             try {
                                 /** @var Organization $organisation */
                                 $organisation = $this->getOrganizationRepository()->getObjectByConnectorID($config['organizationConnectorKeyName'], $codeEtab);
-                                    var_dump($roleOscar);
 
                                 if( !$organisation->hasPerson($person, $roleOscar) ){
                                     $this->getOrganizationRepository()->saveOrganizationPerson($person, $organisation, $roleOscarId);
                                     $repport['infos'][] = "Ajout du rôle $roleOscar a $person dans $organisation";
                                 } else {
-                                    $repport['notice'][] = "$person a déjà le rôle $roleOscar dans $organisation";
+                                    $repport['traces'][] = "$person a déjà le rôle $roleOscar dans $organisation";
                                 }
                             } catch ( \Exception $e ){
                                 $repport['errors'][] = "L'organisation $codeEtab est absent de Oscar";
@@ -207,9 +207,7 @@ class ConnectorPersonOrganizationLdap extends AbstractConnectorPersonOrganizatio
             }
         }
 
-
-        var_dump($repport);
-        die('EXEC !');
+        return $repport;
     }
 
     public function syncAll(){

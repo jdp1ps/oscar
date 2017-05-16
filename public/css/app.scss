@@ -2776,6 +2776,22 @@ time.date-missing {
     border-left-color: $colorGreen;
     .icon-repport:before { content: '\e85c' }
   }
+  &.repport-warnings {
+    border-left-color: $colorOrange;
+    .icon-repport:before { content: '\e865' }
+  }
+  &.repport-infos {
+    border-left-color: $colorGreen;
+    .icon-repport:before { content: '\e85e' }
+  }
+  &.repport-notices {
+    border-left-color: $colorBlue;
+    .icon-repport:before { content: '\e805' }
+  }
+  &.repport-errors {
+    border-left-color: $colorRed;
+    .icon-repport:before { content: '\e88a' }
+  }
   &.repport-update {
     border-left-color: $colorBlue;
     .icon-repport:before { content: '\e88a' }

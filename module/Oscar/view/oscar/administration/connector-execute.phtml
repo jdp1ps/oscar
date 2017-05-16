@@ -7,8 +7,8 @@
             <?= $type ?> <sup>(<?= count($data) ?>)</sup>
         </h1>
         <?php foreach( $data as $message ): ?>
-        <article class="card xs">
-            <?= $message ?>
+        <article class="card xsc repport repport-<?= $type ?>">
+            <i class="icon-repport"></i> <?= $message ?>
         </article>
         <?php endforeach; ?>
     </section>

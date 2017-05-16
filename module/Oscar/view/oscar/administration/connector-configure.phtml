@@ -1,0 +1,13 @@
+<section class="container">
+    <nav>
+        <a href="<?= $this->url('administration/connectors_home') ?>">Retour à la liste des connecteurs</a>
+    </nav>
+    <h1>Configuration du connecteur <strong><?= $connectorType ?>/<?= $connectorName ?></strong></h1>
+    <?php if( $config === null ): ?>
+    <div class="alert alert-info">
+        Ce connecteur n'a pas de configuration disponible depuis l'interface
+    </div>
+    <?php else: ?>
+        <?= $this->partial('/oscar/connector-config/' .$connectorType.'_'.$connectorName . '.phtml', ['config' => $config]) ?>
+    <?php endif; ?>
+</section>

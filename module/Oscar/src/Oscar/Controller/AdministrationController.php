@@ -14,7 +14,9 @@ use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
+use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ConfigurationParser;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\Http\Request;
 
@@ -58,21 +60,71 @@ class AdministrationController extends AbstractOscarController
         ];
     }
 
+
+    private function getRouteConnector($connectorType, $connectorName)
+    {
+        /** @var ConfigurationParser $configOscar */
+        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+
+        try {
+            $connectorsConfig = $configOscar->getConfiguration('connectors');
+            if( !array_key_exists($connectorType, $connectorsConfig) ){
+                throw new \Exception(sprintf("Aucun connecteur de type %s n'est définit dans la configuration", $connectorType));
+            }
+
+            // Configuration du type de connector
+            $connectorTypeConfig = $connectorsConfig[$connectorType];
+
+            // Configuration du connector donné
+            if( !array_key_exists($connectorName, $connectorTypeConfig) ){
+                throw new \Exception(sprintf("Aucun connecteur %s n'est définit dans la configuration", $connectorName));
+            }
+
+            $connectorConfig = $connectorTypeConfig[$connectorName];
+
+            return $this->getServiceLocator()
+                ->get("ConnectorService")
+                ->getConnector($connectorType.'.'.$connectorName);
+
+        } catch(\Exception $e ){
+            throw new OscarException("Impossible de trouver la configuration du connecteur $connectorType/$connectorName");
+        }
+    }
+
+    /**
+     * Écran de configuration des connecteurs.
+     */
+    public function connectorConfigureAction()
+    {
+        $connectorType = $this->params()->fromRoute('connectortype');
+        $connectorName = $this->params()->fromRoute('connectorname');
+
+        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+        $connector = $this->getRouteConnector($connectorType, $connectorName);
+
+        if( $this->getHttpXMethod() == "POST" ){
+            $connector->updateParameters($this->getRequest()->getPost("$connectorType"."_"."$connectorName"));
+        }
+
+        $config = $connector->getConfigData(true);
+        return [
+            'config' => $config,
+            'connectorType' => $connectorType,
+            'connectorName' => $connectorName
+        ];
+
+    }
+
+    /**
+     * Exécution du connecteur.
+     * @return array
+     */
     public function connectorExecuteAction()
     {
         $connectorType = $this->params()->fromRoute('connectortype');
         $connectorName = $this->params()->fromRoute('connectorname');
 
         $configOscar = $this->getServiceLocator()->get('OscarConfig');
-
-        return [
-          'repport' => [
-              'notices' => ['Exemple de notification'],
-              'errors' => ['Exemple erreur'],
-              'warnings' => ['Exemple de warning'],
-              'infos' => ['Exemple de info'],
-          ]
-        ];
 
         try {
             $connectorsConfig = $configOscar->getConfiguration('connectors');
@@ -93,13 +145,13 @@ class AdministrationController extends AbstractOscarController
 
             $connector = $this->getServiceLocator()->get("ConnectorService")->getConnector($connectorType.'.'.$connectorName);
             $repport = $connector->execute();
-            var_dump($repport);
-
-
+            return [
+                'repport' => $repport,
+                'connector'
+            ];
         } catch(\Exception $e ){
             die('ERROR : ' . $e->getMessage());
         }
-        die("EXECUTE");
     }
 
     /**

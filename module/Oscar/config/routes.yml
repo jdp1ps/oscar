@@ -1144,7 +1144,8 @@ administration:
                 route: /connector-test/:connector
                 defaults:
                     action: connectorTest
-         # Lance la procédure de test d'un connecteur
+
+        # Lance la procédure de test d'un connecteur
         connector_execute:
             type: segment
             may_terminate: true
@@ -1152,6 +1153,15 @@ administration:
                 route: /connector-execute/:connectortype/:connectorname
                 defaults:
                     action: connectorExecute
+
+        # Lance la procédure de test d'un connecteur
+        connector_configure:
+            type: segment
+            may_terminate: true
+            options:
+                route: /connector-configure/:connectortype/:connectorname
+                defaults:
+                    action: connectorConfigure
 
         privileges:
             type: segment

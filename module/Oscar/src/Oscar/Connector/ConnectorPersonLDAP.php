@@ -52,6 +52,10 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
         // TODO: Implement getPersonData() method.
     }
 
+    public function getConfigData(){
+        return null;
+    }
+
     /**
      * @param Person $person
      * @param $ldapData
@@ -171,22 +175,26 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
             'cn'
         );
 
-        $repport = [];
+        $repport = [
+            "errors"    => [],
+            "warnings"  => [],
+            "infos"     => [],
+            "notices"   => [],
+        ];
 
         foreach( $personsLDAP as $p ){
 
 
             $email = null;
             if( !key_exists('mail', $p) ){
-                $repport[] = [
-                    'message' => 'Donnée ignorée car email absent',
-                    'type' => 'notice'
-                ];
+                $connectorId = $p[$this->getRemoteID()];
+                $fullname = $p['givenname'] . (is_array($p['sn']) ? $p['sn'][0] : $p['sn']);
+                $repport['errors'][] = sprintf("Impossible d'importer %s(%s), pas d'email", $fullname, $connectorId);
                 continue;
             }
 
             $email = $p['mail'];
-            $type = 'info';
+            $type = 'infos';
             $persons = $personRepository->getPersonsByConnectorID('ldap', $p[$this->getRemoteID()]);
 
             // On recherche avec l'email au cas ou
@@ -203,8 +211,7 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
             }
 
             else {
-                var_dump($persons);
-                echo "# DOUBLONS : \n";
+                $repport['errors'][] = sprintf("Doublons détéctés pour %s.", $persons[0]);
                 continue;
             }
 
@@ -219,22 +226,17 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
 
 
 
+            $action = $type == 'update' ? 'mis à jour' : 'ajouté';
 
             try {
                 $person = $this->hydratePersonWithData($person, $p);
                 $personRepository->flush($person);
 
-                $action = $type == 'update' ? 'mis à jour' : 'ajouté';
-                $repport[] = [
-                    'message' => sprintf('%s (%s) a été %s', $person->getDisplayName(), $person->getEmail(), $action),
-                    'type' => 'notice'
-                ];
+                $repportType = $type == 'update' ? 'notices' : 'infos';
+                $repport[$repportType][] = sprintf('%s (%s) a été %s', $person->getDisplayName(), $person->getEmail(), $action);
 
             } catch( \Exception $e ){
-                $repport[] = [
-                    'message' => sprintf("Error %s (%s) n'a pas été %s", $person->getDisplayName(), $person->getEmail(), $action),
-                    'type' => 'error'
-                ];
+                $repport['errors'][] = sprintf("Error %s (%s) n'a pas été %s", $person->getDisplayName(), $person->getEmail(), $action);
             }
         }
         return $repport;

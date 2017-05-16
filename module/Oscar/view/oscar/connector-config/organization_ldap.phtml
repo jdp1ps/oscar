@@ -1,0 +1,74 @@
+<section class="card connector <?= $config['type'] ?>">
+    <form action="" method="post">
+        <input type="hidden" type="<?= $config['type'] ?>">
+        <h2 class="card-title"><?= $config['label'] ?></h2>
+        <div class="card-content">
+            <h3>Informations</h3>
+            <p class="text-highlight">
+                Type : <strong><?= $config['type'] ?></strong><br>
+                Classe : <strong><?= $config['class'] ?></strong>
+            </p>
+            <?php if( $config['warnings'] ): ?>
+                <?php foreach( $config['warnings'] as $warning ): ?>
+                    <div class="alert alert-danger">
+                        <?= $warning ?>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            <h3>Paramètres</h3>
+            <p>Fichier : <strong><?= $config['file'] ?></strong></p>
+            <pre>
+
+            </pre>
+            <?php foreach( $config['params'] as $param => $data ): ?>
+                <h4><i class="icon-cog"></i><?= $param ?></h4>
+                <p><?= $data['description'] ?></p>
+                <?php if( $data['type'] == 'text' ): ?>
+                <input type="text" value="<?= $data['value'] ?>" name="<?= $config['type'] ?>[<?= $param ?>]"/>
+                <?php elseif( $data['type'] == 'keykey' ): ?>
+                    <?php $id = uniqid('val_') ?>
+
+                    <section class="config-keykey" id="<?= $id ?>">
+                        <pre>{{ keykey }}</pre>
+                        <div v-for="value,key in keykey">
+                            {{ key }} = <input :name="'<?= $config['type'] ?>[<?= $param ?>]['+key+']'" :value="value" />
+                            <a href="#" @click.prevent="handlerRemoveKey(key)">Supprimer</a>
+                        </div>
+                    <button @click="handlerAddKey" type="button">Ajouter une correspondance</button>
+                    </section>
+                <script>
+                    require(['vue', 'bootbox'], function(Vue, Bootbox){
+                        new Vue({
+                            el: "#<?= $id ?>",
+                            data: {
+                                keykey: <?= $data['value'] ? json_encode($data['value']) : '{}' ?>
+                            },
+                            methods: {
+                                handlerRemoveKey: function( key ){
+                                    var newKeyKey = {};
+                                    for (var property in this.keykey) {
+                                        if (property != key && this.keykey.hasOwnProperty(property)) {
+                                            newKeyKey[property] = this.keykey[property];
+                                        }
+                                    }
+                                    this.keykey = newKeyKey;
+                                },
+                                handlerAddKey: function(){
+                                    Bootbox.prompt("Entrez la clef", function(key){
+                                        if( key ){
+                                            this.$set(this.keykey, key, "");
+                                        }
+                                    }.bind(this));
+                                }
+                            }
+                        });
+                    })
+                </script>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            <nav>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </nav>
+        </div>
+    </form>
+</section>

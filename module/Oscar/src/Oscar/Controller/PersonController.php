@@ -478,6 +478,7 @@ class PersonController extends AbstractOscarController
             ;
 
         return [
+            'ldapFilters' => $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed(),
             'persons' => new UnicaenDoctrinePaginator($persons, $page)
         ];
     }
