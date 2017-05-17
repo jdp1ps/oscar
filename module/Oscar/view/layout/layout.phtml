@@ -164,10 +164,10 @@ $this->headScript()
                                 <i class="icon-cube"></i> Activités <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu" role="menu">
-                                <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::PROJECT_INDEX)): ?>
+                                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX)): ?>
                                     <li role="presentation" class="dropdown-header"><i class="icon-cubes"></i> Projets</li>
                                     <li><a href="<?= $this->url('project') ?>">Liste des projets</a></li>
-                                    <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::PROJECT_CREATE)): ?>
+                                    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_CREATE)): ?>
                                         <li><a href="<?= $this->url('project/new') ?>">Créer un projet</a></li>
                                     <?php endif; ?>
                                 <?php endif; ?>
@@ -187,7 +187,7 @@ $this->headScript()
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Administration <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
 
-                                <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::ORGANIZATION_SHOW)): ?>
+                                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_SHOW)): ?>
                                 <li role="presentation" class="dropdown-header"><i class="icon-building-filled"></i> Organisations</li>
                                 <li><a href="<?= $this->url('organization') ?>">Liste des organisations</a></li>
                                 <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
@@ -197,11 +197,11 @@ $this->headScript()
                                 <?php endif; ?>
                                 <?php endif; ?>
 
-                                <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::PERSON_INDEX)): ?>
+                                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX)): ?>
                                 <li role="presentation" class="dropdown-header"><i class="icon-group"></i> Personnes</li>
                                 <li><a href="<?= $this->url('person') ?>">Liste des personnes</a></li>
                                 <li><a href="<?= $this->url('person/boss') ?>">Liste des responsables</a></li>
-                                    <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
+                                    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                                     <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
                                     <?php endif; ?>
                                 <?php endif; ?>
@@ -217,7 +217,9 @@ $this->headScript()
                                 <li role="presentation" class="dropdown-header"><i class="icon-stethoscope"></i> Maintenance des données</li>
                                 <li><a href="<?= $this->url('contract/advancedsearch') ?>?criteria[]=pp%3Bnull%3Bnull">Activités sans projet</a></li>
                                 <li><a href="<?= $this->url('project/empty') ?>">Projets sans activité</a></li>
-
+                                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
+                                <li><a href="<?= $this->url('administration/connectors_home') ?>">Connecteurs disponibles</a></li>
+                                <?php endif; ?>
 
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ): ?>
                                 <li role="presentation" class="dropdown-header"><i class="icon-lock"></i> Droits et sécurités</li>
