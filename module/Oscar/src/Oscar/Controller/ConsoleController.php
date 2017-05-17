@@ -1015,21 +1015,15 @@ die();
 
             foreach( $this->getConfiguration('oscar.connectors.person') as $key=>$getConnector ){
                 /** @var ConnectorPersonHarpege $connector */
-                $connector = $getConnector();
-
-                if( $connector instanceof ServiceLocatorAwareInterface ){
-                    $connector->setServiceLocator($this->getServiceLocator());
-                }
+                $connector = $this->getServiceLocator()->get('ConnectorService')->getConnector('person.'.$key);
 
                 $repport = $connector->syncPersons($this->getEntityManager()->getRepository(Person::class), $force);
-                foreach( $repport as $line ){
-                    if( is_string($line) ){
-                        echo "$line\n";
-                    } else {
-                        echo sprintf("[%s]\t %s\n", $line['type'], $line['message']);
+                foreach( $repport as $type=>$messages ){
+                    echo "# $type\n";
+                    foreach( $messages as $message ){
+                        echo "- $message\n";
                     }
                 }
-
             }
         } catch( \Exception $ex ){
             die($ex->getMessage() . "\n" . $ex->getTraceAsString());
