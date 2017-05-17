@@ -24,13 +24,15 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
     const LDAP_PERSONS = '(&(eduPersonAffiliation=member)(!(eduPersonaffiliation=student)))';
     const STAFF_ACTIVE_OR_DISABLED = 'ou=people,dc=unicaen,dc=fr';
 
-    private $correspondance = [
-        'firstname' => 'givenname',
-        'lastname' => 'sn',
-        'codeLdap' => 'supannaliaslogin',
-        'email' => 'mail',
-        'connectors.ldap' => 'uid'
-    ];
+    private $editable = false;
+
+    public function setEditable($editable){
+        $this->editable = $editable;
+    }
+
+    public function isEditable(){
+        return $this->editable;
+    }
 
     function getName()
     {

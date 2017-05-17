@@ -128,9 +128,10 @@ var Workpackage = {
 
             <div class="buttons" v-if="editable">
                 <div class="btn-group">
+                <!--
                   <button type="button" class="btn btn-default  btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Ajouter un déclarant <span class="caret"></span>
-                  </button>
+                  </button>-->
                   <ul class="dropdown-menu">
                     <li v-for="person in persons"><a href="#" @click.prevent="$emit('addperson', person.id, workpackage.id)">{{ person.displayname }}</a></li>
                   </ul>
@@ -395,17 +396,15 @@ var Workpackageperson = Vue.extend({
         },
 
         fetch(){
-            console.log('TOKEN', this.token);
             this.loading = true;
-            console.log("Fetching...");
 
             this.$http.get(this.$http.$options.root).then(
                 (res) => {
                     this.workpackages = res.body.workpackages;
                     this.persons = res.body.persons;
                     this.editable = res.body.editable;
-                    this.isDeclarant = res.body.isDeclarant;
-                    this.isValidateur = res.body.isValidateur;
+                    this.isDeclarant = false; // res.body.isDeclarant;
+                    this.isValidateur = false; // res.body.isValidateur;
                 },
                 (err) => {
                     this.errors.push("Impossible de charger les lots de travail : " + err.body);

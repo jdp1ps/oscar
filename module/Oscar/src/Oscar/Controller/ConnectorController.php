@@ -32,13 +32,10 @@ class ConnectorController extends AbstractOscarController
             if( count($person) == 1 ){
                 $person = $person[0];
                 $class = $this->getConfiguration('oscar.connectors.person')[$connectorName]['class'];
-                $connector = new $class();
-                $connector->init($this->getServiceLocator(), null);
-                $person = $connector->syncPerson($person);
+                $connector = $this->getServiceLocator()->get('ConnectorService')->getConnector('person.' . $connectorName);
+                $connector->syncPerson($person);
                 $this->getEntityManager()->flush();
-                //var_dump($person);
                 return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
-                //return $this->ajaxResponse($person->toArray());
             } else {
                 $match = [];
                 foreach($person as $p){

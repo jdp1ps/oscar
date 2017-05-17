@@ -438,26 +438,22 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
                     root: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>'
                 },
                 data:{
-                    token: '<?= $tokenValue ?>'
+                    token: '<?= $tokenValue ?>',
+
                 },
                 el: '#workpackages'
             });
+
             wp.$on('valider', function(){
                 window.location = '<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>';
             });
+
             wp.$on('declarer', function(){
                 window.location = '<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>';
             });
         })
     </script>
     <?php endif; ?>
-
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ): ?>
-        <div class="alert alert-info">VALIDATION SCIENTIFIQUE</div>
-    <?php endif; ?>
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ): ?>
-    <div class="alert alert-info">VALIDATION ADMINISTRATIVE</div>
-<?php endif; ?>
 
     <?php /*<section id="workpackage">
         <h2><i class="icon-archive"></i> Lot de travail</h2>

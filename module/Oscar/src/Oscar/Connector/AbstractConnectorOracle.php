@@ -8,16 +8,46 @@
 namespace Oscar\Connector;
 
 
+use Zend\ServiceManager\ServiceManager;
+
 abstract class AbstractConnectorOracle extends AbstractConnectorBdd
 {
+    private $configFilePath;
+
 
     /**
      * AbstractConnectorOracle constructor.
      */
-    public function __construct($params)
+    public function __construct()
     {
-        parent::__construct($params);
+        parent::__construct();
     }
+
+    public function init(ServiceManager $sm, $configFilePath)
+    {
+        $this->setServiceLocator($sm);
+        $this->configFilePath = $configFilePath;
+        $yml = new \Symfony\Component\Yaml\Parser();
+        $this->configure($yml->parse(file_get_contents($this->configFilePath)));
+    }
+
+    public function setHooks($hooks){
+        if( array_key_exists('hydratationPostProcess', $hooks) ){
+            $this->setHydratationPostProcess($hooks['hydratationPostProcess']);
+        }
+    }
+
+    private $editable;
+
+    public function setEditable($editable){
+        $this->editable = $editable;
+    }
+
+    public function isEditable(){
+        return $this->editable;
+    }
+
+
 
     /**
      * @param $query

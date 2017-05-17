@@ -41,6 +41,14 @@ class ConnectorService implements ServiceLocatorAwareInterface, EntityManagerAwa
             // Création de l'instance
             $_CONNECTORS_INSTANCE[$connectorName] = new $connectorConfig['class'];
             $_CONNECTORS_INSTANCE[$connectorName]->init($this->getServiceLocator(), $connectorConfig['params']);
+
+            if( array_key_exists('editable', $connectorConfig) ){
+                $_CONNECTORS_INSTANCE[$connectorName]->setEditable($connectorConfig['editable'] === true);
+            }
+
+            if( array_key_exists('hooks', $connectorConfig) ){
+                $_CONNECTORS_INSTANCE[$connectorName]->setHooks($connectorConfig['hooks']);
+            }
         }
         return $_CONNECTORS_INSTANCE[$connectorName];
     }

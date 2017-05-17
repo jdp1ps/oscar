@@ -388,11 +388,9 @@ class OrganizationController extends AbstractOscarController
         $config = $this->getConfiguration('oscar.connectors.organization');
         if( array_key_exists($connector, $config) ){
             /** @var IConnector, IConnectorOrganization $connector */
-            $connector = $config[$connector]();
+            $connector = $this->getServiceLocator()->get('ConnectorService')->getConnector('organization.'.$connector);
+
             try {
-                if ($connector instanceof ServiceLocatorAwareInterface) {
-                    $connector->setServiceLocator($this->getServiceLocator());
-                }
                 $organization = $connector->syncOrganization($organization);
                 $this->getEntityManager()->flush($organization);
 

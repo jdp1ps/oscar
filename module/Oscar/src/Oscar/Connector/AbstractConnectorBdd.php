@@ -19,6 +19,7 @@ use Oscar\Entity\Organization;
  */
 abstract class AbstractConnectorBdd
 {
+
     private $params;
     private $fieldConfiguration;
     private $dateUpdateField;
@@ -38,17 +39,8 @@ abstract class AbstractConnectorBdd
         $this->queryAll = $query;
     }
 
-    /**
-     * $parameters est un tableau associatif qui doit contenir les informations
-     * pour la connection à la BDD.
-     *
-     * AbstractConnectorBdd constructor.
-     * @param $parameters
-     */
-    function __construct( $parameters )
-    {
-        $this->configure($parameters);
-    }
+    function __construct(){}
+
 
     /**
      * Cette méthode permet de vérifier et compléter la configuration des champs.
@@ -56,10 +48,11 @@ abstract class AbstractConnectorBdd
      * @param $config
      */
     final protected function buildFieldConfiguration( $config ){
+
         $this->fieldConfiguration = [];
         foreach( $config as $oscarName=>$params ){
             if( !isset($params['remoteName']) ){
-                throw new Exception("La configuration du champ $oscarName doit contenir une clef 'remoteName'.");
+                throw new \Exception("La configuration du champ $oscarName doit contenir une clef 'remoteName'.");
             }
 
             $required = key_exists('required', $params) ? (bool)$params['required'] : true;
@@ -127,12 +120,15 @@ abstract class AbstractConnectorBdd
     }
 
     protected function syncAll( IConnectedRepository $repository, $force=false ){
-        $syncRepport = [];
+
         $stid = $this->query($this->queryAll);
         $dateFormat = $this->getUpdateFieldFormat();
-        $dateRemoteName = $this->getUpdateFieldName();
-        $type = "";
-        $LENGTH = 20;
+        $repport = [
+            "errors" => [],
+            "warnings" => [],
+            "infos" => [],
+            "notices" => [],
+        ];
 
         while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
 
@@ -153,47 +149,30 @@ abstract class AbstractConnectorBdd
                     }
                     $dateUpdated = $dateRemoteMaj;
                 }
-                $type = "update";
+                $type = "notices";
 
             } catch( NoResultException $ex ){
-                $type = "add";
+                $type = "infos";
                 $object = $repository->newPersistantObject();
             } catch( NonUniqueResultException $ex ){
-                $type = "error";
+                $type = "errors";
                 $message = "! Erreur, Plusieurs enregistrements sont présents dans Oscar avec l'identifiant $remoteID";
             } catch( \Exception $ex ){
-                $type = "error";
+                $type = "errors";
                 die("ERREUR ! " . $ex->getMessage());
             }
-            if( $type == "update" || $type == "add" ){
+            if( $type == "infos" || $type == "notices" ){
                 $this->hydrateObjectWithRemote($object, $row);
-                $message = sprintf("%s de %s.", ($type == "update" ? 'Mise à jour' : 'Création'), (string)$object);
+                $message = sprintf("%s de %s.", ($type == "notices" ? 'Mise à jour' : 'Création'), (string)$object);
                 if( $force === true )
                     $repository->flush($object);
             }
 
 
-            $syncRepport[] = [
-                'type' => $type,
-                'message' => $message
-            ];
-
-            /*
-            if( $LENGTH <= 0 ){
-                return $syncRepport;
-            } else {
-                $LENGTH--;
-            }
-            /****/
-
+            $repport[$type][] = $message;
         }
-/*
-        if( !$force )
-            $syncRepport[] = "Aperçu des opération uniquement, utilisez l'option --force pour appliquer la mise à jour.";
-*/
-        return $syncRepport;
+        return $repport;
     }
-
 
     protected function syncOne($object, $id){
         $stid = $this->query(sprintf($this->queryOne, $id));

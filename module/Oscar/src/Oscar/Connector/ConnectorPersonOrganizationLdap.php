@@ -174,7 +174,7 @@ class ConnectorPersonOrganizationLdap extends AbstractConnectorPersonOrganizatio
                         $codeRole = $supannRole['role'];
                         $codeEtab = $supannRole['code'];
                         if( !array_key_exists($codeRole, $correspondance) ){
-                            $message = sprintf("Le rôle (code = %s) n'a pas de correspondance dans Oscar.", $codeRole);
+                            $message = sprintf("Le rôle %s (code = %s) n'a pas de correspondance dans Oscar.", $codeRole, $supannRole['libelle']);
                             if( !in_array($message, $repport['notices']) ){
                                 $repport['notices'][] = $message;
                             }
@@ -199,8 +199,6 @@ class ConnectorPersonOrganizationLdap extends AbstractConnectorPersonOrganizatio
                         }
                     }
 
-                } else {
-                    $repport['notices'][] =  "$person n'a pas de rôle pris en charge dans LDAP";
                 }
             } else {
                 $repport['error'][] =  "Impossible de charger les données pour $person ($connectorPersonID).";

@@ -48,6 +48,16 @@ abstract class AbstractConnectorPersonOrganization
      */
     private $rolesConnection;
 
+    private $editable = false;
+
+    public function setEditable($editable){
+        $this->editable = $editable;
+    }
+
+    public function isEditable(){
+        return $this->editable;
+    }
+
     /**
      * ConnectorPersonOrganization constructor.
      * @param string $personConnector

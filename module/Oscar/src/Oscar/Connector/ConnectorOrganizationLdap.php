@@ -189,15 +189,6 @@ class ConnectorOrganizationLdap implements IConnectorOrganization, ServiceLocato
         return 'ldap';
     }
 
-    private function getUsedType( $typeLdap ){
-        static $correspondancesType;
-        if( $correspondancesType === null ){
-            $correspondancesType = $this->getServiceLocator()->get('Config')['oscar']['connectors']['config'];
-        }
-
-        return array_key_exists($typeLdap, $correspondancesType) ? $correspondancesType[$typeLdap] : null;
-    }
-
     function syncOrganization(Organization $organization)
     {
         $report = [];
@@ -205,6 +196,8 @@ class ConnectorOrganizationLdap implements IConnectorOrganization, ServiceLocato
         /////////////////////////////////////////////// Récupération des données
         /** @var Structure ldapStructureService */
         $this->ldapStructureService = $this->getServiceLocator()->get('ldap_structure_service')->getMapper();
+
+
 
         $codeLDAP = $organization->getConnectorID($this->getName());
         $data = $this->ldapStructureService->findOneByDnOrCodeEntite($codeLDAP);
@@ -219,7 +212,17 @@ class ConnectorOrganizationLdap implements IConnectorOrganization, ServiceLocato
     protected function hydrateOragnisationWithLdapDatas( Organization $organization, $data ){
         $split = explode('$', $data->getPostaladdress());
         $type = str_replace('{SUPANN}', '', $data->getSupannTypeEntite());
-        $typeOscar = $this->getUsedType($type);
+
+        $correspondancesType = $this->getParams()['relations']['value'];
+
+        $type = str_replace('{SUPANN}', '', $data->getSupannTypeEntite());
+        if( $correspondancesType && array_key_exists($type, $correspondancesType) ){
+            $type = array_search($correspondancesType[$type], Organization::getTypesSelect());
+        } else {
+            $type = "";
+        }
+
+        $typeOscar = $type;
 
         $ldapData = [
             'shortName'  => $data->getOu(),
