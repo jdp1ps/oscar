@@ -52,7 +52,8 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
         // TODO: Implement getPersonData() method.
     }
 
-    public function getConfigData(){
+    public function getConfigData()
+    {
         return null;
     }
 
@@ -61,75 +62,78 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
      * @param $ldapData
      * @return Person
      */
-    protected function hydratePersonWithData( Person $person, $ldapData ){
+    protected function hydratePersonWithData(Person $person, $ldapData)
+    {
 
         $email = $ldapData['mail'];
 
-        if( array_key_exists('memberof', $ldapData) ){
+        if (array_key_exists('memberof', $ldapData)) {
             $filters = [];
-            if(is_array($ldapData['memberof']) ){
+            if (is_array($ldapData['memberof'])) {
                 $filters = $ldapData['memberof'];
-            } else if( is_string($ldapData['memberof']) ) {
-                $filters[] = $ldapData['memberof'];
+            } else {
+                if (is_string($ldapData['memberof'])) {
+                    $filters[] = $ldapData['memberof'];
+                }
             }
             $person->setLdapMemberOf($filters);
         }
 
         $resupannaffectation = '/\w*;(.*)/i';
 
-        if( !array_key_exists('supannaffectation', $ldapData) ){
+        if (!array_key_exists('supannaffectation', $ldapData)) {
             $supannaffectation = "";
         } else {
             $supannaffectation = $ldapData['supannaffectation'];
 
-            if( is_array($supannaffectation) ){
+            if (is_array($supannaffectation)) {
                 $supannaffectation = $supannaffectation[0];
             }
 
             preg_match($resupannaffectation, $supannaffectation, $matches);
 
-            if( count($matches) >= 2 ){
+            if (count($matches) >= 2) {
                 $supannaffectation = $matches[1];
             }
         }
 
         $supannlocation = "";
-        if( array_key_exists('ucbnsitelocalisation', $ldapData) ){
+        if (array_key_exists('ucbnsitelocalisation', $ldapData)) {
             $supannlocation = $ldapData['ucbnsitelocalisation'];
 
-            if( is_array($supannlocation) ){
+            if (is_array($supannlocation)) {
                 $supannlocation = $supannlocation[0];
             }
 
             preg_match($resupannaffectation, $supannlocation, $matches);
 
-            if( count($matches) >= 2 ){
+            if (count($matches) >= 2) {
                 $supannlocation = $matches[1];
             }
         }
 
-        if( array_key_exists('ucbnsousstructure', $ldapData) ){
+        if (array_key_exists('ucbnsousstructure', $ldapData)) {
             $supannlocation = $ldapData['ucbnsousstructure'];
 
-            if( is_array($supannlocation) ){
+            if (is_array($supannlocation)) {
                 $supannlocation = $supannlocation[0];
             }
 
             preg_match($resupannaffectation, $supannlocation, $matches);
 
-            if( count($matches) >= 2 ){
+            if (count($matches) >= 2) {
                 $supannlocation = $matches[1];
             }
         }
 
-        if( array_key_exists('ucbnstatus', $ldapData) ){
+        if (array_key_exists('ucbnstatus', $ldapData)) {
             $person->setLdapStatus($ldapData['ucbnstatus']);
         }
-  /****
-        if( array_key_exists('datefininscription', $ldapData) ){
-//            $person->setLdapFinInscription(createDanew \DateTime()$ldapData['datefininscription']);
-        }
-   /****/
+        /****
+         * if( array_key_exists('datefininscription', $ldapData) ){
+         * //            $person->setLdapFinInscription(createDanew \DateTime()$ldapData['datefininscription']);
+         * }
+         * /****/
 
         $connectorId = $ldapData[$this->getRemoteID()];
         $firstName = $ldapData['givenname'];
@@ -149,26 +153,30 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
 
     }
 
-    public function init( ServiceManager $sm, $configFilePath){
+    public function init(ServiceManager $sm, $configFilePath)
+    {
         $this->setServiceLocator($sm);
     }
 
     /**
      * @return PersonRepository
      */
-    public function getPersonRepository(){
+    public function getPersonRepository()
+    {
         return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Person::class);
     }
 
 
-    public function execute(){
+    public function execute()
+    {
         $personRepository = $this->getPersonRepository();
+
         return $this->syncPersons($personRepository, true);
     }
 
     function syncPersons(PersonRepository $personRepository, $force)
     {
-       $personsLDAP = $this->getServiceLdap()->searchSimplifiedEntries(
+        $personsLDAP = $this->getServiceLdap()->searchSimplifiedEntries(
             self::LDAP_PERSONS,
             self::STAFF_ACTIVE_OR_DISABLED,
             [],
@@ -176,55 +184,53 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
         );
 
         $repport = [
-            "errors"    => [],
-            "warnings"  => [],
-            "infos"     => [],
-            "notices"   => [],
+            "errors" => [],
+            "warnings" => [],
+            "infos" => [],
+            "notices" => [],
         ];
 
-        foreach( $personsLDAP as $p ){
+        foreach ($personsLDAP as $p) {
 
 
             $email = null;
-            if( !key_exists('mail', $p) ){
+            if (!key_exists('mail', $p)) {
                 $connectorId = $p[$this->getRemoteID()];
                 $fullname = $p['givenname'] . (is_array($p['sn']) ? $p['sn'][0] : $p['sn']);
-                $repport['errors'][] = sprintf("Impossible d'importer %s(%s), pas d'email", $fullname, $connectorId);
+                $repport['errors'][] = sprintf("Impossible d'importer %s(%s), pas d'email",
+                    $fullname, $connectorId);
                 continue;
             }
 
             $email = $p['mail'];
             $type = 'infos';
-            $persons = $personRepository->getPersonsByConnectorID('ldap', $p[$this->getRemoteID()]);
+            $persons = $personRepository->getPersonsByConnectorID('ldap',
+                $p[$this->getRemoteID()]);
 
             // On recherche avec l'email au cas ou
-            if( count($persons) == 0 ){
+            if (count($persons) == 0) {
                 $persons = $personRepository->getPersonByEmail($email);
             }
 
-            if( count($persons) == 0 ){
+            if (count($persons) == 0) {
                 $person = $personRepository->newPersistantObject();
+            } else {
+                if (count($persons) == 1) {
+                    $person = $persons[0];
+                } else {
+                    $repport['errors'][] = sprintf("Doublons détéctés pour %s.",
+                        $persons[0]);
+                    continue;
+                }
             }
 
-            else if( count($persons) == 1 ){
-                $person = $persons[0];
-            }
 
-            else {
-                $repport['errors'][] = sprintf("Doublons détéctés pour %s.", $persons[0]);
-                continue;
-            }
-
-
-            if( $person ){
+            if ($person) {
                 $type = 'update';
-            }
-            else {
+            } else {
                 $type = 'create';
                 $person = $personRepository->newPersistantObject();
             }
-
-
 
             $action = $type == 'update' ? 'mis à jour' : 'ajouté';
 
@@ -233,24 +239,30 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
                 $personRepository->flush($person);
 
                 $repportType = $type == 'update' ? 'notices' : 'infos';
-                $repport[$repportType][] = sprintf('%s (%s) a été %s', $person->getDisplayName(), $person->getEmail(), $action);
+                $repport[$repportType][] = sprintf('%s (%s) a été %s',
+                    $person->getDisplayName(), $person->getEmail(), $action);
 
-            } catch( \Exception $e ){
-                $repport['errors'][] = sprintf("Error %s (%s) n'a pas été %s", $person->getDisplayName(), $person->getEmail(), $action);
+            } catch (\Exception $e) {
+                $repport['errors'][] = sprintf("Error %s (%s) n'a pas été %s",
+                    $person->getDisplayName(), $person->getEmail(), $action);
             }
         }
+
         return $repport;
     }
 
     function syncPerson(Person $person)
     {
-        if( $person->getConnectorID($this->getName()) ){
-            $filter = sprintf(People::UID_FILTER, $person->getConnectorID($this->getName()));
-            $entry = $this->getServiceLdap()->searchSimplifiedEntry($filter, People::UTILISATEURS_BASE_DN);
-            if ($entry ) {
+        if ($person->getConnectorID($this->getName())) {
+            $filter = sprintf(People::UID_FILTER,
+                $person->getConnectorID($this->getName()));
+            $entry = $this->getServiceLdap()->searchSimplifiedEntry($filter,
+                People::UTILISATEURS_BASE_DN);
+            if ($entry) {
                 return $this->hydratePersonWithData($person, $entry);
             } else {
-                throw new \Exception(sprintf("%s(%s) n'est plus présent(e) dans LDAP.", $person, $person->getConnectorID($this->getName())));
+                throw new \Exception(sprintf("%s(%s) n'est plus présent(e) dans LDAP.",
+                    $person, $person->getConnectorID($this->getName())));
             }
 
         } else {

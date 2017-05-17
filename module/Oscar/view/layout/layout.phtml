@@ -190,9 +190,11 @@ $this->headScript()
                                 <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::ORGANIZATION_SHOW)): ?>
                                 <li role="presentation" class="dropdown-header"><i class="icon-building-filled"></i> Organisations</li>
                                 <li><a href="<?= $this->url('organization') ?>">Liste des organisations</a></li>
-                                    <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
-                                    <li><a href="<?= $this->url('organization/new') ?>">Nouvelle organisation</a></li>
-                                    <?php endif; ?>
+                                <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
+                                <li><a href="<?= $this->url('organization/new') ?>">Nouvelle organisation</a></li>
+                                <li><a href="<?= $this->url('organization/fusion') ?>">Fusion d'organisations</a></li>
+                                <li><a href="<?= $this->url('organization/scission') ?>">Scission d'organisations</a></li>
+                                <?php endif; ?>
                                 <?php endif; ?>
 
                                 <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::PERSON_INDEX)): ?>
@@ -215,13 +217,7 @@ $this->headScript()
                                 <li role="presentation" class="dropdown-header"><i class="icon-stethoscope"></i> Maintenance des données</li>
                                 <li><a href="<?= $this->url('contract/advancedsearch') ?>?criteria[]=pp%3Bnull%3Bnull">Activités sans projet</a></li>
                                 <li><a href="<?= $this->url('project/empty') ?>">Projets sans activité</a></li>
-                                <li><a href="<?= $this->url('organization/fusion') ?>">Fusion d'organisations</a></li>
-                                <li><a href="<?= $this->url('organization/scission') ?>">Scission d'organisations</a></li>
-                                <?php /*if($this->grant()->privileges(\Oscar\Provider\Privileges::PERSON_SYNC_LDAP)): ?>
-                                    <li><a href="<?= $this->url('person/syncLDAP') ?>">Synchronisation des personnes (LDAP)</a></li>
-                                    <li><a href="<?= $this->url('organization/ldap') ?>">Synchronisation des organisations (LDAP)</a></li>
-                                    <li><a href="<?= $this->url('person/syncHarpege') ?>">Synchronisation des INM</a></li>
-                                <?php endif;*/ ?>
+
 
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ): ?>
                                 <li role="presentation" class="dropdown-header"><i class="icon-lock"></i> Droits et sécurités</li>
