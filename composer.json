@@ -11,11 +11,8 @@
   "require": {
     "unicaen/unicaen-app": "dev-trunk",
     "unicaen/unicaen-auth": "dev-master",
-    "unicaen/unicaen-ldap": "dev-trunk",
-    "unicaen/unicaen-code": "dev-trunk",
     "enlitepro/enlite-monolog": "~1.1.0",
     "kmelia/monolog-stdout-handler": "1.2.0",
-    "zendframework/zend-developer-tools": "dev-master",
     "zf1/zend-search-lucene": "dev-master",
     "tomphp/tjo-annotation-router": "dev-master",
     "fightbulc/moment": "dev-master",

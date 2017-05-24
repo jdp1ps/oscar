@@ -13,6 +13,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Monolog\Logger;
 use Oscar\Connector\ConnectorPersonHarpege;
+use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Authentification;
@@ -714,13 +715,28 @@ die();
     //
     ////////////////////////////////////////////////////////////////////////////
     public function patchAction(){
+
+        $this->patchPersonConnectorRest();
         // $this->patchData_fieldsToConnectorAction();
         //$this->patchData_fieldsToConnectorAction();
         // $this->patchData_organisationType();
         // $this->autoMerge();
         //$this->patchData_PersonneConnectorID();
-        $this->patchData_OrganisationConnector();
-        $this->patchData_OrganisationDoublon();
+//        $this->patchData_OrganisationConnector();
+//        $this->patchData_OrganisationDoublon();
+    }
+
+    public function patchPersonConnectorRest(){
+        /** @var Person $person */
+        try {
+            $persons = $this->getEntityManager()->getRepository(Person::class)->findAll();
+            foreach ($persons as $person) {
+                $person->setConnectorID('rest', $person->getConnectorID('ldap'));
+            }
+            $this->getEntityManager()->flush();
+        } catch( \Exception $e ){
+            echo $e->getMessage();
+        }
     }
 
     public function patchData_OrganisationDoublon(){
@@ -1014,14 +1030,18 @@ die();
         try {
 
             foreach( $this->getConfiguration('oscar.connectors.person') as $key=>$getConnector ){
+
                 /** @var ConnectorPersonHarpege $connector */
                 $connector = $this->getServiceLocator()->get('ConnectorService')->getConnector('person.'.$key);
 
+                /** @var ConnectorRepport $repport */
                 $repport = $connector->syncPersons($this->getEntityManager()->getRepository(Person::class), $force);
-                foreach( $repport as $type=>$messages ){
-                    echo "# $type\n";
+
+
+                foreach( $repport->getRepportStates() as $type=>$messages ){
+                    echo "################# $type\n";
                     foreach( $messages as $message ){
-                        echo "- $message\n";
+                        echo " - " . $message['message'] . "\n";
                     }
                 }
             }

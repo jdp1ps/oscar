@@ -7,10 +7,10 @@ Oscar est une **application web** développée par l'Université de Caen Normand
 
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
- - PHP 5.6+ (support LDAP, Postgresql)
- - Postgresql 9+
+ - PHP 7.0+ (support LDAP, Postgresql)
+ - Postgresql 9.4+
  - Annuaire LDAP
- 
+
 Selon les différents connecteurs, des modules PHP peuvent être requis (ex : Connecteur vers une base de données MySQL, nécessite le module MySQL de PHP)
 
 
@@ -43,7 +43,7 @@ apt-get install php5 php5-ldap php5-curl php5-cli php5-pgsql php5-intl
 apt-get install postgresql-client postgresql-client-common
 ```
 
-Pour le développement : 
+Pour le développement :
 
 ```bash
 # GIT (composer va en avoir besoin pour récupérer les librairies tiers)
@@ -73,7 +73,7 @@ mkdir -p /var/oscar
 cd !$
 ```
 
-Obtenir la copie de **Oscar** : 
+Obtenir la copie de **Oscar** :
 
 ```bash
 git checkout git clone git@git.unicaen.fr:bouvry/oscar.git

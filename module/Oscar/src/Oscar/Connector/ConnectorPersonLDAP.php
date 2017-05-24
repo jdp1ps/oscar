@@ -185,6 +185,7 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
             'cn'
         );
 
+
         $repport = [
             "errors" => [],
             "warnings" => [],
@@ -260,6 +261,7 @@ class ConnectorPersonLDAP implements IConnectorPerson, ServiceLocatorAwareInterf
                 $person->getConnectorID($this->getName()));
             $entry = $this->getServiceLdap()->searchSimplifiedEntry($filter,
                 People::UTILISATEURS_BASE_DN);
+
             if ($entry) {
                 return $this->hydratePersonWithData($person, $entry);
             } else {
