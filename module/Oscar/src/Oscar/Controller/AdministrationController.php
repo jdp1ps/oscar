@@ -123,7 +123,7 @@ class AdministrationController extends AbstractOscarController
     {
         $connectorType = $this->params()->fromRoute('connectortype');
         $connectorName = $this->params()->fromRoute('connectorname');
-
+        $force = $this->params()->fromQuery('force', false);
         $configOscar = $this->getServiceLocator()->get('OscarConfig');
 
         try {
@@ -144,7 +144,7 @@ class AdministrationController extends AbstractOscarController
 
 
             $connector = $this->getServiceLocator()->get("ConnectorService")->getConnector($connectorType.'.'.$connectorName);
-            $repport = $connector->execute();
+            $repport = $connector->execute($force == '1');
             return [
                 'repport' => $repport,
                 'connectorType' => $connectorType,

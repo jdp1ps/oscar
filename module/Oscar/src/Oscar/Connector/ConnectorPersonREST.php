@@ -12,6 +12,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
+use Oscar\Exception\ConnectorException;
 use UnicaenApp\Mapper\Ldap\People;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -71,11 +72,11 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     }
 
 
-    public function execute()
+    public function execute( $force = false)
     {
         $personRepository = $this->getPersonRepository();
 
-        return $this->syncPersons($personRepository, true);
+        return $this->syncPersons($personRepository, $force);
     }
 
     /**
@@ -96,6 +97,10 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         curl_setopt($curl, CURLOPT_COOKIESESSION, true);
         $return = curl_exec($curl);
         curl_close($curl);
+
+        if( false === $return ){
+            throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
+        }
 
         foreach( json_decode($return) as $personData ){
 
