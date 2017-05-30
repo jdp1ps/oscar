@@ -14,29 +14,24 @@ apt-get upgrade
 ## Logiciels tiers
 
 ```bash
-# Subversion, pour récupérer les sources
-apt-get install Subversion
 
-# Apache2, le serveur web
+# Installation de GIT
+apt-get install git-core
+
+# Installation de APACHE2
 apt-get install apache2
 
 # PHP + Modules PHP
-apt-get install php5 php5-ldap php5-curl php5-cli php5-pgsql php5-intl
-
-# GIT (composer va en avoir besoin pour récupérer les librairies tiers)
-apt-get install git
+apt-get install php5 php5-ldap php5-curl php5-cli php5-pgsql php5-intl php5-mcrypt
 
 # Postgresql (ou autre selon le client de BDD utilisé)
 apt-get install postgresql-client postgresql-client-common
-
-# NodeJS (idem)
-apt-get install nodejs nodejs-legacy npm
 ```
 
 
 ## Proxy
 
-Penser à configurer le proxy :
+Si besoin, configurer le proxy :
 
 ```bash
 export http_proxy=http://proxy.unicaen.fr:3128
@@ -75,6 +70,10 @@ utilisée**.
 cp config/autoload/local.php.dist config/autoload/local.php
 vi !$
 ```
+
+
+AJOUTER CREATE DATABASE de Rien
+
 
 Une copie des données de développement est maintenue à jour dans le dossier `./data/backup_oscar-dev-lasted.sql_` en tenant compte des évolutions du modèle.
 
