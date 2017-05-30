@@ -50,6 +50,7 @@ cd !$
 Faire un *checkout* de la copie de travail,
 
 ```bash
+git clone https:
 svn co https://svn.unicaen.fr/svn/oscar/trunk/developpement --username <username>
 ```
 

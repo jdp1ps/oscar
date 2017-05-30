@@ -1,0 +1,7 @@
+# Emplacement du service REST fournissant la liste des personnes
+url_persons: 'https://rest.service.tdl/api/persons'
+
+# Emplacement du service REST fournissant les données pour une personne
+# Noter la présente du '%s' que Oscar remplacera par l'UID utilisé dans
+# le service REST.
+url_person: 'https://rest.service.tld/api/person/%s'

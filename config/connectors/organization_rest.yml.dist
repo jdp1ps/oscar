@@ -1,0 +1,7 @@
+# Emplacement du service REST fournissant la liste des personnes
+url_organizations: 'https://rest.service.tdl/api/organizations'
+
+# Emplacement du service REST fournissant les données pour une structure
+# Noter la présente du '%s' que Oscar remplacera par le code utilisé dans
+# le service REST.
+url_organization: 'https://rest.service.tld/api/organization/%s'
