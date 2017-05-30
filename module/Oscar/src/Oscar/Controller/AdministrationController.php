@@ -144,14 +144,14 @@ class AdministrationController extends AbstractOscarController
 
 
             $connector = $this->getServiceLocator()->get("ConnectorService")->getConnector($connectorType.'.'.$connectorName);
-            $repport = $connector->execute($force == '1');
+            $repport = $connector->execute(true);
             return [
                 'repport' => $repport,
                 'connectorType' => $connectorType,
                 'connectorName' => $connectorName,
             ];
         } catch(\Exception $e ){
-            die('ERROR : ' . $e->getMessage());
+            die('ERROR : ' . $e->getMessage() . "<br>\n" . $e->getTraceAsString());
         }
     }
 

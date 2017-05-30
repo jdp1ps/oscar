@@ -8,12 +8,13 @@
 namespace Oscar\Connector;
 
 
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
+use Oscar\Entity\Role;
 use Oscar\Exception\ConnectorException;
-use UnicaenApp\Mapper\Ldap\People;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\ServiceManager\ServiceManager;
@@ -76,7 +77,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     {
         $personRepository = $this->getPersonRepository();
 
-        return $this->syncPersons($personRepository, $force);
+        return $this->syncPersons($personRepository, false);
     }
 
     /**
@@ -117,6 +118,8 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
                 $personOscar = $this->hydratePersonWithDatas($personOscar, $personData);
 
+
+
                 $personRepository->flush($personOscar);
                 if( $action == 'add' ){
                     $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
@@ -131,7 +134,44 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         return $repport;
     }
 
+    protected function getRolesOscarByRoleId(){
+        static $roles;
+        if( $roles === null ){
+            $roles = [];
+            /** @var Role $role */
+            foreach($this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Role::class)->findAll() as $role ){
+                $roles[$role->getRoleId()] = $role;
+            }
+        }
+        return $roles;
+    }
+
+    protected function getStructureByCode( $code ){
+        return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Organization::class)->findOneBy(['code' => $code]);
+    }
+
     private function hydratePersonWithDatas( Person $personOscar, $personData ){
+        $rolesOscar = $this->getRolesOscarByRoleId();
+        foreach( $personData->roles as $organizationCode=>$roles ){
+            /** @var Organization $organization */
+            $organization = $this->getStructureByCode($organizationCode);
+            if( $organization ){
+                foreach( $roles as $roleId ){
+                    if( array_key_exists($roleId, $rolesOscar) ){
+                        if( !$organization->hasPerson($personOscar, $roleId) ){
+                            $roleOscar = new OrganizationPerson();
+                            $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->persist($roleOscar);
+                            $roleOscar->setPerson($personOscar)
+                                ->setOrganization($organization)
+                                ->setRoleObj($rolesOscar[$roleId]);
+                            $personOscar->getOrganizations()->add($roleOscar);
+
+                        }
+                    }
+                }
+            }
+        }
+
         return $personOscar->setConnectorID($this->getName(), $personData->uid)
             ->setLadapLogin($personData->login)
             ->setFirstname($personData->firstname)
@@ -159,6 +199,8 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             curl_close($curl);
 
             $personData = json_decode($return);
+
+
             return $this->hydratePersonWithDatas($person, $personData);
 
         } else {
