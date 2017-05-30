@@ -9,7 +9,7 @@ Oscar est une **application web** développée par l'Université de Caen Normand
  - Serveur web (Apache2)
  - PHP 7.0+ (support LDAP, Postgresql)
  - Postgresql 9.4+
- - Annuaire LDAP
+ - Annuaire LDAP (supann)
 
 Selon les différents connecteurs, des modules PHP peuvent être requis (ex : Connecteur vers une base de données MySQL, nécessite le module MySQL de PHP)
 
