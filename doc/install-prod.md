@@ -1,6 +1,10 @@
 # Installation en production/pré-production
 
-## Mettre à jour le système :P
+L'installation a été testé sous Debian et Ubuntu Server
+
+## Installation du système
+
+On commence par mettre le système à jour.
 
 ```bash
 apt-get update
@@ -10,11 +14,9 @@ apt-get update
 apt-get upgrade
 ```
 
-
-## Logiciels tiers
+### Installation des logiciels
 
 ```bash
-
 # Installation de GIT
 apt-get install git-core
 
@@ -28,8 +30,7 @@ apt-get install php5 php5-ldap php5-curl php5-cli php5-pgsql php5-intl php5-mcry
 apt-get install postgresql-client postgresql-client-common
 ```
 
-
-## Proxy
+### Proxy (Si besoin)
 
 Si besoin, configurer le proxy :
 
@@ -37,6 +38,8 @@ Si besoin, configurer le proxy :
 export http_proxy=http://proxy.unicaen.fr:3128
 export https_proxy=http://proxy.unicaen.fr:3128
 ```
+
+
 
 ## Installation de la copie
 
@@ -50,91 +53,112 @@ cd !$
 Faire un *checkout* de la copie de travail,
 
 ```bash
-git clone https:
-svn co https://svn.unicaen.fr/svn/oscar/trunk/developpement --username <username>
+git clone https://<USER>@git.unicaen.fr/bouvry/oscar
 ```
+
+
+## Vendor (librairies tiers)
+
+*Oscar* utilise des libraires tiers (vendor). 
+
+Pour le développement, elles sont gérées via composer, son utilisation necessite 
+ d'avoir accès aux librairies embarquées **Unicaen** : UnicaenApp, UnicaenAuth.
+ 
+Pour une installation en production/démo, une archive du dossier vendor est 
+ disponible dans le dossier `install` : 
+
+```bash
+tar xvfz install/vendor.tar.gz
+```
+
+Ou pour les développeurs : 
+
+```bash
+php composer.phar update
+```
+
+
 
 
 ## Configuration d'oscar
 
-```bash
-cd /var/oscar/developpement
-```
 
-### Oscar (Base de donnée)
+### Base de donnée
 
-Copier le fichier de configuration `./config/autoload/local.php.dist`, puis éditer
-la configuration de la base de donnée. **Penser à modifier le drivers selon la bdd
-utilisée**.
+Oscar est conçu pour fonctionner avec une base de données *Postgresql*.
+
+La configuration de l'accès à la BDD est renseignée dans le fichier
+`./config/autoload/local.php`.
+
+Si le fichier n'existe pas, un modèle existe dans le dépôt :
 
 ```bash
 cp config/autoload/local.php.dist config/autoload/local.php
 vi !$
 ```
 
+### Installation de la base de donnée vide
 
-AJOUTER CREATE DATABASE de Rien
+Création de l'utilisateur/bdd locale si besoin :
 
+```bash
+su - postgres
+```
 
-Une copie des données de développement est maintenue à jour dans le dossier `./data/backup_oscar-dev-lasted.sql_` en tenant compte des évolutions du modèle.
+Puis création de l'utilisateur/bdd :
 
-Pour une installation "vide", utiliser la structure et les données initiales du dossier `install/`
+```sql
+CREATE USER oscar WITH PASSWORD 'azerty';
+CREATE DATABASE oscar;
+GRANT ALL PRIVILEGES ON DATABASE oscar to oscar;
+\q
+```
 
-### Unicaen App (ldap & mail)
+### Données initiales
 
-Copier le fichier `unicaen-app.local.php.dist` puis éditer :
+Les données "de base" sont à disposition dans
+le dépôt dans le fichier : `data/backup_oscar-empty.sql`.
+
+```bash
+psql -h localhost -U oscar < data/backup_oscar-empty.sql
+```
+
+### Configuration de la BDD dans Oscar
+
+La configuration de la BDD est spécifiée dans le fichier `config/autoload/local.php`.
+
+Si le fichier n'existe pas, un modèle est présent dans `` :
 
 ```bash
 cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
 vi !$
 ```
+Exemple de configuration :
 
-### Installation des librairies tiers PHP
-
-Les librairies PHP sont gérées avec [Composer](https://getcomposer.com), installer le si ça n'est pas déjà fait :
-
-```bash
-curl -sS https://getcomposer.org/installer | php
+```php
+<?php
+/config/autoload/local.php
+return array(
+    // ...
+    // Accès BDD
+    'doctrine' => array(
+        'connection' => array(
+            'orm_default' => array(
+                'params' => array(
+                    'host'     => 'localhost',
+                    'port'     => '5432',
+                    'user'     => 'oscar',
+                    'password' => 'azerty',
+                    'dbname'   => 'oscar',
+                    'charset'  => 'utf8'
+                ),
+            ),
+        ),
+    ),
+);
 ```
 
-Puis installer/mettre à jour les dépendances du projet :
-
-```bash
-php composer.phar install
-```
-
-Le processus peut être assez long
-
-### Installation des librairies tiers FRONT (Developpement uniquement)
-
-(Toujours depuis le dossier developpement)
-
-```bash
-npm install
-```
-
-Puis installation des librairies JS/CSS via *bower*
-
-```bash
-node node_modules/bower/bin/bower --allow-root update
-```
-
-
-### Mise à jour de la BDD
-
-Depuis la racine du projet, commencer par visualiser les requêtes qui seront envoyées
-
-```bash
-php vendor/bin/doctrine-module orm:schema-tool:update --dump-sql
-```
-
-Puis mettre à jour la structure avec le flag `--force` :
-
-```bash
-php vendor/bin/doctrine-module orm:schema-tool:update --force
-```
-
-### Configuration du VHost
+## Configurer le serveur web (Apache)
 
 Activer les modules Apache si besoin :
 
@@ -197,12 +221,36 @@ cd /var/www
 ln -s ../oscar/oscar/trunk/developpement/public oscar
 ```
 
+
 ## Droits d'écriture
 
 S'assurer que les dossiers :
 
- - `./data/DoctrineORMModule`
+ - `./data/`
  - Le dossier choisi pour l'index Lucene
  - Le dossier de stoquage des documents
+ - Le fichier de log 
 
 Sont bien accessibles en écriture.
+
+
+
+### Unicaen App (ldap & mail)
+
+La configuration de **UnicaenApp** et **UnicaenAuth** (surcouches utilisées dans 
+Oscar) on leurs fichiers de configuration respectifs dans le dossier `/config/autoload` : 
+
+ - Pour UnicaenApp, `config/autoload/unicaen-app.local.php`
+ - Pour UnicaenAuth, `config/autoload/unicaen-auth.local.php`
+ 
+Des fichiers d'exemple sont disponibles avec l'extension `.dist`.
+  
+**UnicaenApp** :
+ - Configuration de l'authentification avec LDAP
+ - Paramètre pour le *Mailer*
+  
+  
+**UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*. 
+Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames` 
+permet de s'identifier à la place d'un utilisateur.
+
