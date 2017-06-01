@@ -151,7 +151,7 @@ class AdministrationController extends AbstractOscarController
                 'connectorName' => $connectorName,
             ];
         } catch(\Exception $e ){
-            die('ERROR : ' . $e->getMessage() . "<br>\n" . $e->getTraceAsString());
+            throw $e;
         }
     }
 

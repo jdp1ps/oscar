@@ -101,24 +101,6 @@ require __DIR__.'/../vendor/autoload.php';
 
 $conf = require 'config/application.config.php';
 
-try {
-    $app = Zend\Mvc\Application::init(require 'config/application.config.php');
-    $app->run();
-} catch (\Oscar\Exception\OscarException $e ){
-    ?>
-    <!doctype html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>OSCAR FAILURE</title>
-        <style>
-            body { font-family: Arial; color: white:
-                background: #990000;}
-        </style>
-    </head>
-    <body>
-    
-    </body>
-    </html>
-    <?php
-}
+
+$app = Zend\Mvc\Application::init(require 'config/application.config.php');
+$app->run();

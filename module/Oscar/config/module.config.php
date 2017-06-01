@@ -792,7 +792,9 @@ return array(
 
     // Emplacement des templates
     'view_manager' => array(
+        'exception_template'       => 'error/index',
         'template_map' => array(
+            'error/index'             => __DIR__ . '/../view/error.phtml',
             'layout/layout' => __DIR__ . '/../view/layout/layout.phtml',
             'unicaen-auth/droits/privileges' => __DIR__ . '/../view/unicaen-auth/droits/privileges.phtml',
             'unicaen-auth/tbl-link' => __DIR__ . '/../view/unicaen-auth/droits/partials/tbl-link.phtml',

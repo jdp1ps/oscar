@@ -22,6 +22,7 @@ use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Project;
 use Oscar\Entity\TVA;
+use Oscar\Exception\OscarException;
 use Oscar\Validator\EOTP;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -203,11 +204,11 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     protected function searchIndex_getIndex()
     {
-        $path = $this->searchIndex_getPath();
         try {
-
+            $path = $this->searchIndex_getPath();
             if ($this->index === null) {
                 if (!$this->searchIndex_checkPath()) {
+                    $this->index = \Zend_Search_Lucene::create($path);
                     $this->index = \Zend_Search_Lucene::create($path);
                 } else {
                     $this->index = \Zend_Search_Lucene::open($path);
@@ -216,11 +217,10 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
                 \Zend_Search_Lucene_Search_QueryParser::setDefaultEncoding('utf-8');
                 \Zend_Search_Lucene_Analysis_Analyzer::setDefault(new \Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8_CaseInsensitive());
             }
+            return $this->index;
         } catch( \Zend_Search_Lucene_Exception $e ){
-            die(sprintf("%s (%s)", $e->getMessage(), $path));
+            throw new OscarException("Une erreur est survenu lors de l'accès à l'index de recherche");
         }
-
-        return $this->index;
     }
 
     public function searchIndex_addToIndex(Activity $activity)
@@ -268,7 +268,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
 
     private function searchIndex_getPath(){
-        return $this->getServiceLocator()->get('Config')['oscar']['paths']['search_activity'];
+        return $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.search_activity');
     }
 
     public function searchIndex_reset()
@@ -383,14 +383,9 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     public function search($what)
     {
-        try {
-            $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
-            $hits = $this->searchIndex_getIndex()->find($query);
-        } catch (\Zend_Search_Lucene_Exception $e) {
-            $query = \Zend_Search_Lucene_Search_QueryParser::parse('"' . $what . '"');
-            $hits = $this->searchIndex_getIndex()->find($query);
-        }
 
+        $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
+        $hits = $this->searchIndex_getIndex()->find($query);
         $ids = [];
         foreach ($hits as $hit) {
             $ids[] = $hit->ID;

@@ -1,6 +1,5 @@
 <?php
 return array(
-    // Impossible de me souvenir de l'utilité de ces paramètres
     'view_manager' => array(
         'display_not_found_reason' => getenv('APPLICATION_ENV') == 'development',
         'display_exceptions'       => getenv('APPLICATION_ENV') == 'development',
@@ -30,7 +29,7 @@ return array(
 
             // Emplacement de l'index de recherche (emplacement où Lucene écrit
             // sont index de recherche - un DOSSIER).
-            'search_activity' => '/chemin/vers/index/lucene',
+            'search_activity' => APP_DIR . '/data/luceneindex',
         ],
         ////////////////////////////////////////////////////////////////////////
         //
@@ -48,14 +47,14 @@ return array(
             'organization' => [
                'rest' => [
                   'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
-                  'params'    => APP_DIR . '/data/connectors/organization_rest.yml',
+                  'params'    => APP_DIR . '/config/connectors/organization_rest.yml',
                   'editable'  => false
                ]
             ],
             'person' => [
                'rest' => [
                   'class'     => \Oscar\Connector\ConnectorPersonREST::class,
-                  'params'    => APP_DIR . '/data/connectors/person_rest.yml',
+                  'params'    => APP_DIR . '/config/connectors/person_rest.yml',
                   'editable'  => false
                ]
             ]

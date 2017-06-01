@@ -8,6 +8,8 @@
 namespace Oscar\Service;
 
 
+use Oscar\Exception\OscarException;
+
 class ConfigurationParser
 {
     private $config;
@@ -27,7 +29,7 @@ class ConfigurationParser
             $paths = explode('.', $key);
             foreach ($paths as $path) {
                 if( !isset($config[$path]) ){
-                    throw new \Exception("Clef $path absente dans la configuration");
+                    throw new OscarException("Clef $path absente dans la configuration");
                 }
                 $config = $config[$path];
             }

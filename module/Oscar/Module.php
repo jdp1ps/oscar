@@ -84,6 +84,13 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 array($this, 'onUserLogin'),
                 100);
 
+        // Envoi des erreurs dans les LOGS
+        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+            '*', 'dispatch.error', function( $e ){
+            $e->getApplication()->getServiceManager()->get('Logger')->error($e->getParam('exception')->getMessage());
+        });
+
+        // Log des accès
         $e->getApplication()->getEventManager()->attach('*', function ($e) {
             $this->trapEvent($e);
         });

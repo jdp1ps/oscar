@@ -97,11 +97,14 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_COOKIESESSION, true);
         $return = curl_exec($curl);
-        curl_close($curl);
 
         if( false === $return ){
+            // @todo Trouver un moyen de faire remonter une erreur plus "causante"
             throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
         }
+        curl_close($curl);
+
+
 
         foreach( json_decode($return) as $personData ){
 
@@ -197,6 +200,10 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             curl_setopt($curl, CURLOPT_COOKIESESSION, true);
             $return = curl_exec($curl);
             curl_close($curl);
+            if( false === $return ){
+                // @todo Trouver un moyen de faire remonter une erreur plus "causante"
+                throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
+            }
 
             $personData = json_decode($return);
 

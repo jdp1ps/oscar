@@ -1252,8 +1252,7 @@ class ProjectGrantController extends AbstractOscarController
             return $view;
 
         } catch (\Exception $e) {
-            die(sprintf("<h3>%s</h3><pre>%s</pre>", $e->getMessage(),
-                $e->getTraceAsString()));
+            throw $e;
         }
     }
 

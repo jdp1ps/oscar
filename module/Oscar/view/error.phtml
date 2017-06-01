@@ -1,0 +1,22 @@
+<div class="container">
+    <section class="alert alert-danger">
+    <h1>
+        <i class="icon-bug"></i>
+        Hum, c'est embarassant
+    </h1>
+    <p>Oscar a rencontré une erreur et a répondu</p>
+
+    <?php if( $exception && $exception instanceof Oscar\Exception\OscarException ): ?>
+        <div class="card card-danger"><?= $exception->getMessage() ?></div>
+        <p>Si ce message ne vous aide pas, contactez l'administrateur en lui indiquant ce message.</p>
+    <?php else: ?>
+        <pre>Erreur générique : <strong><?= get_class($exception) ?></strong>
+---
+<?= $message ?>
+
+---
+        </pre>
+<?php endif; ?>
+    </section>
+</div>
+

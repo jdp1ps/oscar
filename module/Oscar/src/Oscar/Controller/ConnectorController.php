@@ -9,6 +9,8 @@ namespace Oscar\Controller;
 
 
 use Oscar\Entity\Person;
+use Oscar\Exception\OscarException;
+use Oscar\Provider\Privileges;
 use UnicaenCode\Controller\Controller;
 use Zend\Http\Request;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -17,6 +19,8 @@ class ConnectorController extends AbstractOscarController
 {
     public function personAction()
     {
+
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
         /** @var Request $request */
         $request = $this->getRequest();
 
@@ -41,7 +45,7 @@ class ConnectorController extends AbstractOscarController
                 foreach($person as $p){
                     $match[] = (string)$p;
                 }
-                return $this->getResponseInternalError(implode(', ', $match) . ' ~ Données non-unique ou null');
+                throw new OscarException("Impossible de charger la personne.");
             }
         }
         return $this->getResponseNotImplemented('Synchronisation des personnes non implantée');
