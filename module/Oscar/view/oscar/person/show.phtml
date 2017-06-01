@@ -39,14 +39,6 @@
                         </p>
                     </article>
                 <?php endforeach; ?>
-
-                <a href="<?= $this->url('person/synchronize', ['id' => $entity->getId()]) ?>" class="btn btn-primary">
-                    <i class="icon-plug"></i> Synchronizer les structures
-                </a>
-
-                <?php /**<a href="<?= $this->url('organizationperson/neworganization', ['idenrolled' => $entity->getId()]) ?>" class="btn btn-primary">
-                    <i class="icon-plus-circled"></i> Ajouter
-                </a>*/ ?>
             </section>
         </div>
         <div class="col-xs-10">

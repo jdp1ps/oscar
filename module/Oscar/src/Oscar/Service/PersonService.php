@@ -203,62 +203,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return true;
     }
 
-    public function synchronizeRole( Person $person )
-    {
-        $connector = new ConnectorPersonOrganization('ldap', 'toto',
-            $this->getEntityManager()->getRepository(Person::class),
-            $this->getEntityManager()->getRepository(Organization::class),
-            $this->getServiceLdap(),
-            []);
-
-        //
-
-        var_dump($connector->synchronizePerson($person));
-    }
-
-
-    public function synchronize( Person $person )
-    {
-        $this->synchronizeRole($person);
-        die("Synchronisation pour $person");
-        try {
-            /** @var \UnicaenApp\Entity\Ldap\People $ldapDatas */
-            $ldapDatas = $this->getFromLdap($person);
-        } catch( \Exception $e ){
-            return;
-        }
-
-        if( !$ldapDatas ){
-            return;
-        }
-
-        foreach($ldapDatas->getSupannRolesEntiteToArray('R00') as $role ){
-            $structureCode = $role['code'];
-            if( stripos($structureCode, 'HS_') === 0 ){
-                $structureCode = substr($structureCode, 3);
-            }
-
-            try {
-                /** @var Organization $structure */
-                $structure = $this->getEntityManager()->getRepository(Organization::class)->findOneBy(['code' => $structureCode]);
-                if( !$structure ) {
-                    continue;
-                }
-
-                if( !$structure->hasResponsable($person) ){
-                    echo '<h4>'.$structureCode.'</h4>';
-                    $organizationPerson = new OrganizationPerson();
-                    $this->getEntityManager()->persist($organizationPerson);
-                    $organizationPerson->setPerson($person)->setOrganization($structure)->setRole(ProjectMember::ROLE_RESPONSABLE);
-                    $this->getEntityManager()->flush($organizationPerson);
-                }
-            }
-            catch( \Exception $e ){
-
-            }
-        }
-    }
-
     /**
      * Ecrase les données dans Person avec celle issue de LDAP.
      * @param Person $person

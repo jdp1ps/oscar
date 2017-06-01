@@ -128,13 +128,12 @@ var Workpackage = {
 
             <div class="buttons" v-if="editable">
                 <div class="btn-group">
-                <!--
-                  <button type="button" class="btn btn-default  btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Ajouter un déclarant <span class="caret"></span>
-                  </button>-->
-                  <ul class="dropdown-menu">
-                    <li v-for="person in persons"><a href="#" @click.prevent="$emit('addperson', person.id, workpackage.id)">{{ person.displayname }}</a></li>
-                  </ul>
+                    <button type="button" class="btn btn-default  btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Ajouter un déclarant <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li v-for="person in persons"><a href="#" @click.prevent="$emit('addperson', person.id, workpackage.id)">{{ person.displayname }}</a></li>
+                    </ul>
                 </div>
                 <a href="#" class="btn btn-default btn-xs" @click.prevent="handlerEditWorkPackage"><i class="icon-pencil"></i>Modifier</a>
                 <a href="#" class="btn btn-default btn-xs" @click.prevent="handlerDeleteWorkPackage"><i class="icon-trash"></i>Supprimer</a>
@@ -403,8 +402,8 @@ var Workpackageperson = Vue.extend({
                     this.workpackages = res.body.workpackages;
                     this.persons = res.body.persons;
                     this.editable = res.body.editable;
-                    this.isDeclarant = false; // res.body.isDeclarant;
-                    this.isValidateur = false; // res.body.isValidateur;
+                    this.isDeclarant = res.body.isDeclarant;
+                    this.isValidateur = res.body.isValidateur;
                 },
                 (err) => {
                     this.errors.push("Impossible de charger les lots de travail : " + err.body);

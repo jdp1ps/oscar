@@ -214,11 +214,11 @@ vi /etc/apache2/sites-available/000-default.conf
 </VirtualHost>
 ```
 
-Indiquer comme **DocumentRoot /var/www/oscar/oscar/trunk/developpement/public*** puis créer un lien symbolique dans **/var/www** :
+On peut utiliser un lien symbolique pour simplifier les bascules
 
 ```bash
 cd /var/www
-ln -s ../oscar/oscar/trunk/developpement/public oscar
+ln -s ../oscar/public oscar
 ```
 
 
@@ -243,11 +243,18 @@ Oscar) on leurs fichiers de configuration respectifs dans le dossier `/config/au
  - Pour UnicaenApp, `config/autoload/unicaen-app.local.php`
  - Pour UnicaenAuth, `config/autoload/unicaen-auth.local.php`
  
+ 
 Des fichiers d'exemple sont disponibles avec l'extension `.dist`.
   
 **UnicaenApp** :
  - Configuration de l'authentification avec LDAP
  - Paramètre pour le *Mailer*
+ 
+
+```bash
+cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
+vi !$
+```
   
   
 **UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*. 
