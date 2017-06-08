@@ -5,6 +5,7 @@ namespace Oscar\Controller;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Person;
 use Oscar\Service\OscarUserContext;
+use Zend\EventManager\Event;
 use Zend\Mvc\Application;
 use Zend\View\Model\ViewModel;
 
@@ -82,10 +83,15 @@ class PublicController extends AbstractOscarController
 
     public function documentationAction()
     {
+        $this->getEventManager()->trigger(new Event('foo', 'bar'));
         $doc = $this->params()->fromRoute('doc');
         if( $doc ){
             return [
-                'content' => "super doc"
+                'contenu' => "super doc"
+            ];
+        } else {
+            return [
+                'contenu' => 'foo'
             ];
         }
         return [];

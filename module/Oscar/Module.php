@@ -84,10 +84,20 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 array($this, 'onUserLogin'),
                 100);
 
+        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+            '*',
+            'ldap.error',
+            function($data) {
+                /*var_dump($data->getTarget());
+                echo "DATA : " . $data->getName();*/
+            },
+            100);
+
         // Envoi des erreurs dans les LOGS
         $e->getApplication()->getEventManager()->getSharedManager()->attach(
             '*', 'dispatch.error', function( $e ){
-            $e->getApplication()->getServiceManager()->get('Logger')->error($e->getParam('exception')->getMessage());
+            if( $e->getParam('exception') instanceof \Exception )
+                $e->getApplication()->getServiceManager()->get('Logger')->error($e->getParam('exception')->getMessage());
         });
 
         // Log des accès

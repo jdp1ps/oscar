@@ -532,6 +532,31 @@ body {
     flex: 1;
     display: flex;
     position: relative;
+
+    .event {
+      transition: opacity .3s;
+    }
+
+    &.drawing .event {
+      pointer-events: none !important;
+      opacity: .25;
+    }
+
+    &.drawing .event-changing {
+      opacity: 1;
+    }
+
+
+
+
+    .gost {
+      border: solid thin rgba(0,0,0,.5);
+      cursor: pointer;
+      padding: 2px;
+      margin: 0 .5%;
+      box-shadow: 0 0 4px rgba(0,0,0,.3);
+      background-color: rgba(255,255,255,1);
+    }
   }
 
   .meta {

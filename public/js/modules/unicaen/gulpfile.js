@@ -118,6 +118,13 @@ gulp.task('js', function(){
                         cjs: 'Datepicker',
                         global: 'Datepicker',
                         param: 'Datepicker'
+                    },
+                    {
+                        name: 'bootbox',
+                        amd: 'bootbox',
+                        cjs: 'bootbox',
+                        global: 'bootbox',
+                        param: 'bootbox'
                     }
                 ]
             }

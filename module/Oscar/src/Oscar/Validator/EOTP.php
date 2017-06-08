@@ -14,7 +14,7 @@ use Zend\Validator\Exception;
 class EOTP extends AbstractValidator
 {
     const NOT_EOTP = 'notEotp';
-    const REGEX_EOTP = "/^[0-9]{3}[A-Z]{2}[0-9]{2,4}$/mi";
+    const REGEX_EOTP = "/^[0-9]{3}[A-Z]{2,3}[0-9]{2,4}$/mi";
 
     protected $messageTemplates = array(
         self::NOT_EOTP => "'%value%' n'est pas un EOTP valide."

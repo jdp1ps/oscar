@@ -7,6 +7,9 @@ config/autoload/unicaen-auth.local.php
 /config/connectors/*.yml
 !/config/connector/*.yml.dist
 
+# Documentation
+/doc/*.pdf
+
 # Logs
 /logs/*
 !/logs/.gitkeep

@@ -1,11 +1,4 @@
-/*import EventDT from "EventDT";
-import moment from "moment-timezone"
-import ICalAnalyser from "ICalAnalyser";
-import VueResource from "vue-resource";
-import Datepicker from "Datepicker";
-*/
 moment.locale('fr');
-
 
 var colorLabels = {};
 var colorIndex = 0;
@@ -20,8 +13,6 @@ var colorLabel = (label) => {
     }
     return colorLabels[label];
 };
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +39,22 @@ class CalendarDatas {
         this.defaultDescription = "";
         this.labels = [];
         this.owners = [];
+
+        this.gostDatas = {
+            x: 0,
+            y: 0,
+            startFrom: null,
+            decalageY: 0,
+            day: 1,
+            start: null,
+            end: null,
+            title: "Nouveau créneau",
+            description: "",
+            startX: 0,
+            height: 40,
+            drawing: false,
+            editActive: false
+        };
 
         ////
         this.displayRejectModal = false;
@@ -251,10 +258,10 @@ var store = new CalendarDatas();
 var TimeEvent = {
 
     template: `<div class="event" :style="css"
-            @mouseleave="handlerMouseOut"
+
             @mousedown="handlerMouseDown"
             :title="event.label"
-            :class="{'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject}">
+            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject}">
         <div class="label" data-uid="UID">
           {{ event.label }}
         </div>
@@ -285,7 +292,7 @@ var TimeEvent = {
         </nav>
 
         <div class="bottom-handler" v-if="event.editable"
-            @mouseleave="handlerEndMovingEnd"
+
             @mousedown.prevent.stop="handlerStartMovingEnd">
             <span>===</span>
         </div>
@@ -302,6 +309,7 @@ var TimeEvent = {
             moving: false,
             interval: null,
             movingBoth: true,
+            changing: false,
             change: false,
             labelStart: "",
             labelEnd: "",
@@ -329,9 +337,11 @@ var TimeEvent = {
                 marge = sizeless / this.event.intersect * this.event.intersectIndex;
             }
             return {
+                'pointer-events': this.changing ? 'none' : 'auto',
                 height: (this.pixelEnd - this.pixelStart) + 'px',
                 background: this.withOwner ? colorLabel(this.event.owner): colorLabel(this.event.label),
                 position: "absolute",
+                //'opacity': (this.changing ? '1' : 'inherit'),
                 top: this.pixelStart + 'px',
                 width: ((100 / 7)-1) - sizeless + "%",
                 left: ((this.weekDay-1) * 100 / 7)+marge + "%"
@@ -369,8 +379,8 @@ var TimeEvent = {
             return this.dateEnd.hour() * 40 + (40 / 60 * this.dateEnd.minutes());
         },
 
-        weekDay(){
-            return this.dateStart.day()
+        weekDay() {
+           return this.dateStart.day()
         }
     },
 
@@ -384,6 +394,12 @@ var TimeEvent = {
     },
 
     methods: {
+        updateWeekDay( value ){
+                var start = this.dateStart.day(value);
+                var end = this.dateEnd.day(value);
+                this.event.start = start.format();
+                this.event.end = end.format();
+        },
         move(event){
             if( this.event.editable && event.movementY != 0) {
                 this.change = true;
@@ -399,11 +415,15 @@ var TimeEvent = {
                     this.$el.style.height = currentHeight + "px";
                 }
 
-                var dtUpdate = this.topToStart();
-                this.labelDuration = dtUpdate.duration;
-                this.labelStart = dtUpdate.startLabel;
-                this.labelEnd = dtUpdate.endLabel;
+                this.updateLabel();
             }
+        },
+
+        updateLabel(){
+            var dtUpdate = this.topToStart();
+            this.labelDuration = dtUpdate.duration;
+            this.labelStart = dtUpdate.startLabel;
+            this.labelEnd = dtUpdate.endLabel;
         },
 
         handlerEndMovingEnd(){
@@ -413,8 +433,9 @@ var TimeEvent = {
         },
 
         handlerStartMovingEnd(e){
-            this.movingBoth = false;
-            this.startMoving(e);
+            /*this.movingBoth = false;
+            this.startMoving(e);*/
+            this.$emit('onstartmoveend', this);
         },
 
         startMoving(e){
@@ -428,13 +449,16 @@ var TimeEvent = {
         },
 
         handlerMouseDown(e){
-            this.movingBoth = true;
-            this.startMoving(e);
+            if( this.event.editable ){
+                this.changing = true;
+                this.$emit('mousedown', this, e);
+            }
 
         },
 
         handlerMouseUp(e){
             if( this.event.editable ) {
+                console.log('UPDATE now');
                 this.moving = false;
                 this.$el.removeEventListener('mousemove', this.move);
 
@@ -448,8 +472,10 @@ var TimeEvent = {
                 this.event.end = this.dateEnd
                     .hours(dtUpdate.endHours)
                     .minutes(dtUpdate.endMinutes)
-                    .format()
+                    .format();
+
                 if( this.change ) {
+                    console.log('trigger update');
                     this.change = false;
                     this.$emit('savemoveevent', this.event);
                 }
@@ -551,6 +577,7 @@ var WeekView = {
                     <nav class="copy-paste" v-if="createNew">
                         <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>
                         <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>
+                        <span href="#" @click="submitDay(day)"><i class="icon-right-big"></i></span>
                     </nav>
                 </div>
             </div>
@@ -562,17 +589,20 @@ var WeekView = {
           <div class="labels-time">
             <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>
           </div>
-          <div class="events">
+          <div class="events" :class="{'drawing': (gostDatas.editActive) }"
+                   @mouseup.self="handlerMouseUp"
+                   @mousedown.self="handlerMouseDown"
+                   @mousemove.self="handlerMouseMove">
 
-              <div class="cell cell-day day" v-for="day in 7">
+              <div class="cell cell-day day" v-for="day in 7" style="pointer-events: none">
                 <div class="hour houroff" v-for="time in 6">&nbsp;</div>
                 <div class="hour" v-for="time in 16"
-                    @mouseup="handlerMouseUp"
-                    @mousedown="handlerMouseDown"
                     @dblclick="handlerCreate(day, time+5)">&nbsp;</div>
                 <div class="hour houroff" v-for="time in 2">&nbsp;</div>
               </div>
               <div class="content-events">
+                <div class="gost"
+                    :style="gostStyle" v-show="gostDatas.drawing">&nbsp;</div>
                 <timeevent v-for="event in weekEvents"
                     :with-owner="withOwner"
                     :weekDayRef="currentDay"
@@ -582,7 +612,9 @@ var WeekView = {
                     @submitevent="$emit('submitevent', event)"
                     @validateevent="$emit('validateevent', event)"
                     @rejectevent="$emit('rejectevent', event)"
-                    @savemoveevent="handlerSaveMove"
+                    @mousedown="handlerEventMouseDown"
+                    @savemoveevent="handlerSaveMove(event)"
+                    @onstartmoveend="handlerStartMoveEnd"
                     :event="event"
                     :key="event.id"></timeevent>
               </div>
@@ -645,30 +677,148 @@ var WeekView = {
                 }
             }
             return weekEvents;
+        },
+
+        gostStyle(){
+            return {
+                'left': this.gostDatas.x +"px",
+                'top': this.gostDatas.y +"px",
+                'width' : '13.2857%',
+                'pointer-events': 'none',
+                'height' : this.gostDatas.height + "px",
+                'position': 'absolute'
+            }
         }
     },
 
     methods: {
+
+//        @savemoveevent="handlerSaveMove"
+        handlerEventMouseDown(event, evt){
+            if( event.event.editable ){
+                this.gostDatas.eventActive = event;
+                this.gostDatas.editActive = true;
+            }
+        },
+
+        handlerStartMoveEnd(event){
+
+            this.gostDatas.eventMovedEnd = event;
+            this.gostDatas.editActive = true;
+            this.gostDatas.eventMovedEnd.changing = true;
+            console.log(arguments);
+        },
+
         handlerSaveMove(event){
             this.$emit('savemoveevent', event);
         },
 
-        handlerMouseUp(){
-            console.log('mouse up');
+        handlerMouseUp(e){
+            if( this.gostDatas.drawing ){
+                this.gostDatas.drawing = false;
+                this.createEvent(this.gostDatas.day, Math.floor(this.gostDatas.y/40), this.gostDatas.height/40*60);
+            }
+
+            if( this.gostDatas.eventActive ){
+                this.gostDatas.eventActive.changing = false;
+                this.gostDatas.eventActive.handlerMouseUp();
+                this.gostDatas.eventActive = null;
+                this.gostDatas.startFrom = null;
+            }
+
+            if( this.gostDatas.eventMovedEnd ){
+                console.log("FIN du déplacement de la borne de fin");
+                this.gostDatas.eventMovedEnd.changing = false;
+                this.gostDatas.eventMovedEnd = null;
+            }
+
+            this.gostDatas.editActive = false;
         },
 
-        handlerMouseDown(){
-            console.log('mouse down');
+        handlerMouseDown(e){
+            var roundFactor = 40 / 60 * this.pas;
+            this.gostDatas.y = Math.round(e.offsetY / roundFactor)* (roundFactor);
+            var pas = $(e.target).width() / 7;
+            var day = Math.floor(e.offsetX/pas);
+            this.gostDatas.day = day +1 ;
+            this.gostDatas.x = day * pas;
+            this.gostDatas.startX = this.gostDatas.x;
+            this.gostDatas.drawing = true;
+            this.gostDatas.editActive = true;
+        },
+
+        handlerMouseMove(e){
+            if( this.gostDatas.drawing ){
+                this.gostDatas.height  = Math.round((e.offsetY - this.gostDatas.y) / (40/60*this.pas)) * (40/60*this.pas);
+            }
+            else if( this.gostDatas.eventActive ){
+                this.gostDatas.eventActive.changing = true;
+                if( this.gostDatas.startFrom == null ){
+                    this.gostDatas.startFrom = e.offsetY + parseInt($(this.gostDatas.eventActive.$el).css('top'));
+                    this.gostDatas.decalageY = e.offsetY - parseInt($(this.gostDatas.eventActive.$el).css('top'));
+
+                } else {
+
+                    // On calcule l'emplacement de la souris pour savoir si on
+                    // a une bascule de la journée
+                    var pas = $(e.target).width() / 7,
+                        day = Math.floor(e.offsetX/pas),
+
+                        // Déplacement réél de la souris
+                        realMove = e.offsetY - this.gostDatas.startFrom - this.gostDatas.decalageY,
+
+                        // Déplacement arrondis (effet magnétique)
+                        effectivMove = Math.round(realMove / (40/60 * this.pas)),
+                        effectiveMoveApplication = effectivMove*(40/60*this.pas),
+
+                        // Position Y
+                        top = parseInt($(this.gostDatas.eventActive.$el).css('top'))
+                        ;
+
+                    console.log(realMove,this.gostDatas.startFrom, this.gostDatas.decalageY);
+
+                    // Mise à jour du jour si besoin
+                    if( day+1 != this.gostDatas.eventActive.weekDay ){
+                        this.gostDatas.eventActive.updateWeekDay(day+1);
+                    }
+
+                    // Application du déplacement
+                    if(effectivMove != 0 ){
+                        $(this.gostDatas.eventActive.$el).css('top', effectiveMoveApplication+ top);
+                        this.gostDatas.startFrom = effectiveMoveApplication+ top;
+                        this.gostDatas.eventActive.change = true;
+                        this.gostDatas.eventActive.updateLabel();
+                    }
+                }
+            }
+            else if( this.gostDatas.eventMovedEnd ){
+                console.log("déplacement de la borne de fin");
+                if( this.gostDatas.startFrom == null ){
+                    this.gostDatas.startFrom = e.offsetY;
+                } else {
+                    var pas = $(e.target).width() / 7;
+                    var day = Math.floor(e.offsetX/pas);
+                    var realMove = e.offsetY - this.gostDatas.startFrom; //, e.target;
+                    var effectivMove = Math.round(realMove / (40/60 * this.pas));
+                    if(effectivMove != 0 ){
+                        var height = parseInt($(this.gostDatas.eventMovedEnd.$el).css('height'));
+                        $(this.gostDatas.eventMovedEnd.$el).css('height', effectivMove*(40/60*this.pas)+ height);
+                        this.gostDatas.startFrom =  parseInt($(this.gostDatas.eventMovedEnd.$el).css('top')) + effectivMove*(40/60*this.pas)+ height;
+                        this.gostDatas.eventMovedEnd.change = true;
+                        this.gostDatas.eventMovedEnd.updateLabel();
+                        // eventActive
+                    }
+                }
+            }
         },
 
         handlerCreate(day, time){
-            //console.log()
             this.createEvent(day, time);
         },
 
-        createEvent(day,time){
+        createEvent(day,time, duration=120){
             var start = moment(this.currentDay).day(day).hour(time);
-            var end = moment(start).add(2, 'hours');
+            var end = moment(start).add(duration, 'minutes');
             var newEvent = new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, { editable: true, deletable: true});
             this.$emit('createevent', newEvent);
         },
@@ -691,6 +841,10 @@ var WeekView = {
                     );
                 }
             });
+        },
+
+        submitDay(dt){
+            this.$emit('submitday', dt);
         },
 
         copyCurrentWeek(){
@@ -1279,6 +1433,7 @@ var Calendar = {
                 @rejectevent="handlerRejectEvent"
                 @createevent="handlerCreateEvent"
                 @savemoveevent="handlerSaveMove"
+                @submitday="submitday"
                 @submitall="submitall"
                 @saveevent="restSave"></weekview>
 
@@ -1324,6 +1479,11 @@ var Calendar = {
     },
 
     methods: {
+        /**
+         * Envoi des données (de la semaine), @todo Faire la variante pour les mois.
+         * @param status
+         * @param period
+         */
         submitall(status, period){
             var events = [];
             if( period == 'week' ){
@@ -1335,6 +1495,30 @@ var Calendar = {
             }
             if( events.length ){
                 this.restStep(events, status);
+            }
+        },
+
+        /**
+         * Envoi des créneaux de la journée.
+         *
+         * @param day
+         */
+        submitday(day){
+
+            // Liste des événements éligibles
+            var events = [];
+            this.events.forEach( event => {
+                if( event.mmStart.format('YYYYMMDD') == day.format('YYYYMMDD') && event.sendable ){
+                    events.push(event);
+                }
+            });
+
+            // Envoi
+            if( events.length ){
+                bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
+                    if( confirm )
+                        this.restStep(events, 'send');
+                });
             }
         },
 
@@ -1413,7 +1597,7 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         restSave(events){
-            console.log('restSave');
+
             if( this.restUrl ){
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
@@ -1459,7 +1643,7 @@ var Calendar = {
         },
 
         restStep(events, action){
-            console.log('restStep(', events, action, ')');
+
             if( this.restUrl ){
                 this.transmission = "Enregistrement en cours...";
                 var data = new FormData();
@@ -1518,9 +1702,11 @@ var Calendar = {
 
         /** Soumission de l'événement de la liste */
         handlerSubmitEvent(event){
-            console.log('Modification du label par défaut');
             store.defaultLabel = event.label;
-            this.restSend([event]);
+            bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
+                if( confirm )
+                    this.restSend([event]);
+            });
         },
 
         /** Soumission de l'événement de la liste */

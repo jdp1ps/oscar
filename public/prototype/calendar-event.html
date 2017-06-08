@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body { margin: 0; padding: 0 }
+        #app {
+            margin: 0; padding: 0;
+            position: relative;
+            width: 100vw;
+            background: #1b6d84;
+            height: 100vh;
+        }
+        .reactive-area {
+            margin: 0; padding: 0;
+            position: absolute;
+            top: 50px;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            background: rgba(255,255,255,.7);
+            border-radius: 1em;
+        }
+        h1 {
+            margin: 0;
+            padding: 0;
+        }
+        .cell {
+            border-radius: 100%;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <section>
+            <h1>{{ title }} <em>{{ version }}</em></h1>
+            <pre> X = {{ x }}
+                Y = {{ y }}
+
+            </pre>
+            <div class="reactive-area"  @mousemove.self="handlerMouseMove" @mousedown.self="handlerMouseDown">
+                &nbsp;
+
+                <span v-for="cell in cells" class="cell" :style="cell" class="cell">
+                    {{ cell }}
+                </span>
+            </div>
+
+        </section>
+
+    </div>
+    <script src="../js/vendor/vue/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: "#app",
+
+            data: {
+                cells: ["A"],
+                title: "Super application",
+                version: "1.0",
+                x: 0,
+                y: 0
+            },
+
+            computed: {
+                cell: function () {
+                    return {
+                        left: Math.random() * 100 + '%',
+                        top: Math.random() * 100 + '%',
+                        position: 'absolute'
+                    };
+                }
+            },
+
+            methods: {
+                handlerMouseDown: function(e){
+                    console.log("MOUSEDOWN");
+                    this.cells.push('B');
+                },
+                handlerMouseMove: function( e ){
+                    console.log(e);
+                    this.x = e.offsetX;
+                    this.y = e.offsetY;
+
+                }
+            }
+
+        })
+    </script>
+</body>
+</html>

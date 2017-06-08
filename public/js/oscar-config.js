@@ -113,7 +113,7 @@ requirejs.config({
             deps: ['moment']
         },
         'calendar': {
-            deps: ['EventDT', 'vue', 'ICalAnalyser', 'Datepicker']
+            deps: ['EventDT', 'vue', 'ICalAnalyser', 'Datepicker', 'bootbox']
         },
         'Datepicker': {
             deps: ['moment-tz']

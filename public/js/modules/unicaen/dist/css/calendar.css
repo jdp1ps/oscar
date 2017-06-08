@@ -394,6 +394,20 @@ body {
     flex: 1;
     display: flex;
     position: relative; }
+    .calendar .events .event {
+      transition: opacity .3s; }
+    .calendar .events.drawing .event {
+      pointer-events: none !important;
+      opacity: .25; }
+    .calendar .events.drawing .event-changing {
+      opacity: 1; }
+    .calendar .events .gost {
+      border: solid thin rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      padding: 2px;
+      margin: 0 .5%;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+      background-color: white; }
   .calendar .meta {
     display: flex;
     font-size: 1.25em; }

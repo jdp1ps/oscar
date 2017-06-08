@@ -7,7 +7,7 @@ Oscar est une **application web** développée par l'Université de Caen Normand
 
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
- - PHP 7.0+ (support LDAP, Postgresql)
+ - PHP 5.6+ (compatible 7.0+) (support LDAP, Postgresql)
  - Postgresql 9.4+
  - Annuaire LDAP (supann)
 
@@ -214,11 +214,11 @@ vi /etc/apache2/sites-available/000-default.conf
 </VirtualHost>
 ```
 
-Indiquer comme **DocumentRoot /var/www/oscar/oscar/trunk/developpement/public*** puis créer un lien symbolique dans **/var/www** :
+Indiquer comme **DocumentRoot /path/to/oscar/public*** puis créer un lien symbolique dans **/var/www** :
 
 ```bash
 cd /var/www
-ln -s ../oscar/oscar/trunk/developpement/public oscar
+ln -s ../var/oscar/public oscar
 ```
 
 ## Droits d'écriture
@@ -227,6 +227,7 @@ S'assurer que les dossiers :
 
  - `./data/DoctrineORMModule`
  - Le dossier choisi pour l'index Lucene
- - Le dossier de stoquage des documents
+ - Les dossiers des documents
+ - Le dossier logs
 
 Sont bien accessibles en écriture.

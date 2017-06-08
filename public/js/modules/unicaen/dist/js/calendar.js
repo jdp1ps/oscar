@@ -1,12 +1,12 @@
 ;(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['moment', 'ICalAnalyser', 'EventDT', 'Datepicker'], factory);
+    define(['moment', 'ICalAnalyser', 'EventDT', 'Datepicker', 'bootbox'], factory);
   } else if (typeof exports === 'object') {
-    module.exports = factory(require('moment'), require('ICalAnalyser'), require('EventDT'), require('Datepicker'));
+    module.exports = factory(require('moment'), require('ICalAnalyser'), require('EventDT'), require('Datepicker'), require('bootbox'));
   } else {
-    root.Calendar = factory(root.moment, root.ICalAnalyser, root.EventDT, root.Datepicker);
+    root.Calendar = factory(root.moment, root.ICalAnalyser, root.EventDT, root.Datepicker, root.bootbox);
   }
-}(this, function(moment, ICalAnalyser, EventDT, Datepicker) {
+}(this, function(moment, ICalAnalyser, EventDT, Datepicker, bootbox) {
 'use strict';
 
 var _methods;
@@ -17,12 +17,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/*import EventDT from "EventDT";
-import moment from "moment-timezone"
-import ICalAnalyser from "ICalAnalyser";
-import VueResource from "vue-resource";
-import Datepicker from "Datepicker";
-*/
 moment.locale('fr');
 
 var colorLabels = {};
@@ -66,6 +60,22 @@ var CalendarDatas = function () {
         this.defaultDescription = "";
         this.labels = [];
         this.owners = [];
+
+        this.gostDatas = {
+            x: 0,
+            y: 0,
+            startFrom: null,
+            decalageY: 0,
+            day: 1,
+            start: null,
+            end: null,
+            title: "Nouveau créneau",
+            description: "",
+            startX: 0,
+            height: 40,
+            drawing: false,
+            editActive: false
+        };
 
         ////
         this.displayRejectModal = false;
@@ -278,7 +288,7 @@ var store = new CalendarDatas();
 
 var TimeEvent = {
 
-    template: '<div class="event" :style="css"\n            @mouseleave="handlerMouseOut"\n            @mousedown="handlerMouseDown"\n            :title="event.label"\n            :class="{\'event-moving\': moving, \'event-selected\': selected, \'event-locked\': isLocked, \'status-info\': isInfo, \'status-draft\': isDraft, \'status-send\' : isSend, \'status-valid\': isValid, \'status-reject\': isReject}">\n        <div class="label" data-uid="UID">\n          {{ event.label }}\n        </div>\n        <small>Dur\xE9e : <strong>{{ labelDuration }}</strong> heure(s)</small>\n        <div class="description">\n            <p v-if="withOwner">D\xE9clarant <strong>{{ event.owner }} ({{event.owner_id}})</strong></p>\n          {{ event.description }}\n        </div>\n\n        <nav class="admin">\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'editevent\')" v-if="event.editable">\n                <i class="icon-pencil-1"></i>\n                Modifier</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'deleteevent\')" v-if="event.deletable">\n                <i class="icon-trash-empty"></i>\n                Supprimer</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'submitevent\')" v-if="event.sendable">\n                <i class="icon-right-big"></i>\n                Soumettre</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validateevent\')" v-if="event.validable">\n                <i class="icon-right-big"></i>\n                Valider</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectevent\')" v-if="event.validable">\n                <i class="icon-right-big"></i>\n                Rejeter</a>\n        </nav>\n\n        <div class="bottom-handler" v-if="event.editable"\n            @mouseleave="handlerEndMovingEnd"\n            @mousedown.prevent.stop="handlerStartMovingEnd">\n            <span>===</span>\n        </div>\n\n        <time class="time start">{{ labelStart }}</time>\n        <time class="time end">{{ labelEnd }}</time>\n      </div>',
+    template: '<div class="event" :style="css"\n\n            @mousedown="handlerMouseDown"\n            :title="event.label"\n            :class="{\'event-changing\': changing, \'event-moving\': moving, \'event-selected\': selected, \'event-locked\': isLocked, \'status-info\': isInfo, \'status-draft\': isDraft, \'status-send\' : isSend, \'status-valid\': isValid, \'status-reject\': isReject}">\n        <div class="label" data-uid="UID">\n          {{ event.label }}\n        </div>\n        <small>Dur\xE9e : <strong>{{ labelDuration }}</strong> heure(s)</small>\n        <div class="description">\n            <p v-if="withOwner">D\xE9clarant <strong>{{ event.owner }} ({{event.owner_id}})</strong></p>\n          {{ event.description }}\n        </div>\n\n        <nav class="admin">\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'editevent\')" v-if="event.editable">\n                <i class="icon-pencil-1"></i>\n                Modifier</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'deleteevent\')" v-if="event.deletable">\n                <i class="icon-trash-empty"></i>\n                Supprimer</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'submitevent\')" v-if="event.sendable">\n                <i class="icon-right-big"></i>\n                Soumettre</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validateevent\')" v-if="event.validable">\n                <i class="icon-right-big"></i>\n                Valider</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectevent\')" v-if="event.validable">\n                <i class="icon-right-big"></i>\n                Rejeter</a>\n        </nav>\n\n        <div class="bottom-handler" v-if="event.editable"\n\n            @mousedown.prevent.stop="handlerStartMovingEnd">\n            <span>===</span>\n        </div>\n\n        <time class="time start">{{ labelStart }}</time>\n        <time class="time end">{{ labelEnd }}</time>\n      </div>',
 
     props: ['event', 'weekDayRef', 'withOwner'],
 
@@ -288,6 +298,7 @@ var TimeEvent = {
             moving: false,
             interval: null,
             movingBoth: true,
+            changing: false,
             change: false,
             labelStart: "",
             labelEnd: "",
@@ -315,9 +326,11 @@ var TimeEvent = {
                 marge = sizeless / this.event.intersect * this.event.intersectIndex;
             }
             return {
+                'pointer-events': this.changing ? 'none' : 'auto',
                 height: this.pixelEnd - this.pixelStart + 'px',
                 background: this.withOwner ? _colorLabel(this.event.owner) : _colorLabel(this.event.label),
                 position: "absolute",
+                //'opacity': (this.changing ? '1' : 'inherit'),
                 top: this.pixelStart + 'px',
                 width: 100 / 7 - 1 - sizeless + "%",
                 left: (this.weekDay - 1) * 100 / 7 + marge + "%"
@@ -374,6 +387,12 @@ var TimeEvent = {
     },
 
     methods: {
+        updateWeekDay: function updateWeekDay(value) {
+            var start = this.dateStart.day(value);
+            var end = this.dateEnd.day(value);
+            this.event.start = start.format();
+            this.event.end = end.format();
+        },
         move: function move(event) {
             if (this.event.editable && event.movementY != 0) {
                 this.change = true;
@@ -389,11 +408,14 @@ var TimeEvent = {
                     this.$el.style.height = currentHeight + "px";
                 }
 
-                var dtUpdate = this.topToStart();
-                this.labelDuration = dtUpdate.duration;
-                this.labelStart = dtUpdate.startLabel;
-                this.labelEnd = dtUpdate.endLabel;
+                this.updateLabel();
             }
+        },
+        updateLabel: function updateLabel() {
+            var dtUpdate = this.topToStart();
+            this.labelDuration = dtUpdate.duration;
+            this.labelStart = dtUpdate.startLabel;
+            this.labelEnd = dtUpdate.endLabel;
         },
         handlerEndMovingEnd: function handlerEndMovingEnd() {
             if (this.movingBoth) {
@@ -401,8 +423,9 @@ var TimeEvent = {
             }
         },
         handlerStartMovingEnd: function handlerStartMovingEnd(e) {
-            this.movingBoth = false;
-            this.startMoving(e);
+            /*this.movingBoth = false;
+            this.startMoving(e);*/
+            this.$emit('onstartmoveend', this);
         },
         startMoving: function startMoving(e) {
             if (this.event.editable) {
@@ -414,11 +437,14 @@ var TimeEvent = {
             }
         },
         handlerMouseDown: function handlerMouseDown(e) {
-            this.movingBoth = true;
-            this.startMoving(e);
+            if (this.event.editable) {
+                this.changing = true;
+                this.$emit('mousedown', this, e);
+            }
         },
         handlerMouseUp: function handlerMouseUp(e) {
             if (this.event.editable) {
+                console.log('UPDATE now');
                 this.moving = false;
                 this.$el.removeEventListener('mousemove', this.move);
 
@@ -427,7 +453,9 @@ var TimeEvent = {
                 this.event.start = this.dateStart.hours(dtUpdate.startHours).minutes(dtUpdate.startMinutes).format();
 
                 this.event.end = this.dateEnd.hours(dtUpdate.endHours).minutes(dtUpdate.endMinutes).format();
+
                 if (this.change) {
+                    console.log('trigger update');
                     this.change = false;
                     this.$emit('savemoveevent', this.event);
                 }
@@ -498,7 +526,7 @@ var WeekView = {
         'timeevent': TimeEvent
     },
 
-    template: '<div class="calendar calendar-week">\n    <div class="meta">\n        <a href="#" @click="previousWeek">\n            <i class="icon-left-big"></i>\n        </a>\n        <h3>\n            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}\n            <nav class="copy-paste" v-if="createNew">\n                <span href="#" @click="copyCurrentWeek"><i class="icon-docs"></i></span>\n                <span href="#" @click="pasteWeek"><i class="icon-paste"></i></span>\n                <span href="#" @click="$emit(\'submitall\', \'send\', \'week\')"><i class="icon-right-big"></i></span>\n            </nav>\n        </h3>\n       <a href="#" @click="nextWeek">\n            <i class="icon-right-big"></i>\n       </a>\n    </div>\n\n    <header class="line">\n        <div class="content-full" style="margin-right: 12px">\n            <div class="labels-time">\n                {{currentYear}}\n            </div>\n            <div class="events">\n                <div class="cell cell-day day day-1" :class="{today: isToday(day)}" v-for="day in currentWeekDays">\n                    {{ day.format(\'dddd D\') }}\n                    <nav class="copy-paste" v-if="createNew">\n                        <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>\n                        <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>\n                    </nav>\n                </div>\n            </div>\n        </div>\n    </header>\n\n    <div class="content-wrapper">\n        <div class="content-full">\n          <div class="labels-time">\n            <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>\n          </div>\n          <div class="events">\n\n              <div class="cell cell-day day" v-for="day in 7">\n                <div class="hour houroff" v-for="time in 6">&nbsp;</div>\n                <div class="hour" v-for="time in 16"\n                    @mouseup="handlerMouseUp"\n                    @mousedown="handlerMouseDown"\n                    @dblclick="handlerCreate(day, time+5)">&nbsp;</div>\n                <div class="hour houroff" v-for="time in 2">&nbsp;</div>\n              </div>\n              <div class="content-events">\n                <timeevent v-for="event in weekEvents"\n                    :with-owner="withOwner"\n                    :weekDayRef="currentDay"\n                    v-if="inCurrentWeek(event)"\n                    @deleteevent="$emit(\'deleteevent\', event)"\n                    @editevent="$emit(\'editevent\', event)"\n                    @submitevent="$emit(\'submitevent\', event)"\n                    @validateevent="$emit(\'validateevent\', event)"\n                    @rejectevent="$emit(\'rejectevent\', event)"\n                    @savemoveevent="handlerSaveMove"\n                    :event="event"\n                    :key="event.id"></timeevent>\n              </div>\n          </div>\n        </div>\n    </div>\n\n    <footer class="line">\n      FOOTER\n    </footer>\n    </div>',
+    template: '<div class="calendar calendar-week">\n    <div class="meta">\n        <a href="#" @click="previousWeek">\n            <i class="icon-left-big"></i>\n        </a>\n        <h3>\n            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}\n            <nav class="copy-paste" v-if="createNew">\n                <span href="#" @click="copyCurrentWeek"><i class="icon-docs"></i></span>\n                <span href="#" @click="pasteWeek"><i class="icon-paste"></i></span>\n                <span href="#" @click="$emit(\'submitall\', \'send\', \'week\')"><i class="icon-right-big"></i></span>\n            </nav>\n        </h3>\n       <a href="#" @click="nextWeek">\n            <i class="icon-right-big"></i>\n       </a>\n    </div>\n\n    <header class="line">\n        <div class="content-full" style="margin-right: 12px">\n            <div class="labels-time">\n                {{currentYear}}\n            </div>\n            <div class="events">\n                <div class="cell cell-day day day-1" :class="{today: isToday(day)}" v-for="day in currentWeekDays">\n                    {{ day.format(\'dddd D\') }}\n                    <nav class="copy-paste" v-if="createNew">\n                        <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>\n                        <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>\n                        <span href="#" @click="submitDay(day)"><i class="icon-right-big"></i></span>\n                    </nav>\n                </div>\n            </div>\n        </div>\n    </header>\n\n    <div class="content-wrapper">\n        <div class="content-full">\n          <div class="labels-time">\n            <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>\n          </div>\n          <div class="events" :class="{\'drawing\': (gostDatas.editActive) }"\n                   @mouseup.self="handlerMouseUp"\n                   @mousedown.self="handlerMouseDown"\n                   @mousemove.self="handlerMouseMove">\n\n              <div class="cell cell-day day" v-for="day in 7" style="pointer-events: none">\n                <div class="hour houroff" v-for="time in 6">&nbsp;</div>\n                <div class="hour" v-for="time in 16"\n                    @dblclick="handlerCreate(day, time+5)">&nbsp;</div>\n                <div class="hour houroff" v-for="time in 2">&nbsp;</div>\n              </div>\n              <div class="content-events">\n                <div class="gost"\n                    :style="gostStyle" v-show="gostDatas.drawing">&nbsp;</div>\n                <timeevent v-for="event in weekEvents"\n                    :with-owner="withOwner"\n                    :weekDayRef="currentDay"\n                    v-if="inCurrentWeek(event)"\n                    @deleteevent="$emit(\'deleteevent\', event)"\n                    @editevent="$emit(\'editevent\', event)"\n                    @submitevent="$emit(\'submitevent\', event)"\n                    @validateevent="$emit(\'validateevent\', event)"\n                    @rejectevent="$emit(\'rejectevent\', event)"\n                    @mousedown="handlerEventMouseDown"\n                    @savemoveevent="handlerSaveMove(event)"\n                    @onstartmoveend="handlerStartMoveEnd"\n                    :event="event"\n                    :key="event.id"></timeevent>\n              </div>\n          </div>\n        </div>\n    </div>\n\n    <footer class="line">\n      FOOTER\n    </footer>\n    </div>',
 
     computed: {
         currentYear: function currentYear() {
@@ -550,26 +578,141 @@ var WeekView = {
                 }
             }
             return weekEvents;
+        },
+        gostStyle: function gostStyle() {
+            return {
+                'left': this.gostDatas.x + "px",
+                'top': this.gostDatas.y + "px",
+                'width': '13.2857%',
+                'pointer-events': 'none',
+                'height': this.gostDatas.height + "px",
+                'position': 'absolute'
+            };
         }
     },
 
     methods: {
+
+        //        @savemoveevent="handlerSaveMove"
+        handlerEventMouseDown: function handlerEventMouseDown(event, evt) {
+            if (event.event.editable) {
+                this.gostDatas.eventActive = event;
+                this.gostDatas.editActive = true;
+            }
+        },
+        handlerStartMoveEnd: function handlerStartMoveEnd(event) {
+
+            this.gostDatas.eventMovedEnd = event;
+            this.gostDatas.editActive = true;
+            this.gostDatas.eventMovedEnd.changing = true;
+            console.log(arguments);
+        },
         handlerSaveMove: function handlerSaveMove(event) {
             this.$emit('savemoveevent', event);
         },
-        handlerMouseUp: function handlerMouseUp() {
-            console.log('mouse up');
+        handlerMouseUp: function handlerMouseUp(e) {
+            if (this.gostDatas.drawing) {
+                this.gostDatas.drawing = false;
+                this.createEvent(this.gostDatas.day, Math.floor(this.gostDatas.y / 40), this.gostDatas.height / 40 * 60);
+            }
+
+            if (this.gostDatas.eventActive) {
+                this.gostDatas.eventActive.changing = false;
+                this.gostDatas.eventActive.handlerMouseUp();
+                this.gostDatas.eventActive = null;
+                this.gostDatas.startFrom = null;
+            }
+
+            if (this.gostDatas.eventMovedEnd) {
+                console.log("FIN du déplacement de la borne de fin");
+                this.gostDatas.eventMovedEnd.changing = false;
+                this.gostDatas.eventMovedEnd = null;
+            }
+
+            this.gostDatas.editActive = false;
         },
-        handlerMouseDown: function handlerMouseDown() {
-            console.log('mouse down');
+        handlerMouseDown: function handlerMouseDown(e) {
+            var roundFactor = 40 / 60 * this.pas;
+            this.gostDatas.y = Math.round(e.offsetY / roundFactor) * roundFactor;
+            var pas = $(e.target).width() / 7;
+            var day = Math.floor(e.offsetX / pas);
+            this.gostDatas.day = day + 1;
+            this.gostDatas.x = day * pas;
+            this.gostDatas.startX = this.gostDatas.x;
+            this.gostDatas.drawing = true;
+            this.gostDatas.editActive = true;
+        },
+        handlerMouseMove: function handlerMouseMove(e) {
+            if (this.gostDatas.drawing) {
+                this.gostDatas.height = Math.round((e.offsetY - this.gostDatas.y) / (40 / 60 * this.pas)) * (40 / 60 * this.pas);
+            } else if (this.gostDatas.eventActive) {
+                this.gostDatas.eventActive.changing = true;
+                if (this.gostDatas.startFrom == null) {
+                    this.gostDatas.startFrom = e.offsetY + parseInt($(this.gostDatas.eventActive.$el).css('top'));
+                    this.gostDatas.decalageY = e.offsetY - parseInt($(this.gostDatas.eventActive.$el).css('top'));
+                } else {
+
+                    // On calcule l'emplacement de la souris pour savoir si on
+                    // a une bascule de la journée
+                    var pas = $(e.target).width() / 7,
+                        day = Math.floor(e.offsetX / pas),
+
+
+                    // Déplacement réél de la souris
+                    realMove = e.offsetY - this.gostDatas.startFrom - this.gostDatas.decalageY,
+
+
+                    // Déplacement arrondis (effet magnétique)
+                    effectivMove = Math.round(realMove / (40 / 60 * this.pas)),
+                        effectiveMoveApplication = effectivMove * (40 / 60 * this.pas),
+
+
+                    // Position Y
+                    top = parseInt($(this.gostDatas.eventActive.$el).css('top'));
+
+                    console.log(realMove, this.gostDatas.startFrom, this.gostDatas.decalageY);
+
+                    // Mise à jour du jour si besoin
+                    if (day + 1 != this.gostDatas.eventActive.weekDay) {
+                        this.gostDatas.eventActive.updateWeekDay(day + 1);
+                    }
+
+                    // Application du déplacement
+                    if (effectivMove != 0) {
+                        $(this.gostDatas.eventActive.$el).css('top', effectiveMoveApplication + top);
+                        this.gostDatas.startFrom = effectiveMoveApplication + top;
+                        this.gostDatas.eventActive.change = true;
+                        this.gostDatas.eventActive.updateLabel();
+                    }
+                }
+            } else if (this.gostDatas.eventMovedEnd) {
+                console.log("déplacement de la borne de fin");
+                if (this.gostDatas.startFrom == null) {
+                    this.gostDatas.startFrom = e.offsetY;
+                } else {
+                    var pas = $(e.target).width() / 7;
+                    var day = Math.floor(e.offsetX / pas);
+                    var realMove = e.offsetY - this.gostDatas.startFrom; //, e.target;
+                    var effectivMove = Math.round(realMove / (40 / 60 * this.pas));
+                    if (effectivMove != 0) {
+                        var height = parseInt($(this.gostDatas.eventMovedEnd.$el).css('height'));
+                        $(this.gostDatas.eventMovedEnd.$el).css('height', effectivMove * (40 / 60 * this.pas) + height);
+                        this.gostDatas.startFrom = parseInt($(this.gostDatas.eventMovedEnd.$el).css('top')) + effectivMove * (40 / 60 * this.pas) + height;
+                        this.gostDatas.eventMovedEnd.change = true;
+                        this.gostDatas.eventMovedEnd.updateLabel();
+                        // eventActive
+                    }
+                }
+            }
         },
         handlerCreate: function handlerCreate(day, time) {
-            //console.log()
             this.createEvent(day, time);
         },
         createEvent: function createEvent(day, time) {
+            var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 120;
+
             var start = moment(this.currentDay).day(day).hour(time);
-            var end = moment(start).add(2, 'hours');
+            var end = moment(start).add(duration, 'minutes');
             var newEvent = new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, { editable: true, deletable: true });
             this.$emit('createevent', newEvent);
         },
@@ -591,6 +734,9 @@ var WeekView = {
                     });
                 }
             });
+        },
+        submitDay: function submitDay(dt) {
+            this.$emit('submitday', dt);
         },
         copyCurrentWeek: function copyCurrentWeek() {
             var _this5 = this;
@@ -956,7 +1102,7 @@ var SelectEditable = {
 
 var Calendar = {
 
-    template: '\n        <div class="calendar">\n\n            <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>\n\n            <div class="editor" v-show="eventEditDataVisible">\n                <form @submit.prevent="editSave">\n                    <div class="form-group">\n                        <label for="">Intitul\xE9</label>\n                        <selecteditable v-model="eventEditData.label" :chooses="labels"></selecteditable>\n                    </div>\n                    <div v-if="withOwner">\n                        {{ eventEditData.owner_id }}\n                        <select v-model="eventEditData.owner_id">\n                            <option :value="o.id" v-for="o in owners">{{ o.displayname }}</option>\n                        </select>\n                        D\xE9clarant LISTE\n                    </div>\n                    <div>\n                        <label for="">Description</label>\n                        <textarea class="form-control" v-model="eventEditData.description"></textarea>\n                    </div>\n                    <hr />\n                    <button type="button" @click="handlerEditCancelEvent" class="btn btn-primary">Annuler</button>\n                    <button type="cancel" @click="handlerSaveEvent" class="btn btn-default">Enregistrer</button>\n                </form>\n            </div>\n\n            <div class="editor" v-show="displayRejectModal">\n                <form @submit.prevent="handlerSendReject">\n                    <h3>Refuser des cr\xE9neaux</h3>\n                    <section>\n                       <article v-for="creneau in rejectedEvents" class="event-inline-simple">\n                        <i class="icon-archive"></i><strong>{{ creneau.label }}</strong><br>\n                        <i class="icon-user"></i><strong>{{ creneau.owner }}</strong><br>\n                        <i class="icon-calendar"></i><strong>{{ creneau.dayTime }}</strong>\n                       </article>\n                    </section>\n                    <div class="form-group">\n                        <label for="">Pr\xE9ciser la raison du refus</label>\n                        <textarea class="form-control" v-model="rejectComment" placeholder="Raison du refus"></textarea>\n                    </div>\n                    <hr />\n                    <button type="submit" class="btn btn-primary" :class="{disabled: !rejectComment}">Envoyer</button>\n                    <button type="cancel" class="btn btn-default" @click.prevent="displayRejectModal = false">Annuler</button>\n                </form>\n            </div>\n\n            <nav class="calendar-menu">\n                <nav class="views-switcher">\n                    <a href="#" @click.prevent="state = \'week\'" :class="{active: state == \'week\'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>\n                    <a href="#" @click.prevent="state = \'list\'" :class="{active: state == \'list\'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>\n                    <a href="#" @click.prevent="importInProgress = true"><i class="icon-columns"></i>Importer un ICS</a>\n                </nav>\n                <section class="transmission errors">\n\n                    <p class="error" v-for="error in errors">\n                        <i class="icon-warning-empty"></i> {{ error }}\n                        <a href="#" @click.prevent="errors.splice(errors.indexOf(error), 1)" class="fermer">[fermer]</a>\n                    </p>\n                </section>\n                <section class="transmission infos" v-show="transmission">\n                    <span>\n                        <i class="icon-signal"></i>\n                        {{ transmission }}\n                    </span>\n                </section>\n            </nav>\n\n            <weekview v-show="state == \'week\'"\n                :create-new="createNew"\n                :with-owner="withOwner"\n                @editevent="handlerEditEvent"\n                @deleteevent="handlerDeleteEvent"\n                @createpack="handlerCreatePack"\n                @submitevent="handlerSubmitEvent"\n                @validateevent="handlerValidateEvent"\n                @rejectevent="handlerRejectEvent"\n                @createevent="handlerCreateEvent"\n                @savemoveevent="handlerSaveMove"\n                @submitall="submitall"\n                @saveevent="restSave"></weekview>\n\n            <listview v-show="state == \'list\'"\n                :with-owner="withOwner"\n                @editevent="handlerEditEvent"\n                @deleteevent="handlerDeleteEvent"\n                @validateevent="handlerValidateEvent"\n                @rejectevent="handlerRejectEvent"\n                @submitevent="handlerSubmitEvent"></listview>\n        </div>\n\n    ',
+    template: '\n        <div class="calendar">\n\n            <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>\n\n            <div class="editor" v-show="eventEditDataVisible">\n                <form @submit.prevent="editSave">\n                    <div class="form-group">\n                        <label for="">Intitul\xE9</label>\n                        <selecteditable v-model="eventEditData.label" :chooses="labels"></selecteditable>\n                    </div>\n                    <div v-if="withOwner">\n                        {{ eventEditData.owner_id }}\n                        <select v-model="eventEditData.owner_id">\n                            <option :value="o.id" v-for="o in owners">{{ o.displayname }}</option>\n                        </select>\n                        D\xE9clarant LISTE\n                    </div>\n                    <div>\n                        <label for="">Description</label>\n                        <textarea class="form-control" v-model="eventEditData.description"></textarea>\n                    </div>\n                    <hr />\n                    <button type="button" @click="handlerEditCancelEvent" class="btn btn-primary">Annuler</button>\n                    <button type="cancel" @click="handlerSaveEvent" class="btn btn-default">Enregistrer</button>\n                </form>\n            </div>\n\n            <div class="editor" v-show="displayRejectModal">\n                <form @submit.prevent="handlerSendReject">\n                    <h3>Refuser des cr\xE9neaux</h3>\n                    <section>\n                       <article v-for="creneau in rejectedEvents" class="event-inline-simple">\n                        <i class="icon-archive"></i><strong>{{ creneau.label }}</strong><br>\n                        <i class="icon-user"></i><strong>{{ creneau.owner }}</strong><br>\n                        <i class="icon-calendar"></i><strong>{{ creneau.dayTime }}</strong>\n                       </article>\n                    </section>\n                    <div class="form-group">\n                        <label for="">Pr\xE9ciser la raison du refus</label>\n                        <textarea class="form-control" v-model="rejectComment" placeholder="Raison du refus"></textarea>\n                    </div>\n                    <hr />\n                    <button type="submit" class="btn btn-primary" :class="{disabled: !rejectComment}">Envoyer</button>\n                    <button type="cancel" class="btn btn-default" @click.prevent="displayRejectModal = false">Annuler</button>\n                </form>\n            </div>\n\n            <nav class="calendar-menu">\n                <nav class="views-switcher">\n                    <a href="#" @click.prevent="state = \'week\'" :class="{active: state == \'week\'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>\n                    <a href="#" @click.prevent="state = \'list\'" :class="{active: state == \'list\'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>\n                    <a href="#" @click.prevent="importInProgress = true"><i class="icon-columns"></i>Importer un ICS</a>\n                </nav>\n                <section class="transmission errors">\n\n                    <p class="error" v-for="error in errors">\n                        <i class="icon-warning-empty"></i> {{ error }}\n                        <a href="#" @click.prevent="errors.splice(errors.indexOf(error), 1)" class="fermer">[fermer]</a>\n                    </p>\n                </section>\n                <section class="transmission infos" v-show="transmission">\n                    <span>\n                        <i class="icon-signal"></i>\n                        {{ transmission }}\n                    </span>\n                </section>\n            </nav>\n\n            <weekview v-show="state == \'week\'"\n                :create-new="createNew"\n                :with-owner="withOwner"\n                @editevent="handlerEditEvent"\n                @deleteevent="handlerDeleteEvent"\n                @createpack="handlerCreatePack"\n                @submitevent="handlerSubmitEvent"\n                @validateevent="handlerValidateEvent"\n                @rejectevent="handlerRejectEvent"\n                @createevent="handlerCreateEvent"\n                @savemoveevent="handlerSaveMove"\n                @submitday="submitday"\n                @submitall="submitall"\n                @saveevent="restSave"></weekview>\n\n            <listview v-show="state == \'list\'"\n                :with-owner="withOwner"\n                @editevent="handlerEditEvent"\n                @deleteevent="handlerDeleteEvent"\n                @validateevent="handlerValidateEvent"\n                @rejectevent="handlerRejectEvent"\n                @submitevent="handlerSubmitEvent"></listview>\n        </div>\n\n    ',
 
     data: function data() {
         return store;
@@ -992,6 +1138,11 @@ var Calendar = {
     },
 
     methods: (_methods = {
+        /**
+         * Envoi des données (de la semaine), @todo Faire la variante pour les mois.
+         * @param status
+         * @param period
+         */
         submitall: function submitall(status, period) {
             var events = [];
             if (period == 'week') {
@@ -1003,6 +1154,31 @@ var Calendar = {
             }
             if (events.length) {
                 this.restStep(events, status);
+            }
+        },
+
+
+        /**
+         * Envoi des créneaux de la journée.
+         *
+         * @param day
+         */
+        submitday: function submitday(day) {
+            var _this8 = this;
+
+            // Liste des événements éligibles
+            var events = [];
+            this.events.forEach(function (event) {
+                if (event.mmStart.format('YYYYMMDD') == day.format('YYYYMMDD') && event.sendable) {
+                    events.push(event);
+                }
+            });
+
+            // Envoi
+            if (events.length) {
+                bootbox.confirm("Soumettre le(s) créneau(x) ?", function (confirm) {
+                    if (confirm) _this8.restStep(events, 'send');
+                });
             }
         },
         importEvents: function importEvents(events) {
@@ -1053,13 +1229,13 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         handlerSendReject: function handlerSendReject() {
-            var _this8 = this;
+            var _this9 = this;
 
             console.log(this.rejectedEvents, this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach(function (event) {
                 var e = JSON.parse(JSON.stringify(event));
-                e.rejectedComment = _this8.rejectComment;
+                e.rejectedComment = _this9.rejectComment;
                 events.push(e);
             });
             this.restStep(events, 'reject');
@@ -1077,9 +1253,8 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         restSave: function restSave(events) {
-            var _this9 = this;
+            var _this10 = this;
 
-            console.log('restSave');
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
@@ -1106,11 +1281,11 @@ var Calendar = {
 
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
-                    _this9.handlerEditCancelEvent();
+                    _this10.handlerEditCancelEvent();
                 }, function (error) {
-                    _this9.errors.push("Impossible d'enregistrer les données : " + error);
+                    _this10.errors.push("Impossible d'enregistrer les données : " + error);
                 }).then(function () {
-                    return _this9.transmission = "";
+                    return _this10.transmission = "";
                 });;
             }
         },
@@ -1121,9 +1296,8 @@ var Calendar = {
             this.restStep(events, 'validate');
         },
         restStep: function restStep(events, action) {
-            var _this10 = this;
+            var _this11 = this;
 
-            console.log('restStep(', events, action, ')');
             if (this.restUrl) {
                 this.transmission = "Enregistrement en cours...";
                 var data = new FormData();
@@ -1135,12 +1309,12 @@ var Calendar = {
 
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
-                    _this10.displayRejectModal = false;
-                    _this10.handlerEditCancelEvent();
+                    _this11.displayRejectModal = false;
+                    _this11.handlerEditCancelEvent();
                 }, function (error) {
-                    _this10.errors.push("Impossible de modifier l'état du créneau : " + error);
+                    _this11.errors.push("Impossible de modifier l'état du créneau : " + error);
                 }).then(function () {
-                    _this10.transmission = "";
+                    _this11.transmission = "";
                 });
             }
         },
@@ -1148,16 +1322,16 @@ var Calendar = {
 
         /** Suppression de l'événement de la liste */
         handlerDeleteEvent: function handlerDeleteEvent(event) {
-            var _this11 = this;
+            var _this12 = this;
 
             if (this.restUrl) {
                 this.transmission = "Suppression...";
                 this.$http.delete(this.restUrl() + "?timesheet=" + event.id).then(function (response) {
-                    _this11.events.splice(_this11.events.indexOf(event), 1);
+                    _this12.events.splice(_this12.events.indexOf(event), 1);
                 }, function (error) {
                     console.log(error);
                 }).then(function () {
-                    _this11.transmission = "";
+                    _this12.transmission = "";
                 });
             } else {
                 this.events.splice(this.events.indexOf(event), 1);
@@ -1182,9 +1356,12 @@ var Calendar = {
 
         /** Soumission de l'événement de la liste */
         handlerSubmitEvent: function handlerSubmitEvent(event) {
-            console.log('Modification du label par défaut');
+            var _this13 = this;
+
             store.defaultLabel = event.label;
-            this.restSend([event]);
+            bootbox.confirm("Soumettre le(s) créneau(x) ?", function (confirm) {
+                if (confirm) _this13.restSend([event]);
+            });
         },
 
 
@@ -1199,12 +1376,12 @@ var Calendar = {
 
         /** Charge le fichier ICS depuis l'interface **/
         loadIcsFile: function loadIcsFile(e) {
-            var _this12 = this;
+            var _this14 = this;
 
             this.transmission = "Analyse du fichier ICS...";
             var fr = new FileReader();
             fr.onloadend = function (result) {
-                _this12.parseFileContent(fr.result);
+                _this14.parseFileContent(fr.result);
             };
             fr.readAsText(e.target.files[0]);
         },
@@ -1212,7 +1389,7 @@ var Calendar = {
 
         /** Parse le contenu ICS **/
         parseFileContent: function parseFileContent(content) {
-            var _this13 = this;
+            var _this15 = this;
 
             var analyser = new ICalAnalyser();
             var events = analyser.parse(ICAL.parse(content));
@@ -1224,9 +1401,9 @@ var Calendar = {
 
                 var currentPack = null;
                 var currentLabel = item.mmStart.format('YYYY-MM-D');
-                for (var i = 0; i < _this13.importedData.length && currentPack == null; i++) {
-                    if (_this13.importedData[i].label == currentLabel) {
-                        currentPack = _this13.importedData[i];
+                for (var i = 0; i < _this15.importedData.length && currentPack == null; i++) {
+                    if (_this15.importedData[i].label == currentLabel) {
+                        currentPack = _this15.importedData[i];
                     }
                 }
                 if (!currentPack) {
@@ -1234,7 +1411,7 @@ var Calendar = {
                         label: currentLabel,
                         events: []
                     };
-                    _this13.importedData.push(currentPack);
+                    _this15.importedData.push(currentPack);
                 }
                 currentPack.events.push(item);
             });
@@ -1271,16 +1448,16 @@ var Calendar = {
     }), _defineProperty(_methods, 'editCancel', function editCancel() {
         this.eventEdit = this.eventEditData = null;
     }), _defineProperty(_methods, 'fetch', function fetch() {
-        var _this14 = this;
+        var _this16 = this;
 
         this.transmission = "Chargement des créneaux...";
 
         this.$http.get(this.restUrl()).then(function (ok) {
             store.sync(ok.body.timesheets);
         }, function (ko) {
-            _this14.errors.push("Impossible de charger les données : " + ko);
+            _this16.errors.push("Impossible de charger les données : " + ko);
         }).then(function () {
-            _this14.transmission = "";
+            _this16.transmission = "";
         });
     }), _defineProperty(_methods, 'post', function post(event) {
         console.log("POST", event);

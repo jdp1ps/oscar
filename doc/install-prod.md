@@ -2,6 +2,15 @@
 
 L'installation a été testé sous Debian et Ubuntu Server
 
+## Prérequis
+
+ - Système linux (Debian, Ubuntu)
+ - Serveur web (Apache2)
+ - PHP 5.6+ (compatible 7.0+) (support LDAP, Postgresql)
+ - Postgresql 9.4+
+ - Annuaire LDAP (supann)
+
+
 ## Installation du système
 
 On commence par mettre le système à jour.
