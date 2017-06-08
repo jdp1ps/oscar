@@ -1144,6 +1144,8 @@ var Calendar = {
          * @param period
          */
         submitall: function submitall(status, period) {
+            var _this8 = this;
+
             var events = [];
             if (period == 'week') {
                 this.events.forEach(function (event) {
@@ -1153,7 +1155,9 @@ var Calendar = {
                 });
             }
             if (events.length) {
-                this.restStep(events, status);
+                bootbox.confirm("Soumettre le(s) créneau(x) ?", function (confirm) {
+                    if (confirm) _this8.restStep(events, status);
+                });
             }
         },
 
@@ -1164,7 +1168,7 @@ var Calendar = {
          * @param day
          */
         submitday: function submitday(day) {
-            var _this8 = this;
+            var _this9 = this;
 
             // Liste des événements éligibles
             var events = [];
@@ -1177,7 +1181,7 @@ var Calendar = {
             // Envoi
             if (events.length) {
                 bootbox.confirm("Soumettre le(s) créneau(x) ?", function (confirm) {
-                    if (confirm) _this8.restStep(events, 'send');
+                    if (confirm) _this9.restStep(events, 'send');
                 });
             }
         },
@@ -1229,13 +1233,13 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         handlerSendReject: function handlerSendReject() {
-            var _this9 = this;
+            var _this10 = this;
 
             console.log(this.rejectedEvents, this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach(function (event) {
                 var e = JSON.parse(JSON.stringify(event));
-                e.rejectedComment = _this9.rejectComment;
+                e.rejectedComment = _this10.rejectComment;
                 events.push(e);
             });
             this.restStep(events, 'reject');
@@ -1253,7 +1257,7 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         restSave: function restSave(events) {
-            var _this10 = this;
+            var _this11 = this;
 
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
@@ -1281,11 +1285,11 @@ var Calendar = {
 
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
-                    _this10.handlerEditCancelEvent();
+                    _this11.handlerEditCancelEvent();
                 }, function (error) {
-                    _this10.errors.push("Impossible d'enregistrer les données : " + error);
+                    _this11.errors.push("Impossible d'enregistrer les données : " + error);
                 }).then(function () {
-                    return _this10.transmission = "";
+                    return _this11.transmission = "";
                 });;
             }
         },
@@ -1296,7 +1300,7 @@ var Calendar = {
             this.restStep(events, 'validate');
         },
         restStep: function restStep(events, action) {
-            var _this11 = this;
+            var _this12 = this;
 
             if (this.restUrl) {
                 this.transmission = "Enregistrement en cours...";
@@ -1309,12 +1313,12 @@ var Calendar = {
 
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
-                    _this11.displayRejectModal = false;
-                    _this11.handlerEditCancelEvent();
+                    _this12.displayRejectModal = false;
+                    _this12.handlerEditCancelEvent();
                 }, function (error) {
-                    _this11.errors.push("Impossible de modifier l'état du créneau : " + error);
+                    _this12.errors.push("Impossible de modifier l'état du créneau : " + error);
                 }).then(function () {
-                    _this11.transmission = "";
+                    _this12.transmission = "";
                 });
             }
         },
@@ -1322,16 +1326,16 @@ var Calendar = {
 
         /** Suppression de l'événement de la liste */
         handlerDeleteEvent: function handlerDeleteEvent(event) {
-            var _this12 = this;
+            var _this13 = this;
 
             if (this.restUrl) {
                 this.transmission = "Suppression...";
                 this.$http.delete(this.restUrl() + "?timesheet=" + event.id).then(function (response) {
-                    _this12.events.splice(_this12.events.indexOf(event), 1);
+                    _this13.events.splice(_this13.events.indexOf(event), 1);
                 }, function (error) {
                     console.log(error);
                 }).then(function () {
-                    _this12.transmission = "";
+                    _this13.transmission = "";
                 });
             } else {
                 this.events.splice(this.events.indexOf(event), 1);
@@ -1356,11 +1360,11 @@ var Calendar = {
 
         /** Soumission de l'événement de la liste */
         handlerSubmitEvent: function handlerSubmitEvent(event) {
-            var _this13 = this;
+            var _this14 = this;
 
             store.defaultLabel = event.label;
             bootbox.confirm("Soumettre le(s) créneau(x) ?", function (confirm) {
-                if (confirm) _this13.restSend([event]);
+                if (confirm) _this14.restSend([event]);
             });
         },
 
@@ -1376,12 +1380,12 @@ var Calendar = {
 
         /** Charge le fichier ICS depuis l'interface **/
         loadIcsFile: function loadIcsFile(e) {
-            var _this14 = this;
+            var _this15 = this;
 
             this.transmission = "Analyse du fichier ICS...";
             var fr = new FileReader();
             fr.onloadend = function (result) {
-                _this14.parseFileContent(fr.result);
+                _this15.parseFileContent(fr.result);
             };
             fr.readAsText(e.target.files[0]);
         },
@@ -1389,7 +1393,7 @@ var Calendar = {
 
         /** Parse le contenu ICS **/
         parseFileContent: function parseFileContent(content) {
-            var _this15 = this;
+            var _this16 = this;
 
             var analyser = new ICalAnalyser();
             var events = analyser.parse(ICAL.parse(content));
@@ -1401,9 +1405,9 @@ var Calendar = {
 
                 var currentPack = null;
                 var currentLabel = item.mmStart.format('YYYY-MM-D');
-                for (var i = 0; i < _this15.importedData.length && currentPack == null; i++) {
-                    if (_this15.importedData[i].label == currentLabel) {
-                        currentPack = _this15.importedData[i];
+                for (var i = 0; i < _this16.importedData.length && currentPack == null; i++) {
+                    if (_this16.importedData[i].label == currentLabel) {
+                        currentPack = _this16.importedData[i];
                     }
                 }
                 if (!currentPack) {
@@ -1411,7 +1415,7 @@ var Calendar = {
                         label: currentLabel,
                         events: []
                     };
-                    _this15.importedData.push(currentPack);
+                    _this16.importedData.push(currentPack);
                 }
                 currentPack.events.push(item);
             });
@@ -1448,16 +1452,16 @@ var Calendar = {
     }), _defineProperty(_methods, 'editCancel', function editCancel() {
         this.eventEdit = this.eventEditData = null;
     }), _defineProperty(_methods, 'fetch', function fetch() {
-        var _this16 = this;
+        var _this17 = this;
 
         this.transmission = "Chargement des créneaux...";
 
         this.$http.get(this.restUrl()).then(function (ok) {
             store.sync(ok.body.timesheets);
         }, function (ko) {
-            _this16.errors.push("Impossible de charger les données : " + ko);
+            _this17.errors.push("Impossible de charger les données : " + ko);
         }).then(function () {
-            _this16.transmission = "";
+            _this17.transmission = "";
         });
     }), _defineProperty(_methods, 'post', function post(event) {
         console.log("POST", event);

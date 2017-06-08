@@ -1494,7 +1494,10 @@ var Calendar = {
                 });
             }
             if( events.length ){
-                this.restStep(events, status);
+                bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
+                    if( confirm )
+                        this.restStep(events, status);
+                });
             }
         },
 
