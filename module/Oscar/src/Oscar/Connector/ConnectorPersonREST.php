@@ -107,7 +107,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
 
         foreach( json_decode($return) as $personData ){
-
             try {
                 /** @var Person $personOscar */
                 $personOscar = $personRepository->getPersonByConnectorID($this->getName(),
@@ -118,18 +117,13 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 $action = "add";
             }
             if($personOscar->getDateSyncLdap() < $personData->dateupdated || $force == true ){
-
                 $personOscar = $this->hydratePersonWithDatas($personOscar, $personData);
-
-
-
                 $personRepository->flush($personOscar);
                 if( $action == 'add' ){
                     $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
                 } else {
                     $repport->addupdated(sprintf("%s a été mis à jour.", $personOscar->log()));
                 }
-
             } else {
                 $repport->addnotice(sprintf("%s est à jour.", $personOscar->log()));
             }

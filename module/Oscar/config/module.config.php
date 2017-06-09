@@ -409,19 +409,9 @@ return array(
                     ),
                 ),
 
-                'oscar_personsorganizations_sync' => [
+                  'oscar_organizations_sync' => [
                     'options' => [
-                        'route' => 'oscar personsorganizations:sync',
-                        'defaults' => [
-                            'controller' => 'Console',
-                            'action' => 'personsOrganizationSync',
-                        ],
-                    ],
-                ],
-
-                'oscar_organizations_sync' => [
-                    'options' => [
-                        'route' => 'oscar organizations:sync [--force|-f]',
+                        'route' => 'oscar organizations:sync <connectorkey> [--force|-f]',
                         'defaults' => [
                             'controller' => 'Console',
                             'action' => 'organizationSync',
@@ -429,35 +419,6 @@ return array(
                     ],
                 ],
 
-
-                // PERSONS Version definitive
-                'oscar_sync_persons' => array(
-                    'options' => array(
-                        'route' => 'sync persons',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'syncLdap',
-                        ),
-                    ),
-                ),
-                'oscar_fix_financeur' => array(
-                    'options' => array(
-                        'route' => 'fix:financeur',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'scriptFixFinanceur',
-                        ),
-                    ),
-                ),
-                'oscar_fix_actorsproject' => array(
-                    'options' => array(
-                        'route' => 'fix:actorstoactivities',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'scriptFixPartnerMoveToActivites',
-                        ),
-                    ),
-                ),
 
                 // -------------------------------------------------------------
 
@@ -492,7 +453,7 @@ return array(
                 ],
                 'oscar_persons_sync' => [
                     'options' => array(
-                        'route' => 'oscar persons:sync [-f|--force]',
+                        'route' => 'oscar persons:sync <connectorkey> [-f|--force]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'personsSync',

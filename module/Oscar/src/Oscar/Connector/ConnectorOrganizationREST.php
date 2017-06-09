@@ -93,6 +93,8 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
 
         $url = $this->getParameter('url_organizations');
 
+        $repport->addnotice("URL : $url");
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -103,6 +105,8 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
         if( false === $return ){
             throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
         }
+
+        $repport->addnotice("DÉBUT du traitement...");
 
         foreach( json_decode($return) as $data ){
 
@@ -130,6 +134,7 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
                 $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
             }
         }
+        $repport->addnotice("FIN du traitement...");
         return $repport;
     }
 

@@ -104,7 +104,11 @@ var CalendarDatas = function () {
                 }
             });
         }
+
         ////////////////////////////////////////////////////////////////////////
+        /**
+         * Copie les créneaux de la semaine en cours d'affichage.
+         */
 
     }, {
         key: 'copyCurrentWeek',
@@ -126,6 +130,14 @@ var CalendarDatas = function () {
                 }
             });
         }
+
+        /**
+         * Colle les créneaux en mémoire (jour) dans le jour spécifié.
+         *
+         * @param day
+         * @returns {*}
+         */
+
     }, {
         key: 'pasteDay',
         value: function pasteDay(day) {
@@ -154,6 +166,12 @@ var CalendarDatas = function () {
             }
             return null;
         }
+
+        /**
+         * Colle les créneaux en mémoire dans le semaine en cours d'affichage.
+         * @returns {*}
+         */
+
     }, {
         key: 'pasteWeek',
         value: function pasteWeek() {
@@ -182,16 +200,32 @@ var CalendarDatas = function () {
             }
             return null;
         }
+
+        /**
+         * Affiche la semaine précédente.
+         */
+
     }, {
         key: 'previousWeek',
         value: function previousWeek() {
             this.currentDay = moment(this.currentDay).add(-1, 'week');
         }
+
+        /**
+         * Affiche la semaine suivante.
+         */
+
     }, {
         key: 'nextWeek',
         value: function nextWeek() {
             this.currentDay = moment(this.currentDay).add(1, 'week');
         }
+
+        /**
+         * Création d'un nouveau créneau à partir du EventDT transmis en paramètre.
+         * @param evt EventDT
+         */
+
     }, {
         key: 'newEvent',
         value: function newEvent(evt) {
@@ -424,7 +458,7 @@ var TimeEvent = {
         },
         handlerStartMovingEnd: function handlerStartMovingEnd(e) {
             /*this.movingBoth = false;
-            this.startMoving(e);*/
+             this.startMoving(e);*/
             this.$emit('onstartmoveend', this);
         },
         startMoving: function startMoving(e) {
@@ -526,7 +560,7 @@ var WeekView = {
         'timeevent': TimeEvent
     },
 
-    template: '<div class="calendar calendar-week">\n    <div class="meta">\n        <a href="#" @click="previousWeek">\n            <i class="icon-left-big"></i>\n        </a>\n        <h3>\n            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}\n            <nav class="copy-paste" v-if="createNew">\n                <span href="#" @click="copyCurrentWeek"><i class="icon-docs"></i></span>\n                <span href="#" @click="pasteWeek"><i class="icon-paste"></i></span>\n                <span href="#" @click="$emit(\'submitall\', \'send\', \'week\')"><i class="icon-right-big"></i></span>\n            </nav>\n        </h3>\n       <a href="#" @click="nextWeek">\n            <i class="icon-right-big"></i>\n       </a>\n    </div>\n\n    <header class="line">\n        <div class="content-full" style="margin-right: 12px">\n            <div class="labels-time">\n                {{currentYear}}\n            </div>\n            <div class="events">\n                <div class="cell cell-day day day-1" :class="{today: isToday(day)}" v-for="day in currentWeekDays">\n                    {{ day.format(\'dddd D\') }}\n                    <nav class="copy-paste" v-if="createNew">\n                        <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>\n                        <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>\n                        <span href="#" @click="submitDay(day)"><i class="icon-right-big"></i></span>\n                    </nav>\n                </div>\n            </div>\n        </div>\n    </header>\n\n    <div class="content-wrapper">\n        <div class="content-full">\n          <div class="labels-time">\n            <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>\n          </div>\n          <div class="events" :class="{\'drawing\': (gostDatas.editActive) }"\n                   @mouseup.self="handlerMouseUp"\n                   @mousedown.self="handlerMouseDown"\n                   @mousemove.self="handlerMouseMove">\n\n              <div class="cell cell-day day" v-for="day in 7" style="pointer-events: none">\n                <div class="hour houroff" v-for="time in 6">&nbsp;</div>\n                <div class="hour" v-for="time in 16"\n                    @dblclick="handlerCreate(day, time+5)">&nbsp;</div>\n                <div class="hour houroff" v-for="time in 2">&nbsp;</div>\n              </div>\n              <div class="content-events">\n                <div class="gost"\n                    :style="gostStyle" v-show="gostDatas.drawing">&nbsp;</div>\n                <timeevent v-for="event in weekEvents"\n                    :with-owner="withOwner"\n                    :weekDayRef="currentDay"\n                    v-if="inCurrentWeek(event)"\n                    @deleteevent="$emit(\'deleteevent\', event)"\n                    @editevent="$emit(\'editevent\', event)"\n                    @submitevent="$emit(\'submitevent\', event)"\n                    @validateevent="$emit(\'validateevent\', event)"\n                    @rejectevent="$emit(\'rejectevent\', event)"\n                    @mousedown="handlerEventMouseDown"\n                    @savemoveevent="handlerSaveMove(event)"\n                    @onstartmoveend="handlerStartMoveEnd"\n                    :event="event"\n                    :key="event.id"></timeevent>\n              </div>\n          </div>\n        </div>\n    </div>\n\n    <footer class="line">\n      FOOTER\n    </footer>\n    </div>',
+    template: '<div class="calendar calendar-week">\n    <div class="meta">\n        <a href="#" @click="previousWeek">\n            <i class="icon-left-big"></i>\n        </a>\n        <h3>\n            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}\n            <nav class="copy-paste" v-if="createNew">\n                <span href="#" @click="copyCurrentWeek"><i class="icon-docs"></i></span>\n                <span href="#" @click="pasteWeek"><i class="icon-paste"></i></span>\n                <span href="#" @click="$emit(\'submitall\', \'send\', \'week\')"><i class="icon-right-big"></i></span>\n            </nav>\n        </h3>\n       <a href="#" @click="nextWeek">\n            <i class="icon-right-big"></i>\n       </a>\n    </div>\n\n    <header class="line">\n        <div class="content-full" style="margin-right: 12px">\n            <div class="labels-time">\n                {{currentYear}}\n            </div>\n            <div class="events">\n                <div class="cell cell-day day day-1" :class="{today: isToday(day)}" v-for="day in currentWeekDays">\n                    {{ day.format(\'dddd D\') }}\n                    <nav class="copy-paste" v-if="createNew">\n                        <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>\n                        <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>\n                        <span href="#" @click="submitDay(day)"><i class="icon-right-big"></i></span>\n                    </nav>\n                </div>\n            </div>\n        </div>\n    </header>\n\n    <div class="content-wrapper">\n        <div class="content-full">\n          <div class="labels-time">\n            <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>\n          </div>\n          <div class="events" :class="{\'drawing\': (gostDatas.editActive) }"\n                   @mouseup.self="handlerMouseUp"\n                   @mousedown.self="handlerMouseDown"\n                   @mousemove.self="handlerMouseMove">\n\n              <div class="cell cell-day day" v-for="day in 7" style="pointer-events: none">\n                <div class="hour houroff" v-for="time in 6">&nbsp;</div>\n                <div class="hour" v-for="time in 16"\n                    @dblclick="handlerCreate(day, time+5)">&nbsp;</div>\n                <div class="hour houroff" v-for="time in 2">&nbsp;</div>\n              </div>\n              <div class="content-events">\n                <div class="gost"\n                    :style="gostStyle" v-show="gostDatas.drawing">&nbsp;</div>\n                <timeevent v-for="event in weekEvents"\n                    :with-owner="withOwner"\n                    :weekDayRef="currentDay"\n                    v-if="inCurrentWeek(event)"\n                    @deleteevent="$emit(\'deleteevent\', event)"\n                    @editevent="$emit(\'editevent\', event)"\n                    @submitevent="$emit(\'submitevent\', event)"\n                    @validateevent="$emit(\'validateevent\', event)"\n                    @rejectevent="$emit(\'rejectevent\', event)"\n                    @mousedown="handlerEventMouseDown"\n                    @savemoveevent="handlerSaveMove(event)"\n                    @onstartmoveend="handlerStartMoveEnd"\n                    :event="event"\n                    :key="event.id"></timeevent>\n              </div>\n          </div>\n        </div>\n    </div>\n\n    <footer class="line">\n      Afficher les sous-totaux\n    </footer>\n    </div>',
 
     computed: {
         currentYear: function currentYear() {
@@ -670,7 +704,10 @@ var WeekView = {
                     // Position Y
                     top = parseInt($(this.gostDatas.eventActive.$el).css('top'));
 
-                    console.log(realMove, this.gostDatas.startFrom, this.gostDatas.decalageY);
+                    /*if( top < 0 ){
+                        top = 0;
+                        return;
+                    }*/
 
                     // Mise à jour du jour si besoin
                     if (day + 1 != this.gostDatas.eventActive.weekDay) {
@@ -713,7 +750,10 @@ var WeekView = {
 
             var start = moment(this.currentDay).day(day).hour(time);
             var end = moment(start).add(duration, 'minutes');
-            var newEvent = new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, { editable: true, deletable: true });
+            var newEvent = new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, {
+                editable: true,
+                deletable: true
+            });
             this.$emit('createevent', newEvent);
         },
         copyDay: function copyDay(dt) {
@@ -1290,7 +1330,8 @@ var Calendar = {
                     _this11.errors.push("Impossible d'enregistrer les données : " + error);
                 }).then(function () {
                     return _this11.transmission = "";
-                });;
+                });
+                ;
             }
         },
         restSend: function restSend(events) {
@@ -1344,17 +1385,18 @@ var Calendar = {
         handlerSaveMove: function handlerSaveMove(event) {
             var data = JSON.parse(JSON.stringify(event));
             data.mmStart = moment(data.start);
-            data.mmEnd = moment(data.end);;
+            data.mmEnd = moment(data.end);
+            ;
             this.restSave([data]);
         },
         handlerSaveEvent: function handlerSaveEvent(event) {
             store.defaultLabel = this.eventEditData.label;
             /*
-            var data = JSON.parse(JSON.stringify(this.eventEditData));
-            data.mmStart = this.eventEdit.mmStart;
-            data.mmEnd = this.eventEdit.mmEnd;
-            this.restSave([data], 'new');
-            /****/
+             var data = JSON.parse(JSON.stringify(this.eventEditData));
+             data.mmStart = this.eventEdit.mmStart;
+             data.mmEnd = this.eventEdit.mmEnd;
+             this.restSave([data], 'new');
+             /****/
         },
 
 
@@ -1436,7 +1478,10 @@ var Calendar = {
         createEvent: function createEvent(day, time) {
             var start = moment(this.currentDay).day(day).hour(time);
             var end = moment(start).add(2, 'hours');
-            this.newEvent(new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, { editable: true, deletable: true }));
+            this.newEvent(new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, {
+                editable: true,
+                deletable: true
+            }));
         },
         editEvent: function editEvent(event) {
             console.log('editEvent(', event, ')');
@@ -1447,7 +1492,8 @@ var Calendar = {
         console.log("NEW", JSON.parse(JSON.stringify(this.eventEditData)));
         var event = JSON.parse(JSON.stringify(this.eventEditData));
         event.mmStart = moment(event.start);
-        event.mmEnd = moment(event.end);;
+        event.mmEnd = moment(event.end);
+        ;
         this.restSave([event]);
     }), _defineProperty(_methods, 'editCancel', function editCancel() {
         this.eventEdit = this.eventEditData = null;

@@ -30,6 +30,7 @@ use Oscar\Entity\Role;
 use Oscar\Provider\AbstractOracleProvider;
 use Oscar\Provider\Person\SyncPersonHarpege;
 use Oscar\Provider\SifacBridge;
+use Oscar\Service\ConnectorService;
 use Oscar\Service\PersonService;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
@@ -42,6 +43,47 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
 class ConsoleController extends AbstractOscarController
 {
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // AUTHENTIFICATION
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    /**
+     * Ajoute une authentification.
+     */
+    public function authAddAction()
+    {
+        try {
+            $login = $this->getRequest()->getParam('login');
+            $pass = $this->getRequest()->getParam('pass');
+            $displayname = $this->getRequest()->getParam('displayname');
+            $email = $this->getRequest()->getParam('email');
+            $bcrypt = new Bcrypt();
+
+            $auth = new Authentification();
+            $auth->setPassword($bcrypt->create($pass));
+            $auth->setDisplayName($displayname);
+            $auth->setUsername($login);
+            $auth->setEmail($email);
+
+            $this->getEntityManager()->persist($auth);
+            $this->getEntityManager()->flush();
+
+            die(sprintf('User created : %s(%s) %s:%s', $displayname,$email, $login, $pass));
+        } catch( \Exception $ex ){
+            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // INDEX DE RECHERCHE
+    //
+    ////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
     /**
      * Renseigne le champ LDAP<>ID Harpège en fonction de l'autre si manquant
      */
@@ -499,11 +541,6 @@ die();
         }
     }
 
-    public function syncPersonsAction()
-    {
-        $repport = "Synchronisation des personnes";
-        die($repport);
-    }
 
     public function buildSearchActivityAction()
     {
@@ -523,127 +560,6 @@ die();
      * ###################################################################### */
 
 
-    public function scriptFixFinanceurAction()
-    {
-        foreach ($this->getEntityManager()->getRepository(Activity::class)
-                     ->findAll() as $activity ){
-            $this->getActivityService()->setLonelyPartnerAsFinancer($activity);
-        }
-    }
-
-    public function scriptFixPartnerMoveToActivitesAction()
-    {
-        try {
-            $projects = $this->getEntityManager()->createQueryBuilder()
-                ->select('p')
-                ->from(Project::class, 'p')
-                ->leftJoin('p.grants', 'a')
-                ->leftJoin('p.members', 'pp')
-                ->leftJoin('p.partners', 'po')
-                ->getQuery()
-                ->getResult();
-
-            /** @var Project $project */
-            foreach ( $projects as $project ){
-                $this->getProjectService()->fixMovePartnersToActivities
-                ($project);
-            }
-        } catch (\Exception $e ){
-            $this->getLogger()->error($e->getMessage());
-        }
-
-    }
-
-    /**
-     * Synchronise les personnes de Ldap dnas oscar
-     */
-    public function syncLdapAction()
-    {
-        /** @var PersonService $ldapDatas */
-        $servicePerson = $this->getServiceLocator()->get('PersonService');
-
-
-        $qbCodeLdap = $this->getEntityManager()->createQueryBuilder()
-            ->select('p')
-            ->from(Person::class, 'p')
-            ->where('p.codeLdap = :codeLdap');
-
-        $qbEmail = $this->getEntityManager()->createQueryBuilder()
-            ->select('p')
-            ->from(Person::class, 'p')
-            ->where('p.email = :email');
-
-        foreach ($servicePerson->getLdapPersons() as $ldapData) {
-
-
-            $person = $qbCodeLdap->setParameter('codeLdap',
-                $ldapData['uid'])->getQuery()->getResult();
-            if ($person) {
-                if (count($person) > 1) {
-                    $this->getLogger()->error(sprintf("Trop de personne avec l'identifiant ldap '%s'",
-                        $ldapData['uid']));
-                    continue;
-                }
-
-                $person = $person[0];
-                $servicePerson->pushLdapDataToPerson($person, $ldapData);
-                $this->getEntityManager()->flush($person);
-                continue;
-            }
-
-
-            $people = new People($ldapData);
-            if (!$people->getMail()) {
-                $this->getLogger()->warn(sprintf("Le compte LDAP '%s' ne sera pas créé, mail absent...",
-                    $ldapData['uid']));
-                continue;
-            }
-
-            $person = $qbEmail->setParameter('email',
-                $ldapData['mail'])->getQuery()->getResult();
-            if ($person && count($person) == 1) {
-                $this->getLogger()->debug(sprintf("Mise à jour de '%s'",
-                    $person[0]));
-                $servicePerson->pushLdapDataToPerson($person[0], $ldapData);
-                $this->getEntityManager()->flush($person[0]);
-                continue;
-            }
-
-            if (count($person) > 1) {
-                $this->getLogger()->error(sprintf("Person avec l'identifiant ldap '%s' présent plusieurs fois dans oscar",
-                    $ldapDatas['uid']));
-                continue;
-            }
-
-            $this->getLogger()->info(sprintf("Création pour le compte LDAP '%s'",
-                $ldapData['uid']));
-            $servicePerson->createPersonFromLdapDatas($ldapData);
-        }
-    }
-
-    public function authAddAction()
-    {
-        try {
-            $login = $this->getRequest()->getParam('login');
-            $pass = $this->getRequest()->getParam('pass');
-            $displayname = $this->getRequest()->getParam('displayname');
-            $email = $this->getRequest()->getParam('email');
-            $bcrypt = new Bcrypt();
-
-            $auth = new Authentification();
-            $auth->setPassword($bcrypt->create($pass));
-            $auth->setDisplayName($displayname);
-            $auth->setUsername($login);
-            $auth->setEmail($email);
-
-            $this->getEntityManager()->persist($auth);
-            $this->getEntityManager()->flush();
-
-            die(sprintf('User created : %s(%s) %s:%s', $displayname,$email, $login, $pass));
-        } catch( \Exception $ex ){
-            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
-        }
-    }
 
     public function autoMerge(){
         $persons = $this->getEntityManager()->getRepository(Person::class)->findAll();
@@ -806,7 +722,6 @@ die();
         }
     }
 
-
     public function patchData_organisationType(){
         echo "# PATCH numbers 2016-10-14\n";
 
@@ -923,28 +838,35 @@ die();
         }
     }
 
+
+    private function triggerConnector( $connector ){
+
+    }
+
+    /**
+     * Lancement de la synchronisation des organisations avec le connecteur spécifié.
+     */
     public function organizationSyncAction(){
-        $force = $this->getRequest()->getParam('force');
+        $force      = $this->getRequest()->getParam('force');
+        $connectorName  = $this->getRequest()->getParam('connectorkey');
 
+        /** @var ConnectorService $connectorService */
+        $connectorService = $this->getServiceLocator()->get('ConnectorService');
+
+        $connector = $connectorService->getConnector('organization.' . $connectorName);
+        echo "Execution de 'organization.$connectorName' (".($force ? 'FORCE' : 'NORMAL').") : \n";
         try {
-            foreach( $this->getConfiguration('oscar.connectors.organization') as $key=>$getConnector ){
-                echo "SYNCHRONISATION depuis $key\n";
+            /** @var ConnectorRepport $repport */
+            $repport = $connector->execute($force);
+        } catch( \Exception $e ){
+            die($e->getMessage() . "\n" . $e->getTraceAsString());
+        }
 
-                $connector = $getConnector();
-
-                // Ou que c'est moche !!!
-                if( $connector instanceof ServiceLocatorAwareInterface )
-                    $connector->setServiceLocator($this->getServiceLocator());
-
-
-                $repport = $connector->syncOrganizations($this->getEntityManager()->getRepository(Organization::class), $force);
-                foreach( $repport as $line ){
-                    echo sprintf("%s\t%s\n", $line['type'], $line['message']);
-                }
-
+        foreach( $repport->getRepportStates() as $type => $out ){
+            echo "Opération " . strtoupper($type) . " : \n";
+            foreach( $out as $line ){
+                echo date('Y-m-d H:i:s', $line['time']) . "\t" . $line['message'] . "\n";
             }
-        } catch( \Exception $ex ){
-            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
         }
     }
 
@@ -978,19 +900,6 @@ die();
     }
 
 
-    /**
-     * Retourne l'identifiant Ldap calculé à partir du N° Harpège.
-     *
-     * @param $hargepeId
-     * @return string
-     */
-    public static function getLdapIdFromHarpegeId( $hargepeId ){
-        return sprintf(SyncPersonHarpege::LDAP_ID_FORMAT, $hargepeId);
-    }
-
-    public static function getHarpegeIdFromLdapId( $ldapId ){
-        return preg_replace('/^p0*/', '', $ldapId);
-    }
 
     public function personSyncAction()
     {
@@ -1026,28 +935,27 @@ die();
     public function personsSyncAction()
     {
         $force = $this->getRequest()->getParam('force', false);
+        $connectorName  = $this->getRequest()->getParam('connectorkey');
 
+        /** @var ConnectorService $connectorService */
+        $connectorService = $this->getServiceLocator()->get('ConnectorService');
+
+        $connector = $connectorService->getConnector('person.' . $connectorName);
+        echo "Execution de 'person.$connectorName' (".($force ? 'FORCE' : 'NORMAL').") : \n";
         try {
-
-            foreach( $this->getConfiguration('oscar.connectors.person') as $key=>$getConnector ){
-
-                /** @var ConnectorPersonHarpege $connector */
-                $connector = $this->getServiceLocator()->get('ConnectorService')->getConnector('person.'.$key);
-
-                /** @var ConnectorRepport $repport */
-                $repport = $connector->syncPersons($this->getEntityManager()->getRepository(Person::class), $force);
-
-
-                foreach( $repport->getRepportStates() as $type=>$messages ){
-                    echo "################# $type\n";
-                    foreach( $messages as $message ){
-                        echo " - " . $message['message'] . "\n";
-                    }
-                }
-            }
-        } catch( \Exception $ex ){
-            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
+            /** @var ConnectorRepport $repport */
+            $repport = $connector->execute($force);
+        } catch( \Exception $e ){
+            die($e->getMessage() . "\n" . $e->getTraceAsString());
         }
+
+        foreach( $repport->getRepportStates() as $type => $out ){
+            echo "Opération " . strtoupper($type) . " : \n";
+            foreach( $out as $line ){
+                echo date('Y-m-d H:i:s', $line['time']) . "\t" . $line['message'] . "\n";
+            }
+        }
+
     }
 
     public function authPassAction()

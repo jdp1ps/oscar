@@ -2,14 +2,14 @@ moment.locale('fr');
 
 var colorLabels = {};
 var colorIndex = 0;
-var colorpool = ['#fcdc80','#a6cef8','#9fd588','#fb90bb','#e5fbed','#99a0ce','#bca078','#f3cafd','#d9f4c1','#60e3bb','#f2c7f5','#f64bc0','#ffc1b2','#fc9175','#d7fc74','#e3d7f8','#9ffab3','#d6cbac','#4dd03c','#f8f3be'];
+var colorpool = ['#fcdc80', '#a6cef8', '#9fd588', '#fb90bb', '#e5fbed', '#99a0ce', '#bca078', '#f3cafd', '#d9f4c1', '#60e3bb', '#f2c7f5', '#f64bc0', '#ffc1b2', '#fc9175', '#d7fc74', '#e3d7f8', '#9ffab3', '#d6cbac', '#4dd03c', '#f8f3be'];
 
 var colorLabel = (label) => {
-    if( !colorLabels[label] ){
+    if (!colorLabels[label]) {
         console.log('Color label', label);
 
         colorLabels[label] = colorpool[++colorIndex];
-        colorIndex = colorIndex%colorpool.length;
+        colorIndex = colorIndex % colorpool.length;
     }
     return colorLabels[label];
 };
@@ -20,7 +20,7 @@ var colorLabel = (label) => {
 // MODEL
 
 class CalendarDatas {
-    constructor(){
+    constructor() {
         this.state = 'week';
         this.events = [];
         this.newID = 1;
@@ -62,51 +62,51 @@ class CalendarDatas {
         this.rejectedEvents = [];
     }
 
-    get listEvents(){
+    get listEvents() {
         EventDT.sortByStart(this.events);
         return this.events;
     }
 
-    get today(){
+    get today() {
         return moment();
     }
 
-    get firstEvent(){
+    get firstEvent() {
 
     }
 
-    get lastEvent(){
+    get lastEvent() {
 
     }
 
-    get currentYear(){
+    get currentYear() {
         return this.currentDay.format('YYYY')
     }
 
-    get currentMonth(){
+    get currentMonth() {
         return this.currentDay.format('MMMM')
     }
 
-    get currentWeekKey(){
+    get currentWeekKey() {
         return this.currentDay.format('YYYY-W')
     }
 
-    get currentWeekDays(){
+    get currentWeekDays() {
         let days = [], day = moment(this.currentDay.startOf('week'));
 
-        for( let i = 0; i<7; i++ ){
+        for (let i = 0; i < 7; i++) {
             days.push(moment(day.format()));
             day.add(1, 'day');
         }
         return days;
     }
 
-    copyDay(dt){
+    copyDay(dt) {
         this.copyDayData = [];
         var dDay = dt.format('MMMM D YYYY');
         this.events.forEach((event) => {
             var dayRef = moment(event.start).format('MMMM D YYYY');
-            if( dayRef == dDay ){
+            if (dayRef == dDay) {
                 this.copyDayData.push(
                     {
                         startHours: event.mmStart.hour(),
@@ -120,11 +120,15 @@ class CalendarDatas {
             }
         });
     }
+
     ////////////////////////////////////////////////////////////////////////
-    copyCurrentWeek(){
+    /**
+     * Copie les créneaux de la semaine en cours d'affichage.
+     */
+    copyCurrentWeek() {
         this.copyWeekData = [];
         this.events.forEach((event) => {
-            if( this.inCurrentWeek(event) ){
+            if (this.inCurrentWeek(event)) {
                 this.copyWeekData.push({
                     day: event.mmStart.day(),
                     startHours: event.mmStart.hour(),
@@ -138,8 +142,14 @@ class CalendarDatas {
         })
     }
 
-    pasteDay(day){
-        if( this.copyDayData ){
+    /**
+     * Colle les créneaux en mémoire (jour) dans le jour spécifié.
+     *
+     * @param day
+     * @returns {*}
+     */
+    pasteDay(day) {
+        if (this.copyDayData) {
             var create = [];
 
             this.copyDayData.forEach((event) => {
@@ -165,8 +175,12 @@ class CalendarDatas {
         return null;
     }
 
-    pasteWeek(){
-        if( this.copyWeekData ){
+    /**
+     * Colle les créneaux en mémoire dans le semaine en cours d'affichage.
+     * @returns {*}
+     */
+    pasteWeek() {
+        if (this.copyWeekData) {
             var create = [];
             this.copyWeekData.forEach((event) => {
                 var start = moment(this.currentDay);
@@ -190,27 +204,37 @@ class CalendarDatas {
         return null;
     }
 
-    previousWeek(){
+    /**
+     * Affiche la semaine précédente.
+     */
+    previousWeek() {
         this.currentDay = moment(this.currentDay).add(-1, 'week');
     }
 
-    nextWeek(){
+    /**
+     * Affiche la semaine suivante.
+     */
+    nextWeek() {
         this.currentDay = moment(this.currentDay).add(1, 'week');
     }
 
-    newEvent(evt){
+    /**
+     * Création d'un nouveau créneau à partir du EventDT transmis en paramètre.
+     * @param evt EventDT
+     */
+    newEvent(evt) {
         evt.id = this.generatedId++;
         this.events.push(evt)
     }
 
-    inCurrentWeek(event){
+    inCurrentWeek(event) {
         return event.inWeek(this.currentDay.year(), this.currentDay.week());
     }
 
-    sync(datas){
-        for( var i=0; i< datas.length; i++ ){
+    sync(datas) {
+        for (var i = 0; i < datas.length; i++) {
             let local = this.getEventById(datas[i].id);
-            if( local ){
+            if (local) {
                 local.sync(datas[i]);
             } else {
                 this.addNewEvent(
@@ -228,16 +252,16 @@ class CalendarDatas {
         }
     }
 
-    getEventById( id ){
-        for( let i=0; i< this.events.length; i++ ){
-            if( this.events[i].id == id ){
+    getEventById(id) {
+        for (let i = 0; i < this.events.length; i++) {
+            if (this.events[i].id == id) {
                 return this.events[i];
             }
         }
         return null;
     }
 
-    addNewEvent(id, label, start, end, description, credentials = undefined, status="draft", owner="", owner_id = null){
+    addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft", owner = "", owner_id = null) {
         this.events.push(
             new EventDT(
                 id,
@@ -332,28 +356,38 @@ var TimeEvent = {
         css(){
             var marge = 0;
             var sizeless = 0;
-            if( this.event.intersect > 0 ){
+            if (this.event.intersect > 0) {
                 sizeless = 3;
                 marge = sizeless / this.event.intersect * this.event.intersectIndex;
             }
             return {
                 'pointer-events': this.changing ? 'none' : 'auto',
                 height: (this.pixelEnd - this.pixelStart) + 'px',
-                background: this.withOwner ? colorLabel(this.event.owner): colorLabel(this.event.label),
+                background: this.withOwner ? colorLabel(this.event.owner) : colorLabel(this.event.label),
                 position: "absolute",
                 //'opacity': (this.changing ? '1' : 'inherit'),
                 top: this.pixelStart + 'px',
-                width: ((100 / 7)-1) - sizeless + "%",
-                left: ((this.weekDay-1) * 100 / 7)+marge + "%"
+                width: ((100 / 7) - 1) - sizeless + "%",
+                left: ((this.weekDay - 1) * 100 / 7) + marge + "%"
             }
         },
 
         ///////////////////////////////////////////////////////////////// STATUS
-        isDraft(){ return this.event.status == "draft";},
-        isSend(){ return this.event.status == "send";},
-        isValid(){ return this.event.status == "valid";},
-        isReject(){ return this.event.status == "reject";},
-        isInfo(){ return this.event.status == "info";},
+        isDraft(){
+            return this.event.status == "draft";
+        },
+        isSend(){
+            return this.event.status == "send";
+        },
+        isValid(){
+            return this.event.status == "valid";
+        },
+        isReject(){
+            return this.event.status == "reject";
+        },
+        isInfo(){
+            return this.event.status == "info";
+        },
 
         colorLabel(){
             return colorLabel(this.event.label);
@@ -380,34 +414,34 @@ var TimeEvent = {
         },
 
         weekDay() {
-           return this.dateStart.day()
+            return this.dateStart.day()
         }
     },
 
     watch: {
-        'event.start': function(){
+        'event.start': function () {
             this.labelStart = this.dateStart.format('H:mm');
         },
-        'event.end': function(){
+        'event.end': function () {
             this.labelEnd = this.dateEnd.format('H:mm');
         }
     },
 
     methods: {
-        updateWeekDay( value ){
-                var start = this.dateStart.day(value);
-                var end = this.dateEnd.day(value);
-                this.event.start = start.format();
-                this.event.end = end.format();
+        updateWeekDay(value){
+            var start = this.dateStart.day(value);
+            var end = this.dateEnd.day(value);
+            this.event.start = start.format();
+            this.event.end = end.format();
         },
         move(event){
-            if( this.event.editable && event.movementY != 0) {
+            if (this.event.editable && event.movementY != 0) {
                 this.change = true;
 
                 var currentTop = parseInt(this.$el.style.top);
                 var currentHeight = parseInt(this.$el.style.height);
 
-                if( this.movingBoth ) {
+                if (this.movingBoth) {
                     currentTop += event.movementY;
                     this.$el.style.top = currentTop + "px";
                 } else {
@@ -427,19 +461,19 @@ var TimeEvent = {
         },
 
         handlerEndMovingEnd(){
-            if( this.movingBoth ){
+            if (this.movingBoth) {
                 this.movingBoth = false;
             }
         },
 
         handlerStartMovingEnd(e){
             /*this.movingBoth = false;
-            this.startMoving(e);*/
+             this.startMoving(e);*/
             this.$emit('onstartmoveend', this);
         },
 
         startMoving(e){
-            if( this.event.editable ) {
+            if (this.event.editable) {
                 this.startX = e.clientX;
                 this.selected = true;
                 this.moving = true;
@@ -449,7 +483,7 @@ var TimeEvent = {
         },
 
         handlerMouseDown(e){
-            if( this.event.editable ){
+            if (this.event.editable) {
                 this.changing = true;
                 this.$emit('mousedown', this, e);
             }
@@ -457,7 +491,7 @@ var TimeEvent = {
         },
 
         handlerMouseUp(e){
-            if( this.event.editable ) {
+            if (this.event.editable) {
                 console.log('UPDATE now');
                 this.moving = false;
                 this.$el.removeEventListener('mousemove', this.move);
@@ -474,7 +508,7 @@ var TimeEvent = {
                     .minutes(dtUpdate.endMinutes)
                     .format();
 
-                if( this.change ) {
+                if (this.change) {
                     console.log('trigger update');
                     this.change = false;
                     this.$emit('savemoveevent', this.event);
@@ -487,34 +521,34 @@ var TimeEvent = {
         },
 
         roundMinutes(minutes){
-            return Math.floor(60/40*minutes/15)*15
+            return Math.floor(60 / 40 * minutes / 15) * 15
         },
 
         formatZero(int){
-            return int < 10 ? '0'+int : int;
+            return int < 10 ? '0' + int : int;
         },
 
         ////////////////////////////////////////////////////////////////////////
         topToStart(){
-            var round = 40/12;
+            var round = 40 / 12;
 
             var minutesStart = parseInt(this.$el.style.top);
             var minutesEnd = minutesStart + parseInt(this.$el.style.height);
 
-            var startHours = Math.floor(minutesStart/40);
-            var startMinutes = this.roundMinutes(minutesStart - startHours*40);
+            var startHours = Math.floor(minutesStart / 40);
+            var startMinutes = this.roundMinutes(minutesStart - startHours * 40);
 
-            var endHours = Math.floor(minutesEnd/40);
-            var endMinutes = this.roundMinutes(minutesEnd- endHours*40);
+            var endHours = Math.floor(minutesEnd / 40);
+            var endMinutes = this.roundMinutes(minutesEnd - endHours * 40);
 
             return {
                 startHours: startHours,
                 startMinutes: startMinutes,
                 endHours: endHours,
                 endMinutes: endMinutes,
-                duration: formatDuration(((endHours*60 + endMinutes) - (startHours*60 + startMinutes))*60),
-                startLabel: this.formatZero(startHours)+':'+this.formatZero(startMinutes),
-                endLabel: this.formatZero(endHours)+':'+this.formatZero(endMinutes)
+                duration: formatDuration(((endHours * 60 + endMinutes) - (startHours * 60 + startMinutes)) * 60),
+                startLabel: this.formatZero(startHours) + ':' + this.formatZero(startMinutes),
+                endLabel: this.formatZero(endHours) + ':' + this.formatZero(endMinutes)
             };
         }
     },
@@ -529,7 +563,7 @@ var TimeEvent = {
 
 var formatDuration = (milliseconde) => {
     var h = Math.floor(milliseconde / 60 / 60);
-    var m = (milliseconde - (h*60*60))/60;
+    var m = (milliseconde - (h * 60 * 60)) / 60;
     return h + (m ? 'h' + m : '');
 }
 
@@ -539,9 +573,9 @@ var WeekView = {
     },
 
     props: {
-        'withOwner': { default: false },
-        'createNew': { default: false },
-        'pas': { default: 15 }
+        'withOwner': {default: false},
+        'createNew': {default: false},
+        'pas': {default: 15}
     },
 
     components: {
@@ -623,7 +657,7 @@ var WeekView = {
     </div>
 
     <footer class="line">
-      FOOTER
+      Afficher les sous-totaux
     </footer>
     </div>`,
 
@@ -643,7 +677,7 @@ var WeekView = {
         currentWeekDays(){
             let days = [], day = moment(this.currentDay.startOf('week'));
 
-            for( let i = 0; i<7; i++ ){
+            for (let i = 0; i < 7; i++) {
                 days.push(moment(day.format()));
                 day.add(1, 'day');
             }
@@ -652,8 +686,8 @@ var WeekView = {
 
         weekEvents(){
             var weekEvents = []
-            this.events.forEach( event => {
-                if( store.inCurrentWeek(event) ){
+            this.events.forEach(event => {
+                if (store.inCurrentWeek(event)) {
                     event.intersect = 0;
                     event.intersectIndex = 0;
                     weekEvents.push(event);
@@ -661,15 +695,15 @@ var WeekView = {
             });
 
             // Détection des collapses
-            for( var i=0; i<weekEvents.length; i++ ){
+            for (var i = 0; i < weekEvents.length; i++) {
                 var u1 = weekEvents[i];
 
-                for( var j=i+1; j<weekEvents.length; j++ ){
+                for (var j = i + 1; j < weekEvents.length; j++) {
                     var u2 = weekEvents[j];
-                    if( u2 == u1 ){
+                    if (u2 == u1) {
                         continue;
                     }
-                    if( u2.overlap(u1) ){
+                    if (u2.overlap(u1)) {
                         u1.intersect++;
                         u2.intersect++;
                         u2.intersectIndex++;
@@ -681,11 +715,11 @@ var WeekView = {
 
         gostStyle(){
             return {
-                'left': this.gostDatas.x +"px",
-                'top': this.gostDatas.y +"px",
-                'width' : '13.2857%',
+                'left': this.gostDatas.x + "px",
+                'top': this.gostDatas.y + "px",
+                'width': '13.2857%',
                 'pointer-events': 'none',
-                'height' : this.gostDatas.height + "px",
+                'height': this.gostDatas.height + "px",
                 'position': 'absolute'
             }
         }
@@ -695,7 +729,7 @@ var WeekView = {
 
 //        @savemoveevent="handlerSaveMove"
         handlerEventMouseDown(event, evt){
-            if( event.event.editable ){
+            if (event.event.editable) {
                 this.gostDatas.eventActive = event;
                 this.gostDatas.editActive = true;
             }
@@ -714,19 +748,19 @@ var WeekView = {
         },
 
         handlerMouseUp(e){
-            if( this.gostDatas.drawing ){
+            if (this.gostDatas.drawing) {
                 this.gostDatas.drawing = false;
-                this.createEvent(this.gostDatas.day, Math.floor(this.gostDatas.y/40), this.gostDatas.height/40*60);
+                this.createEvent(this.gostDatas.day, Math.floor(this.gostDatas.y / 40), this.gostDatas.height / 40 * 60);
             }
 
-            if( this.gostDatas.eventActive ){
+            if (this.gostDatas.eventActive) {
                 this.gostDatas.eventActive.changing = false;
                 this.gostDatas.eventActive.handlerMouseUp();
                 this.gostDatas.eventActive = null;
                 this.gostDatas.startFrom = null;
             }
 
-            if( this.gostDatas.eventMovedEnd ){
+            if (this.gostDatas.eventMovedEnd) {
                 console.log("FIN du déplacement de la borne de fin");
                 this.gostDatas.eventMovedEnd.changing = false;
                 this.gostDatas.eventMovedEnd = null;
@@ -737,10 +771,10 @@ var WeekView = {
 
         handlerMouseDown(e){
             var roundFactor = 40 / 60 * this.pas;
-            this.gostDatas.y = Math.round(e.offsetY / roundFactor)* (roundFactor);
+            this.gostDatas.y = Math.round(e.offsetY / roundFactor) * (roundFactor);
             var pas = $(e.target).width() / 7;
-            var day = Math.floor(e.offsetX/pas);
-            this.gostDatas.day = day +1 ;
+            var day = Math.floor(e.offsetX / pas);
+            this.gostDatas.day = day + 1;
             this.gostDatas.x = day * pas;
             this.gostDatas.startX = this.gostDatas.x;
             this.gostDatas.drawing = true;
@@ -748,12 +782,12 @@ var WeekView = {
         },
 
         handlerMouseMove(e){
-            if( this.gostDatas.drawing ){
-                this.gostDatas.height  = Math.round((e.offsetY - this.gostDatas.y) / (40/60*this.pas)) * (40/60*this.pas);
+            if (this.gostDatas.drawing) {
+                this.gostDatas.height = Math.round((e.offsetY - this.gostDatas.y) / (40 / 60 * this.pas)) * (40 / 60 * this.pas);
             }
-            else if( this.gostDatas.eventActive ){
+            else if (this.gostDatas.eventActive) {
                 this.gostDatas.eventActive.changing = true;
-                if( this.gostDatas.startFrom == null ){
+                if (this.gostDatas.startFrom == null) {
                     this.gostDatas.startFrom = e.offsetY + parseInt($(this.gostDatas.eventActive.$el).css('top'));
                     this.gostDatas.decalageY = e.offsetY - parseInt($(this.gostDatas.eventActive.$el).css('top'));
 
@@ -762,48 +796,51 @@ var WeekView = {
                     // On calcule l'emplacement de la souris pour savoir si on
                     // a une bascule de la journée
                     var pas = $(e.target).width() / 7,
-                        day = Math.floor(e.offsetX/pas),
+                        day = Math.floor(e.offsetX / pas),
 
-                        // Déplacement réél de la souris
+                    // Déplacement réél de la souris
                         realMove = e.offsetY - this.gostDatas.startFrom - this.gostDatas.decalageY,
 
-                        // Déplacement arrondis (effet magnétique)
-                        effectivMove = Math.round(realMove / (40/60 * this.pas)),
-                        effectiveMoveApplication = effectivMove*(40/60*this.pas),
+                    // Déplacement arrondis (effet magnétique)
+                        effectivMove = Math.round(realMove / (40 / 60 * this.pas)),
+                        effectiveMoveApplication = effectivMove * (40 / 60 * this.pas),
 
-                        // Position Y
+                    // Position Y
                         top = parseInt($(this.gostDatas.eventActive.$el).css('top'))
                         ;
 
-                    console.log(realMove,this.gostDatas.startFrom, this.gostDatas.decalageY);
+                    /*if( top < 0 ){
+                        top = 0;
+                        return;
+                    }*/
 
                     // Mise à jour du jour si besoin
-                    if( day+1 != this.gostDatas.eventActive.weekDay ){
-                        this.gostDatas.eventActive.updateWeekDay(day+1);
+                    if (day + 1 != this.gostDatas.eventActive.weekDay) {
+                        this.gostDatas.eventActive.updateWeekDay(day + 1);
                     }
 
                     // Application du déplacement
-                    if(effectivMove != 0 ){
-                        $(this.gostDatas.eventActive.$el).css('top', effectiveMoveApplication+ top);
-                        this.gostDatas.startFrom = effectiveMoveApplication+ top;
+                    if (effectivMove != 0) {
+                        $(this.gostDatas.eventActive.$el).css('top', effectiveMoveApplication + top);
+                        this.gostDatas.startFrom = effectiveMoveApplication + top;
                         this.gostDatas.eventActive.change = true;
                         this.gostDatas.eventActive.updateLabel();
                     }
                 }
             }
-            else if( this.gostDatas.eventMovedEnd ){
+            else if (this.gostDatas.eventMovedEnd) {
                 console.log("déplacement de la borne de fin");
-                if( this.gostDatas.startFrom == null ){
+                if (this.gostDatas.startFrom == null) {
                     this.gostDatas.startFrom = e.offsetY;
                 } else {
                     var pas = $(e.target).width() / 7;
-                    var day = Math.floor(e.offsetX/pas);
+                    var day = Math.floor(e.offsetX / pas);
                     var realMove = e.offsetY - this.gostDatas.startFrom; //, e.target;
-                    var effectivMove = Math.round(realMove / (40/60 * this.pas));
-                    if(effectivMove != 0 ){
+                    var effectivMove = Math.round(realMove / (40 / 60 * this.pas));
+                    if (effectivMove != 0) {
                         var height = parseInt($(this.gostDatas.eventMovedEnd.$el).css('height'));
-                        $(this.gostDatas.eventMovedEnd.$el).css('height', effectivMove*(40/60*this.pas)+ height);
-                        this.gostDatas.startFrom =  parseInt($(this.gostDatas.eventMovedEnd.$el).css('top')) + effectivMove*(40/60*this.pas)+ height;
+                        $(this.gostDatas.eventMovedEnd.$el).css('height', effectivMove * (40 / 60 * this.pas) + height);
+                        this.gostDatas.startFrom = parseInt($(this.gostDatas.eventMovedEnd.$el).css('top')) + effectivMove * (40 / 60 * this.pas) + height;
                         this.gostDatas.eventMovedEnd.change = true;
                         this.gostDatas.eventMovedEnd.updateLabel();
                         // eventActive
@@ -816,10 +853,13 @@ var WeekView = {
             this.createEvent(day, time);
         },
 
-        createEvent(day,time, duration=120){
+        createEvent(day, time, duration = 120){
             var start = moment(this.currentDay).day(day).hour(time);
             var end = moment(start).add(duration, 'minutes');
-            var newEvent = new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, { editable: true, deletable: true});
+            var newEvent = new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, {
+                editable: true,
+                deletable: true
+            });
             this.$emit('createevent', newEvent);
         },
 
@@ -828,7 +868,7 @@ var WeekView = {
             var dDay = dt.format('MMMM D YYYY');
             this.events.forEach((event) => {
                 var dayRef = moment(event.start).format('MMMM D YYYY');
-                if( dayRef == dDay ){
+                if (dayRef == dDay) {
                     this.copyDayData.push(
                         {
                             startHours: event.mmStart.hour(),
@@ -850,7 +890,7 @@ var WeekView = {
         copyCurrentWeek(){
             this.copyWeekData = [];
             this.events.forEach((event) => {
-                if( this.inCurrentWeek(event) ){
+                if (this.inCurrentWeek(event)) {
                     this.copyWeekData.push({
                         day: event.mmStart.day(),
                         startHours: event.mmStart.hour(),
@@ -865,13 +905,13 @@ var WeekView = {
         },
 
         pasteDay(day){
-            if( this.copyDayData ){
+            if (this.copyDayData) {
                 this.$emit('createpack', store.pasteDay(day))
             }
         },
 
         pasteWeek(){
-            if( this.copyWeekData ){
+            if (this.copyWeekData) {
                 this.$emit('createpack', store.pasteWeek())
             }
         },
@@ -884,7 +924,7 @@ var WeekView = {
             this.currentDay = moment(this.currentDay).add(1, 'week');
         },
 
-        isToday( day ){
+        isToday(day){
             return day.format('YYYY-MM-DD') == store.today.format('YYYY-MM-DD');
         },
 
@@ -979,13 +1019,13 @@ var ListItemView = {
             return colorLabel(this.event.label);
         },
         css(){
-            var percentUnit = 100 / (18*60)
-                , start = (this.event.mmStart.hour()-6)*60 + this.event.mmStart.minutes()
-                , end = (this.event.mmEnd.hour()-6)*60 + this.event.mmEnd.minutes();
+            var percentUnit = 100 / (18 * 60)
+                , start = (this.event.mmStart.hour() - 6) * 60 + this.event.mmStart.minutes()
+                , end = (this.event.mmEnd.hour() - 6) * 60 + this.event.mmEnd.minutes();
 
             return {
-                left: (percentUnit * start) +'%',
-                width: (percentUnit * (end - start)) +'%',
+                left: (percentUnit * start) + '%',
+                width: (percentUnit * (end - start)) + '%',
                 background: this.colorLabel
             }
         }
@@ -1052,15 +1092,15 @@ var ListView = {
 
             var currentPack = null;
 
-            if( !store.events ){
+            if (!store.events) {
                 return null
             }
 
-            for( let i=0; i<this.events.length; i++ ){
+            for (let i = 0; i < this.events.length; i++) {
                 let event = this.events[i];
                 let label = event.mmStart.format(packerFormat);
 
-                if( packer == null || packer.label != label ){
+                if (packer == null || packer.label != label) {
                     packer = {
                         label: label,
                         events: [],
@@ -1098,14 +1138,14 @@ var EventItemImport = {
             return colorLabel(this.event.label);
         },
         css(){
-            var percentUnit = 100 / (18*60)
-                , start = (this.event.mmStart.hour()-6)*60 + this.event.mmStart.minutes()
-                , end = (this.event.mmEnd.hour()-6)*60 + this.event.mmEnd.minutes();
+            var percentUnit = 100 / (18 * 60)
+                , start = (this.event.mmStart.hour() - 6) * 60 + this.event.mmStart.minutes()
+                , end = (this.event.mmEnd.hour() - 6) * 60 + this.event.mmEnd.minutes();
 
             return {
                 position: "absolute",
-                left: (percentUnit * start) +'%',
-                width: (percentUnit * (end - start)) +'%',
+                left: (percentUnit * start) + '%',
+                width: (percentUnit * (end - start)) + '%',
                 background: this.colorLabel
             }
         }
@@ -1197,21 +1237,21 @@ var ImportICSView = {
 
     components: {
         'datepicker': Datepicker,
-        'eventitemimport' : EventItemImport
+        'eventitemimport': EventItemImport
     },
 
     computed: {
         packs(){
             var packs = [];
-            this.importedEvents.forEach( item => {
+            this.importedEvents.forEach(item => {
                 let currentPack = null;
                 let currentLabel = item.mmStart.format('YYYY MMMM DD');
-                for( let i=0; i<packs.length && currentPack == null ; i++ ){
-                    if( packs[i].label == currentLabel ){
+                for (let i = 0; i < packs.length && currentPack == null; i++) {
+                    if (packs[i].label == currentLabel) {
                         currentPack = packs[i];
                     }
                 }
-                if( !currentPack ){
+                if (!currentPack) {
                     currentPack = {
                         label: currentLabel,
                         events: []
@@ -1226,23 +1266,23 @@ var ImportICSView = {
 
     methods: {
         background(label){
-          return colorLabel(label);
+            return colorLabel(label);
         },
-        updateLabel( from, to ){
-            if( to == 'ignorer' ) {
+        updateLabel(from, to){
+            if (to == 'ignorer') {
                 this.importedEvents.forEach(item => {
                     if (item.label == from)
                         item.imported = false;
                 })
-            } else if( to == 'conserver' ){
-                    this.importedEvents.forEach( item => {
-                        if( item.label == from )
-                            item.useLabel = '';
-                            item.imported = true;
-                    });
+            } else if (to == 'conserver') {
+                this.importedEvents.forEach(item => {
+                    if (item.label == from)
+                        item.useLabel = '';
+                    item.imported = true;
+                });
             } else {
-                this.importedEvents.forEach( item => {
-                    if( item.label == from ) {
+                this.importedEvents.forEach(item => {
+                    if (item.label == from) {
                         item.useLabel = to;
                         item.imported = true;
                     }
@@ -1269,13 +1309,13 @@ var ImportICSView = {
             this.importedEvents = [];
             this.labels = [];
 
-            events.forEach( item => {
+            events.forEach(item => {
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
                 item.imported = true;
                 item.useLabel = "";
                 this.importedEvents.push(item);
-                if( this.labels.indexOf(item.label) < 0 )
+                if (this.labels.indexOf(item.label) < 0)
                     this.labels.push(item.label);
             });
 
@@ -1284,8 +1324,8 @@ var ImportICSView = {
         },
         applyImport(){
             var imported = [];
-            this.importedEvents.forEach( event => {
-                if( event.imported == true ){
+            this.importedEvents.forEach(event => {
+                if (event.imported == true) {
                     imported.push(event)
                 }
             });
@@ -1308,7 +1348,9 @@ var SelectEditable = {
             default: ''
         },
         'chooses': {
-            default(){ return ["A", "B", "C"] }
+            default(){
+                return ["A", "B", "C"]
+            }
         }
     },
 
@@ -1321,7 +1363,7 @@ var SelectEditable = {
 
     computed: {
         selectedValue(){
-            if( this.chooses.indexOf(this.valueIn) >= 0 ){
+            if (this.chooses.indexOf(this.valueIn) >= 0) {
                 return this.valueIn;
             } else {
                 return 'FREE';
@@ -1330,9 +1372,9 @@ var SelectEditable = {
     },
 
     watch: {
-      value(newV, oldV){
-          this.valueIn = newV;
-      }
+        value(newV, oldV){
+            this.valueIn = newV;
+        }
     },
 
     methods: {
@@ -1341,7 +1383,7 @@ var SelectEditable = {
             this.$emit('input', this.valueIn, this.model);
         },
         onSelectChange(e){
-            if( e.target.value == "FREE" ){
+            if (e.target.value == "FREE") {
                 this.valueIn = "";
             } else {
                 this.valueIn = e.target.value;
@@ -1461,11 +1503,13 @@ var Calendar = {
         },
         // Texts
         trans: {
-            default() { return {
-                labelViewWeek: "Semaine",
-                labelViewMonth: "Mois",
-                labelViewList: "Liste"
-            }}
+            default() {
+                return {
+                    labelViewWeek: "Semaine",
+                    labelViewMonth: "Mois",
+                    labelViewList: "Liste"
+                }
+            }
         }
     },
 
@@ -1486,16 +1530,16 @@ var Calendar = {
          */
         submitall(status, period){
             var events = [];
-            if( period == 'week' ){
-                this.events.forEach( event => {
-                   if( store.inCurrentWeek(event) && event.sendable ){
-                       events.push(event);
-                   }
+            if (period == 'week') {
+                this.events.forEach(event => {
+                    if (store.inCurrentWeek(event) && event.sendable) {
+                        events.push(event);
+                    }
                 });
             }
-            if( events.length ){
+            if (events.length) {
                 bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
-                    if( confirm )
+                    if (confirm)
                         this.restStep(events, status);
                 });
             }
@@ -1510,16 +1554,16 @@ var Calendar = {
 
             // Liste des événements éligibles
             var events = [];
-            this.events.forEach( event => {
-                if( event.mmStart.format('YYYYMMDD') == day.format('YYYYMMDD') && event.sendable ){
+            this.events.forEach(event => {
+                if (event.mmStart.format('YYYYMMDD') == day.format('YYYYMMDD') && event.sendable) {
                     events.push(event);
                 }
             });
 
             // Envoi
-            if( events.length ){
+            if (events.length) {
                 bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
-                    if( confirm )
+                    if (confirm)
                         this.restStep(events, 'send');
                 });
             }
@@ -1527,9 +1571,9 @@ var Calendar = {
 
         importEvents(events){
             var datas = [];
-            events.forEach( item => {
+            events.forEach(item => {
                 var event = JSON.parse(JSON.stringify(item));
-                if( event.useLabel ) event.label = event.useLabel;
+                if (event.useLabel) event.label = event.useLabel;
                 event.mmStart = moment(event.start);
                 event.mmEnd = moment(event.end);
                 datas.push(event);
@@ -1543,7 +1587,7 @@ var Calendar = {
         },
 
         confirmImport(){
-          console.log('Tous ajouter');
+            console.log('Tous ajouter');
         },
 
         handleradd(pack, event){
@@ -1592,7 +1636,7 @@ var Calendar = {
             this.showRejectModal([event]);
         },
 
-        showRejectModal( events ){
+        showRejectModal(events){
             this.displayRejectModal = true;
             this.rejectedEvents = events;
         },
@@ -1601,23 +1645,23 @@ var Calendar = {
 
         restSave(events){
 
-            if( this.restUrl ){
+            if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
-                for( var i=0; i<events.length; i++ ){
-                    data.append('events['+i+'][label]', events[i].label);
-                    data.append('events['+i+'][description]', events[i].description);
-                    data.append('events['+i+'][start]', events[i].mmStart.format());
-                    data.append('events['+i+'][end]', events[i].mmEnd.format());
-                    data.append('events['+i+'][id]', events[i].id || null);
-                    data.append('events['+i+'][owner_id]', events[i].owner_id || null);
-                    if( this.customDatas ){
+                for (var i = 0; i < events.length; i++) {
+                    data.append('events[' + i + '][label]', events[i].label);
+                    data.append('events[' + i + '][description]', events[i].description);
+                    data.append('events[' + i + '][start]', events[i].mmStart.format());
+                    data.append('events[' + i + '][end]', events[i].mmEnd.format());
+                    data.append('events[' + i + '][id]', events[i].id || null);
+                    data.append('events[' + i + '][owner_id]', events[i].owner_id || null);
+                    if (this.customDatas) {
                         var customs = this.customDatas();
                         for (var k in customs) {
                             if (customs.hasOwnProperty(k) && events[i].label == k) {
                                 for (var l in customs[k]) {
                                     if (customs[k].hasOwnProperty(l)) {
-                                        data.append('events['+i+']['+l+']', customs[k][l]);
+                                        data.append('events[' + i + '][' + l + ']', customs[k][l]);
                                     }
                                 }
                             }
@@ -1633,7 +1677,8 @@ var Calendar = {
                     error => {
                         this.errors.push("Impossible d'enregistrer les données : " + error)
                     }
-                ).then(()=> this.transmission = "" );;
+                ).then(()=> this.transmission = "");
+                ;
             }
         },
 
@@ -1647,13 +1692,13 @@ var Calendar = {
 
         restStep(events, action){
 
-            if( this.restUrl ){
+            if (this.restUrl) {
                 this.transmission = "Enregistrement en cours...";
                 var data = new FormData();
                 data.append('do', action);
-                for( var i=0; i<events.length; i++ ){
-                    data.append('events['+i+'][id]', events[i].id || null);
-                    data.append('events['+i+'][rejectedComment]', events[i].rejectedComment || null);
+                for (var i = 0; i < events.length; i++) {
+                    data.append('events[' + i + '][id]', events[i].id || null);
+                    data.append('events[' + i + '][rejectedComment]', events[i].rejectedComment || null);
                 }
 
                 this.$http.post(this.restUrl(), data).then(
@@ -1665,22 +1710,26 @@ var Calendar = {
                     error => {
                         this.errors.push("Impossible de modifier l'état du créneau : " + error)
                     }
-                ).then(()=> { this.transmission = ""; });
+                ).then(()=> {
+                    this.transmission = "";
+                });
             }
         },
 
         /** Suppression de l'événement de la liste */
         handlerDeleteEvent(event){
-            if( this.restUrl ){
+            if (this.restUrl) {
                 this.transmission = "Suppression...";
-                this.$http.delete(this.restUrl()+"?timesheet="+event.id).then(
+                this.$http.delete(this.restUrl() + "?timesheet=" + event.id).then(
                     response => {
                         this.events.splice(this.events.indexOf(event), 1);
                     },
                     error => {
                         console.log(error)
                     }
-                ).then(()=> { this.transmission = ""; });
+                ).then(()=> {
+                    this.transmission = "";
+                });
             } else {
                 this.events.splice(this.events.indexOf(event), 1);
             }
@@ -1689,32 +1738,33 @@ var Calendar = {
         handlerSaveMove(event){
             var data = JSON.parse(JSON.stringify(event));
             data.mmStart = moment(data.start);
-            data.mmEnd = moment(data.end);;
+            data.mmEnd = moment(data.end);
+            ;
             this.restSave([data]);
         },
 
         handlerSaveEvent(event){
             store.defaultLabel = this.eventEditData.label;
             /*
-            var data = JSON.parse(JSON.stringify(this.eventEditData));
-            data.mmStart = this.eventEdit.mmStart;
-            data.mmEnd = this.eventEdit.mmEnd;
-            this.restSave([data], 'new');
-            /****/
+             var data = JSON.parse(JSON.stringify(this.eventEditData));
+             data.mmStart = this.eventEdit.mmStart;
+             data.mmEnd = this.eventEdit.mmEnd;
+             this.restSave([data], 'new');
+             /****/
         },
 
         /** Soumission de l'événement de la liste */
         handlerSubmitEvent(event){
             store.defaultLabel = event.label;
             bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
-                if( confirm )
+                if (confirm)
                     this.restSend([event]);
             });
         },
 
         /** Soumission de l'événement de la liste */
         handlerCreateEvent(event){
-            console.log("Afficher le formulaire pour",event);
+            console.log("Afficher le formulaire pour", event);
             this.handlerEditEvent(event);
             // this.restSave([event]);
 //            this.events.push(event);
@@ -1736,18 +1786,18 @@ var Calendar = {
             var events = analyser.parse(ICAL.parse(content));
             this.importedData = [];
 
-            events.forEach( item => {
+            events.forEach(item => {
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
 
                 let currentPack = null;
                 let currentLabel = item.mmStart.format('YYYY-MM-D');
-                for( let i=0; i<this.importedData.length && currentPack == null ; i++ ){
-                    if( this.importedData[i].label == currentLabel ){
+                for (let i = 0; i < this.importedData.length && currentPack == null; i++) {
+                    if (this.importedData[i].label == currentLabel) {
                         currentPack = this.importedData[i];
                     }
                 }
-                if( !currentPack ){
+                if (!currentPack) {
                     currentPack = {
                         label: currentLabel,
                         events: []
@@ -1762,22 +1812,25 @@ var Calendar = {
         /** Ajoute la liste d'événement **/
         hydrateEventWith(arrayOfObj){
 
-          arrayOfObj.forEach((obj) => {
-              store.addNewEvent(obj.id, obj.label,
-                  obj.start, obj.end, obj.description,
-                  { editable: true, deletable: true},
-                  'draft');
-          })
+            arrayOfObj.forEach((obj) => {
+                store.addNewEvent(obj.id, obj.label,
+                    obj.start, obj.end, obj.description,
+                    {editable: true, deletable: true},
+                    'draft');
+            })
         },
 
         deleteEvent(event){
             this.events.splice(this.events.indexOf(event), 1);
         },
 
-        createEvent(day,time){
+        createEvent(day, time){
             var start = moment(this.currentDay).day(day).hour(time);
             var end = moment(start).add(2, 'hours');
-            this.newEvent(new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, { editable: true, deletable: true}));
+            this.newEvent(new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, {
+                editable: true,
+                deletable: true
+            }));
         },
 
         editEvent(event){
@@ -1790,7 +1843,8 @@ var Calendar = {
             console.log("NEW", JSON.parse(JSON.stringify(this.eventEditData)));
             var event = JSON.parse(JSON.stringify(this.eventEditData));
             event.mmStart = moment(event.start);
-            event.mmEnd = moment(event.end);;
+            event.mmEnd = moment(event.end);
+            ;
             this.restSave([event]);
         },
 
@@ -1809,7 +1863,9 @@ var Calendar = {
                 ko => {
                     this.errors.push("Impossible de charger les données : " + ko)
                 }
-            ).then(()=> { this.transmission = "";});
+            ).then(()=> {
+                this.transmission = "";
+            });
         },
 
         post(event){
@@ -1818,13 +1874,13 @@ var Calendar = {
     },
 
     mounted(){
-        if( this.customDatas ){
+        if (this.customDatas) {
             var customs = this.customDatas();
             console.log(customs);
             for (var k in customs) {
                 if (customs.hasOwnProperty(k)) {
                     colorLabels[k] = colorpool[customs[k].color];
-                    if( !store.defaultLabel ){
+                    if (!store.defaultLabel) {
                         store.defaultLabel = k;
                     }
                     store.labels.push(k);
@@ -1837,7 +1893,7 @@ var Calendar = {
             console.log('OWNERS', store.owners);
         }
 
-        if( this.restUrl ){
+        if (this.restUrl) {
             this.fetch();
         }
     }

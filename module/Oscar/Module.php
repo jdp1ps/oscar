@@ -202,12 +202,10 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             'oscar auth:add <login> <email> <pass> <displayname>' => 'Cré un nouvel utilisateur.',
 
             '# PERSONNES',
-            'oscar persons:sync' => 'Lance la synchronisation des personnes depuis les différents connecteurs.',
-            'oscar persons:search:connector <connector> <connectorId>' => "Affiche les personnes ayant l'identifiant 'connectorId' avec le connecteur 'connector'",
-            'oscar personsorganizations:sync' => 'Lance la synchronisation des roles des personnes dans les organisations.',
+            'oscar persons:sync <connectorkey>' => 'Lance la synchronisation des personnes depuis les différents connecteurs.',
 
             '# ORGANISATIONS',
-            'oscar organizations:sync' => 'Lance la synchronisation des organization depuis les différents connecteurs.',
+            'oscar organizations:sync <connectorkey>' => 'Lance la synchronisation des organization depuis les différents connecteurs.',
 
             '# ACTIVTÉS',
             'oscar activity:search:build' => "Reconsruction de l'index de recherche",
