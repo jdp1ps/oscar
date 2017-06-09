@@ -402,12 +402,18 @@ body {
     .calendar .events.drawing .event-changing {
       opacity: 1; }
     .calendar .events .gost {
-      border: solid thin rgba(0, 0, 0, 0.5);
+      border: solid thin rgba(0, 0, 0, 0.25);
       cursor: pointer;
       padding: 2px;
       margin: 0 .5%;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-      background-color: white; }
+      box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.3);
+      background-color: rgba(255, 255, 255, 0.5); }
+  .calendar .refus {
+    color: #9a1e1b;
+    font-weight: 100;
+    font-size: 14px; }
+    .calendar .refus .comment {
+      font-weight: bold; }
   .calendar .meta {
     display: flex;
     font-size: 1.25em; }

@@ -26,10 +26,12 @@ var EventDT = function () {
     var owner_id = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
     var rejectedComment = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : "";
     var rejectedAt = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
-    var validatedBy = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : null;
-    var validatedAt = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : null;
-    var confirmedBy = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : null;
-    var confirmedAt = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
+    var rejectedAdminComment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "";
+    var rejectedAdminAt = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : null;
+    var validatedBy = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : null;
+    var validatedAt = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
+    var confirmedBy = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : null;
+    var confirmedAt = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : null;
 
     _classCallCheck(this, EventDT);
 
@@ -51,6 +53,8 @@ var EventDT = function () {
 
     this.rejectedComment = rejectedComment;
     this.rejectedAt = rejectedAt;
+    this.rejectedAdminComment = rejectedAdminComment;
+    this.rejectedAdminAt = rejectedAdminAt;
 
     this.validatedAt = validatedAt;
     this.validatedBy = validatedBy;
@@ -118,12 +122,18 @@ var EventDT = function () {
     key: 'sync',
     value: function sync(data) {
       console.log("Synchronisation de l'événement", this.id, "avec", data);
+
       if (data.id) this.id = data.id;
       if (data.label) this.label = data.label;
       if (data.description) this.description = data.description;
       if (data.start) this.start = data.start;
       if (data.end) this.end = data.end;
       if (data.status) this.status = data.status;
+      if (data.rejectedComment) this.rejectedComment = data.rejectedComment;
+      if (data.rejectedCommentAt) this.rejectedCommentAt = data.rejectedCommentAt;
+      if (data.rejectedAdminComment) this.rejectedAdminComment = data.rejectedAdminComment;
+      if (data.rejectedAdminCommentAt) this.rejectedAdminCommentAt = data.rejectedAdminCommentAt;
+
       if (data.credentials) {
         this.editable = data.credentials.editable;
         this.deletable = data.credentials.deletable;

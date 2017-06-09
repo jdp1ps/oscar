@@ -3,8 +3,10 @@
 moment.locale('fr');
 
 var EventDT = class {
-  constructor(id, label, start, end, description="", actions={}, status='draft', owner="", owner_id = null,
+  constructor(id, label, start, end, description="",
+              actions={}, status='draft', owner="", owner_id = null,
               rejectedComment="", rejectedAt=null,
+              rejectedAdminComment="", rejectedAdminAt=null,
               validatedBy=null, validatedAt=null,
               confirmedBy=null, confirmedAt=null
             ){
@@ -27,6 +29,8 @@ var EventDT = class {
 
     this.rejectedComment = rejectedComment;
     this.rejectedAt = rejectedAt;
+    this.rejectedAdminComment = rejectedAdminComment;
+    this.rejectedAdminAt = rejectedAdminAt;
 
     this.validatedAt = validatedAt;
     this.validatedBy = validatedBy;
@@ -121,12 +125,18 @@ var EventDT = class {
 
   sync( data ){
     console.log("Synchronisation de l'événement", this.id, "avec", data);
+
     if( data.id ) this.id = data.id;
     if( data.label ) this.label = data.label;
     if( data.description ) this.description = data.description;
     if( data.start ) this.start = data.start;
     if( data.end ) this.end = data.end;
     if( data.status ) this.status = data.status;
+    if( data.rejectedComment ) this.rejectedComment = data.rejectedComment;
+    if( data.rejectedCommentAt ) this.rejectedCommentAt = data.rejectedCommentAt;
+    if( data.rejectedAdminComment ) this.rejectedAdminComment = data.rejectedAdminComment;
+    if( data.rejectedAdminCommentAt ) this.rejectedAdminCommentAt = data.rejectedAdminCommentAt;
+
     if( data.credentials ) {
       this.editable = data.credentials.editable;
       this.deletable = data.credentials.deletable;

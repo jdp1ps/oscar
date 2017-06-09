@@ -136,31 +136,93 @@ class TimeSheet implements ITrackable
     //////////////////////////////////////////////////// VALIDATION SCIENTIFIQUE
 
     ////// VALIDATION
-    /** @var string Personne ayant fait la validation scientifique. */
-    private $validateSciBy;
+    /**
+     * @var string Personne ayant fait la validation scientifique.
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $validatedSciBy;
 
-    /** @var int ID de la personne ayant fait la validation scientifique. */
-    private $validateSciById;
+    /**
+     * @var int ID de la personne ayant fait la validation scientifique.
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $validatedSciById;
 
-    /** @var \DateTime Date de la validation scientifique. */
-    private $validateSciAt;
+    /**
+     * @var \DateTime Date de la validation scientifique.
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $validatedSciAt;
+
+    /**
+     * @var string Personne ayant fait la validation administrative.
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $validatedAdminBy;
+
+    /**
+     * @var int ID de la personne ayant fait la validation administrative.
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $validatedAdminById;
+
+    /**
+     * @var \DateTime Date de la validation administrative.
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $validatedAdminAt;
 
     ////// REFUS
-    /** @var string Personne ayant refusé la validation scientifique. */
+    /**
+     * @var string Personne ayant refusé la validation scientifique.
+     * @ORM\Column(type="string", nullable=true)
+     */
     private $rejectedSciBy;
 
-    /** @var int ID de la personne ayant refusé la validation scientifique. */
+    /**
+     * @var int ID de la personne ayant refusé la validation scientifique.
+     * @ORM\Column(type="integer", nullable=true)
+     */
     private $rejectedSciById;
 
-    /** @var \DateTime Date du refuss de la validation scientifique. */
+    /**
+     * @var \DateTime Date du refuss de la validation scientifique.
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
     private $rejectedSciAt;
 
-    /** @var string Commentaire laisé par la personne ayant refusé la validation scientifique. */
+    /**
+     * @var string Commentaire laisé par la personne ayant refusé la validation scientifique.
+     * @ORM\Column(type="text", nullable=true)
+     */
     private $rejectedSciComment;
 
+    ////// REFUS
+    /**
+     * @var string Personne ayant refusé la validation administrative.
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $rejectedAdminBy;
+
+    /**
+     * @var int ID de la personne ayant refusé la validation administrative.
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $rejectedAdminById;
+
+    /**
+     * @var \DateTime Date du refuss de la validation administrative.
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $rejectedAdminAt;
+
+    /**
+     * @var string Commentaire laisé par la personne ayant refusé la validation administrative.
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $rejectedAdminComment;
+
     ////////////////////////////////////////////////////////////////////////////
-
-
 
 
     /**
@@ -168,40 +230,6 @@ class TimeSheet implements ITrackable
      * @ORM\Column(type="string", nullable=true)
      */
     private $sendBy;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $validatedAt;
-
-    /**
-     * @var
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $validatedBy;
-
-    /**
-     * @var
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $rejectedBy;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $rejectedAt;
-
-    /**
-     * @var string
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private $rejectedComment;
-
-
-
-
 
     ////////////////////////////////////////////////////////////////////////////
     public function __construct()
@@ -221,9 +249,267 @@ class TimeSheet implements ITrackable
             'status' => self::getStatusText()[$this->getStatus()],
             'owner' => $this->getPerson()->getDisplayName(),
             'owner_id' => $this->getPerson()->getId(),
-            'rejectedAt' => $this->getRejectedAt(),
-            'rejectedComment' => $this->getRejectedComment(),
+
+            'rejectedSciAt' => $this->getRejectedSciAt(),
+            'rejectedSciComment' => $this->getRejectedSciComment(),
+            'rejectedSciBy' => $this->getRejectedSciBy(),
+
+            'rejectedAdminAt' => $this->getRejectedAdminAt(),
+            'rejectedAdminComment' => $this->getRejectedAdminComment(),
+            'rejectedAdminBy' => $this->getRejectedAdminBy(),
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidatedSciBy()
+    {
+        return $this->validatedSciBy;
+    }
+
+    /**
+     * @param string $validatedSciBy
+     */
+    public function setValidatedSciBy($validatedSciBy)
+    {
+        $this->validatedSciBy = $validatedSciBy;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getValidatedSciById()
+    {
+        return $this->validatedSciById;
+    }
+
+    /**
+     * @param int $validatedSciById
+     */
+    public function setValidatedSciById($validatedSciById)
+    {
+        $this->validatedSciById = $validatedSciById;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getValidatedSciAt()
+    {
+        return $this->validatedSciAt;
+    }
+
+    /**
+     * @param \DateTime $validatedSciAt
+     */
+    public function setValidatedSciAt($validatedSciAt)
+    {
+        $this->validatedSciAt = $validatedSciAt;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidatedAdminBy()
+    {
+        return $this->validatedAdminBy;
+    }
+
+    /**
+     * @param string $validatedAdminBy
+     */
+    public function setValidatedAdminBy($validatedAdminBy)
+    {
+        $this->validatedAdminBy = $validatedAdminBy;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getValidatedAdminById()
+    {
+        return $this->validatedAdminById;
+    }
+
+    /**
+     * @param int $validatedAdminById
+     */
+    public function setValidatedAdminById($validatedAdminById)
+    {
+        $this->validatedAdminById = $validatedAdminById;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getValidatedAdminAt()
+    {
+        return $this->validatedAdminAt;
+    }
+
+    /**
+     * @param \DateTime $validatedAdminAt
+     */
+    public function setValidatedAdminAt($validatedAdminAt)
+    {
+        $this->validatedAdminAt = $validatedAdminAt;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedSciBy()
+    {
+        return $this->rejectedSciBy;
+    }
+
+    /**
+     * @param string $rejectedSciBy
+     */
+    public function setRejectedSciBy($rejectedSciBy)
+    {
+        $this->rejectedSciBy = $rejectedSciBy;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRejectedSciById()
+    {
+        return $this->rejectedSciById;
+    }
+
+    /**
+     * @param int $rejectedSciById
+     */
+    public function setRejectedSciById($rejectedSciById)
+    {
+        $this->rejectedSciById = $rejectedSciById;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getRejectedSciAt()
+    {
+        return $this->rejectedSciAt;
+    }
+
+    /**
+     * @param \DateTime $rejectedSciAt
+     */
+    public function setRejectedSciAt($rejectedSciAt)
+    {
+        $this->rejectedSciAt = $rejectedSciAt;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedSciComment()
+    {
+        return $this->rejectedSciComment;
+    }
+
+    /**
+     * @param string $rejectedSciComment
+     */
+    public function setRejectedSciComment($rejectedSciComment)
+    {
+        $this->rejectedSciComment = $rejectedSciComment;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedAdminBy()
+    {
+        return $this->rejectedAdminBy;
+    }
+
+    /**
+     * @param string $rejectedAdminBy
+     */
+    public function setRejectedAdminBy($rejectedAdminBy)
+    {
+        $this->rejectedAdminBy = $rejectedAdminBy;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRejectedAdminById()
+    {
+        return $this->rejectedAdminById;
+    }
+
+    /**
+     * @param int $rejectedAdminById
+     */
+    public function setRejectedAdminById($rejectedAdminById)
+    {
+        $this->rejectedAdminById = $rejectedAdminById;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getRejectedAdminAt()
+    {
+        return $this->rejectedAdminAt;
+    }
+
+    /**
+     * @param \DateTime $rejectedAdminAt
+     */
+    public function setRejectedAdminAt($rejectedAdminAt)
+    {
+        $this->rejectedAdminAt = $rejectedAdminAt;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedAdminComment()
+    {
+        return $this->rejectedAdminComment;
+    }
+
+    /**
+     * @param string $rejectedAdminComment
+     */
+    public function setRejectedAdminComment($rejectedAdminComment)
+    {
+        $this->rejectedAdminComment = $rejectedAdminComment;
+
+        return $this;
     }
 
     /**
@@ -244,76 +530,8 @@ class TimeSheet implements ITrackable
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getValidatedBy()
-    {
-        return $this->validatedBy;
-    }
 
-    /**
-     * @param mixed $validatedBy
-     */
-    public function setValidatedBy($validatedBy)
-    {
-        $this->validatedBy = $validatedBy;
 
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getRejectedBy()
-    {
-        return $this->rejectedBy;
-    }
-
-    /**
-     * @param mixed $rejectedBy
-     */
-    public function setRejectedBy($rejectedBy)
-    {
-        $this->rejectedBy = $rejectedBy;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getRejectedAt()
-    {
-        return $this->rejectedAt;
-    }
-
-    /**
-     * @param \DateTime $rejectedAt
-     */
-    public function setRejectedAt($rejectedAt)
-    {
-        $this->rejectedAt = $rejectedAt;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectedComment()
-    {
-        return $this->rejectedComment;
-    }
-
-    /**
-     * @param string $rejectedComment
-     */
-    public function setRejectedComment($rejectedComment)
-    {
-        $this->rejectedComment = $rejectedComment;
-        return $this;
-    }
 
 
 

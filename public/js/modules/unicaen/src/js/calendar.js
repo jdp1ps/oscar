@@ -246,7 +246,11 @@ class CalendarDatas {
                     datas[i].credentials,
                     datas[i].status,
                     datas[i].owner,
-                    datas[i].owner_id
+                    datas[i].owner_id,
+                    datas[i].rejectedComment,
+                    datas[i].rejectedAt,
+                    datas[i].rejectedAdminComment,
+                    datas[i].rejectedAdminAt
                 );
             }
         }
@@ -261,7 +265,11 @@ class CalendarDatas {
         return null;
     }
 
-    addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft", owner = "", owner_id = null) {
+    addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft",
+                owner = "", owner_id = null,
+                rejectedComment = "", rejectedAt = null,
+                rejectedAdminComment = "", rejectedAdminAt = null
+                ) {
         this.events.push(
             new EventDT(
                 id,
@@ -270,8 +278,9 @@ class CalendarDatas {
                 description,
                 credentials,
                 status,
-                owner,
-                owner_id
+                owner, owner_id,
+                rejectedComment, rejectedAt,
+                rejectedAdminComment, rejectedAdminAt
             )
         );
     }
@@ -295,6 +304,18 @@ var TimeEvent = {
           {{ event.description }}
         </div>
 
+        <div class="refus" @mouseover.prevent="showRefus != showRefus">
+            <i class="icon-archive"></i> REFUS {{ showRefus }}
+            <div v-show="showRefus">
+                <i class="icon-beaker"></i>
+                Refus scientifique :
+                <div class="comment">{{ event.rejectedComment}}</div>
+                <i class="icon-archive"></i>
+                Refus administratif :
+                <div class="comment">{{ event.rejectedAdminComment}}</div>
+            </div>
+        </div>
+
         <nav class="admin">
             <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('editevent')" v-if="event.editable">
                 <i class="icon-pencil-1"></i>
@@ -306,6 +327,14 @@ var TimeEvent = {
             <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('submitevent')" v-if="event.sendable">
                 <i class="icon-right-big"></i>
                 Soumettre</a>
+
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerShowRefus" v-if="event.rejectedComment">
+                <i class="icon-attention-1"></i>
+                Refus scientifique</a>
+
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerShowRefusAdmin" v-if="event.rejectedAdminComment">
+                <i class="icon-attention-1"></i>
+                Refus administratif</a>
 
             <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateevent')" v-if="event.validable">
                 <i class="icon-right-big"></i>
@@ -335,6 +364,7 @@ var TimeEvent = {
             movingBoth: true,
             changing: false,
             change: false,
+            showRefus: false,
             labelStart: "",
             labelEnd: "",
             labelDuration: "",
@@ -434,6 +464,22 @@ var TimeEvent = {
             this.event.start = start.format();
             this.event.end = end.format();
         },
+
+        handlerShowRefus(){
+            bootbox.alert({
+                size: "small",
+                title: '<i class="icon-beaker"></i>   Refus scientifique',
+                message: '<em>Motif : </em>' + this.event.rejectedComment + ""
+            })
+        },
+        handlerShowRefusAdmin(){
+            bootbox.alert({
+                size: "small",
+                title: '<i class="icon-archive"></i>   Refus administratif',
+                message: '<em>Motif : </em>' + this.event.rejectedAdminComment + ""
+            })
+        },
+
         move(event){
             if (this.event.editable && event.movementY != 0) {
                 this.change = true;

@@ -743,14 +743,19 @@ class TimesheetController extends AbstractOscarController
                 $newStatus = TimeSheet::STATUS_ACTIVE;
                 $validatedBy = (string)$this->getCurrentPerson();
                 break;
+
             case 'send' :
                 $newStatus = TimeSheet::STATUS_TOVALIDATE;
                 $sendBy = (string)$this->getCurrentPerson();
                 break;
+
             case 'reject' :
                 $newStatus = TimeSheet::STATUS_CONFLICT;
                 $rejectBy = (string) $this->getCurrentPerson();
-                $rejectAt = new \DateTime();
+
+            case 'rejectadmin' :
+                $newStatus = TimeSheet::STATUS_CONFLICT;
+                $rejectAdminBy = (string) $this->getCurrentPerson();
                 break;
             default :
                 //return $this->getResponseBadRequest('Opération inconnue !');
@@ -770,6 +775,10 @@ class TimesheetController extends AbstractOscarController
 
                 if( isset($rejectBy) ){
                     $timeSheet->setRejectedBy($rejectBy)->setRejectedAt(new \DateTime())->setRejectedComment($data['rejectedComment']);
+                }
+
+                if( isset($rejectAdminBy) ){
+                    $timeSheet->setRejectedAdminBy($rejectAdminBy)->setRejectedAdminAt(new \DateTime())->setRejectedAdminComment($data['rejectedAdminComment']);
                 }
 
                 if( isset($validatedBy) ){
