@@ -1,4 +1,4 @@
-# OSCAR (Organisation et Suivi des Contrats et des Activités de Recherche)
+# Installation
 
 Oscar est une **application web** développée par l'Université de Caen Normandie. Ce document présente les prérequis techniques et la procédure d'installation.
 
@@ -18,6 +18,8 @@ Selon les différents connecteurs, des modules PHP peuvent être requis (ex : Co
 
 ### Mettre à jour le système
 
+Commencer par mettre le système à jour
+
 ```bash
 apt-get update
 ```
@@ -29,26 +31,37 @@ apt-get upgrade
 
 ### Logiciels tiers
 
-```bash
-# Subversion, pour obtenir les sources de l'application oscar
-apt-get install Subversion
+Installation du serveur Web *Apache* : 
 
+```bash
 # Apache2, le serveur web
 apt-get install apache2
+```
 
+Installation de *PHP 5.6 +*, avec les modules *LDAP*, *Curl*, *Pgsql* et *Intl* :
+
+```bash
 # PHP + Modules PHP
 apt-get install php5 php5-ldap php5-curl php5-cli php5-pgsql php5-intl
+```
 
+Installation de *Postgresql* (Installer également le serveur si besoin)
+
+```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
 apt-get install postgresql-client postgresql-client-common
 ```
 
-Pour le développement :
+Installation de *GIT* :
 
 ```bash
 # GIT (composer va en avoir besoin pour récupérer les librairies tiers)
 apt-get install git
+```
 
+Pour le développement : 
+
+```bash
 # NodeJS (idem)
 apt-get install nodejs nodejs-legacy npm
 ```

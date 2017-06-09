@@ -9,6 +9,7 @@ config/autoload/unicaen-auth.local.php
 
 # Documentation
 /doc/*.pdf
+/doc/build
 
 # Logs
 /logs/*

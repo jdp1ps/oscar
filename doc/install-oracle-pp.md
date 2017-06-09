@@ -1,4 +1,4 @@
-# Installation PHP (support Oracle)
+# Support Oracle
 
 ## Instant client
 

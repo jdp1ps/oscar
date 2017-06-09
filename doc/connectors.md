@@ -1,4 +1,4 @@
-# Connecteurs OSCAR
+# Connecteurs
 
 *Oscar* dispose d'un mécanisme pour gérer et synchroniser les données tiers.
 La version 2.0 de Oscar s'appuit sur un service REST distant qui va livrer les
