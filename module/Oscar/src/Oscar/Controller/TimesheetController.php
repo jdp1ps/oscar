@@ -20,6 +20,7 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
+use Oscar\Service\TimesheetService;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
@@ -46,8 +47,12 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarationAction()
     {
+
         $method = $this->getHttpXMethod();
         $person = $this->getOscarUserContext()->getCurrentPerson();
+
+        /** @var TimesheetService $timeSheetService */
+        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
         $timesheets = [];
 
         if( $method == 'POST' ) {
@@ -73,6 +78,7 @@ class TimesheetController extends AbstractOscarController
             }
 
             else if( $action == 'send' ){
+
                 foreach ($datas as $data) {
                     if ( $data['id'] ) {
                         /** @var TimeSheet $timeSheet */
@@ -88,41 +94,8 @@ class TimesheetController extends AbstractOscarController
                 $this->getEntityManager()->flush();
 
             } else {
+                $timesheets = $timeSheetService->create($datas, $this->getCurrentPerson());
 
-                foreach ($datas as $data) {
-                    if ($data['id'] && $data['id'] != 'null') {
-                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-                    } else {
-                        $timeSheet = new TimeSheet();
-                        $this->getEntityManager()->persist($timeSheet);
-                    }
-
-                    $status = TimeSheet::STATUS_INFO;
-
-                    if( isset($data['idworkpackage']) && $data['idworkpackage'] != 'null' ){
-                        $workPackage = $this->getEntityManager()->getRepository(WorkPackage::class)->find($data['idworkpackage']);
-                        $timeSheet->setWorkpackage($workPackage);
-                        $status = TimeSheet::STATUS_DRAFT;
-                    } elseif ( isset($data['idactivity']) && $data['idactivity'] != 'null' ){
-                        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($data['idactivity']);
-                        $timeSheet->setActivity($activity);
-                        $status = TimeSheet::STATUS_DRAFT;
-                    }
-
-                    $timeSheet->setComment($data['description'])
-                        ->setLabel($data['label'])
-                        ->setCreatedBy($person)
-                        ->setPerson($person)
-                        ->setStatus($status)
-                        ->setDateFrom(new \DateTime($data['start']))
-                        ->setDateTo(new \DateTime($data['end']));
-
-                    $json = $timeSheet->toJson();
-                    $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
-                    $timesheets[] = $json;
-
-                }
-                $this->getEntityManager()->flush($timeSheet);
             }
         }
 
@@ -739,23 +712,24 @@ class TimesheetController extends AbstractOscarController
 
         // Status à obtenir
         switch( $action ){
-            case 'validate' :
+            case 'validatesci' :
                 $newStatus = TimeSheet::STATUS_ACTIVE;
-                $validatedBy = (string)$this->getCurrentPerson();
+                break;
+
+            case 'validateadmin' :
+                $newStatus = TimeSheet::STATUS_ACTIVE;
                 break;
 
             case 'send' :
                 $newStatus = TimeSheet::STATUS_TOVALIDATE;
-                $sendBy = (string)$this->getCurrentPerson();
                 break;
 
-            case 'reject' :
+            case 'rejectsci' :
                 $newStatus = TimeSheet::STATUS_CONFLICT;
-                $rejectBy = (string) $this->getCurrentPerson();
+                break;
 
             case 'rejectadmin' :
                 $newStatus = TimeSheet::STATUS_CONFLICT;
-                $rejectAdminBy = (string) $this->getCurrentPerson();
                 break;
             default :
                 //return $this->getResponseBadRequest('Opération inconnue !');
@@ -773,12 +747,16 @@ class TimesheetController extends AbstractOscarController
                         ->setDateTo(new \DateTime($data['end']));
                 }
 
-                if( isset($rejectBy) ){
-                    $timeSheet->setRejectedBy($rejectBy)->setRejectedAt(new \DateTime())->setRejectedComment($data['rejectedComment']);
+                if( isset($rejectSciBy) ){
+                    $timeSheet->setRejectedSciBy($rejectSciBy)
+                        ->setRejectedSciAt(new \DateTime())
+                        ->setRejectedSciComment($data['rejectedComment']);
                 }
 
                 if( isset($rejectAdminBy) ){
-                    $timeSheet->setRejectedAdminBy($rejectAdminBy)->setRejectedAdminAt(new \DateTime())->setRejectedAdminComment($data['rejectedAdminComment']);
+                    $timeSheet->setRejectedAdminBy($this->getCurrentPerson())
+                        ->setRejectedAdminAt(new \DateTime())
+                        ->setRejectedAdminComment($data['rejectedAdminComment']);
                 }
 
                 if( isset($validatedBy) ){

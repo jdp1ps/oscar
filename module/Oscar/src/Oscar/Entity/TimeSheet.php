@@ -249,11 +249,13 @@ class TimeSheet implements ITrackable
             'status' => self::getStatusText()[$this->getStatus()],
             'owner' => $this->getPerson()->getDisplayName(),
             'owner_id' => $this->getPerson()->getId(),
-
+            'validatedSciBy' => $this->getValidatedSciBy(),
+            'validatedSciAt' => $this->getValidatedSciAt(),
+            'validatedAdminBy' => $this->getValidatedAdminBy(),
+            'validatedAdminAt' => $this->getValidatedAdminAt(),
             'rejectedSciAt' => $this->getRejectedSciAt(),
             'rejectedSciComment' => $this->getRejectedSciComment(),
             'rejectedSciBy' => $this->getRejectedSciBy(),
-
             'rejectedAdminAt' => $this->getRejectedAdminAt(),
             'rejectedAdminComment' => $this->getRejectedAdminComment(),
             'rejectedAdminBy' => $this->getRejectedAdminBy(),
@@ -530,11 +532,6 @@ class TimeSheet implements ITrackable
         return $this;
     }
 
-
-
-
-
-
     public function getHours(){
         return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp())/60/60;
     }
@@ -682,9 +679,6 @@ class TimeSheet implements ITrackable
 
         return $this;
     }
-
-
-
     ////////////////////////////////////////////////////////////////////////////
 
 }
