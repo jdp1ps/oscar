@@ -58,6 +58,7 @@ class CalendarDatas {
 
         ////
         this.displayRejectModal = false;
+        this.rejectValidateType = null;
         this.rejectComment = "";
         this.rejectedEvents = [];
     }
@@ -247,8 +248,8 @@ class CalendarDatas {
                     datas[i].status,
                     datas[i].owner,
                     datas[i].owner_id,
-                    datas[i].rejectedComment,
-                    datas[i].rejectedAt,
+                    datas[i].rejectedSciComment,
+                    datas[i].rejectedSciAt,
                     datas[i].rejectedAdminComment,
                     datas[i].rejectedAdminAt
                 );
@@ -267,7 +268,7 @@ class CalendarDatas {
 
     addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft",
                 owner = "", owner_id = null,
-                rejectedComment = "", rejectedAt = null,
+                rejectedSciComment = "", rejectedSciAt = null,
                 rejectedAdminComment = "", rejectedAdminAt = null
                 ) {
         this.events.push(
@@ -279,7 +280,7 @@ class CalendarDatas {
                 credentials,
                 status,
                 owner, owner_id,
-                rejectedComment, rejectedAt,
+                rejectedSciComment, rejectedSciAt,
                 rejectedAdminComment, rejectedAdminAt
             )
         );
@@ -309,7 +310,7 @@ var TimeEvent = {
             <div v-show="showRefus">
                 <i class="icon-beaker"></i>
                 Refus scientifique :
-                <div class="comment">{{ event.rejectedComment}}</div>
+                <div class="comment">{{ event.rejectedSciComment}}</div>
                 <i class="icon-archive"></i>
                 Refus administratif :
                 <div class="comment">{{ event.rejectedAdminComment}}</div>
@@ -317,6 +318,17 @@ var TimeEvent = {
         </div>
 
         <nav class="admin">
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerDebug(event)">
+                <i class="icon-bug"></i>
+                Debug</a>
+                
+            <a href="#" 
+                @mousedown.stop.prevent="" 
+                @click.stop.prevent="handlerShowReject(event)" 
+                v-if="event.rejectedSciComment || event.rejectedAdminComment">
+                <i class="icon-attention"></i>
+                Afficher le rejet</a>
+                
             <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('editevent')" v-if="event.editable">
                 <i class="icon-pencil-1"></i>
                 Modifier</a>
@@ -328,14 +340,24 @@ var TimeEvent = {
                 <i class="icon-right-big"></i>
                 Soumettre</a>
 
-            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerShowRefus" v-if="event.rejectedComment">
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectscievent')" v-if="event.validableSci">
                 <i class="icon-attention-1"></i>
                 Refus scientifique</a>
 
-            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerShowRefusAdmin" v-if="event.rejectedAdminComment">
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectadmevent')" v-if="event.validableAdm">
                 <i class="icon-attention-1"></i>
                 Refus administratif</a>
-
+                
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validatescievent')" v-if="event.validableSci">
+                <i class="icon-beaker"></i>
+                Validation scientifique</a>
+            
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateadmevent')" v-if="event.validableAdm">
+                <i class="icon-archive"></i>
+                Validation administrative</a>
+            
+             
+            
             <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateevent')" v-if="event.validable">
                 <i class="icon-right-big"></i>
                 Valider</a>
@@ -458,6 +480,10 @@ var TimeEvent = {
     },
 
     methods: {
+        handlerDebug(data){
+            console.log(data);
+        },
+
         updateWeekDay(value){
             var start = this.dateStart.day(value);
             var end = this.dateEnd.day(value);
@@ -469,7 +495,7 @@ var TimeEvent = {
             bootbox.alert({
                 size: "small",
                 title: '<i class="icon-beaker"></i>   Refus scientifique',
-                message: '<em>Motif : </em>' + this.event.rejectedComment + ""
+                message: '<em>Motif : </em>' + this.event.rejectedSciComment + ""
             })
         },
         handlerShowRefusAdmin(){
@@ -690,8 +716,10 @@ var WeekView = {
                     @deleteevent="$emit('deleteevent', event)"
                     @editevent="$emit('editevent', event)"
                     @submitevent="$emit('submitevent', event)"
-                    @validateevent="$emit('validateevent', event)"
-                    @rejectevent="$emit('rejectevent', event)"
+                    @rejectscievent="$emit('rejectevent', event, 'sci')"
+                    @rejectadmevent="$emit('rejectevent', event, 'adm')"
+                    @validatescievent="$emit('validateevent', event, 'sci')"
+                    @validateadmevent="$emit('validateevent', event, 'adm')"
                     @mousedown="handlerEventMouseDown"
                     @savemoveevent="handlerSaveMove(event)"
                     @onstartmoveend="handlerStartMoveEnd"
@@ -1035,13 +1063,13 @@ var ListItemView = {
                     <i class="icon-trash-empty"></i>
                     Supprimer</button>
 
-                <button class="btn btn-primary btn-xs"  @click="handlerValidate" v-if="event.validable">
+                <!--<button class="btn btn-primary btn-xs"  @click="handlerValidate" v-if="event.validable">
                     <i class="icon-right-big"></i>
                     Valider</button>
 
                 <button class="btn btn-primary btn-xs"  @click="$emit('rejectevent', event)" v-if="event.validable">
                     <i class="icon-right-big"></i>
-                    Rejeter</button>
+                    Rejeter</button>-->
             </nav>
         </div>
     </article>`,
@@ -1654,43 +1682,53 @@ var Calendar = {
 
         /** Edition de l'événement de la liste */
         handlerEditEvent(event){
-            console.log('handlerEditEvent');
             this.eventEdit = event;
             this.eventEditDataVisible = true;
             this.eventEditData = JSON.parse(JSON.stringify(event));
         },
 
-        handlerValidateEvent(event){
-            this.restValidate([event])
-        },
-
         ////////////////////////////////////////////////////////////////////////
 
         handlerSendReject(){
-            console.log(this.rejectedEvents, this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach((event)=> {
                 var e = JSON.parse(JSON.stringify(event));
-                e.rejectedComment = this.rejectComment;
+                e.rejectedSciComment = this.rejectSciComment;
                 events.push(e);
             });
-            this.restStep(events, 'reject');
+            this.restStep(events, this.rejectValidateType);
         },
 
-        handlerRejectEvent(event){
-            console.log("Procédure de rejet");
-            this.showRejectModal([event]);
+        handlerRejectEvent(event, type="unknow"){
+            console.log("Procédure de rejet", type);
+            this.showRejectModal([event], 'reject'+type);
         },
 
-        showRejectModal(events){
+
+        handlerValidateEvent(events, type="unknow"){
+            console.log("Validation", type);
+            if( type == "sci" || type == "adm" ){
+                bootbox.confirm( type == 'sci' ? '<i class="icon-beaker"></i>   Validation scientifique'
+                            : '<i class="icon-archive"></i>   Validation administrative'
+                ,(response) => {
+                    if(response){
+                        this.restStep(events, 'validate' + type)
+                    }
+                })
+            } else {
+                throw "Type inconnue";
+            }
+        },
+
+        showRejectModal(events, type){
             this.displayRejectModal = true;
+            this.rejectValidateType = type;
             this.rejectedEvents = events;
         },
 
         ////////////////////////////////////////////////////////////////////////
 
         restSave(events){
-
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
@@ -1721,6 +1759,7 @@ var Calendar = {
                         this.handlerEditCancelEvent();
                     },
                     error => {
+                        console.log(error);
                         this.errors.push("Impossible d'enregistrer les données : " + error)
                     }
                 ).then(()=> this.transmission = "");
@@ -1737,14 +1776,18 @@ var Calendar = {
         },
 
         restStep(events, action){
-
+            if( !Array.isArray(events) ){
+                events = [events];
+            }
             if (this.restUrl) {
                 this.transmission = "Enregistrement en cours...";
                 var data = new FormData();
                 data.append('do', action);
                 for (var i = 0; i < events.length; i++) {
+                    console.log(events[i]);
                     data.append('events[' + i + '][id]', events[i].id || null);
                     data.append('events[' + i + '][rejectedComment]', events[i].rejectedComment || null);
+                    data.append('events[' + i + '][rejectedAdminComment]', events[i].rejectedAdminComment || null);
                 }
 
                 this.$http.post(this.restUrl(), data).then(
@@ -1810,10 +1853,7 @@ var Calendar = {
 
         /** Soumission de l'événement de la liste */
         handlerCreateEvent(event){
-            console.log("Afficher le formulaire pour", event);
             this.handlerEditEvent(event);
-            // this.restSave([event]);
-//            this.events.push(event);
         },
 
         /** Charge le fichier ICS depuis l'interface **/
@@ -1886,11 +1926,9 @@ var Calendar = {
         },
 
         editSave(){
-            console.log("NEW", JSON.parse(JSON.stringify(this.eventEditData)));
             var event = JSON.parse(JSON.stringify(this.eventEditData));
             event.mmStart = moment(event.start);
             event.mmEnd = moment(event.end);
-            ;
             this.restSave([event]);
         },
 

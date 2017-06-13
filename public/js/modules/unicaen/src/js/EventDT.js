@@ -43,6 +43,8 @@ var EventDT = class {
     this.deletable = actions.deletable || false;
     this.validable = actions.validable || false;
     this.sendable= actions.sendable || false;
+    this.validableSci= actions.validableSci || false;
+    this.validableAdm= actions.validableAdm || false;
 
     // Status
     // - DRAFT, SEND, VALID, REJECT
@@ -140,7 +142,9 @@ var EventDT = class {
     if( data.credentials ) {
       this.editable = data.credentials.editable;
       this.deletable = data.credentials.deletable;
-      this.validable = data.credentials.validable;
+      this.validable = false;
+      this.validableSci = data.credentials.validableSci;
+      this.validableAdm = data.credentials.validableAdm;
       this.sendable= data.credentials.sendable;
     }
   }

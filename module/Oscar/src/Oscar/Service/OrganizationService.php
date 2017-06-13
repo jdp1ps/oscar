@@ -39,7 +39,7 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     {
         if( $this->cacheConnectors == null ){
             $this->cacheConnectors = [];
-
+            // todo Utiliser le service qui gère l'accès à la configuration
             $config = $this->getServiceLocator()->get('Config');
 
             $paths = explode('.', 'oscar.connectors.organization');
@@ -49,7 +49,6 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
                 }
                 $config = $config[$path];
             }
-            var_dump($config);
             $this->cacheConnectors = array_keys($config);
         }
         return $this->cacheConnectors;

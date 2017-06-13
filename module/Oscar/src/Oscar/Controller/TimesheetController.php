@@ -60,8 +60,8 @@ class TimesheetController extends AbstractOscarController
             $datas = $this->getRequest()->getPost()['events'];
             $action = $this->getRequest()->getPost()['do'];
 
-
             if( $action == 'validate' ){
+                throw new \Exception('TODO');
                 foreach ($datas as $data) {
                     if ( $data['id'] ) {
                         /** @var TimeSheet $timeSheet */
@@ -78,24 +78,9 @@ class TimesheetController extends AbstractOscarController
             }
 
             else if( $action == 'send' ){
-
-                foreach ($datas as $data) {
-                    if ( $data['id'] ) {
-                        /** @var TimeSheet $timeSheet */
-                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-                        $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE);
-                        $json = $timeSheet->toJson();
-                        $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
-                        $timesheets[] = $json;
-                    } else {
-                        return $this->getResponseBadRequest("DOBEFORE");
-                    }
-                }
-                $this->getEntityManager()->flush();
-
+                $timesheets = $timeSheetService->send($datas, $this->getCurrentPerson());
             } else {
                 $timesheets = $timeSheetService->create($datas, $this->getCurrentPerson());
-
             }
         }
 
@@ -113,12 +98,12 @@ class TimesheetController extends AbstractOscarController
         }
 
         if( $method == 'DELETE' ){
+
             $timesheetId = $this->params()->fromQuery('timesheet');
             if( $timesheetId ){
-                $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
-                $this->getEntityManager()->remove($timesheet);
-                $this->getEntityManager()->flush();
-                return $this->getResponseOk('Créneaux supprimé');
+                if( $timeSheetService->delete($timesheetId, $this->getCurrentPerson()) ){
+                    return $this->getResponseOk('Créneaux supprimé');
+                }
             }
             return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
         }
@@ -162,7 +147,17 @@ class TimesheetController extends AbstractOscarController
         $deletable = false;
         $sendable = false;
         $editable = false;
+
+        // @deprecated
         $validable = false;
+
+        $validableSci = $timeSheet->getValidatedSciAt() ?
+            false :
+            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $timeSheet->getActivity());
+
+        $validableAdm = $timeSheet->getValidatedSciAt() ?
+            false :
+            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $timeSheet->getActivity());
 
         // En fonction du status
         switch( $timeSheet->getStatus() ){
@@ -191,8 +186,7 @@ class TimesheetController extends AbstractOscarController
                 $deletable = false;
                 $sendable = false;
                 $editable = false;
-
-                $validable = false; //$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_VALIDATE, $timeSheet->getWorkpackage())true; //$this->getCurrentPerson();
+                $validable = false;
                 break;
         }
 
@@ -200,7 +194,9 @@ class TimesheetController extends AbstractOscarController
             'deletable' => $deletable,
             'editable' => $editable,
             'sendable' => $sendable,
-            'validable' => $validable
+            'validable' => $validable,
+            'validableSci' => $validableSci,
+            'validableAdm' => $validableAdm
         ];
     }
 
@@ -230,7 +226,6 @@ class TimesheetController extends AbstractOscarController
 
             $datas = $this->getRequest()->getPost()['events'];
             $action = $this->getRequest()->getPost()['do'];
-
 
             if( $action == 'validate' ){
                 foreach ($datas as $data) {
@@ -264,7 +259,6 @@ class TimesheetController extends AbstractOscarController
                 $this->getEntityManager()->flush();
 
             } else {
-
                 foreach ($datas as $data) {
                     if ($data['id'] && $data['id'] != 'null') {
                         $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
@@ -594,12 +588,9 @@ class TimesheetController extends AbstractOscarController
                 /** @var TimeSheet $timesheet */
                 foreach ($timesheets as $timesheet) {
                     $json = $timesheet->toJson();
-                    $json['credentials'] = [
-                        'deletable' => false,
-                        'editable' => false,
-                        'sendable' => false, //$timesheet->getStatus() == TimeSheet::STATUS_DRAFT,
-                        'validable' => $timesheet->getStatus() == TimeSheet::STATUS_TOVALIDATE
-                    ];
+
+
+                    $json['credentials'] = $this->resolveTimeSheetCredentials($timesheet);
                     $declaration[] = $json;
                 }
                 $response = new JsonModel([
@@ -732,7 +723,7 @@ class TimesheetController extends AbstractOscarController
                 $newStatus = TimeSheet::STATUS_CONFLICT;
                 break;
             default :
-                //return $this->getResponseBadRequest('Opération inconnue !');
+                return $this->getResponseBadRequest('Opération inconnue !');
         }
 
         // Traitement
