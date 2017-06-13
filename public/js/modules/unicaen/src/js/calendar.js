@@ -1693,14 +1693,17 @@ var Calendar = {
             var events = [];
             this.rejectedEvents.forEach((event)=> {
                 var e = JSON.parse(JSON.stringify(event));
-                e.rejectedSciComment = this.rejectSciComment;
+                if( this.rejectValidateType == 'rejectsci' ){
+                    e.rejectedSciComment = this.rejectComment;
+                } else if ( this.rejectValidateType == 'rejectadmin' ){
+                    e.rejectedAdminComment = this.rejectComment;
+                }
                 events.push(e);
             });
             this.restStep(events, this.rejectValidateType);
         },
 
         handlerRejectEvent(event, type="unknow"){
-            console.log("Procédure de rejet", type);
             this.showRejectModal([event], 'reject'+type);
         },
 
@@ -1786,7 +1789,7 @@ var Calendar = {
                 for (var i = 0; i < events.length; i++) {
                     console.log(events[i]);
                     data.append('events[' + i + '][id]', events[i].id || null);
-                    data.append('events[' + i + '][rejectedComment]', events[i].rejectedComment || null);
+                    data.append('events[' + i + '][rejectedSciComment]', events[i].rejectedSciComment || null);
                     data.append('events[' + i + '][rejectedAdminComment]', events[i].rejectedAdminComment || null);
                 }
 

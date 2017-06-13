@@ -26,6 +26,9 @@ class TimeSheet implements ITrackable
     const TIMESHEET_FORMAT_WEEK = 'week';
     const TIMESHEET_FORMAT_MONTH = 'month';
 
+    const STATUS_TOVALIDATE_SCI = 6;
+    const STATUS_TOVALIDATE_ADMIN = 7;
+
     const STATUS_INFO = 9;
 
     /**
@@ -55,6 +58,8 @@ class TimeSheet implements ITrackable
                 self::STATUS_TOVALIDATE => 'Soumis à validation',
                 self::STATUS_ACTIVE => 'Validée',
                 self::STATUS_CONFLICT => 'Conflit',
+                self::STATUS_TOVALIDATE_SCI => 'Soumis à validation scientifique',
+                self::STATUS_TOVALIDATE_ADMIN => 'Soumis à validation administrative',
             ];
         }
         return $status_labels;
@@ -69,6 +74,8 @@ class TimeSheet implements ITrackable
                 self::STATUS_ACTIVE => 'valid',
                 self::STATUS_CONFLICT => 'reject',
                 self::STATUS_INFO => 'info',
+                self::STATUS_TOVALIDATE_SCI => 'sendsci',
+                self::STATUS_TOVALIDATE_ADMIN => 'sendadmin',
             ];
         }
         return $status_text;
