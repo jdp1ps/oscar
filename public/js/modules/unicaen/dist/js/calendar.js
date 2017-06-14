@@ -246,7 +246,7 @@ var CalendarDatas = function () {
                 if (local) {
                     local.sync(datas[i]);
                 } else {
-                    this.addNewEvent(datas[i].id, datas[i].label, datas[i].start, datas[i].end, datas[i].description, datas[i].credentials, datas[i].status, datas[i].owner, datas[i].owner_id, datas[i].rejectedSciComment, datas[i].rejectedSciAt, datas[i].rejectedAdminComment, datas[i].rejectedAdminAt);
+                    this.addNewEvent(datas[i].id, datas[i].label, datas[i].start, datas[i].end, datas[i].description, datas[i].credentials, datas[i].status, datas[i].owner, datas[i].owner_id, datas[i].rejectedSciComment, datas[i].rejectedSciAt, datas[i].rejectedAdminComment, datas[i].rejectedAdminAt, datas[i].validatedSciAt, datas[i].validatedSciBy, datas[i].validatedAdminAt, datas[i].validatedAdminBy);
                 }
             }
         }
@@ -271,8 +271,12 @@ var CalendarDatas = function () {
             var rejectedSciAt = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
             var rejectedAdminComment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "";
             var rejectedAdminAt = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : null;
+            var validatedSciAt = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : null;
+            var validatedSciBy = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
+            var validatedAdminAt = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : null;
+            var validatedAdminBy = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : null;
 
-            this.events.push(new EventDT(id, label, start, end, description, credentials, status, owner, owner_id, rejectedSciComment, rejectedSciAt, rejectedAdminComment, rejectedAdminAt));
+            this.events.push(new EventDT(id, label, start, end, description, credentials, status, owner, owner_id, rejectedSciComment, rejectedSciAt, rejectedAdminComment, rejectedAdminAt, validatedSciAt, validatedSciBy, validatedAdminAt, validatedAdminBy));
         }
     }, {
         key: 'listEvents',
@@ -327,7 +331,7 @@ var store = new CalendarDatas();
 
 var TimeEvent = {
 
-    template: '<div class="event" :style="css"\n\n            @mousedown="handlerMouseDown"\n            :title="event.label"\n            :class="{\'event-changing\': changing, \'event-moving\': moving, \'event-selected\': selected, \'event-locked\': isLocked, \'status-info\': isInfo, \'status-draft\': isDraft, \'status-send\' : isSend, \'status-valid\': isValid, \'status-reject\': isReject}">\n        <div class="label" data-uid="UID">\n          {{ event.label }}\n        </div>\n        <small>Dur\xE9e : <strong>{{ labelDuration }}</strong> heure(s)</small>\n        <div class="description">\n            <p v-if="withOwner">D\xE9clarant <strong>{{ event.owner }} ({{event.owner_id}})</strong></p>\n          {{ event.description }}\n        </div>\n\n        <div class="refus" @mouseover.prevent="showRefus != showRefus">\n            <div v-show="showRefus">\n                <i class="icon-beaker"></i>\n                Refus scientifique :\n                <div class="comment">{{ event.rejectedSciComment}}</div>\n                <i class="icon-archive"></i>\n                Refus administratif :\n                <div class="comment">{{ event.rejectedAdminComment}}</div>\n            </div>\n        </div>\n\n        <nav class="admin">\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerDebug(event)">\n                <i class="icon-bug"></i>\n                Debug</a>\n                \n            <a href="#" \n                @mousedown.stop.prevent="" \n                @click.stop.prevent="handlerShowReject(event)" \n                v-if="event.rejectedSciComment || event.rejectedAdminComment">\n                <i class="icon-attention"></i>\n                Afficher le rejet</a>\n                \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'editevent\')" v-if="event.editable">\n                <i class="icon-pencil-1"></i>\n                Modifier</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'deleteevent\')" v-if="event.deletable">\n                <i class="icon-trash-empty"></i>\n                Supprimer</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'submitevent\')" v-if="event.sendable">\n                <i class="icon-right-big"></i>\n                Soumettre</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectscievent\')" v-if="event.validableSci">\n                <i class="icon-attention-1"></i>\n                Refus scientifique</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectadmevent\')" v-if="event.validableAdm">\n                <i class="icon-attention-1"></i>\n                Refus administratif</a>\n                \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validatescievent\')" v-if="event.validableSci">\n                <i class="icon-beaker"></i>\n                Validation scientifique</a>\n            \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validateadmevent\')" v-if="event.validableAdm">\n                <i class="icon-archive"></i>\n                Validation administrative</a>\n            \n             \n            \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validateevent\')" v-if="event.validable">\n                <i class="icon-right-big"></i>\n                Valider</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectevent\')" v-if="event.validable">\n                <i class="icon-right-big"></i>\n                Rejeter</a>\n        </nav>\n\n        <div class="bottom-handler" v-if="event.editable"\n\n            @mousedown.prevent.stop="handlerStartMovingEnd">\n            <span>===</span>\n        </div>\n\n        <time class="time start">{{ labelStart }}</time>\n        <time class="time end">{{ labelEnd }}</time>\n      </div>',
+    template: '<div class="event" :style="css"\n\n            @mousedown="handlerMouseDown"\n            :title="event.label"\n            :class="{\'event-changing\': changing, \'event-moving\': moving, \'event-selected\': selected, \'event-locked\': isLocked, \'status-info\': isInfo, \'status-draft\': isDraft, \'status-send\' : isSend, \'status-valid\': isValid, \'status-reject\': isReject, \'valid-sci\': isValidSci, \'valid-adm\': isValidAdm}">\n        <div class="label" data-uid="UID">\n          {{ event.label }}\n        </div>\n        <small>Dur\xE9e : <strong>{{ labelDuration }}</strong> heure(s)</small>\n        <div class="description">\n            <p v-if="withOwner">D\xE9clarant <strong>{{ event.owner }} ({{event.owner_id}})</strong></p>\n          {{ event.description }}\n        </div>\n\n        <div class="refus" @mouseover.prevent="showRefus != showRefus">\n            <div v-show="showRefus">\n                <i class="icon-beaker"></i>\n                Refus scientifique :\n                <div class="comment">{{ event.rejectedSciComment}}</div>\n                <i class="icon-archive"></i>\n                Refus administratif :\n                <div class="comment">{{ event.rejectedAdminComment}}</div>\n            </div>\n        </div>\n\n        <nav class="admin">\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerDebug(event)">\n                <i class="icon-bug"></i>\n                Debug</a>\n                \n            <a href="#" \n                @mousedown.stop.prevent="" \n                @click.stop.prevent="handlerShowReject(event)" \n                v-if="event.rejectedSciComment || event.rejectedAdminComment">\n                <i class="icon-attention"></i>\n                Afficher le rejet</a>\n                \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'editevent\')" v-if="event.editable">\n                <i class="icon-pencil-1"></i>\n                Modifier</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'deleteevent\')" v-if="event.deletable">\n                <i class="icon-trash-empty"></i>\n                Supprimer</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'submitevent\')" v-if="event.sendable">\n                <i class="icon-right-big"></i>\n                Soumettre</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectscievent\')" v-if="event.validableSci">\n                <i class="icon-attention-1"></i>\n                Refus scientifique</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectadmevent\')" v-if="event.validableAdm">\n                <i class="icon-attention-1"></i>\n                Refus administratif</a>\n                \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validatescievent\')" v-if="event.validableSci">\n                <i class="icon-beaker"></i>\n                Validation scientifique</a>\n            \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validateadmevent\')" v-if="event.validableAdm">\n                <i class="icon-archive"></i>\n                Validation administrative</a>\n            \n             \n            \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validateevent\')" v-if="event.validable">\n                <i class="icon-right-big"></i>\n                Valider</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectevent\')" v-if="event.validable">\n                <i class="icon-right-big"></i>\n                Rejeter</a>\n        </nav>\n\n        <div class="bottom-handler" v-if="event.editable"\n\n            @mousedown.prevent.stop="handlerStartMovingEnd">\n            <span>===</span>\n        </div>\n\n        <time class="time start">{{ labelStart }}</time>\n        <time class="time end">{{ labelEnd }}</time>\n      </div>',
 
     props: ['event', 'weekDayRef', 'withOwner'],
 
@@ -387,6 +391,12 @@ var TimeEvent = {
         },
         isValid: function isValid() {
             return this.event.status == "valid";
+        },
+        isValidSci: function isValidSci() {
+            return this.event.validatedSciAt != null;
+        },
+        isValidAdm: function isValidAdm() {
+            return this.event.validatedAdminAt != null;
         },
         isReject: function isReject() {
             return this.event.status == "reject";
@@ -1299,12 +1309,13 @@ var Calendar = {
         handlerSendReject: function handlerSendReject() {
             var _this10 = this;
 
+            console.log('Envoi du rejet', this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach(function (event) {
                 var e = JSON.parse(JSON.stringify(event));
                 if (_this10.rejectValidateType == 'rejectsci') {
                     e.rejectedSciComment = _this10.rejectComment;
-                } else if (_this10.rejectValidateType == 'rejectadmin') {
+                } else if (_this10.rejectValidateType == 'rejectadm') {
                     e.rejectedAdminComment = _this10.rejectComment;
                 }
                 events.push(e);

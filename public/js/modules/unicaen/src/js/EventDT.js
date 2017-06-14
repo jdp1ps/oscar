@@ -5,10 +5,10 @@ moment.locale('fr');
 var EventDT = class {
   constructor(id, label, start, end, description="",
               actions={}, status='draft', owner="", owner_id = null,
-              rejectedComment="", rejectedAt=null,
+              rejectedSciComment="", rejectedSciAt=null,
               rejectedAdminComment="", rejectedAdminAt=null,
-              validatedBy=null, validatedAt=null,
-              confirmedBy=null, confirmedAt=null
+              validatedSciAt = null, validatedSciBy = null,
+              validatedAdminAt = null, validatedAdminBy = null
             ){
     this.id = id;
 
@@ -27,15 +27,16 @@ var EventDT = class {
     this.intersect = 0;
     this.intersectIndex = 0;
 
-    this.rejectedComment = rejectedComment;
-    this.rejectedAt = rejectedAt;
+    this.rejectedSciComment = rejectedSciComment;
+    this.rejectedSciAt = rejectedSciAt;
     this.rejectedAdminComment = rejectedAdminComment;
     this.rejectedAdminAt = rejectedAdminAt;
 
-    this.validatedAt = validatedAt;
-    this.validatedBy = validatedBy;
-    this.confirmedAt = confirmedAt;
-    this.confirmedBy = confirmedBy;
+    this.validatedSciAt = validatedSciAt;
+    this.validatedSciBy = validatedSciBy;
+    this.validatedAdminAt = validatedAdminAt;
+    this.validatedAdminBy = validatedAdminBy;
+
 
 
     // OSCAR

@@ -552,7 +552,7 @@ class TimesheetController extends AbstractOscarController
 
                     } else {
                         $action = $this->getRequest()->getPost()['do'];
-                        if( !in_array($action, ['validatesci', 'validateadmin', 'send', 'rejectsci','rejectadmin'])) {
+                        if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
                             return $this->getResponseBadRequest('Opération inconnue !');
                         }
 
@@ -562,13 +562,13 @@ class TimesheetController extends AbstractOscarController
                             case 'validatesci';
                                 $timesheets = $timeSheetService->validateSci($events, $this->getCurrentPerson());
                                 break;
-                            case 'validateadmin';
+                            case 'validateadm';
                                 $timesheets = $timeSheetService->validateAdmin($events, $this->getCurrentPerson());
                                 break;
                             case 'rejectsci';
                                 $timesheets = $timeSheetService->rejectSci($events, $this->getCurrentPerson());
                                 break;
-                            case 'rejectadmin';
+                            case 'rejectadm';
                                 $timesheets = $timeSheetService->rejectAdmin($events, $this->getCurrentPerson());
                                 break;
                             case 'send';

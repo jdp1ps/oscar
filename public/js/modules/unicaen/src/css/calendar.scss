@@ -409,11 +409,21 @@ body {
   }
 
   .status-send {
-    border-left: solid 4px black;
+    border-left: dotted 4px black;
   }
 
   .status-valid {
-    border-left: solid 4px green;
+    border-left: solid 4px green !important;
+  }
+
+  .valid-adm{
+    border-left: dotted 2px rgba(green, .5);
+  }
+  .valid-sci{
+    border-left: dotted 2px rgba(green, .5);
+  }
+  .valid-adm.valid-sci{
+    border-left: solid 4px rgba(green, .5);
   }
 
   .status-reject {

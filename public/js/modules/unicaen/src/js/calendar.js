@@ -251,7 +251,12 @@ class CalendarDatas {
                     datas[i].rejectedSciComment,
                     datas[i].rejectedSciAt,
                     datas[i].rejectedAdminComment,
-                    datas[i].rejectedAdminAt
+                    datas[i].rejectedAdminAt,
+                    datas[i].validatedSciAt,
+                    datas[i].validatedSciBy,
+                    datas[i].validatedAdminAt,
+                    datas[i].validatedAdminBy
+
                 );
             }
         }
@@ -269,7 +274,9 @@ class CalendarDatas {
     addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft",
                 owner = "", owner_id = null,
                 rejectedSciComment = "", rejectedSciAt = null,
-                rejectedAdminComment = "", rejectedAdminAt = null
+                rejectedAdminComment = "", rejectedAdminAt = null,
+                validatedSciAt = null, validatedSciBy = null,
+                validatedAdminAt = null, validatedAdminBy = null
                 ) {
         this.events.push(
             new EventDT(
@@ -281,7 +288,9 @@ class CalendarDatas {
                 status,
                 owner, owner_id,
                 rejectedSciComment, rejectedSciAt,
-                rejectedAdminComment, rejectedAdminAt
+                rejectedAdminComment, rejectedAdminAt,
+                validatedSciAt, validatedSciBy,
+                validatedAdminAt, validatedAdminBy
             )
         );
     }
@@ -295,7 +304,7 @@ var TimeEvent = {
 
             @mousedown="handlerMouseDown"
             :title="event.label"
-            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject}">
+            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm}">
         <div class="label" data-uid="UID">
           {{ event.label }}
         </div>
@@ -432,6 +441,12 @@ var TimeEvent = {
         },
         isValid(){
             return this.event.status == "valid";
+        },
+        isValidSci(){
+            return this.event.validatedSciAt != null;
+        },
+        isValidAdm(){
+            return this.event.validatedAdminAt != null;
         },
         isReject(){
             return this.event.status == "reject";
@@ -1694,12 +1709,13 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         handlerSendReject(){
+            console.log('Envoi du rejet', this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach((event)=> {
                 var e = JSON.parse(JSON.stringify(event));
                 if( this.rejectValidateType == 'rejectsci' ){
                     e.rejectedSciComment = this.rejectComment;
-                } else if ( this.rejectValidateType == 'rejectadmin' ){
+                } else if ( this.rejectValidateType == 'rejectadm' ){
                     e.rejectedAdminComment = this.rejectComment;
                 }
                 events.push(e);

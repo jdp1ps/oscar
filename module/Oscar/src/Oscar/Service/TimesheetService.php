@@ -52,7 +52,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if ($data['id']) {
                 /** @var TimeSheet $timeSheet */
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-                $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE);
+                $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE)
+                    ->setSendBy((string)$this->getOscarUserContext()->getCurrentPerson());
                 $this->getEntityManager()->flush($timeSheet);
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
@@ -112,56 +113,58 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param TimeSheet $timeSheet
      * @return array
      */
-    public function resolveTimeSheetCredentials(TimeSheet $timeSheet)
+    public function resolveTimeSheetCredentials(TimeSheet $timeSheet, $person = null)
     {
+        if ($person == null) {
+            $person = $this->getOscarUserContext()->getCurrentPerson();
+        }
 
         $deletable = false;
+        $isOwner = $timeSheet->getPerson() == $person;
 
         // Le créneau ne peut être envoyé que par sont propriétaire et si
         // le status est "Bouillon"
-        $sendable = $this->getOscarUserContext()->getCurrentPerson() == $timeSheet->getPerson()
-            &&
-            $timeSheet->getStatus() == TimeSheet::STATUS_DRAFT;
+        $sendable = $isOwner && $timeSheet->getStatus() == TimeSheet::STATUS_DRAFT;
 
-        $editable = false;
+        // Seul les déclarations en brouillon peuvent être éditées
+        $editable = $timeSheet->getStatus() == TimeSheet::STATUS_DRAFT && $isOwner;
 
-        // @deprecated
-        $validable = false;
+        // Validation scientifique (déja validé ou la personne a les droits)
 
-        $validableSci = $timeSheet->getValidatedSciAt() ?
-            false :
-            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
-                $timeSheet->getActivity());
+        $validableSci = false;
+        $validableAdm = false;
 
-        $validableAdm = $timeSheet->getValidatedSciAt() ?
-            false :
-            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
-                $timeSheet->getActivity());
+        if ($timeSheet->getStatus() == TimeSheet::STATUS_TOVALIDATE){
+            $validableSci = $timeSheet->getValidatedSciAt() ?
+                false :
+                $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                    $timeSheet->getActivity());
+
+            // Validation administrative
+            $validableAdm = $timeSheet->getValidatedAdminAt() ?
+                false :
+                $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                    $timeSheet->getActivity());
+        }
 
         // En fonction du status
         switch ($timeSheet->getStatus()) {
             case TimeSheet::STATUS_DRAFT :
-                $deletable = true;
-                $editable = true;
-                $validable = false;
+                $deletable = $isOwner;
                 break;
 
             case TimeSheet::STATUS_INFO :
                 $deletable = true;
-                $editable = true;
-                $validable = false;
                 break;
 
             case TimeSheet::STATUS_CONFLICT :
-                $deletable = true;
-                $editable = true;
-                $validable = false;
+                $deletable = $isOwner;
+                $editable = $isOwner;
                 break;
 
             case TimeSheet::STATUS_TOVALIDATE :
                 $deletable = false;
                 $editable = false;
-                $validable = false;
                 break;
         }
 
@@ -271,45 +274,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     ->setRejectedSciComment($data['rejectedSciComment']);
 
                 $this->getEntityManager()->flush($timeSheet);
-/*
-                switch( $action ){
-                    case 'validatesci' :
-                        $timeSheet
-                            ->setStatus(TimeSheet::STATUS_ACTIVE)
-                            ->setValidatedSciAt(new \DateTime())
-                            ->setValidatedSciBy($currentPersonName)
-                            ->setValidatedSciById($currentPersonId);
-                        break;
-
-                    case 'validateadmin' :
-                        $timeSheet
-                            ->setStatus(TimeSheet::STATUS_ACTIVE)
-                            ->setValidatedSciAt(new \DateTime())
-                            ->setValidatedSciBy($currentPersonName)
-                            ->setValidatedSciById($currentPersonId);
-                        break;
-
-                    case 'send' :
-                        $timeSheet
-                            ->setStatus(TimeSheet::STATUS_TOVALIDATE)
-                            ->setSendBy($currentPersonName);
-                        break;
-
-                    case 'rejectsci' :
-
-                        break;
-
-                    case 'rejectadmin' :
-                        $timeSheet
-                            ->setStatus(TimeSheet::STATUS_CONFLICT)
-                            ->setRejectedSciAt(new \DateTime())
-                            ->setRejectedSciBy($currentPersonName)
-                            ->setRejectedSciById($currentPersonId)
-                            ->setRejectedSciComment($data['rejectedAdminComment']);
-                        break;
-                }
-                $this->getEntityManager()->flush($timeSheet);
-*/
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
@@ -338,47 +302,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
 
                 $timeSheet
-                    ->setStatus(TimeSheet::STATUS_ACTIVE)
+                    ->setStatus($timeSheet->getValidatedAdminAt() ? TimeSheet::STATUS_ACTIVE : TimeSheet::STATUS_TOVALIDATE)
                     ->setValidatedSciAt(new \DateTime())
                     ->setValidatedSciBy($currentPersonName)
                     ->setValidatedSciById($currentPersonId);
 
                 $this->getEntityManager()->flush($timeSheet);
-                /*
-                                switch( $action ){
-                                    case 'validatesci' :
-
-                                        break;
-
-                                    case 'validateadmin' :
-                                        $timeSheet
-                                            ->setStatus(TimeSheet::STATUS_ACTIVE)
-                                            ->setValidatedSciAt(new \DateTime())
-                                            ->setValidatedSciBy($currentPersonName)
-                                            ->setValidatedSciById($currentPersonId);
-                                        break;
-
-                                    case 'send' :
-                                        $timeSheet
-                                            ->setStatus(TimeSheet::STATUS_TOVALIDATE)
-                                            ->setSendBy($currentPersonName);
-                                        break;
-
-                                    case 'rejectsci' :
-
-                                        break;
-
-                                    case 'rejectadmin' :
-                                        $timeSheet
-                                            ->setStatus(TimeSheet::STATUS_CONFLICT)
-                                            ->setRejectedSciAt(new \DateTime())
-                                            ->setRejectedSciBy($currentPersonName)
-                                            ->setRejectedSciById($currentPersonId)
-                                            ->setRejectedSciComment($data['rejectedAdminComment']);
-                                        break;
-                                }
-                                $this->getEntityManager()->flush($timeSheet);
-                */
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
@@ -390,14 +319,72 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     public function rejectAdmin( $datas, $by ){
+        $timesheets = [];
 
+        $currentPersonName = "Oscar Bot";
+        $currentPersonId = -1;
+        if( $by ){
+            $currentPersonName = (string)$by;
+            $currentPersonId = $by->getId();
+        }
+
+        // Traitement
+        foreach ($datas as $data) {
+            if ( array_key_exists('id', $data) ) {
+                /** @var TimeSheet $timeSheet */
+                $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
+
+                $timeSheet
+                    ->setStatus(TimeSheet::STATUS_CONFLICT)
+                    ->setRejectedAdminAt(new \DateTime())
+                    ->setRejectedAdminBy($currentPersonName)
+                    ->setRejectedAdminComment($data['rejectedAdminComment'])
+                    ->setRejectedAdminById($currentPersonId)
+                    ;
+
+                $this->getEntityManager()->flush($timeSheet);
+                $json = $timeSheet->toJson();
+                $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
+                $timesheets[] = $json;
+                return $timesheets;
+            } else {
+                return $this->getResponseBadRequest("DOBEFORE");
+            }
+        }
     }
 
     public function validateAdmin($datas, $by)
     {
-        throw new OscarException('Validate Admin not implemented');
-        var_dump('VA : ' . $data . ' - ' . (string)$by);
-        die("Test");
+        $timesheets = [];
+
+        $currentPersonName = "Oscar Bot";
+        $currentPersonId = -1;
+        if( $by ){
+            $currentPersonName = (string)$by;
+            $currentPersonId = $by->getId();
+        }
+
+        // Traitement
+        foreach ($datas as $data) {
+            if ( array_key_exists('id', $data) ) {
+                /** @var TimeSheet $timeSheet */
+                $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
+
+                $timeSheet
+                    ->setStatus($timeSheet->getValidatedSciAt() ? TimeSheet::STATUS_ACTIVE : TimeSheet::STATUS_TOVALIDATE)
+                    ->setValidatedAdminAt(new \DateTime())
+                    ->setValidatedAdminBy($currentPersonName)
+                    ->setValidatedAdminById($currentPersonId);
+
+                $this->getEntityManager()->flush($timeSheet);
+                $json = $timeSheet->toJson();
+                $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
+                $timesheets[] = $json;
+                return $timesheets;
+            } else {
+                return $this->getResponseBadRequest("DOBEFORE");
+            }
+        }
     }
 
 }

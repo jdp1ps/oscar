@@ -312,9 +312,15 @@ body {
   .calendar .status-draft {
     border-left: solid 4px grey; }
   .calendar .status-send {
-    border-left: solid 4px black; }
+    border-left: dotted 4px black; }
   .calendar .status-valid {
-    border-left: solid 4px green; }
+    border-left: solid 4px green !important; }
+  .calendar .valid-adm {
+    border-left: dotted 2px rgba(0, 128, 0, 0.5); }
+  .calendar .valid-sci {
+    border-left: dotted 2px rgba(0, 128, 0, 0.5); }
+  .calendar .valid-adm.valid-sci {
+    border-left: solid 4px rgba(0, 128, 0, 0.5); }
   .calendar .status-reject {
     border-left: solid 4px darkred; }
   .calendar .event.status-draft .label:before, .calendar .event.status-draft .picto:before, .calendar .event.status-send .label:before, .calendar .event.status-send .picto:before, .calendar .event.status-valid .label:before, .calendar .event.status-valid .picto:before, .calendar .event.status-reject .label:before, .calendar .event.status-reject .picto:before, .calendar .event.status-info .label:before, .calendar .event.status-info .picto:before {
