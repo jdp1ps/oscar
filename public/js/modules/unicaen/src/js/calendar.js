@@ -306,7 +306,6 @@ var TimeEvent = {
         </div>
 
         <div class="refus" @mouseover.prevent="showRefus != showRefus">
-            <i class="icon-archive"></i> REFUS {{ showRefus }}
             <div v-show="showRefus">
                 <i class="icon-beaker"></i>
                 Refus scientifique :
@@ -809,12 +808,15 @@ var WeekView = {
             }
         },
 
+        /**
+         * Début du déplacement de la borne de fin.
+         *
+         * @param event
+         */
         handlerStartMoveEnd(event){
-
             this.gostDatas.eventMovedEnd = event;
             this.gostDatas.editActive = true;
             this.gostDatas.eventMovedEnd.changing = true;
-            console.log(arguments);
         },
 
         handlerSaveMove(event){
@@ -831,15 +833,17 @@ var WeekView = {
                 this.gostDatas.eventActive.changing = false;
                 this.gostDatas.eventActive.handlerMouseUp();
                 this.gostDatas.eventActive = null;
-                this.gostDatas.startFrom = null;
+
             }
 
             if (this.gostDatas.eventMovedEnd) {
                 console.log("FIN du déplacement de la borne de fin");
                 this.gostDatas.eventMovedEnd.changing = false;
+                this.gostDatas.eventMovedEnd.handlerMouseUp();
                 this.gostDatas.eventMovedEnd = null;
-            }
 
+            }
+            this.gostDatas.startFrom = null;
             this.gostDatas.editActive = false;
         },
 
@@ -1828,10 +1832,10 @@ var Calendar = {
         },
 
         handlerSaveMove(event){
+            console.log('Sauvegarde de la position', event);
             var data = JSON.parse(JSON.stringify(event));
             data.mmStart = moment(data.start);
             data.mmEnd = moment(data.end);
-            ;
             this.restSave([data]);
         },
 
