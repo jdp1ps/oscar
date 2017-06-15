@@ -804,7 +804,7 @@ $text-small: 12px;
   a {
     display: block;
     text-decoration: none;
-    float: right;
+    //float: right;
     margin: 0 0 0 1em;
     &:hover { text-decoration: underline }
   }

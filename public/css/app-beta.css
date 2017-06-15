@@ -6707,7 +6707,6 @@ mark {
   .subdoc a {
     display: block;
     text-decoration: none;
-    float: right;
     margin: 0 0 0 1em; }
     .subdoc a:hover {
       text-decoration: underline; }

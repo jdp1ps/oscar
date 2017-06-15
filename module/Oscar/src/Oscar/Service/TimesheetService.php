@@ -318,6 +318,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
     }
 
+    /**
+     * Déclenchement du rejet administratif.
+     *
+     * @param $datas
+     * @param $by
+     * @return array
+     */
     public function rejectAdmin( $datas, $by ){
         $timesheets = [];
 
@@ -353,6 +360,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
     }
 
+    /**
+     * Déclenchement de la validation administrative.
+     *
+     * @param $datas
+     * @param $by
+     * @return array
+     */
     public function validateAdmin($datas, $by)
     {
         $timesheets = [];
