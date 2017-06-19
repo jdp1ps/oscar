@@ -317,9 +317,27 @@ body {
     border-left: solid 4px green !important; }
   .calendar .valid-adm {
     border-left: dotted 2px rgba(0, 128, 0, 0.5); }
+    .calendar .valid-adm .icon-admin:before {
+      opacity: 1;
+      color: green; }
   .calendar .valid-sci {
     border-left: dotted 2px rgba(0, 128, 0, 0.5); }
+    .calendar .valid-sci .icon-sci:before {
+      opacity: 1;
+      color: green; }
   .calendar .valid-adm.valid-sci {
+    border-left: solid 4px rgba(255, 0, 0, 0.5); }
+  .calendar .reject-adm {
+    border-left: dotted 2px rgba(0, 128, 0, 0.5); }
+    .calendar .reject-adm .icon-admin:before {
+      opacity: 1;
+      color: red; }
+  .calendar .reject-sci {
+    border-left: dotted 2px rgba(255, 0, 0, 0.5); }
+    .calendar .reject-sci .icon-sci:before {
+      opacity: 1;
+      color: red; }
+  .calendar .reject-adm.valid-sci {
     border-left: solid 4px rgba(0, 128, 0, 0.5); }
   .calendar .status-reject {
     border-left: solid 4px darkred; }

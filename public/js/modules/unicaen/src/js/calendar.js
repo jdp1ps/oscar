@@ -304,7 +304,7 @@ var TimeEvent = {
 
             @mousedown="handlerMouseDown"
             :title="event.label"
-            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm}">
+            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci}, 'reject-adm': isRejectAdm">
         <div class="label" data-uid="UID">
           {{ event.label }}
         </div>
@@ -312,7 +312,12 @@ var TimeEvent = {
         <div class="description">
             <p v-if="withOwner">Déclarant <strong>{{ event.owner }} ({{event.owner_id}})</strong></p>
           {{ event.description }}
+          <div>
+            <i class="icon-archive icon-admin" :class="adminState"></i> Admin / <i class="icon-beaker icon-sci"></i> Scien.
         </div>
+        </div>
+        
+        
 
         <div class="refus" @mouseover.prevent="showRefus != showRefus">
             <div v-show="showRefus">
@@ -413,6 +418,40 @@ var TimeEvent = {
 
     computed: {
 
+        adminState(){
+            return (
+                this.event.rejectedAdminAt ? 'rejected' :
+                    (
+                        this.event.validatedAdminAt ? 'validated':
+                            'waiting'
+                    )
+            )
+        },
+
+        admStatus(){
+            if( this.event.rejectedAdminAt ){
+                return "Rejet administratif"
+            }
+            else if( this.event.validatedAdminAt  ){
+                return "Validation administrative le à"
+            }
+            else {
+                return "en attente de validation"
+            }
+        },
+
+        sciStatus(){
+            if( this.event.rejectedSciAt ){
+                return "Rejet administratif"
+            }
+            else if( this.event.validatedSciAt  ){
+                return "Validation administrative le à"
+            }
+            else {
+                return "en attente de validation"
+            }
+        },
+
         css(){
             var marge = 0;
             var sizeless = 0;
@@ -448,6 +487,14 @@ var TimeEvent = {
         isValidAdm(){
             return this.event.validatedAdminAt != null;
         },
+        isRejectSci(){
+            return this.event.rejectedSciAt != null;
+        },
+        isRejectAdm(){
+            return this.event.rejectedAdminAt != null;
+        },
+
+
         isReject(){
             return this.event.status == "reject";
         },

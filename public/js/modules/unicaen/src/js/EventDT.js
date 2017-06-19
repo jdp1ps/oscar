@@ -140,12 +140,21 @@ var EventDT = class {
     if( data.rejectedAdminComment ) this.rejectedAdminComment = data.rejectedAdminComment;
     if( data.rejectedAdminCommentAt ) this.rejectedAdminCommentAt = data.rejectedAdminCommentAt;
 
+      if( data.rejectedSciComment ) this.rejectedSciComment = data.rejectedSciComment;
+      if( data.rejectedSciAt ) this.rejectedSciAt = data.rejectedSciAt;
+      if( data.rejectedAdminComment ) this.rejectedAdminComment = data.rejectedAdminComment;
+      if( data.rejectedAdminAt ) this.rejectedAdminAt = data.rejectedAdminAt;
+
+      if( data.validatedSciAt ) this.validatedSciAt = data.validatedSciAt;
+      if( data.validatedSciBy ) this.validatedSciBy = data.validatedSciBy;
+      if( data.validatedAdminAt ) this.validatedAdminAt = data.validatedAdminAt;
+      if( data.validatedAdminBy ) this.validatedAdminBy = data.validatedAdminBy;
+
     if( data.credentials ) {
       this.editable = data.credentials.editable;
       this.deletable = data.credentials.deletable;
       this.validable = false;
-      this.validableSci = data.credentials.validableSci;
-      this.validableAdm = data.credentials.validableAdm;
+
       this.sendable= data.credentials.sendable;
     }
   }

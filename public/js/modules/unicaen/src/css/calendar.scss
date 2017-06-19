@@ -418,11 +418,33 @@ body {
 
   .valid-adm{
     border-left: dotted 2px rgba(green, .5);
+    .icon-admin:before {
+      opacity: 1; color: green;
+    }
   }
   .valid-sci{
     border-left: dotted 2px rgba(green, .5);
+    .icon-sci:before {
+      opacity: 1; color: green;
+    }
   }
   .valid-adm.valid-sci{
+    border-left: solid 4px rgba(red, .5);
+  }
+
+  .reject-adm{
+    border-left: dotted 2px rgba(green, .5);
+    .icon-admin:before {
+      opacity: 1; color: red;
+    }
+  }
+  .reject-sci{
+    border-left: dotted 2px rgba(red, .5);
+    .icon-sci:before {
+      opacity: 1; color: red;
+    }
+  }
+  .reject-adm.valid-sci{
     border-left: solid 4px rgba(green, .5);
   }
 
@@ -430,6 +452,7 @@ body {
     border-left: solid 4px darkred;
   }
     .event {
+
 
 
     &.status-draft, &.status-send, &.status-valid, &.status-reject, &.status-info {
