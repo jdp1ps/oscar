@@ -100,6 +100,13 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
         if( false === $return ){
             // @todo Trouver un moyen de faire remonter une erreur plus "causante"
+            $this->getServiceLocator()
+                ->get('Logger')
+                ->error(sprintf(
+                    "Accès connector '%s' impossible : %s",
+                    $this->getName(),
+                    curl_error($curl)
+                ));
             throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
         }
         curl_close($curl);
