@@ -453,14 +453,14 @@ body {
   }
 
   .reject-adm{
-    border-left: dotted 2px rgba(green, .5);
+    border-left: dotted 2px rgba(#990000, .5) !important;
     .admin-status {
       background: #990000;
     }
   }
 
   .reject-sci{
-    border-left: dotted 2px rgba(red, .5);
+    border-left: dotted 2px rgba(#990000, .5) !important;
     .sci-status {
       background: #990000;
     }

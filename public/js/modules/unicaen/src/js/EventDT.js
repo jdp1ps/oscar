@@ -5,8 +5,8 @@ moment.locale('fr');
 var EventDT = class {
   constructor(id, label, start, end, description="",
               actions={}, status='draft', owner="", owner_id = null,
-              rejectedSciComment="", rejectedSciAt=null,
-              rejectedAdminComment="", rejectedAdminAt=null,
+              rejectedSciComment="", rejectedSciAt=null, rejectedSciBy=null,
+              rejectedAdminComment="", rejectedAdminAt=null, rejectedAdminBy=null,
               validatedSciAt = null, validatedSciBy = null,
               validatedAdminAt = null, validatedAdminBy = null
             ){
@@ -29,8 +29,11 @@ var EventDT = class {
 
     this.rejectedSciComment = rejectedSciComment;
     this.rejectedSciAt = rejectedSciAt;
+    this.rejectedSciBy = rejectedSciBy;
+
     this.rejectedAdminComment = rejectedAdminComment;
     this.rejectedAdminAt = rejectedAdminAt;
+    this.rejectedAdminBy = rejectedAdminBy;
 
     this.validatedSciAt = validatedSciAt;
     this.validatedSciBy = validatedSciBy;
@@ -142,8 +145,10 @@ var EventDT = class {
 
       if( data.rejectedSciComment ) this.rejectedSciComment = data.rejectedSciComment;
       if( data.rejectedSciAt != undefined ) this.rejectedSciAt = data.rejectedSciAt;
+      if( data.rejectedSciBy != undefined ) this.rejectedSciBy = data.rejectedSciBy;
       if( data.rejectedAdminComment ) this.rejectedAdminComment = data.rejectedAdminComment;
       if( data.rejectedAdminAt ) this.rejectedAdminAt = data.rejectedAdminAt;
+      if( data.rejectedAdminBy ) this.rejectedAdminBy = data.rejectedAdminBy;
 
       if( data.validatedSciAt ) this.validatedSciAt = data.validatedSciAt;
       if( data.validatedSciBy ) this.validatedSciBy = data.validatedSciBy;

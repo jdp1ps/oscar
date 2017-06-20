@@ -26,12 +26,14 @@ var EventDT = function () {
     var owner_id = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
     var rejectedSciComment = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : "";
     var rejectedSciAt = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
-    var rejectedAdminComment = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : "";
-    var rejectedAdminAt = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : null;
-    var validatedSciAt = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : null;
-    var validatedSciBy = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
-    var validatedAdminAt = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : null;
-    var validatedAdminBy = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : null;
+    var rejectedSciBy = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : null;
+    var rejectedAdminComment = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : "";
+    var rejectedAdminAt = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : null;
+    var rejectedAdminBy = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
+    var validatedSciAt = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : null;
+    var validatedSciBy = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : null;
+    var validatedAdminAt = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : null;
+    var validatedAdminBy = arguments.length > 18 && arguments[18] !== undefined ? arguments[18] : null;
 
     _classCallCheck(this, EventDT);
 
@@ -53,8 +55,11 @@ var EventDT = function () {
 
     this.rejectedSciComment = rejectedSciComment;
     this.rejectedSciAt = rejectedSciAt;
+    this.rejectedSciBy = rejectedSciBy;
+
     this.rejectedAdminComment = rejectedAdminComment;
     this.rejectedAdminAt = rejectedAdminAt;
+    this.rejectedAdminBy = rejectedAdminBy;
 
     this.validatedSciAt = validatedSciAt;
     this.validatedSciBy = validatedSciBy;
@@ -138,8 +143,10 @@ var EventDT = function () {
 
       if (data.rejectedSciComment) this.rejectedSciComment = data.rejectedSciComment;
       if (data.rejectedSciAt != undefined) this.rejectedSciAt = data.rejectedSciAt;
+      if (data.rejectedSciBy != undefined) this.rejectedSciBy = data.rejectedSciBy;
       if (data.rejectedAdminComment) this.rejectedAdminComment = data.rejectedAdminComment;
       if (data.rejectedAdminAt) this.rejectedAdminAt = data.rejectedAdminAt;
+      if (data.rejectedAdminBy) this.rejectedAdminBy = data.rejectedAdminBy;
 
       if (data.validatedSciAt) this.validatedSciAt = data.validatedSciAt;
       if (data.validatedSciBy) this.validatedSciBy = data.validatedSciBy;

@@ -340,11 +340,11 @@ body {
     .calendar .valid-sci .sci-status {
       background: green; }
   .calendar .reject-adm {
-    border-left: dotted 2px rgba(0, 128, 0, 0.5); }
+    border-left: dotted 2px rgba(153, 0, 0, 0.5) !important; }
     .calendar .reject-adm .admin-status {
       background: #990000; }
   .calendar .reject-sci {
-    border-left: dotted 2px rgba(255, 0, 0, 0.5); }
+    border-left: dotted 2px rgba(153, 0, 0, 0.5) !important; }
     .calendar .reject-sci .sci-status {
       background: #990000; }
   .calendar .valid-adm.valid-sci {

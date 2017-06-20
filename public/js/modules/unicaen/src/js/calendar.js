@@ -39,6 +39,7 @@ class CalendarDatas {
         this.defaultDescription = "";
         this.labels = [];
         this.owners = [];
+        this.rejectShow = null;
 
         this.gostDatas = {
             x: 0,
@@ -250,8 +251,10 @@ class CalendarDatas {
                     datas[i].owner_id,
                     datas[i].rejectedSciComment,
                     datas[i].rejectedSciAt,
+                    datas[i].rejectedSciBy,
                     datas[i].rejectedAdminComment,
                     datas[i].rejectedAdminAt,
+                    datas[i].rejectedAdminBy,
                     datas[i].validatedSciAt,
                     datas[i].validatedSciBy,
                     datas[i].validatedAdminAt,
@@ -273,8 +276,8 @@ class CalendarDatas {
 
     addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft",
                 owner = "", owner_id = null,
-                rejectedSciComment = "", rejectedSciAt = null,
-                rejectedAdminComment = "", rejectedAdminAt = null,
+                rejectedSciComment = "", rejectedSciAt = null, rejectedSciBy = null,
+                rejectedAdminComment = "", rejectedAdminAt = null, rejectedAdminBy = null,
                 validatedSciAt = null, validatedSciBy = null,
                 validatedAdminAt = null, validatedAdminBy = null
                 ) {
@@ -287,8 +290,8 @@ class CalendarDatas {
                 credentials,
                 status,
                 owner, owner_id,
-                rejectedSciComment, rejectedSciAt,
-                rejectedAdminComment, rejectedAdminAt,
+                rejectedSciComment, rejectedSciAt, rejectedSciBy,
+                rejectedAdminComment, rejectedAdminAt, rejectedAdminBy,
                 validatedSciAt, validatedSciBy,
                 validatedAdminAt, validatedAdminBy
             )
@@ -304,7 +307,7 @@ var TimeEvent = {
 
             @mousedown="handlerMouseDown"
             :title="event.label"
-            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci}, 'reject-adm': isRejectAdm">
+            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci, 'reject-adm': isRejectAdm}">
         <div class="label" data-uid="UID">
           {{ event.label }}
         </div>
@@ -434,18 +437,6 @@ var TimeEvent = {
             )
         },
 
-        admStatus(){
-            if( this.event.rejectedAdminAt ){
-                return "Rejet administratif"
-            }
-            else if( this.event.validatedAdminAt  ){
-                return "Validation administrative le à"
-            }
-            else {
-                return "en attente de validation"
-            }
-        },
-
         sciStatus(){
             if( this.event.rejectedSciAt ){
                 return "Rejet administratif"
@@ -497,6 +488,7 @@ var TimeEvent = {
             return this.event.rejectedSciAt != null;
         },
         isRejectAdm(){
+            console.log(this.event.rejectedAdminAt);
             return this.event.rejectedAdminAt != null;
         },
 
@@ -547,6 +539,15 @@ var TimeEvent = {
     },
 
     methods: {
+        /**
+         * Déclenche l'affichage du rejet.
+         *
+         * @param event
+         */
+        handlerShowReject(event){
+            this.$emit('rejectshow', event);
+        },
+
         handlerDebug(data){
             console.log(data);
         },
@@ -790,6 +791,7 @@ var WeekView = {
                     @mousedown="handlerEventMouseDown"
                     @savemoveevent="handlerSaveMove(event)"
                     @onstartmoveend="handlerStartMoveEnd"
+                    @rejectshow="handlerRejectShow"
                     :event="event"
                     :key="event.id"></timeevent>
               </div>
@@ -867,6 +869,9 @@ var WeekView = {
     },
 
     methods: {
+        handlerRejectShow( event ){
+            this.$emit('rejectshow', event);
+        },
 
 //        @savemoveevent="handlerSaveMove"
         handlerEventMouseDown(event, evt){
@@ -1545,7 +1550,33 @@ var Calendar = {
         <div class="calendar">
 
             <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>
-
+            
+            <transition name="fade">
+                <div class="vue-loader" v-if="rejectShow">
+                    <div>
+                    <nav><a href="#" @click.prevent="rejectShow = null"><i class="icon-cancel-outline"></i>Fermer</a></nav>
+                    <section v-if="rejectShow.rejectedAdminAt" class="card">
+                        <h2>
+                            <i class="icon-archive">Rejet administratif
+                        </h2>
+                        Ce créneau a été refusé par <strong>{{ rejectShow.rejectedAdminBy }}</strong>  le <time>{{ rejectShow.rejectedAdminAt | moment}}</time> au motif : 
+                        <pre>{{ rejectShow.rejectedAdminComment }}</pre>
+                    </section>
+                    <section v-if="rejectShow.rejectedSciAt" class="card">
+                        <h2>
+                            <i class="icon-archive">Rejet scientifique
+                        </h2>
+                        Ce créneau a été refusé par <strong>{{ rejectShow.rejectedSciBy }}</strong>  le <time>{{ rejectShow.rejectedSciAt | moment}}</time> au motif : 
+                        <pre>{{ rejectShow.rejectedSciComment }}</pre>
+                    </section>
+                    </div>
+                </div>
+            </transition>
+        
+            <div class="vue-loader" v-if="loading">
+                <span>Chargement</span>
+            </div>
+            
             <div class="editor" v-show="eventEditDataVisible">
                 <form @submit.prevent="editSave">
                     <div class="form-group">
@@ -1623,6 +1654,7 @@ var Calendar = {
                 @savemoveevent="handlerSaveMove"
                 @submitday="submitday"
                 @submitall="submitall"
+                @rejectshow="handlerRejectShow"
                 @saveevent="restSave"></weekview>
 
             <listview v-show="state == 'list'"
@@ -1659,6 +1691,13 @@ var Calendar = {
         }
     },
 
+    filters: {
+      moment(value){
+          var d = moment(value.date);
+          return d.format("dddd, D MMMM YYYY") + " (" +d.fromNow() +")";
+      }
+    },
+
     components: {
         weekview: WeekView,
         monthview: MonthView,
@@ -1689,6 +1728,11 @@ var Calendar = {
                         this.restStep(events, status);
                 });
             }
+        },
+
+        handlerRejectShow( event ){
+            console.log('AFFICHAGE DU REJET', event);
+            this.rejectShow = event;
         },
 
         /**
