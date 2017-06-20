@@ -688,5 +688,18 @@ class TimeSheet implements ITrackable
         return $this;
     }
     ////////////////////////////////////////////////////////////////////////////
+    ///
+    ///
+    ///
+    public function isWaitingValidation(){
+        return $this->getStatus() == self::STATUS_TOVALIDATE;
+    }
+    public function isWaitingValidationAdmin(){
+        return $this->getValidatedAdminAt() == null && $this->getStatus() == self::STATUS_TOVALIDATE;
+    }
+
+    public function isWaitingValidationSci(){
+        return $this->getValidatedSciAt() == null && $this->getStatus() == self::STATUS_TOVALIDATE;
+    }
 
 }
