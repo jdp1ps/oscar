@@ -245,12 +245,14 @@ body {
       display: block;
       font-size: .75em; }
     .calendar .event .description {
-      font-size: .8em;
+      font-size: .7em;
       font-weight: lighter;
       color: black;
       position: absolute;
       top: 3em;
-      bottom: 2em;
+      bottom: 20px;
+      left: 2px;
+      right: 2px;
       overflow: hidden; }
     .calendar .event .time {
       position: absolute;
@@ -310,33 +312,43 @@ body {
   .calendar .list-item.status-info strong:before, .calendar .list-item.status-info .picto:before {
     content: '\e85e'; }
   .calendar .status-draft {
-    border-left: solid 4px grey; }
+    border-left: solid 2px grey; }
   .calendar .status-send {
-    border-left: dotted 4px black; }
+    border-left: dotted 2px #333; }
   .calendar .status-valid {
     border-left: solid 4px green !important; }
+  .calendar .status-draft .submit-status {
+    display: none; }
+  .calendar .submit-status {
+    background: #333;
+    display: flex;
+    margin-top: 4px;
+    border-radius: 2px; }
+    .calendar .submit-status .admin-status, .calendar .submit-status .sci-status {
+      flex: 1;
+      color: white;
+      text-align: center;
+      padding: 2px; }
+    .calendar .submit-status .sci-status {
+      border-left: solid thin rgba(51, 51, 51, 0.5); }
   .calendar .valid-adm {
     border-left: dotted 2px rgba(0, 128, 0, 0.5); }
-    .calendar .valid-adm .icon-admin:before {
-      opacity: 1;
-      color: green; }
+    .calendar .valid-adm .admin-status {
+      background: green; }
   .calendar .valid-sci {
     border-left: dotted 2px rgba(0, 128, 0, 0.5); }
-    .calendar .valid-sci .icon-sci:before {
-      opacity: 1;
-      color: green; }
-  .calendar .valid-adm.valid-sci {
-    border-left: solid 4px rgba(255, 0, 0, 0.5); }
+    .calendar .valid-sci .sci-status {
+      background: green; }
   .calendar .reject-adm {
     border-left: dotted 2px rgba(0, 128, 0, 0.5); }
-    .calendar .reject-adm .icon-admin:before {
-      opacity: 1;
-      color: red; }
+    .calendar .reject-adm .admin-status {
+      background: #990000; }
   .calendar .reject-sci {
     border-left: dotted 2px rgba(255, 0, 0, 0.5); }
-    .calendar .reject-sci .icon-sci:before {
-      opacity: 1;
-      color: red; }
+    .calendar .reject-sci .sci-status {
+      background: #990000; }
+  .calendar .valid-adm.valid-sci {
+    border-left: solid 4px rgba(255, 0, 0, 0.5); }
   .calendar .reject-adm.valid-sci {
     border-left: solid 4px rgba(0, 128, 0, 0.5); }
   .calendar .status-reject {

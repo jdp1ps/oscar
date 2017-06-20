@@ -137,7 +137,7 @@ var EventDT = function () {
       if (data.rejectedAdminCommentAt) this.rejectedAdminCommentAt = data.rejectedAdminCommentAt;
 
       if (data.rejectedSciComment) this.rejectedSciComment = data.rejectedSciComment;
-      if (data.rejectedSciAt) this.rejectedSciAt = data.rejectedSciAt;
+      if (data.rejectedSciAt != undefined) this.rejectedSciAt = data.rejectedSciAt;
       if (data.rejectedAdminComment) this.rejectedAdminComment = data.rejectedAdminComment;
       if (data.rejectedAdminAt) this.rejectedAdminAt = data.rejectedAdminAt;
 
@@ -150,6 +150,8 @@ var EventDT = function () {
         this.editable = data.credentials.editable;
         this.deletable = data.credentials.deletable;
         this.validable = false;
+        this.validableAdm = data.credentials.validableAdm;;
+        this.validableSci = data.credentials.validableSci;;
 
         this.sendable = data.credentials.sendable;
       }

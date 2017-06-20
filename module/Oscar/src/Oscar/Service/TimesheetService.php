@@ -53,7 +53,22 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 /** @var TimeSheet $timeSheet */
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
                 $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE)
-                    ->setSendBy((string)$this->getOscarUserContext()->getCurrentPerson());
+                    ->setSendBy((string)$this->getOscarUserContext()->getCurrentPerson())
+                    ->setRejectedSciComment(null)
+                    ->setRejectedSciAt(null)
+                    ->setRejectedSciBy(null)
+                    ->setRejectedSciById(null)
+                    ->setRejectedAdminComment(null)
+                    ->setRejectedAdminAt(null)
+                    ->setRejectedAdminBy(null)
+                    ->setRejectedAdminById(null)
+                    ->setValidatedSciAt(null)
+                    ->setValidatedSciBy(null)
+                    ->setValidatedSciById(null)
+                    ->setValidatedAdminAt(null)
+                    ->setValidatedAdminBy(null)
+                    ->setValidatedAdminById(null)
+                ;
                 $this->getEntityManager()->flush($timeSheet);
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
@@ -271,7 +286,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     ->setRejectedSciAt(new \DateTime())
                     ->setRejectedSciBy($currentPersonName)
                     ->setRejectedSciById($currentPersonId)
-                    ->setRejectedSciComment($data['rejectedSciComment']);
+                    ->setRejectedSciComment($data['rejectedSciComment'])
+                    ->setValidatedSciAt(null)
+                    ->setValidatedSciBy(null)
+                    ->setValidatedSciById(null);
 
                 $this->getEntityManager()->flush($timeSheet);
                 $json = $timeSheet->toJson();
@@ -303,6 +321,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
                 $timeSheet
                     ->setStatus($timeSheet->getValidatedAdminAt() ? TimeSheet::STATUS_ACTIVE : TimeSheet::STATUS_TOVALIDATE)
+                    // On supprime les informations de rejet
+                    ->setRejectedSciAt(null)
+                    ->setRejectedSciBy(null)
+                    ->setRejectedSciComment(null)
+
                     ->setValidatedSciAt(new \DateTime())
                     ->setValidatedSciBy($currentPersonName)
                     ->setValidatedSciById($currentPersonId);
@@ -347,6 +370,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     ->setRejectedAdminBy($currentPersonName)
                     ->setRejectedAdminComment($data['rejectedAdminComment'])
                     ->setRejectedAdminById($currentPersonId)
+
                     ;
 
                 $this->getEntityManager()->flush($timeSheet);
@@ -388,7 +412,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     ->setStatus($timeSheet->getValidatedSciAt() ? TimeSheet::STATUS_ACTIVE : TimeSheet::STATUS_TOVALIDATE)
                     ->setValidatedAdminAt(new \DateTime())
                     ->setValidatedAdminBy($currentPersonName)
-                    ->setValidatedAdminById($currentPersonId);
+                    ->setValidatedAdminById($currentPersonId)
+                    ->setRejectedAdminAt(null)
+                    ->setRejectedAdminBy(null)
+                    ->setRejectedAdminComment(null);
 
                 $this->getEntityManager()->flush($timeSheet);
                 $json = $timeSheet->toJson();

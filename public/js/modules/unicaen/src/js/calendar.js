@@ -309,12 +309,18 @@ var TimeEvent = {
           {{ event.label }}
         </div>
         <small>Durée : <strong>{{ labelDuration }}</strong> heure(s)</small>
-        <div class="description">
+        <div class="description" v-if="!isInfo">
+            <div class="submit-status">
+            <span class="admin-status">
+                <i class="icon-archive icon-admin" :class="adminState"></i> Admin
+            </span>
+            <span class="sci-status">
+                <i class="icon-beaker icon-sci"></i> Scien.
+            </span>
+          </div>
             <p v-if="withOwner">Déclarant <strong>{{ event.owner }} ({{event.owner_id}})</strong></p>
           {{ event.description }}
-          <div>
-            <i class="icon-archive icon-admin" :class="adminState"></i> Admin / <i class="icon-beaker icon-sci"></i> Scien.
-        </div>
+          
         </div>
         
         

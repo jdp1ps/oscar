@@ -423,6 +423,7 @@ class TimeSheet implements ITrackable
 
     /**
      * @param \DateTime $rejectedSciAt
+     * @return TimeSheet
      */
     public function setRejectedSciAt($rejectedSciAt)
     {

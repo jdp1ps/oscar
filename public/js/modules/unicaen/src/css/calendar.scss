@@ -318,12 +318,14 @@ body {
     }
 
     .description {
-      font-size: .8em;
+      font-size: .7em;
       font-weight: lighter;
       color: black;
       position: absolute;
       top: 3em;
-      bottom: 2em;
+      bottom: 20px;
+      left: 2px;
+      right: 2px;
       overflow: hidden;
     }
 
@@ -405,45 +407,70 @@ body {
   }
 
   .status-draft {
-    border-left: solid 4px grey;
+    border-left: solid 2px grey;
   }
 
   .status-send {
-    border-left: dotted 4px black;
+    border-left: dotted 2px #333;
   }
 
   .status-valid {
     border-left: solid 4px green !important;
   }
 
+  .status-draft .submit-status {
+    display: none;
+  }
+  .submit-status {
+    background: #333;
+    display: flex;
+    margin-top: 4px;
+    border-radius: 2px;
+
+    .admin-status, .sci-status {
+      flex: 1;
+      color: white;
+      text-align: center;
+      padding: 2px;
+    }
+
+    .sci-status {
+      border-left: solid thin rgba(#333, .5);
+    }
+  }
+
   .valid-adm{
     border-left: dotted 2px rgba(green, .5);
-    .icon-admin:before {
-      opacity: 1; color: green;
+    .admin-status {
+      background: green;
     }
   }
   .valid-sci{
     border-left: dotted 2px rgba(green, .5);
-    .icon-sci:before {
-      opacity: 1; color: green;
+    .sci-status {
+      background: green;
     }
-  }
-  .valid-adm.valid-sci{
-    border-left: solid 4px rgba(red, .5);
   }
 
   .reject-adm{
     border-left: dotted 2px rgba(green, .5);
-    .icon-admin:before {
-      opacity: 1; color: red;
+    .admin-status {
+      background: #990000;
     }
   }
+
   .reject-sci{
     border-left: dotted 2px rgba(red, .5);
-    .icon-sci:before {
-      opacity: 1; color: red;
+    .sci-status {
+      background: #990000;
     }
   }
+
+  .valid-adm.valid-sci{
+    border-left: solid 4px rgba(red, .5);
+  }
+
+
   .reject-adm.valid-sci{
     border-left: solid 4px rgba(green, .5);
   }
