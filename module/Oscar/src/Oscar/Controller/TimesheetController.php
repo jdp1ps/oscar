@@ -287,7 +287,6 @@ class TimesheetController extends AbstractOscarController
                 if (!array_key_exists($workpackageperson->getPerson()->getId(),
                     $declarants)
                 ) {
-                    echo $workpackageperson->getPerson() . "<br>";
                     $declarants[$workpackageperson->getPerson()->getId()] = $workpackageperson;
                 }
             }

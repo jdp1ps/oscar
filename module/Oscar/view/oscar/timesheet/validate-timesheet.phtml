@@ -4,13 +4,6 @@
 
 
 <div class="container">
-    <h1 class="title-with-small">
-        <small>Validations des créneaux</small>
-    </h1>
-
-    <nav>
-        Personnes :
-    </nav>
 
     <?php
     $crenaux = [];
@@ -26,13 +19,6 @@
         if( !array_key_exists($wpd->getPerson()->getId(), $owners) ){
             $owners[$wpd->getPerson()->getId()] = $wpd->getPerson()->toJson();
         }
-
-        /*$crenaux[((string)$wpd)] = [
-            'label'         => (string)$wpd,
-            'idactivity'    => $wpd->getWorkPackage()->getActivity()->getId(),
-            'idworkpackage' => $wpd->getWorkPackage()->getId(),
-            'color' => $colorPersons[$wpd->getPerson()->getId()]
-        ];*/
     }
 
     /** @var \Oscar\Entity\WorkPackage $workpackage */
@@ -41,7 +27,6 @@
             'label'         => (string)$wpd,
             'idactivity'    => $activity->getId(),
             'idworkpackage' => $wpd->getId(),
-            //'color' => $colorPersons[$wpd->getPerson()->getId()]
         ];
     }
     ?>
@@ -63,6 +48,9 @@
         var customDatas = <?= json_encode($crenaux) ?>;
         console.log(customDatas);
         var mixins = {
+            data: {
+                calendarLabel: "Validation des déclarations"
+            },
             methods: {
                 restUrl(){
                     return '<?= $this->url('timesheet/validation', ['idactivity' => $activity->getId() ]) ?>'
