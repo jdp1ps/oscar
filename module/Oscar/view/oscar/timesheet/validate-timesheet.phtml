@@ -6,6 +6,7 @@
 <div class="container">
 
     <?php
+    $label = sprintf("Validation pour %s", $activity);
     $crenaux = [];
     $colorPersons = [];
     $owners = [];
@@ -32,7 +33,7 @@
     ?>
 
     <div id="app">
-        <calendar :with-owner="true" :createNew="false"></calendar>
+        <calendar with-owner="false" create-new="false" calendar-label="<?= $label ?>"></calendar>
     </div>
 </div>
 
@@ -48,9 +49,6 @@
         var customDatas = <?= json_encode($crenaux) ?>;
         console.log(customDatas);
         var mixins = {
-            data: {
-                calendarLabel: "Validation des déclarations"
-            },
             methods: {
                 restUrl(){
                     return '<?= $this->url('timesheet/validation', ['idactivity' => $activity->getId() ]) ?>'

@@ -32,6 +32,11 @@ body {
 }
 
 .calendar {
+  .calendar-label {
+    font-weight: 100;
+    font-size: 1.2em;
+    padding-left: 2em;
+  }
   position: relative;
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */

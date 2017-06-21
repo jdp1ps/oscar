@@ -36,6 +36,10 @@ body {
   /* Internet Explorer/Edge */
   user-select: none;
   background: rgba(255, 255, 255, 0.8); }
+  .calendar .calendar-label {
+    font-weight: 100;
+    font-size: 1.2em;
+    padding-left: 2em; }
   .calendar .calendar-menu {
     display: flex;
     align-items: flex-start;
