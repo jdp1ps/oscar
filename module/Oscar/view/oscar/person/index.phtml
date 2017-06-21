@@ -58,9 +58,16 @@ $markText = function( $text, $search ){
             })
 
         </script>
+    <?php
+    $filterRoleUrl = "";
+    foreach ($filter_roles as $role ) {
+        $filterRoleUrl .= '&filter_roles[]=' . urlencode($role);
+    }?>
+    <?= $this->pager(
+            $persons, $this->url().'?q='.urlencode($search)
+                .$filterRoleUrl.'&page=%s'
 
-
-    <?= $this->pager($persons, preg_replace("/&page=[0-9]*/", '', $_SERVER['REQUEST_URI']).'&page=%s') ?>
+    ) ?>
 </section>
 
 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
