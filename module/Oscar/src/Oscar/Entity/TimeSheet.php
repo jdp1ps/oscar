@@ -531,7 +531,8 @@ class TimeSheet implements ITrackable
     }
 
     /**
-     * @param mixed $sendBy
+     * @param $sendBy
+     * @return $this
      */
     public function setSendBy($sendBy)
     {

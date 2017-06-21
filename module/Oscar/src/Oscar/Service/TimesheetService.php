@@ -142,7 +142,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $sendable = $isOwner && $timeSheet->getStatus() == TimeSheet::STATUS_DRAFT;
 
         // Seul les déclarations en brouillon peuvent être éditées
-        $editable = $timeSheet->getStatus() == TimeSheet::STATUS_DRAFT && $isOwner;
+        $editable = in_array($timeSheet->getStatus(), [TimeSheet::STATUS_DRAFT, TimeSheet::STATUS_INFO]) && $isOwner;
 
         // Validation scientifique (déja validé ou la personne a les droits)
 
@@ -229,6 +229,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ->setDateFrom(new \DateTime($data['start']))
                 ->setDateTo(new \DateTime($data['end']));
 
+            if( $status == TimeSheet::STATUS_INFO ){
+                $timeSheet->setActivity(null)
+                    ->setWorkpackage(null)
+                    ->setSendBy(null);
+                $timeSheet = $this->resetValidationData($timeSheet);
+            }
+
             $json = $timeSheet->toJson();
             $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
             $timesheets[] = $json;
@@ -237,6 +244,26 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->getEntityManager()->flush($timeSheet);
 
         return $timesheets;
+    }
+
+
+    /**
+     * Supprimer les données des champs de validation/rejet dans la déclaration.
+     *
+     * @param TimeSheet $timeSheet
+     * @return TimeSheet
+     */
+    public function resetValidationData( TimeSheet $timeSheet ){
+        return $timeSheet
+            ->setRejectedAdminById(null)
+            ->setRejectedAdminBy(null)
+            ->setRejectedAdminAt(null)
+            ->setRejectedAdminComment(null)
+            ->setRejectedSciAt(null)
+            ->setRejectedSciBy(null)
+            ->setRejectedSciById(null)
+            ->setRejectedSciComment(null)
+            ->setRejectedAdminComment(null);
     }
 
 
