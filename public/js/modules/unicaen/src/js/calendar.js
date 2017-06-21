@@ -321,7 +321,7 @@ var TimeEvent = {
                 <i class="icon-beaker icon-sci"></i> Scien.
             </span>
           </div>
-            <p v-if="withOwner">Déclarant <strong>{{ event.owner }} ({{event.owner_id}})</strong></p>
+            <p v-if="withOwner">Déclarant <strong>{{ event.owner }}</strong></p>
           {{ event.description }}
           
         </div>
