@@ -725,7 +725,7 @@ var WeekView = {
     template: `<div class="calendar calendar-week">
     <div class="meta">
         <a href="#" @click="previousWeek">
-            <i class="icon-left-big"></i>
+            <i class=" icon-angle-left"></i>
         </a>
         <h3>
             Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}
@@ -736,7 +736,7 @@ var WeekView = {
             </nav>
         </h3>
        <a href="#" @click="nextWeek">
-            <i class="icon-right-big"></i>
+            <i class=" icon-angle-right"></i>
        </a>
     </div>
 
