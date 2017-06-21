@@ -22,6 +22,22 @@ body {
   .event-inline-simple strong {
     font-weight: 100; }
 
+.year-pack {
+  margin: 1em; }
+  .year-pack h2, .year-pack h3, .year-pack h4, .year-pack h5 {
+    font-weight: 100;
+    margin: 0;
+    padding: 0; }
+  .year-pack section {
+    margin-left: .5em;
+    background: rgba(166, 206, 248, 0.2); }
+  .year-pack h2 {
+    font-size: 22px;
+    font-weight: 400;
+    border-bottom: thin rgba(0, 0, 0, 0.25) solid; }
+  .year-pack h5 {
+    line-height: 22px; }
+
 .calendar {
   position: relative;
   -webkit-touch-callout: none;

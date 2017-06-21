@@ -42,7 +42,7 @@ var CalendarDatas = function () {
     function CalendarDatas() {
         _classCallCheck(this, CalendarDatas);
 
-        this.state = 'week';
+        this.state = 'list';
         this.events = [];
         this.newID = 1;
         this.transmission = "";
@@ -776,11 +776,6 @@ var WeekView = {
                     // Position Y
                     top = parseInt($(this.gostDatas.eventActive.$el).css('top'));
 
-                    /*if( top < 0 ){
-                        top = 0;
-                        return;
-                    }*/
-
                     // Mise à jour du jour si besoin
                     if (day + 1 != this.gostDatas.eventActive.weekDay) {
                         this.gostDatas.eventActive.updateWeekDay(day + 1);
@@ -967,7 +962,7 @@ var ListView = _defineProperty({
         listitem: ListItemView
     },
 
-    template: '<div class="calendar calendar-list">\n        <h2>Liste des cr\xE9neaux</h2>\n        <article v-for="pack in listEvents">\n            <section class="events">\n                <h3>{{ pack.label }}</h3>\n                <section class="events-list">\n                <listitem\n                    :with-owner="withOwner"\n                    @selectevent="selectEvent"\n                    @editevent="$emit(\'editevent\', event)"\n                    @deleteevent="$emit(\'deleteevent\', event)"\n                    @submitevent="$emit(\'submitevent\', event)"\n                    @validateevent="$emit(\'validateevent\', event)"\n                    @rejectevent="$emit(\'rejectevent\', event)"\n                    v-bind:event="event" v-for="event in pack.events"></listitem>\n                </section>\n                <div class="total">\n                    {{ pack.totalHours }} heure(s)\n                </div>\n            </section>\n\n        </article>\n    </div>',
+    template: '<div class="calendar calendar-list">\n        <section v-for="eventsYear, year in listEvents" class="year-pack">\n            <h2>{{year}}</h2>\n            <section v-for="eventsMonth, month in eventsYear" class="month-pack">\n                <h3>{{month}} Heures : X (X valid\xE9e(s), X a valider, X non-class\xE9e(s))</h3>\n                <section v-for="eventsWeek, week in eventsMonth" class="week-pack">\n                    <h4>Semaine {{week}}</h4>\n                     <section v-for="eventsDay, day in eventsWeek" class="day-pack events">\n                        <h5>{{day}}</h5>\n                         <section class="events-list">\n                            <listitem\n                                :with-owner="withOwner"\n                                @selectevent="selectEvent"\n                                @editevent="$emit(\'editevent\', event)"\n                                @deleteevent="$emit(\'deleteevent\', event)"\n                                @submitevent="$emit(\'submitevent\', event)"\n                                @validateevent="$emit(\'validateevent\', event)"\n                                @rejectevent="$emit(\'rejectevent\', event)"\n                                v-bind:event="event" v-for="event in eventsDay"></listitem>\n                        </section>\n                        <div class="total">\n                            TTT heure(s)\n                        </div>\n                    </section>\n                </section>\n            </section>\n        </section>\n    </div>',
 
     methods: {
         selectEvent: function selectEvent(event) {
@@ -983,29 +978,58 @@ var ListView = _defineProperty({
         var packerFormat = 'ddd D MMMM YYYY';
         var packer = null;
 
+        var packMonth = null;
+        var packWeek = null;
+        var packDay = null;
+
         var currentPack = null;
 
         if (!store.events) {
             return null;
         }
 
+        var structure = {};
         for (var i = 0; i < this.events.length; i++) {
             var event = this.events[i];
-            var label = event.mmStart.format(packerFormat);
-
-            if (packer == null || packer.label != label) {
+            var labelYear = event.mmStart.format('YYYY');
+            var labelMonth = event.mmStart.format('MMMM');
+            var labelWeek = event.mmStart.format('W');
+            var labelDay = event.mmStart.format('ddd D');
+            if (!structure[labelYear]) {
+                structure[labelYear] = {};
+            }
+            if (!structure[labelYear][labelMonth]) {
+                structure[labelYear][labelMonth] = {};
+            }
+            if (!structure[labelYear][labelMonth][labelWeek]) {
+                structure[labelYear][labelMonth][labelWeek] = {};
+            }
+            if (!structure[labelYear][labelMonth][labelWeek][labelDay]) {
+                structure[labelYear][labelMonth][labelWeek][labelDay] = [];
+            }
+            structure[labelYear][labelMonth][labelWeek][labelDay].push(event);
+        }
+        console.log('Structure:', structure);
+        /*
+        for (let i = 0; i < this.events.length; i++) {
+            let event = this.events[i];
+            let labelMonth = event.mmStart.format('MMMM YYYY');
+            let labelWeek = event.mmStart.format('W');
+            let labelDay = event.mmStart.format('ddd D');
+             let label = event.mmStart.format(packerFormat);
+             if (packer == null || packer.label != label) {
                 packer = {
                     label: label,
                     events: [],
                     totalHours: 0
-                };
+                }
                 pack.push(packer);
             }
             packer.totalHours += event.duration;
             packer.events.push(event);
-        }
+        }*/
 
-        return pack;
+        return structure;
     }
 });
 
