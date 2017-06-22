@@ -604,7 +604,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $newPartner = new ActivityOrganization();
             $this->getEntityManager()->persist($newPartner);
             $newPartner->setOrganization($partner->getOrganization())
-                ->setRole($partner->getRole())
+                ->setRoleObj($partner->getRoleObj())
                 ->setActivity($newActivity)
                 ->setDateStart($partner->getDateStart())
                 ->setDateEnd($partner->getDateEnd());
@@ -617,7 +617,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $this->getEntityManager()->persist($newMember);
             $newMember->setPerson($member->getPerson())
                 ->setActivity($newActivity)
-                ->setRole($member->getRole())
+                ->setRoleObj($member->getRoleObj())
                 ->setDateStart($member->getDateStart())
                 ->setDateEnd($member->getDateEnd());
             $this->getEntityManager()->flush($newMember);
