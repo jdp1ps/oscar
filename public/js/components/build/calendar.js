@@ -1,12 +1,12 @@
 ;(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['moment', 'ICalAnalyser', 'EventDT'], factory);
+    define(['moment', 'IcalAnalyser', 'EventDT'], factory);
   } else if (typeof exports === 'object') {
-    module.exports = factory(require('moment'), require('ICalAnalyser'), require('EventDT'));
+    module.exports = factory(require('moment'), require('IcalAnalyser'), require('EventDT'));
   } else {
-    root.Calendar = factory(root.moment, root.ICalAnalyser, root.EventDT);
+    root.Calendar = factory(root.moment, root.IcalAnalyser, root.EventDT);
   }
-}(this, function(moment, ICalAnalyser, EventDT) {
+}(this, function(moment, IcalAnalyser, EventDT) {
 "use strict";
 
 var _methods;

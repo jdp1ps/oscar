@@ -21,7 +21,7 @@ var colorLabel = (label) => {
 
 class CalendarDatas {
     constructor() {
-        this.state = 'week';
+        this.state = 'list';
         this.events = [];
         this.newID = 1;
         this.transmission = "";
@@ -39,6 +39,7 @@ class CalendarDatas {
         this.defaultDescription = "";
         this.labels = [];
         this.owners = [];
+        this.rejectShow = null;
 
         this.gostDatas = {
             x: 0,
@@ -58,6 +59,7 @@ class CalendarDatas {
 
         ////
         this.displayRejectModal = false;
+        this.rejectValidateType = null;
         this.rejectComment = "";
         this.rejectedEvents = [];
     }
@@ -246,7 +248,18 @@ class CalendarDatas {
                     datas[i].credentials,
                     datas[i].status,
                     datas[i].owner,
-                    datas[i].owner_id
+                    datas[i].owner_id,
+                    datas[i].rejectedSciComment,
+                    datas[i].rejectedSciAt,
+                    datas[i].rejectedSciBy,
+                    datas[i].rejectedAdminComment,
+                    datas[i].rejectedAdminAt,
+                    datas[i].rejectedAdminBy,
+                    datas[i].validatedSciAt,
+                    datas[i].validatedSciBy,
+                    datas[i].validatedAdminAt,
+                    datas[i].validatedAdminBy
+
                 );
             }
         }
@@ -261,7 +274,13 @@ class CalendarDatas {
         return null;
     }
 
-    addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft", owner = "", owner_id = null) {
+    addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft",
+                owner = "", owner_id = null,
+                rejectedSciComment = "", rejectedSciAt = null, rejectedSciBy = null,
+                rejectedAdminComment = "", rejectedAdminAt = null, rejectedAdminBy = null,
+                validatedSciAt = null, validatedSciBy = null,
+                validatedAdminAt = null, validatedAdminBy = null
+                ) {
         this.events.push(
             new EventDT(
                 id,
@@ -270,8 +289,11 @@ class CalendarDatas {
                 description,
                 credentials,
                 status,
-                owner,
-                owner_id
+                owner, owner_id,
+                rejectedSciComment, rejectedSciAt, rejectedSciBy,
+                rejectedAdminComment, rejectedAdminAt, rejectedAdminBy,
+                validatedSciAt, validatedSciBy,
+                validatedAdminAt, validatedAdminBy
             )
         );
     }
@@ -285,17 +307,50 @@ var TimeEvent = {
 
             @mousedown="handlerMouseDown"
             :title="event.label"
-            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject}">
+            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci, 'reject-adm': isRejectAdm}">
         <div class="label" data-uid="UID">
           {{ event.label }}
         </div>
         <small>Durée : <strong>{{ labelDuration }}</strong> heure(s)</small>
-        <div class="description">
-            <p v-if="withOwner">Déclarant <strong>{{ event.owner }} ({{event.owner_id}})</strong></p>
+        <div class="description" v-if="!isInfo">
+            <div class="submit-status">
+            <span class="admin-status">
+                <i class="icon-archive icon-admin" :class="adminState"></i> Admin
+            </span>
+            <span class="sci-status">
+                <i class="icon-beaker icon-sci"></i> Scien.
+            </span>
+          </div>
+            <p v-if="withOwner">Déclarant <strong>{{ event.owner }}</strong></p>
           {{ event.description }}
+          
+        </div>
+        
+        
+
+        <div class="refus" @mouseover.prevent="showRefus != showRefus">
+            <div v-show="showRefus">
+                <i class="icon-beaker"></i>
+                Refus scientifique :
+                <div class="comment">{{ event.rejectedSciComment}}</div>
+                <i class="icon-archive"></i>
+                Refus administratif :
+                <div class="comment">{{ event.rejectedAdminComment}}</div>
+            </div>
         </div>
 
         <nav class="admin">
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerDebug(event)">
+                <i class="icon-bug"></i>
+                Debug</a>
+                
+            <a href="#" 
+                @mousedown.stop.prevent="" 
+                @click.stop.prevent="handlerShowReject(event)" 
+                v-if="event.rejectedSciComment || event.rejectedAdminComment">
+                <i class="icon-attention"></i>
+                Afficher le rejet</a>
+                
             <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('editevent')" v-if="event.editable">
                 <i class="icon-pencil-1"></i>
                 Modifier</a>
@@ -307,6 +362,24 @@ var TimeEvent = {
                 <i class="icon-right-big"></i>
                 Soumettre</a>
 
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectscievent')" v-if="event.validableSci">
+                <i class="icon-attention-1"></i>
+                Refus scientifique</a>
+
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectadmevent')" v-if="event.validableAdm">
+                <i class="icon-attention-1"></i>
+                Refus administratif</a>
+                
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validatescievent')" v-if="event.validableSci">
+                <i class="icon-beaker"></i>
+                Validation scientifique</a>
+            
+            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateadmevent')" v-if="event.validableAdm">
+                <i class="icon-archive"></i>
+                Validation administrative</a>
+            
+             
+            
             <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateevent')" v-if="event.validable">
                 <i class="icon-right-big"></i>
                 Valider</a>
@@ -335,6 +408,7 @@ var TimeEvent = {
             movingBoth: true,
             changing: false,
             change: false,
+            showRefus: false,
             labelStart: "",
             labelEnd: "",
             labelDuration: "",
@@ -352,6 +426,28 @@ var TimeEvent = {
     },
 
     computed: {
+
+        adminState(){
+            return (
+                this.event.rejectedAdminAt ? 'rejected' :
+                    (
+                        this.event.validatedAdminAt ? 'validated':
+                            'waiting'
+                    )
+            )
+        },
+
+        sciStatus(){
+            if( this.event.rejectedSciAt ){
+                return "Rejet administratif"
+            }
+            else if( this.event.validatedSciAt  ){
+                return "Validation administrative le à"
+            }
+            else {
+                return "en attente de validation"
+            }
+        },
 
         css(){
             var marge = 0;
@@ -382,6 +478,21 @@ var TimeEvent = {
         isValid(){
             return this.event.status == "valid";
         },
+        isValidSci(){
+            return this.event.validatedSciAt != null;
+        },
+        isValidAdm(){
+            return this.event.validatedAdminAt != null;
+        },
+        isRejectSci(){
+            return this.event.rejectedSciAt != null;
+        },
+        isRejectAdm(){
+            console.log(this.event.rejectedAdminAt);
+            return this.event.rejectedAdminAt != null;
+        },
+
+
         isReject(){
             return this.event.status == "reject";
         },
@@ -428,12 +539,41 @@ var TimeEvent = {
     },
 
     methods: {
+        /**
+         * Déclenche l'affichage du rejet.
+         *
+         * @param event
+         */
+        handlerShowReject(event){
+            this.$emit('rejectshow', event);
+        },
+
+        handlerDebug(data){
+            console.log(data);
+        },
+
         updateWeekDay(value){
             var start = this.dateStart.day(value);
             var end = this.dateEnd.day(value);
             this.event.start = start.format();
             this.event.end = end.format();
         },
+
+        handlerShowRefus(){
+            bootbox.alert({
+                size: "small",
+                title: '<i class="icon-beaker"></i>   Refus scientifique',
+                message: '<em>Motif : </em>' + this.event.rejectedSciComment + ""
+            })
+        },
+        handlerShowRefusAdmin(){
+            bootbox.alert({
+                size: "small",
+                title: '<i class="icon-archive"></i>   Refus administratif',
+                message: '<em>Motif : </em>' + this.event.rejectedAdminComment + ""
+            })
+        },
+
         move(event){
             if (this.event.editable && event.movementY != 0) {
                 this.change = true;
@@ -585,7 +725,7 @@ var WeekView = {
     template: `<div class="calendar calendar-week">
     <div class="meta">
         <a href="#" @click="previousWeek">
-            <i class="icon-left-big"></i>
+            <i class=" icon-angle-left"></i>
         </a>
         <h3>
             Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}
@@ -596,7 +736,7 @@ var WeekView = {
             </nav>
         </h3>
        <a href="#" @click="nextWeek">
-            <i class="icon-right-big"></i>
+            <i class=" icon-angle-right"></i>
        </a>
     </div>
 
@@ -644,11 +784,14 @@ var WeekView = {
                     @deleteevent="$emit('deleteevent', event)"
                     @editevent="$emit('editevent', event)"
                     @submitevent="$emit('submitevent', event)"
-                    @validateevent="$emit('validateevent', event)"
-                    @rejectevent="$emit('rejectevent', event)"
+                    @rejectscievent="$emit('rejectevent', event, 'sci')"
+                    @rejectadmevent="$emit('rejectevent', event, 'adm')"
+                    @validatescievent="$emit('validateevent', event, 'sci')"
+                    @validateadmevent="$emit('validateevent', event, 'adm')"
                     @mousedown="handlerEventMouseDown"
                     @savemoveevent="handlerSaveMove(event)"
                     @onstartmoveend="handlerStartMoveEnd"
+                    @rejectshow="handlerRejectShow"
                     :event="event"
                     :key="event.id"></timeevent>
               </div>
@@ -726,6 +869,9 @@ var WeekView = {
     },
 
     methods: {
+        handlerRejectShow( event ){
+            this.$emit('rejectshow', event);
+        },
 
 //        @savemoveevent="handlerSaveMove"
         handlerEventMouseDown(event, evt){
@@ -735,12 +881,15 @@ var WeekView = {
             }
         },
 
+        /**
+         * Début du déplacement de la borne de fin.
+         *
+         * @param event
+         */
         handlerStartMoveEnd(event){
-
             this.gostDatas.eventMovedEnd = event;
             this.gostDatas.editActive = true;
             this.gostDatas.eventMovedEnd.changing = true;
-            console.log(arguments);
         },
 
         handlerSaveMove(event){
@@ -757,15 +906,17 @@ var WeekView = {
                 this.gostDatas.eventActive.changing = false;
                 this.gostDatas.eventActive.handlerMouseUp();
                 this.gostDatas.eventActive = null;
-                this.gostDatas.startFrom = null;
+
             }
 
             if (this.gostDatas.eventMovedEnd) {
                 console.log("FIN du déplacement de la borne de fin");
                 this.gostDatas.eventMovedEnd.changing = false;
+                this.gostDatas.eventMovedEnd.handlerMouseUp();
                 this.gostDatas.eventMovedEnd = null;
-            }
 
+            }
+            this.gostDatas.startFrom = null;
             this.gostDatas.editActive = false;
         },
 
@@ -806,13 +957,7 @@ var WeekView = {
                         effectiveMoveApplication = effectivMove * (40 / 60 * this.pas),
 
                     // Position Y
-                        top = parseInt($(this.gostDatas.eventActive.$el).css('top'))
-                        ;
-
-                    /*if( top < 0 ){
-                        top = 0;
-                        return;
-                    }*/
+                        top = parseInt($(this.gostDatas.eventActive.$el).css('top'));
 
                     // Mise à jour du jour si besoin
                     if (day + 1 != this.gostDatas.eventActive.weekDay) {
@@ -989,13 +1134,13 @@ var ListItemView = {
                     <i class="icon-trash-empty"></i>
                     Supprimer</button>
 
-                <button class="btn btn-primary btn-xs"  @click="handlerValidate" v-if="event.validable">
+                <!--<button class="btn btn-primary btn-xs"  @click="handlerValidate" v-if="event.validable">
                     <i class="icon-right-big"></i>
                     Valider</button>
 
                 <button class="btn btn-primary btn-xs"  @click="$emit('rejectevent', event)" v-if="event.validable">
                     <i class="icon-right-big"></i>
-                    Rejeter</button>
+                    Rejeter</button>-->
             </nav>
         </div>
     </article>`,
@@ -1053,27 +1198,32 @@ var ListView = {
     },
 
     template: `<div class="calendar calendar-list">
-        <h2>Liste des créneaux</h2>
-        <article v-for="pack in listEvents">
-            <section class="events">
-                <h3>{{ pack.label }}</h3>
-                <section class="events-list">
-                <listitem
-                    :with-owner="withOwner"
-                    @selectevent="selectEvent"
-                    @editevent="$emit('editevent', event)"
-                    @deleteevent="$emit('deleteevent', event)"
-                    @submitevent="$emit('submitevent', event)"
-                    @validateevent="$emit('validateevent', event)"
-                    @rejectevent="$emit('rejectevent', event)"
-                    v-bind:event="event" v-for="event in pack.events"></listitem>
+        <section v-for="eventsYear, year in listEvents" class="year-pack">
+            <h2>{{year}}</h2>
+            <section v-for="eventsMonth, month in eventsYear" class="month-pack">
+                <h3>{{month}} Heures : X (X validée(s), X a valider, X non-classée(s))</h3>
+                <section v-for="eventsWeek, week in eventsMonth" class="week-pack">
+                    <h4>Semaine {{week}}</h4>
+                     <section v-for="eventsDay, day in eventsWeek" class="day-pack events">
+                        <h5>{{day}}</h5>
+                         <section class="events-list">
+                            <listitem
+                                :with-owner="withOwner"
+                                @selectevent="selectEvent"
+                                @editevent="$emit('editevent', event)"
+                                @deleteevent="$emit('deleteevent', event)"
+                                @submitevent="$emit('submitevent', event)"
+                                @validateevent="$emit('validateevent', event)"
+                                @rejectevent="$emit('rejectevent', event)"
+                                v-bind:event="event" v-for="event in eventsDay"></listitem>
+                        </section>
+                        <div class="total">
+                            TTT heure(s)
+                        </div>
+                    </section>
                 </section>
-                <div class="total">
-                    {{ pack.totalHours }} heure(s)
-                </div>
             </section>
-
-        </article>
+        </section>
     </div>`,
 
     methods: {
@@ -1090,14 +1240,46 @@ var ListView = {
             var packerFormat = 'ddd D MMMM YYYY';
             var packer = null;
 
+            var packMonth = null;
+            var packWeek = null;
+            var packDay = null;
+
             var currentPack = null;
 
             if (!store.events) {
                 return null
             }
 
+            var structure = {};
             for (let i = 0; i < this.events.length; i++) {
                 let event = this.events[i];
+                let labelYear = event.mmStart.format('YYYY');
+                let labelMonth = event.mmStart.format('MMMM');
+                let labelWeek = event.mmStart.format('W');
+                let labelDay = event.mmStart.format('ddd D');
+                if( !structure[labelYear] ) {
+                    structure[labelYear] = {};
+                }
+                if( !structure[labelYear][labelMonth] ){
+                    structure[labelYear][labelMonth] = {};
+                }
+                if( !structure[labelYear][labelMonth][labelWeek] ){
+                    structure[labelYear][labelMonth][labelWeek] = {};
+                }
+                if( !structure[labelYear][labelMonth][labelWeek][labelDay] ){
+                    structure[labelYear][labelMonth][labelWeek][labelDay] = [];
+                }
+                structure[labelYear][labelMonth][labelWeek][labelDay].push(event);
+
+            }
+            console.log('Structure:', structure);
+            /*
+            for (let i = 0; i < this.events.length; i++) {
+                let event = this.events[i];
+                let labelMonth = event.mmStart.format('MMMM YYYY');
+                let labelWeek = event.mmStart.format('W');
+                let labelDay = event.mmStart.format('ddd D');
+
                 let label = event.mmStart.format(packerFormat);
 
                 if (packer == null || packer.label != label) {
@@ -1110,9 +1292,9 @@ var ListView = {
                 }
                 packer.totalHours += event.duration;
                 packer.events.push(event);
-            }
+            }*/
 
-            return pack;
+            return structure;
         }
     }
 };
@@ -1399,7 +1581,33 @@ var Calendar = {
         <div class="calendar">
 
             <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>
-
+            
+            <transition name="fade">
+                <div class="vue-loader" v-if="rejectShow">
+                    <div>
+                    <nav><a href="#" @click.prevent="rejectShow = null"><i class="icon-cancel-outline"></i>Fermer</a></nav>
+                    <section v-if="rejectShow.rejectedAdminAt" class="card">
+                        <h2>
+                            <i class="icon-archive">Rejet administratif
+                        </h2>
+                        Ce créneau a été refusé par <strong>{{ rejectShow.rejectedAdminBy }}</strong>  le <time>{{ rejectShow.rejectedAdminAt | moment}}</time> au motif : 
+                        <pre>{{ rejectShow.rejectedAdminComment }}</pre>
+                    </section>
+                    <section v-if="rejectShow.rejectedSciAt" class="card">
+                        <h2>
+                            <i class="icon-archive">Rejet scientifique
+                        </h2>
+                        Ce créneau a été refusé par <strong>{{ rejectShow.rejectedSciBy }}</strong>  le <time>{{ rejectShow.rejectedSciAt | moment}}</time> au motif : 
+                        <pre>{{ rejectShow.rejectedSciComment }}</pre>
+                    </section>
+                    </div>
+                </div>
+            </transition>
+        
+            <div class="vue-loader" v-if="loading">
+                <span>Chargement</span>
+            </div>
+            
             <div class="editor" v-show="eventEditDataVisible">
                 <form @submit.prevent="editSave">
                     <div class="form-group">
@@ -1448,6 +1656,9 @@ var Calendar = {
                     <a href="#" @click.prevent="state = 'week'" :class="{active: state == 'week'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>
                     <a href="#" @click.prevent="state = 'list'" :class="{active: state == 'list'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>
                     <a href="#" @click.prevent="importInProgress = true"><i class="icon-columns"></i>Importer un ICS</a>
+                    <span class="calendar-label">
+                       {{ calendarLabel }}
+                    </span>
                 </nav>
                 <section class="transmission errors">
 
@@ -1477,6 +1688,7 @@ var Calendar = {
                 @savemoveevent="handlerSaveMove"
                 @submitday="submitday"
                 @submitall="submitall"
+                @rejectshow="handlerRejectShow"
                 @saveevent="restSave"></weekview>
 
             <listview v-show="state == 'list'"
@@ -1501,6 +1713,9 @@ var Calendar = {
         createNew: {
             default: false
         },
+        calendarLabel: {
+            default: "Label par défaut"
+        },
         // Texts
         trans: {
             default() {
@@ -1511,6 +1726,13 @@ var Calendar = {
                 }
             }
         }
+    },
+
+    filters: {
+      moment(value){
+          var d = moment(value.date);
+          return d.format("dddd, D MMMM YYYY") + " (" +d.fromNow() +")";
+      }
     },
 
     components: {
@@ -1543,6 +1765,11 @@ var Calendar = {
                         this.restStep(events, status);
                 });
             }
+        },
+
+        handlerRejectShow( event ){
+            console.log('AFFICHAGE DU REJET', event);
+            this.rejectShow = event;
         },
 
         /**
@@ -1608,43 +1835,57 @@ var Calendar = {
 
         /** Edition de l'événement de la liste */
         handlerEditEvent(event){
-            console.log('handlerEditEvent');
             this.eventEdit = event;
             this.eventEditDataVisible = true;
             this.eventEditData = JSON.parse(JSON.stringify(event));
         },
 
-        handlerValidateEvent(event){
-            this.restValidate([event])
-        },
-
         ////////////////////////////////////////////////////////////////////////
 
         handlerSendReject(){
-            console.log(this.rejectedEvents, this.rejectComment);
+            console.log('Envoi du rejet', this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach((event)=> {
                 var e = JSON.parse(JSON.stringify(event));
-                e.rejectedComment = this.rejectComment;
+                if( this.rejectValidateType == 'rejectsci' ){
+                    e.rejectedSciComment = this.rejectComment;
+                } else if ( this.rejectValidateType == 'rejectadm' ){
+                    e.rejectedAdminComment = this.rejectComment;
+                }
                 events.push(e);
             });
-            this.restStep(events, 'reject');
+            this.restStep(events, this.rejectValidateType);
         },
 
-        handlerRejectEvent(event){
-            console.log("Procédure de rejet");
-            this.showRejectModal([event]);
+        handlerRejectEvent(event, type="unknow"){
+            this.showRejectModal([event], 'reject'+type);
         },
 
-        showRejectModal(events){
+
+        handlerValidateEvent(events, type="unknow"){
+            console.log("Validation", type);
+            if( type == "sci" || type == "adm" ){
+                bootbox.confirm( type == 'sci' ? '<i class="icon-beaker"></i>   Validation scientifique'
+                            : '<i class="icon-archive"></i>   Validation administrative'
+                ,(response) => {
+                    if(response){
+                        this.restStep(events, 'validate' + type)
+                    }
+                })
+            } else {
+                throw "Type inconnue";
+            }
+        },
+
+        showRejectModal(events, type){
             this.displayRejectModal = true;
+            this.rejectValidateType = type;
             this.rejectedEvents = events;
         },
 
         ////////////////////////////////////////////////////////////////////////
 
         restSave(events){
-
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
@@ -1675,6 +1916,7 @@ var Calendar = {
                         this.handlerEditCancelEvent();
                     },
                     error => {
+                        console.log(error);
                         this.errors.push("Impossible d'enregistrer les données : " + error)
                     }
                 ).then(()=> this.transmission = "");
@@ -1691,14 +1933,18 @@ var Calendar = {
         },
 
         restStep(events, action){
-
+            if( !Array.isArray(events) ){
+                events = [events];
+            }
             if (this.restUrl) {
                 this.transmission = "Enregistrement en cours...";
                 var data = new FormData();
                 data.append('do', action);
                 for (var i = 0; i < events.length; i++) {
+                    console.log(events[i]);
                     data.append('events[' + i + '][id]', events[i].id || null);
-                    data.append('events[' + i + '][rejectedComment]', events[i].rejectedComment || null);
+                    data.append('events[' + i + '][rejectedSciComment]', events[i].rejectedSciComment || null);
+                    data.append('events[' + i + '][rejectedAdminComment]', events[i].rejectedAdminComment || null);
                 }
 
                 this.$http.post(this.restUrl(), data).then(
@@ -1736,10 +1982,10 @@ var Calendar = {
         },
 
         handlerSaveMove(event){
+            console.log('Sauvegarde de la position', event);
             var data = JSON.parse(JSON.stringify(event));
             data.mmStart = moment(data.start);
             data.mmEnd = moment(data.end);
-            ;
             this.restSave([data]);
         },
 
@@ -1764,10 +2010,7 @@ var Calendar = {
 
         /** Soumission de l'événement de la liste */
         handlerCreateEvent(event){
-            console.log("Afficher le formulaire pour", event);
             this.handlerEditEvent(event);
-            // this.restSave([event]);
-//            this.events.push(event);
         },
 
         /** Charge le fichier ICS depuis l'interface **/
@@ -1840,11 +2083,9 @@ var Calendar = {
         },
 
         editSave(){
-            console.log("NEW", JSON.parse(JSON.stringify(this.eventEditData)));
             var event = JSON.parse(JSON.stringify(this.eventEditData));
             event.mmStart = moment(event.start);
             event.mmEnd = moment(event.end);
-            ;
             this.restSave([event]);
         },
 

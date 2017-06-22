@@ -240,12 +240,10 @@ var Workpackageperson = Vue.extend({
             <span>Chargement</span>
         </div>
 
-        <h2><i class="icon-archive"></i> Lot de travail</h2>
+        
 
         <nav class="buttons">
             <a href="" class="btn btn-primary" @click.prevent="handlerWorkPackageNew" v-if="editable">Nouveau lot</a>
-            <a href="#" class="btn btn-primary" v-if="isDeclarant" @click.prevent="$emit('declarer')">Déclarer mes heures</a>
-            <a href="#" class="btn btn-primary" v-if="isValidateur" @click.prevent="$emit('valider')">Valider des déclarations</a>
         </nav>
 
         <section class="workpackages">

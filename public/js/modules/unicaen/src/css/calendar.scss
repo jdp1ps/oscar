@@ -31,7 +31,33 @@ body {
   }
 }
 
+.year-pack {
+  h2, h3, h4, h5 {
+    font-weight: 100;
+    margin: 0;
+    padding:0;
+  }
+  section {
+    margin-left: .5em;
+    background: rgba(166, 206, 248, .2);
+  }
+  h2 {
+    font-size: 22px;
+    font-weight: 400;
+    border-bottom: thin rgba(0,0,0,.25) solid;
+  }
+  h5 {
+    line-height: 22px;
+  }
+  margin: 1em;
+}
+
 .calendar {
+  .calendar-label {
+    font-weight: 100;
+    font-size: 1.2em;
+    padding-left: 2em;
+  }
   position: relative;
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */
@@ -318,12 +344,14 @@ body {
     }
 
     .description {
-      font-size: .8em;
+      font-size: .7em;
       font-weight: lighter;
       color: black;
       position: absolute;
       top: 3em;
-      bottom: 2em;
+      bottom: 20px;
+      left: 2px;
+      right: 2px;
       overflow: hidden;
     }
 
@@ -405,21 +433,79 @@ body {
   }
 
   .status-draft {
-    border-left: solid 4px grey;
+    border-left: solid 2px grey;
   }
 
   .status-send {
-    border-left: solid 4px black;
+    border-left: dotted 2px #333;
   }
 
   .status-valid {
-    border-left: solid 4px green;
+    border-left: solid 4px green !important;
+  }
+
+  .status-draft .submit-status {
+    display: none;
+  }
+  .submit-status {
+    background: #333;
+    display: flex;
+    margin-top: 4px;
+    border-radius: 2px;
+
+    .admin-status, .sci-status {
+      flex: 1;
+      color: white;
+      text-align: center;
+      padding: 2px;
+    }
+
+    .sci-status {
+      border-left: solid thin rgba(#333, .5);
+    }
+  }
+
+  .valid-adm{
+    border-left: dotted 2px rgba(green, .5);
+    .admin-status {
+      background: green;
+    }
+  }
+  .valid-sci{
+    border-left: dotted 2px rgba(green, .5);
+    .sci-status {
+      background: green;
+    }
+  }
+
+  .reject-adm{
+    border-left: dotted 2px rgba(#990000, .5) !important;
+    .admin-status {
+      background: #990000;
+    }
+  }
+
+  .reject-sci{
+    border-left: dotted 2px rgba(#990000, .5) !important;
+    .sci-status {
+      background: #990000;
+    }
+  }
+
+  .valid-adm.valid-sci{
+    border-left: solid 4px rgba(red, .5);
+  }
+
+
+  .reject-adm.valid-sci{
+    border-left: solid 4px rgba(green, .5);
   }
 
   .status-reject {
     border-left: solid 4px darkred;
   }
     .event {
+
 
 
     &.status-draft, &.status-send, &.status-valid, &.status-reject, &.status-info {
@@ -550,12 +636,21 @@ body {
 
 
     .gost {
-      border: solid thin rgba(0,0,0,.5);
+      border: solid thin rgba(0,0,0,.25);
       cursor: pointer;
       padding: 2px;
       margin: 0 .5%;
-      box-shadow: 0 0 4px rgba(0,0,0,.3);
-      background-color: rgba(255,255,255,1);
+      box-shadow: -2px 2px 8px rgba(0,0,0,.3);
+      background-color: rgba(255,255,255,.5);
+    }
+  }
+
+  .refus {
+    color: #9a1e1b;
+    font-weight: 100;
+    font-size: 14px;
+    .comment {
+      font-weight: bold;
     }
   }
 

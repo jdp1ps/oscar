@@ -982,7 +982,14 @@ die();
             $loginStr = $this->getRequest()->getParam('login');
             $roleStr = $this->getRequest()->getParam('role');
 
+
+            var_dump($loginStr);
+
+
             $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $loginStr]);
+            if( !$auth ){
+                die("Aucune compte d'authentification d'a pour identifiant '$loginStr'");
+            }
             $role = $this->getEntityManager()->getRepository(Role::class)->findOneBy(['roleId' => $roleStr ]);
 
             $userId =  $auth->getId();

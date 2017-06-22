@@ -12,19 +12,65 @@ var gulp = require('gulp'),
     plumber = require('gulp-plumber'),
     umd = require('gulp-umd'),
     ext_replace = require('gulp-ext-replace'),
+    exec = require('child_process').exec,
 
 // Paths & locations
     directories = {
         css: './public/css/',
         jsComponents: './public/js/components/',
         jsModels: './public/js/models/'
-    };
+    },
+
+    /**
+     * Retourne la dépendance pour la production de la configuration AMD.
+     *
+     * @param name
+     * @returns {{name: *, amd: *, cjs: *, global: *, param: *}}
+     */
+    dependency = function(name){
+        return {
+            'name': name,
+            'amd': name,
+            'cjs': name,
+            'global': name,
+            'param': name
+        };
+    },
+
+    /**
+     *
+     * @param names
+     * @returns {Array}
+     */
+    dependencies = function( names ){
+        var dependencies = [];
+        names.forEach(function(d){
+            dependencies.push(dependency(d));
+        });
+        return dependencies;
+    }
+;
+
+
+
 
 
 // Basic example
-gulp.task('default', ['sass', 'watch:sass', 'oscar-components', 'oscar-model']);
+gulp.task('default', ['sass', 'watch:sass', 'oscar-components', 'oscar-model', 'modules-js', 'modules-css']);
 
 
+
+gulp.task('modules-js', function(){
+    exec('gulp js --gulpfile ./public/js/modules/unicaen/gulpfile.js');
+});
+
+gulp.task('modules-css', function(){
+    exec('gulp sass --gulpfile ./public/js/modules/unicaen/gulpfile.js');
+});
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MODULES
 /**
  * Tâche permettant de compiler les fichiers SASS.
  *
@@ -60,13 +106,7 @@ gulp.task('oscar-components', function(){
         .pipe(babel())
         .pipe(umd({
             dependencies: function (file) {
-                return [{
-                    name: 'moment',
-                    amd: 'moment',
-                    cjs: 'moment',
-                    global: 'moment',
-                    param: 'moment'
-                }]
+                return dependencies(['moment']);
             }
         }))
         .pipe(gulp.dest(directories.jsComponents+'build'))
@@ -76,22 +116,7 @@ gulp.task('oscar-components', function(){
         .pipe(babel())
         .pipe(umd({
             dependencies: function (file) {
-                return [
-                    {
-                        name: 'moment',
-                        amd: 'moment',
-                        cjs: 'moment',
-                        global: 'moment',
-                        param: 'moment'
-                    },
-                    {
-                        name: 'ical',
-                        amd: 'ical',
-                        cjs: 'ical',
-                        global: 'ical',
-                        param: 'ical'
-                    }
-                ]
+                return dependencies(['moment', 'ical']);
             }
         }))
         .pipe(gulp.dest(directories.jsComponents+'build'))
@@ -101,35 +126,13 @@ gulp.task('oscar-components', function(){
         .pipe(babel())
         .pipe(umd({
             dependencies: function (file) {
-                return [
-                    {
-                        name: 'moment',
-                        amd: 'moment',
-                        cjs: 'moment',
-                        global: 'moment',
-                        param: 'moment'
-                    },
-                    {
-                        name: 'ICalAnalyser',
-                        amd: 'ICalAnalyser',
-                        cjs: 'ICalAnalyser',
-                        global: 'ICalAnalyser',
-                        param: 'ICalAnalyser'
-                    },
-                    {
-                        name: 'EventDT',
-                        amd: 'EventDT',
-                        cjs: 'EventDT',
-                        global: 'EventDT',
-                        param: 'EventDT'
-                    }
-                ]
+                return dependencies(['moment', 'IcalAnalyser', 'EventDT']);
             }
         }))
         .pipe(gulp.dest(directories.jsComponents+'build'))
-
-
 })
+
+
 
 gulp.task('oscar-model', function(){
     gulp.src(directories.jsModels +'src/*.js')
@@ -143,4 +146,6 @@ gulp.task('watch:sass', function () {
     gulp.watch(directories.css + '**/*.scss', ['sass']);
     gulp.watch(directories.jsComponents + 'src/*.js', ['oscar-components']);
     gulp.watch(directories.jsModels + 'src/*.js', ['oscar-model']);
+    gulp.watch('./public/js/modules/unicaen/src/css/*.scss', ['modules-css']);
+    gulp.watch('./public/js/modules/unicaen/src/js/*.js', ['modules-js']);
 });

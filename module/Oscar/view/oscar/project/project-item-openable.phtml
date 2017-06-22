@@ -1,5 +1,5 @@
 <?php
-   $openable = $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_SHOW, $project);
+   $openable = true; //$this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_SHOW, $project);
 ?>
 <?php if($project): ?>
 <article class="card xs <?= $openable ? 'openable' : ''?> project"

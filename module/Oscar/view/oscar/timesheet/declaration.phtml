@@ -3,10 +3,6 @@
 <link rel="stylesheet" href="<?= $this->basePath() . '/css/icons/css/fontello.css' ?>" />
 
 <div class="container">
-    <h1 class="title-with-small">
-        <small>Vos déclarations (TESTING)</small>
-    </h1>
-
     <?php
     $crenaux = [];
     $color = 0;
@@ -26,7 +22,7 @@
     }
     ?>
     <div id="app">
-        <calendar :create-new="true"></calendar>
+        <calendar :create-new="true" calendar-label="Déclaration de vos activités"></calendar>
     </div>
 </div>
 

@@ -22,6 +22,22 @@ body {
   .event-inline-simple strong {
     font-weight: 100; }
 
+.year-pack {
+  margin: 1em; }
+  .year-pack h2, .year-pack h3, .year-pack h4, .year-pack h5 {
+    font-weight: 100;
+    margin: 0;
+    padding: 0; }
+  .year-pack section {
+    margin-left: .5em;
+    background: rgba(166, 206, 248, 0.2); }
+  .year-pack h2 {
+    font-size: 22px;
+    font-weight: 400;
+    border-bottom: thin rgba(0, 0, 0, 0.25) solid; }
+  .year-pack h5 {
+    line-height: 22px; }
+
 .calendar {
   position: relative;
   -webkit-touch-callout: none;
@@ -36,6 +52,10 @@ body {
   /* Internet Explorer/Edge */
   user-select: none;
   background: rgba(255, 255, 255, 0.8); }
+  .calendar .calendar-label {
+    font-weight: 100;
+    font-size: 1.2em;
+    padding-left: 2em; }
   .calendar .calendar-menu {
     display: flex;
     align-items: flex-start;
@@ -245,12 +265,14 @@ body {
       display: block;
       font-size: .75em; }
     .calendar .event .description {
-      font-size: .8em;
+      font-size: .7em;
       font-weight: lighter;
       color: black;
       position: absolute;
       top: 3em;
-      bottom: 2em;
+      bottom: 20px;
+      left: 2px;
+      right: 2px;
       overflow: hidden; }
     .calendar .event .time {
       position: absolute;
@@ -310,11 +332,45 @@ body {
   .calendar .list-item.status-info strong:before, .calendar .list-item.status-info .picto:before {
     content: '\e85e'; }
   .calendar .status-draft {
-    border-left: solid 4px grey; }
+    border-left: solid 2px grey; }
   .calendar .status-send {
-    border-left: solid 4px black; }
+    border-left: dotted 2px #333; }
   .calendar .status-valid {
-    border-left: solid 4px green; }
+    border-left: solid 4px green !important; }
+  .calendar .status-draft .submit-status {
+    display: none; }
+  .calendar .submit-status {
+    background: #333;
+    display: flex;
+    margin-top: 4px;
+    border-radius: 2px; }
+    .calendar .submit-status .admin-status, .calendar .submit-status .sci-status {
+      flex: 1;
+      color: white;
+      text-align: center;
+      padding: 2px; }
+    .calendar .submit-status .sci-status {
+      border-left: solid thin rgba(51, 51, 51, 0.5); }
+  .calendar .valid-adm {
+    border-left: dotted 2px rgba(0, 128, 0, 0.5); }
+    .calendar .valid-adm .admin-status {
+      background: green; }
+  .calendar .valid-sci {
+    border-left: dotted 2px rgba(0, 128, 0, 0.5); }
+    .calendar .valid-sci .sci-status {
+      background: green; }
+  .calendar .reject-adm {
+    border-left: dotted 2px rgba(153, 0, 0, 0.5) !important; }
+    .calendar .reject-adm .admin-status {
+      background: #990000; }
+  .calendar .reject-sci {
+    border-left: dotted 2px rgba(153, 0, 0, 0.5) !important; }
+    .calendar .reject-sci .sci-status {
+      background: #990000; }
+  .calendar .valid-adm.valid-sci {
+    border-left: solid 4px rgba(255, 0, 0, 0.5); }
+  .calendar .reject-adm.valid-sci {
+    border-left: solid 4px rgba(0, 128, 0, 0.5); }
   .calendar .status-reject {
     border-left: solid 4px darkred; }
   .calendar .event.status-draft .label:before, .calendar .event.status-draft .picto:before, .calendar .event.status-send .label:before, .calendar .event.status-send .picto:before, .calendar .event.status-valid .label:before, .calendar .event.status-valid .picto:before, .calendar .event.status-reject .label:before, .calendar .event.status-reject .picto:before, .calendar .event.status-info .label:before, .calendar .event.status-info .picto:before {
@@ -402,12 +458,18 @@ body {
     .calendar .events.drawing .event-changing {
       opacity: 1; }
     .calendar .events .gost {
-      border: solid thin rgba(0, 0, 0, 0.5);
+      border: solid thin rgba(0, 0, 0, 0.25);
       cursor: pointer;
       padding: 2px;
       margin: 0 .5%;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-      background-color: white; }
+      box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.3);
+      background-color: rgba(255, 255, 255, 0.5); }
+  .calendar .refus {
+    color: #9a1e1b;
+    font-weight: 100;
+    font-size: 14px; }
+    .calendar .refus .comment {
+      font-weight: bold; }
   .calendar .meta {
     display: flex;
     font-size: 1.25em; }

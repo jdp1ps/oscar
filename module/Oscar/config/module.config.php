@@ -630,7 +630,7 @@ return array(
             'ActivityTypeService' => \Oscar\Service\ActivityTypeService::class,
             'OscarUserContext' => \Oscar\Service\OscarUserContext::class,
             'ConnectorService' => \Oscar\Service\ConnectorService::class,
-
+            'TimesheetService' => \Oscar\Service\TimesheetService::class,
             // Droits
             //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
 

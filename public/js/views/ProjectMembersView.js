@@ -37,7 +37,7 @@
 
         if (repo.displayname) {
             markup += '<div class="col-md-2">';
-            markup += '<img src="http://www.gravatar.com/avatar/' + repo.mailMd5 + ' alt="" class="img-rounded trombi pull-left"/>';
+            markup += '<img src="//www.gravatar.com/avatar/' + repo.mailMd5 + ' alt="" class="img-rounded trombi pull-left"/>';
             markup += '</div>';
             markup += '<div class="col-md-10">';
             markup += '<h6>' + repo.displayname + '</h5>';

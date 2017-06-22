@@ -16,15 +16,18 @@ use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\Authentification;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\PersonService;
+use UnicaenAuth\Authentication\Adapter\Ldap;
 use UnicaenAuth\Event\UserAuthenticatedEvent;
 use UnicaenAuth\Service\UserContext;
 use Zend\Console\Adapter\AdapterInterface;
+use Zend\EventManager\Event;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\ModuleManager\Feature\ConsoleBannerProviderInterface;
 use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\Http\RouteMatch;
+use Zend\ServiceManager\ServiceManager;
 
 class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInterface
 {
@@ -84,13 +87,11 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 array($this, 'onUserLogin'),
                 100);
 
+        // todo Remplacer l'étoile si possible
         $e->getApplication()->getEventManager()->getSharedManager()->attach(
             '*',
-            'ldap.error',
-            function($data) {
-                /*var_dump($data->getTarget());
-                echo "DATA : " . $data->getName();*/
-            },
+            'authentication.ldap.error',
+            array($this, 'onAuthentificationError'),
             100);
 
         // Envoi des erreurs dans les LOGS
@@ -104,6 +105,14 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
         $e->getApplication()->getEventManager()->attach('*', function ($e) {
             $this->trapEvent($e);
         });
+    }
+
+    /**
+     * @param $event Event
+     */
+    public function onAuthentificationError($event){
+        $msg = preg_replace('/\[0x\d* \((.*)\):/','$1', $event->getParam('result')->getMessages()[1]);
+        $this->getServiceManager()->get('Logger')->error($msg);
     }
 
     public function onUserLogin( UserAuthenticatedEvent $e ){

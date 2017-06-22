@@ -1650,6 +1650,10 @@ class Activity implements ResourceInterface
         ];
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// COMPUTED
+    ///
+
     public function hasDeclarant( $person ){
         /** @var WorkPackage $wp */
         foreach( $this->getWorkPackages() as $wp ){
@@ -1661,4 +1665,48 @@ class Activity implements ResourceInterface
         }
         return false;
     }
+
+    public function getTimesheets(){
+        $timesheets = [];
+        /** @var WorkPackage $workPackage */
+        foreach($this->getWorkPackages() as $workPackage ){
+            /** @var TimeSheet $timesheet */
+            foreach ($workPackage->getTimesheets() as $timesheet ){
+                $timesheets[] = $timesheet;
+            }
+        }
+        return $timesheets;
+    }
+
+    public function hasTimesheetsUpForValidation(){
+        /** @var TimeSheet $timesheet */
+        foreach ($this->getTimesheets() as $timesheet ){
+            if( true === $timesheet->isWaitingValidation() ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function hasTimesheetsUpForValidationAdmin(){
+        /** @var TimeSheet $timesheet */
+        foreach ($this->getTimesheets() as $timesheet ){
+            if( true === $timesheet->isWaitingValidationAdmin() ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function hasTimesheetsUpForValidationSci(){
+        /** @var TimeSheet $timesheet */
+        foreach ($this->getTimesheets() as $timesheet ){
+            if( true === $timesheet->isWaitingValidationSci() ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

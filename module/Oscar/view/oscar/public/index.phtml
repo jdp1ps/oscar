@@ -83,7 +83,8 @@
                     <div class="row">
                         <div class="col-md-12">
                             <a href="<?= $this->url('project/mine') ?>" class="btn btn-primary"><i class="icon-cubes"></i> Voir mes projets</a>
-                            <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
+                            <?php if( $this->grant()->getCurrentPerson()
+                                && $this->grant()->isDeclarer()): ?>
                                 <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>">
                                     <i class="icon-pencil"></i>
                                     Déclarer mes heures

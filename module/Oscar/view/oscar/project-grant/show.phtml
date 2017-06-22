@@ -417,19 +417,40 @@
         </div>
     </div>
     <hr>
-    <?php if( $entity->hasDeclarant($this->grant()->getCurrentPerson())  ): ?>
-        <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
-            <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>?activity_id=<?= $entity->getId() ?>">
-                Déclarations
-            </a>
-        <?php endif; ?>
-    <?php endif; ?>
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
 
-    <section id="workpackages"></section>
+
+    <section>
+        <h2><i class="icon-archive"></i> Lot de travail</h2>
+        <nav>
+            <?php if( $entity->hasTimesheetsUpForValidationAdmin() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ): ?>
+                <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
+                    <i class="icon-archive"></i>
+                    Validation administrative en attente
+                </a>
+            <?php endif; ?>
+            <?php if( $entity->hasTimesheetsUpForValidationSci() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ): ?>
+                <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
+                    <i class="icon-beaker"></i>
+                    Validation scientifique en attente
+                </a>
+            <?php endif; ?>
+            <?php if( $entity->hasDeclarant($this->grant()->getCurrentPerson())  ): ?>
+                <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
+                    <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>?activity_id=<?= $entity->getId() ?>">
+                        <i class="icon-calendar"></i>
+                        Déclarer vos heures
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
+        </nav>
+        <div id="workpackages">
+
+        </div>
+    </section>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <script>
         require(['workpackageperson'], function(Workpackageperson){
