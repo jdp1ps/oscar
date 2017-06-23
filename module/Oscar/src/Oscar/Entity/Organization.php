@@ -381,6 +381,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $shortName
+     * @return Organization
      */
     public function setShortName($shortName)
     {
@@ -450,6 +451,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $fullName
+     * @return Organization
      */
     public function setFullName($fullName)
     {
@@ -468,6 +470,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $code
+     * @return Organization
      */
     public function setCode($code)
     {
@@ -486,6 +489,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $email
+     * @return Organization
      */
     public function setEmail($email)
     {
@@ -504,6 +508,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $url
+     * @return Organization
      */
     public function setUrl($url)
     {
@@ -522,6 +527,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $description
+     * @return Organization
      */
     public function setDescription($description)
     {
@@ -540,6 +546,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $street1
+     * @return Organization
      */
     public function setStreet1($street1)
     {
@@ -558,6 +565,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $street2
+     * @return Organization
      */
     public function setStreet2($street2)
     {
@@ -576,11 +584,21 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $street3
+     * @return Organization
      */
     public function setStreet3($street3)
     {
         $this->street3 = $street3;
 
+        return $this;
+    }
+
+    /**
+     * @param $connector
+     * @return $this
+     */
+    public function setConnector($connector){
+        $this->connectors = $connector;
         return $this;
     }
 
@@ -594,6 +612,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $city
+     * @return Organization
      */
     public function setCity($city)
     {
@@ -612,6 +631,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $zipCode
+     * @return Organization
      */
     public function setZipCode($zipCode)
     {
@@ -630,6 +650,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $phone
+     * @return Organization
      */
     public function setPhone($phone)
     {
@@ -648,6 +669,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $sifacId
+     * @return Organization
      */
     public function setSifacId($sifacId)
     {
@@ -666,6 +688,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $codePays
+     * @return Organization
      */
     public function setCodePays($codePays)
     {
@@ -684,6 +707,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $siret
+     * @return Organization
      */
     public function setSiret($siret)
     {
@@ -702,6 +726,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $bp
+     * @return Organization
      */
     public function setBp($bp)
     {
@@ -720,6 +745,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $type
+     * @return Organization
      */
     public function setType($type)
     {
@@ -738,6 +764,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $sifacGroup
+     * @return Organization
      */
     public function setSifacGroup($sifacGroup)
     {
@@ -756,6 +783,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $sifacGroupId
+     * @return Organization
      */
     public function setSifacGroupId($sifacGroupId)
     {
@@ -774,6 +802,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param mixed $numTVACA
+     * @return Organization
      */
     public function setNumTVACA($numTVACA)
     {
@@ -792,6 +821,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param ArrayCollection $projects
+     * @return Organization
      */
     public function setProjects($projects)
     {
@@ -810,6 +840,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param ArrayCollection $activities
+     * @return Organization
      */
     public function setActivities($activities)
     {
@@ -828,6 +859,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $ldapSupannCodeEntite
+     * @return Organization
      */
     public function setLdapSupannCodeEntite($ldapSupannCodeEntite)
     {
@@ -846,6 +878,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * @param string $country
+     * @return Organization
      */
     public function setCountry($country)
     {

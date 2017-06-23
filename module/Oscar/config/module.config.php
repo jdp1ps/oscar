@@ -392,10 +392,10 @@ return array(
 
                 'oscar_console_patch' => array(
                     'options' => array(
-                        'route' => 'oscar suffle',
+                        'route' => 'oscar shuffle',
                         'defaults' => array(
                             'controller' => 'Console',
-                            'action' => 'suffle',
+                            'action' => 'shuffle',
                         ),
                     ),
                 ),
@@ -634,7 +634,7 @@ return array(
             'OscarUserContext' => \Oscar\Service\OscarUserContext::class,
             'ConnectorService' => \Oscar\Service\ConnectorService::class,
             'TimesheetService' => \Oscar\Service\TimesheetService::class,
-            'SuffleService' => \Oscar\Service\SuffleDataService::class,
+            'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             // Droits
             //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
 

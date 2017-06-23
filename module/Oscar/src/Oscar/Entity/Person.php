@@ -600,6 +600,11 @@ class Person implements ResourceInterface
         return $this;
     }
 
+    public function setConnector( $data ){
+        $this->connectors = $data;
+        return $this;
+    }
+
     //////////////////////////////////////////////////////////
 
 
