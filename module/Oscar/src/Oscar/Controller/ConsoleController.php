@@ -32,6 +32,7 @@ use Oscar\Provider\Person\SyncPersonHarpege;
 use Oscar\Provider\SifacBridge;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\PersonService;
+use Oscar\Service\SuffleDataService;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
 use UnicaenApp\Entity\Ldap\People;
@@ -43,6 +44,22 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
 class ConsoleController extends AbstractOscarController
 {
+
+    public function suffleAction(){
+        /** @var SuffleDataService $serviceSuffle */
+        $serviceSuffle = $this->getServiceLocator()->get('SuffleService');
+
+        $serviceSuffle->shufflePersons();
+        //$serviceSuffle->shuffleOrganizations();
+        // Mélange des personnes
+
+        // Mélange des sociétés
+
+        // Mélange des projets
+
+        // Mélange des activités
+        die("SUFFLE");
+    }
     ////////////////////////////////////////////////////////////////////////////
     //
     // AUTHENTIFICATION

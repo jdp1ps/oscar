@@ -264,12 +264,6 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 // ORGANIZATION
                 ////////////////////////////////////////////////////////////////
-                /*
-                [ 'controller' =>   'Organization',
-                    'action' => ['search'],
-                    'roles' => ['user']
-                ],
-                */
                 [ 'controller' =>   'Organization',
                     'action' => ['index', 'search'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_INDEX
@@ -314,7 +308,6 @@ return array(
                     'action' => ['delete'],
                     'privileges' => \Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_DELETE
                 ],
-
 
                 ////////////////////////////////////////////////////////////////
                 // PUBLIC
@@ -393,6 +386,16 @@ return array(
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'patch',
+                        ),
+                    ),
+                ),
+
+                'oscar_console_patch' => array(
+                    'options' => array(
+                        'route' => 'oscar suffle',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'suffle',
                         ),
                     ),
                 ),
@@ -631,6 +634,7 @@ return array(
             'OscarUserContext' => \Oscar\Service\OscarUserContext::class,
             'ConnectorService' => \Oscar\Service\ConnectorService::class,
             'TimesheetService' => \Oscar\Service\TimesheetService::class,
+            'SuffleService' => \Oscar\Service\SuffleDataService::class,
             // Droits
             //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
 
