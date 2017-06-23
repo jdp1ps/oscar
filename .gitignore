@@ -18,6 +18,7 @@ config/autoload/unicaen-auth.local.php
 # Data & Cache
 data/*
 !data/backup_oscar-empty.sql
+!data/oscar-demo-lasted.sql
 !data/connectors/*.dist
 
 # Librairies
