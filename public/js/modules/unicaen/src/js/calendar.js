@@ -1224,6 +1224,9 @@ var ListView = {
                 </section>
             </section>
         </section>
+        <div v-if="!listEvents" class="alert alert-danger">
+            Aucun créneaux détéctés
+        </div>
     </div>`,
 
     methods: {
