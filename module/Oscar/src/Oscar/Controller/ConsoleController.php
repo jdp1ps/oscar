@@ -38,6 +38,8 @@ use Symfony\Component\Yaml\Yaml;
 use UnicaenApp\Entity\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
+use UnicaenAuth\Authentication\Adapter\Ldap;
+use Zend\Authentication\AuthenticationService;
 use Zend\Crypt\Password\Bcrypt;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -1065,5 +1067,53 @@ die();
             }
 //            $this->getLogger()->info($activity);
         }
+    }
+
+    public function checkAuthentificationAction(){
+        echo "START : Test de configuration\n";
+        $login = $this->getRequest()->getParam('login');
+        $pass = $this->getRequest()->getParam('pass');
+
+        try {
+            $ldapOpt = $this->getServiceLocator()->get('unicaen-app_module_options')->getLdap();
+            foreach ($ldapOpt['connection'] as $name => $connection) {
+                $options[$name] = $connection['params'];
+            }
+            /** @var Ldap $ldapUnicaenAuth */
+            $ldapUnicaenAuth = new Ldap();
+            $ldapUnicaenAuth->setServiceManager($this->getServiceLocator());
+            $ldapUnicaenAuth->setEventManager($this->getEventManager());
+            $ldapUnicaenAuth->authenticateUsername($login, $pass);
+            echo " # ACCOUND OBJECT : \n";
+            //var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getAccountObject());
+            var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getIdentity());
+
+            /** @var \UnicaenApp\Mapper\Ldap\People $ldapmapper */
+            $ldapmapper = $this->getServiceLocator()->get('ldap_people_service')->getMapper();
+
+            $people = $ldapmapper->findOneByUsername($ldapUnicaenAuth->getLdapAuthAdapter()->getIdentity());
+            var_dump($people);
+
+            /*
+            $ldapAuthAdapter = new \Zend\Authentication\Adapter\Ldap($options); // NB: array(array)
+            $result = $ldapAuthAdapter->setPassword($pass)->setUsername($login)->authenticate();
+
+            if( $result->isValid() ){
+                echo "Authentification OK : \n";
+                var_dump($result);
+                echo "Get userContext : \n";
+                $context = $this->getServiceLocator()->get('userContext');
+            } else {
+                echo "Authentification FAIL : \n";
+                var_dump($result);
+            }
+            */
+
+        } catch( \Exception $e ){
+            echo "ERROR : " . $e->getMessage() . "\n";
+        }
+
+
+        echo "DONE\n";
     }
 }

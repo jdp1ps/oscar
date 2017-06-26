@@ -3,12 +3,7 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
-use Oscar\Connector\ConnectorPersonOrganization;
-use Oscar\Entity\Organization;
-use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
-use Oscar\Entity\PersonRepository;
-use Oscar\Entity\ProjectMember;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
