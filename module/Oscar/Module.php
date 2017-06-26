@@ -210,6 +210,11 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             'oscar auth:pass <login> <newpass>' => 'Mets à jour le mot de passe du compte <login>',
             'oscar auth:add <login> <email> <pass> <displayname>' => 'Cré un nouvel utilisateur.',
 
+            '# CONFIGURATION',
+            //'oscar check:config' => 'Évaluation de la configuration',
+            'oscar check:authentification <login> <pass>' => "Évaluation de l'authentification",
+            //'oscar check:connector' => 'Cré un nouvel utilisateur.',
+
             '# PERSONNES',
             'oscar persons:sync <connectorkey>' => 'Lance la synchronisation des personnes depuis les différents connecteurs.',
 
