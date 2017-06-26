@@ -38,6 +38,8 @@ use Symfony\Component\Yaml\Yaml;
 use UnicaenApp\Entity\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
+use UnicaenAuth\Authentication\Adapter\Ldap;
+use Zend\Authentication\AuthenticationService;
 use Zend\Crypt\Password\Bcrypt;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -1065,5 +1067,26 @@ die();
             }
 //            $this->getLogger()->info($activity);
         }
+    }
+
+    public function checkAuthentificationAction(){
+        echo "START : Test de configuration\n";
+        $login = $this->getRequest()->getParam('login');
+        $pass = $this->getRequest()->getParam('pass');
+
+        try {
+            $ldapOpt = $this->getServiceLocator()->get('unicaen-app_module_options')->getLdap();
+            foreach ($ldapOpt['connection'] as $name => $connection) {
+                $options[$name] = $connection['params'];
+            }
+            $ldapAuthAdapter = new \Zend\Authentication\Adapter\Ldap($options); // NB: array(array)
+            var_dump($ldapAuthAdapter->setPassword($pass)->setUsername($login)->authenticate());
+
+        } catch( \Exception $e ){
+            echo "ERROR : " . $e->getMessage() . "\n";
+        }
+
+
+        echo "DONE\n";
     }
 }
