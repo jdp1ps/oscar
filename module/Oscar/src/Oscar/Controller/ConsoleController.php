@@ -1085,8 +1085,15 @@ die();
             $ldapUnicaenAuth->setEventManager($this->getEventManager());
             $ldapUnicaenAuth->authenticateUsername($login, $pass);
             echo " # ACCOUND OBJECT : \n";
-            var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getAccountObject());
+            //var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getAccountObject());
             var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getIdentity());
+
+            /** @var \UnicaenApp\Mapper\Ldap\People $ldapmapper */
+            $ldapmapper = $this->getServiceLocator()->get('ldap_people_service')->getMapper();
+
+            $people = $ldapmapper->findOneByUsername($ldapUnicaenAuth->getLdapAuthAdapter()->getIdentity());
+            var_dump($people);
+
             /*
             $ldapAuthAdapter = new \Zend\Authentication\Adapter\Ldap($options); // NB: array(array)
             $result = $ldapAuthAdapter->setPassword($pass)->setUsername($login)->authenticate();
