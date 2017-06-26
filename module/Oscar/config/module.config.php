@@ -14,17 +14,7 @@ use Oscar\View\Helpers\UnicaenDoctrinePaginatorHelper;
 
 $conf = new Symfony\Component\Yaml\Parser();
 
-//$dumper = new Symfony\Component\Yaml\Dumper();
-//echo \Symfony\Component\Yaml\Yaml::dump($oldroutes, 6);
-
-
 return array(
-    'oscar' => [
-        'documents' => [
-            'contract' => '/home/jacksay/Projets/oscar/trunk/documents/'
-        ],
-    ],
-
     'oscar-access' => $conf->parse(file_get_contents(__DIR__ . '/oscar-access.yml')),
 
     'bjyauthorize' => [
@@ -34,25 +24,6 @@ return array(
         ],
 
         ////////////////////////////////////////////////////////////// Resources
-        /* 'resource_providers' => [
-            \BjyAuthorize\Provider\Resource\Config::class => [
-                'Project' => [],
-                'Activity' => [],
-                'Organization' => [],
-                'Person' => [],
-            ]
-        ],*/
-        /*
-        'rule_providers' => [
-            \UnicaenAuth\Provider\Rule\PrivilegeRuleProvider::class => [
-                'allow' => [
-                    ['privileges' => \Oscar\Provider\Privileges::PROJECT_PROJECT_SHOW,
-                    'resources' => 'Project',
-                    'assertion' => 'ProjectShowAssertion']
-                ]
-            ]
-        ],*/
-
         'guards' => [
             UnicaenAuth\Guard\PrivilegeController::class => [
                 ////////////////////////////////////////////////////////////////////////
@@ -317,13 +288,6 @@ return array(
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Console',
-/*                    'action' => ['privilege', 'syncOrganisation', 'buildSearchActivity',
-                        'harpegeINM', 'harpegePersons', 'evalHarpegeLdapPersons',
-                        'syncLdap', 'syncPersons', 'recalculateStatus',
-                        'authAdd', 'authPass', 'authPromote', 'scriptFixFinanceur',
-                        'scriptFixPartnerMoveToActivites', 'personSync', 'personsSync',
-                        'patch', 'personsSearchConnector','personsOrganizationSync',
-                        'organizationSync'],*/
                     'roles' => [],
                 ],
 
@@ -379,6 +343,18 @@ return array(
     'console' => array(
         'router' => array(
             'routes' => array(
+
+                ////////////////////////////////////////////////////////////////
+                // Procédure d'évaluation de la configuration
+                'oscar_check_config' => array(
+                    'options' => array(
+                        'route' => 'oscar check:authentification <login> <pass>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'checkAuthentification',
+                        ),
+                    ),
+                ),
 
                 'oscar_console_patch' => array(
                     'options' => array(
@@ -532,25 +508,6 @@ return array(
                     ),
                 ),
                 //////////////////////////////////////////////////////// HARPÉGE
-                'console_harpege_inm' => [
-                    'options' => array(
-                        'route' => 'oscar harpege:inm',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'harpegeINM',
-                        ),
-                    ),
-                ],
-                'console_harpege_persons' => [
-                    'options' => array(
-                        'route' => 'oscar harpege:persons',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'harpegePersons',
-                        ),
-                    ),
-                ],
-
                 'console_check_persons' => [
                     'options' => array(
                         'route' => 'oscar persons:check',
