@@ -1079,8 +1079,28 @@ die();
             foreach ($ldapOpt['connection'] as $name => $connection) {
                 $options[$name] = $connection['params'];
             }
+            /** @var Ldap $ldapUnicaenAuth */
+            $ldapUnicaenAuth = new Ldap();
+            $ldapUnicaenAuth->setServiceManager($this->getServiceLocator());
+            $ldapUnicaenAuth->setEventManager($this->getEventManager());
+            $ldapUnicaenAuth->authenticateUsername($login, $pass);
+            echo " # ACCOUND OBJECT : \n";
+            var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getAccountObject());
+            var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getIdentity());
+            /*
             $ldapAuthAdapter = new \Zend\Authentication\Adapter\Ldap($options); // NB: array(array)
-            var_dump($ldapAuthAdapter->setPassword($pass)->setUsername($login)->authenticate());
+            $result = $ldapAuthAdapter->setPassword($pass)->setUsername($login)->authenticate();
+
+            if( $result->isValid() ){
+                echo "Authentification OK : \n";
+                var_dump($result);
+                echo "Get userContext : \n";
+                $context = $this->getServiceLocator()->get('userContext');
+            } else {
+                echo "Authentification FAIL : \n";
+                var_dump($result);
+            }
+            */
 
         } catch( \Exception $e ){
             echo "ERROR : " . $e->getMessage() . "\n";
