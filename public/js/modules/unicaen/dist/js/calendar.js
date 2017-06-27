@@ -962,7 +962,7 @@ var ListView = _defineProperty({
         listitem: ListItemView
     },
 
-    template: '<div class="calendar calendar-list">\n        <section v-for="eventsYear, year in listEvents" class="year-pack">\n            <h2>{{year}}</h2>\n            <section v-for="eventsMonth, month in eventsYear" class="month-pack">\n                <h3>{{month}} Heures : X (X valid\xE9e(s), X a valider, X non-class\xE9e(s))</h3>\n                <section v-for="eventsWeek, week in eventsMonth" class="week-pack">\n                    <h4>Semaine {{week}}</h4>\n                     <section v-for="eventsDay, day in eventsWeek" class="day-pack events">\n                        <h5>{{day}}</h5>\n                         <section class="events-list">\n                            <listitem\n                                :with-owner="withOwner"\n                                @selectevent="selectEvent"\n                                @editevent="$emit(\'editevent\', event)"\n                                @deleteevent="$emit(\'deleteevent\', event)"\n                                @submitevent="$emit(\'submitevent\', event)"\n                                @validateevent="$emit(\'validateevent\', event)"\n                                @rejectevent="$emit(\'rejectevent\', event)"\n                                v-bind:event="event" v-for="event in eventsDay"></listitem>\n                        </section>\n                        <div class="total">\n                            TTT heure(s)\n                        </div>\n                    </section>\n                </section>\n            </section>\n        </section>\n        <div v-if="!listEvents" class="alert alert-danger">\n            Aucun cr\xE9neaux d\xE9t\xE9ct\xE9s\n        </div>\n    </div>',
+    template: '<div class="calendar calendar-list">\n        <section v-for="eventsYear, year in listEvents" class="year-pack">\n            <h2 class="flex-position">\n                <strong>{{year}}</strong> \n                <span class="onright total">{{ eventsYear.total }} heure(s)</span>\n            </h2>\n            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">\n                <h3 class="flex-position">\n                    <strong>{{month}}</strong> \n                    <span class="onright total">{{eventsMonth.total}} heure(s)</span>\n                </h3>\n                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">\n                    <h4 class="flex-position">\n                        <strong>Semaine {{week}}</strong> \n                        <span class="onright total">{{eventsWeek.total}} heure(s)</span>\n                    </h4>\n                     <section v-for="eventsDay, day in eventsWeek.days" class="day-pack events">\n                        <h5>{{day}}</h5>\n                         <section class="events-list">\n                            <listitem\n                                :with-owner="withOwner"\n                                @selectevent="selectEvent"\n                                @editevent="$emit(\'editevent\', event)"\n                                @deleteevent="$emit(\'deleteevent\', event)"\n                                @submitevent="$emit(\'submitevent\', event)"\n                                @validateevent="$emit(\'validateevent\', event)"\n                                @rejectevent="$emit(\'rejectevent\', event)"\n                                v-bind:event="event" v-for="event in eventsDay.events"></listitem>\n                        </section>\n                        <div class="total">\n                            {{eventsDay.total}} heure(s)\n                        </div>\n                    </section>\n                </section>\n            </section>\n        </section>\n        <div v-if="!listEvents" class="alert alert-danger">\n            Aucun cr\xE9neaux d\xE9t\xE9ct\xE9s\n        </div>\n    </div>',
 
     methods: {
         selectEvent: function selectEvent(event) {
@@ -974,61 +974,65 @@ var ListView = _defineProperty({
 }, 'computed', {
     listEvents: function listEvents() {
         EventDT.sortByStart(this.events);
-        var pack = [];
-        var packerFormat = 'ddd D MMMM YYYY';
-        var packer = null;
-
-        var packMonth = null;
-        var packWeek = null;
-        var packDay = null;
-
-        var currentPack = null;
-
         if (!store.events) {
             return null;
         }
 
         var structure = {};
         for (var i = 0; i < this.events.length; i++) {
+
+            var currentYear = void 0,
+                currentMonth = void 0,
+                currentWeek = void 0,
+                currentDay = void 0;
+
             var event = this.events[i];
+            var duration = event.duration;
+
             var labelYear = event.mmStart.format('YYYY');
             var labelMonth = event.mmStart.format('MMMM');
             var labelWeek = event.mmStart.format('W');
             var labelDay = event.mmStart.format('ddd D');
+
             if (!structure[labelYear]) {
-                structure[labelYear] = {};
+                structure[labelYear] = {
+                    total: 0.0,
+                    months: {}
+                };
             }
-            if (!structure[labelYear][labelMonth]) {
-                structure[labelYear][labelMonth] = {};
+            currentYear = structure[labelYear];
+            currentYear.total += duration;
+
+            if (!currentYear.months[labelMonth]) {
+                currentYear.months[labelMonth] = {
+                    total: 0.0,
+                    weeks: {}
+                };
             }
-            if (!structure[labelYear][labelMonth][labelWeek]) {
-                structure[labelYear][labelMonth][labelWeek] = {};
+            currentMonth = currentYear.months[labelMonth];
+            currentMonth.total += duration;
+
+            if (!currentMonth.weeks[labelWeek]) {
+                currentMonth.weeks[labelWeek] = {
+                    total: 0.0,
+                    days: {}
+                };
             }
-            if (!structure[labelYear][labelMonth][labelWeek][labelDay]) {
-                structure[labelYear][labelMonth][labelWeek][labelDay] = [];
+            currentWeek = currentMonth.weeks[labelWeek];
+            currentWeek.total += duration;
+
+            if (!currentWeek.days[labelDay]) {
+                currentWeek.days[labelDay] = {
+                    total: 0.0,
+                    events: []
+                };
             }
-            structure[labelYear][labelMonth][labelWeek][labelDay].push(event);
+            currentDay = currentWeek.days[labelDay];
+            currentDay.total += duration;
+
+            currentDay.events.push(event);
         }
         console.log('Structure:', structure);
-        /*
-        for (let i = 0; i < this.events.length; i++) {
-            let event = this.events[i];
-            let labelMonth = event.mmStart.format('MMMM YYYY');
-            let labelWeek = event.mmStart.format('W');
-            let labelDay = event.mmStart.format('ddd D');
-             let label = event.mmStart.format(packerFormat);
-             if (packer == null || packer.label != label) {
-                packer = {
-                    label: label,
-                    events: [],
-                    totalHours: 0
-                }
-                pack.push(packer);
-            }
-            packer.totalHours += event.duration;
-            packer.events.push(event);
-        }*/
-
         return structure;
     }
 });
