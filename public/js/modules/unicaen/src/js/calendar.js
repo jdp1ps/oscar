@@ -1109,7 +1109,7 @@ var ListItemView = {
                 {{ event.description }}
             </p>
             <nav>
-                <button class="btn btn-primary btn-xs" @click="$emit('selectevent', event)">
+                <button class="btn btn-default btn-xs" @click="$emit('selectevent', event)">
                     <i class="icon-calendar"></i>
                 Voir la semaine</button>
 
@@ -1125,21 +1125,21 @@ var ListItemView = {
                     <i class="icon-trash-empty"></i>
                     Supprimer</button>
                     
-                <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectscievent')" v-if="event.validableSci">
+               <button class="btn btn-danger btn-xs" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectscievent')" v-if="event.validableSci">
                     <i class="icon-attention-1"></i>
-                    Refus scientifique</a>
+                    Refus scientifique</button>
     
-                <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectadmevent')" v-if="event.validableAdm">
+                 <button class="btn btn-danger btn-xs" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectadmevent')" v-if="event.validableAdm">
                     <i class="icon-attention-1"></i>
-                    Refus administratif</a>
+                    Refus administratif</button>
                     
-                <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validatescievent')" v-if="event.validableSci">
+                <button class="btn btn-success btn-xs"  @mousedown.stop.prevent="" @click.stop.prevent="$emit('validatescievent')" v-if="event.validableSci">
                     <i class="icon-beaker"></i>
-                    Validation scientifique</a>
+                    Validation scientifique</button>
                 
-                <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateadmevent')" v-if="event.validableAdm">
+                 <button class="btn btn-success btn-xs" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateadmevent')" v-if="event.validableAdm">
                     <i class="icon-archive"></i>
-                    Validation administrative</a>
+                    Validation administrative</button>
 
                 <!--<button class="btn btn-primary btn-xs"  @click="handlerValidate" v-if="event.validable">
                     <i class="icon-right-big"></i>
@@ -1244,8 +1244,11 @@ var ListView = {
                                 @editevent="$emit('editevent', event)"
                                 @deleteevent="$emit('deleteevent', event)"
                                 @submitevent="$emit('submitevent', event)"
-                                @validateevent="$emit('validateevent', event)"
-                                @rejectevent="$emit('rejectevent', event)"
+                                @rejectscievent="$emit('rejectevent', event, 'sci')"
+                                @rejectadmevent="$emit('rejectevent', event, 'adm')"
+                                @validatescievent="$emit('validateevent', event, 'sci')"
+                                @validateadmevent="$emit('validateevent', event, 'adm')"
+                           
                                 v-bind:event="event" v-for="event in eventsDay.events"></listitem>
                         </section>
                         <div class="total">
