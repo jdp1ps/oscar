@@ -45,13 +45,11 @@ body {
 
 .year-pack {
   h2, h3, h4, h5 {
-    font-weight: 100;
     margin: 0;
     padding:0;
   }
   section {
     margin-left: .5em;
-    background: rgba(166, 206, 248, .2);
   }
   h2 {
     font-size: 22px;
@@ -736,8 +734,7 @@ body {
     .total {
       flex: 1;
       text-align: right;
-      padding: 4px;
-      font-weight: bold;
+      font-weight: 100;
     }
     .events-list {
       background: rgba(255,255,255,.5);
@@ -770,15 +767,21 @@ body {
           position: absolute;
           display: none;
           background: white;
-          padding: 10px 1em .5em;
+          padding: 8px 4px 4px;
           box-shadow: 0 0 1em rgba(0,0,0,.5);
           min-width: 350px;
+          .alert {
+            padding: 4px;
+            font-size: .7em;
+            margin: .25em 0;
+          }
           &:before {
             content: "";
             background: white;
             width: 8px;
             height: 8px;
             top: -4px;
+            left: 8px;
             transform: rotate(45deg);
             display: block;
             position: absolute;
@@ -786,6 +789,9 @@ body {
           h4 {
             margin: 0;
             padding:0;
+          }
+          .btn {
+            font-size: 10px;
           }
           .description { font-weight: 100}
         }
@@ -803,6 +809,35 @@ body {
   }
 }
 
+
+
+.year-pack, .week-pack, .month-pack {
+  padding: 4px;
+}
+
+.small-link {
+  line-height: 1em;
+  background: $colorMain;
+  color: white;
+  font-weight: normal;
+  font-size: 10px;
+}
+
+.calendar-list section {
+  color: #777;
+}
+
+.year-pack:hover {
+  h2 { color: #333 }
+}
+.month-pack:hover {
+  background: rgba(black, .1);
+  h3 { color: #333 }
+}
 .week-pack:hover {
-  background: red;
+  background: rgba(white, 1);
+  h4 { color: #333 }
+}
+.day-pack:hover {
+  background: rgba($colorMain, .25);
 }

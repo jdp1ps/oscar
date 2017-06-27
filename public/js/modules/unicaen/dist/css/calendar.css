@@ -34,12 +34,10 @@ body {
 .year-pack {
   margin: 1em; }
   .year-pack h2, .year-pack h3, .year-pack h4, .year-pack h5 {
-    font-weight: 100;
     margin: 0;
     padding: 0; }
   .year-pack section {
-    margin-left: .5em;
-    background: rgba(166, 206, 248, 0.2); }
+    margin-left: .5em; }
   .year-pack h2 {
     font-size: 22px;
     font-weight: 400;
@@ -532,8 +530,7 @@ body {
   .calendar-list .events .total {
     flex: 1;
     text-align: right;
-    padding: 4px;
-    font-weight: bold; }
+    font-weight: 100; }
   .calendar-list .events .events-list {
     background: rgba(255, 255, 255, 0.5);
     flex: 7;
@@ -562,21 +559,28 @@ body {
         position: absolute;
         display: none;
         background: white;
-        padding: 10px 1em .5em;
+        padding: 8px 4px 4px;
         box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
         min-width: 350px; }
+        .calendar-list .events .events-list .list-item .details .alert {
+          padding: 4px;
+          font-size: .7em;
+          margin: .25em 0; }
         .calendar-list .events .events-list .list-item .details:before {
           content: "";
           background: white;
           width: 8px;
           height: 8px;
           top: -4px;
+          left: 8px;
           transform: rotate(45deg);
           display: block;
           position: absolute; }
         .calendar-list .events .events-list .list-item .details h4 {
           margin: 0;
           padding: 0; }
+        .calendar-list .events .events-list .list-item .details .btn {
+          font-size: 10px; }
         .calendar-list .events .events-list .list-item .details .description {
           font-weight: 100; }
       .calendar-list .events .events-list .list-item .end {
@@ -585,5 +589,31 @@ body {
         z-index: 1000;
         display: block; }
 
+.year-pack, .week-pack, .month-pack {
+  padding: 4px; }
+
+.small-link {
+  line-height: 1em;
+  background: #4490c8;
+  color: white;
+  font-weight: normal;
+  font-size: 10px; }
+
+.calendar-list section {
+  color: #777; }
+
+.year-pack:hover h2 {
+  color: #333; }
+
+.month-pack:hover {
+  background: rgba(0, 0, 0, 0.1); }
+  .month-pack:hover h3 {
+    color: #333; }
+
 .week-pack:hover {
-  background: red; }
+  background: white; }
+  .week-pack:hover h4 {
+    color: #333; }
+
+.day-pack:hover {
+  background: rgba(68, 144, 200, 0.25); }
