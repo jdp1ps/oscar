@@ -377,15 +377,7 @@ var TimeEvent = {
             <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateadmevent')" v-if="event.validableAdm">
                 <i class="icon-archive"></i>
                 Validation administrative</a>
-            
-             
-            
-            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateevent')" v-if="event.validable">
-                <i class="icon-right-big"></i>
-                Valider</a>
-            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectevent')" v-if="event.validable">
-                <i class="icon-right-big"></i>
-                Rejeter</a>
+
         </nav>
 
         <div class="bottom-handler" v-if="event.editable"
@@ -1107,7 +1099,6 @@ var ListItemView = {
         <div class="details">
             <h4>
                 <i class="picto" :style="{background: colorLabel}"></i>
-                [ {{ event.id }}/{{ event.uid }}]
                 {{ event.label }}</h4>
             <p class="time">
                 de <time class="start">{{ beginAt }}</time> à <time class="end">{{ endAt }}</time>, <em>{{ event.duration }}</em> heure(s) ~ état : <em>{{ event.status }}</em>
@@ -1127,12 +1118,28 @@ var ListItemView = {
                     Modifier</button>
 
                 <button class="btn btn-primary btn-xs"  @click="$emit('submitevent', event)" v-if="event.sendable">
-                    <i class="icon-pencil-1"></i>
+                    <i class="icon-right-big"></i>
                     Soumettre</button>
 
                 <button class="btn btn-primary btn-xs"  @click="$emit('deleteevent', event)" v-if="event.deletable">
                     <i class="icon-trash-empty"></i>
                     Supprimer</button>
+                    
+                <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectscievent')" v-if="event.validableSci">
+                    <i class="icon-attention-1"></i>
+                    Refus scientifique</a>
+    
+                <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('rejectadmevent')" v-if="event.validableAdm">
+                    <i class="icon-attention-1"></i>
+                    Refus administratif</a>
+                    
+                <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validatescievent')" v-if="event.validableSci">
+                    <i class="icon-beaker"></i>
+                    Validation scientifique</a>
+                
+                <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateadmevent')" v-if="event.validableAdm">
+                    <i class="icon-archive"></i>
+                    Validation administrative</a>
 
                 <!--<button class="btn btn-primary btn-xs"  @click="handlerValidate" v-if="event.validable">
                     <i class="icon-right-big"></i>
@@ -1200,21 +1207,36 @@ var ListView = {
     template: `<div class="calendar calendar-list">
         <section v-for="eventsYear, year in listEvents" class="year-pack">
             <h2 class="flex-position">
-                <strong>{{year}}</strong> 
+                <strong>{{year}} <a href="#" @click.prevent="submitYear(eventsYear)" class="small-link">
+                            <i class="icon-right-big"></i>                
+                        </a></strong> 
                 <span class="onright total">{{ eventsYear.total }} heure(s)</span>
             </h2>
             <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">
                 <h3 class="flex-position">
-                    <strong>{{month}}</strong> 
+                    <strong>{{month}} ~ 
+                    <a href="#" @click.prevent="submitMonth(eventsMonth)" class="small-link">
+                            <i class="icon-right-big"></i>                
+                        </a>
+                    </strong> 
                     <span class="onright total">{{eventsMonth.total}} heure(s)</span>
                 </h3>
                 <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">
                     <h4 class="flex-position">
-                        <strong>Semaine {{week}}</strong> 
+                        <strong>Semaine {{week}} ~ 
+                        <a href="#" @click.prevent="submitWeek(eventsWeek)" class="small-link">
+                            <i class="icon-right-big"></i>                
+                        </a>
+                        </strong> 
+                        
                         <span class="onright total">{{eventsWeek.total}} heure(s)</span>
                     </h4>
                      <section v-for="eventsDay, day in eventsWeek.days" class="day-pack events">
-                        <h5>{{day}}</h5>
+                        <h5>{{day}} 
+                        <a href="#" @click.prevent="submitDay(eventsDay)" class="small-link">
+                            <i class="icon-right-big"></i>                
+                        </a>
+                        </h5>
                          <section class="events-list">
                             <listitem
                                 :with-owner="withOwner"
@@ -1242,7 +1264,54 @@ var ListView = {
         selectEvent(event){
             store.currentDay = moment(event.start);
             store.state = "week";
-        }
+        },
+
+        getMonthPack(pack){
+            var events = [];
+            for (var k in pack.weeks) {
+                if (pack.weeks.hasOwnProperty(k)) {
+                    events = events.concat(this.getWeekPack(pack.weeks[k]));
+                }
+            }
+            return events;
+        },
+
+        getWeekPack(pack){
+            var events = [];
+            for (var k in pack.days) {
+                if (pack.days.hasOwnProperty(k)) {
+                    events = events.concat(this.getDayPack(pack.days[k]));
+                }
+            }
+            return events;
+        },
+
+        getDayPack(pack){
+            return pack.events;
+        },
+
+        submitYear( yearPack ){
+            var events = [];
+            for (var monthKey in yearPack.months) {
+                if (yearPack.months.hasOwnProperty(monthKey)) {
+                    events = events.concat(this.getMonthPack(yearPack.months[monthKey]));
+                }
+            }
+            this.$emit('submitevent', events);
+        },
+
+        submitMonth( monthPack ){
+            this.$emit('submitevent', this.getMonthPack(monthPack));
+        },
+
+        submitWeek( weekPack ){
+            this.$emit('submitevent', this.getWeekPack(weekPack));
+        },
+
+        submitDay( dayPack ){
+            this.$emit('submitevent', this.getDayPack(dayPack));
+        },
+
     },
 
     computed: {
@@ -2011,11 +2080,35 @@ var Calendar = {
 
         /** Soumission de l'événement de la liste */
         handlerSubmitEvent(event){
-            store.defaultLabel = event.label;
-            bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
-                if (confirm)
-                    this.restSend([event]);
-            });
+            var events;
+            if( event.length ){
+                events = event;
+                console.log("Tableau d'événement");
+            } else {
+                console.log("événement seul");
+                store.defaultLabel = event.label;
+                events = [event];
+            }
+
+            // On liste des événements 'soumettable'
+            var eventsSend = [];
+            for( var i=0; i<events.length; i++ ){
+                console.log(events[i]);
+                if( events[i].sendable === true ){
+                    eventsSend.push(events[i]);
+                }
+            }
+
+            if( eventsSend.length ){
+                bootbox.confirm("Soumettre le(s) "+ eventsSend.length +" créneau(x) ?", (confirm) => {
+                    if (confirm)
+                        this.restSend(eventsSend);
+                });
+            } else {
+                bootbox.alert("Aucun créneau à envoyer.");
+            }
+
+
         },
 
         /** Soumission de l'événement de la liste */
