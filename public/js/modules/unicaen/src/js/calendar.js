@@ -1199,12 +1199,21 @@ var ListView = {
 
     template: `<div class="calendar calendar-list">
         <section v-for="eventsYear, year in listEvents" class="year-pack">
-            <h2>{{year}}</h2>
-            <section v-for="eventsMonth, month in eventsYear" class="month-pack">
-                <h3>{{month}} Heures : X (X validée(s), X a valider, X non-classée(s))</h3>
-                <section v-for="eventsWeek, week in eventsMonth" class="week-pack">
-                    <h4>Semaine {{week}}</h4>
-                     <section v-for="eventsDay, day in eventsWeek" class="day-pack events">
+            <h2 class="flex-position">
+                <strong>{{year}}</strong> 
+                <span class="onright total">{{ eventsYear.total }} heure(s)</span>
+            </h2>
+            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">
+                <h3 class="flex-position">
+                    <strong>{{month}}</strong> 
+                    <span class="onright total">{{eventsMonth.total}} heure(s)</span>
+                </h3>
+                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">
+                    <h4 class="flex-position">
+                        <strong>Semaine {{week}}</strong> 
+                        <span class="onright total">{{eventsWeek.total}} heure(s)</span>
+                    </h4>
+                     <section v-for="eventsDay, day in eventsWeek.days" class="day-pack events">
                         <h5>{{day}}</h5>
                          <section class="events-list">
                             <listitem
@@ -1215,10 +1224,10 @@ var ListView = {
                                 @submitevent="$emit('submitevent', event)"
                                 @validateevent="$emit('validateevent', event)"
                                 @rejectevent="$emit('rejectevent', event)"
-                                v-bind:event="event" v-for="event in eventsDay"></listitem>
+                                v-bind:event="event" v-for="event in eventsDay.events"></listitem>
                         </section>
                         <div class="total">
-                            TTT heure(s)
+                            {{eventsDay.total}} heure(s)
                         </div>
                     </section>
                 </section>
@@ -1239,64 +1248,62 @@ var ListView = {
     computed: {
         listEvents(){
             EventDT.sortByStart(this.events);
-            var pack = [];
-            var packerFormat = 'ddd D MMMM YYYY';
-            var packer = null;
-
-            var packMonth = null;
-            var packWeek = null;
-            var packDay = null;
-
-            var currentPack = null;
-
             if (!store.events) {
                 return null
             }
 
             var structure = {};
             for (let i = 0; i < this.events.length; i++) {
+
+                let currentYear, currentMonth, currentWeek, currentDay;
+
                 let event = this.events[i];
+                let duration = event.duration;
+
                 let labelYear = event.mmStart.format('YYYY');
                 let labelMonth = event.mmStart.format('MMMM');
                 let labelWeek = event.mmStart.format('W');
                 let labelDay = event.mmStart.format('ddd D');
-                if( !structure[labelYear] ) {
-                    structure[labelYear] = {};
-                }
-                if( !structure[labelYear][labelMonth] ){
-                    structure[labelYear][labelMonth] = {};
-                }
-                if( !structure[labelYear][labelMonth][labelWeek] ){
-                    structure[labelYear][labelMonth][labelWeek] = {};
-                }
-                if( !structure[labelYear][labelMonth][labelWeek][labelDay] ){
-                    structure[labelYear][labelMonth][labelWeek][labelDay] = [];
-                }
-                structure[labelYear][labelMonth][labelWeek][labelDay].push(event);
 
+                if( !structure[labelYear] ) {
+                    structure[labelYear] = {
+                        total: 0.0,
+                        months: {}
+                    };
+                }
+                currentYear = structure[labelYear];
+                currentYear.total += duration;
+
+                if( !currentYear.months[labelMonth] ){
+                    currentYear.months[labelMonth] = {
+                        total: 0.0,
+                        weeks: {}
+                    };
+                }
+                currentMonth = currentYear.months[labelMonth];
+                currentMonth.total += duration;
+
+                if( !currentMonth.weeks[labelWeek] ){
+                    currentMonth.weeks[labelWeek] = {
+                        total: 0.0,
+                        days: {}
+                    };
+                }
+                currentWeek = currentMonth.weeks[labelWeek];
+                currentWeek.total += duration;
+
+                if( !currentWeek.days[labelDay] ){
+                    currentWeek.days[labelDay] = {
+                        total: 0.0,
+                        events: []
+                    };
+                }
+                currentDay = currentWeek.days[labelDay];
+                currentDay.total += duration;
+
+                currentDay.events.push(event);
             }
             console.log('Structure:', structure);
-            /*
-            for (let i = 0; i < this.events.length; i++) {
-                let event = this.events[i];
-                let labelMonth = event.mmStart.format('MMMM YYYY');
-                let labelWeek = event.mmStart.format('W');
-                let labelDay = event.mmStart.format('ddd D');
-
-                let label = event.mmStart.format(packerFormat);
-
-                if (packer == null || packer.label != label) {
-                    packer = {
-                        label: label,
-                        events: [],
-                        totalHours: 0
-                    }
-                    pack.push(packer);
-                }
-                packer.totalHours += event.duration;
-                packer.events.push(event);
-            }*/
-
             return structure;
         }
     }

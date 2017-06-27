@@ -31,6 +31,18 @@ body {
   }
 }
 
+.flex-position {
+  display: flex;
+  >* {
+    flex: auto;
+  }
+  .onright {
+    align-self: flex-end;
+    flex: 1;
+    text-align: right;
+  }
+}
+
 .year-pack {
   h2, h3, h4, h5 {
     font-weight: 100;
@@ -789,4 +801,8 @@ body {
       }
     }
   }
+}
+
+.week-pack:hover {
+  background: red;
 }
