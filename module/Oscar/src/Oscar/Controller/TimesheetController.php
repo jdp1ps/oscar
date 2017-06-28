@@ -152,7 +152,7 @@ class TimesheetController extends AbstractOscarController
         if( !($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)
             ||
             $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) ){
-            die('NOP');
+            throw new UnAuthorizedException();
         }
 
         /** @var TimesheetService $timeSheetService */
@@ -233,8 +233,21 @@ class TimesheetController extends AbstractOscarController
                             return $this->getResponseBadRequest('Opération inconnue !');
                         }
 
+                        if( in_array($action, ['validatesci', 'rejectsci' ]) &&
+                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) {
+                            throw new OscarException("Vous n'avez les droits pour la validation scientifique.");
+                        }
+
+                        if( in_array($action, ['validateadm', 'rejectadm' ]) &&
+                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)) {
+                            throw new OscarException("Vous n'avez les droits pour la validation administrative.");
+                        }
+
                         $events = $this->getRequest()->getPost()['events'];
                         $timesheets = [];
+
+
+
                         switch($action){
                             case 'validatesci';
                                 $timesheets = $timeSheetService->validateSci($events, $this->getCurrentPerson());
@@ -249,7 +262,7 @@ class TimesheetController extends AbstractOscarController
                                 $timesheets = $timeSheetService->rejectAdmin($events, $this->getCurrentPerson());
                                 break;
                             case 'send';
-                                throw new UnAuthorizedException();
+                                throw new OscarException("Vous n'avez les droits pour soumettre.");
                                 break;
                         }
 

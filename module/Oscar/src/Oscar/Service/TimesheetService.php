@@ -315,11 +315,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
-                return $timesheets;
+
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
+        return $timesheets;
     }
 
     public function validateSci($datas, $by)
@@ -354,11 +355,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
-                return $timesheets;
+
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
+        return $timesheets;
     }
 
     /**
@@ -397,11 +399,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
-                return $timesheets;
+
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
+        return $timesheets;
     }
 
     /**
@@ -441,11 +444,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
-                return $timesheets;
+
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
+        return $timesheets;
     }
+
 
 }

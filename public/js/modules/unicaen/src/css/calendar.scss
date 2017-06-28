@@ -850,3 +850,35 @@ body {
 .day-pack:hover {
   background: rgba($colorMain, .25);
 }
+
+
+.reject-valid-group {
+  display: inline-block;
+  position: relative;
+  &:hover {
+    ul { display: block }
+  }
+  > ul {
+    display: none;
+    background: white;
+    position: absolute;
+    z-index: 5;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    white-space: nowrap;
+    text-align: left;
+    box-shadow: -4px 4px 2px rgba(0,0,0,.2);
+    li {
+      border-bottom: thin rgba(black, .2) solid;
+      cursor: pointer;
+      font-weight: normal;
+      padding: 2px 4px;
+      &:hover {
+        background: $colorMain;
+        color: white;
+      }
+    }
+  }
+}

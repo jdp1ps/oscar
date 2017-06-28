@@ -337,6 +337,10 @@ class OscarUserContext extends UserContext
         }
     }
 
+
+
+
+
     /**
      * Test si l'utilisteur courant a le role $roleId en tenant compte de la
      * hiérarchie des rôles.

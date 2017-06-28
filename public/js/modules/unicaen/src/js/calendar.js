@@ -21,7 +21,7 @@ var colorLabel = (label) => {
 
 class CalendarDatas {
     constructor() {
-        this.state = 'list';
+        this.state = 'week';
         this.filterOwner = "";
         this.events = [];
         this.newID = 1;
@@ -30,7 +30,9 @@ class CalendarDatas {
         this.importedEvents = [];
         this.eventEditData = {};
         this.eventEditDataVisible = false;
-        this.currentDay = moment()
+        this.currentDay = moment();
+        this.loading = true;
+        this.remoteError = "";
         this.eventEdit = null;
         this.copyWeekData = null;
         this.copyDayData = null;
@@ -41,6 +43,7 @@ class CalendarDatas {
         this.labels = [];
         this.owners = [];
         this.rejectShow = null;
+        this.weekCredentials = this.defaultWeekCredentials();
 
         this.gostDatas = {
             x: 0,
@@ -63,6 +66,19 @@ class CalendarDatas {
         this.rejectValidateType = null;
         this.rejectComment = "";
         this.rejectedEvents = [];
+    }
+
+    defaultWeekCredentials(){
+        return {
+            adm: false,
+            sci: false,
+            admdaily: [
+                false, false, false, false, false, false, false, false
+            ],
+            scidaily: [
+                false, false, false, false, false, false, false, false
+            ]
+        };
     }
 
     get listEvents() {
@@ -727,6 +743,17 @@ var WeekView = {
                 <span href="#" @click="pasteWeek"><i class="icon-paste"></i></span>
                 <span href="#" @click="$emit('submitall', 'send', 'week')"><i class="icon-right-big"></i></span>
             </nav>
+            
+             <nav class="reject-valid-group">
+                <i class=" icon-angle-down"></i>
+                <ul>
+                <li @click.prevent="handlerValidateSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Validation scientifique</li>
+                <li @click.prevent="handlerRejectSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Rejet scientifique</li>
+                <li @click.prevent="handlerValidateAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Validation administrative</li>
+                <li @click.prevent="handlerRejectAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Rejet administratif</li>
+                </ul>
+            </nav>
+            
         </h3>
        <a href="#" @click="nextWeek">
             <i class=" icon-angle-right"></i>
@@ -745,6 +772,15 @@ var WeekView = {
                         <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>
                         <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>
                         <span href="#" @click="submitDay(day)"><i class="icon-right-big"></i></span>
+                    </nav>
+                    <nav class="reject-valid-group">
+                        <i class=" icon-angle-down"></i> {{day.day()}}
+                        <ul>
+                        <li @click.prevent="handlerValidateSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Validation scientifique</li>
+                        <li @click.prevent="handlerRejectSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Rejet scientifique</li>
+                        <li @click.prevent="handlerValidateAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Validation administrative</li>
+                        <li @click.prevent="handlerRejectAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Rejet administratif</li>
+                        </ul>
                     </nav>
                 </div>
             </div>
@@ -792,9 +828,6 @@ var WeekView = {
         </div>
     </div>
 
-    <footer class="line">
-      Afficher les sous-totaux
-    </footer>
     </div>`,
 
     computed: {
@@ -810,6 +843,7 @@ var WeekView = {
         currentWeekNum(){
             return this.currentDay.format('W')
         },
+
         currentWeekDays(){
             let days = [], day = moment(this.currentDay.startOf('week'));
 
@@ -826,15 +860,28 @@ var WeekView = {
          */
         weekEvents(){
 
-            var weekEvents = []
+
+            var weekEvents = [];
+            this.weekCredentials = store.defaultWeekCredentials();
+
             this.events.forEach(event => {
                 // On filtre les événements de la semaine et le déclarant si besoin
                 if (store.inCurrentWeek(event) && (store.filterOwner == '' || store.filterOwner == event.owner_id )) {
+                    if( event.validableSci ){
+                        this.weekCredentials.sci = true;
+                        this.weekCredentials.scidaily[event.mmStart.day()] = true;
+                    }
+                    if( event.validableAdm ){
+                        this.weekCredentials.adm = true;
+                        this.weekCredentials.admdaily[event.mmStart.day()] = true;
+                    }
                     event.intersect = 0;
                     event.intersectIndex = 0;
                     weekEvents.push(event);
                 }
             });
+
+            console.log(this.weekCredentials);
 
             // Détection des collapses
             for (var i = 0; i < weekEvents.length; i++) {
@@ -870,6 +917,42 @@ var WeekView = {
     methods: {
         handlerRejectShow( event ){
             this.$emit('rejectshow', event);
+        },
+
+        handlerValidateSciWeek(){
+            this.$emit('validateevent', this.weekEvents, 'sci');
+        },
+        handlerRejectSciWeek(){
+            this.$emit('rejectevent', this.weekEvents, 'sci');
+        },
+        handlerValidateAdmWeek(){
+            this.$emit('validateevent', this.weekEvents, 'adm');
+        },
+        handlerRejectAdmWeek(){
+            this.$emit('rejectevent', this.weekEvents, 'adm');
+        },
+
+        getEventsDay( day ){
+            var events = [];
+            this.weekEvents.forEach(event => {
+                if( day.day() == event.mmStart.day() ){
+                    events.push(event);
+                }
+            });
+            return events;
+        },
+
+        handlerValidateSciDay(day){
+            this.$emit('validateevent',this.getEventsDay(day), 'sci');
+        },
+        handlerRejectSciDay(day){
+            this.$emit('rejectevent',this.getEventsDay(day), 'sci');
+        },
+        handlerValidateAdmDay(day){
+            this.$emit('validateevent',this.getEventsDay(day), 'adm');
+        },
+        handlerRejectAdmDay(day){
+            this.$emit('rejectevent',this.getEventsDay(day), 'adm');
         },
 
 //        @savemoveevent="handlerSaveMove"
@@ -1685,6 +1768,16 @@ var Calendar = {
             <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>
             
             <transition name="fade">
+                <div class="vue-loader" v-if="remoteError" @click="remoteError = ''">
+                    <div>
+                        <h1>Erreur oscar</h1>
+                        <p>{{ remoteError }}</p>
+                    </div>
+                </div>
+            </transition>
+           
+            
+            <transition name="fade">
                 <div class="vue-loader" v-if="rejectShow">
                     <div>
                     <nav><a href="#" @click.prevent="rejectShow = null"><i class="icon-cancel-outline"></i>Fermer</a></nav>
@@ -1969,12 +2062,20 @@ var Calendar = {
         },
 
         handlerRejectEvent(event, type="unknow"){
-            this.showRejectModal([event], 'reject'+type);
+            var events = event;
+            if( !event.length ){
+                events = [event];
+            }
+            this.showRejectModal(events, 'reject'+type);
         },
 
 
         handlerValidateEvent(events, type="unknow"){
-            console.log("Validation", type);
+            console.log("Validation", type, events);
+
+
+
+
             if( type == "sci" || type == "adm" ){
                 bootbox.confirm( type == 'sci' ? '<i class="icon-beaker"></i>   Validation scientifique'
                             : '<i class="icon-archive"></i>   Validation administrative'
@@ -2057,7 +2158,7 @@ var Calendar = {
                     data.append('events[' + i + '][rejectedSciComment]', events[i].rejectedSciComment || null);
                     data.append('events[' + i + '][rejectedAdminComment]', events[i].rejectedAdminComment || null);
                 }
-
+                this.loading = true;
                 this.$http.post(this.restUrl(), data).then(
                     response => {
                         store.sync(response.body.timesheets);
@@ -2065,10 +2166,14 @@ var Calendar = {
                         this.handlerEditCancelEvent();
                     },
                     error => {
-                        this.errors.push("Impossible de modifier l'état du créneau : " + error)
+                        console.log(error);
+                        this.errors.push("Impossible de modifier l'état du créneau : " + error);
+
+                        this.remoteError = "Erreur : " + error.statusText;
                     }
                 ).then(()=> {
                     this.transmission = "";
+                    this.loading = false;
                 });
             }
         },
@@ -2235,9 +2340,12 @@ var Calendar = {
             this.$http.get(this.restUrl()).then(
                 ok => {
                     store.sync(ok.body.timesheets);
+                    store.loading = false;
                 },
                 ko => {
-                    this.errors.push("Impossible de charger les données : " + ko)
+                    this.errors.push("Impossible de charger les données : " + ko);
+                    store.loading = false;
+                    store.remoteError = "Impossible de charger des créneaux";
                 }
             ).then(()=> {
                 this.transmission = "";
