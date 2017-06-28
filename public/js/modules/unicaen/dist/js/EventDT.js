@@ -82,11 +82,6 @@ var EventDT = function () {
         this.end = end;
     }
 
-    /**
-     * Retourne un objet moment pour la date de début.
-     */
-
-
     _createClass(EventDT, [{
         key: 'inWeek',
 
@@ -163,6 +158,51 @@ var EventDT = function () {
                 this.sendable = data.credentials.sendable;
             }
         }
+    }, {
+        key: 'isSend',
+        get: function get() {
+            return this.status == 'send';
+        }
+    }, {
+        key: 'isInfo',
+        get: function get() {
+            return this.status == 'info';
+        }
+    }, {
+        key: 'isValidSci',
+        get: function get() {
+            return this.validatedSciAt != null;
+        }
+    }, {
+        key: 'isValidAdmin',
+        get: function get() {
+            return this.validatedAdminAt != null;
+        }
+    }, {
+        key: 'isRejecteSci',
+        get: function get() {
+            return this.rejectedSciAt != null;
+        }
+    }, {
+        key: 'isRejecteAdmin',
+        get: function get() {
+            return this.rejectedAdminAt != null;
+        }
+    }, {
+        key: 'isValid',
+        get: function get() {
+            return this.isValidAdmin && this.isValidSci;
+        }
+    }, {
+        key: 'isReject',
+        get: function get() {
+            return this.isRejecteAdmin || this.isRejecteSci;
+        }
+
+        /**
+         * Retourne un objet moment pour la date de début.
+         */
+
     }, {
         key: 'mmStart',
         get: function get() {

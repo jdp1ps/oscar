@@ -22,6 +22,7 @@ var colorLabel = (label) => {
 class CalendarDatas {
     constructor() {
         this.state = 'list';
+        this.filterOwner = "";
         this.events = [];
         this.newID = 1;
         this.transmission = "";
@@ -819,10 +820,16 @@ var WeekView = {
             return days;
         },
 
+        /**
+         * Retourne la liste des événements de la semaine en cours d'affichage.
+         * @returns {Array}
+         */
         weekEvents(){
+
             var weekEvents = []
             this.events.forEach(event => {
-                if (store.inCurrentWeek(event)) {
+                // On filtre les événements de la semaine et le déclarant si besoin
+                if (store.inCurrentWeek(event) && (store.filterOwner == '' || store.filterOwner == event.owner_id )) {
                     event.intersect = 0;
                     event.intersectIndex = 0;
                     weekEvents.push(event);
@@ -1092,14 +1099,25 @@ var MonthView = {
 };
 
 var ListItemView = {
-    template: `<article class="list-item" :style="css" :class="cssClass">
+    template: `<article class="list-item" :style="css" :class="{
+        'event-editable': event.editable, 
+        'status-info': event.isInfo, 
+        'status-draft': event.isDraft, 
+        'status-send' : event.isSend, 
+        'status-valid': event.isValid, 
+        'status-reject': event.isReject, 
+        'valid-sci': event.isValidSci, 
+        'valid-adm': event.isValidAdm, 
+        'reject-sci':event.isRejectSci, 
+        'reject-adm': event.isRejectAdm
+        }">
         <time class="start">{{ beginAt }}</time> -
         <time class="end">{{ endAt }}</time>
         <strong>{{ event.label }}</strong>
         <div class="details">
             <h4>
                 <i class="picto" :style="{background: colorLabel}"></i>
-                {{ event.label }}</h4>
+                {{ event.label }} {{ event.status }}</h4>
             <p class="time">
                 de <time class="start">{{ beginAt }}</time> à <time class="end">{{ endAt }}</time>, <em>{{ event.duration }}</em> heure(s) ~ état : <em>{{ event.status }}</em>
             </p>
@@ -1165,6 +1183,7 @@ var ListItemView = {
             return this.event.mmEnd.format('HH:mm');
         },
         cssClass(){
+
             return 'status-' + this.event.status;
         },
         colorLabel(){
@@ -1326,10 +1345,11 @@ var ListView = {
 
             var structure = {};
             for (let i = 0; i < this.events.length; i++) {
+                let event = this.events[i];
+                if( !(store.filterOwner == '' || store.filterOwner == event.owner_id) ) continue;
 
                 let currentYear, currentMonth, currentWeek, currentDay;
 
-                let event = this.events[i];
                 let duration = event.duration;
 
                 let labelYear = event.mmStart.format('YYYY');
@@ -1741,6 +1761,15 @@ var Calendar = {
                     <span class="calendar-label">
                        {{ calendarLabel }}
                     </span>
+                    
+                    <span v-if="owners.length">
+                    Déclarants : 
+                    <select v-model="filterOwner" class="input-sm">
+                      <option value="">Tous les déclarants</option>
+                      <option v-for="owner in owners" :value="owner.id">{{ owner.displayname }}</option>
+                    </select>
+                    </span>
+                    
                 </nav>
                 <section class="transmission errors">
 

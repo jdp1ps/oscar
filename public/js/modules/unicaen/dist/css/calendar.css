@@ -592,6 +592,14 @@ body {
 .year-pack, .week-pack, .month-pack {
   padding: 4px; }
 
+.month-pack {
+  margin: 4px 0; }
+  .month-pack > section {
+    border-left: thin solid rgba(0, 0, 0, 0.1); }
+
+.week-pack {
+  border-left: thin solid rgba(0, 0, 0, 0.25); }
+
 .small-link {
   line-height: 1em;
   background: #4490c8;

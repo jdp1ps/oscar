@@ -55,6 +55,37 @@ var EventDT = class {
         this.start = start;
         this.end = end;
     }
+    get isSend(){
+        return this.status == 'send';
+    }
+
+    get isInfo(){
+        return this.status == 'info';
+    }
+
+    get isValidSci(){
+        return this.validatedSciAt != null;
+    }
+
+    get isValidAdmin(){
+        return this.validatedAdminAt != null;
+    }
+
+    get isRejecteSci(){
+        return this.rejectedSciAt != null;
+    }
+
+    get isRejecteAdmin(){
+        return this.rejectedAdminAt != null;
+    }
+
+    get isValid(){
+        return this.isValidAdmin && this.isValidSci;
+    }
+
+    get isReject(){
+        return this.isRejecteAdmin || this.isRejecteSci;
+    }
 
     /**
      * Retourne un objet moment pour la date de début.
