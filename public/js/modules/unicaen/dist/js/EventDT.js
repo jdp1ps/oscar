@@ -159,6 +159,11 @@ var EventDT = function () {
             }
         }
     }, {
+        key: 'isLocked',
+        get: function get() {
+            return !(this.sendable || this.validableAdm || this.validableSci || this.editable || this.deletable);
+        }
+    }, {
         key: 'isSend',
         get: function get() {
             return this.status == 'send';

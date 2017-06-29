@@ -55,6 +55,11 @@ var EventDT = class {
         this.start = start;
         this.end = end;
     }
+
+    get isLocked(){
+        return !(this.sendable || this.validableAdm || this.validableSci || this.editable || this.deletable);
+    }
+
     get isSend(){
         return this.status == 'send';
     }

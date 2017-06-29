@@ -254,7 +254,7 @@ body {
       .calendar .event.event-moving nav {
         display: none; }
     .calendar .event.event-locked {
-      opacity: .9;
+      opacity: .7;
       cursor: not-allowed; }
     .calendar .event .label {
       font-weight: 400;
@@ -631,6 +631,9 @@ body {
   overflow: scroll;
   overflow-x: hidden;
   overflow-y: scroll; }
+
+.mode-validation .status-draft {
+  opacity: .5; }
 
 .reject-valid-group {
   display: inline-block;
