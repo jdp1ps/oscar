@@ -16,6 +16,7 @@
         $crenaux[((string)$wpd)] = [
             'label'         => (string)$wpd,
             'idactivity'    => $wpd->getActivity()->getId(),
+            'code' => $wpd->getCode(),
             'idworkpackage' => $wpd->getId(),
             'color' => $colorActivity[$wpd->getActivity()->getId()]
         ];
