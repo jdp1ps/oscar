@@ -33,6 +33,8 @@ class CalendarDatas {
         this.currentDay = moment();
         this.loading = true;
         this.remoteError = "";
+        this.workPackageIndex = [];
+        this.wps = null;
         this.eventEdit = null;
         this.copyWeekData = null;
         this.copyDayData = null;
@@ -1422,7 +1424,7 @@ var ListView = {
 
     computed: {
         listEvents(){
-            EventDT.sortByStart(this.events);
+            //EventDT.sortByStart(this.events);
             if (!store.events) {
                 return null
             }
@@ -1479,7 +1481,6 @@ var ListView = {
 
                 currentDay.events.push(event);
             }
-            console.log('Structure:', structure);
             return structure;
         }
     }
@@ -1761,6 +1762,99 @@ var SelectEditable = {
     }
 };
 
+var TimesheetView = {
+    props: ['withOwner'],
+    data(){
+        return store
+    },
+    computed: {
+        colspan(){
+          return this.workPackageIndex.length;
+        },
+        structuredDatas(){
+            let structuredDatas = {};
+
+            this.workPackageIndex = [];
+            for (var k in this.wps) {
+                if (this.wps.hasOwnProperty(k)) {
+                    this.workPackageIndex.push(this.wps[k].code);
+                }
+            }
+            console.log('workpackageindex',this.workPackageIndex);
+
+
+
+            store.listEvents.forEach((event)=>{
+
+                if(event.isValid){
+                  //  console.log('Traitement de ', event);
+
+                    //console.log(this.wps[event.label])
+                }
+
+                if( !structuredDatas[event.owner_id] ){
+                    structuredDatas[event.owner_id] = {
+                        label: event.owner,
+                        total: 0.0,
+                        months: {}
+                    }
+                }
+                structuredDatas[event.owner_id].total += event.duration;
+
+                let monthKey = event.mmStart.format('MMMM YYYY');
+                if( !structuredDatas[event.owner_id].months[monthKey] ){
+                    structuredDatas[event.owner_id].months[monthKey] = {
+                        total: 0.0,
+                        wps:[]
+                    };
+                    this.workPackageIndex.forEach((value, i)=>{
+                        structuredDatas[event.owner_id].months[monthKey].wps[i] = 0.0;
+                    });
+                }
+                structuredDatas[event.owner_id].months[monthKey].total += event.duration;
+
+                let wpKey = this.workPackageIndex.indexOf(this.wps[event.label].code);
+
+                if( !structuredDatas[event.owner_id].months[monthKey].wps[wpKey] ){
+                    structuredDatas[event.owner_id].months[monthKey].wps[wpKey] = 0.0;
+                }
+                structuredDatas[event.owner_id].months[monthKey].wps[wpKey] += event.duration;
+
+
+
+
+            });
+            return structuredDatas;
+        }
+    },
+    template: `<div class="timesheet"><h1>Feuille de temps</h1>
+        <section v-for="personDatas in structuredDatas">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>{{ personDatas.label }}</th>
+                    <th v-for="w in wps">{{ w.code }}</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="monthDatas, month in personDatas.months">
+                    <th>{{ month }}</th>
+                    <td v-for="tps in monthDatas.wps">{{tps}}</td>
+                    <th>{{ monthDatas.total }}</th>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td :colspan="colspan + 1">&nbsp;</td>
+                    <th>{{ personDatas.total }}</th>
+                </tr>
+            </tfoot>
+        </table>
+        </section>
+</div>`
+};
+
 var Calendar = {
 
     template: `
@@ -1855,6 +1949,8 @@ var Calendar = {
                 <nav class="views-switcher">
                     <a href="#" @click.prevent="state = 'week'" :class="{active: state == 'week'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>
                     <a href="#" @click.prevent="state = 'list'" :class="{active: state == 'list'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>
+                    <a href="#" @click.prevent="state = 'timesheet'" :class="{active: state == 'timesheet'}" v-if="this.wps"><i class="icon-file-excel"></i>Feuille de temps</a>
+                    
                     <a href="#" @click.prevent="importInProgress = true" v-if="createNew"><i class="icon-columns"></i>Importer un ICS</a>
                     <span class="calendar-label">
                        {{ calendarLabel }}
@@ -1884,7 +1980,7 @@ var Calendar = {
                 </section>
             </nav>
 
-            <weekview v-show="state == 'week'"
+            <weekview v-if="state == 'week'"
                 :create-new="createNew"
                 :with-owner="withOwner"
                 @editevent="handlerEditEvent"
@@ -1900,13 +1996,17 @@ var Calendar = {
                 @rejectshow="handlerRejectShow"
                 @saveevent="restSave"></weekview>
 
-            <listview v-show="state == 'list'"
+            <listview v-if="state == 'list'"
                 :with-owner="withOwner"
                 @editevent="handlerEditEvent"
                 @deleteevent="handlerDeleteEvent"
                 @validateevent="handlerValidateEvent"
                 @rejectevent="handlerRejectEvent"
                 @submitevent="handlerSubmitEvent"></listview>
+                
+            <timesheetview v-if="state == 'timesheet'"
+                :with-owner="withOwner"
+                ></timesheet>
         </div>
 
     `,
@@ -1949,6 +2049,7 @@ var Calendar = {
         weekview: WeekView,
         monthview: MonthView,
         listview: ListView,
+        timesheetview: TimesheetView,
         eventitemimport: EventItemImport,
         importview: ImportICSView,
         selecteditable: SelectEditable
@@ -2348,7 +2449,6 @@ var Calendar = {
         },
 
         editEvent(event){
-            console.log('editEvent(', event, ')');
             this.eventEdit = event;
             this.eventEditData = JSON.parse(JSON.stringify(event));
         },
@@ -2367,6 +2467,7 @@ var Calendar = {
         /////////////////////////////////////////////////////////////////// REST
         fetch(){
             this.transmission = "Chargement des créneaux...";
+            store.loading = true;
 
             this.$http.get(this.restUrl()).then(
                 ok => {
@@ -2375,11 +2476,11 @@ var Calendar = {
                 },
                 ko => {
                     this.errors.push("Impossible de charger les données : " + ko);
-                    store.loading = false;
                     store.remoteError = "Impossible de charger des créneaux";
                 }
             ).then(()=> {
                 this.transmission = "";
+                store.loading = false;
             });
         },
 
@@ -2391,9 +2492,10 @@ var Calendar = {
     mounted(){
         if (this.customDatas) {
             var customs = this.customDatas();
-            console.log(customs);
+            this.wps = customs;
             for (var k in customs) {
                 if (customs.hasOwnProperty(k)) {
+                    let wp = customs[k];
                     colorLabels[k] = colorpool[customs[k].color];
                     if (!store.defaultLabel) {
                         store.defaultLabel = k;
@@ -2402,6 +2504,7 @@ var Calendar = {
                 }
             }
             colorIndex++;
+
         }
         if (this.ownersList) {
             store.owners = this.ownersList();
