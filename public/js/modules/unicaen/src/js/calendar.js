@@ -1855,7 +1855,7 @@ var Calendar = {
                 <nav class="views-switcher">
                     <a href="#" @click.prevent="state = 'week'" :class="{active: state == 'week'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>
                     <a href="#" @click.prevent="state = 'list'" :class="{active: state == 'list'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>
-                    <a href="#" @click.prevent="importInProgress = true"><i class="icon-columns"></i>Importer un ICS</a>
+                    <a href="#" @click.prevent="importInProgress = true" v-if="createNew"><i class="icon-columns"></i>Importer un ICS</a>
                     <span class="calendar-label">
                        {{ calendarLabel }}
                     </span>
