@@ -31,6 +31,22 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get('OscarUserContext');
     }
 
+
+
+    public function getActivitiesWithTimesheetSend(){
+        $activities = [];
+
+        $activities = $this->getEntityManager()->createQueryBuilder()->select('a')
+            ->from(Activity::class, 'a')
+            ->innerJoin('a.workPackages', 'w')
+            ->innerJoin('w.timesheets', 't')
+            ;
+
+        return $activities->getQuery()->getResult();
+    }
+
+
+
     /**
      * Envoi des déclarations.
      *
