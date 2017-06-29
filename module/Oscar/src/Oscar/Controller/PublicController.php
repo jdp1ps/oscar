@@ -2,9 +2,12 @@
 
 namespace Oscar\Controller;
 
+use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Person;
+use Oscar\Provider\Privileges;
 use Oscar\Service\OscarUserContext;
+use Oscar\Service\TimesheetService;
 use Zend\EventManager\Event;
 use Zend\Mvc\Application;
 use Zend\View\Model\ViewModel;
@@ -31,22 +34,41 @@ class PublicController extends AbstractOscarController
      */
     public function indexAction()
     {
-        $person = null;
 
-        /*
-        $this->flashMessenger()->addErrorMessage("AN ERROR");
-        $this->flashMessenger()->addInfoMessage("AN INFO");
-        $this->flashMessenger()->addMessage("A MESSAGE");
-        $this->flashMessenger()->addSuccessMessage("A SUCCESS");
-        $this->flashMessenger()->addWarningMessage("A WARNING");
-        /****/
+        $person = null;
+        /** @var TimesheetService  $timeSheetService */
+        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        // est déclarant
+
+        // est validateur (Application)
+        $isValidateurScientifique = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI);
+        $isValidateurAdministratif = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
+
+        $activitiesValidation = [];
+        $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
+
+        /** @var Activity $activity */
+        foreach ($activityWithValidationUp as $activity ){
+            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) && $activity->hasTimesheetsUpForValidationSci() ){
+                $activitiesValidation[] = $activity;
+                continue;
+            }
+            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) && $activity->hasTimesheetsUpForValidationAdmin() ){
+                $activitiesValidation[] = $activity;
+                continue;
+            }
+        }
+
 
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
+
         } catch( \Exception $e ){
 
         }
         return [
+            'activitiesValidation' => $activitiesValidation,
             'user' => $person
         ];
     }

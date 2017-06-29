@@ -83,12 +83,29 @@
                     <div class="row">
                         <div class="col-md-12">
                             <a href="<?= $this->url('project/mine') ?>" class="btn btn-primary"><i class="icon-cubes"></i> Voir mes projets</a>
+
                             <?php if( $this->grant()->getCurrentPerson()
                                 && $this->grant()->isDeclarer()): ?>
                                 <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>">
                                     <i class="icon-pencil"></i>
                                     Déclarer mes heures
                                 </a>
+                            <?php endif; ?>
+
+                            <?php if( count($activitiesValidation) ): ?>
+                                <h1>Validation en attente</h1>
+                                <section>
+                                    <?php foreach ($activitiesValidation as $activity): ?>
+                                        <article class="card card-xs">
+                                            <strong><?= $activity->getProject() ?></strong> /
+                                            <?= $activity ?> :
+                                            <a href="<?= $this->url('timesheet/validation', ['idactivity' => $activity->getId()]) ?>">
+                                                <i class="icon-pencil"></i>
+                                                Valider les déclarations
+                                            </a>
+                                        </article>
+                                    <?php endforeach; ?>
+                                </section>
                             <?php endif; ?>
                         </div>
                         <div class="col-md-12">
