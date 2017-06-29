@@ -70,14 +70,13 @@ class CalendarDatas {
 
     defaultWeekCredentials(){
         return {
+            send: false,
             adm: false,
             sci: false,
-            admdaily: [
-                false, false, false, false, false, false, false, false
-            ],
-            scidaily: [
-                false, false, false, false, false, false, false, false
-            ]
+            admdaily: [ false, false, false, false, false, false, false, false ],
+            scidaily: [ false, false, false, false, false, false, false, false ],
+            senddaily: [ false, false, false, false, false, false, false, false ],
+            copydaily: [ false, false, false, false, false, false, false, false ]
         };
     }
 
@@ -738,19 +737,17 @@ var WeekView = {
         </a>
         <h3>
             Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}
-            <nav class="copy-paste" v-if="createNew">
-                <span href="#" @click="copyCurrentWeek"><i class="icon-docs"></i></span>
-                <span href="#" @click="pasteWeek"><i class="icon-paste"></i></span>
-                <span href="#" @click="$emit('submitall', 'send', 'week')"><i class="icon-right-big"></i></span>
-            </nav>
             
              <nav class="reject-valid-group">
-                <i class=" icon-angle-down"></i>
+                <i class=" icon-angle-down"></i> actions
                 <ul>
-                <li @click.prevent="handlerValidateSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Validation scientifique</li>
-                <li @click.prevent="handlerRejectSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Rejet scientifique</li>
-                <li @click.prevent="handlerValidateAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Validation administrative</li>
-                <li @click.prevent="handlerRejectAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Rejet administratif</li>
+                    <li @click="copyCurrentWeek" v-if="createNew && (weekEvents && weekEvents.length > 0)"><i class="icon-docs"></i> Copier la semaine</li>
+                    <li @click="pasteWeek" v-if="createNew && copyWeekData"><i class="icon-paste"></i> Coller la semaine</li>
+                    <li @click="$emit('submitall', 'send', 'week')" v-if="weekCredentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la semaine</li>
+                    <li @click.prevent="handlerValidateSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>
+                    <li @click.prevent="handlerRejectSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>
+                    <li @click.prevent="handlerValidateAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>
+                    <li @click.prevent="handlerRejectAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Rejeter administrativement la semaine</li>
                 </ul>
             </nav>
             
@@ -768,18 +765,16 @@ var WeekView = {
             <div class="events">
                 <div class="cell cell-day day day-1" :class="{today: isToday(day)}" v-for="day in currentWeekDays">
                     {{ day.format('dddd D') }}
-                    <nav class="copy-paste" v-if="createNew">
-                        <span href="#" @click="copyDay(day)"><i class="icon-docs"></i></span>
-                        <span href="#" @click="pasteDay(day)"><i class="icon-paste"></i></span>
-                        <span href="#" @click="submitDay(day)"><i class="icon-right-big"></i></span>
-                    </nav>
                     <nav class="reject-valid-group">
-                        <i class=" icon-angle-down"></i> {{day.day()}}
+                        <i class=" icon-angle-down"></i>
                         <ul>
-                        <li @click.prevent="handlerValidateSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Validation scientifique</li>
-                        <li @click.prevent="handlerRejectSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Rejet scientifique</li>
-                        <li @click.prevent="handlerValidateAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Validation administrative</li>
-                        <li @click.prevent="handlerRejectAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Rejet administratif</li>
+                            <li @click="copyDay(day)" v-if="createNew && weekCredentials.copydaily[day.day()]"><i class="icon-docs"></i> Copier les créneaux</li>
+                            <li @click="pasteDay(day)" v-if="createNew && copyDayData && copyDayData.length"><i class="icon-paste"></i> Coller les créneaux</li>
+                            <li @click="submitDay(day)" v-if="weekCredentials.senddaily[day.day()]"><i class="icon-right-big"></i> Soumettre les créneaux</li>
+                            <li @click.prevent="handlerValidateSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Valider scientifiquement la journée</li>
+                            <li @click.prevent="handlerRejectSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Rejeter scientifiquement la journée</li>
+                            <li @click.prevent="handlerValidateAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Valider administrativement la journée</li>
+                            <li @click.prevent="handlerRejectAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Rejeter administrativement la journée</li>
                         </ul>
                     </nav>
                 </div>
@@ -875,13 +870,16 @@ var WeekView = {
                         this.weekCredentials.adm = true;
                         this.weekCredentials.admdaily[event.mmStart.day()] = true;
                     }
+                    if( event.sendable ){
+                        this.weekCredentials.send = true;
+                        this.weekCredentials.senddaily[event.mmStart.day()] = true;
+                    }
+                    this.weekCredentials.copydaily[event.mmStart.day()] = true;
                     event.intersect = 0;
                     event.intersectIndex = 0;
                     weekEvents.push(event);
                 }
             });
-
-            console.log(this.weekCredentials);
 
             // Détection des collapses
             for (var i = 0; i < weekEvents.length; i++) {
@@ -1829,16 +1827,20 @@ var Calendar = {
             <div class="editor" v-show="displayRejectModal">
                 <form @submit.prevent="handlerSendReject">
                     <h3>Refuser des créneaux</h3>
-                    <section>
-                       <article v-for="creneau in rejectedEvents" class="event-inline-simple">
-                        <i class="icon-archive"></i><strong>{{ creneau.label }}</strong><br>
-                        <i class="icon-user"></i><strong>{{ creneau.owner }}</strong><br>
-                        <i class="icon-calendar"></i><strong>{{ creneau.dayTime }}</strong>
-                       </article>
-                    </section>
-                    <div class="form-group">
-                        <label for="">Préciser la raison du refus</label>
-                        <textarea class="form-control" v-model="rejectComment" placeholder="Raison du refus"></textarea>
+                    <div class="row">
+                        <section class="col-md-6 editor-column-fixed">
+                           <article v-for="creneau in rejectedEvents" class="event-inline-simple">
+                            <i class="icon-archive"></i><strong>{{ creneau.label }}</strong><br>
+                            <i class="icon-user"></i><strong>{{ creneau.owner }}</strong><br>
+                            <i class="icon-calendar"></i><strong>{{ creneau.dayTime }}</strong>
+                           </article>
+                        </section>
+                        <section class="col-md-6">
+                            <div class="form-group">
+                                <label for="">Préciser la raison du refus</label>
+                                <textarea class="form-control" v-model="rejectComment" placeholder="Raison du refus"></textarea>
+                            </div>
+                        </section>
                     </div>
                     <hr />
                     <button type="submit" class="btn btn-primary" :class="{disabled: !rejectComment}">Envoyer</button>
@@ -2061,32 +2063,56 @@ var Calendar = {
             this.restStep(events, this.rejectValidateType);
         },
 
+
+        /**
+         * Déclenche la prodécure de rejet.
+         *
+         * @param event
+         * @param type
+         */
         handlerRejectEvent(event, type="unknow"){
-            var events = event;
-            if( !event.length ){
-                events = [event];
+            // événements reçus
+            var eventsArray = !event.length ? [event] : event,
+                events = [];
+
+            eventsArray.forEach((event)=> {
+               if( type == "sci" && event.validableSci || type == "adm" && event.validableAdm ){
+                   events.push(event);
+               }
+            });
+            if( events.length ){
+                this.showRejectModal(events, 'reject'+type);
+            } else {
+                bootbox.alert("Aucun créneaux ne peut être rejeté");
             }
-            this.showRejectModal(events, 'reject'+type);
         },
 
 
         handlerValidateEvent(events, type="unknow"){
-            console.log("Validation", type, events);
+            // événements reçus
+            var eventsArray = !events.length ? [events] : events,
+                events = [];
 
+            eventsArray.forEach((event)=> {
+                if( type == "sci" && event.validableSci || type == "adm" && event.validableAdm ){
+                    events.push(event);
+                }
+            });
 
-
-
-            if( type == "sci" || type == "adm" ){
-                bootbox.confirm( type == 'sci' ? '<i class="icon-beaker"></i>   Validation scientifique'
-                            : '<i class="icon-archive"></i>   Validation administrative'
-                ,(response) => {
-                    if(response){
-                        this.restStep(events, 'validate' + type)
-                    }
-                })
+            if( events.length ){
+                let message = events.length == 1 ? " du créneau " : " des " + events.length + " créneaux ";
+                bootbox.confirm( type == 'sci' ?
+                        '<i class="icon-beaker"></i> Validation scientifique ' + message
+                        : '<i class="icon-archive"></i>   Validation administrative' + message
+                    ,(response) => {
+                        if(response){
+                            this.restStep(events, 'validate' + type)
+                        }
+                    })
             } else {
-                throw "Type inconnue";
+                bootbox.alert("Aucun créneau ne peut être validé");
             }
+
         },
 
         showRejectModal(events, type){

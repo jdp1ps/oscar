@@ -851,11 +851,20 @@ body {
   background: rgba($colorMain, .25);
 }
 
+.editor-column-fixed {
+  max-height: 70vh;
+  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
 
 .reject-valid-group {
   display: inline-block;
   position: relative;
   &:hover {
+      background: white;
+    >i {
+    }
     ul { display: block }
   }
   > ul {
@@ -863,7 +872,7 @@ body {
     background: white;
     position: absolute;
     z-index: 5;
-    font-size: 12px;
+    font-size: 10px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -871,10 +880,11 @@ body {
     text-align: left;
     box-shadow: -4px 4px 2px rgba(0,0,0,.2);
     li {
+      text-shadow: none;
       border-bottom: thin rgba(black, .2) solid;
       cursor: pointer;
       font-weight: normal;
-      padding: 2px 4px;
+      padding: 2px 8px 2px 4px;
       &:hover {
         background: $colorMain;
         color: white;
