@@ -513,7 +513,7 @@ var TimeEvent = {
         },
 
         isLocked(){
-            return !this.event.editable;
+            return this.event.isLocked;
         },
 
         dateStart(){
@@ -1001,15 +1001,18 @@ var WeekView = {
         },
 
         handlerMouseDown(e){
-            var roundFactor = 40 / 60 * this.pas;
-            this.gostDatas.y = Math.round(e.offsetY / roundFactor) * (roundFactor);
-            var pas = $(e.target).width() / 7;
-            var day = Math.floor(e.offsetX / pas);
-            this.gostDatas.day = day + 1;
-            this.gostDatas.x = day * pas;
-            this.gostDatas.startX = this.gostDatas.x;
-            this.gostDatas.drawing = true;
-            this.gostDatas.editActive = true;
+            console.log("MouseDown", this.createNew == false);
+            if( this.createNew ) {
+                var roundFactor = 40 / 60 * this.pas;
+                this.gostDatas.y = Math.round(e.offsetY / roundFactor) * (roundFactor);
+                var pas = $(e.target).width() / 7;
+                var day = Math.floor(e.offsetX / pas);
+                this.gostDatas.day = day + 1;
+                this.gostDatas.x = day * pas;
+                this.gostDatas.startX = this.gostDatas.x;
+                this.gostDatas.drawing = true;
+                this.gostDatas.editActive = true;
+            }
         },
 
         handlerMouseMove(e){
@@ -1917,7 +1920,8 @@ var Calendar = {
             default: false
         },
         createNew: {
-            default: false
+            default: false,
+            type: Boolean
         },
         calendarLabel: {
             default: "Label par défaut"
@@ -2126,6 +2130,7 @@ var Calendar = {
         restSave(events){
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
+
                 var data = new FormData();
                 for (var i = 0; i < events.length; i++) {
                     data.append('events[' + i + '][label]', events[i].label);
@@ -2147,7 +2152,7 @@ var Calendar = {
                         }
                     }
                 }
-
+                store.loading = true;
                 this.$http.post(this.restUrl(), data).then(
                     response => {
                         store.sync(response.body.timesheets);
@@ -2157,7 +2162,7 @@ var Calendar = {
                         console.log(error);
                         this.errors.push("Impossible d'enregistrer les données : " + error)
                     }
-                ).then(()=> this.transmission = "");
+                ).then(()=> { this.transmission = "";  store.loading = false; });
                 ;
             }
         },

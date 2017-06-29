@@ -447,7 +447,7 @@ var TimeEvent = {
             return _colorLabel(this.event.label);
         },
         isLocked: function isLocked() {
-            return !this.event.editable;
+            return this.event.isLocked;
         },
         dateStart: function dateStart() {
             return moment(this.event.start);
@@ -812,15 +812,18 @@ var WeekView = {
             this.gostDatas.editActive = false;
         },
         handlerMouseDown: function handlerMouseDown(e) {
-            var roundFactor = 40 / 60 * this.pas;
-            this.gostDatas.y = Math.round(e.offsetY / roundFactor) * roundFactor;
-            var pas = $(e.target).width() / 7;
-            var day = Math.floor(e.offsetX / pas);
-            this.gostDatas.day = day + 1;
-            this.gostDatas.x = day * pas;
-            this.gostDatas.startX = this.gostDatas.x;
-            this.gostDatas.drawing = true;
-            this.gostDatas.editActive = true;
+            console.log("MouseDown", this.createNew == false);
+            if (this.createNew) {
+                var roundFactor = 40 / 60 * this.pas;
+                this.gostDatas.y = Math.round(e.offsetY / roundFactor) * roundFactor;
+                var pas = $(e.target).width() / 7;
+                var day = Math.floor(e.offsetX / pas);
+                this.gostDatas.day = day + 1;
+                this.gostDatas.x = day * pas;
+                this.gostDatas.startX = this.gostDatas.x;
+                this.gostDatas.drawing = true;
+                this.gostDatas.editActive = true;
+            }
         },
         handlerMouseMove: function handlerMouseMove(e) {
             if (this.gostDatas.drawing) {
@@ -1369,7 +1372,8 @@ var Calendar = {
             default: false
         },
         createNew: {
-            default: false
+            default: false,
+            type: Boolean
         },
         calendarLabel: {
             default: "Label par défaut"
@@ -1589,6 +1593,7 @@ var Calendar = {
 
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
+
                 var data = new FormData();
                 for (var i = 0; i < events.length; i++) {
                     data.append('events[' + i + '][label]', events[i].label);
@@ -1610,7 +1615,7 @@ var Calendar = {
                         }
                     }
                 }
-
+                store.loading = true;
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
                     _this13.handlerEditCancelEvent();
@@ -1618,7 +1623,7 @@ var Calendar = {
                     console.log(error);
                     _this13.errors.push("Impossible d'enregistrer les données : " + error);
                 }).then(function () {
-                    return _this13.transmission = "";
+                    _this13.transmission = "";store.loading = false;
                 });
                 ;
             }

@@ -325,7 +325,7 @@ body {
     }
 
     &.event-locked {
-      opacity: .9;
+      opacity: .7;
       cursor: not-allowed;
     }
 
@@ -856,6 +856,12 @@ body {
   overflow: scroll;
   overflow-x: hidden;
   overflow-y: scroll;
+}
+
+.mode-validation {
+  .status-draft {
+    opacity: .5;
+  }
 }
 
 .reject-valid-group {
