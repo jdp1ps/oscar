@@ -583,7 +583,7 @@ class TimeSheet implements ITrackable
     }
 
     /**
-     * @return Activity
+     * @return WorkPackage
      */
     public function getWorkpackage()
     {

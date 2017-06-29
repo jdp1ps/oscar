@@ -64,6 +64,62 @@ class TimesheetController extends AbstractOscarController
             if ($action == 'send') {
                 $timesheets = $timeSheetService->send($datas,
                     $this->getCurrentPerson());
+            } else if ( $action ){
+                if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
+                    return $this->getResponseBadRequest('Opération inconnue !');
+                }
+
+                foreach ($datas as $data) {
+                    if ($data['id'] && $data['id'] != 'null') {
+                        /** @var TimeSheet $timeSheet */
+                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
+                        $activity = null ;
+                        if( $timeSheet->getActivity() ){
+                            $activity = $timeSheet->getActivity();
+                        }
+                        elseif ($timeSheet->getWorkpackage()){
+                            $activity = $timeSheet->getWorkpackage()->getActivity();
+                        }
+                        if( !$activity ){
+                            // todo Ajouter un warning
+                            continue;
+                        }
+                        if( in_array($action, ['validatesci', 'rejectsci' ]) &&
+                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) {
+                            throw new OscarException("Vous n'avez les droits pour la validation scientifique.");
+                        }
+
+                        if( in_array($action, ['validateadm', 'rejectadm' ]) &&
+                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)) {
+                            throw new OscarException("Vous n'avez les droits pour la validation administrative.");
+                        }
+
+                        switch($action){
+                            case 'validatesci';
+                                $timesheets = $timeSheetService->validateSci([$data], $this->getCurrentPerson());
+                                break;
+                            case 'validateadm';
+                                $timesheets = $timeSheetService->validateAdmin([$data], $this->getCurrentPerson());
+                                break;
+                            case 'rejectsci';
+                                $timesheets = $timeSheetService->rejectSci([$data], $this->getCurrentPerson());
+                                break;
+                            case 'rejectadm';
+                                $timesheets = $timeSheetService->rejectAdmin([$data], $this->getCurrentPerson());
+                                break;
+                            case 'send';
+                                throw new OscarException("Vous n'avez les droits pour soumettre.");
+                                break;
+                        }
+
+
+
+
+                    }
+                }
+
+
+
             } else {
                 $timesheets = $timeSheetService->create($datas,
                     $this->getCurrentPerson());
