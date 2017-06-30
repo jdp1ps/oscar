@@ -104,17 +104,105 @@ var CalendarDatas = function () {
                 copydaily: [false, false, false, false, false, false, false, false]
             };
         }
+
+        /**
+         * Retourne les données pour afficher la feuille de temps.
+         */
+
+    }, {
+        key: 'timesheetDatas',
+        value: function timesheetDatas() {
+            var _this = this;
+
+            console.log('Accès aux données pour la feuille de temps');
+            var structuredDatas = {};
+
+            var activityWpsIndex = {};
+
+            for (var k in this.wps) {
+                if (this.wps.hasOwnProperty(k)) {
+                    if (!activityWpsIndex[this.wps[k].activity]) {
+                        activityWpsIndex[this.wps[k].activity] = [];
+                    }
+                    activityWpsIndex[this.wps[k].activity].push(this.wps[k].code);
+                }
+            }
+
+            this.workPackageIndex = [];
+            for (var k in this.wps) {
+                if (this.wps.hasOwnProperty(k)) {
+                    this.workPackageIndex.push(this.wps[k].code);
+                }
+            }
+
+            this.listEvents.forEach(function (event) {
+                if (event.isValid) {
+
+                    var packActivity = void 0,
+                        packPerson = void 0,
+                        packMonth = void 0,
+                        packWeek = void 0,
+                        packDay = void 0;
+
+                    console.log('LABEL', event.label);
+                    console.log('ACTIVITY', _this.wps[event.label].activity);
+
+                    var activityLabel = _this.wps[event.label].activity;
+                    var wpReference = activityWpsIndex[activityLabel];
+                    // Regroupement par person
+                    if (!structuredDatas[activityLabel]) {
+                        structuredDatas[activityLabel] = {
+                            label: activityLabel,
+                            total: 0.0,
+                            persons: {},
+                            wps: wpReference
+                        };
+                    }
+                    packActivity = structuredDatas[activityLabel];
+                    packActivity.total += event.duration;
+
+                    // Regroupement par person
+                    if (!packActivity.persons[event.owner_id]) {
+                        packActivity.persons[event.owner_id] = {
+                            label: event.owner,
+                            total: 0.0,
+                            months: {}
+                        };
+                    }
+                    packPerson = packActivity.persons[event.owner_id];
+                    packPerson.total += event.duration;
+
+                    // Regroupement par mois
+                    var monthKey = event.mmStart.format('MMMM YYYY');
+
+                    if (!packPerson.months[monthKey]) {
+                        packPerson.months[monthKey] = {
+                            total: 0.0,
+                            wps: []
+                        };
+                        wpReference.forEach(function (value, i) {
+                            packPerson.months[monthKey].wps[i] = 0.0;
+                        });
+                    }
+                    packMonth = packPerson.months[monthKey];
+                    packMonth.total += event.duration;
+                    var wpKey = wpReference.indexOf(_this.wps[event.label].code);
+                    packMonth.wps[wpKey] += event.duration;
+                }
+            });
+            return structuredDatas;
+        }
     }, {
         key: 'copyDay',
         value: function copyDay(dt) {
-            var _this = this;
+            var _this2 = this;
 
             this.copyDayData = [];
             var dDay = dt.format('MMMM D YYYY');
             this.events.forEach(function (event) {
                 var dayRef = moment(event.start).format('MMMM D YYYY');
                 if (dayRef == dDay) {
-                    _this.copyDayData.push({
+                    _this2.copyDayData.push({
                         startHours: event.mmStart.hour(),
                         startMinutes: event.mmStart.minute(),
                         endHours: event.mmEnd.hour(),
@@ -134,12 +222,12 @@ var CalendarDatas = function () {
     }, {
         key: 'copyCurrentWeek',
         value: function copyCurrentWeek() {
-            var _this2 = this;
+            var _this3 = this;
 
             this.copyWeekData = [];
             this.events.forEach(function (event) {
-                if (_this2.inCurrentWeek(event)) {
-                    _this2.copyWeekData.push({
+                if (_this3.inCurrentWeek(event)) {
+                    _this3.copyWeekData.push({
                         day: event.mmStart.day(),
                         startHours: event.mmStart.hour(),
                         startMinutes: event.mmStart.minute(),
@@ -196,15 +284,15 @@ var CalendarDatas = function () {
     }, {
         key: 'pasteWeek',
         value: function pasteWeek() {
-            var _this3 = this;
+            var _this4 = this;
 
             if (this.copyWeekData) {
                 var create = [];
                 this.copyWeekData.forEach(function (event) {
-                    var start = moment(_this3.currentDay);
+                    var start = moment(_this4.currentDay);
                     start.day(event.day).hour(event.startHours).minute(event.startMinutes);
 
-                    var end = moment(_this3.currentDay);
+                    var end = moment(_this4.currentDay);
                     end.day(event.day).hour(event.endHours).minute(event.endMinutes);
 
                     create.push({
@@ -436,7 +524,6 @@ var TimeEvent = {
             return this.event.rejectedSciAt != null;
         },
         isRejectAdm: function isRejectAdm() {
-            console.log(this.event.rejectedAdminAt);
             return this.event.rejectedAdminAt != null;
         },
         isReject: function isReject() {
@@ -674,7 +761,7 @@ var WeekView = {
          * @returns {Array}
          */
         weekEvents: function weekEvents() {
-            var _this4 = this;
+            var _this5 = this;
 
             var weekEvents = [];
             this.weekCredentials = store.defaultWeekCredentials();
@@ -683,18 +770,18 @@ var WeekView = {
                 // On filtre les événements de la semaine et le déclarant si besoin
                 if (store.inCurrentWeek(event) && (store.filterOwner == '' || store.filterOwner == event.owner_id)) {
                     if (event.validableSci) {
-                        _this4.weekCredentials.sci = true;
-                        _this4.weekCredentials.scidaily[event.mmStart.day()] = true;
+                        _this5.weekCredentials.sci = true;
+                        _this5.weekCredentials.scidaily[event.mmStart.day()] = true;
                     }
                     if (event.validableAdm) {
-                        _this4.weekCredentials.adm = true;
-                        _this4.weekCredentials.admdaily[event.mmStart.day()] = true;
+                        _this5.weekCredentials.adm = true;
+                        _this5.weekCredentials.admdaily[event.mmStart.day()] = true;
                     }
                     if (event.sendable) {
-                        _this4.weekCredentials.send = true;
-                        _this4.weekCredentials.senddaily[event.mmStart.day()] = true;
+                        _this5.weekCredentials.send = true;
+                        _this5.weekCredentials.senddaily[event.mmStart.day()] = true;
                     }
-                    _this4.weekCredentials.copydaily[event.mmStart.day()] = true;
+                    _this5.weekCredentials.copydaily[event.mmStart.day()] = true;
                     event.intersect = 0;
                     event.intersectIndex = 0;
                     weekEvents.push(event);
@@ -903,14 +990,14 @@ var WeekView = {
             this.$emit('createevent', newEvent);
         },
         copyDay: function copyDay(dt) {
-            var _this5 = this;
+            var _this6 = this;
 
             this.copyDayData = [];
             var dDay = dt.format('MMMM D YYYY');
             this.events.forEach(function (event) {
                 var dayRef = moment(event.start).format('MMMM D YYYY');
                 if (dayRef == dDay) {
-                    _this5.copyDayData.push({
+                    _this6.copyDayData.push({
                         startHours: event.mmStart.hour(),
                         startMinutes: event.mmStart.minute(),
                         endHours: event.mmEnd.hour(),
@@ -925,12 +1012,12 @@ var WeekView = {
             this.$emit('submitday', dt);
         },
         copyCurrentWeek: function copyCurrentWeek() {
-            var _this6 = this;
+            var _this7 = this;
 
             this.copyWeekData = [];
             this.events.forEach(function (event) {
-                if (_this6.inCurrentWeek(event)) {
-                    _this6.copyWeekData.push({
+                if (_this7.inCurrentWeek(event)) {
+                    _this7.copyWeekData.push({
                         day: event.mmStart.day(),
                         startHours: event.mmStart.hour(),
                         startMinutes: event.mmStart.minute(),
@@ -1262,11 +1349,11 @@ var ImportICSView = {
 
         /** Charge le fichier ICS depuis l'interface **/
         loadIcsFile: function loadIcsFile(e) {
-            var _this7 = this;
+            var _this8 = this;
 
             var fr = new FileReader();
             fr.onloadend = function (result) {
-                _this7.parseFileContent(fr.result);
+                _this8.parseFileContent(fr.result);
             };
             fr.readAsText(e.target.files[0]);
         },
@@ -1274,7 +1361,7 @@ var ImportICSView = {
 
         /** Parse le contenu ICS **/
         parseFileContent: function parseFileContent(content) {
-            var _this8 = this;
+            var _this9 = this;
 
             var analyser = new ICalAnalyser();
             var events = analyser.parse(ICAL.parse(content));
@@ -1286,8 +1373,8 @@ var ImportICSView = {
                 item.mmEnd = moment(item.end);
                 item.imported = true;
                 item.useLabel = "";
-                _this8.importedEvents.push(item);
-                if (_this8.labels.indexOf(item.label) < 0) _this8.labels.push(item.label);
+                _this9.importedEvents.push(item);
+                if (_this9.labels.indexOf(item.label) < 0) _this9.labels.push(item.label);
             });
 
             this.etape = 2;
@@ -1370,58 +1457,10 @@ var TimesheetView = {
             return this.workPackageIndex.length;
         },
         structuredDatas: function structuredDatas() {
-            var _this9 = this;
-
-            var structuredDatas = {};
-
-            this.workPackageIndex = [];
-            for (var k in this.wps) {
-                if (this.wps.hasOwnProperty(k)) {
-                    this.workPackageIndex.push(this.wps[k].code);
-                }
-            }
-            console.log('workpackageindex', this.workPackageIndex);
-
-            store.listEvents.forEach(function (event) {
-
-                if (event.isValid) {
-                    //  console.log('Traitement de ', event);
-
-                    //console.log(this.wps[event.label])
-                }
-
-                if (!structuredDatas[event.owner_id]) {
-                    structuredDatas[event.owner_id] = {
-                        label: event.owner,
-                        total: 0.0,
-                        months: {}
-                    };
-                }
-                structuredDatas[event.owner_id].total += event.duration;
-
-                var monthKey = event.mmStart.format('MMMM YYYY');
-                if (!structuredDatas[event.owner_id].months[monthKey]) {
-                    structuredDatas[event.owner_id].months[monthKey] = {
-                        total: 0.0,
-                        wps: []
-                    };
-                    _this9.workPackageIndex.forEach(function (value, i) {
-                        structuredDatas[event.owner_id].months[monthKey].wps[i] = 0.0;
-                    });
-                }
-                structuredDatas[event.owner_id].months[monthKey].total += event.duration;
-
-                var wpKey = _this9.workPackageIndex.indexOf(_this9.wps[event.label].code);
-
-                if (!structuredDatas[event.owner_id].months[monthKey].wps[wpKey]) {
-                    structuredDatas[event.owner_id].months[monthKey].wps[wpKey] = 0.0;
-                }
-                structuredDatas[event.owner_id].months[monthKey].wps[wpKey] += event.duration;
-            });
-            return structuredDatas;
+            return store.timesheetDatas();
         }
     },
-    template: '<div class="timesheet"><h1>Feuille de temps</h1>\n        <section v-for="personDatas in structuredDatas">\n        <table class="table table-bordered">\n            <thead>\n                <tr>\n                    <th>{{ personDatas.label }}</th>\n                    <th v-for="w in wps">{{ w.code }}</th>\n                    <th>Total</th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr v-for="monthDatas, month in personDatas.months">\n                    <th>{{ month }}</th>\n                    <td v-for="tps in monthDatas.wps">{{tps}}</td>\n                    <th>{{ monthDatas.total }}</th>\n                </tr>\n            </tbody>\n            <tfoot>\n                <tr>\n                    <td :colspan="colspan + 1">&nbsp;</td>\n                    <th>{{ personDatas.total }}</th>\n                </tr>\n            </tfoot>\n        </table>\n        </section>\n</div>'
+    template: '<div class="timesheet"><h1>Feuille de temps</h1>\n        <section v-for="activityDatas in structuredDatas"> \n            <h1>Activit\xE9 sur <strong>{{ activityDatas.label }}</strong></h1>\n            <section v-for="personDatas in activityDatas.persons">\n                <table class="table table-bordered">\n                    <thead>\n                        <tr>\n                            <th>{{ personDatas.label }}</th>\n                            <th v-for="w in activityDatas.wps">{{ w }}</th>\n                            <th>Total</th>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        <tr v-for="monthDatas, month in personDatas.months">\n                            <th>{{ month }}</th>\n                            <td v-for="tps in monthDatas.wps">{{tps}}</td>\n                            <th>{{ monthDatas.total }}</th>\n                        </tr>\n                    </tbody>\n                    <tfoot>\n                        <tr>\n                            <td :colspan="activityDatas.wps.length + 1">&nbsp;</td>\n                            <th>{{ personDatas.total }}</th>\n                        </tr>\n                    </tfoot>\n                </table>\n            </section>\n        </section>\n</div>'
 };
 
 var Calendar = {
@@ -1690,7 +1729,8 @@ var Calendar = {
                     console.log(error);
                     _this14.errors.push("Impossible d'enregistrer les données : " + error);
                 }).then(function () {
-                    _this14.transmission = "";store.loading = false;
+                    _this14.transmission = "";
+                    store.loading = false;
                 });
                 ;
             }
@@ -1904,7 +1944,9 @@ var Calendar = {
     }), _methods),
 
     mounted: function mounted() {
+        console.log('MOUNTED', this.customDatas);
         if (this.customDatas) {
+            console.log("CustomDatas", this.customDatas());
             var customs = this.customDatas();
             this.wps = customs;
             for (var k in customs) {

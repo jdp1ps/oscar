@@ -70,16 +70,97 @@ class CalendarDatas {
         this.rejectedEvents = [];
     }
 
-    defaultWeekCredentials(){
+    defaultWeekCredentials() {
         return {
             send: false,
             adm: false,
             sci: false,
-            admdaily: [ false, false, false, false, false, false, false, false ],
-            scidaily: [ false, false, false, false, false, false, false, false ],
-            senddaily: [ false, false, false, false, false, false, false, false ],
-            copydaily: [ false, false, false, false, false, false, false, false ]
+            admdaily: [false, false, false, false, false, false, false, false],
+            scidaily: [false, false, false, false, false, false, false, false],
+            senddaily: [false, false, false, false, false, false, false, false],
+            copydaily: [false, false, false, false, false, false, false, false]
         };
+    }
+
+    /**
+     * Retourne les données pour afficher la feuille de temps.
+     */
+    timesheetDatas(){
+        console.log('Accès aux données pour la feuille de temps');
+        let structuredDatas = {};
+
+        let activityWpsIndex = {};
+
+        for (var k in this.wps) {
+            if (this.wps.hasOwnProperty(k)) {
+                if( !activityWpsIndex[this.wps[k].activity] ){
+                    activityWpsIndex[this.wps[k].activity] = [];
+                }
+                activityWpsIndex[this.wps[k].activity].push(this.wps[k].code);
+            }
+        }
+
+        this.workPackageIndex = [];
+        for (var k in this.wps) {
+            if (this.wps.hasOwnProperty(k)) {
+                this.workPackageIndex.push(this.wps[k].code);
+            }
+        }
+
+        this.listEvents.forEach((event) => {
+            if (event.isValid) {
+
+                let packActivity, packPerson, packMonth, packWeek, packDay;
+
+                console.log('LABEL', event.label);
+                console.log('ACTIVITY', this.wps[event.label].activity);
+
+                let activityLabel = this.wps[event.label].activity;
+                let wpReference = activityWpsIndex[activityLabel];
+                // Regroupement par person
+                if (!structuredDatas[activityLabel]) {
+                    structuredDatas[activityLabel] = {
+                        label: activityLabel,
+                        total: 0.0,
+                        persons: {},
+                        wps: wpReference
+                    }
+                }
+                packActivity = structuredDatas[activityLabel];
+                packActivity.total += event.duration;
+
+
+                // Regroupement par person
+                if (!packActivity.persons[event.owner_id]) {
+                    packActivity.persons[event.owner_id] = {
+                        label: event.owner,
+                        total: 0.0,
+                        months: {}
+                    }
+                }
+                packPerson = packActivity.persons[event.owner_id];
+                packPerson.total += event.duration;
+
+                // Regroupement par mois
+                let monthKey = event.mmStart.format('MMMM YYYY');
+
+
+                if (!packPerson.months[monthKey]) {
+                    packPerson.months[monthKey] = {
+                        total: 0.0,
+                        wps: []
+                    };
+                    wpReference.forEach((value, i) => {
+                        packPerson.months[monthKey].wps[i] = 0.0;
+                    });
+                }
+                packMonth = packPerson.months[monthKey];
+                packMonth.total += event.duration;
+                let wpKey = wpReference.indexOf(this.wps[event.label].code);
+                packMonth.wps[wpKey] += event.duration;
+            }
+        });
+        return structuredDatas;
     }
 
     get listEvents() {
@@ -277,7 +358,6 @@ class CalendarDatas {
                     datas[i].validatedSciBy,
                     datas[i].validatedAdminAt,
                     datas[i].validatedAdminBy
-
                 );
             }
         }
@@ -297,8 +377,7 @@ class CalendarDatas {
                 rejectedSciComment = "", rejectedSciAt = null, rejectedSciBy = null,
                 rejectedAdminComment = "", rejectedAdminAt = null, rejectedAdminBy = null,
                 validatedSciAt = null, validatedSciBy = null,
-                validatedAdminAt = null, validatedAdminBy = null
-                ) {
+                validatedAdminAt = null, validatedAdminBy = null) {
         this.events.push(
             new EventDT(
                 id,
@@ -441,17 +520,17 @@ var TimeEvent = {
             return (
                 this.event.rejectedAdminAt ? 'rejected' :
                     (
-                        this.event.validatedAdminAt ? 'validated':
+                        this.event.validatedAdminAt ? 'validated' :
                             'waiting'
                     )
             )
         },
 
         sciStatus(){
-            if( this.event.rejectedSciAt ){
+            if (this.event.rejectedSciAt) {
                 return "Rejet administratif"
             }
-            else if( this.event.validatedSciAt  ){
+            else if (this.event.validatedSciAt) {
                 return "Validation administrative le à"
             }
             else {
@@ -498,7 +577,6 @@ var TimeEvent = {
             return this.event.rejectedSciAt != null;
         },
         isRejectAdm(){
-            console.log(this.event.rejectedAdminAt);
             return this.event.rejectedAdminAt != null;
         },
 
@@ -864,15 +942,15 @@ var WeekView = {
             this.events.forEach(event => {
                 // On filtre les événements de la semaine et le déclarant si besoin
                 if (store.inCurrentWeek(event) && (store.filterOwner == '' || store.filterOwner == event.owner_id )) {
-                    if( event.validableSci ){
+                    if (event.validableSci) {
                         this.weekCredentials.sci = true;
                         this.weekCredentials.scidaily[event.mmStart.day()] = true;
                     }
-                    if( event.validableAdm ){
+                    if (event.validableAdm) {
                         this.weekCredentials.adm = true;
                         this.weekCredentials.admdaily[event.mmStart.day()] = true;
                     }
-                    if( event.sendable ){
+                    if (event.sendable) {
                         this.weekCredentials.send = true;
                         this.weekCredentials.senddaily[event.mmStart.day()] = true;
                     }
@@ -915,7 +993,7 @@ var WeekView = {
     },
 
     methods: {
-        handlerRejectShow( event ){
+        handlerRejectShow(event){
             this.$emit('rejectshow', event);
         },
 
@@ -932,10 +1010,10 @@ var WeekView = {
             this.$emit('rejectevent', this.weekEvents, 'adm');
         },
 
-        getEventsDay( day ){
+        getEventsDay(day){
             var events = [];
             this.weekEvents.forEach(event => {
-                if( day.day() == event.mmStart.day() ){
+                if (day.day() == event.mmStart.day()) {
                     events.push(event);
                 }
             });
@@ -943,16 +1021,16 @@ var WeekView = {
         },
 
         handlerValidateSciDay(day){
-            this.$emit('validateevent',this.getEventsDay(day), 'sci');
+            this.$emit('validateevent', this.getEventsDay(day), 'sci');
         },
         handlerRejectSciDay(day){
-            this.$emit('rejectevent',this.getEventsDay(day), 'sci');
+            this.$emit('rejectevent', this.getEventsDay(day), 'sci');
         },
         handlerValidateAdmDay(day){
-            this.$emit('validateevent',this.getEventsDay(day), 'adm');
+            this.$emit('validateevent', this.getEventsDay(day), 'adm');
         },
         handlerRejectAdmDay(day){
-            this.$emit('rejectevent',this.getEventsDay(day), 'adm');
+            this.$emit('rejectevent', this.getEventsDay(day), 'adm');
         },
 
 //        @savemoveevent="handlerSaveMove"
@@ -1004,7 +1082,7 @@ var WeekView = {
 
         handlerMouseDown(e){
             console.log("MouseDown", this.createNew == false);
-            if( this.createNew ) {
+            if (this.createNew) {
                 var roundFactor = 40 / 60 * this.pas;
                 this.gostDatas.y = Math.round(e.offsetY / roundFactor) * (roundFactor);
                 var pas = $(e.target).width() / 7;
@@ -1034,14 +1112,14 @@ var WeekView = {
                     var pas = $(e.target).width() / 7,
                         day = Math.floor(e.offsetX / pas),
 
-                    // Déplacement réél de la souris
+                        // Déplacement réél de la souris
                         realMove = e.offsetY - this.gostDatas.startFrom - this.gostDatas.decalageY,
 
-                    // Déplacement arrondis (effet magnétique)
+                        // Déplacement arrondis (effet magnétique)
                         effectivMove = Math.round(realMove / (40 / 60 * this.pas)),
                         effectiveMoveApplication = effectivMove * (40 / 60 * this.pas),
 
-                    // Position Y
+                        // Position Y
                         top = parseInt($(this.gostDatas.eventActive.$el).css('top'));
 
                     // Mise à jour du jour si besoin
@@ -1398,7 +1476,7 @@ var ListView = {
             return pack.events;
         },
 
-        submitYear( yearPack ){
+        submitYear(yearPack){
             var events = [];
             for (var monthKey in yearPack.months) {
                 if (yearPack.months.hasOwnProperty(monthKey)) {
@@ -1408,15 +1486,15 @@ var ListView = {
             this.$emit('submitevent', events);
         },
 
-        submitMonth( monthPack ){
+        submitMonth(monthPack){
             this.$emit('submitevent', this.getMonthPack(monthPack));
         },
 
-        submitWeek( weekPack ){
+        submitWeek(weekPack){
             this.$emit('submitevent', this.getWeekPack(weekPack));
         },
 
-        submitDay( dayPack ){
+        submitDay(dayPack){
             this.$emit('submitevent', this.getDayPack(dayPack));
         },
 
@@ -1432,7 +1510,7 @@ var ListView = {
             var structure = {};
             for (let i = 0; i < this.events.length; i++) {
                 let event = this.events[i];
-                if( !(store.filterOwner == '' || store.filterOwner == event.owner_id) ) continue;
+                if (!(store.filterOwner == '' || store.filterOwner == event.owner_id)) continue;
 
                 let currentYear, currentMonth, currentWeek, currentDay;
 
@@ -1443,7 +1521,7 @@ var ListView = {
                 let labelWeek = event.mmStart.format('W');
                 let labelDay = event.mmStart.format('ddd D');
 
-                if( !structure[labelYear] ) {
+                if (!structure[labelYear]) {
                     structure[labelYear] = {
                         total: 0.0,
                         months: {}
@@ -1452,7 +1530,7 @@ var ListView = {
                 currentYear = structure[labelYear];
                 currentYear.total += duration;
 
-                if( !currentYear.months[labelMonth] ){
+                if (!currentYear.months[labelMonth]) {
                     currentYear.months[labelMonth] = {
                         total: 0.0,
                         weeks: {}
@@ -1461,7 +1539,7 @@ var ListView = {
                 currentMonth = currentYear.months[labelMonth];
                 currentMonth.total += duration;
 
-                if( !currentMonth.weeks[labelWeek] ){
+                if (!currentMonth.weeks[labelWeek]) {
                     currentMonth.weeks[labelWeek] = {
                         total: 0.0,
                         days: {}
@@ -1470,7 +1548,7 @@ var ListView = {
                 currentWeek = currentMonth.weeks[labelWeek];
                 currentWeek.total += duration;
 
-                if( !currentWeek.days[labelDay] ){
+                if (!currentWeek.days[labelDay]) {
                     currentWeek.days[labelDay] = {
                         total: 0.0,
                         events: []
@@ -1664,7 +1742,7 @@ var ImportICSView = {
         /** Charge le fichier ICS depuis l'interface **/
         loadIcsFile(e){
             var fr = new FileReader();
-            fr.onloadend = (result)=> {
+            fr.onloadend = (result) => {
                 this.parseFileContent(fr.result);
             };
             fr.readAsText(e.target.files[0]);
@@ -1769,88 +1847,39 @@ var TimesheetView = {
     },
     computed: {
         colspan(){
-          return this.workPackageIndex.length;
+            return this.workPackageIndex.length;
         },
         structuredDatas(){
-            let structuredDatas = {};
-
-            this.workPackageIndex = [];
-            for (var k in this.wps) {
-                if (this.wps.hasOwnProperty(k)) {
-                    this.workPackageIndex.push(this.wps[k].code);
-                }
-            }
-            console.log('workpackageindex',this.workPackageIndex);
-
-
-
-            store.listEvents.forEach((event)=>{
-
-                if(event.isValid){
-                  //  console.log('Traitement de ', event);
-
-                    //console.log(this.wps[event.label])
-                }
-
-                if( !structuredDatas[event.owner_id] ){
-                    structuredDatas[event.owner_id] = {
-                        label: event.owner,
-                        total: 0.0,
-                        months: {}
-                    }
-                }
-                structuredDatas[event.owner_id].total += event.duration;
-
-                let monthKey = event.mmStart.format('MMMM YYYY');
-                if( !structuredDatas[event.owner_id].months[monthKey] ){
-                    structuredDatas[event.owner_id].months[monthKey] = {
-                        total: 0.0,
-                        wps:[]
-                    };
-                    this.workPackageIndex.forEach((value, i)=>{
-                        structuredDatas[event.owner_id].months[monthKey].wps[i] = 0.0;
-                    });
-                }
-                structuredDatas[event.owner_id].months[monthKey].total += event.duration;
-
-                let wpKey = this.workPackageIndex.indexOf(this.wps[event.label].code);
-
-                if( !structuredDatas[event.owner_id].months[monthKey].wps[wpKey] ){
-                    structuredDatas[event.owner_id].months[monthKey].wps[wpKey] = 0.0;
-                }
-                structuredDatas[event.owner_id].months[monthKey].wps[wpKey] += event.duration;
-
-
-
-
-            });
-            return structuredDatas;
+            return store.timesheetDatas();
         }
     },
     template: `<div class="timesheet"><h1>Feuille de temps</h1>
-        <section v-for="personDatas in structuredDatas">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>{{ personDatas.label }}</th>
-                    <th v-for="w in wps">{{ w.code }}</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="monthDatas, month in personDatas.months">
-                    <th>{{ month }}</th>
-                    <td v-for="tps in monthDatas.wps">{{tps}}</td>
-                    <th>{{ monthDatas.total }}</th>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td :colspan="colspan + 1">&nbsp;</td>
-                    <th>{{ personDatas.total }}</th>
-                </tr>
-            </tfoot>
-        </table>
+        <section v-for="activityDatas in structuredDatas"> 
+            <h1>Activité sur <strong>{{ activityDatas.label }}</strong></h1>
+            <section v-for="personDatas in activityDatas.persons">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>{{ personDatas.label }}</th>
+                            <th v-for="w in activityDatas.wps">{{ w }}</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="monthDatas, month in personDatas.months">
+                            <th>{{ month }}</th>
+                            <td v-for="tps in monthDatas.wps">{{tps}}</td>
+                            <th>{{ monthDatas.total }}</th>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td :colspan="activityDatas.wps.length + 1">&nbsp;</td>
+                            <th>{{ personDatas.total }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </section>
         </section>
 </div>`
 };
@@ -2039,10 +2068,10 @@ var Calendar = {
     },
 
     filters: {
-      moment(value){
-          var d = moment(value.date);
-          return d.format("dddd, D MMMM YYYY") + " (" +d.fromNow() +")";
-      }
+        moment(value){
+            var d = moment(value.date);
+            return d.format("dddd, D MMMM YYYY") + " (" + d.fromNow() + ")";
+        }
     },
 
     components: {
@@ -2078,7 +2107,7 @@ var Calendar = {
             }
         },
 
-        handlerRejectShow( event ){
+        handlerRejectShow(event){
             console.log('AFFICHAGE DU REJET', event);
             this.rejectShow = event;
         },
@@ -2156,11 +2185,11 @@ var Calendar = {
         handlerSendReject(){
             console.log('Envoi du rejet', this.rejectComment);
             var events = [];
-            this.rejectedEvents.forEach((event)=> {
+            this.rejectedEvents.forEach((event) => {
                 var e = JSON.parse(JSON.stringify(event));
-                if( this.rejectValidateType == 'rejectsci' ){
+                if (this.rejectValidateType == 'rejectsci') {
                     e.rejectedSciComment = this.rejectComment;
-                } else if ( this.rejectValidateType == 'rejectadm' ){
+                } else if (this.rejectValidateType == 'rejectadm') {
                     e.rejectedAdminComment = this.rejectComment;
                 }
                 events.push(e);
@@ -2175,42 +2204,42 @@ var Calendar = {
          * @param event
          * @param type
          */
-        handlerRejectEvent(event, type="unknow"){
+        handlerRejectEvent(event, type = "unknow"){
             // événements reçus
             var eventsArray = !event.length ? [event] : event,
                 events = [];
 
-            eventsArray.forEach((event)=> {
-               if( type == "sci" && event.validableSci || type == "adm" && event.validableAdm ){
-                   events.push(event);
-               }
+            eventsArray.forEach((event) => {
+                if (type == "sci" && event.validableSci || type == "adm" && event.validableAdm) {
+                    events.push(event);
+                }
             });
-            if( events.length ){
-                this.showRejectModal(events, 'reject'+type);
+            if (events.length) {
+                this.showRejectModal(events, 'reject' + type);
             } else {
                 bootbox.alert("Aucun créneaux ne peut être rejeté");
             }
         },
 
 
-        handlerValidateEvent(events, type="unknow"){
+        handlerValidateEvent(events, type = "unknow"){
             // événements reçus
             var eventsArray = !events.length ? [events] : events,
                 events = [];
 
-            eventsArray.forEach((event)=> {
-                if( type == "sci" && event.validableSci || type == "adm" && event.validableAdm ){
+            eventsArray.forEach((event) => {
+                if (type == "sci" && event.validableSci || type == "adm" && event.validableAdm) {
                     events.push(event);
                 }
             });
 
-            if( events.length ){
+            if (events.length) {
                 let message = events.length == 1 ? " du créneau " : " des " + events.length + " créneaux ";
-                bootbox.confirm( type == 'sci' ?
+                bootbox.confirm(type == 'sci' ?
                         '<i class="icon-beaker"></i> Validation scientifique ' + message
                         : '<i class="icon-archive"></i>   Validation administrative' + message
-                    ,(response) => {
-                        if(response){
+                    , (response) => {
+                        if (response) {
                             this.restStep(events, 'validate' + type)
                         }
                     })
@@ -2263,7 +2292,10 @@ var Calendar = {
                         console.log(error);
                         this.errors.push("Impossible d'enregistrer les données : " + error)
                     }
-                ).then(()=> { this.transmission = "";  store.loading = false; });
+                ).then(() => {
+                    this.transmission = "";
+                    store.loading = false;
+                });
                 ;
             }
         },
@@ -2277,7 +2309,7 @@ var Calendar = {
         },
 
         restStep(events, action){
-            if( !Array.isArray(events) ){
+            if (!Array.isArray(events)) {
                 events = [events];
             }
             if (this.restUrl) {
@@ -2303,7 +2335,7 @@ var Calendar = {
 
                         this.remoteError = "Erreur : " + error.statusText;
                     }
-                ).then(()=> {
+                ).then(() => {
                     this.transmission = "";
                     this.loading = false;
                 });
@@ -2321,7 +2353,7 @@ var Calendar = {
                     error => {
                         console.log(error)
                     }
-                ).then(()=> {
+                ).then(() => {
                     this.transmission = "";
                 });
             } else {
@@ -2350,7 +2382,7 @@ var Calendar = {
         /** Soumission de l'événement de la liste */
         handlerSubmitEvent(event){
             var events;
-            if( event.length ){
+            if (event.length) {
                 events = event;
                 console.log("Tableau d'événement");
             } else {
@@ -2361,15 +2393,15 @@ var Calendar = {
 
             // On liste des événements 'soumettable'
             var eventsSend = [];
-            for( var i=0; i<events.length; i++ ){
+            for (var i = 0; i < events.length; i++) {
                 console.log(events[i]);
-                if( events[i].sendable === true ){
+                if (events[i].sendable === true) {
                     eventsSend.push(events[i]);
                 }
             }
 
-            if( eventsSend.length ){
-                bootbox.confirm("Soumettre le(s) "+ eventsSend.length +" créneau(x) ?", (confirm) => {
+            if (eventsSend.length) {
+                bootbox.confirm("Soumettre le(s) " + eventsSend.length + " créneau(x) ?", (confirm) => {
                     if (confirm)
                         this.restSend(eventsSend);
                 });
@@ -2389,7 +2421,7 @@ var Calendar = {
         loadIcsFile(e){
             this.transmission = "Analyse du fichier ICS...";
             var fr = new FileReader();
-            fr.onloadend = (result)=> {
+            fr.onloadend = (result) => {
                 this.parseFileContent(fr.result);
             };
             fr.readAsText(e.target.files[0]);
@@ -2478,7 +2510,7 @@ var Calendar = {
                     this.errors.push("Impossible de charger les données : " + ko);
                     store.remoteError = "Impossible de charger des créneaux";
                 }
-            ).then(()=> {
+            ).then(() => {
                 this.transmission = "";
                 store.loading = false;
             });
@@ -2490,7 +2522,9 @@ var Calendar = {
     },
 
     mounted(){
+        console.log('MOUNTED', this.customDatas);
         if (this.customDatas) {
+            console.log("CustomDatas", this.customDatas());
             var customs = this.customDatas();
             this.wps = customs;
             for (var k in customs) {
