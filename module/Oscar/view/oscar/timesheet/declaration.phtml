@@ -1,7 +1,6 @@
 <link rel="stylesheet" href="<?= $this->basePath() . '/js/modules/unicaen/dist/css/calendar.css' ?>" />
 <link rel="stylesheet" href="<?= $this->basePath() . '/js/modules/unicaen/dist/css/datepicker.css' ?>" />
 <link rel="stylesheet" href="<?= $this->basePath() . '/css/icons/css/fontello.css' ?>" />
-
 <div class="container">
     <?php
     $crenaux = [];
@@ -15,6 +14,7 @@
         }
         $crenaux[((string)$wpd)] = [
             'label'         => (string)$wpd,
+            'activity'      => $wpd->getActivity()->__toString(),
             'idactivity'    => $wpd->getActivity()->getId(),
             'code' => $wpd->getCode(),
             'idworkpackage' => $wpd->getId(),
@@ -36,6 +36,7 @@
         Vue.http.options.emulateHTTP = true
 
         var customDatas = <?= json_encode($crenaux) ?>;
+
         var mixins = {
             methods: {
                 restUrl(){

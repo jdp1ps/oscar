@@ -26,6 +26,7 @@
     foreach( $activity->getWorkPackages() as $wpd ){
         $crenaux[((string)$wpd)] = [
             'label'         => (string)$wpd,
+            'activity'      => (string)$wpd->getActivity(),
             'idactivity'    => $activity->getId(),
             'code'          => $wpd->getCode(),
             'idworkpackage' => $wpd->getId(),
