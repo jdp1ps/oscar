@@ -21,7 +21,6 @@ var colorLabel = (label) => {
 
 class CalendarDatas {
     constructor() {
-        this.state = 'week';
         this.filterOwner = "";
         this.events = [];
         this.newID = 1;
@@ -1846,13 +1845,9 @@ var TimesheetView = {
 
     methods: {
         getBase64CSV(datas){
-            console.log(datas);
-
             var csv = [];
             let header = [datas.label].concat(datas.wps).concat(['comentaires','total']);
-
             csv.push(header);
-
             for (var month in datas.months) {
                 if( datas.months.hasOwnProperty(month) ){
                     let monthData = datas.months[month];
@@ -1889,23 +1884,23 @@ var TimesheetView = {
             finalLine.push(datas.total.toString().replace('.',','));
             csv.push(finalLine);
 
-
-                var str = Papa.unparse({
-                    data: csv,
-                    quotes: true,
-                    delimiter: ",",
-                    newline: "\r\n"
-                });
+            var str = Papa.unparse({
+                data: csv,
+                quotes: true,
+                delimiter: ",",
+                newline: "\r\n"
+            });
 
             return 'data:application/octet-stream;base64,' + btoa(unescape(encodeURIComponent(str)));
         }
     },
 
-    template: `<div class="timesheet"><h1>Feuille de temps</h1>
+    template: `<div class="timesheet"><h1> <i class="icon-file-excel"></i>Feuille de temps</h1>
+        <p class="help-block">Seul les déclarations <strong>validées</strong> sont affichées ici.</p>
         <section v-for="activityDatas in structuredDatas"> 
             <h2>
                 <i class="icon-cube"></i>
-                Activité sur <strong>{{ activityDatas.label }}</strong>
+                Déclarations validées pour <strong>{{ activityDatas.label }}</strong>
             </h2>
             <section v-for="personDatas in activityDatas.persons">
                 <table class="table table-bordered table-timesheet">
@@ -2117,6 +2112,11 @@ var Calendar = {
     props: {
         withOwner: {
             default: false
+        },
+
+        state: {
+            default: "week",
+            type: String
         },
 
         createNew: {
@@ -2583,7 +2583,11 @@ var Calendar = {
     },
 
     mounted(){
-        console.log('MOUNTED', this.customDatas);
+        var allowState = ['week', 'list', 'timesheet'];
+        if( allowState.indexOf(window.location.hash.substring(1)) ){
+            this.state = window.location.hash.substring(1);
+        }
+
         if (this.customDatas) {
             console.log("CustomDatas", this.customDatas());
             var customs = this.customDatas();

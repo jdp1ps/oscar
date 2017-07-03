@@ -591,6 +591,10 @@ body {
 
 .timesheet {
   padding: 0 1em; }
+  .timesheet h2 {
+    color: #555;
+    font-weight: 100;
+    font-size: 1.6em; }
 
 .data-day {
   font-size: .8em;

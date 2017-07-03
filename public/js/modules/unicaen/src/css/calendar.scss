@@ -813,6 +813,11 @@ body {
 // # Feuille de temps (preview)
 .timesheet {
   padding: 0 1em;
+  h2 {
+    color: #555;
+    font-weight: 100;
+    font-size: 1.6em;
+  }
 }
 
 .data-day {
