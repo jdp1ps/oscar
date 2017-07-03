@@ -1,12 +1,12 @@
 ;(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['moment', 'ICalAnalyser', 'EventDT', 'Datepicker', 'bootbox'], factory);
+    define(['moment', 'ICalAnalyser', 'EventDT', 'Datepicker', 'bootbox', 'papa-parse'], factory);
   } else if (typeof exports === 'object') {
-    module.exports = factory(require('moment'), require('ICalAnalyser'), require('EventDT'), require('Datepicker'), require('bootbox'));
+    module.exports = factory(require('moment'), require('ICalAnalyser'), require('EventDT'), require('Datepicker'), require('bootbox'), require('papa-parse'));
   } else {
-    root.Calendar = factory(root.moment, root.ICalAnalyser, root.EventDT, root.Datepicker, root.bootbox);
+    root.Calendar = factory(root.moment, root.ICalAnalyser, root.EventDT, root.Datepicker, root.bootbox, root.Papa);
   }
-}(this, function(moment, ICalAnalyser, EventDT, Datepicker, bootbox) {
+}(this, function(moment, ICalAnalyser, EventDT, Datepicker, bootbox, Papa) {
 'use strict';
 
 var _methods;
@@ -170,8 +170,12 @@ var CalendarDatas = function () {
                             wps: packActivity.wps,
                             personid: event.owner_id,
                             total: 0.0,
+                            totalWP: [],
                             months: {}
                         };
+                        wpReference.forEach(function (value, i) {
+                            packActivity.persons[event.owner_id].totalWP[i] = 0.0;
+                        });
                     }
                     packPerson = packActivity.persons[event.owner_id];
                     packPerson.total += event.duration;
@@ -192,21 +196,26 @@ var CalendarDatas = function () {
                     packMonth.total += event.duration;
                     var wpKey = wpReference.indexOf(_this.wps[event.label].code);
                     packMonth.wps[wpKey] += event.duration;
+                    packPerson.totalWP[wpKey] += event.duration;
 
                     var dayKey = event.mmStart.format('dddd D MMMM YYYY');
                     if (!packMonth.days[dayKey]) {
                         packMonth.days[dayKey] = {
                             total: 0.0,
+                            comments: "",
                             wps: []
                         };
                         wpReference.forEach(function (value, i) {
                             packMonth.days[dayKey].wps[i] = 0.0;
                         });
                     }
-                    packDay = packMonth.days[dayKey];
 
+                    packDay = packMonth.days[dayKey];
                     packDay.wps[wpKey] += event.duration;
                     packDay.total += event.duration;
+                    if (event.description) {
+                        packDay.comments += event.description + "\n";
+                    }
                 }
             });
             return structuredDatas;
@@ -1473,16 +1482,67 @@ var TimesheetView = {
     },
 
     methods: {
-        handlerDowloadTimesheet: function handlerDowloadTimesheet(datas) {
+        getBase64CSV: function getBase64CSV(datas) {
             console.log(datas);
-            var headers = [];
-            require(["papa-parse"], function (Papa) {
-                console.log(Papa);
+
+            var csv = [];
+            var header = [datas.label].concat(datas.wps).concat(['comentaires', 'total']);
+
+            csv.push(header);
+
+            for (var month in datas.months) {
+                if (datas.months.hasOwnProperty(month)) {
+                    var day;
+
+                    (function () {
+                        var monthData = datas.months[month];
+
+                        for (day in monthData.days) {
+                            if (monthData.days.hasOwnProperty(day)) {
+                                (function () {
+                                    var dayData = monthData.days[day];
+                                    var line = [day];
+                                    dayData.wps.forEach(function (dayTotal) {
+                                        line.push(dayTotal.toString().replace('.', ','));
+                                    });
+                                    line.push(dayData.comments);
+                                    line.push(dayData.total.toString().replace('.', ','));
+                                    csv.push(line);
+                                })();
+                            }
+                        }
+
+                        var monthLine = ['TOTAL pour ' + month];
+                        monthData.wps.forEach(function (monthTotal) {
+                            monthLine.push(monthTotal.toString().replace('.', ','));
+                        });
+                        monthLine.push('');
+                        monthLine.push(monthData.total.toString().replace('.', ','));
+                        csv.push(monthLine);
+                    })();
+                }
+            }
+
+            var finalLine = ["TOTAL"];
+            datas.totalWP.forEach(function (totalCol) {
+                finalLine.push(totalCol.toString().replace('.', ','));
             });
+            finalLine.push('');
+            finalLine.push(datas.total.toString().replace('.', ','));
+            csv.push(finalLine);
+
+            var str = Papa.unparse({
+                data: csv,
+                quotes: true,
+                delimiter: ",",
+                newline: "\r\n"
+            });
+
+            return 'data:application/octet-stream;base64,' + btoa(unescape(encodeURIComponent(str)));
         }
     },
 
-    template: '<div class="timesheet"><h1>Feuille de temps</h1>\n        <section v-for="activityDatas in structuredDatas"> \n            <h2>\n                <i class="icon-cube"></i>\n                Activit\xE9 sur <strong>{{ activityDatas.label }}</strong>\n            </h2>\n            <section v-for="personDatas in activityDatas.persons">\n                <table class="table table-bordered table-timesheet">\n                    <thead>\n                        <tr>\n                            <th>{{ personDatas.label }}</th>\n                            <th v-for="w in activityDatas.wps">{{ w }}</th>\n                            <th class="time">Total</th>\n                        </tr>\n                    </thead>\n                    <tbody v-for="monthDatas, month in personDatas.months" class="person-tbody">\n                        <tr class="header-month">\n                            <th>{{ month }}</th>\n                            <td v-for="tps in monthDatas.wps"  class="time">{{tps}}</td>\n                            <th class="time">{{ monthDatas.total }}</th>\n                        </tr>\n                        <tr v-for="dayDatas, day in monthDatas.days" class="data-day">\n                            <th>{{ day }}</th>\n                            <td v-for="tpsDay in dayDatas.wps" class="time">{{tpsDay}}</td>\n                            <th class="time">{{ dayDatas.total }}</th>\n                        </tr>\n                    </tbody>\n                    <tfoot>\n                        <tr>\n                            <td :colspan="activityDatas.wps.length + 1">&nbsp;</td>\n                            <th class="time">{{ personDatas.total }}</th>\n                        </tr>\n                    </tfoot>\n                </table>\n                <nav class="text-right">\n                    <button @click="handlerDowloadTimesheet(personDatas)" class="btn btn-primary btn-xs">\n                        <i class="icon-download-outline"></i>\n                        T\xE9l\xE9charger le CSV\n                    </button>\n                </nav>\n            </section>\n        </section>\n</div>'
+    template: '<div class="timesheet"><h1>Feuille de temps</h1>\n        <section v-for="activityDatas in structuredDatas"> \n            <h2>\n                <i class="icon-cube"></i>\n                Activit\xE9 sur <strong>{{ activityDatas.label }}</strong>\n            </h2>\n            <section v-for="personDatas in activityDatas.persons">\n                <table class="table table-bordered table-timesheet">\n                    <thead>\n                        <tr>\n                            <th>{{ personDatas.label }}</th>\n                            <th v-for="w in activityDatas.wps">{{ w }}</th>\n                            <th class="time">Commentaire(s)</th>\n                            <th class="time">Total</th>\n                        </tr>\n                    </thead>\n                    <tbody v-for="monthDatas, month in personDatas.months" class="person-tbody">\n                        <tr class="header-month">\n                            <th :colspan="monthDatas.wps.length + 3">{{ month }}</th>\n                        </tr>\n                        <tr v-for="dayDatas, day in monthDatas.days" class="data-day">\n                            <th>{{ day }}</th>\n                            <td v-for="tpsDay in dayDatas.wps" class="time">{{tpsDay}}</td>\n                            <td class="timesheet-comment">{{ dayDatas.comments }}</td>\n                            <th class="time">{{ dayDatas.total }}</th>\n                        </tr>\n                        <tr>\n                            <th>&nbsp;</th>\n                            <td v-for="tps in monthDatas.wps"  class="time">{{tps}}</td>\n                            <td>&nbsp;</td>\n                            <th class="time">{{ monthDatas.total }}</th>\n                        </tr>\n                    </tbody>\n                    <tfoot>\n                        <tr>\n                            <th>Total</th>\n                            <th v-for="totalWP in personDatas.totalWP" class="time">{{totalWP}}</th>\n                            <td>&nbsp;</td>\n                            <th class="time">{{ personDatas.total }}</th>\n                        </tr>\n                    </tfoot>\n                </table>\n                <nav class="text-right">\n                    <a :href="getBase64CSV(personDatas)" :download="\'Feuille-de-temps\' + personDatas.label + \'.csv\'" class="btn btn-primary btn-xs">\n                        <i class="icon-download-outline"></i>\n                        T\xE9l\xE9charger le CSV\n                    </a>\n                </nav>\n            </section>\n        </section>\n</div>'
 };
 
 var Calendar = {
