@@ -359,7 +359,7 @@ var CalendarDatas = function () {
                 if (local) {
                     local.sync(datas[i]);
                 } else {
-                    this.addNewEvent(datas[i].id, datas[i].label, datas[i].start, datas[i].end, datas[i].description, datas[i].credentials, datas[i].status, datas[i].owner, datas[i].owner_id, datas[i].rejectedSciComment, datas[i].rejectedSciAt, datas[i].rejectedSciBy, datas[i].rejectedAdminComment, datas[i].rejectedAdminAt, datas[i].rejectedAdminBy, datas[i].validatedSciAt, datas[i].validatedSciBy, datas[i].validatedAdminAt, datas[i].validatedAdminBy);
+                    this.addNewEvent(datas[i]);
                 }
             }
         }
@@ -375,23 +375,8 @@ var CalendarDatas = function () {
         }
     }, {
         key: 'addNewEvent',
-        value: function addNewEvent(id, label, start, end, description) {
-            var credentials = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : undefined;
-            var status = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : "draft";
-            var owner = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "";
-            var owner_id = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
-            var rejectedSciComment = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : "";
-            var rejectedSciAt = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
-            var rejectedSciBy = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : null;
-            var rejectedAdminComment = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : "";
-            var rejectedAdminAt = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : null;
-            var rejectedAdminBy = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
-            var validatedSciAt = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : null;
-            var validatedSciBy = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : null;
-            var validatedAdminAt = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : null;
-            var validatedAdminBy = arguments.length > 18 && arguments[18] !== undefined ? arguments[18] : null;
-
-            this.events.push(new EventDT(id, label, start, end, description, credentials, status, owner, owner_id, rejectedSciComment, rejectedSciAt, rejectedSciBy, rejectedAdminComment, rejectedAdminAt, rejectedAdminBy, validatedSciAt, validatedSciBy, validatedAdminAt, validatedAdminBy));
+        value: function addNewEvent(data) {
+            this.events.push(new EventDT(data));
         }
     }, {
         key: 'listEvents',
@@ -988,9 +973,16 @@ var WeekView = {
 
             var start = moment(this.currentDay).day(day).hour(time);
             var end = moment(start).add(duration, 'minutes');
-            var newEvent = new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, {
-                editable: true,
-                deletable: true
+            var newEvent = new EventDT({
+                id: null,
+                label: this.defaultLabel,
+                start: start.format(),
+                end: end.format(),
+                description: this.defaultDescription,
+                credentials: {
+                    editable: true,
+                    deletable: true
+                }
             });
             this.$emit('createevent', newEvent);
         },
@@ -1515,7 +1507,7 @@ var Calendar = {
 
     filters: {
         moment: function (_moment) {
-            function moment(_x16) {
+            function moment(_x2) {
                 return _moment.apply(this, arguments);
             }
 
@@ -1925,9 +1917,12 @@ var Calendar = {
         createEvent: function createEvent(day, time) {
             var start = moment(this.currentDay).day(day).hour(time);
             var end = moment(start).add(2, 'hours');
-            this.newEvent(new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, {
-                editable: true,
-                deletable: true
+            this.newEvent(new EventDT({
+                id: null,
+                label: this.defaultLabel, start: start.format(), end: end.format(), description: this.defaultDescription, credentials: {
+                    editable: true,
+                    deletable: true
+                }
             }));
         },
         editEvent: function editEvent(event) {

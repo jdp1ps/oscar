@@ -3,57 +3,8 @@
 moment.locale('fr');
 
 var EventDT = class {
-    constructor(id, label, start, end, description = "",
-                actions = {}, status = 'draft', owner = "", owner_id = null,
-                rejectedSciComment = "", rejectedSciAt = null, rejectedSciBy = null,
-                rejectedAdminComment = "", rejectedAdminAt = null, rejectedAdminBy = null,
-                validatedSciAt = null, validatedSciBy = null,
-                validatedAdminAt = null, validatedAdminBy = null) {
-        this.id = id;
-
-        // From ICS format
-        this.uid = EventDT.UID++;
-
-        // ICS : summary
-        this.label = label;
-
-
-        // ICS : description
-        this.description = description;
-
-        this.owner = owner;
-        this.owner_id = owner_id;
-        this.intersect = 0;
-        this.intersectIndex = 0;
-
-        this.rejectedSciComment = rejectedSciComment;
-        this.rejectedSciAt = rejectedSciAt;
-        this.rejectedSciBy = rejectedSciBy;
-
-        this.rejectedAdminComment = rejectedAdminComment;
-        this.rejectedAdminAt = rejectedAdminAt;
-        this.rejectedAdminBy = rejectedAdminBy;
-
-        this.validatedSciAt = validatedSciAt;
-        this.validatedSciBy = validatedSciBy;
-        this.validatedAdminAt = validatedAdminAt;
-        this.validatedAdminBy = validatedAdminBy;
-
-
-        // OSCAR
-        this.editable = actions.editable || false;
-        this.deletable = actions.deletable || false;
-        this.validable = actions.validable || false;
-        this.sendable = actions.sendable || false;
-        this.validableSci = actions.validableSci || false;
-        this.validableAdm = actions.validableAdm || false;
-
-        // Status
-        // - DRAFT, SEND, VALID, REJECT
-        this.status = status;
-
-        this.start = start;
-        this.end = end;
+    constructor(data) {
+        this.sync(data);
     }
 
     get isLocked(){
@@ -173,6 +124,18 @@ var EventDT = class {
         this.end = data.end;
         this.status = data.status;
 
+        if( !this.uid ){
+            this.uid = EventDT.UID++;
+        }
+
+        this.workpackageId = data.workpackage_id | null;
+        this.workpackageCode = data.workpackage_code | null;
+        this.workpackageLabel = data.workpackage_label | null;
+
+        this.activityId = data.activity_id | null;
+        this.activityLabel = data.activity_label | null;
+
+
         this.rejectedComment = data.rejectedComment;
         this.rejectedCommentAt = data.rejectedCommentAt;
         this.rejectedAdminComment = data.rejectedAdminComment;
@@ -189,6 +152,13 @@ var EventDT = class {
         this.validatedSciBy = data.validatedSciBy;
         this.validatedAdminAt = data.validatedAdminAt;
         this.validatedAdminBy = data.validatedAdminBy;
+
+        this.editable = false;
+        this.deletable = false;
+        this.validable = false;
+        this.validableAdm = false;
+        this.validableSci = false;
+        this.sendable = false;
 
         if (data.credentials) {
             this.editable = data.credentials.editable;

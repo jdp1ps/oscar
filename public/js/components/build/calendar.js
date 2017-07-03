@@ -209,7 +209,7 @@ var CalendarDatas = function () {
                 if (local) {
                     local.sync(datas[i]);
                 } else {
-                    this.addNewEvent(datas[i].id, datas[i].label, datas[i].start, datas[i].end, datas[i].description, datas[i].credentials, datas[i].status, datas[i].owner);
+                    this.addNewEvent(datas[i]);
                 }
             }
         }
@@ -1161,8 +1161,8 @@ var Calendar = {
 
         /** Ajoute la liste d'événement **/
         hydrateEventWith: function hydrateEventWith(arrayOfObj) {
-
             arrayOfObj.forEach(function (obj) {
+//                store.addNewEvent(obj.id, obj.label, obj.start, obj.end, obj.description, { editable: true, deletable: true }, 'draft');
                 store.addNewEvent(obj.id, obj.label, obj.start, obj.end, obj.description, { editable: true, deletable: true }, 'draft');
             });
         },
