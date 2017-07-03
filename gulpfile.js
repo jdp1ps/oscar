@@ -27,12 +27,15 @@ var gulp = require('gulp'),
      * @param name
      * @returns {{name: *, amd: *, cjs: *, global: *, param: *}}
      */
-    dependency = function(name){
+    dependency = function(name, alias){
+        if( alias == undefined ){
+            alias = name;
+        }
         return {
-            'name': name,
+            'name': alias,
             'amd': name,
             'cjs': name,
-            'global': name,
+            'global': alias,
             'param': name
         };
     },

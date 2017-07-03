@@ -126,6 +126,14 @@ gulp.task('js', function(){
                         global: 'bootbox',
                         param: 'bootbox'
                     }
+                    ,
+                    {
+                        name: 'Papa',
+                        amd: 'papa-parse',
+                        cjs: 'papa-parse',
+                        global: 'Papa',
+                        param: 'Papa'
+                    }
                 ]
             }
         }))

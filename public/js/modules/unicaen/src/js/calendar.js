@@ -138,8 +138,12 @@ class CalendarDatas {
                         wps: packActivity.wps,
                         personid: event.owner_id,
                         total: 0.0,
+                        totalWP: [],
                         months: {}
-                    }
+                    };
+                    wpReference.forEach((value, i) => {
+                        packActivity.persons[event.owner_id].totalWP[i] = 0.0;
+                    });
                 }
                 packPerson = packActivity.persons[event.owner_id];
                 packPerson.total += event.duration;
@@ -160,21 +164,26 @@ class CalendarDatas {
                 packMonth.total += event.duration;
                 let wpKey = wpReference.indexOf(this.wps[event.label].code);
                 packMonth.wps[wpKey] += event.duration;
+                packPerson.totalWP[wpKey] += event.duration;
 
                 let dayKey = event.mmStart.format('dddd D MMMM YYYY');
                 if (!packMonth.days[dayKey]) {
                     packMonth.days[dayKey] = {
                         total: 0.0,
+                        comments: "",
                         wps: []
                     };
                     wpReference.forEach((value, i) => {
                         packMonth.days[dayKey].wps[i] = 0.0;
                     });
                 }
-                packDay = packMonth.days[dayKey];
 
+                packDay = packMonth.days[dayKey];
                 packDay.wps[wpKey] += event.duration;
                 packDay.total += event.duration;
+                if( event.description ){
+                    packDay.comments += event.description + "\n";
+                }
 
 
 
@@ -1836,12 +1845,59 @@ var TimesheetView = {
     },
 
     methods: {
-        handlerDowloadTimesheet(datas){
+        getBase64CSV(datas){
             console.log(datas);
-            let headers = [];
-            require(["papa-parse"], function(Papa){
-               console.log(Papa);
+
+            var csv = [];
+            let header = [datas.label].concat(datas.wps).concat(['comentaires','total']);
+
+            csv.push(header);
+
+            for (var month in datas.months) {
+                if( datas.months.hasOwnProperty(month) ){
+                    let monthData = datas.months[month];
+
+                    for (var day in monthData.days) {
+                        if( monthData.days.hasOwnProperty(day) ){
+                            let dayData = monthData.days[day];
+                            let line = [day];
+                            dayData.wps.forEach((dayTotal) => {
+                                line.push(dayTotal.toString().replace('.', ','));
+                            });
+                            line.push(dayData.comments);
+                            line.push(dayData.total.toString().replace('.', ','));
+                            csv.push(line);
+                        }
+                    }
+
+                    let monthLine = ['TOTAL pour ' +month];
+                    monthData.wps.forEach((monthTotal) => {
+                        monthLine.push(monthTotal.toString().replace('.', ','));
+                    });
+                    monthLine.push('');
+                    monthLine.push(monthData.total.toString().replace('.', ','));
+                    csv.push(monthLine);
+
+                }
+            }
+
+            let finalLine = ["TOTAL"];
+            datas.totalWP.forEach((totalCol) => {
+               finalLine.push(totalCol.toString().replace('.', ','));
             });
+            finalLine.push('');
+            finalLine.push(datas.total.toString().replace('.',','));
+            csv.push(finalLine);
+
+
+                var str = Papa.unparse({
+                    data: csv,
+                    quotes: true,
+                    delimiter: ",",
+                    newline: "\r\n"
+                });
+
+            return 'data:application/octet-stream;base64,' + btoa(unescape(encodeURIComponent(str)));
         }
     },
 
@@ -1857,33 +1913,41 @@ var TimesheetView = {
                         <tr>
                             <th>{{ personDatas.label }}</th>
                             <th v-for="w in activityDatas.wps">{{ w }}</th>
+                            <th class="time">Commentaire(s)</th>
                             <th class="time">Total</th>
                         </tr>
                     </thead>
                     <tbody v-for="monthDatas, month in personDatas.months" class="person-tbody">
                         <tr class="header-month">
-                            <th>{{ month }}</th>
-                            <td v-for="tps in monthDatas.wps"  class="time">{{tps}}</td>
-                            <th class="time">{{ monthDatas.total }}</th>
+                            <th :colspan="monthDatas.wps.length + 3">{{ month }}</th>
                         </tr>
                         <tr v-for="dayDatas, day in monthDatas.days" class="data-day">
                             <th>{{ day }}</th>
                             <td v-for="tpsDay in dayDatas.wps" class="time">{{tpsDay}}</td>
+                            <td class="timesheet-comment">{{ dayDatas.comments }}</td>
                             <th class="time">{{ dayDatas.total }}</th>
+                        </tr>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <td v-for="tps in monthDatas.wps"  class="time">{{tps}}</td>
+                            <td>&nbsp;</td>
+                            <th class="time">{{ monthDatas.total }}</th>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td :colspan="activityDatas.wps.length + 1">&nbsp;</td>
+                            <th>Total</th>
+                            <th v-for="totalWP in personDatas.totalWP" class="time">{{totalWP}}</th>
+                            <td>&nbsp;</td>
                             <th class="time">{{ personDatas.total }}</th>
                         </tr>
                     </tfoot>
                 </table>
                 <nav class="text-right">
-                    <button @click="handlerDowloadTimesheet(personDatas)" class="btn btn-primary btn-xs">
+                    <a :href="getBase64CSV(personDatas)" :download="'Feuille-de-temps' + personDatas.label + '.csv'" class="btn btn-primary btn-xs">
                         <i class="icon-download-outline"></i>
                         Télécharger le CSV
-                    </button>
+                    </a>
                 </nav>
             </section>
         </section>
