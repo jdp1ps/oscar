@@ -809,6 +809,34 @@ body {
   }
 }
 
+////////////////////////////////////////////////
+// # Feuille de temps (preview)
+.timesheet {
+  padding: 0 1em;
+}
+
+.data-day {
+  font-size: .8em;
+  line-height: 1em;
+  font-weight: 100;
+  th { font-weight: normal; }
+}
+
+.table-timesheet {
+  box-shadow: 0 0 8px rgba(0,0,0,.1);
+  background: white;
+  margin: 1em 0 4px;
+  .time {
+    text-align: right;
+  }
+  .person-tbody {
+    border-top: 2px solid #ddd;
+    tr td, tr th {
+      border: solid thin #eee;
+      padding: 4px;
+    }
+  }
+}
 
 
 .year-pack, .week-pack, .month-pack {

@@ -133,6 +133,8 @@ var EventDT = class {
         this.activityId = data.activity_id || null;
         this.activityLabel = data.activity_label || null;
 
+        this.owner = data.owner;
+        this.owner_id = data.owner_id;
 
         this.rejectedComment = data.rejectedComment;
         this.rejectedCommentAt = data.rejectedCommentAt;
@@ -166,8 +168,7 @@ var EventDT = class {
             this.validableSci = data.credentials.validableSci;
             this.sendable = data.credentials.sendable;
         }
-
-        console.log("Synchronisation de l'événement", this.id, "avec", data, this);
+//        console.log("Synchronisation de l'événement", this.id, "avec", data, this);
     }
 
     static first(events) {

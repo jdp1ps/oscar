@@ -90,7 +90,7 @@ class CalendarDatas {
      * Retourne les données pour afficher la feuille de temps.
      */
     timesheetDatas(){
-        console.log('Accès aux données pour la feuille de temps');
+        console.log('Accès aux données pour la feuille de temps', this.wps);
         let structuredDatas = {};
         let activityWpsIndex = {};
 
@@ -146,12 +146,11 @@ class CalendarDatas {
 
                 // Regroupement par mois
                 let monthKey = event.mmStart.format('MMMM YYYY');
-
-
                 if (!packPerson.months[monthKey]) {
                     packPerson.months[monthKey] = {
                         total: 0.0,
-                        wps: []
+                        wps: [],
+                        days: {}
                     };
                     wpReference.forEach((value, i) => {
                         packPerson.months[monthKey].wps[i] = 0.0;
@@ -161,6 +160,24 @@ class CalendarDatas {
                 packMonth.total += event.duration;
                 let wpKey = wpReference.indexOf(this.wps[event.label].code);
                 packMonth.wps[wpKey] += event.duration;
+
+                let dayKey = event.mmStart.format('dddd D MMMM YYYY');
+                if (!packMonth.days[dayKey]) {
+                    packMonth.days[dayKey] = {
+                        total: 0.0,
+                        wps: []
+                    };
+                    wpReference.forEach((value, i) => {
+                        packMonth.days[dayKey].wps[i] = 0.0;
+                    });
+                }
+                packDay = packMonth.days[dayKey];
+
+                packDay.wps[wpKey] += event.duration;
+                packDay.total += event.duration;
+
+
+
             }
         });
         return structuredDatas;
@@ -1830,34 +1847,44 @@ var TimesheetView = {
 
     template: `<div class="timesheet"><h1>Feuille de temps</h1>
         <section v-for="activityDatas in structuredDatas"> 
-            <h1>Activité sur <strong>{{ activityDatas.label }}</strong></h1>
+            <h2>
+                <i class="icon-cube"></i>
+                Activité sur <strong>{{ activityDatas.label }}</strong>
+            </h2>
             <section v-for="personDatas in activityDatas.persons">
-                <table class="table table-bordered">
+                <table class="table table-bordered table-timesheet">
                     <thead>
                         <tr>
                             <th>{{ personDatas.label }}</th>
                             <th v-for="w in activityDatas.wps">{{ w }}</th>
-                            <th>Total</th>
+                            <th class="time">Total</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr v-for="monthDatas, month in personDatas.months">
+                    <tbody v-for="monthDatas, month in personDatas.months" class="person-tbody">
+                        <tr class="header-month">
                             <th>{{ month }}</th>
-                            <td v-for="tps in monthDatas.wps">{{tps}}</td>
-                            <th>{{ monthDatas.total }}</th>
+                            <td v-for="tps in monthDatas.wps"  class="time">{{tps}}</td>
+                            <th class="time">{{ monthDatas.total }}</th>
+                        </tr>
+                        <tr v-for="dayDatas, day in monthDatas.days" class="data-day">
+                            <th>{{ day }}</th>
+                            <td v-for="tpsDay in dayDatas.wps" class="time">{{tpsDay}}</td>
+                            <th class="time">{{ dayDatas.total }}</th>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <td :colspan="activityDatas.wps.length + 1">&nbsp;</td>
-                            <th>{{ personDatas.total }}</th>
+                            <th class="time">{{ personDatas.total }}</th>
                         </tr>
                     </tfoot>
                 </table>
-                <button @click="handlerDowloadTimesheet(personDatas)" class="btn btn-primary">
-                    <i class="icon-download-outline"></i>
-                    Télécharger le CSV
-                 </button>
+                <nav class="text-right">
+                    <button @click="handlerDowloadTimesheet(personDatas)" class="btn btn-primary btn-xs">
+                        <i class="icon-download-outline"></i>
+                        Télécharger le CSV
+                    </button>
+                </nav>
             </section>
         </section>
 </div>`
