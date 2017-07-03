@@ -82,6 +82,10 @@ class CalendarDatas {
         };
     }
 
+    downloadTimesheet(personid, activityid){
+        console.log(personid, activityid);
+    }
+
     /**
      * Retourne les données pour afficher la feuille de temps.
      */
@@ -90,6 +94,8 @@ class CalendarDatas {
         let structuredDatas = {};
 
         let activityWpsIndex = {};
+
+
 
         for (var k in this.wps) {
             if (this.wps.hasOwnProperty(k)) {
@@ -111,14 +117,12 @@ class CalendarDatas {
             if (event.isValid) {
 
                 let packActivity, packPerson, packMonth, packWeek, packDay;
-
-                console.log('LABEL', event.label);
-                console.log('ACTIVITY', this.wps[event.label].activity);
-
                 let activityLabel = this.wps[event.label].activity;
                 let wpReference = activityWpsIndex[activityLabel];
+
                 // Regroupement par person
                 if (!structuredDatas[activityLabel]) {
+                    console.log(event);
                     structuredDatas[activityLabel] = {
                         label: activityLabel,
                         total: 0.0,
@@ -134,6 +138,8 @@ class CalendarDatas {
                 if (!packActivity.persons[event.owner_id]) {
                     packActivity.persons[event.owner_id] = {
                         label: event.owner,
+                        wps: packActivity.wps,
+                        personid: event.owner_id,
                         total: 0.0,
                         months: {}
                     }
@@ -1853,6 +1859,16 @@ var TimesheetView = {
             return store.timesheetDatas();
         }
     },
+
+    methods: {
+        handlerDowloadTimesheet(datas){
+            console.log(datas);
+            require(["papa-parse"], function(Papa){
+               console.log(Papa);
+            });
+        }
+    },
+
     template: `<div class="timesheet"><h1>Feuille de temps</h1>
         <section v-for="activityDatas in structuredDatas"> 
             <h1>Activité sur <strong>{{ activityDatas.label }}</strong></h1>
@@ -1879,6 +1895,10 @@ var TimesheetView = {
                         </tr>
                     </tfoot>
                 </table>
+                <button @click="handlerDowloadTimesheet(personDatas)" class="btn btn-primary">
+                    <i class="icon-download-outline"></i>
+                    Télécharger le CSV
+                 </button>
             </section>
         </section>
 </div>`
@@ -2048,13 +2068,16 @@ var Calendar = {
         withOwner: {
             default: false
         },
+
         createNew: {
             default: false,
             type: Boolean
         },
+
         calendarLabel: {
             default: "Label par défaut"
         },
+
         // Texts
         trans: {
             default() {
