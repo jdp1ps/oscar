@@ -344,27 +344,7 @@ class CalendarDatas {
             if (local) {
                 local.sync(datas[i]);
             } else {
-                this.addNewEvent(
-                    datas[i].id,
-                    datas[i].label,
-                    datas[i].start,
-                    datas[i].end,
-                    datas[i].description,
-                    datas[i].credentials,
-                    datas[i].status,
-                    datas[i].owner,
-                    datas[i].owner_id,
-                    datas[i].rejectedSciComment,
-                    datas[i].rejectedSciAt,
-                    datas[i].rejectedSciBy,
-                    datas[i].rejectedAdminComment,
-                    datas[i].rejectedAdminAt,
-                    datas[i].rejectedAdminBy,
-                    datas[i].validatedSciAt,
-                    datas[i].validatedSciBy,
-                    datas[i].validatedAdminAt,
-                    datas[i].validatedAdminBy
-                );
+                this.addNewEvent(datas[i]);
             }
         }
     }
@@ -378,26 +358,9 @@ class CalendarDatas {
         return null;
     }
 
-    addNewEvent(id, label, start, end, description, credentials = undefined, status = "draft",
-                owner = "", owner_id = null,
-                rejectedSciComment = "", rejectedSciAt = null, rejectedSciBy = null,
-                rejectedAdminComment = "", rejectedAdminAt = null, rejectedAdminBy = null,
-                validatedSciAt = null, validatedSciBy = null,
-                validatedAdminAt = null, validatedAdminBy = null) {
+    addNewEvent(data) {
         this.events.push(
-            new EventDT(
-                id,
-                label,
-                start, end,
-                description,
-                credentials,
-                status,
-                owner, owner_id,
-                rejectedSciComment, rejectedSciAt, rejectedSciBy,
-                rejectedAdminComment, rejectedAdminAt, rejectedAdminBy,
-                validatedSciAt, validatedSciBy,
-                validatedAdminAt, validatedAdminBy
-            )
+            new EventDT(data)
         );
     }
 }
@@ -1170,9 +1133,16 @@ var WeekView = {
         createEvent(day, time, duration = 120){
             var start = moment(this.currentDay).day(day).hour(time);
             var end = moment(start).add(duration, 'minutes');
-            var newEvent = new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, {
-                editable: true,
-                deletable: true
+            var newEvent = new EventDT({
+                id: null,
+                label: this.defaultLabel,
+                start: start.format(),
+                end: end.format(),
+                description: this.defaultDescription,
+                credentials: {
+                    editable: true,
+                    deletable: true
+                }
             });
             this.$emit('createevent', newEvent);
         },
@@ -2497,9 +2467,12 @@ var Calendar = {
         createEvent(day, time){
             var start = moment(this.currentDay).day(day).hour(time);
             var end = moment(start).add(2, 'hours');
-            this.newEvent(new EventDT(null, this.defaultLabel, start.format(), end.format(), this.defaultDescription, {
+            this.newEvent(new EventDT({
+                id: null,
+                label: this.defaultLabel, start: start.format(), end: end.format(), description: this.defaultDescription, credentials: {
                 editable: true,
                 deletable: true
+                }
             }));
         },
 

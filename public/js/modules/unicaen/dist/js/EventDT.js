@@ -18,68 +18,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 moment.locale('fr');
 
 var EventDT = function () {
-    function EventDT(id, label, start, end) {
-        var description = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : "";
-        var actions = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
-        var status = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 'draft';
-        var owner = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "";
-        var owner_id = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
-        var rejectedSciComment = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : "";
-        var rejectedSciAt = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
-        var rejectedSciBy = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : null;
-        var rejectedAdminComment = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : "";
-        var rejectedAdminAt = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : null;
-        var rejectedAdminBy = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
-        var validatedSciAt = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : null;
-        var validatedSciBy = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : null;
-        var validatedAdminAt = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : null;
-        var validatedAdminBy = arguments.length > 18 && arguments[18] !== undefined ? arguments[18] : null;
-
+    function EventDT(data) {
         _classCallCheck(this, EventDT);
 
-        this.id = id;
-
-        // From ICS format
-        this.uid = EventDT.UID++;
-
-        // ICS : summary
-        this.label = label;
-
-        // ICS : description
-        this.description = description;
-
-        this.owner = owner;
-        this.owner_id = owner_id;
-        this.intersect = 0;
-        this.intersectIndex = 0;
-
-        this.rejectedSciComment = rejectedSciComment;
-        this.rejectedSciAt = rejectedSciAt;
-        this.rejectedSciBy = rejectedSciBy;
-
-        this.rejectedAdminComment = rejectedAdminComment;
-        this.rejectedAdminAt = rejectedAdminAt;
-        this.rejectedAdminBy = rejectedAdminBy;
-
-        this.validatedSciAt = validatedSciAt;
-        this.validatedSciBy = validatedSciBy;
-        this.validatedAdminAt = validatedAdminAt;
-        this.validatedAdminBy = validatedAdminBy;
-
-        // OSCAR
-        this.editable = actions.editable || false;
-        this.deletable = actions.deletable || false;
-        this.validable = actions.validable || false;
-        this.sendable = actions.sendable || false;
-        this.validableSci = actions.validableSci || false;
-        this.validableAdm = actions.validableAdm || false;
-
-        // Status
-        // - DRAFT, SEND, VALID, REJECT
-        this.status = status;
-
-        this.start = start;
-        this.end = end;
+        this.sync(data);
     }
 
     _createClass(EventDT, [{
@@ -132,6 +74,17 @@ var EventDT = function () {
             this.end = data.end;
             this.status = data.status;
 
+            if (!this.uid) {
+                this.uid = EventDT.UID++;
+            }
+
+            this.workpackageId = data.workpackage_id | null;
+            this.workpackageCode = data.workpackage_code | null;
+            this.workpackageLabel = data.workpackage_label | null;
+
+            this.activityId = data.activity_id | null;
+            this.activityLabel = data.activity_label | null;
+
             this.rejectedComment = data.rejectedComment;
             this.rejectedCommentAt = data.rejectedCommentAt;
             this.rejectedAdminComment = data.rejectedAdminComment;
@@ -148,6 +101,13 @@ var EventDT = function () {
             this.validatedSciBy = data.validatedSciBy;
             this.validatedAdminAt = data.validatedAdminAt;
             this.validatedAdminBy = data.validatedAdminBy;
+
+            this.editable = false;
+            this.deletable = false;
+            this.validable = false;
+            this.validableAdm = false;
+            this.validableSci = false;
+            this.sendable = false;
 
             if (data.credentials) {
                 this.editable = data.credentials.editable;
