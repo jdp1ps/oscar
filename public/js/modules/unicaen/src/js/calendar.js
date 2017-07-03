@@ -92,10 +92,7 @@ class CalendarDatas {
     timesheetDatas(){
         console.log('Accès aux données pour la feuille de temps');
         let structuredDatas = {};
-
         let activityWpsIndex = {};
-
-
 
         for (var k in this.wps) {
             if (this.wps.hasOwnProperty(k)) {
@@ -122,7 +119,7 @@ class CalendarDatas {
 
                 // Regroupement par person
                 if (!structuredDatas[activityLabel]) {
-                    console.log(event);
+                    console.log("event",event);
                     structuredDatas[activityLabel] = {
                         label: activityLabel,
                         total: 0.0,
@@ -391,8 +388,6 @@ var TimeEvent = {
           {{ event.description }}
           
         </div>
-        
-        
 
         <div class="refus" @mouseover.prevent="showRefus != showRefus">
             <div v-show="showRefus">
@@ -446,9 +441,7 @@ var TimeEvent = {
 
         </nav>
 
-        <div class="bottom-handler" v-if="event.editable"
-
-            @mousedown.prevent.stop="handlerStartMovingEnd">
+        <div class="bottom-handler" v-if="event.editable" @mousedown.prevent.stop="handlerStartMovingEnd">
             <span>===</span>
         </div>
 
@@ -487,23 +480,19 @@ var TimeEvent = {
 
         adminState(){
             return (
-                this.event.rejectedAdminAt ? 'rejected' :
-                    (
-                        this.event.validatedAdminAt ? 'validated' :
-                            'waiting'
-                    )
+                this.event.rejectedAdminAt ? 'rejected' : (this.event.validatedAdminAt ? 'validated' : 'waiting')
             )
         },
 
         sciStatus(){
             if (this.event.rejectedSciAt) {
-                return "Rejet administratif"
+                return "Rejet administratif";
             }
             else if (this.event.validatedSciAt) {
-                return "Validation administrative le à"
+                return "Validation administrative le à";
             }
             else {
-                return "en attente de validation"
+                return "en attente de validation";
             }
         },
 
@@ -548,7 +537,6 @@ var TimeEvent = {
         isRejectAdm(){
             return this.event.rejectedAdminAt != null;
         },
-
 
         isReject(){
             return this.event.status == "reject";
@@ -1833,6 +1821,7 @@ var TimesheetView = {
     methods: {
         handlerDowloadTimesheet(datas){
             console.log(datas);
+            let headers = [];
             require(["papa-parse"], function(Papa){
                console.log(Papa);
             });
@@ -2207,6 +2196,7 @@ var Calendar = {
                     events.push(event);
                 }
             });
+
             if (events.length) {
                 this.showRejectModal(events, 'reject' + type);
             } else {
@@ -2239,7 +2229,6 @@ var Calendar = {
             } else {
                 bootbox.alert("Aucun créneau ne peut être validé");
             }
-
         },
 
         showRejectModal(events, type){
@@ -2253,7 +2242,6 @@ var Calendar = {
         restSave(events){
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
-
                 var data = new FormData();
                 for (var i = 0; i < events.length; i++) {
                     data.append('events[' + i + '][label]', events[i].label);
@@ -2282,7 +2270,6 @@ var Calendar = {
                         this.handlerEditCancelEvent();
                     },
                     error => {
-                        console.log(error);
                         this.errors.push("Impossible d'enregistrer les données : " + error)
                     }
                 ).then(() => {
@@ -2310,7 +2297,6 @@ var Calendar = {
                 var data = new FormData();
                 data.append('do', action);
                 for (var i = 0; i < events.length; i++) {
-                    console.log(events[i]);
                     data.append('events[' + i + '][id]', events[i].id || null);
                     data.append('events[' + i + '][rejectedSciComment]', events[i].rejectedSciComment || null);
                     data.append('events[' + i + '][rejectedAdminComment]', events[i].rejectedAdminComment || null);
@@ -2355,7 +2341,6 @@ var Calendar = {
         },
 
         handlerSaveMove(event){
-            console.log('Sauvegarde de la position', event);
             var data = JSON.parse(JSON.stringify(event));
             data.mmStart = moment(data.start);
             data.mmEnd = moment(data.end);
@@ -2364,12 +2349,6 @@ var Calendar = {
 
         handlerSaveEvent(event){
             store.defaultLabel = this.eventEditData.label;
-            /*
-             var data = JSON.parse(JSON.stringify(this.eventEditData));
-             data.mmStart = this.eventEdit.mmStart;
-             data.mmEnd = this.eventEdit.mmEnd;
-             this.restSave([data], 'new');
-             /****/
         },
 
         /** Soumission de l'événement de la liste */
@@ -2377,9 +2356,7 @@ var Calendar = {
             var events;
             if (event.length) {
                 events = event;
-                console.log("Tableau d'événement");
             } else {
-                console.log("événement seul");
                 store.defaultLabel = event.label;
                 events = [event];
             }
@@ -2387,7 +2364,6 @@ var Calendar = {
             // On liste des événements 'soumettable'
             var eventsSend = [];
             for (var i = 0; i < events.length; i++) {
-                console.log(events[i]);
                 if (events[i].sendable === true) {
                     eventsSend.push(events[i]);
                 }
@@ -2401,8 +2377,6 @@ var Calendar = {
             } else {
                 bootbox.alert("Aucun créneau à envoyer.");
             }
-
-
         },
 
         /** Soumission de l'événement de la liste */

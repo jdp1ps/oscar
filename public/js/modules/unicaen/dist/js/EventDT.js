@@ -65,8 +65,6 @@ var EventDT = function () {
     }, {
         key: 'sync',
         value: function sync(data) {
-            console.log("Synchronisation de l'événement", this.id, "avec", data);
-
             this.id = data.id;
             this.label = data.label;
             this.description = data.description;
@@ -78,12 +76,12 @@ var EventDT = function () {
                 this.uid = EventDT.UID++;
             }
 
-            this.workpackageId = data.workpackage_id | null;
-            this.workpackageCode = data.workpackage_code | null;
-            this.workpackageLabel = data.workpackage_label | null;
+            this.workpackageId = data.workpackage_id || null;
+            this.workpackageCode = data.workpackage_code || null;
+            this.workpackageLabel = data.workpackage_label || null;
 
-            this.activityId = data.activity_id | null;
-            this.activityLabel = data.activity_label | null;
+            this.activityId = data.activity_id || null;
+            this.activityLabel = data.activity_label || null;
 
             this.rejectedComment = data.rejectedComment;
             this.rejectedCommentAt = data.rejectedCommentAt;
@@ -117,6 +115,8 @@ var EventDT = function () {
                 this.validableSci = data.credentials.validableSci;
                 this.sendable = data.credentials.sendable;
             }
+
+            console.log("Synchronisation de l'événement", this.id, "avec", data, this);
         }
     }, {
         key: 'isLocked',

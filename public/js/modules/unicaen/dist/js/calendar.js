@@ -121,7 +121,6 @@ var CalendarDatas = function () {
 
             console.log('Accès aux données pour la feuille de temps');
             var structuredDatas = {};
-
             var activityWpsIndex = {};
 
             for (var k in this.wps) {
@@ -153,7 +152,7 @@ var CalendarDatas = function () {
 
                     // Regroupement par person
                     if (!structuredDatas[activityLabel]) {
-                        console.log(event);
+                        console.log("event", event);
                         structuredDatas[activityLabel] = {
                             label: activityLabel,
                             total: 0.0,
@@ -431,7 +430,7 @@ var store = new CalendarDatas();
 
 var TimeEvent = {
 
-    template: '<div class="event" :style="css"\n\n            @mousedown="handlerMouseDown"\n            :title="event.label"\n            :class="{\'event-changing\': changing, \'event-moving\': moving, \'event-selected\': selected, \'event-locked\': isLocked, \'status-info\': isInfo, \'status-draft\': isDraft, \'status-send\' : isSend, \'status-valid\': isValid, \'status-reject\': isReject, \'valid-sci\': isValidSci, \'valid-adm\': isValidAdm, \'reject-sci\':isRejectSci, \'reject-adm\': isRejectAdm}">\n        <div class="label" data-uid="UID">\n          {{ event.label }}\n        </div>\n        <small>Dur\xE9e : <strong>{{ labelDuration }}</strong> heure(s)</small>\n        <div class="description" v-if="!isInfo">\n            <div class="submit-status">\n            <span class="admin-status">\n                <i class="icon-archive icon-admin" :class="adminState"></i> Admin\n            </span>\n            <span class="sci-status">\n                <i class="icon-beaker icon-sci"></i> Scien.\n            </span>\n          </div>\n            <p v-if="withOwner">D\xE9clarant <strong>{{ event.owner }}</strong></p>\n          {{ event.description }}\n          \n        </div>\n        \n        \n\n        <div class="refus" @mouseover.prevent="showRefus != showRefus">\n            <div v-show="showRefus">\n                <i class="icon-beaker"></i>\n                Refus scientifique :\n                <div class="comment">{{ event.rejectedSciComment}}</div>\n                <i class="icon-archive"></i>\n                Refus administratif :\n                <div class="comment">{{ event.rejectedAdminComment}}</div>\n            </div>\n        </div>\n\n        <nav class="admin">\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerDebug(event)">\n                <i class="icon-bug"></i>\n                Debug</a>\n                \n            <a href="#" \n                @mousedown.stop.prevent="" \n                @click.stop.prevent="handlerShowReject(event)" \n                v-if="event.rejectedSciComment || event.rejectedAdminComment">\n                <i class="icon-attention"></i>\n                Afficher le rejet</a>\n                \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'editevent\')" v-if="event.editable">\n                <i class="icon-pencil-1"></i>\n                Modifier</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'deleteevent\')" v-if="event.deletable">\n                <i class="icon-trash-empty"></i>\n                Supprimer</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'submitevent\')" v-if="event.sendable">\n                <i class="icon-right-big"></i>\n                Soumettre</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectscievent\')" v-if="event.validableSci">\n                <i class="icon-attention-1"></i>\n                Refus scientifique</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectadmevent\')" v-if="event.validableAdm">\n                <i class="icon-attention-1"></i>\n                Refus administratif</a>\n                \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validatescievent\')" v-if="event.validableSci">\n                <i class="icon-beaker"></i>\n                Validation scientifique</a>\n            \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validateadmevent\')" v-if="event.validableAdm">\n                <i class="icon-archive"></i>\n                Validation administrative</a>\n\n        </nav>\n\n        <div class="bottom-handler" v-if="event.editable"\n\n            @mousedown.prevent.stop="handlerStartMovingEnd">\n            <span>===</span>\n        </div>\n\n        <time class="time start">{{ labelStart }}</time>\n        <time class="time end">{{ labelEnd }}</time>\n      </div>',
+    template: '<div class="event" :style="css"\n\n            @mousedown="handlerMouseDown"\n            :title="event.label"\n            :class="{\'event-changing\': changing, \'event-moving\': moving, \'event-selected\': selected, \'event-locked\': isLocked, \'status-info\': isInfo, \'status-draft\': isDraft, \'status-send\' : isSend, \'status-valid\': isValid, \'status-reject\': isReject, \'valid-sci\': isValidSci, \'valid-adm\': isValidAdm, \'reject-sci\':isRejectSci, \'reject-adm\': isRejectAdm}">\n        <div class="label" data-uid="UID">\n          {{ event.label }}\n        </div>\n        <small>Dur\xE9e : <strong>{{ labelDuration }}</strong> heure(s)</small>\n        <div class="description" v-if="!isInfo">\n            <div class="submit-status">\n            <span class="admin-status">\n                <i class="icon-archive icon-admin" :class="adminState"></i> Admin\n            </span>\n            <span class="sci-status">\n                <i class="icon-beaker icon-sci"></i> Scien.\n            </span>\n          </div>\n            <p v-if="withOwner">D\xE9clarant <strong>{{ event.owner }}</strong></p>\n          {{ event.description }}\n          \n        </div>\n\n        <div class="refus" @mouseover.prevent="showRefus != showRefus">\n            <div v-show="showRefus">\n                <i class="icon-beaker"></i>\n                Refus scientifique :\n                <div class="comment">{{ event.rejectedSciComment}}</div>\n                <i class="icon-archive"></i>\n                Refus administratif :\n                <div class="comment">{{ event.rejectedAdminComment}}</div>\n            </div>\n        </div>\n\n        <nav class="admin">\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerDebug(event)">\n                <i class="icon-bug"></i>\n                Debug</a>\n                \n            <a href="#" \n                @mousedown.stop.prevent="" \n                @click.stop.prevent="handlerShowReject(event)" \n                v-if="event.rejectedSciComment || event.rejectedAdminComment">\n                <i class="icon-attention"></i>\n                Afficher le rejet</a>\n                \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'editevent\')" v-if="event.editable">\n                <i class="icon-pencil-1"></i>\n                Modifier</a>\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'deleteevent\')" v-if="event.deletable">\n                <i class="icon-trash-empty"></i>\n                Supprimer</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'submitevent\')" v-if="event.sendable">\n                <i class="icon-right-big"></i>\n                Soumettre</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectscievent\')" v-if="event.validableSci">\n                <i class="icon-attention-1"></i>\n                Refus scientifique</a>\n\n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'rejectadmevent\')" v-if="event.validableAdm">\n                <i class="icon-attention-1"></i>\n                Refus administratif</a>\n                \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validatescievent\')" v-if="event.validableSci">\n                <i class="icon-beaker"></i>\n                Validation scientifique</a>\n            \n            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="$emit(\'validateadmevent\')" v-if="event.validableAdm">\n                <i class="icon-archive"></i>\n                Validation administrative</a>\n\n        </nav>\n\n        <div class="bottom-handler" v-if="event.editable" @mousedown.prevent.stop="handlerStartMovingEnd">\n            <span>===</span>\n        </div>\n\n        <time class="time start">{{ labelStart }}</time>\n        <time class="time end">{{ labelEnd }}</time>\n      </div>',
 
     props: ['event', 'weekDayRef', 'withOwner'],
 
@@ -1461,6 +1460,7 @@ var TimesheetView = {
     methods: {
         handlerDowloadTimesheet: function handlerDowloadTimesheet(datas) {
             console.log(datas);
+            var headers = [];
             require(["papa-parse"], function (Papa) {
                 console.log(Papa);
             });
@@ -1663,6 +1663,7 @@ var Calendar = {
                     events.push(event);
                 }
             });
+
             if (events.length) {
                 this.showRejectModal(events, 'reject' + type);
             } else {
@@ -1709,7 +1710,6 @@ var Calendar = {
 
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
-
                 var data = new FormData();
                 for (var i = 0; i < events.length; i++) {
                     data.append('events[' + i + '][label]', events[i].label);
@@ -1736,7 +1736,6 @@ var Calendar = {
                     store.sync(response.body.timesheets);
                     _this14.handlerEditCancelEvent();
                 }, function (error) {
-                    console.log(error);
                     _this14.errors.push("Impossible d'enregistrer les données : " + error);
                 }).then(function () {
                     _this14.transmission = "";
@@ -1762,7 +1761,6 @@ var Calendar = {
                 var data = new FormData();
                 data.append('do', action);
                 for (var i = 0; i < events.length; i++) {
-                    console.log(events[i]);
                     data.append('events[' + i + '][id]', events[i].id || null);
                     data.append('events[' + i + '][rejectedSciComment]', events[i].rejectedSciComment || null);
                     data.append('events[' + i + '][rejectedAdminComment]', events[i].rejectedAdminComment || null);
@@ -1803,7 +1801,6 @@ var Calendar = {
             }
         },
         handlerSaveMove: function handlerSaveMove(event) {
-            console.log('Sauvegarde de la position', event);
             var data = JSON.parse(JSON.stringify(event));
             data.mmStart = moment(data.start);
             data.mmEnd = moment(data.end);
@@ -1811,12 +1808,6 @@ var Calendar = {
         },
         handlerSaveEvent: function handlerSaveEvent(event) {
             store.defaultLabel = this.eventEditData.label;
-            /*
-             var data = JSON.parse(JSON.stringify(this.eventEditData));
-             data.mmStart = this.eventEdit.mmStart;
-             data.mmEnd = this.eventEdit.mmEnd;
-             this.restSave([data], 'new');
-             /****/
         },
 
 
@@ -1827,9 +1818,7 @@ var Calendar = {
             var events;
             if (event.length) {
                 events = event;
-                console.log("Tableau d'événement");
             } else {
-                console.log("événement seul");
                 store.defaultLabel = event.label;
                 events = [event];
             }
@@ -1837,7 +1826,6 @@ var Calendar = {
             // On liste des événements 'soumettable'
             var eventsSend = [];
             for (var i = 0; i < events.length; i++) {
-                console.log(events[i]);
                 if (events[i].sendable === true) {
                     eventsSend.push(events[i]);
                 }
