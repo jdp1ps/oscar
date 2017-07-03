@@ -426,6 +426,12 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
     <section>
         <h2><i class="icon-archive"></i> Lot de travail</h2>
         <nav>
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) || $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity)): ?>
+                <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>#timesheet" class="btn btn-default">
+                    <i class="icon-doc-xls"></i>
+                    Voir les feuilles de temps
+                </a>
+            <?php endif; ?>
             <?php if( $entity->hasTimesheetsUpForValidationAdmin() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ): ?>
                 <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
                     <i class="icon-archive"></i>

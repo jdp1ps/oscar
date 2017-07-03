@@ -42,7 +42,6 @@ var CalendarDatas = function () {
     function CalendarDatas() {
         _classCallCheck(this, CalendarDatas);
 
-        this.state = 'week';
         this.filterOwner = "";
         this.events = [];
         this.newID = 1;
@@ -1483,13 +1482,9 @@ var TimesheetView = {
 
     methods: {
         getBase64CSV: function getBase64CSV(datas) {
-            console.log(datas);
-
             var csv = [];
             var header = [datas.label].concat(datas.wps).concat(['comentaires', 'total']);
-
             csv.push(header);
-
             for (var month in datas.months) {
                 if (datas.months.hasOwnProperty(month)) {
                     var day;
@@ -1542,7 +1537,7 @@ var TimesheetView = {
         }
     },
 
-    template: '<div class="timesheet"><h1>Feuille de temps</h1>\n        <section v-for="activityDatas in structuredDatas"> \n            <h2>\n                <i class="icon-cube"></i>\n                Activit\xE9 sur <strong>{{ activityDatas.label }}</strong>\n            </h2>\n            <section v-for="personDatas in activityDatas.persons">\n                <table class="table table-bordered table-timesheet">\n                    <thead>\n                        <tr>\n                            <th>{{ personDatas.label }}</th>\n                            <th v-for="w in activityDatas.wps">{{ w }}</th>\n                            <th class="time">Commentaire(s)</th>\n                            <th class="time">Total</th>\n                        </tr>\n                    </thead>\n                    <tbody v-for="monthDatas, month in personDatas.months" class="person-tbody">\n                        <tr class="header-month">\n                            <th :colspan="monthDatas.wps.length + 3">{{ month }}</th>\n                        </tr>\n                        <tr v-for="dayDatas, day in monthDatas.days" class="data-day">\n                            <th>{{ day }}</th>\n                            <td v-for="tpsDay in dayDatas.wps" class="time">{{tpsDay}}</td>\n                            <td class="timesheet-comment">{{ dayDatas.comments }}</td>\n                            <th class="time">{{ dayDatas.total }}</th>\n                        </tr>\n                        <tr>\n                            <th>&nbsp;</th>\n                            <td v-for="tps in monthDatas.wps"  class="time">{{tps}}</td>\n                            <td>&nbsp;</td>\n                            <th class="time">{{ monthDatas.total }}</th>\n                        </tr>\n                    </tbody>\n                    <tfoot>\n                        <tr>\n                            <th>Total</th>\n                            <th v-for="totalWP in personDatas.totalWP" class="time">{{totalWP}}</th>\n                            <td>&nbsp;</td>\n                            <th class="time">{{ personDatas.total }}</th>\n                        </tr>\n                    </tfoot>\n                </table>\n                <nav class="text-right">\n                    <a :href="getBase64CSV(personDatas)" :download="\'Feuille-de-temps\' + personDatas.label + \'.csv\'" class="btn btn-primary btn-xs">\n                        <i class="icon-download-outline"></i>\n                        T\xE9l\xE9charger le CSV\n                    </a>\n                </nav>\n            </section>\n        </section>\n</div>'
+    template: '<div class="timesheet"><h1> <i class="icon-file-excel"></i>Feuille de temps</h1>\n        <p class="help-block">Seul les d\xE9clarations <strong>valid\xE9es</strong> sont affich\xE9es ici.</p>\n        <section v-for="activityDatas in structuredDatas"> \n            <h2>\n                <i class="icon-cube"></i>\n                D\xE9clarations valid\xE9es pour <strong>{{ activityDatas.label }}</strong>\n            </h2>\n            <section v-for="personDatas in activityDatas.persons">\n                <table class="table table-bordered table-timesheet">\n                    <thead>\n                        <tr>\n                            <th>{{ personDatas.label }}</th>\n                            <th v-for="w in activityDatas.wps">{{ w }}</th>\n                            <th class="time">Commentaire(s)</th>\n                            <th class="time">Total</th>\n                        </tr>\n                    </thead>\n                    <tbody v-for="monthDatas, month in personDatas.months" class="person-tbody">\n                        <tr class="header-month">\n                            <th :colspan="monthDatas.wps.length + 3">{{ month }}</th>\n                        </tr>\n                        <tr v-for="dayDatas, day in monthDatas.days" class="data-day">\n                            <th>{{ day }}</th>\n                            <td v-for="tpsDay in dayDatas.wps" class="time">{{tpsDay}}</td>\n                            <td class="timesheet-comment">{{ dayDatas.comments }}</td>\n                            <th class="time">{{ dayDatas.total }}</th>\n                        </tr>\n                        <tr>\n                            <th>&nbsp;</th>\n                            <td v-for="tps in monthDatas.wps"  class="time">{{tps}}</td>\n                            <td>&nbsp;</td>\n                            <th class="time">{{ monthDatas.total }}</th>\n                        </tr>\n                    </tbody>\n                    <tfoot>\n                        <tr>\n                            <th>Total</th>\n                            <th v-for="totalWP in personDatas.totalWP" class="time">{{totalWP}}</th>\n                            <td>&nbsp;</td>\n                            <th class="time">{{ personDatas.total }}</th>\n                        </tr>\n                    </tfoot>\n                </table>\n                <nav class="text-right">\n                    <a :href="getBase64CSV(personDatas)" :download="\'Feuille-de-temps\' + personDatas.label + \'.csv\'" class="btn btn-primary btn-xs">\n                        <i class="icon-download-outline"></i>\n                        T\xE9l\xE9charger le CSV\n                    </a>\n                </nav>\n            </section>\n        </section>\n</div>'
 };
 
 var Calendar = {
@@ -1557,6 +1552,11 @@ var Calendar = {
     props: {
         withOwner: {
             default: false
+        },
+
+        state: {
+            default: "week",
+            type: String
         },
 
         createNew: {
@@ -2020,7 +2020,11 @@ var Calendar = {
     }), _methods),
 
     mounted: function mounted() {
-        console.log('MOUNTED', this.customDatas);
+        var allowState = ['week', 'list', 'timesheet'];
+        if (allowState.indexOf(window.location.hash.substring(1))) {
+            this.state = window.location.hash.substring(1);
+        }
+
         if (this.customDatas) {
             console.log("CustomDatas", this.customDatas());
             var customs = this.customDatas();
