@@ -111,15 +111,8 @@ class TimesheetController extends AbstractOscarController
                                 throw new OscarException("Vous n'avez les droits pour soumettre.");
                                 break;
                         }
-
-
-
-
                     }
                 }
-
-
-
             } else {
                 $timesheets = $timeSheetService->create($datas,
                     $this->getCurrentPerson());

@@ -247,8 +247,33 @@ class TimeSheet implements ITrackable
     }
 
     public function toJson(){
+        $activityId = null;
+        $activityLabel = null;
+        $workpackageId = null;
+        $workpackageLabel = null;
+        $workpackageCode = null;
+
+        if( $this->getWorkpackage() ){
+            $workpackageId = $this->getWorkpackage()->getId();
+            $workpackageLabel = (string)$this->getWorkpackage();
+            $workpackageCode = $this->getWorkpackage()->getCode();
+            $activityId = $this->getWorkpackage()->getActivity()->getId();
+            $activityLabel = (string)$this->getWorkpackage()->getActivity();
+        }
+        // Pas de lot, mais une activité ?
+        else if ( $this->getActivity() ){
+            $activityId = $this->getActivity()->getId();
+            $activityLabel = (string)$this->getActivity();
+        }
+
+
         return [
             'id' => $this->getId(),
+            'activity_id' => $activityId,
+            'activity_label' => $activityLabel,
+            'workpackage_id' => $workpackageId,
+            'workpackage_code' => $workpackageCode,
+            'workpackage_label' => $workpackageLabel,
             'label' => $this->getLabel(),
             'description' => $this->getComment(),
             'start' => $this->getDateFrom()->format('c'),

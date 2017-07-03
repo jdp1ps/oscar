@@ -104,6 +104,11 @@ var CalendarDatas = function () {
                 copydaily: [false, false, false, false, false, false, false, false]
             };
         }
+    }, {
+        key: 'downloadTimesheet',
+        value: function downloadTimesheet(personid, activityid) {
+            console.log(personid, activityid);
+        }
 
         /**
          * Retourne les données pour afficher la feuille de temps.
@@ -143,14 +148,12 @@ var CalendarDatas = function () {
                         packMonth = void 0,
                         packWeek = void 0,
                         packDay = void 0;
-
-                    console.log('LABEL', event.label);
-                    console.log('ACTIVITY', _this.wps[event.label].activity);
-
                     var activityLabel = _this.wps[event.label].activity;
                     var wpReference = activityWpsIndex[activityLabel];
+
                     // Regroupement par person
                     if (!structuredDatas[activityLabel]) {
+                        console.log(event);
                         structuredDatas[activityLabel] = {
                             label: activityLabel,
                             total: 0.0,
@@ -165,6 +168,8 @@ var CalendarDatas = function () {
                     if (!packActivity.persons[event.owner_id]) {
                         packActivity.persons[event.owner_id] = {
                             label: event.owner,
+                            wps: packActivity.wps,
+                            personid: event.owner_id,
                             total: 0.0,
                             months: {}
                         };
@@ -1460,7 +1465,17 @@ var TimesheetView = {
             return store.timesheetDatas();
         }
     },
-    template: '<div class="timesheet"><h1>Feuille de temps</h1>\n        <section v-for="activityDatas in structuredDatas"> \n            <h1>Activit\xE9 sur <strong>{{ activityDatas.label }}</strong></h1>\n            <section v-for="personDatas in activityDatas.persons">\n                <table class="table table-bordered">\n                    <thead>\n                        <tr>\n                            <th>{{ personDatas.label }}</th>\n                            <th v-for="w in activityDatas.wps">{{ w }}</th>\n                            <th>Total</th>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        <tr v-for="monthDatas, month in personDatas.months">\n                            <th>{{ month }}</th>\n                            <td v-for="tps in monthDatas.wps">{{tps}}</td>\n                            <th>{{ monthDatas.total }}</th>\n                        </tr>\n                    </tbody>\n                    <tfoot>\n                        <tr>\n                            <td :colspan="activityDatas.wps.length + 1">&nbsp;</td>\n                            <th>{{ personDatas.total }}</th>\n                        </tr>\n                    </tfoot>\n                </table>\n            </section>\n        </section>\n</div>'
+
+    methods: {
+        handlerDowloadTimesheet: function handlerDowloadTimesheet(datas) {
+            console.log(datas);
+            require(["papa-parse"], function (Papa) {
+                console.log(Papa);
+            });
+        }
+    },
+
+    template: '<div class="timesheet"><h1>Feuille de temps</h1>\n        <section v-for="activityDatas in structuredDatas"> \n            <h1>Activit\xE9 sur <strong>{{ activityDatas.label }}</strong></h1>\n            <section v-for="personDatas in activityDatas.persons">\n                <table class="table table-bordered">\n                    <thead>\n                        <tr>\n                            <th>{{ personDatas.label }}</th>\n                            <th v-for="w in activityDatas.wps">{{ w }}</th>\n                            <th>Total</th>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        <tr v-for="monthDatas, month in personDatas.months">\n                            <th>{{ month }}</th>\n                            <td v-for="tps in monthDatas.wps">{{tps}}</td>\n                            <th>{{ monthDatas.total }}</th>\n                        </tr>\n                    </tbody>\n                    <tfoot>\n                        <tr>\n                            <td :colspan="activityDatas.wps.length + 1">&nbsp;</td>\n                            <th>{{ personDatas.total }}</th>\n                        </tr>\n                    </tfoot>\n                </table>\n                <button @click="handlerDowloadTimesheet(personDatas)" class="btn btn-primary">\n                    <i class="icon-download-outline"></i>\n                    T\xE9l\xE9charger le CSV\n                 </button>\n            </section>\n        </section>\n</div>'
 };
 
 var Calendar = {
@@ -1476,13 +1491,16 @@ var Calendar = {
         withOwner: {
             default: false
         },
+
         createNew: {
             default: false,
             type: Boolean
         },
+
         calendarLabel: {
             default: "Label par défaut"
         },
+
         // Texts
         trans: {
             default: function _default() {
