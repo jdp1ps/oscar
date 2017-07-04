@@ -475,6 +475,8 @@ class PersonController extends AbstractOscarController
         $page = $this->params()->fromQuery('page', 1);
         $persons = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
             ->innerJoin('p.organizations', 'o')
+            ->innerJoin('o.roleObj', 'r')
+            ->where('r.principal = true')
             ;
 
         return [
