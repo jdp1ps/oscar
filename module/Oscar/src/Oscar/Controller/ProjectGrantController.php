@@ -786,6 +786,7 @@ class ProjectGrantController extends AbstractOscarController
 
                 'add' => 'Date de début',
                 'adf' => 'Date de fin',
+                'adc' => 'Date de création',
                 'adm' => 'Date de dernière mise à jour',
                 'ads' => 'Date de signature',
                 'adp' => 'Date d\'ouverture du PFI dans SIFAC',
@@ -796,6 +797,7 @@ class ProjectGrantController extends AbstractOscarController
             // Correspondance des champs de type date
             $dateFields = [
                 'add' => 'dateStart',
+                'adc' => 'dateCreated',
                 'adf' => 'dateEnd',
                 'adm' => 'dateUpdated',
                 'ads' => 'dateSigned',
@@ -1135,6 +1137,7 @@ class ProjectGrantController extends AbstractOscarController
                         case 'add' :
                         case 'adf' :
                         case 'adm' :
+                        case 'adc' :
                         case 'ads' :
                         case 'adp' :
                             $field = $dateFields[$type];

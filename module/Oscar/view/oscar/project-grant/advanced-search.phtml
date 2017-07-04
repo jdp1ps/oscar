@@ -541,7 +541,7 @@ console.log(datas);
                     if( datas.type == 'ap' || datas.type == 'sp' || datas.type == 'ao' || datas.type == 'so' ){
                         dom = $(tpl(datas));
                     }
-                    else if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp') {
+                    else if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {
                         dom = $(tplDate(datas));
                     }
                     else if(datas.type == 'as' || datas.type == 'ss' ) {
@@ -646,7 +646,7 @@ console.log(datas);
                         dom.find('.role').val(datas.val2);
                     }
 
-                    if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp') {
+                    if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {
                         $('.datepicker').datepicker({
                             format: "yyyy-mm-dd",
                             todayBtn: "linked",
