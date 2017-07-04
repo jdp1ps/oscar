@@ -45,7 +45,7 @@ class CalendarDatas {
         this.owners = [];
         this.rejectShow = null;
         this.weekCredentials = this.defaultWeekCredentials();
-
+        this.state = 'week';
         this.gostDatas = {
             x: 0,
             y: 0,
@@ -399,20 +399,20 @@ var TimeEvent = {
         <div class="label" data-uid="UID">
           {{ event.label }}
         </div>
-        <small>Durée : <strong>{{ labelDuration }}</strong> heure(s)</small>
+        
         <div class="description" v-if="!isInfo">
             <div class="submit-status">
-            <span class="admin-status">
-                <i class="icon-archive icon-admin" :class="adminState"></i> Admin
-            </span>
-            <span class="sci-status">
-                <i class="icon-beaker icon-sci"></i> Scien.
-            </span>
-          </div>
+                <span class="admin-status">
+                    <i class="icon-archive icon-admin" :class="adminState"></i> Admin
+                </span>
+                <span class="sci-status">
+                    <i class="icon-beaker icon-sci"></i> Scien.
+                </span>
+            </div>
             <p v-if="withOwner">Déclarant <strong>{{ event.owner }}</strong></p>
           {{ event.description }}
-          
         </div>
+        <small>Durée : <strong>{{ labelDuration }}</strong> heure(s)</small>
 
         <div class="refus" @mouseover.prevent="showRefus != showRefus">
             <div v-show="showRefus">
@@ -426,10 +426,6 @@ var TimeEvent = {
         </div>
 
         <nav class="admin">
-            <a href="#" @mousedown.stop.prevent="" @click.stop.prevent="handlerDebug(event)">
-                <i class="icon-bug"></i>
-                Debug</a>
-                
             <a href="#" 
                 @mousedown.stop.prevent="" 
                 @click.stop.prevent="handlerShowReject(event)" 
@@ -618,10 +614,6 @@ var TimeEvent = {
             this.$emit('rejectshow', event);
         },
 
-        handlerDebug(data){
-            console.log(data);
-        },
-
         updateWeekDay(value){
             var start = this.dateStart.day(value);
             var end = this.dateEnd.day(value);
@@ -801,11 +793,17 @@ var WeekView = {
             Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}
             
              <nav class="reject-valid-group">
-                <i class=" icon-angle-down"></i> actions
+                <i class=" icon-angle-down"></i>
                 <ul>
-                    <li @click="copyCurrentWeek" v-if="createNew && (weekEvents && weekEvents.length > 0)"><i class="icon-docs"></i> Copier la semaine</li>
-                    <li @click="pasteWeek" v-if="createNew && copyWeekData"><i class="icon-paste"></i> Coller la semaine</li>
-                    <li @click="$emit('submitall', 'send', 'week')" v-if="weekCredentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la semaine</li>
+                    <li @click="copyCurrentWeek" v-if="createNew && (weekEvents && weekEvents.length > 0)">
+                        <i class="icon-docs"></i> Copier la semaine
+                    </li>
+                    <li @click="pasteWeek" v-if="createNew && copyWeekData">
+                        <i class="icon-paste"></i> Coller la semaine
+                    </li>
+                    <li @click="$emit('submitall', 'send', 'week')" v-if="weekCredentials.send">
+                        <i class="icon-right-big"></i> Soumettre les créneaux de la semaine
+                    </li>
                     <li @click.prevent="handlerValidateSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>
                     <li @click.prevent="handlerRejectSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>
                     <li @click.prevent="handlerValidateAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>
@@ -1383,7 +1381,7 @@ var ListView = {
                 <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">
                     <i class=" icon-angle-down"></i>
                     <ul>
-                        <li @click.prevent="performYear(eventsYear, 'send')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de l'année</li>
+                        <li @click.prevent="performYear(eventsYear, 'submit')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de l'année</li>
                         <li @click.prevent="performYear(eventsYear, 'validatesci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement l'année</li>
                         <li @click.prevent="performYear(eventsYear, 'rejectsci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l'année</li>
                         <li @click.prevent="performYear(eventsYear, 'validateadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l'année</li>
@@ -1399,7 +1397,7 @@ var ListView = {
                     <nav class="reject-valid-group" v-if="eventsMonth.credentials.actions">
                         <i class=" icon-angle-down"></i>
                         <ul>
-                            <li @click.prevent="performMonth(eventsMonth, 'send')" v-if="eventsMonth.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux du mois</li>
+                            <li @click.prevent="performMonth(eventsMonth, 'submit')" v-if="eventsMonth.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux du mois</li>
                             <li @click.prevent="performMonth(eventsMonth, 'validatesci')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement le mois</li>
                             <li @click.prevent="performMonth(eventsMonth, 'rejectsci')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement le mois</li>
                             <li @click.prevent="performMonth(eventsMonth, 'validateadm')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Valider administrativement le mois</li>
@@ -1415,7 +1413,7 @@ var ListView = {
                         <nav class="reject-valid-group" v-if="eventsWeek.credentials.actions">
                             <i class=" icon-angle-down"></i>
                             <ul>
-                                <li @click.prevent="performWeek(eventsWeek, 'send')" v-if="eventsWeek.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la semaine</li>
+                                <li @click.prevent="performWeek(eventsWeek, 'submit')" v-if="eventsWeek.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la semaine</li>
                                 <li @click.prevent="performWeek(eventsWeek, 'validatesci')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>
                                 <li @click.prevent="performWeek(eventsWeek, 'rejectsci')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>
                                 <li @click.prevent="performWeek(eventsWeek, 'validateadm')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>
@@ -1430,7 +1428,7 @@ var ListView = {
                         <nav class="reject-valid-group" v-if="eventsDay.credentials.actions">
                             <i class=" icon-angle-down"></i>
                             <ul>
-                                <li @click.prevent="performDay(eventsDay, 'send')" v-if="eventsDay.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la journée</li>
+                                <li @click.prevent="performDay(eventsDay, 'submit')" v-if="eventsDay.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la journée</li>
                                 <li @click.prevent="performDay(eventsDay, 'validatesci')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la journée</li>
                                 <li @click.prevent="performDay(eventsDay, 'rejectsci')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la journée</li>
                                 <li @click.prevent="performDay(eventsDay, 'validateadm')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Valider administrativement la journée</li>
@@ -1466,6 +1464,7 @@ var ListView = {
 
     methods: {
         selectEvent(event){
+            console.log('selection de la semaine');
             store.currentDay = moment(event.start);
             store.state = "week";
         },
@@ -1494,28 +1493,49 @@ var ListView = {
             return pack.events;
         },
 
-        submitYear(yearPack){
+        performYear(yearPack, action){
             var events = [];
             for (var monthKey in yearPack.months) {
                 if (yearPack.months.hasOwnProperty(monthKey)) {
                     events = events.concat(this.getMonthPack(yearPack.months[monthKey]));
                 }
             }
-            this.$emit('submitevent', events);
+
+            this.performEmit(events, action);
         },
 
-        submitMonth(monthPack){
-            this.$emit('submitevent', this.getMonthPack(monthPack));
+        performMonth(monthPack, action){
+            this.performEmit(this.getMonthPack(monthPack), action);
         },
 
-        submitWeek(weekPack){
-            this.$emit('submitevent', this.getWeekPack(weekPack));
+        performWeek(weekPack, action){
+            this.performEmit(this.getWeekPack(weekPack), action);
         },
 
-        submitDay(dayPack){
-            this.$emit('submitevent', this.getDayPack(dayPack));
+        performDay(dayPack, action){
+            this.performEmit(this.getDayPack(dayPack), action);
         },
 
+        performEmit( events, action ){
+            console.log("EMIT", action, events);
+
+            if( action == 'validatesci' ){
+                console.log('validatesci');
+                this.$emit('validateevent', events, 'sci');
+            }
+            else if( action == 'validateadm' ){
+                this.$emit('validateevent', events, 'adm');
+                console.log('validateadm');
+            }
+            else if( action == 'rejectsci' ){
+                this.$emit('rejectevent', events, 'sci');
+                console.log('rejectsci');
+            }
+            else if( action == 'rejectadm' ){
+                this.$emit('rejectevent', events, 'adm');
+                console.log('rejectadm');
+            }
+        }
     },
 
     computed: {
@@ -1985,14 +2005,14 @@ var TimesheetView = {
                             <td class="timesheet-comment">{{ dayDatas.comments }}</td>
                             <th class="time">{{ dayDatas.total }}</th>
                         </tr>
-                        <tr>
+                        <tr class="subtotal">
                             <th>&nbsp;</th>
                             <td v-for="tps in monthDatas.wps"  class="time">{{tps}}</td>
                             <td>&nbsp;</td>
                             <th class="time">{{ monthDatas.total }}</th>
                         </tr>
                     </tbody>
-                    <tfoot>
+                    <tfoot class="person-tfoot">
                         <tr>
                             <th>Total</th>
                             <th v-for="totalWP in personDatas.totalWP" class="time">{{totalWP}}</th>
@@ -2177,11 +2197,6 @@ var Calendar = {
             default: false
         },
 
-        state: {
-            default: "week",
-            type: String
-        },
-
         createNew: {
             default: false,
             type: Boolean
@@ -2360,6 +2375,7 @@ var Calendar = {
 
 
         handlerValidateEvent(events, type = "unknow"){
+            console.log('VALIDATION', type, 'de', events);
             // événements reçus
             var eventsArray = !events.length ? [events] : events,
                 events = [];

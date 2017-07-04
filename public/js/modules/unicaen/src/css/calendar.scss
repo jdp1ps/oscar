@@ -325,7 +325,7 @@ body {
     }
 
     &.event-locked {
-      opacity: .7;
+      opacity: 1;
       cursor: not-allowed;
     }
 
@@ -350,18 +350,18 @@ body {
 
     small {
       display: block;
-      font-size: .75em;
+      font-size: .7em;
+    }
+
+    p {
+      margin:0;
+      padding:0;
     }
 
     .description {
       font-size: .7em;
       font-weight: lighter;
       color: black;
-      position: absolute;
-      top: 3em;
-      bottom: 20px;
-      left: 2px;
-      right: 2px;
       overflow: hidden;
     }
 
@@ -834,12 +834,20 @@ body {
   .time {
     text-align: right;
   }
+  thead {
+    border-bottom: 2px solid #ddd;
+  }
   .person-tbody {
-    border-top: 2px solid #ddd;
     tr td, tr th {
       border: solid thin #eee;
       padding: 4px;
     }
+    tr.subtotal {
+      background: #eee8d5;
+    }
+  }
+  tfoot tr {
+    border-top: 2px solid #ddd;
   }
 }
 
