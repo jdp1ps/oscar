@@ -244,6 +244,11 @@ body {
     }
   }
 
+  .linked {
+    color: #0a3783;
+    cursor: pointer;
+  }
+
   .event {
     border: solid thin rgba(0,0,0,.5);
     cursor: pointer;
@@ -251,7 +256,7 @@ body {
     margin: 0 .5%;
     box-shadow: 0 0 4px rgba(0,0,0,.3);
     background-color: rgba(255,255,255,.9);
-    //font-size: .7em;
+
     .bottom-handler {
       display: block;
       position: absolute;

@@ -7,6 +7,7 @@
 
     <?php
     $label = sprintf("Validation pour %s", $activity);
+    $url = $this->url('contract/show', ['id' => $activity->getId() ]);
     $crenaux = [];
     $colorPersons = [];
     $owners = [];
@@ -35,7 +36,7 @@
     ?>
 
     <div id="app" class="mode-validation">
-        <calendar with-owner="false" :create-new="false" calendar-label="<?= $label ?>"></calendar>
+        <calendar with-owner="false" :create-new="false" calendar-label="<?= $label ?>" calendar-label-url="<?= $url ?>"></calendar>
     </div>
 </div>
 

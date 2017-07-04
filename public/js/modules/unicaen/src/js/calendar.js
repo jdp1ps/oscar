@@ -1530,20 +1530,19 @@ var ListView = {
             console.log("EMIT", action, events);
 
             if( action == 'validatesci' ){
-                console.log('validatesci');
                 this.$emit('validateevent', events, 'sci');
             }
             else if( action == 'validateadm' ){
                 this.$emit('validateevent', events, 'adm');
-                console.log('validateadm');
             }
             else if( action == 'rejectsci' ){
                 this.$emit('rejectevent', events, 'sci');
-                console.log('rejectsci');
             }
             else if( action == 'rejectadm' ){
                 this.$emit('rejectevent', events, 'adm');
-                console.log('rejectadm');
+            }
+            else if( action == 'submit' ){
+                this.$emit('submitevent', events);
             }
         }
     },
@@ -2140,23 +2139,22 @@ var Calendar = {
                     <a href="#" @click.prevent="state = 'timesheet'" :class="{active: state == 'timesheet'}" v-if="this.wps"><i class="icon-file-excel"></i>Feuille de temps</a>
                     
                     <a href="#" @click.prevent="importInProgress = true" v-if="createNew"><i class="icon-columns"></i>Importer un ICS</a>
-                    <span class="calendar-label">
-                       {{ calendarLabel }}
-                    </span>
+                </nav>
+                 <template v-if="calendarLabelUrl.length">
+                        <span><a :href="calendarLabelUrl">{{ calendarLabel }}</a><span>
+                 </template>
+                 <template v-else><span>{{ calendarLabel }}</span></template>
                     
-                    <span v-if="owners.length">
-                    Déclarants : 
-                    <select v-model="filterOwner" class="input-sm">
-                      <option value="">Tous les déclarants</option>
-                      <option v-for="owner in owners" :value="owner.id">{{ owner.displayname }}</option>
-                    </select>
+                <span v-if="owners.length"> 
+                        <select v-model="filterOwner" class="input-sm">
+                          <option value="">Tous les déclarants</option>
+                          <option v-for="owner in owners" :value="owner.id">{{ owner.displayname }}</option>
+                        </select>
+                    </span>
                     <select v-model="filterType" class="input-sm">
                         <option value="">Tous les états</option>
                         <option v-for="label, key in status" :value="key">{{ label }}</option>
-                    </select>
-                    </span>
-                    
-                </nav>
+                </select>
                 <section class="transmission errors">
 
                     <p class="error" v-for="error in errors">
@@ -2219,6 +2217,10 @@ var Calendar = {
 
         calendarLabel: {
             default: "Label par défaut"
+        },
+
+        calendarLabelUrl: {
+            default: ""
         },
 
         // Texts
