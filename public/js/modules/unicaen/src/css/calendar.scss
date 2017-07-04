@@ -823,6 +823,10 @@ body {
     font-weight: 100;
     font-size: 1.6em;
   }
+  .header-month {
+    text-transform: capitalize;
+    color: #777;
+  }
 }
 
 .data-day {

@@ -596,6 +596,9 @@ body {
     color: #555;
     font-weight: 100;
     font-size: 1.6em; }
+  .timesheet .header-month {
+    text-transform: capitalize;
+    color: #777; }
 
 .data-day {
   font-size: .8em;
