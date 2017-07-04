@@ -59,6 +59,16 @@ body {
   /* Internet Explorer/Edge */
   user-select: none;
   background: rgba(255, 255, 255, 0.8); }
+  .calendar .calendar-tooltip {
+    position: fixed;
+    max-width: 30vw;
+    font-size: 12px;
+    top: 1em;
+    right: 1em;
+    background: rgba(0, 0, 0, 0.8);
+    color: #F0F0F0;
+    z-index: 50;
+    padding: .5em; }
   .calendar .calendar-label {
     font-weight: 100;
     font-size: 1.2em;

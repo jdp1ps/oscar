@@ -37,6 +37,7 @@ class CalendarDatas {
         this.copyDayData = null;
         this.generatedId = 0;
         this.defaultLabel = "";
+        this.tooltip = null;
         this.errors = [];
         this.defaultDescription = "";
         this.status = {
@@ -73,6 +74,10 @@ class CalendarDatas {
         this.rejectValidateType = null;
         this.rejectComment = "";
         this.rejectedEvents = [];
+    }
+
+    tooltipUpdate(){
+      console.log(arguments);
     }
 
     defaultWeekCredentials() {
@@ -398,7 +403,8 @@ var store = new CalendarDatas();
 var TimeEvent = {
 
     template: `<div class="event" :style="css"
-
+            @mouseenter="handlerTooltipOn(event, $event)"
+            @mouseleave="handlerTooltipOff(event, $event)"
             @mousedown="handlerMouseDown"
             :title="event.label"
             :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci, 'reject-adm': isRejectAdm}">
@@ -611,6 +617,18 @@ var TimeEvent = {
     },
 
     methods: {
+        handlerTooltipOn(event, e){
+            console.log(e);
+            store.tooltip = {
+                title: '<h3>' + event.label +'</h3>',
+                event: event,
+                x: '50px',
+                y: '50px'
+            };
+        },
+        handlerTooltipOff(event, e){
+            store.tooltip = "";
+        },
         /**
          * Déclenche l'affichage du rejet.
          *
@@ -1450,6 +1468,7 @@ var ListView = {
                             <listitem
                                 :with-owner="withOwner"
                                 @selectevent="selectEvent"
+                                @tooltipevent="handlerTooltip"
                                 @editevent="$emit('editevent', event)"
                                 @deleteevent="$emit('deleteevent', event)"
                                 @submitevent="$emit('submitevent', event)"
@@ -1477,6 +1496,10 @@ var ListView = {
             console.log('selection de la semaine');
             store.currentDay = moment(event.start);
             store.state = "week";
+        },
+
+        handlerTooltip(){
+          console.log('handlerTooltip', arguments);
         },
 
         getMonthPack(pack){
@@ -2046,6 +2069,34 @@ var Calendar = {
 
     template: `
         <div class="calendar">
+            
+            <transition name="fade">
+                <div class="calendar-tooltip" v-if="tooltip">
+                    <h3>{{ tooltip.event.label }}</h3>
+                    <p>Commentaire : {{ tooltip.event.description }}</p>
+                    <h4>Validation</h4>
+                    <span v-if="tooltip.event.isValidSci">
+                        <i class="icon-beaker"></i> Scientifique : 
+                        <strong>{{ tooltip.event.validatedSciAt | moment }}</strong>
+                        par 
+                        <strong>{{ tooltip.event.validatedSciBy }}</strong>
+                    </span>
+                    <span v-else>
+                        <i class="icon-beaker"></i>  Validation scientifique en attente
+                    </span>
+                    <br>
+                    <span v-if="tooltip.event.isValidAdm">
+                        <i class="icon-archive"></i> Administratif : 
+                        <strong>{{ tooltip.event.validatedAdmAt | moment }}</strong>
+                        par 
+                        <strong>{{ tooltip.event.validatedAdmBy }}</strong>
+                    </span>
+                    <span v-else>
+                        <i class="icon-archive"></i> Validation administrative en attente
+                    </span>
+                       
+                </div>
+            </transition>
 
             <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>
             
@@ -2334,6 +2385,10 @@ var Calendar = {
             this.defaultLabel = this.eventEdit.label = this.eventEditData.label;
             this.defaultDescription = this.eventEdit.description = this.eventEditData.description;
             this.handlerEditCancelEvent();
+        },
+
+        handlerTooltip(){
+          console.log('handlerTooltip CENTRAL', arguments);
         },
 
         handlerEditCancelEvent(){
