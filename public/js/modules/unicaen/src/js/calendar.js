@@ -6,8 +6,6 @@ var colorpool = ['#fcdc80', '#a6cef8', '#9fd588', '#fb90bb', '#e5fbed', '#99a0ce
 
 var colorLabel = (label) => {
     if (!colorLabels[label]) {
-        console.log('Color label', label);
-
         colorLabels[label] = colorpool[++colorIndex];
         colorIndex = colorIndex % colorpool.length;
     }
@@ -41,6 +39,14 @@ class CalendarDatas {
         this.defaultLabel = "";
         this.errors = [];
         this.defaultDescription = "";
+        this.status = {
+           "draft": "Brouillon",
+           "send": "En cours de validation",
+           "valid": "Validé",
+           "reject": "Rejeté",
+           "info": "Information"
+        };
+        this.filterType = "";
         this.labels = [];
         this.owners = [];
         this.rejectShow = null;
@@ -921,7 +927,11 @@ var WeekView = {
 
             this.events.forEach(event => {
                 // On filtre les événements de la semaine et le déclarant si besoin
-                if (store.inCurrentWeek(event) && (store.filterOwner == '' || store.filterOwner == event.owner_id )) {
+                if (
+                    store.inCurrentWeek(event)
+                    && (store.filterOwner == '' || store.filterOwner == event.owner_id )
+                    && (store.filterType == '' || store.filterType == event.status )
+                ){
                     if (event.validableSci) {
                         this.weekCredentials.sci = true;
                         this.weekCredentials.scidaily[event.mmStart.day()] = true;
@@ -1550,6 +1560,7 @@ var ListView = {
             for (let i = 0; i < this.events.length; i++) {
                 let event = this.events[i];
                 if (!(store.filterOwner == '' || store.filterOwner == event.owner_id)) continue;
+                if (!(store.filterType == '' || store.filterType == event.status )) continue;
 
                 let currentYear, currentMonth, currentWeek, currentDay;
 
@@ -2138,6 +2149,10 @@ var Calendar = {
                     <select v-model="filterOwner" class="input-sm">
                       <option value="">Tous les déclarants</option>
                       <option v-for="owner in owners" :value="owner.id">{{ owner.displayname }}</option>
+                    </select>
+                    <select v-model="filterType" class="input-sm">
+                        <option value="">Tous les états</option>
+                        <option v-for="label, key in status" :value="key">{{ label }}</option>
                     </select>
                     </span>
                     
