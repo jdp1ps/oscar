@@ -190,6 +190,9 @@ body {
           background: rgba(0, 0, 0, 0.05); }
       .calendar .editor .importer-ui .buttons, .calendar .importer .importer-ui .buttons {
         display: flex; }
+  .calendar .linked {
+    color: #0a3783;
+    cursor: pointer; }
   .calendar .event {
     border: solid thin rgba(0, 0, 0, 0.5);
     cursor: pointer;
