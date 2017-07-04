@@ -1379,35 +1379,64 @@ var ListView = {
     template: `<div class="calendar calendar-list">
         <section v-for="eventsYear, year in listEvents" class="year-pack">
             <h2 class="flex-position">
-                <strong>{{year}} <a href="#" @click.prevent="submitYear(eventsYear)" class="small-link">
-                            <i class="icon-right-big"></i>                
-                        </a></strong> 
+                <strong>{{year}}
+                <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">
+                    <i class=" icon-angle-down"></i>
+                    <ul>
+                        <li @click.prevent="performYear(eventsYear, 'send')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de l'année</li>
+                        <li @click.prevent="performYear(eventsYear, 'validatesci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement l'année</li>
+                        <li @click.prevent="performYear(eventsYear, 'rejectsci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l'année</li>
+                        <li @click.prevent="performYear(eventsYear, 'validateadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l'année</li>
+                        <li @click.prevent="performYear(eventsYear, 'rejectadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l'année</li>
+                    </ul>
+                </nav>
+                </strong>
                 <span class="onright total">{{ eventsYear.total }} heure(s)</span>
             </h2>
             <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">
                 <h3 class="flex-position">
                     <strong>{{month}} ~ 
-                    <a href="#" @click.prevent="submitMonth(eventsMonth)" class="small-link">
-                            <i class="icon-right-big"></i>                
-                        </a>
+                    <nav class="reject-valid-group" v-if="eventsMonth.credentials.actions">
+                        <i class=" icon-angle-down"></i>
+                        <ul>
+                            <li @click.prevent="performMonth(eventsMonth, 'send')" v-if="eventsMonth.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux du mois</li>
+                            <li @click.prevent="performMonth(eventsMonth, 'validatesci')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement le mois</li>
+                            <li @click.prevent="performMonth(eventsMonth, 'rejectsci')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement le mois</li>
+                            <li @click.prevent="performMonth(eventsMonth, 'validateadm')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Valider administrativement le mois</li>
+                            <li @click.prevent="performMonth(eventsMonth, 'rejectadm')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement le mois</li>
+                        </ul>
+                    </nav>
                     </strong> 
                     <span class="onright total">{{eventsMonth.total}} heure(s)</span>
                 </h3>
                 <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">
                     <h4 class="flex-position">
                         <strong>Semaine {{week}} ~ 
-                        <a href="#" @click.prevent="submitWeek(eventsWeek)" class="small-link">
-                            <i class="icon-right-big"></i>                
-                        </a>
-                        </strong> 
-                        
+                        <nav class="reject-valid-group" v-if="eventsWeek.credentials.actions">
+                            <i class=" icon-angle-down"></i>
+                            <ul>
+                                <li @click.prevent="performWeek(eventsWeek, 'send')" v-if="eventsWeek.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la semaine</li>
+                                <li @click.prevent="performWeek(eventsWeek, 'validatesci')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>
+                                <li @click.prevent="performWeek(eventsWeek, 'rejectsci')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>
+                                <li @click.prevent="performWeek(eventsWeek, 'validateadm')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>
+                                <li @click.prevent="performWeek(eventsWeek, 'rejectadm')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la semaine</li>
+                            </ul>
+                        </nav>
+                        </strong>                        
                         <span class="onright total">{{eventsWeek.total}} heure(s)</span>
                     </h4>
                      <section v-for="eventsDay, day in eventsWeek.days" class="day-pack events">
                         <h5>{{day}} 
-                        <a href="#" @click.prevent="submitDay(eventsDay)" class="small-link">
-                            <i class="icon-right-big"></i>                
-                        </a>
+                        <nav class="reject-valid-group" v-if="eventsDay.credentials.actions">
+                            <i class=" icon-angle-down"></i>
+                            <ul>
+                                <li @click.prevent="performDay(eventsDay, 'send')" v-if="eventsDay.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la journée</li>
+                                <li @click.prevent="performDay(eventsDay, 'validatesci')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la journée</li>
+                                <li @click.prevent="performDay(eventsDay, 'rejectsci')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la journée</li>
+                                <li @click.prevent="performDay(eventsDay, 'validateadm')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Valider administrativement la journée</li>
+                                <li @click.prevent="performDay(eventsDay, 'rejectadm')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la journée</li>
+                            </ul>
+                        </nav>
                         </h5>
                          <section class="events-list">
                             <listitem
@@ -1491,12 +1520,13 @@ var ListView = {
 
     computed: {
         listEvents(){
-            //EventDT.sortByStart(this.events);
+
             if (!store.events) {
                 return null
             }
 
             var structure = {};
+
             for (let i = 0; i < this.events.length; i++) {
                 let event = this.events[i];
                 if (!(store.filterOwner == '' || store.filterOwner == event.owner_id)) continue;
@@ -1513,7 +1543,12 @@ var ListView = {
                 if (!structure[labelYear]) {
                     structure[labelYear] = {
                         total: 0.0,
-                        months: {}
+                        months: {},
+                        credentials: {
+                            send: false,
+                            sci: false,
+                            adm: false
+                        }
                     };
                 }
                 currentYear = structure[labelYear];
@@ -1522,7 +1557,12 @@ var ListView = {
                 if (!currentYear.months[labelMonth]) {
                     currentYear.months[labelMonth] = {
                         total: 0.0,
-                        weeks: {}
+                        weeks: {},
+                        credentials: {
+                            send: false,
+                            sci: false,
+                            adm: false
+                        }
                     };
                 }
                 currentMonth = currentYear.months[labelMonth];
@@ -1531,7 +1571,12 @@ var ListView = {
                 if (!currentMonth.weeks[labelWeek]) {
                     currentMonth.weeks[labelWeek] = {
                         total: 0.0,
-                        days: {}
+                        days: {},
+                        credentials: {
+                            send: false,
+                            sci: false,
+                            adm: false
+                        }
                     };
                 }
                 currentWeek = currentMonth.weeks[labelWeek];
@@ -1540,13 +1585,31 @@ var ListView = {
                 if (!currentWeek.days[labelDay]) {
                     currentWeek.days[labelDay] = {
                         total: 0.0,
-                        events: []
+                        events: [],
+                        credentials: {
+                            send: false,
+                            sci: false,
+                            adm: false
+                        }
                     };
                 }
                 currentDay = currentWeek.days[labelDay];
                 currentDay.total += duration;
-
                 currentDay.events.push(event);
+
+                if( event.validableSci == true ){
+                    currentYear.credentials.sci = currentMonth.credentials.sci = currentWeek.credentials.sci = currentDay.credentials.sci =
+                        currentYear.credentials.actions = currentMonth.credentials.actions = currentWeek.credentials.actions = currentDay.credentials.actions = true;
+                }
+                if( event.validableAdm == true ){
+                    currentYear.credentials.adm = currentMonth.credentials.adm = currentWeek.credentials.adm = currentDay.credentials.adm =
+                        currentYear.credentials.actions = currentMonth.credentials.actions = currentWeek.credentials.actions = currentDay.credentials.actions = true;
+                }
+                if( event.sendable == true ){
+                    currentYear.credentials.send = currentMonth.credentials.send = currentWeek.credentials.send = currentDay.credentials.send =
+                        currentYear.credentials.actions = currentMonth.credentials.actions = currentWeek.credentials.actions = currentDay.credentials.actions = true;;
+                }
+
             }
             return structure;
         }
@@ -2584,8 +2647,10 @@ var Calendar = {
 
     mounted(){
         var allowState = ['week', 'list', 'timesheet'];
-        if( allowState.indexOf(window.location.hash.substring(1)) ){
+        if( allowState.indexOf(window.location.hash.substring(1)) >= 0 ){
             this.state = window.location.hash.substring(1);
+        } else {
+            this.state = 'week';
         }
 
         if (this.customDatas) {
