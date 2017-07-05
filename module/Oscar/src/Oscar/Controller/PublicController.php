@@ -46,6 +46,7 @@ class PublicController extends AbstractOscarController
         $isValidateurAdministratif = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
 
         $activitiesValidation = [];
+        $timesheetRejected = [];
         $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
 
         /** @var Activity $activity */
@@ -63,12 +64,15 @@ class PublicController extends AbstractOscarController
 
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
+            if( $person )
+                $timesheetRejected = $timeSheetService->getTimesheetRejected($person);
+
 
         } catch( \Exception $e ){
-
         }
         return [
             'activitiesValidation' => $activitiesValidation,
+            'timesheetRejected' => $timesheetRejected,
             'user' => $person
         ];
     }

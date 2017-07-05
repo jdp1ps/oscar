@@ -34,8 +34,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
     public function getActivitiesWithTimesheetSend(){
-        $activities = [];
-
         $activities = $this->getEntityManager()->createQueryBuilder()->select('a')
             ->from(Activity::class, 'a')
             ->innerJoin('a.workPackages', 'w')
@@ -43,6 +41,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ;
 
         return $activities->getQuery()->getResult();
+    }
+
+    public function getTimesheetRejected( Person $person ){
+         $timesheets = $this->getEntityManager()->createQueryBuilder()->select('t')
+            ->from(TimeSheet::class, 't')
+            ->where('t.person = :person')
+             ->setParameter('person', $person)
+            ;
+
+        return $timesheets->getQuery()->getResult();
     }
 
 
