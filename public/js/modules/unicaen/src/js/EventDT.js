@@ -118,7 +118,7 @@ var EventDT = class {
         console.log(data);
         this.id = data.id;
         this.label = data.label;
-        this.description = data.description;
+        this.description = data.description == 'undefined' ? '' : data.description;
         this.start = data.start;
         this.end = data.end;
         this.status = data.status;
