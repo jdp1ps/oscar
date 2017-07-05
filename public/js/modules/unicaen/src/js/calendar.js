@@ -1790,13 +1790,11 @@ var ImportICSView = {
 
     computed: {
         packs(){
-            var packs = [],
-                after = this.periodStart ? moment(this.periodStart) : null,
-                before = this.periodStart ? moment(this.periodEnd) : null;
+            var packs = [];
 
             this.importedEvents.forEach(item => {
                 let currentPack = null;
-                let currentLabel = item.mmStart.format('YYYY MMMM DD');
+                let currentLabel = item.mmStart.format('DD MMMM YYYY');
                 for (let i = 0; i < packs.length && currentPack == null; i++) {
                     if (packs[i].label == currentLabel) {
                         currentPack = packs[i];
@@ -1882,6 +1880,8 @@ var ImportICSView = {
                 }
 
             });
+
+            this.importedEvents = EventDT.sortByStart(this.importedEvents);
 
             this.etape = 2;
             /****/

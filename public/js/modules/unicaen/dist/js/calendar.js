@@ -1390,13 +1390,11 @@ var ImportICSView = {
 
     computed: {
         packs: function packs() {
-            var packs = [],
-                after = this.periodStart ? moment(this.periodStart) : null,
-                before = this.periodStart ? moment(this.periodEnd) : null;
+            var packs = [];
 
             this.importedEvents.forEach(function (item) {
                 var currentPack = null;
-                var currentLabel = item.mmStart.format('YYYY MMMM DD');
+                var currentLabel = item.mmStart.format('DD MMMM YYYY');
                 for (var i = 0; i < packs.length && currentPack == null; i++) {
                     if (packs[i].label == currentLabel) {
                         currentPack = packs[i];
@@ -1481,6 +1479,8 @@ var ImportICSView = {
                     console.log('Le créneau est hors limite');
                 }
             });
+
+            this.importedEvents = EventDT.sortByStart(this.importedEvents);
 
             this.etape = 2;
             /****/
