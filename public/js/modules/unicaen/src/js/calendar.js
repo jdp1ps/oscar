@@ -1725,10 +1725,6 @@ var ImportICSView = {
                         <div class="col-md-5">
                             <datepicker v-model="periodEnd"></datepicker>
                         </div>
-
-                        <!-- Période :
-                        <datepicker v-model="periodStart"></datepicker> au <datepicker v-model="periodEnd"></datepicker>
-                        -->
                         <p>Choisissez un fichier ICS : </p>
                         <input type="file" @change="loadIcsFile">
                     </section>
@@ -1751,7 +1747,7 @@ var ImportICSView = {
                             <section class="correspondances"">
                                 <article v-for="label in labels">
                                     <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
-                                    <select name="" id="" @change="updateLabel(label, $event.target.value)">
+                                    <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
                                         <option value="">Conserver</option>
                                         <option value="ignorer">Ignorer ces créneaux</option>
                                         <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>
@@ -1794,7 +1790,10 @@ var ImportICSView = {
 
     computed: {
         packs(){
-            var packs = [];
+            var packs = [],
+                after = this.periodStart ? moment(this.periodStart) : null,
+                before = this.periodStart ? moment(this.periodEnd) : null;
+
             this.importedEvents.forEach(item => {
                 let currentPack = null;
                 let currentLabel = item.mmStart.format('YYYY MMMM DD');
@@ -1811,6 +1810,7 @@ var ImportICSView = {
                     packs.push(currentPack);
                 }
                 currentPack.events.push(item);
+
             });
             return packs;
         }
@@ -1824,6 +1824,7 @@ var ImportICSView = {
             if (to == 'ignorer') {
                 this.importedEvents.forEach(item => {
                     if (item.label == from)
+
                         item.imported = false;
                 })
             } else if (to == 'conserver') {
@@ -1858,6 +1859,11 @@ var ImportICSView = {
 
             var analyser = new ICalAnalyser();
             var events = analyser.parse(ICAL.parse(content));
+            var after = this.periodStart ? moment(this.periodStart) : null;
+            var before = this.periodEnd ? moment(this.periodEnd) : null;
+
+            console.log("Traitement entre", after, 'et', before);
+
             this.importedEvents = [];
             this.labels = [];
 
@@ -1866,9 +1872,15 @@ var ImportICSView = {
                 item.mmEnd = moment(item.end);
                 item.imported = true;
                 item.useLabel = "";
-                this.importedEvents.push(item);
-                if (this.labels.indexOf(item.label) < 0)
-                    this.labels.push(item.label);
+
+                if( (after == null || (item.mmStart > after)) && (before == null || (item.mmEnd < before ))) {
+                    this.importedEvents.push(item);
+                    if (this.labels.indexOf(item.label) < 0)
+                        this.labels.push(item.label);
+                } else {
+                    console.log('Le créneau est hors limite');
+                }
+
             });
 
             this.etape = 2;
