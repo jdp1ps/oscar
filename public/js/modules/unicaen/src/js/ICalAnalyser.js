@@ -145,6 +145,9 @@ class ICalAnalyser {
 
                     else if (dd[0] == 'description') {
                         item.description = dd[3];
+                        if( item.description == 'undefined' ){
+                            item.description = '';
+                        }
                     }
 
                     else if (dd[0] == 'dtstart') {
@@ -195,6 +198,8 @@ class ICalAnalyser {
                 }
             }
         });
+
+        console.log(out);
 
         return out
     }

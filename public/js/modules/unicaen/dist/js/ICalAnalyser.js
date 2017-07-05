@@ -159,6 +159,9 @@ var ICalAnalyser = function () {
                             item.email = dd[3];
                         } else if (dd[0] == 'description') {
                             item.description = dd[3];
+                            if (item.description == 'undefined') {
+                                item.description = '';
+                            }
                         } else if (dd[0] == 'dtstart') {
                             var m = moment.tz(dd[3], dd[1].tzid);
                             item.start = m.tz(defaultTimeZone).format();
@@ -197,6 +200,8 @@ var ICalAnalyser = function () {
                     }
                 }
             });
+
+            console.log(out);
 
             return out;
         }

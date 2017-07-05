@@ -1808,7 +1808,6 @@ var ImportICSView = {
                     packs.push(currentPack);
                 }
                 currentPack.events.push(item);
-
             });
             return packs;
         }
@@ -1859,9 +1858,6 @@ var ImportICSView = {
             var events = analyser.parse(ICAL.parse(content));
             var after = this.periodStart ? moment(this.periodStart) : null;
             var before = this.periodEnd ? moment(this.periodEnd) : null;
-
-            console.log("Traitement entre", after, 'et', before);
-
             this.importedEvents = [];
             this.labels = [];
 
