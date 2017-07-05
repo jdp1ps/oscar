@@ -68,12 +68,28 @@ body {
     max-width: 30vw;
     //font-weight: 100;
     font-size: 12px;
-    top: 1em;
+    top: 4em;
     right: 1em;
     background: rgba(0,0,0,.8);
     color: #F0F0F0;
     z-index: 50;
-    padding: .5em;
+    padding: 8px;
+    h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0 0 .5em;
+      padding: 4px 0;
+      border-bottom: thin solid rgba(white, .3);
+    }
+    h4 {
+      margin:.5em 0 0;
+      padding:0;
+      font-size: 14px;
+      font-weight:600;
+    }
+    p {
+      margin: 0;
+    }
   }
   .calendar-label {
     font-weight: 100;
@@ -531,59 +547,6 @@ body {
   .status-reject {
     border-left: solid 4px darkred;
   }
-    .event {
-
-
-
-    &.status-draft, &.status-send, &.status-valid, &.status-reject, &.status-info {
-      .label:before, .picto:before {
-        font-family: "fontello";
-        font-style: normal;
-        font-weight: normal;
-        speak: none;
-
-        display: inline-block;
-        text-decoration: inherit;
-        width: 1em;
-        margin-right: .2em;
-        text-align: center;
-        /* opacity: .8; */
-
-        /* For safety - reset parent styles, that can break glyph codes*/
-        font-variant: normal;
-        text-transform: none;
-
-        /* fix buttons height, for twitter bootstrap */
-        line-height: 1em;
-
-        /* Animation center compensation - margins should be symmetric */
-        /* remove if not needed */
-        margin-left: .2em;
-
-        /* you can be more comfortable with increased icons size */
-        /* font-size: 120%; */
-
-        /* Font smoothing. That was taken from TWBS */
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-
-        /* Uncomment for 3D effect */
-        /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
-      }
-    }
-    &.status-draft .label:before, &.status-draft .picto:before {
-      content: '\e882'; }
-    &.status-send .label:before, &.status-send .picto:before {
-      content: '\e88a'; }
-    &.status-valid .label:before, &.status-valid .picto:before {
-      content: '\e85b'; }
-    &.status-reject .label:before, &.status-reject .picto:before {
-      content: '\e865'; }
-
-    &.status-info .label:before, &.status-info .picto:before {
-      content: '\e85e'; }
-
-  }
 
   .line {
     display: block;
@@ -594,6 +557,54 @@ body {
       clear: both;
     }
   }
+
+  .status-draft, .status-send, .status-valid, .status-reject, .status-info {
+    .label:before, .picto:before {
+      font-family: "fontello";
+      font-style: normal;
+      font-weight: normal;
+      speak: none;
+
+      display: inline-block;
+      text-decoration: inherit;
+      width: 1em;
+      margin-right: .2em;
+      text-align: center;
+      /* opacity: .8; */
+
+      /* For safety - reset parent styles, that can break glyph codes*/
+      font-variant: normal;
+      text-transform: none;
+
+      /* fix buttons height, for twitter bootstrap */
+      line-height: 1em;
+
+      /* Animation center compensation - margins should be symmetric */
+      /* remove if not needed */
+      margin-left: .2em;
+
+      /* you can be more comfortable with increased icons size */
+      /* font-size: 120%; */
+
+      /* Font smoothing. That was taken from TWBS */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+
+      /* Uncomment for 3D effect */
+      /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+    }
+  }
+  .status-draft .label:before, .status-draft .picto:before {
+    content: '\e882'; }
+  .status-send .label:before, .status-send .picto:before {
+    content: '\e88a'; }
+  .status-valid .label:before, .status-valid .picto:before {
+    content: '\e85b'; }
+  .status-reject .label:before, .status-reject .picto:before {
+    content: '\e865'; }
+
+  .status-info .label:before, .status-info .picto:before {
+    content: '\e85e'; }
 
   .cell {
     display: block;
@@ -921,8 +932,8 @@ body {
 }
 
 .mode-validation {
-  .status-draft {
-    opacity: .5;
+  .event.status-draft {
+    border-style: dashed !important;
   }
 }
 

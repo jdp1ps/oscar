@@ -63,12 +63,25 @@ body {
     position: fixed;
     max-width: 30vw;
     font-size: 12px;
-    top: 1em;
+    top: 4em;
     right: 1em;
     background: rgba(0, 0, 0, 0.8);
     color: #F0F0F0;
     z-index: 50;
-    padding: .5em; }
+    padding: 8px; }
+    .calendar .calendar-tooltip h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0 0 .5em;
+      padding: 4px 0;
+      border-bottom: thin solid rgba(255, 255, 255, 0.3); }
+    .calendar .calendar-tooltip h4 {
+      margin: .5em 0 0;
+      padding: 0;
+      font-size: 14px;
+      font-weight: 600; }
+    .calendar .calendar-tooltip p {
+      margin: 0; }
   .calendar .calendar-label {
     font-weight: 100;
     font-size: 1.2em;
@@ -391,7 +404,14 @@ body {
     border-left: solid 4px rgba(0, 128, 0, 0.5); }
   .calendar .status-reject {
     border-left: solid 4px darkred; }
-  .calendar .event.status-draft .label:before, .calendar .event.status-draft .picto:before, .calendar .event.status-send .label:before, .calendar .event.status-send .picto:before, .calendar .event.status-valid .label:before, .calendar .event.status-valid .picto:before, .calendar .event.status-reject .label:before, .calendar .event.status-reject .picto:before, .calendar .event.status-info .label:before, .calendar .event.status-info .picto:before {
+  .calendar .line {
+    display: block;
+    position: relative; }
+    .calendar .line:after, .calendar .line:before {
+      content: ' ';
+      display: block;
+      clear: both; }
+  .calendar .status-draft .label:before, .calendar .status-draft .picto:before, .calendar .status-send .label:before, .calendar .status-send .picto:before, .calendar .status-valid .label:before, .calendar .status-valid .picto:before, .calendar .status-reject .label:before, .calendar .status-reject .picto:before, .calendar .status-info .label:before, .calendar .status-info .picto:before {
     font-family: "fontello";
     font-style: normal;
     font-weight: normal;
@@ -417,23 +437,16 @@ body {
     -moz-osx-font-smoothing: grayscale;
     /* Uncomment for 3D effect */
     /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */ }
-  .calendar .event.status-draft .label:before, .calendar .event.status-draft .picto:before {
+  .calendar .status-draft .label:before, .calendar .status-draft .picto:before {
     content: '\e882'; }
-  .calendar .event.status-send .label:before, .calendar .event.status-send .picto:before {
+  .calendar .status-send .label:before, .calendar .status-send .picto:before {
     content: '\e88a'; }
-  .calendar .event.status-valid .label:before, .calendar .event.status-valid .picto:before {
+  .calendar .status-valid .label:before, .calendar .status-valid .picto:before {
     content: '\e85b'; }
-  .calendar .event.status-reject .label:before, .calendar .event.status-reject .picto:before {
+  .calendar .status-reject .label:before, .calendar .status-reject .picto:before {
     content: '\e865'; }
-  .calendar .event.status-info .label:before, .calendar .event.status-info .picto:before {
+  .calendar .status-info .label:before, .calendar .status-info .picto:before {
     content: '\e85e'; }
-  .calendar .line {
-    display: block;
-    position: relative; }
-    .calendar .line:after, .calendar .line:before {
-      content: ' ';
-      display: block;
-      clear: both; }
   .calendar .cell {
     display: block;
     width: 14.285%;
@@ -676,8 +689,8 @@ body {
   overflow-x: hidden;
   overflow-y: scroll; }
 
-.mode-validation .status-draft {
-  opacity: .5; }
+.mode-validation .event.status-draft {
+  border-style: dashed !important; }
 
 .reject-valid-group {
   display: inline-block;

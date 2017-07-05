@@ -2071,29 +2071,54 @@ var Calendar = {
         <div class="calendar">
             
             <transition name="fade">
-                <div class="calendar-tooltip" v-if="tooltip">
-                    <h3>{{ tooltip.event.label }}</h3>
-                    <p>Commentaire : {{ tooltip.event.description }}</p>
-                    <h4>Validation</h4>
-                    <span v-if="tooltip.event.isValidSci">
-                        <i class="icon-beaker"></i> Scientifique : 
-                        <strong>{{ tooltip.event.validatedSciAt | moment }}</strong>
-                        par 
-                        <strong>{{ tooltip.event.validatedSciBy }}</strong>
-                    </span>
-                    <span v-else>
-                        <i class="icon-beaker"></i>  Validation scientifique en attente
-                    </span>
-                    <br>
-                    <span v-if="tooltip.event.isValidAdm">
-                        <i class="icon-archive"></i> Administratif : 
-                        <strong>{{ tooltip.event.validatedAdmAt | moment }}</strong>
-                        par 
-                        <strong>{{ tooltip.event.validatedAdmBy }}</strong>
-                    </span>
-                    <span v-else>
-                        <i class="icon-archive"></i> Validation administrative en attente
-                    </span>
+                <div class="calendar-tooltip" :class="'status-'+tooltip.event.status" v-if="tooltip">
+                    <h3><i class="picto"></i> {{ tooltip.event.label }}</h3>
+                    <p>Status : <strong>{{ tooltip.event.status }}</strong></p>
+                    <p>Déclarant : <strong>{{ tooltip.event.owner }}</strong></p>
+                    <p>Durée : <strong> {{ tooltip.event.duration }} heure(s)</strong></p>
+                    <p>Commentaire : <strong>{{ tooltip.event.description }}</strong></p>
+   
+                    <template v-if="tooltip.event.rejectedSciAt">
+                        <h4><i class="icon-beaker"></i> Refus scientifique</h4>
+                        Refusé par <strong>{{ tooltip.event.rejectedSciBy }}</strong> 
+                        le <time>{{ tooltip.event.rejectedSciAt | moment }}</time>
+                        <p>Motif : <strong>{{ tooltip.event.rejectedSciComment }}</strong></p>
+                    </template>
+                    <template v-if="tooltip.event.validatedSciAt">
+                        <h4><i class="icon-beaker"></i> Validation scientifique</h4>
+                        Validé par <strong>{{ tooltip.event.validatedSciBy }}</strong> 
+                        le <time>{{ tooltip.event.validatedSciAt | moment }}</time>
+                    </template>
+                    <template v-if="tooltip.event.status == 'send' && tooltip.event.validatedSciAt == null && tooltip.event.rejectedSciAt == null">
+                        <h4><i class="icon-archive"></i> Validation scientifique en attente...</h4>
+                    </template>                  
+                   
+                    <template v-if="tooltip.event.rejectedAdminAt">
+                        <h4><i class="icon-archive"></i> Refus administratif</h4>
+                        Refusé par <strong>{{ tooltip.event.rejectedAdminBy }}</strong> 
+                        le <time>{{ tooltip.event.rejectedAdminAt | moment }}</time>
+                        <p>Motif : <strong>{{ tooltip.event.rejectedAdminComment }}</strong></p>    
+                    </template>
+                    <template v-if="tooltip.event.validatedAdminAt">
+                        <h4><i class="icon-archive"></i> Validation administrative</h4>
+                        Validé par <strong>{{ tooltip.event.validatedAdminBy }}</strong> 
+                        le <time>{{ tooltip.event.validatedAdminAt | moment }}</time>
+                    </template>
+                    <template v-if="tooltip.event.status == 'send' && tooltip.event.validatedAdminAt == null && tooltip.event.rejectedAdminAt == null">
+                        <h4><i class="icon-archive"></i> Validation administrative en attente...</h4>
+                    </template>
+                    
+                    <template v-if="tooltip.event.status == 'draft'">
+                        <h4><i class="icon-pencil"></i> Brouillon</h4>
+                        Ce créneau n'a pas encore été soumis à validation.
+                    </template>
+                    
+                    <template v-if="tooltip.event.status == 'info'">
+                        <h4><i class="icon-info"></i> Indicatif</h4>
+                        <p>Ce créneau est ici à titre indicatif</p>
+                    </template>
+                   
+                    
                        
                 </div>
             </transition>
