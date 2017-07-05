@@ -169,6 +169,7 @@ body {
     box-shadow: 0 0 1em rgba(0,0,0,.1);
     padding: 1em;
     background: white;
+    font-size: 12px;
 
     h2 {
       font-weight: 400;
@@ -187,10 +188,14 @@ body {
       align-items: stretch;
       justify-content: space-between;
       flex-flow: wrap;
+      max-height: 20vh;
+      overflow: scroll;
       article {
         strong { display: block }
         flex: 1;
         padding: .25em .5em;
+        min-width: 15%;
+        max-width: 20%;
         margin: 4px;
         box-shadow: 0 0 8px rgba(0,0,0,.2);
       }
@@ -255,7 +260,7 @@ body {
     .importer-ui {
       width: 90vw;
       .calendar {
-        max-height: 30vh;
+        max-height: 20vh;
         overflow-y: scroll;
         border: thin solid rgba(0,0,0,.2);
         padding: 4px;

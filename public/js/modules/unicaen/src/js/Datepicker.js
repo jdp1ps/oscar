@@ -1,9 +1,6 @@
 var Datepicker = {
     template: `<div @mouseenter="handlerShow" @mouseleave="handlerHide">
-    <span>
-      Affichage de la date Human Friendly : {{ renderDate }}
-    </span>
-
+   
     <div class="input-group">
       <input type="text" class="form-control" :value="renderValue"/>
       <div class="input-group-addon">

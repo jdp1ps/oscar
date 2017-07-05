@@ -132,7 +132,8 @@ body {
     border: solid thin rgba(0, 0, 0, 0.25);
     box-shadow: 0 0 1em rgba(0, 0, 0, 0.1);
     padding: 1em;
-    background: white; }
+    background: white;
+    font-size: 12px; }
     .calendar .importer-ui h2 {
       font-weight: 400;
       font-size: 1.5em; }
@@ -145,10 +146,14 @@ body {
       display: flex;
       align-items: stretch;
       justify-content: space-between;
-      flex-flow: wrap; }
+      flex-flow: wrap;
+      max-height: 20vh;
+      overflow: scroll; }
       .calendar .importer-ui .correspondances article {
         flex: 1;
         padding: .25em .5em;
+        min-width: 15%;
+        max-width: 20%;
         margin: 4px;
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); }
         .calendar .importer-ui .correspondances article strong {
@@ -203,7 +208,7 @@ body {
     .calendar .editor .importer-ui, .calendar .importer .importer-ui {
       width: 90vw; }
       .calendar .editor .importer-ui .calendar, .calendar .importer .importer-ui .calendar {
-        max-height: 30vh;
+        max-height: 20vh;
         overflow-y: scroll;
         border: thin solid rgba(0, 0, 0, 0.2);
         padding: 4px; }
