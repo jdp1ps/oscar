@@ -2074,7 +2074,9 @@ var Calendar = {
                 <div class="calendar-tooltip" :class="'status-'+tooltip.event.status" v-if="tooltip">
                     <h3><i class="picto"></i> {{ tooltip.event.label }}</h3>
                     <p>Status : <strong>{{ tooltip.event.status }}</strong></p>
-                    <p>Déclarant : <strong>{{ tooltip.event.owner }}</strong></p>
+                    <p>Déclarant : <strong>{{ tooltip.event.owner }}</strong>
+                        <span v-if="tooltip.event.sendAt">Envoyé le {{ tooltip.event.sendAt | moment }}</span>
+                    </p>
                     <p>Durée : <strong> {{ tooltip.event.duration }} heure(s)</strong></p>
                     <p>Commentaire : <strong>{{ tooltip.event.description }}</strong></p>
    

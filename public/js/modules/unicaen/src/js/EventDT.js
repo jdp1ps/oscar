@@ -115,6 +115,7 @@ var EventDT = class {
     }
 
     sync(data) {
+        console.log(data);
         this.id = data.id;
         this.label = data.label;
         this.description = data.description;
