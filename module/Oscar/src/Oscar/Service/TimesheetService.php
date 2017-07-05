@@ -46,8 +46,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function getTimesheetRejected( Person $person ){
          $timesheets = $this->getEntityManager()->createQueryBuilder()->select('t')
             ->from(TimeSheet::class, 't')
-            ->where('t.person = :person')
+            ->where('t.person = :person AND t.status = :status')
              ->setParameter('person', $person)
+             ->setParameter('status', TimeSheet::STATUS_CONFLICT);
             ;
 
         return $timesheets->getQuery()->getResult();
