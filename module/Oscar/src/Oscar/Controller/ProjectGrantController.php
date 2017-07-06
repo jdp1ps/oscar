@@ -905,6 +905,7 @@ class ProjectGrantController extends AbstractOscarController
 
             // Paramètres de la requête finale
             $parameters = [];
+            $startEmpty = false;
 
             if (!$search && count($criteria) === 0) {
                 $ids = [];
@@ -925,8 +926,6 @@ class ProjectGrantController extends AbstractOscarController
                     ->leftJoin('m2.person', 'pers2')
                     ->leftJoin('p2.organization', 'orga2')
                 ;
-                /*$qb = $this->getEntityManager()->createQueryBuilder()->select('c')->from(Activity::class,
-                    'c');*/
 
                 if ($include) {
                     $organizationsPerimeterIds = implode(',', $include);
@@ -936,6 +935,8 @@ class ProjectGrantController extends AbstractOscarController
                             . ') OR p2.organization IN('
                             . $organizationsPerimeterIds
                             . ')');
+                } else {
+                    $startEmpty = true;
                 }
 
             } else {
@@ -1212,24 +1213,17 @@ class ProjectGrantController extends AbstractOscarController
                 }
             }
 
-            $qbIds = $qb->select('DISTINCT c.id');
+            if( $startEmpty == false ) {
+                $qbIds = $qb->select('DISTINCT c.id');
 
-            $ids = [];
-            foreach ($qbIds->getQuery()->getResult() as $row) {
-                $ids[] = $row['id'];
+                $ids = [];
+                foreach ($qbIds->getQuery()->getResult() as $row) {
+                    $ids[] = $row['id'];
+                }
+                $qb->select('c');
+                $qb->orderBy('c.' . $sort, $sortDirection);
+                $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
-            /*
-             *         $qb->innerJoin('c.persons', 'm')
-                ->leftJoin('m.person', 'p')
-                ->leftJoin('c.project', 'pr')
-                ->leftJoin('pr.members', 'pm')
-                ->leftJoin('pm.person', 'p2')
-             */
-            $qb->select('c');
-
-
-            $qb->orderBy('c.' . $sort, $sortDirection);
-            $activities = new UnicaenDoctrinePaginator($qb, $page);
 
 
             $view = new ViewModel([
