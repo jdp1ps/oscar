@@ -421,8 +421,6 @@ var TimeEvent = {
                     <i class="icon-beaker icon-sci"></i> Scien.
                 </span>
             </div>
-            <p v-if="withOwner">Déclarant <strong>{{ event.owner }}</strong></p>
-          {{ event.description }}
         </div>
         <small>Durée : <strong>{{ labelDuration }}</strong> heure(s)</small>
 
@@ -1300,11 +1298,7 @@ var ListItemView = {
             <p class="time">
                 de <time class="start">{{ beginAt }}</time> à <time class="end">{{ endAt }}</time>, <em>{{ event.duration }}</em> heure(s) ~ état : <em>{{ event.status }}</em>
             </p>
-            <p v-if="withOwner">Déclarant <strong>{{ event.owner }}</strong></p>
-            <p v-if="event.status == 'send'" class="alert alert-warning">Cet événement est en attente de validation</p>
-            <p class="description">
-                {{ event.description }}
-            </p>
+         
             <nav>
                 <button class="btn btn-default btn-xs" @click="$emit('selectevent', event)">
                     <i class="icon-calendar"></i>
