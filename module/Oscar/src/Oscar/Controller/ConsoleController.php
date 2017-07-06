@@ -984,14 +984,16 @@ die();
         try {
             $login = $this->getRequest()->getParam('login');
             $pass = $this->getRequest()->getParam('newpass');
+
+            $options = $this->getServiceLocator()->get('zfcuser_module_options');
             $bcrypt = new Bcrypt();
+            $bcrypt->setCost($options->getPasswordCost());
 
             $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $login]);
             $auth->setPassword($bcrypt->create($pass));
-
             $this->getEntityManager()->flush();
 
-            die(sprintf('User pass updated %s:%s', $login, $pass));
+            die(sprintf("User pass updated %s:%s\n", $login, $pass));
         } catch( \Exception $ex ){
             die($ex->getMessage() . "\n" . $ex->getTraceAsString());
         }
