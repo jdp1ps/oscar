@@ -822,7 +822,7 @@ class ProjectGrantController extends AbstractOscarController
 
             $sort = $this->params()->fromQuery('sort', 'dateUpdated');
             $sortDirection = $this->params()->fromQuery('sortDirection',
-                'DESC');
+                'desc');
 
             // Récupération des critères GET
             $criteria = $this->params()->fromQuery('criteria', []);
@@ -1313,8 +1313,9 @@ class ProjectGrantController extends AbstractOscarController
         ];
 
         $sort = $this->params()->fromQuery('sort', 'dateUpdated');
-        $sortDirection = $this->params()->fromQuery('sortDirection', 'DESC');
-
+        $sortDirection = $this->params()->fromQuery('sortDirection', 'desc');
+var_dump($sortDirection);
+die();
         if (!key_exists($sort, $sortCriteria)) {
             $sort = 'dateCreated';
         }
