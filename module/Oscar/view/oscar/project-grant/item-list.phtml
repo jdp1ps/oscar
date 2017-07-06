@@ -78,35 +78,9 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
                 <?php else: ?>
                     <strong>Non signé</strong>
                 <?php endif; ?>
-                <br>
-
-                <?php if ($activity->hasDeclarant($this->grant()->getCurrentPerson())): ?>
-                    Mes heures :
-                    <a href="#" class="btn btn-xs btn-default"><i class="icon-pencil"></i> Déclarer mes heures</a>
-                <?php else: ?>
-                    <strong>Vous n'êtes pas déclarant sur cette activité</strong>
-                <?php endif; ?>
-
 
                 <br>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_VALIDATE, $activity) ): ?>
-                Progression :
-                <?php if( count($activity->getWorkPackages()) == 0 ){
-                    echo "<em>Pas de lot de travail</em>";
-                } else {
-                    $todo = $activity->getTodo();
-                    if( $todo > 0 ){
-                        echo sprintf('<strong>%s <span style="font-weight: 100">sur</span> %s</strong>', $activity->getDone(), $todo);
-                        if( $activity->getTovalidate() > 0 ){
-                            echo sprintf(' ~ <a href="%s" class="btn btn-xs btn-default"><i class="icon-ok-circled"></i> Valider les déclarations (%s heure(s))</a>', $this->url('timesheet/validation', ['idactivity' => $activity->getId()]), $activity->getTovalidate());
-                        }
-                    } else {
-                        echo '<em>Pas de déclarant / Durée</em>';
-                    }
-                } ?>
-                <br/>
-                <?php endif; ?>
-
+                
                 Active du
                 <time><?= $this->moment($activity->getDateStart()) ?></time>
                 au
