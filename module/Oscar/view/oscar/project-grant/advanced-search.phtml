@@ -359,13 +359,18 @@
             </div>
             <?php $perimeter = $organizationsPerimeter ? '?perimeter=1' : '' ?>
 
-            <form action="<?= $this->url('contract/csv') . $perimeter ?>" class=" export-all-area" method="post">
-                <input type="hidden" name="ids" value="<?= $exportIds ?>">
-                <button type="submit" href="#" class="btn btn-default">
-                    <i class="icon-cube"></i>
-                    Exporter les <span class="total"><?= $activities->count() ?></span> activité(s)
-                </button>
-            </form>
+            <div id="exporter"></div>
+            <script>
+               require(['ActivitiesExport'], function(ActivitiesExport){
+                   var ae = new ActivitiesExport.default({
+                       el: '#exporter',
+                       data: {
+                           ids: [<?= $exportIds ?>],
+                           urlPost: '<?= $this->url('contract/csv') . $perimeter ?>'
+                       }
+                   });
+                });
+            </script>
 
             <form action="<?= $this->url('contract/csvpayments') . $perimeter ?>" class=" export-all-area" method="post">
                 <input type="hidden" name="ids" value="<?= $exportIds ?>">
