@@ -306,18 +306,22 @@
             <div class="col-md-2 text-right">
                 <small>Trier</small>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select name="sort" class="form-control">
                     <?php foreach ($sortCriteria as $key => $label): ?>
                         <option value="<?= $key ?>"<?= $sort == $key ? ' selected' : '' ?>><?= $label ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select name="sortDirection" class="form-control">
                     <option value="asc"<?= $sortDirection == 'asc' ? ' selected' : '' ?>>Croissant</option>
                     <option value="desc"<?= $sortDirection == 'desc' ? ' selected' : '' ?>>Décroissant</option>
                 </select>
+            </div>
+            <div class="col-md-2">
+                <label for="sortIgnoreNull">Ignorer si non-renseignée</label>
+                <input id="sortIgnoreNull" name="sortIgnoreNull" type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?>/>
             </div>
         </div>
 
