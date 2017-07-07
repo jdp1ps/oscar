@@ -275,6 +275,7 @@ class ProjectGrantController extends AbstractOscarController
         } else {
             $paramID = $this->params()->fromQuery('ids', '');
         }
+
         if ($paramID) {
             $ids = explode(',', $paramID);
             $qb->andWhere('a.id IN (:ids)');
@@ -286,6 +287,8 @@ class ProjectGrantController extends AbstractOscarController
         if (!count($entities)) {
             return $this->getResponseBadRequest("Aucun résultat à exporter");
         }
+
+
 
         // Fichier temporaire
         $csv = uniqid('oscar_export_activities_') . '.csv';
