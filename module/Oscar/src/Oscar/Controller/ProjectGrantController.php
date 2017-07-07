@@ -1213,6 +1213,7 @@ class ProjectGrantController extends AbstractOscarController
                 }
             }
 
+            $activities = null;
             if( $startEmpty == false ) {
                 $qbIds = $qb->select('DISTINCT c.id');
 
