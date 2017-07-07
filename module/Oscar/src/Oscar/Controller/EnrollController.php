@@ -107,7 +107,7 @@ class EnrollController extends AbstractOscarController
 
             $roleIndex = intval($this->params()->fromPost('role'));
             $role = $this->getRoleObj($class, $roleIndex);
-            
+
             $dateStart = $this->params()->fromPost('dateStart');
             if ($dateStart) {
                 $dateStart = new \DateTime($dateStart);
