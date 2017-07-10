@@ -9,6 +9,7 @@ namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Oscar\Utils\StringUtils;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 
 /**
@@ -621,7 +622,7 @@ class Person implements ResourceInterface
 
     public function getCorpus()
     {
-        return sprintf("%s %s", $this->getDisplayName(), $this->getEmail());
+        return sprintf("%s %s", StringUtils::transliterateString($this->getDisplayName()), $this->getEmail());
     }
 
     public function toArray()

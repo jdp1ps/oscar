@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Oscar\Connector\IConnectedObject;
+use Oscar\Utils\StringUtils;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 
 /**
@@ -915,7 +916,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     public function getCorpus()
     {
-        return $this->__toString();
+        return StringUtils::transliterateString($this->__toString());
     }
     
     public function toArray()
