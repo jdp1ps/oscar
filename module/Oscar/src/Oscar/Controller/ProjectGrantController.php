@@ -1239,6 +1239,7 @@ class ProjectGrantController extends AbstractOscarController
                 'filtersType' => $filtersType,
                 'criteria' => $criterias,
                 'countries' => $this->getOrganizationService()->getCountriesList(),
+                'fieldsCSV' => $this->getActivityService()->getFieldsCSV(),
                 'persons' => $persons,
                 'activities' => $activities,
                 'search' => $search,

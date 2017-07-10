@@ -366,6 +366,7 @@
                        el: '#exporter',
                        data: {
                            ids: [<?= $exportIds ?>],
+                           fields: <?= json_encode($fieldsCSV) ?>,
                            urlPost: '<?= $this->url('contract/csv') . $perimeter ?>'
                        }
                    });
