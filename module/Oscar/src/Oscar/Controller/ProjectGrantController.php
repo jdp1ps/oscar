@@ -275,6 +275,7 @@ class ProjectGrantController extends AbstractOscarController
         } else {
             $paramID = $this->params()->fromQuery('ids', '');
         }
+
         if ($paramID) {
             $ids = explode(',', $paramID);
             $qb->andWhere('a.id IN (:ids)');
@@ -286,6 +287,8 @@ class ProjectGrantController extends AbstractOscarController
         if (!count($entities)) {
             return $this->getResponseBadRequest("Aucun résultat à exporter");
         }
+
+
 
         // Fichier temporaire
         $csv = uniqid('oscar_export_activities_') . '.csv';
@@ -821,6 +824,7 @@ class ProjectGrantController extends AbstractOscarController
             ];
 
             $sort = $this->params()->fromQuery('sort', 'dateUpdated');
+            $sortIgnoreNull = $this->params()->fromQuery('sortIgnoreNull', null);
             $sortDirection = $this->params()->fromQuery('sortDirection',
                 'desc');
 
@@ -1213,6 +1217,7 @@ class ProjectGrantController extends AbstractOscarController
                 }
             }
 
+            $activities = null;
             if( $startEmpty == false ) {
                 $qbIds = $qb->select('DISTINCT c.id');
 
@@ -1222,6 +1227,9 @@ class ProjectGrantController extends AbstractOscarController
                 }
                 $qb->select('c');
                 $qb->orderBy('c.' . $sort, $sortDirection);
+                if( $sortIgnoreNull ){
+                    $qb->andWhere('c.' . $sort . ' IS NOT NULL');
+                }
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
 
@@ -1240,6 +1248,7 @@ class ProjectGrantController extends AbstractOscarController
                 'sort' => $sort,
                 'sortCriteria' => $sortCriteria,
                 'sortDirection' => $sortDirection,
+                'sortIgnoreNull' => $sortIgnoreNull,
                 'types' => $this->getActivityTypeService()->getActivityTypes(true),
             ]);
 

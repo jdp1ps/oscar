@@ -51,6 +51,7 @@ requirejs.config({
         'ICalAnalyser' : 'modules/unicaen/dist/js/ICalAnalyser',
         'Datepicker' : 'modules/unicaen/dist/js/Datepicker',
         'KeySelectEditor' : 'components/build/KeySelectEditor',
+        'ActivitiesExport' : 'components/build/ActivitiesExport'
     },
     shim: {
         "bootstrap": {
