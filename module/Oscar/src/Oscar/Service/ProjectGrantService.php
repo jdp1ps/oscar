@@ -35,6 +35,9 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
+    public function getFieldsCSV(){
+        return Activity::csvHeaders();
+    }
 
     public function getDistinctNumbersKey()
     {
