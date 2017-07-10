@@ -306,18 +306,22 @@
             <div class="col-md-2 text-right">
                 <small>Trier</small>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select name="sort" class="form-control">
                     <?php foreach ($sortCriteria as $key => $label): ?>
                         <option value="<?= $key ?>"<?= $sort == $key ? ' selected' : '' ?>><?= $label ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select name="sortDirection" class="form-control">
                     <option value="asc"<?= $sortDirection == 'asc' ? ' selected' : '' ?>>Croissant</option>
                     <option value="desc"<?= $sortDirection == 'desc' ? ' selected' : '' ?>>Décroissant</option>
                 </select>
+            </div>
+            <div class="col-md-2">
+                <label for="sortIgnoreNull">Ignorer si non-renseignée</label>
+                <input id="sortIgnoreNull" name="sortIgnoreNull" type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?>/>
             </div>
         </div>
 
@@ -335,10 +339,10 @@
         </nav>
     </form>
 
-    <h3 class="text-center"><?= count($activities) ?> résultat(s)</h3>
-    <div id="activities" style="opacity: 0">
-    <?php if(count($activities)): ?>
 
+    <div id="activities" style="opacity: 0">
+    <?php if(count($activities) > 0): ?>
+        <h3 class="text-center"><?= count($activities) ?> résultat(s)</h3>
     <?php /** @var \Oscar\Entity\Activity $contract **/ foreach ($activities as $activity): echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity]) ?><?php endforeach; /**/?>
     <?php
     if( stripos($_SERVER['REQUEST_URI'], '?') === false ){
@@ -355,13 +359,18 @@
             </div>
             <?php $perimeter = $organizationsPerimeter ? '?perimeter=1' : '' ?>
 
-            <form action="<?= $this->url('contract/csv') . $perimeter ?>" class=" export-all-area" method="post">
-                <input type="hidden" name="ids" value="<?= $exportIds ?>">
-                <button type="submit" href="#" class="btn btn-default">
-                    <i class="icon-cube"></i>
-                    Exporter les <span class="total"><?= $activities->count() ?></span> activité(s)
-                </button>
-            </form>
+            <div id="exporter"></div>
+            <script>
+               require(['ActivitiesExport'], function(ActivitiesExport){
+                   var ae = new ActivitiesExport.default({
+                       el: '#exporter',
+                       data: {
+                           ids: [<?= $exportIds ?>],
+                           urlPost: '<?= $this->url('contract/csv') . $perimeter ?>'
+                       }
+                   });
+                });
+            </script>
 
             <form action="<?= $this->url('contract/csvpayments') . $perimeter ?>" class=" export-all-area" method="post">
                 <input type="hidden" name="ids" value="<?= $exportIds ?>">
@@ -462,7 +471,7 @@
 
     <?php endif; ?>
 
-    <?php if( count($activities) == 0 ): ?>
+    <?php if( $activities != null && count($activities) == 0 ): ?>
     <div class="alert-info alert">
         <?php if ($search == 'Pourquoi la vie, l\'univers et le reste ?'): ?>
             <h1 style="text-align: center; font-size: 72px">42</h1>
@@ -471,8 +480,9 @@
                 vie, l'univers et le reste... Peut-être que votre question
                 est mal posée...
             </small>
+
         <?php else: ?>
-            Aucun résultat
+            La recherche n'a donnée aucun résultat...
         <?php endif; ?>
     </div>
     <?php endif; ?>

@@ -94,8 +94,6 @@ class EnrollController extends AbstractOscarController
             'url' => ''
         ]);
 
-
-
         $form->setData([
             'dateStart' => $enroll->getDateStart() ? $enroll->getDateStart()->format('Y-m-d') : '',
             'dateEnd' => $enroll->getDateEnd() ? $enroll->getDateEnd()->format('Y-m-d') : '',
@@ -108,10 +106,7 @@ class EnrollController extends AbstractOscarController
         if ($this->getRequest()->isPost()) {
 
             $roleIndex = intval($this->params()->fromPost('role'));
-            $this->getLogger()->debug("Role envoyé par le formulaire : " . $roleIndex);
             $role = $this->getRoleObj($class, $roleIndex);
-            $this->getLogger()->debug("Role obtenu : " . print_r($role, true));
-
 
             $dateStart = $this->params()->fromPost('dateStart');
             if ($dateStart) {
