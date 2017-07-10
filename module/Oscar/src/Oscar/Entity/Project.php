@@ -9,6 +9,7 @@ namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Oscar\Utils\StringUtils;
 use Zend\Form\Annotation;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 use ZendTest\Code\Annotation\TestAsset\DoctrineAnnotation;
@@ -815,7 +816,7 @@ class Project implements ResourceInterface
 
     public function getCorpus()
     {
-        return $this->__toString() . ' ' . $this->getDescription();
+        return StringUtils::transliterateString($this->__toString() . ' ' . $this->getDescription());
     }
 
     public function __toString()

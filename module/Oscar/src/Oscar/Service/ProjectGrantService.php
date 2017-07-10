@@ -23,6 +23,7 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\Project;
 use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
+use Oscar\Utils\StringUtils;
 use Oscar\Validator\EOTP;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -229,12 +230,14 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         $this->getServiceLocator()->get('Logger')->info("Ajout de $activity à l'index");
 
         $members = [];
+        /** @var ActivityPerson $p */
         foreach ($activity->getPersonsDeep() as $p) {
             $members[] = $p->getPerson()->getCorpus();
         }
         $members = implode(', ', $members);
 
         $partners = [];
+        /** @var ActivityOrganization $o */
         foreach ($activity->getOrganizationsDeep() as $o ) {
             $partners[] = $o->getOrganization()->getCorpus();
         }
@@ -249,9 +252,9 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
         $corpus = new \Zend_Search_Lucene_Document();
 
-        $corpus->addField(\Zend_Search_Lucene_Field::text('acronym', $acronym, 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('label', $activity->getLabel(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('description', $activity->getDescription(), 'UTF-8'));
+        $corpus->addField(\Zend_Search_Lucene_Field::text('acronym', StringUtils::transliterateString($acronym), 'UTF-8'));
+        $corpus->addField(\Zend_Search_Lucene_Field::text('label', StringUtils::transliterateString($activity->getLabel()), 'UTF-8'));
+        $corpus->addField(\Zend_Search_Lucene_Field::text('description', StringUtils::transliterateString($activity->getDescription()), 'UTF-8'));
         $corpus->addField(\Zend_Search_Lucene_Field::text('saic', $activity->getCentaureId(), 'UTF-8'));
         $corpus->addField(\Zend_Search_Lucene_Field::text('oscar', $activity->getOscarNum(), 'UTF-8'));
         $corpus->addField(\Zend_Search_Lucene_Field::text('eotp', $activity->getCodeEOTP(), 'UTF-8'));
@@ -384,7 +387,9 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
     public function search($what)
     {
 
+        $what = StringUtils::transliterateString($what);
         $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
+        $this->getServiceLocator()->get('Logger')->info(sprintf('Search for "%s"', $what));
         $hits = $this->searchIndex_getIndex()->find($query);
         $ids = [];
         foreach ($hits as $hit) {
