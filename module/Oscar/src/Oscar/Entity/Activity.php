@@ -1520,28 +1520,25 @@ class Activity implements ResourceInterface
 
     public function csv()
     {
-        $fat = [];
-        $persons = [];
-        $organizations = [];
-        $currencyFields = ['amount', 'paymentReceived', 'paymentProvided'];
-
-        foreach ($this->toArray() as $key => $value) {
-            if( in_array($key, $currencyFields) ){
-                $value = number_format($value, 2, ',', ' ');
-            }
-            $fat[] = $value;
-        }
-
-        if ($this->getProject()) {
-            /** @var ProjectMember $p */
-            foreach ($this->getProject()->getPersons() as $p) {
-                $persons[] = (string)$p->getPerson();
-            }
-            foreach ($this->getProject()->getOrganizations() as $p) {
-                $organizations[] = (string)$p->getOrganization();
-            }
-        }
-        return $fat;
+        return array(
+            'id' => $this->getId(),
+            'project acronym' => $this->getProject() ? $this->getProject()->getAcronym() : '',
+            'project' => $this->getProject() ? $this->getProject()->getLabel() : '',
+            'intitulé' => $this->getLabel(),
+            'PFI' => $this->getCodeEOTP(),
+            'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format('Y-m-d') : '',
+            'amount' => number_format($this->getAmount(), 2, ',', ' '),
+            'numéro SAIC' => $this->getCentaureNumConvention(),
+            'numéro oscar' => $this->getOscarNum(),
+            'Type' => $this->getActivityType() ? (string)$this->getActivityType() : '',
+            'Statut' => Activity::getStatusLabel(),
+            'Début' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
+            'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
+            'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
+            'source' => $this->getSource() ? (string)$this->getSource() : "",
+            'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, ',', ' '),
+            'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ' '),
+        );
     }
 
     public static function csvHeaders()
