@@ -30,7 +30,7 @@ class Role implements HierarchicalRoleInterface
      * Role constructor.
      * @param int $id
      */
-    public function __construct($id)
+    public function __construct()
     {
         $this->privileges = new ArrayCollection();
     }
