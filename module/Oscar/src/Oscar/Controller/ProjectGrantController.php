@@ -1324,7 +1324,7 @@ class ProjectGrantController extends AbstractOscarController
         return $this->applyAdvancedSearch($qb);
     }
 
-   
+
 
 
     public function almostStartAction()
