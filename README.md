@@ -1,26 +1,18 @@
-# Installation du projet
+# OSCAR (pour les développeurs)
+
+## Installation de la copie 
 
 ```bash
-svn co <repository-url>
+git clone https://git.unicaen.fr/bouvry/oscar
 ```
 
-La racine du projet est dans le dossier `developpement/`.
+## Outils de développement
 
-```bash
-cd developpement
-```
-
-
-# Outils de développement
-
-## Fichiers de configuration pour le développement
+### Fichiers de configuration pour le développement
 
  - `package.json` : Configuration Node.js (Gulp)
  - `bower.json` et `.bowerrc` : Configuration Bower (dépendance JS/CSS)
  - `composer.json/lock` : Configuration Composer (dépendances PHP)
-
-
-## Installation des outils
 
 ### Outils pour le front (Gulp/bower)
 
@@ -30,7 +22,7 @@ Pour installer les outils Node :
 $ npm install
 ```
 
-La commande var télécharger les outils de développement dans le dossier `node_modules` (le contenu ne doit pas être commité). Ces utilitaires ne sont utilisés qu'en développement et en post-deploiment.
+La commande va télécharger les outils de développement dans le dossier `node_modules` (le contenu ne doit pas être commité). Ces utilitaires ne sont utilisés qu'en développement et en post-deploiment.
 
 Puis créer les aliases si les commandes n'existe pas en global : 
 
@@ -49,7 +41,6 @@ $gulp -v
 [11:32:59] CLI version 3.8.11
 [11:32:59] Local version 3.8.11
 ```
-
 
 ### Bower
 
@@ -78,7 +69,7 @@ $ bower search awsomelibrary
 ```
 
 
-## Gulp : Task runner
+### Gulp : Task runner
 
 Gulp est un utilitaire NodeJS. Il a pour principale fonction : 
 
@@ -89,11 +80,7 @@ Gulp est un utilitaire NodeJS. Il a pour principale fonction :
 Il est installé avec node et permet d'automatiser certaines tâches qui sont déclarées dans le fichier `gulpfile.js`.
 
 
-@todo
-
-
-
-## Composer : Dépendances PHP
+### Composer : Dépendances PHP
 
 Les dépendances PHP sont gérées avec <https://getcomposer.org/>, pour mettre à jour les dépendances du projet, se placer à la racine du projet et taper : 
 
@@ -110,13 +97,13 @@ $ composer install <libraryName> --save
 
 ## Serveur de développement
 
-Depuis le dossier `developpement` : 
+Activer `x-debug`, le mode *built-in* de **PhpStorm** est très pratique pour les points d'arret, sinon on peut en exécuter un manuellement : 
 
 ```
 $ php -S 127.0.0.11:2048 -t public/ public/index.php
 ```
 
-ou
+ou en utilisant le script : 
 
 ```bash
 $ ./bin/launch-server-dev.sh

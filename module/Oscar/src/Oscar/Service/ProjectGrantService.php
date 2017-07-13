@@ -20,7 +20,9 @@ use Oscar\Entity\ContractType;
 use Oscar\Entity\Activity;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Project;
+use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\StringUtils;
@@ -36,7 +38,30 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
     public function getFieldsCSV(){
-        return Activity::csvHeaders();
+
+        $headers = [
+            'core' => Activity::csvHeaders(),
+            'organizations' => [],
+            'persons' => [],
+        ];
+
+        $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
+            ->select('r.label')
+            ->from(OrganizationRole::class, 'r')
+            ->getQuery()
+            ->getResult();
+
+        foreach( $rolesOrganizationsQuery as $role ){
+            $headers['organizations'][] = $role['label'];
+        }
+
+
+        $rolesOrga = $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray();
+        foreach( $rolesOrga as $role ){
+            $headers['persons'][] = $role;
+        }
+
+        return $headers;
     }
 
     public function getDistinctNumbersKey()
