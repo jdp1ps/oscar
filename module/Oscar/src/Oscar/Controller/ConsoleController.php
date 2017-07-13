@@ -79,7 +79,10 @@ class ConsoleController extends AbstractOscarController
             $pass = $this->getRequest()->getParam('pass');
             $displayname = $this->getRequest()->getParam('displayname');
             $email = $this->getRequest()->getParam('email');
+
+            $options = $this->getServiceLocator()->get('zfcuser_module_options');
             $bcrypt = new Bcrypt();
+            $bcrypt->setCost($options->getPasswordCost());
 
             $auth = new Authentification();
             $auth->setPassword($bcrypt->create($pass));

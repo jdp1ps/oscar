@@ -58,6 +58,7 @@ body {
   }
   h5 {
     line-height: 22px;
+    flex: 1;
   }
   margin: 1em;
 }
@@ -771,7 +772,7 @@ body {
     }
     .events-list {
       background: rgba(255,255,255,.5);
-      flex: 7;
+      flex: 10;
       position: relative;
       .list-item {
         display: flex;

@@ -2746,6 +2746,32 @@ time.date-missing {
   background: white;
 }
 
+
+.cols {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  >* {
+    flex: 12;
+  }
+  .col3 {
+    flex: 3;
+    min-width: 16.666666666666666666666%;
+    max-width: 16.666666666666666666666%;
+  }
+}
+
+.export-config {
+  h2, h3 {
+    margin: 0;
+    padding: 0;
+  }
+  h3 {
+    margin-top: .5em;
+  }
+}
+
 .vue-loader {
   background: rgba(255,255,255,.95);
   position: fixed;
@@ -2757,6 +2783,11 @@ time.date-missing {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  .content-loader {
+    max-width: 900px;
+    max-width: 80vw;
+  }
 
   span {
     font-weight: 100;
