@@ -8,6 +8,7 @@
 namespace Oscar\Connector;
 
 
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
@@ -122,6 +123,9 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             } catch( NoResultException $e ){
                 $personOscar = $personRepository->newPersistantPerson();
                 $action = "add";
+            } catch( NonUniqueResultException $e ){
+                $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
+                continue;
             }
             if($personOscar->getDateSyncLdap() < $personData->dateupdated || $force == true ){
                 $personOscar = $this->hydratePersonWithDatas($personOscar, $personData);
