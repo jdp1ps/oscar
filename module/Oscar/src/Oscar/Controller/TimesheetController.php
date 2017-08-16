@@ -38,6 +38,142 @@ use Zend\View\Model\ViewModel;
 class TimesheetController extends AbstractOscarController
 {
 
+    public function usurpationAction()
+    {
+        // Méthode réél
+        $method = $this->getHttpXMethod();
+
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_USURPATION, $activity);
+
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
+
+        if (!$activity) {
+            return $this->getResponseNotFound("L'activité n'existe pas");
+        }
+
+        if (!$person) {
+            return $this->getResponseNotFound("La person %s n'existe pas");
+        }
+
+        /** @var TimesheetService $timeSheetService */
+        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        $timesheets = [];
+
+        if ($method == 'GET') {
+            $timesheets = $timeSheetService->allByPerson($person, $person);
+        }
+
+        if ($method == 'POST') {
+
+            $datas = $this->getRequest()->getPost()['events'];
+            $action = $this->getRequest()->getPost()['do'];
+
+            // Ajouter un test sur ACTION et EVENTS
+
+            if ($action == 'send') {
+                $timesheets = $timeSheetService->send($datas, $person);
+            } else if ( $action ){
+                if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
+                    return $this->getResponseBadRequest('Opération inconnue !');
+                }
+
+                foreach ($datas as $data) {
+                    if ($data['id'] && $data['id'] != 'null') {
+                        /** @var TimeSheet $timeSheet */
+                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
+                        $activity = null ;
+                        if( $timeSheet->getActivity() ){
+                            $activity = $timeSheet->getActivity();
+                        }
+                        elseif ($timeSheet->getWorkpackage()){
+                            $activity = $timeSheet->getWorkpackage()->getActivity();
+                        }
+                        if( !$activity ){
+                            // todo Ajouter un warning
+                            continue;
+                        }
+                        if( in_array($action, ['validatesci', 'rejectsci' ]) &&
+                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) {
+                            throw new OscarException("Vous n'avez les droits pour la validation scientifique.");
+                        }
+
+                        if( in_array($action, ['validateadm', 'rejectadm' ]) &&
+                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)) {
+                            throw new OscarException("Vous n'avez les droits pour la validation administrative.");
+                        }
+
+                        switch($action){
+                            case 'validatesci';
+                                $timesheets = array_merge($timesheets, $timeSheetService->validateSci([$data], $this->getCurrentPerson()));
+                                break;
+                            case 'validateadm';
+                                $timesheets = array_merge($timesheets, $timesheets = $timeSheetService->validateAdmin([$data], $this->getCurrentPerson()));
+                                break;
+                            case 'rejectsci';
+                                $timesheets = array_merge($timesheets, $timesheets = $timeSheetService->rejectSci([$data], $this->getCurrentPerson()));
+                                break;
+                            case 'rejectadm';
+                                $timesheets = array_merge($timesheets, $timesheets = $timeSheetService->rejectAdmin([$data], $this->getCurrentPerson()));
+                                break;
+                            case 'send';
+                                throw new OscarException("Vous n'avez les droits pour soumettre.");
+                                break;
+                        }
+                    }
+                }
+            } else {
+                $timesheets = $timeSheetService->create($datas, $person);
+            }
+        }
+
+        if ($method == 'DELETE') {
+            $timesheetId = $this->params()->fromQuery('timesheet');
+            if ($timesheetId) {
+                if ($timeSheetService->delete($timesheetId, $person)){
+                    return $this->getResponseOk('Créneaux supprimé');
+                }
+            }
+            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
+        }
+
+        $wpDeclarants = [];
+        /** @var WorkPackage $workPackage */
+        foreach($activity->getWorkPackages() as $workPackage ){
+            if( $workPackage->hasPerson($person) ){
+                $wpDeclarants[$workPackage->getId()] = $workPackage;
+            }
+        }
+//        $wpDeclarants = $activity->getWorkPackages();
+
+        foreach($timesheets as &$timesheet ){
+            if( !($timesheet['activity_id'] == null || $timesheet['activity_id'] == $activity->getId()) ){
+                $timesheet['credentials']['editable'] = false;
+                $timesheet['credentials']['deletable'] = false;
+                $timesheet['credentials']['sendable'] = false;
+            }
+        }
+
+        $datasView = [
+            'wpDeclarants' => $wpDeclarants,
+            'timesheets' => $timesheets,
+            'person' => $person,
+            'activity' => $activity,
+        ];
+
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            $response = new JsonModel($datasView);
+            $response->setTerminal(true);
+
+            return $response;
+        }
+
+        return $datasView;
+    }
+
     /**
      * Déclaration des heures.
      */
@@ -96,16 +232,16 @@ class TimesheetController extends AbstractOscarController
 
                         switch($action){
                             case 'validatesci';
-                                $timesheets = $timeSheetService->validateSci([$data], $this->getCurrentPerson());
+                                $timesheets = array_merge($timesheets, $timeSheetService->validateSci([$data], $this->getCurrentPerson()));
                                 break;
                             case 'validateadm';
-                                $timesheets = $timeSheetService->validateAdmin([$data], $this->getCurrentPerson());
+                                $timesheets = array_merge($timesheets, $timesheets = $timeSheetService->validateAdmin([$data], $this->getCurrentPerson()));
                                 break;
                             case 'rejectsci';
-                                $timesheets = $timeSheetService->rejectSci([$data], $this->getCurrentPerson());
+                                $timesheets = array_merge($timesheets, $timesheets = $timeSheetService->rejectSci([$data], $this->getCurrentPerson()));
                                 break;
                             case 'rejectadm';
-                                $timesheets = $timeSheetService->rejectAdmin([$data], $this->getCurrentPerson());
+                                $timesheets = array_merge($timesheets, $timesheets = $timeSheetService->rejectAdmin([$data], $this->getCurrentPerson()));
                                 break;
                             case 'send';
                                 throw new OscarException("Vous n'avez les droits pour soumettre.");

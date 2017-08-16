@@ -39,6 +39,12 @@ timesheet:
                 route: /declaration
                 defaults:
                     action: declaration
+        usurpation:
+            type: segment
+            options:
+                route: /usurpation/:idperson/:idactivity
+                defaults:
+                    action: usurpation
         api:
             type: segment
             options:

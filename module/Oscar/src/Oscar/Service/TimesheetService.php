@@ -104,7 +104,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param Person $person
      * @return array
      */
-    function allByPerson(Person $person)
+    function allByPerson(Person $person, $personCredentials = null)
     {
         $timesheets = [];
         $datas = $this->getEntityManager()->getRepository(TimeSheet::class)->findBy(['person' => $person]);
@@ -112,7 +112,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var TimeSheet $data */
         foreach ($datas as $data) {
             $json = $data->toJson();
-            $json['credentials'] = $this->resolveTimeSheetCredentials($data);
+            $json['credentials'] = $this->resolveTimeSheetCredentials($data, $personCredentials);
             $timesheets[] = $json;
         }
 
@@ -255,7 +255,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             $json = $timeSheet->toJson();
-            $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
+            $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet, $by);
             $timesheets[] = $json;
 
         }
