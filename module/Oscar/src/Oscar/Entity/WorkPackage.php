@@ -209,6 +209,15 @@ class WorkPackage
         return $this;
     }
 
+    public function hasPerson( Person $person ){
+        foreach($this->getPersons() as $p ){
+            if( $p->getPerson()->getId() == $person->getId() ){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 
     public function __construct()
