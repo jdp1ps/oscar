@@ -106,34 +106,40 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
             throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
         }
 
-        $repport->addnotice("DÉBUT du traitement...");
+        if( count($return) > 0 ){
+            foreach( json_decode($return) as $data ){
 
-        foreach( json_decode($return) as $data ){
-
-            try {
-                /** @var Person $personOscar */
-                $organization = $repository->getObjectByConnectorID($this->getName(), $data->code);
-                $action = "update";
-            } catch( NoResultException $e ){
-                $organization = $repository->newPersistantObject();
-                $action = "add";
-            }
-
-            if($organization->getDateUpdated() < new \DateTime($data->dateupdated) || $force == true ){
-
-                $organization = $this->hydrateWithDatas($organization, $data);
-
-                $repository->flush($organization);
-                if( $action == 'add' ){
-                    $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
-                } else {
-                    $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
+                try {
+                    /** @var Person $personOscar */
+                    $organization = $repository->getObjectByConnectorID($this->getName(), $data->code);
+                    $action = "update";
+                } catch( NoResultException $e ){
+                    $organization = $repository->newPersistantObject();
+                    $action = "add";
                 }
 
-            } else {
-                $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
+                if($organization->getDateUpdated() < new \DateTime($data->dateupdated) || $force == true ){
+
+                    $organization = $this->hydrateWithDatas($organization, $data);
+
+                    $repository->flush($organization);
+                    if( $action == 'add' ){
+                        $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
+                    } else {
+                        $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
+                    }
+
+                } else {
+                    $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
+                }
             }
+        } else {
+            $repport->adderror("Le service REST n'a retourné aucun résultat.");
         }
+
+        $repport->addnotice("DÉBUT du traitement...");
+
+
         $repport->addnotice("FIN du traitement...");
         return $repport;
     }
