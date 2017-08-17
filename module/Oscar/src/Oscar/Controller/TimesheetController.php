@@ -345,9 +345,6 @@ class TimesheetController extends AbstractOscarController
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             if ($method == 'GET') {
-
-
-
                 // Récupération des déclarations pour cette activité
                 $timesheets = $timeSheetService->allByActivity($activity);
                 $response = new JsonModel([
@@ -365,55 +362,11 @@ class TimesheetController extends AbstractOscarController
                     $events = $request->getPost('events', []);
                     if (count($events) == 1 && $events[0]['id'] == 'null') {
                             throw new OscarException('A refactorer !');
-//                        $event = $events[0];
-//                        $person = $this->getEntityManager()->getRepository(Person::class)->find($event['owner_id']);
-//
-//                        /** @var WorkPackage $workpackage */
-//                        $workpackage = $this->getEntityManager()->getRepository(WorkPackage::class)->find($event['idworkpackage']);
-//
-//                        if (!$person) {
-//                            return $this->getResponseBadRequest('Personne inconnue !');
-//                        }
-//
-//                        if (!$workpackage) {
-//                            return $this->getResponseBadRequest('Lot de travail inconnu !');
-//                        }
-//
-//                        try {
-//                            $timesheet = new TimeSheet();
-//                            $this->getEntityManager()->persist($timesheet);
-//                            $timesheet->setPerson($person)
-//                                ->setActivity($activity)
-//                                ->setLabel((string)$workpackage)
-//                                ->setCreatedBy($this->getCurrentPerson())
-//                                ->setDateFrom(new \DateTime($event['start']))
-//                                ->setValidatedAt(new \DateTime())
-//                                ->setValidatedBy((string)$this->getCurrentPerson())
-//                                ->setDateTo(new \DateTime($event['end']))
-//                                ->setStatus(TimeSheet::STATUS_TOVALIDATE)
-//                                ->setWorkpackage($workpackage);
-//                            $this->getEntityManager()->flush($timesheet);
-//                            $json = $timesheet->toJson();
-//                            $json['credentials'] = [
-//                                'deletable' => true,
-//                                'editable' => true,
-//                                'sendable' => $timesheet->getStatus() == TimeSheet::STATUS_DRAFT,
-//                                'validable' => $timesheet->getStatus() == TimeSheet::STATUS_TOVALIDATE
-//                            ];
-//                            $response = new JsonModel([
-//                                'timesheets' => [$json]
-//                            ]);
-//                            $response->setTerminal(true);
-//
-//                            return $response;
-//
-//                        } catch (\Exception $e) {
-//                            return $this->getResponseBadRequest("Errur " . $e->getMessage());
-//                        }
-
-
                     } else {
+
+
                         $action = $this->getRequest()->getPost()['do'];
+
                         if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
                             return $this->getResponseBadRequest('Opération inconnue !');
                         }
@@ -431,8 +384,6 @@ class TimesheetController extends AbstractOscarController
                         $events = $this->getRequest()->getPost()['events'];
                         $timesheets = [];
 
-
-
                         switch($action){
                             case 'validatesci';
                                 $timesheets = $timeSheetService->validateSci($events, $this->getCurrentPerson());
@@ -447,7 +398,7 @@ class TimesheetController extends AbstractOscarController
                                 $timesheets = $timeSheetService->rejectAdmin($events, $this->getCurrentPerson());
                                 break;
                             case 'send';
-                                throw new OscarException("Vous n'avez les droits pour soumettre.");
+                                $timesheets = $timeSheetService->send($events, $this->getCurrentPerson());
                                 break;
                         }
 
