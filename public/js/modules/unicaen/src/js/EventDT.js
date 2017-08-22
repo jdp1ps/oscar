@@ -115,7 +115,6 @@ var EventDT = class {
     }
 
     sync(data) {
-        console.log(data);
         this.id = data.id;
         this.label = data.label;
         this.description = data.description == 'undefined' ? '' : data.description;
@@ -136,6 +135,7 @@ var EventDT = class {
 
         this.owner = data.owner;
         this.owner_id = data.owner_id;
+        this.decaleY = 0;
 
         this.rejectedComment = data.rejectedComment;
         this.rejectedCommentAt = data.rejectedCommentAt;

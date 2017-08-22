@@ -1368,6 +1368,7 @@ var ListItemView = {
                 , end = (this.event.mmEnd.hour() - 6) * 60 + this.event.mmEnd.minutes();
 
             return {
+                top: this.event.decaleY*1.75 +"em",
                 left: (percentUnit * start) + '%',
                 width: (percentUnit * (end - start)) + '%',
                 background: this.colorLabel
@@ -1458,7 +1459,7 @@ var ListView = {
                             </ul>
                         </nav>
                         </h5>
-                         <section class="events-list">
+                         <section class="events-list" :style="{ 'height': eventsDay.persons.length*1.8 +'em' }">
                             <listitem
                                 :with-owner="withOwner"
                                 @selectevent="selectEvent"
@@ -1572,6 +1573,7 @@ var ListView = {
             }
 
             var structure = {};
+            var owners = [];
 
             for (let i = 0; i < this.events.length; i++) {
                 let event = this.events[i];
@@ -1579,13 +1581,15 @@ var ListView = {
                 if (!(store.filterType == '' || store.filterType == event.status )) continue;
 
                 let currentYear, currentMonth, currentWeek, currentDay;
-
                 let duration = event.duration;
-
                 let labelYear = event.mmStart.format('YYYY');
                 let labelMonth = event.mmStart.format('MMMM');
                 let labelWeek = event.mmStart.format('W');
                 let labelDay = event.mmStart.format('ddd D');
+
+                if( owners.indexOf(event.owner_id) < 0 ){
+                    owners.push(event.owner_id);
+                }
 
                 if (!structure[labelYear]) {
                     structure[labelYear] = {
@@ -1594,7 +1598,8 @@ var ListView = {
                         credentials: {
                             send: false,
                             sci: false,
-                            adm: false
+                            adm: false,
+                            actions: false
                         }
                     };
                 }
@@ -1608,7 +1613,8 @@ var ListView = {
                         credentials: {
                             send: false,
                             sci: false,
-                            adm: false
+                            adm: false,
+                            actions: false
                         }
                     };
                 }
@@ -1622,7 +1628,8 @@ var ListView = {
                         credentials: {
                             send: false,
                             sci: false,
-                            adm: false
+                            adm: false,
+                            actions: false
                         }
                     };
                 }
@@ -1632,17 +1639,25 @@ var ListView = {
                 if (!currentWeek.days[labelDay]) {
                     currentWeek.days[labelDay] = {
                         total: 0.0,
+                        persons: [],
                         events: [],
                         credentials: {
                             send: false,
                             sci: false,
-                            adm: false
+                            adm: false,
+                            actions: false
                         }
                     };
                 }
                 currentDay = currentWeek.days[labelDay];
                 currentDay.total += duration;
+                if( currentDay.persons.indexOf(event.owner_id) < 0 ){
+                    currentDay.persons.push(event.owner_id);
+                }
+                currentDay.total += duration;
                 currentDay.events.push(event);
+
+                event.decaleY = currentDay.persons.indexOf(event.owner_id);
 
                 if( event.validableSci == true ){
                     currentYear.credentials.sci = currentMonth.credentials.sci = currentWeek.credentials.sci = currentDay.credentials.sci =
@@ -1658,6 +1673,10 @@ var ListView = {
                 }
 
             }
+
+            //structure.owners = owners;
+            console.log(structure);
+
             return structure;
         }
     }
