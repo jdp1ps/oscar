@@ -1141,6 +1141,7 @@ var ListItemView = {
                 end = (this.event.mmEnd.hour() - 6) * 60 + this.event.mmEnd.minutes();
 
             return {
+                top: this.event.decaleY * 1.75 + "em",
                 left: percentUnit * start + '%',
                 width: percentUnit * (end - start) + '%',
                 background: this.colorLabel
@@ -1170,7 +1171,7 @@ var ListView = _defineProperty({
         listitem: ListItemView
     },
 
-    template: '<div class="calendar calendar-list">\n        <section v-for="eventsYear, year in listEvents" class="year-pack">\n            <h2 class="flex-position">\n                <strong>{{year}}\n                <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">\n                    <i class=" icon-angle-down"></i>\n                    <ul>\n                        <li @click.prevent="performYear(eventsYear, \'submit\')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'validatesci\')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'rejectsci\')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'validateadm\')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'rejectadm\')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l\'ann\xE9e</li>\n                    </ul>\n                </nav>\n                </strong>\n                <span class="onright total">{{ eventsYear.total }} heure(s)</span>\n            </h2>\n            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">\n                <h3 class="flex-position">\n                    <strong>{{month}} ~ \n                    <nav class="reject-valid-group" v-if="eventsMonth.credentials.actions">\n                        <i class=" icon-angle-down"></i>\n                        <ul>\n                            <li @click.prevent="performMonth(eventsMonth, \'submit\')" v-if="eventsMonth.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux du mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'validatesci\')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'rejectsci\')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'validateadm\')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Valider administrativement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'rejectadm\')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement le mois</li>\n                        </ul>\n                    </nav>\n                    </strong> \n                    <span class="onright total">{{eventsMonth.total}} heure(s)</span>\n                </h3>\n                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">\n                    <h4 class="flex-position">\n                        <strong>Semaine {{week}} ~ \n                        <nav class="reject-valid-group" v-if="eventsWeek.credentials.actions">\n                            <i class=" icon-angle-down"></i>\n                            <ul>\n                                <li @click.prevent="performWeek(eventsWeek, \'submit\')" v-if="eventsWeek.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'validatesci\')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'rejectsci\')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'validateadm\')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'rejectadm\')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la semaine</li>\n                            </ul>\n                        </nav>\n                        </strong>                        \n                        <span class="onright total">{{eventsWeek.total}} heure(s)</span>\n                    </h4>\n                     <section v-for="eventsDay, day in eventsWeek.days" class="day-pack events">\n                        <h5>{{day}} \n                        <nav class="reject-valid-group" v-if="eventsDay.credentials.actions">\n                            <i class=" icon-angle-down"></i>\n                            <ul>\n                                <li @click.prevent="performDay(eventsDay, \'submit\')" v-if="eventsDay.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'validatesci\')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'rejectsci\')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'validateadm\')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Valider administrativement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'rejectadm\')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la journ\xE9e</li>\n                            </ul>\n                        </nav>\n                        </h5>\n                         <section class="events-list">\n                            <listitem\n                                :with-owner="withOwner"\n                                @selectevent="selectEvent"\n                                @tooltipevent="handlerTooltip"\n                                @editevent="$emit(\'editevent\', event)"\n                                @deleteevent="$emit(\'deleteevent\', event)"\n                                @submitevent="$emit(\'submitevent\', event)"\n                                @rejectscievent="$emit(\'rejectevent\', event, \'sci\')"\n                                @rejectadmevent="$emit(\'rejectevent\', event, \'adm\')"\n                                @validatescievent="$emit(\'validateevent\', event, \'sci\')"\n                                @validateadmevent="$emit(\'validateevent\', event, \'adm\')"\n                           \n                                v-bind:event="event" v-for="event in eventsDay.events"></listitem>\n                        </section>\n                        <div class="total">\n                            {{eventsDay.total}} heure(s)\n                        </div>\n                    </section>\n                </section>\n            </section>\n        </section>\n        <div v-if="!listEvents" class="alert alert-danger">\n            Aucun cr\xE9neaux d\xE9t\xE9ct\xE9s\n        </div>\n    </div>',
+    template: '<div class="calendar calendar-list">\n        <section v-for="eventsYear, year in listEvents" class="year-pack">\n            <h2 class="flex-position">\n                <strong>{{year}}\n                <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">\n                    <i class=" icon-angle-down"></i>\n                    <ul>\n                        <li @click.prevent="performYear(eventsYear, \'submit\')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'validatesci\')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'rejectsci\')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'validateadm\')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'rejectadm\')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l\'ann\xE9e</li>\n                    </ul>\n                </nav>\n                </strong>\n                <span class="onright total">{{ eventsYear.total }} heure(s)</span>\n            </h2>\n            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">\n                <h3 class="flex-position">\n                    <strong>{{month}} ~ \n                    <nav class="reject-valid-group" v-if="eventsMonth.credentials.actions">\n                        <i class=" icon-angle-down"></i>\n                        <ul>\n                            <li @click.prevent="performMonth(eventsMonth, \'submit\')" v-if="eventsMonth.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux du mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'validatesci\')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'rejectsci\')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'validateadm\')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Valider administrativement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'rejectadm\')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement le mois</li>\n                        </ul>\n                    </nav>\n                    </strong> \n                    <span class="onright total">{{eventsMonth.total}} heure(s)</span>\n                </h3>\n                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">\n                    <h4 class="flex-position">\n                        <strong>Semaine {{week}} ~ \n                        <nav class="reject-valid-group" v-if="eventsWeek.credentials.actions">\n                            <i class=" icon-angle-down"></i>\n                            <ul>\n                                <li @click.prevent="performWeek(eventsWeek, \'submit\')" v-if="eventsWeek.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'validatesci\')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'rejectsci\')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'validateadm\')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'rejectadm\')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la semaine</li>\n                            </ul>\n                        </nav>\n                        </strong>                        \n                        <span class="onright total">{{eventsWeek.total}} heure(s)</span>\n                    </h4>\n                     <section v-for="eventsDay, day in eventsWeek.days" class="day-pack events">\n                        <h5>{{day}} \n                        <nav class="reject-valid-group" v-if="eventsDay.credentials.actions">\n                            <i class=" icon-angle-down"></i>\n                            <ul>\n                                <li @click.prevent="performDay(eventsDay, \'submit\')" v-if="eventsDay.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'validatesci\')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'rejectsci\')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'validateadm\')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Valider administrativement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'rejectadm\')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la journ\xE9e</li>\n                            </ul>\n                        </nav>\n                        </h5>\n                         <section class="events-list" :style="{ \'height\': eventsDay.persons.length*1.8 +\'em\' }">\n                            <listitem\n                                :with-owner="withOwner"\n                                @selectevent="selectEvent"\n                                @tooltipevent="handlerTooltip"\n                                @editevent="$emit(\'editevent\', event)"\n                                @deleteevent="$emit(\'deleteevent\', event)"\n                                @submitevent="$emit(\'submitevent\', event)"\n                                @rejectscievent="$emit(\'rejectevent\', event, \'sci\')"\n                                @rejectadmevent="$emit(\'rejectevent\', event, \'adm\')"\n                                @validatescievent="$emit(\'validateevent\', event, \'sci\')"\n                                @validateadmevent="$emit(\'validateevent\', event, \'adm\')"\n                           \n                                v-bind:event="event" v-for="event in eventsDay.events"></listitem>\n                        </section>\n                        <div class="total">\n                            {{eventsDay.total}} heure(s)\n                        </div>\n                    </section>\n                </section>\n            </section>\n        </section>\n        <div v-if="!listEvents" class="alert alert-danger">\n            Aucun cr\xE9neaux d\xE9t\xE9ct\xE9s\n        </div>\n    </div>',
 
     methods: {
         selectEvent: function selectEvent(event) {
@@ -1246,6 +1247,7 @@ var ListView = _defineProperty({
         }
 
         var structure = {};
+        var owners = [];
 
         for (var i = 0; i < this.events.length; i++) {
             var event = this.events[i];
@@ -1256,13 +1258,15 @@ var ListView = _defineProperty({
                 currentMonth = void 0,
                 currentWeek = void 0,
                 currentDay = void 0;
-
             var duration = event.duration;
-
             var labelYear = event.mmStart.format('YYYY');
             var labelMonth = event.mmStart.format('MMMM');
             var labelWeek = event.mmStart.format('W');
             var labelDay = event.mmStart.format('ddd D');
+
+            if (owners.indexOf(event.owner_id) < 0) {
+                owners.push(event.owner_id);
+            }
 
             if (!structure[labelYear]) {
                 structure[labelYear] = {
@@ -1271,7 +1275,8 @@ var ListView = _defineProperty({
                     credentials: {
                         send: false,
                         sci: false,
-                        adm: false
+                        adm: false,
+                        actions: false
                     }
                 };
             }
@@ -1285,7 +1290,8 @@ var ListView = _defineProperty({
                     credentials: {
                         send: false,
                         sci: false,
-                        adm: false
+                        adm: false,
+                        actions: false
                     }
                 };
             }
@@ -1299,7 +1305,8 @@ var ListView = _defineProperty({
                     credentials: {
                         send: false,
                         sci: false,
-                        adm: false
+                        adm: false,
+                        actions: false
                     }
                 };
             }
@@ -1309,17 +1316,25 @@ var ListView = _defineProperty({
             if (!currentWeek.days[labelDay]) {
                 currentWeek.days[labelDay] = {
                     total: 0.0,
+                    persons: [],
                     events: [],
                     credentials: {
                         send: false,
                         sci: false,
-                        adm: false
+                        adm: false,
+                        actions: false
                     }
                 };
             }
             currentDay = currentWeek.days[labelDay];
             currentDay.total += duration;
+            if (currentDay.persons.indexOf(event.owner_id) < 0) {
+                currentDay.persons.push(event.owner_id);
+            }
+            currentDay.total += duration;
             currentDay.events.push(event);
+
+            event.decaleY = currentDay.persons.indexOf(event.owner_id);
 
             if (event.validableSci == true) {
                 currentYear.credentials.sci = currentMonth.credentials.sci = currentWeek.credentials.sci = currentDay.credentials.sci = currentYear.credentials.actions = currentMonth.credentials.actions = currentWeek.credentials.actions = currentDay.credentials.actions = true;
@@ -1331,6 +1346,10 @@ var ListView = _defineProperty({
                 currentYear.credentials.send = currentMonth.credentials.send = currentWeek.credentials.send = currentDay.credentials.send = currentYear.credentials.actions = currentMonth.credentials.actions = currentWeek.credentials.actions = currentDay.credentials.actions = true;;
             }
         }
+
+        //structure.owners = owners;
+        console.log(structure);
+
         return structure;
     }
 });
