@@ -90,7 +90,6 @@ var CalendarDatas = function () {
             editActive: false
         };
 
-        ////
         this.displayRejectModal = false;
         this.rejectValidateType = null;
         this.rejectComment = "";
@@ -115,11 +114,6 @@ var CalendarDatas = function () {
                 copydaily: [false, false, false, false, false, false, false, false]
             };
         }
-    }, {
-        key: 'downloadTimesheet',
-        value: function downloadTimesheet(personid, activityid) {
-            console.log(personid, activityid);
-        }
 
         /**
          * Retourne les données pour afficher la feuille de temps.
@@ -130,7 +124,6 @@ var CalendarDatas = function () {
         value: function timesheetDatas() {
             var _this = this;
 
-            console.log('Accès aux données pour la feuille de temps', this.wps);
             var structuredDatas = {};
             var activityWpsIndex = {};
 
@@ -163,7 +156,6 @@ var CalendarDatas = function () {
 
                     // Regroupement par person
                     if (!structuredDatas[activityLabel]) {
-                        console.log("event", event);
                         structuredDatas[activityLabel] = {
                             label: activityLabel,
                             total: 0.0,
@@ -590,7 +582,6 @@ var TimeEvent = {
 
     methods: {
         handlerTooltipOn: function handlerTooltipOn(event, e) {
-            console.log(e);
             store.tooltip = {
                 title: '<h3>' + event.label + '</h3>',
                 event: event,
@@ -681,7 +672,6 @@ var TimeEvent = {
         },
         handlerMouseUp: function handlerMouseUp(e) {
             if (this.event.editable) {
-                console.log('UPDATE now');
                 this.moving = false;
                 this.$el.removeEventListener('mousemove', this.move);
 
@@ -692,7 +682,6 @@ var TimeEvent = {
                 this.event.end = this.dateEnd.hours(dtUpdate.endHours).minutes(dtUpdate.endMinutes).format();
 
                 if (this.change) {
-                    console.log('trigger update');
                     this.change = false;
                     this.$emit('savemoveevent', this.event);
                 }
@@ -926,7 +915,6 @@ var WeekView = {
             }
 
             if (this.gostDatas.eventMovedEnd) {
-                console.log("FIN du déplacement de la borne de fin");
                 this.gostDatas.eventMovedEnd.changing = false;
                 this.gostDatas.eventMovedEnd.handlerMouseUp();
                 this.gostDatas.eventMovedEnd = null;
@@ -935,7 +923,6 @@ var WeekView = {
             this.gostDatas.editActive = false;
         },
         handlerMouseDown: function handlerMouseDown(e) {
-            console.log("MouseDown", this.createNew == false);
             if (this.createNew) {
                 var roundFactor = 40 / 60 * this.pas;
                 this.gostDatas.y = Math.round(e.offsetY / roundFactor) * roundFactor;
@@ -990,7 +977,6 @@ var WeekView = {
                     }
                 }
             } else if (this.gostDatas.eventMovedEnd) {
-                console.log("déplacement de la borne de fin");
                 if (this.gostDatas.startFrom == null) {
                     this.gostDatas.startFrom = e.offsetY;
                 } else {
@@ -1171,16 +1157,12 @@ var ListView = _defineProperty({
         listitem: ListItemView
     },
 
-    template: '<div class="calendar calendar-list">\n        <section v-for="eventsYear, year in listEvents" class="year-pack">\n            <h2 class="flex-position">\n                <strong>{{year}}\n                <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">\n                    <i class=" icon-angle-down"></i>\n                    <ul>\n                        <li @click.prevent="performYear(eventsYear, \'submit\')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'validatesci\')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'rejectsci\')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'validateadm\')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'rejectadm\')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l\'ann\xE9e</li>\n                    </ul>\n                </nav>\n                </strong>\n                <span class="onright total">{{ eventsYear.total }} heure(s)</span>\n            </h2>\n            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">\n                <h3 class="flex-position">\n                    <strong>{{month}} ~ \n                    <nav class="reject-valid-group" v-if="eventsMonth.credentials.actions">\n                        <i class=" icon-angle-down"></i>\n                        <ul>\n                            <li @click.prevent="performMonth(eventsMonth, \'submit\')" v-if="eventsMonth.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux du mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'validatesci\')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'rejectsci\')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'validateadm\')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Valider administrativement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'rejectadm\')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement le mois</li>\n                        </ul>\n                    </nav>\n                    </strong> \n                    <span class="onright total">{{eventsMonth.total}} heure(s)</span>\n                </h3>\n                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">\n                    <h4 class="flex-position">\n                        <strong>Semaine {{week}} ~ \n                        <nav class="reject-valid-group" v-if="eventsWeek.credentials.actions">\n                            <i class=" icon-angle-down"></i>\n                            <ul>\n                                <li @click.prevent="performWeek(eventsWeek, \'submit\')" v-if="eventsWeek.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'validatesci\')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'rejectsci\')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'validateadm\')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'rejectadm\')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la semaine</li>\n                            </ul>\n                        </nav>\n                        </strong>                        \n                        <span class="onright total">{{eventsWeek.total}} heure(s)</span>\n                    </h4>\n                     <section v-for="eventsDay, day in eventsWeek.days" class="day-pack events">\n                        <h5>{{day}} \n                        <nav class="reject-valid-group" v-if="eventsDay.credentials.actions">\n                            <i class=" icon-angle-down"></i>\n                            <ul>\n                                <li @click.prevent="performDay(eventsDay, \'submit\')" v-if="eventsDay.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'validatesci\')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'rejectsci\')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'validateadm\')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Valider administrativement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'rejectadm\')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la journ\xE9e</li>\n                            </ul>\n                        </nav>\n                        </h5>\n                         <section class="events-list" :style="{ \'height\': eventsDay.persons.length*1.8 +\'em\' }">\n                            <listitem\n                                :with-owner="withOwner"\n                                @selectevent="selectEvent"\n                                @tooltipevent="handlerTooltip"\n                                @editevent="$emit(\'editevent\', event)"\n                                @deleteevent="$emit(\'deleteevent\', event)"\n                                @submitevent="$emit(\'submitevent\', event)"\n                                @rejectscievent="$emit(\'rejectevent\', event, \'sci\')"\n                                @rejectadmevent="$emit(\'rejectevent\', event, \'adm\')"\n                                @validatescievent="$emit(\'validateevent\', event, \'sci\')"\n                                @validateadmevent="$emit(\'validateevent\', event, \'adm\')"\n                           \n                                v-bind:event="event" v-for="event in eventsDay.events"></listitem>\n                        </section>\n                        <div class="total">\n                            {{eventsDay.total}} heure(s)\n                        </div>\n                    </section>\n                </section>\n            </section>\n        </section>\n        <div v-if="!listEvents" class="alert alert-danger">\n            Aucun cr\xE9neaux d\xE9t\xE9ct\xE9s\n        </div>\n    </div>',
+    template: '<div class="calendar calendar-list">\n        <section v-for="eventsYear, year in listEvents" class="year-pack">\n            <h2 class="flex-position">\n                <strong>{{year}}\n                <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">\n                    <i class=" icon-angle-down"></i>\n                    <ul>\n                        <li @click.prevent="performYear(eventsYear, \'submit\')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'validatesci\')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'rejectsci\')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'validateadm\')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l\'ann\xE9e</li>\n                        <li @click.prevent="performYear(eventsYear, \'rejectadm\')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l\'ann\xE9e</li>\n                    </ul>\n                </nav>\n                </strong>\n                <span class="onright total">{{ eventsYear.total }} heure(s)</span>\n            </h2>\n            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">\n                <h3 class="flex-position">\n                    <strong>{{month}} ~ \n                    <nav class="reject-valid-group" v-if="eventsMonth.credentials.actions">\n                        <i class=" icon-angle-down"></i>\n                        <ul>\n                            <li @click.prevent="performMonth(eventsMonth, \'submit\')" v-if="eventsMonth.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux du mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'validatesci\')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'rejectsci\')" v-if="eventsMonth.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'validateadm\')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Valider administrativement le mois</li>\n                            <li @click.prevent="performMonth(eventsMonth, \'rejectadm\')" v-if="eventsMonth.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement le mois</li>\n                        </ul>\n                    </nav>\n                    </strong> \n                    <span class="onright total">{{eventsMonth.total}} heure(s)</span>\n                </h3>\n                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">\n                    <h4 class="flex-position">\n                        <strong>Semaine {{week}} ~ \n                        <nav class="reject-valid-group" v-if="eventsWeek.credentials.actions">\n                            <i class=" icon-angle-down"></i>\n                            <ul>\n                                <li @click.prevent="performWeek(eventsWeek, \'submit\')" v-if="eventsWeek.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'validatesci\')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'rejectsci\')" v-if="eventsWeek.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'validateadm\')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>\n                                <li @click.prevent="performWeek(eventsWeek, \'rejectadm\')" v-if="eventsWeek.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la semaine</li>\n                            </ul>\n                        </nav>\n                        </strong>                        \n                        <span class="onright total">{{eventsWeek.total}} heure(s)</span>\n                    </h4>\n                     <section v-for="eventsDay, day in eventsWeek.days" class="day-pack events">\n                        <h5>{{day}} \n                        <nav class="reject-valid-group" v-if="eventsDay.credentials.actions">\n                            <i class=" icon-angle-down"></i>\n                            <ul>\n                                <li @click.prevent="performDay(eventsDay, \'submit\')" v-if="eventsDay.credentials.send"><i class="icon-right-big"></i> Soumettre les cr\xE9neaux de la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'validatesci\')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'rejectsci\')" v-if="eventsDay.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'validateadm\')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Valider administrativement la journ\xE9e</li>\n                                <li @click.prevent="performDay(eventsDay, \'rejectadm\')" v-if="eventsDay.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement la journ\xE9e</li>\n                            </ul>\n                        </nav>\n                        </h5>\n                         <section class="events-list" :style="{ \'height\': eventsDay.persons.length*1.8 +\'em\' }">\n                            <listitem\n                                :with-owner="withOwner"\n                                @selectevent="selectEvent"\n                                @editevent="$emit(\'editevent\', event)"\n                                @deleteevent="$emit(\'deleteevent\', event)"\n                                @submitevent="$emit(\'submitevent\', event)"\n                                @rejectscievent="$emit(\'rejectevent\', event, \'sci\')"\n                                @rejectadmevent="$emit(\'rejectevent\', event, \'adm\')"\n                                @validatescievent="$emit(\'validateevent\', event, \'sci\')"\n                                @validateadmevent="$emit(\'validateevent\', event, \'adm\')"\n                                v-bind:event="event" v-for="event in eventsDay.events"></listitem>\n                        </section>\n                        <div class="total">\n                            {{eventsDay.total}} heure(s)\n                        </div>\n                    </section>\n                </section>\n            </section>\n        </section>\n        <div v-if="!listEvents" class="alert alert-danger">\n            Aucun cr\xE9neaux d\xE9t\xE9ct\xE9s\n        </div>\n    </div>',
 
     methods: {
         selectEvent: function selectEvent(event) {
-            console.log('selection de la semaine');
             store.currentDay = moment(event.start);
             store.state = "week";
-        },
-        handlerTooltip: function handlerTooltip() {
-            console.log('handlerTooltip', arguments);
         },
         getMonthPack: function getMonthPack(pack) {
             var events = [];
@@ -1223,8 +1205,6 @@ var ListView = _defineProperty({
             this.performEmit(this.getDayPack(dayPack), action);
         },
         performEmit: function performEmit(events, action) {
-            console.log("EMIT", action, events);
-
             if (action == 'validatesci') {
                 this.$emit('validateevent', events, 'sci');
             } else if (action == 'validateadm') {
@@ -1347,9 +1327,6 @@ var ListView = _defineProperty({
             }
         }
 
-        //structure.owners = owners;
-        console.log(structure);
-
         return structure;
     }
 });
@@ -1383,7 +1360,7 @@ var EventItemImport = {
 };
 
 var ImportICSView = {
-    template: '<div class="importer">\n                <div class="importer-ui">\n                    <h1><i class="icon-calendar"></i>Importer un ICS</h1>\n                    <nav class="steps">\n                        <span :class="{active: etape == 1}">Fichier ICS</span>\n                        <span :class="{active: etape == 2}">Cr\xE9neaux \xE0 importer</span>\n                        <span :class="{active: etape == 3}">Finalisation</span>\n\n                    </nav>\n\n                    <section class="etape1 row" v-if="etape == 1">\n                        <div class="col-md-1">Du</div>\n                        <div class="col-md-5">\n                            <datepicker v-model="periodStart"></datepicker>\n                        </div>\n\n                        <div class="col-md-1">au</div>\n                        <div class="col-md-5">\n                            <datepicker v-model="periodEnd"></datepicker>\n                        </div>\n                        <p>Choisissez un fichier ICS : </p>\n                        <input type="file" @change="loadIcsFile">\n                    </section>\n\n                    <section class="etape2" v-if="etape == 2">\n                        <h2><i class="icon-download-outline"></i>Aper\xE7u des donn\xE9es charg\xE9es</h2>\n                        <p>Voici les donn\xE9es charg\xE9es depuis le fichier ICS fournis : </p>\n                        <div class="calendar calendar-list">\n                            <article v-for="pack in packs">\n                                <section class="events">\n                                    <h3>{{ pack.label }}</h3>\n                                    <section class="events-list">\n                                        <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>\n                                    </section>\n                                </section>\n                            </article>\n                        </div>\n                        <div>\n                            <h2><i class="icon-loop-outline"></i>Correspondance des cr\xE9neaux</h2>\n                            <section class="correspondances"">\n                                <article v-for="label in labels">\n                                    <strong><span :style="{\'background\': background(label)}" class="square">&nbsp</span>{{ label }}</strong>\n                                    <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">\n                                        <option value="">Conserver</option>\n                                        <option value="ignorer">Ignorer ces cr\xE9neaux</option>\n                                        <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>\n                                    </select>\n                                </article>\n                            </section>\n                        </div>\n                    </section>\n\n                    <div class="buttons">\n                        <button class="btn btn-default" @click="$emit(\'cancel\')">Annuler</button>\n                        <button class="btn btn-primary" @click="applyImport" v-if="etape==2">\n                            Valider l\'import de ces cr\xE9neaux\n                        </button>\n                    </div>\n                </div>\n            </div>',
+    template: '<div class="importer">\n                <div class="importer-ui">\n                    <h1><i class="icon-calendar"></i>Importer un ICS</h1>\n                    <nav class="steps">\n                        <span :class="{active: etape == 1}">Fichier ICS</span>\n                        <span :class="{active: etape == 2}">Cr\xE9neaux \xE0 importer</span>\n                        <span :class="{active: etape == 3}">Finalisation</span>\n\n                    </nav>\n\n                    <section class="etape1 row" v-if="etape == 1">\n                        <div class="col-md-1">Du</div>\n                        <div class="col-md-5">\n                            <datepicker v-model="periodStart"></datepicker>\n                        </div>\n\n                        <div class="col-md-1">au</div>\n                        <div class="col-md-5">\n                            <datepicker v-model="periodEnd"></datepicker>\n                        </div>\n                        <p>Choisissez un fichier ICS : </p>\n                        <input type="file" @change="loadIcsFile">\n                    </section>\n\n                    <section class="etape2" v-if="etape == 2">\n                        <h2><i class="icon-download-outline"></i>Aper\xE7u des donn\xE9es charg\xE9es</h2>\n                        <p>Voici les donn\xE9es charg\xE9es depuis le fichier ICS fournis : </p>\n                        <div class="calendar calendar-list">\n                            <article v-for="pack in packs">\n                                <section class="events">\n                                    <h3>{{ pack.label }}</h3>\n                                    <section class="events-list">\n                                        <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>\n                                    </section>\n                                </section>\n                            </article>\n                        </div>\n                        <div>\n                            <h2><i class="icon-loop-outline"></i>Correspondance des cr\xE9neaux</h2>\n                            <section class="correspondances"">\n                                <article v-for="label in labels">\n                                    <strong><span :style="{\'background\': background(label)}" class="square">&nbsp</span>{{ label }}</strong>\n                                    <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">\n                                        <option value="ignorer">Ignorer ces cr\xE9neaux</option>\n                                        <option value="">Conserver</option>\n                                        <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>\n                                    </select>\n                                </article>\n                            </section>\n                        </div>\n                    </section>\n\n                    <div class="buttons">\n                        <button class="btn btn-default" @click="$emit(\'cancel\')">Annuler</button>\n                        <button class="btn btn-primary" @click="applyImport" v-if="etape==2">\n                            Valider l\'import de ces cr\xE9neaux\n                        </button>\n                    </div>\n                </div>\n            </div>',
     props: {
         'creneaux': {
             default: ['test A', 'test B', 'test C']
@@ -1455,7 +1432,6 @@ var ImportICSView = {
                 });
             }
             this.associations[from] = to;
-            console.log(this.associations);
         },
 
 
@@ -1553,7 +1529,6 @@ var SelectEditable = {
 
     methods: {
         onInput: function onInput() {
-            console.log('change', this.valueIn);
             this.$emit('input', this.valueIn, this.model);
         },
         onSelectChange: function onSelectChange(e) {
@@ -1732,7 +1707,6 @@ var Calendar = {
             }
         },
         handlerRejectShow: function handlerRejectShow(event) {
-            console.log('AFFICHAGE DU REJET', event);
             this.rejectShow = event;
         },
 
@@ -1775,9 +1749,6 @@ var Calendar = {
         handlerCreatePack: function handlerCreatePack(events) {
             this.restSave(events);
         },
-        confirmImport: function confirmImport() {
-            console.log('Tous ajouter');
-        },
         handleradd: function handleradd(pack, event) {
             var packIndex = this.importedData.indexOf(pack);
             this.importedData[packIndex].splice(this.importedData[packIndex].indexOf(event));
@@ -1786,9 +1757,6 @@ var Calendar = {
             this.defaultLabel = this.eventEdit.label = this.eventEditData.label;
             this.defaultDescription = this.eventEdit.description = this.eventEditData.description;
             this.handlerEditCancelEvent();
-        },
-        handlerTooltip: function handlerTooltip() {
-            console.log('handlerTooltip CENTRAL', arguments);
         },
         handlerEditCancelEvent: function handlerEditCancelEvent() {
             this.eventEditDataVisible = false;
@@ -1809,7 +1777,6 @@ var Calendar = {
         handlerSendReject: function handlerSendReject() {
             var _this12 = this;
 
-            console.log('Envoi du rejet', this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach(function (event) {
                 var e = JSON.parse(JSON.stringify(event));
@@ -1854,7 +1821,6 @@ var Calendar = {
 
             var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "unknow";
 
-            console.log('VALIDATION', type, 'de', events);
             // événements reçus
             var eventsArray = !events.length ? [events] : events,
                 events = [];
@@ -1951,7 +1917,6 @@ var Calendar = {
                     _this15.displayRejectModal = false;
                     _this15.handlerEditCancelEvent();
                 }, function (error) {
-                    console.log(error);
                     _this15.errors.push("Impossible de modifier l'état du créneau : " + error);
 
                     _this15.remoteError = "Erreur : " + error.statusText;
@@ -2133,7 +2098,6 @@ var Calendar = {
         }
 
         if (this.customDatas) {
-            console.log("CustomDatas", this.customDatas());
             var customs = this.customDatas();
             this.wps = customs;
             for (var k in customs) {
@@ -2150,7 +2114,6 @@ var Calendar = {
         }
         if (this.ownersList) {
             store.owners = this.ownersList();
-            console.log('OWNERS', store.owners);
         }
 
         if (this.restUrl) {

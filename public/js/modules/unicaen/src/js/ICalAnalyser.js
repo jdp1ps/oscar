@@ -1,4 +1,5 @@
-// import moment from "moment-timezone";
+if( require )
+    moment = require("moment-timezone");
 
 moment.locale('fr');
 //moment.tz(moment.tz.guess());
@@ -6,7 +7,11 @@ moment.locale('fr');
 
 class ICalAnalyser {
 
-    constructor(ending = new Date()) {
+    getDailyStrategy() {
+        return this.dailyStrategy;
+    }
+
+    constructor(ending = new Date(), dailyStrategy = [{startTime: '8:00', endTime: '12:00'}, {startTime: '13:00', endTime: '17:00'}]) {
         if (ending instanceof String)
             ending = new Date(ending);
 
@@ -15,6 +20,7 @@ class ICalAnalyser {
 
         this.ending = typeof ending == 'string' ? new Date(ending) : ending;
         this.daysString = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+        this.dailyStrategy = dailyStrategy;
         this.summaries = [];
     }
 
@@ -176,11 +182,40 @@ class ICalAnalyser {
                             this.summaries.push(item.summary);
                         }
                     }
+
+                    else if (dd[0] == 'x-microsoft-cdo-alldayevent') {
+                        item.daily = "allday";
+                    }
                 });
 
                 if (item.exception) {
                     exceptions = exceptions.concat(this.generateItem(item));
                 }
+
+                else if( item.daily == "allday" ){
+                    var itemStart = moment(item.start);
+                    if( this.dailyStrategy ){
+                        this.dailyStrategy.forEach((copy) => {
+                            var startHourStr = copy.startTime.split(':');
+                            var startHour = parseInt(startHourStr[0]);
+                            var startMinute = parseInt(startHourStr[1]);
+                            var endHourStr = copy.endTime.split(':');
+                            var endHour = parseInt(endHourStr[0]);
+                            var endMinute = parseInt(endHourStr[1]);
+
+                            var event = {
+                                label: item.label,
+                                summary: item.label,
+                                description: item.description,
+                                email: item.email,
+                                start: itemStart.hours(startHour).minutes(startMinute).format(),
+                                end: itemStart.hours(endHour).minutes(endMinute).format()
+                            };
+                            out.push(event);
+                        })
+                    }
+                }
+
                 else {
                     if (rrule) {
                         out = out.concat(this.repeat(item, rrule, exdate));
@@ -198,8 +233,6 @@ class ICalAnalyser {
                 }
             }
         });
-
-        console.log(out);
 
         return out
     }

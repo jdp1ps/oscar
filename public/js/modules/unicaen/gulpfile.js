@@ -138,6 +138,7 @@ gulp.task('js', function(){
             }
         }))
         .pipe(gulp.dest('dist/js'))
+    gulp.run('mocha');
 });
 
 gulp.task('watch:js', ['js'], function () {
