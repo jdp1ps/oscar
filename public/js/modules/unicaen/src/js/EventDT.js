@@ -169,7 +169,6 @@ var EventDT = class {
             this.validableSci = data.credentials.validableSci;
             this.sendable = data.credentials.sendable;
         }
-//        console.log("Synchronisation de l'événement", this.id, "avec", data, this);
     }
 
     static first(events) {

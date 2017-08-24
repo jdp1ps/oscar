@@ -13,15 +13,23 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// import moment from "moment-timezone";
+if (require) moment = require("moment-timezone");
 
 moment.locale('fr');
 //moment.tz(moment.tz.guess());
 
 
 var ICalAnalyser = function () {
+    _createClass(ICalAnalyser, [{
+        key: 'getDailyStrategy',
+        value: function getDailyStrategy() {
+            return this.dailyStrategy;
+        }
+    }]);
+
     function ICalAnalyser() {
         var ending = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
+        var dailyStrategy = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [{ startTime: '8:00', endTime: '12:00' }, { startTime: '13:00', endTime: '17:00' }];
 
         _classCallCheck(this, ICalAnalyser);
 
@@ -31,6 +39,7 @@ var ICalAnalyser = function () {
 
         this.ending = typeof ending == 'string' ? new Date(ending) : ending;
         this.daysString = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+        this.dailyStrategy = dailyStrategy;
         this.summaries = [];
     }
 
@@ -178,11 +187,35 @@ var ICalAnalyser = function () {
                             if (_this.summaries.indexOf(item.summary) < 0) {
                                 _this.summaries.push(item.summary);
                             }
+                        } else if (dd[0] == 'x-microsoft-cdo-alldayevent') {
+                            item.daily = "allday";
                         }
                     });
 
                     if (item.exception) {
                         exceptions = exceptions.concat(_this.generateItem(item));
+                    } else if (item.daily == "allday") {
+                        var itemStart = moment(item.start);
+                        if (_this.dailyStrategy) {
+                            _this.dailyStrategy.forEach(function (copy) {
+                                var startHourStr = copy.startTime.split(':');
+                                var startHour = parseInt(startHourStr[0]);
+                                var startMinute = parseInt(startHourStr[1]);
+                                var endHourStr = copy.endTime.split(':');
+                                var endHour = parseInt(endHourStr[0]);
+                                var endMinute = parseInt(endHourStr[1]);
+
+                                var event = {
+                                    label: item.label,
+                                    summary: item.label,
+                                    description: item.description,
+                                    email: item.email,
+                                    start: itemStart.hours(startHour).minutes(startMinute).format(),
+                                    end: itemStart.hours(endHour).minutes(endMinute).format()
+                                };
+                                out.push(event);
+                            });
+                        }
                     } else {
                         if (rrule) {
                             out = out.concat(_this.repeat(item, rrule, exdate));
@@ -200,8 +233,6 @@ var ICalAnalyser = function () {
                     }
                 }
             });
-
-            console.log(out);
 
             return out;
         }

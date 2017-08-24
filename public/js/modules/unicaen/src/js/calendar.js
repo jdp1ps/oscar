@@ -69,7 +69,6 @@ class CalendarDatas {
             editActive: false
         };
 
-        ////
         this.displayRejectModal = false;
         this.rejectValidateType = null;
         this.rejectComment = "";
@@ -92,15 +91,10 @@ class CalendarDatas {
         };
     }
 
-    downloadTimesheet(personid, activityid){
-        console.log(personid, activityid);
-    }
-
     /**
      * Retourne les données pour afficher la feuille de temps.
      */
     timesheetDatas(){
-        console.log('Accès aux données pour la feuille de temps', this.wps);
         let structuredDatas = {};
         let activityWpsIndex = {};
 
@@ -129,7 +123,6 @@ class CalendarDatas {
 
                 // Regroupement par person
                 if (!structuredDatas[activityLabel]) {
-                    console.log("event",event);
                     structuredDatas[activityLabel] = {
                         label: activityLabel,
                         total: 0.0,
@@ -616,7 +609,6 @@ var TimeEvent = {
 
     methods: {
         handlerTooltipOn(event, e){
-            console.log(e);
             store.tooltip = {
                 title: '<h3>' + event.label +'</h3>',
                 event: event,
@@ -716,7 +708,6 @@ var TimeEvent = {
 
         handlerMouseUp(e){
             if (this.event.editable) {
-                console.log('UPDATE now');
                 this.moving = false;
                 this.$el.removeEventListener('mousemove', this.move);
 
@@ -733,7 +724,6 @@ var TimeEvent = {
                     .format();
 
                 if (this.change) {
-                    console.log('trigger update');
                     this.change = false;
                     this.$emit('savemoveevent', this.event);
                 }
@@ -1076,7 +1066,6 @@ var WeekView = {
             }
 
             if (this.gostDatas.eventMovedEnd) {
-                console.log("FIN du déplacement de la borne de fin");
                 this.gostDatas.eventMovedEnd.changing = false;
                 this.gostDatas.eventMovedEnd.handlerMouseUp();
                 this.gostDatas.eventMovedEnd = null;
@@ -1087,7 +1076,6 @@ var WeekView = {
         },
 
         handlerMouseDown(e){
-            console.log("MouseDown", this.createNew == false);
             if (this.createNew) {
                 var roundFactor = 40 / 60 * this.pas;
                 this.gostDatas.y = Math.round(e.offsetY / roundFactor) * (roundFactor);
@@ -1143,7 +1131,6 @@ var WeekView = {
                 }
             }
             else if (this.gostDatas.eventMovedEnd) {
-                console.log("déplacement de la borne de fin");
                 if (this.gostDatas.startFrom == null) {
                     this.gostDatas.startFrom = e.offsetY;
                 } else {
@@ -1463,7 +1450,6 @@ var ListView = {
                             <listitem
                                 :with-owner="withOwner"
                                 @selectevent="selectEvent"
-                                @tooltipevent="handlerTooltip"
                                 @editevent="$emit('editevent', event)"
                                 @deleteevent="$emit('deleteevent', event)"
                                 @submitevent="$emit('submitevent', event)"
@@ -1471,7 +1457,6 @@ var ListView = {
                                 @rejectadmevent="$emit('rejectevent', event, 'adm')"
                                 @validatescievent="$emit('validateevent', event, 'sci')"
                                 @validateadmevent="$emit('validateevent', event, 'adm')"
-                           
                                 v-bind:event="event" v-for="event in eventsDay.events"></listitem>
                         </section>
                         <div class="total">
@@ -1488,13 +1473,8 @@ var ListView = {
 
     methods: {
         selectEvent(event){
-            console.log('selection de la semaine');
             store.currentDay = moment(event.start);
             store.state = "week";
-        },
-
-        handlerTooltip(){
-          console.log('handlerTooltip', arguments);
         },
 
         getMonthPack(pack){
@@ -1545,8 +1525,6 @@ var ListView = {
         },
 
         performEmit( events, action ){
-            console.log("EMIT", action, events);
-
             if( action == 'validatesci' ){
                 this.$emit('validateevent', events, 'sci');
             }
@@ -1674,9 +1652,6 @@ var ListView = {
 
             }
 
-            //structure.owners = owners;
-            console.log(structure);
-
             return structure;
         }
     }
@@ -1761,8 +1736,8 @@ var ImportICSView = {
                                 <article v-for="label in labels">
                                     <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
                                     <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
-                                        <option value="">Conserver</option>
                                         <option value="ignorer">Ignorer ces créneaux</option>
+                                        <option value="">Conserver</option>
                                         <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>
                                     </select>
                                 </article>
@@ -1852,7 +1827,6 @@ var ImportICSView = {
                 });
             }
             this.associations[from] = to;
-            console.log(this.associations);
         },
 
         /** Charge le fichier ICS depuis l'interface **/
@@ -1952,7 +1926,6 @@ var SelectEditable = {
 
     methods: {
         onInput(){
-            console.log('change', this.valueIn);
             this.$emit('input', this.valueIn, this.model);
         },
         onSelectChange(e){
@@ -2375,7 +2348,6 @@ var Calendar = {
         },
 
         handlerRejectShow(event){
-            console.log('AFFICHAGE DU REJET', event);
             this.rejectShow = event;
         },
 
@@ -2420,10 +2392,6 @@ var Calendar = {
             this.restSave(events);
         },
 
-        confirmImport(){
-            console.log('Tous ajouter');
-        },
-
         handleradd(pack, event){
             var packIndex = this.importedData.indexOf(pack);
             this.importedData[packIndex].splice(this.importedData[packIndex].indexOf(event));
@@ -2433,10 +2401,6 @@ var Calendar = {
             this.defaultLabel = this.eventEdit.label = this.eventEditData.label;
             this.defaultDescription = this.eventEdit.description = this.eventEditData.description;
             this.handlerEditCancelEvent();
-        },
-
-        handlerTooltip(){
-          console.log('handlerTooltip CENTRAL', arguments);
         },
 
         handlerEditCancelEvent(){
@@ -2454,7 +2418,6 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         handlerSendReject(){
-            console.log('Envoi du rejet', this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach((event) => {
                 var e = JSON.parse(JSON.stringify(event));
@@ -2495,7 +2458,6 @@ var Calendar = {
 
 
         handlerValidateEvent(events, type = "unknow"){
-            console.log('VALIDATION', type, 'de', events);
             // événements reçus
             var eventsArray = !events.length ? [events] : events,
                 events = [];
@@ -2599,7 +2561,6 @@ var Calendar = {
                         this.handlerEditCancelEvent();
                     },
                     error => {
-                        console.log(error);
                         this.errors.push("Impossible de modifier l'état du créneau : " + error);
 
                         this.remoteError = "Erreur : " + error.statusText;
@@ -2790,7 +2751,6 @@ var Calendar = {
         }
 
         if (this.customDatas) {
-            console.log("CustomDatas", this.customDatas());
             var customs = this.customDatas();
             this.wps = customs;
             for (var k in customs) {
@@ -2808,7 +2768,6 @@ var Calendar = {
         }
         if (this.ownersList) {
             store.owners = this.ownersList();
-            console.log('OWNERS', store.owners);
         }
 
         if (this.restUrl) {
