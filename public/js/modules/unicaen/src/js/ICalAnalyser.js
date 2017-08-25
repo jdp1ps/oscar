@@ -11,7 +11,7 @@ class ICalAnalyser {
         return this.dailyStrategy;
     }
 
-    constructor(ending = new Date(), dailyStrategy = [{startTime: '8:00', endTime: '12:00'}, {startTime: '13:00', endTime: '17:00'}]) {
+    constructor(ending = new Date(), dailyStrategy = []) {
         if (ending instanceof String)
             ending = new Date(ending);
 
@@ -49,7 +49,15 @@ class ICalAnalyser {
             }
             return [].concat(this.generateItem(part1)).concat(this.generateItem(part2));
         }
-        return [{label: item.summary, summary: item.summary, start: item.start, end: item.end, description: item.description }];
+        return [{
+            uid: item.uid,
+            label: item.summary,
+            summary: item.summary,
+            start: item.start,
+            end: item.end,
+            exception: item.exception ? item.exception : null,
+            description: item.description == undefined ? null : item.description
+        }];
     }
 
     /**
@@ -61,10 +69,8 @@ class ICalAnalyser {
      * @returns {Array}
      */
     repeat(item, rrule, exdate = null) {
-
         var items = [];
         item.recursive = true;
-
         if (rrule.freq == 'DAILY' || rrule.freq == 'WEEKLY') {
             var fromDate = new Date(item.start);
             var toDate = new Date(item.end);
@@ -73,6 +79,7 @@ class ICalAnalyser {
             var pas = rrule.freq == 'DAILY' ? 1 : 7;
             var count = rrule.count || null;
             var byday = rrule.byday || this.daysString;
+
             if (byday instanceof String)
                 byday = [byday];
 
@@ -90,7 +97,6 @@ class ICalAnalyser {
             else {
                 while (fromDate < end) {
                     let currentDay = this.daysString[fromDate.getDay()];
-
                     if (!(byday.indexOf(currentDay) < 0 || exdate.indexOf(fromDate.toISOString()) > -1 )) {
                         let copy = JSON.parse(JSON.stringify(item));
                         copy.start = moment(fromDate).format();
@@ -119,6 +125,7 @@ class ICalAnalyser {
         return items;
     }
 
+
     parse(icsData) {
 
         // local TZ
@@ -135,14 +142,13 @@ class ICalAnalyser {
                 d[1].forEach((dd) => {
                     if (dd[0] == 'uid')
                         item.uid = dd[3];
-
                     else if (dd[0] == 'rrule') {
                         rrule = dd[3];
                     }
 
                     else if (dd[0] == 'exdate') {
                         var m = moment.tz(dd[3], dd[1].tzid);
-                        exdate.push(m.tz(defaultTimeZone).format());
+                        exdate.push(m.tz(defaultTimeZone).toISOString());
                     }
 
                     else if (dd[0] == 'organizer') {
@@ -161,8 +167,8 @@ class ICalAnalyser {
                         item.start = m.tz(defaultTimeZone).format();
                     }
 
-
                     else if (dd[0] == 'recurrence-id') {
+                        item.recurenceid = dd[2];
                         var m = moment.tz(dd[3], dd[1].tzid);
                         item.exception = m.tz(defaultTimeZone).format();
                     }
@@ -192,7 +198,9 @@ class ICalAnalyser {
                     exceptions = exceptions.concat(this.generateItem(item));
                 }
 
+
                 else if( item.daily == "allday" ){
+
                     var itemStart = moment(item.start);
                     if( this.dailyStrategy ){
                         this.dailyStrategy.forEach((copy) => {
@@ -202,8 +210,8 @@ class ICalAnalyser {
                             var endHourStr = copy.endTime.split(':');
                             var endHour = parseInt(endHourStr[0]);
                             var endMinute = parseInt(endHourStr[1]);
-
                             var event = {
+                                uid: item.uid,
                                 label: item.label,
                                 summary: item.label,
                                 description: item.description,
@@ -211,7 +219,11 @@ class ICalAnalyser {
                                 start: itemStart.hours(startHour).minutes(startMinute).format(),
                                 end: itemStart.hours(endHour).minutes(endMinute).format()
                             };
-                            out.push(event);
+                            if( rrule ){
+                                out = out.concat(this.repeat(event, rrule, exdate));
+                            } else {
+                                out = out.concat(this.generateItem(event));
+                            }
                         })
                     }
                 }
@@ -228,6 +240,7 @@ class ICalAnalyser {
 
         exceptions.forEach((ex)=> {
             for (var i = 0; i < out.length; i++) {
+                let current = out[i];
                 if (out[i].uid == ex.uid && out[i].start == ex.exception) {
                     out.splice(i, 1, ex);
                 }
