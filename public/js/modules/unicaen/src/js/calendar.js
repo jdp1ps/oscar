@@ -1732,8 +1732,10 @@ var ImportICSView = {
                         </div>
                         <div>
                             <h2><i class="icon-loop-outline"></i>Correspondance des créneaux</h2>
+                            <input v-model="search" placeholder="Filter les créneaux">
                             <section class="correspondances"">
-                                <article v-for="label in labels">
+
+                                <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
                                     <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
                                     <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
                                         <option value="ignorer">Ignorer ces créneaux</option>
@@ -1767,7 +1769,8 @@ var ImportICSView = {
             importedEvents: [],
             associations: {},
             labels: [],
-            etape: 1
+            etape: 1,
+            search: ""
         }
     },
 
@@ -1781,21 +1784,23 @@ var ImportICSView = {
             var packs = [];
 
             this.importedEvents.forEach(item => {
-                let currentPack = null;
-                let currentLabel = item.mmStart.format('DD MMMM YYYY');
-                for (let i = 0; i < packs.length && currentPack == null; i++) {
-                    if (packs[i].label == currentLabel) {
-                        currentPack = packs[i];
+
+                    let currentPack = null;
+                    let currentLabel = item.mmStart.format('DD MMMM YYYY');
+                    for (let i = 0; i < packs.length && currentPack == null; i++) {
+                        if (packs[i].label == currentLabel) {
+                            currentPack = packs[i];
+                        }
                     }
-                }
-                if (!currentPack) {
-                    currentPack = {
-                        label: currentLabel,
-                        events: []
-                    };
-                    packs.push(currentPack);
-                }
-                currentPack.events.push(item);
+                    if (!currentPack) {
+                        currentPack = {
+                            label: currentLabel,
+                            events: []
+                        };
+                        packs.push(currentPack);
+                    }
+                    currentPack.events.push(item);
+
             });
             return packs;
         }
@@ -1809,7 +1814,6 @@ var ImportICSView = {
             if (to == 'ignorer') {
                 this.importedEvents.forEach(item => {
                     if (item.label == from)
-
                         item.imported = false;
                 })
             } else if (to == 'conserver') {
@@ -1841,7 +1845,10 @@ var ImportICSView = {
         /** Parse le contenu ICS **/
         parseFileContent(content){
 
-            var analyser = new ICalAnalyser();
+            var analyser = new ICalAnalyser(
+                new Date(),
+                [{startTime: '9:00', endTime: '12:30'}, {startTime: '14:00', endTime: '17:30'}]
+            );
             var events = analyser.parse(ICAL.parse(content));
             var after = this.periodStart ? moment(this.periodStart) : null;
             var before = this.periodEnd ? moment(this.periodEnd) : null;
@@ -1851,9 +1858,8 @@ var ImportICSView = {
             events.forEach(item => {
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
-                item.imported = true;
+                item.imported = false;
                 item.useLabel = "";
-
                 if( (after == null || (item.mmStart > after)) && (before == null || (item.mmEnd < before ))) {
                     this.importedEvents.push(item);
                     if (this.labels.indexOf(item.label) < 0)
@@ -1861,7 +1867,6 @@ var ImportICSView = {
                 } else {
                     console.log('Le créneau est hors limite');
                 }
-
             });
 
             this.importedEvents = EventDT.sortByStart(this.importedEvents);
@@ -2637,6 +2642,7 @@ var Calendar = {
 
         /** Charge le fichier ICS depuis l'interface **/
         loadIcsFile(e){
+            console.log('loadICSFile...');
             this.transmission = "Analyse du fichier ICS...";
             var fr = new FileReader();
             fr.onloadend = (result) => {
@@ -2647,7 +2653,12 @@ var Calendar = {
 
         /** Parse le contenu ICS **/
         parseFileContent(content){
-            var analyser = new ICalAnalyser();
+
+            var analyser = new ICalAnalyser(
+                new Date(),
+                [{startTime: '9:00', endTime: '12:30'}, {startTime: '14:00', endTime: '17:30'}]
+            );
+
             var events = analyser.parse(ICAL.parse(content));
             this.importedData = [];
 

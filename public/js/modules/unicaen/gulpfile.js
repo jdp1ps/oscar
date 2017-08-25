@@ -138,7 +138,7 @@ gulp.task('js', function(){
             }
         }))
         .pipe(gulp.dest('dist/js'))
-    gulp.run('mocha');
+
 });
 
 gulp.task('watch:js', ['js'], function () {
@@ -146,3 +146,8 @@ gulp.task('watch:js', ['js'], function () {
     gulp.watch(['src/css/**/*.scss'], ['sass']);
     gulp.watch(['src/**/*.html'], ['examples-copy']);
 });
+
+gulp.task('watch:mocha', ['mocha'], function () {
+    gulp.watch(['src/**/*.js', 'test/*.js'], ['mocha']);
+});
+
