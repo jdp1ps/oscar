@@ -144,4 +144,14 @@ describe('ICalAnalyser', ()=>{
         var events  = analyser.parseFileContent(fileContent.toString());
         assert.equal(20, events.length);
     })
+
+    it(' Weekly reapeat with exception', ()=>{
+
+        var fileContent = fs.readFileSync(__dirname + '/RECURENT-DAILY-WEEKLY-WITH-EXCEPTION.ics');
+        var analyser = new ICalAnalyser(new Date('2017-09-01'), [{startTime: '8:00', endTime: '16:00'}]);
+        analyser.debugMode = true;
+        var events  = analyser.parseFileContent(fileContent.toString());
+        assert.equal(8, events.length);
+    })
+
 });
