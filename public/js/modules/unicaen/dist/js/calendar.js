@@ -60,6 +60,9 @@ var CalendarDatas = function () {
         this.defaultLabel = "";
         this.tooltip = null;
         this.errors = [];
+
+        // Données pour transformer les créneaux longs
+        this.transformLong = [{ startHours: 8, startMinutes: 0, endHours: 12, endMinutes: 0 }, { startHours: 13, startMinutes: 0, endHours: 17, endMinutes: 0 }];
         this.defaultDescription = "";
         this.status = {
             "draft": "Brouillon",
@@ -1239,6 +1242,7 @@ var ListView = _defineProperty({
                 currentWeek = void 0,
                 currentDay = void 0;
             var duration = event.duration;
+            console.log(duration);
             var labelYear = event.mmStart.format('YYYY');
             var labelMonth = event.mmStart.format('MMMM');
             var labelWeek = event.mmStart.format('W');
@@ -1311,7 +1315,7 @@ var ListView = _defineProperty({
             if (currentDay.persons.indexOf(event.owner_id) < 0) {
                 currentDay.persons.push(event.owner_id);
             }
-            currentDay.total += duration;
+
             currentDay.events.push(event);
 
             event.decaleY = currentDay.persons.indexOf(event.owner_id);
@@ -1429,6 +1433,7 @@ var ImportICSView = {
                 this.importedEvents.forEach(function (item) {
                     if (item.label == from) {
                         item.useLabel = to;
+                        if (!item.description) item.description = from;
                         item.imported = true;
                     }
                 });
@@ -1485,7 +1490,7 @@ var ImportICSView = {
                     imported.push(event);
                 }
             });
-            this.$emit('import', imported);
+            if (imported.length > 0) this.$emit('import', imported);
         }
     }
 };
@@ -1736,13 +1741,38 @@ var Calendar = {
             }
         },
         importEvents: function importEvents(events) {
+            var _this12 = this;
+
             var datas = [];
             events.forEach(function (item) {
-                var event = JSON.parse(JSON.stringify(item));
+                var event = JSON.parse(JSON.stringify(item)),
+                    itemStart = moment(event.start),
+                    itemEnd = moment(event.end),
+                    duration = itemEnd - itemStart;
+
+                console.log("Durée:", duration / 1000 / 60 / 60);
+
                 if (event.useLabel) event.label = event.useLabel;
-                event.mmStart = moment(event.start);
-                event.mmEnd = moment(event.end);
-                datas.push(event);
+
+                if (duration / 1000 / 60 / 60 > 9) {
+                    console.log('Transformation du créneaux', event);
+                    _this12.transformLong.forEach(function (transform) {
+                        var itemTransformed = JSON.parse(JSON.stringify(event));
+                        itemStart.hours(transform.startHours).minutes(transform.startMinutes);
+                        itemEnd.hours(transform.endHours).minutes(transform.endMinutes);
+                        itemTransformed.start = itemStart.format();
+                        itemTransformed.end = itemEnd.format();
+                        itemTransformed.mmStart = moment(itemTransformed.start);
+                        itemTransformed.mmEnd = moment(itemTransformed.end);;
+                        datas.push(itemTransformed);
+                    });
+                } else {
+                    event.mmStart = moment(event.start);
+                    event.mmEnd = moment(event.end);
+                    datas.push(event);
+                }
+
+                if (event.useLabel) event.label = event.useLabel;
             });
             this.importInProgress = false;
             this.restSave(datas);
@@ -1776,15 +1806,15 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         handlerSendReject: function handlerSendReject() {
-            var _this12 = this;
+            var _this13 = this;
 
             var events = [];
             this.rejectedEvents.forEach(function (event) {
                 var e = JSON.parse(JSON.stringify(event));
-                if (_this12.rejectValidateType == 'rejectsci') {
-                    e.rejectedSciComment = _this12.rejectComment;
-                } else if (_this12.rejectValidateType == 'rejectadm') {
-                    e.rejectedAdminComment = _this12.rejectComment;
+                if (_this13.rejectValidateType == 'rejectsci') {
+                    e.rejectedSciComment = _this13.rejectComment;
+                } else if (_this13.rejectValidateType == 'rejectadm') {
+                    e.rejectedAdminComment = _this13.rejectComment;
                 }
                 events.push(e);
             });
@@ -1818,7 +1848,7 @@ var Calendar = {
             }
         },
         handlerValidateEvent: function handlerValidateEvent(events) {
-            var _this13 = this;
+            var _this14 = this;
 
             var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "unknow";
 
@@ -1836,7 +1866,7 @@ var Calendar = {
                 var message = events.length == 1 ? " du créneau " : " des " + events.length + " créneaux ";
                 bootbox.confirm(type == 'sci' ? '<i class="icon-beaker"></i> Validation scientifique ' + message : '<i class="icon-archive"></i>   Validation administrative' + message, function (response) {
                     if (response) {
-                        _this13.restStep(events, 'validate' + type);
+                        _this14.restStep(events, 'validate' + type);
                     }
                 });
             } else {
@@ -1853,12 +1883,17 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         restSave: function restSave(events) {
-            var _this14 = this;
+            var _this15 = this;
 
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
                 for (var i = 0; i < events.length; i++) {
+                    // Fix seconds bug
+                    events[i].mmStart.seconds(0);
+                    events[i].mmEnd.seconds(0);
+                    console.log(events[i]);
+
                     data.append('events[' + i + '][label]', events[i].label);
                     data.append('events[' + i + '][description]', events[i].description);
                     data.append('events[' + i + '][start]', events[i].mmStart.format());
@@ -1881,11 +1916,11 @@ var Calendar = {
                 store.loading = true;
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
-                    _this14.handlerEditCancelEvent();
+                    _this15.handlerEditCancelEvent();
                 }, function (error) {
-                    _this14.errors.push("Impossible d'enregistrer les données : " + error);
+                    _this15.errors.push("Impossible d'enregistrer les données : " + error);
                 }).then(function () {
-                    _this14.transmission = "";
+                    _this15.transmission = "";
                     store.loading = false;
                 });
                 ;
@@ -1898,7 +1933,7 @@ var Calendar = {
             this.restStep(events, 'validate');
         },
         restStep: function restStep(events, action) {
-            var _this15 = this;
+            var _this16 = this;
 
             if (!Array.isArray(events)) {
                 events = [events];
@@ -1915,15 +1950,15 @@ var Calendar = {
                 this.loading = true;
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
-                    _this15.displayRejectModal = false;
-                    _this15.handlerEditCancelEvent();
+                    _this16.displayRejectModal = false;
+                    _this16.handlerEditCancelEvent();
                 }, function (error) {
-                    _this15.errors.push("Impossible de modifier l'état du créneau : " + error);
+                    _this16.errors.push("Impossible de modifier l'état du créneau : " + error);
 
-                    _this15.remoteError = "Erreur : " + error.statusText;
+                    _this16.remoteError = "Erreur : " + error.statusText;
                 }).then(function () {
-                    _this15.transmission = "";
-                    _this15.loading = false;
+                    _this16.transmission = "";
+                    _this16.loading = false;
                 });
             }
         },
@@ -1931,16 +1966,16 @@ var Calendar = {
 
         /** Suppression de l'événement de la liste */
         handlerDeleteEvent: function handlerDeleteEvent(event) {
-            var _this16 = this;
+            var _this17 = this;
 
             if (this.restUrl) {
                 this.transmission = "Suppression...";
                 this.$http.delete(this.restUrl() + "?timesheet=" + event.id).then(function (response) {
-                    _this16.events.splice(_this16.events.indexOf(event), 1);
+                    _this17.events.splice(_this17.events.indexOf(event), 1);
                 }, function (error) {
                     console.log(error);
                 }).then(function () {
-                    _this16.transmission = "";
+                    _this17.transmission = "";
                 });
             } else {
                 this.events.splice(this.events.indexOf(event), 1);
@@ -1959,7 +1994,7 @@ var Calendar = {
 
         /** Soumission de l'événement de la liste */
         handlerSubmitEvent: function handlerSubmitEvent(event) {
-            var _this17 = this;
+            var _this18 = this;
 
             var events;
             if (event.length) {
@@ -1979,7 +2014,7 @@ var Calendar = {
 
             if (eventsSend.length) {
                 bootbox.confirm("Soumettre le(s) " + eventsSend.length + " créneau(x) ?", function (confirm) {
-                    if (confirm) _this17.restSend(eventsSend);
+                    if (confirm) _this18.restSend(eventsSend);
                 });
             } else {
                 bootbox.alert("Aucun créneau à envoyer.");
@@ -1995,13 +2030,13 @@ var Calendar = {
 
         /** Charge le fichier ICS depuis l'interface **/
         loadIcsFile: function loadIcsFile(e) {
-            var _this18 = this;
+            var _this19 = this;
 
             console.log('loadICSFile...');
             this.transmission = "Analyse du fichier ICS...";
             var fr = new FileReader();
             fr.onloadend = function (result) {
-                _this18.parseFileContent(fr.result);
+                _this19.parseFileContent(fr.result);
             };
             fr.readAsText(e.target.files[0]);
         },
@@ -2009,7 +2044,7 @@ var Calendar = {
 
         /** Parse le contenu ICS **/
         parseFileContent: function parseFileContent(content) {
-            var _this19 = this;
+            var _this20 = this;
 
             var analyser = new ICalAnalyser(new Date(), [{ startTime: '9:00', endTime: '12:30' }, { startTime: '14:00', endTime: '17:30' }]);
 
@@ -2022,9 +2057,9 @@ var Calendar = {
 
                 var currentPack = null;
                 var currentLabel = item.mmStart.format('YYYY-MM-D');
-                for (var i = 0; i < _this19.importedData.length && currentPack == null; i++) {
-                    if (_this19.importedData[i].label == currentLabel) {
-                        currentPack = _this19.importedData[i];
+                for (var i = 0; i < _this20.importedData.length && currentPack == null; i++) {
+                    if (_this20.importedData[i].label == currentLabel) {
+                        currentPack = _this20.importedData[i];
                     }
                 }
                 if (!currentPack) {
@@ -2032,7 +2067,7 @@ var Calendar = {
                         label: currentLabel,
                         events: []
                     };
-                    _this19.importedData.push(currentPack);
+                    _this20.importedData.push(currentPack);
                 }
                 currentPack.events.push(item);
             });
@@ -2073,7 +2108,7 @@ var Calendar = {
     }), _defineProperty(_methods, 'editCancel', function editCancel() {
         this.eventEdit = this.eventEditData = null;
     }), _defineProperty(_methods, 'fetch', function fetch() {
-        var _this20 = this;
+        var _this21 = this;
 
         this.transmission = "Chargement des créneaux...";
         store.loading = true;
@@ -2082,10 +2117,10 @@ var Calendar = {
             store.sync(ok.body.timesheets);
             store.loading = false;
         }, function (ko) {
-            _this20.errors.push("Impossible de charger les données : " + ko);
+            _this21.errors.push("Impossible de charger les données : " + ko);
             store.remoteError = "Impossible de charger des créneaux";
         }).then(function () {
-            _this20.transmission = "";
+            _this21.transmission = "";
             store.loading = false;
         });
     }), _defineProperty(_methods, 'post', function post(event) {

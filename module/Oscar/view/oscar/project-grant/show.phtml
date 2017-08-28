@@ -439,7 +439,7 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
                     Ajouter des créneaux pour <i class="caret"></i>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <?php foreach( $entity->getPersons() as $person ): ?>
+                    <?php foreach( $entity->getPersonsDeep() as $person ): ?>
                         <li><a class="dropdown-item" href="<?= $this->url('timesheet/usurpation', ['idactivity' => $entity->getId(), 'idperson' => $person->getPerson()->getId()]) ?>"><?= $person->getPerson() ?></a></li>
                     <?php endforeach; ?>
                 </ul>
@@ -479,6 +479,8 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
                 },
                 data:{
                     token: '<?= $tokenValue ?>',
+                    isValidateur: true,
+                    editable: true
 
                 },
                 el: '#workpackages'

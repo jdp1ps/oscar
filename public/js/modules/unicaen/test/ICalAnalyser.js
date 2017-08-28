@@ -130,4 +130,18 @@ describe('ICalAnalyser', ()=>{
         var events  = analyser.parseFileContent(fileContent.toString());
         assert.equal(5, events.length);
     })
+
+    it(' - Many days', ()=>{
+        var fileContent = fs.readFileSync(__dirname + '/MANY-DAY.ics');
+        var analyser = new ICalAnalyser(new Date('2017-09-01'), [{startTime: '8:00', endTime: '16:00'}]);
+        var events  = analyser.parseFileContent(fileContent.toString());
+        assert.equal(3, events.length);
+    })
+
+    it(' - Many labels', ()=>{
+        var fileContent = fs.readFileSync(__dirname + '/MANY-LABELS.ics');
+        var analyser = new ICalAnalyser(new Date('2017-09-01'), [{startTime: '8:00', endTime: '16:00'}]);
+        var events  = analyser.parseFileContent(fileContent.toString());
+        assert.equal(20, events.length);
+    })
 });

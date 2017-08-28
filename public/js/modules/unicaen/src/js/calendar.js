@@ -39,6 +39,12 @@ class CalendarDatas {
         this.defaultLabel = "";
         this.tooltip = null;
         this.errors = [];
+
+        // Données pour transformer les créneaux longs
+        this.transformLong = [
+            { startHours: 8, startMinutes: 0, endHours: 12, endMinutes: 0 },
+            { startHours: 13, startMinutes: 0, endHours: 17, endMinutes: 0 }
+        ];
         this.defaultDescription = "";
         this.status = {
            "draft": "Brouillon",
@@ -1560,6 +1566,7 @@ var ListView = {
 
                 let currentYear, currentMonth, currentWeek, currentDay;
                 let duration = event.duration;
+                console.log(duration);
                 let labelYear = event.mmStart.format('YYYY');
                 let labelMonth = event.mmStart.format('MMMM');
                 let labelWeek = event.mmStart.format('W');
@@ -1632,7 +1639,7 @@ var ListView = {
                 if( currentDay.persons.indexOf(event.owner_id) < 0 ){
                     currentDay.persons.push(event.owner_id);
                 }
-                currentDay.total += duration;
+
                 currentDay.events.push(event);
 
                 event.decaleY = currentDay.persons.indexOf(event.owner_id);
@@ -1826,6 +1833,8 @@ var ImportICSView = {
                 this.importedEvents.forEach(item => {
                     if (item.label == from) {
                         item.useLabel = to;
+                        if( !item.description )
+                            item.description = from;
                         item.imported = true;
                     }
                 });
@@ -1881,7 +1890,8 @@ var ImportICSView = {
                     imported.push(event)
                 }
             });
-            this.$emit('import', imported);
+            if( imported.length > 0 )
+                this.$emit('import', imported);
         }
     }
 };
@@ -2383,11 +2393,34 @@ var Calendar = {
         importEvents(events){
             var datas = [];
             events.forEach(item => {
-                var event = JSON.parse(JSON.stringify(item));
+                var event = JSON.parse(JSON.stringify(item)),
+                    itemStart = moment(event.start),
+                    itemEnd = moment(event.end),
+                    duration = itemEnd - itemStart;
+
+                console.log("Durée:", (duration / 1000 / 60 / 60 ));
+
                 if (event.useLabel) event.label = event.useLabel;
-                event.mmStart = moment(event.start);
-                event.mmEnd = moment(event.end);
-                datas.push(event);
+
+                if( duration / 1000 / 60 / 60 > 9 ){
+                    console.log('Transformation du créneaux', event);
+                    this.transformLong.forEach(transform => {
+                       var itemTransformed =  JSON.parse(JSON.stringify(event));
+                        itemStart.hours(transform.startHours).minutes(transform.startMinutes);
+                        itemEnd.hours(transform.endHours).minutes(transform.endMinutes);
+                        itemTransformed.start = itemStart.format();
+                        itemTransformed.end = itemEnd.format();
+                        itemTransformed.mmStart = moment(itemTransformed.start);
+                        itemTransformed.mmEnd = moment(itemTransformed.end);;
+                        datas.push(itemTransformed);
+                    });
+                } else {
+                    event.mmStart = moment(event.start);
+                    event.mmEnd = moment(event.end);
+                    datas.push(event);
+                }
+
+                if (event.useLabel) event.label = event.useLabel;
             })
             this.importInProgress = false;
             this.restSave(datas);
@@ -2501,6 +2534,11 @@ var Calendar = {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
                 for (var i = 0; i < events.length; i++) {
+                    // Fix seconds bug
+                    events[i].mmStart.seconds(0);
+                    events[i].mmEnd.seconds(0);
+                    console.log(events[i]);
+
                     data.append('events[' + i + '][label]', events[i].label);
                     data.append('events[' + i + '][description]', events[i].description);
                     data.append('events[' + i + '][start]', events[i].mmStart.format());
