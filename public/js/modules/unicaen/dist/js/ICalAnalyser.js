@@ -41,9 +41,15 @@ var ICalAnalyser = function () {
         this.daysString = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
         this.dailyStrategy = dailyStrategy;
         this.summaries = [];
+        this.debugMode = false;
     }
 
     _createClass(ICalAnalyser, [{
+        key: 'debug',
+        value: function debug() {
+            if (this.debugMode === true) console.log.apply(this, arguments);
+        }
+    }, {
         key: 'generateItem',
         value: function generateItem(item) {
             // POST traitement
@@ -95,6 +101,7 @@ var ICalAnalyser = function () {
         value: function repeat(item, rrule) {
             var exdate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
+
             var items = [];
             item.recursive = true;
             if (rrule.freq == 'DAILY' || rrule.freq == 'WEEKLY') {
@@ -114,14 +121,16 @@ var ICalAnalyser = function () {
                         copy.start = moment(fromDate).toISOString();
                         copy.end = moment(toDate).toISOString();
                         copy.recursive = true;
-                        items = items.concat(this.generateItem(copy));
+                        if (exdate.indexOf(fromDate.toISOString()) < 0) {
+                            items = items.concat(this.generateItem(copy));
+                        }
                         fromDate.setDate(fromDate.getDate() + interval * pas);
                         toDate.setDate(toDate.getDate() + interval * pas);
                     }
                 } else {
                     while (fromDate < end) {
                         var currentDay = this.daysString[fromDate.getDay()];
-                        if (!(byday.indexOf(currentDay) < 0 || exdate.indexOf(fromDate.toISOString()) > -1)) {
+                        if (item.daily == "allday" && exdate.indexOf(moment(fromDate).format("YYYY-MM-DD") + 'T00:00:00.000Z') > -1) {} else if (!(byday.indexOf(currentDay) < 0 || exdate.indexOf(fromDate.toISOString()) > -1)) {
                             var _copy = JSON.parse(JSON.stringify(item));
                             _copy.start = moment(fromDate).format();
                             _copy.end = moment(toDate).format();
@@ -214,6 +223,7 @@ var ICalAnalyser = function () {
                                 var endMinute = parseInt(endHourStr[1]);
                                 var event = {
                                     uid: item.uid,
+                                    daily: "allday",
                                     label: item.label,
                                     summary: item.label,
                                     description: item.description,

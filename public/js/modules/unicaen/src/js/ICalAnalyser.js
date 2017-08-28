@@ -22,6 +22,12 @@ class ICalAnalyser {
         this.daysString = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
         this.dailyStrategy = dailyStrategy;
         this.summaries = [];
+        this.debugMode = false;
+    }
+
+    debug(){
+        if( this.debugMode === true )
+            console.log.apply(this, arguments);
     }
 
     generateItem(item) {
@@ -69,6 +75,8 @@ class ICalAnalyser {
      * @returns {Array}
      */
     repeat(item, rrule, exdate = null) {
+
+
         var items = [];
         item.recursive = true;
         if (rrule.freq == 'DAILY' || rrule.freq == 'WEEKLY') {
@@ -89,7 +97,9 @@ class ICalAnalyser {
                     copy.start = moment(fromDate).toISOString();
                     copy.end = moment(toDate).toISOString();
                     copy.recursive = true;
-                    items = items.concat(this.generateItem(copy));
+                    if( exdate.indexOf(fromDate.toISOString()) < 0 ) {
+                        items = items.concat(this.generateItem(copy));
+                    }
                     fromDate.setDate(fromDate.getDate() + (interval * pas));
                     toDate.setDate(toDate.getDate() + (interval * pas));
                 }
@@ -97,7 +107,8 @@ class ICalAnalyser {
             else {
                 while (fromDate < end) {
                     let currentDay = this.daysString[fromDate.getDay()];
-                    if (!(byday.indexOf(currentDay) < 0 || exdate.indexOf(fromDate.toISOString()) > -1 )) {
+                    if( item.daily == "allday" && exdate.indexOf(moment(fromDate).format("YYYY-MM-DD")+'T00:00:00.000Z') > -1 ){
+                    } else if (!(byday.indexOf(currentDay) < 0 || exdate.indexOf(fromDate.toISOString()) > -1 )) {
                         let copy = JSON.parse(JSON.stringify(item));
                         copy.start = moment(fromDate).format();
                         copy.end = moment(toDate).format();
@@ -188,7 +199,6 @@ class ICalAnalyser {
                             this.summaries.push(item.summary);
                         }
                     }
-
                     else if (dd[0] == 'x-microsoft-cdo-alldayevent') {
                         item.daily = "allday";
                     }
@@ -197,8 +207,6 @@ class ICalAnalyser {
                 if (item.exception) {
                     exceptions = exceptions.concat(this.generateItem(item));
                 }
-
-
                 else if( item.daily == "allday" ){
 
                     var itemStart = moment(item.start);
@@ -212,6 +220,7 @@ class ICalAnalyser {
                             var endMinute = parseInt(endHourStr[1]);
                             var event = {
                                 uid: item.uid,
+                                daily: "allday",
                                 label: item.label,
                                 summary: item.label,
                                 description: item.description,
