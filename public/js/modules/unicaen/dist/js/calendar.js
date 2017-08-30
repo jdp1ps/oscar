@@ -1225,15 +1225,16 @@ var ListView = _defineProperty({
 }, 'computed', {
     listEvents: function listEvents() {
 
-        if (!store.events) {
+        if (!store.listEvents) {
             return null;
         }
 
         var structure = {};
         var owners = [];
+        var events = store.listEvents;
 
-        for (var i = 0; i < this.events.length; i++) {
-            var event = this.events[i];
+        for (var i = 0; i < events.length; i++) {
+            var event = events[i];
             if (!(store.filterOwner == '' || store.filterOwner == event.owner_id)) continue;
             if (!(store.filterType == '' || store.filterType == event.status)) continue;
 
@@ -1242,7 +1243,6 @@ var ListView = _defineProperty({
                 currentWeek = void 0,
                 currentDay = void 0;
             var duration = event.duration;
-            console.log(duration);
             var labelYear = event.mmStart.format('YYYY');
             var labelMonth = event.mmStart.format('MMMM');
             var labelWeek = event.mmStart.format('W');
