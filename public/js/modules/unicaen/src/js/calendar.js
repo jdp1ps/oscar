@@ -1555,21 +1555,23 @@ var ListView = {
     computed: {
         listEvents(){
 
-            if (!store.events) {
+            if (!store.listEvents) {
                 return null
             }
 
             var structure = {};
             var owners = [];
+            var events = store.listEvents;
 
-            for (let i = 0; i < this.events.length; i++) {
-                let event = this.events[i];
+
+
+            for (let i = 0; i < events.length; i++) {
+                let event = events[i];
                 if (!(store.filterOwner == '' || store.filterOwner == event.owner_id)) continue;
                 if (!(store.filterType == '' || store.filterType == event.status )) continue;
 
                 let currentYear, currentMonth, currentWeek, currentDay;
                 let duration = event.duration;
-                console.log(duration);
                 let labelYear = event.mmStart.format('YYYY');
                 let labelMonth = event.mmStart.format('MMMM');
                 let labelWeek = event.mmStart.format('W');
