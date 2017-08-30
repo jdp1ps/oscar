@@ -1291,6 +1291,9 @@ var ListItemView = {
             <p class="time">
                 de <time class="start">{{ beginAt }}</time> à <time class="end">{{ endAt }}</time>, <em>{{ event.duration }}</em> heure(s) ~ état : <em>{{ event.status }}</em>
             </p>
+            <p class="small description">
+                {{ event.description }}
+            </p>
          
             <nav>
                 <button class="btn btn-default btn-xs" @click="$emit('selectevent', event)">

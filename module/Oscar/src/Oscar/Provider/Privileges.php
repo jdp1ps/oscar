@@ -41,7 +41,6 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const ACTIVITY_TIMESHEET_VALIDATE_ADM = 'ACTIVITY-TIMESHEET_VALIDATE_ADM';
     const ACTIVITY_TIMESHEET_USURPATION = 'ACTIVITY-TIMESHEET_USURPATION';
 
-
     const PROJECT_CREATE                = 'PROJECT-CREATE';
     const PROJECT_EDIT                  = 'PROJECT-EDIT';
     const PROJECT_ACTIVITY_ADD          = 'PROJECT-ACTIVITY-ADD';
@@ -82,6 +81,8 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const DROIT_ROLEORGA_VISUALISATION     = 'droit-ROLEORGA_VISUALISATION';
     const DROIT_ROLEORGA_EDITION           = 'droit-ROLEORGA_EDITION';
 
+    const PERSON_SHOW_INM           = 'PERSON-SYNC_LDA';
+
     const DEPENSE_SHOW = 'DEPENSE-SHOW';
 
     public static function getResourceId( $privilege )
@@ -90,6 +91,43 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
             $privilege = $privilege->getFullCode();
         }
         return 'privilege/'.$privilege;
+    }
+
+    /**
+     * Cette méthode retourne la structure attendue des privilèges pour
+     * l'installation.
+     */
+    public static function getStructureForCheck(){
+        $categories = [
+
+        ];
+
+        $privileges = [
+
+        ];
+        return [
+            'categories' => [
+                1 => [
+                    'code'=> 'PROJECT',
+                    'label' => 'Projet',
+                    'privileges' => [
+
+                    ]
+                ],
+                2 => [ 'code'=> 'ACTIVITY',         'label' => 'Activité de recherche' ],
+                3 => [ 'code'=> 'PERSON',           'label' => 'Personne' ],
+                4 => [ 'code'=> 'ORGANIZATION',     'label' => 'Organisation' ],
+                5 => [ 'code'=> 'DOCUMENT',         'label' => 'Document' ],
+                6 => [ 'code'=> 'MAINTENANCE',      'label' => 'Maintenance' ],
+                7 => [ 'code'=> 'droit',            'label' => 'Gestion des droits' ],
+                8 => [ 'code'=> 'ADMINISTRATIVE',   'label' => 'Informations administratives' ],
+                9 => [ 'code'=> 'DEPENSE',          'label' => 'Accès aux dépenses' ],
+            ],
+
+            'privileges' => [
+
+            ]
+        ];
     }
 
 }

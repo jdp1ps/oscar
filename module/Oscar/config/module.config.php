@@ -376,6 +376,16 @@ return array(
                     ),
                 ),
 
+                'oscar_console_patch' => array(
+                    'options' => array(
+                        'route' => 'oscar install:check:privileges',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'checkPrivileges',
+                        ),
+                    ),
+                ),
+
                 // -------------------------------------------------------------
                 //////////////// PERSON(S)
                 'oscar_persons_search_by_connector' => array(
