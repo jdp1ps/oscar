@@ -12,6 +12,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Monolog\Logger;
+use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Connector\ConnectorPersonHarpege;
 use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Activity;
@@ -27,6 +28,7 @@ use Oscar\Entity\Privilege;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
+use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\Provider\AbstractOracleProvider;
 use Oscar\Provider\Person\SyncPersonHarpege;
 use Oscar\Provider\SifacBridge;
@@ -46,6 +48,45 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
 class ConsoleController extends AbstractOscarController
 {
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+    ///
+    public function authentificationsSyncAction(){
+        try {
+            $jsonpath = $this->getRequest()->getParam('jsonpath');
+            $force = $this->getRequest()->getParam('force', false);
+
+
+            if( !$jsonpath ){
+                die("Vous devez spécifier le chemin complet vers le fichier JSON");
+            }
+
+            echo "Read $jsonpath:\n";
+            $fileContent = file_get_contents($jsonpath);
+            if( !$fileContent ){
+                die("Oscar n'a pas réussi à charger le contenu du fichier");
+            }
+
+            echo "Convert $jsonpath:\n";
+            $datas = json_decode($fileContent);
+            if( !$datas ){
+                die("les données du fichier $jsonpath n'ont pas pu être converties.");
+            }
+
+            echo "Process datas...\n";
+            $options = $this->getServiceLocator()->get('zfcuser_module_options');
+            $bcrypt = new Bcrypt();
+            $bcrypt->setCost($options->getPasswordCost());
+
+            $connectorAuthentification = new ConnectorAuthentificationJSON($datas, $this->getEntityManager(), $bcrypt);
+            $repport = $connectorAuthentification->syncAll();
+            $connectorFormatter = new ConnectorRepportToPlainText();
+            echo $connectorFormatter->format($repport);
+
+        } catch( \Exception $ex ){
+            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
+        }
+    }
 
     public function shuffleAction(){
         /** @var ShuffleDataService $serviceShuffle */
@@ -1007,9 +1048,6 @@ die();
         try {
             $loginStr = $this->getRequest()->getParam('login');
             $roleStr = $this->getRequest()->getParam('role');
-
-
-            var_dump($loginStr);
 
 
             $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $loginStr]);

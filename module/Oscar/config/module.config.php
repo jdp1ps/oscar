@@ -439,6 +439,15 @@ return array(
                         ),
                     ),
                 ],
+                'oscar_authentifications_sync' => [
+                    'options' => array(
+                        'route' => 'oscar authentifications:sync <jsonpath> [-f|--force]',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'authentificationsSync',
+                        ),
+                    ),
+                ],
                 'oscar_patch' => [
                     'options' => array(
                         'route' => 'oscar patch',
