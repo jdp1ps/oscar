@@ -31,6 +31,7 @@ use Oscar\Entity\Role;
 use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\Provider\AbstractOracleProvider;
 use Oscar\Provider\Person\SyncPersonHarpege;
+use Oscar\Provider\Privileges;
 use Oscar\Provider\SifacBridge;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\PersonService;
@@ -1020,6 +1021,49 @@ die();
                 echo date('Y-m-d H:i:s', $line['time']) . "\t" . $line['message'] . "\n";
             }
         }
+
+    }
+
+    public function checkPrivilegesAction(){
+        echo "Vérification des privilèges installés...\n";
+        $class = new \ReflectionClass(Privileges::class);
+        $infile = $class->getConstants();
+
+        try {
+            $privileges = $this->getEntityManager()
+                ->getRepository(Privilege::class)
+                ->createQueryBuilder('p')
+//                ->indexBy('code', 'p.code')
+                ->leftJoin('p.categorie', 'c')
+                ->addOrderBy('c.id')
+                ->getQuery()->getResult();
+
+            $categorie = null;
+            /** @var Privilege $privilege */
+            foreach( $privileges as $privilege ){
+                if( $categorie !== $privilege->getCategorie() ){
+                    $categorie = $privilege->getCategorie();
+                }
+                $keyFile = $privilege->getCategorie()->getCode() . '_' . $privilege->getCode();
+                $keyFile = strtoupper(str_replace('-', '_', $keyFile));
+                if( array_key_exists($keyFile, $infile) ){
+                    unset($infile[$keyFile]);
+                }
+                //echo (array_key_exists($keyFile, $infile) ? '/!\\' : ' - ') . " $keyFile $privilege\n";
+            }
+            if( count($infile) ){
+                echo " ! DROITS MANQUANTS : \n";
+                foreach( $infile as $key=>$droit ){
+                    echo " - $key = $droit\n";
+                }
+            }
+        } catch( \Exception $e ){
+            echo "!!!" . $e->getMessage()." !!!\n";
+            echo $e->getTraceAsString();
+        }
+    }
+
+    private function getMissingPrivilege(){
 
     }
 

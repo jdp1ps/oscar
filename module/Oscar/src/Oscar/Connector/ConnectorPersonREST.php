@@ -78,7 +78,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     {
         $personRepository = $this->getPersonRepository();
 
-        return $this->syncPersons($personRepository, false);
+        return $this->syncPersons($personRepository, $force);
     }
 
     /**

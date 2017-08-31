@@ -193,7 +193,7 @@ return array(
 
                 // TIMESHEET
                 ['controller' => 'Timesheet',
-                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet"],
+                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet", 'usurpation'],
                     'roles' => ['user']
                 ],
 
@@ -372,6 +372,16 @@ return array(
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'shuffle',
+                        ),
+                    ),
+                ),
+
+                'oscar_console_patch' => array(
+                    'options' => array(
+                        'route' => 'oscar install:check:privileges',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'checkPrivileges',
                         ),
                     ),
                 ),

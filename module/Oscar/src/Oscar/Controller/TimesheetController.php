@@ -38,6 +38,119 @@ use Zend\View\Model\ViewModel;
 class TimesheetController extends AbstractOscarController
 {
 
+    public function usurpationAction()
+    {
+        // Méthode réél
+        $method = $this->getHttpXMethod();
+
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_USURPATION, $activity);
+
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
+
+        if (!$activity) {
+            return $this->getResponseNotFound("L'activité n'existe pas");
+        }
+
+        if (!$person) {
+            return $this->getResponseNotFound("La person %s n'existe pas");
+        }
+
+        /** @var TimesheetService $timeSheetService */
+        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        $timesheets = [];
+
+        if ($method == 'GET') {
+            $timesheets = $timeSheetService->allByPerson($person, $person);
+        }
+
+        if ($method == 'POST') {
+
+            $datas = $this->getRequest()->getPost()['events'];
+            $action = $this->getRequest()->getPost()['do'];
+
+            // Ajouter un test sur ACTION et EVENTS
+
+            if ($action == 'send') {
+                $timesheets = $timeSheetService->send($datas, $person);
+            } else if ( $action ){
+                if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
+                    return $this->getResponseBadRequest('Opération inconnue !');
+                }
+
+                foreach ($datas as $data) {
+                    if ($data['id'] && $data['id'] != 'null') {
+                        /** @var TimeSheet $timeSheet */
+                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
+                        $activity = null ;
+                        if( $timeSheet->getActivity() ){
+                            $activity = $timeSheet->getActivity();
+                        }
+                        elseif ($timeSheet->getWorkpackage()){
+                            $activity = $timeSheet->getWorkpackage()->getActivity();
+                        }
+                        if( !$activity ){
+                            // todo Ajouter un warning
+                            continue;
+                        }
+
+                        $timesheets = array_merge($timesheets, $this->processAction(
+                            $action, [$data], $timeSheetService, $activity, $person)
+                        );
+                    }
+                }
+            } else {
+                $timesheets = $timeSheetService->create($datas, $person);
+            }
+        }
+
+        if ($method == 'DELETE') {
+            $timesheetId = $this->params()->fromQuery('timesheet');
+            if ($timesheetId) {
+                if ($timeSheetService->delete($timesheetId, $person)){
+                    return $this->getResponseOk('Créneaux supprimé');
+                }
+            }
+            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
+        }
+
+        $wpDeclarants = [];
+        /** @var WorkPackage $workPackage */
+        foreach($activity->getWorkPackages() as $workPackage ){
+            if( $workPackage->hasPerson($person) ){
+                $wpDeclarants[$workPackage->getId()] = $workPackage;
+            }
+        }
+//        $wpDeclarants = $activity->getWorkPackages();
+
+        foreach($timesheets as &$timesheet ){
+            if( !($timesheet['activity_id'] == null || $timesheet['activity_id'] == $activity->getId()) ){
+                $timesheet['credentials']['editable'] = false;
+                $timesheet['credentials']['deletable'] = false;
+                $timesheet['credentials']['sendable'] = false;
+            }
+        }
+
+        $datasView = [
+            'wpDeclarants' => $wpDeclarants,
+            'timesheets' => $timesheets,
+            'person' => $person,
+            'activity' => $activity,
+        ];
+
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            $response = new JsonModel($datasView);
+            $response->setTerminal(true);
+
+            return $response;
+        }
+
+        return $datasView;
+    }
+
     /**
      * Déclaration des heures.
      */
@@ -84,33 +197,10 @@ class TimesheetController extends AbstractOscarController
                             // todo Ajouter un warning
                             continue;
                         }
-                        if( in_array($action, ['validatesci', 'rejectsci' ]) &&
-                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) {
-                            throw new OscarException("Vous n'avez les droits pour la validation scientifique.");
-                        }
 
-                        if( in_array($action, ['validateadm', 'rejectadm' ]) &&
-                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)) {
-                            throw new OscarException("Vous n'avez les droits pour la validation administrative.");
-                        }
-
-                        switch($action){
-                            case 'validatesci';
-                                $timesheets = $timeSheetService->validateSci([$data], $this->getCurrentPerson());
-                                break;
-                            case 'validateadm';
-                                $timesheets = $timeSheetService->validateAdmin([$data], $this->getCurrentPerson());
-                                break;
-                            case 'rejectsci';
-                                $timesheets = $timeSheetService->rejectSci([$data], $this->getCurrentPerson());
-                                break;
-                            case 'rejectadm';
-                                $timesheets = $timeSheetService->rejectAdmin([$data], $this->getCurrentPerson());
-                                break;
-                            case 'send';
-                                throw new OscarException("Vous n'avez les droits pour soumettre.");
-                                break;
-                        }
+                        $timesheets = array_merge($timesheets, $this->processAction(
+                            $action, [$data], $timeSheetService, $activity, $this->getOscarUserContext()->getCurrentPerson())
+                        );
                     }
                 }
             } else {
@@ -209,9 +299,6 @@ class TimesheetController extends AbstractOscarController
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             if ($method == 'GET') {
-
-
-
                 // Récupération des déclarations pour cette activité
                 $timesheets = $timeSheetService->allByActivity($activity);
                 $response = new JsonModel([
@@ -229,114 +316,17 @@ class TimesheetController extends AbstractOscarController
                     $events = $request->getPost('events', []);
                     if (count($events) == 1 && $events[0]['id'] == 'null') {
                             throw new OscarException('A refactorer !');
-//                        $event = $events[0];
-//                        $person = $this->getEntityManager()->getRepository(Person::class)->find($event['owner_id']);
-//
-//                        /** @var WorkPackage $workpackage */
-//                        $workpackage = $this->getEntityManager()->getRepository(WorkPackage::class)->find($event['idworkpackage']);
-//
-//                        if (!$person) {
-//                            return $this->getResponseBadRequest('Personne inconnue !');
-//                        }
-//
-//                        if (!$workpackage) {
-//                            return $this->getResponseBadRequest('Lot de travail inconnu !');
-//                        }
-//
-//                        try {
-//                            $timesheet = new TimeSheet();
-//                            $this->getEntityManager()->persist($timesheet);
-//                            $timesheet->setPerson($person)
-//                                ->setActivity($activity)
-//                                ->setLabel((string)$workpackage)
-//                                ->setCreatedBy($this->getCurrentPerson())
-//                                ->setDateFrom(new \DateTime($event['start']))
-//                                ->setValidatedAt(new \DateTime())
-//                                ->setValidatedBy((string)$this->getCurrentPerson())
-//                                ->setDateTo(new \DateTime($event['end']))
-//                                ->setStatus(TimeSheet::STATUS_TOVALIDATE)
-//                                ->setWorkpackage($workpackage);
-//                            $this->getEntityManager()->flush($timesheet);
-//                            $json = $timesheet->toJson();
-//                            $json['credentials'] = [
-//                                'deletable' => true,
-//                                'editable' => true,
-//                                'sendable' => $timesheet->getStatus() == TimeSheet::STATUS_DRAFT,
-//                                'validable' => $timesheet->getStatus() == TimeSheet::STATUS_TOVALIDATE
-//                            ];
-//                            $response = new JsonModel([
-//                                'timesheets' => [$json]
-//                            ]);
-//                            $response->setTerminal(true);
-//
-//                            return $response;
-//
-//                        } catch (\Exception $e) {
-//                            return $this->getResponseBadRequest("Errur " . $e->getMessage());
-//                        }
-
-
                     } else {
                         $action = $this->getRequest()->getPost()['do'];
-                        if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
-                            return $this->getResponseBadRequest('Opération inconnue !');
-                        }
-
-                        if( in_array($action, ['validatesci', 'rejectsci' ]) &&
-                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) {
-                            throw new OscarException("Vous n'avez les droits pour la validation scientifique.");
-                        }
-
-                        if( in_array($action, ['validateadm', 'rejectadm' ]) &&
-                            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)) {
-                            throw new OscarException("Vous n'avez les droits pour la validation administrative.");
-                        }
-
                         $events = $this->getRequest()->getPost()['events'];
-                        $timesheets = [];
-
-
-
-                        switch($action){
-                            case 'validatesci';
-                                $timesheets = $timeSheetService->validateSci($events, $this->getCurrentPerson());
-                                break;
-                            case 'validateadm';
-                                $timesheets = $timeSheetService->validateAdmin($events, $this->getCurrentPerson());
-                                break;
-                            case 'rejectsci';
-                                $timesheets = $timeSheetService->rejectSci($events, $this->getCurrentPerson());
-                                break;
-                            case 'rejectadm';
-                                $timesheets = $timeSheetService->rejectAdmin($events, $this->getCurrentPerson());
-                                break;
-                            case 'send';
-                                throw new OscarException("Vous n'avez les droits pour soumettre.");
-                                break;
-                        }
-
+                        $timesheets = $this->processAction($action, $events, $timeSheetService, $activity, $this->getOscarUserContext()->getCurrentPerson());
                         $response = new JsonModel([
                             'timesheets' => $timesheets
                         ]);
                         $response->setTerminal(true);
-
                         return $response;
                     }
-
-                } else {
-                    if ($method == 'DELETE') {
-                        $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($this->params()->fromQuery('timesheet'));
-                        if ($timesheet) {
-                            $this->getEntityManager()->remove($timesheet);
-                            $this->getEntityManager()->flush();
-
-                            return $this->getResponseOk("Créneau supprimé");
-                        }
-
-                        return $this->getResponseBadRequest();
-                    }
                 }
-
                 return $this->getResponseBadRequest();
             }
         }
@@ -346,9 +336,7 @@ class TimesheetController extends AbstractOscarController
         foreach ($activity->getWorkPackages() as $workpackage) {
             /** @var WorkPackagePerson $workpackageperson */
             foreach ($workpackage->getPersons() as $workpackageperson) {
-                if (!array_key_exists($workpackageperson->getPerson()->getId(),
-                    $declarants)
-                ) {
+                if( !array_key_exists($workpackageperson->getPerson()->getId(), $declarants) ){
                     $declarants[$workpackageperson->getPerson()->getId()] = $workpackageperson;
                 }
             }
@@ -358,6 +346,42 @@ class TimesheetController extends AbstractOscarController
             'activity' => $activity,
             'declarants' => $declarants
         ];
+    }
+
+    protected function processAction( $action, $events, $timeSheetService, $activity, $person ){
+        if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
+            return $this->getResponseBadRequest('Opération inconnue !');
+        }
+
+        if( in_array($action, ['validatesci', 'rejectsci' ]) &&
+            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) {
+            throw new OscarException("Vous n'avez les droits pour la validation scientifique.");
+        }
+
+        if( in_array($action, ['validateadm', 'rejectadm' ]) &&
+            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)) {
+            throw new OscarException("Vous n'avez les droits pour la validation administrative.");
+        }
+
+        switch($action){
+            case 'validatesci';
+                $timesheets = $timeSheetService->validateSci($events, $person);
+                break;
+            case 'validateadm';
+                $timesheets = $timeSheetService->validateAdmin($events, $person);
+                break;
+            case 'rejectsci';
+                $timesheets = $timeSheetService->rejectSci($events, $person);
+                break;
+            case 'rejectadm';
+                $timesheets = $timeSheetService->rejectAdmin($events, $person);
+                break;
+            case 'send';
+                $timesheets = $timeSheetService->send($events, $person);
+                break;
+        }
+
+        return $timesheets;
     }
 
     /**

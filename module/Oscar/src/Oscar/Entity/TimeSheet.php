@@ -253,6 +253,7 @@ class TimeSheet implements ITrackable
         $workpackageLabel = null;
         $workpackageCode = null;
 
+
         if( $this->getWorkpackage() ){
             $workpackageId = $this->getWorkpackage()->getId();
             $workpackageLabel = (string)$this->getWorkpackage();
@@ -575,6 +576,9 @@ class TimeSheet implements ITrackable
      */
     public function getLabel()
     {
+        if( $this->getWorkpackage() ){
+            return (string)$this->getWorkpackage();
+        }
         return $this->label;
     }
 
