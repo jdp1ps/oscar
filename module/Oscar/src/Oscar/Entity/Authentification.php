@@ -90,6 +90,15 @@ class Authentification implements UserInterface, ProviderInterface
         $this->roles = new ArrayCollection();
     }
 
+    public function hasRole( $roleId ){
+        foreach ($this->getRoles() as $role ){
+            if( $roleId == $role ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function toJson()
     {
         $out = [

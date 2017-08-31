@@ -1,0 +1,30 @@
+[
+  {
+    "displayname": "Albert Einstein",
+    "email": "albert.einstein@jacksay.com",
+    "password": "alberteinstein",
+    "login": "alberteinstein",
+    "approles": []
+  },
+  {
+    "displayname": "Maurice Solovine",
+    "email": "maurice.solovine@jacksay.com",
+    "password": "mauricesolovine",
+    "login": "mauricesolovine",
+    "approles": []
+  },
+  {
+    "displayname": "Marcel Grossmann",
+    "email": "marcel.grossmann@jacksay.com",
+    "password": "plain:marcelgrossmann",
+    "login": "marcelgrossmann",
+    "approles": []
+  },
+  {
+    "displayname": "Flying Spagetti Monster",
+    "email": "flyingsm@jacksay.com",
+    "password": "bcrypt:$2y$14$kYmzTH0KHFegg7ss7Yq6xOd2rULd9zEmniZmrb.isOUfIDWAd9DTO",
+    "login": "flyingsm",
+    "approles": ["Administrateur"]
+  }
+]

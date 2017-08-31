@@ -1,0 +1,22 @@
+[
+  {
+    "firstname": "Albert",
+    "lastname": "Einstein",
+    "email": "albert.einstein@jacksay.com",
+    "login": "alberteinstein"
+  },
+  {
+    "firstname": "Maurice",
+    "lastname": "Solovine",
+    "email": "maurice.solovine@jacksay.com",
+    "password": "mauricesolovine",
+    "login": "mauricesolovine"
+  },
+  {
+    "firstname": "Marcel",
+    "lastname": "Grossmann",
+    "email": "marcel.grossmann@jacksay.com",
+    "password": "marcelgrossmann",
+    "login": "marcelgrossmann"
+  }
+]
