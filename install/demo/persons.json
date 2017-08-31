@@ -3,20 +3,42 @@
     "firstname": "Albert",
     "lastname": "Einstein",
     "email": "albert.einstein@jacksay.com",
-    "login": "alberteinstein"
+    "login": "alberteinstein",
+    "uid": "alberteinstein"
   },
   {
     "firstname": "Maurice",
     "lastname": "Solovine",
     "email": "maurice.solovine@jacksay.com",
-    "password": "mauricesolovine",
-    "login": "mauricesolovine"
+    "login": "mauricesolovine",
+    "uid": "mauricesolovine"
   },
   {
     "firstname": "Marcel",
     "lastname": "Grossmann",
     "email": "marcel.grossmann@jacksay.com",
-    "password": "marcelgrossmann",
-    "login": "marcelgrossmann"
+    "login": "marcelgrossmann",
+    "uid": "marcelgrossmann"
+  },
+  {
+    "firstname": "Max",
+    "lastname": "Plank",
+    "email": "max.plank@jacksay.com",
+    "login": "maxplank",
+    "uid": "maxplank"
+  },
+  {
+    "firstname": "Niels",
+    "lastname": "Bohr",
+    "email": "niels.bohr@jacksay.com",
+    "login": "nielsbohr",
+    "uid": "nielsbohr"
+  },
+  {
+    "firstname": "Erwin",
+    "lastname": "Schrödinger",
+    "email": "erwin.schrodinger@jacksay.com",
+    "login": "erwinschrodinger",
+    "uid": "erwinschrodinger"
   }
 ]

@@ -458,6 +458,15 @@ return array(
                         ),
                     ),
                 ],
+                'oscar_personsjson_sync' => [
+                    'options' => array(
+                        'route' => 'oscar personsjson:sync <fichier> [-f|--force]',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'personJsonSync',
+                        ),
+                    ),
+                ],
                 'oscar_patch' => [
                     'options' => array(
                         'route' => 'oscar patch',

@@ -112,8 +112,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         }
         curl_close($curl);
 
-
-
         foreach( json_decode($return) as $personData ){
             try {
                 /** @var Person $personOscar */
