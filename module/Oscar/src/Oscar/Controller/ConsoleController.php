@@ -14,6 +14,7 @@ use Doctrine\ORM\Query;
 use Monolog\Logger;
 use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Connector\ConnectorPersonHarpege;
+use Oscar\Connector\ConnectorPersonJSON;
 use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
@@ -52,6 +53,41 @@ class ConsoleController extends AbstractOscarController
 
     ///////////////////////////////////////////////////////////////////////////////////////
     ///
+    public function personJsonSyncAction(){
+        try {
+            $fichier = $this->getRequest()->getParam('fichier');
+
+            if( !$fichier ){
+                die("Vous devez spécifier le chemin complet vers le fichier JSON");
+            }
+
+            echo "Synchronisation depuis le fichier $fichier\n";
+
+            echo "Read $fichier:\n";
+            $fileContent = file_get_contents($fichier);
+            if( !$fileContent ){
+                die("Oscar n'a pas réussi à charger le contenu du fichier");
+            }
+
+            echo "Convert $fichier:\n";
+            $datas = json_decode($fileContent);
+            if( !$datas ){
+                die("les données du fichier $fichier n'ont pas pu être converties.");
+            }
+
+            $connector = new ConnectorPersonJSON($datas, $this->getEntityManager());
+            $repport = $connector->syncAll();
+            $connectorFormatter = new ConnectorRepportToPlainText();
+
+            echo $connectorFormatter->format($repport);
+
+
+        }
+        catch( \Exception $e ){
+            die("ERROR : " . $e->getMessage());
+        }
+    }
+
     public function authentificationsSyncAction(){
         try {
             $jsonpath = $this->getRequest()->getParam('jsonpath');
