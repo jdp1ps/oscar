@@ -39,6 +39,12 @@ class CalendarDatas {
         this.defaultLabel = "";
         this.tooltip = null;
         this.errors = [];
+
+        // Données pour transformer les créneaux longs
+        this.transformLong = [
+            { startHours: 8, startMinutes: 0, endHours: 12, endMinutes: 0 },
+            { startHours: 13, startMinutes: 0, endHours: 17, endMinutes: 0 }
+        ];
         this.defaultDescription = "";
         this.status = {
            "draft": "Brouillon",
@@ -69,7 +75,6 @@ class CalendarDatas {
             editActive: false
         };
 
-        ////
         this.displayRejectModal = false;
         this.rejectValidateType = null;
         this.rejectComment = "";
@@ -92,15 +97,10 @@ class CalendarDatas {
         };
     }
 
-    downloadTimesheet(personid, activityid){
-        console.log(personid, activityid);
-    }
-
     /**
      * Retourne les données pour afficher la feuille de temps.
      */
     timesheetDatas(){
-        console.log('Accès aux données pour la feuille de temps', this.wps);
         let structuredDatas = {};
         let activityWpsIndex = {};
 
@@ -129,7 +129,6 @@ class CalendarDatas {
 
                 // Regroupement par person
                 if (!structuredDatas[activityLabel]) {
-                    console.log("event",event);
                     structuredDatas[activityLabel] = {
                         label: activityLabel,
                         total: 0.0,
@@ -616,7 +615,6 @@ var TimeEvent = {
 
     methods: {
         handlerTooltipOn(event, e){
-            console.log(e);
             store.tooltip = {
                 title: '<h3>' + event.label +'</h3>',
                 event: event,
@@ -716,7 +714,6 @@ var TimeEvent = {
 
         handlerMouseUp(e){
             if (this.event.editable) {
-                console.log('UPDATE now');
                 this.moving = false;
                 this.$el.removeEventListener('mousemove', this.move);
 
@@ -733,7 +730,6 @@ var TimeEvent = {
                     .format();
 
                 if (this.change) {
-                    console.log('trigger update');
                     this.change = false;
                     this.$emit('savemoveevent', this.event);
                 }
@@ -1076,7 +1072,6 @@ var WeekView = {
             }
 
             if (this.gostDatas.eventMovedEnd) {
-                console.log("FIN du déplacement de la borne de fin");
                 this.gostDatas.eventMovedEnd.changing = false;
                 this.gostDatas.eventMovedEnd.handlerMouseUp();
                 this.gostDatas.eventMovedEnd = null;
@@ -1087,7 +1082,6 @@ var WeekView = {
         },
 
         handlerMouseDown(e){
-            console.log("MouseDown", this.createNew == false);
             if (this.createNew) {
                 var roundFactor = 40 / 60 * this.pas;
                 this.gostDatas.y = Math.round(e.offsetY / roundFactor) * (roundFactor);
@@ -1143,7 +1137,6 @@ var WeekView = {
                 }
             }
             else if (this.gostDatas.eventMovedEnd) {
-                console.log("déplacement de la borne de fin");
                 if (this.gostDatas.startFrom == null) {
                     this.gostDatas.startFrom = e.offsetY;
                 } else {
@@ -1298,6 +1291,9 @@ var ListItemView = {
             <p class="time">
                 de <time class="start">{{ beginAt }}</time> à <time class="end">{{ endAt }}</time>, <em>{{ event.duration }}</em> heure(s) ~ état : <em>{{ event.status }}</em>
             </p>
+            <p class="small description">
+                {{ event.description }}
+            </p>
          
             <nav>
                 <button class="btn btn-default btn-xs" @click="$emit('selectevent', event)">
@@ -1368,6 +1364,7 @@ var ListItemView = {
                 , end = (this.event.mmEnd.hour() - 6) * 60 + this.event.mmEnd.minutes();
 
             return {
+                top: this.event.decaleY*1.75 +"em",
                 left: (percentUnit * start) + '%',
                 width: (percentUnit * (end - start)) + '%',
                 background: this.colorLabel
@@ -1458,11 +1455,10 @@ var ListView = {
                             </ul>
                         </nav>
                         </h5>
-                         <section class="events-list">
+                         <section class="events-list" :style="{ 'height': eventsDay.persons.length*1.8 +'em' }">
                             <listitem
                                 :with-owner="withOwner"
                                 @selectevent="selectEvent"
-                                @tooltipevent="handlerTooltip"
                                 @editevent="$emit('editevent', event)"
                                 @deleteevent="$emit('deleteevent', event)"
                                 @submitevent="$emit('submitevent', event)"
@@ -1470,7 +1466,6 @@ var ListView = {
                                 @rejectadmevent="$emit('rejectevent', event, 'adm')"
                                 @validatescievent="$emit('validateevent', event, 'sci')"
                                 @validateadmevent="$emit('validateevent', event, 'adm')"
-                           
                                 v-bind:event="event" v-for="event in eventsDay.events"></listitem>
                         </section>
                         <div class="total">
@@ -1487,13 +1482,8 @@ var ListView = {
 
     methods: {
         selectEvent(event){
-            console.log('selection de la semaine');
             store.currentDay = moment(event.start);
             store.state = "week";
-        },
-
-        handlerTooltip(){
-          console.log('handlerTooltip', arguments);
         },
 
         getMonthPack(pack){
@@ -1544,8 +1534,6 @@ var ListView = {
         },
 
         performEmit( events, action ){
-            console.log("EMIT", action, events);
-
             if( action == 'validatesci' ){
                 this.$emit('validateevent', events, 'sci');
             }
@@ -1567,25 +1555,31 @@ var ListView = {
     computed: {
         listEvents(){
 
-            if (!store.events) {
+            if (!store.listEvents) {
                 return null
             }
 
             var structure = {};
+            var owners = [];
+            var events = store.listEvents;
 
-            for (let i = 0; i < this.events.length; i++) {
-                let event = this.events[i];
+
+
+            for (let i = 0; i < events.length; i++) {
+                let event = events[i];
                 if (!(store.filterOwner == '' || store.filterOwner == event.owner_id)) continue;
                 if (!(store.filterType == '' || store.filterType == event.status )) continue;
 
                 let currentYear, currentMonth, currentWeek, currentDay;
-
                 let duration = event.duration;
-
                 let labelYear = event.mmStart.format('YYYY');
                 let labelMonth = event.mmStart.format('MMMM');
                 let labelWeek = event.mmStart.format('W');
                 let labelDay = event.mmStart.format('ddd D');
+
+                if( owners.indexOf(event.owner_id) < 0 ){
+                    owners.push(event.owner_id);
+                }
 
                 if (!structure[labelYear]) {
                     structure[labelYear] = {
@@ -1594,7 +1588,8 @@ var ListView = {
                         credentials: {
                             send: false,
                             sci: false,
-                            adm: false
+                            adm: false,
+                            actions: false
                         }
                     };
                 }
@@ -1608,7 +1603,8 @@ var ListView = {
                         credentials: {
                             send: false,
                             sci: false,
-                            adm: false
+                            adm: false,
+                            actions: false
                         }
                     };
                 }
@@ -1622,7 +1618,8 @@ var ListView = {
                         credentials: {
                             send: false,
                             sci: false,
-                            adm: false
+                            adm: false,
+                            actions: false
                         }
                     };
                 }
@@ -1632,17 +1629,25 @@ var ListView = {
                 if (!currentWeek.days[labelDay]) {
                     currentWeek.days[labelDay] = {
                         total: 0.0,
+                        persons: [],
                         events: [],
                         credentials: {
                             send: false,
                             sci: false,
-                            adm: false
+                            adm: false,
+                            actions: false
                         }
                     };
                 }
                 currentDay = currentWeek.days[labelDay];
                 currentDay.total += duration;
+                if( currentDay.persons.indexOf(event.owner_id) < 0 ){
+                    currentDay.persons.push(event.owner_id);
+                }
+
                 currentDay.events.push(event);
+
+                event.decaleY = currentDay.persons.indexOf(event.owner_id);
 
                 if( event.validableSci == true ){
                     currentYear.credentials.sci = currentMonth.credentials.sci = currentWeek.credentials.sci = currentDay.credentials.sci =
@@ -1658,6 +1663,7 @@ var ListView = {
                 }
 
             }
+
             return structure;
         }
     }
@@ -1738,12 +1744,14 @@ var ImportICSView = {
                         </div>
                         <div>
                             <h2><i class="icon-loop-outline"></i>Correspondance des créneaux</h2>
+                            <input v-model="search" placeholder="Filter les créneaux">
                             <section class="correspondances"">
-                                <article v-for="label in labels">
+
+                                <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
                                     <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
                                     <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
-                                        <option value="">Conserver</option>
                                         <option value="ignorer">Ignorer ces créneaux</option>
+                                        <option value="">Conserver</option>
                                         <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>
                                     </select>
                                 </article>
@@ -1773,7 +1781,8 @@ var ImportICSView = {
             importedEvents: [],
             associations: {},
             labels: [],
-            etape: 1
+            etape: 1,
+            search: ""
         }
     },
 
@@ -1787,21 +1796,23 @@ var ImportICSView = {
             var packs = [];
 
             this.importedEvents.forEach(item => {
-                let currentPack = null;
-                let currentLabel = item.mmStart.format('DD MMMM YYYY');
-                for (let i = 0; i < packs.length && currentPack == null; i++) {
-                    if (packs[i].label == currentLabel) {
-                        currentPack = packs[i];
+
+                    let currentPack = null;
+                    let currentLabel = item.mmStart.format('DD MMMM YYYY');
+                    for (let i = 0; i < packs.length && currentPack == null; i++) {
+                        if (packs[i].label == currentLabel) {
+                            currentPack = packs[i];
+                        }
                     }
-                }
-                if (!currentPack) {
-                    currentPack = {
-                        label: currentLabel,
-                        events: []
-                    };
-                    packs.push(currentPack);
-                }
-                currentPack.events.push(item);
+                    if (!currentPack) {
+                        currentPack = {
+                            label: currentLabel,
+                            events: []
+                        };
+                        packs.push(currentPack);
+                    }
+                    currentPack.events.push(item);
+
             });
             return packs;
         }
@@ -1815,7 +1826,6 @@ var ImportICSView = {
             if (to == 'ignorer') {
                 this.importedEvents.forEach(item => {
                     if (item.label == from)
-
                         item.imported = false;
                 })
             } else if (to == 'conserver') {
@@ -1828,12 +1838,13 @@ var ImportICSView = {
                 this.importedEvents.forEach(item => {
                     if (item.label == from) {
                         item.useLabel = to;
+                        if( !item.description )
+                            item.description = from;
                         item.imported = true;
                     }
                 });
             }
             this.associations[from] = to;
-            console.log(this.associations);
         },
 
         /** Charge le fichier ICS depuis l'interface **/
@@ -1848,7 +1859,10 @@ var ImportICSView = {
         /** Parse le contenu ICS **/
         parseFileContent(content){
 
-            var analyser = new ICalAnalyser();
+            var analyser = new ICalAnalyser(
+                new Date(),
+                [{startTime: '9:00', endTime: '12:30'}, {startTime: '14:00', endTime: '17:30'}]
+            );
             var events = analyser.parse(ICAL.parse(content));
             var after = this.periodStart ? moment(this.periodStart) : null;
             var before = this.periodEnd ? moment(this.periodEnd) : null;
@@ -1858,9 +1872,8 @@ var ImportICSView = {
             events.forEach(item => {
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
-                item.imported = true;
+                item.imported = false;
                 item.useLabel = "";
-
                 if( (after == null || (item.mmStart > after)) && (before == null || (item.mmEnd < before ))) {
                     this.importedEvents.push(item);
                     if (this.labels.indexOf(item.label) < 0)
@@ -1868,7 +1881,6 @@ var ImportICSView = {
                 } else {
                     console.log('Le créneau est hors limite');
                 }
-
             });
 
             this.importedEvents = EventDT.sortByStart(this.importedEvents);
@@ -1883,7 +1895,8 @@ var ImportICSView = {
                     imported.push(event)
                 }
             });
-            this.$emit('import', imported);
+            if( imported.length > 0 )
+                this.$emit('import', imported);
         }
     }
 };
@@ -1933,7 +1946,6 @@ var SelectEditable = {
 
     methods: {
         onInput(){
-            console.log('change', this.valueIn);
             this.$emit('input', this.valueIn, this.model);
         },
         onSelectChange(e){
@@ -2356,7 +2368,6 @@ var Calendar = {
         },
 
         handlerRejectShow(event){
-            console.log('AFFICHAGE DU REJET', event);
             this.rejectShow = event;
         },
 
@@ -2387,11 +2398,34 @@ var Calendar = {
         importEvents(events){
             var datas = [];
             events.forEach(item => {
-                var event = JSON.parse(JSON.stringify(item));
+                var event = JSON.parse(JSON.stringify(item)),
+                    itemStart = moment(event.start),
+                    itemEnd = moment(event.end),
+                    duration = itemEnd - itemStart;
+
+                console.log("Durée:", (duration / 1000 / 60 / 60 ));
+
                 if (event.useLabel) event.label = event.useLabel;
-                event.mmStart = moment(event.start);
-                event.mmEnd = moment(event.end);
-                datas.push(event);
+
+                if( duration / 1000 / 60 / 60 > 9 ){
+                    console.log('Transformation du créneaux', event);
+                    this.transformLong.forEach(transform => {
+                       var itemTransformed =  JSON.parse(JSON.stringify(event));
+                        itemStart.hours(transform.startHours).minutes(transform.startMinutes);
+                        itemEnd.hours(transform.endHours).minutes(transform.endMinutes);
+                        itemTransformed.start = itemStart.format();
+                        itemTransformed.end = itemEnd.format();
+                        itemTransformed.mmStart = moment(itemTransformed.start);
+                        itemTransformed.mmEnd = moment(itemTransformed.end);;
+                        datas.push(itemTransformed);
+                    });
+                } else {
+                    event.mmStart = moment(event.start);
+                    event.mmEnd = moment(event.end);
+                    datas.push(event);
+                }
+
+                if (event.useLabel) event.label = event.useLabel;
             })
             this.importInProgress = false;
             this.restSave(datas);
@@ -2399,10 +2433,6 @@ var Calendar = {
 
         handlerCreatePack(events){
             this.restSave(events);
-        },
-
-        confirmImport(){
-            console.log('Tous ajouter');
         },
 
         handleradd(pack, event){
@@ -2414,10 +2444,6 @@ var Calendar = {
             this.defaultLabel = this.eventEdit.label = this.eventEditData.label;
             this.defaultDescription = this.eventEdit.description = this.eventEditData.description;
             this.handlerEditCancelEvent();
-        },
-
-        handlerTooltip(){
-          console.log('handlerTooltip CENTRAL', arguments);
         },
 
         handlerEditCancelEvent(){
@@ -2435,7 +2461,6 @@ var Calendar = {
         ////////////////////////////////////////////////////////////////////////
 
         handlerSendReject(){
-            console.log('Envoi du rejet', this.rejectComment);
             var events = [];
             this.rejectedEvents.forEach((event) => {
                 var e = JSON.parse(JSON.stringify(event));
@@ -2476,7 +2501,6 @@ var Calendar = {
 
 
         handlerValidateEvent(events, type = "unknow"){
-            console.log('VALIDATION', type, 'de', events);
             // événements reçus
             var eventsArray = !events.length ? [events] : events,
                 events = [];
@@ -2515,6 +2539,11 @@ var Calendar = {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
                 for (var i = 0; i < events.length; i++) {
+                    // Fix seconds bug
+                    events[i].mmStart.seconds(0);
+                    events[i].mmEnd.seconds(0);
+                    console.log(events[i]);
+
                     data.append('events[' + i + '][label]', events[i].label);
                     data.append('events[' + i + '][description]', events[i].description);
                     data.append('events[' + i + '][start]', events[i].mmStart.format());
@@ -2580,7 +2609,6 @@ var Calendar = {
                         this.handlerEditCancelEvent();
                     },
                     error => {
-                        console.log(error);
                         this.errors.push("Impossible de modifier l'état du créneau : " + error);
 
                         this.remoteError = "Erreur : " + error.statusText;
@@ -2657,6 +2685,7 @@ var Calendar = {
 
         /** Charge le fichier ICS depuis l'interface **/
         loadIcsFile(e){
+            console.log('loadICSFile...');
             this.transmission = "Analyse du fichier ICS...";
             var fr = new FileReader();
             fr.onloadend = (result) => {
@@ -2667,7 +2696,12 @@ var Calendar = {
 
         /** Parse le contenu ICS **/
         parseFileContent(content){
-            var analyser = new ICalAnalyser();
+
+            var analyser = new ICalAnalyser(
+                new Date(),
+                [{startTime: '9:00', endTime: '12:30'}, {startTime: '14:00', endTime: '17:30'}]
+            );
+
             var events = analyser.parse(ICAL.parse(content));
             this.importedData = [];
 
@@ -2771,7 +2805,6 @@ var Calendar = {
         }
 
         if (this.customDatas) {
-            console.log("CustomDatas", this.customDatas());
             var customs = this.customDatas();
             this.wps = customs;
             for (var k in customs) {
@@ -2789,7 +2822,6 @@ var Calendar = {
         }
         if (this.ownersList) {
             store.owners = this.ownersList();
-            console.log('OWNERS', store.owners);
         }
 
         if (this.restUrl) {

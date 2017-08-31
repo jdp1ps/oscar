@@ -117,7 +117,7 @@ var Workpackage = {
             </small>
             <p>{{ workpackage.description }}</p>
 
-            <section class="workpackage-persons" v-if="workpackage.persons.length > 0 && isValidateur">
+            <section class="workpackage-persons">
                 <h4><i class="icon-calendar"></i>Déclarants </h4>
                 <workpackageperson v-for="person in workpackage.persons"
                     :person="person"
@@ -281,7 +281,6 @@ var Workpackageperson = Vue.extend({
     },
 
     created () {
-        console.log(this.token);
         Vue.http.interceptors.push((request, next) => {
            request.headers.set('X-CSRF-TOKEN', this.token);
            request.headers.set('Authorization', 'OSCAR TOKEN');
