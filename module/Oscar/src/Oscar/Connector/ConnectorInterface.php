@@ -14,7 +14,7 @@ interface ConnectorInterface
     /**
      * Synchronise toute les informations.
      *
-     * @return mixed
+     * @return ConnectorRepport
      */
     public function syncAll();
 
