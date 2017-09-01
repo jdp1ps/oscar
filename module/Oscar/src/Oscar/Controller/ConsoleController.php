@@ -23,12 +23,15 @@ use Oscar\Entity\CategoriePrivilege;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
+use Oscar\Entity\RoleOrganization;
+use Oscar\Entity\RoleRepository;
 use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\Provider\AbstractOracleProvider;
 use Oscar\Provider\Person\SyncPersonHarpege;
@@ -37,6 +40,7 @@ use Oscar\Provider\SifacBridge;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\PersonService;
 use Oscar\Service\ShuffleDataService;
+use Oscar\Utils\ActivityCSVToObject;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
 use UnicaenApp\Entity\Ldap\People;
@@ -53,6 +57,38 @@ class ConsoleController extends AbstractOscarController
 
     ///////////////////////////////////////////////////////////////////////////////////////
     ///
+    public function activityFileSyncAction(){
+        echo "Synchronisation des activités : \n";
+        $file = realpath($this->getRequest()->getParam('fichier'));
+        echo "Importation des activités depuis $file : \n";
+        $handler = fopen($file, 'r');
+        $headers = fgetcsv($handler);
+
+        /** @var RoleRepository $repositoryRole */
+        $repositoryRole = $this->getEntityManager()->getRepository(Role::class);
+
+        // Construction de la correspondance role > colonne
+        $rolesPersons = $repositoryRole->getRolesAtActivityArray();
+        $correspondanceRolesActivites = [];
+        /** @var Role $role */
+        foreach ($rolesPersons as $role ){
+            $correspondanceRolesActivites[$role] = array_search($role, $headers);
+        }
+
+        // Construction de la correspondance role > colonne
+        $rolesOrganizations = $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
+        $correspondanceRolesOrga = [];
+        /** @var OrganizationRole $role */
+        foreach ($rolesOrganizations as $role ){
+            $correspondanceRolesOrga[$role->getLabel()] = array_search($role->getLabel(), $headers);
+        }
+
+        $converteur = new ActivityCSVToObject($correspondanceRolesActivites, $correspondanceRolesOrga);
+        $converteur->convert($file);
+        /****/
+
+    }
+
     public function personJsonSyncAction(){
         try {
             $fichier = $this->getRequest()->getParam('fichier');

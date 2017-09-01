@@ -467,6 +467,15 @@ return array(
                         ),
                     ),
                 ],
+                'oscar_activityfile_sync' => [
+                    'options' => array(
+                        'route' => 'oscar activity:sync <fichier> [-f|--force]',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'activityFileSync',
+                        ),
+                    ),
+                ],
                 'oscar_patch' => [
                     'options' => array(
                         'route' => 'oscar patch',
