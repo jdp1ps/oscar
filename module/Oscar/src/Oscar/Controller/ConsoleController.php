@@ -166,9 +166,9 @@ class ConsoleController extends AbstractOscarController
         $serviceShuffle = $this->getServiceLocator()->get('ShuffleService');
 
         //$serviceShuffle->shufflePersons();
-        //$serviceShuffle->shuffleOrganizations();
-        //$serviceShuffle->shuffleProjects();
-        $serviceShuffle->shuffleActivity();
+        $serviceShuffle->shuffleOrganizations();
+//        $serviceShuffle->shuffleProjects();
+//        $serviceShuffle->shuffleActivity();
         // Mélange des personnes
 
         // Mélange des sociétés

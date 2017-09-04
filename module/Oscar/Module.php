@@ -223,7 +223,12 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
             '# ACTIVTÉS',
             'oscar activity:search:build' => "Reconsruction de l'index de recherche",
-            'oscar activity:search <expression> <objet>' => "Recherche l'<objet>(activity|person|project) avec l'expression <expression> dans les activités"
+            'oscar activity:search <expression> <objet>' => "Recherche l'<objet>(activity|person|project) avec l'expression <expression> dans les activités",
+
+            '# IMPORT',
+            'oscar authentifications:sync <jsonpath>' => "Charge les comptes d'authentification depuis la source JSON",
+            'oscar personsjson:sync <fichier>' => "Charge les personnes depuis le fichier source JSON",
+            'oscar activity:sync <fichier>' => "Charge les activités depuis le fichier CSV spécifié",
             ];
     }
 }
