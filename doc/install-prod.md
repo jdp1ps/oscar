@@ -118,8 +118,8 @@ Puis création de l'utilisateur/bdd :
 
 ```sql
 CREATE USER oscar WITH PASSWORD 'azerty';
-CREATE DATABASE oscar;
-GRANT ALL PRIVILEGES ON DATABASE oscar to oscar;
+CREATE DATABASE oscar_dev;
+GRANT ALL PRIVILEGES ON DATABASE oscar to oscar_dev;
 \q
 ```
 

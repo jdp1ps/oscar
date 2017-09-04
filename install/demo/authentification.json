@@ -21,6 +21,34 @@
     "approles": []
   },
   {
+    "displayname": "Max Plank",
+    "email": "max.plank@jacksay.com",
+    "password": "plain:maxplank",
+    "login": "maxplank",
+    "approles": []
+  },
+  {
+    "displayname": "Niels Bohr",
+    "email": "niels.bohr@jacksay.com",
+    "password": "plain:nielsbohr",
+    "login": "nielsbohr",
+    "approles": []
+  },
+  {
+    "displayname": "Niels Bohr",
+    "email": "niels.bohr@jacksay.com",
+    "password": "plain:nielsbohr",
+    "login": "nielsbohr",
+    "approles": []
+  },
+  {
+    "displayname": "Erwin Schrödinger",
+    "email": "erwin.schrodinger@jacksay.com",
+    "password": "plain:maxplank",
+    "login": "erwinschrodinger",
+    "approles": []
+  },
+  {
     "displayname": "Flying Spagetti Monster",
     "email": "flyingsm@jacksay.com",
     "password": "bcrypt:$2y$14$kYmzTH0KHFegg7ss7Yq6xOd2rULd9zEmniZmrb.isOUfIDWAd9DTO",

@@ -366,7 +366,7 @@ return array(
                     ),
                 ),
 
-                'oscar_console_patch' => array(
+                'oscar_console_shuffle' => array(
                     'options' => array(
                         'route' => 'oscar shuffle',
                         'defaults' => array(
