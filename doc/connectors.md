@@ -172,3 +172,8 @@ Données minimales attendues :
     "siret" : ""
 }
 ```
+
+## Importer des activités
+
+Oscar dispose d'un utilitaire en ligne de commande pour importer des activités depuis un fichier CSV ou JSON.
+

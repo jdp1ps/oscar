@@ -40,5 +40,26 @@
     "email": "erwin.schrodinger@jacksay.com",
     "login": "erwinschrodinger",
     "uid": "erwinschrodinger"
+  },
+  {
+    "firstname": "Romane",
+    "lastname": "Administrateur",
+    "email": "romane.administrateur@jacksay.com",
+    "login": "administrateur",
+    "uid": "administrateur"
+  },
+  {
+    "firstname": "Raphaelle",
+    "lastname": "Responsable",
+    "email": "raphaelle.responsable@jacksay.com",
+    "login": "responsable",
+    "uid": "responsable"
+  },
+  {
+    "firstname": "Sarah",
+    "lastname": "Déclarant",
+    "email": "sarah.declarant@jacksay.com",
+    "login": "declarant",
+    "uid": "declarant"
   }
 ]
