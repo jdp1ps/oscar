@@ -177,3 +177,7 @@ Données minimales attendues :
 
 Oscar dispose d'un utilitaire en ligne de commande pour importer des activités depuis un fichier CSV ou JSON.
 
+Un exemple de fichier est présent dans le dossier `install/demo/activity-demo.csv`
+
+Le script se chargera de créer dans oscar les activités/projets en y associant les personnes/organisations si ces dernières sont bien présentes dans Oscar.
+
