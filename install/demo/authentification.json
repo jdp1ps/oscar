@@ -16,35 +16,28 @@
   {
     "displayname": "Marcel Grossmann",
     "email": "marcel.grossmann@jacksay.com",
-    "password": "plain:marcelgrossmann",
+    "password": "marcelgrossmann",
     "login": "marcelgrossmann",
     "approles": []
   },
   {
     "displayname": "Max Plank",
     "email": "max.plank@jacksay.com",
-    "password": "plain:maxplank",
+    "password": "maxplank",
     "login": "maxplank",
     "approles": []
   },
   {
     "displayname": "Niels Bohr",
     "email": "niels.bohr@jacksay.com",
-    "password": "plain:nielsbohr",
-    "login": "nielsbohr",
-    "approles": []
-  },
-  {
-    "displayname": "Niels Bohr",
-    "email": "niels.bohr@jacksay.com",
-    "password": "plain:nielsbohr",
+    "password": "nielsbohr",
     "login": "nielsbohr",
     "approles": []
   },
   {
     "displayname": "Erwin Schrödinger",
     "email": "erwin.schrodinger@jacksay.com",
-    "password": "plain:maxplank",
+    "password": "erwinschrodinger",
     "login": "erwinschrodinger",
     "approles": []
   },
@@ -54,5 +47,47 @@
     "password": "bcrypt:$2y$14$kYmzTH0KHFegg7ss7Yq6xOd2rULd9zEmniZmrb.isOUfIDWAd9DTO",
     "login": "flyingsm",
     "approles": ["Administrateur"]
+  },
+  {
+    "displayname": "Administrateur",
+    "email": "administrateur@oscar-demo.com",
+    "password": "administrateur",
+    "login": "administrateur",
+    "approles": ["Administrateur"]
+  },
+  {
+    "displayname": "Déclarant",
+    "email": "sarah.declarant@jacksay.com",
+    "password": "declarant",
+    "login": "declarant",
+    "approles": []
+  },
+  {
+    "displayname": "Responsable de labo",
+    "email": "raphaelle.responsable@jacksay.com",
+    "password": "responsable",
+    "login": "responsable",
+    "approles": []
+  },
+  {
+    "displayname": "Administrateur",
+    "email": "romane.administrateur@jacksay.com",
+    "password": "administrateur",
+    "login": "administrateur",
+    "approles": ["Administrateur"]
+  },
+  {
+    "displayname": "Direction de composante",
+    "email": "emmanuelle.directrice@jacksay.com",
+    "password": "direction",
+    "login": "direction",
+    "approles": []
+  },
+  {
+    "displayname": "Chargé de valorisation",
+    "email": "valorisation@oscar-demo.com",
+    "password": "valorisation",
+    "login": "valorisation",
+    "approles": ["Chargé de valorisation"]
   }
 ]

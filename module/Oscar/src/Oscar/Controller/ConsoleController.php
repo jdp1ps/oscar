@@ -12,6 +12,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Monolog\Logger;
+use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Connector\ConnectorPersonHarpege;
 use Oscar\Connector\ConnectorPersonJSON;
@@ -84,7 +85,13 @@ class ConsoleController extends AbstractOscarController
         }
 
         $converteur = new ActivityCSVToObject($correspondanceRolesActivites, $correspondanceRolesOrga);
-        $converteur->convert($file);
+        $json = $converteur->convert($file);
+
+
+        $importer = new ConnectorActivityJSON($json, $this->getEntityManager());
+        $repport = $importer->syncAll();
+
+        var_dump($repport);
         /****/
 
     }

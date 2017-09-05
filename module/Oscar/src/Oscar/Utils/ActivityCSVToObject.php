@@ -30,21 +30,20 @@ class ActivityCSVToObject
         $out = [];
         while( ($datas = fgetcsv($handler)) !== FALSE ){
             $data = [
-                'project'       => $datas[0],
+                'uid'           => $datas[0],
                 'acronym'       => $datas[1],
                 'projectlabel'  => $datas[2],
-                'pfi'           => $datas[3],
-                'datepfi'       => $datas[4],
-                'amount'        => $datas[5],
-                'type'          => $datas[6],
-                'datestart'     => $datas[7],
-                'dateend'       => $datas[8],
-                'datesign'      => $datas[9],
-                'amount'        => $datas[10],
+                'label'         => $datas[3],
+                'pfi'           => $datas[4],
+                'datepfi'       => $datas[5],
+                'amount'        => $datas[6],
+                'type'          => $datas[7],
+                'datestart'     => $datas[8],
+                'dateend'       => $datas[9],
+                'datesigned'      => $datas[10],
                 'organizations' => [],
                 'persons' => []
             ];
-            var_dump($datas);
 
             // Traitement des organisations
             foreach ($this->correspondanceRolesActivites as $role=>$index){
@@ -60,7 +59,7 @@ class ActivityCSVToObject
 
             $out[] = (object)$data;
         }
-        var_dump($out);
+        return $out;
     }
 
     private function extractSeparatedOrNull( $key, $data, &$destination ){
