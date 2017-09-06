@@ -128,10 +128,8 @@ class ConnectorActivityJSON implements ConnectorInterface
                 ->getQuery();
         }
         try {
-            echo "GET $typeLabel\n";
             return $queryType->setParameter('label', $typeLabel)->getSingleResult();
         }catch( \Exception $e ){
-            echo "NOT FOUND... " . $e->getMessage();
             return null;
         }
     }
@@ -144,6 +142,7 @@ class ConnectorActivityJSON implements ConnectorInterface
     {
         $repport = new ConnectorRepport();
 
+        // Devise par défaut
         $defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
 
         foreach ($this->jsonDatas as $data) {
@@ -152,9 +151,22 @@ class ConnectorActivityJSON implements ConnectorInterface
             // Récupération du projet
             $project = null;
 
-            $type = $this->getType($data->type);
+            // Type d'activité
+            $type = null;
 
+            // Pas d'info sur le type, on ne fait rien
+            if( $data->type ) {
 
+                // On tente de récupérer le type d'activité depuis la BDD
+                $type = $this->getType($data->type);
+
+                // Invalid, on ignore
+                if( !$type ){
+                    $repport->addwarning(sprintf("Le type d'activité %s n'existe pas dans osar", $data->type));
+                }
+            }
+
+            // Récupération du projet à partir de acronym ET projectlabel
             try {
                 $project = $this->entityManager->getRepository(Project::class)->createQueryBuilder('p')
                     ->where('p.acronym = :projectacronym AND p.label = :projectlabel')
@@ -176,6 +188,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                     $repport->adderror("Impossible de créer le projet " . $data->projectlabel . ": " . $e->getMessage());
                 }
             }
+            // todo Traiter les erreurs liées à la récupération du projet
 
             /** @var Activity $activity */
             try {
@@ -198,6 +211,8 @@ class ConnectorActivityJSON implements ConnectorInterface
                     continue;
                 }
             }
+            // todo Traiter les erreurs liées à la récupération de l'activité
+
             $activity->setLabel($data->label)
                 ->setCurrency($defaultCurrency)
                 ->setDateStart($data->datestart ? new \DateTime($data->datestart) : null)
@@ -206,8 +221,10 @@ class ConnectorActivityJSON implements ConnectorInterface
                 ->setActivityType($type)
                 ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
                 ->setAmount(((double)$data->amount));
+
             $this->entityManager->flush($activity);
 
+            //// TRAITEMENT des ORGANISATIONS
             foreach( $data->organizations as $role=>$organizations ){
                 try {
                     $roleObj = $this->entityManager->getRepository(OrganizationRole::class)->findOneBy(['label' => $role]);
@@ -232,6 +249,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                 }
             }
 
+            //// TRAITEMENT des PERSONNES
             foreach( $data->persons as $role=>$persons ){
                 try {
                     $roleObj = $this->getRoleObj($role);

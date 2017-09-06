@@ -4,16 +4,56 @@
     "acronym": "RELACSV",
     "projectlabel": "Théorie de la relativité",
     "label": "Exemple d'activité 1",
-    "datestart": null,
-    "dateend": null,
+    "datestart": "",
+    "dateend": "",
     "datesigned": "2017-06-01",
     "pfi": "",
-    "amount": 0.0,
-    "organizations":{
-      "Laboratoire": ["Cyberdyne", "US Robots"]
+    "type": "ANR",
+    "amount": "0.0",
+    "organizations": {
+      "Laboratoire": [
+        "Cyberdyne",
+        "US Robots"
+      ]
     },
     "persons": {
-      "Responsable scientifique": ["Albert Einstein"],
-      "Ingénieur": ["John Doe"]
+      "Responsable scientifique": [
+        "Albert Einstein"
+      ],
+      "Ingénieur": [
+        "John Doe"
+      ]
     }
+  },
+  {
+    "uid": "A0002",
+    "acronym": "RELACSV",
+    "projectlabel": "Théorie de la relativité",
+    "label": "Exemple d'activité 2",
+    "datestart": "2015-01-01",
+    "dateend": "2017-12-31",
+    "datesigned": "2015-02-01",
+    "pfi": "",
+    "type": "Colloques",
+    "amount": 15000,
+    "organizations": {
+      "Laboratoire": [
+        "Cyberdyne",
+        "US Robots"
+      ],
+      "Composante responsable": [
+        "ACME"
+      ]
+    },
+    "persons": {
+      "Responsable scientifique": [
+        "Albert Einstein",
+        "Maurice Solovine"
+      ],
+      "Ingénieur": [
+        "John Doe",
+        "Marcel Grossmann"
+      ]
+    }
+  }
 ]

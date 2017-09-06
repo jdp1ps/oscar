@@ -16,7 +16,7 @@ class ConnectorRepportToPlainText
     public function format(ConnectorRepport $connectorRepport){
 
         foreach ($connectorRepport->getRepportStates() as $state=>$datas) {
-            echo "$state : \n";
+            echo "# " . strtoupper($state) ."\n";
             foreach ($datas as $data ){
                 echo date('Y-m-d H:i:s', $data['time'])
                     ."\t"

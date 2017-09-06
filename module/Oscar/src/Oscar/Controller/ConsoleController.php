@@ -62,36 +62,45 @@ class ConsoleController extends AbstractOscarController
         echo "Synchronisation des activités : \n";
         $file = realpath($this->getRequest()->getParam('fichier'));
         echo "Importation des activités depuis $file : \n";
-        $handler = fopen($file, 'r');
-        $headers = fgetcsv($handler);
+        $fileExtension = pathinfo($file)['extension'];
 
-        /** @var RoleRepository $repositoryRole */
-        $repositoryRole = $this->getEntityManager()->getRepository(Role::class);
+        if( $fileExtension == "csv" ){
+            $handler = fopen($file, 'r');
+            $headers = fgetcsv($handler);
 
-        // Construction de la correspondance role > colonne
-        $rolesPersons = $repositoryRole->getRolesAtActivityArray();
-        $correspondanceRolesActivites = [];
-        /** @var Role $role */
-        foreach ($rolesPersons as $role ){
-            $correspondanceRolesActivites[$role] = array_search($role, $headers);
+            /** @var RoleRepository $repositoryRole */
+            $repositoryRole = $this->getEntityManager()->getRepository(Role::class);
+
+            // Construction de la correspondance role > colonne
+            $rolesPersons = $repositoryRole->getRolesAtActivityArray();
+            $correspondanceRolesActivites = [];
+            /** @var Role $role */
+            foreach ($rolesPersons as $role ){
+                $correspondanceRolesActivites[$role] = array_search($role, $headers);
+            }
+
+            // Construction de la correspondance role > colonne
+            $rolesOrganizations = $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
+            $correspondanceRolesOrga = [];
+            /** @var OrganizationRole $role */
+            foreach ($rolesOrganizations as $role ){
+                $correspondanceRolesOrga[$role->getLabel()] = array_search($role->getLabel(), $headers);
+            }
+
+            $converteur = new ActivityCSVToObject($correspondanceRolesActivites, $correspondanceRolesOrga);
+            $json = $converteur->convert($file);
         }
-
-        // Construction de la correspondance role > colonne
-        $rolesOrganizations = $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
-        $correspondanceRolesOrga = [];
-        /** @var OrganizationRole $role */
-        foreach ($rolesOrganizations as $role ){
-            $correspondanceRolesOrga[$role->getLabel()] = array_search($role->getLabel(), $headers);
+        elseif ($fileExtension == "json" ){
+            $json = json_decode(file_get_contents($file));
         }
-
-        $converteur = new ActivityCSVToObject($correspondanceRolesActivites, $correspondanceRolesOrga);
-        $json = $converteur->convert($file);
-
-
+        else {
+            die("ERROR : Format non pris en charge.");
+        }
         $importer = new ConnectorActivityJSON($json, $this->getEntityManager());
         $repport = $importer->syncAll();
 
-        var_dump($repport);
+        $output = new ConnectorRepportToPlainText();
+        $output->format($repport);
         /****/
 
     }
