@@ -181,3 +181,65 @@ Un exemple de fichier est présent dans le dossier `install/demo/activity-demo.c
 
 Le script se chargera de créer dans oscar les activités/projets en y associant les personnes/organisations si ces dernières sont bien présentes dans Oscar.
 
+Exemple de données JSON : 
+
+```
+[
+  {
+    "uid": "IDENTIFIANTUNIQUE",
+    "acronym": "ACRONYME du PROJET",
+    "projectlabel": "Théorie de la relativité",
+    "label": "Exemple d'activité 1",
+    "datestart": null,
+    "dateend": null,
+    "datesigned": "2017-06-01",
+    "pfi": "",
+    "amount": 0.0,
+    "organizations": {
+      "Laboratoire": [
+        "Cyberdyne",
+        "US Robots"
+      ]
+    },
+    "persons": {
+      "Responsable scientifique": [
+        "Albert Einstein"
+      ],
+      "Ingénieur": [
+        "John Doe"
+      ]
+    }
+  }
+]
+
+```
+
+### uid (requis)
+Le champ `uid` est un identifiant unique qui permet à *Oscar* de savoir s'il doit ajouter ou mettre à jour une activité.
+
+### acronym ET projectlabel (optionnels)
+Ces deux champs permettent à Oscar de savoir dans quel projet l'activité doit être placée. Oscar cherchera dans sa base de donnée un projet ayant ces données précises, s'il ne trouve pas, il va créer un nouveau projet avec ces informations.
+
+### Autres champs (optionnel)
+
+ * **label** Intitulé de l'activité
+ * **datestart** la date de début au format ISO `YYYY-MM-DD`
+ * **dateend** la date de fin au format ISO `YYYY-MM-DD`
+ * **datesigned** la date de signature au format ISO `YYYY-MM-DD`
+ * **pfi** L'EOTP
+ * **amount** Le montant prévus (ex: 15000.50, 2500)
+
+### organizations
+Cette donné est un **objet** ayant une ou plusieurs clefs correspondants aux rôle d'organisation disponibles dans Oscar : 
+
+```
+[{
+    "organizations": {
+      "Laboratoire": ["Cyberdyne", "US Robots"],
+      "Composante responsable": ["Université de Vienne", "ACME"]
+    }
+}]
+```
+Si **le rôle est absent de Oscar**, l'information sera ignorée, un warning sera affiché dans le rapport d'importation.
+
+Le contenu de chaques clefs est un tableau de chaîne de caractère contenant le **fullname** de l'organisation.
