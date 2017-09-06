@@ -1,0 +1,20 @@
+[
+  {
+    "uid": "A0001",
+    "acronym": "RELACSV",
+    "projectlabel": "Théorie de la relativité",
+    "label": "Exemple d'activité 1",
+    "datestart": null,
+    "dateend": null,
+    "datesigned": "2017-06-01",
+    "pfi": "",
+    "amount": 0.0,
+    "organizations":{
+      "Laboratoire": ["Cyberdyne", "US Robots"]
+    },
+    "persons": {
+      "Responsable scientifique": ["Albert Einstein"],
+      "Ingénieur": ["John Doe"]
+    }
+  }
+]
