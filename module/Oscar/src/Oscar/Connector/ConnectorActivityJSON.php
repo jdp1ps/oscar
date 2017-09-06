@@ -15,8 +15,6 @@ use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
-use Oscar\Entity\ActivityType;
-use Oscar\Entity\Currency;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
@@ -113,48 +111,17 @@ class ConnectorActivityJSON implements ConnectorInterface
     }
 
     /**
-     * @param $roleId
-     * @return mixed
-     * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    protected function getType( $typeLabel ){
-        /** @var Query $queryOrganization */
-        static $queryType;
-        if( $queryType === null ){
-            $queryType = $this->entityManager->getRepository(ActivityType::class)
-                ->createQueryBuilder('t')
-                ->where('t.label = :label')
-                ->getQuery();
-        }
-        try {
-            echo "GET $typeLabel\n";
-            return $queryType->setParameter('label', $typeLabel)->getSingleResult();
-        }catch( \Exception $e ){
-            echo "NOT FOUND... " . $e->getMessage();
-            return null;
-        }
-    }
-
-    /**
      * @return ConnectorRepport
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function syncAll()
     {
         $repport = new ConnectorRepport();
-
-        $defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
-
         foreach ($this->jsonDatas as $data) {
             $this->checkData($data);
 
             // Récupération du projet
             $project = null;
-
-            $type = $this->getType($data->type);
-
-
             try {
                 $project = $this->entityManager->getRepository(Project::class)->createQueryBuilder('p')
                     ->where('p.acronym = :projectacronym AND p.label = :projectlabel')
@@ -186,6 +153,13 @@ class ConnectorActivityJSON implements ConnectorInterface
                     $this->entityManager->persist($activity);
                     $activity->setCentaureId($data->uid)
                         ->setProject($project)
+                        ->setLabel($data->label)
+                        ->setDateStart($data->datestart ? new \DateTime($data->datestart) : null)
+                        ->setDateEnd($data->dateend ? new \DateTime($data->dateend) : null)
+                        ->setCodeEOTP($data->pfi)
+                        ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
+                        ->setAmount(((double)$data->amount))
+
                     ;
 
                     $this->entityManager->flush($activity);
@@ -198,15 +172,6 @@ class ConnectorActivityJSON implements ConnectorInterface
                     continue;
                 }
             }
-            $activity->setLabel($data->label)
-                ->setCurrency($defaultCurrency)
-                ->setDateStart($data->datestart ? new \DateTime($data->datestart) : null)
-                ->setDateEnd($data->dateend ? new \DateTime($data->dateend) : null)
-                ->setCodeEOTP($data->pfi)
-                ->setActivityType($type)
-                ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
-                ->setAmount(((double)$data->amount));
-            $this->entityManager->flush($activity);
 
             foreach( $data->organizations as $role=>$organizations ){
                 try {
