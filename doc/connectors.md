@@ -233,13 +233,29 @@ Ces deux champs permettent à Oscar de savoir dans quel projet l'activité doit 
 Cette donné est un **objet** ayant une ou plusieurs clefs correspondants aux rôle d'organisation disponibles dans Oscar : 
 
 ```
-[{
-    "organizations": {
-      "Laboratoire": ["Cyberdyne", "US Robots"],
-      "Composante responsable": ["Université de Vienne", "ACME"]
+[
+    {
+        "organizations": {
+            "Laboratoire": ["Cyberdyne", "US Robots"],
+            "Composante responsable": ["Université de Vienne", "ACME"]
+        }
     }
-}]
+]
 ```
 Si **le rôle est absent de Oscar**, l'information sera ignorée, un warning sera affiché dans le rapport d'importation.
 
-Le contenu de chaques clefs est un tableau de chaîne de caractère contenant le **fullname** de l'organisation.
+Le contenu de chaque clef est un tableau de chaîne de caractère contenant le **fullname** de l'organisation. Si **Oscar** ne trouve pas d'oganisation, il ignorera l'information et ajoutera un *warning* au rapport.
+
+### persons
+Cette donné est un **objet** ayant une ou plusieurs clefs correspondants aux rôle des personnes disponibles dans Oscar :
+
+```
+[
+    {
+        "persons": {
+            "Responsable Scientifique": ["Albert Einstein"],
+            "Ingénieur": ["Marcel Grossmann", "Maurice Solovine"]
+        }
+    }
+]
+```
