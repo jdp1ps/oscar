@@ -60,7 +60,7 @@ class PersonFormHydrator implements HydratorInterface
         ];
 
         foreach( $this->connectorsName as $connector ){
-            $d['connector_'.$connector] = $object->getConnectors()[$connector];
+            $d['connector_'.$connector] = $object->getConnectorID($connector);
         }
         return $d;
 

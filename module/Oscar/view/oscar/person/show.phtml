@@ -46,12 +46,12 @@
             <h2><i class="icon-tag"></i> Informations administratives</h2>
             <div class="card">
                     <p class="text-highlight text-small">
-                        Synchro LDap :
-                        <?php if($entity->getDateSyncLdap()): ?>
+                        Dernière mise à jour :
+                        <?php if($entity->getDateUpdated()): ?>
                             <strong class="text-success">
                                 <i class="icon-ok-circled"></i>
-                                <?= $this->moment($entity->getDateSyncLdap()) ?>
-                                <span class="text-light">(<?= $this->moment($entity->getDateSyncLdap())->since() ?>)</span>
+                                <?= $this->moment($entity->getDateUpdated()) ?>
+                                <span class="text-light">(<?= $this->moment($entity->getDateUpdated())->since() ?>)</span>
                             </strong>
                         <?php else: ?>
                             <i class="icon-cancel-circled-outline"></i>
@@ -59,8 +59,6 @@
                         <?php endif; ?>
                         <br/>
                         Créé le <time><?= $this->moment($entity->getDateCreated())->full() ?></time>
-                        <br/>
-                        Dernière mise à jour le <time><?= $this->moment($entity->getDateUpdated())->full() ?></time>
                     </p>
                     <?php if($auth): ?>
                         <div class="alert alert-info">
@@ -147,11 +145,13 @@
                             <th>Connecteur(s)</th>
                             <td>
                                 <ul>
-                                <?php foreach( $entity->getConnectors() as $connector=>$value ): ?>
+                                <?php foreach( $connectors as $connector ): ?>
                                     <li>
-                                        <?= $connector ?> : <strong><?= $value ?></strong>
-                                        <?php if( $value && $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SYNC_LDAP) ): ?>
-                                        <a href="<?= $this->url('connector/person') ?>?c=<?= $connector ?>&v=<?= $value ?>">synchroniser</a>
+                                        <?= $connector ?> : <strong><?= $entity->getConnectorID($connector) ?></strong>
+                                        <?php if( $entity->getConnectorID($connector) && $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SYNC_LDAP) ): ?>
+                                        <a href="<?= $this->url('connector/person') ?>?c=<?= $connector ?>&v=<?= $entity->getConnectorID($connector) ?>">synchroniser</a>
+                                        <?php else: ?>
+                                        <em>Non connecté</em>
                                         <?php endif; ?>
                                     </li>
                                 <?php endforeach; ?>
