@@ -523,14 +523,14 @@ class PersonController extends AbstractOscarController
             }
         }
 
-        // Test (liste des projets unique)
 
         return [
             'entity' => $this->getPersonService()->getPerson($id),
             'auth' => $auth,
             'projects'  => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
             'activities' => $this->getProjectGrantService()->personActivities($person->getId()),
-            'traces' => $traces
+            'traces' => $traces,
+            'connectors' =>array_keys($this->getConfiguration('oscar.connectors.person'))
         ];
     }
 

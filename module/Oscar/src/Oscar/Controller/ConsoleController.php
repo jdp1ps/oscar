@@ -58,10 +58,16 @@ class ConsoleController extends AbstractOscarController
 
     ///////////////////////////////////////////////////////////////////////////////////////
     ///
+
+    /**
+     * Synchronisation des activités depuis un fichier.
+     */
     public function activityFileSyncAction(){
         echo "Synchronisation des activités : \n";
+
         $file = realpath($this->getRequest()->getParam('fichier'));
         echo "Importation des activités depuis $file : \n";
+
         $fileExtension = pathinfo($file)['extension'];
 
         if( $fileExtension == "csv" ){
