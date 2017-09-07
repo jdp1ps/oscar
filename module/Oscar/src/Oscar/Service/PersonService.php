@@ -105,18 +105,33 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $resultByPage = 50
     ) {
         $query = $this->getBaseQuery();
-        if ($search !== null) {
-            $query->andWhere('lower(p.firstname) LIKE :search')
-                ->orWhere('lower(p.lastname) LIKE :search')
-                ->orWhere('LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search')
-                ->orWhere('LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
-                ->setParameter('search', '%'.strtolower($search).'%');
+
+        if( preg_match('/(([a-z]*):(.*))/', $search, $matches) ){
+            var_dump($matches);
+            $connector = $matches[2];
+            $connectorValue = $matches[3];
+            try {
+                $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery($connector, $connectorValue);
+            }catch( \Exception $e ){
+                die($e->getTraceAsString());
+            }
         }
-        if( isset($filters['filter_roles']) && count($filters['filter_roles'])>0 ){
-            $query->leftJoin('p.projectAffectations', 'pj')
-                ->leftJoin('p.activities', 'ac')
-                ->andWhere('ac.role IN(:roles) OR pj.role IN (:roles)')
-                ->setParameter('roles', $filters['filter_roles']);
+        else {
+            if ($search !== null) {
+                $query->andWhere('lower(p.firstname) LIKE :search')
+                    ->orWhere('lower(p.lastname) LIKE :search')
+                    ->orWhere('lower(p.email) LIKE :search')
+                    ->orWhere('LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search')
+                    ->orWhere('LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
+                    ->setParameter('search', '%' . strtolower($search) . '%');
+            }
+
+            if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {
+                $query->leftJoin('p.projectAffectations', 'pj')
+                    ->leftJoin('p.activities', 'ac')
+                    ->andWhere('ac.role IN(:roles) OR pj.role IN (:roles)')
+                    ->setParameter('roles', $filters['filter_roles']);
+            }
         }
 
         return new UnicaenDoctrinePaginator($query, $currentPage,

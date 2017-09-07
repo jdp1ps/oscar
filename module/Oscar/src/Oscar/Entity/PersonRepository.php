@@ -118,7 +118,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * @param $value
      * @return \Doctrine\ORM\QueryBuilder
      */
-    private function getPersonByConnectorQuery( $connector, $value ){
+    public function getPersonByConnectorQuery( $connector, $value ){
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('p')
             ->from(Person::class, 'p')
