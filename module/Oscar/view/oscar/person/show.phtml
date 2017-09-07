@@ -47,11 +47,11 @@
             <div class="card">
                     <p class="text-highlight text-small">
                         Dernière mise à jour :
-                        <?php if($entity->getDateUpdated()): ?>
+                        <?php if($entity->getDateSyncLdap()): ?>
                             <strong class="text-success">
                                 <i class="icon-ok-circled"></i>
-                                <?= $this->moment($entity->getDateUpdated()) ?>
-                                <span class="text-light">(<?= $this->moment($entity->getDateUpdated())->since() ?>)</span>
+                                <?= $this->moment($entity->getDateSyncLdap()) ?>
+                                <span class="text-light">(<?= $this->moment($entity->getDateSyncLdap())->since() ?>)</span>
                             </strong>
                         <?php else: ?>
                             <i class="icon-cancel-circled-outline"></i>
@@ -148,10 +148,10 @@
                                 <?php foreach( $connectors as $connector ): ?>
                                     <li>
                                         <?= $connector ?> : <strong><?= $entity->getConnectorID($connector) ?></strong>
-                                        <?php if( $entity->getConnectorID($connector) && $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SYNC_LDAP) ): ?>
-                                        <a href="<?= $this->url('connector/person') ?>?c=<?= $connector ?>&v=<?= $entity->getConnectorID($connector) ?>">synchroniser</a>
+                                        <?php if( $entity->getConnectorID($connector) && $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ): ?>
+                                            <a href="<?= $this->url('connector/person') ?>?c=<?= $connector ?>&v=<?= $entity->getConnectorID($connector) ?>">synchroniser</a>
                                         <?php else: ?>
-                                        <em>Non connecté</em>
+                                            <em>Non connecté</em>
                                         <?php endif; ?>
                                     </li>
                                 <?php endforeach; ?>

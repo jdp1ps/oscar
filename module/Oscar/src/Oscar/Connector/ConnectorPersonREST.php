@@ -209,7 +209,11 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             }
 
             $personData = json_decode($return);
-
+            if( $personData === null ){
+                var_dump($return);
+                // @todo Trouver un moyen de faire remonter une erreur plus "causante"
+                throw new ConnectorException(sprintf("Aucune données retournée par le connecteur%s.", $this->getName()));
+            }
 
             return $this->hydratePersonWithDatas($person, $personData);
 
