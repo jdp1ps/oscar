@@ -409,21 +409,24 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             return false;
         }
         return true;
-
     }
 
     public function search($what)
     {
-
-        $what = StringUtils::transliterateString($what);
-        $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
-        $this->getServiceLocator()->get('Logger')->info(sprintf('Search for "%s"', $what));
-        $hits = $this->searchIndex_getIndex()->find($query);
-        $ids = [];
-        foreach ($hits as $hit) {
-            $ids[] = $hit->ID;
+        try {
+            $what = StringUtils::transliterateString($what);
+            $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
+            $this->getServiceLocator()->get('Logger')->info(sprintf('Search for "%s"', $what));
+            $hits = $this->searchIndex_getIndex()->find($query);
+            $ids = [];
+            foreach ($hits as $hit) {
+                $ids[] = $hit->ID;
+            }
+            return $ids;
+        } catch( \Exception $e ){
+            echo $e->getMessage() . "<br>\n";
+            die($e->getTraceAsString());
         }
-        return $ids;
     }
 
     public function searchProject($what)

@@ -125,13 +125,13 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                     ->orWhere('LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
                     ->setParameter('search', '%' . strtolower($search) . '%');
             }
+        }
 
-            if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {
-                $query->leftJoin('p.projectAffectations', 'pj')
-                    ->leftJoin('p.activities', 'ac')
-                    ->andWhere('ac.role IN(:roles) OR pj.role IN (:roles)')
-                    ->setParameter('roles', $filters['filter_roles']);
-            }
+        if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {
+            $query->leftJoin('p.projectAffectations', 'pj')
+                ->leftJoin('p.activities', 'ac')
+                ->andWhere('ac.role IN(:roles) OR pj.role IN (:roles)')
+                ->setParameter('roles', $filters['filter_roles']);
         }
 
         return new UnicaenDoctrinePaginator($query, $currentPage,
