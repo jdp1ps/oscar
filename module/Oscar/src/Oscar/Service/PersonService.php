@@ -4,6 +4,8 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
 use Oscar\Entity\Person;
+use Oscar\Entity\Role;
+use Oscar\Exception\OscarException;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -106,8 +108,10 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     ) {
         $query = $this->getBaseQuery();
 
+
+        // RECHERCHE sur le connector
+        // Ex: rest:p00000001
         if( preg_match('/(([a-z]*):(.*))/', $search, $matches) ){
-            var_dump($matches);
             $connector = $matches[2];
             $connectorValue = $matches[3];
             try {
@@ -116,22 +120,92 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                 die($e->getTraceAsString());
             }
         }
+
+        // RECHERCHE sur le nom/prenom/email
         else {
             if ($search !== null) {
-                $query->andWhere('lower(p.firstname) LIKE :search')
-                    ->orWhere('lower(p.lastname) LIKE :search')
-                    ->orWhere('lower(p.email) LIKE :search')
-                    ->orWhere('LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search')
-                    ->orWhere('LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
+                $query->andWhere('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
                     ->setParameter('search', '%' . strtolower($search) . '%');
             }
         }
 
+        // FILTRE : Application des filtres sur les rôles
         if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {
-            $query->leftJoin('p.projectAffectations', 'pj')
-                ->leftJoin('p.activities', 'ac')
-                ->andWhere('ac.role IN(:roles) OR pj.role IN (:roles)')
+
+            // Liste des ID person retenus
+            $ids = [];
+
+            ////////////////////////////////////////////////////////////////////
+            // IDPERSON à partir des filtres LDAP
+
+            // Obtention des groupes LDAP fixes sur les rôles
+            // BUT : Obtenir la liste des filtres LDAP pour les rôles selectionnés
+            $roles = $this->getEntityManager()->getRepository(Role::class)->createQueryBuilder('r')
+                ->where('r.roleId IN(:roles)')
                 ->setParameter('roles', $filters['filter_roles']);
+
+            $filterLdap = [];
+
+            // Création de la cause pour la selection des personnes niveau Application
+            foreach($roles->getQuery()->getResult() as $role ){
+                if( $role->getLdapFilter() )
+                    $filterLdap[] = "ldapmemberof LIKE '%" . preg_replace('/\(memberOf=(.*)\)/', '$1', $role->getLdapFilter()) . "%'";
+            }
+
+            if( $filterLdap ) {
+
+                // Récupération des IDPERSON avec les filtres LDAP
+                $rsm = new Query\ResultSetMapping();
+                $rsm->addScalarResult('person_id', 'person_id');;
+                $native = $this->getEntityManager()->createNativeQuery(
+                    'select distinct id as person_id from person where ' . implode(' OR ',
+                        $filterLdap),
+                    $rsm
+                );
+
+                try {
+                    foreach ($native->getResult() as $row) {
+                        $ids[] = $row['person_id'];
+                    }
+                } catch (\Exception $e) {
+                    echo $e->getMessage() . "\n";
+                    echo $e->getTraceAsString();
+                }
+            }
+
+
+            ////////////////////////////////////////////////////////////////////
+            // IDPERSON à partir des rôles dans :
+            // - les projets
+            // - les activités
+            // - les organisations
+
+            $rsm = new Query\ResultSetMapping();
+            $rsm->addScalarResult('person_id', 'person_id');
+
+            try {
+                $native = $this->getEntityManager()->createNativeQuery(
+                    'select person_id from organizationperson j inner join user_role r on r.id = j.roleobj_id where r.role_id IN (:roles)
+                    UNION
+                    select person_id from activityperson ap inner join user_role r on r.id = ap.roleobj_id where r.role_id IN (:roles)
+                    UNION
+                    select person_id from projectmember pm inner join user_role r on r.id = pm.roleobj_id where r.role_id IN (:roles)
+                    ',
+                    $rsm
+                );
+
+                foreach ($native->setParameter('roles',
+                    $filters['filter_roles'])->getResult() as $row) {
+                    $ids[] = $row['person_id'];
+                };
+            } catch(\Exception $e ){
+                throw $e;
+            }
+
+            // On compète la requète en réduisant les résultats à la liste
+            // d'ID caluclée
+            $query->andWhere('p.id IN (:ids)')
+                ->setParameter(':ids', $ids);
         }
 
         return new UnicaenDoctrinePaginator($query, $currentPage,
