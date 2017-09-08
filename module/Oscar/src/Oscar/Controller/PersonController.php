@@ -252,7 +252,11 @@ class PersonController extends AbstractOscarController
 
         $roles = $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed();
 
+
+        $dbroles =$this->getPersonService()->getRolesByAuthentification();
+
         return array(
+            'dbroles' => $dbroles,
             'roles' => $roles,
             'search' => $search,
             'persons' => $datas,

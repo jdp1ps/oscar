@@ -82,6 +82,41 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     }
 
     /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getRolesByAuthentification(){
+        try {
+            $rsm = new Query\ResultSetMapping();
+            $rsm->addScalarResult('login', 'login');
+            $rsm->addScalarResult('roleid', 'roleid');
+
+            $native = $this->getEntityManager()->createNativeQuery(
+                'SELECT a.username as login, ur.role_id as roleid FROM authentification a
+                    INNER JOIN authentification_role ar
+                    ON ar.authentification_id = a.id
+                    INNER JOIN user_role ur
+                    ON ar.role_id = ur.id',
+                $rsm
+            );
+
+            $out = [];
+
+            foreach ($native->getResult() as $row) {
+                if( !array_key_exists($row['login'], $out) ){
+                    $out[$row['login']] = [];
+                }
+                $out[$row['login']][] = $row['roleid'];
+            }
+
+            return $out;
+
+        } catch(\Exception $e ){
+            throw $e;
+        }
+    }
+
+    /**
      * @param int $currentPage
      * @param int $resultByPage
      *
