@@ -124,7 +124,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         // RECHERCHE sur le nom/prenom/email
         else {
             if ($search !== null) {
-                $query->andWhere('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
+                $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
                     ->setParameter('search', '%' . strtolower($search) . '%');
             }
         }
@@ -143,6 +143,37 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $roles = $this->getEntityManager()->getRepository(Role::class)->createQueryBuilder('r')
                 ->where('r.roleId IN(:roles)')
                 ->setParameter('roles', $filters['filter_roles']);
+
+            // Rôles attribuès en dur
+            /** @var SELECT * FROM person p
+            INNER JOIN authentification a
+            ON p.ladaplogin = a.username $fixed */
+            try {
+                $rsm = new Query\ResultSetMapping();
+                $rsm->addScalarResult('person_id', 'person_id');;
+                $native = $this->getEntityManager()->createNativeQuery(
+                    'SELECT p.id as person_id FROM person p
+                    INNER JOIN authentification a
+                    ON p.ladaplogin = a.username
+
+                    INNER JOIN authentification_role ar
+                    ON ar.authentification_id = a.id
+
+                    INNER JOIN user_role ur
+                    ON ar.role_id = ur.id
+
+                    WHERE ur.role_id IN (:roles)',
+                    $rsm
+                );
+
+                foreach ($native->setParameter('roles', $filters['filter_roles'])->getResult() as $row) {
+                    $ids[] = $row['person_id'];
+                }
+
+            } catch(\Exception $e ){
+                throw $e;
+            }
+
 
             $filterLdap = [];
 

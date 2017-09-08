@@ -44,12 +44,10 @@ $markText = function( $text, $search ){
 ?>
 
 <section data-context="#ddm" class="container">
-
     <h3 class="text-center"><?= count($persons) ?> résultat(s) - page <?= $persons->getCurrentPage() ?> / <?= $persons->getCountPage() ?></h3>
     <?php foreach( $persons as $person ): ?>
         <?= $this->partial('/oscar/person/item-list.phtml', ['person' => $person, 'markText' => $markText, 'search' => $search, 'ldapFilters' => $roles]) ?>
     <?php endforeach; ?>
-
         <script>
             Initer.ready(function(){
                 require(['select2'], function(){
