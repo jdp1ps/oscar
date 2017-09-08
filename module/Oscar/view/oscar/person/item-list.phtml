@@ -41,12 +41,21 @@
         <?php foreach( $person->getLdapMemberOf() as $ldapFilter ): ?>
             <?php if( array_key_exists($ldapFilter, $ldapFilters )) : ?>
                 <?php foreach($ldapFilters[$ldapFilter] as $roles ): ?>
-                    <span class="cartouche <?= $roles['principal'] ? 'primary' : 'cartouche-default' ?>" title="Droit obtenu via LDAP">
-                        <i class="icon-database"></i>
+                    <span class="cartouche <?= $roles['principal'] ? 'primary' : 'secondary1' ?>" title="Droit obtenu via LDAP">
+                        <i class="icon-link-outline"></i>
                         <?= $roles['label'] ?>
                     </span>
                 <?php endforeach; ?>
             <?php endif; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php if ($dbroles): ?>
+        <?php foreach( $dbroles as $role ): ?>
+        <span class="cartouche complementary" title="Droit attribué en base de données">
+            <i class="icon-database"></i>
+            <?= $role ?>
+        </span>
         <?php endforeach; ?>
     <?php endif; ?>
 

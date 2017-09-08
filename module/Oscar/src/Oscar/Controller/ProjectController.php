@@ -649,7 +649,6 @@ class ProjectController extends AbstractOscarController
         $sort = 'activityDateCreated';
         $projects->orderBy($orderBy, 'DESC');
 
-
         return array(
             'projects' => new UnicaenDoctrinePaginator($projects, $page),
             'search' => $search,
