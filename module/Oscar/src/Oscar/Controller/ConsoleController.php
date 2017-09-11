@@ -183,6 +183,8 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+
+
     public function shuffleAction(){
         /** @var ShuffleDataService $serviceShuffle */
         $serviceShuffle = $this->getServiceLocator()->get('ShuffleService');
