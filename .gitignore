@@ -15,6 +15,10 @@ config/autoload/unicaen-auth.local.php
 /logs/*
 !/logs/.gitkeep
 
+# custom
+/public/custom/*
+!/public/custom/.gitkeep
+
 # Data & Cache
 data/*
 !data/backup_oscar-empty.sql
