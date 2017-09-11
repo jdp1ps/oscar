@@ -781,8 +781,14 @@ class ProjectGrantController extends AbstractOscarController
     {
         try {
             $page = $this->params()->fromQuery('page', 1);
-            $search = $this->params()->fromQuery('q', '');
+            $search = $this->params()->fromQuery('q', null);
             $include = null;
+
+            if( $search === null ){
+                $startEmpty = true;
+            } else {
+                $startEmpty = false;
+            }
 
             if ($this->getOrganizationPerimeter()) {
 
@@ -942,7 +948,7 @@ class ProjectGrantController extends AbstractOscarController
 
             // Paramètres de la requête finale
             $parameters = [];
-            $startEmpty = false;
+
 
             if (!$search && count($criteria) === 0) {
                 $ids = [];
@@ -972,9 +978,12 @@ class ProjectGrantController extends AbstractOscarController
                             . ') OR p2.organization IN('
                             . $organizationsPerimeterIds
                             . ')');
-                } else {
+                }
+                /*
+                else {
                     $startEmpty = true;
                 }
+                /****/
 
             } else {
 
@@ -1251,7 +1260,7 @@ class ProjectGrantController extends AbstractOscarController
             }
 
             $activities = null;
-            if( $startEmpty == false ) {
+            if( $startEmpty === false ) {
                 $qbIds = $qb->select('DISTINCT c.id');
 
                 $ids = [];
