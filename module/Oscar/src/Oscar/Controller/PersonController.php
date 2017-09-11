@@ -483,7 +483,10 @@ class PersonController extends AbstractOscarController
             ->where('r.principal = true')
             ;
 
+        $dbroles =$this->getPersonService()->getRolesByAuthentification();
+
         return [
+            'dbroles' => $dbroles,
             'ldapFilters' => $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed(),
             'persons' => new UnicaenDoctrinePaginator($persons, $page)
         ];

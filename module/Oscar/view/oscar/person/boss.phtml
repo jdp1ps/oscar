@@ -22,7 +22,13 @@ $search = "";
 
     <h3 class="text-center"><?= count($persons) ?> résultat(s) - page <?= $persons->getCurrentPage() ?> / <?= $persons->getCountPage() ?></h3>
     <?php foreach( $persons as $person ): ?>
-        <?= $this->partial('/oscar/person/item-list.phtml', ['person' => $person, 'markText' => $markText, 'search' => $search, 'ldapFilters' => $ldapFilters]) ?>
+        <?= $this->partial('/oscar/person/item-list.phtml', [
+            'person' => $person,
+            'markText' => $markText,
+            'search' => $search,
+            'ldapFilters' => $ldapFilters,
+            'dbroles'=> array_key_exists($person->getLadapLogin(), $dbroles) ? $dbroles[$person->getLadapLogin()] : []
+        ]) ?>
     <?php endforeach; ?>
 
 
