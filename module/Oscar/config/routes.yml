@@ -22,6 +22,25 @@ changelog:
             action: changelog
 
 ################################################################################
+# NOTIFICATIONS
+notification:
+    type: literal
+    options:
+            route: /notification
+            defaults:
+                controller: Notification
+                action: index
+    may_terminate: true
+
+    child_routes:
+        # Déclarations d'une personne pour une activité
+        person:
+            type: segment
+            options:
+                route: /person/:idperson
+                defaults:
+                    action: indexPerson
+
 # TIMESHEET
 timesheet:
     type: literal
