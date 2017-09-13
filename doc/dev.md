@@ -132,10 +132,6 @@ Dans le rôles, la clef **CODE STRUCTURE** doit correspondre à la valeur *CODE*
 
 Pour l'URL "liste", le service REST doit retourner un tableau composé d'objets organisés de la même façon.
 
-### La clef GROUPS
-
-Cette clef est liée à la gestion des rôles. En effet, un rôle peut être définit avec un filtre *Ldap*. Ce champ permet de savoir les rôles que la personne va aquiérir sur l'application entière si elle s'authentifie sur Oscar. Généralement, les groupes correspondent à la donnée **memberOf** dans *Ldap*.
-
 ## Connector ORGANIZATIONS
 
 De la même façon, 2 URL peuvent être utilisées pour synchroniser les données des structures. Voici le modèle attendu :
@@ -272,13 +268,3 @@ Cette donné est un **objet** ayant une ou plusieurs clefs correspondants aux r�
 ```
 
 Chaque clef contient un tableau de chaîne avec comme valeur la nom complet de la personne. Lorsque Oscar recherche cette information, il concatène le **firstname** et le **lastname** séparés par un espace.
-
-### Executer les connecteurs
-
-Une fois les connecteurs configurés, vous pouvez lancer la synchronisation des données depuis l'interface ou utiliser (recommandé) l'utilitaire en ligne de commande en éxecutant la commande :
-
-```bash
-php public/index.php oscar persons:sync rest
-```
-
-Cela va éxecuter la synchronisation des personnes en utilisant le connecteur REST.

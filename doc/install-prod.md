@@ -73,19 +73,19 @@ git clone https://<USER>@git.unicaen.fr/bouvry/oscar
 
 ## Vendor (librairies tiers)
 
-*Oscar* utilise des libraires tiers (vendor). 
+*Oscar* utilise des libraires tiers (vendor).
 
-Pour le développement, elles sont gérées via composer, son utilisation nécessite 
+Pour le développement, elles sont gérées via composer, son utilisation nécessite
  d'avoir accès aux librairies embarquées **Unicaen** : *UnicaenApp*, *UnicaenAuth*.
- 
-**Pour une installation en production/démo**, une archive du dossier vendor est 
+
+**Pour une installation en production/démo**, une archive du dossier vendor est
  disponible dans le dossier `install` au format *.tar.gz* :
 
 ```bash
 tar xvfz install/vendor.tar.gz
 ```
 
-Ou pour les développeurs situé dans le **réseau unicaen** : 
+Ou pour les développeurs situé dans le **réseau unicaen** :
 
 ```bash
 php composer.phar update
@@ -241,7 +241,7 @@ S'assurer que les dossiers :
  - `./data/`
  - Le dossier choisi pour l'index Lucene
  - Le dossier de stoquage des documents
- - Le fichier de log 
+ - Le fichier de log
 
 Sont bien accessibles en écriture.
 
@@ -249,53 +249,53 @@ Sont bien accessibles en écriture.
 
 ### Unicaen App (ldap & mail)
 
-La configuration de **UnicaenApp** et **UnicaenAuth** (surcouches utilisées dans 
-Oscar) on leurs fichiers de configuration respectifs dans le dossier `/config/autoload` : 
+La configuration de **UnicaenApp** et **UnicaenAuth** (surcouches utilisées dans
+Oscar) on leurs fichiers de configuration respectifs dans le dossier `/config/autoload` :
 
  - Pour UnicaenApp, `config/autoload/unicaen-app.local.php`
  - Pour UnicaenAuth, `config/autoload/unicaen-auth.local.php`
- 
- 
+
+
 Des fichiers d'exemple sont disponibles avec l'extension `.dist`.
-  
+
 **UnicaenApp** :
  - Configuration de l'authentification avec LDAP
  - Paramètre pour le *Mailer*
- 
+
 
 ```bash
 cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
 vi !$
 ```
 
-Voici un exemple de configuration LDAP : 
+Voici un exemple de configuration LDAP :
 
 ```php
 <?php
 $settings = array(
-    // LDAP    
-    'ldap' => array(
-        'connection' => array(
-            'default' => array(
-                'params' => array(
-                    'host'                => 'ldap.domain.tdl',
-                    'port'                => 389,
-                    'username'            => 'uid=identifiant,ou=system,dc=domain,dc=fr',
-                    'password'            => 'P@$$W0rD',
-                    'baseDn'              => 'ou=people,dc=domain,dc=fr',
-                    'bindRequiresDn'      => true,
-                    'accountFilterFormat' => '(&(objectClass=posixAccount)(supannAliasLogin=%s))',
-                )
-            )
+  // LDAP    
+  'ldap' => array(
+    'connection' => array(
+      'default' => array(
+        'params' => array(
+          'host'                => 'ldap.domain.tdl',
+          'port'                => 389,
+          'username'            => 'uid=identifiant,ou=system,dc=domain,dc=fr',
+          'password'            => 'P@$$W0rD',
+          'baseDn'              => 'ou=people,dc=domain,dc=fr',
+          'bindRequiresDn'      => true,
+          'accountFilterFormat' => '(&(objectClass=posixAccount)(supannAliasLogin=%s))',
         )
-    ),
-    // etc ...
+      )
+    )
+  ),
+  // etc ...
 );
 ```
 
-  
-**UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*. 
-Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames` 
+
+**UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*.
+Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
 permet de s'identifier à la place d'un utilisateur.
 
 
@@ -303,29 +303,25 @@ permet de s'identifier à la place d'un utilisateur.
 
 ### Compte administrateur
 
-Pour l'administration de l'application, vous pouvez créer un compte administrateur 
+Pour l'administration de l'application, vous pouvez créer un compte administrateur
 dédié en utilisant l'utilitaire en ligne de commande.
 
-Rendez-vous à la racine de l'application : 
+Rendez-vous à la racine de l'application :
 
 ```bash
 cd /var/oscar_path
 ```
 
-Puis on commence par créer un compte d'autentification : 
+Puis on commence par créer un compte d'autentification :
 
 ```bash
 php public/index.php oscar auth:add admin admin@domaine.tld password "Administrateur"
 ```
 
-Puis lon lui attribut le rôle "Administrateur" : 
+Puis lon lui attribut le rôle "Administrateur" :
 
 ```bash
-php public/index.php oscar auth:promote admin Administrateur 
+php public/index.php oscar auth:promote admin Administrateur
 ```
 
 Utiliser ensuite la navigateur pour vous rendre sur oscar et utiliser l'identifiant **admin** avec la mot de passe **password** pour vous connecter en tant qu'administrateur.
-
-
-
-
