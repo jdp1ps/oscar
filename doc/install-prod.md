@@ -6,10 +6,9 @@ L'installation a été testé sous Debian et Ubuntu Server
 
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
- - PHP 5.6+ (compatible 7.0+) (support LDAP, Postgresql)
+ - PHP 7.0+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql)
  - Postgresql 9.4+
  - Annuaire LDAP (supann)
-
 
 ## Installation du système
 
@@ -33,7 +32,15 @@ apt-get install git-core
 apt-get install apache2
 
 # PHP + Modules PHP
-apt-get install php5 php5-ldap php5-curl php5-cli php5-pgsql php5-intl php5-mcrypt
+apt-get install \
+    php7.0 \
+    php7.0-cli \
+    php7.0-curl \
+    php7.0-intl \
+    php7.0-ldap \
+    php7.0-mcrypt \
+    php7.0-pgsql
+
 
 # Postgresql (ou autre selon le client de BDD utilisé)
 apt-get install postgresql-client postgresql-client-common
@@ -47,8 +54,6 @@ Si besoin, configurer le proxy :
 export http_proxy=http://proxy.unicaen.fr:3128
 export https_proxy=http://proxy.unicaen.fr:3128
 ```
-
-
 
 ## Installation de la copie
 
@@ -70,23 +75,21 @@ git clone https://<USER>@git.unicaen.fr/bouvry/oscar
 
 *Oscar* utilise des libraires tiers (vendor). 
 
-Pour le développement, elles sont gérées via composer, son utilisation necessite 
- d'avoir accès aux librairies embarquées **Unicaen** : UnicaenApp, UnicaenAuth.
+Pour le développement, elles sont gérées via composer, son utilisation nécessite 
+ d'avoir accès aux librairies embarquées **Unicaen** : *UnicaenApp*, *UnicaenAuth*.
  
-Pour une installation en production/démo, une archive du dossier vendor est 
- disponible dans le dossier `install` : 
+**Pour une installation en production/démo**, une archive du dossier vendor est 
+ disponible dans le dossier `install` au format *.tar.gz* :
 
 ```bash
 tar xvfz install/vendor.tar.gz
 ```
 
-Ou pour les développeurs : 
+Ou pour les développeurs situé dans le **réseau unicaen** : 
 
 ```bash
 php composer.phar update
 ```
-
-
 
 
 ## Configuration d'oscar
@@ -136,7 +139,7 @@ psql -h localhost -U oscar < data/backup_oscar-empty.sql
 
 La configuration de la BDD est spécifiée dans le fichier `config/autoload/local.php`.
 
-Si le fichier n'existe pas, un modèle est présent dans `` :
+Si le fichier n'existe pas, un modèle est présent dans `config/autoload/unicaen-app.local.php.dist` :
 
 ```bash
 cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
@@ -158,7 +161,7 @@ return array(
                     'port'     => '5432',
                     'user'     => 'oscar',
                     'password' => 'azerty',
-                    'dbname'   => 'oscar',
+                    'dbname'   => 'oscar_dev',
                     'charset'  => 'utf8'
                 ),
             ),
@@ -167,7 +170,7 @@ return array(
 );
 ```
 
-## Configurer le serveur web (Apache)
+### Configurer le serveur web (Apache)
 
 Activer les modules Apache si besoin :
 
@@ -231,7 +234,7 @@ ln -s ../oscar/public oscar
 ```
 
 
-## Droits d'écriture
+### Droits d'écriture
 
 S'assurer que les dossiers :
 
@@ -264,9 +267,65 @@ Des fichiers d'exemple sont disponibles avec l'extension `.dist`.
 cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
 vi !$
 ```
-  
+
+Voici un exemple de configuration LDAP : 
+
+```php
+<?php
+$settings = array(
+    // LDAP    
+    'ldap' => array(
+        'connection' => array(
+            'default' => array(
+                'params' => array(
+                    'host'                => 'ldap.domain.tdl',
+                    'port'                => 389,
+                    'username'            => 'uid=identifiant,ou=system,dc=domain,dc=fr',
+                    'password'            => 'P@$$W0rD',
+                    'baseDn'              => 'ou=people,dc=domain,dc=fr',
+                    'bindRequiresDn'      => true,
+                    'accountFilterFormat' => '(&(objectClass=posixAccount)(supannAliasLogin=%s))',
+                )
+            )
+        )
+    ),
+    // etc ...
+);
+```
+
   
 **UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*. 
 Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames` 
 permet de s'identifier à la place d'un utilisateur.
+
+
+## Première connexion
+
+### Compte administrateur
+
+Pour l'administration de l'application, vous pouvez créer un compte administrateur 
+dédié en utilisant l'utilitaire en ligne de commande.
+
+Rendez-vous à la racine de l'application : 
+
+```bash
+cd /var/oscar_path
+```
+
+Puis on commence par créer un compte d'autentification : 
+
+```bash
+php public/index.php oscar auth:add admin admin@domaine.tld password "Administrateur"
+```
+
+Puis lon lui attribut le rôle "Administrateur" : 
+
+```bash
+php public/index.php oscar auth:promote admin Administrateur 
+```
+
+Utiliser ensuite la navigateur pour vous rendre sur oscar et utiliser l'identifiant **admin** avec la mot de passe **password** pour vous connecter en tant qu'administrateur.
+
+
+
 
