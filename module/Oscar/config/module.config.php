@@ -356,6 +356,7 @@ return array(
                     ),
                 ),
 
+                // Procédure pour lancer des patchs
                 'oscar_console_patch' => array(
                     'options' => array(
                         'route' => 'oscar patch <patchname>',
@@ -366,6 +367,7 @@ return array(
                     ),
                 ),
 
+                // Procédure d'anonymisation des données
                 'oscar_console_shuffle' => array(
                     'options' => array(
                         'route' => 'oscar shuffle',
@@ -400,7 +402,7 @@ return array(
 
                   'oscar_organizations_sync' => [
                     'options' => [
-                        'route' => 'oscar organizations:sync <connectorkey> [--force|-f]',
+                        'route' => 'oscar organizations:sync <connectorkey> [--force|-f] [--verbose|-v]',
                         'defaults' => [
                             'controller' => 'Console',
                             'action' => 'organizationSync',
@@ -442,7 +444,7 @@ return array(
                 ],
                 'oscar_persons_sync' => [
                     'options' => array(
-                        'route' => 'oscar persons:sync <connectorkey> [-f|--force]',
+                        'route' => 'oscar persons:sync <connectorkey> [-f|--force] [-v|--verbose]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'personsSync',
