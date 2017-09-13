@@ -8,50 +8,31 @@
 namespace Oscar\Controller;
 
 
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
-use Monolog\Logger;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Connector\ConnectorPersonHarpege;
 use Oscar\Connector\ConnectorPersonJSON;
 use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\CategoriePrivilege;
-use Oscar\Entity\ContractDocument;
-use Oscar\Entity\Organization;
-use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
-use Oscar\Entity\Project;
-use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleOrganization;
 use Oscar\Entity\RoleRepository;
 use Oscar\Formatter\ConnectorRepportToPlainText;
-use Oscar\Provider\AbstractOracleProvider;
-use Oscar\Provider\Person\SyncPersonHarpege;
 use Oscar\Provider\Privileges;
-use Oscar\Provider\SifacBridge;
 use Oscar\Service\ConnectorService;
-use Oscar\Service\PersonService;
 use Oscar\Service\ShuffleDataService;
 use Oscar\Utils\ActivityCSVToObject;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
-use UnicaenApp\Entity\Ldap\People;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenAuth\Authentication\Adapter\Ldap;
-use Zend\Authentication\AuthenticationService;
 use Zend\Crypt\Password\Bcrypt;
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
 class ConsoleController extends AbstractOscarController
 {
@@ -111,46 +92,48 @@ class ConsoleController extends AbstractOscarController
 
     }
 
+
+
+    /**
+     * Synchronisation des personnes depuis un fichier JSON.
+     */
     public function personJsonSyncAction(){
         try {
             $fichier = $this->getRequest()->getParam('fichier');
 
-            if( !$fichier ){
+            if( !$fichier )
                 die("Vous devez spécifier le chemin complet vers le fichier JSON");
-            }
 
             echo "Synchronisation depuis le fichier $fichier\n";
-
-            echo "Read $fichier:\n";
+            echo "Lecture du fichier $fichier:\n";
             $fileContent = file_get_contents($fichier);
-            if( !$fileContent ){
+            if( !$fileContent )
                 die("Oscar n'a pas réussi à charger le contenu du fichier");
-            }
 
-            echo "Convert $fichier:\n";
+            echo "Conversion du contenu de $fichier:\n";
             $datas = json_decode($fileContent);
-            if( !$datas ){
+            if( !$datas )
                 die("les données du fichier $fichier n'ont pas pu être converties.");
-            }
 
             $connector = new ConnectorPersonJSON($datas, $this->getEntityManager());
             $repport = $connector->syncAll();
             $connectorFormatter = new ConnectorRepportToPlainText();
 
-            echo $connectorFormatter->format($repport);
-
-
+            $connectorFormatter->format($repport);
         }
         catch( \Exception $e ){
             die("ERROR : " . $e->getMessage());
         }
     }
 
+
+    /**
+     * Synchronisation des authentifications depuis un fichier JSON.
+     */
     public function authentificationsSyncAction(){
         try {
             $jsonpath = $this->getRequest()->getParam('jsonpath');
             $force = $this->getRequest()->getParam('force', false);
-
 
             if( !$jsonpath ){
                 die("Vous devez spécifier le chemin complet vers le fichier JSON");
