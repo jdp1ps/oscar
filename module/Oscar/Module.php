@@ -28,6 +28,7 @@ use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\Http\RouteMatch;
 use Zend\ServiceManager\ServiceManager;
+use ZfcUser\Authentication\Adapter\AdapterChainEvent;
 
 class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInterface
 {
@@ -87,6 +88,14 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 array($this, 'onUserLogin'),
                 100);
 
+        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+            //'ZfcUser\Authentication\Adapter\AdapterChain',
+            "*",
+            'authenticate.success',
+            array($this, 'onUserLogin'),
+           100
+        );
+
         // todo Remplacer l'étoile si possible
         $e->getApplication()->getEventManager()->getSharedManager()->attach(
             '*',
@@ -115,27 +124,45 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
         $this->getServiceManager()->get('Logger')->error($msg);
     }
 
-    public function onUserLogin( UserAuthenticatedEvent $e ){
-        $user = $e->getDbUser();
+    public function onUserLogin( $e ){
+
+        $dbUser = null;
+        if( $e instanceof AdapterChainEvent ){
+            $dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
+        }
+        elseif ($e instanceof UserAuthenticatedEvent ) {
+            $dbUser = $e->getDbUser();
+        } else {
+            die('OK ?');
+            // meh !
+        }
+
+
         try {
-            $user->setDateLogin(new \DateTime());
-            $user->setSecret(md5($user->getId().'#'.time()));
-            $this->getEntityManager()->flush($user);
-        } catch( \Exception $e ){}
+            $dbUser->setDateLogin(new \DateTime());
+            $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
+            $this->getEntityManager()->flush($dbUser);
+        } catch (\Exception $e) {
+
+        }
 
         /** @var PersonService $personService */
         $personService = $this->_serviceManager->get('PersonService');
         try {
-            $person = $personService->getPersonByLdapLogin($user->getUsername());
+            $person = $personService->getPersonByLdapLogin($dbUser->getUsername());
             $str = $person->log();
-        } catch( NoResultException $e ){
-            $str = $user->getUsername(). ' - DBUSER';
+        } catch (NoResultException $e) {
+            $str = $dbUser->getUsername() . ' - DBUSER';
         }
-        $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.', $str), $user);
+        $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
+            $str), $dbUser);
+
     }
 
     protected function trapEvent($event)
     {
+
+
         /** @var Request $request */
         $request = $event->getRequest();
         $sm = $event->getApplication()->getServiceManager();
@@ -160,7 +187,16 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $action = $match->getParam('action');
                 $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
                 $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-                $user = $userContext->getLdapUser() ? $userContext->getLdapUser()->getDisplayName() : 'Anonymous';
+
+                if( $userContext->getLdapUser() ){
+                    $user = $userContext->getLdapUser()->getDisplayName();
+                }
+                elseif ( $userContext->getDbUser() ){
+                    $user = $userContext->getDbUser()->getDisplayName();
+                } else {
+                    $user = 'Anonymous';
+                }
+
                 $userid = $userContext->getDbUser() ? $userContext->getDbUser()->getid() : -1;
                 $contextId = $match->getParam('id', '?');
                 $message = sprintf('%s@%s:(%s) %s:%s %s', $ip, $userid, $user, $controller, $action, $uri);

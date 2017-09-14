@@ -7,27 +7,38 @@
 
 namespace Oscar\Controller;
 
+use Oscar\Service\NotificationService;
+use Zend\View\Model\JsonModel;
+
 /**
  * Class NotificationController
  * @package Oscar\Controller
  */
 class NotificationController extends AbstractOscarController
 {
-    public function indexPersonAction()
+    public function testAction()
     {
-        $personId = $this->params()->fromRoute('idperson', null);
-        if( $personId === null ){
-            $personId = $this->getCurrentPerson()->getId();
-        }
-        var_dump($personId);
-        die("Notification d'une personne");
+        $personsId = [13059, 13060];
+
+        /** @var NotificationService $notificationService */
+        $notificationService = $this->getServiceLocator()->get('NotificationService');
+
+
+        $notificationService->notification("Test de notification", $personsId);
+
+        die('Fini');
     }
     public function indexAction()
     {
         $personId = $this->getCurrentPerson()->getId();
+
+        /** @var NotificationService $notificationService */
         $notificationService = $this->getServiceLocator()->get('NotificationService');
+
         $notifications = $notificationService->getNotificationsPerson($personId);
-        var_dump($notifications);
-        die("Notifications");
+
+        $response = new JsonModel($notifications);
+        return $response;
+
     }
 }
