@@ -8303,3 +8303,41 @@ time.date-missing {
 
 .fade-enter, .fade-leave-to, .fade-leave-active {
   opacity: 0; }
+
+#notifications-area {
+  position: relative; }
+  #notifications-area .list {
+    position: absolute;
+    background: white;
+    color: #333;
+    max-height: 350px;
+    max-height: 80vh;
+    width: 350px;
+    overflow: hidden;
+    overflow-y: scroll;
+    right: 0; }
+    #notifications-area .list h3 {
+      font-weight: 500;
+      background: #888888;
+      color: white;
+      margin: 0;
+      padding: .5em;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between; }
+      #notifications-area .list h3 .intitule {
+        flex: 5; }
+      #notifications-area .list h3 a {
+        flex: 0; }
+    #notifications-area .list article {
+      border-bottom: thin solid #AAA;
+      padding: 1em; }
+      #notifications-area .list article h4 {
+        color: #555;
+        margin: 0;
+        padding: 0;
+        font-size: 1em; }
+      #notifications-area .list article p {
+        color: #999;
+        font-size: 1.5em; }

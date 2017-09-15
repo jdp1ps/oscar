@@ -42,6 +42,11 @@ return array(
                     'roles' => ['user'],
                 ],
 
+                [ 'controller' =>  'Notification',
+                    'action' => ['notifyPerson'],
+                    'roles' => ['user'],
+                ],
+
                 [ 'controller' =>  'Administration',
                     'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'organizationRole', 'organizationRoleApi'],
                     'roles' => ['user']

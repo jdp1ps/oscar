@@ -43,7 +43,7 @@ function sendNotification( datas ){
      for( var i=0; i<clients.length; i++ ){
          if( clients[i].personid == datas.recipientid){
             console.log("ENVOI à [", clients[i].personid, "] ",clients[i].username);
-            clients[i].emit('notification', { "notifications": datas });
+            clients[i].emit('notification', { "notification": datas });
         }
     }
 }

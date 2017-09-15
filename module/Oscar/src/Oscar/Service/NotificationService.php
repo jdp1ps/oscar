@@ -17,6 +17,16 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
+    public function deleteNotifications( array $ids ){
+        $query = $this->getEntityManager()->getRepository(Notification::class)->createQueryBuilder('n')
+            ->delete()
+            ->where('n.id IN(:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()->getResult();
+        return true;
+    }
+
+
     public function getNotificationsPerson( $personId ){
         $result = [
             'personid' => $personId,

@@ -273,7 +273,8 @@ class Notification
 
     public function toArray(){
         return [
-            'dateEffective' =>  $this->getDateEffective(),
+            'id' =>  $this->getId(),
+            'dateEffective' =>  $this->getDateEffective()->format('Y-m-d H:i:s'),
             'message' => $this->getMessage(),
             'context' =>  $this->getContext(),
             'contextId' =>  $this->getContextId(),
