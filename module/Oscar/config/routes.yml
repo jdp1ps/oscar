@@ -37,9 +37,9 @@ notification:
         person:
             type: segment
             options:
-                route: /person/:idperson
+                route: /notifyperson/:idperson
                 defaults:
-                    action: indexPerson
+                    action: notifyPerson
 
 # TIMESHEET
 timesheet:

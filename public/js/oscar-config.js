@@ -52,7 +52,8 @@ requirejs.config({
         'Datepicker' : 'modules/unicaen/dist/js/Datepicker',
         'KeySelectEditor' : 'components/build/KeySelectEditor',
         'ActivitiesExport' : 'components/build/ActivitiesExport',
-        'io' : 'http://127.0.0.1:3000/socket.io/socket.io.js'
+        'io' : 'http://127.0.0.1:3000/socket.io/socket.io.js',
+        'notifications' : 'components/build/notifications'
     },
     shim: {
         "bootstrap": {
