@@ -66,6 +66,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function send($datas, $by)
     {
         $timesheets = [];
+
+        /** @var NotificationService $notificationService */
+        $notificationService = $this->getServiceLocator()->get('NotificationService');
+        $activityNotification = [];
+
         foreach ($datas as $data) {
             if ($data['id']) {
                 /** @var TimeSheet $timeSheet */
@@ -87,6 +92,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     ->setValidatedAdminBy(null)
                     ->setValidatedAdminById(null)
                 ;
+                $activityNotification[$timeSheet->getActivity()->getId()] = $timeSheet->getActivity();
+
                 $this->getEntityManager()->flush($timeSheet);
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
@@ -94,6 +101,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
+        }
+
+        try {
+            $notificationService->notifyActivitiesTimesheetSend($activityNotification);
+        } catch ( \Exception $e ){
+            //$this->getServiceLocator()->get('Logger')->error($e->getMessage() ." - " . $e->getTraceAsString());
         }
         return $timesheets;
     }

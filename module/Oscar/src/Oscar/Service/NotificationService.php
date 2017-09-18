@@ -7,7 +7,9 @@
 
 namespace Oscar\Service;
 
+use Oscar\Entity\Activity;
 use Oscar\Entity\Notification;
+use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -45,13 +47,28 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         return $result;
     }
 
+
+    public function notifyActivitiesTimesheetSend( $activities ){
+        /** @var PersonService $personsService */
+        $personsService = $this->getServiceLocator()->get('PersonService');
+
+        /** @var Activity $activity */
+        foreach ($activities as $activity) {
+            $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+            $ids = [];
+            foreach ($persons as $person ){
+                $ids[] = $person->getId();
+            }
+            $this->notification(sprintf("Déclaration en attente de validation dans l'activité %s.", $activity->log()), $ids, 'Activity:timesheetwait:'. $activity->getId());
+        }
+    }
+
     public function notification( $message, $personsId, $key=null ){
         if( $key === null ){
             $key = uniqid();
         }
         $push = [];
         foreach ( $personsId as $personid ){
-            echo "Envoi à $personid\n";
             $hash = md5($personid.'/'.$key);
             $date = new \DateTime();
             $notification = new Notification();

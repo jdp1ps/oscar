@@ -3,7 +3,11 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
+use Oscar\Entity\Activity;
+use Oscar\Entity\Authentification;
 use Oscar\Entity\Person;
+use Oscar\Entity\Privilege;
+use Oscar\Entity\PrivilegeRepository;
 use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\UnicaenDoctrinePaginator;
@@ -21,6 +25,99 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+    /**
+     * Charge en profondeur la liste des personnes disposant du privilége sur une
+     * activité. (Beaucoup de requêtes, attention ux perfs)
+     *
+     * @param $privilegeFullCode
+     * @param $activity
+     */
+    public function getAllPersonsWithPrivilegeInActivity( $privilegeFullCode, Activity $activity )
+    {
+        // Résultat
+        $persons = [];
+
+        /** @var PrivilegeRepository $privilegeRepository */
+        $privilegeRepository = $this->getEntityManager()->getRepository(Privilege::class);
+
+        try {
+            // 1. Récupération des rôles associès au privilège
+            $privilege = $privilegeRepository->getPrivilegeByCode($privilegeFullCode);
+
+            $rolesIds = []; // rôles
+            $ldapFilters = []; // filtre LDAP
+
+            foreach ($privilege->getRole() as $role){
+                $rolesIds[] = $role->getRoleId();
+                if( $role->getLdapFilter() ){
+                    $ldapFilters[] = preg_replace('/\(memberOf=(.*)\)/', '$1', $role->getLdapFilter());
+                }
+            }
+
+            // Selection des personnes qui ont le filtre LDAP (Niveau applicatif)
+            if( $ldapFilters ){
+                $clause = [];
+                foreach ($ldapFilters as $f ){
+                    $clause[] = "p.ldapMemberOf LIKE '%$f%'";
+                }
+
+                $personsLdap = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+                    ->where(implode(' OR ', $clause))
+                    ->getQuery()
+                    ->getResult();
+
+                foreach ($personsLdap as $p ){
+                    $persons[$p->getId()] = $p;
+                }
+            }
+
+            // Selection des personnes via l'authentification (Affectation en dur, niveau applicatif)
+            $authentifications = $this->getEntityManager()->createQueryBuilder()
+                ->select('a, r')
+                ->from(Authentification::class, 'a')
+                ->innerJoin('a.roles', 'r')
+                ->getQuery()
+                ->getResult();
+
+            foreach ($authentifications as $auth) {
+                if( $auth->hasRolesIds($rolesIds) ){
+                    try {
+                        $person = $this->getEntityManager()->getRepository(Person::class)->findOneBy(['ladapLogin' => $auth->getUsername()]);
+                        if( $person ){
+                            $persons[$person->getId()] = $person;
+                        }
+                    } catch (\Exception $e ){
+                        echo "Error : " . $e->getMessage() . "<br>\n";
+                    }
+                }
+            }
+
+            // Selection des personnes associées via le Projet/Activité
+            foreach ($activity->getPersonsRoled($rolesIds) as $p ){
+                $persons[$p->getId()] = $p->getPerson(); ;
+            }
+
+            // Selection des personnes via l'oganisation assocociée au Projet/Activité
+            /** @var Organization $organization */
+            foreach ($activity->getOrganizationsDeep() as $organization ){
+                /** @var OrganizationPerson $personOrganization */
+                if( $organization->isPrincipal() ) {
+                    foreach ($organization->getOrganization()->getPersons() as $personOrganization) {
+                        if (in_array($personOrganization->getRole(), $rolesIds)) {
+                            $persons[$personOrganization->getPerson()->getId()] = $personOrganization->getPerson();
+                        }
+                    }
+                }
+            }
+
+            return $persons;
+
+        } catch ( \Exception $e ){
+            throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
+            die($e->getMessage());
+        }
+    }
 
     public function search($what){
         /** @var ProjectGrantService $activityService */
