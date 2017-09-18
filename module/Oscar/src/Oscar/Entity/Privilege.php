@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Entity
  * @ORM\Table(name="privilege")
+ * @ORM\Entity(repositoryClass="Oscar\Entity\PrivilegeRepository")
  */
 class Privilege implements ResourceInterface
 {

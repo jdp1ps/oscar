@@ -34,6 +34,13 @@ notification:
 
     child_routes:
         # Déclarations d'une personne pour une activité
+        test:
+            type: segment
+            options:
+                route: /test
+                defaults:
+                    action: test
+        # Déclarations d'une personne pour une activité
         person:
             type: segment
             options:

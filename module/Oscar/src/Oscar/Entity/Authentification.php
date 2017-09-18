@@ -325,6 +325,16 @@ class Authentification implements UserInterface, ProviderInterface
         return $this;
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    public function hasRolesIds( array $rolesIds ){
+        foreach ($this->getRoles() as $role ){
+            if( in_array($role->getRoleId(), $rolesIds) ){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 
 

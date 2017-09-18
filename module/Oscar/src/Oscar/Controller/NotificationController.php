@@ -7,7 +7,16 @@
 
 namespace Oscar\Controller;
 
+use Doctrine\ORM\NoResultException;
+use Oscar\Entity\Activity;
+use Oscar\Entity\Authentification;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\Person;
+use Oscar\Entity\Privilege;
+use Oscar\Exception\OscarException;
 use Oscar\Form\NotificationForm;
+use Oscar\Provider\Privileges;
 use Oscar\Service\NotificationService;
 use Zend\View\Model\JsonModel;
 
@@ -19,15 +28,18 @@ class NotificationController extends AbstractOscarController
 {
     public function testAction()
     {
-        $personsId = [13059, 13060];
+        $idActivity = 10090;
 
-        /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get('NotificationService');
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
+        echo "<h1>$activity</h1>\n";
 
+        $persons = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+        foreach( $persons as $id=>$p ){
+            echo sprintf('%s - [%s] %s <br>', $id, $p->getId(), $p);
+        }
 
-        $notificationService->notification("Test de notification", $personsId);
-
-        die('Fini');
+        die('Test');
     }
     public function indexAction()
     {
