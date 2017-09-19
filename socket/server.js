@@ -19,6 +19,7 @@ app.get('/', function(req, res){
 
 app.post(config.socket.push_path, function(req, res){
     var ids = req.body.ids.split(',');
+    console.log('PUSH with', ids);
     var client = new pg.Client({
         user: config.bdd.user,
         host: config.bdd.host,

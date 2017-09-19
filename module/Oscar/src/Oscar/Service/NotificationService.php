@@ -59,21 +59,27 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             foreach ($persons as $person ){
                 $ids[] = $person->getId();
             }
-            $this->notification(sprintf("Déclaration en attente de validation dans l'activité %s.", $activity->log()), $ids, 'Activity:timesheetwait:'. $activity->getId());
+            $this->notification(sprintf("Déclaration en attente de validation dans l'activité %s.", $activity->log()),
+                $ids,
+                'Activity',
+                $activity->getId());
         }
     }
 
-    public function notification( $message, $personsId, $key=null ){
-        if( $key === null ){
-            $key = uniqid();
+    public function notification( $message, $personsId, $context='Application', $contextId=-1, $key=null)
+    {
+        if ($key === null) {
+            $key = $context.':'.$contextId.'-'.uniqid();
         }
         $push = [];
-        foreach ( $personsId as $personid ){
-            $hash = md5($personid.'/'.$key);
+        foreach ($personsId as $personid) {
+            $hash = md5($personid . '/' . $key);
             $date = new \DateTime();
             $notification = new Notification();
             $notification->setContext('Application')
-                ->setContextId(-1)
+                ->setHash($hash)
+                ->setContext($context)
+                ->setContextId($contextId)
                 ->setDatas([])
                 ->setMessage($message)
                 ->setDateEffective($date)
@@ -86,11 +92,19 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             $push[] = $notification->getId();
         }
 
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, "http://localhost:3000/push");
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, "ids=".implode(',', $push));
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_exec($curl);
+        // Push vers le socket si besoin
+        $configSocket = $this->getServiceLocator()->get('Config')['oscar']['socket'];
+        if ($configSocket)
+        {
+            // todo Faire un truc plus propre pour générer l'URL
+            $url = "http://". $_SERVER['SERVER_NAME'].":". $configSocket['port'].$configSocket['push_path'];
+            $this->getServiceLocator()->get('Logger')->info("PUSH " . $url);
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, "ids=" . implode(',', $push));
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_exec($curl);
+        }
     }
 }

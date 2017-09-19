@@ -320,29 +320,13 @@ $this->headScript();
 		});
 	})();
 	</script>
+
         <?php if( $this->grant()->dbUser() ): ?>
         <div id="notifications">
 
         </div>
         <script>
             var socket;
-            /*
-            require(['vue', 'moment', 'jquery'], function(Vue, moment, $){
-
-                var notifications = [], socket, v;
-
-
-
-                v = new Vue({
-
-                    el: "#notifications-area",
-
-
-                });
-
-                v.loadNotifications();
-            });
-                */
             require(['notifications'], (notifications) => {
                 var n = new notifications.default({
                     el: '#notifications-area',
@@ -351,9 +335,9 @@ $this->headScript();
                     },
                 });
                 n.fetch();
-
+                <?php if( $this->grant()->hasSocket() ): ?>
                 require(['io'], (io) => {
-                    socket = io('127.0.0.1:3000', {
+                    socket = io('<?= $this->grant()->getSocketUrl() ?>', {
                         query: {
                             token: '<?= $this->grant()->dbUser()->getSecret() ?>'
                         }
@@ -370,6 +354,7 @@ $this->headScript();
                         console.log('disconnect');
                     });
                 });
+                <?php endif; ?>
             });
         </script>
         <?php endif; ?>

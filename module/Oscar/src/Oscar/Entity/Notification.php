@@ -55,6 +55,11 @@ class Notification
     /**
      * @ORM\Column(type="string")
      */
+    private $hash;
+
+    /**
+     * @ORM\Column(type="string")
+     */
     private $context;
 
     /**
@@ -102,6 +107,24 @@ class Notification
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHash()
+    {
+        return $this->hash;
+    }
+
+    /**
+     * @param mixed $hash
+     */
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+
+        return $this;
     }
 
     /**
