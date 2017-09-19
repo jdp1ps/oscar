@@ -2,7 +2,8 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var pg = require('pg');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var config = require('./config.json');
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -16,13 +17,13 @@ app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
 
-app.post('/push', function(req, res){
+app.post(config.socket.push_path, function(req, res){
     var ids = req.body.ids.split(',');
     var client = new pg.Client({
-        user: 'oscar_empty',
-        host: 'localhost',
-        database: 'oscar_empty',
-        password: 'azerty'
+        user: config.bdd.user,
+        host: config.bdd.host,
+        database: config.bdd.base,
+        password: config.bdd.pass
     });
     client.connect();
     client.query('SELECT * FROM notification WHERE id IN(' +ids.join(',') + ')', function(err, result){
@@ -109,6 +110,6 @@ io.on('connection', function(socket){
     }
 });
 
-http.listen(3000, function(){
+http.listen(config.socket.port, function(){
     console.log('listening on *:3000');
 });
