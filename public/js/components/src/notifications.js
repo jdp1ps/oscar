@@ -30,9 +30,10 @@ var notifications = Vue.extend({
                             </header>
                             <article v-for="notification in orderedNotifications" :class="{ 'read': notification.read, 'fresh' : notification.fresh }" class="notification">
                                 <h4>
+                                    <i :class="'icon-'+notification.context"></i>
                                     <time datetime="">{{ notification.dateEffective | moment }}</time>
                                     <a href="#" @click="deleteNotification([notification])"><i class="icon-trash-empty"></i></a>
-                                </h4>
+                                </h4>                              
                                 <p>{{ notification.message }}</p>
                             </article>
                         </section>
