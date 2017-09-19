@@ -7,6 +7,7 @@
 
 namespace Oscar\Service;
 
+use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
 use Oscar\Entity\Notification;
 use Oscar\Provider\Privileges;
@@ -69,28 +70,40 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     public function notification( $message, $personsId, $context='Application', $contextId=-1, $key=null)
     {
         if ($key === null) {
-            $key = $context.':'.$contextId.'-'.uniqid();
+            $key = $context.':'.$contextId;
         }
         $push = [];
         foreach ($personsId as $personid) {
             $hash = md5($personid . '/' . $key);
-            $date = new \DateTime();
-            $notification = new Notification();
-            $notification->setContext('Application')
-                ->setHash($hash)
-                ->setContext($context)
-                ->setContextId($contextId)
-                ->setDatas([])
-                ->setMessage($message)
-                ->setDateEffective($date)
-                ->setLevel(Notification::LEVEL_INFO)
-                ->setRead(false)
-                ->setRecipientId($personid);
-            $this->getEntityManager()->persist($notification);
 
-            $this->getEntityManager()->flush($notification);
-            $push[] = $notification->getId();
+            try {
+                // On commence par regarder si une notification n'existe pas déjà
+                // pour cette person dans le context (basé sur le HASH)
+                $exist = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
+                if( !$exist ){
+                    $date = new \DateTime();
+                    $notification = new Notification();
+                    $notification->setContext('Application')
+                        ->setHash($hash)
+                        ->setContext($context)
+                        ->setContextId($contextId)
+                        ->setDatas([])
+                        ->setMessage($message)
+                        ->setDateEffective($date)
+                        ->setLevel(Notification::LEVEL_INFO)
+                        ->setRead(false)
+                        ->setRecipientId($personid);
+                    $this->getEntityManager()->persist($notification);
+
+                    $push[] = $notification->getId();
+                } else {
+                    $notification->setDateEffective(new \DateTime());
+                }
+            } catch ( \Exception $e ){
+
+            }
         }
+        $this->getEntityManager()->flush();
 
         // Push vers le socket si besoin
         $configSocket = $this->getServiceLocator()->get('Config')['oscar']['socket'];
