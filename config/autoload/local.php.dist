@@ -1,7 +1,8 @@
 <?php
 $socket = false;
 if( file_exists($pathSocketConfig = __DIR__.'/../../socket/config.json') ){
-    $socket = json_decode(file_get_contents($pathSocketConfig), true);
+    $socketConf = json_decode(file_get_contents($pathSocketConfig), true);
+    $socket = $socketConf['socket'];
 }
 
 return array(
@@ -13,7 +14,7 @@ return array(
     // Oscar
     'oscar' => [
         // Oscar Live
-        'socket' => $socket['socket'],
+        'socket' => $socket,
 
         ////////////////////////////////////////////////////////////////////////
         //
