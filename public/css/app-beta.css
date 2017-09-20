@@ -7510,6 +7510,18 @@ span[class*="status-400"] .icon:before {
 [class*="icon-tutelle-de-gestion"]:before {
   content: '\e851'; }
 
+[class*="icon-Activity"]:before {
+  content: '\e880'; }
+
+[class*="icon-Application"]:before {
+  content: '\e87d'; }
+
+[class*="icon-Person"]:before {
+  content: '\e89a'; }
+
+[class*="icon-Organization"]:before {
+  content: '\e876'; }
+
 /*
 span[class*="status-102"] .icon:before{ content: '\e85e '}
 span[class*="status-4"] .icon:before{ content: '\e865 '}
@@ -8360,6 +8372,10 @@ time.date-missing {
         background: white; }
         #notifications-area .list article:hover h4 a {
           color: #333; }
+      #notifications-area .list article a {
+        color: #790629; }
+        #notifications-area .list article a:hover {
+          background: transparent; }
 
 @keyframes fresh {
   from {

@@ -60,7 +60,7 @@ define(['exports', 'vue', 'vue-resource', 'mm'], function (exports, _vue, _vueRe
                 if (match = reg.exec(message)) {
                     return message.replace(reg, "$1" + '<a href="' + this.urlActivityShow + '$2">$3</a> $4');
                 }
-                return 'URLIZE:' + message;
+                return message;
             },
             deleteNotification: function deleteNotification(notifs) {
                 var _this = this;

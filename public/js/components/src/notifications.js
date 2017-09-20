@@ -72,7 +72,7 @@ var notifications = Vue.extend({
             if( match = reg.exec(message) ){
                 return message.replace(reg, "$1"+'<a href="' + this.urlActivityShow +'$2">$3</a> $4');
             }
-            return 'URLIZE:' + message;
+            return message;
         },
         deleteNotification(notifs) {
             this.loading = true;
