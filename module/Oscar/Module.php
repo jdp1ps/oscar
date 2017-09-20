@@ -128,7 +128,11 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
         $dbUser = null;
         if( $e instanceof AdapterChainEvent ){
-            $dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
+		if( is_string($e->getIdentity()) ){
+			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $e->getIdentity()]);
+		} else {
+			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
+		}
         }
         elseif ($e instanceof UserAuthenticatedEvent ) {
             $dbUser = $e->getDbUser();
