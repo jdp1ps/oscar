@@ -1,4 +1,9 @@
 <?php
+$socket = false;
+if( file_exists($pathSocketConfig = __DIR__.'/../../socket/config.json') ){
+    $socket = json_decode(file_get_contents($pathSocketConfig), true);
+}
+
 return array(
     'view_manager' => array(
         'display_not_found_reason' => getenv('APPLICATION_ENV') == 'development',
@@ -7,6 +12,9 @@ return array(
 
     // Oscar
     'oscar' => [
+        // Oscar Live
+        'socket' => $socket['socket'],
+
         ////////////////////////////////////////////////////////////////////////
         //
         // PATHS
