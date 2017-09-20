@@ -11,6 +11,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
+use Zend\Form\Element\Time;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -37,9 +38,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $activities = $this->getEntityManager()->createQueryBuilder()->select('a')
             ->from(Activity::class, 'a')
             ->innerJoin('a.workPackages', 'w')
-            ->innerJoin('w.timesheets', 't')
-            ;
-
+            ->innerJoin('w.timesheets', 't');
         return $activities->getQuery()->getResult();
     }
 
@@ -49,11 +48,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->where('t.person = :person AND t.status = :status')
              ->setParameter('person', $person)
              ->setParameter('status', TimeSheet::STATUS_CONFLICT);
-            ;
-
         return $timesheets->getQuery()->getResult();
     }
-
 
 
     /**
@@ -368,12 +364,50 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $timesheets;
     }
 
+
+    private $notificationsDatas;
+    protected function stackNotification( Activity $activity, array $personsIds )
+    {
+        if( $this->notificationsDatas === null ){
+            $this->notificationsDatas = [];
+        }
+        $key = 'Activity:' . $activity->getId();
+        if( !array_key_exists($key, $this->notificationsDatas) ){
+            $this->notificationsDatas[$key] = [
+                'persons' => $personsIds,
+                'activity' => $activity
+            ];
+        } else {
+            $this->notificationsDatas[$key]['persons'] = array_unique(array_merge($this->notificationsDatas[$key]['persons'], $personsIds));
+        }
+    }
+    protected function getStackedNotifications()
+    {
+        return $this->notificationsDatas;
+    }
+
+    /**
+     * @return NotificationService
+     */
+    protected function getServiceNotification(){
+        return $this->getServiceLocator()->get("NotificationService");
+    }
+
+    protected function sendStackedNotifications( $message ){
+        if( $this->notificationsDatas ){
+            foreach ($this->notificationsDatas as $activityKey=>$datas) {
+                $this->getServiceNotification()->notification(sprintf($message, $datas['activity']->log()), $datas['persons']);
+            }
+        }
+    }
+
     public function validateSci($datas, $by)
     {
         $timesheets = [];
 
         $currentPersonName = "Oscar Bot";
         $currentPersonId = -1;
+
         if( $by ){
             $currentPersonName = (string)$by;
             $currentPersonId = $by->getId();
@@ -401,10 +435,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
 
+                $this->stackNotification($timeSheet->getActivity(), [$timeSheet->getPerson()->getId()]);
+
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
+
+        $this->sendStackedNotifications("Des déclarations ont été validés scientifiquement dans l'activité %s");
+
+
         return $timesheets;
     }
 
