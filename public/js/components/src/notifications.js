@@ -34,7 +34,7 @@ var notifications = Vue.extend({
                                     <time datetime="">{{ notification.dateEffective | moment }}</time>
                                     <a href="#" @click="deleteNotification([notification])"><i class="icon-trash-empty"></i></a>
                                 </h4>                              
-                                <p>{{ notification.message }}</p>
+                                <p v-html="messageHTML(notification.message)"></p>
                             </article>
                         </section>
                     </p>`,
@@ -43,7 +43,8 @@ var notifications = Vue.extend({
         return {
             open: false,
             loading: true,
-            notifications: []
+            notifications: [],
+            urlActivityShow: "/activites-de-recherche/fiche-detaillee/"
         }
     },
 
@@ -55,6 +56,7 @@ var notifications = Vue.extend({
     },
 
     computed: {
+
         orderedNotifications(){
             return this.notifications.sort((n1, n2) => {
                 return n1.dateEffective > n2.dateEffective ? -1 :
@@ -65,6 +67,13 @@ var notifications = Vue.extend({
     },
 
     methods: {
+        messageHTML(message){
+            var reg = /(.*)\[Activity:([0-9]*):(.*)\](.*)/, match;
+            if( match = reg.exec(message) ){
+                return message.replace(reg, "$1"+'<a href="' + this.urlActivityShow +'$2">$3</a> $4');
+            }
+            return 'URLIZE:' + message;
+        },
         deleteNotification(notifs) {
             this.loading = true;
             var ids = [];
@@ -86,6 +95,8 @@ var notifications = Vue.extend({
             this.$http.get(this.$http.$options.root).then(
                 (res) => {
                     this.notifications = res.body.notifications;
+                    if( this.notifications.length == 0 )
+                        this.open = false;
                 },
                 (err) => {
 

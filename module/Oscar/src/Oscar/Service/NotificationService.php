@@ -67,6 +67,10 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
     }
 
+    public function notifyActivitiesTimesheetReject( $activities ){
+
+    }
+
     public function notification( $message, $personsId, $context='Application', $contextId=-1, $key=null)
     {
         if ($key === null) {
