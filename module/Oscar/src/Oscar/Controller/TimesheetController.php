@@ -348,6 +348,15 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    /**
+     * @param $action
+     * @param $events
+     * @param TimesheetService $timeSheetService
+     * @param $activity
+     * @param $person
+     * @return Response
+     * @throws OscarException
+     */
     protected function processAction( $action, $events, $timeSheetService, $activity, $person ){
         if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
             return $this->getResponseBadRequest('Opération inconnue !');

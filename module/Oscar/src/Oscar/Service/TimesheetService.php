@@ -350,30 +350,37 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
 
+                $this->stackNotification(
+                    sprintf("Des déclarations ont été rejetées scientifiquement dans l'activité %s", $timeSheet->getActivity()->log()),
+                    $timeSheet->getActivity(),
+                    'rejectsci',
+                    [$timeSheet->getPerson()->getId()]
+                );
+
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
 
-        try {
-//            $this->getServiceLocator()->get('NotificationService')->notifyActivitiesTimesheetValidationSci($activityNotification);
-        } catch ( \Exception $e ){
-            //$this->getServiceLocator()->get('Logger')->error($e->getMessage() ." - " . $e->getTraceAsString());
-        }
+        $this->sendStackedNotifications();
+
 
         return $timesheets;
     }
 
 
     private $notificationsDatas;
-    protected function stackNotification( Activity $activity, array $personsIds )
+
+    protected function stackNotification( $message, Activity $activity, $action, array $personsIds )
     {
         if( $this->notificationsDatas === null ){
             $this->notificationsDatas = [];
         }
-        $key = 'Activity:' . $activity->getId();
+        $key = 'Activity:' . $action . ':' . $activity->getId();
         if( !array_key_exists($key, $this->notificationsDatas) ){
             $this->notificationsDatas[$key] = [
+                'message' => $message,
+                'action' => $action,
                 'persons' => $personsIds,
                 'activity' => $activity
             ];
@@ -381,6 +388,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $this->notificationsDatas[$key]['persons'] = array_unique(array_merge($this->notificationsDatas[$key]['persons'], $personsIds));
         }
     }
+
     protected function getStackedNotifications()
     {
         return $this->notificationsDatas;
@@ -393,10 +401,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get("NotificationService");
     }
 
-    protected function sendStackedNotifications( $message ){
+    protected function sendStackedNotifications(){
         if( $this->notificationsDatas ){
             foreach ($this->notificationsDatas as $activityKey=>$datas) {
-                $this->getServiceNotification()->notification(sprintf($message, $datas['activity']->log()), $datas['persons']);
+                $this->getServiceNotification()->notification(
+                    sprintf($datas['message'], $datas['activity']->log()),
+                    $datas['persons'],
+                    'Activity',
+                    $datas['activity']->getId(),
+                    'Activity:'.$datas['action'].':'.$datas['activity']->getId()
+                );
             }
         }
     }
@@ -435,14 +449,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
 
-                $this->stackNotification($timeSheet->getActivity(), [$timeSheet->getPerson()->getId()]);
+                $this->stackNotification(
+                    sprintf("Des déclarations ont été validés scientifiquement dans l'activité %s", $timeSheet->getActivity()->log()),
+                    $timeSheet->getActivity(),
+                    'validatesci',
+                    [$timeSheet->getPerson()->getId()]
+                );
 
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
 
-        $this->sendStackedNotifications("Des déclarations ont été validés scientifiquement dans l'activité %s");
+        $this->sendStackedNotifications();
 
 
         return $timesheets;
@@ -476,19 +495,27 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     ->setRejectedAdminAt(new \DateTime())
                     ->setRejectedAdminBy($currentPersonName)
                     ->setRejectedAdminComment($data['rejectedAdminComment'])
-                    ->setRejectedAdminById($currentPersonId)
-
-                    ;
+                    ->setRejectedAdminById($currentPersonId);
 
                 $this->getEntityManager()->flush($timeSheet);
                 $json = $timeSheet->toJson();
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
 
+                $this->stackNotification(
+                    sprintf("Des déclarations ont été rejetées administrativement dans l'activité %s", $timeSheet->getActivity()->log()),
+                    $timeSheet->getActivity(),
+                    'rejectadmin',
+                    [$timeSheet->getPerson()->getId()]
+                );
+
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
+
+        $this->sendStackedNotifications();
+
         return $timesheets;
     }
 
@@ -530,10 +557,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
                 $timesheets[] = $json;
 
+                $this->stackNotification(
+                    sprintf("Des déclarations ont été validées administrativement dans l'activité %s", $timeSheet->getActivity()->log()),
+                    $timeSheet->getActivity(),
+                    'validateadmin',
+                    [$timeSheet->getPerson()->getId()]
+                );
+
             } else {
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
+        $this->sendStackedNotifications();
         return $timesheets;
     }
 
