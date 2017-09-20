@@ -494,69 +494,6 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
         })
     </script>
     <?php endif; ?>
-
-    <?php /*<section id="workpackage">
-        <h2><i class="icon-archive"></i> Lot de travail</h2>
-        <section class="workpackages">
-            <?php foreach( $entity->getWorkPackages() as $wp ): ?>
-            <article class="workpackage-item">
-                <h3>
-                    <span class="code"><?= $wp->getCode() ?></span>
-                    <span class="label"><?= $wp->getLabel() ?></span>
-                </h3>
-                <p><?= $wp->getDescription() ?></p>
-                <nav>
-                    <?php if( $manage ): ?>
-                        <span class="dropdown">
-                            <a class="dropdown-toggle"
-                                    type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="true">
-                                Gérer <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                                <li>
-                                    <a href="<?= $this->url('workpackage/edit', ['id'=>$wp->getId()]) ?>" class="">
-                                        <i class="icon-edit"></i>&nbsp;Modifier
-                                    </a>
-                                </li>
-                                <li>
-                                    <a data-confirm="Supprimer ce lot de travail ?" data-href="<?= $this->url('workpackage/delete', ['id'=>$wp->getId()]) ?>" class="">
-                                        <i class="icon-trash"></i>&nbsp;Supprimer
-                                    </a>
-                                </li>
-                            </ul>
-                        </span>
-                    <?php endif; ?>
-                    <a href="" class="disabled">
-                        <i class="icon-clock"></i>&nbsp;Déclarer mes heures
-                    </a>
-                </nav>
-            </article>
-            <?php endforeach; ?>
-        </section>
-
-        <nav class="btn-bar">
-            <?php if( $manage ): ?>
-            <a href="<?= $this->url('workpackage/new', ['idactivity' => $entity->getId() ]) ?>" class="btn btn-primary">Nouveau lot</a>
-            <?php endif; ?>
-        <?php if( DEBUG_OSCAR && $this->grant()->getCurrentPerson() ): ?>
-            <nav>
-                <a href="<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>"  class="btn btn-primary">
-                    Déclarer mes heures pour cette activités
-                </a>
-
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_VALIDATE,['idactivity' => $entity->getId()])): ?>
-
-                    <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>"
-                       class="btn btn-primary">
-                        Valider les déclarations
-                    </a>
-                <?php endif; ?>
-            </nav>
-        <?php endif; ?>
-    </section>
- <?php */ ?>
     <?php endif; ?>
 
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ): ?>

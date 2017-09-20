@@ -26,13 +26,14 @@ define(['exports', 'vue', 'vue-resource', 'mm'], function (exports, _vue, _vueRe
     _vue2.default.http.options.emulateHTTP = true;
 
     var notifications = _vue2.default.extend({
-        template: ' <p class="navbar-text navbar-right" id="notifications-area" >\n                        <a class="navbar-link" @click="open = !open">\n                            <i class="icon-bell"></i> Notifications \n                            <span class="notifications-total" :class="notifications.length ? \'unread\' : \'\'">{{ notifications.length }}</span>\n                        </a>\n                        <section class="list" v-show="open">\n                            <header class="control">\n                                <h3>\n                                    <span class="intitule">\n                                        <i class="icon-bell"></i>\n                                        {{ notifications.length }} notifications\n                                        <i class="animate-spin icon-asterisk" v-show="loading"></i>\n                                    </span>\n                                    <a href="#" title="Tous effacer" @click="deleteNotification(notifications)"><i class="icon-trash-empty"></i></a>\n                                    <a href="#" title="Tous marquer comme lu"><i class="icon-ok-circled"></i></a>\n                                </h3>\n                            </header>\n                            <article v-for="notification in orderedNotifications" :class="{ \'read\': notification.read, \'fresh\' : notification.fresh }" class="notification">\n                                <h4>\n                                    <i :class="\'icon-\'+notification.context"></i>\n                                    <time datetime="">{{ notification.dateEffective | moment }}</time>\n                                    <a href="#" @click="deleteNotification([notification])"><i class="icon-trash-empty"></i></a>\n                                </h4>                              \n                                <p>{{ notification.message }}</p>\n                            </article>\n                        </section>\n                    </p>',
+        template: ' <p class="navbar-text navbar-right" id="notifications-area" >\n                        <a class="navbar-link" @click="open = !open">\n                            <i class="icon-bell"></i> Notifications \n                            <span class="notifications-total" :class="notifications.length ? \'unread\' : \'\'">{{ notifications.length }}</span>\n                        </a>\n                        <section class="list" v-show="open">\n                            <header class="control">\n                                <h3>\n                                    <span class="intitule">\n                                        <i class="icon-bell"></i>\n                                        {{ notifications.length }} notifications\n                                        <i class="animate-spin icon-asterisk" v-show="loading"></i>\n                                    </span>\n                                    <a href="#" title="Tous effacer" @click="deleteNotification(notifications)"><i class="icon-trash-empty"></i></a>\n                                    <a href="#" title="Tous marquer comme lu"><i class="icon-ok-circled"></i></a>\n                                </h3>\n                            </header>\n                            <article v-for="notification in orderedNotifications" :class="{ \'read\': notification.read, \'fresh\' : notification.fresh }" class="notification">\n                                <h4>\n                                    <i :class="\'icon-\'+notification.context"></i>\n                                    <time datetime="">{{ notification.dateEffective | moment }}</time>\n                                    <a href="#" @click="deleteNotification([notification])"><i class="icon-trash-empty"></i></a>\n                                </h4>                              \n                                <p v-html="messageHTML(notification.message)"></p>\n                            </article>\n                        </section>\n                    </p>',
 
         data: function data() {
             return {
                 open: false,
                 loading: true,
-                notifications: []
+                notifications: [],
+                urlActivityShow: "/activites-de-recherche/fiche-detaillee/"
             };
         },
 
@@ -53,6 +54,14 @@ define(['exports', 'vue', 'vue-resource', 'mm'], function (exports, _vue, _vueRe
         },
 
         methods: {
+            messageHTML: function messageHTML(message) {
+                var reg = /(.*)\[Activity:([0-9]*):(.*)\](.*)/,
+                    match;
+                if (match = reg.exec(message)) {
+                    return message.replace(reg, "$1" + '<a href="' + this.urlActivityShow + '$2">$3</a> $4');
+                }
+                return 'URLIZE:' + message;
+            },
             deleteNotification: function deleteNotification(notifs) {
                 var _this = this;
 
@@ -76,6 +85,7 @@ define(['exports', 'vue', 'vue-resource', 'mm'], function (exports, _vue, _vueRe
                 this.loading = true;
                 this.$http.get(this.$http.$options.root).then(function (res) {
                     _this2.notifications = res.body.notifications;
+                    if (_this2.notifications.length == 0) _this2.open = false;
                 }, function (err) {}).then(function () {
                     return _this2.loading = false;
                 });

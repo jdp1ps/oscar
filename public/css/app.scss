@@ -3008,6 +3008,12 @@ $oscar-line: dotted thin $colorGreyLight;
           color: #333;
         }
       }
+      a {
+        color: $brand-primary;
+        &:hover {
+          background: transparent;
+        }
+      }
     }
   }
 }

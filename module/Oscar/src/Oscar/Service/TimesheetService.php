@@ -358,6 +358,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 return $this->getResponseBadRequest("DOBEFORE");
             }
         }
+
+        try {
+//            $this->getServiceLocator()->get('NotificationService')->notifyActivitiesTimesheetValidationSci($activityNotification);
+        } catch ( \Exception $e ){
+            //$this->getServiceLocator()->get('Logger')->error($e->getMessage() ." - " . $e->getTraceAsString());
+        }
+
         return $timesheets;
     }
 

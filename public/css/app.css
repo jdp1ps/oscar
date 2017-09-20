@@ -8372,6 +8372,10 @@ time.date-missing {
         background: white; }
         #notifications-area .list article:hover h4 a {
           color: #333; }
+      #notifications-area .list article a {
+        color: #455790; }
+        #notifications-area .list article a:hover {
+          background: transparent; }
 
 @keyframes fresh {
   from {
