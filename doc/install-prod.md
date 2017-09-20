@@ -94,7 +94,6 @@ php composer.phar update
 
 ## Configuration d'oscar
 
-
 ### Base de donnée
 
 Oscar est conçu pour fonctionner avec une base de données *Postgresql*.
@@ -149,7 +148,7 @@ Exemple de configuration :
 
 ```php
 <?php
-/config/autoload/local.php
+//config/autoload/local.php
 return array(
     // ...
     // Accès BDD
@@ -169,7 +168,6 @@ return array(
     ),
 );
 ```
-
 ### Configurer le serveur web (Apache)
 
 Activer les modules Apache si besoin :
@@ -245,8 +243,6 @@ S'assurer que les dossiers :
 
 Sont bien accessibles en écriture.
 
-
-
 ### Unicaen App (ldap & mail)
 
 La configuration de **UnicaenApp** et **UnicaenAuth** (surcouches utilisées dans
@@ -255,13 +251,11 @@ Oscar) on leurs fichiers de configuration respectifs dans le dossier `/config/au
  - Pour UnicaenApp, `config/autoload/unicaen-app.local.php`
  - Pour UnicaenAuth, `config/autoload/unicaen-auth.local.php`
 
-
 Des fichiers d'exemple sont disponibles avec l'extension `.dist`.
 
 **UnicaenApp** :
  - Configuration de l'authentification avec LDAP
  - Paramètre pour le *Mailer*
-
 
 ```bash
 cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
@@ -325,3 +319,37 @@ php public/index.php oscar auth:promote admin Administrateur
 ```
 
 Utiliser ensuite la navigateur pour vous rendre sur oscar et utiliser l'identifiant **admin** avec la mot de passe **password** pour vous connecter en tant qu'administrateur.
+
+  
+**UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*. 
+Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames` 
+permet de s'identifier à la place d'un utilisateur.
+
+## Oscar Live (Oscar 2.2+)
+
+**Fonctionnalité expérimentale** 
+
+Dans le cadre de l'utilisation des *Notification*, Oscar propose un système basé sur **NodeJS** pour actualiser les notifications en temps réél.
+
+Par défaut, cette fonctionnalité est désactivée.
+
+Pour l'activer, il faut commence par configurer le serveur **NodeJS** en copiant la configuration par défaut : 
+
+```bash
+cp socket/config.json.dist socket/config.json
+vim !$
+```
+
+Remplissez les informations de connection à la base de donnée.
+
+Vous pouvez lancer le serveur node avec la commande : 
+
+```bash
+cd socket/
+nodejs server.js
+```
+
+Info : Le serveur doit être lancé dans un screen.
+
+Si le fichier *socket/config.json* est présent, **OscarLive** devrait être automatiquement disponible (voir clef socket dans le fichier *config/autoload/local.php*).
+

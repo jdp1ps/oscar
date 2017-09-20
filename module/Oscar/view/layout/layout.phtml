@@ -7,9 +7,7 @@ Offsets de 1 à 10 pour la lib Unicaen.
 Pour les applications de 11 à l'infini...
  */
 
-$this->headScript()
-
-        ;
+$this->headScript();
 ?>
 
 <html lang="fr">
@@ -27,6 +25,7 @@ $this->headScript()
         <link rel="icon" type="image/png" href="<?= $this->basePath() ?>/favicon.png" />
         <link rel="stylesheet" href="<?= $this->basePath() . '/css/unicaen.css' ?>">
         <link rel="stylesheet" href="<?= $this->basePath() . '/css/fontello/css/fontello.css' ?>">
+        <link rel="stylesheet" href="<?= $this->basePath() . '/css/fontello/css/animation.css' ?>">
         <?php /*if (getenv('APPLICATION_ENV') && (getenv('APPLICATION_ENV') != 'production' && getenv('APPLICATION_ENV') != 'development') ): ?>
             <link rel="stylesheet"
                   href="<?= $this->basePath() . '/css/app-beta.css' ?>">
@@ -98,36 +97,32 @@ $this->headScript()
                 <div class="navbar-collapse bs-navbar-collapse collapse">
 
                     <ul class="nav navbar-nav">
-                        <?php if( $this->grant()->connected() ): ?>
-                            <?php if( $this->grant()->isBoss() ): ?>
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle"
-                                       data-toggle="dropdown" role="button"
-                                       aria-expanded="false">
-                                        <i class="icon-wristwatch"></i> Projets<span
-                                            class="caret"></span>
-                                    </a>
-                                    <ul class="dropdown-menu" role="menu">
-                                        <li><a href="<?= $this->url('project/mine') ?>"><i class="icon-cubes"></i> Projets</a></li>
-                                        <li><a href="<?= $this->url('project/structure') ?>"><i class="icon-building-filled"></i> Par structure</a></li>
-                                    </ul>
-                                </li>
-                            <?php else: ?>
-                                <li>
-                                    <a href="<?= $this->url('project/mine') ?>"><i
-                                            class="icon-cubes"></i> Projets</a>
-                                </li>
-                            <?php endif; ?>
-                        <li>
-                            <a href="<?= $this->url('administrativedocument') ?>">
-                                <i class="icon-book"></i> Documents
+                    <?php if( $this->grant()->connected() ): ?>
+                        <?php if( $this->grant()->isBoss() ): ?>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle"
+                               data-toggle="dropdown" role="button"
+                               aria-expanded="false">
+                                <i class="icon-wristwatch"></i> Projets<span
+                                    class="caret"></span>
                             </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="<?= $this->url('project/mine') ?>"><i class="icon-cubes"></i> Projets</a></li>
+                                <li><a href="<?= $this->url('project/structure') ?>"><i class="icon-building-filled"></i> Par structure</a></li>
+                            </ul>
+                        </li>
+                        <?php else: ?>
+                        <li>
+                            <a href="<?= $this->url('project/mine') ?>"><iclass="icon-cubes"></i> Projets</a>
                         </li>
                         <?php endif; ?>
+                        <li>
+                            <a href="<?= $this->url('administrativedocument') ?>"><i class="icon-book"></i> Documents</a>
+                        </li>
+                    <?php endif; ?>
 
-                        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
 
-
+                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle"
                                    data-toggle="dropdown" role="button"
@@ -235,11 +230,11 @@ $this->headScript()
                         </li>
                         <?php endif; ?><!-- /Menu admin -->
                     </ul>
-
-                    <?php /* echo $this->navigation()->menuPrincipal
-                    ('navigation'); */ ?>
+                    <?php if( $this->grant()->connected() ): ?>
+                    <p class="navbar-text navbar-right" id="notifications-area" ></p>
+                    <?php endif; ?>
                     <p class="navbar-text navbar-right">
-                        <?php echo $this->appConnection(); ?>
+                    <?php echo $this->appConnection(); ?>
                     </p>
                 </div><!--/.nav-collapse -->
             </div>
@@ -325,5 +320,43 @@ $this->headScript()
 		});
 	})();
 	</script>
+
+        <?php if( $this->grant()->dbUser() ): ?>
+        <div id="notifications">
+
+        </div>
+        <script>
+            var socket;
+            require(['notifications'], (notifications) => {
+                var n = new notifications.default({
+                    el: '#notifications-area',
+                    http: {
+                        root: '/notification'
+                    },
+                });
+                n.fetch();
+                <?php if( $this->grant()->hasSocket() ): ?>
+                require(['io'], (io) => {
+                    socket = io('<?= $this->grant()->getSocketUrl() ?>', {
+                        query: {
+                            token: '<?= $this->grant()->dbUser()->getSecret() ?>'
+                        }
+                    });
+                    socket.on('connect', function(){
+                        console.log('Connect');
+                    });
+                    socket.on('notification', function(datas){
+                        datas.notification.fresh = true;
+                        n.notifications.unshift(datas.notification);
+                        n.open = true;
+                    });
+                    socket.on('disconnect', function(){
+                        console.log('disconnect');
+                    });
+                });
+                <?php endif; ?>
+            });
+        </script>
+        <?php endif; ?>
     </body>
 </html>

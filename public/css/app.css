@@ -7510,6 +7510,18 @@ span[class*="status-400"] .icon:before {
 [class*="icon-tutelle-de-gestion"]:before {
   content: '\e851'; }
 
+[class*="icon-Activity"]:before {
+  content: '\e880'; }
+
+[class*="icon-Application"]:before {
+  content: '\e87d'; }
+
+[class*="icon-Person"]:before {
+  content: '\e89a'; }
+
+[class*="icon-Organization"]:before {
+  content: '\e876'; }
+
 /*
 span[class*="status-102"] .icon:before{ content: '\e85e '}
 span[class*="status-4"] .icon:before{ content: '\e865 '}
@@ -8303,3 +8315,70 @@ time.date-missing {
 
 .fade-enter, .fade-leave-to, .fade-leave-active {
   opacity: 0; }
+
+#notifications-area {
+  position: relative; }
+  #notifications-area .notifications-total {
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 1.25em;
+    line-height: 1em;
+    padding: 0 .5em;
+    border-radius: 4px; }
+    #notifications-area .notifications-total.unread {
+      background: #DD423E; }
+  #notifications-area .list {
+    box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.2);
+    background: #efefef;
+    position: absolute;
+    color: #333;
+    max-height: 350px;
+    max-height: 80vh;
+    width: 450px;
+    overflow: hidden;
+    overflow-y: scroll;
+    right: 0; }
+    #notifications-area .list h3 {
+      font-weight: 500;
+      background: #888888;
+      color: white;
+      margin: 0;
+      padding: .5em;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.25); }
+      #notifications-area .list h3 .intitule {
+        flex: 5; }
+      #notifications-area .list h3 a {
+        flex: 0; }
+    #notifications-area .list article {
+      border-bottom: thin solid #AAA;
+      padding: 1em; }
+      #notifications-area .list article h4 {
+        color: #555;
+        margin: 0;
+        padding: 0;
+        font-size: 1em; }
+      #notifications-area .list article.fresh {
+        animation-name: fresh;
+        animation-duration: 5s; }
+      #notifications-area .list article p {
+        color: #999;
+        font-size: 1.25em;
+        margin: 0;
+        padding: 0; }
+      #notifications-area .list article:hover {
+        background: white; }
+        #notifications-area .list article:hover h4 a {
+          color: #333; }
+      #notifications-area .list article a {
+        color: #455790; }
+        #notifications-area .list article a:hover {
+          background: transparent; }
+
+@keyframes fresh {
+  from {
+    background: #30b0d5; }
+  to {
+    background: #ffffff; } }

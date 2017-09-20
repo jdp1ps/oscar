@@ -1,0 +1,36 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 17-09-15 11:56
+ * @copyright Certic (c) 2017
+ */
+?>
+
+<div class="container">
+    <header class="jumbotron oscar-header">
+        <h1>Envoyer un message à <?= $person ?></h1>
+    </header>
+    <div class="tab-content">
+        <?= $this->form()->openTag($form); ?>
+        <?= $this->formControlGroup($form->get('secure')); ?>
+
+        <div class="clearfix">
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Message</span>
+                    <?= $this->formTextarea($form->get('message')) ?>
+                    <?php echo $this->formElementErrors($form->get('message')); ?>
+                </div>
+            </div>
+        </div>
+        <hr/>
+        <nav class="text-center">
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">
+                    Enregistrer
+                </button>
+            </div>
+        </nav>
+        <?= $this->form()->closeTag(); ?>
+    </div>
+</div>

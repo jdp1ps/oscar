@@ -23,6 +23,8 @@
                     </span>
 
                     <a href="<?= $this->url('person/show', ['id'=>$person->getId()]) ?>" class="more">Fiche</a>
+                    <a href="<?= $this->url('notification/person', ['idperson'=>$person->getId()]) ?>" class="more"><i class="icon-bell"></i> Notifier</a>
+
                 </span>
     </h2>
     <div class="card-content text-highlight">
@@ -58,16 +60,4 @@
         </span>
         <?php endforeach; ?>
     <?php endif; ?>
-
-
-    <!--
-            <div class="card-content text-highlight">
-                codeHarpege : <strong class="addon"><?= $person->getCodeharpege() ?></strong> |
-                ldapStatus : <strong class="addon"><?= $person->getLdapStatus() ?></strong> |
-                ldapAffectation : <strong class="addon"><?= $person->getLdapAffectation() ?></strong> |
-                ldapDisabled : <strong class="addon"><?= $person->getLdapDisabled() ?></strong> |
-                ldapDateFinInscription : <strong class="addon"><?= $person->getLdapFinInscription() ?></strong> |
-                ladapLogin : <strong class="addon"><?= $person->getLadapLogin() ?></strong> |
-                phone : <strong class="addon"><?= $person->getPhone() ?></strong> |
-            </div>-->
 </article>

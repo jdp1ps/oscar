@@ -37,6 +37,16 @@ return array(
                     'roles' => ['user'],
                 ],
 
+                [ 'controller' =>  'Notification',
+                    'action' => ['indexPerson', 'index', 'test'],
+                    'roles' => ['user'],
+                ],
+
+                [ 'controller' =>  'Notification',
+                    'action' => ['notifyPerson'],
+                    'roles' => ['user'],
+                ],
+
                 [ 'controller' =>  'Administration',
                     'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'organizationRole', 'organizationRoleApi'],
                     'roles' => ['user']
@@ -630,6 +640,7 @@ return array(
             'OscarUserContext' => \Oscar\Service\OscarUserContext::class,
             'ConnectorService' => \Oscar\Service\ConnectorService::class,
             'TimesheetService' => \Oscar\Service\TimesheetService::class,
+            'NotificationService' => \Oscar\Service\NotificationService::class,
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             // Droits
             //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
@@ -745,6 +756,7 @@ return array(
             'ActivityPayment' => \Oscar\Controller\ActivityPaymentController::class,
             'WorkPackage' => \Oscar\Controller\WorkPackageController::class,
             'Timesheet' => \Oscar\Controller\TimesheetController::class,
+            'Notification' => \Oscar\Controller\NotificationController::class,
             'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentController::class,
             'Depense' => \Oscar\Controller\DepenseController::class,
             'Connector' => \Oscar\Controller\ConnectorController::class,
