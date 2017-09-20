@@ -83,10 +83,10 @@ io.on('connection', function(socket){
     }
     else {
         var client = new pg.Client({
-           user: 'oscar_empty',
-           host: 'localhost',
-           database: 'oscar_empty',
-           password: 'azerty'
+            user: config.bdd.user,
+            host: config.bdd.host,
+            database: config.bdd.base,
+            password: config.bdd.pass
         });
 
         client.connect();
