@@ -3,9 +3,11 @@ config/autoload/local.php
 config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
 
+
 # Connecteurs
 /config/connectors/*.yml
 !/config/connector/*.yml.dist
+socket/config.json
 
 # Documentation
 /doc/*.pdf

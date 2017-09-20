@@ -47,6 +47,14 @@ class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
         return $this->getOscarUserContext()->getRolesOrganisationLeader();
     }
 
+    public function getSocketUrl(){
+        $config = $this->getServiceLocator()->getServiceLocator()->get('Config');
+        return $_SERVER['SERVER_NAME'].':'.$config['oscar']['socket']['port'];
+    }
+
+    public function hasSocket(){
+        return (bool) $this->getServiceLocator()->getServiceLocator()->get('Config')['oscar']['socket'];
+    }
 
     public function privileges()
     {
