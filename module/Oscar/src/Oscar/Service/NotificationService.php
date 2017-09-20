@@ -83,8 +83,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             try {
                 // On commence par regarder si une notification n'existe pas déjà
                 // pour cette person dans le context (basé sur le HASH)
-                $exist = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
-                if( !$exist ){
+                $notification = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
+                if( !$notification ){
                     $date = new \DateTime();
                     $notification = new Notification();
                     $notification->setContext('Application')
@@ -111,7 +111,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         // Push vers le socket si besoin
         $configSocket = $this->getServiceLocator()->get('Config')['oscar']['socket'];
-        if ($configSocket)
+        if (count($push) && $configSocket)
         {
             // todo Faire un truc plus propre pour générer l'URL
             $url = "http://". $_SERVER['SERVER_NAME'].":". $configSocket['port'].$configSocket['push_path'];
