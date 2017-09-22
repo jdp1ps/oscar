@@ -122,20 +122,12 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
     public function onUserLogin( $e ){
 
         $dbUser = null;
-        if( $e instanceof AdapterChainEvent ){
-            if( is_string($e->getIdentity()) ){
-                $dbUser = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $e->getIdentity()]);
-            } else {
-                $dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
-            }
-        }
-        elseif ($e instanceof UserAuthenticatedEvent ) {
-            $dbUser = $e->getDbUser();
-        } else {
-            die('OK ?');
-            // meh !
-        }
 
+		if( is_string($e->getIdentity()) ){
+			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $e->getIdentity()]);
+		} else {
+			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
+		}
 
         try {
             $dbUser->setDateLogin(new \DateTime());
