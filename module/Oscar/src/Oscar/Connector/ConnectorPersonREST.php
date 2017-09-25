@@ -125,7 +125,10 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
                 continue;
             }
-            if($personOscar->getDateSyncLdap() < $personData->dateupdated || $force == true ){
+            if($personData->dateupdated == null
+                || $personOscar->getDateSyncLdap() == null
+                || $personOscar->getDateSyncLdap() < $personData->dateupdated
+                || $force == true ){
                 $personOscar = $this->hydratePersonWithDatas($personOscar, $personData);
                 $personRepository->flush($personOscar);
                 if( $action == 'add' ){

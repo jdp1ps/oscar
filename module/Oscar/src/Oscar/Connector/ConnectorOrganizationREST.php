@@ -137,9 +137,6 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
             $repport->adderror("Le service REST n'a retourné aucun résultat.");
         }
 
-        $repport->addnotice("DÉBUT du traitement...");
-
-
         $repport->addnotice("FIN du traitement...");
         return $repport;
     }
