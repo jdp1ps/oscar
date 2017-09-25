@@ -18,6 +18,8 @@ DELETE FROM activity;
 DELETE FROM person;
 DELETE FROM organization;
 DELETE FROM authentification;
+DELETE FROM project;
+DELETE FROM administrativedocument;
 
 
 
