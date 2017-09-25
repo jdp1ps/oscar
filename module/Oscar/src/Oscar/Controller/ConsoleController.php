@@ -39,6 +39,38 @@ class ConsoleController extends AbstractOscarController
 
     ///////////////////////////////////////////////////////////////////////////////////////
     ///
+    ///  PATCH
+    ///
+    public function patchAction()
+    {
+        $patchName = $this->params()->fromRoute('patchname');
+        $method = "patch_" . $patchName;
+        if( method_exists($this, $method) ){
+            $this->$method();
+        } else {
+            die("Le patch '$patchName' n'existe pas/plus.");
+        }
+        die('Execution du patch ' . $patchName);
+    }
+
+    private function patch_connectors_person(){
+        echo "PATCH 'connector_person'\n";
+        $persons = $this->getEntityManager()->getRepository(Person::class)->findAll();
+        /** @var Person $person */
+        foreach ($persons as $person) {
+            $connectorsPerson = $person->getConnectors();
+            if( $person->getConnectorID('rest') ){
+                if( count($connectorsPerson) > 1 ){
+                    echo "Traitement de $person \n";
+                    $newConnector = [
+                        'rest' => $connectorsPerson['rest']
+                    ];
+                    $person->setConnector($newConnector);
+                    $this->getEntityManager()->flush($person);
+                }
+            }
+        }
+    }
 
     /**
      * Synchronisation des activités depuis un fichier.
