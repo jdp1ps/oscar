@@ -82,6 +82,7 @@ ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b93174800f;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b9217bbb47;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b91c4132c1;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b9166d1f9c;
+ALTER TABLE ONLY public.role DROP CONSTRAINT fk_57698a6a727aca70;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0cc54c8c93;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0ca1b4b28c;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0c953c1c61;
@@ -120,6 +121,8 @@ DROP INDEX public.uniq_9de7cd62f85e0677;
 DROP INDEX public.uniq_9de7cd62e7927c74;
 DROP INDEX public.uniq_6e60b4f7d60322ac;
 DROP INDEX public.uniq_598638fb8a90aba9;
+DROP INDEX public.uniq_57698a6ab8c2fd88;
+DROP INDEX public.uniq_57698a6a1596728e;
 DROP INDEX public.uniq_2de8c6a3d60322ac;
 DROP INDEX public.uniq_2de8c6a31596728e;
 DROP INDEX public.idx_e9b876779485a167;
@@ -193,6 +196,7 @@ DROP INDEX public.idx_5d5b51b93174800f;
 DROP INDEX public.idx_5d5b51b9217bbb47;
 DROP INDEX public.idx_5d5b51b91c4132c1;
 DROP INDEX public.idx_5d5b51b9166d1f9c;
+DROP INDEX public.idx_57698a6a727aca70;
 DROP INDEX public.idx_55026b0cc54c8c93;
 DROP INDEX public.idx_55026b0ca1b4b28c;
 DROP INDEX public.idx_55026b0c953c1c61;
@@ -233,6 +237,7 @@ ALTER TABLE ONLY public.typedocument DROP CONSTRAINT typedocument_pkey;
 ALTER TABLE ONLY public.tva DROP CONSTRAINT tva_pkey;
 ALTER TABLE ONLY public.timesheet DROP CONSTRAINT timesheet_pkey;
 ALTER TABLE ONLY public.role_privilege DROP CONSTRAINT role_privilege_pkey;
+ALTER TABLE ONLY public.role DROP CONSTRAINT role_pkey;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT projectpartner_pkey;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT projectmember_pkey;
 ALTER TABLE ONLY public.project DROP CONSTRAINT project_pkey;
@@ -243,6 +248,7 @@ ALTER TABLE ONLY public.organizationrole DROP CONSTRAINT organizationrole_pkey;
 ALTER TABLE ONLY public.organizationperson DROP CONSTRAINT organizationperson_pkey;
 ALTER TABLE ONLY public.organization_role DROP CONSTRAINT organization_role_pkey;
 ALTER TABLE ONLY public.organization DROP CONSTRAINT organization_pkey;
+ALTER TABLE ONLY public.notification DROP CONSTRAINT notification_pkey;
 ALTER TABLE ONLY public.logactivity DROP CONSTRAINT logactivity_pkey;
 ALTER TABLE ONLY public.grantsource DROP CONSTRAINT grantsource_pkey;
 ALTER TABLE ONLY public.discipline DROP CONSTRAINT discipline_pkey;
@@ -277,6 +283,7 @@ DROP SEQUENCE public.timesheet_id_seq;
 DROP TABLE public.timesheet;
 DROP TABLE public.role_privilege;
 DROP SEQUENCE public.role_id_seq;
+DROP TABLE public.role;
 DROP SEQUENCE public.projectpartner_id_seq;
 DROP TABLE public.projectpartner;
 DROP SEQUENCE public.projectmember_id_seq;
@@ -297,6 +304,8 @@ DROP SEQUENCE public.organization_role_id_seq;
 DROP TABLE public.organization_role;
 DROP SEQUENCE public.organization_id_seq;
 DROP TABLE public.organization;
+DROP SEQUENCE public.notification_id_seq;
+DROP TABLE public.notification;
 DROP SEQUENCE public.logactivity_id_seq;
 DROP TABLE public.logactivity;
 DROP SEQUENCE public.grantsource_id_seq;
@@ -1053,6 +1062,43 @@ CREATE SEQUENCE logactivity_id_seq
 
 
 --
+-- Name: notification; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE notification (
+    id integer NOT NULL,
+    dateeffective timestamp(0) without time zone NOT NULL,
+    message text NOT NULL,
+    context character varying(255) NOT NULL,
+    contextid character varying(255) DEFAULT NULL::character varying,
+    recipientid integer,
+    level integer NOT NULL,
+    read boolean NOT NULL,
+    datas text,
+    hash character varying(255) NOT NULL
+);
+
+
+--
+-- Name: COLUMN notification.datas; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN notification.datas IS '(DC2Type:object)';
+
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE notification_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: organization; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1420,6 +1466,19 @@ CREATE SEQUENCE projectpartner_id_seq
 
 
 --
+-- Name: role; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE role (
+    id integer NOT NULL,
+    parent_id integer,
+    roleid character varying(255) NOT NULL,
+    is_default boolean NOT NULL,
+    ldap_filter character varying(255) DEFAULT NULL::character varying
+);
+
+
+--
 -- Name: role_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1461,8 +1520,6 @@ CREATE TABLE timesheet (
     deletedby_id integer,
     activity_id integer,
     label text,
-    sendby character varying(255) DEFAULT NULL::character varying,
-    rejectedscicomment text,
     validatedsciby character varying(255) DEFAULT NULL::character varying,
     validatedscibyid integer,
     validatedsciat timestamp(0) with time zone DEFAULT NULL::timestamp with time zone,
@@ -1472,10 +1529,12 @@ CREATE TABLE timesheet (
     rejectedsciby character varying(255) DEFAULT NULL::character varying,
     rejectedscibyid integer,
     rejectedsciat timestamp(0) with time zone DEFAULT NULL::timestamp with time zone,
+    rejectedscicomment text,
     rejectedadminby character varying(255) DEFAULT NULL::character varying,
     rejectedadminbyid integer,
     rejectedadminat timestamp(0) with time zone DEFAULT NULL::timestamp with time zone,
-    rejectedadmincomment text
+    rejectedadmincomment text,
+    sendby character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1676,7 +1735,6 @@ CREATE SEQUENCE workpackageperson_id_seq
 --
 
 COPY activity (id, source_id, project_id, type_id, centaureid, centaurenumconvention, codeeotp, label, description, hassheet, duration, justifyworkingtime, justifycost, amount, datestart, dateend, datesigned, dateopened, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activitytype_id, currency_id, tva_id, oscarid, oscarnum, timesheetformat, numbers, financialimpact) FROM stdin;
-9840	\N	8635	\N	\N			Relativité Générale		f	0	0	0	0	\N	\N	\N	\N	102	2017-06-12 12:46:23	2017-06-12 16:10:38	\N	\N	\N	\N	411	1	1	\N	2017DRI00001	none	a:0:{}	Recette
 \.
 
 
@@ -1685,7 +1743,6 @@ COPY activity (id, source_id, project_id, type_id, centaureid, centaurenumconven
 --
 
 COPY activity_discipline (activity_id, discipline_id) FROM stdin;
-9840	91
 \.
 
 
@@ -1693,7 +1750,7 @@ COPY activity_discipline (activity_id, discipline_id) FROM stdin;
 -- Name: activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activity_id_seq', 9840, true);
+SELECT pg_catalog.setval('activity_id_seq', 10092, true);
 
 
 --
@@ -1708,7 +1765,7 @@ COPY activitydate (id, type_id, activity_id, datestart, comment, status, datecre
 -- Name: activitydate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitydate_id_seq', 1114, true);
+SELECT pg_catalog.setval('activitydate_id_seq', 1195, true);
 
 
 --
@@ -1716,8 +1773,6 @@ SELECT pg_catalog.setval('activitydate_id_seq', 1114, true);
 --
 
 COPY activityorganization (id, organization_id, activity_id, main, role, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, datestart, dateend, roleobj_id) FROM stdin;
-83930	12933	9840	f	Composante responsable	1	2017-06-12 16:10:16	\N	\N	\N	\N	\N	\N	\N	4
-83931	12934	9840	f	Partenaire	1	2017-06-12 16:10:38	\N	\N	\N	\N	\N	\N	\N	13
 \.
 
 
@@ -1725,7 +1780,7 @@ COPY activityorganization (id, organization_id, activity_id, main, role, status,
 -- Name: activityorganization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityorganization_id_seq', 83931, true);
+SELECT pg_catalog.setval('activityorganization_id_seq', 86425, true);
 
 
 --
@@ -1740,7 +1795,7 @@ COPY activitypayment (id, activity_id, currency_id, datepayment, comment, status
 -- Name: activitypayment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitypayment_id_seq', 2466, true);
+SELECT pg_catalog.setval('activitypayment_id_seq', 2624, true);
 
 
 --
@@ -1748,8 +1803,6 @@ SELECT pg_catalog.setval('activitypayment_id_seq', 2466, true);
 --
 
 COPY activityperson (id, person_id, activity_id, main, role, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, datestart, dateend, roleobj_id) FROM stdin;
-20985	11692	9840	f	Responsable scientifique	1	2017-06-12 12:46:45	\N	\N	\N	\N	\N	\N	\N	10
-20986	11693	9840	f	Chercheur	1	2017-06-12 12:47:02	\N	\N	\N	\N	\N	\N	\N	17
 \.
 
 
@@ -1757,7 +1810,7 @@ COPY activityperson (id, person_id, activity_id, main, role, status, datecreated
 -- Name: activityperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityperson_id_seq', 20986, true);
+SELECT pg_catalog.setval('activityperson_id_seq', 21443, true);
 
 
 --
@@ -1765,8 +1818,75 @@ SELECT pg_catalog.setval('activityperson_id_seq', 20986, true);
 --
 
 COPY activitytype (id, lft, rgt, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, label, description, nature, centaureid) FROM stdin;
-1	1	4	\N	\N	\N	\N	\N	\N	\N	ROOT	\N	\N	\N
-411	2	3	1	2017-04-24 12:31:55	\N	\N	\N	\N	\N	Type non-définit		0	\N
+411	2	3	1	2016-03-14 12:21:16	\N	\N	\N	\N	\N	Accords cadre		0	\N
+441	11	12	1	2016-03-14 13:07:09	\N	\N	\N	\N	\N	Cession de droit d'auteur		0	\N
+439	9	10	1	2016-03-14 13:06:25	\N	\N	\N	\N	\N	Accord de copropriété avec exploitation		0	\N
+437	5	6	1	2016-03-14 13:05:25	\N	\N	\N	\N	\N	Accord de confidentialité		0	\N
+438	7	8	1	2016-03-14 13:05:59	\N	\N	\N	\N	\N	Accord de copropriété		0	\N
+450	15	16	1	2016-03-14 13:13:08	\N	\N	\N	\N	\N	Cession de brevet		0	\N
+417	56	59	1	2016-03-14 12:27:57	\N	\N	\N	\N	\N	ANR		0	\N
+476	91	92	1	2016-03-14 13:25:18	\N	\N	\N	\N	\N	LIFE+		0	\N
+454	105	106	1	2016-03-14 13:15:14	\N	\N	\N	\N	\N	Contrat Accompagnement Cifre		0	\N
+474	29	30	1	2016-03-14 13:24:11	\N	\N	\N	\N	\N	Contrat de licence (brevet)		0	\N
+452	17	18	1	2016-03-14 13:14:02	\N	\N	\N	\N	\N	Cession de quotes parts de brevet		0	\N
+462	69	70	1	2016-03-14 13:19:32	\N	\N	\N	\N	\N	FEAMP		0	\N
+466	77	78	1	2016-03-14 13:21:19	\N	\N	\N	\N	\N	FP7 - Marie curie		0	\N
+470	85	86	1	2016-03-14 13:22:23	\N	\N	\N	\N	\N	H2020		0	\N
+418	60	61	1	2016-03-14 12:28:29	\N	\N	\N	\N	\N	BQR		0	\N
+414	42	43	1	2016-03-14 12:24:20	\N	\N	\N	\N	\N	Achat en commun                                                                                                                                                                                                                                                		0	\N
+446	57	58	1	2016-03-14 13:10:20	\N	\N	\N	\N	\N	Convention de subvention (ANR)		0	\N
+465	75	76	1	2016-03-14 13:20:37	\N	\N	\N	\N	\N	FP6 - tous programmes		0	\N
+449	103	104	1	2016-03-14 13:12:36	\N	\N	\N	\N	\N	Thèse subvention Région		0	\N
+420	96	99	1	2016-03-14 12:36:17	\N	\N	\N	\N	\N	 Appels à projets pôles (FUI)		0	\N
+412	4	33	1	2016-03-14 12:21:48	\N	\N	\N	\N	\N	Valorisation		0	\N
+451	13	14	1	2016-03-14 13:13:33	\N	\N	\N	\N	\N	Cession de logiciel		0	\N
+1	1	138	\N	\N	\N	\N	\N	\N	\N	ROOT	\N	\N	\N
+448	97	98	1	2016-03-14 13:11:38	\N	\N	\N	\N	\N	Convention de subvention (FUI)		0	\N
+421	100	101	1	2016-03-14 12:36:46	\N	\N	\N	\N	\N	International hors UE		0	\N
+477	93	94	1	2016-03-14 13:28:10	\N	\N	\N	\N	\N	Interreg III		0	\N
+463	71	72	1	2016-03-14 13:19:43	\N	\N	\N	\N	\N	FEDER - 2014 / 2020		0	\N
+467	79	80	1	2016-03-14 13:21:30	\N	\N	\N	\N	\N	FP7 - Capacité		0	\N
+471	87	88	1	2016-03-14 13:23:06	\N	\N	\N	\N	\N	Interreg IVA		0	\N
+447	63	64	1	2016-03-14 13:11:02	\N	\N	\N	\N	\N	Autres financements UE		0	\N
+453	19	20	1	2016-03-14 13:14:17	\N	\N	\N	\N	\N	Contrat de transfert de Savoir-Faire		0	\N
+444	47	48	1	2016-03-14 13:09:12	\N	\N	\N	\N	\N	Post-doc subvention autre que Région		0	\N
+415	44	51	1	2016-03-14 12:26:44	\N	\N	\N	\N	\N	Allocations de recherche		0	\N
+416	52	55	1	2016-03-14 12:26:59	\N	\N	\N	\N	\N	Aides OSEO		0	\N
+445	49	50	1	2016-03-14 13:09:51	\N	\N	\N	\N	\N	Post-doc subvention Région		0	\N
+442	53	54	1	2016-03-14 13:07:49	\N	\N	\N	\N	\N	Aides BPI		0	\N
+455	21	22	1	2016-03-14 13:15:36	\N	\N	\N	\N	\N	Contrat d'édition		0	\N
+468	81	82	1	2016-03-14 13:21:42	\N	\N	\N	\N	\N	FP7 - Coopération		0	\N
+472	89	90	1	2016-03-14 13:23:17	\N	\N	\N	\N	\N	Interreg V		0	\N
+475	31	32	1	2016-03-14 13:24:30	\N	\N	\N	\N	\N	Contrat de licence		0	\N
+458	23	24	1	2016-03-14 13:17:50	\N	\N	\N	\N	\N	Concours scientifique		0	\N
+419	62	95	1	2016-03-14 12:33:48	\N	\N	\N	\N	\N	Union Européenne		0	\N
+422	102	107	1	2016-03-14 12:38:18	\N	\N	\N	\N	\N	Thèse		0	\N
+423	108	109	1	2016-03-14 12:39:54	\N	\N	\N	\N	\N	Collaboration recherche		0	\N
+459	25	26	1	2016-03-14 13:18:13	\N	\N	\N	\N	\N	Convention de mise en délégation		0	\N
+443	45	46	1	2016-03-14 13:08:30	\N	\N	\N	\N	\N	Thèse subvention autre que Région		0	\N
+413	34	41	1	2016-03-14 12:24:04	\N	\N	\N	\N	\N	Recherche partenariale		0	\N
+457	39	40	1	2016-03-14 13:17:09	\N	\N	\N	\N	\N	Contrats de transfert de matériel		0	\N
+456	37	38	1	2016-03-14 13:16:30	\N	\N	\N	\N	\N	Contrats de mise à disposition		0	\N
+440	35	36	1	2016-03-14 13:06:49	\N	\N	\N	\N	\N	Accord de consortium		0	\N
+460	65	66	1	2016-03-14 13:18:43	\N	\N	\N	\N	\N	COST		0	\N
+461	67	68	1	2016-03-14 13:19:03	\N	\N	\N	\N	\N	EUREKA		0	\N
+464	73	74	1	2016-03-14 13:19:55	\N	\N	\N	\N	\N	FEDER - 2007 / 2013		0	\N
+469	83	84	1	2016-03-14 13:21:55	\N	\N	\N	\N	\N	FP7 - Idées		0	\N
+473	27	28	1	2016-03-14 13:23:55	\N	\N	\N	\N	\N	Contrat de licence (logiciel)		0	\N
+424	110	113	1	2016-03-14 12:41:35	\N	\N	\N	\N	\N	Relations internationales		0	\N
+427	118	119	1	2016-03-14 12:49:38	\N	\N	\N	\N	\N	Location		0	\N
+428	120	121	1	2016-03-14 12:50:13	\N	\N	\N	\N	\N	Maintenance		0	\N
+429	122	123	1	2016-03-14 12:51:24	\N	\N	\N	\N	\N	Mise à disposition de matériel		0	\N
+430	124	125	1	2016-03-14 12:53:44	\N	\N	\N	\N	\N	Prestations		0	\N
+431	126	127	1	2016-03-14 12:56:10	\N	\N	\N	\N	\N	Transfert de financement		0	\N
+436	136	137	1	2016-03-14 13:04:13	\N	\N	\N	\N	\N	Vente de matériel		0	\N
+425	114	115	1	2016-03-14 12:42:22	\N	\N	\N	\N	\N	Contrats européens		0	\N
+426	116	117	1	2016-03-14 12:43:24	\N	\N	\N	\N	\N	Formation		0	\N
+433	130	131	1	2016-03-14 12:59:33	\N	\N	\N	\N	\N	Conseils régionaux		0	\N
+432	128	129	1	2016-03-14 12:57:56	\N	\N	\N	\N	\N	Autres collectivités territoriales		0	\N
+434	132	133	1	2016-03-14 13:00:17	\N	\N	\N	\N	\N	Subventions		0	\N
+435	134	135	1	2016-03-14 13:03:05	\N	\N	\N	\N	\N	Colloques		0	\N
+409	111	112	1	2016-10-20 10:56:40	\N	\N	\N	\N	\N	LIA (Laboratoire International Associé)		0	\N
 \.
 
 
@@ -1774,7 +1894,7 @@ COPY activitytype (id, lft, rgt, status, datecreated, dateupdated, datedeleted, 
 -- Name: activitytype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitytype_id_seq', 411, true);
+SELECT pg_catalog.setval('activitytype_id_seq', 409, true);
 
 
 --
@@ -1782,8 +1902,6 @@ SELECT pg_catalog.setval('activitytype_id_seq', 411, true);
 --
 
 COPY administrativedocument (id, person_id, dateupdoad, path, information, filetypemime, filesize, filename, version, status) FROM stdin;
-6	\N	2016-09-22	oscar-1-demo-docx	Test	application/vnd.openxmlformats-officedocument.wordprocessingml.document; charset=binary	1908	demo.docx	1	5
-10	\N	2016-11-10	oscar-1-document-fictif-pdf	TEST	application/pdf; charset=binary	9035	document-fictif.pdf	1	5
 \.
 
 
@@ -1791,7 +1909,7 @@ COPY administrativedocument (id, person_id, dateupdoad, path, information, filet
 -- Name: administrativedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('administrativedocument_id_seq', 14, true);
+SELECT pg_catalog.setval('administrativedocument_id_seq', 32, true);
 
 
 --
@@ -1799,9 +1917,6 @@ SELECT pg_catalog.setval('administrativedocument_id_seq', 14, true);
 --
 
 COPY authentification (id, username, email, display_name, password, state, datelogin, settings, secret) FROM stdin;
-124	einstein	albert.einstein@oscar-demo.fr	Albert Einstein	$2y$14$ziLh.bUxS6RaS7qPgphMlu2OGTqZN9k/qeCQAjD8PiAJAJPd5AjGW	0	\N	N;	\N
-123	grossmann	marcel.grossmann@oscar-demo.fr	Marcel Grossmann	$2y$14$dBEHqgmu.9ijYOwUwQ79UuRaHzQIwEsNQJnhLZebNGQHrUMw3fiBa	0	\N	N;	\N
-125	planck	max.planck@oscar-demo.fr	Max Plank	$2y$10$AIpuIxLtPt1HitumlMthgOlGHt7F8I4spWXvQ.exNhxw2rhKj6BJG	0	\N	N;	\N
 \.
 
 
@@ -1809,7 +1924,7 @@ COPY authentification (id, username, email, display_name, password, state, datel
 -- Name: authentification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('authentification_id_seq', 125, true);
+SELECT pg_catalog.setval('authentification_id_seq', 173, true);
 
 
 --
@@ -1856,7 +1971,7 @@ COPY contractdocument (id, grant_id, person_id, dateupdoad, path, information, c
 -- Name: contractdocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('contractdocument_id_seq', 55696, true);
+SELECT pg_catalog.setval('contractdocument_id_seq', 56188, true);
 
 
 --
@@ -2250,18 +2365,6 @@ SELECT pg_catalog.setval('grantsource_id_seq', 33, true);
 --
 
 COPY logactivity (id, datecreated, message, context, contextid, userid, level, type, ip, datas) FROM stdin;
-29164	2017-06-12 12:06:53	121:Administrateur a créé le projet [Project:8635:RELATIV Théorie de la relativité]	Project	8635	121	200	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:12:"/project/new";}
-29165	2017-06-12 12:07:46	121:Administrateur a ajouté [Person:11692:Albert Einstein] à la liste des personnes	Person:new	11692	121	200	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:11:"/person/new";}
-29166	2017-06-12 12:09:10	121:Administrateur a ajouté [Person:11693:Marcel Grossmann] à la liste des personnes	Person:new	11693	121	200	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:11:"/person/new";}
-29167	2017-06-12 12:45:30	121:Administrateur a ajouté [Person:11693:Marcel Grossmann] (Chercheur) dans [Organization:12933:UDZ(Zurich)]	Organisation	12933	121	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:29:"/organizationperson/new/12933";}
-29168	2017-06-12 12:46:45	121:Administrateur a ajouté [Person:11692:Albert Einstein] (Responsable scientifique) dans [Activity:9840:Relativité Générale]	Activity	9840	121	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:25:"/personnactivity/new/9840";}
-29169	2017-06-12 12:47:02	121:Administrateur a ajouté [Person:11693:Marcel Grossmann] (Chercheur) dans [Activity:9840:Relativité Générale]	Activity	9840	121	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:25:"/personnactivity/new/9840";}
-29170	2017-06-12 16:08:16	121:Administrateur a ajouté [Person:11692:Albert Einstein] (Responsable scientifique) dans [Organization:12934:Olympia]	Organisation	12934	121	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:29:"/organizationperson/new/12934";}
-29171	2017-06-12 16:09:04	121:Administrateur a ajouté [Person:11694:Maurice Solovine] à la liste des personnes	Person:new	11694	121	200	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:11:"/person/new";}
-29172	2017-06-12 16:09:32	121:Administrateur a ajouté [Person:11694:Maurice Solovine] (Responsable scientifique) dans [Organization:12934:Olympia]	Organisation	12934	121	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:29:"/organizationperson/new/12934";}
-29173	2017-06-12 16:10:16	121:Administrateur a ajouté [Organization:12933:UDZ(Zurich)] (Composante responsable) dans [Activity:9840:Relativité Générale]	Activity	9840	121	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:30:"/organizationactivity/new/9840";}
-29174	2017-06-12 16:10:38	121:Administrateur a ajouté [Organization:12934:Olympia] (Partenaire) dans [Activity:9840:Relativité Générale]	Activity	9840	121	100	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:30:"/organizationactivity/new/9840";}
-29175	2017-06-14 10:59:48	121:Administrateur a ajouté [Person:11695:Max Planck] à la liste des personnes	Person:new	11695	121	200	info	127.0.0.1	a:1:{s:11:"REQUEST_URI";s:11:"/person/new";}
 \.
 
 
@@ -2269,7 +2372,28 @@ COPY logactivity (id, datecreated, message, context, contextid, userid, level, t
 -- Name: logactivity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('logactivity_id_seq', 29175, true);
+SELECT pg_catalog.setval('logactivity_id_seq', 38091, true);
+
+
+--
+-- Data for Name: notification; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY notification (id, dateeffective, message, context, contextid, recipientid, level, read, datas, hash) FROM stdin;
+195	2017-09-21 08:31:37	Déclaration en attente de validation dans l'activité [Activity:10092:Exemple d'activité 2].	Activity	10092	13060	400	f	a:0:{}	99f7bf2b4153a48894c430db98837a70
+196	2017-09-21 08:31:37	Déclaration en attente de validation dans l'activité [Activity:10092:Exemple d'activité 2].	Activity	10092	11480	400	f	a:0:{}	5af4866cfd93d95867ac74fd1528ab77
+212	2017-09-21 08:31:37	Déclaration en attente de validation dans l'activité [Activity:10090:Relativité test5].	Activity	10090	11480	400	f	a:0:{}	e4b6b0967278fe3869976dc66d52cd1e
+222	2017-09-21 12:30:18	Des déclarations ont été validées administrativement dans l'activité [Activity:10092:Exemple d'activité 2]	Activity	10092	13059	400	f	a:0:{}	4db73e6c6169deedc8b331590e8988a5
+223	2017-09-21 12:30:45	Des déclarations ont été validées administrativement dans l'activité [Activity:10090:Relativité test5]	Activity	10090	13059	400	f	a:0:{}	6109b853473ace72e83cacf20f363603
+224	2017-09-21 12:30:50	Des déclarations ont été validés scientifiquement dans l'activité [Activity:10090:Relativité test5]	Activity	10090	13059	400	f	a:0:{}	e379f03de0cb998e3ba69ca24ba3d190
+\.
+
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('notification_id_seq', 224, true);
 
 
 --
@@ -2277,8 +2401,6 @@ SELECT pg_catalog.setval('logactivity_id_seq', 29175, true);
 --
 
 COPY organization (id, centaureid, shortname, fullname, code, email, url, description, street1, street2, street3, city, zipcode, phone, dateupdated, datecreated, dateend, datestart, status, datedeleted, createdby_id, updatedby_id, deletedby_id, ldapsupanncodeentite, country, sifacid, codepays, siret, bp, type, sifacgroup, sifacgroupid, numtvaca, connectors) FROM stdin;
-12933	\N	UDZ	Université de Zurich								Zurich		\N	2017-06-12 12:45:30	2017-06-12 12:39:44	\N	\N	1	\N	\N	\N	\N	\N		\N	\N		\N	1	\N	\N	\N	a:1:{s:4:"rest";s:0:"";}
-12934	\N	Olympia	Académie Olympia										\N	2017-06-12 16:09:32	2017-06-12 16:08:00	\N	\N	1	\N	\N	\N	\N	\N		\N	\N		\N	4	\N	\N	\N	a:1:{s:4:"rest";s:0:"";}
 \.
 
 
@@ -2286,7 +2408,7 @@ COPY organization (id, centaureid, shortname, fullname, code, email, url, descri
 -- Name: organization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organization_id_seq', 12934, true);
+SELECT pg_catalog.setval('organization_id_seq', 12703, true);
 
 
 --
@@ -2309,9 +2431,6 @@ SELECT pg_catalog.setval('organization_role_id_seq', 1, false);
 --
 
 COPY organizationperson (id, person_id, organization_id, main, role, datestart, dateend, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, roleobj_id) FROM stdin;
-182	11693	12933	f	Chercheur	\N	\N	1	2017-06-12 12:45:29	\N	\N	\N	\N	\N	17
-183	11692	12934	f	Responsable scientifique	\N	\N	1	2017-06-12 16:08:16	\N	\N	\N	\N	\N	10
-184	11694	12934	f	Responsable scientifique	\N	\N	1	2017-06-12 16:09:32	\N	\N	\N	\N	\N	10
 \.
 
 
@@ -2319,7 +2438,7 @@ COPY organizationperson (id, person_id, organization_id, main, role, datestart, 
 -- Name: organizationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organizationperson_id_seq', 184, true);
+SELECT pg_catalog.setval('organizationperson_id_seq', 395, true);
 
 
 --
@@ -2354,10 +2473,6 @@ SELECT pg_catalog.setval('organizationrole_id_seq', 1, false);
 --
 
 COPY person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, ldapstatus, ldapsitelocation, ldapaffectation, ldapdisabled, ldapfininscription, ladaplogin, phone, datesyncldap, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, emailprive, harpegeinm, connectors, ldapmemberof) FROM stdin;
-11693	Marcel	Grossmann		\N	\N	marcel.grossmann@oscar-demo.fr	\N	\N	\N	\N	\N	grossmann		\N	1	2017-06-12 12:09:10	\N	\N	\N	\N	\N	\N	\N	N;	N;
-11694	Maurice	Solovine		\N	\N	maurice.solovine@oscar-demo.fr	\N	\N	\N	\N	\N			\N	1	2017-06-12 16:09:03	\N	\N	\N	\N	\N	\N	\N	N;	N;
-11692	Albert	Einstein		\N	\N	albert.einstein@oscar-demo.fr	\N	\N	\N	\N	\N	einstein		\N	1	2017-06-12 12:07:46	\N	\N	\N	\N	\N	\N	\N	N;	N;
-11695	Max	Planck		\N	\N	max.plank@oscar-demo.fr	\N	\N	\N	\N	\N	plank		\N	1	2017-06-14 10:59:48	\N	\N	\N	\N	\N	\N	\N	N;	N;
 \.
 
 
@@ -2365,7 +2480,7 @@ COPY person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, 
 -- Name: person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('person_id_seq', 11695, true);
+SELECT pg_catalog.setval('person_id_seq', 23328, true);
 
 
 --
@@ -2433,9 +2548,10 @@ COPY privilege (id, categorie_id, code, libelle, ordre) FROM stdin;
 64	7	USER_EDITION	Gérer les authentifications des utilisateurs	\N
 65	7	ROLEORGA_VISUALISATION	Voir les rôles des organisations	\N
 66	7	ROLEORGA_EDITION	Gérer les rôles des organisations	\N
-67	2	TIMESHEET_VALIDATE_SCI	Validation scientifique des déclarations	\N
-68	2	TIMESHEET_VALIDATE_ADM	Validation administrative des déclarations	\N
-69	6	CONNECTOR_ACCESS	Accès à la configuration et l'exécution des connectors	\N
+67	2	TIMESHEET_VALIDATE_SCI	Validation scientifique des feuilles de temps	\N
+68	2	TIMESHEET_VALIDATE_ADM	Validation administrative des feuilles de temps	\N
+70	6	CONNECTOR_ACCESS	Peut exécuter la synchronisation des données	\N
+69	2	TIMESHEET_USURPATION	Peut remplir les feuilles de temps des déclarants d'une activité	\N
 \.
 
 
@@ -2451,7 +2567,6 @@ SELECT pg_catalog.setval('privilege_id_seq', 1, false);
 --
 
 COPY project (id, discipline_id, centaureid, code, eotp, composanteprincipal, acronym, label, description, datecreated, dateupdated, datevalidated) FROM stdin;
-8635	\N	\N	\N	\N	\N	RELATIV	Théorie de la relativité		2017-06-12 12:06:53	2017-06-12 16:10:38	\N
 \.
 
 
@@ -2467,7 +2582,7 @@ COPY project_discipline (project_id, discipline_id) FROM stdin;
 -- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('project_id_seq', 8635, true);
+SELECT pg_catalog.setval('project_id_seq', 8724, true);
 
 
 --
@@ -2504,7 +2619,25 @@ COPY projectpartner (id, project_id, organization_id, datestart, dateend, main, 
 -- Name: projectpartner_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('projectpartner_id_seq', 59703, true);
+SELECT pg_catalog.setval('projectpartner_id_seq', 60583, true);
+
+
+--
+-- Data for Name: role; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY role (id, parent_id, roleid, is_default, ldap_filter) FROM stdin;
+2	\N	user	t	\N
+3	\N	testeur	f	(cn=projet_oscar,ou=groups,dc=unicaen,dc=fr)
+4	\N	hunter	f	\N
+5	\N	Chargé de valorisation	f	\N
+6	\N	Responsable scientifique	f	\N
+7	\N	Responsable	f	\N
+8	\N	Responsable juridique	f	\N
+9	\N	Responsable financier	f	\N
+10	\N	Responsable administratif	f	\N
+1	\N	Administrateur	f	\N
+\.
 
 
 --
@@ -2529,7 +2662,9 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 31	10
 25	10
 54	1
+57	1
 53	9
+57	10
 2	9
 32	9
 34	9
@@ -2551,6 +2686,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 41	15
 51	15
 55	7
+57	7
 6	16
 2	16
 32	16
@@ -2574,6 +2710,9 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 30	11
 54	12
 54	13
+56	12
+56	13
+56	8
 59	1
 58	16
 51	9
@@ -2593,6 +2732,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 22	18
 30	18
 54	18
+57	18
 61	18
 61	10
 61	15
@@ -2682,6 +2822,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 18	1
 18	7
 18	14
+21	7
 21	1
 20	1
 20	7
@@ -2707,6 +2848,11 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 53	22
 41	22
 58	22
+52	16
+65	16
+70	1
+69	1
+68	24
 29	1
 30	1
 30	7
@@ -2759,6 +2905,8 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 30	10
 54	10
 55	1
+56	1
+56	10
 1	9
 3	9
 33	9
@@ -2780,6 +2928,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 39	15
 40	15
 54	7
+56	7
 4	16
 1	16
 3	16
@@ -2789,6 +2938,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 20	16
 24	16
 31	16
+56	16
 39	16
 40	16
 3	11
@@ -2802,6 +2952,9 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 30	12
 54	11
 54	14
+56	11
+56	14
+56	15
 58	1
 60	1
 58	9
@@ -2815,12 +2968,14 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 3	17
 35	17
 30	17
+56	17
 1	18
 32	18
 35	18
 20	18
 24	18
 31	18
+56	18
 58	18
 61	16
 61	8
@@ -2874,6 +3029,13 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 52	22
 40	22
 61	22
+63	16
+37	16
+68	23
+68	21
+67	1
+67	10
+68	1
 \.
 
 
@@ -2881,7 +3043,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 -- Data for Name: timesheet; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activity_id, label, sendby, rejectedscicomment, validatedsciby, validatedscibyid, validatedsciat, validatedadminby, validatedadminbyid, validatedadminat, rejectedsciby, rejectedscibyid, rejectedsciat, rejectedadminby, rejectedadminbyid, rejectedadminat, rejectedadmincomment) FROM stdin;
+COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activity_id, label, validatedsciby, validatedscibyid, validatedsciat, validatedadminby, validatedadminbyid, validatedadminat, rejectedsciby, rejectedscibyid, rejectedsciat, rejectedscicomment, rejectedadminby, rejectedadminbyid, rejectedadminat, rejectedadmincomment, sendby) FROM stdin;
 \.
 
 
@@ -2889,7 +3051,7 @@ COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status
 -- Name: timesheet_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('timesheet_id_seq', 32, true);
+SELECT pg_catalog.setval('timesheet_id_seq', 66, true);
 
 
 --
@@ -2997,7 +3159,6 @@ SELECT pg_catalog.setval('useraccessdefinition_id_seq', 1, false);
 --
 
 COPY workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, code, label, description, datestart, dateend) FROM stdin;
-23	9840	1	\N	\N	\N	\N	\N	\N	VM	Vérification mathématique		\N	\N
 \.
 
 
@@ -3005,7 +3166,7 @@ COPY workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted
 -- Name: workpackage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackage_id_seq', 23, true);
+SELECT pg_catalog.setval('workpackage_id_seq', 27, true);
 
 
 --
@@ -3013,8 +3174,6 @@ SELECT pg_catalog.setval('workpackage_id_seq', 23, true);
 --
 
 COPY workpackageperson (id, person_id, duration, status, datecreated, dateupdated, datedeleted, workpackage_id, createdby_id, updatedby_id, deletedby_id) FROM stdin;
-2	11693	0	1	2017-06-12 16:10:54	\N	\N	23	\N	\N	\N
-3	11692	0	1	2017-06-14 10:55:06	\N	\N	23	\N	\N	\N
 \.
 
 
@@ -3022,7 +3181,7 @@ COPY workpackageperson (id, person_id, duration, status, datecreated, dateupdate
 -- Name: workpackageperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackageperson_id_seq', 3, true);
+SELECT pg_catalog.setval('workpackageperson_id_seq', 15, true);
 
 
 --
@@ -3170,6 +3329,14 @@ ALTER TABLE ONLY logactivity
 
 
 --
+-- Name: notification_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY notification
+    ADD CONSTRAINT notification_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: organization_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -3247,6 +3414,14 @@ ALTER TABLE ONLY projectmember
 
 ALTER TABLE ONLY projectpartner
     ADD CONSTRAINT projectpartner_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: role_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY role
+    ADD CONSTRAINT role_pkey PRIMARY KEY (id);
 
 
 --
@@ -3535,6 +3710,13 @@ CREATE INDEX idx_55026b0ca1b4b28c ON activity USING btree (activitytype_id);
 --
 
 CREATE INDEX idx_55026b0cc54c8c93 ON activity USING btree (type_id);
+
+
+--
+-- Name: idx_57698a6a727aca70; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX idx_57698a6a727aca70 ON role USING btree (parent_id);
 
 
 --
@@ -4049,6 +4231,20 @@ CREATE UNIQUE INDEX uniq_2de8c6a3d60322ac ON user_role USING btree (role_id);
 
 
 --
+-- Name: uniq_57698a6a1596728e; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX uniq_57698a6a1596728e ON role USING btree (ldap_filter);
+
+
+--
+-- Name: uniq_57698a6ab8c2fd88; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX uniq_57698a6ab8c2fd88 ON role USING btree (roleid);
+
+
+--
 -- Name: uniq_598638fb8a90aba9; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -4344,6 +4540,14 @@ ALTER TABLE ONLY activity
 
 ALTER TABLE ONLY activity
     ADD CONSTRAINT fk_55026b0cc54c8c93 FOREIGN KEY (type_id) REFERENCES contracttype(id);
+
+
+--
+-- Name: fk_57698a6a727aca70; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY role
+    ADD CONSTRAINT fk_57698a6a727aca70 FOREIGN KEY (parent_id) REFERENCES role(id);
 
 
 --
