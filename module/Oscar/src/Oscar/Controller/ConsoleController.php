@@ -61,14 +61,14 @@ class ConsoleController extends AbstractOscarController
             $connectorsPerson = $person->getConnectors();
             if( $person->getConnectorID('rest') ){
                 if( count($connectorsPerson) > 1 ){
-                    echo "Traitement appliquable : ";
-                    var_dump($connectorsPerson);
-                    die();
+                    echo "Traitement de $person \n";
+                    $newConnector = [
+                        'rest' => $connectorsPerson['rest']
+                    ];
+                    $person->setConnector($newConnector);
+                    $this->getEntityManager()->flush($person);
                 }
-            } else {
-                // N'est pas connecté
             }
-
         }
     }
 
