@@ -388,7 +388,7 @@ return array(
                     ),
                 ),
 
-                'oscar_console_patch' => array(
+                'oscar_check_privileges' => array(
                     'options' => array(
                         'route' => 'oscar install:check:privileges',
                         'defaults' => array(
@@ -485,15 +485,6 @@ return array(
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'activityFileSync',
-                        ),
-                    ),
-                ],
-                'oscar_patch' => [
-                    'options' => array(
-                        'route' => 'oscar patch',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'patch',
                         ),
                     ),
                 ],
