@@ -49,7 +49,7 @@ class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
 
     public function getSocketUrl(){
         $config = $this->getServiceLocator()->getServiceLocator()->get('Config');
-        return $_SERVER['SERVER_NAME'].':'.$config['oscar']['socket']['port'];
+        return $config['oscar']['socket']['url'];
     }
 
     public function hasSocket(){

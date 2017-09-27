@@ -326,7 +326,8 @@ $this->headScript();
 
         </div>
         <script>
-            var socket;
+		    var socket;
+	
             require(['notifications'], (notifications) => {
                 var n = new notifications.default({
                     el: '#notifications-area',
@@ -335,7 +336,10 @@ $this->headScript();
                     },
                 });
                 n.fetch();
-                <?php if( $this->grant()->hasSocket() ): ?>
+		<?php if( $this->grant()->hasSocket() ): ?>
+		requirejs.config({ paths: {
+			"io":  "<?= $this->grant()->getSocketUrl().'socket.io/socket.io' ?>"
+		}});
                 require(['io'], (io) => {
                     socket = io('<?= $this->grant()->getSocketUrl() ?>', {
                         query: {
