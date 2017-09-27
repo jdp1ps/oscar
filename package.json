@@ -26,5 +26,8 @@
     "gulp-umd": "^0.2.0",
     "mocha": "^3.2.0",
     "requirejs": "^2.3.3"
+  },
+  "dependencies": {
+    "https": "^1.0.0"
   }
 }

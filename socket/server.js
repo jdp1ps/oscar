@@ -1,9 +1,16 @@
-var app = require('express')();
-var http = require('https').Server(app);
-var io = require('socket.io')(http);
+var express = require('express');
+var fs = require('fs');
+var https = require('https');
 var pg = require('pg');
 var bodyParser = require('body-parser');
 var config = require('./config.json');
+
+var app = express();
+var server = https.createServer({
+	key: fs.readFileSync('/etc/ssl/private/oscar-pp_unicaen_fr.key'),
+	cert: fs.readFileSync('/etc/ssl/certs/oscar-pp_unicaen_fr.concat.pem')
+}, app);
+var io = require('socket.io')(server);
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -12,6 +19,10 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 var clients = [];
 var clientsOnline = [];
+
+app.get('*', function(){
+	console.log("access...");
+});
 
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
@@ -111,6 +122,7 @@ io.on('connection', function(socket){
     }
 });
 
-http.listen(config.socket.port, function(){
-    console.log('listening on *:3000');
+
+server.listen(config.socket.port, function(){
+    console.log('listening on *:', config.socket.port);
 });
