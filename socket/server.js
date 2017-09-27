@@ -7,8 +7,8 @@ var config = require('./config.json');
 
 var app = express();
 var server = https.createServer({
-	key: fs.readFileSync('/etc/ssl/private/oscar-pp_unicaen_fr.key'),
-	cert: fs.readFileSync('/etc/ssl/certs/oscar-pp_unicaen_fr.concat.pem')
+	key: fs.readFileSync(config.ssl.key),
+	cert: fs.readFileSync(config.ssl.cert)
 }, app);
 var io = require('socket.io')(server);
 
@@ -20,10 +20,12 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 var clients = [];
 var clientsOnline = [];
 
-app.get('*', function(){
-	console.log("access...");
+app.get('*', function(req, res, next){
+	console.log("GET", (new Date()).toISOString(), req.connection.remoteAddress, req.url);
+	next();
 });
 
+// Page d'accueil
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
