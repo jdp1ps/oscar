@@ -91,4 +91,22 @@ class RoleRepository extends EntityRepository
             ->setParameter('level', $level);
         return $q;
     }
+
+    /**
+     * Retourne un tableau de role indexé par ROLEID.
+     *
+     * @return array|null
+     */
+    public function getRolesOscarByRoleId()
+    {
+        static $rolesByRoleId;
+        if( $rolesByRoleId === null ){
+            $rolesByRoleId = [];
+            /** @var Role $role */
+            foreach($this->findAll() as $role ){
+                $rolesByRoleId[$role->getRoleId()] = $role;
+            }
+        }
+        return $rolesByRoleId;
+    }
 }

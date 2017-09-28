@@ -28,7 +28,7 @@ class ConnectorRepport
             'errors' => $this->getErrors(),
             'warnings' => $this->getWarnings(),
             'removed' => $this->getRemoved(),
-            'noticed' => $this->getNotices(),
+            'notices' => $this->getNotices(),
         ];
     }
 
@@ -78,6 +78,10 @@ class ConnectorRepport
     public function getRemoved()
     {
         return $this->removed;
+    }
+
+    public function isSuspect(){
+        return count($this->getErrors()) + count($this->getWarnings()) > 0;
     }
 
 
@@ -140,6 +144,12 @@ class ConnectorRepport
             'time' => time(),
             'message' => $message
         ];
+    }
+
+    public function addRepport( ConnectorRepport $repport ){
+        foreach ( $repport->getRepportStates() as $state=>$rep ){
+            $this->$state = array_merge($this->$state, $rep);
+        }
     }
 
     public function end(){

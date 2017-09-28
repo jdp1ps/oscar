@@ -486,8 +486,13 @@ class ConsoleController extends AbstractOscarController
 
         foreach( $repport->getRepportStates() as $type => $out ){
             echo "Opération " . strtoupper($type) . " : \n";
-            foreach( $out as $line ){
-                echo date('Y-m-d H:i:s', $line['time']) . "\t" . $line['message'] . "\n";
+            if( $type == "notices" ){
+                echo " - " . count($out) . " notice(s) - Rien à faire\n";
+            } else {
+                foreach ($out as $line) {
+                    echo date('Y-m-d H:i:s',
+                            $line['time']) . "\t" . $line['message'] . "\n";
+                }
             }
         }
     }
