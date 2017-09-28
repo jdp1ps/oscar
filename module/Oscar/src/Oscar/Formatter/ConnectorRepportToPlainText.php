@@ -13,15 +13,19 @@ use Oscar\Connector\ConnectorRepport;
 
 class ConnectorRepportToPlainText
 {
-    public function format(ConnectorRepport $connectorRepport){
+    public function format(ConnectorRepport $connectorRepport, $compact=true){
 
         foreach ($connectorRepport->getRepportStates() as $state=>$datas) {
             echo "# " . strtoupper($state) ."\n";
-            foreach ($datas as $data ){
-                echo date('Y-m-d H:i:s', $data['time'])
-                    ."\t"
-                    . $data['message']
-                    . "\n";
+            if( $compact === true && $state == 'notices' ){
+                echo count($datas) . " notice(s)\n";
+            } else {
+                foreach ($datas as $data ){
+                    echo date('Y-m-d H:i:s', $data['time'])
+                        ."\t"
+                        . $data['message']
+                        . "\n";
+                }
             }
         }
     }

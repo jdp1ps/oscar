@@ -26,6 +26,9 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
     private $editable = false;
 
+    /** @var  ConnectorPersonHydrator */
+    private $personHydrator = null;
+
     public function setEditable($editable){
         $this->editable = $editable;
     }
@@ -65,20 +68,25 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         $this->loadParameters($configFilePath);
     }
 
-    /**
-     * @return PersonRepository
-     */
-    public function getPersonRepository()
-    {
-        return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Person::class);
-    }
-
 
     public function execute( $force = false)
     {
-        $personRepository = $this->getPersonRepository();
+        $personRepository = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Person::class);
 
         return $this->syncPersons($personRepository, $force);
+    }
+
+    /**
+     * @return ConnectorPersonHydrator
+     */
+    public function getPersonHydrator()
+    {
+        if( $this->personHydrator === null ){
+            $this->personHydrator = new ConnectorPersonHydrator(
+                $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
+            );
+        }
+        return $this->personHydrator;
     }
 
     /**
@@ -129,7 +137,11 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 || $personOscar->getDateSyncLdap() == null
                 || $personOscar->getDateSyncLdap() < $personData->dateupdated
                 || $force == true ){
-                $personOscar = $this->hydratePersonWithDatas($personOscar, $personData);
+                $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
+                if( $this->getPersonHydrator()->isSuspect() ){
+                    $repport->addRepport($this->getPersonHydrator()->getRepport());
+                }
+
                 $personRepository->flush($personOscar);
                 if( $action == 'add' ){
                     $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
@@ -141,58 +153,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             }
         }
         return $repport;
-    }
-
-    protected function getRolesOscarByRoleId(){
-        static $roles;
-        if( $roles === null ){
-            $roles = [];
-            /** @var Role $role */
-            foreach($this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Role::class)->findAll() as $role ){
-                $roles[$role->getRoleId()] = $role;
-            }
-        }
-        return $roles;
-    }
-
-    protected function getStructureByCode( $code ){
-        return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Organization::class)->findOneBy(['code' => $code]);
-    }
-
-    private function hydratePersonWithDatas( Person $personOscar, $personData ){
-        $rolesOscar = $this->getRolesOscarByRoleId();
-        foreach( $personData->roles as $organizationCode=>$roles ){
-            /** @var Organization $organization */
-            $organization = $this->getStructureByCode($organizationCode);
-            if( $organization ){
-                foreach( $roles as $roleId ){
-                    if( array_key_exists($roleId, $rolesOscar) ){
-                        if( !$organization->hasPerson($personOscar, $roleId) ){
-                            $roleOscar = new OrganizationPerson();
-                            $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->persist($roleOscar);
-                            $roleOscar->setPerson($personOscar)
-                                ->setOrganization($organization)
-                                ->setRoleObj($rolesOscar[$roleId]);
-                            $personOscar->getOrganizations()->add($roleOscar);
-
-                        }
-                    }
-                }
-            }
-        }
-
-        return $personOscar->setConnectorID($this->getName(), $personData->uid)
-            ->setLadapLogin($personData->login)
-            ->setFirstname($personData->firstname)
-            ->setLastname($personData->lastname)
-            ->setEmail($personData->mail)
-            ->setHarpegeINM($personData->inm)
-            ->setPhone($personData->phone)
-            ->setDateSyncLdap(new \DateTime())
-            ->setLdapStatus($personData->status)
-            ->setLdapAffectation($personData->affectation)
-            ->setLdapSiteLocation($personData->structure)
-            ->setLdapMemberOf($personData->groups);
     }
 
     function syncPerson(Person $person)
@@ -217,7 +177,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 throw new ConnectorException(sprintf("Aucune données retournée par le connecteur%s.", $this->getName()));
             }
 
-            return $this->hydratePersonWithDatas($person, $personData);
+            return $this->getPersonHydrator()->hydratePerson($person, $personData, $this->getName());
 
         } else {
             throw new \Exception('Impossible de synchroniser la personne ' . $person);
