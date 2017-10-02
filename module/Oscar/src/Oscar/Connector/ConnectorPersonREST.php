@@ -10,6 +10,7 @@ namespace Oscar\Connector;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Monolog\Logger;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
@@ -160,6 +161,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         if ($person->getConnectorID($this->getName())) {
 
             $url = sprintf($this->getParameter('url_person'), $person->getConnectorID($this->getName()));
+            $this->getLogger()->info("connector request : " . $url);
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -167,14 +169,17 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             $return = curl_exec($curl);
             curl_close($curl);
             if( false === $return ){
-                // @todo Trouver un moyen de faire remonter une erreur plus "causante"
-                throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
+                $message = sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName());
+                $this->getLogger()->error($message . " - " . cubrid_error_msg());
+                throw new ConnectorException($message);
             }
 
             $personData = json_decode($return);
             if( $personData === null ){
                 // @todo Trouver un moyen de faire remonter une erreur plus "causante"
-                throw new ConnectorException(sprintf("Aucune données retournée par le connecteur%s.", $this->getName()));
+                $message = sprintf("Aucune données retournée par le connecteur%s.", $this->getName());
+                $this->getLogger()->error($message . " - " . print_r($return, true));
+                throw new ConnectorException($message);
             }
 
             return $this->getPersonHydrator()->hydratePerson($person, $personData, $this->getName());
@@ -183,6 +188,13 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             throw new \Exception('Impossible de synchroniser la personne ' . $person);
         }
 
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLogger(){
+        return $this->getServiceLocator()->get('Logger');
     }
 
     /**

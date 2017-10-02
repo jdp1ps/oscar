@@ -147,9 +147,14 @@
                                 <ul>
                                 <?php foreach( $connectors as $connector ): ?>
                                     <li>
-                                        <?= $connector ?> : <strong><?= $entity->getConnectorID($connector) ?></strong>
-                                        <?php if( $entity->getConnectorID($connector) && $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ): ?>
-                                            <a href="<?= $this->url('connector/person') ?>?c=<?= $connector ?>&v=<?= $entity->getConnectorID($connector) ?>">synchroniser</a>
+                                        <?= $connector ?> :
+                                        <?php if( $entity->getConnectorID($connector) ): ?>
+                                            <strong><?= $entity->getConnectorID($connector) ?></strong>
+                                            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ): ?>
+                                                <a  href="<?= $this->url('connector/person') ?>?c=<?= $connector ?>&v=<?= $entity->getConnectorID($connector) ?>"
+                                                    class="btn btn-xs btn-primary">
+                                                    synchroniser</a>
+                                            <?php endif; ?>
                                         <?php else: ?>
                                             <em>Non connecté</em>
                                         <?php endif; ?>
