@@ -12,6 +12,7 @@ use Doctrine\ORM\Query;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Connector\ConnectorPersonHarpege;
+use Oscar\Connector\ConnectorPersonHydrator;
 use Oscar\Connector\ConnectorPersonJSON;
 use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Activity;
@@ -146,6 +147,7 @@ class ConsoleController extends AbstractOscarController
             $datas = json_decode($fileContent);
             if( !$datas )
                 die("les données du fichier $fichier n'ont pas pu être converties.");
+
 
             $connector = new ConnectorPersonJSON($datas, $this->getEntityManager());
             $repport = $connector->syncAll();

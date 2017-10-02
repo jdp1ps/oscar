@@ -2,63 +2,79 @@
   {
     "firstname": "Albert",
     "lastname": "Einstein",
-    "email": "albert.einstein@jacksay.com",
+    "mail": "albert.einstein@jacksay.com",
     "login": "alberteinstein",
-    "uid": "alberteinstein"
+    "uid": "alberteinstein",
+    "roles": {
+      "14": ["Responsable scientifique"]
+    }
+  },
+  {
+    "firstname": "Cet enregistrement sera ignoré, pas d'UID",
+    "lastname": "",
+    "mail": "",
+    "login": ""
   },
   {
     "firstname": "Maurice",
     "lastname": "Solovine",
-    "email": "maurice.solovine@jacksay.com",
+    "mail": "maurice.solovine@jacksay.com",
     "login": "mauricesolovine",
-    "uid": "mauricesolovine"
+    "uid": "mauricesolovine",
+    "roles": {
+      "14": ["Responsable scientifique", "Doctorant"]
+    }
   },
   {
     "firstname": "Marcel",
     "lastname": "Grossmann",
-    "email": "marcel.grossmann@jacksay.com",
+    "mail": "marcel.grossmann@jacksay.com",
     "login": "marcelgrossmann",
     "uid": "marcelgrossmann"
   },
   {
     "firstname": "Max",
     "lastname": "Plank",
-    "email": "max.plank@jacksay.com",
+    "mail": "max.plank@jacksay.com",
     "login": "maxplank",
-    "uid": "maxplank"
+    "uid": "maxplank",
+    "roles": {
+      "14": ["Turlututu"],
+      "ED209": ["Code Absent de oscar => Ignoré"]
+    }
   },
   {
     "firstname": "Niels",
     "lastname": "Bohr",
-    "email": "niels.bohr@jacksay.com",
+    "mail": "niels.bohr@jacksay.com",
     "login": "nielsbohr",
     "uid": "nielsbohr"
   },
   {
     "firstname": "Erwin",
     "lastname": "Schrödinger",
-    "email": "erwin.schrodinger@jacksay.com",
+    "mail": "erwin.schrodinger@jacksay.com",
     "login": "erwinschrodinger",
     "uid": "erwinschrodinger"
   },
   {
     "firstname": "Romane",
     "lastname": "Administrateur",
-    "email": "romane.administrateur@jacksay.com",
+    "mail": "romane.administrateur@jacksay.com",
     "login": "administrateur",
     "uid": "administrateur"
   },
   {
     "firstname": "Raphaelle",
     "lastname": "Responsable",
-    "email": "raphaelle.responsable@jacksay.com",
+    "mail": "raphaelle.responsable@jacksay.com",
     "login": "responsable",
     "uid": "responsable"
   },
   {
     "firstname": "Sarah",
     "lastname": "Déclarant",
-    "email": "sarah.declarant@jacksay.com",
+    "mail": "sarah.declarant@jacksay.com",
     "login": "declarant",
     "uid": "declarant"
   }

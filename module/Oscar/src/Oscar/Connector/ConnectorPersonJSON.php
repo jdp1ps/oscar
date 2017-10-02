@@ -17,6 +17,7 @@ use Oscar\Entity\PersonRepository;
 class ConnectorPersonJSON implements ConnectorInterface
 {
     private $jsonDatas;
+    private $connectorPersonHydrator;
     private $entityManager;
 
     /**
@@ -28,6 +29,7 @@ class ConnectorPersonJSON implements ConnectorInterface
     {
         $this->jsonDatas = $jsonData;
         $this->entityManager = $entityManager;
+        $this->connectorPersonHydrator = new ConnectorPersonHydrator($entityManager);
     }
 
     protected function checkData( $data ){
@@ -46,6 +48,10 @@ class ConnectorPersonJSON implements ConnectorInterface
     {
         $repport = new ConnectorRepport();
         foreach ($this->jsonDatas as $data) {
+            if( !property_exists($data, 'uid') ){
+                $repport->adderror("Les données sans UID sont ignorées : " . print_r($data, true));
+                continue;
+            }
             $this->checkData($data);
             try {
                 $person = $this->getPerson($data->uid);
@@ -56,12 +62,12 @@ class ConnectorPersonJSON implements ConnectorInterface
                 $this->entityManager->persist($person);
             }
 
-            $person->setConnectorID('json', $data->uid)
-                ->setFirstname($data->firstname)
-                ->setLastname($data->lastname)
-                ->setLadapLogin($data->login)
-                ->setEmail($data->email);
+            $this->connectorPersonHydrator->hydratePerson($person, $data, 'json');
+            $repport->addRepport($this->connectorPersonHydrator->getRepport());
+            if( $this->connectorPersonHydrator->isSuspect() ){
 
+                continue;
+            }
 
             try {
                 $this->entityManager->flush($person);
@@ -75,9 +81,6 @@ class ConnectorPersonJSON implements ConnectorInterface
             catch( \Exception $e ){
                 $repport->adderror($message . " a échoué : " . $e->getMessage());
             }
-
-
-
         }
         return $repport;
     }
