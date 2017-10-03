@@ -1,0 +1,362 @@
+{
+  "droit-role-visualisation": {
+    "categorie_id": 7,
+    "code": "role-visualisation",
+    "libelle": "Visualisation des r\u00f4les",
+    "fullcode": "droit-role-visualisation"
+  },
+  "droit-role-edition": {
+    "categorie_id": 7,
+    "code": "role-edition",
+    "libelle": "\u00c9dition des r\u00f4les",
+    "fullcode": "droit-role-edition"
+  },
+  "droit-privilege-visualisation": {
+    "categorie_id": 7,
+    "code": "privilege-visualisation",
+    "libelle": "Privil\u00e8ges - Visualisation",
+    "fullcode": "droit-privilege-visualisation"
+  },
+  "droit-privilege-edition": {
+    "categorie_id": 7,
+    "code": "privilege-edition",
+    "libelle": "Privil\u00e8ges - \u00c9dition",
+    "fullcode": "droit-privilege-edition"
+  },
+  "PROJECT-CREATE": {
+    "categorie_id": 1,
+    "code": "CREATE",
+    "libelle": "Cr\u00e9ation d'un nouveau projet",
+    "fullcode": "PROJECT-CREATE"
+  },
+  "PROJECT-EDIT": {
+    "categorie_id": 1,
+    "code": "EDIT",
+    "libelle": "Modifier la description d'un projet",
+    "fullcode": "PROJECT-EDIT"
+  },
+  "PROJECT-ACTIVITY-ADD": {
+    "categorie_id": 1,
+    "code": "ACTIVITY-ADD",
+    "libelle": "Ajouter une activit\u00e9 dans le projet",
+    "fullcode": "PROJECT-ACTIVITY-ADD"
+  },
+  "PROJECT-PERSON_MANAGE": {
+    "categorie_id": 1,
+    "code": "PERSON_MANAGE",
+    "libelle": "G\u00e9rer les membres d'un projet",
+    "fullcode": "PROJECT-PERSON_MANAGE"
+  },
+  "PROJECT-ORGANIZATION_MANAGE": {
+    "categorie_id": 1,
+    "code": "ORGANIZATION_MANAGE",
+    "libelle": "G\u00e9rer les partenaires d'un projet",
+    "fullcode": "PROJECT-ORGANIZATION_MANAGE"
+  },
+  "PROJECT-DASHBOARD": {
+    "categorie_id": 1,
+    "code": "DASHBOARD",
+    "libelle": "Tableau de bord",
+    "fullcode": "PROJECT-DASHBOARD"
+  },
+  "PROJECT-INDEX": {
+    "categorie_id": 1,
+    "code": "INDEX",
+    "libelle": "Lister et recherche dans les projets",
+    "fullcode": "PROJECT-INDEX"
+  },
+  "ACTIVITY-EXPORT": {
+    "categorie_id": 2,
+    "code": "EXPORT",
+    "libelle": "Exporter les donn\u00e9es des activit\u00e9s",
+    "fullcode": "ACTIVITY-EXPORT"
+  },
+  "ACTIVITY-PAYMENT_MANAGE": {
+    "categorie_id": 2,
+    "code": "PAYMENT_MANAGE",
+    "libelle": "Gestion des versements d'une activit\u00e9s",
+    "fullcode": "ACTIVITY-PAYMENT_MANAGE"
+  },
+  "ACTIVITY-ORGANIZATION_MANAGE": {
+    "categorie_id": 2,
+    "code": "ORGANIZATION_MANAGE",
+    "libelle": "Gestion des partenaires d'une activit\u00e9",
+    "fullcode": "ACTIVITY-ORGANIZATION_MANAGE"
+  },
+  "ACTIVITY-EDIT": {
+    "categorie_id": 2,
+    "code": "EDIT",
+    "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9",
+    "fullcode": "ACTIVITY-EDIT"
+  },
+  "ACTIVITY-INDEX": {
+    "categorie_id": 2,
+    "code": "INDEX",
+    "libelle": "Afficher \/ recherche dans les activit\u00e9s",
+    "fullcode": "ACTIVITY-INDEX"
+  },
+  "ACTIVITY-SHOW": {
+    "categorie_id": 2,
+    "code": "SHOW",
+    "libelle": "Afficher la fiche d'une activit\u00e9",
+    "fullcode": "ACTIVITY-SHOW"
+  },
+  "ACTIVITY-NUMBER": {
+    "categorie_id": 2,
+    "code": "NUMBER",
+    "libelle": "Peut num\u00e9roter l'activit\u00e9",
+    "fullcode": "ACTIVITY-NUMBER"
+  },
+  "ACTIVITY-PAYMENT_SHOW": {
+    "categorie_id": 2,
+    "code": "PAYMENT_SHOW",
+    "libelle": "Voir les versements et le budget",
+    "fullcode": "ACTIVITY-PAYMENT_SHOW"
+  },
+  "ACTIVITY-MILESTONE_SHOW": {
+    "categorie_id": 2,
+    "code": "MILESTONE_SHOW",
+    "libelle": "Peut voir les jalons",
+    "fullcode": "ACTIVITY-MILESTONE_SHOW"
+  },
+  "ACTIVITY-MILESTONE_MANAGE": {
+    "categorie_id": 2,
+    "code": "MILESTONE_MANAGE",
+    "libelle": "Peut g\u00e9rer les jalons",
+    "fullcode": "ACTIVITY-MILESTONE_MANAGE"
+  },
+  "ACTIVITY-DOCUMENT_SHOW": {
+    "categorie_id": 2,
+    "code": "DOCUMENT_SHOW",
+    "libelle": "Peut voir les documents",
+    "fullcode": "ACTIVITY-DOCUMENT_SHOW"
+  },
+  "ACTIVITY-DOCUMENT_MANAGE": {
+    "categorie_id": 2,
+    "code": "DOCUMENT_MANAGE",
+    "libelle": "Peut g\u00e9rer les documents (Ajouter)",
+    "fullcode": "ACTIVITY-DOCUMENT_MANAGE"
+  },
+  "ACTIVITY-DUPLICATE": {
+    "categorie_id": 2,
+    "code": "DUPLICATE",
+    "libelle": "Peut dupliquer l'activit\u00e9",
+    "fullcode": "ACTIVITY-DUPLICATE"
+  },
+  "ACTIVITY-CHANGE_PROJECT": {
+    "categorie_id": 2,
+    "code": "CHANGE_PROJECT",
+    "libelle": "Peut modifier le projet d'une activit\u00e9",
+    "fullcode": "ACTIVITY-CHANGE_PROJECT"
+  },
+  "ACTIVITY-DELETE": {
+    "categorie_id": 2,
+    "code": "DELETE",
+    "libelle": "Peut supprimer d\u00e9finitivement une activit\u00e9",
+    "fullcode": "ACTIVITY-DELETE"
+  },
+  "ACTIVITY-STATUS_OFF": {
+    "categorie_id": 2,
+    "code": "STATUS_OFF",
+    "libelle": "Peut modifier le status vers \"D\u00e9sactiv\u00e9\"",
+    "fullcode": "ACTIVITY-STATUS_OFF"
+  },
+  "ACTIVITY-PERSON_SHOW": {
+    "categorie_id": 2,
+    "code": "PERSON_SHOW",
+    "libelle": "Peut voir les membres d'une activit\u00e9",
+    "fullcode": "ACTIVITY-PERSON_SHOW"
+  },
+  "ACTIVITY-ORGANIZATION_SHOW": {
+    "categorie_id": 2,
+    "code": "ORGANIZATION_SHOW",
+    "libelle": "Peut voir les partenaires d'un projet",
+    "fullcode": "ACTIVITY-ORGANIZATION_SHOW"
+  },
+  "PROJECT-SHOW": {
+    "categorie_id": 1,
+    "code": "SHOW",
+    "libelle": "Voir les d\u00e9tails d'un projet",
+    "fullcode": "PROJECT-SHOW"
+  },
+  "PROJECT-PERSON_SHOW": {
+    "categorie_id": 1,
+    "code": "PERSON_SHOW",
+    "libelle": "Voir les membres d'un projet",
+    "fullcode": "PROJECT-PERSON_SHOW"
+  },
+  "PROJECT-ORGANIZATION_SHOW": {
+    "categorie_id": 1,
+    "code": "ORGANIZATION_SHOW",
+    "libelle": "Voir les partenaires d'un projet",
+    "fullcode": "PROJECT-ORGANIZATION_SHOW"
+  },
+  "PROJECT-DOCUMENT_SHOW": {
+    "categorie_id": 1,
+    "code": "DOCUMENT_SHOW",
+    "libelle": "Voir les documents d'un projet",
+    "fullcode": "PROJECT-DOCUMENT_SHOW"
+  },
+  "PROJECT-ACTIVITY_SHOW": {
+    "categorie_id": 1,
+    "code": "ACTIVITY_SHOW",
+    "libelle": "Voir les activit\u00e9s d'un projet",
+    "fullcode": "PROJECT-ACTIVITY_SHOW"
+  },
+  "PERSON-SHOW": {
+    "categorie_id": 3,
+    "code": "SHOW",
+    "libelle": "Voir la fiche d'une personne",
+    "fullcode": "PERSON-SHOW"
+  },
+  "PERSON-EDIT": {
+    "categorie_id": 3,
+    "code": "EDIT",
+    "libelle": "Modifier la fiche d'une personne",
+    "fullcode": "PERSON-EDIT"
+  },
+  "PERSON-SYNC_LDAP": {
+    "categorie_id": 3,
+    "code": "SYNC_LDAP",
+    "libelle": "Synchroniser les donn\u00e9es avec LDAP",
+    "fullcode": "PERSON-SYNC_LDAP"
+  },
+  "ORGANIZATION-SHOW": {
+    "categorie_id": 4,
+    "code": "SHOW",
+    "libelle": "Voir la fiche d'une organisation",
+    "fullcode": "ORGANIZATION-SHOW"
+  },
+  "ORGANIZATION-EDIT": {
+    "categorie_id": 4,
+    "code": "EDIT",
+    "libelle": "Modifier la fiche d'une organisation",
+    "fullcode": "ORGANIZATION-EDIT"
+  },
+  "ORGANIZATION-SYNC_LDAP": {
+    "categorie_id": 4,
+    "code": "SYNC_LDAP",
+    "libelle": "Synchroniser les donn\u00e9es avec LDAP",
+    "fullcode": "ORGANIZATION-SYNC_LDAP"
+  },
+  "ACTIVITY-PERSON_MANAGE": {
+    "categorie_id": 2,
+    "code": "PERSON_MANAGE",
+    "libelle": "Gestion des membres d'une activit\u00e9",
+    "fullcode": "ACTIVITY-PERSON_MANAGE"
+  },
+  "MAINTENANCE-MENU_ADMIN": {
+    "categorie_id": 6,
+    "code": "MENU_ADMIN",
+    "libelle": "Acc\u00e8s aux menu d'administration",
+    "fullcode": "MAINTENANCE-MENU_ADMIN"
+  },
+  "ORGANIZATION-INDEX": {
+    "categorie_id": 4,
+    "code": "INDEX",
+    "libelle": "Voir la liste des organisations",
+    "fullcode": "ORGANIZATION-INDEX"
+  },
+  "PERSON-INDEX": {
+    "categorie_id": 3,
+    "code": "INDEX",
+    "libelle": "Voir la liste des personnes",
+    "fullcode": "PERSON-INDEX"
+  },
+  "ORGANIZATION-TEST": {
+    "categorie_id": 4,
+    "code": "TEST",
+    "libelle": "Test de requ\u00e8te",
+    "fullcode": "ORGANIZATION-TEST"
+  },
+  "PERSON-PROJECTS": {
+    "categorie_id": 3,
+    "code": "PROJECTS",
+    "libelle": "Voir les projets d'une personnes",
+    "fullcode": "PERSON-PROJECTS"
+  },
+  "PERSON-INFOS_RH": {
+    "categorie_id": 3,
+    "code": "INFOS_RH",
+    "libelle": "Voir les donn\u00e9es administratives",
+    "fullcode": "PERSON-INFOS_RH"
+  },
+  "ACTIVITY-WORKPACKAGE_SHOW": {
+    "categorie_id": 2,
+    "code": "WORKPACKAGE_SHOW",
+    "libelle": "Voir les lots de travail d'une activit\u00e9",
+    "fullcode": "ACTIVITY-WORKPACKAGE_SHOW"
+  },
+  "ACTIVITY-WORKPACKAGE_MANAGE": {
+    "categorie_id": 2,
+    "code": "WORKPACKAGE_MANAGE",
+    "libelle": "G\u00e9rer les lots de travail d'une activit\u00e9",
+    "fullcode": "ACTIVITY-WORKPACKAGE_MANAGE"
+  },
+  "ACTIVITY-WORKPACKAGE_COMMIT": {
+    "categorie_id": 2,
+    "code": "WORKPACKAGE_COMMIT",
+    "libelle": "D\u00e9clarer des heures pour un lot de travail",
+    "fullcode": "ACTIVITY-WORKPACKAGE_COMMIT"
+  },
+  "ACTIVITY-WORKPACKAGE_VALIDATE": {
+    "categorie_id": 2,
+    "code": "WORKPACKAGE_VALIDATE",
+    "libelle": "Valider une d\u00e9claration d'heure pour un lot de travail",
+    "fullcode": "ACTIVITY-WORKPACKAGE_VALIDATE"
+  },
+  "ADMINISTRATIVE-DOCUMENT_INDEX": {
+    "categorie_id": 8,
+    "code": "DOCUMENT_INDEX",
+    "libelle": "Voir les documents adminstratifs",
+    "fullcode": "ADMINISTRATIVE-DOCUMENT_INDEX"
+  },
+  "ADMINISTRATIVE-DOCUMENT_DELETE": {
+    "categorie_id": 8,
+    "code": "DOCUMENT_DELETE",
+    "libelle": "Supprimer un document",
+    "fullcode": "ADMINISTRATIVE-DOCUMENT_DELETE"
+  },
+  "ADMINISTRATIVE-DOCUMENT_DOWNLOAD": {
+    "categorie_id": 8,
+    "code": "DOCUMENT_DOWNLOAD",
+    "libelle": "T\u00e9l\u00e9charger un document",
+    "fullcode": "ADMINISTRATIVE-DOCUMENT_DOWNLOAD"
+  },
+  "ADMINISTRATIVE-DOCUMENT_NEW": {
+    "categorie_id": 8,
+    "code": "DOCUMENT_NEW",
+    "libelle": "T\u00e9l\u00e9verser un nouveau document",
+    "fullcode": "ADMINISTRATIVE-DOCUMENT_NEW"
+  },
+  "DEPENSE-SHOW": {
+    "categorie_id": 9,
+    "code": "SHOW",
+    "libelle": "Voir les d\u00e9penses",
+    "fullcode": "DEPENSE-SHOW"
+  },
+  "droit-USER_VISUALISATION": {
+    "categorie_id": 7,
+    "code": "USER_VISUALISATION",
+    "libelle": "Voir les authentifications utilisateur",
+    "fullcode": "droit-USER_VISUALISATION"
+  },
+  "droit-USER_EDITION": {
+    "categorie_id": 7,
+    "code": "USER_EDITION",
+    "libelle": "G\u00e9rer les authentifications des utilisateurs",
+    "fullcode": "droit-USER_EDITION"
+  },
+  "droit-ROLEORGA_VISUALISATION": {
+    "categorie_id": 7,
+    "code": "ROLEORGA_VISUALISATION",
+    "libelle": "Voir les r\u00f4les des organisations",
+    "fullcode": "droit-ROLEORGA_VISUALISATION"
+  },
+  "droit-ROLEORGA_EDITION": {
+    "categorie_id": 7,
+    "code": "ROLEORGA_EDITION",
+    "libelle": "G\u00e9rer les r\u00f4les des organisations",
+    "fullcode": "droit-ROLEORGA_EDITION"
+  }
+}

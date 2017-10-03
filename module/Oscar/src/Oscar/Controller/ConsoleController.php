@@ -54,6 +54,47 @@ class ConsoleController extends AbstractOscarController
         die('Execution du patch ' . $patchName);
     }
 
+    public function patch_generatePrivilegesJSON(){
+
+        $privileges = [];
+
+        /** @var Privilege $p */
+        foreach($this->getEntityManager()->getRepository(Privilege::class)->findAll() as $p ){
+            $privilege = [
+                'categorie_id'  => $p->getCategorie()->getId(),
+                'code'          => $p->getCode(),
+                'libelle'       => $p->getLibelle(),
+                'fullcode'      => $p->getFullCode(),
+            ];
+            $privileges[$p->getFullCode()] = $privilege;
+        }
+        echo json_encode($privileges);
+        die('Génération du fichier JSON à partir des données de la BDD courante.');
+    }
+
+    public function patch_checkPrivilegesJSON(){
+        $cheminFichier = realpath(__DIR__.'/../../../../../data/privileges.json');
+        echo "$cheminFichier\n";
+        $datas = json_decode(file_get_contents($cheminFichier));
+        var_dump($datas);
+        die();
+        $donneesFichier = json_decode(file_get_contents());
+
+
+        /** @var Privilege $p */
+        foreach($this->getEntityManager()->getRepository(Privilege::class)->findAll() as $p ){
+            $privilege = [
+                'categorie_id'  => $p->getCategorie()->getId(),
+                'code'          => $p->getCode(),
+                'libelle'       => $p->getLibelle(),
+                'fullcode'      => $p->getFullCode(),
+            ];
+            $privileges[$p->getFullCode()] = $privilege;
+        }
+        echo json_encode($privileges);
+        die('Génération du fichier JSON à partir des données de la BDD courante.');
+    }
+
     private function patch_connectors_person(){
         echo "PATCH 'connector_person'\n";
         $persons = $this->getEntityManager()->getRepository(Person::class)->findAll();
@@ -260,112 +301,7 @@ class ConsoleController extends AbstractOscarController
     //
     ////////////////////////////////////////////////////////////////////////////
 
-    public function privilegeAction()
-    {
-        $what = $this->getRequest()->getParam('what');
-        $path = realpath(__DIR__ . '/../../../../../data') . 'privilege_backup';
-        $strEscape = function ($str) {
-            return str_replace("'", "''", $str);
-        };
-        ob_start();
-        ?>
-        -- {roleId}
-        UPDATE user_role SET id = {id}, role_id = {roleId}, is_default = {isDefault}, ldap_filter={ldapFilter} WHERE id={id};
-        INSERT INTO user_role (id, role_id, is_default, ldap_filter) SELECT {id}, {roleId}, {isDefault}, {ldapFilter} WHERE NOT EXISTS (SELECT 1 FROM user_role WHERE id={id});
 
-        <?php $tplRole = ob_get_clean();
-        $tplPrivilegeRole = "INSERT INTO role_privilege (role_id, privilege_id) VALUES ({roleId},{privilegeId}); -- {role}";
-        ob_start();
-        ?>
-
-        -- {code} : {libelle}
-        UPDATE categorie_privilege SET id = {id}, code = {code}, libelle = {libelle} WHERE id={id};
-        INSERT INTO categorie_privilege (id, code, libelle) SELECT {id}, {code}, {libelle} WHERE NOT EXISTS (SELECT 1 FROM categorie_privilege WHERE id={id});
-
-        <?php $tplCategoriePrivilege = ob_get_clean();
-
-        ob_start();
-        ?>
-
-        -- {code} : {libelle}
-        UPDATE privilege SET id = {id}, categorie_id = {categorieId}, code={code}, libelle = {libelle} WHERE id={id};
-        INSERT INTO privilege (id, categorie_id, code, libelle) SELECT {id}, {categorieId}, {code}, {libelle} WHERE NOT EXISTS (SELECT 1 FROM privilege WHERE id={id});
-
-        <?php $tplPrivilege = ob_get_clean();
-
-        if ($what === 'dump') {
-            // Traitement des rôles
-            $roles = $this->getEntityManager()->createQueryBuilder()->select('r')->from(Role::class,
-                'r')
-                ->orderBy('r.parent', 'DESC')
-                ->getQuery()->getResult();
-            ob_start(); ?>
-            -------------------------------------------------------------------
-            -- Script de maintenance Oscar© Université de Normandie 2016
-            -- généré avec la commande 'php public/index.php oscar droits dump'
-            -- le <?= date('Y-m-d H:i:s') ?>
-
-            -------------------------------------------------------------------
-            <?php
-            /** @var Role $role */
-            echo "--\n-- Synchronisation des rôles\n--\n\n";
-            foreach ($roles as $role) {
-                echo strtr($tplRole, [
-                    '{id}' => $role->getId(),
-                    '{roleId}' => "'" . $strEscape($role->getRoleId()) . "'",
-                    '{parentId}' => $role->getParent() ? $role->getParent()->getId() : 'null',
-                    '{isDefault}' => $role->getIsDefault() ? 'true' : 'false',
-                    '{ldapFilter}' => $role->getLdapFilter() ? "'" . $role->getLdapFilter() . "'" : 'null',
-                ]);
-            }
-            echo "\n\n\n--\n-- Synchronisation des catégories de privilèges\n--\n\n";
-
-            $categories = $this->getEntityManager()->createQueryBuilder()->select('c')->from(CategoriePrivilege::class,
-                'c')
-                ->getQuery()->getResult();
-            /** @var CategoriePrivilege $category */
-            foreach ($categories as $category) {
-                echo strtr($tplCategoriePrivilege, [
-                    '{id}' => $category->getId(),
-                    '{code}' => "'" . $category->getCode() . "'",
-                    '{libelle}' => "'" . $strEscape($category->getLibelle()) . "'",
-                ]);
-
-            }
-
-            $privileges = $this->getEntityManager()->createQueryBuilder()->select('p')->from(Privilege::class,
-                'p')
-                ->getQuery()->getResult();
-
-            $privilegesRoles = [];
-            /** @var Privilege $privilege */
-            foreach ($privileges as $privilege) {
-                echo strtr($tplPrivilege, [
-                    '{id}' => $privilege->getId(),
-                    '{code}' => "'" . $privilege->getCode() . "'",
-                    '{categorieId}' => $privilege->getCategorie() ? $privilege->getCategorie()->getId() : 'null',
-                    '{libelle}' => sprintf("'%s'",
-                        $strEscape($privilege->getLibelle())),
-                ]);
-                $privilegesRoles[] = "\n-- %%%% " . $privilege->getFullCode() . " ~ " . $privilege->getLibelle();
-                foreach ($privilege->getRole() as $role) {
-                    $privilegesRoles[] = strtr($tplPrivilegeRole, [
-                        '{privilegeId}' => $privilege->getId(),
-                        '{roleId}' => $role->getId(),
-                        '{role}' => $role->getRoleId()
-                    ]);
-                }
-
-            }
-        }
-        echo ob_get_clean();
-
-        echo "-- SYNCHRONISATION des ROLES <> PRIVILEGES\n";
-        echo "DELETE FROM role_privilege; \n";
-        echo implode("\n", $privilegesRoles);
-
-
-    }
 
     public function confAction()
     {
