@@ -33,6 +33,7 @@ use Oscar\Utils\ActivityCSVToObject;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
 use UnicaenAuth\Authentication\Adapter\Ldap;
+use Zend\Console\Prompt\Confirm;
 use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
@@ -57,7 +58,6 @@ class ConsoleController extends AbstractOscarController
     public function patch_generatePrivilegesJSON(){
 
         $privileges = [];
-
         /** @var Privilege $p */
         foreach($this->getEntityManager()->getRepository(Privilege::class)->findAll() as $p ){
             $privilege = [
@@ -73,26 +73,76 @@ class ConsoleController extends AbstractOscarController
     }
 
     public function patch_checkPrivilegesJSON(){
-        $cheminFichier = realpath(__DIR__.'/../../../../../data/privileges.json');
-        echo "$cheminFichier\n";
-        $datas = json_decode(file_get_contents($cheminFichier));
-        var_dump($datas);
-        die();
-        $donneesFichier = json_decode(file_get_contents());
-
+        $cheminFichier = realpath(__DIR__.'/../../../../../install/privileges.json');
+        if( !file_exists($cheminFichier) ){
+            die("ERREUR : Fichier introuvable\n");
+        }
+        $contenuFichier = file_get_contents($cheminFichier);
+        if( !$contenuFichier ){
+            die("ERREUR : Impossible de lire le fichier : $contenuFichier\n");
+        }
+        $datas = json_decode($contenuFichier);
+        if( !$datas ){
+            die("ERREUR : Impossible de traiter les données du fichier\n");
+        }
+        $toRemove = [];
+        $toAdd = [];
 
         /** @var Privilege $p */
         foreach($this->getEntityManager()->getRepository(Privilege::class)->findAll() as $p ){
-            $privilege = [
-                'categorie_id'  => $p->getCategorie()->getId(),
-                'code'          => $p->getCode(),
-                'libelle'       => $p->getLibelle(),
-                'fullcode'      => $p->getFullCode(),
-            ];
-            $privileges[$p->getFullCode()] = $privilege;
+            $property = $p->getFullCode();
+            if( property_exists($datas, $property) ){
+                unset($datas->$property);
+            } else {
+                $toRemove[$p->getFullCode()] = $p;
+            }
         }
-        echo json_encode($privileges);
-        die('Génération du fichier JSON à partir des données de la BDD courante.');
+        if( count(get_object_vars($datas)) ){
+            echo "Le(s) privilège(s) suivant(s) vont/va être ajouté(s) ? \n";
+            $created = [];
+            foreach ($datas as $fullCode=>$privilegeData){
+                $p = new Privilege();
+                $this->getEntityManager()->persist($p);
+                $p->setCategorie($this->getEntityManager()->getRepository(CategoriePrivilege::class)->find($privilegeData->categorie_id))
+                    ->setCode($privilegeData->code)
+                    ->setLibelle($privilegeData->libelle);
+                $created[] = $p;
+                echo sprintf(" - '%s' : %s\n", $p->getFullCode(), $p->getLibelle());
+            }
+            $confirm = new Confirm("Confirmer la création ? (Y/n) : ");
+            if( $confirm->show() ) {
+                try {
+                    $this->getEntityManager()->flush($created);
+                    echo sprintf("%s objet(s) créé(s).\n", count($created));
+                } catch (\Exception $e ){
+                    echo sprintf("Problème pendant l'enregistrement des privilèges manquants : %s.\n", $e->getMessage());
+                }
+            }
+        } else {
+            echo "Aucun privilèges manquants\n";
+        }
+
+        if( count($toRemove) ){
+            echo "\nIl y'a des privilèges obsolètes : \n";
+            foreach ($toRemove as $fullCode=>$privilege ){
+                echo sprintf(" - '%s' : %s\n", $fullCode, $p->getLibelle());
+            }
+            $confirm = new Confirm("Supprimer les privilèges obsolètes ? (Y/n) : ");
+            if( $confirm->show() ) {
+                try {
+                    foreach ($toRemove as $fullCode=>$privilege ){
+                        $this->getEntityManager()->remove($p);
+                        $this->getEntityManager()->flush($p);
+                        echo sprintf(" - '%s' supprimé\n", $fullCode);
+                    }
+
+                } catch (\Exception $e ){
+                    echo sprintf("Problème pendant la suppression : %s.\n", $e->getMessage());
+                }
+            }
+        } else {
+            echo "Aucun privilèges obsolètes\n";
+        }
     }
 
     private function patch_connectors_person(){
