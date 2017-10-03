@@ -27,6 +27,6 @@ class PublicControllerTest extends AbstractHttpControllerTestCase
         //$this->dispatch('/');
         //$this->assertResponseStatusCode(200);
         //$this->assertXpathQuery('/html');
-        **/
+
     }
 }

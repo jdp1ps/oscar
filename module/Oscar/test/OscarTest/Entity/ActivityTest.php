@@ -15,14 +15,14 @@ class ActivityTest extends PHPUnit_Framework_TestCase
         $activity = new \Oscar\Entity\Activity();
 
         $jc = new \Oscar\Entity\ActivityPerson();
-        $jc->setPerson($person)->setActivity($activity)->setRole("Régis");
+        $jc->setPerson($person)->setActivity($activity)->setRole("Participant");
 
         $activity->getPersons()->add($jc);
 
         $this->assertTrue($activity->hasPerson($person), 'Doit être TRUE');
-        $this->assertTrue($activity->hasPerson($person, "Régis"), 'Doit être TRUE');
+        $this->assertTrue($activity->hasPerson($person, "Participant"), "La personne est dans l'activité avec le rôle donné");
 
-        $this->assertFalse(!$activity->hasPerson($notIn), 'Doit être FALSE');
+        $this->assertFalse($activity->hasPerson($notIn), 'Doit être FALSE');
 
     }
 }

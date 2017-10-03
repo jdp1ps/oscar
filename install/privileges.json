@@ -358,5 +358,29 @@
     "code": "ROLEORGA_EDITION",
     "libelle": "G\u00e9rer les r\u00f4les des organisations",
     "fullcode": "droit-ROLEORGA_EDITION"
+  },
+  "ACTIVITY-TIMESHEET_VALIDATE_SCI": {
+    "categorie_id": 2,
+    "code": "TIMESHEET_VALIDATE_SCI",
+    "libelle": "Validation scientifique des feuilles de temps",
+    "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_SCI"
+  },
+  "ACTIVITY-TIMESHEET_VALIDATE_ADM": {
+    "categorie_id": 2,
+    "code": "TIMESHEET_VALIDATE_ADM",
+    "libelle": "Validation administrative des feuilles de temps",
+    "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_ADM"
+  },
+  "MAINTENANCE-CONNECTOR_ACCESS": {
+    "categorie_id": 6,
+    "code": "CONNECTOR_ACCESS",
+    "libelle": "Peut ex\u00e9cuter la synchronisation des donn\u00e9es",
+    "fullcode": "MAINTENANCE-CONNECTOR_ACCESS"
+  },
+  "ACTIVITY-TIMESHEET_USURPATION": {
+    "categorie_id": 2,
+    "code": "TIMESHEET_USURPATION",
+    "libelle": "Peut remplir les feuilles de temps des d\u00e9clarants d'une activit\u00e9",
+    "fullcode": "ACTIVITY-TIMESHEET_USURPATION"
   }
 }
