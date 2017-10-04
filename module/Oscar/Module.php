@@ -191,7 +191,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $userid = $userContext->getDbUser() ? $userContext->getDbUser()->getid() : -1;
                 $contextId = $match->getParam('id', '?');
                 $message = sprintf('%s@%s:(%s) %s:%s %s', $ip, $userid, $user, $controller, $action, $uri);
-                $sm->get('Logger')->info($message);
+
+                if( $controller != 'Console')
+                    $sm->get('Logger')->info($message);
             } catch (\Exception $e) {
                 error_log($e->getMessage());
             }
