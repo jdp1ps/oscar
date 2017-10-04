@@ -8,5 +8,9 @@
     "socket": {
         "port": 3000,
         "push_path": "/scr2a548f96E712v54398560125408795"
+    },
+    "ssl": {
+        "key": "../data/cert/key.pem",
+        "cert": "../data/cert/cert.pem"
     }
 }
