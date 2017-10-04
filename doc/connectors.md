@@ -7,18 +7,19 @@ Il propose des utilitaires en ligne de commande pour **importer des données** d
 
 ## Principe de Connectors
 
-Les connectors permettent de *brancher* Oscar sur des sources de donnée et d'automatiser la maintenance de ces données à jour.
+Les connectors permettent de *brancher* Oscar sur des sources de donnée et d'automatiser la maintenance de ces données.
 
 Les connectors dans version 2.0 de Oscar s'appuie sur un service REST distant qui va livrer les données à Oscar sous un format standardisé.
 
-Il est possible de développer ces propres services REST si les informations sont réparties de façon plus spécifique dans le SI.
+Il est possible de développer ces propres services si les informations sont réparties de façon plus spécifique dans le SI.
+
 
 
 ## Connector PERSONS
 
 Données utilisées dans l'application pour les personnes qui participent aux activités de recherche.
 
-Note : Attention, dans Oscar, les comptes pour s'authentifier et les personnes sont des données distinctes, une personne peut être présente dans Oscar sans pour autant avoir de compte pour s'authentifier dessus. Par contre, il existe une relation facultative entre les personnes et les authentifications.
+Note : Attention, dans Oscar, les comptes pour s'authentifier et les personnes sont des données distinctes, une personne peut être présente dans Oscar sans pour autant avoir de compte pour s'authentifier dessus. Par contre, il existe une relation facultative entre les personnes et les authentifications. Cette relation est établit côté Oscar via les champs **ldapLogin** dans **Person** et **username** dans **Authentification**.
 
 La configuration suivante dans le fichier `/config/autoload/local.php` permet d'activer le connecteur REST pour les personnes.
 
@@ -43,7 +44,7 @@ return array(
 
 Pour information, la clef `class` permet de choisir une classe à utiliser pour traiter les données. Cette class implémente l'interface `IConnectorPerson`, il est possible d'implémenter vos propres connectors si besoin.
 
-le fichier `/config/connectors/person_rest.yml` contiends les URL utilisées par le connecteur pour obtenir les données :
+le fichier `/config/connectors/person_rest.yml` contient les URL utilisées par le connecteur pour obtenir les données :
 
 ```yml
 # Emplacement du service REST fournissant la liste des personnes
@@ -57,11 +58,9 @@ url_person: 'https://rest.service.tld/api/person/%s'
 
 Les URL correspondent à l'API REST qui devra retourner un JSON standard, pour la liste un tableau d'objet, pour l'accès unitaire un objet simple sous la forme :
 
-(les valeurs terminées par un \* sont obligatoire)
-
 ```JSON
 {
-   "uid": "p00000237",
+   "uid": "p00000237*",
    "login": "sbouvry",
    "firstname": "Stéphane",
    "lastname": "Bouvry",
@@ -97,6 +96,7 @@ Les URL correspondent à l'API REST qui devra retourner un JSON standard, pour l
 ```
 
 Voici les données minimales attendues :
+(les valeurs terminées par un \* sont obligatoire)
 
 ```JSON
 {
@@ -124,17 +124,59 @@ Voici les données minimales attendues :
 }
 ```
 
-Important : Oscar gère l'authentification séparement, il établie la jonction entre
-la Personne (donnée) et l'autentification en utilisant la valeur présente dans login
-qui doit correspondre au champ "supannAliasLogin" côté LDAP.
-
-Dans le rôles, la clef **CODE STRUCTURE** doit correspondre à la valeur *CODE* fournit par le connecteur des organisations (ci-après).
+Important : Oscar gère l'authentification séparément, il établie la jonction entre
+la Personne (donnée) et l'authentification en utilisant la valeur présente dans login
+qui doit correspondre au champ username, cette valeur provient généralement du champ **upannAliasLogin** côté LDAP.
 
 Pour l'URL "liste", le service REST doit retourner un tableau composé d'objets organisés de la même façon.
 
+```JSON
+[
+  {  
+    "uid": "person1",
+    "login": "etc..." 
+  },
+  {
+    "uid": "person2",
+   "login": "etc..." 
+  },
+  { 
+    "uid": "person3",
+    "login": "etc..." 
+  }
+]
+```
+
+### Clef ROLES
+
+Cette clef permet d'affecter automatiquement une personne (**Person**) à une organisation (**Organization**) avec un ou plusieurs rôles.
+
+Elle se présente sous cette forme : 
+```json
+{
+  "roles": {
+    "STRUCTUREA": ["Responsable financier", "Responsable RH"],
+    "STRUCTUREB": ["Responsable RH"]
+  }
+}
+```
+
+La clef rôle est un objet composé de clef, une clef pour chaque structure. Dans cet exemple, il y'a 2 structures identifiées ayant pour **Code de structure** : *STRUCTUREA* et *STRUCTUREB* (ces codes correspondent aux valeur du champ **code** dans le connecteur des organisations - voir plus bas).
+
+La valeur de chaque clef *structure* est un tableau de chaîne de caractère contenant le rôle tel que définit dans Oscar.
+
+La liste des rôles est disponible en base de données dans la table **user_role** ou via l'interface avec le menu `Administration > Gestion des droits`
+
+![Gestion des droits](images/ui-droits.png)
+
+
 ### La clef GROUPS
 
-Cette clef est liée à la gestion des rôles. En effet, un rôle peut être définit avec un filtre *Ldap*. Ce champ permet de savoir les rôles que la personne va aquiérir sur l'application entière si elle s'authentifie sur Oscar. Généralement, les groupes correspondent à la donnée **memberOf** dans *Ldap*.
+Cette clef est liée à la gestion des rôles. En effet, un rôle peut être définit avec un filtre *Ldap*. Dans l'exemple ci dessous, les rôles **utilisateur** et **responsable financier** ont des filtres LDAP.
+
+![Rôle avec des filtres LDAP](images/ui-role-ldap.png)
+
+Si un utilisateur se connecte à Oscar, et qu'il appartiend a un rôle correspondant côté LDAP(généralement, le champ **memberOf** dans un LDAP supann), il va endosser automatiquement dans oscar ce rôle **sur la totalité de l'application** (toutes les activités).
 
 ## Connector ORGANIZATIONS
 
@@ -183,7 +225,6 @@ Données minimales attendues :
 
 
 ## Importer des activités (Installation initiale)
-
 
 Oscar dispose d'un utilitaire en ligne de commande pour importer des activités depuis un fichier CSV ou JSON.
 

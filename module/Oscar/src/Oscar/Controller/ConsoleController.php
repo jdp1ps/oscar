@@ -54,6 +54,12 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    public function patch_test()
+    {
+        echo "TEST:\n";
+
+    }
+
     public function patch_generatePrivilegesJSON(){
 
         $privileges = [];
