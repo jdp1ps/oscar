@@ -6,11 +6,14 @@ L'installation a été testé sous Debian et Ubuntu Server
 
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
- - PHP 7.0+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql)
+ - PHP 7.0+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql, mcrypt, intl)
  - Postgresql 9.4+
  - Annuaire LDAP (supann)
 
+
 ## Installation du système
+
+### Mise à jour du système
 
 On commence par mettre le système à jour.
 
@@ -24,10 +27,17 @@ apt-get upgrade
 
 ### Installation des logiciels
 
+
+Pour récupérer le dépôt 
+
 ```bash
 # Installation de GIT
 apt-get install git-core
+```
 
+Serveur web (Apache) et PHP7 : 
+
+```bash
 # Installation de APACHE2
 apt-get install apache2
 
@@ -40,8 +50,11 @@ apt-get install \
     php7.0-ldap \
     php7.0-mcrypt \
     php7.0-pgsql
+```
 
+Si la base de données est sur la même machine, installation de Postgresql : 
 
+```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
 apt-get install postgresql-client postgresql-client-common
 ```
@@ -70,15 +83,15 @@ Faire un *checkout* de la copie de travail,
 git clone https://<USER>@git.unicaen.fr/bouvry/oscar
 ```
 
+> L'accès au dépôt sur le Gitlab Unicaen necessite la création d'un compte nominatif. Un fois le compte activé, vous aurez accès aux dépôts complets (inculant cette documentation technique)
 
 ## Vendor (librairies tiers)
 
-*Oscar* utilise des libraires tiers (vendor).
+*Oscar* utilise des libraires PHP tiers (vendor).
 
-Pour le développement, elles sont gérées via composer, son utilisation nécessite
- d'avoir accès aux librairies embarquées **Unicaen** : *UnicaenApp*, *UnicaenAuth*.
+> Pour le développement, elles sont gérées via [Composer](https://getcomposer.org), son utilisation nécessite d'avoir accès aux librairies embarquées **Unicaen** : *UnicaenApp*, *UnicaenAuth*. 
 
-**Pour une installation en production/démo**, une archive du dossier vendor est
+Pour une installation en production/démo/développement **hors unicaen**, une archive du dossier vendor est
  disponible dans le dossier `install` au format *.tar.gz* :
 
 ```bash
@@ -333,23 +346,51 @@ Dans le cadre de l'utilisation des *Notification*, Oscar propose un système bas
 
 Par défaut, cette fonctionnalité est désactivée.
 
-Pour l'activer, il faut commence par configurer le serveur **NodeJS** en copiant la configuration par défaut : 
+### Installation du serveur WebSocket
+
+Pour l'activer, il faut commencer par installer NodeJS et NPM : 
 
 ```bash
-cp socket/config.json.dist socket/config.json
+apt-get install node npm
+```
+
+Installer les dépendances du serveur Node : 
+
+```bash
+cd socket
+npm install
+```
+
+### Configuration
+
+Puis configurer le serveur **NodeJS** en copiant la configuration par défaut : 
+
+```bash
+# dans le dossier socket/
+cp config.json.dist config.json
 vim !$
 ```
 
-Remplissez les informations de connection à la base de donnée.
+Remplissez les informations de connection à la base de donnée et d'accès au serveur.
 
 Vous pouvez lancer le serveur node avec la commande : 
 
 ```bash
-cd socket/
+# dans le dossier socket/
 nodejs server.js
 ```
+
+### ProxyPass Apache
+
+Il faut enfin déléger à Apache le soin de relayer les requètes déstinées à NodeJS en utilisant le module **proxy** : 
+
+TODO (feat. Nico)
+
+### Informations complémentaires
 
 Info : Le serveur doit être lancé dans un screen.
 
 Si le fichier *socket/config.json* est présent, **OscarLive** devrait être automatiquement disponible (voir clef socket dans le fichier *config/autoload/local.php*).
+
+
 
