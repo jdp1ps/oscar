@@ -1,7 +1,7 @@
 BUILD = build
 BOOKNAME = Documentation-Oscar
 TITLE = title.txt
-CHAPTERS = install-prod.md connectors.md oscar-commands.md dev.md
+CHAPTERS = install-prod.md connectors.md oscar-commands.md dev.md privileges.md
 TOC = --toc --toc-depth=2
 LATEX_CLASS = report
 
