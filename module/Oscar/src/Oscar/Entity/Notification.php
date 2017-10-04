@@ -43,7 +43,7 @@ class Notification
     private $id;
 
     /**
-     * @ORM\Column(type="datetime", nullable=false)
+     * @ORM\Column(type="datetimetz", nullable=false)
      */
     private $dateEffective;
 
