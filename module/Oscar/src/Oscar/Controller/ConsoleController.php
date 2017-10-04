@@ -52,7 +52,6 @@ class ConsoleController extends AbstractOscarController
         } else {
             die("Le patch '$patchName' n'existe pas/plus.");
         }
-        die('Execution du patch ' . $patchName);
     }
 
     public function patch_generatePrivilegesJSON(){
@@ -86,7 +85,6 @@ class ConsoleController extends AbstractOscarController
             die("ERREUR : Impossible de traiter les données du fichier\n");
         }
         $toRemove = [];
-        $toAdd = [];
 
         /** @var Privilege $p */
         foreach($this->getEntityManager()->getRepository(Privilege::class)->findAll() as $p ){
@@ -119,7 +117,7 @@ class ConsoleController extends AbstractOscarController
                 }
             }
         } else {
-            echo "Aucun privilèges manquants\n";
+            echo " - Aucun privilèges manquants\n";
         }
 
         if( count($toRemove) ){
@@ -141,7 +139,7 @@ class ConsoleController extends AbstractOscarController
                 }
             }
         } else {
-            echo "Aucun privilèges obsolètes\n";
+            echo " - Aucun privilèges obsolètes\n";
         }
     }
 
