@@ -237,7 +237,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             '# AUTHENTIFICATION',
             'oscar auth:promote <login> <role>' => 'Ajoute Un rôle <role> au compte <login>',
             'oscar auth:pass <login> <newpass>' => 'Mets à jour le mot de passe du compte <login>',
-            'oscar auth:add <login> <email> <pass> <displayname>' => 'Cré un nouvel utilisateur.',
+            'oscar auth:add' => 'Cré un nouvel utilisateur.',
 
             '# CONFIGURATION',
             //'oscar check:config' => 'Évaluation de la configuration',
@@ -246,6 +246,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
             '# PERSONNES',
             'oscar persons:sync <connectorkey>' => 'Lance la synchronisation des personnes depuis les différents connecteurs.',
+            'oscar persons:search:connector <connector> <value>' => 'Recherche les personnes ayant pour le connecteur <connector> la valeur <value>',
 
             '# ORGANISATIONS',
             'oscar organizations:sync <connectorkey>' => 'Lance la synchronisation des organization depuis les différents connecteurs.',

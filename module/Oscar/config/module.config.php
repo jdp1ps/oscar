@@ -388,16 +388,6 @@ return array(
                     ),
                 ),
 
-                'oscar_check_privileges' => array(
-                    'options' => array(
-                        'route' => 'oscar install:check:privileges',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'checkPrivileges',
-                        ),
-                    ),
-                ),
-
                 // -------------------------------------------------------------
                 //////////////// PERSON(S)
                 'oscar_persons_search_by_connector' => array(
@@ -492,10 +482,19 @@ return array(
                 /////////////////////////////////////////////// Authentification
                 'oscar_auth_add' => [
                     'options' => array(
-                        'route' => 'oscar auth:add <login> <email> <pass> <displayname>',
+                        'route' => 'oscar auth:add [login] [email] [pass] [displayname]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'authAdd',
+                        ),
+                    ),
+                ],
+                'oscar_auth_list' => [
+                    'options' => array(
+                        'route' => 'oscar auth:list',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'authList',
                         ),
                     ),
                 ],

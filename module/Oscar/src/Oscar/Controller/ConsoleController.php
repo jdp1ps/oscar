@@ -33,7 +33,13 @@ use Oscar\Utils\ActivityCSVToObject;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
 use UnicaenAuth\Authentication\Adapter\Ldap;
+use Zend\Console\Adapter\AdapterInterface;
+use Zend\Console\ColorInterface;
+use Zend\Console\Console;
 use Zend\Console\Prompt\Confirm;
+use Zend\Console\Prompt\Line;
+use Zend\Console\Prompt\Password;
+use Zend\Console\Prompt\PromptInterface;
 use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
@@ -314,11 +320,35 @@ class ConsoleController extends AbstractOscarController
         // Mélange des activités
         die("SUFFLE");
     }
+
+
+    protected function consoleError($msg){
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE, ColorInterface::RED);
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     //
     // AUTHENTIFICATION
     //
     ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Affiche la liste des authentification présentes dans Oscar.
+     */
+    public function authListAction()
+    {
+        $authentifications = $this->getEntityManager()
+            ->getRepository(Authentification::class)
+            ->findAll();
+
+        /** @var Authentification $authentification */
+        foreach ($authentifications as $authentification) {
+            $this->getConsole()->write($authentification->getId()."\t", ColorInterface::CYAN);
+            $this->getConsole()->write($authentification->getUsername());
+            $this->getConsole()->writeLine(sprintf("(%s)", $authentification->getEmail()), ColorInterface::GRAY);
+        }
+    }
+
     /**
      * Ajoute une authentification.
      */
@@ -326,24 +356,77 @@ class ConsoleController extends AbstractOscarController
     {
         try {
             $login = $this->getRequest()->getParam('login');
-            $pass = $this->getRequest()->getParam('pass');
+            if( !$login ){
+                $login = Line::prompt("Entrez l'identifiant : ", true, 64);
+            }
+
+            // Identifiant trop court
+            if( strlen($login) < 4 ){
+                $this->consoleError("L'identifiant doit avoir au moins 4 caractères.");
+                return;
+            }
+
+            // Identifiant déjà utilisé
+            $checkLogin = $this->getEntityManager()
+                ->getRepository(Authentification::class)
+                ->findBy([
+                    'username' => $login
+                ]);
+
+            if( $checkLogin ){
+                $this->consoleError(sprintf("L'identifiant %s est déjà utilisé.", $login));
+                return;
+            }
+
+
+
             $displayname = $this->getRequest()->getParam('displayname');
+            if( !$displayname ){
+                $displayname = Line::prompt("Nom affiché ($login) : ", true, 64);
+                $displayname = $displayname ? $displayname : $login;
+            }
+
+
             $email = $this->getRequest()->getParam('email');
+            if( !$email ){
+                $email = Line::prompt("Email (éviter de laisser vide) : ", true, 256);
+            }
 
             $options = $this->getServiceLocator()->get('zfcuser_module_options');
             $bcrypt = new Bcrypt();
             $bcrypt->setCost($options->getPasswordCost());
 
-            $auth = new Authentification();
-            $auth->setPassword($bcrypt->create($pass));
-            $auth->setDisplayName($displayname);
-            $auth->setUsername($login);
-            $auth->setEmail($email);
+            $password = Password::prompt('Entrez le mot de passe (8 caractères minimum): ', true);
 
-            $this->getEntityManager()->persist($auth);
-            $this->getEntityManager()->flush();
+            if( strlen($password) < 8 ){
+                $this->getConsole()->writeLine("Le mot de passe est trop court :", ColorInterface::WHITE, ColorInterface::RED);
+                return;
+            }
 
-            die(sprintf('User created : %s(%s) %s:%s', $displayname,$email, $login, $pass));
+            // Récape :
+            $this->getConsole()->writeLine("L'utilisateur suivant va être créé : ");
+
+            $this->getConsole()->write("Identifiant de connexion : ", ColorInterface::GRAY);
+            $this->getConsole()->writeLine($login, ColorInterface::WHITE);
+
+            $this->getConsole()->write("Nom affiché : ", ColorInterface::GRAY);
+            $this->getConsole()->writeLine($displayname, ColorInterface::WHITE);
+
+            $this->getConsole()->write("Courriel : ", ColorInterface::GRAY);
+            $this->getConsole()->writeLine($email, ColorInterface::WHITE);
+
+            $confirm = Confirm::prompt("Créer l'utilisateur ? ");
+            if( $confirm ){
+                $auth = new Authentification();
+                $auth->setPassword($bcrypt->create($password));
+                $auth->setDisplayName($displayname);
+                $auth->setUsername($login);
+                $auth->setEmail($email);
+                $this->getEntityManager()->persist($auth);
+                $this->getEntityManager()->flush();
+                $this->getConsole()->writeLine(sprintf("%s a été créé avec succès.", $login), ColorInterface::WHITE, ColorInterface::GREEN);
+            }
+            return;
         } catch( \Exception $ex ){
             die($ex->getMessage() . "\n" . $ex->getTraceAsString());
         }
@@ -451,12 +534,6 @@ class ConsoleController extends AbstractOscarController
      *
      * ###################################################################### */
 
-
-
-    private function triggerConnector( $connector ){
-
-    }
-
     /**
      * Lancement de la synchronisation des organisations avec le connecteur spécifié.
      */
@@ -489,31 +566,49 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * @return AdapterInterface
+     */
+    protected function getConsole(){
+        return $this->getServiceLocator()->get('console');
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     //
     // PERSON(S)
     //
+    ////////////////////////////////////////////////////////////////////////////
+    /**
+     * Recherche une personne dans la base de donnée à partir avec la valeur
+     * donnée pour un connecteur donné.
+     */
     public function personsSearchConnectorAction(){
         $connectorName = $this->getRequest()->getParam('connector');
         $value = $this->getRequest()->getParam('value');
+
+        $this->getConsole()->clear();
+        $this->getConsole()->writeLine(sprintf("Recherche de pour %s = '%s' : ", $connectorName, $value), ColorInterface::GRAY);
 
         /** @var PersonRepository $personRepository */
         $personRepository = $this->getEntityManager()->getRepository(Person::class);
 
         try {
             $persons = $personRepository->getPersonsByConnectorID($connectorName, $value);
+            if( count($persons) == 0 ){
+                $this->getConsole()->writeLine(sprintf("Aucun résultat pour %s = '%s'", $connectorName, $value), ColorInterface::YELLOW);
+            }
+
             foreach( $persons as $person ){
-                echo sprintf(" - [%s] %s (%s)\n", $person->getId(), $person, $person->getEmail());
+                $this->getConsole()->write(sprintf(" [%s] ", $person->getId()), ColorInterface::CYAN);
+                $this->getConsole()->write(sprintf("%s", $person), ColorInterface::NORMAL);
+                $this->getConsole()->writeLine(sprintf(" (%s)", $person->getEmail()), ColorInterface::GRAY);
             }
         } catch( \Exception $ex ){
+
             echo "############################ " . $ex->getMessage() . "\n"
                 . $ex->getTraceAsString();
         }
-
-        echo $connectorName." = ".$value;
     }
-
-
 
     public function personSyncAction()
     {
@@ -623,6 +718,13 @@ class ConsoleController extends AbstractOscarController
 
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // AUTHENTIFICATION
+    //
+    ////////////////////////////////////////////////////////////////////////////
+
+
     public function authPassAction()
     {
         try {
@@ -708,55 +810,6 @@ class ConsoleController extends AbstractOscarController
                     }
                 }
             }
-//            $this->getLogger()->info($activity);
         }
-    }
-
-    public function checkAuthentificationAction(){
-        echo "START : Test de configuration\n";
-        $login = $this->getRequest()->getParam('login');
-        $pass = $this->getRequest()->getParam('pass');
-
-        try {
-            $ldapOpt = $this->getServiceLocator()->get('unicaen-app_module_options')->getLdap();
-            foreach ($ldapOpt['connection'] as $name => $connection) {
-                $options[$name] = $connection['params'];
-            }
-            /** @var Ldap $ldapUnicaenAuth */
-            $ldapUnicaenAuth = new Ldap();
-            $ldapUnicaenAuth->setServiceManager($this->getServiceLocator());
-            $ldapUnicaenAuth->setEventManager($this->getEventManager());
-            $ldapUnicaenAuth->authenticateUsername($login, $pass);
-            echo " # ACCOUND OBJECT : \n";
-            //var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getAccountObject());
-            var_dump($ldapUnicaenAuth->getLdapAuthAdapter()->getIdentity());
-
-            /** @var \UnicaenApp\Mapper\Ldap\People $ldapmapper */
-            $ldapmapper = $this->getServiceLocator()->get('ldap_people_service')->getMapper();
-
-            $people = $ldapmapper->findOneByUsername($ldapUnicaenAuth->getLdapAuthAdapter()->getIdentity());
-            var_dump($people);
-
-            /*
-            $ldapAuthAdapter = new \Zend\Authentication\Adapter\Ldap($options); // NB: array(array)
-            $result = $ldapAuthAdapter->setPassword($pass)->setUsername($login)->authenticate();
-
-            if( $result->isValid() ){
-                echo "Authentification OK : \n";
-                var_dump($result);
-                echo "Get userContext : \n";
-                $context = $this->getServiceLocator()->get('userContext');
-            } else {
-                echo "Authentification FAIL : \n";
-                var_dump($result);
-            }
-            */
-
-        } catch( \Exception $e ){
-            echo "ERROR : " . $e->getMessage() . "\n";
-        }
-
-
-        echo "DONE\n";
     }
 }
