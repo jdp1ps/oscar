@@ -235,7 +235,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
     {
         return [
             '# AUTHENTIFICATION',
-            'oscar auth:promote <login> [<role>]' => 'Ajoute Un rôle <role> au compte <login>',
+            'oscar auth:promote <login> [<role>]' => 'Ajoute Un rôle <role> au compte <login>, si le role n\'est pas précisé, une liste de choix s\'affiche',
             'oscar auth:pass <login> [--ldap]' => 'Mets à jour le mot de passe du compte <login>, l\'option --ldap permet de déléger le contrôle du mot de passe à ldap' ,
             'oscar auth:add' => 'Cré un nouvel utilisateur.',
 
