@@ -9,6 +9,7 @@ namespace Oscar\Controller;
 
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
@@ -17,8 +18,10 @@ use Oscar\Connector\ConnectorPersonHydrator;
 use Oscar\Connector\ConnectorPersonJSON;
 use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\CategoriePrivilege;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
@@ -349,6 +352,14 @@ class ConsoleController extends AbstractOscarController
     }
 
     /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleKeyValue($key, $value){
+        $this->getConsole()->write($key, ColorInterface::GRAY);
+        $this->getConsole()->writeLine($value, ColorInterface::CYAN);
+    }
+
+    /**
      * @param $msg Erreur à afficher
      */
     protected function consoleError($msg){
@@ -562,6 +573,67 @@ class ConsoleController extends AbstractOscarController
             }
 
             $this->consoleSuccess(sprintf("Le role '%s' a été ajouté à %s(%s) dans l'application.", $roleId, $auth->getUsername(), $auth->getDisplayName()));
+            return;
+
+        } catch( \Exception $ex ){
+            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
+        }
+    }
+
+    public function authInfoAction()
+    {
+        try {
+            $loginStr = $this->getRequest()->getParam('login');
+
+            /** @var Authentification $auth */
+            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $loginStr]);
+            if( !$auth ){
+                $this->consoleError("Aucune compte d'authentification d'a pour identifiant '$loginStr'");
+                return;
+            }
+            $this->getConsole(sprintf("Détails du compte %s : ", $auth->getUsername()));
+            $this->consoleKeyValue('ID : ', $auth->getId());
+            $this->consoleKeyValue('username (identifiant) : ', $auth->getUsername());
+            $this->consoleKeyValue('displayName : ', $auth->getDisplayName());
+            $this->consoleKeyValue('email : ', $auth->getEmail());
+            $this->getConsole()->writeLine("Rôles : ", ColorInterface::GRAY);
+            foreach ($auth->getRoles() as $role ){
+                $this->getConsole()->writeLine(' - ' . $role, ColorInterface::YELLOW);
+            }
+
+            try {
+                $person = $this->getPersonService()->getPersonByLdapLogin($auth->getUsername());
+                $this->consoleKeyValue('Person : ', $person);
+
+                if( $this->params('org') ) {
+                    $this->getConsole()->writeLine("# Rôles dans des organisations : ", ColorInterface::GRAY);
+                    /** @var OrganizationPerson $op */
+                    foreach ($person->getOrganizations() as $op) {
+                        $this->getConsole()->write($op->getOrganization(),
+                            ColorInterface::BLUE);
+                        $this->getConsole()->write(" : ", ColorInterface::GRAY);
+                        $this->getConsole()->writeLine($op->getRole(),
+                            $op->getRoleObj()->isPrincipal() ? ColorInterface::WHITE : ColorInterface::GRAY);
+                    }
+                }
+                if( $this->params('act') ) {
+                    $this->getConsole()->writeLine("# Rôles dans des activitès : ", ColorInterface::GRAY);
+                    /** @var ActivityPerson $op */
+                    foreach ($person->getActivities() as $ap) {
+                        $this->getConsole()->write($ap->getActivity(),
+                            ColorInterface::BLUE);
+                        $this->getConsole()->write(" : ", ColorInterface::GRAY);
+                        $this->getConsole()->writeLine($ap->getRole(),
+                            $ap->getRoleObj()->isPrincipal() ? ColorInterface::WHITE : ColorInterface::GRAY);
+                    }
+                }
+            } catch (NoResultException $e ){
+                $this->getConsole()->writeLine("Ce compte n'est pas associé à une personne physique dans oscar", ColorInterface::BLACK, ColorInterface::YELLOW);
+            }
+
+
+
+
             return;
 
         } catch( \Exception $ex ){
