@@ -517,6 +517,16 @@ return array(
                     ),
                 ],
 
+                'oscar_auth_info' => [
+                    'options' => array(
+                        'route' => 'oscar auth:info <login> [--org] [--act]',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'authInfo',
+                        ),
+                    ),
+                ],
+
                 'oscar_search_delete' => array(
                     'options' => array(
                         'route' => 'oscar search:delete <id>',
