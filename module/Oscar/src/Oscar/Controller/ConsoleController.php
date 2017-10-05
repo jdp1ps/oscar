@@ -58,7 +58,11 @@ class ConsoleController extends AbstractOscarController
         /** @var NotificationService $notificationService */
         $notificationService = $this->getServiceLocator()->get('NotificationService');
 
-        //$notificationService->generateNotificationsForActivity()
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find(9099);
+
+
+        $notificationService->generateNotificationsForActivity($activity);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////

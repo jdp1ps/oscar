@@ -45,6 +45,29 @@ class ActivityDate implements ITrackable
     private $comment;
 
     /**
+     * Test
+     * @return array
+     */
+    public function getRecursivity(){
+        if( $this->getType() ){
+            return $this->getType()->getRecursivity();
+        }
+        return [];
+    }
+
+    public function getRecursivityDate(){
+        $dates = [];
+
+        foreach ( $this->getRecursivity() as $days ){
+            $date = new \DateTime($this->getDateStart()->format('Y-m-d'));
+            $interval = new \DateInterval('P'.$days.'D');
+            $interval->invert = 1;
+            echo $date->format('Y-m-d') . " - $days = ";
+            echo $date->add($interval)->format("Y-m-d")."\n";
+        }
+    }
+
+    /**
      * @return datetime
      */
     public function getDateStart()

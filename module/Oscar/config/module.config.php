@@ -354,6 +354,17 @@ return array(
         'router' => array(
             'routes' => array(
 
+                'notification_activity_generate' => [
+                    'options' => [
+                        'route' => 'oscar notifications:generate <idactivity>',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'notificationsActivityGenerate',
+                        ],
+                    ]
+                ],
+
+
                 ////////////////////////////////////////////////////////////////
                 // Procédure d'évaluation de la configuration
                 'oscar_check_config' => array(

@@ -33,7 +33,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
      * @param $privilegeFullCode
      * @param $activity
      */
-    public function getAllPersonsWithPrivilegeInActivity( $privilegeFullCode, Activity $activity )
+    public function getAllPersonsWithPrivilegeInActivity( $privilegeFullCode, Activity $activity, $includeApp=false )
     {
         // Résultat
         $persons = [];
@@ -42,53 +42,57 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $privilegeRepository = $this->getEntityManager()->getRepository(Privilege::class);
 
         try {
+            $rolesIds = []; // rôles
+            $ldapFilters = []; // filtre LDAP
             // 1. Récupération des rôles associès au privilège
             $privilege = $privilegeRepository->getPrivilegeByCode($privilegeFullCode);
 
-            $rolesIds = []; // rôles
-            $ldapFilters = []; // filtre LDAP
-
-            foreach ($privilege->getRole() as $role){
+            foreach ($privilege->getRole() as $role) {
                 $rolesIds[] = $role->getRoleId();
-                if( $role->getLdapFilter() ){
-                    $ldapFilters[] = preg_replace('/\(memberOf=(.*)\)/', '$1', $role->getLdapFilter());
+                if ($role->getLdapFilter()) {
+                    $ldapFilters[] = preg_replace('/\(memberOf=(.*)\)/',
+                        '$1', $role->getLdapFilter());
                 }
             }
 
-            // Selection des personnes qui ont le filtre LDAP (Niveau applicatif)
-            if( $ldapFilters ){
-                $clause = [];
-                foreach ($ldapFilters as $f ){
-                    $clause[] = "p.ldapMemberOf LIKE '%$f%'";
+            if( $includeApp ) {
+
+
+                // Selection des personnes qui ont le filtre LDAP (Niveau applicatif)
+                if ($ldapFilters) {
+                    $clause = [];
+                    foreach ($ldapFilters as $f) {
+                        $clause[] = "p.ldapMemberOf LIKE '%$f%'";
+                    }
+
+                    $personsLdap = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+                        ->where(implode(' OR ', $clause))
+                        ->getQuery()
+                        ->getResult();
+
+                    foreach ($personsLdap as $p) {
+                        $persons[$p->getId()] = $p;
+                    }
                 }
 
-                $personsLdap = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
-                    ->where(implode(' OR ', $clause))
+                // Selection des personnes via l'authentification (Affectation en dur, niveau applicatif)
+                $authentifications = $this->getEntityManager()->createQueryBuilder()
+                    ->select('a, r')
+                    ->from(Authentification::class, 'a')
+                    ->innerJoin('a.roles', 'r')
                     ->getQuery()
                     ->getResult();
 
-                foreach ($personsLdap as $p ){
-                    $persons[$p->getId()] = $p;
-                }
-            }
-
-            // Selection des personnes via l'authentification (Affectation en dur, niveau applicatif)
-            $authentifications = $this->getEntityManager()->createQueryBuilder()
-                ->select('a, r')
-                ->from(Authentification::class, 'a')
-                ->innerJoin('a.roles', 'r')
-                ->getQuery()
-                ->getResult();
-
-            foreach ($authentifications as $auth) {
-                if( $auth->hasRolesIds($rolesIds) ){
-                    try {
-                        $person = $this->getEntityManager()->getRepository(Person::class)->findOneBy(['ladapLogin' => $auth->getUsername()]);
-                        if( $person ){
-                            $persons[$person->getId()] = $person;
+                foreach ($authentifications as $auth) {
+                    if ($auth->hasRolesIds($rolesIds)) {
+                        try {
+                            $person = $this->getEntityManager()->getRepository(Person::class)->findOneBy(['ladapLogin' => $auth->getUsername()]);
+                            if ($person) {
+                                $persons[$person->getId()] = $person;
+                            }
+                        } catch (\Exception $e) {
+                            echo "Error : " . $e->getMessage() . "<br>\n";
                         }
-                    } catch (\Exception $e ){
-                        echo "Error : " . $e->getMessage() . "<br>\n";
                     }
                 }
             }
