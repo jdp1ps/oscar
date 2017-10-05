@@ -11,6 +11,7 @@ use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\Notification;
+use Oscar\Entity\Person;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -25,8 +26,21 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     {
         $notifications = [];
 
+        /** @var PersonService $personsService */
+        $personsService = $this->getServiceLocator()->get('PersonService');
+
+        /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
+        $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
+
+        /** @var Person $person */
+        foreach ($persons as $person){
+            echo "$person\n";
+        }
+
         /** @var ActivityDate $milestone */
         foreach( $activity->getMilestones() as $milestone ){
+            echo " --- " . $milestone->getType()->getLabel() . "\n";
+            var_dump($milestone->getRecursivityDate());
             echo " - $milestone\n";
         }
 

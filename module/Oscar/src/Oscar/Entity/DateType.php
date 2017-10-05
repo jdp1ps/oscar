@@ -41,12 +41,22 @@ class DateType implements ITrackable
      */
     private $description;
 
+    private $recursivity = [60,30,15,7,1,0];
+
     /**
      * @return string
      */
     public function getLabel()
     {
         return $this->label;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRecursivity()
+    {
+        return $this->recursivity;
     }
 
     /**
