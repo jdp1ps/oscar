@@ -500,7 +500,7 @@ return array(
                 ],
                 'oscar_auth_pass' => [
                     'options' => array(
-                        'route' => 'oscar auth:pass <login> <newpass>',
+                        'route' => 'oscar auth:pass <login> [--ldap]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'authPass',

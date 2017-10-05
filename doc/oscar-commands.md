@@ -8,20 +8,24 @@ Oscar dispose d'un accès terminal pour lancer automatiquement certaines tâche 
 ### Créer un accès 'libre'
 
 ```bash
-php public/index.php oscar auth:add logindemaurice maurice@domain.tld SuperMotDePasse Maurice
+php public/index.php oscar auth:add
 ```
+
+Une série d'invites permettront de renseigner les différents paramètres du compte à créer.
 
 ### Créer un administrateur
 
 Se connecter en SSH sur la machine hébergeant Oscar et se rendre dans le dossier racine :
 
-On commence par créer un utilisateur :  
+On commence par créer un utilisateur, puis lui attribuer le rôle *Administrateur* :
 
 ```bash
-php public/index.php oscar auth:add hulk b.banner@domaine.tld PasColere "Bruce Banner"
+php public/index.php oscar auth:promote hulk Administrateur
 ```
 
-Puis lon lui attribut le rôle "Administrateur" :
+### Lister les authentifications actives
+
+On peut également lister les authentifications actives dans la BDD : 
 
 ```bash
 php public/index.php oscar auth:promote hulk Administrateur
