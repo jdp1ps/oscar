@@ -28,6 +28,7 @@ use Oscar\Entity\RoleRepository;
 use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConnectorService;
+use Oscar\Service\NotificationService;
 use Oscar\Service\ShuffleDataService;
 use Oscar\Utils\ActivityCSVToObject;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -44,6 +45,16 @@ use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
 {
+
+
+
+    public function notificationsActivityGenerateAction()
+    {
+        /** @var NotificationService $notificationService */
+        $notificationService = $this->getServiceLocator()->get('NotificationService');
+
+        //$notificationService->generateNotificationsForActivity()
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////
     ///
@@ -321,7 +332,23 @@ class ConsoleController extends AbstractOscarController
         die("SUFFLE");
     }
 
+    /**
+     * @return AdapterInterface
+     */
+    protected function getConsole(){
+        return $this->getServiceLocator()->get('console');
+    }
 
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleSuccess($msg){
+        $this->getConsole()->writeLine($msg, ColorInterface::BLACK, ColorInterface::GREEN);
+    }
+
+    /**
+     * @param $msg Erreur à afficher
+     */
     protected function consoleError($msg){
         $this->getConsole()->writeLine($msg, ColorInterface::WHITE, ColorInterface::RED);
     }
@@ -566,13 +593,6 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
-    /**
-     * @return AdapterInterface
-     */
-    protected function getConsole(){
-        return $this->getServiceLocator()->get('console');
-    }
-
     ////////////////////////////////////////////////////////////////////////////
     //
     // PERSON(S)
@@ -730,16 +750,46 @@ class ConsoleController extends AbstractOscarController
         try {
             $login = $this->getRequest()->getParam('login');
             $pass = $this->getRequest()->getParam('newpass');
+            $ldap = $this->getRequest()->getParam('ldap');
 
-            $options = $this->getServiceLocator()->get('zfcuser_module_options');
-            $bcrypt = new Bcrypt();
-            $bcrypt->setCost($options->getPasswordCost());
-
+            /** @var Authentification $auth */
             $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $login]);
-            $auth->setPassword($bcrypt->create($pass));
-            $this->getEntityManager()->flush();
+            if( !$auth ){
+                $this->consoleError("Ce compte n'existe pas...");
+                return;
+            } else {
+                $this->getConsole()->write("Modification du mot de passe pour ", ColorInterface::GRAY);
+                $this->getConsole()->write($auth->getUsername(), ColorInterface::WHITE);
+                $this->getConsole()->writeLine(" (" . $auth->getDisplayName() . ", ". $auth->getEmail().")", ColorInterface::BLUE);
+            }
 
-            die(sprintf("User pass updated %s:%s\n", $login, $pass));
+            if( !$ldap ){
+                $pass = Password::prompt("Entrez le nouveau mot de passe : ");
+                if( strlen($pass) < 8 ){
+                    $this->consoleError("Le mot de passe doit faire au moins 8 caractères.");
+                    return;
+                }
+
+                $confirm = Password::prompt("Confirmer le nouveau mot de passe : ");
+                if( $confirm != $pass ){
+                    $this->consoleError("Les mots de passe ne correspondent pas");
+                    return;
+                }
+
+                $options = $this->getServiceLocator()->get('zfcuser_module_options');
+                $bcrypt = new Bcrypt();
+                $bcrypt->setCost($options->getPasswordCost());
+                $password = $bcrypt->create($pass);
+
+            } else {
+                $password = 'ldap';
+            }
+
+            if( Confirm::prompt("Modifier le mot de passe ? (Y|n) ") ){
+                $auth->setPassword($password);
+                $this->getEntityManager()->flush();
+                $this->consoleSuccess("Le mot de passe a été mis à jour");
+            }
         } catch( \Exception $ex ){
             die($ex->getMessage() . "\n" . $ex->getTraceAsString());
         }
