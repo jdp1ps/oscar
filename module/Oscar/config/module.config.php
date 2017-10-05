@@ -509,7 +509,7 @@ return array(
                 ],
                 'oscar_auth_promote' => [
                     'options' => array(
-                        'route' => 'oscar auth:promote <login> <role>',
+                        'route' => 'oscar auth:promote <login> [<role>]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'authPromote',

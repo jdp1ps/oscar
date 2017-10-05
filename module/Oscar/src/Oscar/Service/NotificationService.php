@@ -9,6 +9,7 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityDate;
 use Oscar\Entity\Notification;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -20,6 +21,17 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
+    public function generateNotificationsForActivity( Activity $activity )
+    {
+        $notifications = [];
+
+        /** @var ActivityDate $milestone */
+        foreach( $activity->getMilestones() as $milestone ){
+            echo " - $milestone\n";
+        }
+
+    }
+
     public function deleteNotifications( array $ids ){
         $query = $this->getEntityManager()->getRepository(Notification::class)->createQueryBuilder('n')
             ->delete()
@@ -28,7 +40,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ->getQuery()->getResult();
         return true;
     }
-
 
     public function getNotificationsPerson( $personId ){
         $result = [

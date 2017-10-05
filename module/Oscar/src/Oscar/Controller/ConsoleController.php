@@ -8,6 +8,7 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\Query;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
@@ -41,6 +42,7 @@ use Zend\Console\Prompt\Confirm;
 use Zend\Console\Prompt\Line;
 use Zend\Console\Prompt\Password;
 use Zend\Console\Prompt\PromptInterface;
+use Zend\Console\Prompt\Select;
 use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
@@ -405,8 +407,6 @@ class ConsoleController extends AbstractOscarController
                 return;
             }
 
-
-
             $displayname = $this->getRequest()->getParam('displayname');
             if( !$displayname ){
                 $displayname = Line::prompt("Nom affiché ($login) : ", true, 64);
@@ -459,14 +459,121 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    public function authPassAction()
+    {
+        try {
+            $login = $this->getRequest()->getParam('login');
+            $pass = $this->getRequest()->getParam('newpass');
+            $ldap = $this->getRequest()->getParam('ldap');
+
+            /** @var Authentification $auth */
+            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $login]);
+            if( !$auth ){
+                $this->consoleError("Ce compte n'existe pas...");
+                return;
+            } else {
+                $this->getConsole()->write("Modification du mot de passe pour ", ColorInterface::GRAY);
+                $this->getConsole()->write($auth->getUsername(), ColorInterface::WHITE);
+                $this->getConsole()->writeLine(" (" . $auth->getDisplayName() . ", ". $auth->getEmail().")", ColorInterface::BLUE);
+            }
+
+            if( !$ldap ){
+                $pass = Password::prompt("Entrez le nouveau mot de passe : ");
+                if( strlen($pass) < 8 ){
+                    $this->consoleError("Le mot de passe doit faire au moins 8 caractères.");
+                    return;
+                }
+
+                $confirm = Password::prompt("Confirmer le nouveau mot de passe : ");
+                if( $confirm != $pass ){
+                    $this->consoleError("Les mots de passe ne correspondent pas");
+                    return;
+                }
+
+                $options = $this->getServiceLocator()->get('zfcuser_module_options');
+                $bcrypt = new Bcrypt();
+                $bcrypt->setCost($options->getPasswordCost());
+                $password = $bcrypt->create($pass);
+
+            } else {
+                $password = 'ldap';
+            }
+
+            if( Confirm::prompt("Modifier le mot de passe ? (Y|n) ") ){
+                $auth->setPassword($password);
+                $this->getEntityManager()->flush();
+                $this->consoleSuccess("Le mot de passe a été mis à jour");
+            }
+        } catch( \Exception $ex ){
+            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
+        }
+    }
+
+    public function authPromoteAction()
+    {
+        try {
+            $loginStr = $this->getRequest()->getParam('login');
+            $roleStr = $this->getRequest()->getParam('role');
+
+            /** @var Authentification $auth */
+            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $loginStr]);
+
+            if( !$auth ){
+                $this->consoleError("Aucune compte d'authentification d'a pour identifiant '$loginStr'");
+                return;
+            }
+
+            if( !$roleStr ){
+                $this->getConsole()->writeLine("Liste des rôles : ");
+                $options = [];
+                $codes = 'abcdefghifklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+                $choose = 0;
+                /** @var Role $role */
+                foreach ($this->getEntityManager()->getRepository(Role::class)->findBy([], ['roleId'=>'ASC']) as $role ){
+                    $options[$codes[$choose++]] = $role->getRoleId();
+                }
+
+                $answer = Select::prompt(
+                    'Quel rôle ajouter à '.$auth->getDisplayname().' ?',
+                    $options,
+                    false,
+                    false
+                );
+
+                $roleStr = $options[$answer];
+            }
+
+            $role = $this->getEntityManager()->getRepository(Role::class)->findOneBy(['roleId' => $roleStr ]);
+            if( !$role ){
+                $this->consoleError("Impossible de charge ce rôle.");
+                return;
+            }
+
+            $userId =  $auth->getId();
+            $roleId = $role->getId();
+
+            try {
+                $query = $this->getEntityManager()->createNativeQuery("INSERT INTO authentification_role VALUES($userId, $roleId)",
+                    new Query\ResultSetMapping());
+                $query->execute();
+            } catch (UniqueConstraintViolationException $e ){
+                $this->consoleError(sprintf("Le compte '%s' a déjà ce rôle.", $auth->getUsername()));
+                return;
+            }
+
+            $this->consoleSuccess(sprintf("Le role '%s' a été ajouté à %s(%s) dans l'application.", $roleId, $auth->getUsername(), $auth->getDisplayName()));
+            return;
+
+        } catch( \Exception $ex ){
+            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     //
     // INDEX DE RECHERCHE
     //
     ////////////////////////////////////////////////////////////////////////////
-
-
-
     public function confAction()
     {
         $what = $this->getRequest()->getParam('what');
@@ -731,91 +838,6 @@ class ConsoleController extends AbstractOscarController
         } catch( \Exception $e ){
             echo "!!!" . $e->getMessage()." !!!\n";
             echo $e->getTraceAsString();
-        }
-    }
-
-    private function getMissingPrivilege(){
-
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // AUTHENTIFICATION
-    //
-    ////////////////////////////////////////////////////////////////////////////
-
-
-    public function authPassAction()
-    {
-        try {
-            $login = $this->getRequest()->getParam('login');
-            $pass = $this->getRequest()->getParam('newpass');
-            $ldap = $this->getRequest()->getParam('ldap');
-
-            /** @var Authentification $auth */
-            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $login]);
-            if( !$auth ){
-                $this->consoleError("Ce compte n'existe pas...");
-                return;
-            } else {
-                $this->getConsole()->write("Modification du mot de passe pour ", ColorInterface::GRAY);
-                $this->getConsole()->write($auth->getUsername(), ColorInterface::WHITE);
-                $this->getConsole()->writeLine(" (" . $auth->getDisplayName() . ", ". $auth->getEmail().")", ColorInterface::BLUE);
-            }
-
-            if( !$ldap ){
-                $pass = Password::prompt("Entrez le nouveau mot de passe : ");
-                if( strlen($pass) < 8 ){
-                    $this->consoleError("Le mot de passe doit faire au moins 8 caractères.");
-                    return;
-                }
-
-                $confirm = Password::prompt("Confirmer le nouveau mot de passe : ");
-                if( $confirm != $pass ){
-                    $this->consoleError("Les mots de passe ne correspondent pas");
-                    return;
-                }
-
-                $options = $this->getServiceLocator()->get('zfcuser_module_options');
-                $bcrypt = new Bcrypt();
-                $bcrypt->setCost($options->getPasswordCost());
-                $password = $bcrypt->create($pass);
-
-            } else {
-                $password = 'ldap';
-            }
-
-            if( Confirm::prompt("Modifier le mot de passe ? (Y|n) ") ){
-                $auth->setPassword($password);
-                $this->getEntityManager()->flush();
-                $this->consoleSuccess("Le mot de passe a été mis à jour");
-            }
-        } catch( \Exception $ex ){
-            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
-        }
-    }
-
-    public function authPromoteAction()
-    {
-        try {
-            $loginStr = $this->getRequest()->getParam('login');
-            $roleStr = $this->getRequest()->getParam('role');
-
-
-            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $loginStr]);
-            if( !$auth ){
-                die("Aucune compte d'authentification d'a pour identifiant '$loginStr'");
-            }
-            $role = $this->getEntityManager()->getRepository(Role::class)->findOneBy(['roleId' => $roleStr ]);
-
-            $userId =  $auth->getId();
-            $roleId = $role->getId();
-
-            $query = $this->getEntityManager()->createNativeQuery("INSERT INTO authentification_role VALUES($userId, $roleId)", new Query\ResultSetMapping());
-            $query->execute();
-
-        } catch( \Exception $ex ){
-            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
         }
     }
 
