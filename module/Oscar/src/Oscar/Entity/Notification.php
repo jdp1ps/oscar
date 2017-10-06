@@ -290,6 +290,7 @@ class Notification
             ."@".$this->getRecipientId()."\t"
             ."[".$this->getLevel()."]"
             ."(".$this->getContext().":".$this->getContextId().") "
+            ."(".$this->getContext().":".$this->getContextId().") "
             .$this->getMessage()
             ;
     }

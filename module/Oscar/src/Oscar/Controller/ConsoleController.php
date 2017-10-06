@@ -55,11 +55,19 @@ class ConsoleController extends AbstractOscarController
 
     public function notificationsActivityGenerateAction()
     {
+
+        $id = $this->params('idactivity');
+
         /** @var NotificationService $notificationService */
         $notificationService = $this->getServiceLocator()->get('NotificationService');
 
         /** @var Activity $activity */
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find(9099);
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        if( !$activity ){
+            $this->consoleError("Impossible de charger l'activité '$id'");
+            return;
+        }
 
 
         $notificationService->generateNotificationsForActivity($activity);

@@ -55,16 +55,21 @@ class ActivityDate implements ITrackable
         return [];
     }
 
+    /**
+     * @return array
+     *
+     * Retourne les dates de notification du jalon.
+     */
     public function getRecursivityDate(){
         $dates = [];
-
         foreach ( $this->getRecursivity() as $days ){
             $date = new \DateTime($this->getDateStart()->format('Y-m-d'));
             $interval = new \DateInterval('P'.$days.'D');
             $interval->invert = 1;
-            echo $date->format('Y-m-d') . " - $days = ";
-            echo $date->add($interval)->format("Y-m-d")."\n";
+            $date->add($interval);
+            $dates[] = $date;
         }
+        return $dates;
     }
 
     /**
