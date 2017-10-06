@@ -1,8 +1,18 @@
 <?php
+<?php
+
+// Par défaut, Oscar n'utilise pas le serveur Websocker
 $socket = false;
+
+// Si le fichier de configuration est présent, on charge la configuration
 if( file_exists($pathSocketConfig = __DIR__.'/../../socket/config.json') ){
     $socketConf = json_decode(file_get_contents($pathSocketConfig), true);
     $socket = $socketConf['socket'];
+}
+
+// Rétro compatibilité avec le module Doctrine
+if(  !defined('APP_DIR') ){
+    define('APP_DIR', realpath(__DIR__.'/../../'));
 }
 
 return array(
@@ -25,16 +35,11 @@ return array(
         //
         ////////////////////////////////////////////////////////////////////////
         'paths' => [
-            // Emplacement des documents issus de centaure (ne sera plus
-            // necessaire une fois la synchro centaure suspendue).
-            // !!! OBSOLETE
-            'document_centaure' => '/chemin/ou/sont/les/documents/centaure/',
-
             // Emplacement où sont stoqués les documents Oscar
-            'document_oscar' => '/chemin/ou/sont/les/documents/oscar/',
+            'document_oscar' => APP_DIR . '/data/documents/oscar/',
 
             // Emplacement où sont stoqués les documents administratifs Oscar
-            'document_admin_oscar' => '/chemin/ou/sont/les/documents/administratifs/',
+            'document_admin_oscar' => APP_DIR . '/data/documents/administratifs/',
 
             // Emplacement de l'index de recherche (emplacement où Lucene écrit
             // sont index de recherche - un DOSSIER).
@@ -109,7 +114,7 @@ return array(
                 ),
 
                 ////////////////////////////////////////////////////// CONNEXION
-                // Exemple (MySQL)
+                // Exemple
                 'params' => array(
                     'host'     => 'localhost',
                     'port'     => '5432',
@@ -118,16 +123,6 @@ return array(
                     'dbname'   => 'oscar_dev',
                     'charset'  => 'utf8'
                 ),
-
-                // Exemple (POSGRESQL)
-//                'params' => array(
-//                    'host'     => 'sub.domain.tld',
-//                    'port'     => '5432',
-//                    'user'     => 'jeanclaude',
-//                    'password' => 'jvéconclure',
-//                    'dbname'   => 'ma_base_preprod',
-//                    'charset'  => 'utf8'
-//                ),
             ),
         ),
     ),
