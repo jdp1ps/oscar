@@ -1,29 +1,50 @@
 var express = require('express');
 var fs = require('fs');
-var https = require('https');
-var pg = require('pg');
-var bodyParser = require('body-parser');
 var config = require('./config.json');
-
 var app = express();
-var server = https.createServer({
-	key: fs.readFileSync(config.ssl.key),
-	cert: fs.readFileSync(config.ssl.cert)
-}, app);
-var io = require('socket.io')(server);
+var exec = require('child_process').exec;
+
+/*
+exec('php ../public/index.php oscar auth:info bohr', function(err, stdout, stderr) {
+  console.log(stdout)
+})
+*/
+
+var clients = [];
+var clientsOnline = [];
+var bodyParser = require('body-parser');
+
+
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 }));
 
-var clients = [];
-var clientsOnline = [];
-
 app.get('*', function(req, res, next){
-	console.log("GET", (new Date()).toISOString(), req.connection.remoteAddress, req.url);
-	next();
+    console.log("GET", (new Date()).toISOString(), req.connection.remoteAddress, req.url);
+    next();
 });
+
+
+
+var  https, server;
+
+if( config.ssl === true  ){
+    https = require('https');
+    server = https.createServer({
+        key: fs.readFileSync(config.ssl.key),
+        cert: fs.readFileSync(config.ssl.cert)
+    }, app)
+}
+
+else {
+    https = require('http');
+    server = https.createServer(app);
+
+}
+
+var io = require('socket.io')(server);
 
 // Page d'accueil
 app.get('/', function(req, res){
@@ -31,26 +52,25 @@ app.get('/', function(req, res){
 });
 
 app.post(config.socket.push_path, function(req, res){
-    var ids = req.body.ids.split(',');
-    console.log('PUSH with', ids);
-    var client = new pg.Client({
-        user: config.bdd.user,
-        host: config.bdd.host,
-        database: config.bdd.base,
-        password: config.bdd.pass
-    });
-    client.connect();
-    client.query('SELECT * FROM notification WHERE id IN(' +ids.join(',') + ')', function(err, result){
-        if( err ){
+
+    // IDS des notifs
+    var ids = req.body.ids;
+    console.log("Notifications à diffuser", ids);
+
+    exec('php ../public/index.php oscar json:notifications '+ids, function(err, stdout, stderr) {
+        if( err  ){
             console.log("ERROR", err);
         }
-        if( result ) {
-            for( var i=0; i<result.rows.length; i++ ){
-                sendNotification(result.rows[i]);
+        if( stdout ){
+            console.log('OSCAR envoi', stdout);
+            var result = JSON.parse(stdout);
+            for( var i=0; i<result.length; i++ ){
+                sendNotification(result[i]);
             }
+
         }
-        client.end();
     })
+
     res.end();
 });
 
@@ -90,33 +110,24 @@ function displayClientsList(){
 
 
 io.on('connection', function(socket){
+    console.log("CONNECTION");
     var query = socket.handshake.query;
     if( !query.token ){
         console.log('Bad user');
     }
     else {
-        var client = new pg.Client({
-            user: config.bdd.user,
-            host: config.bdd.host,
-            database: config.bdd.base,
-            password: config.bdd.pass
-        });
-
-        client.connect();
-
-        client.query('SELECT display_name, p.id as id FROM authentification a LEFT JOIN person p ON a.username = p.ladaplogin WHERE a.secret = $1 ', [query.token], function(err, res){
-            if( res.rows.length == 1 ){
-                var displayName = res.rows[0].display_name;
-                socket.username = displayName;
+        console.log("GET INFOS USER");
+        // CHECK SECRET
+        exec('php ../public/index.php oscar json:user '+query.token, function(err, stdout, stderr) {
+            if( stdout ){
+                var data = JSON.parse(stdout);
+                socket.username = data.fullname;
                 socket.usertoken = query.token;
-                socket.personid = res.rows[0].id;
-                if( res.rows[0].id ){
-                    connected = socket.personid;
-                }
+                socket.personid = data.id;
                 addClient(socket);
+                connected = socket.personid;
             }
-            client.end();
-        });
+        })
 
         socket.on('disconnect', () => {
             removeClient(socket);

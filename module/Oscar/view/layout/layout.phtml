@@ -339,7 +339,7 @@ $this->headScript();
 		<?php if( $this->grant()->hasSocket() ): ?>
 
             requirejs.config({ paths: {
-                "io":  "<?= $this->grant()->getSocketUrl().'/socket.io/socket.io' ?>"
+                "io":  "/js/socket.io"
             }});
             require(['io'], (io) => {
                 socket = io('<?= $this->grant()->getSocketUrl() ?>', {

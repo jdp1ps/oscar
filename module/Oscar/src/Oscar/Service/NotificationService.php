@@ -27,7 +27,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function addNotificationTrigerrable( Notification $n )
     {
-        if( array_search($n->getId(), $this->notificationsToTrigger) ){
+        $this->getServiceLocator()->get('Logger')->info('Ajout à la pile de ' . $n->getId());
+        if( !array_search($n->getId(), $this->notificationsToTrigger) ){
             $this->notificationsToTrigger[] = $n->getId();
         }
     }
@@ -39,7 +40,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         if (count($this->notificationsToTrigger) && $configSocket)
         {
             // todo Faire un truc plus propre pour générer l'URL
-            $url = "http://". $_SERVER['SERVER_NAME'].":". $configSocket['port'].$configSocket['push_path'];
+            $url = $configSocket['url'].$configSocket['push_path'];
             $this->getServiceLocator()->get('Logger')->info("PUSH " . $url);
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
@@ -48,6 +49,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
             curl_exec($curl);
             $this->notificationsToTrigger = [];
+        } else {
+            $this->getServiceLocator()->get("Logger")->info("PAS DE PUSH !!!");
         }
     }
 
@@ -158,6 +161,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      */
     public function notification( $message, $personsId, $context='Application', $contextId=-1, $dateEffective = null, $key=null, $trigger=true)
     {
+
         if ($key === null)
             $key = $context.':'.$contextId;
 
@@ -167,12 +171,16 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         foreach ($personsId as $personid) {
             $hash = md5($personid . '/' . $key);
+            $this->getServiceLocator()->get('Logger')->info('ADD notification : ' . $hash." - " . $message);
 
             try {
                 // On commence par regarder si une notification n'existe pas déjà
                 // pour cette person dans le context (basé sur le HASH)
+                /** @var Notification $notification */
                 $notification = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
+                //$this->getServiceLocator()->get("Logger")->info("DUMP " . print_r($notification->toArray()));
                 if( !$notification ){
+                    $this->getServiceLocator()->get('Logger')->info('CREATE');
                     $notification = new Notification();
                     $notification->setContext('Application')
                         ->setHash($hash)
@@ -189,10 +197,11 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
                     $this->addNotificationTrigerrable($notification);
                 } else {
+                    $this->getServiceLocator()->get('Logger')->info('UPDATE');
                     $notification->setDateEffective(new \DateTime());
                 }
             } catch ( \Exception $e ){
-
+                $this->getServiceLocator()->get('Logger')->error('Notification error : ' . $e->getMessage());
             }
         }
         $this->getEntityManager()->flush();

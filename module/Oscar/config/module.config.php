@@ -364,6 +364,26 @@ return array(
                     ]
                 ],
 
+                'json_auth_token' => [
+                    'options' => [
+                        'route' => 'oscar json:user <token>',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'jsonUser',
+                        ],
+                    ]
+                ],
+
+                'json_notifications' => [
+                    'options' => [
+                        'route' => 'oscar json:notifications <ids>',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'jsonNotifications',
+                        ],
+                    ]
+                ],
+
 
                 ////////////////////////////////////////////////////////////////
                 // Procédure d'évaluation de la configuration
