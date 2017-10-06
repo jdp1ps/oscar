@@ -21,6 +21,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\CategoriePrivilege;
+use Oscar\Entity\Notification;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
@@ -50,7 +51,53 @@ use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
 {
+    public function jsonUserAction(){
+        $token = $this->params('token');
+        try {
+            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['secret' => $token]);
+            $person = $this->getEntityManager()->getRepository(Person::class)->findOneBy(['ladapLogin' => $auth->getUsername()]);
+            $data = [
+                "id" => $person->getId(),
+                "username" => $auth->getUsername(),
+                "fullname" => (string)$person
+            ];
+            echo json_encode($data);
+        } catch( \Exception $e ){
+            die("ERROR! : ".$e->getMessage());
+        }
+    }
 
+    public function jsonNotificationsAction()
+    {
+        $ids = explode(',',$this->params('ids'));
+        try {
+            $notifications = $this->getEntityManager()->createQueryBuilder()
+                ->select('n')
+                ->from(Notification::class, 'n')
+                ->where('n.id IN(:ids)')
+                ->getQuery()
+                ->setParameter('ids', $ids)
+                ->getResult();
+
+            $data = [];
+            /** @var Notification $notification */
+            foreach ($notifications as $notification){
+                $data[] = [
+                  'id' => $notification->getId(),
+                  'message' => $notification->getMessage(),
+                  'context' => $notification->getContext(),
+                    'recipientid' => $notification->getRecipientId(),
+                  'contextid' => $notification->getContextId(),
+                  'date' => $notification->getDateEffective()->format('Y-m-d'),
+                  'hash' => $notification->getHash(),
+                ];
+            }
+
+            echo json_encode($data);
+        } catch( \Exception $e ){
+            die("ERROR! : ".$e->getMessage());
+        }
+    }
 
 
     public function notificationsActivityGenerateAction()
