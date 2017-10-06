@@ -20,6 +20,7 @@ var colorLabel = (label) => {
 class CalendarDatas {
     constructor() {
         this.filterOwner = "";
+        this.filterActivity = "";
         this.events = [];
         this.newID = 1;
         this.transmission = "";
@@ -32,6 +33,7 @@ class CalendarDatas {
         this.remoteError = "";
         this.workPackageIndex = [];
         this.wps = null;
+        this.activities = [];
         this.eventEdit = null;
         this.copyWeekData = null;
         this.copyDayData = null;
@@ -939,8 +941,10 @@ var WeekView = {
 
             this.events.forEach(event => {
                 // On filtre les événements de la semaine et le déclarant si besoin
+                console.log("ActivityId", event.activityId);
                 if (
                     store.inCurrentWeek(event)
+                    && (store.filterActivity == '' || store.filterActivity == event.activityId)
                     && (store.filterOwner == '' || store.filterOwner == event.owner_id )
                     && (store.filterType == '' || store.filterType == event.status )
                 ){
@@ -1567,6 +1571,7 @@ var ListView = {
 
             for (let i = 0; i < events.length; i++) {
                 let event = events[i];
+                if (!(store.filterActivity == '' || store.filterActivity == event.activityId) ) continue;
                 if (!(store.filterOwner == '' || store.filterOwner == event.owner_id)) continue;
                 if (!(store.filterType == '' || store.filterType == event.status )) continue;
 
@@ -2238,15 +2243,22 @@ var Calendar = {
                  <template v-else><span>{{ calendarLabel }}</span></template>
                     
                 <span v-if="owners.length"> 
-                        <select v-model="filterOwner" class="input-sm">
-                          <option value="">Tous les déclarants</option>
-                          <option v-for="owner in owners" :value="owner.id">{{ owner.displayname }}</option>
-                        </select>
-                    </span>
-                    <select v-model="filterType" class="input-sm">
-                        <option value="">Tous les états</option>
-                        <option v-for="label, key in status" :value="key">{{ label }}</option>
+                    <select v-model="filterOwner" class="input-sm">
+                      <option value="">Tous les déclarants</option>
+                      <option v-for="owner in owners" :value="owner.id">{{ owner.displayname }}</option>
+                    </select>
+                </span>
+                <span v-else>
+                    <select v-model="filterActivity" class="input-sm">
+                        <option value="">Toutes</option>
+                        <option v-for="a in activities" :value="a.id">{{ a.label }}</option>
+                    </select>
+                </span>
+                <select v-model="filterType" class="input-sm">
+                    <option value="">Tous les états</option>
+                    <option v-for="label, key in status" :value="key">{{ label }}</option>
                 </select>
+                    
                 <section class="transmission errors">
 
                     <p class="error" v-for="error in errors">
@@ -2809,6 +2821,10 @@ var Calendar = {
             this.wps = customs;
             for (var k in customs) {
                 if (customs.hasOwnProperty(k)) {
+                    store.activities.pushIfNot({
+                        id: customs[k].idactivity,
+                        label: customs[k].activity
+                    }, 'id')
                     let wp = customs[k];
                     colorLabels[k] = colorpool[customs[k].color];
                     if (!store.defaultLabel) {
@@ -2829,3 +2845,19 @@ var Calendar = {
         }
     }
 };
+
+/**
+ * Ajoute l'objet dans le tableau si une valeur de la clef spécifiée n'est pas déjà présente.
+ *
+ * @param obj
+ * @param testField
+ */
+Array.prototype.pushIfNot = function(obj, testField){
+    var add = true,
+        val = obj[testField];
+    for( var i=0; i<this.length; i++ ){
+        if(this[i][testField] == obj[testField]) add = false;
+    }
+    if( add )
+        this.push(obj)
+}
