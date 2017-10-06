@@ -11,7 +11,80 @@ Oscar dispose d'un accès terminal pour lancer automatiquement certaines tâche 
 php public/index.php oscar auth:add
 ```
 
-Une série d'invites permettront de renseigner les différents paramètres du compte à créer.
+Répondre aux différentes questions pour activer ce compte : 
+
+```
+$ php public/index.php oscar auth:add
+Entrez l'identifiant : pbanner
+Nom affiché (pbanner) : Peter Banner
+Email (éviter de laisser vide) : peter.banner@oscar-demo.com
+Entrez le mot de passe (8 caractères minimum): 
+L'utilisateur suivant va être créé :                                                                                                                                 
+Identifiant de connexion : pbanner
+Nom affiché : Peter Banner
+Courriel : peter.banner@oscar-demo.com
+Créer l'utilisateur ? y
+pbanner a été créé avec succès.
+
+```
+
+
+## Modifier le mot de passe d'un utilisateur
+
+La commande `php public/index.php oscar auth:pass LOGIN` permet de lancer la procédure de modifiction d'un mot de passe en base de donnée. Elle propose une série d'invite permettant de vérifier l'utilisteur et le mot de passe : 
+
+```
+$ php public/index.php oscar auth:pass bohr
+Modification du mot de passe pour bohr (Niels Bohr, niels.bohr@jacksay.com)
+Entrez le nouveau mot de passe : 
+Confirmer le nouveau mot de passe :                                                                                                                                  
+Modifier le mot de passe ? (Y|n) y                                                                                                                                   
+Le mot de passe a été mis à jour
+```
+
+L'option `--ldap` permet d'appliquer la règle "LDAP" pour activer l'authentification LDAP de ce compte.
+
+```
+$ php public/index.php oscar auth:pass bohr --ldap
+Modification du mot de passe pour bohr (Niels Bohr, niels.bohr@jacksay.com)
+Modifier le mot de passe ? (Y|n) y
+Le mot de passe a été mis à jour
+```
+
+
+
+## Promouvoir un utilisateur
+
+La commande ```php public/index.php oscar auth:promote LOGIN``` permet de gérer les rôles au niveau **Application**.
+
+Elle propose la liste des rôles disponibles pour les ajouter à un utilisateur : 
+
+```
+$ php public/index.php oscar auth:promote bohr
+Liste des rôles : 
+Quel rôle ajouter à Niels Bohr ?
+  a) Administrateur
+  b) beta_testeur
+  c) Chargé de mission Europe
+  d) Chargé de valorisation
+  e) Chercheur
+  f) Gestionnaire
+  g) Directeur de composante
+  h) Directeur de laboratoire
+  i) Doctorant
+  k) Gestionnaire recherche de laboratoire
+  l) Ingénieur
+  m) Post-doc
+  n) Responsable
+  o) Responsable administratif et gestionnaire de composante
+  p) Responsable financier
+  q) Responsable juridique
+  r) Responsable RH
+  s) Responsable scientifique
+  t) Superviseur
+  u) Utilisateur
+  v) valo
+```
 
 ### Créer un administrateur
 
@@ -20,7 +93,7 @@ Se connecter en SSH sur la machine hébergeant Oscar et se rendre dans le dossie
 On commence par créer un utilisateur, puis lui attribuer le rôle *Administrateur* :
 
 ```bash
-php public/index.php oscar auth:promote hulk Administrateur
+php public/index.php oscar auth:promote hulk
 ```
 
 ### Lister les authentifications actives
@@ -28,7 +101,7 @@ php public/index.php oscar auth:promote hulk Administrateur
 On peut également lister les authentifications actives dans la BDD : 
 
 ```bash
-php public/index.php oscar auth:promote hulk Administrateur
+php public/index.php oscar auth:list
 ```
 
 ### Informations utilisateurs
@@ -56,9 +129,6 @@ Olympia : Responsable scientifique
 [2017DRI00001] Relativité Générale : Responsable scientifique
 [2017DRI00002] Relativité restrinte : Responsable scientifique
 ```
-
-
-
 
 ### Personnes (Person)
 
