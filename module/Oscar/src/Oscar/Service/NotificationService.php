@@ -22,6 +22,54 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
+    /** @var array Contiens la liste des ID des notifications créée pendant l'exécution */
+    private $notificationsToTrigger = [];
+
+    public function addNotificationTrigerrable( Notification $n )
+    {
+        if( array_search($n->getId(), $this->notificationsToTrigger) ){
+            $this->notificationsToTrigger[] = $n->getId();
+        }
+    }
+
+    public function triggerSocket()
+    {
+        // Push vers le socket si besoin
+        $configSocket = $this->getServiceLocator()->get('Config')['oscar']['socket'];
+        if (count($this->notificationsToTrigger) && $configSocket)
+        {
+            // todo Faire un truc plus propre pour générer l'URL
+            $url = "http://". $_SERVER['SERVER_NAME'].":". $configSocket['port'].$configSocket['push_path'];
+            $this->getServiceLocator()->get('Logger')->info("PUSH " . $url);
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, "ids=" . implode(',', $this->notificationsToTrigger));
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_exec($curl);
+            $this->notificationsToTrigger = [];
+        }
+    }
+
+    /**
+     * Retourne la date limite en deça de laquelle les notifications n'ont pas besoin d'être générée.
+     *
+     * @return \DateTime
+     */
+    public function getLimitNotificationDate()
+    {
+        static $limitNotificationDate;
+        if( $limitNotificationDate === null ){
+            $limit = 30;
+            $limitNotificationDate = new \DateTime();
+            $interval = new \DateInterval('P'.$limit.'D');
+            $interval->invert = 1;
+            $limitNotificationDate->add($interval);
+        }
+        return $limitNotificationDate;
+    }
+
+
     public function generateNotificationsForActivity( Activity $activity )
     {
         $notifications = [];
@@ -31,19 +79,23 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
         $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
+        $personsIds = [];
 
         /** @var Person $person */
         foreach ($persons as $person){
-            echo "$person\n";
+            $personsIds[] = $person->getId();
         }
 
         /** @var ActivityDate $milestone */
         foreach( $activity->getMilestones() as $milestone ){
-            echo " --- " . $milestone->getType()->getLabel() . "\n";
-            var_dump($milestone->getRecursivityDate());
-            echo " - $milestone\n";
+            $notificationMessage = sprintf("Échéance '%s' dans '%s'.", $milestone->getType()->getLabel(), $activity->log());
+            foreach ($milestone->getRecursivityDate() as $date) {
+                if( $date > $this->getLimitNotificationDate() ){
+                    $this->notification($notificationMessage, $personsIds, "Activity:milestone".$milestone->getType()->getId().'-'.$date->format('Ymd'), $activity->getId(), $date);
+                }
+            }
         }
-
+        $this->triggerSocket();
     }
 
     public function deleteNotifications( array $ids ){
@@ -96,12 +148,23 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     }
 
-    public function notification( $message, $personsId, $context='Application', $contextId=-1, $key=null)
+    /**
+     * @param $message
+     * @param $personsId
+     * @param string $context
+     * @param int $contextId
+     * @param null $key
+     * @param bool $trigger
+     */
+    public function notification( $message, $personsId, $context='Application', $contextId=-1, $dateEffective = null, $key=null, $trigger=true)
     {
-        if ($key === null) {
+        if ($key === null)
             $key = $context.':'.$contextId;
-        }
-        $push = [];
+
+        if( $dateEffective === null )
+            $dateEffective = new \DateTime();
+
+
         foreach ($personsId as $personid) {
             $hash = md5($personid . '/' . $key);
 
@@ -110,7 +173,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 // pour cette person dans le context (basé sur le HASH)
                 $notification = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
                 if( !$notification ){
-                    $date = new \DateTime();
                     $notification = new Notification();
                     $notification->setContext('Application')
                         ->setHash($hash)
@@ -118,13 +180,14 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                         ->setContextId($contextId)
                         ->setDatas([])
                         ->setMessage($message)
-                        ->setDateEffective($date)
+                        ->setDateEffective($dateEffective)
                         ->setLevel(Notification::LEVEL_INFO)
                         ->setRead(false)
                         ->setRecipientId($personid);
                     $this->getEntityManager()->persist($notification);
+                    $this->getServiceLocator()->get("Logger")->info("Création d'une notification $notification");
 
-                    $push[] = $notification->getId();
+                    $this->addNotificationTrigerrable($notification);
                 } else {
                     $notification->setDateEffective(new \DateTime());
                 }
@@ -133,20 +196,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             }
         }
         $this->getEntityManager()->flush();
+        if( $trigger === true )
+            $this->triggerSocket();
 
-        // Push vers le socket si besoin
-        $configSocket = $this->getServiceLocator()->get('Config')['oscar']['socket'];
-        if (count($push) && $configSocket)
-        {
-            // todo Faire un truc plus propre pour générer l'URL
-            $url = "http://". $_SERVER['SERVER_NAME'].":". $configSocket['port'].$configSocket['push_path'];
-            $this->getServiceLocator()->get('Logger')->info("PUSH " . $url);
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, "ids=" . implode(',', $push));
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-            curl_exec($curl);
-        }
     }
 }
