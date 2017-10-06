@@ -26,7 +26,6 @@ socket/config.json
 data/*
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
-!data/connectors/*.dist
 
 # Librairies
 /vendor
