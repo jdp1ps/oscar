@@ -229,7 +229,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function create($datas, $by)
     {
         foreach ($datas as $data) {
-            if (array_key_exists('id', $data) && $data['id'] != 'null') {
+            if (array_key_exists('id', $data) && $data['id'] != null) {
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
             } else {
                 $timeSheet = new TimeSheet();

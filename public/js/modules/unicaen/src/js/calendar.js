@@ -1800,9 +1800,7 @@ var ImportICSView = {
     computed: {
         packs(){
             var packs = [];
-
             this.importedEvents.forEach(item => {
-
                     let currentPack = null;
                     let currentLabel = item.mmStart.format('DD MMMM YYYY');
                     for (let i = 0; i < packs.length && currentPack == null; i++) {
@@ -1818,7 +1816,6 @@ var ImportICSView = {
                         packs.push(currentPack);
                     }
                     currentPack.events.push(item);
-
             });
             return packs;
         }
@@ -2139,9 +2136,6 @@ var Calendar = {
                         <h4><i class="icon-info"></i> Indicatif</h4>
                         <p>Ce créneau est ici à titre indicatif</p>
                     </template>
-                   
-                    
-                       
                 </div>
             </transition>
 
@@ -2548,30 +2542,37 @@ var Calendar = {
             if (this.restUrl) {
                 this.transmission = "Enregistrement des données";
                 var data = new FormData();
+
+                var datas =  [];
+
                 for (var i = 0; i < events.length; i++) {
                     // Fix seconds bug
                     events[i].mmStart.seconds(0);
                     events[i].mmEnd.seconds(0);
 
-                    data.append('events[' + i + '][label]', events[i].label);
-                    data.append('events[' + i + '][description]', events[i].description);
-                    data.append('events[' + i + '][start]', events[i].mmStart.format());
-                    data.append('events[' + i + '][end]', events[i].mmEnd.format());
-                    data.append('events[' + i + '][id]', events[i].id || null);
-                    data.append('events[' + i + '][owner_id]', events[i].owner_id || null);
+                    var jsonData = {
+                        'label': events[i].label,
+                        'description': events[i].description,
+                        'start': events[i].mmStart.format(),
+                        'end': events[i].mmEnd.format(),
+                        'id': events[i].id || null,
+                        'owner_id': events[i].owner_id || ''
+                    };
+
                     if (this.customDatas) {
                         var customs = this.customDatas();
                         for (var k in customs) {
                             if (customs.hasOwnProperty(k) && events[i].label == k) {
                                 for (var l in customs[k]) {
-                                    if (customs[k].hasOwnProperty(l)) {
-                                        data.append('events[' + i + '][' + l + ']', customs[k][l]);
-                                    }
+                                    if (customs[k].hasOwnProperty(l)) jsonData[l] = customs[k][l];
                                 }
                             }
                         }
                     }
+                    datas.push(jsonData);
                 }
+                data.append('events', JSON.stringify(datas));
+
                 store.loading = true;
                 this.$http.post(this.restUrl(), data).then(
                     response => {
@@ -2605,11 +2606,15 @@ var Calendar = {
                 this.transmission = "Enregistrement en cours...";
                 var data = new FormData();
                 data.append('do', action);
+                var datas = [];
                 for (var i = 0; i < events.length; i++) {
-                    data.append('events[' + i + '][id]', events[i].id || null);
-                    data.append('events[' + i + '][rejectedSciComment]', events[i].rejectedSciComment || null);
-                    data.append('events[' + i + '][rejectedAdminComment]', events[i].rejectedAdminComment || null);
+                    datas.push({
+                        id:  events[i].id || null,
+                        rejectedSciComment: events[i].rejectedSciComment || null,
+                        rejectedAdminComment: events[i].rejectedAdminComment || null
+                    });
                 }
+                data.append(events, JSON.stringify(datas));
                 this.loading = true;
                 this.$http.post(this.restUrl(), data).then(
                     response => {
