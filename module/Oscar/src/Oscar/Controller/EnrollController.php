@@ -342,6 +342,7 @@ class EnrollController extends AbstractOscarController
             'id' => null,
             'title'   => $label,
             'form' => $form,
+            'labelEnrolled' => $labelEnrolled,
             'enroller' => $enroller,
             'enrolled' => $enrolled
         ));
