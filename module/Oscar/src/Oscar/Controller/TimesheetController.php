@@ -69,9 +69,10 @@ class TimesheetController extends AbstractOscarController
 
         if ($method == 'POST') {
 
-            $datas = $this->getRequest()->getPost()['events'];
+            $datas = json_decode($this->getRequest()->getPost()['events'], true);
             $action = $this->getRequest()->getPost()['do'];
 
+            // Ajouter un test sur ACTION et EVENTS
             // Ajouter un test sur ACTION et EVENTS
 
             if ($action == 'send') {
@@ -167,46 +168,57 @@ class TimesheetController extends AbstractOscarController
         // Retour
         $timesheets = [];
 
-        if ($method == 'POST') {
+        try {
+            if ($method == 'POST') {
+                $datas = json_decode($this->getRequest()->getPost()['events'],true);
+                $action = $this->getRequest()->getPost()['do'];
 
-            $datas = $this->getRequest()->getPost()['events'];
-            $action = $this->getRequest()->getPost()['do'];
-
-            // Ajouter un test sur ACTION et EVENTS
-
-            if ($action == 'send') {
-                $timesheets = $timeSheetService->send($datas,
-                    $this->getCurrentPerson());
-            } else if ( $action ){
-                if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
-                    return $this->getResponseBadRequest('Opération inconnue !');
-                }
-
-                foreach ($datas as $data) {
-                    if ($data['id'] && $data['id'] != 'null') {
-                        /** @var TimeSheet $timeSheet */
-                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-                        $activity = null ;
-                        if( $timeSheet->getActivity() ){
-                            $activity = $timeSheet->getActivity();
-                        }
-                        elseif ($timeSheet->getWorkpackage()){
-                            $activity = $timeSheet->getWorkpackage()->getActivity();
-                        }
-                        if( !$activity ){
-                            // todo Ajouter un warning
-                            continue;
+                if ($action == 'send') {
+                    $timesheets = $timeSheetService->send($datas, $this->getCurrentPerson());
+                } else {
+                    if ($action) {
+                        if (!in_array($action, [
+                            'validatesci',
+                            'validateadm',
+                            'send',
+                            'rejectsci',
+                            'rejectadm'
+                        ])) {
+                            return $this->getResponseBadRequest('Opération inconnue !');
                         }
 
-                        $timesheets = array_merge($timesheets, $this->processAction(
-                            $action, [$data], $timeSheetService, $activity, $this->getOscarUserContext()->getCurrentPerson())
-                        );
+                        foreach ($datas as $data) {
+                            if ($data['id'] && $data['id'] != 'null') {
+                                /** @var TimeSheet $timeSheet */
+                                $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
+                                $activity = null;
+                                if ($timeSheet->getActivity()) {
+                                    $activity = $timeSheet->getActivity();
+                                } elseif ($timeSheet->getWorkpackage()) {
+                                    $activity = $timeSheet->getWorkpackage()->getActivity();
+                                }
+                                if (!$activity) {
+                                    // todo Ajouter un warning
+                                    continue;
+                                }
+
+                                $timesheets = array_merge($timesheets,
+                                    $this->processAction(
+                                        $action, [$data], $timeSheetService,
+                                        $activity,
+                                        $this->getOscarUserContext()->getCurrentPerson())
+                                );
+                            }
+                        }
+                    } else {
+                        $timesheets = $timeSheetService->create($datas,
+                            $this->getCurrentPerson());
                     }
                 }
-            } else {
-                $timesheets = $timeSheetService->create($datas,
-                    $this->getCurrentPerson());
             }
+        } catch (\Exception $e ){
+            var_dump($datas);
+            return $this->getResponseInternalError("ERROR : " . $e->getMessage() . " - " . $e->getTraceAsString());
         }
 
 
@@ -313,12 +325,12 @@ class TimesheetController extends AbstractOscarController
                 $request = $this->getRequest();
 
                 if ($method == 'POST') {
-                    $events = $request->getPost('events', []);
+                    $events = json_decode($request->getPost('events', '[]'), true);
                     if (count($events) == 1 && $events[0]['id'] == 'null') {
                             throw new OscarException('A refactorer !');
                     } else {
                         $action = $this->getRequest()->getPost()['do'];
-                        $events = $this->getRequest()->getPost()['events'];
+                        $events = json_decode($this->getRequest()->getPost()['events'], true);
                         $timesheets = $this->processAction($action, $events, $timeSheetService, $activity, $this->getOscarUserContext()->getCurrentPerson());
                         $response = new JsonModel([
                             'timesheets' => $timesheets

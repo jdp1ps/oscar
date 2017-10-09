@@ -59,6 +59,7 @@ class ICalAnalyser {
             uid: item.uid,
             label: item.summary,
             summary: item.summary,
+            lastimport: true,
             start: item.start,
             end: item.end,
             exception: item.exception ? item.exception : null,
@@ -128,14 +129,11 @@ class ICalAnalyser {
             console.log(' TO => ', new Date(rrule.until))
             console.log(' TO => ', this.ending)
             console.log(' TO => ', end)
-
         } else {
             console.log(' ================ ', items.length, ' créé(s)')
         }
-
         return items;
     }
-
 
     parse(icsData) {
 
@@ -208,7 +206,6 @@ class ICalAnalyser {
                     exceptions = exceptions.concat(this.generateItem(item));
                 }
                 else if( item.daily == "allday" ){
-
                     var itemStart = moment(item.start);
                     if( this.dailyStrategy ){
                         this.dailyStrategy.forEach((copy) => {
@@ -235,9 +232,7 @@ class ICalAnalyser {
                             }
                         })
                     }
-                }
-
-                else {
+                } else {
                     if (rrule) {
                         out = out.concat(this.repeat(item, rrule, exdate));
                     } else {

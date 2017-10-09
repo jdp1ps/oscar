@@ -80,6 +80,7 @@ var ICalAnalyser = function () {
                 uid: item.uid,
                 label: item.summary,
                 summary: item.summary,
+                lastimport: true,
                 start: item.start,
                 end: item.end,
                 exception: item.exception ? item.exception : null,
@@ -153,7 +154,6 @@ var ICalAnalyser = function () {
             } else {
                 console.log(' ================ ', items.length, ' créé(s)');
             }
-
             return items;
         }
     }, {
@@ -211,7 +211,6 @@ var ICalAnalyser = function () {
                     if (item.exception) {
                         exceptions = exceptions.concat(_this.generateItem(item));
                     } else if (item.daily == "allday") {
-
                         var itemStart = moment(item.start);
                         if (_this.dailyStrategy) {
                             _this.dailyStrategy.forEach(function (copy) {
