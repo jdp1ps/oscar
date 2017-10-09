@@ -62,6 +62,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function send($datas, $by)
     {
         $timesheets = [];
+        if( !$datas ){
+            throw new \Exception("Invalid datas");
+        }
 
         /** @var NotificationService $notificationService */
         $notificationService = $this->getServiceLocator()->get('NotificationService');
