@@ -1956,7 +1956,7 @@ var Calendar = {
                         rejectedAdminComment: events[i].rejectedAdminComment || null
                     });
                 }
-                data.append(events, JSON.stringify(datas));
+                data.append('events', JSON.stringify(datas));
                 this.loading = true;
                 this.$http.post(this.restUrl(), data).then(function (response) {
                     store.sync(response.body.timesheets);
