@@ -796,7 +796,6 @@ var WeekView = {
 
             this.events.forEach(function (event) {
                 // On filtre les événements de la semaine et le déclarant si besoin
-                console.log("ActivityId", event.activityId);
                 if (store.inCurrentWeek(event) && (store.filterActivity == '' || store.filterActivity == event.activityId) && (store.filterOwner == '' || store.filterOwner == event.owner_id) && (store.filterType == '' || store.filterType == event.status)) {
                     if (event.validableSci) {
                         _this5.weekCredentials.sci = true;
@@ -911,7 +910,7 @@ var WeekView = {
         handlerMouseUp: function handlerMouseUp(e) {
             if (this.gostDatas.drawing) {
                 this.gostDatas.drawing = false;
-                this.createEvent(this.gostDatas.day, Math.floor(this.gostDatas.y / 40), this.gostDatas.height / 40 * 60);
+                this.createEvent(this.gostDatas.day, this.gostDatas.y / 40, this.gostDatas.height / 40 * 60);
             }
 
             if (this.gostDatas.eventActive) {
@@ -1007,7 +1006,9 @@ var WeekView = {
         createEvent: function createEvent(day, time) {
             var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 120;
 
-            var start = moment(this.currentDay).day(day).hour(time);
+            var hours = Math.floor(time);
+            var minutes = Math.round((time - hours) * 60);
+            var start = moment(this.currentDay).day(day).hour(time).minutes(minutes);
             var end = moment(start).add(duration, 'minutes');
             var newEvent = new EventDT({
                 id: null,
@@ -1754,12 +1755,9 @@ var Calendar = {
                     itemEnd = moment(event.end),
                     duration = itemEnd - itemStart;
 
-                console.log("Durée:", duration / 1000 / 60 / 60);
-
                 if (event.useLabel) event.label = event.useLabel;
 
                 if (duration / 1000 / 60 / 60 > 9) {
-                    console.log('Transformation du créneaux', event);
                     _this12.transformLong.forEach(function (transform) {
                         var itemTransformed = JSON.parse(JSON.stringify(event));
                         itemStart.hours(transform.startHours).minutes(transform.startMinutes);
@@ -1896,7 +1894,6 @@ var Calendar = {
                     // Fix seconds bug
                     events[i].mmStart.seconds(0);
                     events[i].mmEnd.seconds(0);
-                    console.log(events[i]);
 
                     data.append('events[' + i + '][label]', events[i].label);
                     data.append('events[' + i + '][description]', events[i].description);
@@ -2036,7 +2033,6 @@ var Calendar = {
         loadIcsFile: function loadIcsFile(e) {
             var _this19 = this;
 
-            console.log('loadICSFile...');
             this.transmission = "Analyse du fichier ICS...";
             var fr = new FileReader();
             fr.onloadend = function (result) {
