@@ -4,8 +4,11 @@
  * @date: 07/09/15 11:33
  * @copyright Certic (c) 2015
  */
+
 namespace Oscar\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -15,25 +18,25 @@ use Doctrine\ORM\Mapping as ORM;
 class Notification
 {
     // Niveau "d'urgence"
-    const LEVEL_NOTICE           = 500;
-    const LEVEL_INFO             = 400;
-    const LEVEL_WARN             = 300;
-    const LEVEL_ERROR            = 200;
-    const LEVEL_CRITICAL         = 100;
+    const LEVEL_NOTICE = 500;
+    const LEVEL_INFO = 400;
+    const LEVEL_WARN = 300;
+    const LEVEL_ERROR = 200;
+    const LEVEL_CRITICAL = 100;
 
     // Context
     // Permet de charger éventuellement un objet via le context ID.
     // Permet également d'éviter l'accumulation de notifications
     // pour un même objet.
     // Exemple : Person:1024 a été modifié
-    const CONTEXT_ORGANIZATION  = 'organization';
-    const CONTEXT_PERSON        = 'person';
-    const CONTEXT_ACTIVITY      = 'activity';
-    const CONTEXT_APPLICATION   = 'application';
+    const OBJECT_ORGANIZATION = 'organization';
+    const OBJECT_PERSON = 'person';
+    const OBJECT_ACTIVITY = 'activity';
+    const OBJECT_APPLICATION = 'application';
 
     // Valeurs par défaut
-    const DEFAULT_LEVEL         = self::LEVEL_INFO;
-    const DEFAULT_CONTEXT       = self::CONTEXT_APPLICATION;
+    const DEFAULT_LEVEL = self::LEVEL_INFO;
+    const DEFAULT_CONTEXT = self::OBJECT_APPLICATION;
 
     /**
      * @ORM\Id
@@ -43,14 +46,33 @@ class Notification
     private $id;
 
     /**
-     * @ORM\Column(type="datetimetz", nullable=false)
+     * @ORM\Column(type="date", nullable=false)
      */
     private $dateEffective;
+
+    /**
+     * @ORM\Column(type="datetimetz", nullable=false)
+     */
+    private $dateCreated;
 
     /**
      * @ORM\Column(type="text")
      */
     private $message;
+
+    /**
+     * Le type d'objet attaché (Activity, Person, etc...)
+     * @var string
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $object;
+
+    /**
+     * L'identifiant de cet objet dans la BDD.
+     * @var integer
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $objectId;
 
     /**
      * @ORM\Column(type="string")
@@ -63,14 +85,10 @@ class Notification
     private $context;
 
     /**
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $contextId;
+    private $serie;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $recipientId;
 
     /**
      * Type de notification.
@@ -80,33 +98,153 @@ class Notification
     private $level;
 
     /**
-     * Type de notification.
-     *
-     * @ORM\Column(type="boolean")
-     */
-    private $read;
-
-    /**
      * @ORM\Column(type="object", nullable=true)
      */
     private $datas;
 
-    function __construct()
-    {
-        $this->dateCreated  = new \DateTime();
-        $this->context      = self::DEFAULT_CONTEXT;
-        $this->datas        = null;
-        $this->level        = self::DEFAULT_LEVEL;
-        $this->read         = false;
-    }
+    /**
+     * Lots de travail
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="NotificationPerson", mappedBy="notification", cascade={"remove"})
+     * ORM\OrderBy({"code" = "ASC"})
+     */
+    private $persons;
 
-    ////////////////////////////////////////////////////////////////////////////
     /**
      * @return mixed
      */
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDateEffective()
+    {
+        return $this->dateEffective;
+    }
+
+    /**
+     * @param mixed $dateEffective
+     */
+    public function setDateEffective($dateEffective)
+    {
+        $this->dateEffective = $dateEffective;
+
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getPersons()
+    {
+        return $this->persons;
+    }
+
+    /**
+     * @param NotificationPerson $notificationPerson
+     * @return $this
+     */
+    public function addNotificationPerson(NotificationPerson $notificationPerson)
+    {
+        if( !$this->persons->contains($notificationPerson) ){
+            $this->persons->add($notificationPerson);
+        }
+        return $this;
+    }
+
+    /**
+     * @param Person $person
+     * @return $this|null
+     */
+    public function addPerson( Person $person, EntityManager $em ){
+        /** @var NotificationPerson $notificationPerson */
+        foreach ( $this->persons as $notificationPerson ){
+            if( $notificationPerson->getPerson() == $person ){
+                return null;
+            }
+        }
+        $n = new NotificationPerson();
+        $em->persist($n);
+        return $n->setNotification($this)->setPerson($person);
+    }
+
+    /**
+     * @param Person $person
+     * @return $this|null
+     */
+    public function addPersons( array $persons, EntityManager $em ){
+        /** @var Person $p */
+        foreach ( $persons as $p ){
+            $this->addPerson($p, $em);
+        }
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDateCreated()
+    {
+        return $this->dateCreated;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+
+    /**
+     * @param mixed $message
+     */
+    public function setMessage($message)
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getObject()
+    {
+        return $this->object;
+    }
+
+    /**
+     * @param string $object
+     */
+    public function setObject($object)
+    {
+        $this->object = $object;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getObjectId()
+    {
+        return $this->objectId;
+    }
+
+    /**
+     * @param int $objectId
+     */
+    public function setObjectId($objectId)
+    {
+        $this->objectId = $objectId;
+
+        return $this;
     }
 
     /**
@@ -130,93 +268,9 @@ class Notification
     /**
      * @return mixed
      */
-    public function getDateEffective()
-    {
-        return $this->dateEffective;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getMessage()
-    {
-        return $this->message;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getContext()
     {
         return $this->context;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getContextId()
-    {
-        return $this->contextId;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getRecipientId()
-    {
-        return $this->recipientId;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getLevel()
-    {
-        return $this->level;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getDatas()
-    {
-        return $this->datas;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function getRead()
-    {
-        return $this->read;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isRead()
-    {
-        return $this->read;
-    }
-
-    /**
-     * @param mixed $dateEffective
-     */
-    public function setDateEffective($dateEffective)
-    {
-        $this->dateEffective = $dateEffective;
-
-        return $this;
-    }
-
-    /**
-     * @param mixed $message
-     */
-    public function setMessage($message)
-    {
-        $this->message = $message;
-
-        return $this;
     }
 
     /**
@@ -230,23 +284,29 @@ class Notification
     }
 
     /**
-     * @param mixed $contextId
+     * @return mixed
      */
-    public function setContextId($contextId)
+    public function getSerie()
     {
-        $this->contextId = $contextId;
+        return $this->serie;
+    }
+
+    /**
+     * @param mixed $serie
+     */
+    public function setSerie($serie)
+    {
+        $this->serie = $serie;
 
         return $this;
     }
 
     /**
-     * @param mixed $recipientId
+     * @return mixed
      */
-    public function setRecipientId($recipientId)
+    public function getLevel()
     {
-        $this->recipientId = $recipientId;
-
-        return $this;
+        return $this->level;
     }
 
     /**
@@ -260,6 +320,14 @@ class Notification
     }
 
     /**
+     * @return mixed
+     */
+    public function getDatas()
+    {
+        return $this->datas;
+    }
+
+    /**
      * @param mixed $datas
      */
     public function setDatas($datas)
@@ -269,43 +337,41 @@ class Notification
         return $this;
     }
 
-    /**
-     * @param mixed $read
-     */
-    public function setRead($read)
+    function __construct()
     {
-        $this->read = $read;
-
-        return $this;
+        $this->dateCreated = new \DateTime();
+        $this->context = self::DEFAULT_CONTEXT;
+        $this->datas = null;
+        $this->level = self::DEFAULT_LEVEL;
+        $this->persons = new ArrayCollection();
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
 
+    ////////////////////////////////////////////////////////////////////////////
+
 
     function __toString()
     {
         return
-            $this->getDateEffective()->format('Y-m-d H:i:s')
-            ."@".$this->getRecipientId()."\t"
-            ."[".$this->getLevel()."]"
-            ."(".$this->getContext().":".$this->getContextId().") "
-            ."(".$this->getContext().":".$this->getContextId().") "
-            .$this->getMessage()
-            ;
+            $this->getDateEffective()->format('Y-m-d')
+            . " " . $this->getObject() . ":" . $this->getObjectId() . "\t"
+            . "[" . $this->getContext() . "]"
+            . $this->getMessage();
     }
 
-    public function toArray(){
+    public function toArray()
+    {
         return [
-            'id' =>  $this->getId(),
-            'dateEffective' =>  $this->getDateEffective()->format('Y-m-d H:i:s'),
+            'id' => $this->getId(),
+            'dateEffective' => $this->getDateEffective()->format('Y-m-d'),
             'message' => $this->getMessage(),
-            'context' =>  $this->getContext(),
-            'contextId' =>  $this->getContextId(),
-            'level' =>  $this->getLevel(),
-            'recipientId' =>  $this->getRecipientId(),
-            'level' =>  $this->getLevel(),
-            'read' => $this->isRead()
+            'object' => $this->getObject(),
+            'objectId' => $this->getObjectId(),
+            'context' => $this->getContext(),
+            'level' => $this->getLevel(),
+            'serie' => $this->getSerie(),
         ];
     }
 }
