@@ -13,11 +13,13 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\Notification;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
@@ -520,11 +522,17 @@ class ProjectGrantController extends AbstractOscarController
             $documentTypes[$type->getId()] = $type->getLabel();
         }
 
+        $activity = $this->getProjectGrantService()->getGrant($id);
+
         return [
-            'entity' => $this->getProjectGrantService()->getGrant($id),
+            'entity' => $activity,
 
             // Jeton de sécurité
             'tokenValue' => $this->getOscarUserContext()->getTokenValue(true),
+
+            // Notifications précalculées
+            'notifications' => $this->getEntityManager()->getRepository(Notification::class)
+                ->findBy(['object' => Notification::OBJECT_ACTIVITY, 'objectId' => $activity->getId()]),
 
 
             'documentTypes' => json_encode($documentTypes),

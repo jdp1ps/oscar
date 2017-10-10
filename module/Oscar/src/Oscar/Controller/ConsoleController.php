@@ -86,39 +86,73 @@ class ConsoleController extends AbstractOscarController
                   'id' => $notification->getId(),
                   'message' => $notification->getMessage(),
                   'context' => $notification->getContext(),
-                    'recipientid' => $notification->getRecipientId(),
+                  'recipientid' => $notification->getRecipientId(),
                   'contextid' => $notification->getContextId(),
                   'date' => $notification->getDateEffective()->format('Y-m-d'),
                   'hash' => $notification->getHash(),
                 ];
             }
-
             echo json_encode($data);
         } catch( \Exception $e ){
             die("ERROR! : ".$e->getMessage());
         }
     }
 
+    /**
+     * Affiche la liste des notifications
+     */
+    public function notificationsActivityListAction(){
 
-    public function notificationsActivityGenerateAction()
-    {
+    }
 
+
+
+    public function notificationsActivityGenerateAction() {
         $id = $this->params('idactivity');
 
         /** @var NotificationService $notificationService */
         $notificationService = $this->getServiceLocator()->get('NotificationService');
 
-        /** @var Activity $activity */
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+        if( $id == 'all' ){
+            $notificationService->generateNotificationsActivities();
+        } else {
+            /** @var Activity $activity */
+            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
-        if( !$activity ){
-            $this->consoleError("Impossible de charger l'activité '$id'");
-            return;
+            if (!$activity) {
+                $this->consoleError("Impossible de charger l'activité '$id'");
+                return;
+            }
+            $notificationService->generateNotificationsForActivity($activity);
         }
-
-
-        $notificationService->generateNotificationsForActivity($activity);
     }
+
+
+    /** ACIENNE VERSION
+    public function notificationsActivityGenerateAction()
+    {
+
+        $id = $this->params('idactivity');
+
+
+
+        $notificationService = $this->getServiceLocator()->get('NotificationService');
+
+
+        if( $id == 'all' ){
+            $notificationService->generateNotificationsActivities();
+        } else {
+            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+            if (!$activity) {
+                $this->consoleError("Impossible de charger l'activité '$id'");
+
+                return;
+            }
+            $notificationService->generateNotificationsForActivity($activity);
+        }
+    }
+    /****/
 
     ///////////////////////////////////////////////////////////////////////////////////////
     ///

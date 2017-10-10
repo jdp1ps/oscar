@@ -122,6 +122,22 @@
 
     <div class="row">
         <div class="col-md-8">
+            <section>
+                <h2>Notifications</h2>
+                <?php foreach ($notifications as $notification): ?>
+                <article class="card card-xs">
+                    <?= $notification ?>
+                    <hr>
+                    <ul>
+                    <?php foreach ($notification->getPersons() as $np): ?>
+                        <li><?= $np->getPerson() ?></li>
+                    <?php endforeach; ?>
+                    </ul>
+                </article>
+                <?php endforeach; ?>
+            </section>
+
+
             <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_SHOW, $entity)): ?>
 
             <section id="members-activity" class="has-btn">

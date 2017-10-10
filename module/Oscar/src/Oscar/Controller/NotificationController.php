@@ -64,7 +64,11 @@ class NotificationController extends AbstractOscarController
             return $this->getResponseInternalError("Impossible de traiter la demande");
         }
 
-        $notifications = $notificationService->getNotificationsPerson($personId);
+        try {
+            $notifications = $notificationService->getNotificationsPerson($personId);
+        } catch (\Exception $e ){
+            return $this->getResponseInternalError($e->getMessage()." - " . $e->getTraceAsString());
+        }
 
 
         $response = new JsonModel($notifications);
