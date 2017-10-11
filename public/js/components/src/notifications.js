@@ -31,7 +31,7 @@ var notifications = Vue.extend({
                             <article v-for="notification in orderedNotifications" :class="{ 'read': notification.read, 'fresh' : notification.fresh }" class="notification">
                                 <h4>
                                     <i :class="'icon-'+notification.context"></i>
-                                    <time datetime="">{{ notification.dateEffective | moment }}</time>
+                                    <time datetime="">{{ notification.dateReal | moment }}</time>
                                     <a href="#" @click="deleteNotification([notification])"><i class="icon-trash-empty"></i></a>
                                 </h4>                              
                                 <p v-html="messageHTML(notification.message)"></p>

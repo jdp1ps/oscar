@@ -115,14 +115,15 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         echo count($activities) . " activité(s)\n";
-
     }
 
-
+    /**
+     * Génère les notifications pour une activité.
+     *
+     * @param Activity $activity
+     */
     public function generateNotificationsForActivity( Activity $activity )
     {
-        $notifications = [];
-
         /** @var PersonService $personsService */
         $personsService = $this->getServiceLocator()->get('PersonService');
 
@@ -139,7 +140,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         /** @var ActivityDate $milestone */
         foreach( $activity->getMilestones() as $milestone ){
             $context = "milestone-" . $milestone->getId();
-            $notificationMessage = sprintf("Échéance '%s' pour '%s'",
+            $notificationMessage = sprintf("%s pour l'activité %s",
                 $milestone->getType()->getLabel(),
                 $activity->log()
                 );
@@ -147,7 +148,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 if( $date > $this->getLimitNotificationDate() ){
                     $this->notification($notificationMessage, $persons,
                         Notification::OBJECT_ACTIVITY, $activity->getId(),
-                        $context, $date, false);
+                        $context, $date, $milestone->getDateStart(), false);
                 }
             }
         }
@@ -155,36 +156,44 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $this->triggerSocket();
     }
 
-    public function deleteNotifications( array $ids ){
-        $query = $this->getEntityManager()->getRepository(Notification::class)->createQueryBuilder('n')
-            ->delete()
-            ->where('n.id IN(:ids)')
-            ->setParameter('ids', $ids)
-            ->getQuery()->getResult();
-        return true;
+    public function deleteNotificationsPersonById( array $ids, Person $person ){
+        return $this->getEntityManager()->getRepository(NotificationPerson::class, 'np')
+            ->createQueryBuilder('np')
+            ->update(NotificationPerson::class, 'np')
+            ->set('np.read', ':now')
+            ->where('np.notification IN (:ids) AND np.person = :person')
+            ->setParameters([
+                'ids' => $ids,
+                'person' => $person,
+                'now' => new \DateTime()
+            ])
+            ->getQuery()
+            ->execute();
     }
 
-    public function getNotificationsPerson( $personId ){
-
-        // @Test
-        $personId = 5245;
-
+    /**
+     * @param $personId
+     * @return array
+     */
+    public function getNotificationsPerson( $personId, $onlyFresh = false)
+    {
         $result = [
             'personid' => $personId,
             'notifications' => []
         ];
 
-        $notificationsPerson =
-
-            $this->getEntityManager()->getRepository(NotificationPerson::class)
+        $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
                 ->createQueryBuilder('p')
                 ->innerJoin('p.notification', 'n')
                 ->orderBy('n.dateEffective', 'DESC')
                 ->where('p.person = :person AND n.dateEffective <= :now')
-                ->setParameters(['person'=> $personId, 'now'=>date('Y-m-d')])
-                ->getQuery()
-                ->getResult();
+                ->setParameters(['person'=> $personId, 'now'=>date('Y-m-d')]);
 
+        if( $onlyFresh === true ){
+            $query->andWhere("p.read IS NULL");
+        }
+
+        $notificationsPerson = $query->getQuery()->getResult();
 
         /** @var NotificationPerson $notificationPerson */
         foreach ($notificationsPerson as $notificationPerson ){
@@ -192,6 +201,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             $dt['read'] = $notificationPerson->getRead();
             $dt['person_id'] = $notificationPerson->getPerson()->getId();
             $dt['person'] = (string)$notificationPerson->getPerson();
+            $dt['notificationperson_id'] = $notificationPerson->getId();
 
             $result['notifications'][] = $dt;
         }
@@ -227,7 +237,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      * @param null $key
      * @param bool $trigger
      */
-    public function notification( $message, $persons, $object, $objectId, $context, \DateTime $dateEffective, $trigger=true)
+    public function notification( $message, $persons, $object, $objectId, $context, \DateTime $dateEffective, \DateTime $dateReal, $trigger=true)
     {
         // Code de série
         $serie = sprintf('%s:%s:%s', $object, $objectId, $context);
@@ -236,22 +246,25 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $hash = $serie.':'.$dateEffective->format('Ymd');
 
         $notif = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
+
+        // Création de la notification
         if( !$notif ){
             $notif = new Notification();
             $this->getEntityManager()->persist($notif);
             $notif->setMessage($message)
                 ->setDateEffective($dateEffective)
+                ->setDateReal($dateReal)
                 ->setContext($context)
                 ->setObject($object)
                 ->setObjectId($objectId)
                 ->setSerie($serie)
                 ->setHash($hash);
-
-            $notif->addPersons($persons, $this->getEntityManager());
-            $this->getEntityManager()->flush();
-
-            if( $trigger === true )
-                $this->triggerSocket();
         }
+
+        $notif->addPersons($persons, $this->getEntityManager());
+        $this->getEntityManager()->flush();
+
+        if( $trigger === true )
+            $this->triggerSocket();
     }
 }
