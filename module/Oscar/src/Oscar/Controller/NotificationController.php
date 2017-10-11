@@ -43,8 +43,8 @@ class NotificationController extends AbstractOscarController
     }
     public function indexAction()
     {
-        $personId = $this->getCurrentPerson()->getId();
-
+        //$personId = $this->getCurrentPerson()->getId();
+        $personId = 120;
         /** @var NotificationService $notificationService */
         $notificationService = $this->getServiceLocator()->get('NotificationService');
 
