@@ -54,7 +54,7 @@ class NotificationController extends AbstractOscarController
             if( $ids ){
                 $ids = explode(',',$ids);
                 try {
-                    $notificationService->deleteNotifications($ids);
+                    $notificationService->deleteNotificationsPersonById($ids, $this->getCurrentPerson());
                     return $this->getResponseOk('Notifications supprimées');
                 } catch( \Exception $e ){
                     return $this->getResponseInternalError($e->getMessage());
@@ -65,7 +65,7 @@ class NotificationController extends AbstractOscarController
         }
 
         try {
-            $notifications = $notificationService->getNotificationsPerson($personId);
+            $notifications = $notificationService->getNotificationsPerson($personId, true);
         } catch (\Exception $e ){
             return $this->getResponseInternalError($e->getMessage()." - " . $e->getTraceAsString());
         }

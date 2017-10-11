@@ -46,9 +46,19 @@ class Notification
     private $id;
 
     /**
+     * Date à partir de laquelle la notification s'affiche.
+     *
      * @ORM\Column(type="date", nullable=false)
      */
     private $dateEffective;
+
+    /**
+     * Date réél de l'événement lié à la notification.
+     *
+     * @ORM\Column(type="date", nullable=false)
+     */
+    private $dateReal;
+
 
     /**
      * @ORM\Column(type="datetimetz", nullable=false)
@@ -337,6 +347,25 @@ class Notification
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getDateReal()
+    {
+        return $this->dateReal;
+    }
+
+    /**
+     * @param mixed $dateReal
+     */
+    public function setDateReal($dateReal)
+    {
+        $this->dateReal = $dateReal;
+
+        return $this;
+    }
+
+
     function __construct()
     {
         $this->dateCreated = new \DateTime();
@@ -355,7 +384,8 @@ class Notification
     function __toString()
     {
         return
-            $this->getDateEffective()->format('Y-m-d')
+            $this->getDateEffective()->format('Y-m-d') . ' / '
+            . $this->getDateReal()->format('Y-m-d')
             . " " . $this->getObject() . ":" . $this->getObjectId() . "\t"
             . "[" . $this->getContext() . "]"
             . $this->getMessage();
@@ -366,6 +396,7 @@ class Notification
         return [
             'id' => $this->getId(),
             'dateEffective' => $this->getDateEffective()->format('Y-m-d'),
+            'dateReal' => $this->getDateReal()->format('Y-m-d'),
             'message' => $this->getMessage(),
             'object' => $this->getObject(),
             'objectId' => $this->getObjectId(),
