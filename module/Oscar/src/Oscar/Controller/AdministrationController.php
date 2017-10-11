@@ -589,7 +589,7 @@ class AdministrationController extends AbstractOscarController
                     return $this->ajaxResponse($out);
                 }
             } ////////////////////////////////////////////////////////////////////
-            // POST : Nouveau rôle
+            // POST : Nouveau type
             elseif( $this->getHttpXMethod() == 'POST' ){
                 $this->getLogger()->info("INFO : typeDocumentActionApi() POST ajout d'un nouveau type de document");
                 //$this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_EDITION);
