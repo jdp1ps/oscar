@@ -1,0 +1,70 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 17-10-11 10:55
+ * @copyright Certic (c) 2017
+ */
+?>
+<style>
+    .past { opacity: .5}
+</style>
+<div class="container">
+    <header>
+        <h1>
+            <strong>Notification planifiées </strong> dans
+            <em><?= $activity ?></em>
+        </h1>
+    </header>
+    <div id="notifications"></div>
+    <script>
+        require(['vue', 'mm'], function(Vue, moment){
+            Vue.filter('fromNow', function(str){
+                let m = moment(str);
+               return m.format("D MMMM YYYY") +", " +m.fromNow()
+            });
+            new Vue({
+                el: '#notifications',
+                template: `
+<section>
+    <section v-for="s in grouped" class="card">
+        <p>{{ s.message }}</p>
+        <strong><i class="icon-group"></i> Personnes concernées :</strong>
+        <span class="cartouche xs" v-for="p in s.persons" :class="p.read ? 'read' : ''">
+            {{ p.person }}
+        </span>
+        <br>
+        <strong><i class="icon-calendar"></i> Rappels</strong>
+        <span class="cartouche" v-for="d in s.dates" :class="d < now ? 'past' : ''">
+            {{ d | fromNow }}
+        </span>
+    </section>
+</section>`,
+                data : {
+                    notifications: <?= json_encode($notifications) ?>,
+                    groupBy: "serie"
+                },
+                computed: {
+                    now(){
+                      return moment().format('YYYY-MM-DD');
+                    },
+                    grouped(){
+                        let group = {};
+                        this.notifications.forEach(n => {
+                            let serie = n.serie;
+                            if( !group.hasOwnProperty(serie) ){
+                                group[serie] = {
+                                    message: n.message,
+                                    persons: n.persons,
+                                    dates: []
+                                }
+                            }
+                            group[serie].dates.push(n.dateEffective);
+
+                        })
+                        return group;
+                    }
+                }
+            })
+        })
+    </script>
+</div>

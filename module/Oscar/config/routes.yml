@@ -166,9 +166,6 @@ workpackage:
 
 ################################################################################
 # GESTION des PROJETS
-
-
-
 project:
     type: literal
     options:
@@ -548,6 +545,13 @@ contract:
                 route: /fiche-detaillee/:id
                 defaults:
                     action: show
+
+        notifications:
+            type: segment
+            options:
+                route: /notifications/:id
+                defaults:
+                    action: notifications
 
         documents-json:
             type: segment

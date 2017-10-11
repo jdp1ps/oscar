@@ -30,6 +30,7 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Provider\Privileges;
+use Oscar\Service\NotificationService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
@@ -486,6 +487,38 @@ class ProjectGrantController extends AbstractOscarController
 
         return new JsonModel($out);
 
+    }
+
+    public function notificationsAction(){
+        // Identifiant de l'activité
+        $id = $this->params()->fromRoute('id');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+
+        /** @var NotificationService $notificationService */
+        $notificationService = $this->getServiceLocator()->get('NotificationService');
+
+        $notificationJson = [];
+        foreach ($notificationService->notificationsActivity($entity) as $n) {
+            $notification = $n->toArray();
+            $notification['persons'] = [];
+            foreach ($n->getPersons() as $personNotification) {
+                $notification['persons'][] = [
+                    'person' => (string)$personNotification->getPerson(),
+                    'read' => $personNotification->getRead() ? $personNotification->getRead()->format('Y-m-d') : false,
+                ];
+            }
+            $notificationJson[] = $notification;
+        }
+
+        return [
+            'activity' => $entity,
+            'notifications' => $notificationJson
+        ];
     }
 
     /**
