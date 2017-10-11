@@ -6,7 +6,9 @@
     </h1>
     <p>Oscar a rencontré une erreur et a répondu</p>
 
-    <?php if( $exception && $exception instanceof Oscar\Exception\OscarException ): ?>
+    <?php
+    /** @var Exception $exception */
+    if( $exception && $exception instanceof Oscar\Exception\OscarException ): ?>
         <div class="card card-danger"><?= $exception->getMessage() ?></div>
         <p>Si ce message ne vous aide pas, contactez l'administrateur en lui indiquant ce message.</p>
     <?php else: ?>
@@ -15,6 +17,11 @@
 <?= $message ?>
 
 ---
+         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
+
+<strong>Stack : </strong>
+<?= $exception->getTraceAsString() ?>
+         <?php endif; ?>
         </pre>
 <?php endif; ?>
     </section>
