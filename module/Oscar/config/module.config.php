@@ -53,7 +53,7 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure'],
+                    'action' => ['connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
                     'roles' => ['Administrateur']
                 ],
 
