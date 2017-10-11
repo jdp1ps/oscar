@@ -27,6 +27,7 @@ class NotificationPerson
     /**
      * @var Notification
      * @ORM\ManyToOne(targetEntity="Notification", inversedBy="persons")
+     * @ORM\JoinColumn(name="notification_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $notification;
 
