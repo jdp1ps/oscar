@@ -4,19 +4,23 @@
 
 *Oscar* permet de modifier votre instance en utilisant un fichier CSS complémentaire.
 
-Pour cela, créez un fichier dans le dossier `public/custom/custom.css` : 
+Pour cela, créez un fichier dans le dossier `public/custom/custom.css` :
 
 ```bash
 touch public/custom/custom.css
 ```
 
-Par exemple : 
+Par exemple :
 
 ```css
 html body {
     background: #ff6600 !important;
 }
 ```
+
+## Soumettre des modifications avec GIT
+
+
 
 ## Développement Front
 

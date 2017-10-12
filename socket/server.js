@@ -54,9 +54,13 @@ app.get('/', function(req, res){
 app.post(config.socket.push_path, function(req, res){
 
     // IDS des notifs
-    var ids = req.body.ids;
+    console.log(req.body.ids);
+    var ids = req.body.ids.split(",");
     console.log("Notifications à diffuser", ids);
-
+    for( var i=0; i<ids.length; i++ ){
+        sendNotification(ids[i]);
+    }
+/*
     exec('php ../public/index.php oscar json:notifications '+ids, function(err, stdout, stderr) {
         if( err  ){
             console.log("ERROR", err);
@@ -70,15 +74,16 @@ app.post(config.socket.push_path, function(req, res){
 
         }
     })
+    */
 
     res.end();
 });
 
 function sendNotification( datas ){
+    console.log("sendNotification", datas);
      for( var i=0; i<clients.length; i++ ){
-         if( clients[i].personid == datas.recipientid){
-            console.log("ENVOI à [", clients[i].personid, "] ",clients[i].username);
-            clients[i].emit('notification', { "notification": datas });
+         if( clients[i].usertoken == datas){
+            clients[i].emit('notification', {});
         }
     }
 }

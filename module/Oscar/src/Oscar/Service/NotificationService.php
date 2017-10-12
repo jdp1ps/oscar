@@ -11,6 +11,7 @@ use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNotification;
+use Oscar\Entity\Authentification;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Person;
@@ -46,9 +47,12 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function addNotificationTrigerrable( Notification $n )
     {
-        $this->getServiceLocator()->get('Logger')->info('Ajout à la pile de ' . $n->getId());
-        if( !array_search($n->getId(), $this->notificationsToTrigger) ){
-            $this->notificationsToTrigger[] = $n->getId();
+        /** @var NotificationPerson $p */
+        foreach ($n->getPersons() as $p) {
+            $person = $p->getPerson();
+            if( $person->getLadapLogin() && !in_array($person->getLadapLogin(), $this->notificationsToTrigger) ){
+                $this->notificationsToTrigger[] = $person->getLadapLogin();
+            }
         }
     }
 
@@ -58,16 +62,28 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $configSocket = $this->getServiceLocator()->get('Config')['oscar']['socket'];
         if (count($this->notificationsToTrigger) && $configSocket)
         {
+            $this->getServiceLocator()->get('Logger')->info("TRIGGER !");
+            $auths = $this->getEntityManager()->getRepository(Authentification::class)->createQueryBuilder('a')
+                ->where('a.username IN (:logins)')
+                ->setParameter('logins', array_unique($this->notificationsToTrigger))
+                ->getQuery()
+                ->getResult();
+
+            $keys = [];
+            foreach ($auths as $auth) {
+                $this->getServiceLocator()->get('Logger')->info($auth);
+                $keys[] = $auth->getSecret();
+            }
             // todo Faire un truc plus propre pour générer l'URL
             $url = $configSocket['url'].$configSocket['push_path'];
-            $this->getServiceLocator()->get('Logger')->info("PUSH " . $url);
+            $this->getServiceLocator()->get('Logger')->info("PUSH " . $url . " WITH " . implode(",", $keys));
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, "ids=" . implode(',', $this->notificationsToTrigger));
+            curl_setopt($curl, CURLOPT_POSTFIELDS, "ids=" . implode(',', $keys));
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
             curl_exec($curl);
-            $this->notificationsToTrigger = [];
+            //$this->notificationsToTrigger = [];
         } else {
             $this->getServiceLocator()->get("Logger")->info("PAS DE PUSH !!!");
         }
@@ -106,15 +122,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
-            echo "# $activity\n";
-            /** @var ActivityDate $milestone */
-            foreach ($activity->getMilestones() as $milestone) {
-                echo " - $milestone \n";
-            }
-
+            $this->generateNotificationsForActivity($activity);
         }
-
-        echo count($activities) . " activité(s)\n";
     }
 
     /**
@@ -156,6 +165,13 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $this->triggerSocket();
     }
 
+    /**
+     * Marque les notifications comme lues
+     *
+     * @param array $ids IDS des Notifications
+     * @param Person $person Personne consernée
+     * @return mixed
+     */
     public function deleteNotificationsPersonById( array $ids, Person $person ){
         return $this->getEntityManager()->getRepository(NotificationPerson::class, 'np')
             ->createQueryBuilder('np')
@@ -212,16 +228,24 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function notifyActivitiesTimesheetSend( $activities ){
 
-//        /** @var PersonService $personsService */
-//        $personsService = $this->getServiceLocator()->get('PersonService');
-//
-//        /** @var Activity $activity */
-//        foreach ($activities as $activity) {
-//            $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
-//            $this->notification(sprintf("Déclaration en attente de validation dans l'activité %s.", $activity->log()),
-//                $persons,
-//                'Activity', $activity->getId());
-//        }
+        /** @var PersonService $personsService */
+        $personsService = $this->getServiceLocator()->get('PersonService');
+
+        /** @var Activity $activity */
+        foreach ($activities as $activity) {
+            $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+            $this->notification(
+                sprintf("Déclaration en attente de validation dans l'activité %s.", $activity->log()),
+                $persons,
+                Notification::OBJECT_ACTIVITY,
+                $activity->getId(),
+                'declarationsend',
+                new \DateTime(),
+                new \DateTime(),
+                false);
+        }
+
+        $this->triggerSocket();
     }
 
     public function notifyActivitiesTimesheetReject( $activities ){
@@ -261,7 +285,10 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 ->setHash($hash);
         }
 
-        $notif->addPersons($persons, $this->getEntityManager());
+        $change = $notif->addPersons($persons, $this->getEntityManager());
+
+        $this->addNotificationTrigerrable($notif);
+
         $this->getEntityManager()->flush();
 
         if( $trigger === true )
