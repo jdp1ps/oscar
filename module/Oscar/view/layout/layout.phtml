@@ -326,16 +326,16 @@ $this->headScript();
 
         </div>
         <script>
-		    var socket;
+		    var socket, notifications;
 	
             require(['notifications'], (notifications) => {
-                var n = new notifications.default({
+                notifications = new notifications.default({
                     el: '#notifications-area',
                     http: {
                         root: '/notification'
                     },
                 });
-                n.fetch();
+                notifications.fetch();
 		<?php if( $this->grant()->hasSocket() ): ?>
 
             requirejs.config({ paths: {
@@ -351,9 +351,7 @@ $this->headScript();
                     console.log('Connect');
                 });
                 socket.on('notification', function(datas){
-                    datas.notification.fresh = true;
-                    n.notifications.unshift(datas.notification);
-                    n.open = true;
+                    notifications.fetch();
                 });
                 socket.on('disconnect', function(){
                     console.log('disconnect');

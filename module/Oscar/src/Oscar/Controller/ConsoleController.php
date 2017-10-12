@@ -55,6 +55,9 @@ class ConsoleController extends AbstractOscarController
         $token = $this->params('token');
         try {
             $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['secret' => $token]);
+            if( !$auth ){
+                throw new \Exception("Not Auth");
+            }
             $person = $this->getEntityManager()->getRepository(Person::class)->findOneBy(['ladapLogin' => $auth->getUsername()]);
             $data = [
                 "id" => $person->getId(),
@@ -63,7 +66,7 @@ class ConsoleController extends AbstractOscarController
             ];
             echo json_encode($data);
         } catch( \Exception $e ){
-            die("ERROR! : ".$e->getMessage());
+            die();
         }
     }
 
@@ -82,15 +85,19 @@ class ConsoleController extends AbstractOscarController
             $data = [];
             /** @var Notification $notification */
             foreach ($notifications as $notification){
-                $data[] = [
-                  'id' => $notification->getId(),
-                  'message' => $notification->getMessage(),
-                  'context' => $notification->getContext(),
-                  'recipientid' => $notification->getRecipientId(),
-                  'contextid' => $notification->getContextId(),
-                  'date' => $notification->getDateEffective()->format('Y-m-d'),
-                  'hash' => $notification->getHash(),
-                ];
+                foreach ($notification->getPersons() as $person) {
+                    $data[] = [
+                      'id' => $notification->getId(),
+                      'message' => $notification->getMessage(),
+                      'object' => $notification->getObject(),
+                      'objectid' => $notification->getObjectId(),
+                      'recipientid' => $person->getId(),
+                      'context' => $notification->getContext(),
+                      'serie' => $notification->getSerie(),
+                      'date' => $notification->getDateEffective()->format('Y-m-d'),
+                      'hash' => $notification->getHash(),
+                    ];
+                }
             }
             echo json_encode($data);
         } catch( \Exception $e ){
