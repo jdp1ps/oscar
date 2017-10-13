@@ -109,4 +109,17 @@ class RoleRepository extends EntityRepository
         }
         return $rolesByRoleId;
     }
+
+
+    public function getRolesWithPrivilege( $privilege )
+    {
+        $roles = $this->createQueryBuilder('r')
+            ->from( Role::class, 'role')
+            ->innerJoin('role.privileges', 'p')
+            ->innerJoin('p.categorie', 'c')
+            //->where('1')
+            ->getQuery()
+            ->getResult();
+        return $roles;
+    }
 }

@@ -280,6 +280,9 @@ $this->headScript();
                     </a>
                 </div>
                 <div class="col-md-6">
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX) ): ?>
+                    <span id="connected"></span>
+                    <?php endif; ?>
                     <strong>oscar<sup>&copy</sup></strong> - <em><?= $this->appInfos()->desc ?></em>
                 </div>
             </div>
@@ -341,7 +344,7 @@ $this->headScript();
             requirejs.config({ paths: {
                 "io":  "/js/socket.io"
             }});
-            require(['io'], (io) => {
+            require(['io', 'vue'], (io, Vue) => {
                 socket = io('<?= $this->grant()->getSocketUrl() ?>', {
                     query: {
                         token: '<?= $this->grant()->dbUser()->getSecret() ?>'
@@ -353,6 +356,24 @@ $this->headScript();
                 socket.on('notification', function(datas){
                     notifications.fetch();
                 });
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX) ): ?>
+                var connected = new Vue({
+                    el: "#connected",
+                    data: {
+                        users: []
+                    },
+                    template: `<section class="connected">
+                        Personnes connectées :
+                        <span class="cartouche xs" v-for="u in users">
+                            {{ u }}
+                        </span>
+                    </section>`
+                })
+                socket.on('users', function(datas){
+                    console.log('USERS', datas);
+                    connected.users = datas;
+                });
+                <?php endif; ?>
                 socket.on('disconnect', function(){
                     console.log('disconnect');
                 });
