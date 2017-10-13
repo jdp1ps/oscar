@@ -51,6 +51,65 @@ use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
 {
+    /**
+     * Retourne la liste des clefs utilisateurs disposant du privilège.
+     */
+    public function tokensWithPrivilegesAction()
+    {
+        $privilege = $this->params('privilege');
+
+        /** @var RoleRepository $roleRepository */
+        $roleRepository = $this->getEntityManager()->getRepository(Role::class);
+
+        $privilege = $this->getEntityManager()->getRepository(Privilege::class)->createQueryBuilder('p')
+            ->innerJoin('p.categorie', 'c')
+            ->where("CONCAT(c.code,'-',p.code) = :code")
+            ->setParameter('code', $privilege)
+            ->getQuery()
+            ->getSingleResult();
+
+        $roles = [];
+        foreach ($privilege->getRole() as $r) {
+            $roles[] = $r;
+        }
+
+        $authentifications = $this->getEntityManager()->getRepository(Authentification::class)
+            ->createQueryBuilder('a')
+           /* ->where('a.roles IN (:roles)')
+            ->setParameter('roles', $roles) /****/
+            ->getQuery()
+            ->getResult();
+
+        $secrets = [];
+        /** @var Authentification $a */
+        foreach ($authentifications as $a) {
+            foreach ($roles as $r )
+                if( $a->getSecret() && !in_array($a->getSecret(), $secrets) && in_array($r, $a->getRoles()) )
+                    $secrets[] = $a->getSecret();
+        }
+        echo json_encode($secrets);
+    }
+
+
+    public function tokenHasPrivilegeAction(){
+        $token = $this->params('token');
+        $privilege = $this->params('privilege');
+
+        /** @var Authentification $auth */
+        $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['secret' => $token]);
+        /** @var Role $role */
+        foreach ($auth->getRoles() as $role ){
+            /** @var Privilege $privilege */
+            foreach ($role->getPrivileges() as $p ){
+                if( $p->getFullCode() == $privilege ){
+                    return json_encode(true);
+                }
+            }
+        }
+        return json_encode(false);
+    }
+
+
     public function jsonUserAction(){
         $token = $this->params('token');
         try {

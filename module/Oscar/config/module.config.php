@@ -354,6 +354,25 @@ return array(
         'router' => array(
             'routes' => array(
 
+                'tokens_with_privilege' => [
+                    'options' => [
+                        'route' => 'oscar tokens:with-privilege <privilege>',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'tokensWithPrivileges',
+                        ],
+                    ]
+                ],
+                'token_has_privilege' => [
+                    'options' => [
+                        'route' => 'oscar token:has-privilege <token> <privilege> ',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'tokenHasPrivilege',
+                        ],
+                    ]
+                ],
+
                 'notification_activity_generate' => [
                     'options' => [
                         'route' => 'oscar notifications:generate <idactivity>',
