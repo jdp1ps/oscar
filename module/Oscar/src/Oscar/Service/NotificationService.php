@@ -28,6 +28,18 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     /** @var array Contiens la liste des ID des notifications créée pendant l'exécution */
     private $notificationsToTrigger = [];
 
+    public function getAllNotificationsPerson( $personId )
+    {
+        $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
+            ->createQueryBuilder('p')
+            ->innerJoin('p.notification', 'n')
+            ->orderBy('n.dateEffective', 'DESC')
+            ->where('p.person = :person')
+            ->setParameters(['person'=> $personId]);
+
+
+        return $query->getQuery()->getResult();
+    }
     /**
      * Retourne la liste des notifications programmées pour une activités.
      *

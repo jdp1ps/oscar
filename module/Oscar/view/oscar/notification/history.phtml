@@ -1,0 +1,52 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 17-09-15 11:56
+ * @copyright Certic (c) 2017
+ */
+?>
+
+<div class="container">
+    <header class="jumbotron oscar-header">
+        <h1>Historique des notifications</h1>
+    </header>
+    <section>
+
+        <?php
+        $dateSeparator = "";
+        $now = new DateTime();
+        /** @var \Oscar\Entity\NotificationPerson $n */
+        foreach( $notifications as $n ):
+            $currentDateSeparator = $this->moment($n->getNotification()->getDateEffective())->since();
+            if( $currentDateSeparator != $dateSeparator ){
+                $dateSeparator = $currentDateSeparator;
+                echo "<h2>$dateSeparator</h2>";
+            }
+
+            // Icone à utiliser
+            if( $n->getNotification()->getDateEffective() > $now ){
+                $icon = "icon-history";
+                $title = "Notification planifiée pour s'afficher";
+            } else {
+                if( $n->getRead() ) {
+                    $icon = " icon-ok-circled";
+                    $title = "Vous avez marqué cette notification comme lue le " . $this->moment($n->getRead())->full();
+                } else {
+                    $icon = " icon-attention-circled";
+                    $title = "Notification envoyée (par encore lu)";
+                }
+            }
+            ?>
+        <article class="card xs">
+            <h3 class="card-title">
+                <span>
+                    <i class="<?= $icon ?>" title="<?= $title ?>"></i>
+                    <?= $this->moment($n->getNotification()->getDateEffective())->full() ?>
+                </span>
+            </h3>
+
+            <p><?= $n->getNotification()->getMessage() ?></p>
+        </article>
+        <?php endforeach; ?>
+    </section>
+</div>
