@@ -118,7 +118,16 @@ class NotificationController extends AbstractOscarController
                 /** @var NotificationService $serviceNotification */
                 $serviceNotification = $this->getServiceLocator()->get('NotificationService');
                 $message = $form->get('message')->getValue();
-                $serviceNotification->notification($message, [$person->getId()]);
+                $serviceNotification->notification(
+                    $message,
+                    [$person],
+                    'Application',
+                    -1,
+                    'free-notification',
+                    new \DateTime(),
+                    new \DateTime()
+
+                );
                 die();
             }
 

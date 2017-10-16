@@ -2952,6 +2952,12 @@ $oscar-line: dotted thin $colorGreyLight;
     }
   }
 
+  footer {
+    background: #999;
+    text-align: center;
+    margin: .2em;
+  }
+
   .list {
     box-shadow: -4px 4px 4px rgba(0,0,0,.2);
     background: #efefef;

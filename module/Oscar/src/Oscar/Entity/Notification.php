@@ -175,6 +175,7 @@ class Notification
         /** @var NotificationPerson $notificationPerson */
         foreach ( $this->persons as $notificationPerson ){
             if( $notificationPerson->getPerson() == $person ){
+                $notificationPerson->setRead(null);
                 return null;
             }
         }

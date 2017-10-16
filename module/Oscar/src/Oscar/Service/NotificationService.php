@@ -240,6 +240,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function notifyActivitiesTimesheetSend( $activities ){
 
+        $this->getServiceLocator()->get('Logger')->info("Notification timesheet send !");
+
         /** @var PersonService $personsService */
         $personsService = $this->getServiceLocator()->get('PersonService');
 
@@ -278,9 +280,12 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         // Code de série
         $serie = sprintf('%s:%s:%s', $object, $objectId, $context);
 
+        $this->getServiceLocator()->get('Logger')->info("Add $serie");
+
         // Code unique
         $hash = $serie.':'.$dateEffective->format('Ymd');
 
+        /** @var Notification $notif */
         $notif = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
 
         // Création de la notification
@@ -295,6 +300,9 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 ->setObjectId($objectId)
                 ->setSerie($serie)
                 ->setHash($hash);
+        } else {
+            $notif->setDateReal($dateReal)
+                ->setDateEffective($dateEffective);
         }
 
         $change = $notif->addPersons($persons, $this->getEntityManager());
