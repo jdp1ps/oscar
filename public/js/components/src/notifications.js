@@ -36,7 +36,11 @@ var notifications = Vue.extend({
                                 </h4>                              
                                 <p v-html="messageHTML(notification.message)"></p>
                             </article>
+                            <footer class="control">
+                                <a :href="urlHistory">Historique des notifications</a>
+                            </footer>
                         </section>
+                        
                     </p>`,
 
     data() {

@@ -8326,6 +8326,10 @@ time.date-missing {
     border-radius: 4px; }
     #notifications-area .notifications-total.unread {
       background: #DD423E; }
+  #notifications-area footer {
+    background: #999;
+    text-align: center;
+    margin: .2em; }
   #notifications-area .list {
     box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.2);
     background: #efefef;

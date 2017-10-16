@@ -357,7 +357,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     sprintf("Des déclarations ont été rejetées scientifiquement dans l'activité %s", $timeSheet->getActivity()->log()),
                     $timeSheet->getActivity(),
                     'rejectsci',
-                    [$timeSheet->getPerson()->getId()]
+                    [$timeSheet->getPerson()]
                 );
 
             } else {
@@ -374,7 +374,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     private $notificationsDatas;
 
-    protected function stackNotification( $message, Activity $activity, $action, array $personsIds )
+    protected function stackNotification( $message, Activity $activity, $action, array $persons )
     {
         if( $this->notificationsDatas === null ){
             $this->notificationsDatas = [];
@@ -384,11 +384,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $this->notificationsDatas[$key] = [
                 'message' => $message,
                 'action' => $action,
-                'persons' => $personsIds,
+                'persons' => $persons,
                 'activity' => $activity
             ];
         } else {
-            $this->notificationsDatas[$key]['persons'] = array_unique(array_merge($this->notificationsDatas[$key]['persons'], $personsIds));
+            $this->notificationsDatas[$key]['persons'] = array_unique(array_merge($this->notificationsDatas[$key]['persons'], $persons));
         }
     }
 
@@ -412,7 +412,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $datas['persons'],
                     'Activity',
                     $datas['activity']->getId(),
-                    'Activity:'.$datas['action'].':'.$datas['activity']->getId()
+                    $datas['action'],
+                    new \DateTime(),
+                    new \DateTime()
                 );
             }
         }
@@ -456,7 +458,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     sprintf("Des déclarations ont été validés scientifiquement dans l'activité %s", $timeSheet->getActivity()->log()),
                     $timeSheet->getActivity(),
                     'validatesci',
-                    [$timeSheet->getPerson()->getId()]
+                    [$timeSheet->getPerson()]
                 );
 
             } else {
@@ -509,7 +511,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     sprintf("Des déclarations ont été rejetées administrativement dans l'activité %s", $timeSheet->getActivity()->log()),
                     $timeSheet->getActivity(),
                     'rejectadmin',
-                    [$timeSheet->getPerson()->getId()]
+                    [$timeSheet->getPerson()]
                 );
 
             } else {
@@ -564,7 +566,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     sprintf("Des déclarations ont été validées administrativement dans l'activité %s", $timeSheet->getActivity()->log()),
                     $timeSheet->getActivity(),
                     'validateadmin',
-                    [$timeSheet->getPerson()->getId()]
+                    [$timeSheet->getPerson()]
                 );
 
             } else {

@@ -81,7 +81,6 @@ function notifyUserList(){
             clients[i].emit('users', userlist);
         }
     }
-
 }
 
 function sendNotification( datas ){
@@ -94,22 +93,39 @@ function sendNotification( datas ){
 }
 
 function addClient( socket){
-    console.log("Connexion", socket.username, socket.personid);
+    console.log("Ajout du socket", socket.id, socket.username, socket.personid);
     clients.push(socket);
     clientsOnline.push(socket.personid);
-    console.log( clients.length, "connecté(s)");
+    console.log( clients.length, "socket(s) référencé(s)");
+    clients.forEach(s=>{
+        console.log(s.id, s.personid,s.usertoken, s.username);
+    })
 }
 
 function removeClient( socket ){
-    console.log("Déconnection", socket.username, socket.personid);
-    var index = clients.indexOf(socket);
-    if( index >= 0 ){
-        clients.splice(index, 1);
+    console.log("Déconnection", socket.username, socket.personid, socket.id);
+    var index = -1;
+    for( var i= 0; i<clients.length; i++ ){
+        if( clients[i].id == socket.id ){
+            index = i;
+        }
     }
+    if( index >= 0 ){
+        console.log("retrait du socket ?");
+        clients.splice(index, 1);
+
+    }
+
+    console.log( clients.length, "socket(s) référencé(s)");
+    clients.forEach(s=>{
+        console.log(s.id, s.personid,s.usertoken, s.username);
+    })
+    /*
     index = clientsOnline.indexOf(socket.personid);
     if( index >= 0 ){
         clientsOnline.splice(index, 1);
     }
+    */
 
     notifyUserList();
 }
