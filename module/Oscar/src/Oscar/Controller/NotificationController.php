@@ -41,6 +41,25 @@ class NotificationController extends AbstractOscarController
 
         die('Test');
     }
+
+
+    public function historyAction()
+    {
+        $personId = $this->getCurrentPerson()->getId();
+
+        /** @var NotificationService $notificationService */
+        $notificationService = $this->getServiceLocator()->get('NotificationService');
+
+        try {
+            return [
+                'notifications' => $notificationService->getAllNotificationsPerson($personId)
+            ];
+        } catch (\Exception $e ){
+            return $this->getResponseInternalError($e->getMessage()." - " . $e->getTraceAsString());
+        }
+    }
+
+
     public function indexAction()
     {
         $personId = $this->getCurrentPerson()->getId();

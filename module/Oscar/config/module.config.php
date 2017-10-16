@@ -43,7 +43,7 @@ return array(
                 ],
 
                 [ 'controller' =>  'Notification',
-                    'action' => ['notifyPerson'],
+                    'action' => ['notifyPerson', 'history'],
                     'roles' => ['user'],
                 ],
 

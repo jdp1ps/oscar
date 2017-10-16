@@ -40,13 +40,18 @@ notification:
                 route: /test
                 defaults:
                     action: test
-        # Déclarations d'une personne pour une activité
         person:
             type: segment
             options:
                 route: /notifyperson/:idperson
                 defaults:
                     action: notifyPerson
+        history:
+            type: segment
+            options:
+                route: /history
+                defaults:
+                    action: history
 
 # TIMESHEET
 timesheet:

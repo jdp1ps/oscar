@@ -334,6 +334,9 @@ $this->headScript();
             require(['notifications'], (notifications) => {
                 notifications = new notifications.default({
                     el: '#notifications-area',
+                    data: {
+                        urlHistory: '<?= $this->url('notification/history') ?>'
+                    },
                     http: {
                         root: '/notification'
                     },
