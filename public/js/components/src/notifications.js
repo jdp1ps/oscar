@@ -34,7 +34,7 @@ var notifications = Vue.extend({
                                     <time datetime="">{{ notification.dateReal | moment }}</time>
                                     <a href="#" @click="deleteNotification([notification])"><i class="icon-trash-empty"></i></a>
                                 </h4>                              
-                                <p v-html="messageHTML(notification.message)"></p>
+                                <p v-html="messageHTML(notification.message)" @click.prevent.stop="handlerClickNotification($event, notification)"></p>
                             </article>
                             <footer class="control">
                                 <a :href="urlHistory">Historique des notifications</a>
@@ -60,7 +60,10 @@ var notifications = Vue.extend({
     },
 
     computed: {
-
+        /**
+         * Retourne les notifications rangées par date effective.
+         * @returns {Array.<T>}
+         */
         orderedNotifications(){
             return this.notifications.sort((n1, n2) => {
                 return n1.dateEffective > n2.dateEffective ? -1 :
@@ -71,6 +74,21 @@ var notifications = Vue.extend({
     },
 
     methods: {
+        handlerClickNotification(evt, notification){
+            var redirect = null;
+            if( evt.target.href )
+                redirect = evt.target.href;
+
+
+            this.$http.delete(this.$http.$options.root+'?ids=' + notification.id).then(
+                (res) => {
+                    document.location = redirect;
+                },
+                (err) => {
+                    console.log("ERROR");
+                }).then(()=>{this.loading = false;});
+
+        },
         messageHTML(message){
             var reg = /(.*)\[Activity:([0-9]*):(.*)\](.*)/, match;
             if( match = reg.exec(message) ){
