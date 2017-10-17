@@ -105,7 +105,12 @@ function addClient( socket){
 function removeClient( socket ){
     console.log("Déconnection", socket.username, socket.personid, socket.id);
     var index = -1;
+    var newClients = [];
     for( var i= 0; i<clients.length; i++ ){
+        if( clients[i].disconnected ){
+            clients.splice(i, 1);
+            continue;
+        }
         if( clients[i].id == socket.id ){
             index = i;
         }
@@ -113,7 +118,6 @@ function removeClient( socket ){
     if( index >= 0 ){
         console.log("retrait du socket ?");
         clients.splice(index, 1);
-
     }
 
     console.log( clients.length, "socket(s) référencé(s)");
@@ -161,8 +165,7 @@ io.on('connection', function(socket){
                 connected = socket.personid;
                 notifyUserList();
             }
-        })
-
+        });
 
         socket.on('disconnect', () => {
             removeClient(socket);
