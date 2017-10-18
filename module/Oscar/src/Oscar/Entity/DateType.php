@@ -76,7 +76,7 @@ class DateType implements ITrackable
         if( $this->recursivity ){
             return explode(',', $this->recursivity);
         } else {
-            return $this->recursivity;
+            return [];
         }
     }
 

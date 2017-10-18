@@ -180,7 +180,7 @@ class ConsoleController extends AbstractOscarController
         $notificationService = $this->getServiceLocator()->get('NotificationService');
 
         if( $id == 'all' ){
-            $notificationService->generateNotificationsActivities();
+            $notificationService->generateNotificationsActivities(true);
         } else {
             /** @var Activity $activity */
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
@@ -189,7 +189,7 @@ class ConsoleController extends AbstractOscarController
                 $this->consoleError("Impossible de charger l'activité '$id'");
                 return;
             }
-            $notificationService->generateNotificationsForActivity($activity);
+            $notificationService->generateNotificationsForActivity($activity, true);
         }
     }
 
