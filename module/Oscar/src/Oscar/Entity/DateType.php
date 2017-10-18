@@ -41,7 +41,13 @@ class DateType implements ITrackable
      */
     private $description;
 
-    private $recursivity = [60,30,15,7,1,0];
+    /**
+     * Description.
+     *
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $recursivity;
 
     /**
      * @return string
@@ -56,7 +62,7 @@ class DateType implements ITrackable
      */
     public function getRecursivity()
     {
-        return $this->recursivity;
+        return [60,30,15,5,0];
     }
 
     /**
