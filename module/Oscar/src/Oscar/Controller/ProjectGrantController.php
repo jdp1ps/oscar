@@ -27,6 +27,7 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\TypeDocument;
+use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Provider\Privileges;
@@ -150,11 +151,22 @@ class ProjectGrantController extends AbstractOscarController
     {
         $id = $this->params()->fromRoute($fieldName);
         if (!($activity = $this->getEntityManager()->getRepository(Activity::class)->find($id))) {
-            throw new \Exception(sprintf("Impossible de charger l'activité '%s'",
+            throw new OscarException(sprintf("Impossible de charger l'activité '%s'",
                 $id));
         }
-
         return $activity;
+    }
+
+    public function generateNotificationsAction(){
+        $entity = $this->getActivityFromRoute();
+
+        /** @var NotificationService $serviceNotification */
+        $serviceNotification = $this->getServiceLocator()->get('NotificationService');
+
+        $serviceNotification->generateNotificationsForActivity($entity);
+
+        return $this->redirect()->toRoute('contract/notifications', ['id' => $entity->getId()]);
+        die("DONE");
     }
 
     /**
@@ -489,12 +501,16 @@ class ProjectGrantController extends AbstractOscarController
 
     }
 
+    /*
+    protected function getActivityFromRoute( $field = 'id' ){
+
+    }
+    /****/
+
     public function notificationsAction(){
-        // Identifiant de l'activité
-        $id = $this->params()->fromRoute('id');
 
         /** @var Activity $entity */
-        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+        $entity = $this->getActivityFromRoute();
 
         // Check access
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_MENU_ADMIN);

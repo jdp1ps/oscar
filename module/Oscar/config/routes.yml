@@ -611,6 +611,12 @@ contract:
                 route: /makeproject/:id
                 defaults:
                     action: makeProject
+        generatenotifications:
+            type: segment
+            options:
+                route: /generer-notifications/:id
+                defaults:
+                    action: generateNotifications
 
         number:
             type: segment
