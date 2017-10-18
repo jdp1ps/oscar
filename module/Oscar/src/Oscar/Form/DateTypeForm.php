@@ -55,6 +55,23 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
             'type'=>'Select'
         ]);
 
+        // Fréquence des notifications
+        $label = 'Fréquence des notifications';
+        $this->add([
+            'name'   => 'recursivity',
+            'options' => [
+                'label' => $label
+            ],
+            'help'=> [
+                'before' => "Indiquer les jours séparés par des virgules, par exemple : 30,15,1,0"
+            ],
+            'attributes'    => [
+                'class'       => 'form-control',
+                'placeholder'   => $label,
+            ],
+            'type'=>'Text'
+        ]);
+
         // DESCRIPTION
         $label = 'Description';
         $this->add([
@@ -68,6 +85,7 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
             ],
             'type'=>'Textarea'
         ]);
+
         $this->add(array(
             'name'  => 'secure',
             'type'  => 'Csrf',

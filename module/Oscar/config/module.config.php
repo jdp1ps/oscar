@@ -181,7 +181,7 @@ return array(
 
                 // ---   - { controller: ActivityDate, action: [index, change, new], roles: [user] }
                 ['controller' => 'DateType',
-                    'action' => ['index', 'change', 'new'],
+                    'action' => ['index', 'change', 'new', 'edit'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN,
                 ],
 

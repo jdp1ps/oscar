@@ -58,11 +58,26 @@ class DateType implements ITrackable
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getRecursivity()
     {
-        return [60,30,15,5,0];
+        return $this->recursivity;
+    }
+
+    public function setRecursivity( $value )
+    {
+        $this->recursivity = $value;
+        return $this;
+    }
+
+    public function getRecursivityArray()
+    {
+        if( $this->recursivity ){
+            return explode(',', $this->recursivity);
+        } else {
+            return $this->recursivity;
+        }
     }
 
     /**
