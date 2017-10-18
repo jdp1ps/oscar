@@ -10,12 +10,11 @@ namespace Oscar\Hydrator;
 
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\DateType;
-use Oscar\Entity\OscarFacet;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\Stdlib\Hydrator\HydratorInterface;
 
-class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
+class DateTypeHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
 
@@ -25,12 +24,10 @@ class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInte
      */
     public function extract($object)
     {
-
         return [
-            'id' => $object->getId(),
-            'description' => $object->getDescription(),
-            'facet' => array_search($object->getFacet(), OscarFacet::getFacets()),
             'label' => $object->getLabel(),
+            'description' => $object->getDescription(),
+            'facet' => $object->getFacet(),
             'recursivity' => $object->getRecursivity()
         ];
     }
@@ -42,9 +39,9 @@ class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInte
     public function hydrate(array $data, $object)
     {
         return $object->setDescription($data['description'])
-            ->setFacet(OscarFacet::getFacets()[$data['facet']])
-            ->setRecursivity($data['recursivity'])
-            ->setLabel($data['label']);
+            ->setLabel($data['label'])
+            ->setFacet($data['facet'])
+            ->setRecursivity($data['recursivity']);
     }
 
 

@@ -52,7 +52,32 @@ class DateTypeController extends AbstractOscarController
     }
 
     public function editAction(){
-        die('TODO');
+
+        $form = new DateTypeForm();
+        $entity = $this->getEntityManager()->getRepository(DateType::class)->find($this->params()->fromRoute('id'));
+        $request = $this->getRequest();
+//        $form->setObject($entity);
+        $form->setAttribute('action', $this->url()->fromRoute('datetype/edit', ['id' => $entity->getId()]));
+
+        $form->init();
+        $form->bind($entity);
+
+        // Traitement des données envoyées
+        if( $request->isPost() ){
+
+            $form->setData($request->getPost());
+            if( $form->isValid() ){
+                $this->getEntityManager()->persist($entity);
+                $this->getEntityManager()->flush();
+                $this->redirect()->toRoute('datetype');
+            }
+        }
+        $view = new ViewModel([
+            'entity' => $entity,
+            'form' => $form,
+        ]);
+        $view->setTemplate('oscar/date-type/form.phtml');
+        return $view;
     }
 
 }
