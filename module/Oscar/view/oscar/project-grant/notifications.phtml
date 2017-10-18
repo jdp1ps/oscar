@@ -14,6 +14,7 @@
             <strong>Notification planifiées </strong> dans
             <em><?= $activity ?></em>
         </h1>
+        <a href="<?= $this->url('contract/generatenotifications', ['id' => $activity->getId()]) ?>" class="btn btn-primary">Générer les notifications</a>
     </header>
     <div id="notifications"></div>
     <script>
