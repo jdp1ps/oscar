@@ -50,7 +50,7 @@ class ActivityDate implements ITrackable
      */
     public function getRecursivity(){
         if( $this->getType() ){
-            return $this->getType()->getRecursivity();
+            return $this->getType()->getRecursivityArray();
         }
         return [];
     }

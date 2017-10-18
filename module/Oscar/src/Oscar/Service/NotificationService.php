@@ -123,7 +123,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         echo " [debug] $str\n";
     }
 
-    public function generateNotificationsActivities()
+    public function generateNotificationsActivities( $silent = false )
     {
         $activities = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
@@ -134,7 +134,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
-            $this->generateNotificationsForActivity($activity);
+            $this->generateNotificationsForActivity($activity, $silent);
         }
     }
 
@@ -143,7 +143,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      *
      * @param Activity $activity
      */
-    public function generateNotificationsForActivity( Activity $activity )
+    public function generateNotificationsForActivity( Activity $activity , $silent = false)
     {
         /** @var PersonService $personsService */
         $personsService = $this->getServiceLocator()->get('PersonService');
@@ -173,8 +173,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 }
             }
         }
-
-        $this->triggerSocket();
+        if( $silent == true )
+            $this->triggerSocket();
     }
 
     /**
