@@ -59,6 +59,7 @@ define(['exports', 'vue', 'vue-resource', 'mm'], function (exports, _vue, _vueRe
 
                 var redirect = null;
                 if (evt.target.href) redirect = evt.target.href;
+                return;
 
                 this.$http.delete(this.$http.$options.root + '?ids=' + notification.id).then(function (res) {
                     document.location = redirect;

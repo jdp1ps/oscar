@@ -78,6 +78,7 @@ var notifications = Vue.extend({
             var redirect = null;
             if( evt.target.href )
                 redirect = evt.target.href;
+            return;
 
 
             this.$http.delete(this.$http.$options.root+'?ids=' + notification.id).then(
