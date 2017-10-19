@@ -11,6 +11,7 @@ use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNotification;
+use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
@@ -154,14 +155,34 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         /** @var Person $person */
         foreach ($persons as $person){
-            $this->debug("$person est concernée.");
             $personsIds[] = $person->getId();
         }
+
+        $now = new \DateTime();
+        /** @var ActivityPayment $payment */
+        foreach( $activity->getPayments() as $payment ){
+            if( $payment->getDatePredicted() ){
+                $message = "$payment";
+                $context = "payment:" . $payment->getId();
+                $dateEffective = $payment->getDatePredicted();
+                
+                if( $payment->getDatePredicted() < $now ){
+                    $message .= " est en retard";
+                    $dateEffective = $now;
+                }
+
+                $this->notification($message, $persons,
+                    Notification::OBJECT_ACTIVITY, $activity->getId(),
+                    $context, $dateEffective, $payment->getDatePredicted(), false);
+            }
+        }
+
+        //die("TEST");
 
         /** @var ActivityDate $milestone */
         foreach( $activity->getMilestones() as $milestone ){
             $context = "milestone-" . $milestone->getId();
-            $notificationMessage = sprintf("%s pour l'activité %s",
+            $notificationMessage = sprintf("L'échéance %s pour l'activité %s",
                 $milestone->getType()->getLabel(),
                 $activity->log()
                 );
