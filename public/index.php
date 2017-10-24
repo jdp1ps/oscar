@@ -52,10 +52,6 @@ function mojoDebugger($level, $error, $file, $line, $context) {
 
 set_error_handler('mojoDebugger', E_ALL | E_WARNING | E_NOTICE | E_STRICT | E_PARSE);
 */
-if( file_exists(__DIR__.'/../MAINTENANCE') ){
-    include 'maintenance.html';
-    exit;
-}
 
 // On test la variable d'environnement issue de apache
 if (function_exists('apache_getenv') && ($apacheEnv = apache_getenv('APPLICATION_ENV'))) {
@@ -74,9 +70,15 @@ elseif( !getenv('APPLICATION_ENV' )){
     putenv('APPLICATION_ENV=production');
 }
 
+
 // Servir normalement les fichiers effectif
 if (php_sapi_name() === 'cli-server' && is_file(__DIR__ . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH))) {
     return false;
+}
+
+if( php_sapi_name() !== 'cli' && file_exists(__DIR__.'/../MAINTENANCE') ){
+	include 'maintenance.html';
+	exit;
 }
 
 if( getenv('APPLICATION_ENV') == 'development' ){
