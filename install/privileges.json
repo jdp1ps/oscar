@@ -382,5 +382,11 @@
     "code": "TIMESHEET_USURPATION",
     "libelle": "Peut remplir les feuilles de temps des d\u00e9clarants d'une activit\u00e9",
     "fullcode": "ACTIVITY-TIMESHEET_USURPATION"
+  },
+  "PERSON-NOTIFICATION_MENU": {
+    "categorie_id": 3,
+    "code": "NOTIFICATION_MENU",
+    "libelle": "La personne peut voir le menu notification",
+    "fullcode": "PERSON-NOTIFICATION_MENU"
   }
 }
