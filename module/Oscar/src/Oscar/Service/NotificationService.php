@@ -165,7 +165,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 $message = "$payment";
                 $context = "payment:" . $payment->getId();
                 $dateEffective = $payment->getDatePredicted();
-                
+
                 if( $payment->getDatePredicted() < $now ){
                     $message .= " est en retard";
                     $dateEffective = $now;
