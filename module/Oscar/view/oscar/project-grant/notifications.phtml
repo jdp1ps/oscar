@@ -14,7 +14,14 @@
             <strong>Notification planifiées </strong> dans
             <em><?= $activity ?></em>
         </h1>
-        <a href="<?= $this->url('contract/generatenotifications', ['id' => $activity->getId()]) ?>" class="btn btn-primary">Générer les notifications</a>
+
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_GENERATE) ):?>
+        <nav>
+            <a href="<?= $this->url('contract/generatenotifications', ['id' => $activity->getId()]) ?>" class="btn btn-primary">
+                Générer les notifications
+            </a>
+        </nav>
+        <?php endif; ?>
     </header>
     <div id="notifications"></div>
     <script>

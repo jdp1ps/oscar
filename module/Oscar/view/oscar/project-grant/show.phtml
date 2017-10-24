@@ -273,10 +273,12 @@
                     </div>
                     <div class="lc-content"></div>
                 </div>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity) ): ?>
                 <a href="<?= $this->url('contract/notifications', ['id' => $entity->getId()]) ?>" class="btn btn-default">
                     <i class="icon-bell"></i>
                     Voir les notifications planifiées
                 </a>
+                <?php endif; ?>
             </div>
             <script>
                 var milestones;
