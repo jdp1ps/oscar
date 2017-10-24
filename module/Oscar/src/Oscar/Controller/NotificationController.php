@@ -28,23 +28,13 @@ class NotificationController extends AbstractOscarController
 {
     public function testAction()
     {
-        $idActivity = 10090;
-
-        /** @var Activity $activity */
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
-        echo "<h1>$activity</h1>\n";
-
-        $persons = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
-        foreach( $persons as $id=>$p ){
-            echo sprintf('%s - [%s] %s <br>', $id, $p->getId(), $p);
-        }
-
-        die('Test');
+        throw $this->getResponseBadRequest('INACTIVE FUNCTION');
     }
 
 
     public function historyAction()
     {
+        $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
         $personId = $this->getCurrentPerson()->getId();
 
         /** @var NotificationService $notificationService */
@@ -62,6 +52,7 @@ class NotificationController extends AbstractOscarController
 
     public function indexAction()
     {
+        $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
         $personId = $this->getCurrentPerson()->getId();
 
         /** @var NotificationService $notificationService */
@@ -107,6 +98,7 @@ class NotificationController extends AbstractOscarController
 
     public function notifyPersonAction()
     {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_NOTIFICATION_PERSON);
         $method = $this->getHttpXMethod();
         $form = new NotificationForm();
         $person = $this->getPersonService()->getPerson($this->params()->fromRoute('idperson'));
@@ -128,7 +120,7 @@ class NotificationController extends AbstractOscarController
                     new \DateTime()
 
                 );
-                die();
+                die("OK");
             }
 
         } else {
