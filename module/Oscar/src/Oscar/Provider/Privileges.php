@@ -11,6 +11,8 @@ namespace Oscar\Provider;
 
 
 
+use Oscar\Entity\Privilege;
+
 class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
 {
 
@@ -99,15 +101,9 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     /**
      * Cette méthode retourne la structure attendue des privilèges pour
      * l'installation.
+     * @deprecated
      */
     public static function getStructureForCheck(){
-        $categories = [
-
-        ];
-
-        $privileges = [
-
-        ];
         return [
             'categories' => [
                 1 => [
