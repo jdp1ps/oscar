@@ -230,7 +230,8 @@ $this->headScript();
                         </li>
                         <?php endif; ?><!-- /Menu admin -->
                     </ul>
-                    <?php if( $this->grant()->connected() ): ?>
+                    <?php if( $this->grant()->connected() &&
+                        $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_NOTIFICATION_MENU)): ?>
                     <p class="navbar-text navbar-right" id="notifications-area" ></p>
                     <?php endif; ?>
                     <p class="navbar-text navbar-right">
@@ -324,7 +325,7 @@ $this->headScript();
 	})();
 	</script>
 
-        <?php if( $this->grant()->dbUser() ): ?>
+        <?php if( $this->grant()->dbUser() && $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_NOTIFICATION_MENU) ): ?>
         <div id="notifications">
 
         </div>
