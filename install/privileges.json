@@ -388,5 +388,17 @@
     "code": "NOTIFICATION_MENU",
     "libelle": "La personne peut voir le menu notification",
     "fullcode": "PERSON-NOTIFICATION_MENU"
+  },
+  "ACTIVITY-NOTIFICATIONS_SHOW": {
+    "categorie_id": 2,
+    "code": "NOTIFICATIONS_SHOW",
+    "libelle": "Peut voir les notifications planifiées dans la fiche activité",
+    "fullcode": "ACTIVITY-NOTIFICATIONS_SHOW"
+  },
+  "ACTIVITY-NOTIFICATIONS_GENERATE": {
+    "categorie_id": 2,
+    "code": "NOTIFICATIONS_GENERATE",
+    "libelle": "Peut regénérer manuellement les notifications d'une activité",
+    "fullcode": "ACTIVITY-NOTIFICATIONS_GENERATE"
   }
 }
