@@ -23,8 +23,9 @@
                     </span>
 
                     <a href="<?= $this->url('person/show', ['id'=>$person->getId()]) ?>" class="more">Fiche</a>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
                     <a href="<?= $this->url('notification/person', ['idperson'=>$person->getId()]) ?>" class="more"><i class="icon-bell"></i> Notifier</a>
-
+                    <?php endif; ?>
                 </span>
     </h2>
     <div class="card-content text-highlight">
