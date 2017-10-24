@@ -158,7 +158,12 @@ class ProjectGrantController extends AbstractOscarController
     }
 
     public function generateNotificationsAction(){
+
         $entity = $this->getActivityFromRoute();
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
+        // $this->getM
+        $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
 
         /** @var NotificationService $serviceNotification */
         $serviceNotification = $this->getServiceLocator()->get('NotificationService');
@@ -166,7 +171,6 @@ class ProjectGrantController extends AbstractOscarController
         $serviceNotification->generateNotificationsForActivity($entity);
 
         return $this->redirect()->toRoute('contract/notifications', ['id' => $entity->getId()]);
-        die("DONE");
     }
 
     /**
