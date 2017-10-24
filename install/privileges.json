@@ -400,5 +400,11 @@
     "code": "NOTIFICATIONS_GENERATE",
     "libelle": "Peut regénérer manuellement les notifications d'une activité",
     "fullcode": "ACTIVITY-NOTIFICATIONS_GENERATE"
+  },
+  "MAINTENANCE-NOTIFICATION_PERSON": {
+    "categorie_id": 6,
+    "code": "NOTIFICATION_PERSON",
+    "libelle": "Peut notifier manuellement un personne",
+    "fullcode": "MAINTENANCE-NOTIFICATION_PERSON"
   }
 }
