@@ -30,3 +30,10 @@ php vendor/bin/orm:schema-tool:update --dump-sql
 # Pour appliquer
 php vendor/bin/orm:schema-tool:update --force
 ```
+
+# Mise à jour des privilèges
+
+```bash
+# Mise à jour des privileges
+php public/index.php oscar patch checkPrivilegesJSON
+```
