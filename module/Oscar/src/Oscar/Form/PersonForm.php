@@ -68,7 +68,7 @@ class PersonForm extends Form implements InputFilterProviderInterface
                 'class' => 'form-control'
             ],
             'options' => [
-                'label' => 'Identifiant de connection (LDAP)'
+                'label' => 'Identifiant de connection'
             ],
             'type'=>'Text'
         ]);
@@ -101,7 +101,7 @@ class PersonForm extends Form implements InputFilterProviderInterface
                 'class' => 'form-control'
             ],
             'options' => [
-                'label' => 'Loaclisation (LDAP)'
+                'label' => 'Localisation'
             ],
             'type'=>'Text'
         ]);
@@ -112,7 +112,7 @@ class PersonForm extends Form implements InputFilterProviderInterface
                 'class' => 'form-control'
             ],
             'options' => [
-                'label' => 'Affectation (LDAP)'
+                'label' => 'Affectation'
             ],
             'type'=>'Text'
         ]);
