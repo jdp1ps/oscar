@@ -1052,7 +1052,7 @@ class ProjectGrantController extends AbstractOscarController
                 if ($search) {
 
                     // La saisie est un PFI
-                    if (preg_match(EOTP::REGEX_EOTP, $search)) {
+                    if (preg_match($this->getServiceLocator()->get("Config")['oscar']['validation']['pfi'], $search)) {
                         $parameters['search'] = $search;
                         $qb->andWhere('c.codeEOTP = :search');
                     } elseif (preg_match('/(.*)=(.*)/', $search, $result)) {

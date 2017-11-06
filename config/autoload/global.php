@@ -3,6 +3,24 @@ return array(
     'translator' => array(
         'locale' => 'fr_FR',
     ),
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// CONFIGURATION PAR DÉFAUT
+    /// Vous pouvez surcharger ces paramètres en les redéclarants dans le
+    /// fichier local.php
+    'oscar' => [
+
+        ////////////////////////////////////////////////////////////////////////
+        // Validation des données
+        'validation' => [
+            // ------------------------------------------ Validation du code PFI
+            // Il s'agit de l'expression régulière utilisé par Oscar pour
+            // vérifier la validité formelle du PFI saisi.
+            // ex: 209ED2024
+            'pfi' => '/^[0-9]{3}[A-Z]{2,3}[0-9]{2,4}$/mi'
+        ]
+    ],
+
     // Configuration de la base de données
     'doctrine' => array(
         'connection' => array(
