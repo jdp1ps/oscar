@@ -48,7 +48,7 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
         $fullName = new Element\Text('fullName');
         $fullName->setAttributes([
             'class'       => 'form-control',
-            'placeholder'   => 'Acronyme'
+            'placeholder'   => 'Nom complet'
         ]);
         $this->add($fullName);
 
@@ -186,7 +186,7 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
         $description = new Element\Textarea('description');
         $description->setAttributes([
             'class'       => 'form-control',
-            'placeholder'   => 'Description du projet',
+            'placeholder'   => 'Description',
             'row'           => 5
         ]);
         $this->add($description);
