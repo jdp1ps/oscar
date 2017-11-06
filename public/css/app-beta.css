@@ -7844,6 +7844,21 @@ form .help {
     display: block;
     font-size: .8em; }
 
+.form ul.alert-danger {
+  font-size: .9em;
+  padding: .5em;
+  margin-top: .5em;
+  list-style: none; }
+  .form ul.alert-danger li:before {
+    font-family: 'fontello';
+    content: "" " "; }
+
+.alert-help {
+  margin-top: .5em; }
+  .alert-help h3 {
+    margin: 0 0 .5em;
+    border-bottom: thin rgba(0, 0, 0, 0.8) solid; }
+
 .datepicker {
   font-size: 14px; }
   .datepicker thead th, .datepicker tfoot th {

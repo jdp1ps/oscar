@@ -2304,6 +2304,16 @@ form {
   }
 }
 
+.alert-help {
+  margin-top: .5em;
+  background: rgba(217, 237, 247, .7);
+  h3 {
+    margin:0 0 .5em;
+    padding-bottom: .5em;
+    text-shadow: 1px -1px 0 white;
+    border-bottom: thin rgba(49, 112, 143, 0.3) solid;
+  }
+}
 .datepicker {
   font-size: $font-size-base;
 

@@ -7853,6 +7853,15 @@ form .help {
     font-family: 'fontello';
     content: "" " "; }
 
+.alert-help {
+  margin-top: .5em;
+  background: rgba(217, 237, 247, 0.7); }
+  .alert-help h3 {
+    margin: 0 0 .5em;
+    padding-bottom: .5em;
+    text-shadow: 1px -1px 0 white;
+    border-bottom: thin rgba(49, 112, 143, 0.3) solid; }
+
 .datepicker {
   font-size: 14px; }
   .datepicker thead th, .datepicker tfoot th {
