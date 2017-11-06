@@ -844,6 +844,7 @@ class ProjectGrantController extends AbstractOscarController
             $page = $this->params()->fromQuery('page', 1);
             $search = $this->params()->fromQuery('q', null);
             $include = null;
+            $error = "";
 
             if( $search === null ){
                 $startEmpty = true;
@@ -1049,6 +1050,7 @@ class ProjectGrantController extends AbstractOscarController
             } else {
 
                 // Traitement : Champ de recherche libre
+
                 if ($search) {
 
                     // La saisie est un PFI
@@ -1071,7 +1073,17 @@ class ProjectGrantController extends AbstractOscarController
                             $qb->andWhere('c.oscarNum LIKE :search');
                         } // Saisie 'libre'
                         else {
-                            $filterIds = $this->getActivityService()->search($search);
+                            try {
+                                $filterIds = $this->getActivityService()->search($search);
+                            } catch (\Zend_Search_Lucene_Exception $e ){
+                                if( stripos($e->getMessage(), 'non-wildcard') > 0 ){
+                                    $error = "Les motifs de recherche doivent commencer par au moins 3 caractères non-wildcard.";
+                                } else {
+                                    $error = "Motif de recherche incorrecte : " . $e->getMessage();
+                                }
+                                $filterIds = [];
+
+                            }
                         }
                     }
                 }
@@ -1340,6 +1352,7 @@ class ProjectGrantController extends AbstractOscarController
             $view = new ViewModel([
                 'exportIds' => implode(',', $ids),
                 'filtersType' => $filtersType,
+                'error' => $error,
                 'criteria' => $criterias,
                 'countries' => $this->getOrganizationService()->getCountriesList(),
                 'fieldsCSV' => $this->getActivityService()->getFieldsCSV(),

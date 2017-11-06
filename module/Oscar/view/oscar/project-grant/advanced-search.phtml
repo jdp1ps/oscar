@@ -253,6 +253,11 @@
                     <button type="submit" class="btn btn-primary">Rechercher</button>
                 </span>
         </div>
+        <?php if( $error ): ?>
+            <div class="alert alert-danger">
+                <?= $error ?>
+            </div>
+        <?php endif;?>
 
         <?php if( $organizationsPerimeter ): $include = isset($include) ? $include : []; ?>
             <h3><i class="icon-building-filled"></i>
