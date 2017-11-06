@@ -30,6 +30,8 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         $hydrator->setServiceLocator($this->getServiceLocator());
         $this->setHydrator($hydrator);
 
+
+
         /** @var ProjectGrantService $grantService */
         $grantService = $this->getServiceLocator()->get('ProjectGrantService');
 
@@ -315,7 +317,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
                     ['name' => StringTrim::class],
                 ],
                 'validators' => [
-                    new EOTP(),
+                    new EOTP($this->getServiceLocator()->get('Config')['oscar']['validation']['pfi']),
                 ]
             ],
 

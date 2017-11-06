@@ -45,7 +45,7 @@
             <div class="col-md-3">
                 <?php echo $this->formLabel($form->get('codeEOTP'));?>
                 <?php echo $this->formInput($form->get('codeEOTP'));?>
-                <?php echo $this->formElementErrors($form->get('codeEOTP')); ?>
+                <?php echo $this->formElementErrors($form->get('codeEOTP'), ["class" => "alert alert-danger"]); ?>
             </div>
             <div class="col-md-3">
                 <?php echo $this->formLabel($form->get('status'));?>

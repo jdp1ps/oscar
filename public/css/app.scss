@@ -2293,6 +2293,17 @@ form {
   }
 }
 
+.form ul.alert-danger {
+  font-size: .9em;
+  padding: .5em;
+  margin-top: .5em;
+  list-style: none;
+  li:before {
+    font-family: 'fontello';
+    content: '\e865 '' '
+  }
+}
+
 .datepicker {
   font-size: $font-size-base;
 
