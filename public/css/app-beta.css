@@ -7854,10 +7854,13 @@ form .help {
     content: "" " "; }
 
 .alert-help {
-  margin-top: .5em; }
+  margin-top: .5em;
+  background: rgba(217, 237, 247, 0.7); }
   .alert-help h3 {
     margin: 0 0 .5em;
-    border-bottom: thin rgba(0, 0, 0, 0.8) solid; }
+    padding-bottom: .5em;
+    text-shadow: 1px -1px 0 white;
+    border-bottom: thin rgba(49, 112, 143, 0.3) solid; }
 
 .datepicker {
   font-size: 14px; }
@@ -8395,6 +8398,9 @@ time.date-missing {
         color: #790629; }
         #notifications-area .list article a:hover {
           background: transparent; }
+
+.week-days-total {
+  font-size: .75em; }
 
 @keyframes fresh {
   from {
