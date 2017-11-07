@@ -95,7 +95,8 @@ class CalendarDatas {
             admdaily: [false, false, false, false, false, false, false, false],
             scidaily: [false, false, false, false, false, false, false, false],
             senddaily: [false, false, false, false, false, false, false, false],
-            copydaily: [false, false, false, false, false, false, false, false]
+            copydaily: [false, false, false, false, false, false, false, false],
+            total: [0,0,0,0,0,0,0]
         };
     }
 
@@ -804,58 +805,47 @@ var WeekView = {
         'timeevent': TimeEvent
     },
 
-    template: `<div class="calendar calendar-week">
+    template: `
+<div class="calendar calendar-week">
     <div class="meta">
-        <a href="#" @click="previousWeek">
-            <i class=" icon-angle-left"></i>
-        </a>
+        <a href="#" @click="previousWeek"><i class=" icon-angle-left"></i></a>
         <h3>
             Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}
-            
-             <nav class="reject-valid-group">
+            <nav class="reject-valid-group">
                 <i class=" icon-angle-down"></i>
                 <ul>
-                    <li @click="copyCurrentWeek" v-if="createNew && (weekEvents && weekEvents.length > 0)">
-                        <i class="icon-docs"></i> Copier la semaine
-                    </li>
-                    <li @click="pasteWeek" v-if="createNew && copyWeekData">
-                        <i class="icon-paste"></i> Coller la semaine
-                    </li>
-                    <li @click="$emit('submitall', 'send', 'week')" v-if="weekCredentials.send">
-                        <i class="icon-right-big"></i> Soumettre les créneaux de la semaine
-                    </li>
+                    <li @click="copyCurrentWeek" v-if="createNew && (weekEvents && weekEvents.length > 0)"><i class="icon-docs"></i> Copier la semaine</li>
+                    <li @click="pasteWeek" v-if="createNew && copyWeekData"><i class="icon-paste"></i> Coller la semaine</li>
+                    <li @click="$emit('submitall', 'send', 'week')" v-if="weekCredentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de la semaine</li>
                     <li @click.prevent="handlerValidateSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Valider scientifiquement la semaine</li>
                     <li @click.prevent="handlerRejectSciWeek" v-if="weekCredentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement la semaine</li>
                     <li @click.prevent="handlerValidateAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Valider administrativement la semaine</li>
                     <li @click.prevent="handlerRejectAdmWeek" v-if="weekCredentials.adm"><i class="icon-archive"></i>Rejeter administrativement la semaine</li>
                 </ul>
             </nav>
-            
         </h3>
-       <a href="#" @click="nextWeek">
-            <i class=" icon-angle-right"></i>
-       </a>
+        <a href="#" @click="nextWeek"><i class=" icon-angle-right"></i></a>
     </div>
-
+    
     <header class="line">
         <div class="content-full" style="margin-right: 12px">
             <div class="labels-time">
-                {{currentYear}}
+            {{currentYear}}
             </div>
             <div class="events">
                 <div class="cell cell-day day day-1" :class="{today: isToday(day)}" v-for="day in currentWeekDays">
                     {{ day.format('dddd D') }}
                     <nav class="reject-valid-group">
-                        <i class=" icon-angle-down"></i>
-                        <ul>
-                            <li @click="copyDay(day)" v-if="createNew && weekCredentials.copydaily[day.day()]"><i class="icon-docs"></i> Copier les créneaux</li>
-                            <li @click="pasteDay(day)" v-if="createNew && copyDayData && copyDayData.length"><i class="icon-paste"></i> Coller les créneaux</li>
-                            <li @click="submitDay(day)" v-if="weekCredentials.senddaily[day.day()]"><i class="icon-right-big"></i> Soumettre les créneaux</li>
-                            <li @click.prevent="handlerValidateSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Valider scientifiquement la journée</li>
-                            <li @click.prevent="handlerRejectSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Rejeter scientifiquement la journée</li>
-                            <li @click.prevent="handlerValidateAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Valider administrativement la journée</li>
-                            <li @click.prevent="handlerRejectAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Rejeter administrativement la journée</li>
-                        </ul>
+                    <i class=" icon-angle-down"></i>
+                    <ul>
+                        <li @click="copyDay(day)" v-if="createNew && weekCredentials.copydaily[day.day()]"><i class="icon-docs"></i> Copier les créneaux</li>
+                        <li @click="pasteDay(day)" v-if="createNew && copyDayData && copyDayData.length"><i class="icon-paste"></i> Coller les créneaux</li>
+                        <li @click="submitDay(day)" v-if="weekCredentials.senddaily[day.day()]"><i class="icon-right-big"></i> Soumettre les créneaux</li>
+                        <li @click.prevent="handlerValidateSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Valider scientifiquement la journée</li>
+                        <li @click.prevent="handlerRejectSciDay(day)" v-if="weekCredentials.scidaily[day.day()]"><i class="icon-beaker"></i>Rejeter scientifiquement la journée</li>
+                        <li @click.prevent="handlerValidateAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Valider administrativement la journée</li>
+                        <li @click.prevent="handlerRejectAdmDay(day)" v-if="weekCredentials.admdaily[day.day()]"><i class="icon-archive"></i>Rejeter administrativement la journée</li>
+                    </ul>
                     </nav>
                 </div>
             </div>
@@ -864,46 +854,54 @@ var WeekView = {
 
     <div class="content-wrapper">
         <div class="content-full">
-          <div class="labels-time">
-            <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>
-          </div>
-          <div class="events" :class="{'drawing': (gostDatas.editActive) }"
-                   @mouseup.self="handlerMouseUp"
-                   @mousedown.self="handlerMouseDown"
-                   @mousemove.self="handlerMouseMove">
+            <div class="labels-time">
+                <div class="unit timeinfo" v-for="time in 24">{{time-1}}:00</div>
+            </div>
+            <div class="events" :class="{'drawing': (gostDatas.editActive) }"
+                    @mouseup.self="handlerMouseUp"
+                    @mousedown.self="handlerMouseDown"
+                    @mousemove.self="handlerMouseMove">
 
-              <div class="cell cell-day day" v-for="day in 7" style="pointer-events: none">
-                <div class="hour houroff" v-for="time in 6">&nbsp;</div>
-                <div class="hour" v-for="time in 16"
-                    @dblclick="handlerCreate(day, time+5)">&nbsp;</div>
-                <div class="hour houroff" v-for="time in 2">&nbsp;</div>
-              </div>
-              <div class="content-events">
-                <div class="gost"
-                    :style="gostStyle" v-show="gostDatas.drawing">&nbsp;</div>
-                <timeevent v-for="event in weekEvents"
-                    :with-owner="withOwner"
-                    :weekDayRef="currentDay"
-                    v-if="inCurrentWeek(event)"
-                    @deleteevent="$emit('deleteevent', event)"
-                    @editevent="$emit('editevent', event)"
-                    @submitevent="$emit('submitevent', event)"
-                    @rejectscievent="$emit('rejectevent', event, 'sci')"
-                    @rejectadmevent="$emit('rejectevent', event, 'adm')"
-                    @validatescievent="$emit('validateevent', event, 'sci')"
-                    @validateadmevent="$emit('validateevent', event, 'adm')"
-                    @mousedown="handlerEventMouseDown"
-                    @savemoveevent="handlerSaveMove(event)"
-                    @onstartmoveend="handlerStartMoveEnd"
-                    @rejectshow="handlerRejectShow"
-                    :event="event"
-                    :key="event.id"></timeevent>
-              </div>
-          </div>
+                <div class="cell cell-day day" v-for="day in 7" style="pointer-events: none">
+                    <div class="hour houroff" v-for="time in 6">&nbsp;</div>
+                    <div class="hour" v-for="time in 16" @dblclick="handlerCreate(day, time+5)">&nbsp;</div>
+                    <div class="hour houroff" v-for="time in 2">&nbsp;</div>
+                </div>
+                <div class="content-events">
+                    <div class="gost" :style="gostStyle" v-show="gostDatas.drawing">&nbsp;</div>
+                    <timeevent v-for="event in weekEvents"
+                            :with-owner="withOwner"
+                            :weekDayRef="currentDay"
+                            v-if="inCurrentWeek(event)"
+                            @deleteevent="$emit('deleteevent', event)"
+                            @editevent="$emit('editevent', event)"
+                            @submitevent="$emit('submitevent', event)"
+                            @rejectscievent="$emit('rejectevent', event, 'sci')"
+                            @rejectadmevent="$emit('rejectevent', event, 'adm')"
+                            @validatescievent="$emit('validateevent', event, 'sci')"
+                            @validateadmevent="$emit('validateevent', event, 'adm')"
+                            @mousedown="handlerEventMouseDown"
+                            @savemoveevent="handlerSaveMove(event)"
+                            @onstartmoveend="handlerStartMoveEnd"
+                            @rejectshow="handlerRejectShow"
+                            :event="event"
+                            :key="event.id"></timeevent>
+                </div>
+            </div>
         </div>
     </div>
-
-    </div>`,
+   
+    <header class="line week-days-total">
+        <div class="content-full" style="margin-right: 12px">
+            <div class="labels-time">-</div>
+            <div class="events">
+                <div class="cell cell-day day day-1" v-for="t in weekCredentials.total">
+                    <strong>{{ t }}</strong> heure(s)
+                </div>
+            </div>
+        </div>
+    </header>
+</div>`,
 
     computed: {
         currentYear(){
@@ -960,6 +958,7 @@ var WeekView = {
                         this.weekCredentials.senddaily[event.mmStart.day()] = true;
                     }
                     this.weekCredentials.copydaily[event.mmStart.day()] = true;
+                    this.weekCredentials.total[event.mmStart.day()-1] += event.duration;
                     event.intersect = 0;
                     event.intersectIndex = 0;
                     weekEvents.push(event);
@@ -1332,14 +1331,6 @@ var ListItemView = {
                  <button class="btn btn-success btn-xs" @mousedown.stop.prevent="" @click.stop.prevent="$emit('validateadmevent')" v-if="event.validableAdm">
                     <i class="icon-archive"></i>
                     Validation administrative</button>
-
-                <!--<button class="btn btn-primary btn-xs"  @click="handlerValidate" v-if="event.validable">
-                    <i class="icon-right-big"></i>
-                    Valider</button>
-
-                <button class="btn btn-primary btn-xs"  @click="$emit('rejectevent', event)" v-if="event.validable">
-                    <i class="icon-right-big"></i>
-                    Rejeter</button>-->
             </nav>
         </div>
     </article>`,
