@@ -26,6 +26,8 @@ socket/config.json
 data/*
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
+!data/documents/activity/.gitkeep
+!data/documents/public/.gitkeep
 
 # Librairies
 /vendor
