@@ -99,7 +99,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
             // Selection des personnes associées via le Projet/Activité
             foreach ($activity->getPersonsRoled($rolesIds) as $p ){
-                $persons[$p->getId()] = $p->getPerson(); ;
+                $persons[$p->getPerson()->getId()] = $p->getPerson(); ;
             }
 
             // Selection des personnes via l'oganisation assocociée au Projet/Activité
