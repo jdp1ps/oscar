@@ -577,11 +577,23 @@ class ProjectGrantController extends AbstractOscarController
 
         $activity = $this->getProjectGrantService()->getGrant($id);
 
+        $involvedPersons = null;
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_ACCESS, $activity) ){
+            $involved = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_SHOW, $activity, true);
+            foreach ($involved as $p){
+                $involvedPersons[] = $p->toJson();
+            }
+            $involvedPersonsJSON = json_encode($involvedPersons);
+        }
+
         return [
             'entity' => $activity,
 
             // Jeton de sécurité
             'tokenValue' => $this->getOscarUserContext()->getTokenValue(true),
+
+            // Personnes pouvant voir cette activité
+            'involvedPerson' => $involvedPersonsJSON,
 
             // Notifications précalculées
             'notifications' => $this->getEntityManager()->getRepository(Notification::class)

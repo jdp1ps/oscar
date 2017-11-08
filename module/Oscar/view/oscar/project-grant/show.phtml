@@ -155,6 +155,58 @@
                     <?php endif; ?>
 
                 </div>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
+                <section id="involved">
+
+                </section>
+                <script>
+                    require(['vue'], function(Vue){
+                        new Vue({
+                            el: '#involved',
+                            template: `<div>
+                                <h4 @click="displayed = !displayed" style="cursor: pointer">
+                                    <i class="icon-right-dir" v-show="displayed === false"></i>
+                                    <i class="icon-sort-down" v-show="displayed === true"></i>
+                                    Personnes pouvant voir cette activité
+                                </h4>
+                                <p class="text-muted"><small>Personnes disposant d'un droit d'accès (à minima en lecture) dans cette activité</small></p>
+                                <section v-show="displayed">
+                                    <div class="input-group">
+                                      <span class="input-group-addon">
+                                          <i class="icon-filter"></i>
+                                      </span>
+                                      <input type="search" v-model="filter" class="form-control" placeholder="Filtrer..." />
+                                    </div>
+
+                                    <span v-for="p in filteredPersons" class="cartouche xs">
+                                        {{ p.displayname }}
+                                        <span class="addon" v-if="p.affectation">{{ p.affectation }}</span>
+                                    </span>
+                                </section>
+                                </div>`,
+                            data: {
+                                displayed: false,
+                                filter: "",
+                                persons: <?= $involvedPerson ?>
+                            },
+                            computed: {
+                                filteredPersons(){
+                                    var ret;
+                                    if( !this.filter ) ret = this.persons;
+                                    else {
+                                        var criteria = this.filter;
+                                        ret = this.persons.filter(p => p.displayname.indexOf(criteria)>=0 ||  p.affectation.indexOf(criteria)>=0 );
+                                    }
+                                    return ret.sort( (a, b) => a.displayname.localeCompare(b.displayname));
+
+                                }
+                            }
+                        })
+                    })
+                </script>
+
+
+                <?php endif; ?>
             </section>
             <hr />
             <?php endif; ?>
