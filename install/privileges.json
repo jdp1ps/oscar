@@ -406,5 +406,11 @@
     "code": "NOTIFICATION_PERSON",
     "libelle": "Peut notifier manuellement un personne",
     "fullcode": "MAINTENANCE-NOTIFICATION_PERSON"
+  },
+  "ACTIVITY-PERSON_ACCESS": {
+    "categorie_id": 2,
+    "code": "PERSON_ACCESS",
+    "libelle": "Voir les personnes qui ont la vision sur l'activité",
+    "fullcode": "ACTIVITY-PERSON_ACCESS"
   }
 }
