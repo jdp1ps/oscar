@@ -86,6 +86,7 @@ if( getenv('APPLICATION_ENV') == 'development' ){
     error_reporting(E_ALL ^ E_DEPRECATED);
 } else {
     define('DEBUG_OSCAR', false);
+    error_reporting(E_ERROR);
 }
 
 /**
