@@ -83,7 +83,7 @@ if( php_sapi_name() !== 'cli' && file_exists(__DIR__.'/../MAINTENANCE') ){
 
 if( getenv('APPLICATION_ENV') == 'development' ){
     define('DEBUG_OSCAR', true);
-    error_reporting(E_ALL ^ E_DEPRECATED);
+    error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 } else {
     define('DEBUG_OSCAR', false);
     error_reporting(E_ERROR);
