@@ -9,12 +9,25 @@ return array(
     /// Vous pouvez surcharger ces paramètres en les redéclarants dans le
     /// fichier local.php
     'oscar' => [
+        // Par défaut, pas de socket
+        'socket' => false,
+
+        ////////////////////////////////////////////////////////////// DOCUMENTS
+        // Emplacement des dossiers pour les documents
+        'paths' => [
+            // Documents des activités
+            'document_oscar' => realpath( __DIR__.'/../../data/documents/activity'),
+            // Documents 'publiques"
+            'document_admin_oscar' => realpath( __DIR__.'/../../data/documents/public'),
+            // Index de recherche
+            'search_activity' => realpath( __DIR__.'/../../data/luceneindex'),
+        ],
 
         ////////////////////////////////////////////////////////////////////////
         // Validation des données
         'validation' => [
             // ------------------------------------------ Validation du code PFI
-            // Il s'agit de l'expression régulière utilisé par Oscar pour
+            // Il s'agit de l'expression régulière utilisée par Oscar pour
             // vérifier la validité formelle du PFI saisi.
             // ex: 209ED2024
             'pfi' => '/^[0-9]{3}[A-Z]{2,3}[0-9]{2,4}$/mi'
