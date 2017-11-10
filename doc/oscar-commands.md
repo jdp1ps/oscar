@@ -153,3 +153,76 @@ Reconstruire l'index de recherche des activités :
 ```bash
 php public/index.php oscar activity:search:build
 ```
+
+## Importer des authentifications depuis un fichier JSON
+
+On peut (pour le développement) importer des autentifications en BDD.
+
+```bash
+php public/index.php oscar authentifications:sync install/demo/authentification.json
+```
+
+Les données sont sous la forme : 
+
+```json
+[
+  {
+    "displayname": "Albert Einstein",
+    "email": "albert.einstein@jacksay.com",
+    "password": "alberteinstein",
+    "login": "alberteinstein",
+    "approles": []
+  },
+  {
+    "displayname": "Maurice Solovine",
+    "email": "maurice.solovine@jacksay.com",
+    "password": "mauricesolovine",
+    "login": "mauricesolovine",
+    "approles": []
+  },
+   {
+      "displayname": "Flying Spagetti Monster",
+      "email": "flyingsm@jacksay.com",
+      "password": "bcrypt:$2y$14$MotDePasseCrypt.cestPratique",
+      "login": "flyingsm",
+      "approles": ["Administrateur"]
+    }
+]
+```
+
+## Importation de donnée PERSON
+
+On peut égalementimporter des personnes en BDD.
+
+```bash
+php public/index.php oscar personsjson:sync install/demo/persons.json
+```
+
+Les données sont sous la forme : 
+
+```json
+[
+  {
+    "firstname": "Albert",
+    "lastname": "Einstein",
+    "mail": "albert.einstein@jacksay.com",
+    "login": "alberteinstein",
+    "uid": "alberteinstein",
+    "roles": {
+      "14": ["Responsable scientifique"]
+    }
+  },
+  {
+    "firstname": "Maurice",
+    "lastname": "Solovine",
+    "mail": "maurice.solovine@jacksay.com",
+    "login": "mauricesolovine",
+    "uid": "mauricesolovine",
+    "roles": {
+      "14": ["Responsable scientifique", "Doctorant"]
+    }
+  }
+]
+```
+
+
