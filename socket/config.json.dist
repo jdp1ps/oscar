@@ -1,10 +1,4 @@
 {
-    "bdd": {
-        "user": "oscar_empty",
-        "host": "localhost",
-        "base": "oscar_empty",
-        "pass": "azerty"
-    },
     "socket": {
         "port": 3000,
         "push_path": "/scr2a548f96E712v54398560125408795"
