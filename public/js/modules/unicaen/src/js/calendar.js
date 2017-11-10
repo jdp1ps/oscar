@@ -41,6 +41,7 @@ class CalendarDatas {
         this.defaultLabel = "";
         this.tooltip = null;
         this.errors = [];
+        this.listEventsOpen = [];
 
         // Données pour transformer les créneaux longs
         this.transformLong = [
@@ -82,6 +83,7 @@ class CalendarDatas {
         this.rejectComment = "";
         this.rejectedEvents = [];
     }
+
 
     tooltipUpdate(){
       console.log(arguments);
@@ -1274,17 +1276,17 @@ var MonthView = {
 
 var ListItemView = {
     template: `<article class="list-item" :style="css" :class="{
-        'event-editable': event.editable, 
-        'status-info': event.isInfo, 
-        'status-draft': event.isDraft, 
-        'status-send' : event.isSend, 
-        'status-valid': event.isValid, 
-        'status-reject': event.isReject, 
-        'valid-sci': event.isValidSci, 
-        'valid-adm': event.isValidAdm, 
-        'reject-sci':event.isRejectSci, 
-        'reject-adm': event.isRejectAdm
-        }">
+                    'event-editable': event.editable, 
+                    'status-info': event.isInfo, 
+                    'status-draft': event.isDraft, 
+                    'status-send' : event.isSend, 
+                    'status-valid': event.isValid, 
+                    'status-reject': event.isReject, 
+                    'valid-sci': event.isValidSci, 
+                    'valid-adm': event.isValidAdm, 
+                    'reject-sci':event.isRejectSci, 
+                    'reject-adm': event.isRejectAdm
+                    }">
         <time class="start">{{ beginAt }}</time> -
         <time class="end">{{ endAt }}</time>
         <strong>{{ event.label }}</strong>
@@ -1381,6 +1383,9 @@ var ListView = {
         lastDate(){
             return store.lastEvent;
         },
+        open(){
+            return store.listEventsOpen;
+        }
     },
 
     props: ['withOwner'],
@@ -1392,23 +1397,33 @@ var ListView = {
     template: `<div class="calendar calendar-list">
         <section v-for="eventsYear, year in listEvents" class="year-pack">
             <h2 class="flex-position">
-                <strong>{{year}}
-                <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">
-                    <i class=" icon-angle-down"></i>
-                    <ul>
-                        <li @click.prevent="performYear(eventsYear, 'submit')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de l'année</li>
-                        <li @click.prevent="performYear(eventsYear, 'validatesci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement l'année</li>
-                        <li @click.prevent="performYear(eventsYear, 'rejectsci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l'année</li>
-                        <li @click.prevent="performYear(eventsYear, 'validateadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l'année</li>
-                        <li @click.prevent="performYear(eventsYear, 'rejectadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l'année</li>
-                    </ul>
-                </nav>
+                <strong>
+                    <span @click="toggle(year)">
+                        <i class="icon-right-dir" v-show="listEventsOpen.indexOf(year) == -1"></i>    
+                        <i class="icon-down-dir" v-show="listEventsOpen.indexOf(year) >= 0"></i>
+                        {{year}}
+                    </span>
+                    <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">
+                        <i class=" icon-angle-down"></i>
+                        <ul>
+                            <li @click.prevent="performYear(eventsYear, 'submit')" v-if="eventsYear.credentials.send"><i class="icon-right-big"></i> Soumettre les créneaux de l'année</li>
+                            <li @click.prevent="performYear(eventsYear, 'validatesci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Valider scientifiquement l'année</li>
+                            <li @click.prevent="performYear(eventsYear, 'rejectsci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l'année</li>
+                            <li @click.prevent="performYear(eventsYear, 'validateadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l'année</li>
+                            <li @click.prevent="performYear(eventsYear, 'rejectadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l'année</li>
+                        </ul>
+                    </nav>
                 </strong>
                 <span class="onright total">{{ eventsYear.total }} heure(s)</span>
             </h2>
-            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack">
+            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack" v-show="listEventsOpen.indexOf(year) >= 0">
                 <h3 class="flex-position">
-                    <strong>{{month}} ~ 
+                    <strong>  
+                    <span  @click="toggle(year+'-'+month)">
+                        <i class="icon-right-dir" v-show="listEventsOpen.indexOf(year+'-'+month) == -1"></i>    
+                        <i class="icon-down-dir" v-show="listEventsOpen.indexOf(year+'-'+month) >= 0"></i>
+                        {{month}}
+                    </span>
                     <nav class="reject-valid-group" v-if="eventsMonth.credentials.actions">
                         <i class=" icon-angle-down"></i>
                         <ul>
@@ -1422,7 +1437,7 @@ var ListView = {
                     </strong> 
                     <span class="onright total">{{eventsMonth.total}} heure(s)</span>
                 </h3>
-                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack">
+                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack" v-show="listEventsOpen.indexOf(year+'-'+month) >= 0">
                     <h4 class="flex-position">
                         <strong>Semaine {{week}} ~ 
                         <nav class="reject-valid-group" v-if="eventsWeek.credentials.actions">
@@ -1477,6 +1492,15 @@ var ListView = {
     </div>`,
 
     methods: {
+
+        toggle(tag){
+            if( store.listEventsOpen.indexOf(tag) == -1 ){
+                store.listEventsOpen.push(tag);
+            } else {
+                store.listEventsOpen.splice(store.listEventsOpen.indexOf(tag), 1);
+            }
+        },
+
         selectEvent(event){
             store.currentDay = moment(event.start);
             store.state = "week";
