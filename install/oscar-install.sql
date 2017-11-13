@@ -82,7 +82,6 @@ ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b93174800f;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b9217bbb47;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b91c4132c1;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b9166d1f9c;
-ALTER TABLE ONLY public.role DROP CONSTRAINT fk_57698a6a727aca70;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0cc54c8c93;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0ca1b4b28c;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0c953c1c61;
@@ -121,8 +120,6 @@ DROP INDEX public.uniq_9de7cd62f85e0677;
 DROP INDEX public.uniq_9de7cd62e7927c74;
 DROP INDEX public.uniq_6e60b4f7d60322ac;
 DROP INDEX public.uniq_598638fb8a90aba9;
-DROP INDEX public.uniq_57698a6ab8c2fd88;
-DROP INDEX public.uniq_57698a6a1596728e;
 DROP INDEX public.uniq_2de8c6a3d60322ac;
 DROP INDEX public.uniq_2de8c6a31596728e;
 DROP INDEX public.idx_e9b876779485a167;
@@ -196,7 +193,6 @@ DROP INDEX public.idx_5d5b51b93174800f;
 DROP INDEX public.idx_5d5b51b9217bbb47;
 DROP INDEX public.idx_5d5b51b91c4132c1;
 DROP INDEX public.idx_5d5b51b9166d1f9c;
-DROP INDEX public.idx_57698a6a727aca70;
 DROP INDEX public.idx_55026b0cc54c8c93;
 DROP INDEX public.idx_55026b0ca1b4b28c;
 DROP INDEX public.idx_55026b0c953c1c61;
@@ -237,7 +233,6 @@ ALTER TABLE ONLY public.typedocument DROP CONSTRAINT typedocument_pkey;
 ALTER TABLE ONLY public.tva DROP CONSTRAINT tva_pkey;
 ALTER TABLE ONLY public.timesheet DROP CONSTRAINT timesheet_pkey;
 ALTER TABLE ONLY public.role_privilege DROP CONSTRAINT role_privilege_pkey;
-ALTER TABLE ONLY public.role DROP CONSTRAINT role_pkey;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT projectpartner_pkey;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT projectmember_pkey;
 ALTER TABLE ONLY public.project DROP CONSTRAINT project_pkey;
@@ -283,7 +278,6 @@ DROP SEQUENCE public.timesheet_id_seq;
 DROP TABLE public.timesheet;
 DROP TABLE public.role_privilege;
 DROP SEQUENCE public.role_id_seq;
-DROP TABLE public.role;
 DROP SEQUENCE public.projectpartner_id_seq;
 DROP TABLE public.projectpartner;
 DROP SEQUENCE public.projectmember_id_seq;
@@ -1466,19 +1460,6 @@ CREATE SEQUENCE projectpartner_id_seq
 
 
 --
--- Name: role; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE role (
-    id integer NOT NULL,
-    parent_id integer,
-    roleid character varying(255) NOT NULL,
-    is_default boolean NOT NULL,
-    ldap_filter character varying(255) DEFAULT NULL::character varying
-);
-
-
---
 -- Name: role_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1750,7 +1731,7 @@ COPY activity_discipline (activity_id, discipline_id) FROM stdin;
 -- Name: activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activity_id_seq', 10092, true);
+SELECT pg_catalog.setval('activity_id_seq', 1, true);
 
 
 --
@@ -1765,7 +1746,7 @@ COPY activitydate (id, type_id, activity_id, datestart, comment, status, datecre
 -- Name: activitydate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitydate_id_seq', 1195, true);
+SELECT pg_catalog.setval('activitydate_id_seq', 1, true);
 
 
 --
@@ -1780,7 +1761,7 @@ COPY activityorganization (id, organization_id, activity_id, main, role, status,
 -- Name: activityorganization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityorganization_id_seq', 86425, true);
+SELECT pg_catalog.setval('activityorganization_id_seq', 1, true);
 
 
 --
@@ -1795,7 +1776,7 @@ COPY activitypayment (id, activity_id, currency_id, datepayment, comment, status
 -- Name: activitypayment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitypayment_id_seq', 2624, true);
+SELECT pg_catalog.setval('activitypayment_id_seq', 1, true);
 
 
 --
@@ -1810,7 +1791,7 @@ COPY activityperson (id, person_id, activity_id, main, role, status, datecreated
 -- Name: activityperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityperson_id_seq', 21443, true);
+SELECT pg_catalog.setval('activityperson_id_seq', 1, false);
 
 
 --
@@ -1894,7 +1875,7 @@ COPY activitytype (id, lft, rgt, status, datecreated, dateupdated, datedeleted, 
 -- Name: activitytype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitytype_id_seq', 409, true);
+SELECT pg_catalog.setval('activitytype_id_seq', 478, false);
 
 
 --
@@ -1909,7 +1890,7 @@ COPY administrativedocument (id, person_id, dateupdoad, path, information, filet
 -- Name: administrativedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('administrativedocument_id_seq', 32, true);
+SELECT pg_catalog.setval('administrativedocument_id_seq', 1, false);
 
 
 --
@@ -1924,7 +1905,7 @@ COPY authentification (id, username, email, display_name, password, state, datel
 -- Name: authentification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('authentification_id_seq', 173, true);
+SELECT pg_catalog.setval('authentification_id_seq', 12, true);
 
 
 --
@@ -1956,7 +1937,7 @@ COPY categorie_privilege (id, code, libelle, ordre) FROM stdin;
 -- Name: categorie_privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('categorie_privilege_id_seq', 1, false);
+SELECT pg_catalog.setval('categorie_privilege_id_seq', 10, false);
 
 
 --
@@ -1971,7 +1952,7 @@ COPY contractdocument (id, grant_id, person_id, dateupdoad, path, information, c
 -- Name: contractdocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('contractdocument_id_seq', 56188, true);
+SELECT pg_catalog.setval('contractdocument_id_seq', 1, false);
 
 
 --
@@ -2217,7 +2198,7 @@ COPY contracttype (id, code, label, description, lft, rgt) FROM stdin;
 -- Name: contracttype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('contracttype_id_seq', 231, true);
+SELECT pg_catalog.setval('contracttype_id_seq', 232, false);
 
 
 --
@@ -2236,7 +2217,7 @@ COPY currency (id, status, datecreated, dateupdated, datedeleted, createdby_id, 
 -- Name: currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('currency_id_seq', 1, false);
+SELECT pg_catalog.setval('currency_id_seq', 5, false);
 
 
 --
@@ -2272,7 +2253,7 @@ COPY datetype (id, label, description, status, datecreated, dateupdated, datedel
 -- Name: datetype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('datetype_id_seq', 54, true);
+SELECT pg_catalog.setval('datetype_id_seq', 55, false);
 
 
 --
@@ -2316,7 +2297,7 @@ COPY discipline (id, label, centaureid) FROM stdin;
 -- Name: discipline_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('discipline_id_seq', 122, true);
+SELECT pg_catalog.setval('discipline_id_seq', 120, false);
 
 
 --
@@ -2357,7 +2338,7 @@ COPY grantsource (id, description, logo, informations, centaureid, label) FROM s
 -- Name: grantsource_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('grantsource_id_seq', 33, true);
+SELECT pg_catalog.setval('grantsource_id_seq', 27, false);
 
 
 --
@@ -2372,7 +2353,7 @@ COPY logactivity (id, datecreated, message, context, contextid, userid, level, t
 -- Name: logactivity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('logactivity_id_seq', 38091, true);
+SELECT pg_catalog.setval('logactivity_id_seq', 1, false);
 
 
 --
@@ -2380,12 +2361,6 @@ SELECT pg_catalog.setval('logactivity_id_seq', 38091, true);
 --
 
 COPY notification (id, dateeffective, message, context, contextid, recipientid, level, read, datas, hash) FROM stdin;
-195	2017-09-21 08:31:37	Déclaration en attente de validation dans l'activité [Activity:10092:Exemple d'activité 2].	Activity	10092	13060	400	f	a:0:{}	99f7bf2b4153a48894c430db98837a70
-196	2017-09-21 08:31:37	Déclaration en attente de validation dans l'activité [Activity:10092:Exemple d'activité 2].	Activity	10092	11480	400	f	a:0:{}	5af4866cfd93d95867ac74fd1528ab77
-212	2017-09-21 08:31:37	Déclaration en attente de validation dans l'activité [Activity:10090:Relativité test5].	Activity	10090	11480	400	f	a:0:{}	e4b6b0967278fe3869976dc66d52cd1e
-222	2017-09-21 12:30:18	Des déclarations ont été validées administrativement dans l'activité [Activity:10092:Exemple d'activité 2]	Activity	10092	13059	400	f	a:0:{}	4db73e6c6169deedc8b331590e8988a5
-223	2017-09-21 12:30:45	Des déclarations ont été validées administrativement dans l'activité [Activity:10090:Relativité test5]	Activity	10090	13059	400	f	a:0:{}	6109b853473ace72e83cacf20f363603
-224	2017-09-21 12:30:50	Des déclarations ont été validés scientifiquement dans l'activité [Activity:10090:Relativité test5]	Activity	10090	13059	400	f	a:0:{}	e379f03de0cb998e3ba69ca24ba3d190
 \.
 
 
@@ -2393,7 +2368,7 @@ COPY notification (id, dateeffective, message, context, contextid, recipientid, 
 -- Name: notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('notification_id_seq', 224, true);
+SELECT pg_catalog.setval('notification_id_seq', 1, false);
 
 
 --
@@ -2408,7 +2383,7 @@ COPY organization (id, centaureid, shortname, fullname, code, email, url, descri
 -- Name: organization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organization_id_seq', 12703, true);
+SELECT pg_catalog.setval('organization_id_seq', 1, false);
 
 
 --
@@ -2438,7 +2413,7 @@ COPY organizationperson (id, person_id, organization_id, main, role, datestart, 
 -- Name: organizationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organizationperson_id_seq', 395, true);
+SELECT pg_catalog.setval('organizationperson_id_seq', 1, false);
 
 
 --
@@ -2465,7 +2440,7 @@ COPY organizationrole (id, label, description, principal, status, datecreated, d
 -- Name: organizationrole_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organizationrole_id_seq', 1, false);
+SELECT pg_catalog.setval('organizationrole_id_seq', 14, false);
 
 
 --
@@ -2480,7 +2455,7 @@ COPY person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, 
 -- Name: person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('person_id_seq', 23328, true);
+SELECT pg_catalog.setval('person_id_seq', 1, false);
 
 
 --
@@ -2552,6 +2527,11 @@ COPY privilege (id, categorie_id, code, libelle, ordre) FROM stdin;
 68	2	TIMESHEET_VALIDATE_ADM	Validation administrative des feuilles de temps	\N
 70	6	CONNECTOR_ACCESS	Peut exécuter la synchronisation des données	\N
 69	2	TIMESHEET_USURPATION	Peut remplir les feuilles de temps des déclarants d'une activité	\N
+71	3	NOTIFICATION_MENU	La personne peut voir le menu notification	\N
+72	2	NOTIFICATIONS_SHOW	Peut voir les notifications planifiées dans la fiche activité	\N
+73	2	NOTIFICATIONS_GENERATE	Peut regénérer manuellement les notifications d'une activité	\N
+74	6	NOTIFICATION_PERSON	Peut notifier manuellement un personne	\N
+75	2	PERSON_ACCESS	Voir les personnes qui ont la vision sur l'activité	\N
 \.
 
 
@@ -2559,7 +2539,7 @@ COPY privilege (id, categorie_id, code, libelle, ordre) FROM stdin;
 -- Name: privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('privilege_id_seq', 1, false);
+SELECT pg_catalog.setval('privilege_id_seq', 75, true);
 
 
 --
@@ -2582,7 +2562,7 @@ COPY project_discipline (project_id, discipline_id) FROM stdin;
 -- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('project_id_seq', 8724, true);
+SELECT pg_catalog.setval('project_id_seq', 1, false);
 
 
 --
@@ -2604,7 +2584,7 @@ COPY projectmember (id, project_id, person_id, role, datestart, dateend, main, s
 -- Name: projectmember_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('projectmember_id_seq', 10714, true);
+SELECT pg_catalog.setval('projectmember_id_seq', 1, false);
 
 
 --
@@ -2619,32 +2599,14 @@ COPY projectpartner (id, project_id, organization_id, datestart, dateend, main, 
 -- Name: projectpartner_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('projectpartner_id_seq', 60583, true);
-
-
---
--- Data for Name: role; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY role (id, parent_id, roleid, is_default, ldap_filter) FROM stdin;
-2	\N	user	t	\N
-3	\N	testeur	f	(cn=projet_oscar,ou=groups,dc=unicaen,dc=fr)
-4	\N	hunter	f	\N
-5	\N	Chargé de valorisation	f	\N
-6	\N	Responsable scientifique	f	\N
-7	\N	Responsable	f	\N
-8	\N	Responsable juridique	f	\N
-9	\N	Responsable financier	f	\N
-10	\N	Responsable administratif	f	\N
-1	\N	Administrateur	f	\N
-\.
+SELECT pg_catalog.setval('projectpartner_id_seq', 1, false);
 
 
 --
 -- Name: role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('role_id_seq', 1, false);
+SELECT pg_catalog.setval('role_id_seq', 11, false);
 
 
 --
@@ -3051,7 +3013,7 @@ COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status
 -- Name: timesheet_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('timesheet_id_seq', 66, true);
+SELECT pg_catalog.setval('timesheet_id_seq', 1, false);
 
 
 --
@@ -3073,7 +3035,7 @@ COPY tva (id, label, rate, active, status, datecreated, dateupdated, datedeleted
 -- Name: tva_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('tva_id_seq', 1, false);
+SELECT pg_catalog.setval('tva_id_seq', 8, false);
 
 
 --
@@ -3099,7 +3061,7 @@ COPY typedocument (id, label, description, codecentaure, status, datecreated, da
 -- Name: typedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('typedocument_id_seq', 41, true);
+SELECT pg_catalog.setval('typedocument_id_seq', 12, false);
 
 
 --
@@ -3108,7 +3070,6 @@ SELECT pg_catalog.setval('typedocument_id_seq', 41, true);
 
 COPY user_role (id, parent_id, role_id, is_default, ldap_filter, spot, description, principal) FROM stdin;
 16	\N	Superviseur	f	\N	4	\N	f
-5	\N	valo	f	\N	0	\N	f
 6	\N	Utilisateur	t	(memberOf=cn=harpege,ou=groups,dc=unicaen,dc=fr)	4	\N	f
 1	\N	Administrateur	f	\N	4	\N	f
 8	\N	Responsable RH	f	\N	6	\N	f
@@ -3121,7 +3082,6 @@ COPY user_role (id, parent_id, role_id, is_default, ldap_filter, spot, descripti
 17	\N	Chercheur	f	\N	3	\N	f
 18	\N	Co-responsable	f	\N	3	\N	f
 19	\N	Gestionnaire	f	\N	2	\N	f
-2	\N	beta_testeur	f	\N	0	\N	f
 20	\N	Chargé de mission Europe	f	\N	3		t
 10	\N	Responsable scientifique	f	\N	3		t
 22	\N	Directeur de composante	f	\N	2	Contient les directeurs de composantes, directeurs de composantes adjoint, les administrateurs provisoires 	t
@@ -3136,7 +3096,7 @@ COPY user_role (id, parent_id, role_id, is_default, ldap_filter, spot, descripti
 -- Name: user_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('user_role_id_seq', 24, true);
+SELECT pg_catalog.setval('user_role_id_seq', 25, false);
 
 
 --
@@ -3166,7 +3126,7 @@ COPY workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted
 -- Name: workpackage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackage_id_seq', 27, true);
+SELECT pg_catalog.setval('workpackage_id_seq', 1, false);
 
 
 --
@@ -3181,7 +3141,7 @@ COPY workpackageperson (id, person_id, duration, status, datecreated, dateupdate
 -- Name: workpackageperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackageperson_id_seq', 15, true);
+SELECT pg_catalog.setval('workpackageperson_id_seq', 1, false);
 
 
 --
@@ -3414,14 +3374,6 @@ ALTER TABLE ONLY projectmember
 
 ALTER TABLE ONLY projectpartner
     ADD CONSTRAINT projectpartner_pkey PRIMARY KEY (id);
-
-
---
--- Name: role_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY role
-    ADD CONSTRAINT role_pkey PRIMARY KEY (id);
 
 
 --
@@ -3710,13 +3662,6 @@ CREATE INDEX idx_55026b0ca1b4b28c ON activity USING btree (activitytype_id);
 --
 
 CREATE INDEX idx_55026b0cc54c8c93 ON activity USING btree (type_id);
-
-
---
--- Name: idx_57698a6a727aca70; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX idx_57698a6a727aca70 ON role USING btree (parent_id);
 
 
 --
@@ -4231,20 +4176,6 @@ CREATE UNIQUE INDEX uniq_2de8c6a3d60322ac ON user_role USING btree (role_id);
 
 
 --
--- Name: uniq_57698a6a1596728e; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX uniq_57698a6a1596728e ON role USING btree (ldap_filter);
-
-
---
--- Name: uniq_57698a6ab8c2fd88; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE UNIQUE INDEX uniq_57698a6ab8c2fd88 ON role USING btree (roleid);
-
-
---
 -- Name: uniq_598638fb8a90aba9; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -4540,14 +4471,6 @@ ALTER TABLE ONLY activity
 
 ALTER TABLE ONLY activity
     ADD CONSTRAINT fk_55026b0cc54c8c93 FOREIGN KEY (type_id) REFERENCES contracttype(id);
-
-
---
--- Name: fk_57698a6a727aca70; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY role
-    ADD CONSTRAINT fk_57698a6a727aca70 FOREIGN KEY (parent_id) REFERENCES role(id);
 
 
 --
