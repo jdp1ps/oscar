@@ -32,5 +32,13 @@
   "config": {
     "github-protocols": ["https", "ssh"],
     "secure-http": false
+  },
+  "autoload": {
+    "psr-0": {
+      "Oscar": "module/Oscar/src/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit -c tests"
   }
 }
