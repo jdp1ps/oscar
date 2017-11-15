@@ -1,0 +1,13 @@
+before_script:
+  - export http_proxy=http://proxy.unicaen.fr:3128
+  - export https_proxy=http://proxy.unicaen.fr:3128
+  - apt-get -qq update && apt-get -qq install -y curl wget gnupg2 build-essential libssl-dev php7.0 php7.0-intl php7.0-mbstring php7.0-mcrypt php7.0-curl php7.0-cli php7.0-xml git php7.0-zip
+  - wget https://getcomposer.org/composer.phar
+  - php composer.phar install
+  - curl -sL https://deb.nodesource.com/setup_6.x | bash
+  - apt-get -qq install -y nodejs
+  - npm install --silent
+  - composer run-script test
+
+test:
+	- composer run-script test
