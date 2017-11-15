@@ -40,7 +40,10 @@ php public/index.php oscar patch checkPrivilegesJSON
 
 > La séquence qui gère les ID n'est pas à jour (dans les données initiales). Connectez vous à la base Postegresql pour exécuter cette requète pour metre à jour les ID. `select setval('privilege_id_seq',(select max(id)+1 from privilege), false)`.
 
+
 # Requètes de maintenance
+
+> Les requêtes ici ne sont utilisées que dans le cadre du développement 
 
 Supprimer les jointures activité > Personnes orphelines : 
 
