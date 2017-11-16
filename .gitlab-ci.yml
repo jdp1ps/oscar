@@ -1,3 +1,10 @@
+image: debian
+
+
+services:
+  - nodejs
+  - postregsql@9.3
+
 before_script:
   - export http_proxy=http://proxy.unicaen.fr:3128
   - export https_proxy=http://proxy.unicaen.fr:3128
