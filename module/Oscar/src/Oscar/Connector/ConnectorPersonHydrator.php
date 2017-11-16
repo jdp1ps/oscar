@@ -17,6 +17,8 @@ use Oscar\Entity\Person;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
 use Oscar\Exception\ConnectorException;
+use Oscar\Exception\OscarException;
+use Oscar\Factory\JsonToPersonFactory;
 
 /**
  * Cette classe centralise l'analyse des données d'un personne pour mettre à jour un objet Person avec.
@@ -57,7 +59,7 @@ class ConnectorPersonHydrator
      * @param $organisationCode
      * @return mixed
      */
-    protected function getOrganisationByCode( $organisationCode )
+    protected function getOrganisationByCode($organisationCode)
     {
         return $this->getOrganizationRepository()->getOrganisationByCode($organisationCode);
     }
@@ -65,7 +67,8 @@ class ConnectorPersonHydrator
     /**
      * @return array|null
      */
-    protected function getRolesOscarByRoleId(){
+    protected function getRolesOscarByRoleId()
+    {
         return $this->getRoleRepository()->getRolesOscarByRoleId();
     }
 
@@ -81,61 +84,43 @@ class ConnectorPersonHydrator
     /**
      * @return mixed
      */
-    public function getRepport(){
+    public function getRepport()
+    {
         return $this->repport;
     }
 
     /**
      * @return bool
      */
-    public function isSuspect(){
+    public function isSuspect()
+    {
         return $this->repport != null && $this->repport->isSuspect();
     }
 
+    protected function factory(){
+        static $factory;
+        if( $factory === null )
+            $factory = new JsonToPersonFactory();
+        return $factory;
+    }
 
-    public function hydratePerson( Person $personOscar, $personData, $connectorName )
-    {
+
+    public function hydratePerson(
+        Person $personOscar,
+        $personData,
+        $connectorName
+    ) {
         $rolesOscar = $this->getRolesOscarByRoleId();
         $this->repport = new ConnectorRepport();
 
-        ////////////////////////////////////////////////////////////////////////
-        ///
-        /// Champs obligatoires
-        if( !property_exists($personData, 'uid') ){
-            $this->repport->adderror("Le champ 'uid' est obligatoire.");
+        try {
+            $personOscar = $this->factory()->hydrateWithDatas($personOscar, $personData, $connectorName);
+        } catch (OscarException $e ){
+            $this->repport->adderror($e->getMessage());
             return;
         }
 
-        if( !property_exists($personData, 'firstname') ){
-            $this->repport->adderror("Le champ 'firstname' est manquant pour l'entrée UID = " . $personData->uid);
-            return;
-        }
-
-        if( !property_exists($personData, 'lastname') ){
-            $this->repport->adderror("Le champ 'lastname' est manquant pour l'entrée UID = " . $personData->uid);
-            return;
-        }
-
-        ///
-        /// Champs facultatifs
-        if( property_exists($personData, 'login') ) $personOscar->setLadapLogin($personData->login);
-        if( property_exists($personData, 'groups') ) $personOscar->setLdapMemberOf($personData->groups);
-        if( property_exists($personData, 'structure') ) $personOscar->setLdapSiteLocation($personData->structure);
-        if( property_exists($personData, 'affectation') ) $personOscar->setLdapAffectation($personData->affectation);
-        if( property_exists($personData, 'status') ) $personOscar->setLdapStatus($personData->status);
-        if( property_exists($personData, 'phone') ) $personOscar->setPhone($personData->phone);
-        if( property_exists($personData, 'inm') ) $personOscar->setHarpegeINM($personData->inm);
-        if( property_exists($personData, 'mail') ) $personOscar->setEmail($personData->mail);
-
-
-
-        $personOscar->setConnectorID($connectorName, $personData->uid)
-            ->setFirstname($personData->firstname)
-            ->setLastname($personData->lastname)
-            ->setDateSyncLdap(new \DateTime())
-            ;
-
-        if( property_exists($personData, 'roles') ) {
+        if (property_exists($personData, 'roles')) {
             foreach ($personData->roles as $organizationCode => $roles) {
 
                 try {
@@ -153,14 +138,17 @@ class ConnectorPersonHydrator
                                         ->setOrganization($organization)
                                         ->setRoleObj($rolesOscar[$roleId]);
                                     $personOscar->getOrganizations()->add($roleOscar);
-                                    $this->repport->addupdated(sprintf("%s a le role '%s' dans %s", $personOscar, $roleId, $organization));
+                                    $this->repport->addupdated(sprintf("%s a le role '%s' dans %s",
+                                        $personOscar, $roleId, $organization));
                                 }
                             } else {
-                                $this->repport->addwarning(sprintf("Le role '%s' n'a pas été ajouté à '%s' dans '%s' car il est absent de Oscar", $roleId, $personOscar, $organization));
+                                $this->repport->addwarning(sprintf("Le role '%s' n'a pas été ajouté à '%s' dans '%s' car il est absent de Oscar",
+                                    $roleId, $personOscar, $organization));
                             }
                         }
                     } else {
-                        $this->repport->addwarning(sprintf("L'organisation avec le code '%s' n'existe pas dans Oscar", $organizationCode));
+                        $this->repport->addwarning(sprintf("L'organisation avec le code '%s' n'existe pas dans Oscar",
+                            $organizationCode));
                     }
                 } catch (NoResultException $e) {
                     $this->repport->addwarning(sprintf("Impossible de charger l'organisation avec le code '%s'.",
@@ -174,7 +162,6 @@ class ConnectorPersonHydrator
 
         return $personOscar;
     }
-
 
 
 }
