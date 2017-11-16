@@ -103,4 +103,14 @@ class TypeDocument implements ITrackable
             'description' => $this->getDescription(),
         ];
     }
+
+
+    function toArray()
+    {
+        return array(
+            'id' => $this->getId(),
+            'label' => $this->getLabel(),
+            'description' => $this->getDescription(),
+        );
+    }
 }

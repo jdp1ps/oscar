@@ -1258,3 +1258,19 @@ administration:
                         route: /api[/[:roleid]]
                         defaults:
                             action: organizationRoleApi
+
+        typedocument:
+             type: segment
+             options:
+                 route: /typedocument
+                 defaults:
+                   action: typedocument
+             may_terminate: true
+             child_routes:
+                 api:
+                     type: segment
+                     may_terminate: true
+                     options:
+                         route: /api[/[:typedocumentid]]
+                         defaults:
+                           action: typeDocumentApi
