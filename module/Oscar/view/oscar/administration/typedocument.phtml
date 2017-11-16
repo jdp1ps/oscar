@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="<?= $this->basePath(). '/css/privileges.css' ?>">
+<div class="container">
+    <h1>
+        <i class="icon-building-filled"></i>
+        Liste des types de documents :
+    </h1>
+        <section>
+            <div id="types"></div>
+            <script>
+                require(['vue', 'vue-resource', 'Typedocument'],function(Vue, VueRessource, TypeDocument){
+                    Vue.use(VueRessource);
+
+                    var typedocument = new TypeDocument.default({
+                        http: {
+                            root : '<?= $this->url('administration/typedocument/api') ?>'
+                        },
+                        data : {
+                            types : [],
+                            manage : true
+                        },
+                        el: '#types'
+                    });
+                })
+            </script>
+</section>
+</div>
