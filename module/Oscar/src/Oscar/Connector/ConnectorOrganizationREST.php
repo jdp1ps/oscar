@@ -15,6 +15,7 @@ use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Exception\ConnectorException;
+use Oscar\Factory\JsonToOrganizationFactory;
 use UnicaenApp\Mapper\Ldap\People;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -82,6 +83,16 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
     }
 
     /**
+     * @return JsonToOrganizationFactory
+     */
+    protected function factory(){
+        static $factory;
+        if( $factory === null )
+            $factory = new JsonToOrganizationFactory();
+        return $factory;
+    }
+
+    /**
      * @param OrganizationRepository $repository
      * @param bool $force
      * @return ConnectorRepport
@@ -142,20 +153,7 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
     }
 
     private function hydrateWithDatas( Organization $organization, $data ){
-        return $organization->setConnectorID($this->getName(), $data->code)
-            ->setDateUpdated(new \DateTime($data->dateupdated))
-            ->setShortName($data->shortname)
-            ->setCode($data->code)
-            ->setFullName($data->longname)
-            ->setPhone($data->phone)
-            ->setDescription($data->description)
-            ->setStreet1($data->address ? $data->address->address1 : null)
-            ->setStreet2($data->address ? $data->address->address2 : null)
-            ->setZipCode($data->address ? $data->address->zipcode : null)
-            ->setCity($data->address ? $data->address->city : null)
-            ->setCountry($data->address ? $data->address->country : null)
-            ->setBp($data->address ? $data->address->address3 : null)
-            ;
+        return $this->factory()->hydrateWithDatas($organization, $data, $this->getName());
     }
 
     function syncOrganization(Organization $organization)

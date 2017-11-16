@@ -25,12 +25,20 @@
   },
   "require-dev": {
     "phpmd/phpmd": "@stable",
-    "phpunit/phpunit": "4.8.*",
-    "twig/twig": "^2.0@dev"
+    "twig/twig": "^2.0@dev",
+    "phpunit/phpunit": "^6"
   },
   "minimum-stability": "dev",
   "config": {
     "github-protocols": ["https", "ssh"],
     "secure-http": false
+  },
+  "autoload": {
+    "psr-0": {
+      "Oscar": "module/Oscar/src/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit -c tests"
   }
 }
