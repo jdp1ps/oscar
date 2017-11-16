@@ -9,7 +9,6 @@ namespace Oscar\Factory;
 
 
 use Oscar\Entity\Organization;
-use Oscar\Entity\Person;
 
 /**
  * Class JsonToPersonFactory
