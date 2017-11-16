@@ -21,7 +21,8 @@
     "erusev/parsedown": "dev-master",
     "oro/doctrine-extensions": "dev-master",
     "jacksay/php-file-extension": "dev-master",
-    "swiftmailer/swiftmailer": "^6.0@dev"
+    "swiftmailer/swiftmailer": "^6.0@dev",
+    "symfony/yaml": "*"
   },
   "require-dev": {
     "phpmd/phpmd": "@stable",
