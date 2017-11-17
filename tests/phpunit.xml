@@ -3,5 +3,8 @@
     <testsuite name="Factory">
       <directory>Oscar/Factory</directory>
     </testsuite>
+    <testsuite name="Connector">
+      <directory>Oscar/Connector</directory>
+    </testsuite>
   </testsuites>
 </phpunit>
