@@ -1,5 +1,4 @@
 <?php
-<?php
 
 // Par défaut, Oscar n'utilise pas le serveur Websocker
 $socket = false;
