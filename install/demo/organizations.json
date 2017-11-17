@@ -1,0 +1,118 @@
+[
+  {
+    "uid": "ED209",
+    "code": "ED209",
+    "shortname": "Etude Directive 20 Al 9"
+  },
+  {
+    "uid": "ACME",
+    "code": "ACME",
+    "shortname": "ACME",
+    "longname": "ACME Corporation"
+  },
+  {
+    "uid": "Aperture",
+    "code": "Aperture",
+    "shortname": "Aperture",
+    "longname": "Aperture Science"
+  },
+  {
+    "uid": "BNL",
+    "code": "BNL",
+    "shortname": "BNL",
+    "longname": "Big And Large"
+  },
+  {
+    "uid": "COGIP",
+    "code": "COGIP",
+    "shortname": "COGIP",
+    "longname": "Bureau de la COGIP"
+  },
+  {
+    "uid": "DICOC",
+    "code": "DICOC",
+    "shortname": "DINOCO"
+  },
+  {
+    "uid": "FONDA",
+    "code": "FONDA",
+    "shortname": "Fondation"
+  },
+  {
+    "uid": "GROUPW",
+    "code": "GROUPW",
+    "shortname": "Group W",
+    "longname": "Groupe Winch"
+  },
+  {
+    "uid": "LEXC",
+    "code": "LEXC",
+    "shortname": "LEX CORP",
+    "longname": "Lex Corporation"
+  },
+  {
+    "uid": "STARK",
+    "code": "STARK",
+    "shortname": "STARK",
+    "longname": "Stark Industries"
+  },
+  {
+    "uid": "UMBRE",
+    "code": "UMBRE",
+    "shortname": "Umbrella",
+    "longname": "Umbrella Corporation"
+  },
+  {
+    "uid": "OSCORP",
+    "code": "OSCORP",
+    "shortname": "Oscorp",
+    "longname": "Oscorp Industries",
+    "address": {
+      "city": "New York",
+      "country": "United States Of America"
+    }
+  },
+  {
+    "uid": "BLACKM",
+    "code": "BLACKM",
+    "shortname": "BLACK MESSA"
+  },
+  {
+    "uid": "WAYNE",
+    "code": "WAYNE",
+    "shortname": "WE",
+    "longname": "Wayne Enterprises",
+    "address": {
+      "city": "Gotham"
+    }
+  },
+  {
+    "uid": "USR",
+    "code": "USR",
+    "shortname": "US Robots"
+  },
+  {
+    "uid": "CBD",
+    "code": "CBD",
+    "shortname": "Cyberdyne",
+    "longname": "Cyberdyne Systems"
+  },
+  {
+    "uid": "LABO1",
+    "code": "LABO1",
+    "shortname": "OLYMPIA",
+    "longname": "Groupe Olympia"
+  },
+  {
+    "uid": "UNIV1",
+    "code": "UNIV1",
+    "shortname": "USB",
+    "longname": "Université des sciences de Berne"
+  },
+  {
+    "uid": "UNIV2",
+    "code": "UNIV2",
+    "shortname": "USB",
+    "longname": "Université des sciences de Berlin"
+  }
+]

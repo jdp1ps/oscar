@@ -10,6 +10,15 @@
     }
   },
   {
+    "uid": "normanosborn",
+    "firstname": "Norman",
+    "lastname": "Osborn",
+    "mail": "g.goblin@oscorp.com",
+    "roles": {
+      "OSCORP": ["Responsable scientifique"]
+    }
+  },
+  {
     "firstname": "Cet enregistrement sera ignoré, pas d'UID",
     "lastname": "",
     "mail": "",

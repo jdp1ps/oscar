@@ -11,7 +11,7 @@ namespace Oscar\Connector;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 
-class GetJsonDataFromFileStrategy implements GetJsonDataStrategy
+class GetJsonDataFromFileStrategy extends GetJsonDataStrategy
 {
     private $filepath;
 
@@ -41,41 +41,21 @@ class GetJsonDataFromFileStrategy implements GetJsonDataStrategy
     }
 
     /**
-     * Retourne le contenu du fichier.
+     * Retourne le contenu depuis la source
      *
      * @return bool|string
      * @throws OscarException
      */
-    public function getFileContent()
+    public function getContent()
     {
         $file = $this->getFilepath();
         if (!is_readable($file)) {
             throw new OscarException(sprintf("Impossible de lire le fichier '%s'.",
                 $file));
         }
+
         return file_get_contents($file);
     }
-
-    public function getJsonContent()
-    {
-        $content = $this->getFileContent();
-        $json = json_decode($content);
-        if( $json === null && $content != '' ){
-            throw new NotJsonFileException(sprintf("Le fichier '%s' n'est pas un fichier JSON valide.", $this->filepath));
-        }
-        return $json;
-    }
-
-    public function getAll()
-    {
-        static $datas;
-        if ($datas === null) {
-            $datas = $this->getJsonContent();
-        }
-
-        return $datas;
-    }
-
 
     public function getOne($id)
     {
@@ -84,6 +64,12 @@ class GetJsonDataFromFileStrategy implements GetJsonDataStrategy
                 return $entry;
             }
         }
+
         return null;
+    }
+
+    public function getAll()
+    {
+        return $this->stringToJson($this->getContent());
     }
 }

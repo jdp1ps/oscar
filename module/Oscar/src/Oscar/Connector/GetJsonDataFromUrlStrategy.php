@@ -8,7 +8,7 @@
 namespace Oscar\Connector;
 
 
-class GetJsonDataFromUrlStrategy implements GetJsonDataStrategy
+class GetJsonDataFromUrlStrategy extends GetJsonDataStrategy
 {
 
     private $urlOne;
@@ -45,7 +45,8 @@ class GetJsonDataFromUrlStrategy implements GetJsonDataStrategy
     /**
      * @return mixed un tableau de stdObject
      */
-    public function getAll(){
+    public function getAll()
+    {
         return $this->getDataFromUrl($this->getUrlAll());
     }
 
@@ -53,15 +54,18 @@ class GetJsonDataFromUrlStrategy implements GetJsonDataStrategy
      * @param $id
      * @return mixed stdObject
      */
-    public function getOne($id){
+    public function getOne($id)
+    {
         return $this->getDataFromUrl(sprintf($this->getUrlOne(), $id));
     }
 
-    protected function getDataFromUrl( $url ){
+    protected function getDataFromUrl($url)
+    {
         static $curl;
 
-        if( $curl === null )
+        if ($curl === null) {
             $curl = curl_init();
+        }
 
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -69,21 +73,12 @@ class GetJsonDataFromUrlStrategy implements GetJsonDataStrategy
 
         $return = curl_exec($curl);
 
-        if( false === $return ){
-            throw new ConnectorException("L'URL du connecteur n'a pas fournis les données attendues");
+        if (false === $return) {
+            throw new ConnectorException("L'URL n'a pas fournis les données attendues");
         }
 
         curl_close($curl);
 
-        $jsonData = json_decode($return);
-
-        if( $jsonData === null ){
-            throw new ConnectorException("Les données retourné par le connecteur ne sont pas lisibles");
-        }
-
-        return $return;
+        return $this->stringToJson($return);
     }
-
-
-
 }

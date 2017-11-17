@@ -363,6 +363,7 @@ return array(
                         ],
                     ]
                 ],
+
                 'token_has_privilege' => [
                     'options' => [
                         'route' => 'oscar token:has-privilege <token> <privilege> ',
@@ -516,6 +517,15 @@ return array(
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'personJsonSync',
+                        ),
+                    ),
+                ],
+                'oscar_organizationsjson_sync' => [
+                    'options' => array(
+                        'route' => 'oscar organizationsjson:sync <fichier> [-f|--force]',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'organizationJsonSync',
                         ),
                     ),
                 ],

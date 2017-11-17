@@ -13,10 +13,12 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
+use Oscar\Connector\ConnectorOrganizationJSON;
 use Oscar\Connector\ConnectorPersonHarpege;
 use Oscar\Connector\ConnectorPersonHydrator;
 use Oscar\Connector\ConnectorPersonJSON;
 use Oscar\Connector\ConnectorRepport;
+use Oscar\Connector\GetJsonDataFromFileStrategy;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
@@ -426,6 +428,35 @@ class ConsoleController extends AbstractOscarController
 
 
             $connector = new ConnectorPersonJSON($datas, $this->getEntityManager());
+            $repport = $connector->syncAll();
+            $connectorFormatter = new ConnectorRepportToPlainText();
+
+            $connectorFormatter->format($repport);
+        }
+        catch( \Exception $e ){
+            die("ERROR : " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Synchronisation des personnes depuis un fichier JSON.
+     */
+    public function organizationJsonSyncAction(){
+        try {
+            $fichier = $this->getRequest()->getParam('fichier');
+
+            if( !$fichier )
+                die("Vous devez spécifier le chemin complet vers le fichier JSON");
+
+            echo "Synchronisation depuis le fichier $fichier\n";
+            $sourceJSONFile = new GetJsonDataFromFileStrategy($fichier);
+            try {
+                $datas = $sourceJSONFile->getAll();
+            } catch (\Exception $e ){
+                die("Impossible de charger les ogranizations depuis $fichier : " . $e->getMessage());
+            }
+
+            $connector = new ConnectorOrganizationJSON($datas, $this->getEntityManager(), 'json');
             $repport = $connector->syncAll();
             $connectorFormatter = new ConnectorRepportToPlainText();
 
