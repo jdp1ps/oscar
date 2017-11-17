@@ -6,12 +6,12 @@ use PHPUnit\Framework\TestCase;
 class JsonToOrganizationFactoryTest extends TestCase {
 
     /**
-     * @return \Oscar\Factory\JsonToOrganizationFactory
+     * @return \Oscar\Factory\JsonToOrganization
      */
     protected function getFactory(){
         static $factory;
         if( $factory === null )
-            $factory = new \Oscar\Factory\JsonToOrganizationFactory();
+            $factory = new \Oscar\Factory\JsonToOrganization();
         return $factory;
     }
 

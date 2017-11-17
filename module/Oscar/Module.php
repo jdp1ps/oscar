@@ -258,6 +258,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             '# IMPORT',
             'oscar authentifications:sync <jsonpath>' => "Charge les comptes d'authentification depuis la source JSON",
             'oscar personsjson:sync <fichier>' => "Charge les personnes depuis le fichier source JSON",
+            'oscar organizationsjson:sync <fichier>' => "Charge les organisations depuis le fichier source JSON",
             'oscar activity:sync <fichier>' => "Charge les activités depuis le fichier CSV spécifié",
             'oscar patch checkPrivilegesJSON' => "Mise à jour automatique de la liste des privilèges"
             ];

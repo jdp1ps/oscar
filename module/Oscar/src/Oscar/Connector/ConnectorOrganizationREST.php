@@ -15,7 +15,7 @@ use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Exception\ConnectorException;
-use Oscar\Factory\JsonToOrganizationFactory;
+use Oscar\Factory\JsonToOrganization;
 use UnicaenApp\Mapper\Ldap\People;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -83,12 +83,12 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
     }
 
     /**
-     * @return JsonToOrganizationFactory
+     * @return JsonToOrganization
      */
     protected function factory(){
         static $factory;
         if( $factory === null )
-            $factory = new JsonToOrganizationFactory();
+            $factory = new JsonToOrganization();
         return $factory;
     }
 

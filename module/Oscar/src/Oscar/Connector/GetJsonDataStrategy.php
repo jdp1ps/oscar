@@ -8,16 +8,33 @@
 namespace Oscar\Connector;
 
 
-interface GetJsonDataStrategy
+abstract class GetJsonDataStrategy
 {
-    /**
-     * @return mixed un tableau de stdObject
-     */
-    public function getAll();
-
     /**
      * @param $id
      * @return mixed stdObject
      */
-    public function getOne($id);
+    abstract public function getOne($id);
+    abstract public function getAll();
+
+    protected function stringToJson( $string ){
+        $json = json_decode($string);
+        if ($json === null && $string != '') {
+            throw new NotJsonFileException("Le contenu source n'est pas du JSON valide.");
+        }
+        return $json;
+    }
+
+    /**
+     * @return \stdClass[]
+     *
+    public function getAll()
+    {
+        static $datas;
+        if ($datas === null) {
+            $datas = $this->getJsonContent();
+        }
+
+        return $datas;
+    }*/
 }
