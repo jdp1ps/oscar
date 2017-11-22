@@ -708,6 +708,9 @@ class Activity implements ResourceInterface
      */
     public function setDateStart($dateStart)
     {
+        if( is_string($dateStart) ){
+            $dateStart = new \DateTime($dateStart);
+        }
         $this->dateStart = $dateStart;
 
         return $this;
@@ -726,6 +729,9 @@ class Activity implements ResourceInterface
      */
     public function setDateEnd($dateEnd)
     {
+        if( is_string($dateEnd) ){
+            $dateEnd = new \DateTime($dateEnd);
+        }
         $this->dateEnd = $dateEnd;
 
         return $this;
@@ -1609,9 +1615,9 @@ class Activity implements ResourceInterface
     }
 
 
-    public function toArray()
+    public function toArray($withAssoc = false)
     {
-        return array(
+        $out = array(
             'id' => $this->getId(),
             'projectacronym' => $this->getProject() ? $this->getProject()->getAcronym() : '',
             'project' => $this->getProject() ? $this->getProject()->getLabel() : '',
@@ -1630,6 +1636,19 @@ class Activity implements ResourceInterface
             'paymentReceived' => $this->getTotalPaymentReceived(),
             'paymentProvided' => $this->getTotalPaymentProvided(),
         );
+
+        if( $withAssoc === true ){
+            $out['persons'] = [];
+            foreach ( $this->getPersons() as $personActivity ){
+                $out['persons'][] = sprintf('%s (%s)', $personActivity->getPerson(), $personActivity->getRoleObj());
+            }
+            $out['organizations'] = [];
+            foreach ( $this->getOrganizations() as $organizationActivity ){
+                $out['organizations'][] = sprintf('%s (%s)', $organizationActivity->getOrganization()->__toString(), $organizationActivity->getRoleObj());
+            }
+        }
+
+        return $out;
     }
 
     public function getResourceId()

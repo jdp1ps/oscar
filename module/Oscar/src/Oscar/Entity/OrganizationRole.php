@@ -14,6 +14,7 @@ use Oscar\Utils\DateTimeUtils;
  * Membre d'un projet.
  * @package Oscar\Entity
  * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Oscar\Entity\OrganizationRoleRepository")
  */
 class OrganizationRole
 {

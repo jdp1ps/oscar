@@ -11,6 +11,7 @@ namespace Oscar\Controller;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
+use Oscar\Connector\ConnectorActivityCSVWithConf;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Connector\ConnectorOrganizationJSON;
@@ -240,6 +241,26 @@ class ConsoleController extends AbstractOscarController
     public function patch_test()
     {
         echo "TEST:\n";
+
+    }
+
+    public function importActivity2Action()
+    {
+        echo "TEST ACTIVITY WITH CONF : \n";
+
+
+        echo $this->params('fichier') . "\n";
+        echo $this->params('config') . "\n";
+
+        $conf = require(realpath($this->params('config')));
+
+        $csv = realpath($this->params('fichier'));
+        $handler = fopen($csv, 'r');
+
+        $headers = fgetcsv($handler);
+
+        $sync = new ConnectorActivityCSVWithConf($handler, $conf, $this->getEntityManager());
+        $sync->syncAll();
 
     }
 

@@ -70,6 +70,10 @@ elseif( !getenv('APPLICATION_ENV' )){
     putenv('APPLICATION_ENV=production');
 }
 
+if( php_sapi_name() === 'cli' ){
+    putenv('APPLICATION_ENV=development');
+}
+
 
 // Servir normalement les fichiers effectif
 if (php_sapi_name() === 'cli-server' && is_file(__DIR__ . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH))) {
@@ -83,7 +87,7 @@ if( php_sapi_name() !== 'cli' && file_exists(__DIR__.'/../MAINTENANCE') ){
 
 if( getenv('APPLICATION_ENV') == 'development' ){
     define('DEBUG_OSCAR', true);
-    error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
+    error_reporting(E_ALL);
 } else {
     define('DEBUG_OSCAR', false);
     error_reporting(E_ERROR);

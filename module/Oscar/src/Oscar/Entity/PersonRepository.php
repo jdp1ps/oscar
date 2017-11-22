@@ -8,7 +8,9 @@ namespace Oscar\Entity;
 
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NoResultException;
 use Oscar\Connector\IConnectedRepository;
+use Oscar\Exception\OscarException;
 
 /**
  * Class ProjectGrantRepository
@@ -17,6 +19,36 @@ use Oscar\Connector\IConnectedRepository;
 class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
+
+
+    function getPersonByDisplayName( $displayName ){
+        /** @var Query $queryPerson */
+        static $queryPerson;
+        if( $queryPerson === null ){
+            $queryPerson = $this->createQueryBuilder('p')
+                ->where('CONCAT(p.firstname, \' \', p.lastname) = :displayName')
+                ->getQuery();
+        }
+        return $queryPerson->setParameter('displayName', $displayName)->getSingleResult();
+    }
+
+    public function getPersonByDisplayNameOrCreate( $displayName ){
+        try {
+            $person = $this->getPersonByDisplayName($displayName);
+        }
+        catch ( NoResultException $e ){
+            $person = new Person();
+            $preg = preg_match('/(.*) (.*)/i', $displayName, $matches);
+            if( $preg ) {
+                $this->getEntityManager()->persist($person);
+                $person->setFirstname($matches[1])->setLastname($matches[2]);
+            } else {
+                throw new OscarException(sprintf("Impossible de créer la personne à partir du nom complet '%s' : %s", $displayName, $e->getMessage()));
+            }
+        }
+        return $person;
+    }
+
     /**
      * Retourne la liste des rôles dans les organisations pour la création de select.
      */

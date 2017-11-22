@@ -9,11 +9,28 @@ namespace Oscar\Entity;
 
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 
 class ProjectRepository extends EntityRepository {
     public function getUserProjects( $userId ){
         return $this->findAll();
+    }
+
+    public function getProjectByLabelOrCreate( $label ){
+        try {
+            return $this->createQueryBuilder('p')
+                ->select('p')
+                ->where('p.label = :label')
+                ->setParameter('label', $label)
+                ->getQuery()
+                ->getSingleResult();
+        } catch (NoResultException $e){
+            $project = new Project();
+            $this->getEntityManager()->persist($project);
+            $project->setLabel($label);
+            return $project;
+        }
     }
 
     public function getByUserEmail( $userEmail, $time='all' )
