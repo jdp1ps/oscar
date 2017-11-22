@@ -6,7 +6,7 @@ L'installation a été testé sous Debian et Ubuntu Server
 
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
- - PHP 7.0+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql, mcrypt, intl)
+ - PHP 7.0+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql, mcrypt, intl, DOM/XML)
  - Postgresql 9.4+
  - Annuaire LDAP (supann)
 
@@ -47,6 +47,8 @@ apt-get install \
     php7.0-cli \
     php7.0-curl \
     php7.0-intl \
+    php7.0-xml \
+    php7.0-dom \
     php7.0-ldap \
     php7.0-mcrypt \
     php7.0-pgsql
