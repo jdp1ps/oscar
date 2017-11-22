@@ -33,6 +33,7 @@ use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleOrganization;
 use Oscar\Entity\RoleRepository;
+use Oscar\Exception\OscarException;
 use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConnectorService;
@@ -197,32 +198,6 @@ class ConsoleController extends AbstractOscarController
     }
 
 
-    /** ACIENNE VERSION
-    public function notificationsActivityGenerateAction()
-    {
-
-        $id = $this->params('idactivity');
-
-
-
-        $notificationService = $this->getServiceLocator()->get('NotificationService');
-
-
-        if( $id == 'all' ){
-            $notificationService->generateNotificationsActivities();
-        } else {
-            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
-
-            if (!$activity) {
-                $this->consoleError("Impossible de charger l'activité '$id'");
-
-                return;
-            }
-            $notificationService->generateNotificationsForActivity($activity);
-        }
-    }
-    /****/
-
     ///////////////////////////////////////////////////////////////////////////////////////
     ///
     ///  PATCH
@@ -244,24 +219,51 @@ class ConsoleController extends AbstractOscarController
 
     }
 
+    private function getReadablePath( $path ){
+        $realpath = realpath($path);
+
+        if( !$realpath )
+            throw new OscarException(sprintf("Le chemin '%s' n'a aucun sens...", $path));
+
+
+        if( !is_file($realpath) )
+            throw new OscarException(sprintf("Le chemin '%s' n'est pas un fichier... faites un effort.", $realpath));
+
+        if( !is_readable($realpath) )
+            throw new OscarException(sprintf("Le chemin '%s' n'est pas lisible....", $realpath));
+
+        return $realpath;
+    }
+
+    /**
+     * Procédure d'importation initiale des activités dans Oscar.
+     */
     public function importActivity2Action()
     {
-        echo "TEST ACTIVITY WITH CONF : \n";
+        $this->consoleHeader("Chargement des activités dans oscar...");
 
+        // Fichiers
+        try {
+            $sourceFilePath = $this->getReadablePath($this->params('fichier'));
+            $configurationFilePath = $this->getReadablePath($this->params('config'));
+            $skip = 2;
 
-        echo $this->params('fichier') . "\n";
-        echo $this->params('config') . "\n";
+            $this->consoleKeyValue("Source", $sourceFilePath);
+            $this->consoleKeyValue("Configuration", $configurationFilePath);
 
-        $conf = require(realpath($this->params('config')));
+            $configuration = require($configurationFilePath);
+            $source = fopen($sourceFilePath, 'r');
 
-        $csv = realpath($this->params('fichier'));
-        $handler = fopen($csv, 'r');
+            while ($skip > 0 ){
+                fgetcsv($source); $skip--;
+            }
 
-        $headers = fgetcsv($handler);
+            $sync = new ConnectorActivityCSVWithConf($source, $configuration, $this->getEntityManager());
+            $sync->syncAll();
 
-        $sync = new ConnectorActivityCSVWithConf($handler, $conf, $this->getEntityManager());
-        $sync->syncAll();
-
+        } catch (\Exception $e){
+            $this->consoleError($e->getMessage());
+        }
     }
 
     public function patch_generatePrivilegesJSON(){
@@ -565,8 +567,16 @@ class ConsoleController extends AbstractOscarController
     /**
      * @param $msg Succes à afficher
      */
+    protected function consoleHeader($msg){
+        $this->getConsole()->write('# ', ColorInterface::WHITE);
+        $this->getConsole()->writeLine($msg, ColorInterface::GRAY);
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
     protected function consoleKeyValue($key, $value){
-        $this->getConsole()->write($key, ColorInterface::GRAY);
+        $this->getConsole()->write($key.' ', ColorInterface::GRAY);
         $this->getConsole()->writeLine($value, ColorInterface::CYAN);
     }
 

@@ -8,11 +8,13 @@
  */
 return [
     // 0 => "connectorId",
-    2 => "label",
-    3 => "project.",
-    4 => "persons.Chargé d'affaire",
-    5 => "codeEOTP",
-    6 => "persons.Préposé à la ventilation",
-    7 => "organizations.Laboratoire",
-    8 => "organizations.Structure Hyper Ventilée",
+    2   => "label",
+    3   => "project.",
+    4   => "persons.Chargé d'affaire",
+    5   => "codeEOTP",
+    6   => "persons.Préposé à la ventilation",
+    7   => "organizations.Laboratoire",
+    8   => "persons.Responsable scientifique",
+    9   => "amount",
+    10  => "payments.",
 ];
