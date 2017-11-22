@@ -15,6 +15,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\Currency;
@@ -97,7 +98,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
             case "organizations":
                 return $this->getHandlerOrganization($split[1]);
             case "payments":
-                return function(){};
+                return $this->getHandlerPayment($split[1]);
             case "milestones":
                 return function(){};
 
@@ -106,10 +107,28 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
         }
     }
 
+    protected function getHandlerPayment( $param ){
+        $entityManager = $this->entityManager;
+        /** @var $activity Activity */
+        return function( &$activity, $datas, $index ) use ($entityManager){
+            $payment = new ActivityPayment();
+            $entityManager->persist($payment);
+            $payment->setActivity($activity);
+            $payment->setAmount($datas[$index]);
+
+            try {
+                $payment->getDatePredicted(new \DateTime($datas[$index+1]));
+            } catch (\Exception $e ){
+                throw new \Exception(sprintf("Erreur de date %s : %s", $datas[$index+1], $e->getMessage()));
+            }
+            $activity->getPayments()->add($payment);
+          return $activity;
+        };
+    }
+
     protected function getHandlerProject(){
         $entityManager = $this->entityManager;
         return function(&$activity, $datas, $index) use ($entityManager){
-            $projectRepository = $entityManager->getRepository(Project::class);
             $projectRepository = $entityManager->getRepository(Project::class);
             $activity->setProject($projectRepository->getProjectByLabelOrCreate($datas[$index]));
             return $activity;
@@ -219,19 +238,19 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
         $defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
 
         while($datas = fgetcsv($this->csvDatas)){
+            var_dump($datas);
             $activity = new Activity();
             $this->entityManager->persist($activity);
             foreach ($datas as $index => $value ){
-                echo "- " . $value . "\n";
-                //if( $value == 0 ) continue;
+                if( !$value ) continue;
                 $handler = $this->getHandler($index);
                 if( $handler != null )
                     $handler($activity, $datas, $index);
             }
-
             var_dump($activity->toArray(true));
-            die();
+
         }
+        $this->entityManager->flush();
 
         /*
         foreach ($this->csvDatas as $data) {

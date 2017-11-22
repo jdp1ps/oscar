@@ -1646,6 +1646,11 @@ class Activity implements ResourceInterface
             foreach ( $this->getOrganizations() as $organizationActivity ){
                 $out['organizations'][] = sprintf('%s (%s)', $organizationActivity->getOrganization()->__toString(), $organizationActivity->getRoleObj());
             }
+            $out['payments'] = [];
+            /** @var ActivityPayment $payment */
+            foreach ( $this->getPayments() as $payment ){
+                $out['payments'][] = sprintf('%s (%s)', $payment->getAmount(), $payment->getDatePredicted() ? $payment->getDatePredicted()->format('Ymd') : 'nop');
+            }
         }
 
         return $out;

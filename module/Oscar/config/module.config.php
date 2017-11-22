@@ -541,7 +541,7 @@ return array(
 
                 'oscar_activityfile_sync2' => [
                     'options' => array(
-                        'route' => 'oscar activity:sync2 <fichier> <config> [-f|--force]',
+                        'route' => 'oscar activity:sync2 <fichier> <config> [-f|--force] [-p|--persons] [-o|-organizations]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'importActivity2',
