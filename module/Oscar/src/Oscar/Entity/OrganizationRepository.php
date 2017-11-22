@@ -9,6 +9,7 @@ namespace Oscar\Entity;
 
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NoResultException;
 use Oscar\Connector\IConnectedRepository;
 
 class OrganizationRepository extends EntityRepository implements IConnectedRepository
@@ -20,6 +21,24 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->setOrganization($organisation)
             ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
         $this->getEntityManager()->flush($personOrganization);
+    }
+
+    public function getOrganisationByNameOrCreate( $fullName ){
+        try {
+
+            $qb = $this->getEntityManager()->createQueryBuilder();
+            $qb->select('o')
+                ->from(Organization::class, 'o')
+                ->where('o.shortName = :name or o.fullName = :name')
+                ->setParameter('name',  $fullName );
+            return $qb->getQuery()->getSingleResult();
+        } catch (NoResultException $e){
+            $organisation = new Organization();
+            $this->getEntityManager()->persist($organisation);
+            $organisation->setShortName($fullName)->setFullName($fullName);
+            return $organisation;
+        }
+
     }
 
     public function getObjectByConnectorID($connectorName, $connectorID)

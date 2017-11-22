@@ -451,7 +451,7 @@ return array(
                     ),
                 ),
 
-                  'oscar_organizations_sync' => [
+                'oscar_organizations_sync' => [
                     'options' => [
                         'route' => 'oscar organizations:sync <connectorkey> [--force|-f] [--verbose|-v]',
                         'defaults' => [
@@ -535,6 +535,16 @@ return array(
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'activityFileSync',
+                        ),
+                    ),
+                ],
+
+                'oscar_activityfile_sync2' => [
+                    'options' => array(
+                        'route' => 'oscar activity:sync2 <fichier> <config> [-f|--force]',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'importActivity2',
                         ),
                     ),
                 ],

@@ -9,6 +9,7 @@ namespace Oscar\Entity;
 
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NoResultException;
 
 class RoleRepository extends EntityRepository
 {
@@ -108,6 +109,42 @@ class RoleRepository extends EntityRepository
             }
         }
         return $rolesByRoleId;
+    }
+
+    /**
+     * Retourne le rôle en fonction du ROLEID.
+     *
+     * @param $roleId
+     * @return mixed
+     */
+    public function getRoleByRoleId($roleId){
+        static $queryRole;
+        if( $queryRole === null ){
+            $queryRole = $this->createQueryBuilder('r')
+                ->from( Role::class, 'role')
+                ->where('r.roleId = :roleId')
+                ->getQuery();
+        }
+        return $queryRole->setParameter('roleId', $roleId)->getSingleResult();
+    }
+
+    /**
+     * Retourne le role en fonction du roleID, si le rôle n'existe pas,
+     * Le rôle est créé.
+     *
+     * @param $roleId
+     * @return mixed|Role
+     */
+    public function getRoleOrCreate($roleId)
+    {
+        try {
+            $role = $this->getRoleByRoleId($roleId);
+        } catch (NoResultException $e) {
+            $role = new Role();
+            $this->getEntityManager()->persist($role);
+            $role->setRoleId($roleId);
+        }
+        return $role;
     }
 
 
