@@ -1,10 +1,13 @@
 <phpunit bootstrap="Bootstrap.php">
   <testsuites>
+    <testsuite name="Connector">
+      <directory>Oscar/Connector</directory>
+    </testsuite>
     <testsuite name="Factory">
       <directory>Oscar/Factory</directory>
     </testsuite>
-    <testsuite name="Connector">
-      <directory>Oscar/Connector</directory>
+    <testsuite name="Import">
+      <directory>Oscar/Import</directory>
     </testsuite>
   </testsuites>
 </phpunit>

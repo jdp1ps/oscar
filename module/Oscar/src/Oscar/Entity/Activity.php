@@ -1649,7 +1649,7 @@ class Activity implements ResourceInterface
             $out['payments'] = [];
             /** @var ActivityPayment $payment */
             foreach ( $this->getPayments() as $payment ){
-                $out['payments'][] = sprintf('%s (%s)', $payment->getAmount(), $payment->getDatePredicted() ? $payment->getDatePredicted()->format('Ymd') : 'nop');
+                $out['payments'][] = sprintf('%s (%s)', $payment->getAmount(), $payment->getDatePayment() ? $payment->getDatePayment()->format('Ymd') : 'nop');
             }
         }
 
