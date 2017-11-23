@@ -220,6 +220,7 @@ class ActivityPayment implements ITrackable
 
     /**
      * @param mixed $currency
+     * @return ActivityPayment
      */
     public function setCurrency($currency)
     {

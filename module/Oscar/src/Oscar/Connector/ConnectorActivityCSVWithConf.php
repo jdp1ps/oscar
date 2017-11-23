@@ -29,6 +29,12 @@ use Oscar\Entity\Project;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Import\Activity\FieldStrategy\FieldImportMilestoneStrategy;
+use Oscar\Import\Activity\FieldStrategy\FieldImportOrganizationStrategy;
+use Oscar\Import\Activity\FieldStrategy\FieldImportPaymentStrategy;
+use Oscar\Import\Activity\FieldStrategy\FieldImportPersonStrategy;
+use Oscar\Import\Activity\FieldStrategy\FieldImportProjectStrategy;
+use Oscar\Import\Activity\FieldStrategy\FieldImportSetterStrategy;
 
 class ConnectorActivityCSVWithConf implements ConnectorInterface
 {
@@ -92,63 +98,30 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
         $split = explode('.', $key);
         switch( $split[0] ){
             case "project":
-                return $this->getHandlerProject();
+                return new FieldImportProjectStrategy($this->entityManager);
             case "persons":
-                return $this->getHandlerPerson($split[1]);
+                return NEW FieldImportPersonStrategy($this->entityManager, $split[1]);
             case "organizations":
-                return $this->getHandlerOrganization($split[1]);
+                return new FieldImportOrganizationStrategy($this->entityManager, $split[1]);
             case "payments":
-                return $this->getHandlerPayment($split[1]);
+                return new FieldImportPaymentStrategy($this->entityManager);
             case "milestones":
-                return function(){};
+                return new FieldImportMilestoneStrategy($this->entityManager, $split[1]);
 
             default:
                 throw new OscarException(sprintf("Les traitements de type %s ne sont pas pris en charge", $split[0]));
         }
     }
 
-    protected function getHandlerPayment( $param ){
-        $entityManager = $this->entityManager;
-        /** @var $activity Activity */
-        return function( &$activity, $datas, $index ) use ($entityManager){
-            $payment = new ActivityPayment();
-            $entityManager->persist($payment);
-            $payment->setActivity($activity);
-            $payment->setAmount($datas[$index]);
 
-            try {
-                $payment->getDatePredicted(new \DateTime($datas[$index+1]));
-            } catch (\Exception $e ){
-                throw new \Exception(sprintf("Erreur de date %s : %s", $datas[$index+1], $e->getMessage()));
-            }
-            $activity->getPayments()->add($payment);
-          return $activity;
-        };
-    }
-
-    protected function getHandlerProject(){
-        $entityManager = $this->entityManager;
-        return function(&$activity, $datas, $index) use ($entityManager){
-            $projectRepository = $entityManager->getRepository(Project::class);
-            $activity->setProject($projectRepository->getProjectByLabelOrCreate($datas[$index]));
-            return $activity;
-        };
-    }
-
+/*
     protected function getHandlerOrganization( $role ){
         $entitymanager = $this->entityManager;
-        /** @var Activity $activity */
         return function( &$activity, $datas, $index) use ($entitymanager, $role) {
-            /** @var OrganizationRepository $organizationRepository */
             $organizationRepository = $entitymanager->getRepository(Organization::class);
-
-            /** @var OrganizationRoleRepository $organizationRoleRepository */
             $organizationRoleRepository = $entitymanager->getRepository(OrganizationRole::class);
-
             $organizationName = $datas[$index];
-
             $roleObj = $organizationRoleRepository->getRoleByRoleIdOrCreate($role);
-
             $organization = $organizationRepository->getOrganisationByNameOrCreate($organizationName);
             if( !$activity->hasOrganization($organization, $role) ){
                 $activityOrganization = new ActivityOrganization();
@@ -166,11 +139,9 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
 
             $entityManager = $this->entityManager;
 
-            /** @var Activity $activity */
             return function(&$activity, $datas, $index) use ($entityManager, $role){
                 $displayName = $datas[$index];
                 try {
-                    /** @var PersonRepository $personRepo */
                     $personRepo = $entityManager->getRepository(Person::class);
                     $person = $personRepo->getPersonByDisplayNameOrCreate($datas[$index]);
                 } catch (NonUniqueResultException $e ){
@@ -178,7 +149,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 }
 
                 $personActivity = new ActivityPerson();
-                /** @var RoleRepository $roleRepository */
                 $roleRepository = $entityManager->getRepository(Role::class);
                 $entityManager->persist($personActivity);
                 $personActivity->setPerson($person)->setActivity($activity)->setRoleObj($roleRepository->getRoleOrCreate($role));
@@ -187,6 +157,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
             };
 
     }
+/****/
 
     protected function getHandler( $index ){
         // Si la clef n'existe pas dans la conf on ne fait rien
@@ -207,17 +178,8 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
 
             // Chaîne : setter simple
             else {
-                return function( &$activity, $data, $index ) use ($key){
-                    $setter = 'set'.ucfirst($key);
-                    $activity->$setter($data[$index]);
-                    return $activity;
-                };
+                return new FieldImportSetterStrategy($key);
             }
-        }
-
-        // C'est une Closure
-        elseif (is_callable($key)){
-            return $key;
         }
 
         // Autre ...
@@ -238,17 +200,14 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
         $defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
 
         while($datas = fgetcsv($this->csvDatas)){
-            var_dump($datas);
             $activity = new Activity();
             $this->entityManager->persist($activity);
             foreach ($datas as $index => $value ){
                 if( !$value ) continue;
                 $handler = $this->getHandler($index);
                 if( $handler != null )
-                    $handler($activity, $datas, $index);
+                    $handler->run($activity, $datas, $index);
             }
-            var_dump($activity->toArray(true));
-
         }
         $this->entityManager->flush();
 
