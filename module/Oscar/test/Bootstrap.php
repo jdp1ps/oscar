@@ -13,8 +13,7 @@ use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager\ServiceManager;
 
 //
-require_once realpath(__DIR__.'/../../../vendor/autoload.php');
-error_reporting(E_ERROR);
+error_reporting(E_ALL);
 chdir(__DIR__);
 
 

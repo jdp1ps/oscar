@@ -34,7 +34,7 @@ class NotificationController extends AbstractOscarController
 
     public function historyAction()
     {
-        $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
+        // $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
         $personId = $this->getCurrentPerson()->getId();
 
         /** @var NotificationService $notificationService */
@@ -53,7 +53,7 @@ class NotificationController extends AbstractOscarController
     public function indexAction()
     {
 
-        $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
+        // $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
         $personId = $this->getCurrentPerson()->getId();
 
         /** @var NotificationService $notificationService */

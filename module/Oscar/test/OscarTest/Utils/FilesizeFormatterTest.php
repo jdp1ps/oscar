@@ -5,7 +5,7 @@
  * @date: 20/10/15 10:17
  * @copyright Certic (c) 2015
  */
-class FilesizeFormatterTest extends PHPUnit_Framework_TestCase
+class FilesizeFormatterTest extends \PHPUnit\Framework\TestCase
 {
 
     public function testFormat()
