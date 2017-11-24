@@ -17,4 +17,7 @@ return [
     8   => "persons.Responsable scientifique",
     9   => "amount",
     10  => "payments.",
+    11  => function() {
+        return \Oscar\Import\Activity\FieldStrategy\FieldImportSetterStrategy::class;
+    }
 ];

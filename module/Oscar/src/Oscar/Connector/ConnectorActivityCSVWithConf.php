@@ -107,57 +107,10 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 return new FieldImportPaymentStrategy($this->entityManager);
             case "milestones":
                 return new FieldImportMilestoneStrategy($this->entityManager, $split[1]);
-
             default:
                 throw new OscarException(sprintf("Les traitements de type %s ne sont pas pris en charge", $split[0]));
         }
     }
-
-
-/*
-    protected function getHandlerOrganization( $role ){
-        $entitymanager = $this->entityManager;
-        return function( &$activity, $datas, $index) use ($entitymanager, $role) {
-            $organizationRepository = $entitymanager->getRepository(Organization::class);
-            $organizationRoleRepository = $entitymanager->getRepository(OrganizationRole::class);
-            $organizationName = $datas[$index];
-            $roleObj = $organizationRoleRepository->getRoleByRoleIdOrCreate($role);
-            $organization = $organizationRepository->getOrganisationByNameOrCreate($organizationName);
-            if( !$activity->hasOrganization($organization, $role) ){
-                $activityOrganization = new ActivityOrganization();
-                $entitymanager->persist($activityOrganization);
-                $activityOrganization->setOrganization($organization)
-                    ->setActivity($activity)
-                    ->setRoleObj($roleObj);
-                $activity->getOrganizations()->add($activityOrganization);
-            }
-            return $activity;
-        };
-    }
-
-    protected function getHandlerPerson( $role = "Role inconnu" ){
-
-            $entityManager = $this->entityManager;
-
-            return function(&$activity, $datas, $index) use ($entityManager, $role){
-                $displayName = $datas[$index];
-                try {
-                    $personRepo = $entityManager->getRepository(Person::class);
-                    $person = $personRepo->getPersonByDisplayNameOrCreate($datas[$index]);
-                } catch (NonUniqueResultException $e ){
-                    throw new OscarException(sprintf("Impossible d'ajouter la personne à l'activité car oscar a trouvé plusieurs correspondance pour '%s'."), $displayName);
-                }
-
-                $personActivity = new ActivityPerson();
-                $roleRepository = $entityManager->getRepository(Role::class);
-                $entityManager->persist($personActivity);
-                $personActivity->setPerson($person)->setActivity($activity)->setRoleObj($roleRepository->getRoleOrCreate($role));
-                $activity->addActivityPerson($personActivity);
-                return $activity;
-            };
-
-    }
-/****/
 
     protected function getHandler( $index ){
         // Si la clef n'existe pas dans la conf on ne fait rien
@@ -180,6 +133,10 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
             else {
                 return new FieldImportSetterStrategy($key);
             }
+        }
+        elseif (is_callable($key)) {
+            $type = $key();
+            return new $type($this->entityManager, $key);
         }
 
         // Autre ...

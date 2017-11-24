@@ -231,9 +231,8 @@ $this->headScript();
                         </li>
                         <?php endif; ?><!-- /Menu admin -->
                     </ul>
-                    <?php if( $this->grant()->connected() &&
-                        $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_NOTIFICATION_MENU)): ?>
-                    <p class="navbar-text navbar-right" id="notifications-area" ></p>
+                    <?php if( $this->grant()->connected() ): ?>
+                    <p class="navbar-text navbar-right" id="notifications-area" >TEST</p>
                     <?php endif; ?>
                     <p class="navbar-text navbar-right">
                     <?php echo $this->appConnection(); ?>
@@ -257,7 +256,6 @@ $this->headScript();
 
 
         <div id="contenu-principal" class="">
-
             <?php if (($menuSecondaire = $this->navigation()->menuSecondaire('navigation')->render())): ?>
                 <div class="row">
                     <div id="sidebar" class="col-xs-6 col-md-2" role="navigation">
@@ -326,10 +324,7 @@ $this->headScript();
 	})();
 	</script>
 
-        <?php if( $this->grant()->dbUser() && $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_NOTIFICATION_MENU) ): ?>
-        <div id="notifications">
-
-        </div>
+        <?php if( $this->grant()->dbUser() ): ?>
         <script>
 		    var socket, notifications;
 	

@@ -24,8 +24,7 @@ var notifications = Vue.extend({
                                         {{ notifications.length }} notifications
                                         <i class="animate-spin icon-asterisk" v-show="loading"></i>
                                     </span>
-                                    <a href="#" title="Tous effacer" @click="deleteNotification(notifications)"><i class="icon-trash-empty"></i></a>
-                                    <a href="#" title="Tous marquer comme lu"><i class="icon-ok-circled"></i></a>
+                                    <a href="#" title="Tous marquer comme lu" @click="deleteNotification(notifications)"><i class="icon-ok-circled"></i></a>
                                 </h3>
                             </header>
                             <article v-for="notification in orderedNotifications" :class="{ 'read': notification.read, 'fresh' : notification.fresh }" class="notification">

@@ -140,6 +140,16 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     }
 
     /**
+     * Génére une liste d'objet "Notification" pour les Jalons pour une activité donnée
+     *
+     * @param Activity $activity
+     */
+    public function createOrUpdateMilestoneNotifications( Activity $activity )
+    {
+
+    }
+
+    /**
      * Génère les notifications pour une activité.
      *
      * @param Activity $activity

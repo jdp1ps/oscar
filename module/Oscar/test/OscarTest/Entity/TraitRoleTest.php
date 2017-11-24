@@ -9,8 +9,9 @@ namespace OscarTest\Entity;
 
 
 use Oscar\Entity\ActivityPerson;
+use PHPUnit\Framework\TestCase;
 
-class TraitRoleTest extends \PHPUnit_Framework_TestCase
+class TraitRoleTest extends TestCase
 {
     public function testIsObsolete()
     {
