@@ -100,6 +100,13 @@ touch MAINTENANCE
 git pull
 ```
 
+### Suppression des anciens Vendors et mise en place des nouveau
+
+```bash
+rm -Rf vendor
+tar xvfz install/vendor.tar.gz
+```
+
 ### Mise à jour du modèle
 
 ```bash
