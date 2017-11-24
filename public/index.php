@@ -87,11 +87,12 @@ if( php_sapi_name() !== 'cli' && file_exists(__DIR__.'/../MAINTENANCE') ){
 
 if( getenv('APPLICATION_ENV') == 'development' ){
     define('DEBUG_OSCAR', true);
-    error_reporting(E_ALL);
+    error_reporting(E_ERROR);
 } else {
     define('DEBUG_OSCAR', false);
     error_reporting(E_ERROR);
 }
+
 
 /**
  * This makes our life easier when dealing with paths. Everything is relative
