@@ -27,7 +27,7 @@ $settings = array(
             'GROUPS_BASE_DN'                        => 'ou=groups,dc=unicaen,dc=fr',
             'STRUCTURES_BASE_DN'                    => 'ou=structures,dc=unicaen,dc=fr',
         ],
-        /*** ET SI BESOIN
+        
         'filters' => [
             'LOGIN_FILTER'                          => '(supannAliasLogin=%s)',
             'UTILISATEUR_STD_FILTER'                => '(|(uid=p*)(&(uid=e*)(eduPersonAffiliation=student)))',
