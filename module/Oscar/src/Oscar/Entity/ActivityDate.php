@@ -149,5 +149,15 @@ class ActivityDate implements ITrackable
         return $this->getDateStart()->format('d M Y').' ('.$this->getType().')';
     }
 
+    function toArray(){
+        return [
+            'id' => $this->getId(),
+            'type' => $this->getType()->getLabel(),
+            'type_id' => $this->getType()->getId(),
+            'type_facet' => $this->getType()->getFacet(),
+            'comment' => $this->getComment(),
+            'dateStart' => $this->getDateStart()
+        ];
+    }
 
 }

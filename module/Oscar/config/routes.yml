@@ -550,6 +550,12 @@ contract:
                 route: /fiche-detaillee/:id
                 defaults:
                     action: show
+        show2:
+            type: segment
+            options:
+                route: /fiche/:id[/:do]
+                defaults:
+                    action: show2
 
         notifications:
             type: segment

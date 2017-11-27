@@ -541,6 +541,33 @@ class ProjectGrantController extends AbstractOscarController
         ];
     }
 
+    public function show2Action(){
+        $method = $this->getHttpXMethod();
+
+
+        $id = $this->params()->fromRoute('id');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_SHOW, $entity);
+
+        switch ($method) {
+            case 'GET' :
+                if( $this->isAjax() )
+                    return $this->getResponseOk('RETOUR AJAX');
+                else
+                    return [
+                        'activity' => $entity,
+                        'json' => $this->getActivityService()->getActivityJson($id, $this->getOscarUserContext())
+                    ];
+                break;
+            default :
+                return $this->getResponseBadRequest('Bad Method ' . $method);
+        }
+    }
+
     /**
      * Fiche pour une activité de recherche.
      */

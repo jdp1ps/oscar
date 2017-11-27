@@ -265,6 +265,11 @@ class ActivityPayment implements ITrackable
         ];
     }
 
+    public function toArray()
+    {
+        return $this->json();
+    }
+
     /**
      * Retourn true si le versement est prévisionnel et en retard.
      */

@@ -9,6 +9,7 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
 use Oscar\Entity\ActivityDate;
+use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
@@ -22,9 +23,11 @@ use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Project;
+use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
+use Oscar\Provider\Privileges;
 use Oscar\Utils\StringUtils;
 use Oscar\Validator\EOTP;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -36,6 +39,120 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+    /**
+     * @return ProjectGrantRepository
+     */
+    protected function getActivityRepository()
+    {
+       return $this->getEntityManager()->getRepository(Activity::class);
+    }
+
+    /**
+     * @param $id
+     * @param OscarUserContext $oscaruserContext
+     * @return array
+     */
+    public function getActivityJson( $id, $oscaruserContext){
+        /** @var Activity $activity */
+        $activity = $this->getActivityRepository()->find($id);
+
+        $datas = [
+            'infos' => $activity->toArray()
+        ];
+
+        // --- Membres de l'activités
+        $datas['persons'] = [
+            'readable' => false,
+            'editable' => false,
+            'datas' => []
+        ];
+        if( $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity) ){
+            $datas['persons']['readable'] = true;
+            $editable = $datas['persons']['editable'] = $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
+            /** @var ActivityPerson $p */
+            foreach ( $activity->getPersonsDeep() as $p ){
+                $person = $p->getPerson();
+                $datas['persons']['datas'][$person->getId()] = [
+                    'join' => get_class($p),
+                    'join_id' => $p->getId(),
+                    'displayName' => (string) $person,
+                    'main' => $p->isPrincipal(),
+                    'role' => $p->getRole(),
+                    'editable' => $editable
+                ];
+            }
+        }
+
+        // --- Partenaires de l'activités
+        $datas['organizations'] = [
+            'readable' => false,
+            'editable' => false,
+            'datas' => []
+        ];
+        if( $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity) ){
+            $datas['organizations']['readable'] = true;
+            $editable = $datas['organizations']['editable'] = $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
+            foreach ( $activity->getOrganizationsDeep() as $p ){
+                $organization = $p->getOrganization();
+                $datas['organizations']['datas'][$organization->getId()] = [
+                    'join' => get_class($p),
+                    'join_id' => $p->getId(),
+                    'displayName' => (string) $organization,
+                    'role' => $p->getRole(),
+                    'editable' => $editable
+                ];
+            }
+        }
+
+        // --- Partenaires de l'activités
+        $datas['milestones'] = [
+            'readable' => false,
+            'editable' => false,
+            'datas' => []
+        ];
+        if( $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity) ){
+            $datas['milestones']['readable'] = true;
+            $editable = $datas['milestones']['editable'] = $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+
+            if( $editable ) {
+                $datas['milestones']['types'] = $this->getMilestoneTypesArray();
+                $datas['milestoneEdit'] = null;
+            }
+            /** @var ActivityDate $m */
+            foreach ( $activity->getMilestones() as $m ){
+                $datas['milestones']['datas'][$m->getId()] = $m->toArray();
+            }
+        }
+
+        // --- Partenaires de l'activités
+        $datas['payments'] = [
+            'readable' => false,
+            'editable' => false,
+            'datas' => []
+        ];
+        if( $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity) ){
+            $datas['payments']['readable'] = true;
+            $editable = $datas['payments']['editable'] = $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity);
+
+            /** @var ActivityPayment $p */
+            foreach ( $activity->getPayments() as $p ){
+                $datas['payments']['datas'][$p->getId()] = $p->toArray();
+            }
+        }
+
+
+        return $datas;
+    }
+
+    public function getMilestoneTypesArray(){
+        $milestones = [];
+        /** @var DateType $milestoneType */
+        foreach ($this->getEntityManager()->getRepository(DateType::class)->findAll() as $milestoneType ){
+            $milestones[ $milestoneType->getId() ] = $milestoneType->toArray();
+        }
+        return $milestones;
+    }
 
     public function getFieldsCSV(){
 
