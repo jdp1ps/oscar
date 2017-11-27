@@ -139,6 +139,11 @@ class TimeSheet implements ITrackable
      */
     private $person;
 
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $icsid;
 
     //////////////////////////////////////////////////// VALIDATION SCIENTIFIQUE
 
@@ -275,6 +280,7 @@ class TimeSheet implements ITrackable
             'workpackage_id' => $workpackageId,
             'workpackage_code' => $workpackageCode,
             'workpackage_label' => $workpackageLabel,
+            'icsid' => $this->getIcsid(),
             'label' => $this->getLabel(),
             'description' => $this->getComment(),
             'start' => $this->getDateFrom()->format('c'),
@@ -294,6 +300,26 @@ class TimeSheet implements ITrackable
             'rejectedAdminBy' => $this->getRejectedAdminBy(),
         ];
     }
+
+    /**
+     * @return string
+     */
+    public function getIcsid(): string
+    {
+        return $this->icsid;
+    }
+
+    /**
+     * @param string $icsid
+     */
+    public function setIcsid($icsid)
+    {
+        $this->icsid = $icsid;
+
+        return $this;
+    }
+
+
 
     /**
      * @return string
