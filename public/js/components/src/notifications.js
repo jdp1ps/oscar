@@ -11,36 +11,36 @@ Vue.http.options.emulateJSON = true;
 Vue.http.options.emulateHTTP = true;
 
 var notifications = Vue.extend({
-    template: ` <p class="navbar-text navbar-right" id="notifications-area" >
-                        <a class="navbar-link" @click="open = !open">
-                            <i class="icon-bell"></i> Notifications 
-                            <span class="notifications-total" :class="notifications.length ? 'unread' : ''">{{ notifications.length }}</span>
-                        </a>
-                        <section class="list" v-show="open">
-                            <header class="control">
-                                <h3>
-                                    <span class="intitule">
-                                        <i class="icon-bell"></i>
-                                        {{ notifications.length }} notifications
-                                        <i class="animate-spin icon-asterisk" v-show="loading"></i>
-                                    </span>
-                                    <a href="#" title="Tous marquer comme lu" @click="deleteNotification(notifications)"><i class="icon-ok-circled"></i></a>
-                                </h3>
-                            </header>
-                            <article v-for="notification in orderedNotifications" :class="{ 'read': notification.read, 'fresh' : notification.fresh }" class="notification">
-                                <h4>
-                                    <i :class="'icon-'+notification.context"></i>
-                                    <time datetime="">{{ notification.dateReal | moment }}</time>
-                                    <a href="#" @click="deleteNotification([notification])"><i class="icon-trash-empty"></i></a>
-                                </h4>                              
-                                <p v-html="messageHTML(notification.message)" @click.prevent.stop="handlerClickNotification($event, notification)"></p>
-                            </article>
-                            <footer class="control">
-                                <a :href="urlHistory">Historique des notifications</a>
-                            </footer>
-                        </section>
-                        
-                    </p>`,
+    template: `
+<p class="navbar-text navbar-right" id="notifications-area" >
+    <a class="navbar-link" @click="open = !open">
+        <i class="icon-bell"></i> Notifications 
+        <span class="notifications-total" :class="notifications.length ? 'unread' : ''">{{ notifications.length }}</span>
+    </a>
+    <section class="list" v-show="open">
+        <header class="control">
+            <h3>
+                <span class="intitule">
+                    <i class="icon-bell"></i>
+                    {{ notifications.length }} notifications
+                    <i class="animate-spin icon-asterisk" v-show="loading"></i>
+                </span>
+                <a href="#" title="Tous marquer comme lu" @click="deleteNotification(notifications)"><i class="icon-ok-circled"></i></a>
+            </h3>
+        </header>
+        <article v-for="notification in orderedNotifications" :class="{ 'read': notification.read, 'fresh' : notification.fresh }" class="notification">
+            <h4>
+                <i :class="'icon-'+notification.context"></i>
+                <time datetime="">{{ notification.dateReal | moment }}</time>
+                <a href="#" @click="deleteNotification([notification])"><i class="icon-trash-empty"></i></a>
+            </h4>                              
+            <p v-html="messageHTML(notification.message)" @click.prevent.stop="handlerClickNotification($event, notification)"></p>
+        </article>
+        <footer class="control">
+            <a :href="urlHistory">Historique des notifications</a>
+        </footer>
+    </section>
+</p>`,
 
     data() {
         return {
@@ -67,8 +67,7 @@ var notifications = Vue.extend({
             return this.notifications.sort((n1, n2) => {
                 return n1.dateEffective > n2.dateEffective ? -1 :
                     n1.dateEffective < n2.dateEffective ? 1 : 0;
-
-            })
+            });
         }
     },
 
@@ -79,7 +78,6 @@ var notifications = Vue.extend({
                 redirect = evt.target.href;
             return;
 
-
             this.$http.delete(this.$http.$options.root+'?ids=' + notification.id).then(
                 (res) => {
                     document.location = redirect;
@@ -87,8 +85,8 @@ var notifications = Vue.extend({
                 (err) => {
                     console.log("ERROR");
                 }).then(()=>{this.loading = false;});
-
         },
+
         messageHTML(message){
             var reg = /(.*)\[Activity:([0-9]*):(.*)\](.*)/, match;
             if( match = reg.exec(message) ){
@@ -96,6 +94,7 @@ var notifications = Vue.extend({
             }
             return message;
         },
+
         deleteNotification(notifs) {
             this.loading = true;
             var ids = [];
