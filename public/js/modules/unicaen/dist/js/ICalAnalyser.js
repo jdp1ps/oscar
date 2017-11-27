@@ -78,6 +78,7 @@ var ICalAnalyser = function () {
             }
             return [{
                 uid: item.uid,
+                icsid: item.icsid,
                 label: item.summary,
                 summary: item.summary,
                 lastimport: true,
@@ -166,15 +167,23 @@ var ICalAnalyser = function () {
                 out = [],
                 exceptions = [];
 
+            var icsid = icsData[1][1][3];
+            console.log('ICSID', icsid);
+
             icsData[2].forEach(function (d) {
-                var item = { warnings: [] },
+                var item = {
+                    'icsid': icsid,
+                    warnings: []
+                },
                     rrule = null,
                     exdate = [];
 
                 // Extraction des données brutes
                 if (d[0] == 'vevent') {
                     d[1].forEach(function (dd) {
-                        if (dd[0] == 'uid') item.uid = dd[3];else if (dd[0] == 'rrule') {
+                        if (dd[0] == 'uid') {
+                            item.uid = dd[3];
+                        } else if (dd[0] == 'rrule') {
                             rrule = dd[3];
                         } else if (dd[0] == 'exdate') {
                             var m = moment.tz(dd[3], dd[1].tzid);
@@ -222,6 +231,7 @@ var ICalAnalyser = function () {
                                 var endMinute = parseInt(endHourStr[1]);
                                 var event = {
                                     uid: item.uid,
+                                    icsid: item.icsid,
                                     daily: "allday",
                                     label: item.label,
                                     summary: item.label,

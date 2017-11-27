@@ -430,6 +430,8 @@ var TimeEvent = {
                 <div class="comment">{{ event.rejectedAdminComment}}</div>
             </div>
         </div>
+        
+        {{ event.icsid }}
 
         <nav class="admin">
             <a href="#" 
@@ -1881,6 +1883,7 @@ var ImportICSView = {
             this.labels = [];
 
             events.forEach(item => {
+                console.log(item);
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
                 item.imported = false;
@@ -2560,6 +2563,7 @@ var Calendar = {
 
                     var jsonData = {
                         'label': events[i].label,
+                        'icsid': events[i].icsid,
                         'description': events[i].description,
                         'start': events[i].mmStart.format(),
                         'end': events[i].mmEnd.format(),
