@@ -65,6 +65,15 @@ class AbstractOscarController extends AbstractActionController
         return $method;
     }
 
+    /**
+     * @return bool
+     */
+    protected function isAjax(){
+        /** @var Request $request */
+        $request = $this->getRequest();
+        return $request->isXmlHttpRequest();
+    }
+
     protected function getDefaultContext()
     {
         return $this->params()->fromRoute('controller').':'.$this->params()->fromRoute('action');

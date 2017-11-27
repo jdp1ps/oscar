@@ -54,6 +54,7 @@ requirejs.config({
         'ActivitiesExport' : 'components/build/ActivitiesExport',
         'io' : 'http://127.0.0.1:3000/socket.io/socket.io.js',
         'notifications' : 'components/build/notifications',
+        'activity' : 'components/build/activity',
         'Typedocument' : 'components/build/Typedocument'
     },
     shim: {
