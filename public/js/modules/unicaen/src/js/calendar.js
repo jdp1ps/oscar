@@ -215,14 +215,6 @@ class CalendarDatas {
         return moment();
     }
 
-    get firstEvent() {
-
-    }
-
-    get lastEvent() {
-
-    }
-
     get currentYear() {
         return this.currentDay.format('YYYY')
     }
@@ -1411,6 +1403,7 @@ var ListView = {
                             <li @click.prevent="performYear(eventsYear, 'rejectsci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l'année</li>
                             <li @click.prevent="performYear(eventsYear, 'validateadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l'année</li>
                             <li @click.prevent="performYear(eventsYear, 'rejectadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l'année</li>
+                            <li><i class="icon-archive"></i> Suprimmer les créneaux affichés</li>
                         </ul>
                     </nav>
                 </strong>
