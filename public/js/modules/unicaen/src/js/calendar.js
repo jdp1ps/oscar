@@ -2570,6 +2570,7 @@ var Calendar = {
                         'id': events[i].id || null,
                         'owner_id': events[i].owner_id || ''
                     };
+                    console.log(jsonData);
 
                     if (this.customDatas) {
                         var customs = this.customDatas();
