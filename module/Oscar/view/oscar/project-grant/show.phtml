@@ -483,7 +483,8 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
     <section>
         <h2><i class="icon-archive"></i> Lot de travail</h2>
         <nav>
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) || $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity)): ?>
+            <?php if( ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) || $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ) &&
+                $entity->hasDeclarers()): ?>
                 <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>#timesheet" class="btn btn-default">
                     <i class="icon-doc-xls"></i>
                     Voir les feuilles de temps
@@ -491,16 +492,31 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
             <?php endif; ?>
 
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION, $entity) ): ?>
+
+                <?php if( count($entity->getWorkPackages()) == 0 ): ?>
+                    <p class="alert-infos">
+                        <i class="icon-info"></i>
+                        Vous devez créer des lots de travail et leur assigner des déclarants pour permettre la déclaration d'heures.
+                    </p>
+                <?php else: ?>
+
             <div class="dropdown">
                 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Ajouter des créneaux pour <i class="caret"></i>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <?php foreach( $entity->getPersonsDeep() as $person ): ?>
-                        <li><a class="dropdown-item" href="<?= $this->url('timesheet/usurpation', ['idactivity' => $entity->getId(), 'idperson' => $person->getPerson()->getId()]) ?>"><?= $person->getPerson() ?></a></li>
+                        <li><a class="dropdown-item <?= $entity->hasDeclarant($person) ? '' : ' disabled' ?>" href="<?= $this->url('timesheet/usurpation', ['idactivity' => $entity->getId(), 'idperson' => $person->getPerson()->getId()]) ?>">
+                                <?= $person->getPerson() ?>
+                                <?php if(!$entity->hasDeclarant($person)): ?>
+                                <small> (N'est identifié comme déclarant dans aucun lot de travail)</small>
+                                <?php endif; ?>
+                            </a>
+                        </li>
                     <?php endforeach; ?>
                 </ul>
             </div>
+                <?php endif; ?>
             <?php endif; ?>
             <?php if( $entity->hasTimesheetsUpForValidationAdmin() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ): ?>
                 <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">

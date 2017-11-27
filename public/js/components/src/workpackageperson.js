@@ -20,7 +20,7 @@ var WorkpackagePerson = {
                 <div class="tempsdeclare temps">
                     <div v-if="editable && mode == 'edit'">
                         Heures prévues :
-                        <input type="integer" v-model="durationForm" style="width: 5em"/>
+                        <input type="integer" v-model="durationForm" style="width: 5em" @keyup.13="handlerUpdate"/>
                         <a href="#" @click.prevent="handlerUpdate" title="Appliquer la modification des heures prévues"><i class="icon-floppy"></i></a>
                         <a href="#" @click.prevent="handlerCancel" title="Annuler la modification des heures prévues"><i class="icon-cancel-outline"></i></a>
                     </div>
@@ -48,6 +48,9 @@ var WorkpackagePerson = {
       }
     },
     methods: {
+        handlerKeyUp(){
+          console.log(arguments);
+        },
         handlerUpdate(){
             this.$emit('workpackagepersonupdate', this.person, this.durationForm);
             this.mode = 'read';
