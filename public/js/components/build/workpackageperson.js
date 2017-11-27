@@ -30,7 +30,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
     _vue2.default.http.options.emulateHTTP = true;
 
     var WorkpackagePerson = {
-        template: '<article class="workpackage-person">\n                <div class="displayname">\n                    <strong>{{ person.person.displayname }}</strong>\n                </div>\n                <div class="tempsdeclare temps">\n                    <div v-if="editable && mode == \'edit\'">\n                        Heures pr\xE9vues :\n                        <input type="integer" v-model="durationForm" style="width: 5em"/>\n                        <a href="#" @click.prevent="handlerUpdate" title="Appliquer la modification des heures pr\xE9vues"><i class="icon-floppy"></i></a>\n                        <a href="#" @click.prevent="handlerCancel" title="Annuler la modification des heures pr\xE9vues"><i class="icon-cancel-outline"></i></a>\n                    </div>\n                    <span v-else>\n                        <strong >{{person.hours}}/{{ person.duration }}</strong> heure(s)\n                    </span>\n                    <a href="#" @click.prevent="handlerEdit" v-if="editable && mode == \'read\'" title="Modifier les heures pr\xE9vues"><i class="icon-pencil"></i></a>\n                </div>\n                <a href="#" @click.prevent="handlerRemove(person)" class="link" v-if="editable && mode == \'read\'"><i class="icon-trash"></i> Retirer</a>\n            </article>',
+        template: '<article class="workpackage-person">\n                <div class="displayname">\n                    <strong>{{ person.person.displayname }}</strong>\n                </div>\n                <div class="tempsdeclare temps">\n                    <div v-if="editable && mode == \'edit\'">\n                        Heures pr\xE9vues :\n                        <input type="integer" v-model="durationForm" style="width: 5em" @keyup.13="handlerUpdate"/>\n                        <a href="#" @click.prevent="handlerUpdate" title="Appliquer la modification des heures pr\xE9vues"><i class="icon-floppy"></i></a>\n                        <a href="#" @click.prevent="handlerCancel" title="Annuler la modification des heures pr\xE9vues"><i class="icon-cancel-outline"></i></a>\n                    </div>\n                    <span v-else>\n                        <strong >{{person.hours}}/{{ person.duration }}</strong> heure(s)\n                    </span>\n                    <a href="#" @click.prevent="handlerEdit" v-if="editable && mode == \'read\'" title="Modifier les heures pr\xE9vues"><i class="icon-pencil"></i></a>\n                </div>\n                <a href="#" @click.prevent="handlerRemove(person)" class="link" v-if="editable && mode == \'read\'"><i class="icon-trash"></i> Retirer</a>\n            </article>',
         props: {
             'person': { default: function _default() {
                     return {};
@@ -51,6 +51,9 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
         },
 
         methods: {
+            handlerKeyUp: function handlerKeyUp() {
+                console.log(arguments);
+            },
             handlerUpdate: function handlerUpdate() {
                 this.$emit('workpackagepersonupdate', this.person, this.durationForm);
                 this.mode = 'read';

@@ -625,6 +625,11 @@ class Person implements ResourceInterface
         return sprintf("%s %s", StringUtils::transliterateString($this->getDisplayName()), $this->getEmail());
     }
 
+    public function isDeclarerInActivity( Activity $activity )
+    {
+        $activity->hasDeclarant($this);
+    }
+
     public function toArray()
     {
         return array(

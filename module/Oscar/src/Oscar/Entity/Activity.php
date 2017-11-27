@@ -1687,6 +1687,21 @@ class Activity implements ResourceInterface
         return false;
     }
 
+    /**
+     * Retourne TRUE si l'activité a des déclarants d'identifiés.
+     *
+     * @return bool
+     */
+    public function hasDeclarers(){
+        /** @var WorkPackage $wp */
+        foreach( $this->getWorkPackages() as $wp ){
+            foreach( $wp->getPersons() as $p ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function getTimesheets(){
         $timesheets = [];
         /** @var WorkPackage $workPackage */
