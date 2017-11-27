@@ -252,6 +252,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             $timeSheet->setComment($data['description'])
+                ->setIcsid($data['icsid'] ? $data['icsid'] : '')
                 ->setLabel($data['label'])
                 ->setCreatedBy($by)
                 ->setPerson($by)
