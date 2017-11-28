@@ -233,15 +233,21 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
         foreach ($datas as $data) {
             if (array_key_exists('id', $data) && $data['id'] != null) {
+                $this->getServiceLocator()->get('Logger')->info("MAJ " . $data['id']);
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
             } else {
+                $this->getServiceLocator()->get('Logger')->info("ADD " . $data['id']);
                 $timeSheet = new TimeSheet();
                 $this->getEntityManager()->persist($timeSheet);
             }
 
+            $this->getServiceLocator()->get('Logger')->info("owner " . $by);
             $status = TimeSheet::STATUS_INFO;
 
+            $this->getServiceLocator()->get('Logger')->info(print_r($data, true));
+
             if (isset($data['idworkpackage']) && $data['idworkpackage'] != 'null') {
+                /** @var WorkPackage $workPackage */
                 $workPackage = $this->getEntityManager()->getRepository(WorkPackage::class)->find($data['idworkpackage']);
                 $timeSheet->setWorkpackage($workPackage);
                 $status = TimeSheet::STATUS_DRAFT;
@@ -249,6 +255,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($data['idactivity']);
                 $timeSheet->setActivity($activity);
                 $status = TimeSheet::STATUS_DRAFT;
+            } else {
+                $timeSheet->setWorkpackage(null)->setActivity(null);
             }
 
             $timeSheet->setComment($data['description'])

@@ -412,7 +412,7 @@ var CalendarDatas = function () {
         key: 'getIcsByUid',
         value: function getIcsByUid(uid) {
             for (var i = 0; i < this.ics.length; i++) {
-                if (this.ics[i].uid == uid) {
+                if (this.ics[i].icsfileuid == uid) {
                     return this.ics[i];
                 }
             }
@@ -422,13 +422,15 @@ var CalendarDatas = function () {
         key: 'addIcsRef',
         value: function addIcsRef(event) {
             this.ics.push({
-                uid: event.icsid
+                icsfileuid: event.icsfileuid,
+                icsfilename: event.icsfilename,
+                icsfiledateAdded: event.icsfiledateadded
             });
         }
     }, {
         key: 'addNewEvent',
         value: function addNewEvent(data) {
-            if (data.icsid && !this.getIcsByUid(data.icsid)) this.addIcsRef(data);
+            if (data.icsfileuid && !this.getIcsByUid(data.icsfileuid)) this.addIcsRef(data);
 
             this.events.push(new EventDT(data));
         }
@@ -1397,7 +1399,7 @@ var EventItemImport = {
 };
 
 var ImportICSView = {
-    template: '<div class="importer">\n                <div class="importer-ui">\n                    <h1><i class="icon-calendar"></i>Importer un ICS</h1>\n                    <nav class="steps">\n                        <span :class="{active: etape == 1}">Fichier ICS</span>\n                        <span :class="{active: etape == 2}">Cr\xE9neaux \xE0 importer</span>\n                        <span :class="{active: etape == 3}">Finalisation</span>\n\n                    </nav>\n\n                    <section class="etape1 row" v-if="etape == 1">\n                        <div class="col-md-1">Du</div>\n                        <div class="col-md-5">\n                            <datepicker v-model="periodStart"></datepicker>\n                        </div>\n\n                        <div class="col-md-1">au</div>\n                        <div class="col-md-5">\n                            <datepicker v-model="periodEnd"></datepicker>\n                        </div>\n                        <p>Choisissez un fichier ICS : </p>\n                        <input type="file" @change="loadIcsFile">\n                    </section>\n\n                    <section class="etape2" v-if="etape == 2">\n                        <h2><i class="icon-download-outline"></i>Aper\xE7u des donn\xE9es charg\xE9es</h2>\n                        <p>Voici les donn\xE9es charg\xE9es depuis le fichier ICS fournis : </p>\n                        <div class="calendar calendar-list">\n                            <article v-for="pack in packs">\n                                <section class="events">\n                                    <h3>{{ pack.label }}</h3>\n                                    <section class="events-list">\n                                        <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>\n                                    </section>\n                                </section>\n                            </article>\n                        </div>\n                        <div>\n                            <h2><i class="icon-loop-outline"></i>Correspondance des cr\xE9neaux</h2>\n                            <input v-model="search" placeholder="Filter les cr\xE9neaux">\n                            <section class="correspondances"">\n\n                                <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">\n                                    <strong><span :style="{\'background\': background(label)}" class="square">&nbsp</span>{{ label }}</strong>\n                                    <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">\n                                        <option value="ignorer">Ignorer ces cr\xE9neaux</option>\n                                        <option value="">Conserver</option>\n                                        <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>\n                                    </select>\n                                </article>\n                            </section>\n                        </div>\n                    </section>\n\n                    <div class="buttons">\n                        <button class="btn btn-default" @click="$emit(\'cancel\')">Annuler</button>\n                        <button class="btn btn-primary" @click="applyImport" v-if="etape==2">\n                            Valider l\'import de ces cr\xE9neaux\n                        </button>\n                    </div>\n                </div>\n            </div>',
+    template: '<div class="importer">\n                <div class="importer-ui">\n                    <h1><i class="icon-calendar"></i>Importer un ICS</h1>\n                    <pre>{{ existingIcs }}</pre>\n                    <nav class="steps">\n                        <span :class="{active: etape == 1}">Fichier ICS</span>\n                        <span :class="{active: etape == 2}">Cr\xE9neaux \xE0 importer</span>\n                        <span :class="{active: etape == 3}">Finalisation</span>\n\n                    </nav>\n\n                    <section class="etape1 row" v-if="etape == 1">\n                        <div class="col-md-1">Du</div>\n                        <div class="col-md-5">\n                            <datepicker v-model="periodStart"></datepicker>\n                        </div>\n\n                        <div class="col-md-1">au</div>\n                        <div class="col-md-5">\n                            <datepicker v-model="periodEnd"></datepicker>\n                        </div>\n                        <p>Choisissez un fichier ICS : </p>\n                        <input type="file" @change="loadIcsFile">\n                    </section>\n\n                    <section class="etape2" v-if="etape == 2">\n                        <h2><i class="icon-download-outline"></i>Aper\xE7u des donn\xE9es charg\xE9es</h2>\n                        <p>Voici les donn\xE9es charg\xE9es depuis le fichier ICS fournis : </p>\n                        <div class="calendar calendar-list">\n                            <article v-for="pack in packs">\n                                <section class="events">\n                                    <h3>{{ pack.label }}</h3>\n                                    <section class="events-list">\n                                        <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>\n                                    </section>\n                                </section>\n                            </article>\n                        </div>\n                        <div>\n                            <h2><i class="icon-loop-outline"></i>Correspondance des cr\xE9neaux</h2>\n                            <input v-model="search" placeholder="Filter les cr\xE9neaux">\n                            <section class="correspondances"">\n\n                                <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">\n                                    <strong><span :style="{\'background\': background(label)}" class="square">&nbsp</span>{{ label }}</strong>\n                                    <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">\n                                        <option value="ignorer">Ignorer ces cr\xE9neaux</option>\n                                        <option value="">Conserver</option>\n                                        <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>\n                                    </select>\n                                </article>\n                            </section>\n                        </div>\n                    </section>\n\n                    <div class="buttons">\n                        <button class="btn btn-default" @click="$emit(\'cancel\')">Annuler</button>\n                        <button class="btn btn-primary" @click="applyImport" v-if="etape==2">\n                            Valider l\'import de ces cr\xE9neaux\n                        </button>\n                    </div>\n                </div>\n            </div>',
     props: {
         'creneaux': {
             default: ['test A', 'test B', 'test C']
@@ -1423,6 +1425,9 @@ var ImportICSView = {
     },
 
     computed: {
+        existingIcs: function existingIcs() {
+            return store.ics;
+        },
         packs: function packs() {
             var packs = [];
             this.importedEvents.forEach(function (item) {
@@ -1772,15 +1777,30 @@ var Calendar = {
                 });
             }
         },
+        getEventByIcsUid: function getEventByIcsUid(uid) {
+            for (var i = 0; i < this.events.length; i++) {
+                if (this.events[i].icsuid == uid) {
+                    console.log("EXISTE DEJA");
+                    return this.events[i];
+                }
+            }
+            return null;
+        },
         importEvents: function importEvents(events) {
             var _this12 = this;
 
             var datas = [];
             events.forEach(function (item) {
+
                 var event = JSON.parse(JSON.stringify(item)),
+                    exist = _this12.getEventByIcsUid(item.icsuid),
                     itemStart = moment(event.start),
                     itemEnd = moment(event.end),
                     duration = itemEnd - itemStart;
+
+                if (exist) {
+                    event.id = exist.id;
+                }
 
                 if (event.useLabel) event.label = event.useLabel;
 
@@ -1798,12 +1818,14 @@ var Calendar = {
                 } else {
                     event.mmStart = moment(event.start);
                     event.mmEnd = moment(event.end);
+
                     datas.push(event);
                 }
 
                 if (event.useLabel) event.label = event.useLabel;
             });
             this.importInProgress = false;
+
             this.restSave(datas);
         },
         handlerCreatePack: function handlerCreatePack(events) {
@@ -1950,6 +1972,7 @@ var Calendar = {
                     }
                     datas.push(jsonData);
                 }
+                console.log("Données envoyées", jsonData);
                 data.append('events', JSON.stringify(datas));
 
                 store.loading = true;
