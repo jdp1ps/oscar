@@ -1746,7 +1746,6 @@ var ImportICSView = {
     template: `<div class="importer">
                 <div class="importer-ui">
                     <h1><i class="icon-calendar"></i>Importer un ICS</h1>
-                    <pre>{{ existingIcs }}</pre>
                     <nav class="steps">
                         <span :class="{active: etape == 1}">Fichier ICS</span>
                         <span :class="{active: etape == 2}">Créneaux à importer</span>
@@ -1909,7 +1908,6 @@ var ImportICSView = {
             this.labels = [];
 
             events.forEach(item => {
-                console.log(item);
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
                 item.imported = false;
@@ -2131,7 +2129,11 @@ var Calendar = {
                     <p>Déclarant : <strong>{{ tooltip.event.owner }}</strong>
                         <span v-if="tooltip.event.sendAt">Envoyé le {{ tooltip.event.sendAt | moment }}</span>
                     </p>
-                    <p>ICS : <strong>{{ tooltip.event.icsid }}</strong></p>
+                    
+                    <p v-if="tooltip.event.icsuid">
+                        N°ICS : <strong>{{ tooltip.event.icsuid }}</strong><br />
+                        ICAL : <strong>{{ tooltip.event.icsfilename }}</strong> <small>({{ tooltip.event.icsfileuid }})</small>
+                    </p>
                     <p>Durée : <strong> {{ tooltip.event.duration }} heure(s)</strong></p>
                     <p>Commentaire : <strong>{{ tooltip.event.description }}</strong></p>
    
@@ -2214,8 +2216,6 @@ var Calendar = {
             <div class="vue-loader" v-if="loading">
                 <span>Chargement</span>
             </div>
-            
-            <pre>{{ ics }}</pre> 
             
             <div class="editor" v-show="eventEditDataVisible">
                 <form @submit.prevent="editSave">
@@ -2445,7 +2445,6 @@ var Calendar = {
         getEventByIcsUid( uid ){
           for( let i = 0; i<this.events.length; i++ ){
               if( this.events[i].icsuid == uid ){
-                  console.log("EXISTE DEJA");
                   return this.events[i];
               }
           }
@@ -2620,7 +2619,6 @@ var Calendar = {
                         'id': events[i].id || null,
                         'owner_id': events[i].owner_id || ''
                     };
-                    console.log(jsonData);
 
                     if (this.customDatas) {
                         var customs = this.customDatas();
@@ -2634,7 +2632,6 @@ var Calendar = {
                     }
                     datas.push(jsonData);
                 }
-                console.log("Données envoyées", jsonData);
                 data.append('events', JSON.stringify(datas));
 
                 store.loading = true;

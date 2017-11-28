@@ -222,6 +222,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         ];
     }
 
+    public function createOrMerge( $datas ){
+
+    }
+
     /**
      * Création des déclarations.
      *
