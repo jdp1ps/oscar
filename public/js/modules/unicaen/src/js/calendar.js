@@ -43,6 +43,8 @@ class CalendarDatas {
         this.errors = [];
         this.listEventsOpen = [];
 
+        this.ics = [];
+
         // Données pour transformer les créneaux longs
         this.transformLong = [
             { startHours: 8, startMinutes: 0, endHours: 12, endMinutes: 0 },
@@ -387,7 +389,25 @@ class CalendarDatas {
         return null;
     }
 
+    getIcsByUid( uid ){
+        for( let i=0; i<this.ics.length; i++ ){
+            if( this.ics[i].uid == uid ){
+                return this.ics[i];
+            }
+        }
+        return null;
+    }
+
+    addIcsRef(event){
+        this.ics.push({
+            uid: event.icsid
+        })
+    }
+
     addNewEvent(data) {
+        if( data.icsid && !this.getIcsByUid(data.icsid) )
+            this.addIcsRef(data);
+
         this.events.push(
             new EventDT(data)
         );
@@ -431,7 +451,7 @@ var TimeEvent = {
             </div>
         </div>
         
-        {{ event.icsid }}
+        
 
         <nav class="admin">
             <a href="#" 
@@ -2105,6 +2125,7 @@ var Calendar = {
                     <p>Déclarant : <strong>{{ tooltip.event.owner }}</strong>
                         <span v-if="tooltip.event.sendAt">Envoyé le {{ tooltip.event.sendAt | moment }}</span>
                     </p>
+                    <p>ICS : <strong>{{ tooltip.event.icsid }}</strong></p>
                     <p>Durée : <strong> {{ tooltip.event.duration }} heure(s)</strong></p>
                     <p>Commentaire : <strong>{{ tooltip.event.description }}</strong></p>
    
@@ -2187,6 +2208,8 @@ var Calendar = {
             <div class="vue-loader" v-if="loading">
                 <span>Chargement</span>
             </div>
+            
+            <pre>{{ ics }}</pre> 
             
             <div class="editor" v-show="eventEditDataVisible">
                 <form @submit.prevent="editSave">
@@ -2563,7 +2586,9 @@ var Calendar = {
 
                     var jsonData = {
                         'label': events[i].label,
-                        'icsid': events[i].icsid,
+                        'icsuid': events[i].icsuid,
+                        'icsfileuid': events[i].icsfileuid,
+                        'icsfilename': events[i].icsfilename,
                         'description': events[i].description,
                         'start': events[i].mmStart.format(),
                         'end': events[i].mmEnd.format(),

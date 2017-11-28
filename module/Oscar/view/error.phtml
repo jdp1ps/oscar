@@ -15,13 +15,12 @@
         <pre>Erreur générique : <strong><?= get_class($exception) ?></strong>
 ---
 <?= $message ?>
-
 ---
          <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
 
 <strong>Stack : </strong>
-<?= $exception->getTraceAsString() ?>
          <?php endif; ?>
+<?= $exception->getTraceAsString() ?>
         </pre>
 <?php endif; ?>
     </section>

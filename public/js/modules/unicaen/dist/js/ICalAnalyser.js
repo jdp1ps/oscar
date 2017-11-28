@@ -78,7 +78,10 @@ var ICalAnalyser = function () {
             }
             return [{
                 uid: item.uid,
-                icsid: item.icsid,
+                icsuid: item.icsuid,
+                icsfileuid: item.icsfileuid,
+                icsfilename: item.icsfilename,
+                icsfiledateaddedd: item.icsfiledateaddedd,
                 label: item.summary,
                 summary: item.summary,
                 lastimport: true,
@@ -167,12 +170,17 @@ var ICalAnalyser = function () {
                 out = [],
                 exceptions = [];
 
-            var icsid = icsData[1][1][3];
-            console.log('ICSID', icsid);
+            // Données concernant le fichier ICS
+            var icsfilename = icsData[1][0][3];
+            var icsfileuid = icsData[1][1][3];
+            var icsfiledateaddedd = moment().format('YYYY-MM-DD');
 
+            // Events
             icsData[2].forEach(function (d) {
                 var item = {
-                    'icsid': icsid,
+                    'icsfileuid': icsfileuid,
+                    'icsfilename': icsfilename,
+                    'icsfiledateaddedd': icsfiledateaddedd,
                     warnings: []
                 },
                     rrule = null,
@@ -183,6 +191,7 @@ var ICalAnalyser = function () {
                     d[1].forEach(function (dd) {
                         if (dd[0] == 'uid') {
                             item.uid = dd[3];
+                            item.icsuid = dd[3];
                         } else if (dd[0] == 'rrule') {
                             rrule = dd[3];
                         } else if (dd[0] == 'exdate') {
@@ -231,7 +240,10 @@ var ICalAnalyser = function () {
                                 var endMinute = parseInt(endHourStr[1]);
                                 var event = {
                                     uid: item.uid,
-                                    icsid: item.icsid,
+                                    icsuid: item.icsuid,
+                                    icsfileuid: item.icsfileuid,
+                                    icsfilename: item.icsfilename,
+                                    icsfiledateadded: item.icsfiledateadded,
                                     daily: "allday",
                                     label: item.label,
                                     summary: item.label,
