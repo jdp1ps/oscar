@@ -57,7 +57,10 @@ class ICalAnalyser {
         }
         return [{
             uid: item.uid,
-            icsid: item.icsid,
+            icsuid: item.icsuid,
+            icsfileuid: item.icsfileuid,
+            icsfilename: item.icsfilename,
+            icsfiledateaddedd: item.icsfiledateaddedd,
             label: item.summary,
             summary: item.summary,
             lastimport: true,
@@ -142,24 +145,28 @@ class ICalAnalyser {
             , out = []
             , exceptions = [];
 
-        var icsid = icsData[1][1][3];
-        console.log('ICSID', icsid);
+        // Données concernant le fichier ICS
+        var icsfilename = icsData[1][0][3];
+        var icsfileuid = icsData[1][1][3];
+        var icsfiledateaddedd = moment().format('YYYY-MM-DD');
 
-
+        // Events
         icsData[2].forEach((d)=> {
             var item = {
-                'icsid': icsid,
-                warnings: []
-            }
-                , rrule = null, exdate = [];
+                    'icsfileuid': icsfileuid,
+                    'icsfilename': icsfilename,
+                    'icsfiledateaddedd': icsfiledateaddedd,
+                    warnings: []
+                },
+                rrule = null,
+                exdate = [];
 
             // Extraction des données brutes
             if (d[0] == 'vevent') {
                 d[1].forEach((dd) => {
                     if (dd[0] == 'uid') {
                         item.uid = dd[3];
-
-
+                        item.icsuid = dd[3];
                     } else if (dd[0] == 'rrule') {
                         rrule = dd[3];
                     }
@@ -226,7 +233,10 @@ class ICalAnalyser {
                             var endMinute = parseInt(endHourStr[1]);
                             var event = {
                                 uid: item.uid,
-                                icsid: item.icsid,
+                                icsuid: item.icsuid,
+                                icsfileuid: item.icsfileuid,
+                                icsfilename: item.icsfilename,
+                                icsfiledateadded: item.icsfiledateadded,
                                 daily: "allday",
                                 label: item.label,
                                 summary: item.label,

@@ -70,6 +70,10 @@ var EventDT = function () {
             this.description = data.description == 'undefined' ? '' : data.description;
             this.start = data.start;
             this.end = data.end;
+            this.icsfileuid = data.icsfileuid;
+            this.icsfilename = data.icsfilename;
+            this.icsfiledateadded = data.icsfiledateadded;
+            this.icsuid = data.icsuid;
             this.status = data.status;
 
             if (!this.uid) {

@@ -217,7 +217,6 @@ class TimesheetController extends AbstractOscarController
                 }
             }
         } catch (\Exception $e ){
-            var_dump($datas);
             return $this->getResponseInternalError("ERROR : " . $e->getMessage() . " - " . $e->getTraceAsString());
         }
 

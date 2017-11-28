@@ -140,10 +140,36 @@ class TimeSheet implements ITrackable
     private $person;
 
     /**
+     * Identifiant du créneau dans le ficheir ICS.
+     *
      * @var string
      * @ORM\Column(type="text", nullable=true)
      */
-    private $icsid;
+    private $icsUid;
+
+
+    /**
+     * Identifiant du calendrier ICS.
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $icsFileUid;
+
+    /**
+     * Nom du calendrier ICS.
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $icsFileName;
+
+    /**
+     * @var \DateTime Date de l'import de l'ics
+     *
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $icsFileDateAdded;
 
     //////////////////////////////////////////////////// VALIDATION SCIENTIFIQUE
 
@@ -280,7 +306,12 @@ class TimeSheet implements ITrackable
             'workpackage_id' => $workpackageId,
             'workpackage_code' => $workpackageCode,
             'workpackage_label' => $workpackageLabel,
-            'icsid' => $this->getIcsid(),
+
+            'icsuid'=> $this->getIcsUid(),
+            'icsfileuid'=> $this->getIcsUid(),
+            'icsfilename'=> $this->getIcsFileName(),
+            'icsfiledateaddedd'=> $this->getIcsFileDateAdded() ? $this->getIcsFileDateAdded()->format('c') : null,
+
             'label' => $this->getLabel(),
             'description' => $this->getComment(),
             'start' => $this->getDateFrom()->format('c'),
@@ -304,22 +335,74 @@ class TimeSheet implements ITrackable
     /**
      * @return string
      */
-    public function getIcsid(): string
+    public function getIcsUid(): string
     {
-        return $this->icsid;
+        return $this->icsUid;
     }
 
     /**
-     * @param string $icsid
+     * @param string $icsUid
      */
-    public function setIcsid($icsid)
+    public function setIcsUid($icsUid)
     {
-        $this->icsid = $icsid;
+        $this->icsUid = $icsUid;
 
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getIcsFileUid(): string
+    {
+        return $this->icsFileUid;
+    }
 
+    /**
+     * @param string $icsFileUid
+     */
+    public function setIcsFileUid($icsFileUid)
+    {
+        $this->icsFileUid = $icsFileUid;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIcsFileName(): string
+    {
+        return $this->icsFileName;
+    }
+
+    /**
+     * @param string $icsFileName
+     */
+    public function setIcsFileName($icsFileName)
+    {
+        $this->icsFileName = $icsFileName;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getIcsFileDateAdded()
+    {
+        return $this->icsFileDateAdded;
+    }
+
+    /**
+     * @param string $icsFileDateAdded
+     */
+    public function setIcsFileDateAdded($icsFileDateAdded)
+    {
+        $this->icsFileDateAdded = $icsFileDateAdded;
+
+        return $this;
+    }
 
     /**
      * @return string
