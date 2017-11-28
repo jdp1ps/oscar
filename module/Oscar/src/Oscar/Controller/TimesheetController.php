@@ -192,6 +192,11 @@ class TimesheetController extends AbstractOscarController
                                 /** @var TimeSheet $timeSheet */
                                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
                                 $activity = null;
+
+                                // idactivity
+                                // idworkpackage
+
+
                                 if ($timeSheet->getActivity()) {
                                     $activity = $timeSheet->getActivity();
                                 } elseif ($timeSheet->getWorkpackage()) {
@@ -211,6 +216,7 @@ class TimesheetController extends AbstractOscarController
                             }
                         }
                     } else {
+                        $this->getLogger()->info('CREATE OR UPDATE FROM IMPORT !');
                         $timesheets = $timeSheetService->create($datas,
                             $this->getCurrentPerson());
                     }

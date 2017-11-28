@@ -308,9 +308,9 @@ class TimeSheet implements ITrackable
             'workpackage_label' => $workpackageLabel,
 
             'icsuid'=> $this->getIcsUid(),
-            'icsfileuid'=> $this->getIcsUid(),
+            'icsfileuid'=> $this->getIcsFileUid(),
             'icsfilename'=> $this->getIcsFileName(),
-            'icsfiledateaddedd'=> $this->getIcsFileDateAdded() ? $this->getIcsFileDateAdded()->format('c') : null,
+            'icsfiledateadded'=> $this->getIcsFileDateAdded() ? $this->getIcsFileDateAdded()->format('c') : null,
 
             'label' => $this->getLabel(),
             'description' => $this->getComment(),

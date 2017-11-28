@@ -391,7 +391,7 @@ class CalendarDatas {
 
     getIcsByUid( uid ){
         for( let i=0; i<this.ics.length; i++ ){
-            if( this.ics[i].uid == uid ){
+            if( this.ics[i].icsfileuid == uid ){
                 return this.ics[i];
             }
         }
@@ -400,12 +400,14 @@ class CalendarDatas {
 
     addIcsRef(event){
         this.ics.push({
-            uid: event.icsid
+            icsfileuid: event.icsfileuid,
+            icsfilename: event.icsfilename,
+            icsfiledateAdded: event.icsfiledateadded
         })
     }
 
     addNewEvent(data) {
-        if( data.icsid && !this.getIcsByUid(data.icsid) )
+        if( data.icsfileuid && !this.getIcsByUid(data.icsfileuid) )
             this.addIcsRef(data);
 
         this.events.push(
@@ -1744,6 +1746,7 @@ var ImportICSView = {
     template: `<div class="importer">
                 <div class="importer-ui">
                     <h1><i class="icon-calendar"></i>Importer un ICS</h1>
+                    <pre>{{ existingIcs }}</pre>
                     <nav class="steps">
                         <span :class="{active: etape == 1}">Fichier ICS</span>
                         <span :class="{active: etape == 2}">Créneaux à importer</span>
@@ -1828,6 +1831,9 @@ var ImportICSView = {
     },
 
     computed: {
+        existingIcs(){
+          return store.ics;
+        },
         packs(){
             var packs = [];
             this.importedEvents.forEach(item => {
@@ -2436,13 +2442,30 @@ var Calendar = {
             }
         },
 
+        getEventByIcsUid( uid ){
+          for( let i = 0; i<this.events.length; i++ ){
+              if( this.events[i].icsuid == uid ){
+                  console.log("EXISTE DEJA");
+                  return this.events[i];
+              }
+          }
+          return null;
+        },
+
         importEvents(events){
             var datas = [];
             events.forEach(item => {
-                var event = JSON.parse(JSON.stringify(item)),
+
+
+                var  event = JSON.parse(JSON.stringify(item)),
+                    exist = this.getEventByIcsUid(item.icsuid),
                     itemStart = moment(event.start),
                     itemEnd = moment(event.end),
                     duration = itemEnd - itemStart;
+
+                if( exist ){
+                    event.id = exist.id;
+                }
 
                 if (event.useLabel) event.label = event.useLabel;
 
@@ -2460,12 +2483,14 @@ var Calendar = {
                 } else {
                     event.mmStart = moment(event.start);
                     event.mmEnd = moment(event.end);
+
                     datas.push(event);
                 }
 
                 if (event.useLabel) event.label = event.useLabel;
             })
             this.importInProgress = false;
+
             this.restSave(datas);
         },
 
@@ -2609,6 +2634,7 @@ var Calendar = {
                     }
                     datas.push(jsonData);
                 }
+                console.log("Données envoyées", jsonData);
                 data.append('events', JSON.stringify(datas));
 
                 store.loading = true;
