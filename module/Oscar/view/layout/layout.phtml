@@ -283,7 +283,8 @@ $this->headScript();
                     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX) ): ?>
                     <span id="connected"></span>
                     <?php endif; ?>
-                    <strong>oscar<sup>&copy</sup></strong> - <em><?= $this->appInfos()->desc ?></em>
+                    <strong>OSCAR</strong><sup>&copy</sup> - <em><?= $this->appInfos()->desc ?></em><br>
+                    <small><?= \Oscar\OscarVersion::getBuild() ?></small>
                 </div>
             </div>
         </footer>
