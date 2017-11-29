@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\TimesheetRepository")
  */
 class TimeSheet implements ITrackable
 {

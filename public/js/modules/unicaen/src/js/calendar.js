@@ -86,7 +86,6 @@ class CalendarDatas {
         this.rejectedEvents = [];
     }
 
-
     tooltipUpdate(){
       console.log(arguments);
     }
@@ -1743,68 +1742,102 @@ var EventItemImport = {
 };
 
 var ImportICSView = {
-    template: `<div class="importer">
-                <div class="importer-ui">
-                    <h1><i class="icon-calendar"></i>Importer un ICS</h1>
-                    <nav class="steps">
-                        <span :class="{active: etape == 1}">Fichier ICS</span>
-                        <span :class="{active: etape == 2}">Créneaux à importer</span>
-                        <span :class="{active: etape == 3}">Finalisation</span>
-
+    template: `
+<div class="importer">
+    <div class="importer-ui">
+        
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#import-newimport" data-toggle="tab">
+                    <i class="icon-calendar"></i>
+                    Nouvel import
+                </a>                        
+            </li>
+            <li role="presentation">
+                <a href="#import-importslist" data-toggle="tab">
+                    <i class="icon-history"></i>
+                    Historique des importations
+                </a>                        
+            </li>
+        </ul>
+        
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane" id="import-importslist">
+                <article class="card" v-for="imp in existingIcs">
+                    <h3 class="card-title">
+                        {{ imp.icsfilename }}, le {{ imp.icsfiledateAdded | moment }}
+                    </h3>
+                    <small>UID : <strong>{{ imp.icsfileuid }} </strong></small>
+                    <nav>
+                        <a href="#" @click="$emit('deleteics',imp.icsfileuid)" class="link"><i class="icon-trash"> supprimer</a>
                     </nav>
+                </article>
+                <div class="buttons">
+                    <button class="btn btn-default" @click="$emit('cancel')">Fermer</button>                   
+                </div>        
+            </div>
+            <div role="tabpanel" class="tab-pane active" id="import-newimport">
+                <h1><i class="icon-calendar"></i>Importer un ICS</h1>
+                <nav class="steps">
+                    <span :class="{active: etape == 1}">Fichier ICS</span>
+                    <span :class="{active: etape == 2}">Créneaux à importer</span>
+                    <span :class="{active: etape == 3}">Finalisation</span>
+                </nav>
 
-                    <section class="etape1 row" v-if="etape == 1">
-                        <div class="col-md-1">Du</div>
-                        <div class="col-md-5">
-                            <datepicker v-model="periodStart"></datepicker>
-                        </div>
-
-                        <div class="col-md-1">au</div>
-                        <div class="col-md-5">
-                            <datepicker v-model="periodEnd"></datepicker>
-                        </div>
-                        <p>Choisissez un fichier ICS : </p>
-                        <input type="file" @change="loadIcsFile">
-                    </section>
-
-                    <section class="etape2" v-if="etape == 2">
-                        <h2><i class="icon-download-outline"></i>Aperçu des données chargées</h2>
-                        <p>Voici les données chargées depuis le fichier ICS fournis : </p>
-                        <div class="calendar calendar-list">
-                            <article v-for="pack in packs">
-                                <section class="events">
-                                    <h3>{{ pack.label }}</h3>
-                                    <section class="events-list">
-                                        <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>
-                                    </section>
-                                </section>
-                            </article>
-                        </div>
-                        <div>
-                            <h2><i class="icon-loop-outline"></i>Correspondance des créneaux</h2>
-                            <input v-model="search" placeholder="Filter les créneaux">
-                            <section class="correspondances"">
-
-                                <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
-                                    <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
-                                    <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
-                                        <option value="ignorer">Ignorer ces créneaux</option>
-                                        <option value="">Conserver</option>
-                                        <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>
-                                    </select>
-                                </article>
-                            </section>
-                        </div>
-                    </section>
-
-                    <div class="buttons">
-                        <button class="btn btn-default" @click="$emit('cancel')">Annuler</button>
-                        <button class="btn btn-primary" @click="applyImport" v-if="etape==2">
-                            Valider l'import de ces créneaux
-                        </button>
+                <section class="etape1 row" v-if="etape == 1">
+                    <div class="col-md-1">Du</div>
+                    <div class="col-md-5">
+                        <datepicker v-model="periodStart"></datepicker>
                     </div>
+
+                    <div class="col-md-1">au</div>
+                    <div class="col-md-5">
+                        <datepicker v-model="periodEnd"></datepicker>
+                    </div>
+                    <p>Choisissez un fichier ICS : </p>
+                    <input type="file" @change="loadIcsFile">
+                </section>
+
+                <section class="etape2" v-if="etape == 2">
+                    <h2><i class="icon-download-outline"></i>Aperçu des données chargées</h2>
+                    <p>Voici les données chargées depuis le fichier ICS fournis : </p>
+                    <div class="calendar calendar-list">
+                        <article v-for="pack in packs">
+                            <section class="events">
+                                <h3>{{ pack.label }}</h3>
+                                <section class="events-list">
+                                    <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>
+                                </section>
+                            </section>
+                        </article>
+                    </div>
+                    <div>
+                        <h2><i class="icon-loop-outline"></i>Correspondance des créneaux</h2>
+                        <input v-model="search" placeholder="Filter les créneaux">
+                        <section class="correspondances"">
+
+                            <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
+                                <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
+                                <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
+                                    <option value="ignorer">Ignorer ces créneaux</option>
+                                    <option value="">Conserver</option>
+                                    <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>
+                                </select>
+                            </article>
+                        </section>
+                    </div>
+                </section>
+
+                <div class="buttons">
+                    <button class="btn btn-default" @click="$emit('cancel')">Annuler</button>
+                    <button class="btn btn-primary" @click="applyImport" v-if="etape==2">
+                        Valider l'import de ces créneaux
+                    </button>
                 </div>
-            </div>`,
+            </div>
+        </div>
+    </div>
+</div>`,
     props: {
         'creneaux': {
             default: ['test A', 'test B', 'test C']
@@ -1821,6 +1854,13 @@ var ImportICSView = {
             labels: [],
             etape: 1,
             search: ""
+        }
+    },
+
+    filters: {
+        moment( str ){
+            let m = moment(str);
+            return m.format('DD MMMM YYYY') + '(' + m.fromNow() +')';
         }
     },
 
@@ -2179,7 +2219,12 @@ var Calendar = {
                 </div>
             </transition>
 
-            <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>
+            <importview :creneaux="labels" 
+                    @cancel="importInProgress = false" 
+                    @import="importEvents" 
+                    v-if="importInProgress"
+                    @deleteics="handlerDeleteImport" 
+                    ></importview>
             
             <transition name="fade">
                 <div class="vue-loader" v-if="remoteError" @click="remoteError = ''">
@@ -2641,6 +2686,9 @@ var Calendar = {
                         this.handlerEditCancelEvent();
                     },
                     error => {
+                        require(['bootbox'], bootbox => {
+                            bootbox.alert("ERROR : " + error);
+                        });
                         this.errors.push("Impossible d'enregistrer les données : " + error)
                     }
                 ).then(() => {
@@ -2693,6 +2741,26 @@ var Calendar = {
                     this.loading = false;
                 });
             }
+        },
+
+        handlerDeleteImport(icsuid){
+          console.log("Suppression des événements issues de l'import", icsuid);
+            this.transmission = "Suppression...";
+            this.$http.delete(this.restUrl() + "?icsuid=" + icsuid).then(
+                response => {
+                    store.events = [];
+                    this.fetch();
+                },
+                error => {
+                    console.log(error);
+                    require(['bootbox'], bootbox => {
+                        bootbox.alert("ERROR : " + error.body);
+                    });
+                    store.errors.push(error);
+                }
+            ).then(() => {
+                this.transmission = "";
+            });
         },
 
         /** Suppression de l'événement de la liste */
@@ -2847,6 +2915,7 @@ var Calendar = {
 
         /////////////////////////////////////////////////////////////////// REST
         fetch(){
+            this.ics = [];
             this.transmission = "Chargement des créneaux...";
             store.loading = true;
 

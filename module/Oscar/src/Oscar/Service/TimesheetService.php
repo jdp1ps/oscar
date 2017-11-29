@@ -6,7 +6,9 @@ use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\Person;
 use Oscar\Entity\TimeSheet;
+use Oscar\Entity\TimesheetRepository;
 use Oscar\Entity\WorkPackage;
+use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -312,6 +314,46 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->setRejectedAdminComment(null);
     }
 
+    /**
+     * Suppression des créneaux issues de l'ICS.
+     *
+     * @param $icsUid UID du fichier ICAL source
+     * @param $by Person à l'origine de la suppression
+     */
+    public function deleteIcsFileUid($icsUid, $by){
+        // Récupération des créneaux correspondant
+        $timesheets = $this->getTimesheetRepository()->getTimesheetsByIcsFileUid($icsUid);
+
+        // Liste des problèmes
+        $warnings = [];
+
+        // Status éligibles à la suppression
+        $status = [TimeSheet::STATUS_DRAFT, TimeSheet::STATUS_TOVALIDATE_ADMIN, TimeSheet::STATUS_TOVALIDATE, TimeSheet::STATUS_TOVALIDATE_SCI];
+
+
+        /** @var TimeSheet $timesheet */
+        foreach( $timesheets as $timesheet ){
+            if($timesheet->getPerson() != $by ){
+                $warnings[] = sprintf("Le créneau '%s' n'a pas été supprimé (owner error).");
+                continue;
+            }
+            if( !in_array($timesheet->getStatus(), $status) ){
+                $warnings[] = sprintf("Le créneau '%s' n'a pas été supprimé (statut error).");
+                continue;
+            }
+            $this->getEntityManager()->remove($timesheet);
+        }
+        $this->getEntityManager()->flush();
+        return $warnings;
+    }
+
+
+    /**
+     * @return TimesheetRepository
+     */
+    protected function getTimesheetRepository(){
+        return $this->getEntityManager()->getRepository(TimeSheet::class);
+    }
 
     /**
      * Suppression du créneau.
