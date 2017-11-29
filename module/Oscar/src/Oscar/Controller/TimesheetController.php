@@ -232,13 +232,29 @@ class TimesheetController extends AbstractOscarController
         }
 
         if ($method == 'DELETE') {
+            // Identifiant de l'événement
+            $timesheetId = $this->params()->fromQuery('timesheet', null);
 
-            $timesheetId = $this->params()->fromQuery('timesheet');
+            // UID de l'ICS
+            $icsUid = $this->params()->fromQuery('icsuid', null);
+
             if ($timesheetId) {
                 if ($timeSheetService->delete($timesheetId,
                     $this->getCurrentPerson())
                 ) {
                     return $this->getResponseOk('Créneaux supprimé');
+                }
+            }
+            elseif ($icsUid) {
+                try {
+                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $this->getCurrentPerson());
+                    foreach ($warnings as $w){
+                        $this->getLogger()->info($w);
+                    }
+                    return $this->getResponseOk(json_encode($warnings));
+                }
+                catch (\Exception $e ){
+                    return $this->getResponseInternalError("Impossible de supprimer ce calendrier : " . $e->getMessage());
                 }
             }
 
