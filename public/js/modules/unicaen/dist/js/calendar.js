@@ -1399,7 +1399,7 @@ var EventItemImport = {
 };
 
 var ImportICSView = {
-    template: '\n<div class="importer">\n    <div class="importer-ui">\n        \n        <ul class="nav nav-tabs" role="tablist">\n            <li role="presentation" class="active">\n                <a href="#import-newimport" data-toggle="tab">\n                    <i class="icon-calendar"></i>\n                    Nouvel import\n                </a>                        \n            </li>\n            <li role="presentation">\n                <a href="#import-importslist" data-toggle="tab">\n                    <i class="icon-history"></i>\n                    Historique des importations\n                </a>                        \n            </li>\n        </ul>\n        \n        <div class="tab-content">\n            <div role="tabpanel" class="tab-pane" id="import-importslist">\n                <article class="card" v-for="imp in existingIcs">\n                    <h3 class="card-title">\n                        {{ imp.icsfilename }}, le {{ imp.icsfiledateAdded | moment }}\n                    </h3>\n                    <small>UID : <strong>{{ imp.icsfileuid }} </strong></small>\n                    <nav>\n                        <a href="#" @click="$emit(\'deleteics\',imp.icsfileuid)" class="link"><i class="icon-trash"> supprimer</a>\n                    </nav>\n                </article>\n                <div class="buttons">\n                    <button class="btn btn-default" @click="$emit(\'cancel\')">Fermer</button>                   \n                </div>        \n            </div>\n            <div role="tabpanel" class="tab-pane active" id="import-newimport">\n                <h1><i class="icon-calendar"></i>Importer un ICS</h1>\n                <nav class="steps">\n                    <span :class="{active: etape == 1}">Fichier ICS</span>\n                    <span :class="{active: etape == 2}">Cr\xE9neaux \xE0 importer</span>\n                    <span :class="{active: etape == 3}">Finalisation</span>\n                </nav>\n                \n                <pre>{{ associations }}</pre> \n\n                <section class="etape1 row" v-if="etape == 1">\n                    <div class="col-md-1">Du</div>\n                    <div class="col-md-5">\n                        <datepicker v-model="periodStart"></datepicker>\n                    </div>\n\n                    <div class="col-md-1">au</div>\n                    <div class="col-md-5">\n                        <datepicker v-model="periodEnd"></datepicker>\n                    </div>\n                    <p>Choisissez un fichier ICS : </p>\n                    <input type="file" @change="loadIcsFile">\n                </section>\n\n                <section class="etape2" v-if="etape == 2">\n                    <h2><i class="icon-download-outline"></i>Aper\xE7u des donn\xE9es charg\xE9es</h2>\n                    <p>Voici les donn\xE9es charg\xE9es depuis le fichier ICS fournis : </p>\n                    <div class="calendar calendar-list">\n                        <article v-for="pack in packs">\n                            <section class="events">\n                                <h3>{{ pack.label }}</h3>\n                                <section class="events-list">\n                                    <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>\n                                </section>\n                            </section>\n                        </article>\n                    </div>\n                    <div>\n                        <h2><i class="icon-loop-outline"></i>Correspondance des cr\xE9neaux</h2>\n                        <input v-model="search" placeholder="Filter les cr\xE9neaux">\n                        <section class="correspondances"">\n\n                            <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">\n                                <strong><span :style="{\'background\': background(label)}" class="square">&nbsp</span>{{ label }}</strong>\n                                <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">\n                                    <option value="ignorer">Ignorer ces cr\xE9neaux</option>\n                                    <option value="">Conserver</option>\n                                    <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>\n                                </select>\n                            </article>\n                        </section>\n                    </div>\n                </section>\n\n                <div class="buttons">\n                    <button class="btn btn-default" @click="$emit(\'cancel\')">Annuler</button>\n                    <button class="btn btn-primary" @click="applyImport" v-if="etape==2">\n                        Valider l\'import de ces cr\xE9neaux\n                    </button>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>',
+    template: '\n<div class="importer">\n    <div class="importer-ui">\n        \n        <ul class="nav nav-tabs" role="tablist">\n            <li role="presentation" class="active">\n                <a href="#import-newimport" data-toggle="tab">\n                    <i class="icon-calendar"></i>\n                    Nouvel import\n                </a>                        \n            </li>\n            <li role="presentation">\n                <a href="#import-importslist" data-toggle="tab">\n                    <i class="icon-history"></i>\n                    Historique des importations\n                </a>                        \n            </li>\n        </ul>\n        \n        <div class="tab-content">\n            <div role="tabpanel" class="tab-pane" id="import-importslist">\n                <article class="card" v-for="imp in existingIcs">\n                    <h3 class="card-title">\n                        {{ imp.icsfilename }}, le {{ imp.icsfiledateAdded | moment }}\n                    </h3>\n                    <small>UID : <strong>{{ imp.icsfileuid }} </strong></small>\n                    <nav>\n                        <a href="#" @click="$emit(\'deleteics\',imp.icsfileuid)" class="link"><i class="icon-trash"> supprimer</a>\n                    </nav>\n                </article>\n                <div class="buttons">\n                    <button class="btn btn-default" @click="$emit(\'cancel\')">Fermer</button>                   \n                </div>        \n            </div>\n            <div role="tabpanel" class="tab-pane active" id="import-newimport">\n                <h1><i class="icon-calendar"></i>Importer un ICS</h1>\n                <nav class="steps">\n                    <span :class="{active: etape == 1}">Fichier ICS</span>\n                    <span :class="{active: etape == 2}">Cr\xE9neaux \xE0 importer</span>\n                    <span :class="{active: etape == 3}">Finalisation</span>\n                </nav>\n                \n                <pre>{{ associations }}</pre> \n\n                <section class="etape1 row" v-if="etape == 1">\n                    <div class="col-md-1">Du</div>\n                    <div class="col-md-5">\n                        <datepicker v-model="periodStart"></datepicker>\n                    </div>\n\n                    <div class="col-md-1">au</div>\n                    <div class="col-md-5">\n                        <datepicker v-model="periodEnd"></datepicker>\n                    </div>\n                    <p>Choisissez un fichier ICS : </p>\n                    <input type="file" @change="loadIcsFile">\n                </section>\n\n                <section class="etape2" v-if="etape == 2">\n                    <h2><i class="icon-download-outline"></i>Aper\xE7u des donn\xE9es charg\xE9es</h2>\n                    <p>Voici les donn\xE9es charg\xE9es depuis le fichier ICS fournis : </p>\n                    <div class="calendar calendar-list">\n                        <article v-for="pack in packs">\n                            <section class="events">\n                                <h3>{{ pack.label }}</h3>\n                                <section class="events-list">\n                                    <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>\n                                </section>\n                            </section>\n                        </article>\n                    </div>\n                    <div>\n                        <h2><i class="icon-loop-outline"></i>Correspondance des cr\xE9neaux</h2>\n                        <input v-model="search" placeholder="Filter les cr\xE9neaux">\n                        <section class="correspondances"">\n\n                            <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">\n                                <strong><span :style="{\'background\': background(label)}" class="square">&nbsp</span>{{ label }}</strong>\n                                <select v-model="associations[label]" id="" @change="updateLabel(label, $event.target.value)" class="form-control">\n                                    <option value="ignorer">Ignorer ces cr\xE9neaux</option>\n                                    <option value="">Conserver</option>\n                                    <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>\n                                </select>\n                            </article>\n                        </section>\n                    </div>\n                </section>\n\n                <div class="buttons">\n                    <button class="btn btn-default" @click="$emit(\'cancel\')">Annuler</button>\n                    <button class="btn btn-primary" @click="applyImport" v-if="etape==2">\n                        Valider l\'import de ces cr\xE9neaux\n                    </button>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>',
     props: {
         'creneaux': {
             default: ['test A', 'test B', 'test C']
@@ -1411,7 +1411,7 @@ var ImportICSView = {
             periodStart: null,
             periodEnd: null,
             importedEvents: [],
-            associations: new Map(),
+            associations: [],
             labels: [],
             etape: 1,
             search: ""
@@ -1442,6 +1442,9 @@ var ImportICSView = {
     },
 
     computed: {
+        workpackages: function workpackages() {
+            return store.wps;
+        },
         existingIcs: function existingIcs() {
             return store.ics;
         },
@@ -1491,7 +1494,7 @@ var ImportICSView = {
                     }
                 });
             }
-            this.associations.set(from, to);
+            this.associations[from] = to;
         },
 
 
@@ -1515,6 +1518,7 @@ var ImportICSView = {
             var events = analyser.parse(ICAL.parse(content));
             var after = this.periodStart ? moment(this.periodStart) : null;
             var before = this.periodEnd ? moment(this.periodEnd) : null;
+            var icsName = "";
             this.importedEvents = [];
             this.labels = [];
 
@@ -1523,6 +1527,7 @@ var ImportICSView = {
             console.log(store.wps);
 
             events.forEach(function (item) {
+                icsName = item.icsfilename;
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
                 item.imported = false;
@@ -1534,6 +1539,54 @@ var ImportICSView = {
                     console.log('Le créneau est hors limite');
                 }
             });
+
+            /**
+             * Recherche à partir des WPS le label correspondant.
+             *
+             * @param labels
+             */
+            var associationParser = function associationParser(label) {
+                var out = "";
+                Object.keys(store.wps).map(function (objectKey, index) {
+                    var wpDatas = store.wps[objectKey],
+                        acronym = wpDatas.acronym,
+                        code = wpDatas.activity_code;
+                    if (!(icsName.indexOf(acronym) || icsName.indexOf(code))) {
+                        console.log("L'ics", icsName, " ne correspond pas au code", code, " ou à l'acronym", acronym);
+                    }
+
+                    if (label.indexOf(wpDatas.code) >= 0) {
+                        out = objectKey;
+                    }
+                });
+                return out;
+            };
+
+            // 'acronym'       => $wpd->getActivity()->getAcronym(),
+            //     'activity'      => $wpd->getActivity()->__toString(),
+            //     'activity_code' => $wpd->getActivity()->getOscarNum(),
+            //     'idactivity'    => $wpd->getActivity()->getId(),
+            //     'code' => $wpd->getCode(),
+
+
+            var associations = {};
+            for (var i = 0; i < this.labels.length; i++) {
+                var label = this.labels[i];
+                var corre = associationParser(label);
+                console.log(corre);
+                associations[label] = corre ? corre : "";
+                if (corre) this.updateLabel(label, corre);else associations[label] = "ignorer";
+            }
+
+            /*
+            if( store.wps  ){
+                Object.keys(store.wps).map((objectKey, index) => {
+                    associations[objectKey] = associationParser(store.wps[objectKey], this.labels);
+                });
+            }
+            /****/
+
+            this.associations = associations;
 
             this.importedEvents = EventDT.sortByStart(this.importedEvents);
 

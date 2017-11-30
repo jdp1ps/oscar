@@ -1820,7 +1820,7 @@ var ImportICSView = {
 
                             <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
                                 <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
-                                <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
+                                <select v-model="associations[label]" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
                                     <option value="ignorer">Ignorer ces créneaux</option>
                                     <option value="">Conserver</option>
                                     <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>
@@ -1852,7 +1852,7 @@ var ImportICSView = {
             periodStart: null,
             periodEnd: null,
             importedEvents: [],
-            associations: new Map(),
+            associations: [],
             labels: [],
             etape: 1,
             search: ""
@@ -1872,6 +1872,9 @@ var ImportICSView = {
     },
 
     computed: {
+        workpackages(){
+          return store.wps;
+        },
         existingIcs(){
           return store.ics;
         },
@@ -1924,7 +1927,7 @@ var ImportICSView = {
                     }
                 });
             }
-            this.associations.set(from, to);
+            this.associations[from] = to;
         },
 
         /** Charge le fichier ICS depuis l'interface **/
@@ -1946,6 +1949,7 @@ var ImportICSView = {
             var events = analyser.parse(ICAL.parse(content));
             var after = this.periodStart ? moment(this.periodStart) : null;
             var before = this.periodEnd ? moment(this.periodEnd) : null;
+            var icsName  =  "";
             this.importedEvents = [];
             this.labels = [];
 
@@ -1953,7 +1957,9 @@ var ImportICSView = {
             // et les informations disponibles sur les Workpackage
             console.log(store.wps);
 
+
             events.forEach(item => {
+                icsName = item.icsfilename;
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
                 item.imported = false;
@@ -1966,6 +1972,59 @@ var ImportICSView = {
                     console.log('Le créneau est hors limite');
                 }
             });
+
+            /**
+             * Recherche à partir des WPS le label correspondant.
+             *
+             * @param labels
+             */
+            var associationParser  = (label) => {
+                let out = "";
+                Object.keys(store.wps).map((objectKey, index) => {
+                    let wpDatas = store.wps[objectKey],
+                        acronym = wpDatas.acronym,
+                        code = wpDatas.activity_code
+                    ;
+                    if( !(icsName.indexOf(acronym) || icsName.indexOf(code)) ){
+                        console.log("L'ics", icsName, " ne correspond pas au code", code, " ou à l'acronym", acronym);
+                    }
+
+                    if( label.indexOf(wpDatas.code) >= 0 ){
+                        out = objectKey;
+                    }
+                });
+                return out;
+            };
+
+            // 'acronym'       => $wpd->getActivity()->getAcronym(),
+            //     'activity'      => $wpd->getActivity()->__toString(),
+            //     'activity_code' => $wpd->getActivity()->getOscarNum(),
+            //     'idactivity'    => $wpd->getActivity()->getId(),
+            //     'code' => $wpd->getCode(),
+
+
+            var associations = {};
+            for( var i=0; i<this.labels.length; i++ ){
+                var label = this.labels[i];
+                var corre = associationParser(label);
+                console.log(corre);
+                associations[label] = corre ? corre : "";
+                if ( corre )
+                    this.updateLabel(label, corre);
+                else
+                    associations[label] = "ignorer"
+            }
+
+            /*
+            if( store.wps  ){
+                Object.keys(store.wps).map((objectKey, index) => {
+                    associations[objectKey] = associationParser(store.wps[objectKey], this.labels);
+                });
+            }
+            /****/
+
+            this.associations = associations;
+
 
             this.importedEvents = EventDT.sortByStart(this.importedEvents);
 
