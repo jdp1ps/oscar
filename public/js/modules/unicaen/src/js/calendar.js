@@ -1783,6 +1783,8 @@ var ImportICSView = {
                     <span :class="{active: etape == 2}">Créneaux à importer</span>
                     <span :class="{active: etape == 3}">Finalisation</span>
                 </nav>
+                
+                <pre>{{ associations }}</pre> 
 
                 <section class="etape1 row" v-if="etape == 1">
                     <div class="col-md-1">Du</div>
@@ -1850,7 +1852,7 @@ var ImportICSView = {
             periodStart: null,
             periodEnd: null,
             importedEvents: [],
-            associations: {},
+            associations: new Map(),
             labels: [],
             etape: 1,
             search: ""
@@ -1922,7 +1924,7 @@ var ImportICSView = {
                     }
                 });
             }
-            this.associations[from] = to;
+            this.associations.set(from, to);
         },
 
         /** Charge le fichier ICS depuis l'interface **/
@@ -1946,6 +1948,10 @@ var ImportICSView = {
             var before = this.periodEnd ? moment(this.periodEnd) : null;
             this.importedEvents = [];
             this.labels = [];
+
+            // On précalcule les correspondances possibles entre les créneaux trouvés
+            // et les informations disponibles sur les Workpackage
+            console.log(store.wps);
 
             events.forEach(item => {
                 item.mmStart = moment(item.start);

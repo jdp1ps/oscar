@@ -361,6 +361,19 @@ class Activity implements ResourceInterface
      */
     protected $numbers = [];
 
+
+    /**
+     * Retourne l'acronyme du projet si disponible.
+     *
+     * @return mixed|null
+     */
+    public function getAcronym(){
+        if( $this->getProject() ){
+            return $this->getProject()->getAcronym();
+        }
+        return null;
+    }
+
     /**
      * @return string
      */
