@@ -1540,23 +1540,24 @@ var ImportICSView = {
                 }
             });
 
-            /**
-             * Recherche à partir des WPS le label correspondant.
-             *
-             * @param labels
-             */
+            // En minuscule pour les test de proximité
+            var icsNameLC = icsName.toLowerCase();
+
             var associationParser = function associationParser(label) {
                 var out = "";
+                label = label.toLowerCase();
+
                 Object.keys(store.wps).map(function (objectKey, index) {
                     var wpDatas = store.wps[objectKey],
-                        acronym = wpDatas.acronym,
-                        code = wpDatas.activity_code;
-                    if (!(icsName.indexOf(acronym) || icsName.indexOf(code))) {
+                        wpCode = wpDatas.code.toLowerCase(),
+                        acronym = wpDatas.acronym.toLowerCase(),
+                        code = wpDatas.activity_code.toLowerCase();
+                    if (!(icsNameLC.indexOf(acronym) || icsNameLC.indexOf(code))) {
                         console.log("L'ics", icsName, " ne correspond pas au code", code, " ou à l'acronym", acronym);
-                    }
-
-                    if (label.indexOf(wpDatas.code) >= 0) {
+                    } else if (label.indexOf(wpCode) >= 0) {
                         out = objectKey;
+                    } else {
+                        console.log("le code ", wpCode, "n'est pas présent dans le label", label);
                     }
                 });
                 return out;
