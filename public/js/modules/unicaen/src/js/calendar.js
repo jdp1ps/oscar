@@ -1984,12 +1984,18 @@ var ImportICSView = {
                         acronym = wpDatas.acronym.toLowerCase(),
                         code = wpDatas.activity_code.toLowerCase()
                     ;
-                    if( !(icsNameLC.indexOf(acronym) || icsNameLC.indexOf(code)) ){
-                        console.log("L'ics", icsName, " ne correspond pas au code", code, " ou à l'acronym", acronym);
-                    } else if( label.indexOf(wpCode) >= 0 ){
-                        out = objectKey;
+                    if( (icsNameLC.indexOf(acronym) >= 0 || icsNameLC.indexOf(code) >= 0) || (label.indexOf(acronym) >= 0 || label.indexOf(code) >= 0)){
+                        if( label.indexOf(wpCode) >= 0 ){
+                            out = objectKey;
+                        } else {
+                            console.log("Pas de code WP");
+                        }
                     } else {
-                        console.log("le code ", wpCode, "n'est pas présent dans le label", label);
+                        // ou dans le label ...
+                        console.log(icsNameLC, acronym, code, label);
+                        console.log((icsNameLC.indexOf(acronym) >= 0 || icsNameLC.indexOf(code) >= 0));
+                        console.log((label.indexOf(acronym) >= 0 || label.indexOf(code) >= 0));
+                        console.log("Pas de code/acronyme");
                     }
                 });
                 return out;
