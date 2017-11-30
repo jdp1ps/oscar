@@ -1783,8 +1783,6 @@ var ImportICSView = {
                     <span :class="{active: etape == 2}">Créneaux à importer</span>
                     <span :class="{active: etape == 3}">Finalisation</span>
                 </nav>
-                
-                <pre>{{ associations }}</pre> 
 
                 <section class="etape1 row" v-if="etape == 1">
                     <div class="col-md-1">Du</div>
