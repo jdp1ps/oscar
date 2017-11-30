@@ -15,11 +15,14 @@
         }
         $crenaux[((string)$wpd)] = [
             'label'         => (string)$wpd,
+            'acronym'       => $wpd->getActivity()->getAcronym(),
             'activity'      => $wpd->getActivity()->__toString(),
+            'activity_code' => $wpd->getActivity()->getOscarNum(),
             'idactivity'    => $wpd->getActivity()->getId(),
             'code' => $wpd->getCode(),
             'idworkpackage' => $wpd->getId(),
             'color' => $colorActivity[$wpd->getActivity()->getId()]
+
         ];
     }
     ?>
