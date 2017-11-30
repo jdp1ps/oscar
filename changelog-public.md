@@ -3,6 +3,7 @@
 ## Déclarations
  - Il est maintenant possible de *synchroniser* un fichier ICS déjà importé préalablement. Si le déclarant retéléverse un ICS, Oscar analyse parmis les créneaux présent ceux issus d'un import et tente des les mettre à jour automatiquement. Oscar ajoute les nouveaux créneaux mais **il ne supprime pas les créneaux qui ont disparu**
  - Un nouvel onglet dans l'écran d'importation est disponible. Il affiche la liste des ICS importés. Il permet de supprimer les créneaux importés depuis un des imports (en cas d'erreur).
+ - Lors de l'import d'un ICS, Oscar essaye de déterminer le lot de travail idéal pour un créneau en s'appyant sur le nom du calendrier (il doit contenir l'acronyme du projet ou CODE de l'activité) et l'intitulé (il doit contenire le code du lot de travail)
 
 # Build 552
  - Patch DB : Fusion des organisations partageant le même code LDAP
