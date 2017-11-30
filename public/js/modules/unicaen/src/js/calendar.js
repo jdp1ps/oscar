@@ -1973,24 +1973,25 @@ var ImportICSView = {
                 }
             });
 
-            /**
-             * Recherche à partir des WPS le label correspondant.
-             *
-             * @param labels
-             */
+            // En minuscule pour les test de proximité
+            let icsNameLC = icsName.toLowerCase();
+
             var associationParser  = (label) => {
                 let out = "";
+                label = label.toLowerCase();
+
                 Object.keys(store.wps).map((objectKey, index) => {
                     let wpDatas = store.wps[objectKey],
-                        acronym = wpDatas.acronym,
-                        code = wpDatas.activity_code
+                        wpCode = wpDatas.code.toLowerCase(),
+                        acronym = wpDatas.acronym.toLowerCase(),
+                        code = wpDatas.activity_code.toLowerCase()
                     ;
-                    if( !(icsName.indexOf(acronym) || icsName.indexOf(code)) ){
+                    if( !(icsNameLC.indexOf(acronym) || icsNameLC.indexOf(code)) ){
                         console.log("L'ics", icsName, " ne correspond pas au code", code, " ou à l'acronym", acronym);
-                    }
-
-                    if( label.indexOf(wpDatas.code) >= 0 ){
+                    } else if( label.indexOf(wpCode) >= 0 ){
                         out = objectKey;
+                    } else {
+                        console.log("le code ", wpCode, "n'est pas présent dans le label", label);
                     }
                 });
                 return out;
