@@ -1270,7 +1270,7 @@ administration:
              options:
                  route: /typedocument
                  defaults:
-                   action: typedocument
+                   action: typeDocument
              may_terminate: true
              child_routes:
                  api:
