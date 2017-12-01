@@ -6292,7 +6292,7 @@ html body {
   padding: 15px 10px;
   border-right: solid thin rgba(0, 0, 0, 0.15); }
 
-.navbar.navbar-primary .dropdown-menu a {
+.navbar.navbar-main .dropdown-menu a {
   color: #51BADD; }
 
 mark {
@@ -6441,10 +6441,145 @@ mark {
   border-radius: 2px;
   padding: 0 4px; }
 
-.navbar-primary .popover .popover-content, .navbar-primary .popover .popover-title {
+.navbar-main .popover .popover-content, .navbar-main .popover .popover-title {
   color: #455790; }
-  .navbar-primary .popover .popover-content a, .navbar-primary .popover .popover-content strong, .navbar-primary .popover .popover-title a, .navbar-primary .popover .popover-title strong {
+  .navbar-main .popover .popover-content a, .navbar-main .popover .popover-content strong, .navbar-main .popover .popover-title a, .navbar-main .popover .popover-title strong {
     color: #455790; }
+
+.navbar-global {
+  background-color: indigo; }
+
+.navbar-global .navbar-brand {
+  color: white; }
+
+.navbar-global .navbar-user > li > a {
+  color: white; }
+
+body::-webkit-scrollbar {
+  width: 8px; }
+
+body::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); }
+
+body::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey; }
+
+.navbar-admin {
+  box-shadow: 0.5em 0 0.5em rgba(0, 0, 0, 0.1);
+  padding: 2em 1em;
+  background-color: rgba(255, 255, 255, 0.8);
+  bottom: 0px;
+  left: 0px;
+  font-size: .8em;
+  position: fixed;
+  top: 51px;
+  width: 260px;
+  z-index: 8;
+  -webkit-transition: all 0.1s ease-in-out;
+  -moz-transition: all 0.1s ease-in-out;
+  transition: all 0.1s ease-in-out; }
+  .navbar-admin .content {
+    position: absolute;
+    left: 0;
+    right: 10px;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    overflow-y: scroll;
+    padding: 2em 0 2em; }
+    .navbar-admin .content ul {
+      margin: 0;
+      padding: 0;
+      list-style: none; }
+    .navbar-admin .content li a {
+      display: block;
+      text-decoration: none;
+      padding: 2px 1em; }
+      .navbar-admin .content li a:hover {
+        background: #555;
+        color: white; }
+    .navbar-admin .content:hover .handler-collapse, .navbar-admin .content:hover .handler-collapse span {
+      background: #30b0d5; }
+    .navbar-admin .content:hover::-webkit-scrollbar {
+      opacity: .5; }
+    .navbar-admin .content::-webkit-scrollbar {
+      width: 8px;
+      opacity: .1; }
+    .navbar-admin .content::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1); }
+    .navbar-admin .content::-webkit-scrollbar-thumb {
+      background-color: rgba(170, 170, 170, 0.25);
+      outline: 1px solid #1F180D; }
+  .navbar-admin .handler-collapse {
+    background: #AAA;
+    position: absolute;
+    right: 0;
+    top: 0px;
+    bottom: 0px;
+    display: flex;
+    align-items: center;
+    width: 10px;
+    outline: 0; }
+    .navbar-admin .handler-collapse span {
+      color: white;
+      background: #AAA;
+      display: block;
+      border-radius: 1em;
+      width: 2em;
+      height: 2em;
+      line-height: 2em; }
+  .navbar-admin h3 {
+    border-top: rgba(85, 85, 85, 0.25) thin solid;
+    color: #555;
+    font-size: 1.2em;
+    margin: 0;
+    margin-top: .5em;
+    padding: 2px; }
+  .navbar-admin .btn-expand-collapse {
+    position: absolute;
+    display: block;
+    left: 0px;
+    bottom: 0;
+    width: 100%;
+    padding: 8px 0;
+    border-top: solid 1px #666;
+    color: grey;
+    font-size: 20px;
+    text-align: center; }
+  .navbar-admin .btn-expand-collapse:hover,
+  .navbar-admin .btn-expand-collapse:focus {
+    background-color: #222;
+    color: white; }
+  .navbar-admin .btn-expand-collapse:active {
+    background-color: #111; }
+  .navbar-admin .navbar-primary-menu,
+  .navbar-admin .navbar-primary-menu li {
+    margin: 0;
+    padding: 0;
+    list-style: none; }
+  .navbar-admin .navbar-primary-menu li a {
+    display: block;
+    padding: 10px 18px;
+    text-align: left;
+    border-bottom: solid 1px #444;
+    color: #ccc; }
+  .navbar-admin .navbar-primary-menu li a:hover {
+    background-color: #000;
+    text-decoration: none;
+    color: white; }
+  .navbar-admin .navbar-primary-menu li a .glyphicon {
+    margin-right: 6px; }
+  .navbar-admin .navbar-primary-menu li a:hover .glyphicon {
+    color: orchid; }
+
+.navbar-primary.collapsed {
+  left: -250px; }
+  .navbar-primary.collapsed .handler-collapse span {
+    transform: rotate(180deg); }
+
+.navbar-primary.collapsed .nav-label {
+  display: none; }
 
 .section-title {
   font-weight: 100;
