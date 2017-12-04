@@ -37,6 +37,16 @@ use Zend\View\Model\ViewModel;
  */
 class TimesheetController extends AbstractOscarController
 {
+    /**
+     * Retourne la liste des déclarants actifs
+     */
+    public function declarersAction()
+    {
+        $datas = $this->getServiceLocator()->get('TimesheetService')->getDeclarers();
+        return [
+            'datas' => $datas
+        ];
+    }
 
     public function usurpationAction()
     {
