@@ -6,22 +6,21 @@
     </h1>
     <p>Oscar a rencontré une erreur et a répondu</p>
 
-    <?php
-    /** @var Exception $exception */
-    if( $exception && $exception instanceof Oscar\Exception\OscarException ): ?>
-        <div class="card card-danger"><?= $exception->getMessage() ?></div>
-        <p>Si ce message ne vous aide pas, contactez l'administrateur en lui indiquant ce message.</p>
-    <?php else: ?>
-        <pre>Erreur générique : <strong><?= get_class($exception) ?></strong>
+<?php
+/** @var Exception $exception */
+if( $exception && $exception instanceof Oscar\Exception\OscarException ): ?>
+    <div class="card card-danger"><?= $exception->getMessage() ?></div>
+    <p>Si ce message ne vous aide pas, contactez l'administrateur en lui indiquant ce message.</p>
+<?php else: ?>
+    <pre><h3 style="margin: 0"><small>Erreur générique : <strong><?= get_class($exception) ?></strong></small></h3>
+> <strong><?= $exception->getMessage() ?></strong>
 ---
-<?= $message ?>
----
-         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
-
+    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
 <strong>Stack : </strong>
-         <?php endif; ?>
 <?= $exception->getTraceAsString() ?>
-        </pre>
+
+    <?php endif; ?>
+    </pre>
 <?php endif; ?>
     </section>
 </div>
