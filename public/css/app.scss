@@ -2015,11 +2015,42 @@ span[class*="status"] {
     opacity: 1;
   }
 }
+
+.icon {
+  font-family: fontello;
+  font-weight: normal;
+  font-style: normal;
+  &.draft:before {
+    /**/
+      color: gray;
+      content: '\e882'
+  }
+  &.send:before {
+    /**/
+      color: black;
+      content: '\e88d'
+  }
+  &.reject:before {
+    /**/
+      color: darkred;
+      content: '\e889'
+  }
+  &.valid:before {
+    /**/
+      color: darkolivegreen;
+      content: '\e85b'
+  }
+
+}
 span[class*="status-10"]{
   .icon:before{
     content: '\e85e '
   }
   .label { color: green; }
+}
+
+*[class*="draft"]{
+
 }
 
 span[class*="status-103"] .icon:before{
