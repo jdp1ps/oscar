@@ -7597,6 +7597,27 @@ span[class*="status"] {
   span[class*="status"]:hover .text {
     opacity: 1; }
 
+.icon {
+  font-family: fontello;
+  font-weight: normal;
+  font-style: normal; }
+  .icon.draft:before {
+    /**/
+    color: gray;
+    content: '\e882'; }
+  .icon.send:before {
+    /**/
+    color: black;
+    content: '\e88d'; }
+  .icon.reject:before {
+    /**/
+    color: darkred;
+    content: '\e889'; }
+  .icon.valid:before {
+    /**/
+    color: darkolivegreen;
+    content: '\e85b'; }
+
 span[class*="status-10"] .icon:before {
   content: '\e85e '; }
 

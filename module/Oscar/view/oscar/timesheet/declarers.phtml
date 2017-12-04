@@ -1,14 +1,51 @@
+<style>
+    .activity {
+        border-top: thin #dedede solid;
+        padding: .25em .5em;
+        margin: .5em 1em;
+    }
+    .timesheet {
+        margin-left: 1em;
+        border-bottom: thin #dedede dotted;
+        }
+        .timesheet.draft {
+            opacity: .5;
+            font-size: .9em;
+        }
+</style>
 <section class="container">
     <h1>Déclarants</h1>
     <div id="declarers"></div>
 </section>
 <script>
-require(['vue'], function(Vue){
+require(['vue', 'mm'], function(Vue, moment){
 
 
     let timesheet = {
         props: ['timesheet'],
-        template: `<article class="timesheet">{{ timesheet }}</article>`
+        template: `
+<article class="timesheet" :class="timesheet.status">
+<i class="icon" :class="timesheet.status"></i> {{ timesheet.status }} /
+<strong>{{ timesheet.workpackage_code }}</strong> - {{ timesheet.start | day }} ({{ duration }})
+</article>`,
+        filters: {
+            day(date){
+                return moment(date).format('D MMMM YYYY');
+            }
+        },
+        computed: {
+            duration(){
+                let s = moment(this.timesheet.start),
+                    e = moment(this.timesheet.end),
+                    m = e.diff(s, 'minutes'),
+                    minutes = m%60,
+                    heures = (m - minutes)/60;
+
+
+
+                return heures +"'" + minutes;
+            }
+        }
     };
 
     let activity = {
@@ -41,7 +78,6 @@ require(['vue'], function(Vue){
             <small><i class="icon-mail"></i>{{ person.email }}</small>
         </h3>
         <activity :activity="activity" v-for="activity in person.declarations" />
-        <pre>{{ person }}</pre>
     </article>
 </section>`
     })
