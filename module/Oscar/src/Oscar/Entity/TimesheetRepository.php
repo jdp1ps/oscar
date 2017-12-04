@@ -26,4 +26,16 @@ class TimesheetRepository extends EntityRepository {
             ->getQuery()
             ->getResult();
     }
+
+
+    /**
+     * Retourne la liste des déclarations qui ont un lot de travail.
+     * @return array
+     */
+    public function getTimesheetsWithWorkPackage(){
+        return $this->createQueryBuilder('t')
+            ->innerJoin('t.workpackage', 'wp')
+            ->getQuery()
+            ->getResult();
+    }
 }

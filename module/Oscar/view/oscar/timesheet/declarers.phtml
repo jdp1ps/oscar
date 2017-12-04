@@ -1,0 +1,49 @@
+<section class="container">
+    <h1>Déclarants</h1>
+    <div id="declarers"></div>
+</section>
+<script>
+require(['vue'], function(Vue){
+
+
+    let timesheet = {
+        props: ['timesheet'],
+        template: `<article class="timesheet">{{ timesheet }}</article>`
+    };
+
+    let activity = {
+        props: ['activity'],
+        components: {
+            'timesheet': timesheet
+        },
+        template: `
+<article class="activity">
+    <h4>{{ activity.text }}</h4>
+    <section>
+        <timesheet v-for="timesheet in activity.timesheets" :timesheet="timesheet" />
+    </section>
+</article>`
+    };
+
+    new Vue({
+        components: {
+            'activity': activity
+        },
+        el: "#declarers",
+        data: <?= json_encode($datas) ?>,
+        template: `
+<section>
+    <h2>Déclarants</h2>
+    <article v-for="person in persons" class="card">
+        <h3>
+            <span class="displayname"><i class="icon-user"></i>{{ person.displayname }}</span>
+            <em v-if="person.affectation"> ({{ person.affectation}})</em>
+            <small><i class="icon-mail"></i>{{ person.email }}</small>
+        </h3>
+        <activity :activity="activity" v-for="activity in person.declarations" />
+        <pre>{{ person }}</pre>
+    </article>
+</section>`
+    })
+});
+</script>

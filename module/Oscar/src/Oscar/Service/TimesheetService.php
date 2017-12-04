@@ -35,6 +35,41 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
+    public function getDeclarers(){
+        // Récupération des IDS des déclarants
+        $timesheets = $this->getTimesheetRepository()->getTimesheetsWithWorkPackage();
+        $out = [];
+        $persons = [];
+        $activities = [];
+        /** @var TimeSheet $timesheet */
+        foreach( $timesheets as $timesheet ){
+            /** @var Person $currentPerson */
+            $currentPerson = $timesheet->getPerson();
+
+            if( !array_key_exists($currentPerson->getId(), $persons) ){
+                $persons[$currentPerson->getId()] = $currentPerson->toJson();
+                $persons[$currentPerson->getId()]['declarations'] = [];
+            }
+
+            /** @var Activity $currentActivity */
+            $currentActivity = $timesheet->getActivity();
+
+            if( !array_key_exists($currentActivity->getId(), $persons[$currentPerson->getId()]['declarations']) ){
+                $persons[$currentPerson->getId()]['declarations'][$currentActivity->getId()] = $currentActivity->toJson();
+                $persons[$currentPerson->getId()]['declarations'][$currentActivity->getId()]['timesheets'] = [];
+            }
+
+            $persons[$currentPerson->getId()]['declarations'][$currentActivity->getId()]['timesheets'][] = $timesheet->toJson();
+
+            $out[] = $timesheet->toJson();
+
+        }
+        return [
+            'persons' => $persons,
+        ];
+    }
+
+
 
     public function getActivitiesWithTimesheetSend(){
         $activities = $this->getEntityManager()->createQueryBuilder()->select('a')

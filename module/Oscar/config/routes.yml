@@ -64,12 +64,20 @@ timesheet:
     may_terminate: false
     child_routes:
         # Déclarations d'une personne pour une activité
+        declarers:
+            type: segment
+            options:
+                route: /declarers
+                defaults:
+                    action: declarers
+        # Déclarations d'une personne pour une activité
         declaration:
             type: segment
             options:
                 route: /declaration
                 defaults:
                     action: declaration
+
         usurpation:
             type: segment
             options:
