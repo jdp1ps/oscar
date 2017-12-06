@@ -20,8 +20,42 @@ DELETE FROM organization;
 DELETE FROM authentification;
 DELETE FROM project;
 DELETE FROM administrativedocument;
+DELETE FROM notification;
 
+select setval('activity_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activity), 1)), false);
+select setval('activitydate_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitydate), 1)), false);
+select setval('activitynotification_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitynotification), 1)), false);
+select setval('activityorganization_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activityorganization), 1)), false);
+select setval('activitypayment_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitypayment), 1)), false);
+select setval('activityperson_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activityperson), 1)), false);
+select setval('activitytype_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitytype), 1)), false);
 
-
+select setval('administrativedocument_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM administrativedocument), 1)), false);
+select setval('authentification_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM authentification), 1)), false);
+select setval('categorie_privilege_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM categorie_privilege), 1)), false);
+select setval('contractdocument_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM contractdocument), 1)), false);
+select setval('contracttype_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM contracttype), 1)), false);
+select setval('currency_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM currency), 1)), false);
+select setval('datetype_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM datetype), 1)), false);
+select setval('discipline_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM discipline), 1)), false);
+select setval('grantsource_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM grantsource), 1)), false);
+select setval('logactivity_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM logactivity), 1)), false);
+select setval('notification_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM notification), 1)), false);
+select setval('organization_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM organization), 1)), false);
+select setval('organization_role_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM organization_role), 1)), false);
+select setval('organizationperson_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM organizationperson), 1)), false);
+select setval('organizationrole_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM organizationrole), 1)), false);
+select setval('person_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM person), 1)), false);
+select setval('privilege_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM privilege), 1)), false);
+select setval('project_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM project), 1)), false);
+select setval('projectmember_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM projectmember), 1)), false);
+select setval('projectpartner_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM projectpartner), 1)), false);
+select setval('role_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM role), 1)), false);
+select setval('timesheet_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM timesheet), 1)), false);
+select setval('tva_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM tva), 1)), false);
+select setval('typedocument_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM typedocument), 1)), false);
+select setval('user_role_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM user_role), 1)), false);
+select setval('workpackage_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM workpackage), 1)), false);
+select setval('workpackageperson_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM workpackageperson), 1)), false);
 
 

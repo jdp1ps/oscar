@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Oscar\Import\Data\DataExtractorDate;
 use Oscar\Service\ActivityTypeService;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 
@@ -722,7 +723,7 @@ class Activity implements ResourceInterface
     public function setDateStart($dateStart)
     {
         if( is_string($dateStart) ){
-            $dateStart = new \DateTime($dateStart);
+            $dateStart = (new DataExtractorDate())->extract($dateStart);
         }
         $this->dateStart = $dateStart;
 
@@ -743,7 +744,7 @@ class Activity implements ResourceInterface
     public function setDateEnd($dateEnd)
     {
         if( is_string($dateEnd) ){
-            $dateEnd = new \DateTime($dateEnd);
+            $dateEnd = (new DataExtractorDate())->extract($dateEnd);
         }
         $this->dateEnd = $dateEnd;
 

@@ -111,6 +111,42 @@ $colorGreyDark: #555;
 $colorGreyBlack: #222;
 
 
+.link {
+  color: saturate($brand-primary, 50%);
+  text-decoration: underline;
+  &.small {
+    color: saturate($brand-primary, 50%);
+    font-size: .75em;
+  }
+  &:hover {
+    color: lighten(saturate($brand-primary, 50%), 25%);
+  }
+
+  &[data-tooltip]{
+    background: red;
+    position: relative;
+    &:hover:before{
+      display: block;
+    }
+    &:before{
+      display: none;
+      animation: all .3s;
+      position: absolute;
+      content: attr(data-tooltip);
+      bottom: 1.4em;
+      min-width: 20em;
+      //font-size: .8em;
+      padding: .5em .75em;
+      border: thin solid #333;
+      box-shadow: -4px 4px 1px rgba(0,0,0,.2);
+      z-index: 5;
+      background: #555;
+      color: white;
+    }
+  }
+}
+
+
 html body {
   background-image: url($bg-image) !important;;
   background-size: cover;

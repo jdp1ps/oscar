@@ -29,24 +29,25 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
                 ->where('CONCAT(p.firstname, \' \', p.lastname) = :displayName')
                 ->getQuery();
         }
-        return $queryPerson->setParameter('displayName', $displayName)->getSingleResult();
+        return $queryPerson->setParameter('displayName', $displayName)->getResult();
     }
 
     public function getPersonByDisplayNameOrCreate( $displayName ){
-        try {
-            $person = $this->getPersonByDisplayName($displayName);
-        }
-        catch ( NoResultException $e ){
+
+        $person = $this->getPersonByDisplayName($displayName);
+        if( !$person ) {
             $person = new Person();
-            $preg = preg_match('/(.*) (.*)/i', $displayName, $matches);
+            $preg = preg_match('/(.*)( |\.)(.*)/i', $displayName, $matches);
             if( $preg ) {
                 $this->getEntityManager()->persist($person);
-                $person->setFirstname($matches[1])->setLastname($matches[2]);
+                $person->setFirstname($matches[1])->setLastname($matches[3]);
+                $this->getEntityManager()->flush($person);
             } else {
-                throw new OscarException(sprintf("Impossible de créer la personne à partir du nom complet '%s' : %s", $displayName, $e->getMessage()));
+                return null;
             }
+        } else {
+            return $person[0];
         }
-        return $person;
     }
 
     /**

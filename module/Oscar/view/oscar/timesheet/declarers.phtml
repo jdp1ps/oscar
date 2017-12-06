@@ -14,19 +14,35 @@
         }
 </style>
 <section class="container">
-    <h1>Déclarants</h1>
+    <?= $this->url('contract/show', ['id'=>'ACTIVITYID']) ?>
     <div id="declarers"></div>
+
 </section>
 <script>
 require(['vue', 'mm'], function(Vue, moment){
 
+    // Correspondance entre les statuts et les descriptifs conrespondants
+    const textStatus = {
+        "draft": "Ce créneau n'a pas encore été soumis par le déclarant.",
+        "send": "Ce créneau a été soumis et est en attente validation.",
+        "reject": "Ce créneau a été rejeté.",
+        "valid": "Ce créneau a été validé",
+    };
+
+    const urls = {
+        "activity": "<?= $this->url('contract/show', ['id'=>'IDACTIVITY']) ?>",
+        "activity-timesheet":  "<?= $this->url('timesheet/validation', ['idactivity'=>'IDACTIVITY']) ?>",
+        "person": "<?= $this->url('person/show', ['id'=>'IDACTIVITY']) ?>",
+        "person-usurpation": "<?= $this->url('timesheet/usurpation', ['idperson'=>'IDPERSON', 'idactivity' => 'IDACTIVITY']) ?>",
+    };
 
     let timesheet = {
         props: ['timesheet'],
         template: `
-<article class="timesheet" :class="timesheet.status">
-<i class="icon" :class="timesheet.status"></i> {{ timesheet.status }} /
+<article class="timesheet" :class="timesheet.status"  :data-tooltip="textStatus">
+<i class="icon" :class="timesheet.status"></i>
 <strong>{{ timesheet.workpackage_code }}</strong> - {{ timesheet.start | day }} ({{ duration }})
+<small>{{ textStatus }}</small>
 </article>`,
         filters: {
             day(date){
@@ -34,6 +50,10 @@ require(['vue', 'mm'], function(Vue, moment){
             }
         },
         computed: {
+            textStatus(){
+                return this.timesheet.status + ' : ' + textStatus[this.timesheet.status];
+            },
+
             duration(){
                 let s = moment(this.timesheet.start),
                     e = moment(this.timesheet.end),
@@ -55,11 +75,23 @@ require(['vue', 'mm'], function(Vue, moment){
         },
         template: `
 <article class="activity">
-    <h4>{{ activity.text }}</h4>
+    <h4>
+        <i class="icon-cube"></i>
+        {{ activity.text }}
+         ~
+        <a :href="url" class="link small" role="link" data-tooltip="Ouvrir la fiche de cette activité">
+            <i class="icon-search-outline"></i>
+        </a>
+    </h4>
     <section>
         <timesheet v-for="timesheet in activity.timesheets" :timesheet="timesheet" />
     </section>
-</article>`
+</article>`,
+        computed:{
+            url(){
+                return urls.activity.replace('IDACTIVITY', this.activity.id);
+            }
+        }
     };
 
     new Vue({
