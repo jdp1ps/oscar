@@ -25,18 +25,23 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
     public function getOrganisationByNameOrCreate( $fullName ){
         try {
-
             $qb = $this->getEntityManager()->createQueryBuilder();
             $qb->select('o')
                 ->from(Organization::class, 'o')
-                ->where('o.shortName = :name or o.fullName = :name')
+                ->where('o.shortName = :name OR o.fullName = :name')
                 ->setParameter('name',  $fullName );
-            return $qb->getQuery()->getSingleResult();
-        } catch (NoResultException $e){
-            $organisation = new Organization();
-            $this->getEntityManager()->persist($organisation);
-            $organisation->setShortName($fullName)->setFullName($fullName);
-            return $organisation;
+           $organizations = $qb->getQuery()->getResult();
+           if( count($organizations) == 0 ){
+               $organisation = new Organization();
+               $this->getEntityManager()->persist($organisation);
+               $organisation->setShortName($fullName)->setFullName($fullName);
+               $this->getEntityManager()->flush($organisation);
+               return $organisation;
+           }
+           return $organizations[0];
+        } catch (\Exception $e){
+            echo "Can't create or get Org $fullName \n";
+            return null;
         }
 
     }

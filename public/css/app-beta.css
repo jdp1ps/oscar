@@ -6211,6 +6211,22 @@ button.close {
 .openable.open .icon-openable:before {
   content: '\e860'; }
 
+.link {
+  color: #7f0027;
+  text-decoration: underline; }
+  .link.small {
+    color: #7f0027;
+    font-size: .75em; }
+  .link:hover {
+    color: #ff004d; }
+  .link[data-tooltip] {
+    background: red;
+    position: relative; }
+    .link[data-tooltip]:before {
+      position: absolute;
+      content: "toto";
+      bottom: 1em; }
+
 html body {
   background-image: url("bg-beta.jpg") !important;
   background-size: cover;
@@ -7597,12 +7613,26 @@ span[class*="status"] {
   span[class*="status"]:hover .text {
     opacity: 1; }
 
-.icon.draft:before {
+.icon {
   font-family: fontello;
   font-weight: normal;
-  font-style: normal;
-  color: green;
-  content: '\e85e '; }
+  font-style: normal; }
+  .icon.draft:before {
+    /**/
+    color: gray;
+    content: '\e882'; }
+  .icon.send:before {
+    /**/
+    color: black;
+    content: '\e88d'; }
+  .icon.reject:before {
+    /**/
+    color: darkred;
+    content: '\e889'; }
+  .icon.valid:before {
+    /**/
+    color: darkolivegreen;
+    content: '\e85b'; }
 
 span[class*="status-10"] .icon:before {
   content: '\e85e '; }
