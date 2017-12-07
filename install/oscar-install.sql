@@ -1799,7 +1799,7 @@ COPY activityorganization (id, organization_id, activity_id, main, role, status,
 -- Name: activityorganization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityorganization_id_seq', 83932, true);
+SELECT pg_catalog.setval('activityorganization_id_seq', 1, false);
 
 
 --
@@ -1814,7 +1814,7 @@ COPY activitypayment (id, activity_id, currency_id, datepayment, comment, status
 -- Name: activitypayment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitypayment_id_seq', 2466, true);
+SELECT pg_catalog.setval('activitypayment_id_seq', 1, false);
 
 
 --
@@ -2407,6 +2407,18 @@ SELECT pg_catalog.setval('organizationperson_id_seq', 1, false);
 --
 
 COPY organizationrole (id, label, description, principal, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+5	Co-financeur	\N	f	\N	\N	\N	\N	\N	\N	\N
+6	Coordinateur	\N	f	\N	\N	\N	\N	\N	\N	\N
+8	Client	\N	f	\N	\N	\N	\N	\N	\N	\N
+2	Composante de gestion	\N	t	\N	\N	\N	\N	\N	\N	\N
+1	Laboratoire	\N	t	\N	\N	\N	\N	\N	\N	\N
+3	Financeur	\N	t	\N	\N	\N	\N	\N	\N	\N
+4	Composante responsable	\N	t	\N	\N	\N	\N	\N	\N	\N
+9	Co-contractant	\N	f	\N	\N	\N	\N	\N	\N	\N
+10	Tutelle de gestion	\N	t	\N	\N	\N	\N	\N	\N	\N
+12	Conseiller	\N	f	\N	\N	\N	\N	\N	\N	\N
+13	Partenaire	\N	f	\N	\N	\N	\N	\N	\N	\N
+7	Scientifique		f	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -2414,7 +2426,7 @@ COPY organizationrole (id, label, description, principal, status, datecreated, d
 -- Name: organizationrole_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organizationrole_id_seq', 1, false);
+SELECT pg_catalog.setval('organizationrole_id_seq', 14, false);
 
 
 --
@@ -2500,6 +2512,12 @@ COPY privilege (id, categorie_id, code, libelle, ordre) FROM stdin;
 67	2	TIMESHEET_VALIDATE_SCI	Validation scientifique des déclarations	\N
 68	2	TIMESHEET_VALIDATE_ADM	Validation administrative des déclarations	\N
 69	6	CONNECTOR_ACCESS	Permet de configurer et d'exécuter les connecteurs	\N
+70	2	TIMESHEET_USURPATION	Peut remplir les feuilles de temps des déclarants d'une activité	\N
+71	3	NOTIFICATION_MENU	La personne peut voir le menu notification	\N
+72	2	NOTIFICATIONS_SHOW	Peut voir les notifications planifiées dans la fiche activité	\N
+73	2	NOTIFICATIONS_GENERATE	Peut regénérer manuellement les notifications d'une activité	\N
+74	6	NOTIFICATION_PERSON	Peut notifier manuellement un personne	\N
+75	2	PERSON_ACCESS	Voir les personnes qui ont la vision sur l'activité	\N
 \.
 
 
@@ -2507,7 +2525,7 @@ COPY privilege (id, categorie_id, code, libelle, ordre) FROM stdin;
 -- Name: privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('privilege_id_seq', 70, false);
+SELECT pg_catalog.setval('privilege_id_seq', 75, true);
 
 
 --
@@ -2574,7 +2592,7 @@ SELECT pg_catalog.setval('projectpartner_id_seq', 1, false);
 -- Name: role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('role_id_seq', 1, false);
+SELECT pg_catalog.setval('role_id_seq', 25, false);
 
 
 --
@@ -2978,7 +2996,7 @@ COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status
 -- Name: timesheet_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('timesheet_id_seq', 46, true);
+SELECT pg_catalog.setval('timesheet_id_seq', 1, false);
 
 
 --
@@ -3000,7 +3018,7 @@ COPY tva (id, label, rate, active, status, datecreated, dateupdated, datedeleted
 -- Name: tva_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('tva_id_seq', 1, false);
+SELECT pg_catalog.setval('tva_id_seq', 8, false);
 
 
 --
@@ -3026,7 +3044,7 @@ COPY typedocument (id, label, description, codecentaure, status, datecreated, da
 -- Name: typedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('typedocument_id_seq', 41, true);
+SELECT pg_catalog.setval('typedocument_id_seq', 12, false);
 
 
 --
@@ -3063,7 +3081,7 @@ COPY user_role (id, parent_id, role_id, is_default, ldap_filter, spot, descripti
 -- Name: user_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('user_role_id_seq', 24, true);
+SELECT pg_catalog.setval('user_role_id_seq', 25, false);
 
 
 --
@@ -3093,7 +3111,7 @@ COPY workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted
 -- Name: workpackage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackage_id_seq', 28, true);
+SELECT pg_catalog.setval('workpackage_id_seq', 1, false);
 
 
 --
@@ -3108,7 +3126,7 @@ COPY workpackageperson (id, person_id, duration, status, datecreated, dateupdate
 -- Name: workpackageperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackageperson_id_seq', 6, true);
+SELECT pg_catalog.setval('workpackageperson_id_seq', 1, false);
 
 
 --
