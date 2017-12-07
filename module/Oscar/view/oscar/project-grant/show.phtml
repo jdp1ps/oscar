@@ -508,6 +508,7 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
                     <?php foreach( $entity->getPersonsDeep() as $person ): ?>
                         <li><a class="dropdown-item <?= $entity->hasDeclarant($person) ? '' : ' disabled' ?>" href="<?= $this->url('timesheet/usurpation', ['idactivity' => $entity->getId(), 'idperson' => $person->getPerson()->getId()]) ?>">
                                 <?= $person->getPerson() ?>
+
                                 <?php if(!$entity->hasDeclarant($person)): ?>
                                 <small> (N'est identifié comme déclarant dans aucun lot de travail)</small>
                                 <?php endif; ?>
