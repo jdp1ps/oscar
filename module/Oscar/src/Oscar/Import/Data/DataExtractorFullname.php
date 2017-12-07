@@ -20,10 +20,11 @@ class DataExtractorFullname extends AbstractDataExtractor
         if( !is_string($data) )
             return null;
 
-        if( preg_match('/(.*)( |\.)(.*)/i', $data, $matches) ){
+        if( preg_match('/([\w-]*)( |\.)([\w-]*)( <(.*@.*)>)?/ui', $data, $matches) ){
             return [
                 'firstname' => $matches[1],
                 'lastname' => $matches[3],
+                'email' => count($matches) == 6 ? $matches[5] : ""
             ];
         }
         return null;
