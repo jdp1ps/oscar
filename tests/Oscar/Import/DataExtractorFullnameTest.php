@@ -17,7 +17,6 @@ class DataExtractorFullnameTest extends TestCase
     public function testValid(){
         $extractor = new DataExtractorFullname();
 
-
         $out = $extractor->extract("Stéphane Bouvry");
         $this->assertEquals("Stéphane", $out['firstname']);
         $this->assertEquals("Bouvry", $out['lastname']);
