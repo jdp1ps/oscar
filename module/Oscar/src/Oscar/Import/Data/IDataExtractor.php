@@ -11,6 +11,16 @@ namespace Oscar\Import\Data;
 interface IDataExtractor
 {
     function extract( $data, $params = null );
+
+    /**
+     * Retourne un booléen indiquant si la dernière execution de la méthode extract a retournée une erreur.
+     * @return boolean
+     */
     function hasError();
+
+    /**
+     * Retourne le message d'erreur.
+     * @return string|null
+     */
     function getError();
 }
