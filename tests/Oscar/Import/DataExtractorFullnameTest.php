@@ -23,7 +23,6 @@ class DataExtractorFullnameTest extends TestCase
         $this->assertEquals("", $out['email']);
     }
 
-
     public function testCommatFirst(){
         $extractor = new DataExtractorFullname();
 
