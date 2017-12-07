@@ -1690,10 +1690,16 @@ class Activity implements ResourceInterface
     ///
 
     public function hasDeclarant( $person ){
+
+        if( $person instanceof ActivityPerson || $person instanceof ProjectMember )
+            $person = $person->getPerson();
+
         /** @var WorkPackage $wp */
         foreach( $this->getWorkPackages() as $wp ){
+
+            /** @var WorkPackagePerson $p */
             foreach( $wp->getPersons() as $p ){
-                if( $person == $p->getPerson() ){
+                if( $person->getId() == $p->getPerson()->getId() ){
                     return true;
                 }
             }
