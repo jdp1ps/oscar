@@ -103,8 +103,6 @@ class ConsoleController extends AbstractOscarController
                 "select setval('".$sequence."_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM ".$sequence."), 1)), false);",
                 $result)->execute();
         }
-
-        die();
     }
 
 
