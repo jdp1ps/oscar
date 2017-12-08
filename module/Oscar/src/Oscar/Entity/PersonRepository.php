@@ -46,10 +46,12 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         $person = $this->getPersonByDisplayName($displayName);
         if (!$person) {
             $person = new Person();
+            $this->getEntityManager()->persist($person);
             $fullname = (new DataExtractorFullname())->extract($displayName);
             if ($fullname) {
                 $person->setFirstname($fullname['firstname'])
-                    ->setLastname($fullname['lastname']);
+                    ->setLastname($fullname['lastname'])
+                    ->setEmail($fullname['email']);
 
                 $this->getEntityManager()->flush($person);
             } else {

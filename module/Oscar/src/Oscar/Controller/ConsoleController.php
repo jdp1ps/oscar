@@ -56,8 +56,8 @@ use Zend\Crypt\Password\Bcrypt;
 class ConsoleController extends AbstractOscarController
 {
     public function patch_debug(){
-        $privileges = $this->getEntityManager()->getRepository(Privilege::class)->findAll();
-        /** @var Privilege $p */
+        /*$privileges = $this->getEntityManager()->getRepository(Privilege::class)->findAll();
+
         foreach ( $privileges as $p ){
             echo $p->getId()." - ";
         }
@@ -70,6 +70,7 @@ class ConsoleController extends AbstractOscarController
         $this->getEntityManager()->flush($privilege);
 
         die("OK");
+        */
     }
 
 
@@ -92,8 +93,10 @@ class ConsoleController extends AbstractOscarController
             "notificationperson",
             "organization",
             "organizationperson",
+            "organizationrole",
             "privilege",
             "project",
+            "person",
         ];
 
         foreach ($sequences as $sequence) {
