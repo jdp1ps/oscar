@@ -1854,6 +1854,8 @@ SELECT pg_catalog.setval('activitytype_id_seq', 412, false);
 --
 
 COPY administrativedocument (id, person_id, dateupdoad, path, information, filetypemime, filesize, filename, version, status) FROM stdin;
+6	\N	2016-09-22	oscar-1-demo-docx	Test	application/vnd.openxmlformats-officedocument.wordprocessingml.document; charset=binary	1908	demo.docx	1	5
+10	\N	2016-11-10	oscar-1-document-fictif-pdf	TEST	application/pdf; charset=binary	9035	document-fictif.pdf	1	5
 \.
 
 
@@ -1861,7 +1863,7 @@ COPY administrativedocument (id, person_id, dateupdoad, path, information, filet
 -- Name: administrativedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('administrativedocument_id_seq', 1, false);
+SELECT pg_catalog.setval('administrativedocument_id_seq', 11, false);
 
 
 --
@@ -1908,7 +1910,7 @@ COPY categorie_privilege (id, code, libelle, ordre) FROM stdin;
 -- Name: categorie_privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('categorie_privilege_id_seq', 10, false);
+SELECT pg_catalog.setval('categorie_privilege_id_seq', 1, false);
 
 
 --
@@ -2169,7 +2171,7 @@ COPY contracttype (id, code, label, description, lft, rgt) FROM stdin;
 -- Name: contracttype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('contracttype_id_seq', 232, false);
+SELECT pg_catalog.setval('contracttype_id_seq', 231, true);
 
 
 --
@@ -2309,7 +2311,7 @@ COPY grantsource (id, description, logo, informations, centaureid, label) FROM s
 -- Name: grantsource_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('grantsource_id_seq', 27, false);
+SELECT pg_catalog.setval('grantsource_id_seq', 33, true);
 
 
 --
@@ -2332,6 +2334,9 @@ SELECT pg_catalog.setval('logactivity_id_seq', 1, false);
 --
 
 COPY notification (id, dateeffective, message, context, object, objectid, level, datas, hash, datereal, datecreated, serie) FROM stdin;
+1	2017-12-07	Déclaration en attente de validation dans l'activité [Activity:1:Test de déclaration].	declarationsend	activity	1	400	N;	activity:1:declarationsend:20171207	2017-12-07	2017-12-07 17:12:35+01	activity:1:declarationsend
+2	2017-12-07	Des déclarations ont été validés scientifiquement dans l'activité [Activity:1:Test de déclaration]	validatesci	Activity	1	400	N;	Activity:1:validatesci:20171207	2017-12-07	2017-12-07 17:12:40+01	Activity:1:validatesci
+3	2017-12-07	Des déclarations ont été validées administrativement dans l'activité [Activity:1:Test de déclaration]	validateadmin	Activity	1	400	N;	Activity:1:validateadmin:20171207	2017-12-07	2017-12-07 17:12:44+01	Activity:1:validateadmin
 \.
 
 
@@ -2339,7 +2344,7 @@ COPY notification (id, dateeffective, message, context, object, objectid, level,
 -- Name: notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('notification_id_seq', 1, false);
+SELECT pg_catalog.setval('notification_id_seq', 4, false);
 
 
 --
@@ -2347,6 +2352,13 @@ SELECT pg_catalog.setval('notification_id_seq', 1, false);
 --
 
 COPY notificationperson (id, notification_id, person_id, read) FROM stdin;
+7	1	1	\N
+8	2	1	\N
+9	2	1	\N
+10	2	1	\N
+11	3	1	\N
+12	3	1	\N
+13	3	1	\N
 \.
 
 
@@ -2354,7 +2366,7 @@ COPY notificationperson (id, notification_id, person_id, read) FROM stdin;
 -- Name: notificationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('notificationperson_id_seq', 6, true);
+SELECT pg_catalog.setval('notificationperson_id_seq', 14, false);
 
 
 --
@@ -2426,7 +2438,7 @@ COPY organizationrole (id, label, description, principal, status, datecreated, d
 -- Name: organizationrole_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organizationrole_id_seq', 14, false);
+SELECT pg_catalog.setval('organizationrole_id_seq', 1, false);
 
 
 --
@@ -2434,6 +2446,16 @@ SELECT pg_catalog.setval('organizationrole_id_seq', 14, false);
 --
 
 COPY person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, ldapstatus, ldapsitelocation, ldapaffectation, ldapdisabled, ldapfininscription, ladaplogin, phone, datesyncldap, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, emailprive, harpegeinm, connectors, ldapmemberof) FROM stdin;
+1	Albert	Einstein	\N	\N	\N	albert.einstein@jacksay.com	\N	\N	\N	\N	\N	alberteinstein	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:14:"alberteinstein";}	N;
+2	Norman	Osborn	\N	\N	\N	g.goblin@oscorp.com	\N	\N	\N	\N	\N	\N	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:12:"normanosborn";}	N;
+3	Maurice	Solovine	\N	\N	\N	maurice.solovine@jacksay.com	\N	\N	\N	\N	\N	mauricesolovine	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:15:"mauricesolovine";}	N;
+4	Marcel	Grossmann	\N	\N	\N	marcel.grossmann@jacksay.com	\N	\N	\N	\N	\N	marcelgrossmann	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:15:"marcelgrossmann";}	N;
+5	Max	Plank	\N	\N	\N	max.plank@jacksay.com	\N	\N	\N	\N	\N	maxplank	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:8:"maxplank";}	N;
+6	Niels	Bohr	\N	\N	\N	niels.bohr@jacksay.com	\N	\N	\N	\N	\N	nielsbohr	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:9:"nielsbohr";}	N;
+7	Erwin	Schrödinger	\N	\N	\N	erwin.schrodinger@jacksay.com	\N	\N	\N	\N	\N	erwinschrodinger	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:16:"erwinschrodinger";}	N;
+8	Romane	Administrateur	\N	\N	\N	romane.administrateur@jacksay.com	\N	\N	\N	\N	\N	administrateur	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:14:"administrateur";}	N;
+9	Raphaelle	Responsable	\N	\N	\N	raphaelle.responsable@jacksay.com	\N	\N	\N	\N	\N	responsable	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:11:"responsable";}	N;
+10	Sarah	Déclarant	\N	\N	\N	sarah.declarant@jacksay.com	\N	\N	\N	\N	\N	declarant	\N	2017-12-07 14:26:30	1	2017-12-07 14:26:30	\N	\N	\N	\N	\N	\N	\N	a:1:{s:4:"json";s:9:"declarant";}	N;
 \.
 
 
@@ -2441,7 +2463,7 @@ COPY person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, 
 -- Name: person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('person_id_seq', 1, false);
+SELECT pg_catalog.setval('person_id_seq', 41841, true);
 
 
 --
@@ -2533,6 +2555,8 @@ SELECT pg_catalog.setval('privilege_id_seq', 75, true);
 --
 
 COPY project (id, discipline_id, centaureid, code, eotp, composanteprincipal, acronym, label, description, datecreated, dateupdated, datevalidated) FROM stdin;
+8635	\N	\N	\N	\N	\N	OSCAR	Organisation et Suivi des Contrat et Activité de Recherche		2017-05-05 08:33:20	2017-05-10 11:18:08	\N
+8636	\N	\N	\N	\N	\N	OSCAR	Test sur le référencement des acronymes		2017-05-17 14:22:35	2017-05-17 14:24:11	\N
 \.
 
 
@@ -2548,7 +2572,7 @@ COPY project_discipline (project_id, discipline_id) FROM stdin;
 -- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('project_id_seq', 1, false);
+SELECT pg_catalog.setval('project_id_seq', 8637, false);
 
 
 --
@@ -2570,7 +2594,7 @@ COPY projectmember (id, project_id, person_id, role, datestart, dateend, main, s
 -- Name: projectmember_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('projectmember_id_seq', 1, false);
+SELECT pg_catalog.setval('projectmember_id_seq', 10714, true);
 
 
 --
@@ -2585,14 +2609,14 @@ COPY projectpartner (id, project_id, organization_id, datestart, dateend, main, 
 -- Name: projectpartner_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('projectpartner_id_seq', 1, false);
+SELECT pg_catalog.setval('projectpartner_id_seq', 59703, true);
 
 
 --
 -- Name: role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('role_id_seq', 25, false);
+SELECT pg_catalog.setval('role_id_seq', 1, false);
 
 
 --
@@ -2996,7 +3020,7 @@ COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status
 -- Name: timesheet_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('timesheet_id_seq', 1, false);
+SELECT pg_catalog.setval('timesheet_id_seq', 46, true);
 
 
 --
@@ -3018,7 +3042,7 @@ COPY tva (id, label, rate, active, status, datecreated, dateupdated, datedeleted
 -- Name: tva_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('tva_id_seq', 8, false);
+SELECT pg_catalog.setval('tva_id_seq', 1, false);
 
 
 --
@@ -3044,7 +3068,7 @@ COPY typedocument (id, label, description, codecentaure, status, datecreated, da
 -- Name: typedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('typedocument_id_seq', 12, false);
+SELECT pg_catalog.setval('typedocument_id_seq', 41, true);
 
 
 --
@@ -3081,7 +3105,7 @@ COPY user_role (id, parent_id, role_id, is_default, ldap_filter, spot, descripti
 -- Name: user_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('user_role_id_seq', 25, false);
+SELECT pg_catalog.setval('user_role_id_seq', 24, true);
 
 
 --
@@ -3111,7 +3135,7 @@ COPY workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted
 -- Name: workpackage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackage_id_seq', 1, false);
+SELECT pg_catalog.setval('workpackage_id_seq', 28, true);
 
 
 --
@@ -3126,7 +3150,7 @@ COPY workpackageperson (id, person_id, duration, status, datecreated, dateupdate
 -- Name: workpackageperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackageperson_id_seq', 1, false);
+SELECT pg_catalog.setval('workpackageperson_id_seq', 6, true);
 
 
 --
