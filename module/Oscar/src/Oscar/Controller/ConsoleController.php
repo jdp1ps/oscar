@@ -55,6 +55,59 @@ use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
 {
+    public function patch_debug(){
+        $privileges = $this->getEntityManager()->getRepository(Privilege::class)->findAll();
+        /** @var Privilege $p */
+        foreach ( $privileges as $p ){
+            echo $p->getId()." - ";
+        }
+
+        //
+        $privilege = new Privilege();
+        $privilege->setLibelle("TEST_PRIVILEGE")
+            ->setCode("TEST_PRIVILEGE");
+        $this->getEntityManager()->persist($privilege);
+        $this->getEntityManager()->flush($privilege);
+
+        die("OK");
+    }
+
+
+    public function patch_fixSequenceAutoNum(){
+        $sequences = [
+            "activity",
+            "activitydate",
+            "activityorganization",
+            "activitypayment",
+            "activityperson",
+            "activitytype",
+            "administrativedocument",
+            "authentification",
+            "contractdocument",
+            "currency",
+            "datetype",
+            "discipline",
+            "logactivity",
+            "notification",
+            "notificationperson",
+            "organization",
+            "organizationperson",
+            "privilege",
+            "project",
+        ];
+
+        foreach ($sequences as $sequence) {
+            $result = new Query\ResultSetMapping();
+            echo "Update numeration for $sequence\n";
+            $this->getEntityManager()->createNativeQuery(
+                "select setval('".$sequence."_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM ".$sequence."), 1)), false);",
+                $result)->execute();
+        }
+
+        die();
+    }
+
+
     /**
      * Retourne la liste des clefs utilisateurs disposant du privilège.
      */
