@@ -42,7 +42,6 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      */
     public function getPersonByDisplayNameOrCreate($displayName)
     {
-
         $person = $this->getPersonByDisplayName($displayName);
         if (!$person) {
             $person = new Person();
