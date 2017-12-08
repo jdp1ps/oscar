@@ -22,14 +22,14 @@ DELETE FROM project;
 DELETE FROM administrativedocument;
 DELETE FROM notification;
 
+-- Recalcule des séquences
 select setval('activity_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activity), 1)), false);
 select setval('activitydate_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitydate), 1)), false);
-select setval('activitynotification_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitynotification), 1)), false);
+--select setval('activitynotification_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitynotification), 1)), false);
 select setval('activityorganization_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activityorganization), 1)), false);
 select setval('activitypayment_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitypayment), 1)), false);
 select setval('activityperson_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activityperson), 1)), false);
 select setval('activitytype_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM activitytype), 1)), false);
-
 select setval('administrativedocument_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM administrativedocument), 1)), false);
 select setval('authentification_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM authentification), 1)), false);
 select setval('categorie_privilege_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM categorie_privilege), 1)), false);
