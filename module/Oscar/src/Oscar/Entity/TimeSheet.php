@@ -336,7 +336,7 @@ class TimeSheet implements ITrackable
     /**
      * @return string
      */
-    public function getIcsUid(): string
+    public function getIcsUid()
     {
         return $this->icsUid;
     }
@@ -354,7 +354,7 @@ class TimeSheet implements ITrackable
     /**
      * @return string
      */
-    public function getIcsFileUid(): string
+    public function getIcsFileUid()
     {
         return $this->icsFileUid;
     }
@@ -372,7 +372,7 @@ class TimeSheet implements ITrackable
     /**
      * @return string
      */
-    public function getIcsFileName(): string
+    public function getIcsFileName()
     {
         return $this->icsFileName;
     }
