@@ -1696,7 +1696,6 @@ class Activity implements ResourceInterface
 
         /** @var WorkPackage $wp */
         foreach( $this->getWorkPackages() as $wp ){
-
             /** @var WorkPackagePerson $p */
             foreach( $wp->getPersons() as $p ){
                 if( $person->getId() == $p->getPerson()->getId() ){
