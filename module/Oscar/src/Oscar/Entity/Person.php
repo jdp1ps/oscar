@@ -641,8 +641,8 @@ class Person implements ResourceInterface
             'email'                 => $this->getEmail(),
             'mail'                  => $this->getEmail(),
             'mailMd5'               => md5($this->getEmail()),
-            'ucbnSiteLocalisation'  => $this->getLdapSiteLocation() ?? "",
-            'affectation' => $this->getLdapAffectation() ?? ""
+            'ucbnSiteLocalisation'  => $this->getLdapSiteLocation() ? $this->getLdapSiteLocation() : "",
+            'affectation'           => $this->getLdapAffectation() ? $this->getLdapAffectation() :  ""
         );
     }
 
