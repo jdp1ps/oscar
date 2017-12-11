@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "d55c216525e1922d834988598c52c0ff",
+    "content-hash": "1dedc4c2a81d655d6773cc86e16972ec",
     "packages": [
         {
             "name": "bjyoungblood/bjy-authorize",
@@ -1059,6 +1059,42 @@
                 "validate"
             ],
             "time": "2017-08-14T05:06:04+00:00"
+        },
+        {
+            "name": "jacksay/php-file-extension",
+            "version": "0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Jacksay/php-file-extension.git",
+                "reference": "56aa4a38b6561f3a4a1bda025d8396c6d6bbc447"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Jacksay/php-file-extension/zipball/56aa4a38b6561f3a4a1bda025d8396c6d6bbc447",
+                "reference": "56aa4a38b6561f3a4a1bda025d8396c6d6bbc447",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "6.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Jacksay": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "jacksay",
+                    "email": "jacksay@jacksay.com"
+                }
+            ],
+            "description": "Utils for check and get file extension",
+            "time": "2017-12-11T07:44:49+00:00"
         },
         {
             "name": "jasig/phpcas",

@@ -199,6 +199,7 @@ class VersionnedDocumentService {
 
             $manager->addExtension('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx')
                 ->addExtension('application/vnd.ms-office', 'docx', 'Document Microsoft Office')
+                ->addExtension('text/plain', 'txt', 'Fichier texte')
                 ->addExtension('text/csv', 'csv', 'Comma Separated Values');
 
         }
