@@ -17,6 +17,13 @@ use Zend\View\Model\ViewModel;
  */
 class PublicController extends AbstractOscarController
 {
+
+    public function gitlogAction(){
+        exec('git log --pretty=format:"<span class="hash">%h</span><span class="author">%an</span><time>%ai</time><span class="message">%s</span>"', $log);
+        return ['log' => $log];
+    }
+
+
     public function accessAction()
     {
         $accessResolverService = $this->getAccessResolverService();

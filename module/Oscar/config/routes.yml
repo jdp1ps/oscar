@@ -21,6 +21,14 @@ changelog:
             controller: Public
             action: changelog
 
+gitlog:
+    type: literal
+    options:
+        route: /gitlog
+        defaults:
+            controller: Public
+            action: gitlog
+
 ################################################################################
 # NOTIFICATIONS
 notification:
