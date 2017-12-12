@@ -321,6 +321,9 @@ $this->headScript();
                             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                                 <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
                             <?php endif; ?>
+                            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION)): ?>
+                                <li><a href="<?= $this->url('timesheet/declarers') ?>">Liste des déclarants</a></li>
+                            <?php endif; ?>
                         </ul>
                     </section>
 
@@ -413,8 +416,13 @@ $this->headScript();
                     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX) ): ?>
                     <span id="connected"></span>
                     <?php endif; ?>
-                    <strong>OSCAR</strong><sup>&copy</sup> - <em><?= $this->appInfos()->desc ?></em><br>
-                    <small><?= \Oscar\OscarVersion::getBuild() ?></small>
+
+
+
+                        <strong>OSCAR</strong><sup>&copy</sup> - <em><?= $this->appInfos()->desc ?></em><br>
+                    <a href="<?= $this->url('gitlog') ?>">
+                        <small><?= \Oscar\OscarVersion::getBuild() ?></small>
+                    </a>
                 </div>
             </div>
         </footer>

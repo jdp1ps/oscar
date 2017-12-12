@@ -29,7 +29,7 @@ return array(
                 ////////////////////////////////////////////////////////////////////////
                 // PUBLIC
                 [ 'controller' =>  'Public',
-                    'action' => ['index'],
+                    'action' => ['index', 'gitlog'],
                     'roles' => [],
                 ],
                 [ 'controller' =>  'Public',
@@ -531,7 +531,7 @@ return array(
                 ],
                 'oscar_activityfile_sync' => [
                     'options' => array(
-                        'route' => 'oscar activity:sync <fichier> [-f|--force]',
+                        'route' => 'oscar activity:sync <fichier> [-f|--force] [--create-missing-project] [--create-missing-person] [--create-missing-organization] [--create-missing-person-role] [--create-missing-organization-role] [--create-missing-activity-type]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'activityFileSync',
