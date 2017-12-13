@@ -226,3 +226,5 @@ Les données sont sous la forme :
 ```
 
 
+Recalculer 
+
