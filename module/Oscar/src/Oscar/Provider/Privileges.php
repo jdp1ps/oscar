@@ -80,6 +80,7 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const MAINTENANCE_MENU_ADMIN            = 'MAINTENANCE-MENU_ADMIN';
     const MAINTENANCE_CONNECTOR_ACCESS      = 'MAINTENANCE-CONNECTOR_ACCESS';
     const MAINTENANCE_NOTIFICATION_PERSON      = 'MAINTENANCE-NOTIFICATION_PERSON';
+    const MAINTENANCE_DECLARERS_INDEX = "MAINTENANCE-DECLARERS_INDEX";
 
     const ORGANIZATION_TEST = 'ORGANIZATION-TEST';
 
@@ -87,6 +88,7 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const DROIT_USER_EDITION               = 'droit-USER_EDITION';
     const DROIT_ROLEORGA_VISUALISATION     = 'droit-ROLEORGA_VISUALISATION';
     const DROIT_ROLEORGA_EDITION           = 'droit-ROLEORGA_EDITION';
+
 
     const PERSON_SHOW_INM           = 'PERSON-SYNC_LDA';
 
