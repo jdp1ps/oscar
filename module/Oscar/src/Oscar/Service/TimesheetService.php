@@ -359,6 +359,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Récupération des créneaux correspondant
         $timesheets = $this->getTimesheetRepository()->getTimesheetsByIcsFileUid($icsUid);
 
+
+        $this->getServiceLocator()->get('Logger')->info("Nombre de créneaux à traiter : " . count($timesheets));
+
         // Liste des problèmes
         $warnings = [];
 
@@ -369,16 +372,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var TimeSheet $timesheet */
         foreach( $timesheets as $timesheet ){
             if($timesheet->getPerson() != $by ){
-                $warnings[] = sprintf("Le créneau '%s' n'a pas été supprimé (owner error).");
+                $warnings[] = sprintf("Le créneau '%s' n'a pas été supprimé (owner error).", $timesheet);
                 continue;
             }
             if( !in_array($timesheet->getStatus(), $status) ){
-                $warnings[] = sprintf("Le créneau '%s' n'a pas été supprimé (statut error).");
+                $warnings[] = sprintf("Le créneau '%s' n'a pas été supprimé (statut error).", $status);
                 continue;
             }
             $this->getEntityManager()->remove($timesheet);
         }
         $this->getEntityManager()->flush();
+        $this->getServiceLocator()->get('Logger')->info("warnings : " . count($warnings));
         return $warnings;
     }
 

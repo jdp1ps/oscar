@@ -119,13 +119,42 @@ class TimesheetController extends AbstractOscarController
         }
 
         if ($method == 'DELETE') {
-            $timesheetId = $this->params()->fromQuery('timesheet');
+            $timesheetId = $this->params()->fromQuery('timesheet', null);
+
+            // UID de l'ICS
+            $icsUid = $this->params()->fromQuery('icsuid', null);
+
             if ($timesheetId) {
-                if ($timeSheetService->delete($timesheetId, $person)){
+                if ($timeSheetService->delete($timesheetId,
+                    $this->getCurrentPerson())
+                ) {
                     return $this->getResponseOk('Créneaux supprimé');
                 }
             }
+            elseif ($icsUid) {
+                $this->getLogger()->info("Suppression d'un ICS");
+                try {
+                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $this->getCurrentPerson());
+                    $this->getLogger()->info("Suppression OK warn = " . count($warnings));
+                    foreach ($warnings as $w){
+                        $this->getLogger()->info($w);
+                    }
+                    return $this->getResponseOk(json_encode($warnings));
+                }
+                catch (\Exception $e ){
+                    $this->getLogger()->err($e->getMessage());
+                    return $this->getResponseInternalError("Impossible de supprimer ce calendrier : " . $e->getMessage());
+                }
+            }
+
             return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
+//            $timesheetId = $this->params()->fromQuery('timesheet');
+//            if ($timesheetId) {
+//                if ($timeSheetService->delete($timesheetId, $person)){
+//                    return $this->getResponseOk('Créneaux supprimé');
+//                }
+//            }
+//            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
         }
 
         $wpDeclarants = [];

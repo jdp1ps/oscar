@@ -11,6 +11,8 @@ namespace Oscar\Entity;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\IConnectedRepository;
+use Oscar\Import\Activity\FieldStrategy\FieldImportOrganizationStrategy;
+use Oscar\Import\Data\DataExtractorOrganization;
 
 class OrganizationRepository extends EntityRepository implements IConnectedRepository
 {
@@ -23,6 +25,21 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $this->getEntityManager()->flush($personOrganization);
     }
 
+    /**
+     * @param $fullName
+     * @return Organization
+     */
+    public function createFromFullName( $fullName ){
+        $organisation = new Organization();
+        $this->getEntityManager()->persist($organisation);
+        $datas = (new DataExtractorOrganization())->extract($fullName);
+        $organisation->setCode($datas['code'])
+            ->setFullName($fullName)
+            ->setShortName($datas['shortname']);
+        $this->getEntityManager()->flush($organisation);
+        return $organisation;
+    }
+
     public function getOrganisationByNameOrCreate( $fullName ){
         try {
             $qb = $this->getEntityManager()->createQueryBuilder();
@@ -32,11 +49,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
                 ->setParameter('name',  $fullName );
            $organizations = $qb->getQuery()->getResult();
            if( count($organizations) == 0 ){
-               $organisation = new Organization();
-               $this->getEntityManager()->persist($organisation);
-               $organisation->setShortName($fullName)->setFullName($fullName);
-               $this->getEntityManager()->flush($organisation);
-               return $organisation;
+               return $this->createFromFullname($fullName);
            }
            return $organizations[0];
         } catch (\Exception $e){
