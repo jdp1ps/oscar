@@ -1412,6 +1412,26 @@ class Activity implements ResourceInterface
         return $inCharge;
     }
 
+    public function hasMilestoneAt( DateType $type, \DateTime $date){
+        /** @var ActivityDate $milestone */
+        foreach ($this->getMilestones() as $milestone ){
+            if( $milestone->getDateStart() == $date  && $milestone->getType() == $type ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function hasPaymentAt( $amount, \DateTime $date ){
+        /** @var ActivityPayment $payment */
+        foreach ($this->getPayments() as $payment ){
+            if( $payment->getDatePayment() == $date  && $payment->getAmount() == $amount ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Test si l'organisation est présente sur l'activité de recherche.
      *

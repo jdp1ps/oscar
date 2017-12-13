@@ -168,19 +168,92 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
 
         // Devise par défaut
         $defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
+        $out = [];
+
+
+        $i = 1;
 
         while($datas = fgetcsv($this->csvDatas)){
-            $activity = new Activity();
-            $this->entityManager->persist($activity);
+
+            $json = [
+                "uid" => 'LN-' . ($i++),
+                "organizations" => [],
+                "persons" => [],
+                "milestones" => [],
+                "payments" => [],
+            ];
+//            $activity = new Activity();
+//            $this->entityManager->persist($activity);
             foreach ($datas as $index => $value ){
                 if( !$value ) continue;
-                $handler = $this->getHandler($index);
-                if( $handler != null )
-                    $handler->run($activity, $datas, $index);
+
+                if( !array_key_exists($index, $this->config) )
+                    continue;
+
+                // Si la clef existe mais que la valeur de conf est vide on passe
+                if( !$this->config[$index] )
+                    continue;
+
+                // Si la clef est une chaîne, on détermine si c'est un appel de setter
+                // simple ou un mécanisme plus "avancé"
+                $key = $this->config[$index];
+
+
+                if( preg_match("/organizations\.(.*)/", $key, $matches) ){
+                    $role = $matches[1];
+                    if( !array_key_exists($role, $json['organizations']) ){
+                        $json['organizations'][$role] = [];
+                    }
+                    if( !in_array($value, $json['organizations'][$role]) ){
+                        $json['organizations'][$role][] = $value;
+                    }
+                }
+
+                else if( preg_match("/persons\.(.*)/", $key, $matches) ){
+                    $role = $matches[1];
+                    if( !array_key_exists($role, $json['persons']) ){
+                        $json['persons'][$role] = [];
+                    }
+                    if( !in_array($value, $json['persons'][$role]) ){
+                        $json['persons'][$role][] = $value;
+                    }
+                }
+
+                else if( preg_match("/milestones\.(.*)/", $key, $matches) ){
+                    $json['milestones'][] = [
+                        "type" => $matches[1],
+                        "date" => $value
+                    ];
+                }
+
+                else if( preg_match("/payments\.(.*)/", $key, $matches) ){
+                    $json['payments'][] = [
+                        "amount" => $datas[$index+1],
+                        "date" => $value
+                    ];
+                }
+
+                else if( $key == "codeEOTP" ){ $json['pfi'] = $value; }
+                else if( $key == "amount" ){ $json['amount'] = $value; }
+                else if( $key == "dateStart" ){ $json['datestart'] = $value; }
+                else if( $key == "dateEnd" ){ $json['dateend'] = $value; }
+                else if( $key == "label" ){ $json['label'] = $value; }
+
+                else if( $key == "project." ){
+                    $json['acronym'] = $value;
+                    $json['projectlabel'] = $value;
+                }
+
+                else {
+                    echo "\n### Traitement de la colonne $index => $key ///////// $value \n";
+                }
+
+
             }
-            $this->entityManager->flush($activity);
+            $out[] = $json;
         }
-        return $repport;
+
+        return $out;
     }
 
     public function syncOne($key)

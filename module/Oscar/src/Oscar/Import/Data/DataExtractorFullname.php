@@ -24,6 +24,7 @@ class DataExtractorFullname extends AbstractDataExtractor
             return [
                 'firstname' => $matches[1],
                 'lastname' => $matches[3],
+                'fullname' => $matches[1].' '.$matches[3],
                 'email' => count($matches) == 6 ? $matches[5] : ""
             ];
         }

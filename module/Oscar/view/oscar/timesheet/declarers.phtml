@@ -14,9 +14,7 @@
         }
 </style>
 <section class="container">
-    <?= $this->url('contract/show', ['id'=>'ACTIVITYID']) ?>
     <div id="declarers"></div>
-
 </section>
 <script>
 require(['vue', 'mm'], function(Vue, moment){
@@ -102,7 +100,7 @@ require(['vue', 'mm'], function(Vue, moment){
         data: <?= json_encode($datas) ?>,
         template: `
 <section>
-    <h2>Déclarants</h2>
+    <h2><i class="icon-group"></i> Déclarants</h2>
     <article v-for="person in persons" class="card">
         <h3>
             <span class="displayname"><i class="icon-user"></i>{{ person.displayname }}</span>
