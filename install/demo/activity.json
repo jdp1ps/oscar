@@ -11,6 +11,7 @@
     "type": "ANR",
     "amount": "0.0",
     "organizations": {
+      "Référent extérieur": [],
       "Laboratoire": [
         "Cyberdyne",
         "US Robots"
@@ -36,6 +37,12 @@
     "pfi": "",
     "type": "Colloques",
     "amount": 15000,
+    "milestones": [
+
+    ],
+    "payments": [
+
+    ],
     "organizations": {
       "Laboratoire": [
         "Cyberdyne",
