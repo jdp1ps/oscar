@@ -24,7 +24,7 @@ abstract class JsonToObject
      * @param $fieldName
      * @return bool
      */
-    protected function isRequired($fieldName): bool
+    protected function isRequired($fieldName)
     {
         return in_array($fieldName, $this->requiredFieldsName);
     }
