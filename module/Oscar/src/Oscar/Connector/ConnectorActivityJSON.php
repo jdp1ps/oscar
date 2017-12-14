@@ -412,95 +412,95 @@ class ConnectorActivityJSON implements ConnectorInterface
 
 
 
-//            //// TRAITEMENT des ORGANISATIONS
-//            foreach( $data->organizations as $role=>$organizations ){
-//                try {
-//
-//                    $roleObj = $this->getRoleOrganizationOrCreate( $role );
-//
-//                    foreach( $organizations as $fullName ){
-//                        try {
-//                            $organization = $this->getOrganizationOrCreate($fullName);
-//
-//                            if( !$activity->hasOrganization($organization, $roleObj->getLabel()) ){
-//                                $activityOrganization = new ActivityOrganization();
-//                                $this->entityManager->persist($activityOrganization);
-//                                $activityOrganization->setOrganization($organization)
-//                                    ->setActivity($activity)
-//                                    ->setRoleObj($roleObj);
-//                                $this->entityManager->flush($activityOrganization);
-//                                $repport->addadded(sprintf("L'oganisation '%s' a été ajoutée dans %s avec le rôle '%s'.", $fullName, $activity, $role));
-//                            }
-//                        } catch( \Exception $e ){
-//                            $repport->adderror(sprintf("Impossible d'affecter %s comme %s dans %s : %s.", $fullName, $role, $activity, $e->getMessage()));
-//                            return $repport;
-//                        }
-//                    }
-//                } catch( \Exception $e ){
-//                    $repport->adderror($e->getMessage());
-//                    return $repport;
-//                }
-//            }
-//
-//            //// TRAITEMENT des PERSONNES
-//            foreach( $data->persons as $role=>$persons ){
-//                try {
-//
-//                    ////////////////////////////////////////////////////////////
-//                    $roleObj = $this->getRolePersonOrCreate( $role );
-//
-//
-//                    foreach( $persons as $fullName ){
-//
-//                        $datasPerson = (new DataExtractorFullname())->extract($fullName);
-//                        $person = $this->getPersonOrCreate($datasPerson);
-//
-//
-//                        if( !$activity->hasPerson($person, $role) ){
-//                            try {
-//                                $personActivity = new ActivityPerson();
-//                                $this->entityManager->persist($personActivity);
-//                                $personActivity->setPerson($person)
-//                                    ->setActivity($activity)
-//                                    ->setRoleObj($roleObj);
-//                                $this->entityManager->flush($personActivity);
-//                                $repport->addadded(sprintf("%s a été ajoutée dans %s avec le rôle %s.", $fullName, $activity, $role));
-//
-//                            } catch( \Exception $e ){
-//                                $repport->addadded(sprintf("Impossible d'ajouter %s dans %s avec le rôle %s : %s.", $fullName, $activity, $role, $e->getMessage()));
-//                            }
-//                        }
-//                    }
-//                } catch( \Exception $e ){
-//                    $repport->addwarning(sprintf("Impossible d'ajouter la personne '%s' avec le rôle '%s' dans l'activité '%s' : %s",
+            //// TRAITEMENT des ORGANISATIONS
+            foreach( $data->organizations as $role=>$organizations ){
+                try {
+
+                    $roleObj = $this->getRoleOrganizationOrCreate( $role );
+
+                    foreach( $organizations as $fullName ){
+                        try {
+                            $organization = $this->getOrganizationOrCreate($fullName);
+
+                            if( !$activity->hasOrganization($organization, $roleObj->getLabel()) ){
+                                $activityOrganization = new ActivityOrganization();
+                                $this->entityManager->persist($activityOrganization);
+                                $activityOrganization->setOrganization($organization)
+                                    ->setActivity($activity)
+                                    ->setRoleObj($roleObj);
+                                $this->entityManager->flush($activityOrganization);
+                                $repport->addadded(sprintf("L'oganisation '%s' a été ajoutée dans %s avec le rôle '%s'.", $fullName, $activity, $role));
+                            }
+                        } catch( \Exception $e ){
+                            $repport->adderror(sprintf("Impossible d'affecter %s comme %s dans %s : %s.", $fullName, $role, $activity, $e->getMessage()));
+                            return $repport;
+                        }
+                    }
+                } catch( \Exception $e ){
+                    $repport->adderror($e->getMessage());
+                    return $repport;
+                }
+            }
+
+            //// TRAITEMENT des PERSONNES
+            foreach( $data->persons as $role=>$persons ){
+                try {
+
+                    ////////////////////////////////////////////////////////////
+                    $roleObj = $this->getRolePersonOrCreate( $role );
+
+
+                    foreach( $persons as $fullName ){
+
+                        $datasPerson = (new DataExtractorFullname())->extract($fullName);
+                        $person = $this->getPersonOrCreate($datasPerson);
+
+
+                        if( !$activity->hasPerson($person, $role) ){
+                            try {
+                                $personActivity = new ActivityPerson();
+                                $this->entityManager->persist($personActivity);
+                                $personActivity->setPerson($person)
+                                    ->setActivity($activity)
+                                    ->setRoleObj($roleObj);
+                                $this->entityManager->flush($personActivity);
+                                $repport->addadded(sprintf("%s a été ajoutée dans %s avec le rôle %s.", $fullName, $activity, $role));
+
+                            } catch( \Exception $e ){
+                                $repport->addadded(sprintf("Impossible d'ajouter %s dans %s avec le rôle %s : %s.", $fullName, $activity, $role, $e->getMessage()));
+                            }
+                        }
+                    }
+                } catch( \Exception $e ){
+                    $repport->addwarning(sprintf("Impossible d'ajouter la personne '%s' avec le rôle '%s' dans l'activité '%s' : %s",
+                        $fullName, $role, $activity, $e->getMessage()));
+                }
+            }
+
+            ///////////////////////////////////////////////////////// MILESTONES
+            foreach ( $data->milestones as $milestone ){
+                try {
+                    $type = $this->getMilestoneTypeOrCreate($milestone->type);
+                    try {
+                        $date = new \DateTime($milestone->date);
+                    } catch (\Exception $e) {
+                        throw new \Exception(sprintf("Impossible de convertir '%s' en objet Date : %s", $milestone->date, $e->getMessage()));
+                    }
+
+                    if( !$activity->hasMilestoneAt( $type, $date ) ){
+                        $milestoneActivity = new ActivityDate();
+                        $this->entityManager->persist($milestoneActivity);
+                        $milestoneActivity->setType($type)
+                            ->setActivity($activity)
+                            ->setDateStart($date);
+                        $this->entityManager->flush($milestoneActivity);
+                        $repport->addadded(sprintf("Jalon '%s'(date : %s) ajouté dans '%s'", $milestone->type, $milestone->date, $activity));
+                    }
+                } catch (\Exception $e ){
+                    $repport->adderror(sprintf("Impossible d'ajouter le jalon '%s'(date : %s) dans '%s' : %s", $milestone->type, $milestone->date, $activity, $e->getMessage()));
 //                        $fullName, $role, $activity, $e->getMessage()));
-//                }
-//            }
-//
-//            ///////////////////////////////////////////////////////// MILESTONES
-//            foreach ( $data->milestones as $milestone ){
-//                try {
-//                    $type = $this->getMilestoneTypeOrCreate($milestone->type);
-//                    try {
-//                        $date = new \DateTime($milestone->date);
-//                    } catch (\Exception $e) {
-//                        throw new \Exception(sprintf("Impossible de convertir '%s' en objet Date : %s", $milestone->date, $e->getMessage()));
-//                    }
-//
-//                    if( !$activity->hasMilestoneAt( $type, $date ) ){
-//                        $milestoneActivity = new ActivityDate();
-//                        $this->entityManager->persist($milestoneActivity);
-//                        $milestoneActivity->setType($type)
-//                            ->setActivity($activity)
-//                            ->setDateStart($date);
-//                        $this->entityManager->flush($milestoneActivity);
-//                        $repport->addadded(sprintf("Jalon '%s'(date : %s) ajouté dans '%s'", $milestone->type, $milestone->date, $activity));
-//                    }
-//                } catch (\Exception $e ){
-//                    $repport->adderror(sprintf("Impossible d'ajouter le jalon '%s'(date : %s) dans '%s' : %s", $milestone->type, $milestone->date, $activity, $e->getMessage()));
-////                        $fullName, $role, $activity, $e->getMessage()));
-//                }
-//            }
+                }
+            }
             foreach ($data->payments as $paymentData) {
 
                 try {
