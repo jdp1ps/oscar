@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Université de Caen" />
+  <title>Importer des activités dans Oscar</title>
+  <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+    integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
+    crossorigin="anonymous">
+  <style type="text/css">
+      .container {
+        max-width: 1000px;
+        margin: auto;
+        background: #efefef;
+        padding: 1em;
+      }
+      body {
+        font-size: 16px;
+        background: #dddddd;
+      }
+      table {
+        background: white;
+      }
+      table td, table th {
+        padding: .5em;
+      }
+      table tbody tr {
+        border: thin solid #ddd;
+      }
+      .sourceCode pre {
+        border: thin solid #ddd;
+        background: white;
+        padding: .2em .5em;
+      }
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.line-block{white-space: pre-line;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<section class="container">
+<header class="jumbotron">
+<h1 class="title">Importer des activités dans Oscar</h1>
+<p class="author">Université de Caen</p>
+<p class="date">Décembre 2017</p>
+</header>
+<h1 id="import-initial-des-activités">Import initial des activités</h1>
+<h2 id="script-dimportation">Script d'importation</h2>
+<p><strong>Oscar</strong> dispose d'un utilitaire en ligne de commande permettant de synchroniser des activités depuis <strong>un fichier JSON</strong>.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">php</span> public/index.php oscar activity:sync path/to/file.json</code></pre></div>
+<p>Un échantillon de ce fichier est disponible dans les sources de l'application dans le dossier <code>./install/demo/activity.json</code>. Le contenu du fichier se présente sous la forme d'un tableau d'objet.</p>
+<p>Chaque objet correspond à UNE activité.</p>
+<p>Voici la liste des clefs attendues :</p>
+<table style="width:99%;">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="59%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Clef</th>
+<th align="left">Type</th>
+<th align="left">PÊ Vide</th>
+<th align="left">Unique</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">uid</td>
+<td align="left">String</td>
+<td align="left">Non</td>
+<td align="left">Oui</td>
+<td align="left">Identifiant d'import (évite les doublons et permet de mettre à jour les données importées</td>
+</tr>
+<tr class="even">
+<td align="left">acronym</td>
+<td align="left">String</td>
+<td align="left">Non</td>
+<td align="left">Non</td>
+<td align="left">Acronyme du projet, Si Oscar trouve pas de projet existant avec cet acronyme, il le créera automatiquement</td>
+</tr>
+<tr class="odd">
+<td align="left">projectlabel</td>
+<td align="left">String</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Utiliser pour créer le projet si il n'existe pas</td>
+</tr>
+<tr class="even">
+<td align="left">label</td>
+<td align="left">String</td>
+<td align="left">NR</td>
+<td align="left">Non</td>
+<td align="left">Intitulé de l'activité</td>
+</tr>
+<tr class="odd">
+<td align="left">datestart</td>
+<td align="left">Date ISO</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Date de début de l'activité</td>
+</tr>
+<tr class="even">
+<td align="left">dateend</td>
+<td align="left">Date ISO</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Date de fin de l'activité</td>
+</tr>
+<tr class="odd">
+<td align="left">pfi</td>
+<td align="left">String</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">EOTP/PFI de l'activité de recherche</td>
+</tr>
+<tr class="even">
+<td align="left">type</td>
+<td align="left">String</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Type d'activité, si Oscar ne trouve pas de type correspondant, la donnée est ignorée</td>
+</tr>
+<tr class="odd">
+<td align="left">amount</td>
+<td align="left">Double</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Montant de la convention</td>
+</tr>
+<tr class="even">
+<td align="left">organizations</td>
+<td align="left">Object</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Voir détails dans <a href="#organizations">Gestion des organisations</a></td>
+</tr>
+<tr class="odd">
+<td align="left">persons</td>
+<td align="left">Object</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Voir détails dans <a href="#persons">Gestion des personnes</a></td>
+</tr>
+<tr class="even">
+<td align="left">milestones</td>
+<td align="left">Array</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Voir détails dans <a href="#milestones">Gestion des jalons</a></td>
+</tr>
+<tr class="odd">
+<td align="left">payments</td>
+<td align="left">Array</td>
+<td align="left">Oui</td>
+<td align="left">Non</td>
+<td align="left">Voir détails dans <a href="#payments">Gestion des versements</a></td>
+</tr>
+</tbody>
+</table>
+<p>Le corps vide d'un objet se présente ainsi :</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="ot">[</span>
+  <span class="fu">{</span>
+    <span class="dt">&quot;uid&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;acronym&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;projectlabel&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;datestart&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;dateend&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;datesigned&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;pfi&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;amount&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;organizations&quot;</span><span class="fu">:</span> <span class="fu">{},</span>
+    <span class="dt">&quot;persons&quot;</span><span class="fu">:</span> <span class="fu">{},</span>
+    <span class="dt">&quot;milestones&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span>
+    <span class="dt">&quot;payments&quot;</span><span class="fu">:</span> <span class="ot">[]</span>
+  <span class="fu">}</span>
+<span class="ot">]</span></code></pre></div>
+<h2 id="détails-des-champs">Détails des champs</h2>
+<h3 id="la-clef-uid">La clef <code>uid</code></h3>
+<p>Cette clef contient une valeur unique permettant à oscar de maintenir le lien logique entre l'activité dans la base de donnée et l'information dans le fichier JSON. Elle permet de mettre à jour l'activité si le script d'importation est éxécuté plusieurs fois.</p>
+<h3 id="donnée-projet-les-clefs-acronym-et-projectlabel">Donnée projet (les clefs <code>acronym</code> et <code>projectlabel</code>)</h3>
+<p>La clef <code>acronym</code> correspond à l'acronyme du projet. Elle est utilisée par Oscar pour retrouver le projet dans la base de donnée.</p>
+<p>Si plusieurs activité ont la même valeur <code>acronym</code>, elles sont agrégées dans le même projet.</p>
+<p>Si oscar ne trouve pas le projet dans la base de donnée, il tentera de le créer. Il utilisera alors la clef <code>projectlabel</code> pour renseigner l'intitulé du projet.</p>
+<h3 id="la-clef-type">la clef <code>type</code></h3>
+<p>La valeur doit correspondre à l'intitulé d'un type d'activité, si Oscar ne trouve pas de type correspondant, il n'affecte pas de type à l'activité.</p>
+<p>On peut voir la liste des type d'activité dans le menu <strong>Administration &gt; Gérer les types d'activités</strong>.</p>
+<p><a id="organizations"></a></p>
+<h3 id="la-clef-organizations">La clef <code>organizations</code></h3>
+<p>La clef <code>organizations</code> permet d'associer des organisations à une activité avec une affectation de structure (Rôle d'organisation)..</p>
+<p>Elle est de type <strong>Object</strong> et se compose d'un nombre libre de clef.</p>
+<p>Chaque clef correspond à un rôle.</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;organizations&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+    <span class="dt">&quot;Role A&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span>
+    <span class="dt">&quot;Role B&quot;</span><span class="fu">:</span> <span class="ot">[]</span>
+  <span class="fu">}</span>
+<span class="fu">}</span></code></pre></div>
+<p>Oscar cherchera dans la base de données une correspondance entre la valeur de la clef (Dans l'exemple ci dessus, les rôles sont <em>Role A</em> et <em>Role B</em>) et la liste des rôles disponibles dans la base de données : <strong>Administration &gt; Affectation des structures</strong>. Si Oscar ne trouve pas de correspondance, il tentera de créer le rôle.</p>
+<p>Par exemple si l'activité implique en tant que Laboratoire les organisations <em>Cyberdyne</em> et <em>Black Mesa</em>, la clef se présentera ainsi :</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;organizations&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+    <span class="dt">&quot;Laboratoire&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Cyberdyne&quot;</span><span class="ot">,</span> <span class="st">&quot;Black Mesa&quot;</span><span class="ot">]</span>
+  <span class="fu">}</span>
+<span class="fu">}</span></code></pre></div>
+<p>Si l'on souhaite ajouter d'autres organisations avec un rôle différent, il suffit d'ajouter une clef avec le rôle en question :</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;organizations&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+    <span class="dt">&quot;Laboratoire&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Cyberdyne&quot;</span><span class="ot">,</span> <span class="st">&quot;Black Mesa&quot;</span><span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;Financeur&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Wayne Enterprise&quot;</span><span class="ot">,</span> <span class="st">&quot;LexCorp&quot;</span><span class="ot">]</span>
+  <span class="fu">}</span>
+<span class="fu">}</span></code></pre></div>
+<p>Le nom de l'organisation utilisé comme valeur correspond au champ &quot;Nom complet&quot; dans la fiche organisation dans Oscar. <strong>Si l'organisation n'existe pas dans Oscar</strong>, Oscar tentera de la créer.</p>
+<blockquote>
+<p>Si les données des organisations sont synchronisées avec le SI, il faut synchroniser les organisations AVANT d'importer les activités pour éviter la création de doublon.</p>
+</blockquote>
+<p><a id="persons"></a> ### La clef <code>persons</code></p>
+<p>La clef <code>persons</code> permet d'associer une personne à une activité avec un rôle.</p>
+<p>Elle fonctionne sur le même principe que le clef <code>organizations</code>.</p>
+<p>Elle se compose de clefs correspondants aux rôles des personnes dans l'activité. Chaque clef rôle contient un tableau avec les nom complet des personnes (Prénom + Nom séparés par un espace) :</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;persons&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+    <span class="dt">&quot;Responsable Scientifique&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Albert Einstein&quot;</span><span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;Ingénieur&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Maurice Solovine&quot;</span><span class="ot">,</span> <span class="st">&quot;Marcel Grossmann&quot;</span><span class="ot">]</span>
+  <span class="fu">}</span>
+<span class="fu">}</span></code></pre></div>
+<p>Comme pour les organisations, Oscar se chargera d'ajouter les rôles et les personnes si elles sont absentes de la base de donnée.</p>
+<blockquote>
+<p>Si les données des personnes sont synchronisées avec le SI, il faut synchroniser les personnes AVANT d'importer les activités pour éviter la création de doublon.</p>
+</blockquote>
+<p><a id="milestones"></a> ### La clef <code>milestones</code></p>
+<p>La clef <code>milestones</code> est utilisée pour ajouter des jalons à une activité.</p>
+<p>La valeur est un tableau contenant des Objets JSON</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="er">&quot;milestones&quot;:</span> <span class="ot">[</span>
+      <span class="fu">{</span> <span class="er">/*</span> <span class="er">Objet</span> <span class="er">*/</span><span class="fu">}</span><span class="ot">,</span>
+      <span class="fu">{</span> <span class="er">/*</span> <span class="er">Objet</span> <span class="er">*/</span> <span class="fu">}</span>
+    <span class="ot">]</span><span class="er">,</span></code></pre></div>
+<p>Ces objets contiennent une clef <code>date</code> qui contiendra une Date ISO correspondant à la date d'échéance du jalon, ainsi qu'une clef <code>type</code> correspondant au type de jalon (<strong>Administration &gt; Gérer les types d'activités</strong>) :</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+    <span class="dt">&quot;milestones&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="fu">{</span>
+            <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;Rapport scientifique&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;date&quot;</span><span class="fu">:</span> <span class="st">&quot;2014-07-03&quot;</span>
+        <span class="fu">}</span><span class="ot">,</span>
+        <span class="fu">{</span>
+            <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;Fin des dépenses&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;date&quot;</span><span class="fu">:</span> <span class="st">&quot;2018-01-31&quot;</span>
+        <span class="fu">}</span>
+    <span class="ot">]</span>
+<span class="fu">}</span></code></pre></div>
+<blockquote>
+<p>Si oscar trouve un Jalon de même type à la même date, il ne cré pas le jalon.</p>
+</blockquote>
+<p><a id="payments"></a> ### La clef payments</p>
+<p>La clef <code>payments</code> est utilisée pour ajouter des versements à une activité.</p>
+<p>La valeur est un tableau contenant des Objets JSON</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="er">&quot;payments&quot;:</span> <span class="ot">[</span>
+      <span class="fu">{</span> <span class="er">/*</span> <span class="er">Objet</span> <span class="er">*/</span><span class="fu">}</span><span class="ot">,</span>
+      <span class="fu">{</span> <span class="er">/*</span> <span class="er">Objet</span> <span class="er">*/</span> <span class="fu">}</span>
+    <span class="ot">]</span><span class="er">,</span></code></pre></div>
+<p>Ces objets contiennent une clef <code>date</code> qui contiendra une Date ISO correspondant à la date prévisionnelle et une clef <code>amount</code> contenant un <em>double</em> correspondant au montant du versement :</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+    <span class="dt">&quot;milestones&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="fu">{</span>
+            <span class="dt">&quot;amount&quot;</span><span class="fu">:</span> <span class="fl">249.5</span><span class="fu">,</span>
+            <span class="dt">&quot;date&quot;</span><span class="fu">:</span> <span class="st">&quot;2014-07-03&quot;</span>
+        <span class="fu">}</span><span class="ot">,</span>
+        <span class="fu">{</span>
+            <span class="dt">&quot;amount&quot;</span><span class="fu">:</span> <span class="fl">3249.5</span><span class="fu">,</span>
+            <span class="dt">&quot;date&quot;</span><span class="fu">:</span> <span class="st">&quot;2018-01-31&quot;</span>
+        <span class="fu">}</span>
+    <span class="ot">]</span>
+<span class="fu">}</span></code></pre></div>
+<h2 id="exemple-de-donnée">Exemple de donnée</h2>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="ot">[</span>
+  <span class="fu">{</span>
+    <span class="dt">&quot;uid&quot;</span><span class="fu">:</span> <span class="st">&quot;A0001&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;acronym&quot;</span><span class="fu">:</span> <span class="st">&quot;RELACSV&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;projectlabel&quot;</span><span class="fu">:</span> <span class="st">&quot;Théorie de la relativité&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;Exemple d&#39;activité 1&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;datestart&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;dateend&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;datesigned&quot;</span><span class="fu">:</span> <span class="st">&quot;2017-06-01&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;pfi&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;ANR&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;amount&quot;</span><span class="fu">:</span> <span class="st">&quot;0.0&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;organizations&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+      <span class="dt">&quot;Laboratoire&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Cyberdyne&quot;</span><span class="ot">,</span> <span class="st">&quot;US Robots&quot;</span><span class="ot">]</span>
+    <span class="fu">},</span>
+    <span class="dt">&quot;persons&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+      <span class="dt">&quot;Responsable scientifique&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Albert Einstein&quot;</span><span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;Ingénieur&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Maurice Solovine&quot;</span><span class="ot">,</span> <span class="st">&quot;Marcel Grossman&quot;</span><span class="ot">]</span>
+    <span class="fu">},</span>
+    <span class="dt">&quot;milestones&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span>
+  <span class="fu">}</span><span class="ot">,</span>
+  <span class="fu">{</span>
+    <span class="dt">&quot;uid&quot;</span><span class="fu">:</span> <span class="st">&quot;A0002&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;acronym&quot;</span><span class="fu">:</span> <span class="st">&quot;RELACSV&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;projectlabel&quot;</span><span class="fu">:</span> <span class="st">&quot;Théorie de la relativité&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;Exemple d&#39;activité 2&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;datestart&quot;</span><span class="fu">:</span> <span class="st">&quot;2015-01-01&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;dateend&quot;</span><span class="fu">:</span> <span class="st">&quot;2017-12-31&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;datesigned&quot;</span><span class="fu">:</span> <span class="st">&quot;2015-02-01&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;pfi&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;Colloques&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;amount&quot;</span><span class="fu">:</span> <span class="dv">15000</span><span class="fu">,</span>
+    <span class="dt">&quot;milestones&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+
+    <span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;payments&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+
+    <span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;organizations&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+      <span class="dt">&quot;Laboratoire&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="st">&quot;Cyberdyne&quot;</span><span class="ot">,</span>
+        <span class="st">&quot;US Robots&quot;</span>
+      <span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;Composante responsable&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="st">&quot;ACME&quot;</span>
+      <span class="ot">]</span>
+    <span class="fu">},</span>
+    <span class="dt">&quot;persons&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+      <span class="dt">&quot;Responsable scientifique&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="st">&quot;Albert Einstein&quot;</span><span class="ot">,</span>
+        <span class="st">&quot;Maurice Solovine&quot;</span>
+      <span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;Ingénieur&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="st">&quot;John Doe&quot;</span><span class="ot">,</span>
+        <span class="st">&quot;Marcel Grossmann&quot;</span>
+      <span class="ot">]</span>
+    <span class="fu">}</span>
+  <span class="fu">}</span>
+<span class="ot">]</span></code></pre></div>
+<h2 id="importation-depuis-un-fichier-excel">Importation depuis un fichier Excel</h2>
+<p>Oscar propose un utilitaire en ligne de commande pour convertir une source de donnée CSV en un fichier JSON.</p>
+<p>Ce script implique de configurer la correspondance entre les colonnes de la source CSV et la destination de le JSON dans un fichier de configuration PHP.</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php"><span class="kw">&lt;?php</span>
+<span class="co">//</span>
+<span class="kw">return</span> <span class="ot">[</span>
+    <span class="dv">0</span> =&gt;    <span class="st">&quot;project.&quot;</span><span class="ot">,</span>
+    <span class="dv">1</span> =&gt;    <span class="st">&quot;label&quot;</span><span class="ot">,</span>
+    <span class="dv">120</span> =&gt;  <span class="st">&quot;amount&quot;</span><span class="ot">,</span>
+    <span class="dv">166</span> =&gt;  <span class="st">&quot;dateStart&quot;</span><span class="ot">,</span> <span class="co">//</span>
+    <span class="dv">167</span> =&gt;  <span class="st">&quot;dateEnd&quot;</span><span class="ot">,</span> <span class="co">//</span>
+    <span class="dv">427</span> =&gt; <span class="st">&quot;codeEOTP&quot;</span><span class="ot">,</span> <span class="co">// PFI</span>
+
+    <span class="co">// Organizations</span>
+    <span class="dv">3</span> =&gt;    <span class="st">&quot;organizations.Porteur du projet&quot;</span><span class="ot">,</span>
+    <span class="dv">9</span> =&gt;    <span class="st">&quot;organizations.Laboratoire&quot;</span><span class="ot">,</span>
+    <span class="dv">117</span> =&gt;  <span class="st">&quot;organizations.Financeur&quot;</span><span class="ot">,</span> <span class="co">//</span>
+    <span class="dv">175</span> =&gt;  <span class="st">&quot;organizations.Payeur&quot;</span><span class="ot">,</span> <span class="co">//</span>
+
+    <span class="co">// Payment</span>
+    <span class="dv">11</span> =&gt;   <span class="st">&quot;payments.date&quot;</span><span class="ot">,</span> <span class="co">// 12 =&gt; Date</span>
+    <span class="dv">13</span> =&gt;   <span class="st">&quot;payments.date&quot;</span><span class="ot">,</span> <span class="co">// 14 =&gt; Date</span>
+    <span class="dv">15</span> =&gt;   <span class="st">&quot;payments.date&quot;</span><span class="ot">,</span> <span class="co">// 16 =&gt; Date</span>
+    <span class="dv">17</span> =&gt;   <span class="st">&quot;payments.date&quot;</span><span class="ot">,</span> <span class="co">// 18 =&gt; Date</span>
+    <span class="dv">19</span> =&gt;   <span class="st">&quot;payments.date&quot;</span><span class="ot">,</span> <span class="co">// 20 =&gt; Date</span>
+
+    <span class="co">// Milestones</span>
+    <span class="dv">169</span> =&gt;  <span class="st">&quot;milestones.Début d&#39;éligibilité des dépenses&quot;</span><span class="ot">,</span> <span class="co">//</span>
+    <span class="dv">170</span> =&gt;  <span class="st">&quot;milestones.Fin d&#39;éligibilité des dépenses&quot;</span><span class="ot">,</span> <span class="co">//</span>
+
+    <span class="co">// Persons</span>
+    <span class="dv">423</span> =&gt; <span class="st">&quot;persons.Responsable scientifique&quot;</span><span class="ot">,</span>
+    <span class="dv">424</span> =&gt; <span class="st">&quot;persons.Chargé d&#39;affaires&quot;</span><span class="ot">,</span>
+    <span class="dv">425</span> =&gt; <span class="st">&quot;persons.Ingénieur&quot;</span><span class="ot">,</span>
+<span class="ot">];</span></code></pre></div>
+</section>
+</body>
+</html>

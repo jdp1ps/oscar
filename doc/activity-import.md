@@ -1,0 +1,326 @@
+% Importer des activités dans Oscar
+% Université de Caen
+% Décembre 2017
+
+# Import initial des activités
+
+## Script d'importation
+
+**Oscar** dispose d'un utilitaire en ligne de commande permettant de synchroniser des activités depuis **un fichier JSON**.
+
+```bash
+$ php public/index.php oscar activity:sync path/to/file.json
+```
+
+Un échantillon de ce fichier est disponible dans les sources de l'application dans le dossier `./install/demo/activity.json`. Le contenu du fichier se présente sous la forme d'un tableau d'objet.
+
+Chaque objet correspond à UNE activité.
+
+Voici la liste des clefs attendues :
+
+Clef          | Type      | PÊ Vide   | Unique | Description
+------|------|------|------|------------------------------------------
+uid             | String    | Non       | Oui    | Identifiant d'import (évite les doublons et permet de mettre à jour les données importées
+acronym         | String    | Non       | Non    | Acronyme du projet, Si Oscar trouve pas de projet existant avec cet acronyme, il le créera automatiquement
+projectlabel | String    | Oui       | Non    | Utiliser pour créer le projet si il n'existe pas
+label           | String    | NR        | Non    | Intitulé de l'activité
+datestart       | Date ISO  | Oui       | Non    | Date de début de l'activité
+dateend         | Date ISO  | Oui       | Non    | Date de fin de l'activité
+pfi             | String    | Oui       | Non    | EOTP/PFI de l'activité de recherche
+type            | String    | Oui       | Non    | Type d'activité, si Oscar ne trouve pas de type correspondant, la donnée est ignorée
+amount          | Double    | Oui       | Non    | Montant de la convention
+organizations   | Object    | Oui       | Non    | Voir détails dans [Gestion des organisations](#organizations)
+persons         | Object    | Oui       | Non    | Voir détails dans [Gestion des personnes](#persons)
+milestones      | Array     | Oui       | Non    | Voir détails dans [Gestion des jalons](#milestones)
+payments        | Array     | Oui       | Non    | Voir détails dans [Gestion des versements](#payments)
+
+
+Le corps vide d'un objet se présente ainsi :
+
+
+```json
+[
+  {
+    "uid": "",
+    "acronym": "",
+    "projectlabel": "",
+    "label": "",
+    "datestart": "",
+    "dateend": "",
+    "datesigned": "",
+    "pfi": "",
+    "type": "",
+    "amount": "",
+    "organizations": {},
+    "persons": {},
+    "milestones": [],
+    "payments": []
+  }
+]
+```
+
+## Détails des champs
+
+### La clef `uid`
+
+Cette clef contient une valeur unique permettant à oscar de maintenir le lien logique entre l'activité dans la base de donnée et l'information dans le fichier JSON. Elle permet de mettre à jour l'activité si le script d'importation est éxécuté plusieurs fois.
+
+
+### Donnée projet (les clefs `acronym` et `projectlabel`)
+
+La clef `acronym` correspond à l'acronyme du projet. Elle est utilisée par Oscar pour retrouver le projet dans la base de donnée.
+
+Si plusieurs activité ont la même valeur `acronym`, elles sont agrégées dans le même projet.
+
+Si oscar ne trouve pas le projet dans la base de donnée, il tentera de le créer. Il utilisera alors la clef `projectlabel` pour renseigner l'intitulé du projet.
+
+
+### la clef `type`
+
+La valeur doit correspondre à l'intitulé d'un type d'activité, si Oscar ne trouve pas de type correspondant, il n'affecte pas de type à l'activité.
+
+On peut voir la liste des type d'activité dans le menu **Administration > Gérer les types d'activités**.
+
+
+<a id="organizations"></a>
+
+### La clef `organizations`
+
+La clef `organizations` permet d'associer des organisations à une activité avec une affectation de structure (Rôle d'organisation)..
+
+Elle est de type **Object** et se compose d'un nombre libre de clef.
+
+Chaque clef correspond à un rôle.
+
+```json
+{
+  "organizations": {
+    "Role A": [],
+    "Role B": []
+  }
+}
+```
+
+Oscar cherchera dans la base de données une correspondance entre la valeur de la clef (Dans l'exemple ci dessus, les rôles sont *Role A* et *Role B*) et la liste des rôles disponibles dans la base de données : **Administration > Affectation des structures**. Si Oscar ne trouve pas de correspondance, il tentera de créer le rôle.
+
+
+Par exemple si l'activité implique en tant que Laboratoire les organisations *Cyberdyne* et *Black Mesa*, la clef se présentera ainsi :
+
+```json
+{
+  "organizations": {
+    "Laboratoire": ["Cyberdyne", "Black Mesa"]
+  }
+}
+```
+
+Si l'on souhaite ajouter d'autres organisations avec un rôle différent, il suffit d'ajouter une clef avec le rôle en question :
+
+```json
+{
+  "organizations": {
+    "Laboratoire": ["Cyberdyne", "Black Mesa"],
+    "Financeur": ["Wayne Enterprise", "LexCorp"]
+  }
+}
+```
+
+Le nom de l'organisation utilisé comme valeur correspond au champ "Nom complet" dans la fiche organisation dans Oscar. **Si l'organisation n'existe pas dans Oscar**,  Oscar tentera de la créer.
+
+
+> Si les données des organisations sont synchronisées avec le SI, il faut synchroniser les organisations AVANT d'importer les activités pour éviter la création de doublon.
+
+
+<a id="persons"></a>
+### La clef `persons`
+
+La clef `persons` permet d'associer une personne à une activité avec un rôle.
+
+Elle fonctionne sur le même principe que le clef `organizations`.
+
+Elle se compose de clefs correspondants aux rôles des personnes dans l'activité. Chaque clef rôle contient un tableau avec les nom complet des personnes (Prénom + Nom séparés par un espace) :
+
+```json
+{
+  "persons": {
+    "Responsable Scientifique": ["Albert Einstein"],
+    "Ingénieur": ["Maurice Solovine", "Marcel Grossmann"]
+  }
+}
+```
+
+Comme pour les organisations, Oscar se chargera d'ajouter les rôles et les personnes si elles sont absentes de la base de donnée.
+
+> Si les données des personnes sont synchronisées avec le SI, il faut synchroniser les personnes AVANT d'importer les activités pour éviter la création de doublon.
+
+
+<a id="milestones"></a>
+### La clef `milestones`
+
+La clef `milestones` est utilisée pour ajouter des jalons à une activité.
+
+La valeur est un tableau contenant des Objets JSON
+
+```json
+"milestones": [
+      { /* Objet */},
+      { /* Objet */ }
+    ],
+```
+
+Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date d'échéance du jalon, ainsi qu'une clef `type` correspondant au type de jalon (**Administration > Gérer les types d'activités**) :
+
+```json
+{
+    "milestones": [
+        {
+            "type": "Rapport scientifique",
+            "date": "2014-07-03"
+        },
+        {
+            "type": "Fin des dépenses",
+            "date": "2018-01-31"
+        }
+    ]
+}
+```
+
+> Si oscar trouve un Jalon de même type à la même date, il ne cré pas le jalon.
+
+
+<a id="payments"></a>
+### La clef payments
+
+La clef `payments` est utilisée pour ajouter des versements à une activité.
+
+La valeur est un tableau contenant des Objets JSON
+
+```json
+"payments": [
+      { /* Objet */},
+      { /* Objet */ }
+    ],
+```
+
+Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date prévisionnelle et une clef `amount` contenant un *double* correspondant au montant du versement :
+
+```json
+{
+    "milestones": [
+        {
+            "amount": 249.5,
+            "date": "2014-07-03"
+        },
+        {
+            "amount": 3249.5,
+            "date": "2018-01-31"
+        }
+    ]
+}
+```
+
+
+## Exemple de donnée
+
+```json
+[
+  {
+    "uid": "A0001",
+    "acronym": "RELACSV",
+    "projectlabel": "Théorie de la relativité",
+    "label": "Exemple d'activité 1",
+    "datestart": "",
+    "dateend": "",
+    "datesigned": "2017-06-01",
+    "pfi": "",
+    "type": "ANR",
+    "amount": "0.0",
+    "organizations": {
+      "Laboratoire": ["Cyberdyne", "US Robots"]
+    },
+    "persons": {
+      "Responsable scientifique": ["Albert Einstein"],
+      "Ingénieur": ["Maurice Solovine", "Marcel Grossman"]
+    },
+    "milestones": [],
+  },
+  {
+    "uid": "A0002",
+    "acronym": "RELACSV",
+    "projectlabel": "Théorie de la relativité",
+    "label": "Exemple d'activité 2",
+    "datestart": "2015-01-01",
+    "dateend": "2017-12-31",
+    "datesigned": "2015-02-01",
+    "pfi": "",
+    "type": "Colloques",
+    "amount": 15000,
+    "milestones": [
+
+    ],
+    "payments": [
+
+    ],
+    "organizations": {
+      "Laboratoire": [
+        "Cyberdyne",
+        "US Robots"
+      ],
+      "Composante responsable": [
+        "ACME"
+      ]
+    },
+    "persons": {
+      "Responsable scientifique": [
+        "Albert Einstein",
+        "Maurice Solovine"
+      ],
+      "Ingénieur": [
+        "John Doe",
+        "Marcel Grossmann"
+      ]
+    }
+  }
+]
+```
+
+## Importation depuis un fichier Excel
+
+Oscar propose un utilitaire en ligne de commande pour convertir une source de donnée CSV en un fichier JSON.
+
+Ce script implique de configurer la correspondance entre les colonnes de la source CSV et la destination de le JSON dans un fichier de configuration PHP.
+
+```php
+<?php
+//
+return [
+    0 =>    "project.",
+    1 =>    "label",
+    120 =>  "amount",
+    166 =>  "dateStart", //
+    167 =>  "dateEnd", //
+    427 => "codeEOTP", // PFI
+
+    // Organizations
+    3 =>    "organizations.Porteur du projet",
+    9 =>    "organizations.Laboratoire",
+    117 =>  "organizations.Financeur", //
+    175 =>  "organizations.Payeur", //
+
+    // Payment
+    11 =>   "payments.date", // 12 => Date
+    13 =>   "payments.date", // 14 => Date
+    15 =>   "payments.date", // 16 => Date
+    17 =>   "payments.date", // 18 => Date
+    19 =>   "payments.date", // 20 => Date
+
+    // Milestones
+    169 =>  "milestones.Début d'éligibilité des dépenses", //
+    170 =>  "milestones.Fin d'éligibilité des dépenses", //
+
+    // Persons
+    423 => "persons.Responsable scientifique",
+    424 => "persons.Chargé d'affaires",
+    425 => "persons.Ingénieur",
+];
+```
