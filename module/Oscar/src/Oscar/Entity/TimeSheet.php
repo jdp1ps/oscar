@@ -278,6 +278,13 @@ class TimeSheet implements ITrackable
             ->setStatus(self::STATUS_DRAFT);
     }
 
+    const UNIT_MINUTE = 60;
+    const UNIT_HOUR = 3600;
+
+    public function getDuration( $unit = self::UNIT_HOUR){
+        return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp()) / $unit;
+    }
+
     public function toJson(){
         $activityId = null;
         $activityLabel = null;
