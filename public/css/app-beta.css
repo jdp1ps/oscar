@@ -6222,10 +6222,21 @@ button.close {
   .link[data-tooltip] {
     background: red;
     position: relative; }
+    .link[data-tooltip]:hover:before {
+      display: block; }
     .link[data-tooltip]:before {
+      display: none;
+      animation: all .3s;
       position: absolute;
-      content: "toto";
-      bottom: 1em; }
+      content: attr(data-tooltip);
+      bottom: 1.4em;
+      min-width: 20em;
+      padding: .5em .75em;
+      border: thin solid #333;
+      box-shadow: -4px 4px 1px rgba(0, 0, 0, 0.2);
+      z-index: 5;
+      background: #555;
+      color: white; }
 
 html body {
   background-image: url("bg-beta.jpg") !important;

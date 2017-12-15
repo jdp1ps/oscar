@@ -226,9 +226,15 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                     ];
                 }
 
-                else if( preg_match("/payments\.(.*)/", $key, $matches) ){
+                else if( preg_match("/payments\.?(-?[\d]*)/", $key, $matches) ){
+
+                    $amountPosition = $index+1;
+                    if( count($matches) === 2 ){
+                        if( $matches[2] != "" )
+                            $amountPosition = $index + intval($matches[1]);
+                    }
                     $json['payments'][] = [
-                        "amount" => $datas[$index+1],
+                        "amount" => doubleval($datas[$amountPosition]),
                         "date" => $value
                     ];
                 }
@@ -237,6 +243,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 else if( $key == "amount" ){ $json['amount'] = $value; }
                 else if( $key == "dateStart" ){ $json['datestart'] = $value; }
                 else if( $key == "dateEnd" ){ $json['dateend'] = $value; }
+                else if( $key == "dateSigned" ){ $json['datesigned'] = $value; }
                 else if( $key == "label" ){ $json['label'] = $value; }
 
                 else if( $key == "project." ){
