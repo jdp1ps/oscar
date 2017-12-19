@@ -834,6 +834,34 @@ class TimeSheet implements ITrackable
 
         return $this;
     }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getYear(){
+        return intval($this->getDateFrom()->format('Y'));
+    }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getMonth(){
+        return intval($this->getDateFrom()->format('m'));
+    }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getDate(){
+        return intval($this->getDateFrom()->format('d'));
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     ///
     ///

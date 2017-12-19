@@ -878,6 +878,13 @@ class Activity implements ResourceInterface
         return $this->duration;
     }
 
+    public function getCalculatedDuration(){
+        if( $this->getDateStart() && $this->getDateEnd() ){
+            return ceil(($this->getDateEnd()->getTimestamp() - $this->getDateStart()->getTimestamp())/(60*60*24));
+        }
+        return 0;
+    }
+
     /**
      * @param int $duration
      */
