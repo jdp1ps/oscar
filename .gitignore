@@ -6,6 +6,12 @@ config/autoload/unicaen-auth.local.php
 tmp
 sandbox
 
+# Prototype
+prototype/timesheet/*
+!prototype/timesheet/test-exel.php
+!prototype/timesheet/ods-base-test.xls
+
+doc/*.html
 
 # Connecteurs
 /config/connectors/*.yml
