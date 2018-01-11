@@ -1,0 +1,16 @@
+Index: src/UnicaenAuth/Authentication/Storage/Db.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/UnicaenAuth/Authentication/Storage/Db.php	(revision 321)
++++ src/UnicaenAuth/Authentication/Storage/Db.php	(revision )
+@@ -114,7 +114,7 @@
+          * NB: En cas de problème de connexion ou de service 'zfcuser_user_mapper' introuvable,
+          * cela signifie sans doute que l'application n'utilise pas de table des utilisateurs.
+          */
+-        if (is_int($id) || is_scalar($id)) {
++        if (is_int($id) || (is_scalar($id) && !is_string($id))) {
+             try {
+                 $identity = $this->getMapper()->findById($id);
+             }
