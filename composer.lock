@@ -2189,7 +2189,7 @@
             "source": {
                 "type": "svn",
                 "url": "https://svn.unicaen.fr/svn/UnicaenAuth",
-                "reference": "/branches/extract_ldap_params/@321"
+                "reference": "/branches/extract_ldap_params/@323"
             },
             "require": {
                 "bjyoungblood/bjy-authorize": ">=1.4",
@@ -2211,7 +2211,7 @@
                 ]
             },
             "description": "Module d'authentification pour les applis ZF2 de l'UCBN",
-            "time": "2017-11-09T16:48:00+00:00"
+            "time": "2018-01-08T14:06:59+00:00"
         },
         {
             "name": "zendframework/zend-authentication",
