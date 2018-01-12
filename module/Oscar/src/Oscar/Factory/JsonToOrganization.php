@@ -43,7 +43,7 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
     {
         if ($connectorName !== null) {
             $object->setConnectorID($connectorName,
-                $this->getFieldValue($jsonData, 'code'));
+                $this->getFieldValue($jsonData, 'uid'));
         }
 
         return $object
