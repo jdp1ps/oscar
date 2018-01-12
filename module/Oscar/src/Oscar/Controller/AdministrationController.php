@@ -36,7 +36,7 @@ class AdministrationController extends AbstractOscarController
 
         $labels = [
             'person_organization' => "Affection des personnes aux organisations",
-            'organization' => "Organisations/Strucutres",
+            'organization' => "Organisations/Structures",
             'person' => "Personnes",
         ];
 
