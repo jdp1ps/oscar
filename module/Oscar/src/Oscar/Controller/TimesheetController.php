@@ -37,6 +37,65 @@ use Zend\View\Model\ViewModel;
  */
 class TimesheetController extends AbstractOscarController
 {
+    public function excelAction(){
+        $activityId     = $this->params()->fromQuery('activityid');
+        $personId       = $this->params()->fromQuery('personid');
+        if( !$personId || !$activityId )
+            die("Paramètres insuffisants");
+
+        /** @var Person $person */
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($personId);
+
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+
+        $wpCodes = [];
+        /** @var WorkPackage $wp */
+        foreach ($activity->getWorkPackages() as $wp) {
+            if( !in_array($wp->getCode(), $wpCodes) ){
+                $wpCodes[] = $wp->getCode();
+            }
+        }
+
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        $timesheets = $this->getEntityManager()->getRepository(TimeSheet::class)->findBy(['person' => $person]);
+
+        $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AG'];
+        $lineWpFormula = '=SUM(C%s:AG%s)';
+
+
+        $datas = [];
+        /** @var TimeSheet $ts */
+        foreach ($timesheets as $ts ){
+            $period = $ts->getDateFrom()->format('Y-m');
+            if( !array_key_exists($period, $datas) ){
+                $datas[$period] = [];
+                foreach ($wpCodes as $code ){
+                    $datas[$period][$code] = [];
+                    for( $i=1; $i <= 31; $i++ ){
+                        $datas[$period][$code][$i] = 0.0;
+                    }
+                }
+            }
+
+            if( !$ts->getWorkpackage() ) continue;
+
+            $currentCode = $ts->getWorkpackage()->getCode();
+            $currentDay = $ts->getDateFrom()->format('d');
+            $duration = $ts->getDuration();
+
+echo "$period.ADD.$currentCode.$currentDay += $duration\n";
+            $datas[$period][$currentCode][$currentDay] += $ts->getDuration();
+        }
+
+        var_dump($datas);
+
+        die("export exel : " . count($timesheets));
+    }
+
     /**
      * Retourne la liste des déclarants actifs
      */
