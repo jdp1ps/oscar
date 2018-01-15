@@ -1,26 +1,20 @@
 <?php /** @var $entity Oscar\Entity\Activity */ ?>
 <link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css" />
 
-<div class="container activity-full">
-    <article class="activity" id="activity">
+<article class="activity" id="activity"></article>
 
-    </article>
-    <div class="loader">
-        <p>Chargement de l'activité</p>
-    </div>
-
-    <script>
-        console.log("toto");
-        require(['activity'], function(m){
-            console.log(m.default);
-            var activity = new m.default({
-                el: '#activity',
-                data: <?= json_encode($json) ?>,
-                http: {
-                    root: '<?= $this->url('contract/show2', ['id' => $activity->getId()]) ?>'
-                }
-            })
+<script>
+    console.log("toto");
+    require(['activity'], function(m){
+        console.log(m.default);
+        var activity = new m.default({
+            el: '#activity',
+            data: <?= json_encode($json) ?>,
+            http: {
+                root: '<?= $this->url('contract/show2', ['id' => $activity->getId()]) ?>'
+            }
         })
-    </script>
-</div>
+    })
+</script>
+
 

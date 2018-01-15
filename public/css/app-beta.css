@@ -8591,3 +8591,11 @@ time.date-missing {
     background: #30b0d5; }
   to {
     background: #ffffff; } }
+
+.activity-header {
+  background: #6a5999;
+  color: white; }
+
+.activity-metas {
+  font-size: .8em;
+  font-weight: 100; }
