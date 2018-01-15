@@ -1717,7 +1717,9 @@ class Activity implements ResourceInterface
     ///
 
     public function hasDeclarant( $person ){
-
+        if( !$person ){
+            return false;
+        }
         if( $person instanceof ActivityPerson || $person instanceof ProjectMember )
             $person = $person->getPerson();
 
