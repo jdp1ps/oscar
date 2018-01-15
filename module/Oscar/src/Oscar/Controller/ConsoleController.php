@@ -176,12 +176,15 @@ class ConsoleController extends AbstractOscarController
                 throw new \Exception("Not Auth");
             }
             $person = $this->getEntityManager()->getRepository(Person::class)->findOneBy(['ladapLogin' => $auth->getUsername()]);
-            $data = [
-                "id" => $person->getId(),
-                "username" => $auth->getUsername(),
-                "fullname" => (string)$person
-            ];
-            echo json_encode($data);
+            if( $person ) {
+                $data = [
+                    "id" => $person->getId(),
+                    "username" => $auth->getUsername(),
+                    "fullname" => (string)$person
+                ];
+                echo json_encode($data);
+            }
+            exit(1);
         } catch( \Exception $e ){
             die();
         }
