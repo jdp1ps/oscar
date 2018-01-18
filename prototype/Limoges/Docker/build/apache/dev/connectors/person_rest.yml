@@ -1,0 +1,9 @@
+# Emplacement du service REST fournissant la liste des personnes
+#url_persons: 'https://rest.service.tdl/api/persons'
+url_persons: 'http://127.0.0.1:81/PersonConnector.php'
+
+# Emplacement du service REST fournissant les données pour une personne
+# Noter la présente du '%s' que Oscar remplacera par l'UID utilisé dans
+# le service REST.
+#url_person: 'https://rest.service.tld/api/person/%s'
+url_person: 'http://127.0.0.1:81/PersonConnector.php?uid=%s'
