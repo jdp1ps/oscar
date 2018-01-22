@@ -4,3 +4,80 @@
  * @date: 18-01-17 13:01
  * @copyright Certic (c) 2018
  */
+$downloadBaseUrl = $this->url('timesheet/excel');
+
+function fmt(){
+    static $fmt;
+    if( $fmt === null )
+        $fmt = new \IntlDateFormatter(
+            'fr_FR',
+            \IntlDateFormatter::FULL,
+            \IntlDateFormatter::FULL,
+            'Europe/Paris',
+            \IntlDateFormatter::GREGORIAN,
+            'MMMM Y');
+    return $fmt;
+}
+function formatPeriod( $strPeriod ){
+    return fmt()->format((new DateTime($strPeriod."-01")));
+}
+
+?>
+<section class="container">
+    <?php foreach ($datas as $activityDatas): ?>
+        <section>
+            <h3>Déclaration de <strong><?= $person ?></strong></h3>
+            <h2>
+                <small class="thin"><?= $activityDatas['project'] ?></small><br>
+                <strong><?= $activityDatas['activity'] ?></strong>
+            </h2>
+
+            <table class="table table-bordered table-condensed card">
+
+                <?php $first = true ?>
+                <?php foreach ($activityDatas['timesheets'] as $period=>$totaux): ?>
+                    <?php if( $first ): ?>
+                        <tr>
+                            <th>Période</th>
+                            <?php foreach ($totaux as $tag=>$value): ?>
+                                <?php if( $tag != 'total' && $tag != 'unvalidate' ): ?>
+                                    <th><?= $tag ?></th>
+                                <?php endif; ?>
+                                </td>
+                            <?php endforeach; ?>
+                            <th>Total</th>
+                            <th>Feuille de temps</th>
+                        </tr>
+                        <?php $first = false; ?>
+                    <?php endif; ?>
+                    <tr>
+                        <th><i class="icon-calendar"></i><?= formatPeriod($period) ?></th>
+                        <?php foreach ($totaux as $tag=>$wp): ?>
+                            <?php if( $tag != 'total' && $tag != 'unvalidate'): ?>
+                                <td class="text-right"><?= number_format($wp['total'], 2) ?></td>
+                            <?php endif; ?>
+
+                        </td>
+                        <?php endforeach; ?>
+                        <td class="text-right"><strong><?= number_format($totaux['total'],2) ?></strong></td>
+                        <td>
+                            <nav class="btn-group">
+                                <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>" class="btn btn-default">
+                                    <i class="icon-download-outline"></i>
+                                    Télécharger
+                                </a>
+                            </nav>
+                            <?php if( $totaux['unvalidate'] == true ): ?>
+                            <span class="helper danger">
+                                <i class="icon-warning-empty"></i>
+                                Certains créneaux n'ont pas été validé</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+
+                <?php endforeach; ?>
+            </table>
+        </section>
+    <?php endforeach; ?>
+</section>
+

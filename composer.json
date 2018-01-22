@@ -36,7 +36,8 @@
   },
   "autoload": {
     "psr-0": {
-      "Oscar": "module/Oscar/src/"
+      "Oscar": "module/Oscar/src/",
+      "UnicaenAde": "unicaen/unicaen-ade/src/"
     }
   },
   "scripts": {
