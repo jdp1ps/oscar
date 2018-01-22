@@ -1544,6 +1544,7 @@ var ImportICSView = {
             var icsNameLC = icsName.toLowerCase();
 
             var associationParser = function associationParser(label) {
+                if (!label) return "";
                 var out = "";
                 label = label.toLowerCase();
 

@@ -9,6 +9,19 @@
 require __DIR__.'/../../vendor/autoload.php';
 
 
+$fmt = new IntlDateFormatter(
+    'fr_FR',
+    IntlDateFormatter::FULL,
+    IntlDateFormatter::FULL,
+    'Europe/Paris',
+    IntlDateFormatter::GREGORIAN,
+    'd MMMM Y');
+
+
+$ade = new \UnicaenAde\ADEAccessAPI();
+var_dump($ade);
+die();
+
 function getTimeSheet($year, $month, $day, $start, $end, $person, $wp, $description=""){
     $day = $year.'-'.$month.'-'.$day;
 
@@ -110,7 +123,8 @@ foreach ($staff as $data){
 }
 
 
-    $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AG'];
+
+    $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
     $lineWpFormula = '=SUM(C%s:AG%s)';
 
 foreach( $timesheets as $lastName=>$timesheetPerson ){
@@ -135,8 +149,8 @@ foreach( $timesheets as $lastName=>$timesheetPerson ){
         $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
         $spreadsheet->getActiveSheet()->setCellValue('C5', $activity->getAcronym());
 
-        $spreadsheet->getActiveSheet()->setCellValue('U3', $activity->getDateStart()->format("d F Y"));
-        $spreadsheet->getActiveSheet()->setCellValue('U4', $activity->getDateEnd()->format("d F Y"));
+        $spreadsheet->getActiveSheet()->setCellValue('U3', $fmt->format($activity->getDateStart()));
+        $spreadsheet->getActiveSheet()->setCellValue('U4', $fmt->format($activity->getDateEnd()));
         $spreadsheet->getActiveSheet()->setCellValue('U5', '2015DRI00394');
         $spreadsheet->getActiveSheet()->setCellValue('U6', $activity->getCodeEOTP());
 

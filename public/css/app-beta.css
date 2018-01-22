@@ -8592,10 +8592,20 @@ time.date-missing {
   to {
     background: #ffffff; } }
 
-.activity-header {
+.activity header {
   background: #6a5999;
   color: white; }
+  .activity header h4 {
+    margin-bottom: 0; }
+  .activity header h2 {
+    margin-top: 0;
+    font-size: 3em; }
 
-.activity-metas {
+.activity .metas {
+  color: rgba(255, 255, 255, 0.75);
   font-size: .8em;
-  font-weight: 100; }
+  font-weight: 100;
+  list-style: none;
+  line-height: 1.5em; }
+  .activity .metas strong {
+    color: white; }

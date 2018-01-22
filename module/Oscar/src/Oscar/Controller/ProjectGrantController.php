@@ -1054,6 +1054,7 @@ class ProjectGrantController extends AbstractOscarController
             if (!$search && count($criteria) === 0) {
                 $ids = [];
                 // Requêtes de base
+                /** @var QueryBuilder $qb */
                 $qb = $this->getEntityManager()->createQueryBuilder()
                     ->select('c, m1, p1, pr, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis')
                     ->from(Activity::class, 'c')
@@ -1331,14 +1332,14 @@ class ProjectGrantController extends AbstractOscarController
                     $criterias[] = $crit;
 
 
-                    if ($type == 'ap' || $type == 'ao' || $type = 'pm') {
+                    if ($type == 'ap' || $type == 'ao' || $type == 'pm' ) {
+
                         if ($filterIds === null) {
                             $filterIds = $ids;
                         } else {
                             $filterIds = array_intersect($filterIds, $ids);
                         }
                     }
-
 
                     if ($type == "sp" || $type == 'so') {
                         $filterNotIds = array_merge($filterNotIds, $ids);
@@ -1375,10 +1376,12 @@ class ProjectGrantController extends AbstractOscarController
             if( $startEmpty === false ) {
                 $qbIds = $qb->select('DISTINCT c.id');
 
+
                 $ids = [];
                 foreach ($qbIds->getQuery()->getResult() as $row) {
                     $ids[] = $row['id'];
                 }
+
                 $qb->select('c');
                 $qb->orderBy('c.' . $sort, $sortDirection);
                 if( $sortIgnoreNull ){

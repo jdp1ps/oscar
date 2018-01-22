@@ -34,6 +34,68 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get('OscarUserContext');
     }
 
+    /**
+     * Retourne les créneaux de la personne regroupès par activité
+     * @param Person $person
+     */
+    public function getPersonTimesheets( Person $person, $validatedOnly = false, $periodFilter = null ){
+
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.person = :person')
+            ->orderBy('t.activity, t.dateFrom')
+            ->setParameter('person', $person);
+
+        $datas = [];
+
+        /** @var TimeSheet $timesheet */
+        foreach( $query->getQuery()->getResult() as $timesheet ){
+            if( !$timesheet->getActivity() ) continue;
+
+            $activityId = $timesheet->getActivity()->getId();
+            $period = $timesheet->getDateFrom()->format('Y-m');
+
+            if( $periodFilter!== null && $periodFilter != $period )
+                continue;
+
+            if( !array_key_exists($activityId, $datas) ){
+                $datas[$activityId] = [
+                  'activity' => (string) $timesheet->getActivity(),
+                  'project' => (string) $timesheet->getActivity()->getProject(),
+                  'activity_id' => $timesheet->getActivity()->getId()
+                ];
+            }
+
+            if( !array_key_exists($period, $datas[$activityId]) ){
+                $datas[$activityId][$period] = [
+                    'unvalidate' => false,
+                    'total' => 0.0,
+                ];
+                /** @var WorkPackage $wp */
+                foreach ($timesheet->getActivity()->getWorkPackages() as $wp ){
+                    if( !array_key_exists($wp->getCode(), $datas[$activityId]['timesheets'][$period]) )
+                        $datas[$activityId]['timesheets'][$period][$wp->getCode()] = [
+                            'total' => 0.0
+                        ];
+                }
+            }
+            $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]['total'] += $timesheet->getDuration();
+            $datas[$activityId]['timesheets'][$period]['total'] += $timesheet->getDuration();
+            if( $timesheet->getStatus() != TimeSheet::STATUS_ACTIVE ){
+                $datas[$activityId]['timesheets'][$period]['unvalidate'] = true;
+            }
+
+            $day = (string) $timesheet->getDateFrom()->format('j');
+            if (!array_key_exists($day, $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()])){
+                $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()][$day] = 0.0;
+                $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]["crenaux_".$day] = 0;
+            }
+            $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]["crenaux_".$day]++;
+            $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()][$day] += $timesheet->getDuration();
+
+        }
+        return $datas;
+    }
 
     public function getDeclarers(){
         // Récupération des IDS des déclarants

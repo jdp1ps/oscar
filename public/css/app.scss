@@ -46,12 +46,12 @@ $grid-float-breakpoint: 1024px;
 // Reset and dependencies
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/normalize";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/print";
-@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons";
+// @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons";
 
 // Core CSS
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/scaffolding";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/type";
-@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/code";
+//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/code";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/grid";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/tables";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/forms";
@@ -712,6 +712,25 @@ body::-webkit-scrollbar-thumb {
 
 .contract-terminated {
   border-left-color: $gray-light;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Infos color
+
+.helper {
+  font-size: .8em;
+  text-shadow: -1px -1px -1px rgba(0,0,0,.5);
+  padding: .25em 1em .25em .25em;
+  border-radius: .25em;
+  display: inline-block;
+  &.danger {
+    background: $brand-danger;
+    color: white;
+  }
+}
+
+.thin {
+  font-weight: 100;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

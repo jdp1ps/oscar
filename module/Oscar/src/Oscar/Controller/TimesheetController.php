@@ -39,27 +39,120 @@ class TimesheetController extends AbstractOscarController
 {
     public function excelAction(){
         $activityId     = $this->params()->fromQuery('activityid');
-        $personId       = $this->params()->fromQuery('personid');
-        if( !$personId || !$activityId )
-            die("Paramètres insuffisants");
+        $action = $this->params()->fromQuery('action');
+        $period = $this->params()->fromQuery('period', null);
+        $personIdQuery = $this->params()->fromQuery('personid', null );
+        $currentPersonId = $this->getCurrentPerson()->getId();
+
+
+        if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
+            $this->getOscarUserContext()->check(Privileges::PERSON_VIEW_TIMESHEET);
+            $personId = $personIdQuery;
+        } else {
+            $personId = $currentPersonId;
+        }
 
         /** @var Person $person */
         $person = $this->getEntityManager()->getRepository(Person::class)->find($personId);
 
-        /** @var Activity $activity */
+        if( !$person ){
+            throw new OscarException("Impossible de trouver la personne.");
+        }
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        $datas = $timesheetService->getPersonTimesheets($person, true, $period);
+
+        if( $action == "export" ){
+            $fmt = new \IntlDateFormatter(
+                'fr_FR',
+                \IntlDateFormatter::FULL,
+                \IntlDateFormatter::FULL,
+                'Europe/Paris',
+                \IntlDateFormatter::GREGORIAN,
+                'd MMMM Y');
+
+            /** @var Activity $activity */
+            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+            //var_dump($datas[$activityId]['timesheets']);
+
+            $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
+            $lineWpFormula = '=SUM(C%s:AG%s)';
+            foreach( $datas[$activityId]['timesheets'] as $period=>$timesheetsPeriod ){
+                $lineWpStart = 10;
+                $lineWpCurent = $lineWpStart;
+                $lineWpCount = 0;
+                $spreadsheet = \PHPExcel_IOFactory::load(__DIR__.'/ods-base-test.xls');
+
+
+                $spreadsheet->getActiveSheet()->setCellValue('A1', $activity->getLabel());
+                $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
+                $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
+                $spreadsheet->getActiveSheet()->setCellValue('C5', $activity->getAcronym());
+
+                $spreadsheet->getActiveSheet()->setCellValue('U3', $fmt->format($activity->getDateStart()));
+                $spreadsheet->getActiveSheet()->setCellValue('U4', $fmt->format($activity->getDateEnd()));
+                $spreadsheet->getActiveSheet()->setCellValue('U5', $activity->getOscarNum());
+                $spreadsheet->getActiveSheet()->setCellValue('U6', $activity->getCodeEOTP());
+
+                $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
+                $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
+                $spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
+
+                foreach ($timesheetsPeriod as $workpackage=>$timesheetsWorkpackage) {
+
+                    $rowNum = $lineWpStart + $lineWpCount;
+                    $spreadsheet->getActiveSheet()->insertNewRowBefore(($rowNum + 1));
+                    for( $i=0; $i<count($cellDays); $i++ ){
+                        $day = $i+1;
+                        $cellIndex = $cellDays[$i].$rowNum;
+                        $totalDay = array_key_exists($day, $timesheetsWorkpackage) ? $timesheetsWorkpackage[$day] : 0.0;
+                        $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $totalDay);
+                    }
+                    $spreadsheet->getActiveSheet()->setCellValue('A'.$rowNum, "");
+                    $spreadsheet->getActiveSheet()->setCellValue('B'.$rowNum, $workpackage);
+                    $spreadsheet->getActiveSheet()->setCellValue('AH'.$rowNum, sprintf($lineWpFormula, $rowNum, $rowNum));
+                    $lineWpCount++;
+                }
+
+                $rowNum = $lineWpStart + $lineWpCount + 1;
+
+                for( $i=0; $i<count($cellDays); $i++ ){
+                    $day = $i+1;
+                    $cellIndex = $cellDays[$i].$rowNum;
+                    $sum = "=SUM(" . $cellDays[$i] .'10:' .$cellDays[$i].($rowNum-1) .')';
+
+                    $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $sum);
+                }
+
+                $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
+
+                $name = ($person->getLadapLogin())."-" . $period . ".xls";
+                $filepath = '/tmp/'. $name;
+
+                $edited->save($filepath);
+
+                header('Content-Type: application/octet-stream');
+                header("Content-Transfer-Encoding: Binary");
+                header("Content-disposition: attachment; filename=\"" . $name . "\"");
+                die(readfile($filepath));
+            }
+            die();
+        }
+
+
+        /*
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
 
         $wpCodes = [];
-        /** @var WorkPackage $wp */
+
         foreach ($activity->getWorkPackages() as $wp) {
             if( !in_array($wp->getCode(), $wpCodes) ){
                 $wpCodes[] = $wp->getCode();
             }
         }
 
-
-        /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
         $timesheets = $this->getEntityManager()->getRepository(TimeSheet::class)->findBy(['person' => $person]);
 
@@ -68,32 +161,34 @@ class TimesheetController extends AbstractOscarController
 
 
         $datas = [];
-        /** @var TimeSheet $ts */
-        foreach ($timesheets as $ts ){
+
+        foreach ($timesheets as $ts ) {
             $period = $ts->getDateFrom()->format('Y-m');
-            if( !array_key_exists($period, $datas) ){
+            if (!array_key_exists($period, $datas)) {
                 $datas[$period] = [];
-                foreach ($wpCodes as $code ){
+                foreach ($wpCodes as $code) {
                     $datas[$period][$code] = [];
-                    for( $i=1; $i <= 31; $i++ ){
+                    for ($i = 1; $i <= 31; $i++) {
                         $datas[$period][$code][$i] = 0.0;
                     }
                 }
             }
 
-            if( !$ts->getWorkpackage() ) continue;
+            if (!$ts->getWorkpackage()) {
+                continue;
+            }
 
             $currentCode = $ts->getWorkpackage()->getCode();
-            $currentDay = $ts->getDateFrom()->format('d');
+            $currentDay = $ts->getDateFrom()->format('j');
             $duration = $ts->getDuration();
 
-echo "$period.ADD.$currentCode.$currentDay += $duration\n";
-            $datas[$period][$currentCode][$currentDay] += $ts->getDuration();
         }
+        /****/
+        return [
+            "datas" => $datas,
+            "person" => $person,
 
-        var_dump($datas);
-
-        die("export exel : " . count($timesheets));
+        ];
     }
 
     /**
@@ -140,9 +235,6 @@ echo "$period.ADD.$currentCode.$currentDay += $duration\n";
 
             $datas = json_decode($this->getRequest()->getPost()['events'], true);
             $action = $this->getRequest()->getPost()['do'];
-
-            // Ajouter un test sur ACTION et EVENTS
-            // Ajouter un test sur ACTION et EVENTS
 
             if ($action == 'send') {
                 $timesheets = $timeSheetService->send($datas, $person);

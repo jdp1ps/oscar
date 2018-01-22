@@ -506,7 +506,7 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <?php foreach( $entity->getPersonsDeep() as $person ): ?>
-                        <pre><?php var_dump($person); die() ?></pre>
+
                         <li><a class="dropdown-item <?= $entity->hasDeclarant($person) ? '' : ' disabled' ?>" href="<?= $this->url('timesheet/usurpation', ['idactivity' => $entity->getId(), 'idperson' => $person->getPerson()->getId()]) ?>">
                                 <?= $person->getPerson() ?>
 

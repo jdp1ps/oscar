@@ -1975,6 +1975,7 @@ var ImportICSView = {
             let icsNameLC = icsName.toLowerCase();
 
             var associationParser  = (label) => {
+                if( !label ) return "";
                 let out = "";
                 label = label.toLowerCase();
 
