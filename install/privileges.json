@@ -221,6 +221,12 @@
     "libelle": "Synchroniser les donn\u00e9es avec LDAP",
     "fullcode": "PERSON-SYNC_LDAP"
   },
+  "PERSON-VIEW_TIMESHEET": {
+    "categorie_id": 3,
+    "code": "VIEW_TIMESHEET",
+    "libelle": "Peut voir les feuilles de temps de n'importe quelle personne",
+    "fullcode": "PERSON-VIEW_TIMESHEET"
+  },
   "ORGANIZATION-SHOW": {
     "categorie_id": 4,
     "code": "SHOW",
