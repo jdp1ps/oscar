@@ -30,6 +30,9 @@ function formatPeriod( $strPeriod ){
             <h2>
                 <small class="thin"><?= $activityDatas['project'] ?></small><br>
                 <strong><?= $activityDatas['activity'] ?></strong>
+                <a href="<?= $this->url('contract/show', ['id' => $activityDatas['activity_id']]) ?>" class="btn btn-sm btn-default">
+                    <i class="icon-cube"></i>
+                    Revenir sur la fiche activité</a>
             </h2>
 
             <table class="table table-bordered table-condensed card">
@@ -62,7 +65,7 @@ function formatPeriod( $strPeriod ){
                         <td class="text-right"><strong><?= number_format($totaux['total'],2) ?></strong></td>
                         <td>
                             <nav class="btn-group">
-                                <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>" class="btn btn-default">
+                                <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>" class="btn btn-default">
                                     <i class="icon-download-outline"></i>
                                     Télécharger
                                 </a>

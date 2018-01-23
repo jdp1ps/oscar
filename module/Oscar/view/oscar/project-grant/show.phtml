@@ -482,6 +482,21 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
 
     <section>
         <h2><i class="icon-archive"></i> Lot de travail</h2>
+
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_VIEW_TIMESHEET, $entity) ): ?>
+        <section>
+            <h3>Feuille de temps</h3>
+            <?php foreach ($entity->getPersons() as $personActivity): ?>
+                <?php if( $entity->hasDeclarant($personActivity->getPerson()) ): ?>
+                    <a href="<?= $this->url('timesheet/excel') ?>?activityid=<?= $entity->getId() ?>&personid=<?= $personActivity->getPerson()->getId() ?>" class="btn btn-default">
+                        <i class="icon-calendar"></i>
+                        <?= $personActivity->getPerson() ?>
+                    </a>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </section>
+        <?php endif; ?>
+
         <nav>
             <?php if( ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) || $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ) &&
                 $entity->hasDeclarers()): ?>

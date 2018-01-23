@@ -39,14 +39,19 @@ class TimesheetController extends AbstractOscarController
 {
     public function excelAction(){
         $activityId     = $this->params()->fromQuery('activityid');
+        $activity       = null;
         $action = $this->params()->fromQuery('action');
         $period = $this->params()->fromQuery('period', null);
         $personIdQuery = $this->params()->fromQuery('personid', null );
         $currentPersonId = $this->getCurrentPerson()->getId();
 
+        if( $activityId ){
+            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+        }
+
 
         if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
-            $this->getOscarUserContext()->check(Privileges::PERSON_VIEW_TIMESHEET);
+            $this->getOscarUserContext()->check(Privileges::PERSON_VIEW_TIMESHEET, $activity);
             $personId = $personIdQuery;
         } else {
             $personId = $currentPersonId;
@@ -62,8 +67,9 @@ class TimesheetController extends AbstractOscarController
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
-        $datas = $timesheetService->getPersonTimesheets($person, true, $period);
+        $datas = $timesheetService->getPersonTimesheets($person, false, $period, $activity);
 
+       // var_dump($activity);
         if( $action == "export" ){
             $fmt = new \IntlDateFormatter(
                 'fr_FR',
@@ -75,7 +81,7 @@ class TimesheetController extends AbstractOscarController
 
             /** @var Activity $activity */
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
-            //var_dump($datas[$activityId]['timesheets']);
+           var_dump($datas[$activityId]['timesheets']);
 
             $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
             $lineWpFormula = '=SUM(C%s:AG%s)';
