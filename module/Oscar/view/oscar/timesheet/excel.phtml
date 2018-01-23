@@ -54,7 +54,7 @@ function formatPeriod( $strPeriod ){
                         <?php $first = false; ?>
                     <?php endif; ?>
                     <tr>
-                        <th><i class="icon-calendar"></i><?= git formatPeriod($period) ?></th>
+                        <th><i class="icon-calendar"></i><?= formatPeriod($period) ?></th>
                         <?php foreach ($totaux as $tag=>$wp): ?>
                             <?php if( $tag != 'total' && $tag != 'unvalidate'): ?>
                                 <td class="text-right"><?= number_format($wp['total'], 2) ?></td>
