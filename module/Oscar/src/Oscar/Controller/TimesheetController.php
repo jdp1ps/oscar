@@ -101,6 +101,8 @@ class TimesheetController extends AbstractOscarController
                 $spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
 
                 foreach ($timesheetsPeriod as $workpackage=>$timesheetsWorkpackage) {
+                    if( $workpackage == "unvalidate" || $workpackage == "total" )
+                        continue;
 
                     $rowNum = $lineWpStart + $lineWpCount;
                     $spreadsheet->getActiveSheet()->insertNewRowBefore(($rowNum + 1));
