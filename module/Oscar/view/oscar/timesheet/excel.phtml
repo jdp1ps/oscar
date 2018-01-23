@@ -23,6 +23,10 @@ function formatPeriod( $strPeriod ){
 }
 
 ?>
+<style>
+
+
+</style>
 <section class="container">
     <?php foreach ($datas as $activityDatas): ?>
         <section>
@@ -35,22 +39,26 @@ function formatPeriod( $strPeriod ){
                     Revenir sur la fiche activité</a>
             </h2>
 
-            <table class="table table-bordered table-condensed card">
+            <table class="oscar-table">
 
                 <?php $first = true ?>
                 <?php foreach ($activityDatas['timesheets'] as $period=>$totaux): ?>
                     <?php if( $first ): ?>
-                        <tr>
-                            <th>Période</th>
-                            <?php foreach ($totaux as $tag=>$value): ?>
-                                <?php if( $tag != 'total' && $tag != 'unvalidate' ): ?>
-                                    <th><?= $tag ?></th>
-                                <?php endif; ?>
-                                </td>
-                            <?php endforeach; ?>
-                            <th>Total</th>
-                            <th>Feuille de temps</th>
-                        </tr>
+                        <thead>
+                            <tr>
+                                <th>Période</th>
+                                <?php foreach ($totaux as $tag=>$value): ?>
+                                    <?php if( $tag != 'total' && $tag != 'unvalidate' ): ?>
+                                        <th>
+                                            <i class="icon-archive"></i>
+                                            <?= $tag ?></th>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                                <th>Total</th>
+                                <th>Feuille de temps</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                         <?php $first = false; ?>
                     <?php endif; ?>
                     <tr>
@@ -64,21 +72,23 @@ function formatPeriod( $strPeriod ){
                         <?php endforeach; ?>
                         <td class="text-right"><strong><?= number_format($totaux['total'],2) ?></strong></td>
                         <td>
-                            <nav class="btn-group">
-                                <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>" class="btn btn-default">
+                            <nav class="btn-group btn-group-sm">
+                                <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
+                                   class="btn btn-default btn-sm">
                                     <i class="icon-download-outline"></i>
-                                    Télécharger
+                                    Télécharger la feuille de temps (Excel)
                                 </a>
                             </nav>
                             <?php if( $totaux['unvalidate'] == true ): ?>
-                            <span class="helper danger">
+                            <small class="helper danger">
                                 <i class="icon-warning-empty"></i>
-                                Certains créneaux n'ont pas été validé</span>
+                                Certains créneaux n'ont pas été validé</small>
                             <?php endif; ?>
                         </td>
                     </tr>
 
                 <?php endforeach; ?>
+                </tbody>
             </table>
         </section>
     <?php endforeach; ?>

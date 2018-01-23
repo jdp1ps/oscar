@@ -147,6 +147,33 @@ $colorGreyBlack: #222;
 }
 
 
+.oscar-table {
+  @extend .table;
+
+  box-shadow: 0 0 1em rgba(0,0,0,.25);
+  background: white;
+
+  thead {
+    background: $brand-primary; color: white;
+    th { font-weight: 100 }
+  }
+
+  tbody tr:nth-child(even) {
+    background: #eeeeee;
+  }
+
+  tbody, thead {
+    tr {
+      th, td {
+        line-height: 1.6em;
+      }
+    }
+  }
+  th, td {
+    border: solid rgba(0,0,0,.2) thin;
+  }
+}
+
 html body {
   background-image: url($bg-image) !important;;
   background-size: cover;
