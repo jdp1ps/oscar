@@ -38,13 +38,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * Retourne les créneaux de la personne regroupès par activité
      * @param Person $person
      */
-    public function getPersonTimesheets( Person $person, $validatedOnly = false, $periodFilter = null ){
+    public function getPersonTimesheets( Person $person, $validatedOnly = false, $periodFilter = null, $activity = null ){
 
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)
             ->createQueryBuilder('t')
             ->where('t.person = :person')
             ->orderBy('t.activity, t.dateFrom')
             ->setParameter('person', $person);
+
+        if( $activity != null ){
+            $query->andWhere('t.activity = :activity')
+                ->setParameter('activity', $activity);
+        }
 
         $datas = [];
 
