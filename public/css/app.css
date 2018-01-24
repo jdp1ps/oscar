@@ -5391,17 +5391,35 @@ button.close {
       color: white; }
 
 .oscar-table {
-  box-shadow: 0 0 1em rgba(0, 0, 0, 0.25);
-  background: white; }
+  background: none; }
+  .oscar-table .sous-total-year {
+    background: none !important; }
+  .oscar-table .year-head {
+    background: none !important; }
+    .oscar-table .year-head .labeled {
+      font-size: 1em;
+      line-height: 1em;
+      padding: .2em .5em;
+      display: inline-block;
+      color: white;
+      background: rgba(69, 87, 144, 0.6) !important;
+      text-shadow: -1px 1px 1px rgba(0, 0, 0, 0.5); }
   .oscar-table thead {
     background: #455790;
-    color: white; }
+    color: white;
+    text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.5); }
     .oscar-table thead th {
       font-weight: 100; }
+    .oscar-table thead :not(:nth-child(1)) {
+      text-align: right; }
+  .oscar-table tbody tr {
+    background: #fff; }
   .oscar-table tbody tr:nth-child(even) {
     background: #eeeeee; }
+  .oscar-table tbody tr.small, .oscar-table thead tr.small {
+    font-size: .8em; }
   .oscar-table tbody tr th, .oscar-table tbody tr td, .oscar-table thead tr th, .oscar-table thead tr td {
-    line-height: 1.6em; }
+    line-height: 1em; }
   .oscar-table th, .oscar-table td {
     border: solid rgba(0, 0, 0, 0.2) thin; }
 
