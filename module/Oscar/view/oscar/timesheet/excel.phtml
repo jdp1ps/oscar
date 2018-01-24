@@ -80,7 +80,7 @@ function displayTotaux( $array, $label ){
                                     ?>
                                     <?php if( $tag != 'total' && $tag != 'unvalidate' ): ?>
                                         <th>
-                                            <i class="icon-archives"></i>
+                                            <i class="icon-archive"></i>
                                             <?= $tag ?></th>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
@@ -99,11 +99,11 @@ function displayTotaux( $array, $label ){
                             }
                             $totauxYear = buildTotauxArray($wpCodes);
                             $year = $currentYear;
-                            echo "<tr><th colspan='".(count($totaux)+2)."'>$year</th></tr>";
+                            echo "<tr class='year-head'><th colspan='".(count($totaux)+2)."' class='text-right'><strong class='labeled'>$year</strong></th></tr>";
                         }
 
                     ?>
-                    <tr style="font-size: .8em">
+                    <tr class="small">
                         <th><i class="icon-calendar"></i><?= formatPeriod($period) ?></th>
                         <?php foreach ($totaux as $tag=>$wp): ?>
                             <?php
@@ -117,18 +117,16 @@ function displayTotaux( $array, $label ){
                                 ?>
                                 <td class="text-right"><?= number_format($wp['total'], 2) ?></td>
                             <?php endif; ?>
-
-                        </td>
                         <?php endforeach; ?>
                         <td class="text-right"><strong><?= number_format($totaux['total'],2) ?></strong></td>
-                        <td>
-                            <nav class="btn-group btn-group-sm">
-                                <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
-                                   class="btn btn-default btn-sm">
-                                    <i class="icon-download-outline"></i>
-                                    Télécharger la feuille de temps (Excel)
-                                </a>
-                            </nav>
+                        <td class="text-right">
+
+                            <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
+                               class="link">
+                                <i class="icon-download-outline"></i>
+                                Télécharger la feuille de temps (Excel)
+                            </a>
+
                             <?php if( $totaux['unvalidate'] == true ): ?>
                             <small class="helper danger">
                                 <i class="icon-warning-empty"></i>
