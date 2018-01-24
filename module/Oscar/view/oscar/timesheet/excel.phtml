@@ -22,6 +22,26 @@ function formatPeriod( $strPeriod ){
     return fmt()->format((new DateTime($strPeriod.'-15')));
 }
 
+function buildTotauxArray( $wpsCodes ){
+    $array = [];
+    foreach ($wpsCodes as $code) {
+        $array[$code] = 0.0;
+    }
+    return $array;
+}
+
+function displayTotaux( $array, $label ){
+    $array['unvalidate'] = "";
+    ?>
+    <tr class="sous-total-year">
+        <th><?= $label ?></th>
+        <?php foreach( $array as $col=>$value): ?>
+        <th class="text-right"><?= number_format($value, 2) ?></th>
+        <?php endforeach; ?>
+    </tr>
+    <?php
+}
+
 ?>
 <style>
 
@@ -39,18 +59,28 @@ function formatPeriod( $strPeriod ){
                     Revenir sur la fiche activité</a>
             </h2>
 
+            <p>
+                <a href="<?= $downloadBaseUrl ?>?action=csv&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
+                   class="btn btn-default btn-lg">
+                    <i class="icon-download-outline"></i>
+                    Télécharger les données (CSV)
+                </a>
+            </p>
+
             <table class="oscar-table">
 
-                <?php $first = true ?>
+                <?php $first = true; $year = null; $totauxYear = []; $totauxFull = []; $wpCodes = [];?>
                 <?php foreach ($activityDatas['timesheets'] as $period=>$totaux): ?>
                     <?php if( $first ): ?>
                         <thead>
                             <tr>
                                 <th>Période</th>
-                                <?php foreach ($totaux as $tag=>$value): ?>
+                                <?php foreach ($totaux as $tag=>$value):
+                                    $wpCodes[] = $tag;
+                                    ?>
                                     <?php if( $tag != 'total' && $tag != 'unvalidate' ): ?>
                                         <th>
-                                            <i class="icon-archive"></i>
+                                            <i class="icon-archives"></i>
                                             <?= $tag ?></th>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
@@ -61,10 +91,30 @@ function formatPeriod( $strPeriod ){
                         <tbody>
                         <?php $first = false; ?>
                     <?php endif; ?>
-                    <tr>
+                    <?php
+                        $currentYear = preg_replace('/(\d*)-(\d*)/', '$1', $period);
+                        if( $currentYear != $year ){
+                            if( $year != null ){
+                                displayTotaux($totauxYear, 'Total ' . $year);
+                            }
+                            $totauxYear = buildTotauxArray($wpCodes);
+                            $year = $currentYear;
+                            echo "<tr><th colspan='".(count($totaux)+2)."'>$year</th></tr>";
+                        }
+
+                    ?>
+                    <tr style="font-size: .8em">
                         <th><i class="icon-calendar"></i><?= formatPeriod($period) ?></th>
                         <?php foreach ($totaux as $tag=>$wp): ?>
-                            <?php if( $tag != 'total' && $tag != 'unvalidate'): ?>
+                            <?php
+                            if( $tag != 'unvalidate' ){
+                                $totauxYear[$tag] += $wp['total'];
+                                $totauxYear['total'] += $wp['total'];
+                            }
+
+                            ?>
+                            <?php if( $tag != 'total' && $tag != 'unvalidate'):
+                                ?>
                                 <td class="text-right"><?= number_format($wp['total'], 2) ?></td>
                             <?php endif; ?>
 
@@ -88,6 +138,7 @@ function formatPeriod( $strPeriod ){
                     </tr>
 
                 <?php endforeach; ?>
+                        <?php displayTotaux($totauxYear, 'Total '.$year); ?>
                 </tbody>
             </table>
         </section>
