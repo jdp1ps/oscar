@@ -324,7 +324,7 @@ class TimesheetController extends AbstractOscarController
             elseif ($icsUid) {
                 $this->getLogger()->info("Suppression d'un ICS");
                 try {
-                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $this->getCurrentPerson());
+                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $person);
                     $this->getLogger()->info("Suppression OK warn = " . count($warnings));
                     foreach ($warnings as $w){
                         $this->getLogger()->info($w);
