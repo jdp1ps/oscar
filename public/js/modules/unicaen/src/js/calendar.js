@@ -2384,7 +2384,7 @@ var Calendar = {
                 <nav class="views-switcher">
                     <a href="#" @click.prevent="state = 'week'" :class="{active: state == 'week'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>
                     <a href="#" @click.prevent="state = 'list'" :class="{active: state == 'list'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>
-                    <a href="#" @click.prevent="state = 'timesheet'" :class="{active: state == 'timesheet'}" v-if="this.wps"><i class="icon-file-excel"></i>Feuille de temps</a>
+                    
                     
                     <a href="#" @click.prevent="importInProgress = true" v-if="createNew"><i class="icon-columns"></i>Importer un ICS</a>
                 </nav>
@@ -2448,10 +2448,6 @@ var Calendar = {
                 @validateevent="handlerValidateEvent"
                 @rejectevent="handlerRejectEvent"
                 @submitevent="handlerSubmitEvent"></listview>
-                
-            <timesheetview v-if="state == 'timesheet'"
-                :with-owner="withOwner"
-                ></timesheet>
         </div>
 
     `,
@@ -2501,7 +2497,6 @@ var Calendar = {
         weekview: WeekView,
         monthview: MonthView,
         listview: ListView,
-        timesheetview: TimesheetView,
         eventitemimport: EventItemImport,
         importview: ImportICSView,
         selecteditable: SelectEditable

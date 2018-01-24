@@ -5396,10 +5396,14 @@ button.close {
   .oscar-table thead {
     background: #790629;
     color: white; }
+    .oscar-table thead th {
+      font-weight: 100; }
   .oscar-table tbody tr:nth-child(even) {
     background: #eeeeee; }
+  .oscar-table tbody tr th, .oscar-table tbody tr td, .oscar-table thead tr th, .oscar-table thead tr td {
+    line-height: 1.6em; }
   .oscar-table th, .oscar-table td {
-    border: solid rgba(255, 255, 255, 0.3) thin; }
+    border: solid rgba(0, 0, 0, 0.2) thin; }
 
 html body {
   background-image: url("bg-beta.jpg") !important;
