@@ -486,7 +486,7 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_VIEW_TIMESHEET, $entity) ): ?>
         <section>
             <h3>Feuille de temps</h3>
-            <?php foreach ($entity->getPersons() as $personActivity): ?>
+            <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
                 <?php if( $entity->hasDeclarant($personActivity->getPerson()) ): ?>
                     <a href="<?= $this->url('timesheet/excel') ?>?activityid=<?= $entity->getId() ?>&personid=<?= $personActivity->getPerson()->getId() ?>" class="btn btn-default">
                         <i class="icon-calendar"></i>
