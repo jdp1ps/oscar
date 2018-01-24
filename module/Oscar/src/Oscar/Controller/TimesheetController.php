@@ -37,18 +37,25 @@ use Zend\View\Model\ViewModel;
  */
 class TimesheetController extends AbstractOscarController
 {
+    public function exportCSVAction(){
+
+    }
+
+
     public function excelAction(){
         $activityId     = $this->params()->fromQuery('activityid');
-        $activity       = null;
-        $action = $this->params()->fromQuery('action');
-        $period = $this->params()->fromQuery('period', null);
-        $personIdQuery = $this->params()->fromQuery('personid', null );
-        $currentPersonId = $this->getCurrentPerson()->getId();
+
+        /** @var Activity $activity */
+        $activity           = null;
+        $action             = $this->params()->fromQuery('action');
+        $period             = $this->params()->fromQuery('period', null);
+        $personIdQuery      = $this->params()->fromQuery('personid', null );
+
+        $currentPersonId    = $this->getCurrentPerson()->getId();
 
         if( $activityId ){
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
         }
-
 
         if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
             $this->getOscarUserContext()->check(Privileges::PERSON_VIEW_TIMESHEET, $activity);
@@ -67,9 +74,34 @@ class TimesheetController extends AbstractOscarController
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
+
+        if( $action == "csv" ){
+            if( !$activity ){
+                $this->getResponseBadRequest("Impossible de trouver l'activité");
+            }
+            $datas = $timesheetService->getPersonTimesheetsCSV($person, $activity, false);
+            $filename = $activity->getAcronym() . '-' . $activity->getOscarNum().'-'.$person->getLadapLogin().'.csv';
+
+
+
+            $handler = fopen('/tmp/' . $filename, 'w');
+
+             /** @var ActivityPayment $payment */
+            foreach ($datas as $line) {
+                fputcsv($handler, $line);
+            }
+
+            fclose($handler);
+
+            header('Content-Disposition: attachment; filename='.$filename);
+            header('Content-Length: ' . filesize('/tmp/' . $filename));
+            header('Content-type: plain/text');
+
+            die(file_get_contents('/tmp/' . $filename));
+        }
         $datas = $timesheetService->getPersonTimesheets($person, false, $period, $activity);
 
-       // var_dump($activity);
+
         if( $action == "export" ){
             $fmt = new \IntlDateFormatter(
                 'fr_FR',
