@@ -34,6 +34,101 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get('OscarUserContext');
     }
 
+
+
+    /**
+     * Retourne les créneaux de la personne regroupès par activité
+     * @param Person $person
+     */
+    public function getPersonTimesheetsCSV( Person $person, Activity $activity = null, $validatedOnly = false){
+        $fmt = new \IntlDateFormatter(
+            'fr_FR',
+            \IntlDateFormatter::FULL,
+            \IntlDateFormatter::FULL,
+            'Europe/Paris',
+            \IntlDateFormatter::GREGORIAN,
+            'd MMMM Y');
+
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.person = :person')
+            ->andWhere('t.activity = :activity')
+            ->orderBy('t.activity, t.dateFrom')
+            ;
+
+        $datas = [];
+
+        $workpackages = [];
+
+        /** @var WorkPackage $workPackage */
+        foreach ($activity->getWorkPackages() as $workPackage ){
+            $workpackages[] = $workPackage->getCode();
+        }
+        sort($workpackages);
+
+        $ligneHeader = [ (string)$person ];
+        foreach ($workpackages as $wpCode) {
+            $ligneHeader[] = $wpCode;
+        }
+
+        $ligneHeader[] = "Commentaires";
+        $ligneHeader[] = "Nbr créneaux";
+        $ligneHeader[] = "Total jour";
+
+        $datas[] = $ligneHeader;
+
+        $days = [];
+        $yearStart = (int) $activity->getDateStart()->format('Y');
+        $yearEnd = (int) $activity->getDateEnd()->format('Y');
+
+        // Prétraitement des créneaux
+        $creneaux = [];
+        $timesheets = $query->getQuery()->setParameters([
+            'person' => $person,
+            'activity' => $activity
+        ])->getResult();
+
+        /** @var TimeSheet $timesheet */
+        foreach( $timesheets as $timesheet ){
+
+            $dayStr =   $fmt->format($timesheet->getDateFrom());
+            $code =     $timesheet->getWorkpackage()->getCode();
+            $comment =  trim($timesheet->getComment());
+            $duration = (float) $timesheet->getDuration();
+
+            if( !array_key_exists($dayStr, $creneaux) ){
+                $creneaux[$dayStr] = [];
+                foreach ($workpackages as $wpCode) {
+                    $creneaux[$dayStr][$wpCode] = 0.0;
+                }
+                $creneaux[$dayStr]['total'] = 0.0;
+                $creneaux[$dayStr]['qte'] = 0;
+                $creneaux[$dayStr]['commentaire'] = [];
+            }
+
+            $creneaux[$dayStr][$code] += $duration;
+            $creneaux[$dayStr]['commentaire'][] = $comment;
+            $creneaux[$dayStr]['total'] += $duration;
+            $creneaux[$dayStr]['qte'] += 1;
+        }
+
+
+        $content = [];
+
+        foreach ($creneaux as $dayStr=>$dayData) {
+            $ligne = [$dayStr];
+            foreach ($workpackages as $wpCode) {
+                $ligne[] = $creneaux[$dayStr][$wpCode];
+            }
+            $ligne[] = implode(" - ", array_unique($creneaux[$dayStr]['commentaire']));
+            $ligne[] = $creneaux[$dayStr]['qte'];
+            $ligne[] = $creneaux[$dayStr]['total'];
+            $datas[] = $ligne;
+        }
+
+        return $datas;
+    }
+
     /**
      * Retourne les créneaux de la personne regroupès par activité
      * @param Person $person
