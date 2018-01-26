@@ -48,6 +48,13 @@ function displayTotaux( $array, $label ){
 
 </style>
 <section class="container">
+    <h1><i class="icon-calendar"></i>Prévisualisation des feuilles de temps</h1>
+    <?php if( !$datas ): ?>
+        <p class="alert alert-warning">
+            Aucune déclaration disponible
+        </p>
+    <?php endif; ?>
+
     <?php foreach ($datas as $activityDatas): ?>
         <section>
             <h3>Déclaration de <strong><?= $person ?></strong></h3>
