@@ -160,6 +160,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             if( !array_key_exists($activityId, $datas) ){
                 $datas[$activityId] = [
+                  'activityObj' => $timesheet->getActivity(),
                   'activity' => (string) $timesheet->getActivity(),
                   'project' => (string) $timesheet->getActivity()->getProject(),
                   'activity_id' => $timesheet->getActivity()->getId()
