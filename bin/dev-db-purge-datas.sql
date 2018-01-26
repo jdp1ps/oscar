@@ -5,6 +5,7 @@ DELETE FROM activityperson;
 DELETE FROM activityorganization;
 DELETE FROM activitydate;
 DELETE FROM activitypayment;
+DELETE FROM notificationperson;
 DELETE FROM contractdocument;
 DELETE FROM organizationperson;
 DELETE FROM workpackageperson;
