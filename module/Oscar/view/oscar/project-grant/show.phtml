@@ -474,91 +474,87 @@
         </div>
     </div>
     <hr>
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_VIEW_TIMESHEET, $entity) ): ?>
+        <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
+        <h3>Visualiser les feuilles de temps</h3>
+        <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
+            <?php if( $entity->hasDeclarant($personActivity->getPerson()) ): ?>
+                <a href="<?= $this->url('timesheet/excel') ?>?activityid=<?= $entity->getId() ?>&personid=<?= $personActivity->getPerson()->getId() ?>" class="btn btn-default">
+                    <i class="icon-calendar"></i>
+                    <?= $personActivity->getPerson() ?>
+                </a>
+            <?php endif; ?>
+        <?php endforeach; ?>
+
+        <h3>Gérer les déclarations</h3>
+        <?php if( $entity->hasTimesheetsUpForValidationAdmin() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ): ?>
+            <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
+                <i class="icon-archive"></i>
+                Validation administrative en attente
+            </a>
+        <?php endif; ?>
+        <?php if( $entity->hasTimesheetsUpForValidationSci() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ): ?>
+            <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
+                <i class="icon-beaker"></i>
+                Validation scientifique en attente
+            </a>
+        <?php endif; ?>
+        <?php if( $entity->hasDeclarant($this->grant()->getCurrentPerson())  ): ?>
+            <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
+                <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>?activity_id=<?= $entity->getId() ?>">
+                    <i class="icon-calendar"></i>
+                    Déclarer vos heures
+                </a>
+            <?php endif; ?>
+        <?php endif; ?>
+
+        <?php /*if( ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ||
+                $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ) &&
+                $entity->hasDeclarers()): ?>
+
+            <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>#timesheet" class="btn btn-default">
+                <i class="icon-doc-xls"></i>
+                Validation des déclarations
+            </a>
+        <?php endif;*/ ?>
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION, $entity) ): ?>
+
+            <?php if( count($entity->getWorkPackages()) == 0 ): ?>
+                <p class="alert-infos">
+                    <i class="icon-info"></i>
+                    Vous devez créer des lots de travail et leur assigner des déclarants pour permettre la déclaration d'heures.
+                </p>
+            <?php else: ?>
+
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Ajouter des créneaux pour <i class="caret"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <?php foreach( $entity->getPersonsDeep() as $person ): ?>
+
+                            <li><a class="dropdown-item <?= !$entity->hasDeclarant($person->getPerson()) ? 'disabled' : '' ?>" href="<?= $this->url('timesheet/usurpation', ['idactivity' => $entity->getId(), 'idperson' => $person->getPerson()->getId()]) ?>">
+                                    <?= $person->getPerson() ?>
+
+                                    <?php if(!$entity->hasDeclarant($person)): ?>
+                                        <small> (N'est identifié comme déclarant dans aucun lot de travail)</small>
+                                    <?php endif; ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+
+    <?php endif; ?>
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-
-
     <section>
         <h2><i class="icon-archive"></i> Lot de travail</h2>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_VIEW_TIMESHEET, $entity) ): ?>
-        <section>
-            <h3>Feuille de temps</h3>
-            <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
-                <?php if( $entity->hasDeclarant($personActivity->getPerson()) ): ?>
-                    <a href="<?= $this->url('timesheet/excel') ?>?activityid=<?= $entity->getId() ?>&personid=<?= $personActivity->getPerson()->getId() ?>" class="btn btn-default">
-                        <i class="icon-calendar"></i>
-                        <?= $personActivity->getPerson() ?>
-                    </a>
-                <?php endif; ?>
-            <?php endforeach; ?>
-        </section>
-        <?php endif; ?>
-
-        <nav>
-            <?php if( ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) || $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ) &&
-                $entity->hasDeclarers()): ?>
-                <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>#timesheet" class="btn btn-default">
-                    <i class="icon-doc-xls"></i>
-                    Validation des déclarations
-                </a>
-            <?php endif; ?>
-
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION, $entity) ): ?>
-
-                <?php if( count($entity->getWorkPackages()) == 0 ): ?>
-                    <p class="alert-infos">
-                        <i class="icon-info"></i>
-                        Vous devez créer des lots de travail et leur assigner des déclarants pour permettre la déclaration d'heures.
-                    </p>
-                <?php else: ?>
-
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Ajouter des créneaux pour <i class="caret"></i>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <?php foreach( $entity->getPersonsDeep() as $person ): ?>
-
-                        <li><a class="dropdown-item <?= $entity->hasDeclarant($person) ? '' : ' disabled' ?>" href="<?= $this->url('timesheet/usurpation', ['idactivity' => $entity->getId(), 'idperson' => $person->getPerson()->getId()]) ?>">
-                                <?= $person->getPerson() ?>
-
-                                <?php if(!$entity->hasDeclarant($person)): ?>
-                                <small> (N'est identifié comme déclarant dans aucun lot de travail)</small>
-                                <?php endif; ?>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-                <?php endif; ?>
-            <?php endif; ?>
-            <?php if( $entity->hasTimesheetsUpForValidationAdmin() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ): ?>
-                <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
-                    <i class="icon-archive"></i>
-                    Validation administrative en attente
-                </a>
-            <?php endif; ?>
-            <?php if( $entity->hasTimesheetsUpForValidationSci() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ): ?>
-                <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
-                    <i class="icon-beaker"></i>
-                    Validation scientifique en attente
-                </a>
-            <?php endif; ?>
-            <?php if( $entity->hasDeclarant($this->grant()->getCurrentPerson())  ): ?>
-                <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
-                    <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>?activity_id=<?= $entity->getId() ?>">
-                        <i class="icon-calendar"></i>
-                        Déclarer vos heures
-                    </a>
-                <?php endif; ?>
-            <?php endif; ?>
-        </nav>
-        <div id="workpackages">
-
-        </div>
+        <div id="workpackages"></div>
     </section>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <script>
