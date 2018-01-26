@@ -37,11 +37,12 @@ use Zend\View\Model\ViewModel;
  */
 class TimesheetController extends AbstractOscarController
 {
-    public function exportCSVAction(){
-
-    }
-
-
+    /**
+     * Exportation et visualisation des feuilles de temps.
+     *
+     * @return array
+     * @throws OscarException
+     */
     public function excelAction(){
         $activityId     = $this->params()->fromQuery('activityid');
 
@@ -51,6 +52,7 @@ class TimesheetController extends AbstractOscarController
         $period             = $this->params()->fromQuery('period', null);
         $personIdQuery      = $this->params()->fromQuery('personid', null );
 
+        //
         $currentPersonId    = $this->getCurrentPerson()->getId();
 
         if( $activityId ){
@@ -103,6 +105,12 @@ class TimesheetController extends AbstractOscarController
 
 
         if( $action == "export" ){
+
+            $modele = $this->getConfiguration('oscar.paths.timesheet_modele');
+            if( !$modele ){
+                throw new OscarException("Impossible de charger le modèle de feuille de temps");
+            }
+
             $fmt = new \IntlDateFormatter(
                 'fr_FR',
                 \IntlDateFormatter::FULL,
@@ -120,7 +128,7 @@ class TimesheetController extends AbstractOscarController
                 $lineWpStart = 10;
                 $lineWpCurent = $lineWpStart;
                 $lineWpCount = 0;
-                $spreadsheet = \PHPExcel_IOFactory::load(__DIR__.'/ods-base-test.xls');
+                $spreadsheet = \PHPExcel_IOFactory::load($modele);
 
 
                 $spreadsheet->getActiveSheet()->setCellValue('A1', $activity->getLabel());
@@ -164,6 +172,8 @@ class TimesheetController extends AbstractOscarController
 
                     $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $sum);
                 }
+
+                $spreadsheet->getActiveSheet()->setCellValue('AH'.$rowNum, sprintf('=SUM(AH10:AH%s)', ($rowNum-1)));
 
                 $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
 
