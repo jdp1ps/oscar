@@ -478,10 +478,17 @@
         <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
         <h3>Visualiser les feuilles de temps</h3>
         <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
-            <?php if( $entity->hasDeclarant($personActivity->getPerson()) ): ?>
-                <a href="<?= $this->url('timesheet/excel') ?>?activityid=<?= $entity->getId() ?>&personid=<?= $personActivity->getPerson()->getId() ?>" class="btn btn-default">
+            <?php if( $entity->hasDeclarant($personActivity->getPerson()) ):
+                $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($entity);
+                ?>
+
+                <a href="<?= $this->url('timesheet/excel') ?>?activityid=<?= $entity->getId() ?>&personid=<?= $personActivity->getPerson()->getId() ?>"
+                   class="btn <?=  $hasDeclaration ? 'btn-primary' : 'btn-default disabled' ?>">
                     <i class="icon-calendar"></i>
                     <?= $personActivity->getPerson() ?>
+                    <?php if(!$hasDeclaration): ?>
+                    <small>(N'a encore rien déclaré)</small>
+                    <?php endif; ?>
                 </a>
             <?php endif; ?>
         <?php endforeach; ?>

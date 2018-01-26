@@ -630,6 +630,17 @@ class Person implements ResourceInterface
         $activity->hasDeclarant($this);
     }
 
+
+    public function hasDeclarationIn( Activity $activity ){
+        /** @var TimeSheet $timesheet */
+        foreach ($activity->getTimesheets() as $timesheet ){
+            if( $timesheet->getPerson() == $this ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function toArray()
     {
         return array(
