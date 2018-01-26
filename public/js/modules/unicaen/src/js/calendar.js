@@ -38,6 +38,7 @@ class CalendarDatas {
         this.copyWeekData = null;
         this.copyDayData = null;
         this.generatedId = 0;
+        this.totalWeek = 0;
         this.defaultLabel = "";
         this.tooltip = null;
         this.errors = [];
@@ -827,7 +828,8 @@ var WeekView = {
     <div class="meta">
         <a href="#" @click="previousWeek"><i class=" icon-angle-left"></i></a>
         <h3>
-            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}
+            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }} 
+            <small class="total-heures-semaine"> ({{ totalWeek }} heures)</small>  
             <nav class="reject-valid-group">
                 <i class=" icon-angle-down"></i>
                 <ul>
@@ -953,6 +955,7 @@ var WeekView = {
 
             var weekEvents = [];
             this.weekCredentials = store.defaultWeekCredentials();
+            var totalW = 0;
 
             this.events.forEach(event => {
                 // On filtre les événements de la semaine et le déclarant si besoin
@@ -976,6 +979,7 @@ var WeekView = {
                     }
                     this.weekCredentials.copydaily[event.mmStart.day()] = true;
                     this.weekCredentials.total[event.mmStart.day()-1] += event.duration;
+                    totalW += event.duration;
                     event.intersect = 0;
                     event.intersectIndex = 0;
                     weekEvents.push(event);
@@ -998,6 +1002,9 @@ var WeekView = {
                     }
                 }
             }
+            
+            this.totalWeek = totalW;
+            
             return weekEvents;
         },
 
