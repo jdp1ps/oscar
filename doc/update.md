@@ -1,5 +1,19 @@
 # Procédure de mise à jour Oscar
 
+## Sauvegarde
+
+Faites une sauvegarde de l'application en copiant le dossier oscar : 
+
+```bash
+cp /path/to/oscar /tmp/oscar_save
+```
+
+Faites une sauvegarde de la BDD pour pouvoir revenir en arrière en cas de problème.
+
+```bash
+pg_dump --clean --no-owner -h [SERVER] -U [USER] [BASE] > /tmp/backup_oscar-prod.sql
+```
+
 ## Mettre en maintenance
 
 Commencez par mettre Oscar OFFLINE en créant un fichier MAINTENANCE à la racine de la copie :
@@ -19,6 +33,16 @@ Mettre ensuite les sources à jour :
 git pull
 ```
 
+## Mise à jour des vendors (Librairies tiers)
+
+```bash
+# On supprime les anciennes
+rm -Rf vendor
+
+# On extrait les dernières
+tar xvfz install/vendor.tar.gz
+```
+
 ## Mise à jour de la BDD
 
 Il faut mettre à jour le schéma avec l'utilitaire intégré à **Doctrine** :
@@ -30,6 +54,10 @@ php vendor/bin/orm:schema-tool:update --dump-sql
 # Pour appliquer
 php vendor/bin/orm:schema-tool:update --force
 ```
+
+## Vérifier la configuration
+
+Selon la mise à jour, la configuration peut avoir été mise à jour, controler le fichier `./config/autoload/local.php.dist`. Si une mise à jour implique des changements plus spécifiques, ces derniers seront documentés en détails dans un document dédié.
 
 # Mise à jour des privilèges
 
