@@ -129,24 +129,26 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
 		}
 
-        try {
-            $dbUser->setDateLogin(new \DateTime());
-            $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
-            $this->getEntityManager()->flush($dbUser);
-        } catch (\Exception $e) {
+		if( $dbUser ) {
+            try {
+                $dbUser->setDateLogin(new \DateTime());
+                $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
+                $this->getEntityManager()->flush($dbUser);
+            } catch (\Exception $e) {
 
-        }
+            }
 
-        /** @var PersonService $personService */
-        $personService = $this->_serviceManager->get('PersonService');
-        try {
-            $person = $personService->getPersonByLdapLogin($dbUser->getUsername());
-            $str = $person->log();
-        } catch (NoResultException $e) {
-            $str = $dbUser->getUsername() . ' - DBUSER';
+            /** @var PersonService $personService */
+            $personService = $this->_serviceManager->get('PersonService');
+            try {
+                $person = $personService->getPersonByLdapLogin($dbUser->getUsername());
+                $str = $person->log();
+            } catch (NoResultException $e) {
+                $str = $dbUser->getUsername() . ' - DBUSER';
+            }
+            $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
+                $str), $dbUser);
         }
-        $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
-            $str), $dbUser);
 
     }
 
@@ -258,6 +260,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             '# IMPORT',
             'oscar authentifications:sync <jsonpath>' => "Charge les comptes d'authentification depuis la source JSON",
             'oscar personsjson:sync <fichier>' => "Charge les personnes depuis le fichier source JSON",
+            'oscar activity:csvtojson <fichier> <config> [-f|--force] [--cp] [--co] [--cpr] [--cor]' => "Converti les données CSV au format JSON à partir de la configuration",
             'oscar organizationsjson:sync <fichier>' => "Charge les organisations depuis le fichier source JSON",
             'oscar activity:sync <fichier>' => "Charge les activités depuis le fichier CSV spécifié",
             'oscar patch checkPrivilegesJSON' => "Mise à jour automatique de la liste des privilèges"

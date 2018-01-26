@@ -43,6 +43,8 @@ class CalendarDatas {
         this.errors = [];
         this.listEventsOpen = [];
 
+        this.ics = [];
+
         // Données pour transformer les créneaux longs
         this.transformLong = [
             { startHours: 8, startMinutes: 0, endHours: 12, endMinutes: 0 },
@@ -83,7 +85,6 @@ class CalendarDatas {
         this.rejectComment = "";
         this.rejectedEvents = [];
     }
-
 
     tooltipUpdate(){
       console.log(arguments);
@@ -213,14 +214,6 @@ class CalendarDatas {
 
     get today() {
         return moment();
-    }
-
-    get firstEvent() {
-
-    }
-
-    get lastEvent() {
-
     }
 
     get currentYear() {
@@ -395,7 +388,27 @@ class CalendarDatas {
         return null;
     }
 
+    getIcsByUid( uid ){
+        for( let i=0; i<this.ics.length; i++ ){
+            if( this.ics[i].icsfileuid == uid ){
+                return this.ics[i];
+            }
+        }
+        return null;
+    }
+
+    addIcsRef(event){
+        this.ics.push({
+            icsfileuid: event.icsfileuid,
+            icsfilename: event.icsfilename,
+            icsfiledateAdded: event.icsfiledateadded
+        })
+    }
+
     addNewEvent(data) {
+        if( data.icsfileuid && !this.getIcsByUid(data.icsfileuid) )
+            this.addIcsRef(data);
+
         this.events.push(
             new EventDT(data)
         );
@@ -438,6 +451,8 @@ var TimeEvent = {
                 <div class="comment">{{ event.rejectedAdminComment}}</div>
             </div>
         </div>
+        
+        
 
         <nav class="admin">
             <a href="#" 
@@ -1411,6 +1426,7 @@ var ListView = {
                             <li @click.prevent="performYear(eventsYear, 'rejectsci')" v-if="eventsYear.credentials.sci"><i class="icon-beaker"></i>Rejeter scientifiquement l'année</li>
                             <li @click.prevent="performYear(eventsYear, 'validateadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Valider administrativement l'année</li>
                             <li @click.prevent="performYear(eventsYear, 'rejectadm')" v-if="eventsYear.credentials.adm"><i class="icon-archive"></i>Rejeter administrativement l'année</li>
+                            <li><i class="icon-archive"></i> Suprimmer les créneaux affichés</li>
                         </ul>
                     </nav>
                 </strong>
@@ -1726,68 +1742,102 @@ var EventItemImport = {
 };
 
 var ImportICSView = {
-    template: `<div class="importer">
-                <div class="importer-ui">
-                    <h1><i class="icon-calendar"></i>Importer un ICS</h1>
-                    <nav class="steps">
-                        <span :class="{active: etape == 1}">Fichier ICS</span>
-                        <span :class="{active: etape == 2}">Créneaux à importer</span>
-                        <span :class="{active: etape == 3}">Finalisation</span>
-
+    template: `
+<div class="importer">
+    <div class="importer-ui">
+        
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#import-newimport" data-toggle="tab">
+                    <i class="icon-calendar"></i>
+                    Nouvel import
+                </a>                        
+            </li>
+            <li role="presentation">
+                <a href="#import-importslist" data-toggle="tab">
+                    <i class="icon-history"></i>
+                    Historique des importations
+                </a>                        
+            </li>
+        </ul>
+        
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane" id="import-importslist">
+                <article class="card" v-for="imp in existingIcs">
+                    <h3 class="card-title">
+                        {{ imp.icsfilename }}, le {{ imp.icsfiledateAdded | moment }}
+                    </h3>
+                    <small>UID : <strong>{{ imp.icsfileuid }} </strong></small>
+                    <nav>
+                        <a href="#" @click="$emit('deleteics',imp.icsfileuid)" class="link"><i class="icon-trash"> supprimer</a>
                     </nav>
+                </article>
+                <div class="buttons">
+                    <button class="btn btn-default" @click="$emit('cancel')">Fermer</button>                   
+                </div>        
+            </div>
+            <div role="tabpanel" class="tab-pane active" id="import-newimport">
+                <h1><i class="icon-calendar"></i>Importer un ICS</h1>
+                <nav class="steps">
+                    <span :class="{active: etape == 1}">Fichier ICS</span>
+                    <span :class="{active: etape == 2}">Créneaux à importer</span>
+                    <span :class="{active: etape == 3}">Finalisation</span>
+                </nav>
 
-                    <section class="etape1 row" v-if="etape == 1">
-                        <div class="col-md-1">Du</div>
-                        <div class="col-md-5">
-                            <datepicker v-model="periodStart"></datepicker>
-                        </div>
-
-                        <div class="col-md-1">au</div>
-                        <div class="col-md-5">
-                            <datepicker v-model="periodEnd"></datepicker>
-                        </div>
-                        <p>Choisissez un fichier ICS : </p>
-                        <input type="file" @change="loadIcsFile">
-                    </section>
-
-                    <section class="etape2" v-if="etape == 2">
-                        <h2><i class="icon-download-outline"></i>Aperçu des données chargées</h2>
-                        <p>Voici les données chargées depuis le fichier ICS fournis : </p>
-                        <div class="calendar calendar-list">
-                            <article v-for="pack in packs">
-                                <section class="events">
-                                    <h3>{{ pack.label }}</h3>
-                                    <section class="events-list">
-                                        <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>
-                                    </section>
-                                </section>
-                            </article>
-                        </div>
-                        <div>
-                            <h2><i class="icon-loop-outline"></i>Correspondance des créneaux</h2>
-                            <input v-model="search" placeholder="Filter les créneaux">
-                            <section class="correspondances"">
-
-                                <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
-                                    <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
-                                    <select name="" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
-                                        <option value="ignorer">Ignorer ces créneaux</option>
-                                        <option value="">Conserver</option>
-                                        <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>
-                                    </select>
-                                </article>
-                            </section>
-                        </div>
-                    </section>
-
-                    <div class="buttons">
-                        <button class="btn btn-default" @click="$emit('cancel')">Annuler</button>
-                        <button class="btn btn-primary" @click="applyImport" v-if="etape==2">
-                            Valider l'import de ces créneaux
-                        </button>
+                <section class="etape1 row" v-if="etape == 1">
+                    <div class="col-md-1">Du</div>
+                    <div class="col-md-5">
+                        <datepicker v-model="periodStart"></datepicker>
                     </div>
+
+                    <div class="col-md-1">au</div>
+                    <div class="col-md-5">
+                        <datepicker v-model="periodEnd"></datepicker>
+                    </div>
+                    <p>Choisissez un fichier ICS : </p>
+                    <input type="file" @change="loadIcsFile">
+                </section>
+
+                <section class="etape2" v-if="etape == 2">
+                    <h2><i class="icon-download-outline"></i>Aperçu des données chargées</h2>
+                    <p>Voici les données chargées depuis le fichier ICS fournis : </p>
+                    <div class="calendar calendar-list">
+                        <article v-for="pack in packs">
+                            <section class="events">
+                                <h3>{{ pack.label }}</h3>
+                                <section class="events-list">
+                                    <eventitemimport :event="event" v-for="event in pack.events"></eventitemimport>
+                                </section>
+                            </section>
+                        </article>
+                    </div>
+                    <div>
+                        <h2><i class="icon-loop-outline"></i>Correspondance des créneaux</h2>
+                        <input v-model="search" placeholder="Filter les créneaux">
+                        <section class="correspondances"">
+
+                            <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
+                                <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
+                                <select v-model="associations[label]" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
+                                    <option value="ignorer">Ignorer ces créneaux</option>
+                                    <option value="">Conserver</option>
+                                    <option :value="creneau" v-for="creneau in creneaux">Placer dans {{ creneau }}</option>
+                                </select>
+                            </article>
+                        </section>
+                    </div>
+                </section>
+
+                <div class="buttons">
+                    <button class="btn btn-default" @click="$emit('cancel')">Annuler</button>
+                    <button class="btn btn-primary" @click="applyImport" v-if="etape==2">
+                        Valider l'import de ces créneaux
+                    </button>
                 </div>
-            </div>`,
+            </div>
+        </div>
+    </div>
+</div>`,
     props: {
         'creneaux': {
             default: ['test A', 'test B', 'test C']
@@ -1800,10 +1850,17 @@ var ImportICSView = {
             periodStart: null,
             periodEnd: null,
             importedEvents: [],
-            associations: {},
+            associations: [],
             labels: [],
             etape: 1,
             search: ""
+        }
+    },
+
+    filters: {
+        moment( str ){
+            let m = moment(str);
+            return m.format('DD MMMM YYYY') + '(' + m.fromNow() +')';
         }
     },
 
@@ -1813,6 +1870,12 @@ var ImportICSView = {
     },
 
     computed: {
+        workpackages(){
+          return store.wps;
+        },
+        existingIcs(){
+          return store.ics;
+        },
         packs(){
             var packs = [];
             this.importedEvents.forEach(item => {
@@ -1884,10 +1947,17 @@ var ImportICSView = {
             var events = analyser.parse(ICAL.parse(content));
             var after = this.periodStart ? moment(this.periodStart) : null;
             var before = this.periodEnd ? moment(this.periodEnd) : null;
+            var icsName  =  "";
             this.importedEvents = [];
             this.labels = [];
 
+            // On précalcule les correspondances possibles entre les créneaux trouvés
+            // et les informations disponibles sur les Workpackage
+            console.log(store.wps);
+
+
             events.forEach(item => {
+                icsName = item.icsfilename;
                 item.mmStart = moment(item.start);
                 item.mmEnd = moment(item.end);
                 item.imported = false;
@@ -1900,6 +1970,67 @@ var ImportICSView = {
                     console.log('Le créneau est hors limite');
                 }
             });
+
+            // En minuscule pour les test de proximité
+            let icsNameLC = icsName.toLowerCase();
+
+            var associationParser  = (label) => {
+                if( !label ) return "";
+                let out = "";
+                label = label.toLowerCase();
+
+                Object.keys(store.wps).map((objectKey, index) => {
+                    let wpDatas = store.wps[objectKey],
+                        wpCode = wpDatas.code.toLowerCase(),
+                        acronym = wpDatas.acronym.toLowerCase(),
+                        code = wpDatas.activity_code.toLowerCase()
+                    ;
+                    if( (icsNameLC.indexOf(acronym) >= 0 || icsNameLC.indexOf(code) >= 0) || (label.indexOf(acronym) >= 0 || label.indexOf(code) >= 0)){
+                        if( label.indexOf(wpCode) >= 0 ){
+                            out = objectKey;
+                        } else {
+                            console.log("Pas de code WP");
+                        }
+                    } else {
+                        // ou dans le label ...
+                        console.log(icsNameLC, acronym, code, label);
+                        console.log((icsNameLC.indexOf(acronym) >= 0 || icsNameLC.indexOf(code) >= 0));
+                        console.log((label.indexOf(acronym) >= 0 || label.indexOf(code) >= 0));
+                        console.log("Pas de code/acronyme");
+                    }
+                });
+                return out;
+            };
+
+            // 'acronym'       => $wpd->getActivity()->getAcronym(),
+            //     'activity'      => $wpd->getActivity()->__toString(),
+            //     'activity_code' => $wpd->getActivity()->getOscarNum(),
+            //     'idactivity'    => $wpd->getActivity()->getId(),
+            //     'code' => $wpd->getCode(),
+
+
+            var associations = {};
+            for( var i=0; i<this.labels.length; i++ ){
+                var label = this.labels[i];
+                var corre = associationParser(label);
+                console.log(corre);
+                associations[label] = corre ? corre : "";
+                if ( corre )
+                    this.updateLabel(label, corre);
+                else
+                    associations[label] = "ignorer"
+            }
+
+            /*
+            if( store.wps  ){
+                Object.keys(store.wps).map((objectKey, index) => {
+                    associations[objectKey] = associationParser(store.wps[objectKey], this.labels);
+                });
+            }
+            /****/
+
+            this.associations = associations;
+
 
             this.importedEvents = EventDT.sortByStart(this.importedEvents);
 
@@ -2109,6 +2240,11 @@ var Calendar = {
                     <p>Déclarant : <strong>{{ tooltip.event.owner }}</strong>
                         <span v-if="tooltip.event.sendAt">Envoyé le {{ tooltip.event.sendAt | moment }}</span>
                     </p>
+                    
+                    <p v-if="tooltip.event.icsuid">
+                        N°ICS : <strong>{{ tooltip.event.icsuid }}</strong><br />
+                        ICAL : <strong>{{ tooltip.event.icsfilename }}</strong> <small>({{ tooltip.event.icsfileuid }})</small>
+                    </p>
                     <p>Durée : <strong> {{ tooltip.event.duration }} heure(s)</strong></p>
                     <p>Commentaire : <strong>{{ tooltip.event.description }}</strong></p>
    
@@ -2154,7 +2290,12 @@ var Calendar = {
                 </div>
             </transition>
 
-            <importview :creneaux="labels" @cancel="importInProgress = false" @import="importEvents" v-if="importInProgress"></importview>
+            <importview :creneaux="labels" 
+                    @cancel="importInProgress = false" 
+                    @import="importEvents" 
+                    v-if="importInProgress"
+                    @deleteics="handlerDeleteImport" 
+                    ></importview>
             
             <transition name="fade">
                 <div class="vue-loader" v-if="remoteError" @click="remoteError = ''">
@@ -2243,8 +2384,6 @@ var Calendar = {
                 <nav class="views-switcher">
                     <a href="#" @click.prevent="state = 'week'" :class="{active: state == 'week'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>
                     <a href="#" @click.prevent="state = 'list'" :class="{active: state == 'list'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>
-                    <a href="#" @click.prevent="state = 'timesheet'" :class="{active: state == 'timesheet'}" v-if="this.wps"><i class="icon-file-excel"></i>Feuille de temps</a>
-                    
                     <a href="#" @click.prevent="importInProgress = true" v-if="createNew"><i class="icon-columns"></i>Importer un ICS</a>
                 </nav>
                  <template v-if="calendarLabelUrl.length">
@@ -2307,10 +2446,6 @@ var Calendar = {
                 @validateevent="handlerValidateEvent"
                 @rejectevent="handlerRejectEvent"
                 @submitevent="handlerSubmitEvent"></listview>
-                
-            <timesheetview v-if="state == 'timesheet'"
-                :with-owner="withOwner"
-                ></timesheet>
         </div>
 
     `,
@@ -2360,7 +2495,6 @@ var Calendar = {
         weekview: WeekView,
         monthview: MonthView,
         listview: ListView,
-        timesheetview: TimesheetView,
         eventitemimport: EventItemImport,
         importview: ImportICSView,
         selecteditable: SelectEditable
@@ -2417,13 +2551,29 @@ var Calendar = {
             }
         },
 
+        getEventByIcsUid( uid ){
+          for( let i = 0; i<this.events.length; i++ ){
+              if( this.events[i].icsuid == uid ){
+                  return this.events[i];
+              }
+          }
+          return null;
+        },
+
         importEvents(events){
             var datas = [];
             events.forEach(item => {
-                var event = JSON.parse(JSON.stringify(item)),
+
+
+                var  event = JSON.parse(JSON.stringify(item)),
+                    exist = this.getEventByIcsUid(item.icsuid),
                     itemStart = moment(event.start),
                     itemEnd = moment(event.end),
                     duration = itemEnd - itemStart;
+
+                if( exist ){
+                    event.id = exist.id;
+                }
 
                 if (event.useLabel) event.label = event.useLabel;
 
@@ -2441,12 +2591,14 @@ var Calendar = {
                 } else {
                     event.mmStart = moment(event.start);
                     event.mmEnd = moment(event.end);
+
                     datas.push(event);
                 }
 
                 if (event.useLabel) event.label = event.useLabel;
             })
             this.importInProgress = false;
+
             this.restSave(datas);
         },
 
@@ -2567,6 +2719,9 @@ var Calendar = {
 
                     var jsonData = {
                         'label': events[i].label,
+                        'icsuid': events[i].icsuid,
+                        'icsfileuid': events[i].icsfileuid,
+                        'icsfilename': events[i].icsfilename,
                         'description': events[i].description,
                         'start': events[i].mmStart.format(),
                         'end': events[i].mmEnd.format(),
@@ -2595,6 +2750,9 @@ var Calendar = {
                         this.handlerEditCancelEvent();
                     },
                     error => {
+                        require(['bootbox'], bootbox => {
+                            bootbox.alert("ERROR : " + error);
+                        });
                         this.errors.push("Impossible d'enregistrer les données : " + error)
                     }
                 ).then(() => {
@@ -2647,6 +2805,26 @@ var Calendar = {
                     this.loading = false;
                 });
             }
+        },
+
+        handlerDeleteImport(icsuid){
+          console.log("Suppression des événements issues de l'import", icsuid);
+            this.transmission = "Suppression...";
+            this.$http.delete(this.restUrl() + "?icsuid=" + icsuid).then(
+                response => {
+                    store.events = [];
+                    this.fetch();
+                },
+                error => {
+                    console.log(error);
+                    require(['bootbox'], bootbox => {
+                        bootbox.alert("ERROR : " + error.body);
+                    });
+                    store.errors.push(error);
+                }
+            ).then(() => {
+                this.transmission = "";
+            });
         },
 
         /** Suppression de l'événement de la liste */
@@ -2801,6 +2979,7 @@ var Calendar = {
 
         /////////////////////////////////////////////////////////////////// REST
         fetch(){
+            this.ics = [];
             this.transmission = "Chargement des créneaux...";
             store.loading = true;
 

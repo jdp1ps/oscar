@@ -57,12 +57,17 @@ $this->headScript();
         <?php endif; ?>
     </head>
 
+
+    <style>
+
+    </style>
+
     <body class="<?php echo getenv('APPLICATION_ENV') ?: 'development' ?>">
 
         <!--[if lt IE 7]>
             <p class="chromeframe">Vous utilisez un navigateur internet hors d'âge. Veuillez le mettre à jour, svp.</p>
         <![endif]-->
-        <div id="navbar" class="navbar navbar-primary navbar-fixed-top" role="navigation">
+        <div id="navbar" class="navbar navbar-primary navbar-main navbar-fixed-top" role="navigation">
             <div class="container">
 
                 <div class="navbar-header">
@@ -232,7 +237,7 @@ $this->headScript();
                         <?php endif; ?><!-- /Menu admin -->
                     </ul>
                     <?php if( $this->grant()->connected() ): ?>
-                    <p class="navbar-text navbar-right" id="notifications-area" >TEST</p>
+                    <p class="navbar-text navbar-right" id="notifications-area" ></p>
                     <?php endif; ?>
                     <p class="navbar-text navbar-right">
                     <?php echo $this->appConnection(); ?>
@@ -240,6 +245,134 @@ $this->headScript();
                 </div><!--/.nav-collapse -->
             </div>
         </div>
+
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
+        <nav class="navbar-primary navbar-admin collapsed">
+            <a href="#" class="handler-collapse"><span class="icon-angle-left"></span></a>
+            <div class="content">
+                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW)): ?>
+                <section>
+                    <h3><i class="icon-bank"></i> Versements</h3>
+                    <ul>
+                        <li><a href="<?= $this->url('payment/income') ?>">Prochains versements</a></li>
+                        <li><a href="<?= $this->url('payment/late') ?>">Versements en retard</a></li>
+                        <li><a href="<?= $this->url('payment/difference') ?>">Écarts de paiement</a></li>
+                        <li><a href="<?= $this->url('payment') ?>">Tous les versements</a></li>
+                    </ul>
+                </section>
+                <?php endif; ?>
+
+                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW)): ?>
+                <section>
+                    <h3><i class="icon-calendar"></i> Jalons</h3>
+                    <ul>
+                        <li><a href="<?= $this->url('milestones') ?>">Tous les jalons</a></li>
+                        <li><a href="<?= $this->url('datetype') ?>">Gérer les types de date</a></li>
+                    </ul>
+                </section>
+                <?php endif; ?>
+
+                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX)): ?>
+                    <section>
+                        <h3><i class="icon-cube"></i> Activités</h3>
+                        <ul>
+                            <li><a href="<?= $this->url('contract/advancedsearch') ?>">Liste des activités<i class="icon-asterisk"></i></a></li>
+                            <li><a href="<?= $this->url('contract/new') ?>">Nouvelle activité</a></li>
+                            <li><a href="<?= $this->url('contract/almostdone') ?>">Bientôt terminés</a></li>
+                            <li><a href="<?= $this->url('contract/almoststart') ?>">Débutant prochainement</a></li>
+                            <li><a href="<?= $this->url('contractdocument') ?>">Liste des documents téléversé</a></li>
+                            <li><a href="<?= $this->url('activitytype') ?>">Gérer les types d'activités</a></li>
+                        </ul>
+                    </section>
+                <?php endif; ?>
+
+                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX)): ?>
+                    <section>
+                        <h3><i class="icon-cubes"></i> Projets</h3>
+                        <ul>
+                            <li><a href="<?= $this->url('project') ?>">Liste des projets</a></li>
+                            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_CREATE)): ?>
+                                <li><a href="<?= $this->url('project/new') ?>">Créer un projet</a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </section>
+                <?php endif; ?>
+
+                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_SHOW)): ?>
+                    <section>
+                        <h3><i class="icon-building-filled"></i> Organisations</h3>
+                        <ul>
+                            <li><a href="<?= $this->url('organization') ?>">Liste des organisations</a></li>
+                            <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
+                                <li><a href="<?= $this->url('organization/new') ?>">Nouvelle organisation</a></li>
+                                <li><a href="<?= $this->url('organization/fusion') ?>">Fusion d'organisations</a></li>
+                                <li><a href="<?= $this->url('organization/scission') ?>">Scission d'organisations</a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </section>
+                <?php endif; ?>
+
+                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX)): ?>
+                    <section>
+                        <h3><i class="icon-group"></i> Personnes</h3>
+                        <ul>
+                            <li><a href="<?= $this->url('person') ?>">Liste des personnes</a></li>
+                            <li><a href="<?= $this->url('person/boss') ?>">Liste des responsables</a></li>
+                            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
+                                <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
+                            <?php endif; ?>
+                            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION)): ?>
+                                <li><a href="<?= $this->url('timesheet/declarers') ?>">Liste des déclarants</a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </section>
+
+                <?php endif; ?>
+
+                <section>
+                    <h3><i class="icon-stethoscope"></i> Maintenance des données</h3>
+                    <ul>
+                        <li><a href="<?= $this->url('contract/advancedsearch') ?>?criteria[]=pp%3Bnull%3Bnull">Activités sans projet</a></li>
+                        <li><a href="<?= $this->url('project/empty') ?>">Projets sans activité</a></li>
+                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
+                            <li><a href="<?= $this->url('administration/connectors_home') ?>">Connecteurs disponibles</a></li>
+                        <?php endif; ?>
+                        <li><a href="<?= $this->url('changelog') ?>">Quoi de neuf ?</a></li>
+                    </ul>
+                </section>
+
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ): ?>
+                    <section>
+                        <h3><i class="icon-lock"></i> Droits et sécurités</h3>
+                        <ul>
+                            <li><a href="<?php echo $this->url('administration') ?>">Gestion des droits</a></li>
+                            <li><a href="<?php echo $this->url('administration/users') ?>">Authentifications actives</a></li>
+                            <li><a href="<?php echo $this->url('administration/organizationrole') ?>">Affectation des structures</a></li>
+                            <li><a href="<?php echo $this->url('administration/typedocument') ?>">Gestion des types de documents</a></li>
+                        </ul>
+                    </section>
+                <?php endif; ?>
+            </div>
+        </nav>
+        <script>
+            require(['jquery'], function($){
+                // Panneau latéral
+                $('.handler-collapse').click(function(e) {
+                    $('.navbar-admin').toggleClass('collapsed');
+                    window.localStorage.setItem('adminmenu', !$('.navbar-admin').hasClass('collapsed'));
+                    console.log(localStorage.getItem('adminmenu'))
+
+                    e.preventDefault();
+                });
+                console.log(localStorage.getItem('adminmenu'))
+                if( localStorage.getItem('adminmenu') == 'true' ){
+                    $('.navbar-admin').removeClass('collapsed');
+                }
+
+//                $('.navbar-admin').on('clickoutside')
+            })
+        </script>
+        <?php endif; ?>
 
 
         <div class="container flash-messages" id="flash-messages" style="opacity: 0"><?php
@@ -283,7 +416,13 @@ $this->headScript();
                     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX) ): ?>
                     <span id="connected"></span>
                     <?php endif; ?>
-                    <strong>oscar<sup>&copy</sup></strong> - <em><?= $this->appInfos()->desc ?></em>
+
+
+
+                        <strong>OSCAR</strong><sup>&copy</sup> - <em><?= $this->appInfos()->desc ?></em><br>
+                    <a href="<?= $this->url('gitlog') ?>">
+                        <small><?= \Oscar\OscarVersion::getBuild() ?></small>
+                    </a>
                 </div>
             </div>
         </footer>
@@ -382,5 +521,6 @@ $this->headScript();
             });
         </script>
         <?php endif; ?>
+
     </body>
 </html>

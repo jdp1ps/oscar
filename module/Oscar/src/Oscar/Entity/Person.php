@@ -625,6 +625,22 @@ class Person implements ResourceInterface
         return sprintf("%s %s", StringUtils::transliterateString($this->getDisplayName()), $this->getEmail());
     }
 
+    public function isDeclarerInActivity( Activity $activity )
+    {
+        $activity->hasDeclarant($this);
+    }
+
+
+    public function hasDeclarationIn( Activity $activity ){
+        /** @var TimeSheet $timesheet */
+        foreach ($activity->getTimesheets() as $timesheet ){
+            if( $timesheet->getPerson() == $this ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function toArray()
     {
         return array(
@@ -636,8 +652,8 @@ class Person implements ResourceInterface
             'email'                 => $this->getEmail(),
             'mail'                  => $this->getEmail(),
             'mailMd5'               => md5($this->getEmail()),
-            'ucbnSiteLocalisation'  => $this->getLdapSiteLocation() ?? "",
-            'affectation' => $this->getLdapAffectation() ?? ""
+            'ucbnSiteLocalisation'  => $this->getLdapSiteLocation() ? $this->getLdapSiteLocation() : "",
+            'affectation'           => $this->getLdapAffectation() ? $this->getLdapAffectation() :  ""
         );
     }
 

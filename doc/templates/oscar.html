@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+$for(author-meta)$
+  <meta name="author" content="$author-meta$" />
+$endfor$
+$if(date-meta)$
+  <meta name="dcterms.date" content="$date-meta$" />
+$endif$
+$if(keywords)$
+  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+
+$endif$
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+    integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
+    crossorigin="anonymous">
+  <style type="text/css">
+      .page-header {
+        min-height: 40vh;
+        display: flex;
+      }
+      .page-header header {
+        text-align: center;
+        background: none;
+      }
+      .page-header header h1 {
+        font-weight: 900;
+        font-size: 5em;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: auto;
+        background: #fff;
+        padding: 1em;
+      }
+
+      .content {
+        font-size: 20px;
+        border: thin solid #ddd;
+        padding: 1em 3em;
+        color: #333;
+      }
+      .content h1 {
+        padding-left: 4px;
+        border-left: 4px solid #DDD;
+        font-weight: 900;
+        color: #777;
+        margin-left: -.5em;
+        margin-top: 2em; }
+      .content h1:first-child { font-weight: 900; margin-top: 1em; }
+
+      .content h2 { font-weight: bold; margin-top: 2em; }
+      .content h1+h2 { margin-top: 0em; }
+
+      .content h3 { border-bottom: #ddd solid thin; margin-top: 1em; padding-bottom: 4px}
+      blockquote {
+        padding: 1em 2em .5em;
+        border-radius: 1em;
+        background: #eee;
+      }
+      body {
+        font-size: 16px;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-image: url(bg-beta.jpg);
+      }
+      table {
+        background: #fefefe;
+      }
+      table td, table th {
+        padding: .5em;
+      }
+      table tbody tr {
+        border: thin solid #ddd;
+      }
+      pre.sourceCode {
+        border: thin solid #ddd;
+        border-left-width: 8px;
+        background: #eee;
+        padding: .2em .5em;
+        font-size: .75em;}
+
+      pre.sourceCode > code:before {
+
+      }
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.line-block{white-space: pre-line;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+$if(quotes)$
+      q { quotes: "“" "”" "‘" "’"; }
+$endif$
+  </style>
+$if(highlighting-css)$
+  <style type="text/css">
+$highlighting-css$
+  </style>
+$endif$
+$for(css)$
+  <link rel="stylesheet" href="$css$">
+$endfor$
+$if(math)$
+  $math$
+$endif$
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+$for(header-includes)$
+  $header-includes$
+$endfor$
+</head>
+<body>
+$for(include-before)$
+$include-before$
+$endfor$
+$if(title)$
+<section class="page-header">
+<header class="jumbotron container">
+<h1 class="title">$title$</h1>
+$if(subtitle)$
+<p class="subtitle">$subtitle$</p>
+$endif$
+$for(author)$
+<p class="author">$author$</p>
+$endfor$
+$if(date)$
+<p class="date">$date$</p>
+$endif$
+</header>
+</section>
+$endif$
+$if(toc)$
+<nav id="$idprefix$TOC">
+$table-of-contents$
+</nav>
+$endif$
+<section class="container content">
+$body$
+</section>
+$for(include-after)$
+$include-after$
+$endfor$
+
+</body>
+</html>

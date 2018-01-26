@@ -18,6 +18,7 @@ use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\Person;
+use Oscar\Import\Data\DataExtractorDate;
 
 class FieldImportPaymentStrategy extends AbstractFieldImportStrategy
 {
@@ -29,18 +30,25 @@ class FieldImportPaymentStrategy extends AbstractFieldImportStrategy
      */
     public function run(&$activity, $datas, $index)
     {
-        $payment = new ActivityPayment();
-        $this->getEntityManager()->persist($payment);
-        $amount = doubleval($datas[$index]);
-        $date = new \DateTime($datas[($index+1)]);
+        try {
+            $payment = new ActivityPayment();
+            $this->getEntityManager()->persist($payment);
+            $amount = doubleval($datas[$index+1]);
+            $extractor = new DataExtractorDate();
+            $date =  $extractor->extract($datas[($index)]);
 
+            $payment->setActivity($activity)
+                ->setCurrency($this->getEntityManager()->getRepository(Currency::class)->findOneBy(['rate' => 1]))
+                ->setAmount($amount)
+                ->setDatePredicted($date);
 
-        $payment->setActivity($activity)
-            ->setCurrency($this->getEntityManager()->getRepository(Currency::class)->findOneBy(['rate' => 1]))
-            ->setAmount($amount)
-            ->setDatePredicted($date);
+            $this->getEntityManager()->flush($payment);
 
-        $activity->getPayments()->add($payment);
+            $activity->getPayments()->add($payment);
+
+        } catch( \Exception $e ){
+            echo "ERROR : " . $e->getMessage();
+        }
 
         return $activity;
     }

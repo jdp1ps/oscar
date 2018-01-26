@@ -11,6 +11,8 @@ namespace Oscar\Entity;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\IConnectedRepository;
+use Oscar\Import\Activity\FieldStrategy\FieldImportOrganizationStrategy;
+use Oscar\Import\Data\DataExtractorOrganization;
 
 class OrganizationRepository extends EntityRepository implements IConnectedRepository
 {
@@ -23,20 +25,36 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $this->getEntityManager()->flush($personOrganization);
     }
 
+    /**
+     * @param $fullName
+     * @return Organization
+     */
+    public function createFromFullName( $fullName ){
+        $organisation = new Organization();
+        $this->getEntityManager()->persist($organisation);
+        $datas = (new DataExtractorOrganization())->extract($fullName);
+        $organisation->setCode($datas['code'])
+            ->setFullName($fullName)
+            ->setShortName($datas['shortname']);
+        $this->getEntityManager()->flush($organisation);
+        return $organisation;
+    }
+
     public function getOrganisationByNameOrCreate( $fullName ){
         try {
-
             $qb = $this->getEntityManager()->createQueryBuilder();
             $qb->select('o')
                 ->from(Organization::class, 'o')
-                ->where('o.shortName = :name or o.fullName = :name')
+                ->where('o.shortName = :name OR o.fullName = :name')
                 ->setParameter('name',  $fullName );
-            return $qb->getQuery()->getSingleResult();
-        } catch (NoResultException $e){
-            $organisation = new Organization();
-            $this->getEntityManager()->persist($organisation);
-            $organisation->setShortName($fullName)->setFullName($fullName);
-            return $organisation;
+           $organizations = $qb->getQuery()->getResult();
+           if( count($organizations) == 0 ){
+               return $this->createFromFullname($fullName);
+           }
+           return $organizations[0];
+        } catch (\Exception $e){
+            echo "Can't create or get Org $fullName \n";
+            return null;
         }
 
     }

@@ -52,6 +52,12 @@ class FieldImportPersonStrategy extends AbstractFieldImportStrategy
     {
         $person = $this->getPersonRepository()->getPersonByDisplayNameOrCreate($datas[$index]);
         $roleObj = $this->getRoleRepository()->getRoleOrCreate($this->getRole());
+
+        if( !$person ){
+            echo "Error, impossible de créer la personne : " . $datas[$index] ." \n";
+            return $activity;
+        }
+
         if( !$activity->hasPerson($person, $roleObj->getRoleId()) ){
             $rolePerson = new ActivityPerson();
             $this->getEntityManager()->persist($rolePerson);

@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\IConnectedRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Import\Data\DataExtractorFullname;
 
 /**
  * Class ProjectGrantRepository
@@ -21,49 +22,62 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     private $_cacheSelectebleRolesOrganisation;
 
 
-    function getPersonByDisplayName( $displayName ){
+    function getPersonByDisplayName($displayName)
+    {
         /** @var Query $queryPerson */
         static $queryPerson;
-        if( $queryPerson === null ){
+        if ($queryPerson === null) {
             $queryPerson = $this->createQueryBuilder('p')
                 ->where('CONCAT(p.firstname, \' \', p.lastname) = :displayName')
                 ->getQuery();
         }
-        return $queryPerson->setParameter('displayName', $displayName)->getSingleResult();
+        return $queryPerson->setParameter('displayName', $displayName)->getResult();
     }
 
-    public function getPersonByDisplayNameOrCreate( $displayName ){
-        try {
-            $person = $this->getPersonByDisplayName($displayName);
-        }
-        catch ( NoResultException $e ){
+    /**
+     * Recherche dans Oscar une personne à partir du nom complet.
+     *
+     * @param $displayName
+     * @return null
+     */
+    public function getPersonByDisplayNameOrCreate($displayName)
+    {
+        $person = $this->getPersonByDisplayName($displayName);
+        if (!$person) {
             $person = new Person();
-            $preg = preg_match('/(.*) (.*)/i', $displayName, $matches);
-            if( $preg ) {
-                $this->getEntityManager()->persist($person);
-                $person->setFirstname($matches[1])->setLastname($matches[2]);
+            $this->getEntityManager()->persist($person);
+            $fullname = (new DataExtractorFullname())->extract($displayName);
+            if ($fullname) {
+                $person->setFirstname($fullname['firstname'])
+                    ->setLastname($fullname['lastname'])
+                    ->setEmail($fullname['email']);
+
+                $this->getEntityManager()->flush($person);
             } else {
-                throw new OscarException(sprintf("Impossible de créer la personne à partir du nom complet '%s' : %s", $displayName, $e->getMessage()));
+                return null;
             }
+        } else {
+            return $person[0];
         }
-        return $person;
     }
 
     /**
      * Retourne la liste des rôles dans les organisations pour la création de select.
      */
-    public function getSelectableRolesOrganization(){
-        if( $this->_cacheSelectebleRolesOrganisation === null ){
+    public function getSelectableRolesOrganization()
+    {
+        if ($this->_cacheSelectebleRolesOrganisation === null) {
             $this->_cacheSelectebleRolesOrganisation = [];
             /** @var RoleOrganization $roleOrganization */
-            foreach( $this->getRolesOrganization() as $roleOrganization ){
+            foreach ($this->getRolesOrganization() as $roleOrganization) {
                 $this->_cacheSelectebleRolesOrganisation[$roleOrganization->getId()] = $roleOrganization->getRoleId();
             }
         }
         return $this->_cacheSelectebleRolesOrganisation;
     }
 
-    public function getRolesOrganizationArray(){
+    public function getRolesOrganizationArray()
+    {
         return $this->getEntityManager()->getRepository(Role::class)->getRolesAtOrganizationArray();
     }
 
@@ -71,16 +85,19 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     /**
      * Retourne la liste des rôles dans les organisations.
      */
-    public function getRolesOrganization(){
+    public function getRolesOrganization()
+    {
         return $this->getEntityManager()->getRepository(RoleOrganization::class)->findAll();
     }
 
 
-    public function flush($mixed){
+    public function flush($mixed)
+    {
         $this->getEntityManager()->flush($mixed);
     }
 
-    public function newPersistantPerson(){
+    public function newPersistantPerson()
+    {
         $person = new Person();
         $this->getEntityManager()->persist($person);
         return $person;
@@ -90,9 +107,10 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * @param $email
      * @return Person[]
      */
-    public function getPersonByEmail( $email ){
+    public function getPersonByEmail($email)
+    {
         static $personByEmail;
-        if( $personByEmail == null ){
+        if ($personByEmail == null) {
             $personByEmail = $this->getBaseQuery()->where('p.email = :email');
         }
         return $personByEmail->setParameter('email', $email)->getQuery()->getResult();
@@ -114,11 +132,12 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         return $qb;
     }
 
-    public function search($search){
+    public function search($search)
+    {
         $query = $this->getBaseQuery();
         $query->orWhere('p.firstname LIKE :search')
             ->orWhere('p.lastname LIKE :search');
-        return $query->getQuery()->execute(['search' => '%'.$search.'%']);
+        return $query->getQuery()->execute(['search' => '%' . $search . '%']);
     }
 
     /**
@@ -130,7 +149,8 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getPersonByConnectorID( $connector, $value ){
+    public function getPersonByConnectorID($connector, $value)
+    {
         return $this->getPersonByConnectorQuery($connector, $value)->getQuery()->getSingleResult();
     }
 
@@ -141,7 +161,8 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getPersonsByConnectorID( $connector, $value ){
+    public function getPersonsByConnectorID($connector, $value)
+    {
         return $this->getPersonByConnectorQuery($connector, $value)->getQuery()->getResult();
     }
 
@@ -150,26 +171,27 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * @param $value
      * @return \Doctrine\ORM\QueryBuilder
      */
-    public function getPersonByConnectorQuery( $connector, $value ){
+    public function getPersonByConnectorQuery($connector, $value)
+    {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('p')
             ->from(Person::class, 'p')
             ->where('p.connectors LIKE :search')
-            ->setParameter('search', '%"'.$connector.'";s:%:"'.$value.'";%');
+            ->setParameter('search', '%"' . $connector . '";s:%:"' . $value . '";%');
         return $qb;
     }
 
 
-
-    public function getRolesLdapUsed(){
+    public function getRolesLdapUsed()
+    {
         $query = $this->getEntityManager()->createQuery(
-            'SELECT DISTINCT r.ldapFilter, r.roleId, r.principal FROM '.Role::class.' r WHERE r.ldapFilter IS NOT NULL');
+            'SELECT DISTINCT r.ldapFilter, r.roleId, r.principal FROM ' . Role::class . ' r WHERE r.ldapFilter IS NOT NULL');
         $filtersUsed = [];
-        foreach( $query->getResult() as $row ){
+        foreach ($query->getResult() as $row) {
             $ldapFilter = preg_replace('/\(memberOf=(.*)\)/i', '$1', $row['ldapFilter']);
             $roleId = $row['roleId'];
 
-            if( !array_key_exists($ldapFilter, $filtersUsed) ){
+            if (!array_key_exists($ldapFilter, $filtersUsed)) {
                 $filtersUsed[$ldapFilter] = [];
             }
             $filtersUsed[$ldapFilter][] = [

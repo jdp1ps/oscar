@@ -43,6 +43,11 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
     private $entityManager;
 
 
+    function log( $msg ){
+        echo "$msg\n";
+    }
+
+
     public function __construct( $csvDatas, array $config, EntityManager $entityManager )
     {
         $this->csvDatas = $csvDatas;
@@ -117,9 +122,15 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
         if( !array_key_exists($index, $this->config) )
             return;
 
+        // Si la clef existe mais que la valeur de conf est vide on passe
+        if( !$this->config[$index] )
+            return;
+
         // Si la clef est une chaîne, on détermine si c'est un appel de setter
         // simple ou un mécanisme plus "avancé"
         $key = $this->config[$index];
+
+        echo "### Traitement de la colonne $index => $key\n";
 
         // Chaîne
         if( is_string($key) ){
@@ -134,9 +145,10 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 return new FieldImportSetterStrategy($key);
             }
         }
+
         elseif (is_callable($key)) {
-            $type = $key();
-            return new $type($this->entityManager, $key);
+            echo "callable (not implemented !!!)\n";
+            return null;
         }
 
         // Autre ...
@@ -153,147 +165,102 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
     {
         $repport = new ConnectorRepport();
 
+
         // Devise par défaut
         $defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
+        $out = [];
+
+
+        $i = 1;
 
         while($datas = fgetcsv($this->csvDatas)){
-            $activity = new Activity();
-            $this->entityManager->persist($activity);
+
+            $json = [
+                "uid" => 'LN-' . ($i++),
+                "organizations" => [],
+                "persons" => [],
+                "milestones" => [],
+                "payments" => [],
+            ];
+//            $activity = new Activity();
+//            $this->entityManager->persist($activity);
             foreach ($datas as $index => $value ){
                 if( !$value ) continue;
-                $handler = $this->getHandler($index);
-                if( $handler != null )
-                    $handler->run($activity, $datas, $index);
-            }
-        }
-        $this->entityManager->flush();
 
-        /*
-        foreach ($this->csvDatas as $data) {
-            $this->checkData($data);
-
-            // Récupération du projet
-            $project = null;
-
-            // Type d'activité
-            $type = null;
-
-            // Récupération du projet à partir de acronym ET projectlabel
-            try {
-                $project = $this->entityManager->getRepository(Project::class)->createQueryBuilder('p')
-                    ->where('p.acronym = :projectacronym AND p.label = :projectlabel')
-                    ->getQuery()
-                    ->setParameters([
-                        'projectacronym' => $data->acronym,
-                        'projectlabel' => $data->projectlabel,
-                    ])->getSingleResult();
-            } catch( NoResultException $e ){
-                try {
-                    // Création du projet
-                    $project = new Project();
-                    $this->entityManager->persist($project);
-                    $project->setAcronym($data->acronym)
-                        ->setLabel($data->projectlabel);
-                    $this->entityManager->flush($project);
-                    $repport->addadded(sprintf("Projet créé : %s", $project));
-                } catch( \Exception $e ){
-                    $repport->adderror("Impossible de créer le projet " . $data->projectlabel . ": " . $e->getMessage());
-                }
-            }
-            // todo Traiter les erreurs liées à la récupération du projet
-
-            /** @var Activity $activity /
-            try {
-                $activity = $this->getActivity($data->uid);
-            } catch (NoResultException $e) {
-                try {
-                    $activity = new Activity();
-                    $this->entityManager->persist($activity);
-                    $activity->setCentaureId($data->uid)
-                        ->setProject($project)
-                    ;
-
-                    $this->entityManager->flush($activity);
-
-                    $message = sprintf("Création de l'activité %s/%s", $activity->getProject(), $activity->getLabel());
-                    $repport->addadded($message);
-                }
-                catch( \Exception $e ){
-                    $repport->adderror("Impossible de créer l'activité " . $data->uid . ": " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                if( !array_key_exists($index, $this->config) )
                     continue;
-                }
-            }
-            // todo Traiter les erreurs liées à la récupération de l'activité
 
-            $activity->setLabel($data->label)
-                ->setCurrency($defaultCurrency)
-                ->setDateStart($data->datestart ? new \DateTime($data->datestart) : null)
-                ->setDateEnd($data->dateend ? new \DateTime($data->dateend) : null)
-                ->setCodeEOTP($data->pfi)
-                ->setActivityType($type)
-                ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
-                ->setAmount(((double)$data->amount));
+                // Si la clef existe mais que la valeur de conf est vide on passe
+                if( !$this->config[$index] )
+                    continue;
 
-            $this->entityManager->flush($activity);
+                // Si la clef est une chaîne, on détermine si c'est un appel de setter
+                // simple ou un mécanisme plus "avancé"
+                $key = $this->config[$index];
 
-            //// TRAITEMENT des ORGANISATIONS
-            foreach( $data->organizations as $role=>$organizations ){
-                try {
-                    $roleObj = $this->entityManager->getRepository(OrganizationRole::class)->findOneBy(['label' => $role]);
-                    foreach( $organizations as $fullName ){
-                        try {
-                            $organization = $this->getOrganization($fullName);
-                            if( !$activity->hasOrganization($organization, $role) ){
-                                $activityOrganization = new ActivityOrganization();
-                                $this->entityManager->persist($activityOrganization);
-                                $activityOrganization->setOrganization($organization)
-                                    ->setActivity($activity)
-                                    ->setRoleObj($roleObj);
-                                $this->entityManager->flush($activityOrganization);
-                                $repport->addadded(sprintf("L'oganisation %s a été ajoutée dans %s avec le rôle %s.", $fullName, $activity, $role));
-                            }
-                        } catch( \Exception $e ){
-                            $repport->adderror(sprintf("Impossible d'affecter %s comme %s dans %s : %s.", $fullName, $role, $activity, $e->getMessage()));
-                        }
+
+                if( preg_match("/organizations\.(.*)/", $key, $matches) ){
+                    $role = $matches[1];
+                    if( !array_key_exists($role, $json['organizations']) ){
+                        $json['organizations'][$role] = [];
                     }
-                } catch( \Exception $e ){
-                    $repport->adderror(sprintf("Le rôle d'organisation %s n'existe pas dans oscar.", $role));
-                }
-            }
-
-            //// TRAITEMENT des PERSONNES
-            foreach( $data->persons as $role=>$persons ){
-                try {
-                    $roleObj = $this->getRoleObj($role);
-                    foreach( $persons as $fullName ){
-                        // Récupération du rôle
-                        try {
-                            $person = $this->getPerson($fullName);
-                            if( !$activity->hasPerson($person, $role) ){
-                                try {
-                                    $personActivity = new ActivityPerson();
-                                    $this->entityManager->persist($personActivity);
-                                    $personActivity->setPerson($person)
-                                        ->setActivity($activity)
-                                        ->setRoleObj($roleObj);
-                                    $this->entityManager->flush($personActivity);
-                                    $repport->addadded(sprintf("%s a été ajoutée dans %s avec le rôle %s.", $fullName, $activity, $role));
-
-                                } catch( \Exception $e ){
-                                    $repport->addadded(sprintf("Impossible d'ajouter %s dans %s avec le rôle %s : %s.", $fullName, $activity, $role, $e->getMessage()));
-                                }
-                            }
-                        } catch( \Exception $e ){
-                            $repport->adderror(sprintf("%s n'a pas été ajoutée dans %s avec le rôle %s : %s.", $fullName, $activity, $role, $e->getMessage()));
-                        }
-
+                    if( !in_array($value, $json['organizations'][$role]) ){
+                        $json['organizations'][$role][] = $value;
                     }
-                } catch( \Exception $e ){
-                    $repport->addwarning(sprintf("Le rôle %s n'existe pas dans Oscar : %s", $role, $e->getMessage()));
                 }
+
+                else if( preg_match("/persons\.(.*)/", $key, $matches) ){
+                    $role = $matches[1];
+                    if( !array_key_exists($role, $json['persons']) ){
+                        $json['persons'][$role] = [];
+                    }
+                    if( !in_array($value, $json['persons'][$role]) ){
+                        $json['persons'][$role][] = $value;
+                    }
+                }
+
+                else if( preg_match("/milestones\.(.*)/", $key, $matches) ){
+                    $json['milestones'][] = [
+                        "type" => $matches[1],
+                        "date" => $value
+                    ];
+                }
+
+                else if( preg_match("/payments\.?(-?[\d]*)/", $key, $matches) ){
+
+                    $amountPosition = $index+1;
+                    if( count($matches) === 2 ){
+                        if( $matches[2] != "" )
+                            $amountPosition = $index + intval($matches[1]);
+                    }
+                    $json['payments'][] = [
+                        "amount" => doubleval($datas[$amountPosition]),
+                        "date" => $value
+                    ];
+                }
+
+                else if( $key == "codeEOTP" ){ $json['pfi'] = $value; }
+                else if( $key == "amount" ){ $json['amount'] = $value; }
+                else if( $key == "dateStart" ){ $json['datestart'] = $value; }
+                else if( $key == "dateEnd" ){ $json['dateend'] = $value; }
+                else if( $key == "dateSigned" ){ $json['datesigned'] = $value; }
+                else if( $key == "label" ){ $json['label'] = $value; }
+
+                else if( $key == "project." ){
+                    $json['acronym'] = $value;
+                    $json['projectlabel'] = $value;
+                }
+
+                else {
+                    echo "\n### Traitement de la colonne $index => $key ///////// $value \n";
+                }
+
+
             }
-        }*/
-        return $repport;
+            $out[] = $json;
+        }
+
+        return $out;
     }
 
     public function syncOne($key)
