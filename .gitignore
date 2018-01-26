@@ -32,6 +32,7 @@ socket/config.json
 
 # Data & Cache
 data/*
+!data/timesheet_model.xls
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
 !data/documents/activity/.gitkeep
