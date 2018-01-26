@@ -37,6 +37,209 @@ use Zend\View\Model\ViewModel;
  */
 class TimesheetController extends AbstractOscarController
 {
+    public function exportCSVAction(){
+
+    }
+
+
+    public function excelAction(){
+        $activityId     = $this->params()->fromQuery('activityid');
+
+        /** @var Activity $activity */
+        $activity           = null;
+        $action             = $this->params()->fromQuery('action');
+        $period             = $this->params()->fromQuery('period', null);
+        $personIdQuery      = $this->params()->fromQuery('personid', null );
+
+        $currentPersonId    = $this->getCurrentPerson()->getId();
+
+        if( $activityId ){
+            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+        }
+
+        if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
+            $this->getOscarUserContext()->check(Privileges::PERSON_VIEW_TIMESHEET, $activity);
+            $personId = $personIdQuery;
+        } else {
+            $personId = $currentPersonId;
+        }
+
+        /** @var Person $person */
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($personId);
+
+        if( !$person ){
+            throw new OscarException("Impossible de trouver la personne.");
+        }
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+
+        if( $action == "csv" ){
+            if( !$activity ){
+                $this->getResponseBadRequest("Impossible de trouver l'activité");
+            }
+            $datas = $timesheetService->getPersonTimesheetsCSV($person, $activity, false);
+            $filename = $activity->getAcronym() . '-' . $activity->getOscarNum().'-'.$person->getLadapLogin().'.csv';
+
+
+
+            $handler = fopen('/tmp/' . $filename, 'w');
+
+             /** @var ActivityPayment $payment */
+            foreach ($datas as $line) {
+                fputcsv($handler, $line);
+            }
+
+            fclose($handler);
+
+            header('Content-Disposition: attachment; filename='.$filename);
+            header('Content-Length: ' . filesize('/tmp/' . $filename));
+            header('Content-type: plain/text');
+
+            die(file_get_contents('/tmp/' . $filename));
+        }
+        $datas = $timesheetService->getPersonTimesheets($person, false, $period, $activity);
+
+
+        if( $action == "export" ){
+            $fmt = new \IntlDateFormatter(
+                'fr_FR',
+                \IntlDateFormatter::FULL,
+                \IntlDateFormatter::FULL,
+                'Europe/Paris',
+                \IntlDateFormatter::GREGORIAN,
+                'd MMMM Y');
+
+            /** @var Activity $activity */
+            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+
+            $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
+            $lineWpFormula = '=SUM(C%s:AG%s)';
+            foreach( $datas[$activityId]['timesheets'] as $period=>$timesheetsPeriod ){
+                $lineWpStart = 10;
+                $lineWpCurent = $lineWpStart;
+                $lineWpCount = 0;
+                $spreadsheet = \PHPExcel_IOFactory::load(__DIR__.'/ods-base-test.xls');
+
+
+                $spreadsheet->getActiveSheet()->setCellValue('A1', $activity->getLabel());
+                $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
+                $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
+                $spreadsheet->getActiveSheet()->setCellValue('C5', $activity->getAcronym());
+
+                $spreadsheet->getActiveSheet()->setCellValue('U3', $fmt->format($activity->getDateStart()));
+                $spreadsheet->getActiveSheet()->setCellValue('U4', $fmt->format($activity->getDateEnd()));
+                $spreadsheet->getActiveSheet()->setCellValue('U5', $activity->getOscarNum());
+                $spreadsheet->getActiveSheet()->setCellValue('U6', $activity->getCodeEOTP());
+
+                $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
+                $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
+                $spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
+
+                foreach ($timesheetsPeriod as $workpackage=>$timesheetsWorkpackage) {
+                    if( $workpackage == "unvalidate" || $workpackage == "total" )
+                        continue;
+
+                    $rowNum = $lineWpStart + $lineWpCount;
+                    $spreadsheet->getActiveSheet()->insertNewRowBefore(($rowNum + 1));
+                    for( $i=0; $i<count($cellDays); $i++ ){
+                        $day = $i+1;
+                        $cellIndex = $cellDays[$i].$rowNum;
+                        $totalDay = array_key_exists($day, $timesheetsWorkpackage) ? $timesheetsWorkpackage[$day] : 0.0;
+                        $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $totalDay);
+                    }
+                    $spreadsheet->getActiveSheet()->setCellValue('A'.$rowNum, "");
+                    $spreadsheet->getActiveSheet()->setCellValue('B'.$rowNum, $workpackage);
+                    $spreadsheet->getActiveSheet()->setCellValue('AH'.$rowNum, sprintf($lineWpFormula, $rowNum, $rowNum));
+                    $lineWpCount++;
+                }
+
+                $rowNum = $lineWpStart + $lineWpCount + 1;
+
+                for( $i=0; $i<count($cellDays); $i++ ){
+                    $day = $i+1;
+                    $cellIndex = $cellDays[$i].$rowNum;
+                    $sum = "=SUM(" . $cellDays[$i] .'10:' .$cellDays[$i].($rowNum-1) .')';
+
+                    $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $sum);
+                }
+
+                $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
+
+                $name = ($person->getLadapLogin())."-" . $period . ".xls";
+                $filepath = '/tmp/'. $name;
+
+                $edited->save($filepath);
+
+                header('Content-Type: application/octet-stream');
+                header("Content-Transfer-Encoding: Binary");
+                header("Content-disposition: attachment; filename=\"" . $name . "\"");
+                die(readfile($filepath));
+            }
+            die();
+        }
+
+
+        /*
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+
+        $wpCodes = [];
+
+        foreach ($activity->getWorkPackages() as $wp) {
+            if( !in_array($wp->getCode(), $wpCodes) ){
+                $wpCodes[] = $wp->getCode();
+            }
+        }
+
+
+        $timesheets = $this->getEntityManager()->getRepository(TimeSheet::class)->findBy(['person' => $person]);
+
+        $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AG'];
+        $lineWpFormula = '=SUM(C%s:AG%s)';
+
+
+        $datas = [];
+
+        foreach ($timesheets as $ts ) {
+            $period = $ts->getDateFrom()->format('Y-m');
+            if (!array_key_exists($period, $datas)) {
+                $datas[$period] = [];
+                foreach ($wpCodes as $code) {
+                    $datas[$period][$code] = [];
+                    for ($i = 1; $i <= 31; $i++) {
+                        $datas[$period][$code][$i] = 0.0;
+                    }
+                }
+            }
+
+            if (!$ts->getWorkpackage()) {
+                continue;
+            }
+
+            $currentCode = $ts->getWorkpackage()->getCode();
+            $currentDay = $ts->getDateFrom()->format('j');
+            $duration = $ts->getDuration();
+
+        }
+        /****/
+        return [
+            "datas" => $datas,
+            "person" => $person,
+
+        ];
+    }
+
+    /**
+     * Retourne la liste des déclarants actifs
+     */
+    public function declarersAction()
+    {
+        $datas = $this->getServiceLocator()->get('TimesheetService')->getDeclarers();
+        return [
+            'datas' => $datas
+        ];
+    }
 
     public function usurpationAction()
     {
@@ -72,9 +275,6 @@ class TimesheetController extends AbstractOscarController
             $datas = json_decode($this->getRequest()->getPost()['events'], true);
             $action = $this->getRequest()->getPost()['do'];
 
-            // Ajouter un test sur ACTION et EVENTS
-            // Ajouter un test sur ACTION et EVENTS
-
             if ($action == 'send') {
                 $timesheets = $timeSheetService->send($datas, $person);
             } else if ( $action ){
@@ -109,13 +309,42 @@ class TimesheetController extends AbstractOscarController
         }
 
         if ($method == 'DELETE') {
-            $timesheetId = $this->params()->fromQuery('timesheet');
+            $timesheetId = $this->params()->fromQuery('timesheet', null);
+
+            // UID de l'ICS
+            $icsUid = $this->params()->fromQuery('icsuid', null);
+
             if ($timesheetId) {
-                if ($timeSheetService->delete($timesheetId, $person)){
+                if ($timeSheetService->delete($timesheetId,
+                    $this->getCurrentPerson())
+                ) {
                     return $this->getResponseOk('Créneaux supprimé');
                 }
             }
+            elseif ($icsUid) {
+                $this->getLogger()->info("Suppression d'un ICS");
+                try {
+                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $person);
+                    $this->getLogger()->info("Suppression OK warn = " . count($warnings));
+                    foreach ($warnings as $w){
+                        $this->getLogger()->info($w);
+                    }
+                    return $this->getResponseOk(json_encode($warnings));
+                }
+                catch (\Exception $e ){
+                    $this->getLogger()->err($e->getMessage());
+                    return $this->getResponseInternalError("Impossible de supprimer ce calendrier : " . $e->getMessage());
+                }
+            }
+
             return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
+//            $timesheetId = $this->params()->fromQuery('timesheet');
+//            if ($timesheetId) {
+//                if ($timeSheetService->delete($timesheetId, $person)){
+//                    return $this->getResponseOk('Créneaux supprimé');
+//                }
+//            }
+//            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
         }
 
         $wpDeclarants = [];
@@ -192,6 +421,11 @@ class TimesheetController extends AbstractOscarController
                                 /** @var TimeSheet $timeSheet */
                                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
                                 $activity = null;
+
+                                // idactivity
+                                // idworkpackage
+
+
                                 if ($timeSheet->getActivity()) {
                                     $activity = $timeSheet->getActivity();
                                 } elseif ($timeSheet->getWorkpackage()) {
@@ -211,13 +445,13 @@ class TimesheetController extends AbstractOscarController
                             }
                         }
                     } else {
+                        $this->getLogger()->info('CREATE OR UPDATE FROM IMPORT !');
                         $timesheets = $timeSheetService->create($datas,
                             $this->getCurrentPerson());
                     }
                 }
             }
         } catch (\Exception $e ){
-            var_dump($datas);
             return $this->getResponseInternalError("ERROR : " . $e->getMessage() . " - " . $e->getTraceAsString());
         }
 
@@ -227,13 +461,29 @@ class TimesheetController extends AbstractOscarController
         }
 
         if ($method == 'DELETE') {
+            // Identifiant de l'événement
+            $timesheetId = $this->params()->fromQuery('timesheet', null);
 
-            $timesheetId = $this->params()->fromQuery('timesheet');
+            // UID de l'ICS
+            $icsUid = $this->params()->fromQuery('icsuid', null);
+
             if ($timesheetId) {
                 if ($timeSheetService->delete($timesheetId,
                     $this->getCurrentPerson())
                 ) {
                     return $this->getResponseOk('Créneaux supprimé');
+                }
+            }
+            elseif ($icsUid) {
+                try {
+                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $this->getCurrentPerson());
+                    foreach ($warnings as $w){
+                        $this->getLogger()->info($w);
+                    }
+                    return $this->getResponseOk(json_encode($warnings));
+                }
+                catch (\Exception $e ){
+                    return $this->getResponseInternalError("Impossible de supprimer ce calendrier : " . $e->getMessage());
                 }
             }
 

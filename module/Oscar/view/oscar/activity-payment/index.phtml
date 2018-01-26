@@ -23,18 +23,29 @@
         /** @var \Oscar\Entity\ActivityPayment $payment */
         foreach ($payments as $payment):
 
-            $dateRef = $payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_REALISE ? $payment->getDatePayment() : $payment->getDatePredicted();
+            // 2018 Janvier :
+            // Les écarts de payements ne sont pas datés et sont une donnée spécifique
+            // qui n'est pas lieu dans cette écran (dixit : Agence Comptable)
+            if( $payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_ECART ) continue;
 
-            if( $annee != $dateRef->format('Y') ){
-                $annee = $dateRef->format('Y');
-                $mois = '';
-                echo "<h2>$annee</h2>";
-            }
+            $dateRef = $payment->getStatus() ==
+                \Oscar\Entity\ActivityPayment::STATUS_REALISE ?
+                $payment->getDatePayment() :
+                $payment->getDatePredicted();
 
-            $currentMois = ucfirst($this->moment($dateRef, 'F'));
-            if( $mois != $currentMois ){
-                $mois = $currentMois;
-                echo "<h3>$mois</h3>";
+            // En cas de problème de date
+            if( $dateRef ) {
+                if ($annee != $dateRef->format('Y')) {
+                    $annee = $dateRef->format('Y');
+                    $mois = '';
+                    echo "<h2>$annee</h2>";
+                }
+
+                $currentMois = ucfirst($this->moment($dateRef, 'F'));
+                if ($mois != $currentMois) {
+                    $mois = $currentMois;
+                    echo "<h3>$mois</h3>";
+                }
             }
 
 

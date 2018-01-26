@@ -46,12 +46,12 @@ $grid-float-breakpoint: 1024px;
 // Reset and dependencies
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/normalize";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/print";
-@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons";
+// @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons";
 
 // Core CSS
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/scaffolding";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/type";
-@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/code";
+//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/code";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/grid";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/tables";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/forms";
@@ -110,6 +110,98 @@ $colorGreyMedium: #999;
 $colorGreyDark: #555;
 $colorGreyBlack: #222;
 
+
+.link {
+  color: saturate($brand-primary, 50%);
+  text-decoration: underline;
+  &.small {
+    color: saturate($brand-primary, 50%);
+    font-size: .75em;
+  }
+  &:hover {
+    color: lighten(saturate($brand-primary, 50%), 25%);
+  }
+
+  &[data-tooltip]{
+    background: red;
+    position: relative;
+    &:hover:before{
+      display: block;
+    }
+    &:before{
+      display: none;
+      animation: all .3s;
+      position: absolute;
+      content: attr(data-tooltip);
+      bottom: 1.4em;
+      min-width: 20em;
+      //font-size: .8em;
+      padding: .5em .75em;
+      border: thin solid #333;
+      box-shadow: -4px 4px 1px rgba(0,0,0,.2);
+      z-index: 5;
+      background: #555;
+      color: white;
+    }
+  }
+}
+
+
+.oscar-table {
+  @extend .table;
+
+  //box-shadow: 0 0 1em rgba(0,0,0,.25);
+  background: none;
+
+  .sous-total-year {
+    background: none !important;
+  }
+
+  .year-head {
+    background: none !important;
+    .labeled {
+      font-size: 1em;
+      line-height: 1em;
+      padding: .2em .5em;
+      display: inline-block;
+      color: white;
+      background: rgba($brand-primary, .6) !important;
+      text-shadow: -1px 1px 1px rgba(0, 0, 0, .5);
+    }
+  }
+
+  thead {
+    background: $brand-primary; color: white;
+    text-shadow: -1px 1px 0 rgba(0,0,0,.5);
+    th { font-weight: 100 }
+    :not(:nth-child(1)){
+      text-align: right;
+    }
+  }
+
+  tbody {
+    tr {
+      background: #fff;
+    }
+    tr:nth-child(even) {
+      background: #eeeeee;
+    }
+  }
+
+  tbody, thead {
+    tr {
+      &.small {
+        font-size: .8em;
+      }
+      th, td {
+        line-height: 1em;
+      }
+    }
+  }
+  th, td {
+    border: solid rgba(0,0,0,.2) thin;
+  }
+}
 
 html body {
   background-image: url($bg-image) !important;;
@@ -224,7 +316,7 @@ html body {
   border-right: solid thin rgba(0,0,0,.15)
 }
 
-.navbar.navbar-primary .dropdown-menu a {
+.navbar.navbar-main .dropdown-menu a {
   color: #51BADD;
 }
 
@@ -440,13 +532,200 @@ $colorDefault: $colorMedium;
   padding: 0 4px;
 }
 
-.navbar-primary .popover {
+.navbar-main .popover {
   .popover-content, .popover-title {
     a, strong {
       color: $brand-primary;
     }
     color: $brand-primary;
   }
+}
+
+.navbar-global {
+  background-color: indigo;
+}
+
+.navbar-global .navbar-brand {
+  color: white;
+}
+
+.navbar-global .navbar-user > li > a
+{
+  color: white;
+}
+
+
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
+
+.navbar-admin {
+  box-shadow: .5em 0 .5em rgba(0,0,0,.1);
+  padding: 2em 1em;
+  background-color: rgba(255,255,255,.8);
+  bottom: 0px;
+  left: 0px;
+  font-size: .8em;
+  position: fixed;
+  top: 51px;
+  width: 260px;
+  z-index: 8;
+
+  -webkit-transition: all 0.1s ease-in-out;
+  -moz-transition: all 0.1s ease-in-out;
+  transition: all 0.1s ease-in-out;
+
+  .content {
+    position: absolute;
+    left:0;
+    right:10px;
+    top:0;
+    bottom:0;
+    overflow: hidden;
+    overflow-y: scroll;
+    padding: 2em 0 2em;
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li a{
+      display: block;
+      text-decoration: none;
+      padding: 2px 1em;
+      &:hover {
+        background: $colorGreyDark; color: white;
+      }
+    }
+
+    &:hover {
+      .handler-collapse, .handler-collapse span {
+        background: $colorBlue;
+      }
+    }
+
+    &:hover::-webkit-scrollbar {
+      opacity: .5;
+    }
+
+    &::-webkit-scrollbar {
+      width: 8px;
+      opacity: .1;
+    }
+
+    &::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba($colorGreyLight, .25);
+      outline: 1px solid $colorDark;
+    }
+  }
+
+  .handler-collapse {
+    background: $colorGreyLight;
+    position: absolute;
+    right: 0;
+    top: 0px;
+    bottom: 0px;
+    display: flex;
+    align-items: center;
+    width: 10px;
+    outline: 0;
+    span {
+      color: white;
+      background: $colorGreyLight;
+      display: block;
+      border-radius: 1em;
+      width: 2em;
+      height: 2em;
+      line-height: 2em;
+    }
+  }
+
+  h3 {
+    border-top: rgba($colorGreyDark, .25) thin solid;
+    color: $colorGreyDark;
+    font-size: 1.2em;
+    margin: 0;
+    margin-top: .5em;
+    padding: 2px;
+  }
+
+  .btn-expand-collapse {
+    position: absolute;
+    display: block;
+    left: 0px;
+    bottom:0;
+    width: 100%;
+    padding: 8px 0;
+    border-top:solid 1px #666;
+    color: grey;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .btn-expand-collapse:hover,
+  .btn-expand-collapse:focus {
+    background-color: #222;
+    color: white;
+  }
+
+  .btn-expand-collapse:active {
+    background-color: #111;
+  }
+
+  .navbar-primary-menu,
+  .navbar-primary-menu li {
+    margin:0; padding:0;
+    list-style: none;
+  }
+
+  .navbar-primary-menu li a {
+    display: block;
+    padding: 10px 18px;
+    text-align: left;
+    border-bottom:solid 1px #444;
+    color: #ccc;
+  }
+
+  .navbar-primary-menu li a:hover {
+    background-color: #000;
+    text-decoration: none;
+    color: white;
+  }
+
+  .navbar-primary-menu li a .glyphicon {
+    margin-right: 6px;
+  }
+
+  .navbar-primary-menu li a:hover .glyphicon {
+    color: orchid;
+  }
+}
+
+.navbar-primary.collapsed {
+  left: -250px;
+  .handler-collapse span {
+    transform: rotate(180deg);
+  }
+//  left: 99%;
+}
+
+.navbar-primary.collapsed .nav-label {
+  display: none;
 }
 
 .section-title {
@@ -489,6 +768,25 @@ $colorDefault: $colorMedium;
 
 .contract-terminated {
   border-left-color: $gray-light;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Infos color
+
+.helper {
+  font-size: .8em;
+  text-shadow: -1px -1px -1px rgba(0,0,0,.5);
+  padding: .25em 1em .25em .25em;
+  border-radius: .25em;
+  display: inline-block;
+  &.danger {
+    background: $brand-danger;
+    color: white;
+  }
+}
+
+.thin {
+  font-weight: 100;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1828,11 +2126,42 @@ span[class*="status"] {
     opacity: 1;
   }
 }
+
+.icon {
+  font-family: fontello;
+  font-weight: normal;
+  font-style: normal;
+  &.draft:before {
+    /**/
+      color: gray;
+      content: '\e882'
+  }
+  &.send:before {
+    /**/
+      color: black;
+      content: '\e88d'
+  }
+  &.reject:before {
+    /**/
+      color: darkred;
+      content: '\e889'
+  }
+  &.valid:before {
+    /**/
+      color: darkolivegreen;
+      content: '\e85b'
+  }
+
+}
 span[class*="status-10"]{
   .icon:before{
     content: '\e85e '
   }
   .label { color: green; }
+}
+
+*[class*="draft"]{
+
 }
 
 span[class*="status-103"] .icon:before{
@@ -3059,5 +3388,29 @@ $oscar-line: dotted thin $colorGreyLight;
 
   to {
     background: #ffffff;
+  }
+}
+
+// ######################################################### ACTIVITY FICHE v2.0
+.activity {
+  header {
+    background: $brand-secondary1;
+    color: white;
+    h4 { margin-bottom:  0}
+    h2 {
+      margin-top: 0;
+      font-size: 3em;
+    }
+  }
+
+  .metas {
+    color: rgba(white, .75);
+    font-size: .8em;
+    font-weight: 100;
+    list-style: none;
+    line-height: 1.5em;
+    strong {
+      color: white;
+    }
   }
 }

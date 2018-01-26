@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\TimesheetRepository")
  */
 class TimeSheet implements ITrackable
 {
@@ -139,6 +140,37 @@ class TimeSheet implements ITrackable
      */
     private $person;
 
+    /**
+     * Identifiant du créneau dans le ficheir ICS.
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $icsUid;
+
+
+    /**
+     * Identifiant du calendrier ICS.
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $icsFileUid;
+
+    /**
+     * Nom du calendrier ICS.
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $icsFileName;
+
+    /**
+     * @var \DateTime Date de l'import de l'ics
+     *
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $icsFileDateAdded;
 
     //////////////////////////////////////////////////// VALIDATION SCIENTIFIQUE
 
@@ -246,6 +278,13 @@ class TimeSheet implements ITrackable
             ->setStatus(self::STATUS_DRAFT);
     }
 
+    const UNIT_MINUTE = 60;
+    const UNIT_HOUR = 3600;
+
+    public function getDuration( $unit = self::UNIT_HOUR){
+        return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp()) / $unit;
+    }
+
     public function toJson(){
         $activityId = null;
         $activityLabel = null;
@@ -275,6 +314,12 @@ class TimeSheet implements ITrackable
             'workpackage_id' => $workpackageId,
             'workpackage_code' => $workpackageCode,
             'workpackage_label' => $workpackageLabel,
+
+            'icsuid'=> $this->getIcsUid(),
+            'icsfileuid'=> $this->getIcsFileUid(),
+            'icsfilename'=> $this->getIcsFileName(),
+            'icsfiledateadded'=> $this->getIcsFileDateAdded() ? $this->getIcsFileDateAdded()->format('c') : null,
+
             'label' => $this->getLabel(),
             'description' => $this->getComment(),
             'start' => $this->getDateFrom()->format('c'),
@@ -293,6 +338,78 @@ class TimeSheet implements ITrackable
             'rejectedAdminComment' => $this->getRejectedAdminComment(),
             'rejectedAdminBy' => $this->getRejectedAdminBy(),
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getIcsUid()
+    {
+        return $this->icsUid;
+    }
+
+    /**
+     * @param string $icsUid
+     */
+    public function setIcsUid($icsUid)
+    {
+        $this->icsUid = $icsUid;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIcsFileUid()
+    {
+        return $this->icsFileUid;
+    }
+
+    /**
+     * @param string $icsFileUid
+     */
+    public function setIcsFileUid($icsFileUid)
+    {
+        $this->icsFileUid = $icsFileUid;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIcsFileName()
+    {
+        return $this->icsFileName;
+    }
+
+    /**
+     * @param string $icsFileName
+     */
+    public function setIcsFileName($icsFileName)
+    {
+        $this->icsFileName = $icsFileName;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getIcsFileDateAdded()
+    {
+        return $this->icsFileDateAdded;
+    }
+
+    /**
+     * @param string $icsFileDateAdded
+     */
+    public function setIcsFileDateAdded($icsFileDateAdded)
+    {
+        $this->icsFileDateAdded = $icsFileDateAdded;
+
+        return $this;
     }
 
     /**
@@ -717,6 +834,34 @@ class TimeSheet implements ITrackable
 
         return $this;
     }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getYear(){
+        return intval($this->getDateFrom()->format('Y'));
+    }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getMonth(){
+        return intval($this->getDateFrom()->format('m'));
+    }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getDate(){
+        return intval($this->getDateFrom()->format('d'));
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     ///
     ///

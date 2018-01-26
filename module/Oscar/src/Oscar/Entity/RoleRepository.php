@@ -122,10 +122,9 @@ class RoleRepository extends EntityRepository
         if( $queryRole === null ){
             $queryRole = $this->createQueryBuilder('r')
                 ->from( Role::class, 'role')
-                ->where('r.roleId = :roleId')
-                ->getQuery();
+                ->where('r.roleId = :roleId');
         }
-        return $queryRole->setParameter('roleId', $roleId)->getSingleResult();
+        return $queryRole->setParameter('roleId', $roleId)->getQuery()->getSingleResult();
     }
 
     /**
@@ -140,9 +139,11 @@ class RoleRepository extends EntityRepository
         try {
             $role = $this->getRoleByRoleId($roleId);
         } catch (NoResultException $e) {
+            echo "Le rôle '$roleId' n'existe pas, il va être créé... \n";
             $role = new Role();
             $this->getEntityManager()->persist($role);
             $role->setRoleId($roleId);
+            $this->getEntityManager()->flush($role);
         }
         return $role;
     }

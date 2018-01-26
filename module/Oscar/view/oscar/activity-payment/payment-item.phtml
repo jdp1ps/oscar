@@ -52,17 +52,26 @@ else {
         </strong>
         <?php if ($payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_REALISE): ?>
             effectué le
+            <?php if( !$payment->getDatePayment() ): ?>
+                <span class="text-danger">Pas de date renseignée</span>
+            <?php else: ?>
             <time
                 datetime="<?= $payment->getDatePayment()->format('Y-m-d') ?>">
                 <?= $this->moment($payment->getDatePayment())->full() ?>
             </time>
+            <?php endif; ?>
         <?php endif; ?>
         <?php if ($payment->getStatus() == \Oscar\Entity\ActivityPayment::STATUS_PREVISIONNEL): ?>
             prévu le
+            <?php if( !$payment->getDatePredicted() ): ?>
+                <span class="text-danger">Pas de date renseignée</span>
+            <?php else: ?>
             <time
                 datetime="<?= $payment->getDatePredicted()->format('Y-m-d') ?>">
                 <?= $this->moment($payment->getDatePredicted())->full() ?>
             </time>
+            <?php endif; ?>
+
         <?php endif; ?>
 
 

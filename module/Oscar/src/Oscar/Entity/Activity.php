@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Oscar\Import\Data\DataExtractorDate;
 use Oscar\Service\ActivityTypeService;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 
@@ -361,6 +362,19 @@ class Activity implements ResourceInterface
      */
     protected $numbers = [];
 
+
+    /**
+     * Retourne l'acronyme du projet si disponible.
+     *
+     * @return mixed|null
+     */
+    public function getAcronym(){
+        if( $this->getProject() ){
+            return $this->getProject()->getAcronym();
+        }
+        return null;
+    }
+
     /**
      * @return string
      */
@@ -709,7 +723,7 @@ class Activity implements ResourceInterface
     public function setDateStart($dateStart)
     {
         if( is_string($dateStart) ){
-            $dateStart = new \DateTime($dateStart);
+            $dateStart = (new DataExtractorDate())->extract($dateStart);
         }
         $this->dateStart = $dateStart;
 
@@ -730,7 +744,7 @@ class Activity implements ResourceInterface
     public function setDateEnd($dateEnd)
     {
         if( is_string($dateEnd) ){
-            $dateEnd = new \DateTime($dateEnd);
+            $dateEnd = (new DataExtractorDate())->extract($dateEnd);
         }
         $this->dateEnd = $dateEnd;
 
@@ -862,6 +876,13 @@ class Activity implements ResourceInterface
     public function getDuration()
     {
         return $this->duration;
+    }
+
+    public function getCalculatedDuration(){
+        if( $this->getDateStart() && $this->getDateEnd() ){
+            return ceil(($this->getDateEnd()->getTimestamp() - $this->getDateStart()->getTimestamp())/(60*60*24));
+        }
+        return 0;
     }
 
     /**
@@ -1398,6 +1419,26 @@ class Activity implements ResourceInterface
         return $inCharge;
     }
 
+    public function hasMilestoneAt( DateType $type, \DateTime $date){
+        /** @var ActivityDate $milestone */
+        foreach ($this->getMilestones() as $milestone ){
+            if( $milestone->getDateStart() == $date  && $milestone->getType() == $type ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function hasPaymentAt( $amount, \DateTime $date ){
+        /** @var ActivityPayment $payment */
+        foreach ($this->getPayments() as $payment ){
+            if( $payment->getDatePayment() == $date  && $payment->getAmount() == $amount ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Test si l'organisation est présente sur l'activité de recherche.
      *
@@ -1676,12 +1717,34 @@ class Activity implements ResourceInterface
     ///
 
     public function hasDeclarant( $person ){
+        if( !$person ){
+            return false;
+        }
+        if( $person instanceof ActivityPerson || $person instanceof ProjectMember )
+            $person = $person->getPerson();
+
+        /** @var WorkPackage $wp */
+        foreach( $this->getWorkPackages() as $wp ){
+            /** @var WorkPackagePerson $p */
+            foreach( $wp->getPersons() as $p ){
+                if( $person->getId() == $p->getPerson()->getId() ){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Retourne TRUE si l'activité a des déclarants d'identifiés.
+     *
+     * @return bool
+     */
+    public function hasDeclarers(){
         /** @var WorkPackage $wp */
         foreach( $this->getWorkPackages() as $wp ){
             foreach( $wp->getPersons() as $p ){
-                if( $person == $p->getPerson() ){
-                    return true;
-                }
+                return true;
             }
         }
         return false;

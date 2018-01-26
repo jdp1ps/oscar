@@ -18,13 +18,14 @@ class OrganizationRoleRepository extends EntityRepository
             return $this->createQueryBuilder('r')
                 ->select('r')
                 ->where('r.label = :label')
-                ->setParameter('label', $roleId)
                 ->getQuery()
+                ->setParameter('label', $roleId)
                 ->getSingleResult();
         } catch (NoResultException $e){
             $role = new OrganizationRole();
             $this->getEntityManager()->persist($role);
             $role->setLabel($roleId);
+            $this->getEntityManager()->flush($role);
             return $role;
         }
     }

@@ -55,6 +55,60 @@ use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
 {
+    public function patch_debug(){
+        /*$privileges = $this->getEntityManager()->getRepository(Privilege::class)->findAll();
+
+        foreach ( $privileges as $p ){
+            echo $p->getId()." - ";
+        }
+
+        //
+        $privilege = new Privilege();
+        $privilege->setLibelle("TEST_PRIVILEGE")
+            ->setCode("TEST_PRIVILEGE");
+        $this->getEntityManager()->persist($privilege);
+        $this->getEntityManager()->flush($privilege);
+
+        die("OK");
+        */
+    }
+
+
+    public function patch_fixSequenceAutoNum(){
+        $sequences = [
+            "activity",
+            "activitydate",
+            "activityorganization",
+            "activitypayment",
+            "activityperson",
+            "activitytype",
+            "administrativedocument",
+            "authentification",
+            "contractdocument",
+            "currency",
+            "datetype",
+            "discipline",
+            "logactivity",
+            "notification",
+            "notificationperson",
+            "organization",
+            "organizationperson",
+            "organizationrole",
+            "privilege",
+            "project",
+            "person",
+        ];
+
+        foreach ($sequences as $sequence) {
+            $result = new Query\ResultSetMapping();
+            echo "Update numeration for $sequence\n";
+            $this->getEntityManager()->createNativeQuery(
+                "select setval('".$sequence."_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM ".$sequence."), 1)), false);",
+                $result)->execute();
+        }
+    }
+
+
     /**
      * Retourne la liste des clefs utilisateurs disposant du privilège.
      */
@@ -122,12 +176,15 @@ class ConsoleController extends AbstractOscarController
                 throw new \Exception("Not Auth");
             }
             $person = $this->getEntityManager()->getRepository(Person::class)->findOneBy(['ladapLogin' => $auth->getUsername()]);
-            $data = [
-                "id" => $person->getId(),
-                "username" => $auth->getUsername(),
-                "fullname" => (string)$person
-            ];
-            echo json_encode($data);
+            if( $person ) {
+                $data = [
+                    "id" => $person->getId(),
+                    "username" => $auth->getUsername(),
+                    "fullname" => (string)$person
+                ];
+                echo json_encode($data);
+            }
+            exit(1);
         } catch( \Exception $e ){
             die();
         }
@@ -240,16 +297,12 @@ class ConsoleController extends AbstractOscarController
      */
     public function importActivity2Action()
     {
-        $this->consoleHeader("Chargement des activités dans oscar...");
-
         // Fichiers
         try {
             $sourceFilePath = $this->getReadablePath($this->params('fichier'));
             $configurationFilePath = $this->getReadablePath($this->params('config'));
             $skip = 2;
 
-            $this->consoleKeyValue("Source", $sourceFilePath);
-            $this->consoleKeyValue("Configuration", $configurationFilePath);
 
             $configuration = require($configurationFilePath);
             $source = fopen($sourceFilePath, 'r');
@@ -259,7 +312,7 @@ class ConsoleController extends AbstractOscarController
             }
 
             $sync = new ConnectorActivityCSVWithConf($source, $configuration, $this->getEntityManager());
-            $sync->syncAll();
+            echo json_encode($sync->syncAll());
 
         } catch (\Exception $e){
             $this->consoleError($e->getMessage());
@@ -383,6 +436,15 @@ class ConsoleController extends AbstractOscarController
         $file = realpath($this->getRequest()->getParam('fichier'));
         echo "Importation des activités depuis $file : \n";
 
+        $options = [
+            'create-missing-project' => $this->getRequest()->getParam('create-missing-project', false),
+            'create-missing-person' => $this->getRequest()->getParam('create-missing-person', false),
+            'create-missing-person-role' => $this->getRequest()->getParam('create-missing-person-role', false),
+            'create-missing-organization' => $this->getRequest()->getParam('create-missing-organization', false),
+            'create-missing-organization-role' => $this->getRequest()->getParam('create-missing-organization-role', false),
+            'create-missing-activity-type' => $this->getRequest()->getParam('create-missing-activity-type', false),
+        ];
+
         $fileExtension = pathinfo($file)['extension'];
 
         if( $fileExtension == "csv" ){
@@ -417,7 +479,8 @@ class ConsoleController extends AbstractOscarController
         else {
             die("ERROR : Format non pris en charge.");
         }
-        $importer = new ConnectorActivityJSON($json, $this->getEntityManager());
+
+        $importer = new ConnectorActivityJSON($json, $this->getEntityManager(), $options);
         $repport = $importer->syncAll();
 
         $output = new ConnectorRepportToPlainText();

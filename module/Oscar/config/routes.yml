@@ -21,6 +21,14 @@ changelog:
             controller: Public
             action: changelog
 
+gitlog:
+    type: literal
+    options:
+        route: /gitlog
+        defaults:
+            controller: Public
+            action: gitlog
+
 ################################################################################
 # NOTIFICATIONS
 notification:
@@ -63,6 +71,19 @@ timesheet:
             controller: Timesheet
     may_terminate: false
     child_routes:
+        excel:
+            type: segment
+            options:
+                route: /excel
+                defaults:
+                    action: excel
+        # Déclarations d'une personne pour une activité
+        declarers:
+            type: segment
+            options:
+                route: /declarers
+                defaults:
+                    action: declarers
         # Déclarations d'une personne pour une activité
         declaration:
             type: segment
@@ -70,6 +91,7 @@ timesheet:
                 route: /declaration
                 defaults:
                     action: declaration
+
         usurpation:
             type: segment
             options:
@@ -550,6 +572,12 @@ contract:
                 route: /fiche-detaillee/:id
                 defaults:
                     action: show
+        show2:
+            type: segment
+            options:
+                route: /fiche/:id[/:do]
+                defaults:
+                    action: show2
 
         notifications:
             type: segment
@@ -1264,7 +1292,7 @@ administration:
              options:
                  route: /typedocument
                  defaults:
-                   action: typedocument
+                   action: typeDocument
              may_terminate: true
              child_routes:
                  api:

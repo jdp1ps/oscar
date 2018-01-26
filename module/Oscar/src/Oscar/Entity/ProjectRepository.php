@@ -18,19 +18,24 @@ class ProjectRepository extends EntityRepository {
     }
 
     public function getProjectByLabelOrCreate( $label ){
-        try {
-            return $this->createQueryBuilder('p')
-                ->select('p')
-                ->where('p.label = :label')
-                ->setParameter('label', $label)
-                ->getQuery()
-                ->getSingleResult();
-        } catch (NoResultException $e){
+
+        $projects = $this->createQueryBuilder('p')
+            ->select('p')
+            ->where('p.label = :label')
+            ->setParameter('label', $label)
+            ->getQuery()
+            ->getResult();
+        if( count($projects) == 0 ){
             $project = new Project();
             $this->getEntityManager()->persist($project);
-            $project->setLabel($label);
+            $project->setLabel($label)->setAcronym($label);
+            echo "Création du projet $project\n";
+            $this->getEntityManager()->flush($project);
             return $project;
+        } else {
+            return $projects[0];
         }
+
     }
 
     public function getByUserEmail( $userEmail, $time='all' )

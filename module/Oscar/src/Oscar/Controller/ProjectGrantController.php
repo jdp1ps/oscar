@@ -541,6 +541,33 @@ class ProjectGrantController extends AbstractOscarController
         ];
     }
 
+    public function show2Action(){
+        $method = $this->getHttpXMethod();
+
+
+        $id = $this->params()->fromRoute('id');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_SHOW, $entity);
+
+        switch ($method) {
+            case 'GET' :
+                if( $this->isAjax() )
+                    return $this->getResponseOk('RETOUR AJAX');
+                else
+                    return [
+                        'activity' => $entity,
+                        'json' => $this->getActivityService()->getActivityJson($id, $this->getOscarUserContext())
+                    ];
+                break;
+            default :
+                return $this->getResponseBadRequest('Bad Method ' . $method);
+        }
+    }
+
     /**
      * Fiche pour une activité de recherche.
      */
@@ -1027,6 +1054,7 @@ class ProjectGrantController extends AbstractOscarController
             if (!$search && count($criteria) === 0) {
                 $ids = [];
                 // Requêtes de base
+                /** @var QueryBuilder $qb */
                 $qb = $this->getEntityManager()->createQueryBuilder()
                     ->select('c, m1, p1, pr, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis')
                     ->from(Activity::class, 'c')
@@ -1304,14 +1332,14 @@ class ProjectGrantController extends AbstractOscarController
                     $criterias[] = $crit;
 
 
-                    if ($type == 'ap' || $type == 'ao' || $type = 'pm') {
+                    if ($type == 'ap' || $type == 'ao' || $type == 'pm' ) {
+
                         if ($filterIds === null) {
                             $filterIds = $ids;
                         } else {
                             $filterIds = array_intersect($filterIds, $ids);
                         }
                     }
-
 
                     if ($type == "sp" || $type == 'so') {
                         $filterNotIds = array_merge($filterNotIds, $ids);
@@ -1348,10 +1376,12 @@ class ProjectGrantController extends AbstractOscarController
             if( $startEmpty === false ) {
                 $qbIds = $qb->select('DISTINCT c.id');
 
+
                 $ids = [];
                 foreach ($qbIds->getQuery()->getResult() as $row) {
                     $ids[] = $row['id'];
                 }
+
                 $qb->select('c');
                 $qb->orderBy('c.' . $sort, $sortDirection);
                 if( $sortIgnoreNull ){

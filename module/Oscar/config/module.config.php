@@ -29,7 +29,7 @@ return array(
                 ////////////////////////////////////////////////////////////////////////
                 // PUBLIC
                 [ 'controller' =>  'Public',
-                    'action' => ['index'],
+                    'action' => ['index', 'gitlog'],
                     'roles' => [],
                 ],
                 [ 'controller' =>  'Public',
@@ -101,7 +101,7 @@ return array(
                 // ACTIVITÉS
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Activity',
-                    'action' => ['show', 'edit', 'new', 'duplicate', 'delete', 'visualization', 'documentsJson', 'activitiesOrganizations', 'notifications', 'generateNotifications'],
+                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate', 'delete', 'visualization', 'documentsJson', 'activitiesOrganizations', 'notifications', 'generateNotifications'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
@@ -203,7 +203,7 @@ return array(
 
                 // TIMESHEET
                 ['controller' => 'Timesheet',
-                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet", 'usurpation'],
+                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet", 'usurpation', 'declarers', 'excel'],
                     'roles' => ['user']
                 ],
 
@@ -531,7 +531,7 @@ return array(
                 ],
                 'oscar_activityfile_sync' => [
                     'options' => array(
-                        'route' => 'oscar activity:sync <fichier> [-f|--force]',
+                        'route' => 'oscar activity:sync <fichier> [-f|--force] [--create-missing-project] [--create-missing-person] [--create-missing-organization] [--create-missing-person-role] [--create-missing-organization-role] [--create-missing-activity-type]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'activityFileSync',
@@ -541,7 +541,7 @@ return array(
 
                 'oscar_activityfile_sync2' => [
                     'options' => array(
-                        'route' => 'oscar activity:sync2 <fichier> <config> [-f|--force] [-p|--persons] [-o|-organizations]',
+                        'route' => 'oscar activity:csvtojson <fichier> <config> [-f|--force] [--cp] [--co] [--cpr] [--cor]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'importActivity2',

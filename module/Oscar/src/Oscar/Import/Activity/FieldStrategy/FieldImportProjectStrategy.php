@@ -16,6 +16,7 @@ use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Entity\ProjectRepository;
 
 class FieldImportProjectStrategy implements IFieldImportStrategy
 {
@@ -43,8 +44,13 @@ class FieldImportProjectStrategy implements IFieldImportStrategy
     
     public function run(&$activity, $datas, $index)
     {
+        /** @var ProjectRepository $projectRepository */
         $projectRepository = $this->getEntityManager()->getRepository(Project::class);
-        $activity->setProject($projectRepository->getProjectByLabelOrCreate($datas[$index]));
+
+        $project = $projectRepository->getProjectByLabelOrCreate($datas[$index]);
+        if( $project )
+            $activity->setProject($project);
+
         return $activity;
     }
 }

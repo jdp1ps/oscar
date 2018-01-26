@@ -43,17 +43,18 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
     {
         if ($connectorName !== null) {
             $object->setConnectorID($connectorName,
-                $this->getFieldValue($jsonData, 'code'));
+                $this->getFieldValue($jsonData, 'uid'));
         }
 
         return $object
-            ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData,
-                'dateupdate', null)))
+            ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData,'dateupdate', null)))
             ->setShortName($this->getFieldValue($jsonData, 'shortname'))
             ->setCode($this->getFieldValue($jsonData, 'code'))
             ->setFullName($this->getFieldValue($jsonData, 'longname'))
             ->setPhone($this->getFieldValue($jsonData, 'phone'))
             ->setDescription($this->getFieldValue($jsonData, 'description'))
+
+            // La partie qui suit devrait être mieux sécurisée
             ->setStreet1(property_exists($jsonData,
                 'address') ? $jsonData->address->address1 : null)
             ->setStreet2(property_exists($jsonData,

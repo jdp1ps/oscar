@@ -29,7 +29,7 @@ class ConnectorOrganizationJSON implements ConnectorInterface
      * @param array $jsonData
      * @param EntityManager $entityManager
      */
-    public function __construct( array $jsonData, EntityManager $entityManager, $connectorName = 'json' )
+    public function __construct( $jsonData, $entityManager, $connectorName = 'json' )
     {
         $this->jsonDatas = $jsonData;
         $this->entityManager = $entityManager;
@@ -41,13 +41,29 @@ class ConnectorOrganizationJSON implements ConnectorInterface
         return true;
     }
 
+    /** Retourne le format JSON attendu par la classe JsonToOrganization.
+     *
+     * @return mixed
+     */
+    public function getJsonData(){
+        return $this->jsonDatas();
+    }
+
+    public function getEntityManager(){
+        return $this->entityManager;
+    }
+
+    public function getConnectorName(){
+        return $this->connectorName;
+    }
+
     /**
      * @param $uid
      * @return Organization
      */
     protected function getOrganization( $uid ){
         /** @var OrganizationRepository $repo */
-        $repo = $this->entityManager->getRepository(Organization::class);
+        $repo = $this->getEntityManager()->getRepository(Organization::class);
 
         return $repo->getObjectByConnectorID($this->connectorName, $uid);
     }
@@ -55,7 +71,7 @@ class ConnectorOrganizationJSON implements ConnectorInterface
     public function syncAll()
     {
         $repport = new ConnectorRepport();
-        foreach ($this->jsonDatas as $data) {
+        foreach ($this->getJsonData() as $data) {
             if( !property_exists($data, 'uid') ){
                 $repport->adderror("Les données sans UID sont ignorées : " . print_r($data, true));
                 continue;
@@ -67,7 +83,7 @@ class ConnectorOrganizationJSON implements ConnectorInterface
             } catch (NoResultException $e) {
                 $action = 'Création';
                 $organization = new Organization();
-                $this->entityManager->persist($organization);
+                $this->getEntityManager()->persist($organization);
             }
 
             try {
@@ -79,7 +95,7 @@ class ConnectorOrganizationJSON implements ConnectorInterface
 
 
             try {
-                $this->entityManager->flush($organization);
+                $this->getEntityManager()->flush($organization);
                 $message = sprintf('%s de %s', $action, $organization);
                 if( $action == 'Création' ){
                     $repport->addadded($message);

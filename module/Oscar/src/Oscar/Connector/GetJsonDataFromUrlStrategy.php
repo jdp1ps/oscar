@@ -8,6 +8,8 @@
 namespace Oscar\Connector;
 
 
+use Oscar\Exception\ConnectorException;
+
 class GetJsonDataFromUrlStrategy extends GetJsonDataStrategy
 {
 

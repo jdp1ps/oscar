@@ -126,6 +126,16 @@ class DateType implements ITrackable
         return $this;
     }
 
+    function toArray(){
+        return [
+            'id' => $this->getId(),
+            'label' => $this->getLabel(),
+            'facet' => $this->getFacet(),
+            'description' => $this->getDescription(),
+            'recursivity' => $this->getRecursivityArray()
+        ];
+    }
+
     function __toString()
     {
         return $this->getLabel();

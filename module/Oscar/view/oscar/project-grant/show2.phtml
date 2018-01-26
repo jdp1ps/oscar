@@ -1,0 +1,20 @@
+<?php /** @var $entity Oscar\Entity\Activity */ ?>
+<link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css" />
+
+<article class="activity" id="activity"></article>
+
+<script>
+    console.log("toto");
+    require(['activity'], function(m){
+        console.log(m.default);
+        var activity = new m.default({
+            el: '#activity',
+            data: <?= json_encode($json) ?>,
+            http: {
+                root: '<?= $this->url('contract/show2', ['id' => $activity->getId()]) ?>'
+            }
+        })
+    })
+</script>
+
+
