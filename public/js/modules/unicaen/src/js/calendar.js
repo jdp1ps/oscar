@@ -1821,9 +1821,8 @@ var ImportICSView = {
                     <div>
                         <h2><i class="icon-loop-outline"></i>Correspondance des créneaux</h2>
                         <input v-model="search" placeholder="Filter les créneaux">
-                        <section class="correspondances"">
-
-                            <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
+                        <section class="correspondances">
+                            <article v-for="label in labels" v-show="!search || (label && label.toLowerCase().indexOf(search.toLowerCase())) >= 0">
                                 <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
                                 <select v-model="associations[label]" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
                                     <option value="ignorer">Ignorer ces créneaux</option>
