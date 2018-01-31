@@ -121,6 +121,18 @@ describe('Directive v-bind', () => {
     expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
   })
 
+  it('.prop modifier with normal attribute binding', () => {
+    const vm = new Vue({
+      template: '<input :some.prop="some" :id="id">',
+      data: {
+        some: 'hello',
+        id: false
+      }
+    }).$mount()
+    expect(vm.$el.some).toBe('hello')
+    expect(vm.$el.getAttribute('id')).toBe(null)
+  })
+
   it('.camel modifier', () => {
     const vm = new Vue({
       template: '<svg :view-box.camel="viewBox"></svg>',
@@ -234,6 +246,17 @@ describe('Directive v-bind', () => {
       }
     }).$mount()
     expect('v-bind without argument expects an Object or Array value').toHaveBeenWarned()
+  })
+
+  it('set value for option element', () => {
+    const vm = new Vue({
+      template: '<select><option :value="val">val</option></select>',
+      data: {
+        val: 'val'
+      }
+    }).$mount()
+    // check value attribute
+    expect(vm.$el.options[0].getAttribute('value')).toBe('val')
   })
 
   // a vdom patch edge case where the user has several un-keyed elements of the

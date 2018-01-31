@@ -3,9 +3,10 @@
 import { makeMap } from 'shared/util'
 
 // attributes that should be using props for binding
-export const mustUseProp = (tag: string, attr: string): boolean => {
+const acceptValue = makeMap('input,textarea,option,select')
+export const mustUseProp = (tag: string, type: ?string, attr: string): boolean => {
   return (
-    (attr === 'value' && (tag === 'input' || tag === 'textarea' || tag === 'option')) ||
+    (attr === 'value' && acceptValue(tag)) && type !== 'button' ||
     (attr === 'selected' && tag === 'option') ||
     (attr === 'checked' && tag === 'input') ||
     (attr === 'muted' && tag === 'video')
