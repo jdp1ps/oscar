@@ -3,13 +3,18 @@
 import { genHandlers } from './events'
 import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
-import { camelize } from 'shared/util'
+import { camelize, no } from 'shared/util'
+
+type TransformFunction = (el: ASTElement, code: string) => string
+type DataGenFunction = (el: ASTElement) => string
+type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean
 
 // configurable state
 let warn
-let transforms
-let dataGenFns
+let transforms: Array<TransformFunction>
+let dataGenFns: Array<DataGenFunction>
 let platformDirectives
+let isPlatformReservedTag
 let staticRenderFns
 let onceCount
 let currentOptions
@@ -31,7 +36,8 @@ export function generate (
   transforms = pluckModuleFunction(options.modules, 'transformCode')
   dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
-  const code = ast ? genElement(ast) : '_h("div")'
+  isPlatformReservedTag = options.isReservedTag || no
+  const code = ast ? genElement(ast) : '_c("div")'
   staticRenderFns = prevStaticRenderFns
   onceCount = prevOnceCount
   return {
@@ -61,8 +67,8 @@ function genElement (el: ASTElement): string {
     } else {
       const data = el.plain ? undefined : genData(el)
 
-      const children = el.inlineTemplate ? null : genChildren(el)
-      code = `_h('${el.tag}'${
+      const children = el.inlineTemplate ? null : genChildren(el, true)
+      code = `_c('${el.tag}'${
         data ? `,${data}` : '' // data
       }${
         children ? `,${children}` : '' // children
@@ -120,7 +126,7 @@ function genIfConditions (conditions: ASTIfConditions): string {
     return '_e()'
   }
 
-  var condition = conditions.shift()
+  const condition = conditions.shift()
   if (condition.exp) {
     return `(${condition.exp})?${genTernaryExp(condition.block)}:${genIfConditions(conditions)}`
   } else {
@@ -223,7 +229,7 @@ function genDirectives (el: ASTElement): string | void {
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     needRuntime = true
-    const gen = platformDirectives[dir.name] || baseDirectives[dir.name]
+    const gen: DirctiveFunction = platformDirectives[dir.name] || baseDirectives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
@@ -262,7 +268,7 @@ function genInlineTemplate (el: ASTElement): ?string {
   }
 }
 
-function genScopedSlots (slots) {
+function genScopedSlots (slots: { [key: string]: ASTElement }): string {
   return `scopedSlots:{${
     Object.keys(slots).map(key => genScopedSlot(key, slots[key])).join(',')
   }}`
@@ -276,13 +282,59 @@ function genScopedSlot (key: string, el: ASTElement) {
   }}`
 }
 
-function genChildren (el: ASTElement): string | void {
-  if (el.children.length) {
-    return '[' + el.children.map(genNode).join(',') + ']'
+function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
+  const children = el.children
+  if (children.length) {
+    const el: any = children[0]
+    // optimize single v-for
+    if (children.length === 1 &&
+        el.for &&
+        el.tag !== 'template' &&
+        el.tag !== 'slot') {
+      return genElement(el)
+    }
+    const normalizationType = getNormalizationType(children)
+    return `[${children.map(genNode).join(',')}]${
+      checkSkip
+        ? normalizationType ? `,${normalizationType}` : ''
+        : ''
+    }`
   }
 }
 
-function genNode (node: ASTNode) {
+// determine the normalization needed for the children array.
+// 0: no normalization needed
+// 1: simple normalization needed (possible 1-level deep nested array)
+// 2: full normalization needed
+function getNormalizationType (children: Array<ASTNode>): number {
+  let res = 0
+  for (let i = 0; i < children.length; i++) {
+    const el: ASTNode = children[i]
+    if (el.type !== 1) {
+      continue
+    }
+    if (needsNormalization(el) ||
+        (el.ifConditions && el.ifConditions.some(c => needsNormalization(c.block)))) {
+      res = 2
+      break
+    }
+    if (maybeComponent(el) ||
+        (el.ifConditions && el.ifConditions.some(c => maybeComponent(c.block)))) {
+      res = 1
+    }
+  }
+  return res
+}
+
+function needsNormalization (el: ASTElement): boolean {
+  return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
+}
+
+function maybeComponent (el: ASTElement): boolean {
+  return !isPlatformReservedTag(el.tag)
+}
+
+function genNode (node: ASTNode): string {
   if (node.type === 1) {
     return genElement(node)
   } else {
@@ -291,27 +343,34 @@ function genNode (node: ASTNode) {
 }
 
 function genText (text: ASTText | ASTExpression): string {
-  return text.type === 2
+  return `_v(${text.type === 2
     ? text.expression // no need for () because already wrapped in _s()
     : transformSpecialNewlines(JSON.stringify(text.text))
+  })`
 }
 
 function genSlot (el: ASTElement): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el)
-  return `_t(${slotName}${
-    children ? `,${children}` : ''
-  }${
-    el.attrs ? `${children ? '' : ',null'},{${
-      el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')
-    }}` : ''
-  })`
+  let res = `_t(${slotName}${children ? `,${children}` : ''}`
+  const attrs = el.attrs && `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}}`
+  const bind = el.attrsMap['v-bind']
+  if ((attrs || bind) && !children) {
+    res += `,null`
+  }
+  if (attrs) {
+    res += `,${attrs}`
+  }
+  if (bind) {
+    res += `${attrs ? '' : ',null'},${bind}`
+  }
+  return res + ')'
 }
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
-function genComponent (componentName, el): string {
-  const children = el.inlineTemplate ? null : genChildren(el)
-  return `_h(${componentName},${genData(el)}${
+function genComponent (componentName: string, el: ASTElement): string {
+  const children = el.inlineTemplate ? null : genChildren(el, true)
+  return `_c(${componentName},${genData(el)}${
     children ? `,${children}` : ''
   })`
 }

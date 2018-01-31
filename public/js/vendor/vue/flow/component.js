@@ -33,20 +33,15 @@ declare interface Component {
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
-  $set: (obj: Array<any> | Object, key: any, val: any) => void;
+  $set: (obj: Array<mixed> | Object, key: mixed, val: mixed) => void;
   $delete: (obj: Object, key: string) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
   $on: (event: string, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
   $off: (event?: string, fn?: Function) => Component;
-  $emit: (event: string, ...args: Array<any>) => Component;
+  $emit: (event: string, ...args: Array<mixed>) => Component;
   $nextTick: (fn: Function) => void;
-  $createElement: (
-    tag?: string | Component,
-    data?: Object,
-    children?: VNodeChildren,
-    namespace?: string
-  ) => VNode;
+  $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;
 
   // private properties
   _uid: number;
@@ -64,30 +59,33 @@ declare interface Component {
   _isBeingDestroyed: boolean;
   _vnode: ?VNode;
   _staticTrees: ?Array<VNode>;
+  _hasHookEvent: boolean;
 
   // private methods
   // lifecycle
   _init: Function;
   _mount: (el?: Element | void, hydrating?: boolean) => Component;
   _update: (vnode: VNode, hydrating?: boolean) => void;
-  _updateListeners: (listeners: Object, oldListeners: ?Object) => void;
   _updateFromParent: (
     propsData: ?Object,
     listeners: ?{ [key: string]: Function | Array<Function> },
     parentVnode: VNode,
-    renderChildren: ?VNodeChildren
+    renderChildren: ?Array<VNode>
   ) => void;
   // rendering
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => any;
   // createElement
-  _h: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren) => VNode | void;
+  // _c is internal that accepts `normalizationType` optimization hint
+  _c: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren, normalizationType?: number) => VNode | void;
   // renderStatic
   _m: (index: number, isInFor?: boolean) => VNode | VNodeChildren;
   // markOnce
   _o: (vnode: VNode | Array<VNode>, index: number, key: string) => VNode | VNodeChildren;
   // toString
-  _s: (value: any) => string;
+  _s: (value: mixed) => string;
+  // text to VNode
+  _v: (value: string | number) => VNode;
   // toNumber
   _n: (value: string) => number | string;
   // empty vnode
@@ -99,7 +97,7 @@ declare interface Component {
   // resolveFilter
   _f: (id: string) => Function;
   // renderList
-  _l: (val: any, render: Function) => ?Array<VNode>;
+  _l: (val: mixed, render: Function) => ?Array<VNode>;
   // renderSlot
   _t: (name: string, fallback: ?Array<VNode>, props: ?Object) => ?Array<VNode>;
   // apply v-bind object
