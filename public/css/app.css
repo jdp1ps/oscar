@@ -7790,20 +7790,28 @@ time.date-missing {
   to {
     background: #ffffff; } }
 
-.activity header {
-  background: #6a5999;
-  color: white; }
-  .activity header h4 {
-    margin-bottom: 0; }
-  .activity header h2 {
-    margin-top: 0;
-    font-size: 3em; }
+/*
+// ######################################################### ACTIVITY FICHE v2.0
+.activity {
+  header {
+    background: $brand-secondary1;
+    color: white;
+    h4 { margin-bottom:  0}
+    h2 {
+      margin-top: 0;
+      font-size: 3em;
+    }
+  }
 
-.activity .metas {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: .8em;
-  font-weight: 100;
-  list-style: none;
-  line-height: 1.5em; }
-  .activity .metas strong {
-    color: white; }
+  .metas {
+    color: rgba(white, .75);
+    font-size: .8em;
+    font-weight: 100;
+    list-style: none;
+    line-height: 1.5em;
+    strong {
+      color: white;
+    }
+  }
+}
+*/
