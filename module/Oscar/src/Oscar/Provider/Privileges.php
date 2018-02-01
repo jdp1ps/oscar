@@ -66,6 +66,7 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const PERSON_INFOS_RH               = 'PERSON-INFOS_RH';
     const PERSON_INDEX                  = 'PERSON-INDEX';
     const PERSON_NOTIFICATION_MENU      = 'PERSON-NOTIFICATION_MENU';
+    const PERSON_VIEW_TIMESHEET         = 'PERSON-VIEW_TIMESHEET';
 
     const ORGANIZATION_SHOW             = 'ORGANIZATION-SHOW';
     const ORGANIZATION_EDIT             = 'ORGANIZATION-EDIT';

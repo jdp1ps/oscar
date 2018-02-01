@@ -129,24 +129,26 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
 		}
 
-        try {
-            $dbUser->setDateLogin(new \DateTime());
-            $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
-            $this->getEntityManager()->flush($dbUser);
-        } catch (\Exception $e) {
+		if( $dbUser ) {
+            try {
+                $dbUser->setDateLogin(new \DateTime());
+                $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
+                $this->getEntityManager()->flush($dbUser);
+            } catch (\Exception $e) {
 
-        }
+            }
 
-        /** @var PersonService $personService */
-        $personService = $this->_serviceManager->get('PersonService');
-        try {
-            $person = $personService->getPersonByLdapLogin($dbUser->getUsername());
-            $str = $person->log();
-        } catch (NoResultException $e) {
-            $str = $dbUser->getUsername() . ' - DBUSER';
+            /** @var PersonService $personService */
+            $personService = $this->_serviceManager->get('PersonService');
+            try {
+                $person = $personService->getPersonByLdapLogin($dbUser->getUsername());
+                $str = $person->log();
+            } catch (NoResultException $e) {
+                $str = $dbUser->getUsername() . ' - DBUSER';
+            }
+            $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
+                $str), $dbUser);
         }
-        $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
-            $str), $dbUser);
 
     }
 

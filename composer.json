@@ -20,7 +20,9 @@
     "erusev/parsedown": "^1.6",
     "zf1/zend-search-lucene": "^1.12",
     "zendframework/zend-text": "^2.6",
-    "jacksay/php-file-extension": "^0.0.1"
+    "jacksay/php-file-extension": "^0.0.1",
+    "mpdf/mpdf": "^7.0",
+    "phpoffice/phpexcel": "^1.8"
   },
   "require-dev": {
     "phpmd/phpmd": "@stable",
@@ -34,7 +36,8 @@
   },
   "autoload": {
     "psr-0": {
-      "Oscar": "module/Oscar/src/"
+      "Oscar": "module/Oscar/src/",
+      "UnicaenAde": "unicaen/unicaen-ade/src/"
     }
   },
   "scripts": {

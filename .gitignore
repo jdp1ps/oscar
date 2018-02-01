@@ -6,6 +6,12 @@ config/autoload/unicaen-auth.local.php
 tmp
 sandbox
 
+# Prototype
+prototype/timesheet/*
+!prototype/timesheet/test-exel.php
+!prototype/timesheet/ods-base-test.xls
+
+doc/*.html
 
 # Connecteurs
 /config/connectors/*.yml
@@ -26,6 +32,7 @@ socket/config.json
 
 # Data & Cache
 data/*
+!data/timesheet_model.xls
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
 !data/documents/activity/.gitkeep

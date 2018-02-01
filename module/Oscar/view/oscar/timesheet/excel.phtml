@@ -1,0 +1,177 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 18-01-17 13:01
+ * @copyright Certic (c) 2018
+ */
+$downloadBaseUrl = $this->url('timesheet/excel');
+
+function fmt(){
+    static $fmt;
+    if( $fmt === null )
+        $fmt = new \IntlDateFormatter(
+            'fr_FR',
+            \IntlDateFormatter::FULL,
+            \IntlDateFormatter::FULL,
+            'Europe/Paris',
+            \IntlDateFormatter::GREGORIAN,
+            'MMMM Y');
+    return $fmt;
+}
+function formatPeriod( $strPeriod ){
+    return fmt()->format((new DateTime($strPeriod.'-15')));
+}
+
+function buildTotauxArray( $wpsCodes ){
+    $array = [];
+    foreach ($wpsCodes as $code) {
+        $array[$code] = 0.0;
+    }
+    return $array;
+}
+
+function displayTotaux( $array, $label ){
+    $array['unvalidate'] = "";
+    ?>
+    <tr class="sous-total-year">
+        <th><?= $label ?></th>
+        <?php foreach( $array as $col=>$value): ?>
+        <th class="text-right"><?= number_format($value, 2) ?></th>
+        <?php endforeach; ?>
+    </tr>
+    <?php
+}
+
+?>
+<style>
+
+
+</style>
+<section class="container">
+    <h1><i class="icon-calendar"></i>Prévisualisation des feuilles de temps</h1>
+    <?php if( !$datas ): ?>
+        <p class="alert alert-warning">
+            Aucune déclaration disponible
+        </p>
+    <?php endif; ?>
+
+    <?php foreach ($datas as $activityDatas): ?>
+        <section>
+            <h3>Déclaration de <strong><?= $person ?></strong></h3>
+            <h2>
+                <small class="thin"><?= $activityDatas['project'] ?></small><br>
+                <strong><?= $activityDatas['activity'] ?></strong>
+                <a href="<?= $this->url('contract/show', ['id' => $activityDatas['activity_id']]) ?>" class="btn btn-sm btn-default">
+                    <i class="icon-cube"></i>
+                    Revenir sur la fiche activité</a>
+            </h2>
+
+            <p>
+                <a href="<?= $downloadBaseUrl ?>?action=csv&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
+                   class="btn btn-default btn-lg">
+                    <i class="icon-download-outline"></i>
+                    Télécharger les données (CSV)
+                </a>
+
+                <?php
+                /** @var \Oscar\Entity\Activity $activityObj */
+                $activityObj = $activityDatas['activityObj'];
+                if($activityObj && $activityObj->hasDeclarant($this->grant()->getCurrentPerson())): ?>
+                    <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>?activity_id=<?= $activityObj->getId() ?>">
+                        <i class="icon-calendar"></i>
+                        Déclarer des heures
+                    </a>
+                <?php endif; ?>
+
+                <?php if( $activityObj->hasTimesheetsUpForValidationAdmin() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activityObj) ): ?>
+                    <a href="<?= $this->url('timesheet/validation', ['idactivity' => $activityObj->getId()]) ?>" class="btn btn-primary">
+                        <i class="icon-archive"></i>
+                        Validation administrative en attente
+                    </a>
+                <?php endif; ?>
+                <?php if( $activityObj->hasTimesheetsUpForValidationSci() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activityObj) ): ?>
+                    <a href="<?= $this->url('timesheet/validation', ['idactivity' => $activityObj->getId()]) ?>" class="btn btn-primary">
+                        <i class="icon-beaker"></i>
+                        Validation scientifique en attente
+                    </a>
+                <?php endif; ?>
+
+
+            </p>
+
+            <table class="oscar-table">
+
+                <?php $first = true; $year = null; $totauxYear = []; $totauxFull = []; $wpCodes = [];?>
+                <?php foreach ($activityDatas['timesheets'] as $period=>$totaux): ?>
+                    <?php if( $first ): ?>
+                        <thead>
+                            <tr>
+                                <th>Période</th>
+                                <?php foreach ($totaux as $tag=>$value):
+                                    $wpCodes[] = $tag;
+                                    ?>
+                                    <?php if( $tag != 'total' && $tag != 'unvalidate' ): ?>
+                                        <th>
+                                            <i class="icon-archive"></i>
+                                            <?= $tag ?></th>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                                <th>Total</th>
+                                <th>Feuille de temps</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php $first = false; ?>
+                    <?php endif; ?>
+                    <?php
+                        $currentYear = preg_replace('/(\d*)-(\d*)/', '$1', $period);
+                        if( $currentYear != $year ){
+                            if( $year != null ){
+                                displayTotaux($totauxYear, 'Total ' . $year);
+                            }
+                            $totauxYear = buildTotauxArray($wpCodes);
+                            $year = $currentYear;
+                            echo "<tr class='year-head'><th colspan='".(count($totaux)+2)."' class='text-right'><strong class='labeled'>$year</strong></th></tr>";
+                        }
+
+                    ?>
+                    <tr class="small">
+                        <th><i class="icon-calendar"></i><?= formatPeriod($period) ?></th>
+                        <?php foreach ($totaux as $tag=>$wp): ?>
+                            <?php
+                            if( $tag != 'unvalidate' ){
+                                $totauxYear[$tag] += $wp['total'];
+                                $totauxYear['total'] += $wp['total'];
+                            }
+
+                            ?>
+                            <?php if( $tag != 'total' && $tag != 'unvalidate'):
+                                ?>
+                                <td class="text-right"><?= number_format($wp['total'], 2) ?></td>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                        <td class="text-right"><strong><?= number_format($totaux['total'],2) ?></strong></td>
+                        <td class="text-right">
+
+                            <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
+                               class="link">
+                                <i class="icon-download-outline"></i>
+                                Télécharger la feuille de temps (Excel)
+                            </a>
+
+                            <?php if( $totaux['unvalidate'] == true ): ?>
+                            <small class="helper danger">
+                                <i class="icon-warning-empty"></i>
+                                Certains créneaux n'ont pas été validé</small>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+
+                <?php endforeach; ?>
+                        <?php displayTotaux($totauxYear, 'Total '.$year); ?>
+                </tbody>
+            </table>
+        </section>
+    <?php endforeach; ?>
+</section>
+

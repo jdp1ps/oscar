@@ -1,15 +1,30 @@
 {
   "name": "vue-router",
+  "main": "dist/vue-router.js",
+  "description": "official router for Vue.js",
+  "authors": "Evan You",
+  "license": "MIT",
+  "ignore": [
+    "examples",
+    "test",
+    "docs",
+    ".gitignore",
+    ".eslintrc",
+    ".babelrc",
+    "*.json",
+    "*.md",
+    "*.yml",
+    "*.lock"
+  ],
   "homepage": "https://github.com/vuejs/vue-router",
-  "version": "2.1.1",
-  "_release": "2.1.1",
+  "version": "2.1.3",
+  "_release": "2.1.3",
   "_resolution": {
     "type": "version",
-    "tag": "v2.1.1",
-    "commit": "5b394e106bdf69897aaa75b06365926779118bf2"
+    "tag": "v2.1.3",
+    "commit": "da36db3104016ef7708325eabf9079b71d5a1b5e"
   },
   "_source": "https://github.com/vuejs/vue-router.git",
   "_target": "~2.1.1",
-  "_originalSource": "vue-router",
-  "_direct": true
+  "_originalSource": "vue-router"
 }

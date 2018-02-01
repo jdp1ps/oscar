@@ -71,6 +71,12 @@ timesheet:
             controller: Timesheet
     may_terminate: false
     child_routes:
+        excel:
+            type: segment
+            options:
+                route: /excel
+                defaults:
+                    action: excel
         # Déclarations d'une personne pour une activité
         declarers:
             type: segment

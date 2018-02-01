@@ -1,6 +1,18 @@
 import Vue from 'vue'
 import { looseEqual } from 'shared/util'
 
+// Android 4.4 Chrome 30 has the bug that a multi-select option cannot be
+// deseleted by setting its "selected" prop via JavaScript.
+function hasMultiSelectBug () {
+  var s = document.createElement('select')
+  s.setAttribute('multiple', '')
+  var o = document.createElement('option')
+  s.appendChild(o)
+  o.selected = true
+  o.selected = false
+  return o.selected !== false
+}
+
 /**
  * setting <select>'s value in IE9 doesn't work
  * we have to manually loop through the options
@@ -187,33 +199,68 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
-  it('multiple', done => {
-    const vm = new Vue({
-      data: {
-        test: ['b']
-      },
-      template:
-        '<select v-model="test" multiple>' +
-          '<option>a</option>' +
-          '<option>b</option>' +
-          '<option>c</option>' +
-        '</select>'
-    }).$mount()
-    var opts = vm.$el.options
-    expect(opts[0].selected).toBe(false)
-    expect(opts[1].selected).toBe(true)
-    expect(opts[2].selected).toBe(false)
-    vm.test = ['a', 'c']
-    waitForUpdate(() => {
-      expect(opts[0].selected).toBe(true)
-      expect(opts[1].selected).toBe(false)
-      expect(opts[2].selected).toBe(true)
-      opts[0].selected = false
-      opts[1].selected = true
-      triggerEvent(vm.$el, 'change')
-      expect(vm.test).toEqual(['b', 'c'])
-    }).then(done)
-  })
+  if (!hasMultiSelectBug()) {
+    it('multiple', done => {
+      const vm = new Vue({
+        data: {
+          test: ['b']
+        },
+        template:
+          '<select v-model="test" multiple>' +
+            '<option>a</option>' +
+            '<option>b</option>' +
+            '<option>c</option>' +
+          '</select>'
+      }).$mount()
+      var opts = vm.$el.options
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(true)
+      expect(opts[2].selected).toBe(false)
+      vm.test = ['a', 'c']
+      waitForUpdate(() => {
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(true)
+        opts[0].selected = false
+        opts[1].selected = true
+        triggerEvent(vm.$el, 'change')
+        expect(vm.test).toEqual(['b', 'c'])
+      }).then(done)
+    })
+
+    it('multiple + v-for', done => {
+      const vm = new Vue({
+        data: {
+          test: ['b'],
+          opts: ['a', 'b', 'c']
+        },
+        template:
+          '<select v-model="test" multiple>' +
+            '<option v-for="o in opts">{{ o }}</option>' +
+          '</select>'
+      }).$mount()
+      var opts = vm.$el.options
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(true)
+      expect(opts[2].selected).toBe(false)
+      vm.test = ['a', 'c']
+      waitForUpdate(() => {
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(true)
+        opts[0].selected = false
+        opts[1].selected = true
+        triggerEvent(vm.$el, 'change')
+        expect(vm.test).toEqual(['b', 'c'])
+        // update v-for opts
+        vm.opts = ['c', 'd']
+      }).then(() => {
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        expect(vm.test).toEqual(['c']) // should remove 'd' which no longer has a matching option
+      }).then(done)
+    })
+  }
 
   it('multiple with static template', () => {
     const vm = new Vue({
@@ -228,39 +275,6 @@ describe('Directive v-model select', () => {
     expect(opts[0].selected).toBe(true)
     expect(opts[1].selected).toBe(true)
     expect(opts[2].selected).toBe(true)
-  })
-
-  it('multiple + v-for', done => {
-    const vm = new Vue({
-      data: {
-        test: ['b'],
-        opts: ['a', 'b', 'c']
-      },
-      template:
-        '<select v-model="test" multiple>' +
-          '<option v-for="o in opts">{{ o }}</option>' +
-        '</select>'
-    }).$mount()
-    var opts = vm.$el.options
-    expect(opts[0].selected).toBe(false)
-    expect(opts[1].selected).toBe(true)
-    expect(opts[2].selected).toBe(false)
-    vm.test = ['a', 'c']
-    waitForUpdate(() => {
-      expect(opts[0].selected).toBe(true)
-      expect(opts[1].selected).toBe(false)
-      expect(opts[2].selected).toBe(true)
-      opts[0].selected = false
-      opts[1].selected = true
-      triggerEvent(vm.$el, 'change')
-      expect(vm.test).toEqual(['b', 'c'])
-      // update v-for opts
-      vm.opts = ['c', 'd']
-    }).then(() => {
-      expect(opts[0].selected).toBe(true)
-      expect(opts[1].selected).toBe(false)
-      expect(vm.test).toEqual(['c']) // should remove 'd' which no longer has a matching option
-    }).then(done)
   })
 
   it('multiple selects', (done) => {
@@ -310,13 +324,64 @@ describe('Directive v-model select', () => {
         '<select v-model.number="test">' +
           '<option value="1">a</option>' +
           '<option :value="2">b</option>' +
-        ' <option :value="3">c</option>' +
+          '<option :value="3">c</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
     updateSelect(vm.$el, '1')
     triggerEvent(vm.$el, 'change')
     expect(vm.test).toBe(1)
+  })
+
+  it('should respect different pritive type value', (done) => {
+    const vm = new Vue({
+      data: {
+        test: 0
+      },
+      template:
+        '<select v-model.number="test">' +
+          '<option value="">a</option>' +
+          '<option value="0">b</option>' +
+          '<option value="1">c</option>' +
+          '<option value="false">c</option>' +
+          '<option value="true">c</option>' +
+        '</select>'
+    }).$mount()
+    var opts = vm.$el.options
+    expect(opts[0].selected).toBe(false)
+    expect(opts[1].selected).toBe(true)
+    expect(opts[2].selected).toBe(false)
+    expect(opts[3].selected).toBe(false)
+    expect(opts[4].selected).toBe(false)
+    vm.test = 1
+    waitForUpdate(() => {
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(true)
+      expect(opts[3].selected).toBe(false)
+      expect(opts[4].selected).toBe(false)
+      vm.test = ''
+    }).then(() => {
+      expect(opts[0].selected).toBe(true)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(false)
+      expect(opts[3].selected).toBe(false)
+      expect(opts[4].selected).toBe(false)
+      vm.test = false
+    }).then(() => {
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(false)
+      expect(opts[3].selected).toBe(true)
+      expect(opts[4].selected).toBe(false)
+      vm.test = true
+    }).then(() => {
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(false)
+      expect(opts[3].selected).toBe(false)
+      expect(opts[4].selected).toBe(true)
+    }).then(done)
   })
 
   it('should warn inline selected', () => {
