@@ -56,10 +56,13 @@ function genCheckboxModel (
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
     `Array.isArray(${value})` +
-      `?_i(${value},${valueBinding})>-1` +
-      `:_q(${value},${trueValueBinding})`
+      `?_i(${value},${valueBinding})>-1` + (
+        trueValueBinding === 'true'
+          ? `:(${value})`
+          : `:_q(${value},${trueValueBinding})`
+      )
   )
-  addHandler(el, 'change',
+  addHandler(el, 'click',
     `var $$a=${value},` +
         '$$el=$event.target,' +
         `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
@@ -90,7 +93,7 @@ function genRadioModel (
   let valueBinding = getBindingAttr(el, 'value') || 'null'
   valueBinding = number ? `_n(${valueBinding})` : valueBinding
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
-  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
+  addHandler(el, 'click', genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genDefaultModel (
@@ -127,10 +130,12 @@ function genDefaultModel (
   valueExpression = number || type === 'number'
     ? `_n(${valueExpression})`
     : valueExpression
+
   let code = genAssignmentCode(value, valueExpression)
   if (isNative && needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
+
   // inputs with type="file" are read only and setting the input's
   // value will throw an error.
   if (process.env.NODE_ENV !== 'production' &&
@@ -140,8 +145,12 @@ function genDefaultModel (
       `File inputs are read only. Use a v-on:change listener instead.`
     )
   }
+
   addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
   addHandler(el, event, code, null, true)
+  if (trim || number || type === 'number') {
+    addHandler(el, 'blur', '$forceUpdate()')
+  }
 }
 
 function genSelect (

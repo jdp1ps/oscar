@@ -1,12 +1,11 @@
 /* @flow */
 
 import VNode from './vnode'
-import { normalizeChildren } from './helpers/index'
 import { resolveConstructorOptions } from '../instance/init'
 import { activeInstance, callHook } from '../instance/lifecycle'
 import { resolveSlots } from '../instance/render'
 import { createElement } from './create-element'
-import { warn, isObject, hasOwn, hyphenate, validateProp, bind } from '../util/index'
+import { warn, isObject, hasOwn, hyphenate, validateProp } from '../util/index'
 
 const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
@@ -15,7 +14,7 @@ export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data?: VNodeData,
   context: Component,
-  children?: VNodeChildren,
+  children: ?Array<VNode>,
   tag?: string
 ): VNode | void {
   if (!Ctor) {
@@ -85,7 +84,7 @@ export function createComponent (
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
-    data, undefined, undefined, undefined, undefined, context,
+    data, undefined, undefined, undefined, context,
     { Ctor, propsData, listeners, tag, children }
   )
   return vnode
@@ -96,7 +95,7 @@ function createFunctionalComponent (
   propsData: ?Object,
   data: VNodeData,
   context: Component,
-  children?: VNodeChildren
+  children: ?Array<VNode>
 ): VNode | void {
   const props = {}
   const propOptions = Ctor.options.props
@@ -105,19 +104,17 @@ function createFunctionalComponent (
       props[key] = validateProp(key, propOptions, propsData)
     }
   }
-  const vnode = Ctor.options.render.call(
-    null,
-    // ensure the createElement function in functional components
-    // gets a unique context - this is necessary for correct named slot check
-    bind(createElement, { _self: Object.create(context) }),
-    {
-      props,
-      data,
-      parent: context,
-      children: normalizeChildren(children),
-      slots: () => resolveSlots(children, context)
-    }
-  )
+  // ensure the createElement function in functional components
+  // gets a unique context - this is necessary for correct named slot check
+  const _context = Object.create(context)
+  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
+  const vnode = Ctor.options.render.call(null, h, {
+    props,
+    data,
+    parent: context,
+    children,
+    slots: () => resolveSlots(children, context)
+  })
   if (vnode instanceof VNode) {
     vnode.functionalContext = context
     if (data.slot) {
@@ -160,8 +157,8 @@ function init (
   parentElm: ?Node,
   refElm: ?Node
 ): ?boolean {
-  if (!vnode.child || vnode.child._isDestroyed) {
-    const child = vnode.child = createComponentInstanceForVnode(
+  if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
+    const child = vnode.componentInstance = createComponentInstanceForVnode(
       vnode,
       activeInstance,
       parentElm,
@@ -180,7 +177,7 @@ function prepatch (
   vnode: MountedComponentVNode
 ) {
   const options = vnode.componentOptions
-  const child = vnode.child = oldVnode.child
+  const child = vnode.componentInstance = oldVnode.componentInstance
   child._updateFromParent(
     options.propsData, // updated props
     options.listeners, // updated listeners
@@ -190,23 +187,23 @@ function prepatch (
 }
 
 function insert (vnode: MountedComponentVNode) {
-  if (!vnode.child._isMounted) {
-    vnode.child._isMounted = true
-    callHook(vnode.child, 'mounted')
+  if (!vnode.componentInstance._isMounted) {
+    vnode.componentInstance._isMounted = true
+    callHook(vnode.componentInstance, 'mounted')
   }
   if (vnode.data.keepAlive) {
-    vnode.child._inactive = false
-    callHook(vnode.child, 'activated')
+    vnode.componentInstance._inactive = false
+    callHook(vnode.componentInstance, 'activated')
   }
 }
 
 function destroy (vnode: MountedComponentVNode) {
-  if (!vnode.child._isDestroyed) {
+  if (!vnode.componentInstance._isDestroyed) {
     if (!vnode.data.keepAlive) {
-      vnode.child.$destroy()
+      vnode.componentInstance.$destroy()
     } else {
-      vnode.child._inactive = true
-      callHook(vnode.child, 'deactivated')
+      vnode.componentInstance._inactive = true
+      callHook(vnode.componentInstance, 'deactivated')
     }
   }
 }

@@ -40,16 +40,19 @@ export default class Watcher {
     vm: Component,
     expOrFn: string | Function,
     cb: Function,
-    options?: Object = {}
+    options?: Object
   ) {
     this.vm = vm
     vm._watchers.push(this)
     // options
-    this.deep = !!options.deep
-    this.user = !!options.user
-    this.lazy = !!options.lazy
-    this.sync = !!options.sync
-    this.expression = expOrFn.toString()
+    if (options) {
+      this.deep = !!options.deep
+      this.user = !!options.user
+      this.lazy = !!options.lazy
+      this.sync = !!options.sync
+    } else {
+      this.deep = this.user = this.lazy = this.sync = false
+    }
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
@@ -58,6 +61,9 @@ export default class Watcher {
     this.newDeps = []
     this.depIds = new Set()
     this.newDepIds = new Set()
+    this.expression = process.env.NODE_ENV !== 'production'
+      ? expOrFn.toString()
+      : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
@@ -210,9 +216,8 @@ export default class Watcher {
     if (this.active) {
       // remove self from vm's watcher list
       // this is a somewhat expensive operation so we skip it
-      // if the vm is being destroyed or is performing a v-for
-      // re-render (the watcher list is then filtered by v-for).
-      if (!this.vm._isBeingDestroyed && !this.vm._vForRemoving) {
+      // if the vm is being destroyed.
+      if (!this.vm._isBeingDestroyed) {
         remove(this.vm._watchers, this)
       }
       let i = this.deps.length
