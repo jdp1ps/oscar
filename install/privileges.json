@@ -269,12 +269,6 @@
     "libelle": "Voir la liste des personnes",
     "fullcode": "PERSON-INDEX"
   },
-  "ORGANIZATION-TEST": {
-    "categorie_id": 4,
-    "code": "TEST",
-    "libelle": "Test de requ\u00e8te",
-    "fullcode": "ORGANIZATION-TEST"
-  },
   "PERSON-PROJECTS": {
     "categorie_id": 3,
     "code": "PROJECTS",
