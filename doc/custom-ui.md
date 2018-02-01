@@ -1,4 +1,4 @@
-# Développer dans Oscar
+# Personnalisation visuel
 
 ## Modification visuels
 
@@ -17,11 +17,3 @@ html body {
     background: #ff6600 !important;
 }
 ```
-
-## Soumettre des modifications avec GIT
-
-
-
-## Développement Front
-
-*A venir*
