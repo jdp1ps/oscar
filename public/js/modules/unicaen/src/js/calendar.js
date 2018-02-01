@@ -38,6 +38,7 @@ class CalendarDatas {
         this.copyWeekData = null;
         this.copyDayData = null;
         this.generatedId = 0;
+        this.totalWeek = 0;
         this.defaultLabel = "";
         this.tooltip = null;
         this.errors = [];
@@ -827,7 +828,8 @@ var WeekView = {
     <div class="meta">
         <a href="#" @click="previousWeek"><i class=" icon-angle-left"></i></a>
         <h3>
-            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }}
+            Semaine {{ currentWeekNum}}, {{ currentMonth }} {{ currentYear }} 
+            <small class="total-heures-semaine"> ({{ totalWeek }} heures)</small>  
             <nav class="reject-valid-group">
                 <i class=" icon-angle-down"></i>
                 <ul>
@@ -953,6 +955,7 @@ var WeekView = {
 
             var weekEvents = [];
             this.weekCredentials = store.defaultWeekCredentials();
+            var totalW = 0;
 
             this.events.forEach(event => {
                 // On filtre les événements de la semaine et le déclarant si besoin
@@ -976,6 +979,7 @@ var WeekView = {
                     }
                     this.weekCredentials.copydaily[event.mmStart.day()] = true;
                     this.weekCredentials.total[event.mmStart.day()-1] += event.duration;
+                    totalW += event.duration;
                     event.intersect = 0;
                     event.intersectIndex = 0;
                     weekEvents.push(event);
@@ -998,6 +1002,9 @@ var WeekView = {
                     }
                 }
             }
+            
+            this.totalWeek = totalW;
+            
             return weekEvents;
         },
 
@@ -1814,9 +1821,8 @@ var ImportICSView = {
                     <div>
                         <h2><i class="icon-loop-outline"></i>Correspondance des créneaux</h2>
                         <input v-model="search" placeholder="Filter les créneaux">
-                        <section class="correspondances"">
-
-                            <article v-for="label in labels" v-show="!search || label.indexOf(search) >= 0">
+                        <section class="correspondances">
+                            <article v-for="label in labels" v-show="!search || (label && label.toLowerCase().indexOf(search.toLowerCase())) >= 0">
                                 <strong><span :style="{'background': background(label)}" class="square">&nbsp</span>{{ label }}</strong>
                                 <select v-model="associations[label]" id="" @change="updateLabel(label, $event.target.value)" class="form-control">
                                     <option value="ignorer">Ignorer ces créneaux</option>
@@ -1975,6 +1981,7 @@ var ImportICSView = {
             let icsNameLC = icsName.toLowerCase();
 
             var associationParser  = (label) => {
+                if( !label ) return "";
                 let out = "";
                 label = label.toLowerCase();
 
@@ -2383,8 +2390,6 @@ var Calendar = {
                 <nav class="views-switcher">
                     <a href="#" @click.prevent="state = 'week'" :class="{active: state == 'week'}"><i class="icon-calendar"></i>{{ trans.labelViewWeek }}</a>
                     <a href="#" @click.prevent="state = 'list'" :class="{active: state == 'list'}"><i class="icon-columns"></i>{{ trans.labelViewList }}</a>
-                    <a href="#" @click.prevent="state = 'timesheet'" :class="{active: state == 'timesheet'}" v-if="this.wps"><i class="icon-file-excel"></i>Feuille de temps</a>
-                    
                     <a href="#" @click.prevent="importInProgress = true" v-if="createNew"><i class="icon-columns"></i>Importer un ICS</a>
                 </nav>
                  <template v-if="calendarLabelUrl.length">
@@ -2447,10 +2452,6 @@ var Calendar = {
                 @validateevent="handlerValidateEvent"
                 @rejectevent="handlerRejectEvent"
                 @submitevent="handlerSubmitEvent"></listview>
-                
-            <timesheetview v-if="state == 'timesheet'"
-                :with-owner="withOwner"
-                ></timesheet>
         </div>
 
     `,
@@ -2500,7 +2501,6 @@ var Calendar = {
         weekview: WeekView,
         monthview: MonthView,
         listview: ListView,
-        timesheetview: TimesheetView,
         eventitemimport: EventItemImport,
         importview: ImportICSView,
         selecteditable: SelectEditable

@@ -1,10 +1,11 @@
 /* @flow */
 
 import Watcher from '../observer/watcher'
-import { emptyVNode } from '../vdom/vnode'
+import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { warn, validateProp, remove, noop } from '../util/index'
 import { resolveSlots } from './render'
+import { updateComponentListeners } from './events'
 
 export let activeInstance: any = null
 
@@ -41,7 +42,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const vm: Component = this
     vm.$el = el
     if (!vm.$options.render) {
-      vm.$options.render = emptyVNode
+      vm.$options.render = createEmptyVNode
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
         if (vm.$options.template && vm.$options.template.charAt(0) !== '#') {
@@ -60,7 +61,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       }
     }
     callHook(vm, 'beforeMount')
-    vm._watcher = new Watcher(vm, () => {
+    vm._watcher = new Watcher(vm, function updateComponent () {
       vm._update(vm._render(), hydrating)
     }, noop)
     hydrating = false
@@ -108,16 +109,15 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el
     }
-    if (vm._isMounted) {
-      callHook(vm, 'updated')
-    }
+    // updated hook is called by the scheduler to ensure that children are
+    // updated in a parent's updated hook.
   }
 
   Vue.prototype._updateFromParent = function (
     propsData: ?Object,
     listeners: ?Object,
     parentVnode: VNode,
-    renderChildren: ?VNodeChildren
+    renderChildren: ?Array<VNode>
   ) {
     const vm: Component = this
     const hasChildren = !!(vm.$options._renderChildren || renderChildren)
@@ -148,7 +148,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (listeners) {
       const oldListeners = vm.$options._parentListeners
       vm.$options._parentListeners = listeners
-      vm._updateListeners(listeners, oldListeners)
+      updateComponentListeners(vm, listeners, oldListeners)
     }
     // resolve slots + force update if has children
     if (hasChildren) {
@@ -210,5 +210,7 @@ export function callHook (vm: Component, hook: string) {
       handlers[i].call(vm)
     }
   }
-  vm.$emit('hook:' + hook)
+  if (vm._hasHookEvent) {
+    vm.$emit('hook:' + hook)
+  }
 }

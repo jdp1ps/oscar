@@ -1,0 +1,21 @@
+version: '3'
+services:
+        # OSCAR Apache
+        apache:  
+               image: unilim/apache_oscar
+               build: ./build/apache
+               environment:
+                   - "OSCAR_APACHE_ADMIN=damien.rieu@unilim.fr"
+                   - "OSCAR_APACHE_DOC_ROOT=/var/oscar/oscar/public"
+                   - "OSCAR_APACHE_SERVERNAME=oscar-test.unilim.fr"
+                   - "OSCAR_APACHE_LOGDIR=/var/log/apache2/"
+                   - "OSCAR_DIR=/var/oscar/oscar"
+                   - "OSCAR_DOCDIR=/var/oscar/oscar"
+                   - "OSCAR_CONNECTDIR=/var/oscar/connector"
+
+        # OSCAR database       
+        postgresql:
+                image: library/postgres:9.6
+                environment:
+                        POSTGRES_USER: aaaaa
+                        POSTGRES_PASSWORD: aaaaaa

@@ -10,6 +10,17 @@
     "pfi": "",
     "type": "ANR",
     "amount": "0.0",
+    "milestones": [
+      {
+        "type": "Rapport scientifique",
+        "date": "2014-07-03"
+      },
+      {
+        "type": "Fin des dépenses",
+        "date": "2018-01-31"
+      }
+    ],
+
     "organizations": {
       "Référent extérieur": [],
       "Laboratoire": [

@@ -35,6 +35,169 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
+
+    /**
+     * Retourne les créneaux de la personne regroupès par activité
+     * @param Person $person
+     */
+    public function getPersonTimesheetsCSV( Person $person, Activity $activity = null, $validatedOnly = false){
+        $fmt = new \IntlDateFormatter(
+            'fr_FR',
+            \IntlDateFormatter::FULL,
+            \IntlDateFormatter::FULL,
+            'Europe/Paris',
+            \IntlDateFormatter::GREGORIAN,
+            'd MMMM Y');
+
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.person = :person')
+            ->andWhere('t.activity = :activity')
+            ->orderBy('t.activity, t.dateFrom')
+            ;
+
+        $datas = [];
+
+        $workpackages = [];
+
+        /** @var WorkPackage $workPackage */
+        foreach ($activity->getWorkPackages() as $workPackage ){
+            $workpackages[] = $workPackage->getCode();
+        }
+        sort($workpackages);
+
+        $ligneHeader = [ (string)$person ];
+        foreach ($workpackages as $wpCode) {
+            $ligneHeader[] = $wpCode;
+        }
+
+        $ligneHeader[] = "Commentaires";
+        $ligneHeader[] = "Nbr créneaux";
+        $ligneHeader[] = "Total jour";
+
+        $datas[] = $ligneHeader;
+
+        $days = [];
+        $yearStart = (int) $activity->getDateStart()->format('Y');
+        $yearEnd = (int) $activity->getDateEnd()->format('Y');
+
+        // Prétraitement des créneaux
+        $creneaux = [];
+        $timesheets = $query->getQuery()->setParameters([
+            'person' => $person,
+            'activity' => $activity
+        ])->getResult();
+
+        /** @var TimeSheet $timesheet */
+        foreach( $timesheets as $timesheet ){
+
+            $dayStr =   $fmt->format($timesheet->getDateFrom());
+            $code =     $timesheet->getWorkpackage()->getCode();
+            $comment =  trim($timesheet->getComment());
+            $duration = (float) $timesheet->getDuration();
+
+            if( !array_key_exists($dayStr, $creneaux) ){
+                $creneaux[$dayStr] = [];
+                foreach ($workpackages as $wpCode) {
+                    $creneaux[$dayStr][$wpCode] = 0.0;
+                }
+                $creneaux[$dayStr]['total'] = 0.0;
+                $creneaux[$dayStr]['qte'] = 0;
+                $creneaux[$dayStr]['commentaire'] = [];
+            }
+
+            $creneaux[$dayStr][$code] += $duration;
+            $creneaux[$dayStr]['commentaire'][] = $comment;
+            $creneaux[$dayStr]['total'] += $duration;
+            $creneaux[$dayStr]['qte'] += 1;
+        }
+
+
+        $content = [];
+
+        foreach ($creneaux as $dayStr=>$dayData) {
+            $ligne = [$dayStr];
+            foreach ($workpackages as $wpCode) {
+                $ligne[] = $creneaux[$dayStr][$wpCode];
+            }
+            $ligne[] = implode(" - ", array_unique($creneaux[$dayStr]['commentaire']));
+            $ligne[] = $creneaux[$dayStr]['qte'];
+            $ligne[] = $creneaux[$dayStr]['total'];
+            $datas[] = $ligne;
+        }
+
+        return $datas;
+    }
+
+    /**
+     * Retourne les créneaux de la personne regroupès par activité
+     * @param Person $person
+     */
+    public function getPersonTimesheets( Person $person, $validatedOnly = false, $periodFilter = null, $activity = null ){
+
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.person = :person')
+            ->orderBy('t.activity, t.dateFrom')
+            ->setParameter('person', $person);
+
+        if( $activity != null ){
+            $query->andWhere('t.activity = :activity')
+                ->setParameter('activity', $activity);
+        }
+
+        $datas = [];
+
+        /** @var TimeSheet $timesheet */
+        foreach( $query->getQuery()->getResult() as $timesheet ){
+            if( !$timesheet->getActivity() ) continue;
+
+            $activityId = $timesheet->getActivity()->getId();
+            $period = $timesheet->getDateFrom()->format('Y-m');
+
+            if( $periodFilter!== null && $periodFilter != $period )
+                continue;
+
+            if( !array_key_exists($activityId, $datas) ){
+                $datas[$activityId] = [
+                  'activityObj' => $timesheet->getActivity(),
+                  'activity' => (string) $timesheet->getActivity(),
+                  'project' => (string) $timesheet->getActivity()->getProject(),
+                  'activity_id' => $timesheet->getActivity()->getId()
+                ];
+            }
+
+            if( !array_key_exists($period, $datas[$activityId]) ){
+                $datas[$activityId][$period] = [
+                    'unvalidate' => false,
+                    'total' => 0.0,
+                ];
+                /** @var WorkPackage $wp */
+                foreach ($timesheet->getActivity()->getWorkPackages() as $wp ){
+                    if( !array_key_exists($wp->getCode(), $datas[$activityId]['timesheets'][$period]) )
+                        $datas[$activityId]['timesheets'][$period][$wp->getCode()] = [
+                            'total' => 0.0
+                        ];
+                }
+            }
+            $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]['total'] += $timesheet->getDuration();
+            $datas[$activityId]['timesheets'][$period]['total'] += $timesheet->getDuration();
+            if( $timesheet->getStatus() != TimeSheet::STATUS_ACTIVE ){
+                $datas[$activityId]['timesheets'][$period]['unvalidate'] = true;
+            }
+
+            $day = (string) $timesheet->getDateFrom()->format('j');
+            if (!array_key_exists($day, $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()])){
+                $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()][$day] = 0.0;
+                $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]["crenaux_".$day] = 0;
+            }
+            $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]["crenaux_".$day]++;
+            $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()][$day] += $timesheet->getDuration();
+
+        }
+        return $datas;
+    }
+
     public function getDeclarers(){
         // Récupération des IDS des déclarants
         $timesheets = $this->getTimesheetRepository()->getTimesheetsWithWorkPackage();

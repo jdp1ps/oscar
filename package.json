@@ -28,6 +28,7 @@
     "requirejs": "^2.3.3"
   },
   "dependencies": {
+    "gulp-shell": "^0.6.3",
     "https": "^1.0.0"
   }
 }

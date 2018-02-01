@@ -878,6 +878,13 @@ class Activity implements ResourceInterface
         return $this->duration;
     }
 
+    public function getCalculatedDuration(){
+        if( $this->getDateStart() && $this->getDateEnd() ){
+            return ceil(($this->getDateEnd()->getTimestamp() - $this->getDateStart()->getTimestamp())/(60*60*24));
+        }
+        return 0;
+    }
+
     /**
      * @param int $duration
      */
@@ -1710,7 +1717,9 @@ class Activity implements ResourceInterface
     ///
 
     public function hasDeclarant( $person ){
-
+        if( !$person ){
+            return false;
+        }
         if( $person instanceof ActivityPerson || $person instanceof ProjectMember )
             $person = $person->getPerson();
 

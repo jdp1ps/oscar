@@ -46,12 +46,12 @@ $grid-float-breakpoint: 1024px;
 // Reset and dependencies
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/normalize";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/print";
-@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons";
+// @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons";
 
 // Core CSS
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/scaffolding";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/type";
-@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/code";
+//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/code";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/grid";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/tables";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/forms";
@@ -146,6 +146,62 @@ $colorGreyBlack: #222;
   }
 }
 
+
+.oscar-table {
+  @extend .table;
+
+  //box-shadow: 0 0 1em rgba(0,0,0,.25);
+  background: none;
+
+  .sous-total-year {
+    background: none !important;
+  }
+
+  .year-head {
+    background: none !important;
+    .labeled {
+      font-size: 1em;
+      line-height: 1em;
+      padding: .2em .5em;
+      display: inline-block;
+      color: white;
+      background: rgba($brand-primary, .6) !important;
+      text-shadow: -1px 1px 1px rgba(0, 0, 0, .5);
+    }
+  }
+
+  thead {
+    background: $brand-primary; color: white;
+    text-shadow: -1px 1px 0 rgba(0,0,0,.5);
+    th { font-weight: 100 }
+    :not(:nth-child(1)){
+      text-align: right;
+    }
+  }
+
+  tbody {
+    tr {
+      background: #fff;
+    }
+    tr:nth-child(even) {
+      background: #eeeeee;
+    }
+  }
+
+  tbody, thead {
+    tr {
+      &.small {
+        font-size: .8em;
+      }
+      th, td {
+        line-height: 1em;
+      }
+    }
+  }
+  th, td {
+    border: solid rgba(0,0,0,.2) thin;
+  }
+}
 
 html body {
   background-image: url($bg-image) !important;;
@@ -712,6 +768,25 @@ body::-webkit-scrollbar-thumb {
 
 .contract-terminated {
   border-left-color: $gray-light;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Infos color
+
+.helper {
+  font-size: .8em;
+  text-shadow: -1px -1px -1px rgba(0,0,0,.5);
+  padding: .25em 1em .25em .25em;
+  border-radius: .25em;
+  display: inline-block;
+  &.danger {
+    background: $brand-danger;
+    color: white;
+  }
+}
+
+.thin {
+  font-weight: 100;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3313,5 +3388,29 @@ $oscar-line: dotted thin $colorGreyLight;
 
   to {
     background: #ffffff;
+  }
+}
+
+// ######################################################### ACTIVITY FICHE v2.0
+.activity {
+  header {
+    background: $brand-secondary1;
+    color: white;
+    h4 { margin-bottom:  0}
+    h2 {
+      margin-top: 0;
+      font-size: 3em;
+    }
+  }
+
+  .metas {
+    color: rgba(white, .75);
+    font-size: .8em;
+    font-weight: 100;
+    list-style: none;
+    line-height: 1.5em;
+    strong {
+      color: white;
+    }
   }
 }

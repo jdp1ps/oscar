@@ -2,19 +2,89 @@
 % Université de Caen
 % Décembre 2017
 
-# Import initial des activités
-
-## Script d'importation
+# Présentation
 
 **Oscar** dispose d'un utilitaire en ligne de commande permettant de synchroniser des activités depuis **un fichier JSON**.
+
+Cet utilitaire sera utilisé pour importer et synchroniser des activités dans Oscar.
+
+La procédure de synchronisation s'utilise en ligne de commande :
 
 ```bash
 $ php public/index.php oscar activity:sync path/to/file.json
 ```
 
-Un échantillon de ce fichier est disponible dans les sources de l'application dans le dossier `./install/demo/activity.json`. Le contenu du fichier se présente sous la forme d'un tableau d'objet.
+# Source des données
 
-Chaque objet correspond à UNE activité.
+## Format JSON
+
+Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce fichier est disponible dans les sources de l'application dans le dossier `./install/demo/activity.json`. Le contenu du fichier se présente sous la forme d'un tableau d'objet.
+
+```json
+[
+  {
+    "uid": "A0001",
+    "acronym": "RELACSV",
+    "projectlabel": "Théorie de la relativité",
+    "label": "Exemple d'activité 1",
+    "datestart": "",
+    "dateend": "",
+    "datesigned": "2017-06-01",
+    "pfi": "",
+    "type": "ANR",
+    "amount": "0.0",
+    "organizations": {
+      "Laboratoire": ["Cyberdyne", "US Robots"]
+    },
+    "persons": {
+      "Responsable scientifique": ["Albert Einstein"],
+      "Ingénieur": ["Maurice Solovine", "Marcel Grossman"]
+    },
+    "milestones": [],
+  },
+  {
+    "uid": "A0002",
+    "acronym": "RELACSV",
+    "projectlabel": "Théorie de la relativité",
+    "label": "Exemple d'activité 2",
+    "datestart": "2015-01-01",
+    "dateend": "2017-12-31",
+    "datesigned": "2015-02-01",
+    "pfi": "",
+    "type": "Colloques",
+    "amount": 15000,
+    "milestones": [
+
+    ],
+    "payments": [
+
+    ],
+    "organizations": {
+      "Laboratoire": [
+        "Cyberdyne",
+        "US Robots"
+      ],
+      "Composante responsable": [
+        "ACME"
+      ]
+    },
+    "persons": {
+      "Responsable scientifique": [
+        "Albert Einstein",
+        "Maurice Solovine"
+      ],
+      "Ingénieur": [
+        "John Doe",
+        "Marcel Grossmann"
+      ]
+    }
+  }
+]
+```
+
+Le tableau contient des **objets JSON**, chaque objet correspond à UNE activité.
+
+## Données d'une activité
 
 Voici la liste des clefs attendues :
 
@@ -132,6 +202,7 @@ Le nom de l'organisation utilisé comme valeur correspond au champ "Nom complet"
 
 
 <a id="persons"></a>
+
 ### La clef `persons`
 
 La clef `persons` permet d'associer une personne à une activité avec un rôle.
@@ -155,20 +226,12 @@ Comme pour les organisations, Oscar se chargera d'ajouter les rôles et les pers
 
 
 <a id="milestones"></a>
+
 ### La clef `milestones`
 
 La clef `milestones` est utilisée pour ajouter des jalons à une activité.
 
 La valeur est un tableau contenant des Objets JSON
-
-```json
-"milestones": [
-      { /* Objet */},
-      { /* Objet */ }
-    ],
-```
-
-Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date d'échéance du jalon, ainsi qu'une clef `type` correspondant au type de jalon (**Administration > Gérer les types d'activités**) :
 
 ```json
 {
@@ -185,10 +248,15 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 }
 ```
 
+Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date d'échéance du jalon, ainsi qu'une clef `type` correspondant au type de jalon (**Administration > Gérer les types d'activités**) :
+
+
+
 > Si oscar trouve un Jalon de même type à la même date, il ne cré pas le jalon.
 
 
 <a id="payments"></a>
+
 ### La clef payments
 
 La clef `payments` est utilisée pour ajouter des versements à une activité.
@@ -197,9 +265,9 @@ La valeur est un tableau contenant des Objets JSON
 
 ```json
 "payments": [
-      { /* Objet */},
-      { /* Objet */ }
-    ],
+      {},
+      {}
+    ]
 ```
 
 Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date prévisionnelle et une clef `amount` contenant un *double* correspondant au montant du versement :
@@ -220,73 +288,14 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 ```
 
 
-## Exemple de donnée
 
-```json
-[
-  {
-    "uid": "A0001",
-    "acronym": "RELACSV",
-    "projectlabel": "Théorie de la relativité",
-    "label": "Exemple d'activité 1",
-    "datestart": "",
-    "dateend": "",
-    "datesigned": "2017-06-01",
-    "pfi": "",
-    "type": "ANR",
-    "amount": "0.0",
-    "organizations": {
-      "Laboratoire": ["Cyberdyne", "US Robots"]
-    },
-    "persons": {
-      "Responsable scientifique": ["Albert Einstein"],
-      "Ingénieur": ["Maurice Solovine", "Marcel Grossman"]
-    },
-    "milestones": [],
-  },
-  {
-    "uid": "A0002",
-    "acronym": "RELACSV",
-    "projectlabel": "Théorie de la relativité",
-    "label": "Exemple d'activité 2",
-    "datestart": "2015-01-01",
-    "dateend": "2017-12-31",
-    "datesigned": "2015-02-01",
-    "pfi": "",
-    "type": "Colloques",
-    "amount": 15000,
-    "milestones": [
-
-    ],
-    "payments": [
-
-    ],
-    "organizations": {
-      "Laboratoire": [
-        "Cyberdyne",
-        "US Robots"
-      ],
-      "Composante responsable": [
-        "ACME"
-      ]
-    },
-    "persons": {
-      "Responsable scientifique": [
-        "Albert Einstein",
-        "Maurice Solovine"
-      ],
-      "Ingénieur": [
-        "John Doe",
-        "Marcel Grossmann"
-      ]
-    }
-  }
-]
-```
-
-## Importation depuis un fichier Excel
+# Importation depuis un fichier Excel
 
 Oscar propose un utilitaire en ligne de commande pour convertir une source de donnée CSV en un fichier JSON.
+
+```bash
+oscar activity:csvtojson chemin/vers/source.csv chemin/vers/config.php
+```
 
 Ce script implique de configurer la correspondance entre les colonnes de la source CSV et la destination de le JSON dans un fichier de configuration PHP.
 
@@ -297,30 +306,143 @@ return [
     0 =>    "project.",
     1 =>    "label",
     120 =>  "amount",
-    166 =>  "dateStart", //
-    167 =>  "dateEnd", //
-    427 => "codeEOTP", // PFI
+    166 =>  "dateStart",
+    167 =>  "dateEnd",
+    427 =>  "codeEOTP",
 
     // Organizations
     3 =>    "organizations.Porteur du projet",
     9 =>    "organizations.Laboratoire",
-    117 =>  "organizations.Financeur", //
-    175 =>  "organizations.Payeur", //
+    117 =>  "organizations.Financeur",
+    175 =>  "organizations.Payeur",
 
     // Payment
-    11 =>   "payments.date", // 12 => Date
-    13 =>   "payments.date", // 14 => Date
-    15 =>   "payments.date", // 16 => Date
-    17 =>   "payments.date", // 18 => Date
-    19 =>   "payments.date", // 20 => Date
+    11 =>   "payments",
+    13 =>   "payments.1",
+    15 =>   "payments.-1",
 
     // Milestones
-    169 =>  "milestones.Début d'éligibilité des dépenses", //
-    170 =>  "milestones.Fin d'éligibilité des dépenses", //
+    169 =>  "milestones.Début d'éligibilité des dépenses",
+    170 =>  "milestones.Fin d'éligibilité des dépenses",
 
     // Persons
     423 => "persons.Responsable scientifique",
     424 => "persons.Chargé d'affaires",
     425 => "persons.Ingénieur",
 ];
+```
+
+Le tableau de configuration permet d'associer une colonne (index numérique), à une donnée dans le JSON résultant.
+
+La clef numérique correspond à l'emplacement de la colonne dans le fichier CSV.
+
+> Attention : En PHP, la première colonne a l'index 0, pas 1.
+
+La valeur de la clef correspond à un code qui sera utilisé pour savoir comment ranger la valeur dans le JSON. Parmis les codes disponibles, certains sont simples :
+
+| Code | Correspondance
+|---|------
+| label | Intitulé de l'activité
+| amount | Montant
+| dateStart | Date de début au format YYYY-MM-DD
+| dateEnd | Date de fin au format YYYY-MM-DD
+| codeEOTP | PFI
+
+Les objets plus complexes comme les organisations, les personnes, les versements et les jalons sont gérés avec des code "pointés". Ils sont sous la forme **objet.paramètre**.
+
+### organizations.Role
+
+La clef `organizations` prend pour paramètre le role de l'organisation trouvé dans la cellule, Si par exemple la colonne 3 contient un laboratoire, la configuration se présentera ainsi :
+
+Valeur dans la cellule : Chaîne ou vide
+
+```php
+return [
+  3 => "organizations.Laboratoire",
+]
+```
+
+On obtiendra en JSON :
+
+```json
+{
+  "organizations": {
+    "Laboratoire": ["Valeur de la colonne"]
+  }
+}
+```
+
+### persons.Role
+
+La clef `persons` prend pour paramètre le role de la personne trouvé dans la cellule, Si par exemple la colonne 7 contient le responsable scientifique, la configuration se présentera ainsi :
+
+```php
+return [
+  7 => "persons.Responsable scientifique",
+]
+```
+
+On obtiendra en JSON :
+
+```json
+{
+  "persons": {
+    "Responsable scientifique": ["Valeur de la colonne"]
+  }
+}
+```
+
+### milestones.Type
+
+La clef `milestones` prend pour paramètre le type de jalon trouvé dans la cellule, Si par exemple la colonne 13 contient la date du rapport scientifique, la configuration se présentera ainsi :
+
+```php
+return [
+  13 => "milestones.Rapport scientifique",
+]
+```
+
+On obtiendra en JSON :
+
+```json
+{
+  "milestones": [
+      {
+        "type": "Rapport scientifique",
+        "date": "VALEUR DE LA COLONNE"
+      }
+  ]
+}
+```
+
+
+### payments.POSITIONMONTANT
+
+La clef `payments` prend pour paramètre la position du montant. Par exemple si le fichier CSV propose la date du versement à la colonne 13 et le montant de ce versement à la colonne 14, le paramètre sera 1 (13 + 1).
+
+Par exemple, le fichier CSV suivant :
+
+| Activité | Acronym Projet | Premier versement (date) | Premier versement (montant)
+|---|---|---|---|---
+| La relativité restreinte | RELATIV | 2016-01-01 | 2500.50
+
+La date du versement est à la colone 2, et le montant correspondant à la colonne suivante (1), la configuration se présentera ainsi :
+
+```php
+return [
+  2 => "payments.1",
+]
+```
+
+On obtiendra en JSON :
+
+```json
+{
+  "payments": [
+      {
+        "amount": 2500.5,
+        "date": "2016-01-01"
+      }
+  ]
+}
 ```

@@ -4,13 +4,13 @@ declare type VNodeComponentOptions = {
   Ctor: Class<Component>;
   propsData: ?Object;
   listeners: ?Object;
-  children: ?VNodeChildren;
+  children: ?Array<VNode>;
   tag?: string;
 }
 
 declare type MountedComponentVNode = {
   componentOptions: VNodeComponentOptions;
-  child: Component;
+  componentInstance: Component;
   parent: VNode;
   data: VNodeData;
 }
@@ -19,14 +19,14 @@ declare type MountedComponentVNode = {
 declare type VNodeWithData = {
   tag: string;
   data: VNodeData;
-  children: Array<VNode> | void;
+  children: ?Array<VNode>;
   text: void;
   elm: any;
   ns: string | void;
   context: Component;
   key: string | number | void;
   parent?: VNodeWithData;
-  child?: Component;
+  componentInstance?: Component;
   isRootInsert: boolean;
 }
 

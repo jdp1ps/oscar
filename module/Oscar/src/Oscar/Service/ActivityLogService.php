@@ -71,7 +71,7 @@ class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManager
     {
         if ($this->_currentPerson === null) {
             if ($this->getUserContext()->getLdapUser()) {
-                $this->_currentPerson = "intruder";
+                $this->_currentPerson = "ldapuser";
                 $login = $this->getUserContext()->getLdapUser()->getSupannAliasLogin();
             }
             elseif ( $this->getUserContext()->getDbUser() ){
@@ -90,7 +90,9 @@ class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManager
     {
         $person = $this->getCurrentPerson();
         $personText = "Anonymous";
-        if( $person ) {
+        if( is_string($person) ){
+            $personText = $person;
+        } elseif( $person ) {
             $personText = $person->log();
         } elseif ( $this->getUserContext()->getDbUser() ) {
             $personText = $this->getUserContext()->getDbUser()->getId().':'.$this->getUserContext()->getDbUser()->getDisplayName();

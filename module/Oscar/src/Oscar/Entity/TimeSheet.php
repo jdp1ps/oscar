@@ -278,6 +278,13 @@ class TimeSheet implements ITrackable
             ->setStatus(self::STATUS_DRAFT);
     }
 
+    const UNIT_MINUTE = 60;
+    const UNIT_HOUR = 3600;
+
+    public function getDuration( $unit = self::UNIT_HOUR){
+        return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp()) / $unit;
+    }
+
     public function toJson(){
         $activityId = null;
         $activityLabel = null;
@@ -827,6 +834,34 @@ class TimeSheet implements ITrackable
 
         return $this;
     }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getYear(){
+        return intval($this->getDateFrom()->format('Y'));
+    }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getMonth(){
+        return intval($this->getDateFrom()->format('m'));
+    }
+
+    /**
+     * Retourne l'année du créneau.
+     *
+     * @return int
+     */
+    public function getDate(){
+        return intval($this->getDateFrom()->format('d'));
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     ///
     ///
