@@ -388,6 +388,7 @@
 			"abbr": "CL",
 			"zones": [
 				"America/Santiago",
+				"America/Punta_Arenas",
 				"Pacific/Easter"
 			]
 		},
@@ -1583,7 +1584,7 @@
 			"name": "South Sudan",
 			"abbr": "SS",
 			"zones": [
-				"Africa/Khartoum"
+				"Africa/Juba"
 			]
 		},
 		"ST": {
@@ -2841,6 +2842,15 @@
 				"CL"
 			],
 			"comments": "Chile (most areas)"
+		},
+		"America/Punta_Arenas": {
+			"name": "America/Punta_Arenas",
+			"lat": -52.85,
+			"long": -69.0833,
+			"countries": [
+				"CL"
+			],
+			"comments": "Region of Magallanes"
 		},
 		"Pacific/Easter": {
 			"name": "Pacific/Easter",
@@ -4515,8 +4525,7 @@
 			"lat": 15.6,
 			"long": 32.5333,
 			"countries": [
-				"SD",
-				"SS"
+				"SD"
 			],
 			"comments": ""
 		},
@@ -4544,6 +4553,15 @@
 			"long": -54.8333,
 			"countries": [
 				"SR"
+			],
+			"comments": ""
+		},
+		"Africa/Juba": {
+			"name": "Africa/Juba",
+			"lat": 4.85,
+			"long": 31.6167,
+			"countries": [
+				"SS"
 			],
 			"comments": ""
 		},
