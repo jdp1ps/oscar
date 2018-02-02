@@ -1,5 +1,5 @@
 module.exports = (options, req) => ({
-    entry: './src/index.js',
+    entry: './src/Calendar.js',
     format: 'umd',
-    moduleName: 'Calendar'
+    moduleName: 'calendar'
 })
