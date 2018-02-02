@@ -142,7 +142,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
             handlerDelete: function handlerDelete(person) {
                 var _this2 = this;
 
-                _bootbox2.default.confirm("Souhaitez-vous supprimer ce personne de la liste des déclarants ?", function (result) {
+                _bootbox2.default.confirm("Souhaitez-vous supprimer cette personne de la liste des déclarants ?", function (result) {
                     if (result) _this2.$emit('workpackagepersondelete', person);
                 });
             },
