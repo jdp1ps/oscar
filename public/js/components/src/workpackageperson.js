@@ -206,7 +206,7 @@ var Workpackage = {
         },
 
         handlerDelete(person){
-            Bootbox.confirm("Souhaitez-vous supprimer ce personne de la liste des déclarants ?", (result) => {
+            Bootbox.confirm("Souhaitez-vous supprimer cette personne de la liste des déclarants ?", (result) => {
                 if( result ) this.$emit('workpackagepersondelete', person);
             });
         },
