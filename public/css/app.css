@@ -278,7 +278,6 @@ a {
     color: #1b4ded;
     text-decoration: underline; }
   a:focus {
-    outline: thin dotted;
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px; }
 
@@ -1449,7 +1448,6 @@ select[size] {
 input[type="file"]:focus,
 input[type="radio"]:focus,
 input[type="checkbox"]:focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px; }
 
@@ -1991,7 +1989,6 @@ select[multiple].input-lg,
   -ms-user-select: none;
   user-select: none; }
   .btn:focus, .workpackages .workpackage-add:focus, .btn.focus, .workpackages .focus.workpackage-add, .btn:active:focus, .workpackages .workpackage-add:active:focus, .btn:active.focus, .workpackages .workpackage-add:active.focus, .btn.active:focus, .workpackages .active.workpackage-add:focus, .btn.active.focus, .workpackages .active.focus.workpackage-add {
-    outline: thin dotted;
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px; }
   .btn:hover, .workpackages .workpackage-add:hover, .btn:focus, .workpackages .workpackage-add:focus, .btn.focus, .workpackages .focus.workpackage-add {
@@ -7790,20 +7787,28 @@ time.date-missing {
   to {
     background: #ffffff; } }
 
-.activity header {
-  background: #6a5999;
-  color: white; }
-  .activity header h4 {
-    margin-bottom: 0; }
-  .activity header h2 {
-    margin-top: 0;
-    font-size: 3em; }
+/*
+// ######################################################### ACTIVITY FICHE v2.0
+.activity {
+  header {
+    background: $brand-secondary1;
+    color: white;
+    h4 { margin-bottom:  0}
+    h2 {
+      margin-top: 0;
+      font-size: 3em;
+    }
+  }
 
-.activity .metas {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: .8em;
-  font-weight: 100;
-  list-style: none;
-  line-height: 1.5em; }
-  .activity .metas strong {
-    color: white; }
+  .metas {
+    color: rgba(white, .75);
+    font-size: .8em;
+    font-weight: 100;
+    list-style: none;
+    line-height: 1.5em;
+    strong {
+      color: white;
+    }
+  }
+}
+*/

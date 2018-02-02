@@ -278,7 +278,6 @@ a {
     color: #b20036;
     text-decoration: underline; }
   a:focus {
-    outline: thin dotted;
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px; }
 
@@ -1449,7 +1448,6 @@ select[size] {
 input[type="file"]:focus,
 input[type="radio"]:focus,
 input[type="checkbox"]:focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px; }
 
@@ -1991,7 +1989,6 @@ select[multiple].input-lg,
   -ms-user-select: none;
   user-select: none; }
   .btn:focus, .workpackages .workpackage-add:focus, .btn.focus, .workpackages .focus.workpackage-add, .btn:active:focus, .workpackages .workpackage-add:active:focus, .btn:active.focus, .workpackages .workpackage-add:active.focus, .btn.active:focus, .workpackages .active.workpackage-add:focus, .btn.active.focus, .workpackages .active.focus.workpackage-add {
-    outline: thin dotted;
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px; }
   .btn:hover, .workpackages .workpackage-add:hover, .btn:focus, .workpackages .workpackage-add:focus, .btn.focus, .workpackages .focus.workpackage-add {
@@ -5391,17 +5388,35 @@ button.close {
       color: white; }
 
 .oscar-table {
-  box-shadow: 0 0 1em rgba(0, 0, 0, 0.25);
-  background: white; }
+  background: none; }
+  .oscar-table .sous-total-year {
+    background: none !important; }
+  .oscar-table .year-head {
+    background: none !important; }
+    .oscar-table .year-head .labeled {
+      font-size: 1em;
+      line-height: 1em;
+      padding: .2em .5em;
+      display: inline-block;
+      color: white;
+      background: rgba(121, 6, 41, 0.6) !important;
+      text-shadow: -1px 1px 1px rgba(0, 0, 0, 0.5); }
   .oscar-table thead {
     background: #790629;
-    color: white; }
+    color: white;
+    text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.5); }
     .oscar-table thead th {
       font-weight: 100; }
+    .oscar-table thead :not(:nth-child(1)) {
+      text-align: right; }
+  .oscar-table tbody tr {
+    background: #fff; }
   .oscar-table tbody tr:nth-child(even) {
     background: #eeeeee; }
+  .oscar-table tbody tr.small, .oscar-table thead tr.small {
+    font-size: .8em; }
   .oscar-table tbody tr th, .oscar-table tbody tr td, .oscar-table thead tr th, .oscar-table thead tr td {
-    line-height: 1.6em; }
+    line-height: 1em; }
   .oscar-table th, .oscar-table td {
     border: solid rgba(0, 0, 0, 0.2) thin; }
 
@@ -7772,20 +7787,28 @@ time.date-missing {
   to {
     background: #ffffff; } }
 
-.activity header {
-  background: #6a5999;
-  color: white; }
-  .activity header h4 {
-    margin-bottom: 0; }
-  .activity header h2 {
-    margin-top: 0;
-    font-size: 3em; }
+/*
+// ######################################################### ACTIVITY FICHE v2.0
+.activity {
+  header {
+    background: $brand-secondary1;
+    color: white;
+    h4 { margin-bottom:  0}
+    h2 {
+      margin-top: 0;
+      font-size: 3em;
+    }
+  }
 
-.activity .metas {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: .8em;
-  font-weight: 100;
-  list-style: none;
-  line-height: 1.5em; }
-  .activity .metas strong {
-    color: white; }
+  .metas {
+    color: rgba(white, .75);
+    font-size: .8em;
+    font-weight: 100;
+    list-style: none;
+    line-height: 1.5em;
+    strong {
+      color: white;
+    }
+  }
+}
+*/

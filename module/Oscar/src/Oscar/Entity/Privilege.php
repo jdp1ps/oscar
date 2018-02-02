@@ -50,11 +50,11 @@ class Privilege implements ResourceInterface
 
 
     /**
-     * @ORM\ManyToMany(targetEntity="Role", inversedBy="privileges",cascade={"all"})
+     * @ORM\ManyToMany(targetEntity="Role", inversedBy="privileges")
      * @ORM\JoinTable(
      *     name="role_privilege",
-     *     joinColumns={@ORM\JoinColumn(name="privilege_id", referencedColumnName="id", onDelete="cascade")},
-     *     inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id", onDelete="cascade")}
+     *     joinColumns={@ORM\JoinColumn(name="privilege_id", referencedColumnName="id")},
+     *     inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
      *
      * )
      */

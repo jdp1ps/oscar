@@ -75,7 +75,7 @@ var Workpackage = {
     },
     template: `<article class="workpackage">
         <form action="" @submit.prevent="handlerUpdateWorkPackage" v-if="mode == 'edit'">
-            <h4>Modification du lot {{ formData.label }}</h4>
+            <h4><span v-if="workpackage.id > 0">Modification du lot</span><span v-else>Nouveau lot</span> {{ formData.label }}</h4>
             <div class="form-group">
                 <label for="">Intitulé</label>
                 <input type="text" placeholder="Intitulé" v-model="formData.label" class="form-control" />
@@ -148,6 +148,7 @@ var Workpackage = {
           mode: "read",
           canSave: false,
           formData: {
+              id: -1,
               code: "",
               label : "",
               description: "",
@@ -205,7 +206,7 @@ var Workpackage = {
         },
 
         handlerDelete(person){
-            Bootbox.confirm("Souhaitez-vous supprimer ce personne de la liste des déclarants ?", (result) => {
+            Bootbox.confirm("Souhaitez-vous supprimer cette personne de la liste des déclarants ?", (result) => {
                 if( result ) this.$emit('workpackagepersondelete', person);
             });
         },
