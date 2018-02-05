@@ -28,6 +28,9 @@
 .role-list-item.selected {
   background: #daf1f8; }
 
+.privilege.discret {
+  opacity: .3; }
+
 .roles {
   display: flex;
   flex-wrap: wrap; }
