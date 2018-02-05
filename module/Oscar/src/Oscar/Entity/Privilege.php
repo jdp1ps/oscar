@@ -15,6 +15,10 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Privilege implements ResourceInterface
 {
+    const LEVEL_ACTIVITY = 1;
+    const LEVEL_ORGANIZATION = 2;
+    const LEVEL_APPLICATION = 4;
+
     /**
      * @var int
      * @ORM\Id
@@ -48,6 +52,11 @@ class Privilege implements ResourceInterface
      */
     private $categorie;
 
+    /**
+    * @var int
+    * @ORM\Column(name="spot", type="integer", nullable=true, options={"default"=7})
+    */
+    private $spot = 7;
 
     /**
      * @ORM\ManyToMany(targetEntity="Role", inversedBy="privileges")
@@ -61,6 +70,12 @@ class Privilege implements ResourceInterface
     private $role;
 
 
+    /**
+     * @var Privilege
+     * @ORM\ManyToOne(targetEntity="Privilege")
+     */
+    private $root;
+
 
     /**
      * Constructor
@@ -70,7 +85,23 @@ class Privilege implements ResourceInterface
         $this->role = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    /**
+     * @return int
+     */
+    public function getSpot(): int
+    {
+        return $this->spot;
+    }
 
+    /**
+     * @param int $spot
+     */
+    public function setSpot($spot)
+    {
+        $this->spot = $spot;
+
+        return $this;
+    }
 
     /**
      * Set code
@@ -86,7 +117,23 @@ class Privilege implements ResourceInterface
         return $this;
     }
 
+    /**
+     * @return Privilege|null
+     */
+    public function getRoot()
+    {
+        return $this->root;
+    }
 
+    /**
+     * @param Privilege $root
+     */
+    public function setRoot($root)
+    {
+        $this->root = $root;
+
+        return $this;
+    }
 
     /**
      * Get code
@@ -273,6 +320,7 @@ class Privilege implements ResourceInterface
         return $roleIds;
     }
 
+
     public function asArray()
     {
         return [
@@ -280,7 +328,9 @@ class Privilege implements ResourceInterface
             'code' => $this->getCode(),
             'libelle' => $this->getLibelle(),
             'categorie' => $this->getCategorie()->toArray(),
-            'roles' => $this->getRoleIds()
+            'roles' => $this->getRoleIds(),
+            'root' => $this->getRoot(),
+            'spot' => $this->getSpot()
         ];
     }
 }

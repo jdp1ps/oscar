@@ -68,8 +68,12 @@ var Privilege = Vue.extend({
                 {{ group.categorie.libelle }}
             </strong>
         </h1>
-        <article v-for="privilege in group.privileges" class="privilege" v-show="group.open" :key="'p'+privilege.id">
-            <strong>{{ privilege.libelle }}</strong><br>
+        <article v-for="privilege in group.privileges" 
+                class="privilege" 
+                v-show="group.open" 
+                :key="'p'+privilege.id" 
+                :class="{'discret': (privilege.spot & activeSpots) == 0}">
+            <strong>{{ privilege.libelle }}, {{ privilege.spot }}, {{ activeSpots }}</strong><br>
             <roles :roleHighLight="roleHighLight" :roleSelected="roleSelected" :activeSpots="activeSpots" :selected="privilege.roles" :roles="roles" @toggle="toggle(privilege.id, $event)" @hover="handlerRoleHover"></roles>
         </article>
     </section>
