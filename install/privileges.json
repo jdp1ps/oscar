@@ -29,55 +29,9 @@
     "libelle": "Privil\u00e8ges - \u00c9dition",
     "fullcode": "droit-privilege-edition"
   },
-  "PROJECT-CREATE": {
-    "category_id": 1,
-    "spot": 4,
-    "code": "CREATE",
-    "libelle": "Cr\u00e9ation d'un nouveau projet",
-    "fullcode": "PROJECT-CREATE"
-  },
-  "PROJECT-EDIT": {
-    "category_id": 1,
-    "spot": 4,
-    "code": "EDIT",
-    "libelle": "Modifier un projet",
-    "fullcode": "PROJECT-EDIT"
-  },
-  "PROJECT-ACTIVITY-ADD": {
-    "category_id": 1,
-    "spot": 7,
-    "code": "ACTIVITY-ADD",
-    "libelle": "Ajouter une activit\u00e9 dans le projet",
-    "fullcode": "PROJECT-ACTIVITY-ADD"
-  },
-  "PROJECT-PERSON_MANAGE": {
-    "category_id": 1,
-    "spot": 7,
-    "code": "PERSON_MANAGE",
-    "libelle": "G\u00e9rer les membres d'un projet",
-    "fullcode": "PROJECT-PERSON_MANAGE"
-  },
-  "PROJECT-ORGANIZATION_MANAGE": {
-    "category_id": 1,
-    "spot": 7,
-    "code": "ORGANIZATION_MANAGE",
-    "libelle": "G\u00e9rer les partenaires d'un projet",
-    "fullcode": "PROJECT-ORGANIZATION_MANAGE"
-  },
-  "PROJECT-DASHBOARD": {
-    "category_id": 1,
-    "spot": 4,
-    "code": "DASHBOARD",
-    "libelle": "Tableau de bord",
-    "fullcode": "PROJECT-DASHBOARD"
-  },
-  "PROJECT-INDEX": {
-    "category_id": 1,
-    "spot": 6,
-    "code": "INDEX",
-    "libelle": "Lister et recherche dans les projets",
-    "fullcode": "PROJECT-INDEX"
-  },
+
+
+
   "ACTIVITY-EXPORT": {
     "category_id": 2,
     "spot": 4,
@@ -85,6 +39,32 @@
     "libelle": "Exporter les donn\u00e9es des activit\u00e9s",
     "fullcode": "ACTIVITY-EXPORT"
   },
+
+  "ACTIVITY-PERSON_SHOW": {
+    "category_id": 2,
+    "spot": 7,
+    "code": "PERSON_SHOW",
+    "libelle": "Peut voir les membres d'une activit\u00e9",
+    "fullcode": "ACTIVITY-PERSON_SHOW"
+  },
+  "ACTIVITY-PERSON_MANAGE": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-PERSON_SHOW",
+    "code": "PERSON_MANAGE",
+    "libelle": "Gestion des membres d'une activit\u00e9",
+    "fullcode": "ACTIVITY-PERSON_MANAGE"
+  },
+
+
+  "ACTIVITY-ORGANIZATION_SHOW": {
+    "category_id": 2,
+    "spot": 7,
+    "code": "ORGANIZATION_SHOW",
+    "libelle": "Peut voir les partenaires d'un projet",
+    "fullcode": "ACTIVITY-ORGANIZATION_SHOW"
+  },
+
   "ACTIVITY-PAYMENT_MANAGE": {
     "category_id": 2,
     "spot": 1,
@@ -98,13 +78,6 @@
     "code": "ORGANIZATION_MANAGE",
     "libelle": "Gestion des partenaires d'une activit\u00e9",
     "fullcode": "ACTIVITY-ORGANIZATION_MANAGE"
-  },
-  "ACTIVITY-EDIT": {
-    "category_id": 2,
-    "spot": 6,
-    "code": "EDIT",
-    "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9",
-    "fullcode": "ACTIVITY-EDIT"
   },
   "ACTIVITY-INDEX": {
     "category_id": 2,
@@ -120,6 +93,14 @@
     "libelle": "Afficher la fiche d'une activit\u00e9",
     "fullcode": "ACTIVITY-SHOW"
   },
+  "ACTIVITY-EDIT": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-SHOW",
+    "code": "EDIT",
+    "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9",
+    "fullcode": "ACTIVITY-EDIT"
+  },
   "ACTIVITY-PAYMENT_SHOW": {
     "category_id": 2,
     "spot": 7,
@@ -127,6 +108,7 @@
     "libelle": "Voir les versements et le budget",
     "fullcode": "ACTIVITY-PAYMENT_SHOW"
   },
+
   "ACTIVITY-MILESTONE_SHOW": {
     "category_id": 2,
     "spot": 7,
@@ -136,6 +118,7 @@
   },
   "ACTIVITY-MILESTONE_MANAGE": {
     "category_id": 2,
+    "root": "ACTIVITY-MILESTONE_SHOW",
     "spot": 7,
     "code": "MILESTONE_MANAGE",
     "libelle": "Peut g\u00e9rer les jalons",
@@ -151,6 +134,7 @@
   "ACTIVITY-DOCUMENT_MANAGE": {
     "category_id": 2,
     "spot": 7,
+    "root": "ACTIVITY-DOCUMENT_SHOW",
     "code": "DOCUMENT_MANAGE",
     "libelle": "Peut g\u00e9rer les documents (Ajouter)",
     "fullcode": "ACTIVITY-DOCUMENT_MANAGE"
@@ -183,19 +167,49 @@
     "libelle": "Peut modifier le status vers \"D\u00e9sactiv\u00e9\"",
     "fullcode": "ACTIVITY-STATUS_OFF"
   },
-  "ACTIVITY-PERSON_SHOW": {
-    "category_id": 2,
-    "spot": 7,
-    "code": "PERSON_SHOW",
-    "libelle": "Peut voir les membres d'une activit\u00e9",
-    "fullcode": "ACTIVITY-PERSON_SHOW"
+
+  "PROJECT-CREATE": {
+    "category_id": 1,
+    "spot": 4,
+    "code": "CREATE",
+    "libelle": "Cr\u00e9ation d'un nouveau projet",
+    "fullcode": "PROJECT-CREATE"
   },
-  "ACTIVITY-ORGANIZATION_SHOW": {
-    "category_id": 2,
+  "PROJECT-EDIT": {
+    "category_id": 1,
+    "spot": 4,
+    "root": "PROJECT-SHOW",
+    "code": "EDIT",
+    "libelle": "Modifier un projet",
+    "fullcode": "PROJECT-EDIT"
+  },
+  "PROJECT-ACTIVITY-ADD": {
+    "category_id": 1,
     "spot": 7,
-    "code": "ORGANIZATION_SHOW",
-    "libelle": "Peut voir les partenaires d'un projet",
-    "fullcode": "ACTIVITY-ORGANIZATION_SHOW"
+    "code": "ACTIVITY-ADD",
+    "libelle": "Ajouter une activit\u00e9 dans le projet",
+    "fullcode": "PROJECT-ACTIVITY-ADD"
+  },
+  "PROJECT-ORGANIZATION_MANAGE": {
+    "category_id": 1,
+    "spot": 7,
+    "code": "ORGANIZATION_MANAGE",
+    "libelle": "G\u00e9rer les partenaires d'un projet",
+    "fullcode": "PROJECT-ORGANIZATION_MANAGE"
+  },
+  "PROJECT-DASHBOARD": {
+    "category_id": 1,
+    "spot": 4,
+    "code": "DASHBOARD",
+    "libelle": "Tableau de bord",
+    "fullcode": "PROJECT-DASHBOARD"
+  },
+  "PROJECT-INDEX": {
+    "category_id": 1,
+    "spot": 6,
+    "code": "INDEX",
+    "libelle": "Lister et recherche dans les projets",
+    "fullcode": "PROJECT-INDEX"
   },
   "PROJECT-SHOW": {
     "category_id": 1,
@@ -210,6 +224,14 @@
     "code": "PERSON_SHOW",
     "libelle": "Voir les membres d'un projet",
     "fullcode": "PROJECT-PERSON_SHOW"
+  },
+  "PROJECT-PERSON_MANAGE": {
+    "category_id": 1,
+    "spot": 7,
+    "root": "PROJECT-PERSON_SHOW",
+    "code": "PERSON_MANAGE",
+    "libelle": "G\u00e9rer les membres d'un projet",
+    "fullcode": "PROJECT-PERSON_MANAGE"
   },
   "PROJECT-ORGANIZATION_SHOW": {
     "category_id": 1,
@@ -280,13 +302,6 @@
     "code": "SYNC_LDAP",
     "libelle": "Synchroniser les donn\u00e9es avec LDAP",
     "fullcode": "ORGANIZATION-SYNC_LDAP"
-  },
-  "ACTIVITY-PERSON_MANAGE": {
-    "category_id": 2,
-    "spot": 7,
-    "code": "PERSON_MANAGE",
-    "libelle": "Gestion des membres d'une activit\u00e9",
-    "fullcode": "ACTIVITY-PERSON_MANAGE"
   },
   "MAINTENANCE-MENU_ADMIN": {
     "category_id": 6,

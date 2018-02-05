@@ -72,9 +72,15 @@ class Privilege implements ResourceInterface
 
     /**
      * @var Privilege
-     * @ORM\ManyToOne(targetEntity="Privilege")
+     * @ORM\ManyToOne(targetEntity="Privilege", inversedBy="children")
      */
     private $root;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Privilege", mappedBy="root")
+     */
+    private $children;
+
 
 
     /**
@@ -83,6 +89,7 @@ class Privilege implements ResourceInterface
     public function __construct()
     {
         $this->role = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->children = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -131,6 +138,24 @@ class Privilege implements ResourceInterface
     public function setRoot($root)
     {
         $this->root = $root;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * @param mixed $children
+     */
+    public function setChildren($children)
+    {
+        $this->children = $children;
 
         return $this;
     }
@@ -323,14 +348,21 @@ class Privilege implements ResourceInterface
 
     public function asArray()
     {
-        return [
+        $data = [
             'id' => $this->getId(),
             'code' => $this->getCode(),
             'libelle' => $this->getLibelle(),
             'categorie' => $this->getCategorie()->toArray(),
             'roles' => $this->getRoleIds(),
             'root' => $this->getRoot(),
-            'spot' => $this->getSpot()
+            'spot' => $this->getSpot(),
+            'children' => []
         ];
+
+        foreach ($this->getChildren() as $child ){
+            $data['children'][] = $child->asArray();
+        }
+
+        return $data;
     }
 }

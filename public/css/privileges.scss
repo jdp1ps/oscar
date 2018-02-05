@@ -187,27 +187,38 @@ $brand-info: #5bc0de !default;
 }
 
 .privilege {
-  padding-left: 1em;
   font-size: .9em;
   line-height: 1.2em;
-  align-items: stretch;
-  display: flex;
-  justify-content: space-between;
 
-  background: lighten($brand-primary, 50%);
-  &:nth-child(odd){
-    background: lighten($brand-primary, 55%);
+  .droits .privilege-label-heading {
+    font-weight: 700;
   }
-  &:hover {
-    background: lighten($brand-primary, 40%);
-    text-shadow: 1px -1px 0 rgba(255,255,255,.25);
-    box-shadow: inset -2px 2px 4px rgba(0,0,0,.1);
+
+  .privilege strong.privilege-label:before {
+    content: ' - ';
   }
-  strong {
-    font-weight: 400;
-    flex: 1
-  }
-  .roles {
-    flex: 2;
+
+  .droits {
+    align-items: stretch;
+    display: flex;
+    justify-content: space-between;
+
+    background: lighten($brand-primary, 50%);
+    &:nth-child(odd) {
+      background: lighten($brand-primary, 55%);
+    }
+    &:hover {
+      background: lighten($brand-primary, 40%);
+      text-shadow: 1px -1px 0 rgba(255, 255, 255, .25);
+      box-shadow: inset -2px 2px 4px rgba(0, 0, 0, .1);
+    }
+    strong {
+      font-weight: 400;
+      flex: 1;
+      padding-left: .5em;
+    }
+    .roles {
+      flex: 2;
+    }
   }
 }
