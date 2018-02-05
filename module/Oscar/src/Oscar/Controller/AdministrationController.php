@@ -269,7 +269,8 @@ class AdministrationController extends AbstractOscarController
 
                     /** @var Privilege $privilege */
                     foreach ($privileges as $privilege) {
-                        $out['privileges'][] = $privilege->asArray();
+                        if( !$privilege->getRoot() )
+                            $out['privileges'][] = $privilege->asArray();
                     }
                     /** @var Role $role */
                     foreach ($roles as $role) {

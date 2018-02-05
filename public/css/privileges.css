@@ -140,21 +140,26 @@
   margin: 0 .5em; }
 
 .privilege {
-  padding-left: 1em;
   font-size: .9em;
-  line-height: 1.2em;
-  align-items: stretch;
-  display: flex;
-  justify-content: space-between;
-  background: #e3e6f1; }
-  .privilege:nth-child(odd) {
-    background: #f4f5fa; }
-  .privilege:hover {
-    background: #c0c8e1;
-    text-shadow: 1px -1px 0 rgba(255, 255, 255, 0.25);
-    box-shadow: inset -2px 2px 4px rgba(0, 0, 0, 0.1); }
-  .privilege strong {
-    font-weight: 400;
-    flex: 1; }
-  .privilege .roles {
-    flex: 2; }
+  line-height: 1.2em; }
+  .privilege .droits .privilege-label-heading {
+    font-weight: 700; }
+  .privilege .privilege strong.privilege-label:before {
+    content: ' - '; }
+  .privilege .droits {
+    align-items: stretch;
+    display: flex;
+    justify-content: space-between;
+    background: #e3e6f1; }
+    .privilege .droits:nth-child(odd) {
+      background: #f4f5fa; }
+    .privilege .droits:hover {
+      background: #c0c8e1;
+      text-shadow: 1px -1px 0 rgba(255, 255, 255, 0.25);
+      box-shadow: inset -2px 2px 4px rgba(0, 0, 0, 0.1); }
+    .privilege .droits strong {
+      font-weight: 400;
+      flex: 1;
+      padding-left: .5em; }
+    .privilege .droits .roles {
+      flex: 2; }
