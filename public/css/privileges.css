@@ -2,7 +2,6 @@
   font-size: 1em;
   cursor: pointer; }
 
-
 .form-wrapper {
   position: fixed;
   display: flex;
@@ -163,4 +162,4 @@
       flex: 1;
       padding-left: .5em; }
     .privilege .droits .roles {
-      flex: 2; }
+      flex: 3; }
