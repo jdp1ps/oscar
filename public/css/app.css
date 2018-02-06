@@ -4680,6 +4680,8 @@ button.close {
       background-color: #98e372; }
       .cartouche.green .addon:before, a.cartouche.green .addon:before {
         background-color: #98e372; }
+  .cartouche.xs, a.cartouche.xs {
+    font-size: .8em; }
   .cartouche.primary, a.cartouche.primary {
     background-color: #455790;
     color: white;

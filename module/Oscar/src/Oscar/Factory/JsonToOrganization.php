@@ -19,7 +19,7 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
 {
     public function __construct()
     {
-        parent::__construct(['code', 'shortname']);
+        parent::__construct(['uid', 'code', 'shortname']);
     }
 
     /**

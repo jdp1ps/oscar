@@ -184,7 +184,7 @@ De la même façon, 2 URL peuvent être utilisées pour synchroniser les donnée
 
 ```json
 {
-    "id" : "ID UNIQUE",
+    "uid" : "ID UNIQUE (utilisé par oscar pour synchroniser)",
     "code" : "CODE UNIQUE (utiliser pour les affectations des personnes)",
     "shortname" : "ex : ANR",
     "longname" : "ex : Agence Nationale de la Recherche",
@@ -209,7 +209,7 @@ Données minimales attendues :
 
 ```json
 {
-    "id" : "ID UNIQUE",
+    "uid" : "ID UNIQUE",
     "code" : "CODE UNIQUE (utiliser pour les affectations des personnes)",
     "shortname" : "ex : ANR",
     "longname" : "ex : Agence Nationale de la Recherche",
