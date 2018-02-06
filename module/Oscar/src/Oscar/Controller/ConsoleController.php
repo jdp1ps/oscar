@@ -526,14 +526,19 @@ class ConsoleController extends AbstractOscarController
         }
 
 
-        foreach ($datas as $fullCode => $privilegeData) {
+	foreach ($datas as $fullCode => $privilegeData) {
+		try {
+			if( !property_exists($privilegeData, 'category_id')){
+				$this->consoleError('Propriété categorie_id manquante dans la configuration : ' . print_r($privilegeData, true));
+				continue;
+			}
             $newPrivilege = new Privilege();
             $this->getEntityManager()->persist($newPrivilege);
-            $newPrivilege->setCategorie($this->getEntityManager()->getRepository(CategoriePrivilege::class)->find($privilegeData->categorie_id))
+            $newPrivilege->setCategorie($this->getEntityManager()->getRepository(CategoriePrivilege::class)->find($privilegeData->category_id))
                 ->setCode($privilegeData->code)
                 ->setSpot($privilegeData->spot)
                 ->setLibelle($privilegeData->libelle);
-            try {
+            
                 $this->getEntityManager()->flush($newPrivilege);
                 $this->consoleSuccess("Le privilège " . $privilegeData->code . " a bien été créé.");
             } catch (\Exception $e) {
