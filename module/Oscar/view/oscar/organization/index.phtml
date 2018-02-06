@@ -67,6 +67,13 @@ $markText = function( $text, $search ){
             <?php endif ?>
                 </a>
 
+
+            <?php if( $entity->getConnectors() ): ?>
+                <?php foreach ($entity->getConnectors() as $connectorName=>$connectorValue ): ?>
+                    <span class="cartouche xs <?= $connectorValue ? 'primary' : '' ?>"><?= $connectorName ?> : <span class="addon"><?= $connectorValue ?></span></span>
+                <?php endforeach; ?>
+            <?php endif; ?>
+
             <span class="label <?= ($nbrProjects + $nbrActivities) ? ' label-primary' : 'label-default' ?>">
                 <?= $nbrProjects + $nbrActivities ?>
             </span>

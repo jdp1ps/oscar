@@ -397,10 +397,12 @@ class OrganizationController extends AbstractOscarController
                 return $this->redirect()->toRoute('organization/show',
                     ['id' => $organization->getId()]);
             } catch( \Exception $e ){
-                die($e->getMessage());
+                throw $e;
             }
+        } else {
+            die('Bad connector ' . $connector);
         }
-        die('Bad connector ' . $connector);
+
     }
 
     public function scissionAction()

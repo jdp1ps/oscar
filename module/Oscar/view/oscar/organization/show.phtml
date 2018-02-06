@@ -76,8 +76,16 @@
                         <?php if( count($organization->getConnectors()) ): ?>
                             <ul>
                             <?php foreach($organization->getConnectors() as $connector=>$value): ?>
-                                <a href="<?= $this->url('organization/synchronize', ['id' => $organization->getId(), 'connector' => $connector]) ?>">Synchroniser</a>
-                                <li><?= $connector ?> : <strong><?= $value ?></strong></li>
+                                <?php if( $value ): ?>
+                                <li>
+                                    <?= $connector ?> : <strong><?= $value ?></strong>
+                                    <a href="<?= $this->url('organization/synchronize', ['id' => $organization->getId(), 'connector' => $connector]) ?>"
+                                            class="btn btn-primary btn-xs">
+                                        <i class="icon-cw-outline"></i>
+                                        Synchroniser
+                                    </a>
+                                </li>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                             </ul>
                         <?php endif; ?>
