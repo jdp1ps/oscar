@@ -112,6 +112,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
                     this.openedGroup.push(idCategory);
                 }
             },
+
             updatePrivilege: function updatePrivilege(jsonData) {
                 for (var i = 0; i < this.privileges.length; i++) {
                     if (this.privileges[i].id == jsonData.id) {
@@ -119,7 +120,24 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
                     }
                 }
             },
+            updateRecursive: function updateRecursive(privilegelist, jsonData) {
+                for (var i = 0; i < privilegelist.length; i++) {
+                    if (privilegelist[i].id == jsonData.id) {
+                        privilegelist.splice(i, 1, jsonData);
+                    }
+                    if (privilegelist[i].children && privilegelist[i].children.length) {
+                        this.updateRecursive(privilegelist[i].children, jsonData);
+                    }
+                }
+            },
 
+
+            /**
+             * Permutte les droits.
+             *
+             * @param privilegeid
+             * @param roleid
+             */
             toggle: function toggle(privilegeid, roleid) {
                 var _this2 = this;
 
@@ -127,7 +145,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
 
                 this.$http.patch(this.$http.$options.root, { privilegeid: privilegeid, roleid: roleid }).then(function (res) {
                     console.log(res);
-                    _this2.updatePrivilege(res.body);
+                    _this2.updateRecursive(_this2.privileges, res.body);
                 }, function (err) {
                     console.error(err);
                     _this2.errors.push(err.body);
@@ -135,8 +153,8 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
                     _this2.loading = false;
                 });
             },
+
             getRoleById: function getRoleById(id) {
-                console.log('getRoleById(', id, ')', this.roles);
                 for (var i = 0; i < this.roles.length; i++) {
                     if (this.roles[i].id == id) return this.roles[i];
                 }

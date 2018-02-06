@@ -162,6 +162,11 @@ var Privilege = Vue.extend({
                 this.openedGroup.push(idCategory);
             }
         },
+
+        /**
+         * @deprecated
+         * @param jsonData
+         */
         updatePrivilege(jsonData){
             for( var i=0; i<this.privileges.length; i++ ){
                 if( this.privileges[i].id == jsonData.id ) {
@@ -169,13 +174,35 @@ var Privilege = Vue.extend({
                 }
             }
         },
+        /**
+         * Parcourt récursivement les privilèges.
+         *
+         * @param jsonData
+         */
+        updateRecursive(privilegelist, jsonData){
+            for( var i=0; i<privilegelist.length; i++ ){
+                if( privilegelist[i].id == jsonData.id ) {
+                    privilegelist.splice(i,1, jsonData);
+                }
+                if( privilegelist[i].children && privilegelist[i].children.length ){
+                    this.updateRecursive(privilegelist[i].children, jsonData);
+                }
+            }
+        },
+
+        /**
+         * Permutte les droits.
+         *
+         * @param privilegeid
+         * @param roleid
+         */
         toggle: function(privilegeid, roleid){
             this.loading = true;
 
             this.$http.patch(this.$http.$options.root, {privilegeid, roleid}).then(
                 (res) => {
                     console.log(res)
-                    this.updatePrivilege(res.body);
+                    this.updateRecursive(this.privileges, res.body);
                 },
                 (err) => {
                     console.error(err)
@@ -185,8 +212,8 @@ var Privilege = Vue.extend({
                 this.loading = false;
             });
         },
+
         getRoleById: function( id ){
-            console.log('getRoleById(', id, ')', this.roles)
             for( let i=0; i<this.roles.length; i++ ){
                 if(this.roles[i].id == id )
                     return this.roles[i];

@@ -32,59 +32,20 @@
 
 
 
-  "ACTIVITY-EXPORT": {
-    "category_id": 2,
-    "spot": 4,
-    "code": "EXPORT",
-    "libelle": "Exporter les donn\u00e9es des activit\u00e9s",
-    "fullcode": "ACTIVITY-EXPORT"
-  },
-
-  "ACTIVITY-PERSON_SHOW": {
-    "category_id": 2,
-    "spot": 7,
-    "code": "PERSON_SHOW",
-    "libelle": "Peut voir les membres d'une activit\u00e9",
-    "fullcode": "ACTIVITY-PERSON_SHOW"
-  },
-  "ACTIVITY-PERSON_MANAGE": {
-    "category_id": 2,
-    "spot": 7,
-    "root": "ACTIVITY-PERSON_SHOW",
-    "code": "PERSON_MANAGE",
-    "libelle": "Gestion des membres d'une activit\u00e9",
-    "fullcode": "ACTIVITY-PERSON_MANAGE"
-  },
-
-
-  "ACTIVITY-ORGANIZATION_SHOW": {
-    "category_id": 2,
-    "spot": 7,
-    "code": "ORGANIZATION_SHOW",
-    "libelle": "Peut voir les partenaires d'un projet",
-    "fullcode": "ACTIVITY-ORGANIZATION_SHOW"
-  },
-
-  "ACTIVITY-PAYMENT_MANAGE": {
-    "category_id": 2,
-    "spot": 1,
-    "code": "PAYMENT_MANAGE",
-    "libelle": "Gestion des versements d'une activit\u00e9s",
-    "fullcode": "ACTIVITY-PAYMENT_MANAGE"
-  },
-  "ACTIVITY-ORGANIZATION_MANAGE": {
-    "category_id": 2,
-    "spot": 1,
-    "code": "ORGANIZATION_MANAGE",
-    "libelle": "Gestion des partenaires d'une activit\u00e9",
-    "fullcode": "ACTIVITY-ORGANIZATION_MANAGE"
-  },
   "ACTIVITY-INDEX": {
     "category_id": 2,
     "spot": 4,
     "code": "INDEX",
-    "libelle": "Afficher \/ recherche dans les activit\u00e9s",
+    "libelle": "Afficher \/ rechercher dans les activit\u00e9s",
     "fullcode": "ACTIVITY-INDEX"
+  },
+  "ACTIVITY-EXPORT": {
+    "category_id": 2,
+    "spot": 4,
+    "root": "ACTIVITY_INDEX",
+    "code": "EXPORT",
+    "libelle": "Exporter les donn\u00e9es des activit\u00e9s",
+    "fullcode": "ACTIVITY-EXPORT"
   },
   "ACTIVITY-SHOW": {
     "category_id": 2,
@@ -101,12 +62,54 @@
     "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9",
     "fullcode": "ACTIVITY-EDIT"
   },
+
+  "ACTIVITY-PERSON_SHOW": {
+    "category_id": 2,
+    "spot": 7,
+    "code": "PERSON_SHOW",
+    "libelle": "Peut voir les membres d'une activit\u00e9",
+    "fullcode": "ACTIVITY-PERSON_SHOW"
+  },
+  "ACTIVITY-PERSON_MANAGE": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-PERSON_SHOW",
+    "root": "ACTIVITY-PERSON_SHOW",
+    "code": "PERSON_MANAGE",
+    "libelle": "Gestion des membres d'une activit\u00e9",
+    "fullcode": "ACTIVITY-PERSON_MANAGE"
+  },
+
+  "ACTIVITY-ORGANIZATION_SHOW": {
+    "category_id": 2,
+    "spot": 7,
+    "code": "ORGANIZATION_SHOW",
+    "libelle": "Peut voir les partenaires d'un projet",
+    "fullcode": "ACTIVITY-ORGANIZATION_SHOW"
+  },
+  "ACTIVITY-ORGANIZATION_MANAGE": {
+    "category_id": 2,
+    "spot": 7,
+    "root" : "ACTIVITY-ORGANIZATION_SHOW",
+    "code": "ORGANIZATION_MANAGE",
+    "libelle": "Gestion des partenaires d'une activit\u00e9",
+    "fullcode": "ACTIVITY-ORGANIZATION_MANAGE"
+  },
+
   "ACTIVITY-PAYMENT_SHOW": {
     "category_id": 2,
     "spot": 7,
     "code": "PAYMENT_SHOW",
     "libelle": "Voir les versements et le budget",
     "fullcode": "ACTIVITY-PAYMENT_SHOW"
+  },
+  "ACTIVITY-PAYMENT_MANAGE": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-PAYMENT_SHOW",
+    "code": "PAYMENT_MANAGE",
+    "libelle": "Gestion des versements d'une activit\u00e9s",
+    "fullcode": "ACTIVITY-PAYMENT_MANAGE"
   },
 
   "ACTIVITY-MILESTONE_SHOW": {
@@ -124,6 +127,7 @@
     "libelle": "Peut g\u00e9rer les jalons",
     "fullcode": "ACTIVITY-MILESTONE_MANAGE"
   },
+
   "ACTIVITY-DOCUMENT_SHOW": {
     "category_id": 2,
     "spot": 7,
@@ -139,6 +143,7 @@
     "libelle": "Peut g\u00e9rer les documents (Ajouter)",
     "fullcode": "ACTIVITY-DOCUMENT_MANAGE"
   },
+
   "ACTIVITY-DUPLICATE": {
     "category_id": 2,
     "spot": 3,
@@ -146,6 +151,7 @@
     "libelle": "Peut dupliquer l'activit\u00e9",
     "fullcode": "ACTIVITY-DUPLICATE"
   },
+
   "ACTIVITY-CHANGE_PROJECT": {
     "category_id": 2,
     "spot": 4,
@@ -160,6 +166,7 @@
     "libelle": "Peut supprimer d\u00e9finitivement une activit\u00e9",
     "fullcode": "ACTIVITY-DELETE"
   },
+
   "ACTIVITY-STATUS_OFF": {
     "category_id": 2,
     "spot": 4,
@@ -185,18 +192,12 @@
   },
   "PROJECT-ACTIVITY-ADD": {
     "category_id": 1,
-    "spot": 7,
+    "spot": 4,
     "code": "ACTIVITY-ADD",
     "libelle": "Ajouter une activit\u00e9 dans le projet",
     "fullcode": "PROJECT-ACTIVITY-ADD"
   },
-  "PROJECT-ORGANIZATION_MANAGE": {
-    "category_id": 1,
-    "spot": 7,
-    "code": "ORGANIZATION_MANAGE",
-    "libelle": "G\u00e9rer les partenaires d'un projet",
-    "fullcode": "PROJECT-ORGANIZATION_MANAGE"
-  },
+
   "PROJECT-DASHBOARD": {
     "category_id": 1,
     "spot": 4,
@@ -204,6 +205,7 @@
     "libelle": "Tableau de bord",
     "fullcode": "PROJECT-DASHBOARD"
   },
+
   "PROJECT-INDEX": {
     "category_id": 1,
     "spot": 6,
@@ -225,6 +227,8 @@
     "libelle": "Voir les membres d'un projet",
     "fullcode": "PROJECT-PERSON_SHOW"
   },
+
+
   "PROJECT-PERSON_MANAGE": {
     "category_id": 1,
     "spot": 7,
@@ -233,6 +237,7 @@
     "libelle": "G\u00e9rer les membres d'un projet",
     "fullcode": "PROJECT-PERSON_MANAGE"
   },
+
   "PROJECT-ORGANIZATION_SHOW": {
     "category_id": 1,
     "spot": 7,
@@ -240,10 +245,20 @@
     "libelle": "Voir les partenaires d'un projet",
     "fullcode": "PROJECT-ORGANIZATION_SHOW"
   },
+  "PROJECT-ORGANIZATION_MANAGE": {
+    "category_id": 1,
+    "spot": 7,
+    "root": "PROJECT-ORGANIZATION_SHOW",
+    "code": "ORGANIZATION_MANAGE",
+    "libelle": "G\u00e9rer les partenaires d'un projet",
+    "fullcode": "PROJECT-ORGANIZATION_MANAGE"
+  },
+
   "PROJECT-DOCUMENT_SHOW": {
     "category_id": 1,
     "spot": 7,
     "code": "DOCUMENT_SHOW",
+
     "libelle": "Voir les documents d'un projet",
     "fullcode": "PROJECT-DOCUMENT_SHOW"
   },
@@ -254,6 +269,18 @@
     "libelle": "Voir les activit\u00e9s d'un projet",
     "fullcode": "PROJECT-ACTIVITY_SHOW"
   },
+
+
+
+  "PERSON-INDEX": {
+    "category_id": 3,
+    "spot": 4,
+    "code": "INDEX",
+    "libelle": "Voir la liste des personnes",
+    "fullcode": "PERSON-INDEX"
+  },
+
+
   "PERSON-SHOW": {
     "category_id": 3,
     "spot": 4,
@@ -261,9 +288,18 @@
     "libelle": "Voir la fiche d'une personne",
     "fullcode": "PERSON-SHOW"
   },
+  "PERSON-PROJECTS": {
+    "category_id": 3,
+    "root": "PERSON-SHOW",
+    "spot": 7,
+    "code": "PROJECTS",
+    "libelle": "Voir les projets d'une personnes",
+    "fullcode": "PERSON-PROJECTS"
+  },
   "PERSON-EDIT": {
     "category_id": 3,
     "spot": 4,
+    "root": "PERSON-SHOW",
     "code": "EDIT",
     "libelle": "Modifier la fiche d'une personne",
     "fullcode": "PERSON-EDIT"
@@ -271,9 +307,18 @@
   "PERSON-SYNC_LDAP": {
     "category_id": 3,
     "spot": 4,
+    "root": "PERSON-SHOW",
     "code": "SYNC_LDAP",
     "libelle": "Synchroniser les donn\u00e9es avec LDAP",
     "fullcode": "PERSON-SYNC_LDAP"
+  },
+  "PERSON-INFOS_RH": {
+    "category_id": 3,
+    "code": "INFOS_RH",
+    "root": "PERSON-SHOW",
+    "spot": 4,
+    "libelle": "Voir les donn\u00e9es administratives",
+    "fullcode": "PERSON-INFOS_RH"
   },
   "PERSON-VIEW_TIMESHEET": {
     "category_id": 3,
@@ -282,34 +327,9 @@
     "libelle": "Peut voir les feuilles de temps de n'importe quelle personne",
     "fullcode": "PERSON-VIEW_TIMESHEET"
   },
-  "ORGANIZATION-SHOW": {
-    "category_id": 4,
-    "spot": 4,
-    "code": "SHOW",
-    "libelle": "Voir la fiche d'une organisation",
-    "fullcode": "ORGANIZATION-SHOW"
-  },
-  "ORGANIZATION-EDIT": {
-    "category_id": 4,
-    "spot": 4,
-    "code": "EDIT",
-    "libelle": "Modifier la fiche d'une organisation",
-    "fullcode": "ORGANIZATION-EDIT"
-  },
-  "ORGANIZATION-SYNC_LDAP": {
-    "category_id": 4,
-    "spot": 4,
-    "code": "SYNC_LDAP",
-    "libelle": "Synchroniser les donn\u00e9es avec LDAP",
-    "fullcode": "ORGANIZATION-SYNC_LDAP"
-  },
-  "MAINTENANCE-MENU_ADMIN": {
-    "category_id": 6,
-    "spot": 4,
-    "code": "MENU_ADMIN",
-    "libelle": "Acc\u00e8s aux menu d'administration",
-    "fullcode": "MAINTENANCE-MENU_ADMIN"
-  },
+
+
+
   "ORGANIZATION-INDEX": {
     "category_id": 4,
     "spot": 4,
@@ -317,27 +337,45 @@
     "libelle": "Voir la liste des organisations",
     "fullcode": "ORGANIZATION-INDEX"
   },
-  "PERSON-INDEX": {
-    "category_id": 3,
+
+
+  "ORGANIZATION-SHOW": {
+    "category_id": 4,
     "spot": 4,
-    "code": "INDEX",
-    "libelle": "Voir la liste des personnes",
-    "fullcode": "PERSON-INDEX"
+    "code": "SHOW",
+    "libelle": "Voir la fiche d'une organisation",
+    "fullcode": "ORGANIZATION-SHOW"
   },
-  "PERSON-PROJECTS": {
-    "category_id": 3,
-    "spot": 7,
-    "code": "PROJECTS",
-    "libelle": "Voir les projets d'une personnes",
-    "fullcode": "PERSON-PROJECTS"
-  },
-  "PERSON-INFOS_RH": {
-    "category_id": 3,
-    "code": "INFOS_RH",
+
+  "ORGANIZATION-EDIT": {
+    "category_id": 4,
     "spot": 4,
-    "libelle": "Voir les donn\u00e9es administratives",
-    "fullcode": "PERSON-INFOS_RH"
+    "root": "ORGANIZATION-SHOW",
+    "code": "EDIT",
+    "libelle": "Modifier la fiche d'une organisation",
+    "fullcode": "ORGANIZATION-EDIT"
   },
+  "ORGANIZATION-SYNC_LDAP": {
+    "category_id": 4,
+    "spot": 4,
+    "root": "ORGANIZATION-SHOW",
+    "code": "SYNC_LDAP",
+    "libelle": "Synchroniser les donn\u00e9es avec LDAP",
+    "fullcode": "ORGANIZATION-SYNC_LDAP"
+  },
+
+
+  "MAINTENANCE-MENU_ADMIN": {
+    "category_id": 6,
+    "spot": 4,
+    "code": "MENU_ADMIN",
+    "libelle": "Acc\u00e8s aux menu d'administration",
+    "fullcode": "MAINTENANCE-MENU_ADMIN"
+  },
+
+
+
+
   "ACTIVITY-WORKPACKAGE_SHOW": {
     "category_id": 2,
     "spot": 7,
@@ -348,6 +386,7 @@
   "ACTIVITY-WORKPACKAGE_MANAGE": {
     "category_id": 2,
     "spot": 7,
+    "root": "ACTIVITY-WORKPACKAGE_SHOW",
     "code": "WORKPACKAGE_MANAGE",
     "libelle": "G\u00e9rer les lots de travail d'une activit\u00e9",
     "fullcode": "ACTIVITY-WORKPACKAGE_MANAGE"
@@ -359,13 +398,53 @@
     "libelle": "D\u00e9clarer des heures pour un lot de travail",
     "fullcode": "ACTIVITY-WORKPACKAGE_COMMIT"
   },
-  "ACTIVITY-WORKPACKAGE_VALIDATE": {
-    "category_id": 2,
+  
+  "ACTIVITY-TIMESHEET_VALIDATE_SCI": {
     "spot": 7,
-    "code": "WORKPACKAGE_VALIDATE",
-    "libelle": "Valider une d\u00e9claration d'heure pour un lot de travail",
-    "fullcode": "ACTIVITY-WORKPACKAGE_VALIDATE"
+    "category_id": 2,
+    "code": "TIMESHEET_VALIDATE_SCI",
+    "libelle": "Validation scientifique des feuilles de temps",
+    "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_SCI"
   },
+  "ACTIVITY-TIMESHEET_VALIDATE_ADM": {
+    "spot": 7,
+    "category_id": 2,
+    "code": "TIMESHEET_VALIDATE_ADM",
+    "libelle": "Validation administrative des feuilles de temps",
+    "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_ADM"
+  },
+  "ACTIVITY-TIMESHEET_USURPATION": {
+    "spot": 7,
+    "category_id": 2,
+    "code": "TIMESHEET_USURPATION",
+    "libelle": "Peut remplir les feuilles de temps des d\u00e9clarants d'une activit\u00e9",
+    "fullcode": "ACTIVITY-TIMESHEET_USURPATION"
+  },
+  "ACTIVITY-NOTIFICATIONS_SHOW": {
+    "spot": 7,
+    "category_id": 2,
+    "code": "NOTIFICATIONS_SHOW",
+    "libelle": "Peut voir les notifications planifiées dans la fiche activité",
+    "fullcode": "ACTIVITY-NOTIFICATIONS_SHOW"
+  },
+  "ACTIVITY-NOTIFICATIONS_GENERATE": {
+    "spot": 7,
+    "category_id": 2,
+    "root": "ACTIVITY-NOTIFICATIONS_SHOW",
+    "code": "NOTIFICATIONS_GENERATE",
+    "libelle": "Peut regénérer manuellement les notifications d'une activité",
+    "fullcode": "ACTIVITY-NOTIFICATIONS_GENERATE"
+  },
+  "ACTIVITY-PERSON_ACCESS": {
+    "spot": 7,
+    "category_id": 2,
+    "code": "PERSON_ACCESS",
+    "libelle": "Voir les personnes qui ont la vision sur l'activité",
+    "fullcode": "ACTIVITY-PERSON_ACCESS"
+  },
+
+
+
   "ADMINISTRATIVE-DOCUMENT_INDEX": {
     "category_id": 8,
     "spot": 4,
@@ -376,6 +455,7 @@
   "ADMINISTRATIVE-DOCUMENT_DELETE": {
     "category_id": 8,
     "spot": 4,
+    "root": "ADMINISTRATIVE-DOCUMENT_INDEX",
     "code": "DOCUMENT_DELETE",
     "libelle": "Supprimer un document",
     "fullcode": "ADMINISTRATIVE-DOCUMENT_DELETE"
@@ -383,6 +463,7 @@
   "ADMINISTRATIVE-DOCUMENT_DOWNLOAD": {
     "category_id": 8,
     "spot": 4,
+    "root": "ADMINISTRATIVE-DOCUMENT_INDEX",
     "code": "DOCUMENT_DOWNLOAD",
     "libelle": "T\u00e9l\u00e9charger un document",
     "fullcode": "ADMINISTRATIVE-DOCUMENT_DOWNLOAD"
@@ -390,10 +471,13 @@
   "ADMINISTRATIVE-DOCUMENT_NEW": {
     "category_id": 8,
     "spot": 4,
+    "root": "ADMINISTRATIVE-DOCUMENT_INDEX",
     "code": "DOCUMENT_NEW",
     "libelle": "T\u00e9l\u00e9verser un nouveau document",
     "fullcode": "ADMINISTRATIVE-DOCUMENT_NEW"
   },
+
+
   "DEPENSE-SHOW": {
     "category_id": 9,
     "spot": 7,
@@ -425,24 +509,12 @@
   "droit-ROLEORGA_EDITION": {
     "spot": 4,
     "category_id": 7,
+    "root": "droit-ROLEORGA_VISUALISATION",
     "code": "ROLEORGA_EDITION",
     "libelle": "G\u00e9rer les r\u00f4les des organisations",
     "fullcode": "droit-ROLEORGA_EDITION"
   },
-  "ACTIVITY-TIMESHEET_VALIDATE_SCI": {
-    "spot": 7,
-    "category_id": 2,
-    "code": "TIMESHEET_VALIDATE_SCI",
-    "libelle": "Validation scientifique des feuilles de temps",
-    "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_SCI"
-  },
-  "ACTIVITY-TIMESHEET_VALIDATE_ADM": {
-    "spot": 7,
-    "category_id": 2,
-    "code": "TIMESHEET_VALIDATE_ADM",
-    "libelle": "Validation administrative des feuilles de temps",
-    "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_ADM"
-  },
+
   "MAINTENANCE-CONNECTOR_ACCESS": {
     "spot": 7,
     "category_id": 6,
@@ -450,39 +522,12 @@
     "libelle": "Peut ex\u00e9cuter la synchronisation des donn\u00e9es",
     "fullcode": "MAINTENANCE-CONNECTOR_ACCESS"
   },
-  "ACTIVITY-TIMESHEET_USURPATION": {
-    "spot": 7,
-    "category_id": 2,
-    "code": "TIMESHEET_USURPATION",
-    "libelle": "Peut remplir les feuilles de temps des d\u00e9clarants d'une activit\u00e9",
-    "fullcode": "ACTIVITY-TIMESHEET_USURPATION"
-  },
-  "ACTIVITY-NOTIFICATIONS_SHOW": {
-    "spot": 7,
-    "category_id": 2,
-    "code": "NOTIFICATIONS_SHOW",
-    "libelle": "Peut voir les notifications planifiées dans la fiche activité",
-    "fullcode": "ACTIVITY-NOTIFICATIONS_SHOW"
-  },
-  "ACTIVITY-NOTIFICATIONS_GENERATE": {
-    "spot": 7,
-    "category_id": 2,
-    "code": "NOTIFICATIONS_GENERATE",
-    "libelle": "Peut regénérer manuellement les notifications d'une activité",
-    "fullcode": "ACTIVITY-NOTIFICATIONS_GENERATE"
-  },
+
   "MAINTENANCE-NOTIFICATION_PERSON": {
     "spot": 7,
     "category_id": 6,
     "code": "NOTIFICATION_PERSON",
     "libelle": "Peut notifier manuellement un personne",
     "fullcode": "MAINTENANCE-NOTIFICATION_PERSON"
-  },
-  "ACTIVITY-PERSON_ACCESS": {
-    "spot": 7,
-    "category_id": 2,
-    "code": "PERSON_ACCESS",
-    "libelle": "Voir les personnes qui ont la vision sur l'activité",
-    "fullcode": "ACTIVITY-PERSON_ACCESS"
   }
 }

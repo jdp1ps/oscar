@@ -455,7 +455,7 @@ class ConsoleController extends AbstractOscarController
         }
         $datas = json_decode($contenuFichier);
         if (!$datas) {
-            die("ERREUR : Impossible de traiter les données du fichier\n");
+            die("ERREUR : Impossible de traiter les données du fichier ". json_last_error_msg()."\n");
         }
         $toRemove = [];
         $toAdd = [];
