@@ -74,7 +74,6 @@
     "category_id": 2,
     "spot": 7,
     "root": "ACTIVITY-PERSON_SHOW",
-    "root": "ACTIVITY-PERSON_SHOW",
     "code": "PERSON_MANAGE",
     "libelle": "Gestion des membres d'une activit\u00e9",
     "fullcode": "ACTIVITY-PERSON_MANAGE"
@@ -398,7 +397,7 @@
     "libelle": "D\u00e9clarer des heures pour un lot de travail",
     "fullcode": "ACTIVITY-WORKPACKAGE_COMMIT"
   },
-  
+
   "ACTIVITY-TIMESHEET_VALIDATE_SCI": {
     "spot": 7,
     "category_id": 2,
