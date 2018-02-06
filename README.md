@@ -5,6 +5,7 @@
 
  - [Installation de Oscar](./doc/install-prod.md)
  - [Mettre à jour Oscar](./doc/update.md)
+ - [Connectors Oscar](./doc/connectors.md)
  - [Administrer Oscar en ligne de commande](./doc/oscar-commands.md)
  - [Importer des activités](./doc/activity-import.md)
 

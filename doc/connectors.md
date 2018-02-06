@@ -223,6 +223,7 @@ Données minimales attendues :
 }
 ```
 
+> Conernant le CODE. Le champs CODE permet dans la version actuelle d'établir la liaison entre une personne et une organisation. Dans les prochaines versions, cette liaison sera probablement découplée du reste (un nouveau connecteur sera dédié à gérer cette relation) et utilisera l'UID plutôt que le code.
 
 ## Importer des activités (Installation initiale)
 
