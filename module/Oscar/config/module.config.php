@@ -203,8 +203,12 @@ return array(
 
                 // TIMESHEET
                 ['controller' => 'Timesheet',
-                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet", 'usurpation', 'declarers', 'excel'],
+                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet", 'usurpation', 'excel'],
                     'roles' => ['user']
+                ],
+                ['controller' => 'Timesheet',
+                    'action' => ['declarers'],
+                    'roles' => ['Administrateur']
                 ],
 
                 ////////////////////////////////////////////////////////////////
