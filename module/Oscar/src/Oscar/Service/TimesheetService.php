@@ -40,7 +40,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * Retourne les créneaux de la personne regroupès par activité
      * @param Person $person
      */
-    public function getPersonTimesheetsCSV( Person $person, Activity $activity = null, $validatedOnly = false){
+    public function getPersonTimesheetsCSV( Person $person, Activity $activity, $validatedOnly = false){
         $fmt = new \IntlDateFormatter(
             'fr_FR',
             \IntlDateFormatter::FULL,
