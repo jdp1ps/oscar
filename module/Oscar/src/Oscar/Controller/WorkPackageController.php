@@ -198,7 +198,7 @@ class WorkPackageController extends AbstractOscarController
             else if( $workpackageid ){
                 $workpackage = $this->getEntityManager()->getRepository(WorkPackage::class)->find($workpackageid);
                 if( !$workpackage ){
-                    return $this->getResponseBadRequest('Let de travail introuvable.');
+                    return $this->getResponseBadRequest('Lot de travail introuvable.');
                 }
                 try {
                     $this->getEntityManager()->remove($workpackage);

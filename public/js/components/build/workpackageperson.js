@@ -234,7 +234,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB', 'bootbox', 'moment-timezone
                 for (var key in workPackageData) {
                     datas.append(key, workPackageData[key]);
                 }
-                if (workPackageData.id) {
+                if (workPackageData.id > 0) {
                     // Mise à jour
                     datas.append('workpackageid', workPackageData.id);
                     this.$http.post(this.$http.$options.root, datas).then(function (res) {
