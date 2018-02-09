@@ -1,0 +1,19 @@
+<section class="container">
+<div id="app"></div>
+</section>
+<script>
+    require(['vue', 'vue-resource', '/js/oscar/dist/TimesheetLeader.js'], function(Vue, VueResource, TimesheetLeader){
+
+        Vue.use(VueResource);
+
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true;
+
+        var vue = new Vue({
+            el: "#app",
+            render(h){
+                return h(TimesheetLeader.default, { props: { validsci: false, validadm: true }})
+            }
+        });
+    })
+</script>

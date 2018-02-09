@@ -14,6 +14,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityType;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\WorkPackage;
@@ -249,6 +250,77 @@ class TimesheetController extends AbstractOscarController
         return [
             'datas' => $datas
         ];
+    }
+
+    /**
+     * Affiche les déclarations par structure
+     */
+    public function organizationLeaderAction(){
+
+        /** @var TimesheetService $timesheetsService */
+        $timesheetsService = $this->getServiceLocator()->get('TimesheetService');
+
+        $method = $this->getHttpXMethod();
+
+        switch( $method ){
+            case 'GET':
+                if( $this->isAjax() ){
+                    $result = [];
+
+                    /** @var OrganizationPerson $organizationPerson */
+                    foreach ($this->getCurrentPerson()->getLeadedOrganizations() as $organizationPerson ){
+
+                        if(
+                            $organizationPerson->getRoleObj()->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI) ||
+                            $organizationPerson->getRoleObj()->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
+                        ){
+                            $organisationDatas = [
+                              'label' => (string)$organizationPerson->getOrganization(),
+                              'role'  => (string)$organizationPerson->getRoleObj()->getRoleId(),
+                              'timesheets' => []
+                            ];
+                            foreach ($timesheetsService->getTimesheetToValidateByOrganization( $organizationPerson->getOrganization()) as $timesheet ){
+                                $json = $timesheet->toJson();
+                                $json = array_merge($json, $timesheetsService->resolveTimeSheetCredentials($timesheet));
+                                $organisationDatas['timesheets'][] = $json;
+                                //$this->
+                            }
+                        }
+                        $result[] = $organisationDatas;
+                    }
+                    return $this->ajaxResponse($result);
+                } else {
+                    return [];
+                }
+            case "POST":
+                $action = $this->params()->fromPost('action', null);
+                $timesheetId = $this->params()->fromPost('timesheet_id', null);
+                if( !$timesheetId ){
+                    return $this->getResponseInternalError("Erreur, impossible d'identifier le créneau à modifier");
+                } else {
+                    try {
+                        $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
+                    } catch( \Exception $e ){
+                        return $this->getResponseNotFound('Impossible de trouver ce créneau.');
+                    }
+                }
+                switch ( $action ){
+                    case 'validateadm':
+                        $timesheet = $timesheetsService->validateAdmin([$timesheet->toJson()], $this->getCurrentPerson());
+                        return $this->ajaxResponse($timesheet);
+
+                    case 'validatesci':
+                        $timesheet = $timesheetsService->validateSci([$timesheet->toJson()], $this->getCurrentPerson());
+                        return $this->ajaxResponse($timesheet);
+
+                }
+            default :
+                return $this->getResponseBadRequest();
+        }
+
+
+
+
     }
 
     public function usurpationAction()

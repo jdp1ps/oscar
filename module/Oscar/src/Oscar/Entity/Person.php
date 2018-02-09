@@ -217,7 +217,7 @@ class Person implements ResourceInterface
         /** @var OrganizationPerson $organizationPerson */
         foreach( $this->getOrganizations() as $organizationPerson ){
             if( $organizationPerson->getRoleObj()->isPrincipal() ){
-                $organizations[] = $organizationPerson->getOrganization();
+                $organizations[] = $organizationPerson;
             }
         }
         return $organizations;

@@ -25,7 +25,7 @@ $config = array(
 );
 
 if( getenv('APPLICATION_ENV') == 'development' ){
-    //$config['modules'][] = 'ZendDeveloperTools';
+    // $config['modules'][] = 'ZendDeveloperTools';
 }
 
 

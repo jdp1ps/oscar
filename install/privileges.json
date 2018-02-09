@@ -398,9 +398,19 @@
     "fullcode": "ACTIVITY-WORKPACKAGE_COMMIT"
   },
 
+
+  "ACTIVITY-TIMESHEET_VIEW": {
+    "spot": 7,
+    "category_id": 2,
+    "code": "TIMESHEET_VIEW",
+    "libelle": "Voir les feuilles de temps",
+    "fullcode": "ACTIVITY-TIMESHEET_VIEW"
+  },
+
   "ACTIVITY-TIMESHEET_VALIDATE_SCI": {
     "spot": 7,
     "category_id": 2,
+    "root": "ACTIVITY-TIMESHEET_VIEW",
     "code": "TIMESHEET_VALIDATE_SCI",
     "libelle": "Validation scientifique des feuilles de temps",
     "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_SCI"
@@ -408,6 +418,7 @@
   "ACTIVITY-TIMESHEET_VALIDATE_ADM": {
     "spot": 7,
     "category_id": 2,
+    "root": "ACTIVITY-TIMESHEET_VIEW",
     "code": "TIMESHEET_VALIDATE_ADM",
     "libelle": "Validation administrative des feuilles de temps",
     "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_ADM"

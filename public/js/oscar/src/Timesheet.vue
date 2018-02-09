@@ -1,0 +1,113 @@
+<template>
+    <div class="timesheet">
+        <span class="activity">
+            <i class="icon-cube"></i>
+            {{ timesheet.activity_label }}
+        </span>
+        <span class="wp">
+            <i class="icon-archive"></i>
+            {{ timesheet.workpackage_code }}
+        </span>
+        <span class="jour">
+            <i class="icon-calendar"></i>
+            le <strong>{{ jour }}</strong>
+        </span>
+        <span class="duree">de {{ start }} à {{ end }} (durée : {{ duree }})</span>
+        <span>
+            <i class="icon-person"></i>
+            par <strong>{{ timesheet.owner }}</strong></span>
+
+
+
+        <div class="small-note" v-if="timesheet.validatedSciBy">
+            <i class="icon-beaker"></i>
+            Validée par <strong>{{ timesheet.validatedSciBy }}</strong>
+        </div>
+        <div v-else>
+            <nav class="btn-group btn-group-xs" v-if="timesheet.validableSci">
+                <button class="btn btn-xs btn-success" @click="$emit('validsci', timesheet)" title="Valider scientifiquement ce créneau">
+                    <i class="icon-beaker"></i>
+                    Valider
+                    </button>
+                <button class="btn btn-xs btn-danger" @click="$emit('rejectsci', timesheet)" title="Refuser scientifiquement ce créneau">
+                    <i class="icon-minus-circled"></i>
+                    Refuser
+                </button>
+            </nav>
+            <div class="small-note" v-else>
+                <i class="icon-beaker"></i>
+                En attente de la validation scientifique
+            </div>
+        </div>
+
+
+        <div class="small-note" v-if="timesheet.validatedAdminBy">
+            <i class="icon-beaker"></i>
+            Validée par <strong>{{ timesheet.validatedAdminBy }}</strong>
+        </div>
+        <div v-else>
+            <nav class="btn-group btn-group-xs" v-if="timesheet.validableAdm">
+                <button class="btn btn-xs btn-danger" @click="$emit('rejectadm', timesheet)" title="Refuser administrativement ce créneau">
+                    <i class="icon-minus-circled"></i>
+                    Refuser
+                </button>
+                <button class="btn btn-xs btn-success" @click="$emit('validadm', timesheet)" title="Valider administrativement ce créneau">
+                    <i class="icon-ok-circled"></i>
+                    Valider
+                </button>
+            </nav>
+            <div class="small-note" v-else>
+                <i class="icon-beaker"></i>
+                En attente de la validation administrative
+            </div>
+        </div>
+
+    </div>
+</template>
+
+<script>
+    import moment from 'moment'
+    moment.locale('FR_fr');
+
+    export default {
+        name:'timesheet',
+        props: ['timesheet'],
+        computed: {
+            start(){
+              return moment(this.timesheet.start).format('HH:mm')
+            },
+            end(){
+                return moment(this.timesheet.end).format('HH:mm')
+            },
+            jour(){
+              return moment(this.timesheet).format('dddd D MMMM YYYY')
+            },
+            duree(){
+                let fin = moment(this.timesheet.end),
+                    debut = moment(this.timesheet.start);
+                return moment(fin.diff(debut)).format('HH:mm')
+            }
+        }
+    }
+</script>
+
+<style scoped>
+    .timesheet {
+        border-bottom: solid thin #eee;
+        display: flex;
+        align-items: center;
+        justify-items: center;
+    }
+    .timesheet > * {
+        flex: 1;
+    }
+    .small-note {
+        background: rgba(255,255,255,.7);
+        border: thin solid #ccc;
+        color: #777;
+        padding: .25em 1em;
+        border-radius: 4px;
+        font-size: .75em;
+        margin: 0 .5em;
+    }
+</style>

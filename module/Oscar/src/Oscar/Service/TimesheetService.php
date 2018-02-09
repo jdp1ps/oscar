@@ -4,6 +4,7 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
+use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\TimesheetRepository;
@@ -34,6 +35,27 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get('OscarUserContext');
     }
 
+    public function getTimesheetToValidateByOrganization( Organization $organization ){
+        // Activities
+
+        $query = $this->getEntityManager()->createQueryBuilder()->select('ts')
+            ->from(TimeSheet::class, 'ts')
+            ->innerJoin('ts.activity', 'a')
+            ->innerJoin('a.project', 'p')
+            ->leftJoin('a.organizations', 'o1')
+            ->leftJoin('o1.roleObj', 'roleo1')
+            ->leftJoin('p.partners', 'o2')
+            ->leftJoin('o2.roleObj', 'roleo2')
+
+            ->where('ts.status = :status')
+            ->andWhere('(o1.organization = :organization AND roleo1.principal = true) OR (o2.organization = :organization AND roleo2.principal = true)')
+
+            ->setParameters([
+                'status' => TimeSheet::STATUS_TOVALIDATE,
+                'organization' => $organization
+            ]);
+        return $query->getQuery()->getResult();
+    }
 
 
     /**

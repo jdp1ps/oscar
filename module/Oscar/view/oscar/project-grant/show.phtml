@@ -474,7 +474,7 @@
         </div>
     </div>
     <hr>
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_VIEW_TIMESHEET, $entity) ): ?>
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
         <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
         <h3>Visualiser les feuilles de temps</h3>
         <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>

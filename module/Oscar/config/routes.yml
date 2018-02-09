@@ -84,6 +84,12 @@ timesheet:
                 route: /declarers
                 defaults:
                     action: declarers
+        organization:
+            type: segment
+            options:
+                route: /organizations
+                defaults:
+                    action: organizationLeader
         # Déclarations d'une personne pour une activité
         declaration:
             type: segment
