@@ -1,25 +1,39 @@
 <template>
-    <div class="timesheet">
+    <tr class="timesheet">
 
-        <span class="activity">
-            <i class="icon-cube"></i>
-            {{ timesheet.activity_label }}
-        </span>
-        <span class="wp">
+        <td class="activity">
+            <strong>
+                <i class="icon-cubes"></i>
+                {{ timesheet.project_acronym }}
+            </strong>
+            <small>
+                <i class="icon-cube"></i>
+                {{ timesheet.activity_label }}
+            </small>
+        </td>
+
+        <td class="wp">
             <i class="icon-archive"></i>
             {{ timesheet.workpackage_code }}
-        </span>
-        <span class="jour">
-            <i class="icon-calendar"></i>
-            le <strong>{{ jour }}</strong>
-        </span>
-        <span class="duree">de {{ start }} à {{ end }} (durée : {{ duree }})</span>
-        <span>
-            <i class="icon-person"></i>
-            par <strong>{{ timesheet.owner }}</strong></span>
+        </td>
 
+        <td class="jour">
+            {{ jour }}
+        </td>
 
-        <span>
+        <td class="horaire">
+            {{ start }} à {{ end }}
+        </td>
+
+        <td class="duree">
+            {{ duree }} heures
+        </td>
+
+        <td class="declarant">
+            {{ timesheet.owner }}
+        </td>
+
+        <td>
             <span class="small-note" v-if="timesheet.validatedSciBy">
                 <i class="icon-beaker"></i>
                 Validée par <strong>{{ timesheet.validatedSciBy }}</strong>
@@ -40,10 +54,14 @@
                     En attente de la validation scientifique
                 </span>
             </span>
+        </td>
 
-            <span class="small-note" v-if="timesheet.validatedAdminBy">
-                <i class="icon-beaker"></i>
-                Validée par <strong>{{ timesheet.validatedAdminBy }}</strong>
+        <td>
+            <span v-if="timesheet.validatedAdminBy" :title="'Ce créneau a été validé administrativement par ' + timesheet.validatedAdminBy">
+                <span class="small-note" >
+                    <i class="icon-archive"></i>
+                    Validée par <strong>{{ timesheet.validatedAdminBy }}</strong>
+                </span>
             </span>
             <span v-else>
                 <nav class="btn-group btn-group-xs" v-if="timesheet.validableAdm">
@@ -61,8 +79,8 @@
                     En attente de la validation administrative
                 </span>
             </span>
-        </span>
-    </div>
+        </td>
+    </tr>
 </template>
 
 <script>
@@ -92,7 +110,7 @@
 </script>
 
 <style scoped>
-    .timesheet {
+    /*.timesheet {
         border-bottom: solid thin #eee;
         display: flex;
         align-items: center;
@@ -100,8 +118,16 @@
     }
     .timesheet > * {
         flex: 1;
+    }*/
+    .duree, .declarant, .jour, .jour, .horaire {
+        font-size: .8em;
+        font-weight: normal;
+    }
+    .declarant {
+        font-weight: 600;
     }
     .small-note {
+        white-space: nowrap;
         background: rgba(255,255,255,.7);
         border: thin solid #ccc;
         color: #777;

@@ -313,6 +313,22 @@ class TimesheetController extends AbstractOscarController
                         $timesheet = $timesheetsService->validateSci([$timesheet->toJson()], $this->getCurrentPerson());
                         return $this->ajaxResponse($timesheet);
 
+                    case 'rejectadm':
+                        $datas = [
+                            'id' => $timesheet->getId(),
+                            'rejectedAdminComment' => $this->params()->fromPost('rejectComment')
+                        ];
+                        $timesheet = $timesheetsService->rejectAdmin([$datas], $this->getCurrentPerson());
+                        return $this->ajaxResponse($timesheet);
+
+                    case 'rejectsci':
+                        $datas = [
+                            'id' => $timesheet->getId(),
+                            'rejectedSciComment' => $this->params()->fromPost('rejectComment')
+                        ];
+                        $timesheet = $timesheetsService->rejectSci([$datas], $this->getCurrentPerson());
+                        return $this->ajaxResponse($timesheet);
+
                 }
             default :
                 return $this->getResponseBadRequest();

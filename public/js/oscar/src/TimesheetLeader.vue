@@ -8,20 +8,36 @@
             {{ error }}
         </div>
 
+        <div class="overlay" v-if="rejectModal">
+            <div class="overlay-content">
+                <p>Indiquez la raison du rejet</p>
+
+                <textarea class="form-control" v-model="rejectMsg"></textarea>
+
+                <nav>
+                    <button @click="handlerCancelReject">
+                        Annuler
+                    </button>
+                    <button @click="handlerSubmitReject">
+                        Envoyer
+                    </button>
+                </nav>
+            </div>
+        </div>
+
         <section v-for="group in structuredTimesheets" class="organization-timesheets" v-if="group.timesheets.length">
-            <h2><i class="icon-building-filled"></i>{{ group.label }} ({{ group.role }})</h2>
-            <timesheet v-for="timesheet in group.timesheets" :timesheet="timesheet" :key="timesheet.id"
-                       @validsci="handlerValidSci"
-                       @validadm="handlerValidAdm"
-                       @rejectsci="handlerRejectSci"
-                       @rejectadm="handlerRejectSci"
+            <timesheetorganization :timesheets="group.timesheets" :label="group.label" :role="group.role"
+                   @validsci="handlerValidSci"
+                   @validadm="handlerValidAdm"
+                   @rejectsci="handlerRejectSci"
+                   @rejectadm="handlerRejectAdm"
             />
         </section>
     </div>
 </template>
 
 <script>
-    import Timesheet from './Timesheet.vue'
+    import TimesheetOrganization from './TimesheetOrganization.vue'
 
     /**
      *
@@ -43,6 +59,14 @@
               subgroup: 'activity_label',
               pending: false,
               timesheets: [],
+
+              rejectModal: false,
+              rejectType: null,
+              rejectTimesheet: null,
+              rejectMsg: "",
+
+              filtreDeclarant: "",
+
               groups: {
                 'organization': "Par organization",
                 'owner': 'Par déclarant'
@@ -51,35 +75,16 @@
         },
 
         components: {
-            'timesheet': Timesheet
+            'timesheetorganization': TimesheetOrganization
         },
 
         computed: {
             structuredTimesheets(){
-                /*let datas = {};
-                this.timesheets.forEach( timesheet => {
-
-                    let grouper = timesheet[this.group],
-                        subgrouper = timesheet[this.subgroup];
-
-                    if( !datas.hasOwnProperty(grouper) ){
-                        datas[grouper] = {
-                            label: grouper,
-                            subgroup: {}
-                        }
-                    }
-
-                    if( !datas[grouper].subgroup.hasOwnProperty(subgrouper) ){
-                        datas[grouper].subgroup[subgrouper] = {
-                            label: subgrouper,
-                            timesheets: []
-                        }
-                    }
-
-                    datas[grouper].subgroup[subgrouper].timesheets.push(timesheet);
-                });
-                return datas;
-                */
+                if( this.filtreDeclarant )
+                    return this.timesheets.filter( (value) => {
+                        console.log(JSON.parse(JSON.stringify(value)));
+                        return value.owner.indexOf(this.filtreDeclarant) > -1
+                    })
                 return this.timesheets;
             }
         },
@@ -122,11 +127,39 @@
             },
 
             handlerRejectSci(timesheet){
-                this.send('rejectsci', timesheet);
+                this.rejectModal = true;
+                this.rejectType = 'rejectsci';
+                this.rejectTimesheet = timesheet;
             },
 
-            handlerRejectSci(timesheet){
-                this.send('rejectadm', timesheet);
+            handlerRejectAdm(timesheet){
+                this.rejectModal = true;
+                this.rejectType = 'rejectadm';
+                this.rejectTimesheet = timesheet;
+            },
+
+            handlerCancelReject(){
+                this.rejectType = '';
+                this.rejectTimesheet = null;
+                this.rejectModal = false;
+            },
+            handlerSubmitReject(){
+                this.pending = true;
+                this.$http.post('', {
+                    'action': this.rejectType,
+                    'timesheet_id': this.rejectTimesheet.id,
+                    'rejectComment' : this.rejectMsg
+                }).then(
+                    success => {
+                        this.fetch();
+                    },
+                    error => {
+                        this.error = error.body ? error.body : "Erreur : " + error.statusText;
+                    }
+                ).then( () => {
+                    this.pending = false;
+                    this.rejectModal = false;
+                }  )
             }
         },
 
