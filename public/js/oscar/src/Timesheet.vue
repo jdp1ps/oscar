@@ -1,5 +1,6 @@
 <template>
     <div class="timesheet">
+
         <span class="activity">
             <i class="icon-cube"></i>
             {{ timesheet.activity_label }}
@@ -18,50 +19,49 @@
             par <strong>{{ timesheet.owner }}</strong></span>
 
 
-
-        <div class="small-note" v-if="timesheet.validatedSciBy">
-            <i class="icon-beaker"></i>
-            Validée par <strong>{{ timesheet.validatedSciBy }}</strong>
-        </div>
-        <div v-else>
-            <nav class="btn-group btn-group-xs" v-if="timesheet.validableSci">
-                <button class="btn btn-xs btn-success" @click="$emit('validsci', timesheet)" title="Valider scientifiquement ce créneau">
-                    <i class="icon-beaker"></i>
-                    Valider
+        <span>
+            <span class="small-note" v-if="timesheet.validatedSciBy">
+                <i class="icon-beaker"></i>
+                Validée par <strong>{{ timesheet.validatedSciBy }}</strong>
+            </span>
+            <span v-else>
+                <nav class="btn-group btn-group-xs" v-if="timesheet.validableSci">
+                    <button class="btn btn-xs btn-success" @click="$emit('validsci', timesheet)" title="Valider scientifiquement ce créneau">
+                        <i class="icon-beaker"></i>
+                        Valider
+                        </button>
+                    <button class="btn btn-xs btn-danger" @click="$emit('rejectsci', timesheet)" title="Refuser scientifiquement ce créneau">
+                        <i class="icon-minus-circled"></i>
+                        Refuser
                     </button>
-                <button class="btn btn-xs btn-danger" @click="$emit('rejectsci', timesheet)" title="Refuser scientifiquement ce créneau">
-                    <i class="icon-minus-circled"></i>
-                    Refuser
-                </button>
-            </nav>
-            <div class="small-note" v-else>
+                </nav>
+                <span class="small-note" v-else>
+                    <i class="icon-beaker"></i>
+                    En attente de la validation scientifique
+                </span>
+            </span>
+
+            <span class="small-note" v-if="timesheet.validatedAdminBy">
                 <i class="icon-beaker"></i>
-                En attente de la validation scientifique
-            </div>
-        </div>
-
-
-        <div class="small-note" v-if="timesheet.validatedAdminBy">
-            <i class="icon-beaker"></i>
-            Validée par <strong>{{ timesheet.validatedAdminBy }}</strong>
-        </div>
-        <div v-else>
-            <nav class="btn-group btn-group-xs" v-if="timesheet.validableAdm">
-                <button class="btn btn-xs btn-danger" @click="$emit('rejectadm', timesheet)" title="Refuser administrativement ce créneau">
-                    <i class="icon-minus-circled"></i>
-                    Refuser
-                </button>
-                <button class="btn btn-xs btn-success" @click="$emit('validadm', timesheet)" title="Valider administrativement ce créneau">
-                    <i class="icon-ok-circled"></i>
-                    Valider
-                </button>
-            </nav>
-            <div class="small-note" v-else>
-                <i class="icon-beaker"></i>
-                En attente de la validation administrative
-            </div>
-        </div>
-
+                Validée par <strong>{{ timesheet.validatedAdminBy }}</strong>
+            </span>
+            <span v-else>
+                <nav class="btn-group btn-group-xs" v-if="timesheet.validableAdm">
+                    <button class="btn btn-xs btn-danger" @click="$emit('rejectadm', timesheet)" title="Refuser administrativement ce créneau">
+                        <i class="icon-minus-circled"></i>
+                        Refuser
+                    </button>
+                    <button class="btn btn-xs btn-success" @click="$emit('validadm', timesheet)" title="Valider administrativement ce créneau">
+                        <i class="icon-ok-circled"></i>
+                        Valider
+                    </button>
+                </nav>
+                <span class="small-note" v-else>
+                    <i class="icon-beaker"></i>
+                    En attente de la validation administrative
+                </span>
+            </span>
+        </span>
     </div>
 </template>
 

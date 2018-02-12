@@ -145,10 +145,20 @@ gulp.task('oscar-model', function(){
         .pipe(gulp.dest(directories.jsModels+'build'))
 })
 
+
+gulp.task('module-oscar-build', function(){
+    exec('poi build --format umd --moduleName timesheetleader public/js/oscar/src/TimesheetLeader.vue --filename.js TimesheetLeader.js --dist public/js/oscar/dist');
+});
+
+
 gulp.task('watch:sass', function () {
     gulp.watch(directories.css + '**/*.scss', ['sass']);
     gulp.watch(directories.jsComponents + 'src/*.js', ['oscar-components']);
     gulp.watch(directories.jsModels + 'src/*.js', ['oscar-model']);
     gulp.watch('./public/js/modules/unicaen/src/css/*.scss', ['modules-css']);
     gulp.watch('./public/js/modules/unicaen/src/js/*.js', ['modules-js']);
+});
+
+gulp.task('module-oscar-watch', function () {
+    gulp.watch('./public/js/oscar/src/*.vue', ['module-oscar-build']);
 });
