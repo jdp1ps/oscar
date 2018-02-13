@@ -54,7 +54,7 @@ class TimesheetController extends AbstractOscarController
         $personIdQuery      = $this->params()->fromQuery('personid', null );
 
         //
-        $currentPersonId    = $this->getCurrentPerson()->getId();
+        $currentPersonId    = $this->getCurrentPerson() ? $this->getCurrentPerson()->getId() : -1;
 
         if( $activityId ){
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
