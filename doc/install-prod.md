@@ -100,6 +100,12 @@ Pour une installation en production/démo/développement **hors unicaen**, une a
 tar xvfz install/vendor.tar.gz
 ```
 
+Pensez à accorder les droits d'accès au dossier.
+
+```bash
+chown -R <user>:<group> ./vendor/
+```
+
 Ou pour les développeurs situé dans le **réseau unicaen** :
 
 ```bash
