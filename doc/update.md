@@ -41,7 +41,11 @@ rm -Rf vendor
 
 # On extrait les dernières
 tar xvfz install/vendor.tar.gz
+
+# On accorde les droits d'accès si besoin
+chown -R <user>:<group> ./vendor/
 ```
+
 
 ## Mise à jour de la BDD
 
@@ -49,10 +53,10 @@ Il faut mettre à jour le schéma avec l'utilitaire intégré à **Doctrine** :
 
 ```bash
 # Pour prévisualiser
-php vendor/bin/orm:schema-tool:update --dump-sql
+php vendor/bin/doctrine-module orm:schema-tool:update --dump-sql
 
 # Pour appliquer
-php vendor/bin/orm:schema-tool:update --force
+php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
 
 ## Vérifier la configuration
