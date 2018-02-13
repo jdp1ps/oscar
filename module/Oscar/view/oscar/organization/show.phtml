@@ -109,6 +109,7 @@
                 <?= $this->partial('/partials/person-enrolled-card.phtml', array(
                     'enroll'    => $person,
                     'urlDelete' => $this->url('organizationperson/delete', ['idenroll' => $person->getId()]),
+                    'urlClose'  => $this->url('organizationperson/close', ['idenroll' => $person->getId()]),
                 )); ?>
             <?php endforeach; ?>
             <hr>

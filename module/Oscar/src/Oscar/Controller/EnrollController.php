@@ -21,7 +21,9 @@ use Oscar\Entity\Role;
 use Oscar\Entity\RoleOrganization;
 use Oscar\Entity\RoleRepository;
 use Oscar\Entity\TraitRole;
+use Oscar\Exception\OscarException;
 use Oscar\Form\RoleForm;
+use Oscar\Provider\Privileges;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\View\Model\ViewModel;
 
@@ -73,6 +75,36 @@ class EnrollController extends AbstractOscarController
         else {
             return $this->getEntityManager()->getRepository(Role::class)->find($id);
         }
+    }
+
+    private function closeEnroll($class){
+
+        $this->getOscarUserContext()->check(Privileges::PERSON_EDIT);
+
+        /** @var OrganizationPerson $enroll */
+        $enroll = $this->getEntityManager()->getRepository($class)->find($this->params()->fromRoute('idenroll'));
+
+        $date = $this->params()->fromPost('at');
+        if( !$date || !$enroll ){
+            throw new OscarException("Erreur, données manquantes, veuillez reessayer");
+        }
+
+        try {
+            $datet = new \DateTime($date);
+        } catch (\Exception $e ){
+            throw new OscarException("Erreur, données inconhérente");
+        }
+
+        try {
+            $enroll->setDateEnd($datet);
+            $this->getEntityManager()->flush($enroll);
+        } catch (\Exception $e ){
+            $msg = sprinf("Impossible de mettre le rôle de la person à jour : %s", $e->getMessage());
+            $this->getActivityLogService()->addUserInfo($msg, "organizationperson", $enroll->getId());
+            throw new OscarException($msg);
+        }
+        var_dump($datet);
+        die(" / " . $date);
     }
 
     /**
@@ -517,6 +549,12 @@ class EnrollController extends AbstractOscarController
     public function organizationActivityEditAction()
     {
         return $this->editEnroll(ActivityOrganization::class);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Fin des rôles
+    public function organizationPersonCloseAction(){
+        return $this->closeEnroll(OrganizationPerson::class);
     }
 }
 

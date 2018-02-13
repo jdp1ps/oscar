@@ -698,6 +698,8 @@ class OrganizationController extends AbstractOscarController
 
     }
 
+
+
     /**
      * Édition des informations de base.
      */

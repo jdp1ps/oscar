@@ -19,7 +19,22 @@ $person = $enroll->getPerson();
             <span class="firstname"><?= $person->getFirstname() ?></span>
             <span class="lastname"><?= $person->getLastname() ?></span>
             <span class="affectation">(<?= $person->getLdapAffectation() ?>)</span>
-            <div class="role"><?= $enroll->getRole() ?></div>
+
+            <?php if( $enroll->getDateEnd() ): ?>
+                <div class="role"style="<?= $enroll->isOutOfDate() ? 'opacity: .5' : '' ?>">
+                    <?= $enroll->getRole() ?>
+                    <small> ( <?= ($enroll->isPast() ? 'fini depuis le ' : 'prendra effet le' ) . $this->moment($enroll->getDateEnd()) ?>)</small>
+                </div>
+            <?php else: ?>
+                <div class="role"><?= $enroll->getRole() ?></div>
+            <?php endif; ?>
+
+
+            <?php if( $enroll->getDateStart() ): ?>
+            <small>Depuis le <?= $this->moment($enroll->getDateStart()) ?></small>
+            <?php endif; ?>
+
+
         </span>
 
     </span>
@@ -27,5 +42,14 @@ $person = $enroll->getPerson();
     <nav>
         <a href="<?= $this->url('person/show', ['id' => $person->getId()]) ?>" class="link-show"><i class="icon-zoom-in-outline"></i> Fiche</a>
         <a href="<?= $urlDelete ?>" class="link-show"><i class="icon-trash"></i> Supprimer ce rôle</a>
+        <?php if( isset($urlClose) ):?>
+            <form action="<?= $urlClose ?>" method="post">
+                <input type="text" name="at" placeholder="Date de résiliation" required />
+                <button type="submit">
+                    Résilier
+                </button>
+            </form>
+
+        <?php endif; ?>
     </nav>
 </article>

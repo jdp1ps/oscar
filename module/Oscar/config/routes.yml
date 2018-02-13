@@ -844,6 +844,13 @@ organizationperson:
                 route: /delete/:idenroll
                 defaults:
                     action: organizationPersonDelete
+        close:
+            type: segment
+            options:
+                route: /close/:idenroll
+                defaults:
+                    action: organizationPersonClose
+
         edit:
             type: segment
             options:

@@ -93,7 +93,7 @@ return array(
                 ],
                 // Partenaires (Orgnaization)
                 [ 'controller' =>   'Enroll',
-                    'action' => ['organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit'],
+                    'action' => ['organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit', 'organizationPersonClose'],
                     'privileges' => \Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE
                 ],
 

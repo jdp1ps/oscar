@@ -25,14 +25,22 @@
             </div>
         </div>
 
-        <section v-for="group in structuredTimesheets" class="organization-timesheets" v-if="group.timesheets.length">
-            <timesheetorganization :timesheets="group.timesheets" :label="group.label" :role="group.role"
-                   @validsci="handlerValidSci"
-                   @validadm="handlerValidAdm"
-                   @rejectsci="handlerRejectSci"
-                   @rejectadm="handlerRejectAdm"
-            />
-        </section>
+        <div v-if="timesheets.length == 0">
+            <div class="alert alert-warning">
+                <i class="icon-attention-1"></i>
+                Vous n'êtes pas associé à une organisation
+            </div>
+        </div>
+        <div v-else>
+            <section v-for="group in structuredTimesheets" class="organization-timesheets" v-if="group.timesheets.length">
+                <timesheetorganization :timesheets="group.timesheets" :label="group.label" :role="group.role"
+                       @validsci="handlerValidSci"
+                       @validadm="handlerValidAdm"
+                       @rejectsci="handlerRejectSci"
+                       @rejectadm="handlerRejectAdm"
+                />
+            </section>
+        </div>
     </div>
 </template>
 
@@ -143,6 +151,10 @@
                 this.rejectTimesheet = null;
                 this.rejectModal = false;
             },
+
+            /**
+             * Envoi du rejet
+             */
             handlerSubmitReject(){
                 this.pending = true;
                 this.$http.post('', {
