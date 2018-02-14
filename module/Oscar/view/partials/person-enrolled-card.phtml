@@ -43,13 +43,7 @@ $person = $enroll->getPerson();
         <a href="<?= $this->url('person/show', ['id' => $person->getId()]) ?>" class="link-show"><i class="icon-zoom-in-outline"></i> Fiche</a>
         <a href="<?= $urlDelete ?>" class="link-show"><i class="icon-trash"></i> Supprimer ce rôle</a>
         <?php if( isset($urlClose) ):?>
-            <form action="<?= $urlClose ?>" method="post">
-                <input type="text" name="at" placeholder="Date de résiliation" required />
-                <button type="submit">
-                    Résilier
-                </button>
-            </form>
-
+            <button data-enrollid="<?= $enroll->getId() ?>">Résilier</button>
         <?php endif; ?>
     </nav>
 </article>

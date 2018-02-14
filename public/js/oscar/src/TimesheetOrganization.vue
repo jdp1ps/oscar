@@ -10,13 +10,42 @@
                 <i class="icon-cancel-circled-outline" @click="filtreActivite = ''"></i>
                 </span>
         </p>
+        <div class="timesheet">
+
+            <div class="activity">
+                Activité
+                <input v-model="filtreActivite" class="form-control" placeholder="Filtrer sur les activités" />
+            </div>
+
+            <div class="wp">
+                Lot de travail
+            </div>
+
+            <div class="date">
+                Créneau
+            </div>
+
+
+            <div class="declarant">
+                Déclarant
+                <input v-model="filtreDeclarant" class="form-control" placeholder="Filtrer sur les déclarants" />
+            </div>
+
+            <div>
+                Validation scientifique
+            </div>
+
+            <div>
+                Validation administrative
+            </div>
+        </div>
         <table class="table table-condensed table-bordered">
             <thead>
             <tr>
                 <th rowspan="2">
                     <i class="icon-cube"></i>
                     Activité
-                    <input v-model="filtreActivite" class="form-control" placeholder="Filtrer sur les activités" />
+
                 </th>
 
                 <th rowspan="2">
@@ -38,7 +67,7 @@
                 <th rowspan="2">
                     <i class="icon-user"></i>
                     Déclarants
-                    <input v-model="filtreDeclarant" class="form-control" placeholder="Filtrer sur les déclarants" />
+
                 </th>
 
                 <th colspan="2">Validation</th>
@@ -48,15 +77,17 @@
                 <th>Administrative</th>
             </tr>
             </thead>
-            <tbody>
-            <timesheet v-for="timesheet in filteredTimesheets" :timesheet="timesheet" :key="timesheet.id"
-                       @validsci="$emit('validsci', $event)"
-                       @validadm="$emit('validadm', $event)"
-                       @rejectsci="$emit('rejectsci', $event)"
-                       @rejectadm="$emit('rejectadm', $event)"
-            />
-            </tbody>
         </table>
+            <section class="timesheets">
+            <transition-group name="list" tag="article">
+                <timesheet v-for="timesheet in filteredTimesheets" :timesheet="timesheet" :key="timesheet.id"
+                           @validsci="$emit('validsci', $event)"
+                           @validadm="$emit('validadm', $event)"
+                           @rejectsci="$emit('rejectsci', $event)"
+                           @rejectadm="$emit('rejectadm', $event)"
+                />
+            </transition-group>
+            </section>
     </section>
 </template>
 
@@ -99,28 +130,3 @@
     }
 </script>
 
-<style scoped>
-    table {
-        background: rgba(255,255,255,0.9);
-    }
-    thead {
-        background: #0a3783;
-        text-align: center;
-        vertical-align: middle;
-        color: white;
-        text-shadow: -1px 1px 0 rgba(0,0,0,.3);
-
-    }
-    tbody tr:nth-child(odd){
-        background: rgba(0,0,0,.05);
-    }
-    th {
-        text-align: center;
-        vertical-align: middle;
-        border: thin solid rgba(255,255,255,.25);
-        font-weight: 100;
-    }
-    td nav {
-        white-space: nowrap;
-    }
-</style>

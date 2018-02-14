@@ -1,7 +1,7 @@
 <template>
-    <tr class="timesheet">
+    <div class="timesheet">
 
-        <td class="activity">
+        <div class="activity">
             <strong>
                 <i class="icon-cubes"></i>
                 {{ timesheet.project_acronym }}
@@ -10,30 +10,28 @@
                 <i class="icon-cube"></i>
                 {{ timesheet.activity_label }}
             </small>
-        </td>
+        </div>
 
-        <td class="wp">
+        <div class="wp" :title="timesheet.workpackage_label">
             <i class="icon-archive"></i>
             {{ timesheet.workpackage_code }}
-        </td>
+        </div>
 
-        <td class="jour">
-            {{ jour }}
-        </td>
+        <div class="date">
+            <div class="jour">{{ jour }}</div>
+            <div class="horaire">{{ start }} à {{ end }}</div>
+            <div class="duree">
+                <i class="icon-stopwatch"></i>{{ duree }} heures
+            </div>
+        </div>
 
-        <td class="horaire">
-            {{ start }} à {{ end }}
-        </td>
 
-        <td class="duree">
-            {{ duree }} heures
-        </td>
-
-        <td class="declarant">
+        <div class="declarant">
+            <i class="icon-user"></i>
             {{ timesheet.owner }}
-        </td>
+        </div>
 
-        <td>
+        <div>
             <span class="small-note" v-if="timesheet.validatedSciBy">
                 <i class="icon-beaker"></i>
                 Validée par <strong>{{ timesheet.validatedSciBy }}</strong>
@@ -54,9 +52,9 @@
                     En attente de la validation scientifique
                 </span>
             </span>
-        </td>
+        </div>
 
-        <td>
+        <div>
             <span v-if="timesheet.validatedAdminBy" :title="'Ce créneau a été validé administrativement par ' + timesheet.validatedAdminBy">
                 <span class="small-note" >
                     <i class="icon-archive"></i>
@@ -79,8 +77,8 @@
                     En attente de la validation administrative
                 </span>
             </span>
-        </td>
-    </tr>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -108,32 +106,3 @@
         }
     }
 </script>
-
-<style scoped>
-    /*.timesheet {
-        border-bottom: solid thin #eee;
-        display: flex;
-        align-items: center;
-        justify-items: center;
-    }
-    .timesheet > * {
-        flex: 1;
-    }*/
-    .duree, .declarant, .jour, .jour, .horaire {
-        font-size: .8em;
-        font-weight: normal;
-    }
-    .declarant {
-        font-weight: 600;
-    }
-    .small-note {
-        white-space: nowrap;
-        background: rgba(255,255,255,.7);
-        border: thin solid #ccc;
-        color: #777;
-        padding: .25em 1em;
-        border-radius: 4px;
-        font-size: .75em;
-        margin: 0 .5em;
-    }
-</style>

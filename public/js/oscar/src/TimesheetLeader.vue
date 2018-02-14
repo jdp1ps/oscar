@@ -1,6 +1,15 @@
 <template>
     <div class="timesheetleaderarea">
-        <div class="pending" v-if="pending">pending</div>
+
+        <transition name="fade">
+            <div class="pending overlay" v-if="pending">
+                <div class="overlay-content">
+                    <i class="icon-spinner animate-spin"></i>
+                    {{ pendingMsg }}
+                </div>
+            </div>
+        </transition>
+
         <h1>Déclarations en attente de validation</h1>
 
         <div class="alert-danger alert" v-show="error">
@@ -33,12 +42,14 @@
         </div>
         <div v-else>
             <section v-for="group in structuredTimesheets" class="organization-timesheets" v-if="group.timesheets.length">
+
                 <timesheetorganization :timesheets="group.timesheets" :label="group.label" :role="group.role"
                        @validsci="handlerValidSci"
                        @validadm="handlerValidAdm"
                        @rejectsci="handlerRejectSci"
                        @rejectadm="handlerRejectAdm"
                 />
+
             </section>
         </div>
     </div>
@@ -66,6 +77,7 @@
               group: 'organization',
               subgroup: 'activity_label',
               pending: false,
+              pendingMsg: "Chargement des données",
               timesheets: [],
 
               rejectModal: false,
@@ -114,11 +126,31 @@
                 );
             },
 
+            refreshTimesheet(timesheet){
+                console.log('Refresh timesheet', timesheet);
+                for( let i=0; i<this.timesheets.length; i++ ){
+                    for( let j=0; j<this.timesheets[i].timesheets.length; j++ ){
+                        console.log('Refresh timesheet', this.timesheets[i].timesheets[j].id , ' < ', timesheet.id);
+
+                        if( this.timesheets[i].timesheets[j].id == timesheet.id ){
+                            if( timesheet.status == 'reject' ){
+                                this.timesheets[i].timesheets.splice(j, 1);
+                            } else {
+                                this.timesheets[i].timesheets.splice(j, 1, timesheet);
+                            }
+                            return;
+                        }
+                    }
+                }
+            },
+
+
             send(action, timesheet){
                 this.pending = true;
                 this.$http.post('', { 'action': action, 'timesheet_id': timesheet.id}).then(
                     success => {
-                       this.fetch();
+                        let updateTimesheet = success.data[0];
+                        this.refreshTimesheet(updateTimesheet);
                     },
                     error => {
                         this.error = error.body ? error.body : "Erreur : " + error.statusText;

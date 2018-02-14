@@ -59,7 +59,7 @@ var gulp = require('gulp'),
 
 
 // Basic example
-gulp.task('default', ['sass', 'watch:sass', 'oscar-components', 'oscar-model', 'modules-js', 'modules-css']);
+gulp.task('default', ['sass', 'watch:sass', 'oscar-components', 'oscar-model', 'modules-js', 'modules-css', 'module-oscar-watch']);
 
 
 

@@ -109,7 +109,7 @@
                 <?= $this->partial('/partials/person-enrolled-card.phtml', array(
                     'enroll'    => $person,
                     'urlDelete' => $this->url('organizationperson/delete', ['idenroll' => $person->getId()]),
-                    'urlClose'  => $this->url('organizationperson/close', ['idenroll' => $person->getId()]),
+                    'urlClose'  => $this->url('organizationperson/close', ['idenroll' => '']),
                 )); ?>
             <?php endforeach; ?>
             <hr>
@@ -146,5 +146,46 @@
         </section>
  */ ?>
     </section>
+
+    <div class="overlay" id="overlay" style="display: none">
+        <div class="overlay-content">
+            <form action="" method="post" id="formResiliation">
+                Selectionnez la date de résilation (par défaut aujourd'hui) :
+                <input type="text" class="form-control datepicker" name="at" />
+                <nav>
+                    <button id="cancel" class="btn btn-default">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Confirmer</button>
+                </nav>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        require(['jquery', 'datepicker'], function($){
+
+            var idEnroll = null;
+
+            $('.datepicker').datepicker({
+                format: "yyyy-mm-dd",
+                todayBtn: "linked",
+                clearBtn: true,
+                language: "fr",
+                autoclose: true,
+                toggleActive: true
+            });
+
+
+            $('#cancel').on("click", function(){
+                $("#overlay").hide();
+            })
+
+            $('[data-enrollid]').on('click', function(e){
+
+                idEnroll = $(e.target).data('enrollid');
+                $('#formResiliation').attr('action', '<?= $this->url('organizationperson/close', ['idenroll' => '']) ?>' + idEnroll)
+                $("#overlay").show();
+            })
+        })
+    </script>
 </div>
 
