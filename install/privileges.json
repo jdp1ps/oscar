@@ -42,7 +42,7 @@
   "ACTIVITY-EXPORT": {
     "category_id": 2,
     "spot": 4,
-    "root": "ACTIVITY_INDEX",
+    "root": "ACTIVITY-INDEX",
     "code": "EXPORT",
     "libelle": "Exporter les donn\u00e9es des activit\u00e9s",
     "fullcode": "ACTIVITY-EXPORT"
