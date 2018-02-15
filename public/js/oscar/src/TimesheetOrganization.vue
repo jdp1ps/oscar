@@ -10,23 +10,27 @@
                 <i class="icon-cancel-circled-outline" @click="filtreActivite = ''"></i>
                 </span>
         </p>
-        <div class="timesheet">
+        <div class="timesheet timesheet-header">
 
             <div class="activity">
+                <i class="icon-cube"></i>
                 Activité
                 <input v-model="filtreActivite" class="form-control" placeholder="Filtrer sur les activités" />
             </div>
 
             <div class="wp">
+                <i class="icon-archive"></i>
                 Lot de travail
             </div>
 
             <div class="date">
+                <i class="icon-calendar"></i>
                 Créneau
             </div>
 
 
             <div class="declarant">
+                <i class="icon-user"></i>
                 Déclarant
                 <input v-model="filtreDeclarant" class="form-control" placeholder="Filtrer sur les déclarants" />
             </div>
@@ -39,46 +43,8 @@
                 Validation administrative
             </div>
         </div>
-        <table class="table table-condensed table-bordered">
-            <thead>
-            <tr>
-                <th rowspan="2">
-                    <i class="icon-cube"></i>
-                    Activité
 
-                </th>
-
-                <th rowspan="2">
-                    <i class="icon-archive"></i>
-                    Lot de travail</th>
-
-                <th rowspan="2">
-                    <i class="icon-calendar"></i>
-                    Jour</th>
-
-                <th rowspan="2">
-                    <i class="icon-clock"></i>
-                    Horaire</th>
-
-                <th rowspan="2">
-                    <i class="icon-stopwatch"></i>
-                    Durée</th>
-
-                <th rowspan="2">
-                    <i class="icon-user"></i>
-                    Déclarants
-
-                </th>
-
-                <th colspan="2">Validation</th>
-            </tr>
-            <tr>
-                <th>Scientfique</th>
-                <th>Administrative</th>
-            </tr>
-            </thead>
-        </table>
-            <section class="timesheets">
+        <section class="timesheets">
             <transition-group name="list" tag="article">
                 <timesheet v-for="timesheet in filteredTimesheets" :timesheet="timesheet" :key="timesheet.id"
                            @validsci="$emit('validsci', $event)"
@@ -87,7 +53,7 @@
                            @rejectadm="$emit('rejectadm', $event)"
                 />
             </transition-group>
-            </section>
+        </section>
     </section>
 </template>
 

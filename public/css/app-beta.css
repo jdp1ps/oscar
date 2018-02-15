@@ -7714,6 +7714,53 @@ time.date-missing {
 .fade-enter, .fade-leave-to, .fade-leave-active {
   opacity: 0; }
 
+.list-item {
+  display: inline-block;
+  margin-right: 10px; }
+
+.list-enter-active, .list-leave-active {
+  transition: all .25s; }
+
+.list-enter, .list-leave-to {
+  opacity: 0;
+  transform: translateX(-50px); }
+
+.organization-timesheets .timesheet {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: solid thin #999;
+  background: rgba(255, 255, 255, 0.75);
+  padding: .5em; }
+  .organization-timesheets .timesheet:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.5); }
+  .organization-timesheets .timesheet:hover {
+    background: white; }
+  .organization-timesheets .timesheet > div {
+    flex: 2;
+    vertical-align: center;
+    border-right: thin dotted #999;
+    align-self: stretch;
+    padding: 0 .5em; }
+  .organization-timesheets .timesheet .activity {
+    flex: 3; }
+  .organization-timesheets .timesheet .declarant, .organization-timesheets .timesheet .jour {
+    font-size: .8em;
+    font-weight: normal;
+    flex: 2; }
+  .organization-timesheets .timesheet .wp {
+    flex: 1; }
+  .organization-timesheets .timesheet .declarant {
+    font-weight: 600; }
+  .organization-timesheets .timesheet .small-note {
+    background: rgba(255, 255, 255, 0.7);
+    border: thin solid #ccc;
+    color: #777;
+    padding: .25em 1em;
+    border-radius: 4px;
+    font-size: .75em;
+    margin: 0 .5em; }
+
 #notifications-area {
   position: relative; }
   #notifications-area .notifications-total {
@@ -7795,10 +7842,13 @@ time.date-missing {
   left: 0;
   height: 100%;
   width: 100%;
-  background: rgba(255, 255, 255, 0.8);
-  z-index: 10; }
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center; }
   .overlay .overlay-content {
-    width: 75%;
+    width: 80%;
     margin: 100px auto;
     text-align: center; }
 
