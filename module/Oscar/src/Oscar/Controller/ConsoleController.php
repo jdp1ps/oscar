@@ -457,6 +457,12 @@ class ConsoleController extends AbstractOscarController
         if (!$datas) {
             die("ERREUR : Impossible de traiter les données du fichier ". json_last_error_msg()."\n");
         }
+
+        // Mise à jour de la séquence
+        $rsm = new Query\ResultSetMapping();
+        $query = $this->getEntityManager()->createNativeQuery("select setval('privilege_id_seq',(select max(id)+1 from privilege), false)", $rsm);
+        $query->execute();
+
         $toRemove = [];
         $toAdd = [];
         $toUpdate = [];
