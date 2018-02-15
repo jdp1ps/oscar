@@ -360,23 +360,6 @@
                 </script>
             <?php endif ?>
 
-            <?php /* if( DEBUG_OSCAR ): ?>
-                <div id="TEST" class="has-btn lc">TEST</div>
-                <script>
-                    require(['components/build/versements'], function(OscarVersements){
-                        var v = new OscarVersements.default({
-                            el: "#TEST",
-                            data: {
-                                url: '<?= $this->url("activitypayment_rest", ['idactivity' => $entity->getId()]) ?>'
-                            }
-                        });
-                        v.$on('notifications', function(type, message, err){
-                            flashMessage(type, message + ' (' +err.status +' : ' +err.statusText +')');
-                        });
-                    })
-                </script>
-            <?php endif*/ ?>
-
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
             <div id="payments-area" class="has-btn">
                 <h2><i class="icon-bank"></i>Versements</h2>
