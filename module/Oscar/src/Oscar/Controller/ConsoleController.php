@@ -319,7 +319,7 @@ class ConsoleController extends AbstractOscarController
         try {
             $sourceFilePath = $this->getReadablePath($this->params('fichier'));
             $configurationFilePath = $this->getReadablePath($this->params('config'));
-            $skip = 2;
+            $skip = 1;
 
 
             $configuration = require($configurationFilePath);

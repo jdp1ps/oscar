@@ -676,7 +676,7 @@ class TimesheetController extends AbstractOscarController
                 ]);
 
                 $response->setTerminal(true);
-                
+
                 return $response;
 
             } else {

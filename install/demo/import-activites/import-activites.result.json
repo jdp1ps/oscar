@@ -1,0 +1,37 @@
+[
+  {
+    "uid": "ED209",
+    "organizations": {
+      "Laboratoire": [
+        "Cyberdyne Corp"
+      ]
+    },
+    "persons": {
+      "Charg\u00e9 d'affaire": [
+        "Jean-marcel Acheval"
+      ],
+      "Pr\u00e9pos\u00e9 \u00e0 la ventilation": [
+        "Gontran Pouille"
+      ],
+      "Responsable scientifique": [
+        "Responsable Scientifique"
+      ]
+    },
+    "milestones": [
+      {
+        "type": "Rapport financier",
+        "date": "2017-08-22"
+      }
+    ],
+    "payments": [
+      {
+        "amount": 2017,
+        "date": "42589.5"
+      }
+    ],
+    "label": "Activit\u00e91",
+    "acronym": "Projet1",
+    "projectlabel": "Projet1",
+    "pfi": "EOTP201400002"
+  }
+]
