@@ -8,8 +8,10 @@
  */
 namespace Oscar\Controller;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
@@ -421,9 +423,24 @@ class PersonController extends AbstractOscarController
             }
         }
 
+        $ldapRoles = $this->getEntityManager()
+            ->createQueryBuilder('r', 'r.ldapFilter')
+            ->select('r')
+            ->from(Role::class, 'r', 'r.ldapFilter')
+            ->where('r.ldapFilter IS NOT NULL')
+            ->getQuery()
+            ->getResult(AbstractQuery::HYDRATE_ARRAY);
+
+        $roles = [];
+        $re = '/\(memberOf=(.*)\)/';
+        foreach ($ldapRoles as $role ){
+            $roles[preg_replace($re, '$1', $role['ldapFilter'])] = $role;
+        }
 
         return [
-            'entity' => $this->getPersonService()->getPerson($id),
+            'entity' => $person,
+            'ldapRoles' => $roles,
+            'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
             'auth' => $auth,
             'projects'  => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
             'activities' => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),

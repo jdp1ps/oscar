@@ -100,10 +100,18 @@
                         <tr>
                             <th>Groupes (LDAP)</th>
                             <td>
+
                                 <?php if( $entity->getLdapMemberOf() ): ?>
                                 <ul style="list-style: none">
                                 <?php foreach( $entity->getLdapMemberOf() as $memberOf ): ?>
-                                    <li><i class="icon-group"></i><code><?= $memberOf ?></code></li>
+                                    <?php if( array_key_exists($memberOf, $ldapRoles) ):?>
+                                    <li>
+                                        <i class="icon-group"></i><code><?= $memberOf ?></code>
+                                        <span class="cartouche <?= $ldapRoles[$memberOf]['principal'] ? 'primary' : '' ?>"><?= $ldapRoles[$memberOf]['roleId'] ?></span>
+                                    </li>
+                                    <?php else: ?>
+                                    <li style="opacity: .5"><i class="icon-group"></i><code><?= $memberOf ?></code></li>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                                 </ul>
                                 <?php else: ?>
@@ -195,6 +203,28 @@
                 <?php endforeach; ?>
                 <?= $this->pager($projects, preg_replace("/\\??&page=[0-9]*/", '', $_SERVER['REQUEST_URI']) . '?&page=%s') ?>
             </section>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_EDITION) ): ?>
+            <section>
+                <h2><i class="icon-lock-1"></i> Authentification</h2>
+                <?php if( !$entity->getLadapLogin() ): ?>
+                    <p class="alert alert-warning">Cette personne ne peut pas accéder à Oscar.</p>
+                <?php elseif ( $authentification ): ?>
+                    <p class="alert alert-info">
+                        Dernière connection <?= $this->moment($authentification->getDateLogin())->full() ?>
+                    </p>
+                    <?php if( $authentification->getRoles() ): ?>
+                        <p>Cette personne dispose de droit applicatif spécifique :
+                    <?php foreach( $authentification->getRoles() as $role) : ?>
+                        <span class="cartouche <?= $role->isPrincipal() ? 'primary' : '' ?>"><?= $role ?></span>
+                    <?php endforeach; ?>
+                        </p>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <p class="alert alert-info">Cette personne n'a pas d'authentification active</p>
+                <?php endif; ?>
+            </section>
+            <?php endif; ?>
 
             <?php if( count($activities) ): ?>
             <section id="activites">
