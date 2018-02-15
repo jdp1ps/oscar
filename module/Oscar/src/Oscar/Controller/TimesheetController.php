@@ -659,13 +659,24 @@ class TimesheetController extends AbstractOscarController
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             if ($method == 'GET') {
+
                 // Récupération des déclarations pour cette activité
-                $timesheets = $timeSheetService->allByActivity($activity);
+                $timesheets = [];
+
+                foreach( $timeSheetService->allByActivity($activity) as $timesheet ){
+                    // On désactive les fonctionnalités de déclaration
+                    $timesheet['credentials']['deletable'] = false;
+                    $timesheet['credentials']['editable'] = false;
+                    $timesheet['credentials']['sendable'] = false;
+                    $timesheets[] = $timesheet;
+                }
+
                 $response = new JsonModel([
                     'timesheets' => $timesheets
                 ]);
-                $response->setTerminal(true);
 
+                $response->setTerminal(true);
+                
                 return $response;
 
             } else {

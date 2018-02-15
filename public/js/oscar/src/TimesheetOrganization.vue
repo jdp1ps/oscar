@@ -15,7 +15,7 @@
             <div class="activity">
                 <i class="icon-cube"></i>
                 Activité
-                <input v-model="filtreActivite" class="form-control" placeholder="Filtrer sur les activités" />
+                <input v-model="filtreActivite" class="form-control input-sm" placeholder="Filtrer sur les activités" />
             </div>
 
             <div class="wp">
@@ -32,7 +32,7 @@
             <div class="declarant">
                 <i class="icon-user"></i>
                 Déclarant
-                <input v-model="filtreDeclarant" class="form-control" placeholder="Filtrer sur les déclarants" />
+                <input v-model="filtreDeclarant" class="form-control input-sm" placeholder="Filtrer sur les déclarants" />
             </div>
 
             <div>

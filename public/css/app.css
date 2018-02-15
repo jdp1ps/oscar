@@ -7744,6 +7744,8 @@ time.date-missing {
     padding: 0 .5em; }
   .organization-timesheets .timesheet .activity {
     flex: 3; }
+    .organization-timesheets .timesheet .activity small {
+      display: block; }
   .organization-timesheets .timesheet .declarant, .organization-timesheets .timesheet .jour {
     font-size: .8em;
     font-weight: normal;
@@ -7760,6 +7762,13 @@ time.date-missing {
     border-radius: 4px;
     font-size: .75em;
     margin: 0 .5em; }
+  .organization-timesheets .timesheet.timesheet-header {
+    background: #455790;
+    color: white;
+    font-weight: bold;
+    text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.5); }
+    .organization-timesheets .timesheet.timesheet-header .declarant {
+      font-size: 1em; }
 
 #notifications-area {
   position: relative; }
