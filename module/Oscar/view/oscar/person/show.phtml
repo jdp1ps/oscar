@@ -196,6 +196,7 @@
                 <?= $this->pager($projects, preg_replace("/\\??&page=[0-9]*/", '', $_SERVER['REQUEST_URI']) . '?&page=%s') ?>
             </section>
 
+            <?php if( count($activities) ): ?>
             <section id="activites">
                 <h2>Activités de recherche (Sans projet)</h2>
                 <?php
@@ -214,6 +215,7 @@
                 ]); ?>
                 <?php endforeach; ?>
             </section>
+            <?php endif; ?>
 
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_EDITION)): ?>
                 <section>

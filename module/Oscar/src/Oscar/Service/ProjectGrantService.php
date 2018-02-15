@@ -1064,6 +1064,16 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             ->getResult();
     }
 
+    public function personActivitiesWithoutProject($personId)
+    {
+        return $this->getBaseQuery()
+            ->where('per.id = :personId AND c.project IS NULL')
+            ->setParameter('personId', $personId)
+            ->orderBy('c.dateCreated', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     /**
      * Retourne la requète pour obtenir la liste complète des contrats.
      *
