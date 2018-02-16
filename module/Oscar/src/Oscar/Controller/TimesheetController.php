@@ -14,8 +14,10 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityType;
+use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
+use Oscar\Entity\Privilege;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
@@ -191,49 +193,6 @@ class TimesheetController extends AbstractOscarController
             die();
         }
 
-
-        /*
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
-
-        $wpCodes = [];
-
-        foreach ($activity->getWorkPackages() as $wp) {
-            if( !in_array($wp->getCode(), $wpCodes) ){
-                $wpCodes[] = $wp->getCode();
-            }
-        }
-
-
-        $timesheets = $this->getEntityManager()->getRepository(TimeSheet::class)->findBy(['person' => $person]);
-
-        $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AG'];
-        $lineWpFormula = '=SUM(C%s:AG%s)';
-
-
-        $datas = [];
-
-        foreach ($timesheets as $ts ) {
-            $period = $ts->getDateFrom()->format('Y-m');
-            if (!array_key_exists($period, $datas)) {
-                $datas[$period] = [];
-                foreach ($wpCodes as $code) {
-                    $datas[$period][$code] = [];
-                    for ($i = 1; $i <= 31; $i++) {
-                        $datas[$period][$code][$i] = 0.0;
-                    }
-                }
-            }
-
-            if (!$ts->getWorkpackage()) {
-                continue;
-            }
-
-            $currentCode = $ts->getWorkpackage()->getCode();
-            $currentDay = $ts->getDateFrom()->format('j');
-            $duration = $ts->getDuration();
-
-        }
-        /****/
         return [
             "datas" => $datas,
             "person" => $person,
@@ -260,6 +219,46 @@ class TimesheetController extends AbstractOscarController
         /** @var TimesheetService $timesheetsService */
         $timesheetsService = $this->getServiceLocator()->get('TimesheetService');
 
+        $organizationId = $this->params()->fromQuery('id', null);
+
+        $organizationsTimesheets = [];
+
+        if( $organizationId != null ){
+            if( !( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
+                || $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI)
+                )) {
+                throw new UnAuthorizedException("Droits insuffisants");
+            }
+            $organisation = $this->getEntityManager()->getRepository(Organization::class)->find($organizationId);
+            $label = (string) $organisation;
+            $roleOk = null;
+
+            foreach ($this->getOscarUserContext()->getDbUser()->getRoles() as $role){
+                if( $role->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI) || $role->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM) ){
+                  $roleOk = $role;
+                }
+            }
+            $organizationsTimesheets[] = [
+              'organization' => $organisation,
+              'role' => $roleOk
+            ];
+        } else {
+            /** @var OrganizationPerson $organizationPerson */
+            foreach ($this->getCurrentPerson()->getLeadedOrganizations() as $organizationPerson ){
+
+                if(
+                    $organizationPerson->getRoleObj()->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI) ||
+                    $organizationPerson->getRoleObj()->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
+                ){
+                    $organizationsTimesheets[] = [
+                        'organization' => $organizationPerson->getOrganization(),
+                        'role' => $organizationPerson->getRoleObj()
+                    ];
+                }
+            }
+        }
+
+
         $method = $this->getHttpXMethod();
 
         switch( $method ){
@@ -267,24 +266,21 @@ class TimesheetController extends AbstractOscarController
                 if( $this->isAjax() ){
                     $result = [];
 
-                    /** @var OrganizationPerson $organizationPerson */
-                    foreach ($this->getCurrentPerson()->getLeadedOrganizations() as $organizationPerson ){
+                    //$organizations
 
-                        if(
-                            $organizationPerson->getRoleObj()->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI) ||
-                            $organizationPerson->getRoleObj()->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
-                        ){
-                            $organisationDatas = [
-                              'label' => (string)$organizationPerson->getOrganization(),
-                              'role'  => (string)$organizationPerson->getRoleObj()->getRoleId(),
-                              'timesheets' => []
-                            ];
-                            foreach ($timesheetsService->getTimesheetToValidateByOrganization( $organizationPerson->getOrganization()) as $timesheet ){
-                                $json = $timesheet->toJson();
-                                $json = array_merge($json, $timesheetsService->resolveTimeSheetCredentials($timesheet));
-                                $organisationDatas['timesheets'][] = $json;
-                                //$this->
-                            }
+                    /** @var OrganizationPerson $organizationPerson */
+                    foreach ($organizationsTimesheets as $data ){
+
+                        $organisationDatas = [
+                          'label' => (string)$data['organization'],
+                          'role'  => (string)$data['role'],
+                          'timesheets' => []
+                        ];
+                        foreach ($timesheetsService->getTimesheetToValidateByOrganization( $data['organization']) as $timesheet ){
+                            $json = $timesheet->toJson();
+                            $json = array_merge($json, $timesheetsService->resolveTimeSheetCredentials($timesheet));
+                            $organisationDatas['timesheets'][] = $json;
+                            //$this->
                         }
                         $result[] = $organisationDatas;
                     }
@@ -328,15 +324,10 @@ class TimesheetController extends AbstractOscarController
                         ];
                         $timesheet = $timesheetsService->rejectSci([$datas], $this->getCurrentPerson());
                         return $this->ajaxResponse($timesheet);
-
                 }
             default :
                 return $this->getResponseBadRequest();
         }
-
-
-
-
     }
 
     public function usurpationAction()
@@ -436,13 +427,6 @@ class TimesheetController extends AbstractOscarController
             }
 
             return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
-//            $timesheetId = $this->params()->fromQuery('timesheet');
-//            if ($timesheetId) {
-//                if ($timeSheetService->delete($timesheetId, $person)){
-//                    return $this->getResponseOk('Créneaux supprimé');
-//                }
-//            }
-//            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
         }
 
         $wpDeclarants = [];
@@ -452,7 +436,6 @@ class TimesheetController extends AbstractOscarController
                 $wpDeclarants[$workPackage->getId()] = $workPackage;
             }
         }
-//        $wpDeclarants = $activity->getWorkPackages();
 
         foreach($timesheets as &$timesheet ){
             if( !($timesheet['activity_id'] == null || $timesheet['activity_id'] == $activity->getId()) ){
@@ -478,6 +461,8 @@ class TimesheetController extends AbstractOscarController
 
         return $datasView;
     }
+
+
 
     /**
      * Déclaration des heures.
@@ -552,7 +537,6 @@ class TimesheetController extends AbstractOscarController
         } catch (\Exception $e ){
             return $this->getResponseInternalError("ERROR : " . $e->getMessage() . " - " . $e->getTraceAsString());
         }
-
 
         if ($method == 'GET') {
             $timesheets = $timeSheetService->allByPerson($this->getCurrentPerson());

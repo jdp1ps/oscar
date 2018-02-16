@@ -171,7 +171,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $now = new \DateTime();
         /** @var ActivityPayment $payment */
         foreach( $activity->getPayments() as $payment ){
-            if( $payment->getDatePredicted() ){
+            if( $payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_REALISE ){
                 $message = "$payment";
                 $context = "payment:" . $payment->getId();
                 $dateEffective = $payment->getDatePredicted();

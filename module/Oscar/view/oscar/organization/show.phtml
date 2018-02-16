@@ -96,6 +96,8 @@
             <a href="<?= $this->url('organization/edit', array('id' => $organization->getId())) ?>" class="btn btn-default btn-sm">
                 Éditer les informations
             </a>
+
+            <a href="<?= $this->url('timesheet/organization') ?>?id=<?= $organization->getId() ?>" class="btn btn-primary">Déclarations en attente</a>
         </nav>
 
     </header>
