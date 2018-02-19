@@ -59,9 +59,15 @@ var versements = Vue.extend({
                 <strong class="amount">{{ versement.amount | currency }}{{ versement.currency.symbol }}</strong>
                 <div class="date">
                     <i class="icon-calendar"></i>
-                    <time :datetime="versement.datePredicted" class="date" v-if="versement.status == 1">
+                    
+                    <template v-if="versement.status == 1">
+                    <time :datetime="versement.datePredicted" class="date" v-if="versement.datePredicted">
                         {{ versement.datePredicted | date}}
                     </time>
+                    <strong class="text-danger">
+                        Pas de date prévue !
+                    </strong>
+                    </template>
                     <time :datetime="versement.datePayment" class="date" v-else>
                         {{ versement.datePayment | date}}
                     </time>

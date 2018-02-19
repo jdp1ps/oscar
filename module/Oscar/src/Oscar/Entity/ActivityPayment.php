@@ -36,6 +36,12 @@ class ActivityPayment implements ITrackable
         ];
     }
 
+    public function getSymbol(){
+        if( $this->getCurrency() )
+            return $this->getCurrency()->getSymbol();
+        return '€';
+    }
+
     public function getStatusLabel()
     {
         return isset( self::getStatusPayments()[$this->getStatus()] ) ?

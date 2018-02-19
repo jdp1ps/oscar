@@ -445,6 +445,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         $now = new \DateTime();
         foreach( $dates as $data ){
             $data['deletable'] = true;
+            $dateStart = $data["dateStart"];
             $data['past'] = ($data['dateStart']<$now);
             $data['css'] = ($data['dateStart']<$now) ? 'past' : '';
             $out[$data['dateStart']->format('YmdHis').$data['id']] = $data;
@@ -466,15 +467,19 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         $currencyFormatter = new \Oscar\View\Helpers\Currency();
         /** @var ActivityPayment $v */
         foreach( $versements as $v ){
-            $out[$v->getDatePredicted()->format('YmdHis'.'v'.$v->getId())] = [
-                'dateStart' => $v->getDatePredicted(),
+
+            /** @var \DateTime $dateRef */
+            $dateRef = $v->getDatePayment() ? $v->getDatePayment() : $v->getDatePredicted();
+
+            $out[$dateRef->format('YmdHis'.'v'.$v->getId())] = [
+                'dateStart' => $dateRef,
                 'deletable' => false,
                 'css' => ($v->getDatePredicted()<$now) ? 'jalon-warn' : '',
                 'past' => ($v->getDatePredicted()<$now),
                 'comment' => ($v->getDatePredicted()<$now) ? 'Ce versement aurait dû être réalisé.' : 'Versement prévu',
                 'id' => $v->getId(),
                 'type' => [
-                    'label' => 'Versement de ' . $currencyFormatter->format($v->getAmount()). ' ' . $v->getCurrency()->getSymbol(),
+                    'label' => 'Versement de ' . $currencyFormatter->format($v->getAmount()). ' ' . $v->getSymbol(),
                     'facet' => 'payment'
                 ]
             ];

@@ -25,8 +25,8 @@
     ],
     "payments": [
       {
-        "amount": 2017,
-        "date": "42589.5"
+        "amount": 42589.5,
+        "date": "2017-01-01"
       }
     ],
     "label": "Activit\u00e91",

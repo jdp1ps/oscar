@@ -521,6 +521,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                         $payment = new ActivityPayment();
                         $this->entityManager->persist($payment);
                         $payment->setDatePayment($date)
+                            ->setStatus(ActivityPayment::STATUS_REALISE)
                             ->setActivity($activity)
                             ->setAmount($amount);
                         $this->entityManager->flush($payment);

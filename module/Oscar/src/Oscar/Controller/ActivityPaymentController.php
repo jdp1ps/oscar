@@ -76,7 +76,7 @@ class ActivityPaymentController extends AbstractOscarController
             $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
                 ->addSelect('c')
                 ->innerJoin('p.activity', 'a')
-                ->innerJoin('p.currency', 'c')
+                ->leftJoin('p.currency', 'c')
                 ->where('a.id = :idactivity')
                 ->orderBy('p.status', 'DESC')
                 ->addOrderBy('p.datePayment');

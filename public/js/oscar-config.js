@@ -212,8 +212,13 @@ define('hbs', ['handlebars', 'mm'], function (Handlebars, moment) {
     });
 
     Handlebars.registerHelper('past', function(context, options){
-        if(context.status == 1 && context.datePredicted.date < new Date().toISOString()){
-            return "past";
+
+        if(context.status == 1){
+            if( !context.datePredicted )
+                return 'error';
+
+            if( context.datePredicted.date < new Date().toISOString() )
+                return "past";
         }
         return "";
     });
