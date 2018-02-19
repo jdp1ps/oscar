@@ -169,6 +169,10 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         $now = new \DateTime();
+
+
+        // TODO Ne générer les notifications que pour les personnes ayant le privilège sur les payments (Voir)
+
         /** @var ActivityPayment $payment */
         foreach( $activity->getPayments() as $payment ){
             if( $payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_REALISE ){
@@ -204,6 +208,11 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 }
             }
         }
+
+        ////////// Déclarations en attentes
+        // TODO Générer les notifications pour les déclarations
+
+
         if( $silent == true )
             $this->triggerSocket();
     }
