@@ -324,13 +324,13 @@ cd /var/oscar_path
 Puis on commence par créer un compte d'autentification :
 
 ```bash
-php public/index.php oscar auth:add admin admin@domaine.tld password "Administrateur"
+php public/index.php oscar auth:add
 ```
 
 Puis lon lui attribut le rôle "Administrateur" :
 
 ```bash
-php public/index.php oscar auth:promote admin Administrateur
+php public/index.php oscar auth:promote <USER> Administrateur
 ```
 
 Utiliser ensuite la navigateur pour vous rendre sur oscar et utiliser l'identifiant **admin** avec la mot de passe **password** pour vous connecter en tant qu'administrateur.
