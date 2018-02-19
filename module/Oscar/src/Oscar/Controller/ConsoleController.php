@@ -603,7 +603,12 @@ class ConsoleController extends AbstractOscarController
     {
         echo "Synchronisation des activités : \n";
 
-        $file = realpath($this->getRequest()->getParam('fichier'));
+        try {
+            $file = $this->getReadablePath($this->getRequest()->getParam('fichier'));
+        } catch (\Exception $e ){
+            $this->consoleError("Impossible de lire le fichier source : " . $e->getMessage());
+        }
+
         echo "Importation des activités depuis $file : \n";
 
         $options = [
