@@ -46,7 +46,7 @@ class ConnectorOrganizationJSON implements ConnectorInterface
      * @return mixed
      */
     public function getJsonData(){
-        return $this->jsonDatas();
+        return $this->jsonDatas;
     }
 
     public function getEntityManager(){
