@@ -1,5 +1,9 @@
 <section class="container-fluid">
+    <?php if($activity->getId()): ?>
+    <h1>Modification du jalon</h1>
+    <?php else: ?>
     <h1>Nouveau Jalon</h1>
+    <?php endif; ?>
     <div class="form">
         <?= $this->form()->openTag($form->prepare()); ?>
         <?= $this->formControlGroup($form->get('type')); ?>

@@ -66,7 +66,7 @@ class ActivityDateForm extends Form implements ServiceLocatorAwareInterface
         $this->add($dateType);
 
         // DESCRIPTION
-        $label = 'Comment';
+        $label = 'Commentaire';
         $this->add([
             'name'   => 'comment',
             'options' => [
