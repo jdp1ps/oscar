@@ -93,7 +93,7 @@ define(['exports', 'vue', 'vue-resource', 'bootbox'], function (exports, _vue, _
 
                 _bootbox2.default.confirm({
                     title: 'Supprimer définitivement le rôle ?',
-                    message: 'Si vous souhaitez désactiver le rôle, décochez la portée dans le forumaire.',
+                    message: 'Si vous souhaitez désactiver le rôle, décochez la portée dans le formulaire.',
                     callback: function callback(response) {
                         if (!response) return;
                         _this2.loading = true;

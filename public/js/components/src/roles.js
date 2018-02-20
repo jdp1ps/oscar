@@ -193,7 +193,7 @@ var Roles = Vue.extend({
         remove (role) {
             Bootbox.confirm({
                 title: 'Supprimer définitivement le rôle ?',
-                message: 'Si vous souhaitez désactiver le rôle, décochez la portée dans le forumaire.',
+                message: 'Si vous souhaitez désactiver le rôle, décochez la portée dans le formulaire.',
                 callback: (response) => {
                     if (!response) return;
                     this.loading = true;
