@@ -89,6 +89,7 @@ class ActivityDateController extends AbstractOscarController
             }
 
             $view = new ViewModel([
+                'title' => 'Modification du jalon',
                 'message' => $message,
                 'activity' => $activity,
                 'form' => $form,
@@ -143,6 +144,7 @@ class ActivityDateController extends AbstractOscarController
         }
 
         $view = new ViewModel([
+            'title' => 'Nouveau jalon',
             'activity' => $activity,
             'form' => $form,
         ]);

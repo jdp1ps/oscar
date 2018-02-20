@@ -82,7 +82,9 @@
 </template>
 
 <script>
-    import moment from 'moment'
+    // Externe
+    const moment = import('moment');
+
     moment.locale('FR_fr');
 
     export default {
