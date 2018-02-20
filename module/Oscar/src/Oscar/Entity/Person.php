@@ -171,6 +171,18 @@ class Person implements ResourceInterface
         $this->setDateCreated(new \DateTime());
     }
 
+    public function getRolesFromConnector( $connectorName ){
+//        $roles = [];
+//        /** @var OrganizationPerson $organizationPerson */
+//        foreach ($this->getOrganizations() as $organizationPerson ){
+//            if( $organizationPerson->getFrom() == $connectorName ){
+//                $roles[$organizationPerson->getRole()] = $organizationPerson;
+//            }
+//        }
+//        return $roles;
+        return [];
+    }
+
     /**
      * @return array
      */

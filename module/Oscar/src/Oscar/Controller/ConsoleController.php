@@ -706,7 +706,7 @@ class ConsoleController extends AbstractOscarController
 
             $connectorFormatter->format($repport);
         } catch (\Exception $e) {
-            die("ERROR : " . $e->getMessage());
+            die("ERROR : " . $e->getMessage() . $e->getTraceAsString());
         }
     }
 

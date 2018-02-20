@@ -135,15 +135,18 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 continue;
             }
             if($personData->dateupdated == null
-                || $personOscar->getDateSyncLdap() == null
-                || $personOscar->getDateSyncLdap() < $personData->dateupdated
-                || $force == true ){
+                    || $personOscar->getDateSyncLdap() == null
+                    || $personOscar->getDateSyncLdap() < $personData->dateupdated
+                    || $force == true )
+            {
                 $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
+
                 if( $this->getPersonHydrator()->isSuspect() ){
                     $repport->addRepport($this->getPersonHydrator()->getRepport());
                 }
 
                 $personRepository->flush($personOscar);
+
                 if( $action == 'add' ){
                     $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
                 } else {
