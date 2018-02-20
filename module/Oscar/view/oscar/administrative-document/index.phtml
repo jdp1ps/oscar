@@ -55,7 +55,7 @@ foreach( $documents as $document ) {
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_NEW)): ?>
             <a class="btn btn-default btn-xs" href="<?= $this->url('administrativedocument/upload', ['id' => $document['main']->getId()]) ?>?id=<?= $document['main']->getId() ?>">
                 <i class="icon-attach-1"></i>
-                Téléverser un nouvelle version
+                Téléverser une nouvelle version
             </a>
             <?php endif; ?>
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_DELETE)): ?>
