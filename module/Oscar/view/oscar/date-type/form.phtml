@@ -1,7 +1,8 @@
 <section class="container">
 
         <h1>
-           <?= ($entity->getId()) ? $entity : "Nouveau type d'activité" ?>
+
+           <?= ($entity->getId()) ? "<small>Modification de</small><br><i class=\"icon-calendar\"></i> <strong>" . $entity . "</strong>" : "Nouveau type d'activité" ?>
         </h1>
         <div class="form">
 
@@ -9,24 +10,27 @@
             <?= $this->formControlGroup($form->get('label')); ?>
             <?= $this->formElementErrors($form->get('label'), array('class' => 'help-inline')); ?>
 
-            <?= $this->formControlGroup($form->get('facet')); ?>
-            <?= $this->formElementErrors($form->get('facet'), array('class' => 'help-inline')); ?>
+
 
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <?= $this->formControlGroup($form->get('facet')); ?>
+                    <?= $this->formElementErrors($form->get('facet'), array('class' => 'help-inline')); ?>
+                </div>
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="">Récursivité</label>
                         <p class="help">Permet de configurer la fréquence des rappels. Renseigner les jours séparés par des virgules ex : 60,30,10 (60 jours avant, 30 et 10)</p>
                         <?= $this->formInput($form->get('recursivity')); ?>
                     </div>
-                    <?= $this->formElementErrors($form->get('recursivity'), array('class' => 'help-inline')); ?>
+                    <?= $this->formElementErrors($form->get('recursivity')); ?>
                 </div>
             <div class="form-group">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="">Complétude</label>
                     <p class="help">Permet d'utiliser les mécanismes gérant l'état d'avancement du jalon</p>
-                    <?= $this->formInput($form->get('finishable')); ?>
+                    <?= $this->formCheckbox($form->get('finishable')); ?>
                     <?= $this->formElementErrors($form->get('finishable'), array('class' => 'help-inline')); ?>
                 </div>
 

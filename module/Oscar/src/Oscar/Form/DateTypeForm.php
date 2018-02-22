@@ -35,7 +35,7 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
                 'label' => $label
             ],
             'attributes'    => [
-                'class'       => 'form-control',
+                'class'       => 'form-control input-lg',
                 'placeholder'   => $label,
             ],
             'type'=>'Text'
@@ -61,14 +61,15 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
             'name'   => 'finishable',
             'options' => [
                 'label' => $label,
-                'use_hidden_element' => true,
-                'checked_value' => 'on',
-                'unchecked_value' => 'off'
+                'use_hidden_element' => false,
+                'checked_value' => 1,
+                'unchecked_value' => 0
             ],
             'attributes'    => [
-                'class'       => 'form-control',
+                'class'     => 'form-control',
+                'checked'     => 1
             ],
-            'type'=>'Checkbox'
+            'type'=>Checkbox::class
         ]);
 
 
