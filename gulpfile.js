@@ -59,7 +59,7 @@ var gulp = require('gulp'),
 
 
 // Basic example
-gulp.task('default', ['sass', 'watch:sass', 'oscar-components', 'oscar-model', 'modules-js', 'modules-css', 'module-oscar-watch']);
+gulp.task('default', ['sass', 'watch:sass', 'oscar-components', 'oscar-model', 'modules-js', 'modules-css']);
 
 
 
@@ -146,19 +146,24 @@ gulp.task('oscar-model', function(){
 })
 
 
-gulp.task('module-oscar-build', function(){
+gulp.task('module-oscar-milestones', function(){
+    exec('poi build --format umd --moduleName milestones public/js/oscar/src/Milestones.vue --filename.js Milestones.js --dist public/js/oscar/dist');
+});
+
+gulp.task('module-oscar-timesheet', function(){
     exec('poi build --format umd --moduleName timesheetleader public/js/oscar/src/TimesheetLeader.vue --filename.js TimesheetLeader.js --dist public/js/oscar/dist');
 });
 
 
-gulp.task('watch:sass', function () {
+gulp.task('watch', function () {
     gulp.watch(directories.css + '**/*.scss', ['sass']);
     gulp.watch(directories.jsComponents + 'src/*.js', ['oscar-components']);
     gulp.watch(directories.jsModels + 'src/*.js', ['oscar-model']);
     gulp.watch('./public/js/modules/unicaen/src/css/*.scss', ['modules-css']);
     gulp.watch('./public/js/modules/unicaen/src/js/*.js', ['modules-js']);
+
+    gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);
+    gulp.watch(['./public/js/oscar/src/Milestone*'], ['module-oscar-milestones']);
 });
 
-gulp.task('module-oscar-watch', function () {
-    gulp.watch('./public/js/oscar/src/*.vue', ['module-oscar-build']);
-});
+
