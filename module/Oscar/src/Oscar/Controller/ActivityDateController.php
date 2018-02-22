@@ -65,19 +65,57 @@ class ActivityDateController extends AbstractOscarController
 
             $milestones = array_values($this->getActivityService()->getMilestones($idActivity));
 
+
             $data = [
                 'milestones' => $milestones,
                 'types' => $types
             ];
             switch( $method ){
+                case 'DELETE':
+                    $id =  $this->params()->fromQuery('id');
+                    $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
+                    $this->getEntityManager()->remove($milestone);
+                    $this->getEntityManager()->flush();
+                    return $this->getResponseOk("Jalon supprimé");
+                    break;
+
                 case 'GET':
 
                     break;
                 case 'PUT':
+                    $type = $this->getEntityManager()->getRepository(DateType::class)->find($_POST['type']);
+                    $comment = $_POST['comment'];
+                    $date = new \DateTime($_POST['dateStart']);
+
+                    $milestone = new ActivityDate();
+                    $this->getEntityManager()->persist($milestone);
+                    $milestone->setDateStart($date)
+                        ->setActivity($activity)
+                        ->setComment($comment)
+                        ->setType($type)
+                        ;
+                    $this->getEntityManager()->flush($milestone);
+
+                    return $this->ajaxResponse($milestone->toArray());
+
 
                     break;
                 case 'POST':
-                    return $this->getResponseBadRequest(print_r($_POST), true);
+                    $id = $_POST['id'];
+                    $type = $this->getEntityManager()->getRepository(DateType::class)->find($_POST['type']);
+                    $comment = $_POST['comment'];
+                    $date = new \DateTime($_POST['dateStart']);
+
+                    $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
+
+                    $milestone->setDateStart($date)
+                        ->setActivity($activity)
+                        ->setComment($comment)
+                        ->setType($type)
+                    ;
+                    $this->getEntityManager()->flush($milestone);
+
+                    return $this->ajaxResponse($milestone->toArray());
                     break;
                 default:
                     return $this->getResponseBadRequest("Protocol bullshit");

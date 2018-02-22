@@ -8,15 +8,16 @@
         <nav>
             <a href="#"
                     class="btn-valid"
+                    v-if="milestone.validable"
                     title="Marquer comme terminé"
                     @click.prevent="$emit('valid', milestone)"
                     >
                 <i class="icon-ok-circled"></i>
             </a>
-            <a href="#" class="btn-delete" title="Supprimer ce jalon" @click.prevent="$emit('remove', milestone)">
+            <a href="#" class="btn-delete" title="Supprimer ce jalon" @click.prevent="$emit('remove', milestone)" v-if="milestone.deletable">
                 <i class="icon-trash"></i>
             </a>
-            <a href="#" class="btn-edit" title="Modifier ce jalon" @click.prevent="$emit('edit', milestone)">
+            <a href="#" class="btn-edit" title="Modifier ce jalon" @click.prevent="$emit('edit', milestone)" v-if="milestone.editable">
                 <i class="icon-edit"></i>
             </a>
         </nav>

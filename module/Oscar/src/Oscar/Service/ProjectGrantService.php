@@ -430,8 +430,24 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         return file_exists($path) && is_readable($path) && ($resources = scandir($path)) && (count($resources) > 2);
     }
 
-
+    /**
+     * Retourne les jalons de l'activités.
+     *
+     * @param $idActivity
+     * @return array
+     */
     public function getMilestones( $idActivity ){
+
+        // Droit d'accès
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
+
+        /** @var OscarUserContext $oscarUserContext */
+        $oscarUserContext = $this->getServiceLocator()->get('OscarUserContext');
+
+        $oscarUserContext->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
+
+        $deletable = $editable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+
         $qb = $this->getEntityManager()->getRepository(ActivityDate::class)->createQueryBuilder('d')
             ->addSelect('t')
             ->innerJoin('d.activity', 'a')
@@ -445,9 +461,12 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         $now = new \DateTime();
         foreach( $dates as $data ){
             $data['deletable'] = true;
-            $dateStart = $data["dateStart"];
             $data['past'] = ($data['dateStart']<$now);
             $data['css'] = ($data['dateStart']<$now) ? 'past' : '';
+            $data['deletable'] = $deletable;
+            $data['editable'] = $editable;
+            $data['validable'] = $editable;
+
             $out[$data['dateStart']->format('YmdHis').$data['id']] = $data;
         }
 
@@ -478,6 +497,9 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
                 'past' => ($v->getDatePredicted()<$now),
                 'comment' => ($v->getDatePredicted()<$now) ? 'Ce versement aurait dû être réalisé.' : 'Versement prévu',
                 'id' => $v->getId(),
+                'deletable' => false,
+                'editable' => false,
+                'validable' => false,
                 'type' => [
                     'label' => 'Versement de ' . $currencyFormatter->format($v->getAmount()). ' ' . $v->getSymbol(),
                     'facet' => 'payment'

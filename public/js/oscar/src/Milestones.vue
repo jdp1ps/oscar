@@ -3,7 +3,14 @@
         <h1>
             <i class="icon-calendar"></i>
             Jalons UP</h1>
-
+        <transition name="fade">
+            <div class="error overlay" v-if="error">
+                <div class="overlay-content">
+                    <i class="icon-warning-empty"></i>
+                    {{ error }}
+                </div>
+            </div>
+        </transition>
         <transition name="fade">
             <div class="pending overlay" v-if="pendingMsg">
                 <div class="overlay-content">
@@ -29,7 +36,7 @@
 
                     <div class="form-group">
                         <label for="">Date prévu pour le jalon</label>
-                        <input v-model="formData.dateStart.date" class="form-control" type="date" />
+                        <input v-model="formData.dateStart" class="form-control" type="date" />
                     </div>
 
                     <div class="form-group">
@@ -122,18 +129,40 @@
                 this.deleteMilestone = milestone;
             },
 
+            preformDelete(){
+                this.pendingMsg = "Suppression du jalon";
+                this.$http.delete(this.url+"?id=" + this.deleteMilestone.id).then(
+                    success => {
+                        this.getMilestones();
+                    },
+                    error => {
+                        console.log(error);
+                        this.error = "Impossible de supprimer le jalon " + error.body;
+                    }
+                ).then( foo => {
+                    this.pendingMsg = null;
+                    this.deleteMilestone = null;
+                })
+            },
+
             handlerEdit(milestone){
                 this.editMilestone = milestone;
-                this.formData = JSON.parse(JSON.stringify(milestone));
+                this.formData = {
+                    type: milestone.type,
+                    id:milestone.id,
+                    comment: milestone.comment,
+                    dateStart: this.getMoment()(milestone.dateStart.date).format('YYYY-MM-DD'),
+                };
             },
 
             handlerNew(){
                 this.formData = {
                     id: 0,
                     type: JSON.parse(JSON.stringify(this.types[0])),
-                    dateStart: new Date(),
+                    dateStart: this.getMoment()().format('YYYY-MM-DD'),
                     comment: "Commentaire par defaut"
                 };
+                console.log(this.formData.dateStart);
             },
 
             getMoment(){
@@ -141,32 +170,37 @@
             },
 
             saveFormData(){
-                console.log(this.formData);
+
 
                 var datas = new FormData();
                 datas.append('id', this.formData.id)
                 datas.append('type', this.formData.type.id)
                 datas.append('comment', this.formData.comment)
-                datas.append('dateStart', this.formData.dateStart.date)
+                datas.append('dateStart', this.formData.dateStart)
 
                 if( this.formData.id ){
+                    this.pendingMsg = "Enregistrement des modifications";
                     this.$http.post(this.url, datas).then(
                         success => {
-                            console.log('OK')
+                            this.getMilestones();
                         },
                         error => {
-                            console.log('ERROR', error)
+                            this.error = "Impossible d'enregistrer le jalon " + error;
                         }
-                    )
+                    ).then( foo => {
+                        this.pendingMsg = null;
+                        this.formData = null;
+                    })
                 }else{
+                    this.pendingMsg = "Création du nouveau jalon";
                     this.$http.put(this.url, datas).then(
                         success => {
-                            console.log('OK')
+                            this.getMilestones();
                         },
                         error => {
-                            console.log('ERROR', error)
+                            this.error = "Impossible de créer le jalon " + error;
                         }
-                    )
+                    ).then( foo => { this.pendingMsg = null; this.formData = null; })
                 }
             },
 
