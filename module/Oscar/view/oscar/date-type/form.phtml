@@ -7,12 +7,37 @@
 
             <?= $this->form()->openTag($form->prepare()); ?>
             <?= $this->formControlGroup($form->get('label')); ?>
+            <?= $this->formElementErrors($form->get('label'), array('class' => 'help-inline')); ?>
+
             <?= $this->formControlGroup($form->get('facet')); ?>
-            <?= $this->formControlGroup($form->get('recursivity')); ?>
+            <?= $this->formElementErrors($form->get('facet'), array('class' => 'help-inline')); ?>
+
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="">Récursivité</label>
+                        <p class="help">Permet de configurer la fréquence des rappels. Renseigner les jours séparés par des virgules ex : 60,30,10 (60 jours avant, 30 et 10)</p>
+                        <?= $this->formInput($form->get('recursivity')); ?>
+                    </div>
+                    <?= $this->formElementErrors($form->get('recursivity'), array('class' => 'help-inline')); ?>
+                </div>
+            <div class="form-group">
+                <div class="col-md-6">
+                    <label for="">Complétude</label>
+                    <p class="help">Permet d'utiliser les mécanismes gérant l'état d'avancement du jalon</p>
+                    <?= $this->formInput($form->get('finishable')); ?>
+                    <?= $this->formElementErrors($form->get('finishable'), array('class' => 'help-inline')); ?>
+                </div>
+
+            </div>
+            </div>
             <?= $this->formControlGroup($form->get('description')); ?>
+            <?= $this->formElementErrors($form->get('description'), array('class' => 'help-inline')); ?>
 
             <?= $this->formHidden($form->get('id')); ?>
             <?= $this->formHidden($form->get('secure')); ?>
+            <?= $this->formElementErrors($form->get('secure'), array('class' => 'help-inline')); ?>
             <hr>
             <div class="text-center">
                 <nav class="btn-group">

@@ -82,7 +82,6 @@ class ActivityType implements ITrackable
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-
     protected $centaureId;
 
     /**

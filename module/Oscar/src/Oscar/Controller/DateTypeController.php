@@ -61,12 +61,11 @@ class DateTypeController extends AbstractOscarController
 
         $form->init();
         $form->bind($entity);
-
         // Traitement des données envoyées
         if( $request->isPost() ){
-
             $form->setData($request->getPost());
             if( $form->isValid() ){
+
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush();
                 $this->redirect()->toRoute('datetype');

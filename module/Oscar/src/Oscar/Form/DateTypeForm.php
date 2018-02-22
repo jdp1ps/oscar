@@ -10,6 +10,7 @@ namespace Oscar\Form;
 
 use Oscar\Entity\OscarFacet;
 use Oscar\Hydrator\DateTypeFormHydrator;
+use Zend\Form\Element\Checkbox;
 use Zend\Form\Form;
 use Zend\InputFilter\InputFilterProviderInterface;
 
@@ -55,6 +56,22 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
             'type'=>'Select'
         ]);
 
+        $label = 'Complétude';
+        $this->add([
+            'name'   => 'finishable',
+            'options' => [
+                'label' => $label,
+                'use_hidden_element' => true,
+                'checked_value' => 'on',
+                'unchecked_value' => 'off'
+            ],
+            'attributes'    => [
+                'class'       => 'form-control',
+            ],
+            'type'=>'Checkbox'
+        ]);
+
+
         // Fréquence des notifications
         $label = 'Fréquence des notifications';
         $this->add([
@@ -98,7 +115,10 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
     {
         return [
             'label' => [ 'required' => true ],
-            'description' => [ 'required' => false ]
+            'description' => [ 'required' => false ],
+            'recursivity' => [ 'required' => false ],
+            'finishable' => [ 'required' => false ],
+
         ];
     }
 }

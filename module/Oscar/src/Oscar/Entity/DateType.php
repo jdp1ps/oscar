@@ -27,7 +27,8 @@ class DateType implements ITrackable
     private $label;
 
     /**
-     * Permet juste de filtre les dates (OscarFacet)
+     * Permet juste de filtrer les types de dates (OscarFacet)
+     *
      * @var
      * @ORM\Column(type="string", nullable=true)
      */
@@ -42,12 +43,38 @@ class DateType implements ITrackable
     private $description;
 
     /**
-     * Description.
+     * Permet de configurer les féquences de rappel.
      *
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
     private $recursivity;
+
+    /**
+     * Détermine si le jalon intégre des notions d'accomplissement.
+     *
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false, options={"default"=false})
+     */
+    private $finishable = false;
+
+    /**
+     * @return bool
+     */
+    public function isFinishable()
+    {
+        return $this->finishable;
+    }
+
+    /**
+     * @param bool $finishable
+     */
+    public function setFinishable($finishable)
+    {
+        $this->finishable = $finishable;
+
+        return $this;
+    }
 
     /**
      * @return string
