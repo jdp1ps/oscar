@@ -306,6 +306,36 @@
             <?php endif; ?>
         </div>
         <div class="col-md-4">
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
+
+                <pre><?= $this->url("activitydate", ['idactivity' => $entity->getId()]) ?></pre>
+            <div id="milestones">
+                Initialisation...
+            </div>
+            <script>
+                require(['vue','vue-resource', 'mm','milestones'], function(Vue, VueResource, moment, milestone){
+                    Vue.use(VueResource);
+                    Vue.filter('moment', function(value){
+                        var m = moment(value.date);
+                       return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
+                    });
+                    new Vue({
+                        render(h){
+                            return h(milestone.default, {
+                                props: {
+                                    url: '<?= $this->url("milestones/activity", ['idactivity' => $entity->getId()]) ?>',
+                                    moment: moment
+                                }
+                            })
+                        }
+                    }).$mount('#milestones')
+
+                })
+            </script>
+            <?php endif; ?>
+
+
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
             <div id="jalons-area" class="has-btn">
                 <h2><i class="icon-calendar-outlilne"></i>Jalons</h2>

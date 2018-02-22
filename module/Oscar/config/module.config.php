@@ -140,7 +140,7 @@ return array(
 
                 // --- DATES CLEFS
                 [ 'controller' =>   'ActivityDate',
-                    'action' => ['index'],
+                    'action' => ['index', 'activity'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'ActivityDate',

@@ -7197,6 +7197,8 @@ form .help {
     opacity: .5; }
     .jalon.past .details {
       display: none; }
+  .jalon.unfinished {
+    background: #DD423E !important; }
   .jalon.payment:before {
     content: '\e875';
     font-family: fontello; }

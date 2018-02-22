@@ -7187,6 +7187,7 @@ form .help {
   align-items: center; }
 
 .jalon {
+  /** Apparence des jalons non terminé (en retard) **/
   position: relative; }
   .jalon:before {
     content: '\e871';
@@ -7197,6 +7198,13 @@ form .help {
     opacity: .5; }
     .jalon.past .details {
       display: none; }
+  .jalon.late {
+    color: white;
+    text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.25);
+    opacity: 1;
+    background: #DD423E !important; }
+  .jalon.finished {
+    background: #499D1F; }
   .jalon.payment:before {
     content: '\e875';
     font-family: fontello; }
@@ -7859,7 +7867,8 @@ time.date-missing {
   .overlay .overlay-content {
     width: 80%;
     margin: 100px auto;
-    text-align: center; }
+    max-height: 80vh;
+    overflow-y: auto; }
 
 /*
 // ######################################################### ACTIVITY FICHE v2.0

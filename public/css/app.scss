@@ -2585,6 +2585,16 @@ form {
       display: none;
     }
   }
+  /** Apparence des jalons non terminé (en retard) **/
+  &.late {
+    color: white;
+    text-shadow: -1px 1px 0 rgba(0,0,0,.25);
+    opacity: 1;
+    background: $colorRed !important;
+  }
+  &.finished {
+    background: $colorGreen;
+  }
   &.payment:before {
     content: '\e875';
     font-family: fontello;
@@ -3490,7 +3500,8 @@ $oscar-line: dotted thin $colorGreyLight;
   .overlay-content {
     width: 80%;
     margin: 100px auto;
-    text-align: center;
+    max-height: 80vh;
+    overflow-y: auto;
   }
 }
 

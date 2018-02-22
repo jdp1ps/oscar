@@ -13,6 +13,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityType;
+use Oscar\Entity\DateType;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
@@ -38,6 +39,58 @@ class ActivityDateController extends AbstractOscarController
             return [
                 'milestones' => $qb->getQuery()->getResult()
             ];
+        }
+    }
+
+    /**
+     * Gestion des Jalons (v 2.0)
+     *
+     * @return \Zend\Http\Response|JsonModel
+     */
+    public function activityAction()
+    {
+        $idActivity = $this->params()->fromRoute('idactivity');
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
+
+        if( $idActivity ) {
+
+            $method = $this->getHttpXMethod();
+
+            $types = $this->getEntityManager()->createQueryBuilder()
+                ->select('t')
+                ->from(DateType::class, 't')
+                ->getQuery()
+                ->getResult(Query::HYDRATE_ARRAY);
+
+            $milestones = array_values($this->getActivityService()->getMilestones($idActivity));
+
+            $data = [
+                'milestones' => $milestones,
+                'types' => $types
+            ];
+            switch( $method ){
+                case 'GET':
+
+                    break;
+                case 'PUT':
+
+                    break;
+                case 'POST':
+                    return $this->getResponseBadRequest(print_r($_POST), true);
+                    break;
+                default:
+                    return $this->getResponseBadRequest("Protocol bullshit");
+
+            }
+
+
+
+            $view = new JsonModel($data);
+
+            return $view;
+        } else {
+            return $this->getResponseInternalError();
         }
     }
 

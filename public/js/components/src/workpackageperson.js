@@ -235,7 +235,7 @@ var Workpackageperson = Vue.extend({
             <div class="vue-loader" v-if="errors.length">
                 <div class="alert alert-danger" v-for="error, i in errors">
                     {{ error }}
-                    <a href="" @click.prevent="errors.splice(i,1)"><i class="glyphicon glyphicon-remove"></i></a>
+                    <a href="" @click.prevent="errors.splice(i,1)"><i class="icon-cancel-outline"></i></a>
                 </div>
             </div>
         </transition>

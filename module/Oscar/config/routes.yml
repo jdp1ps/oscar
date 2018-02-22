@@ -993,6 +993,13 @@ milestones:
             controller: ActivityDate
             action: index
     may_terminate: true
+    child_routes:
+        activity:
+            type: segment
+            options:
+                route: /:idactivity
+                defaults:
+                    action: activity
 
 activitydate:
     type: segment
