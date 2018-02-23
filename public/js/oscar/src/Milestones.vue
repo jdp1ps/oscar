@@ -1,16 +1,20 @@
 <template>
     <section class="milestones">
-        <h1>
-            <i class="icon-calendar"></i>
-            Jalons UP</h1>
+        <h2><i class="icon-calendar"></i>Jalons</h2>
+
         <transition name="fade">
             <div class="error overlay" v-if="error">
                 <div class="overlay-content">
                     <i class="icon-warning-empty"></i>
                     {{ error }}
+                    <br>
+                    <a href="#" @click="error = null" class="btn btn-sm btn-default btn-xs">
+                        <i class="icon-cancel-circled"></i>
+                        Fermer</a>
                 </div>
             </div>
         </transition>
+
         <transition name="fade">
             <div class="pending overlay" v-if="pendingMsg">
                 <div class="overlay-content">
@@ -30,13 +34,20 @@
                     <div class="form-group">
                         <label for="">Type de jalon</label>
                         <select name="" id="" v-model="formData.type.id" class="form-control">
-                            <option :value="t.id" v-for="t in types">{{ t.label }}</option>
+                            <optgroup :label="g.label" v-for="g in groupedTypes">
+                                <option :value="t.id" v-for="t in g.types">{{ t.label }}</option>
+                            </optgroup>
+
                         </select>
+                        <p v-show="formTypeFinishable" class="help">
+                            <i class="icon-info-circled"></i>
+                            Ce type de jalon inclu des méchanismes de validation pour marquer le jalon comme terminé
+                        </p>
                     </div>
 
                     <div class="form-group">
                         <label for="">Date prévu pour le jalon</label>
-                        <input v-model="formData.dateStart" class="form-control" type="date" />
+                        <input v-model="formData.dateStart" class="form-control" type="date"/>
                     </div>
 
                     <div class="form-group">
@@ -45,7 +56,7 @@
                     </div>
 
                     <nav>
-                        <button class="btn btn-default" @click="saveFormData">
+                        <button class="btn btn-default" @click="performSave">
                             <i class="icon-trash"></i>
                             Enregistrer
                         </button>
@@ -61,8 +72,9 @@
         <transition name="fade">
             <div class="deleteconfirm overlay" v-if="deleteMilestone">
                 <div class="overlay-content">
-                    <i class="icon-help-circled"></i>
-                    Supprimer définitivement ce jalon ?
+                    <h3><i class="icon-help-circled"></i>
+                        Supprimer ce jalon ?</h3>
+                    <p>Cette suppression sera <strong>définitive</strong>, si vous souaitez signifier que ce jalon est réalisé, utilisez plutôt l'option <em>Marquer comme terminé</em>. Si cette option n'est pas disponible, demandez à l'administrateur Oscar si vous avez les privilèges pour faire ça ou si le type de jalon <strong>{{ deleteMilestone.type.label }}</strong> est correctement configuré.</p>
                     <nav>
                         <button class="btn btn-default" @click="preformDelete">
                             <i class="icon-trash"></i>
@@ -77,27 +89,72 @@
             </div>
         </transition>
 
-        <div class="alert" v-if="error">
-            {{ error }}
-        </div>
+        <transition name="fade">
+            <div class="validconfirm overlay" v-if="validMilestone">
+                <div class="overlay-content">
+                    <h3>
+                        <i class="icon-help-circled"></i>
+                        Valider ce jalon ?
+                    </h3>
+                    <p>Les jalons marqués comme terminés ne feront pas l'objet de notifications ou d'alertes.</p>
+                    <nav>
+                        <button class="btn btn-default" @click="performValid('valid')">
+                            <i class="icon-ok-circled"></i>
+                            Marquer ce jalon comme terminé
+                        </button>
+                        <button class="btn btn-default" @click="validMilestone = null">
+                            <i class="icon-cancel-outline"></i>
+                            Annuler
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
+        <transition name="fade">
+            <div class="validconfirm overlay" v-if="unvalidMilestone">
+                <div class="overlay-content">
+                    <h3>
+                        <i class="icon-help-circled"></i>
+                        Invalider ce jalon ?
+                    </h3>
+                    <p>L'état d'avancement du jalon sera réinitialisé.</p>
+                    <nav>
+                        <button class="btn btn-default" @click="performValid('unvalid')">
+                            <i class="icon-ok-circled"></i>
+                            Marquer ce jalon comme non-terminé
+                        </button>
+                        <button class="btn btn-default" @click="unvalidMilestone = null">
+                            <i class="icon-cancel-outline"></i>
+                            Annuler
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
 
         <section class="list" v-if="milestones != null">
-            <p>Il y'a {{ milestones.length }} jalon(s)</p>
+            <p><small>Il y'a {{ milestones.length }} jalon(s)</small></p>
             <milestone :milestone="m" v-for="m in milestones" :key="m.id"
-                @valid="handlerValid"
-                @remove="handlerRemove"
-                @edit="handlerEdit"
+                       @valid="handlerValid"
+                       @unvalid="handlerUnvalid"
+                       @remove="handlerRemove"
+                       @edit="handlerEdit"
             />
         </section>
 
-        <button class="btn btn-default" @click="handlerNew">
-            <i class="icon-calendar-plus-o"></i>
-            Nouveau Jalon</button>
+        <nav class="text-right">
+            <a href="#" @click.prevent="handlerNew" v-show="creatable" class="oscar-link">
+                <i class="icon-calendar-plus-o"></i>
+                Nouveau Jalon
+            </a>
+        </nav>
 
     </section>
 
 </template>
 <script>
+    //////////////////////////////////////////////////////////////
     import MilestoneItem from './MilestoneItem.vue'
 
     export default {
@@ -107,124 +164,210 @@
             'milestone': MilestoneItem
         },
 
-        data(){
+        data() {
             return {
                 error: null,
                 formData: null,
                 pendingMsg: "",
+                creatable: false,
                 milestones: null,
                 deleteMilestone: null,
                 editMilestone: null,
                 validMilestone: null,
+                unvalidMilestone: null,
                 types: null
             }
         },
 
+        computed: {
+            formTypeFinishable(){
+                if( !this.formData )
+                    return false;
+
+                return this.types.find( type => type.id == this.formData.type.id && type.finishable );
+            },
+            groupedTypes(){
+                let groupedTypes = {};
+                this.types.forEach( type => {
+                    let facet = type.facet;
+                    if(!groupedTypes.hasOwnProperty(facet) ){
+                        groupedTypes[facet] = {
+                            label: facet,
+                            types: []
+                        };
+                    }
+                    groupedTypes[type.facet].types.push(type);
+                });
+                return groupedTypes;
+            }
+        },
+
         methods: {
-            handlerValid(milestone){
+            ////////////////////////////////////////////////////////////////
+            //
+            // HANDLERS
+            //
+            ////////////////////////////////////////////////////////////////
+
+            /**
+             * Demande de validation
+             */
+            handlerValid(milestone) {
                 this.validMilestone = milestone;
             },
 
-            handlerRemove(milestone){
+            handlerUnvalid(milestone) {
+                console.log("Confirmation d'invalidation de ", milestone)
+                this.unvalidMilestone = milestone;
+            },
+
+            /**
+             * Demande de suppression
+             */
+            handlerRemove(milestone) {
                 this.deleteMilestone = milestone;
             },
 
-            preformDelete(){
-                this.pendingMsg = "Suppression du jalon";
-                this.$http.delete(this.url+"?id=" + this.deleteMilestone.id).then(
-                    success => {
-                        this.getMilestones();
-                    },
-                    error => {
-                        console.log(error);
-                        this.error = "Impossible de supprimer le jalon " + error.body;
-                    }
-                ).then( foo => {
-                    this.pendingMsg = null;
-                    this.deleteMilestone = null;
-                })
-            },
-
-            handlerEdit(milestone){
+            /**
+             * Édition : Hydratation du formulaire
+             */
+            handlerEdit(milestone) {
                 this.editMilestone = milestone;
                 this.formData = {
                     type: milestone.type,
-                    id:milestone.id,
+                    id: milestone.id,
                     comment: milestone.comment,
                     dateStart: this.getMoment()(milestone.dateStart.date).format('YYYY-MM-DD'),
                 };
             },
 
-            handlerNew(){
+            /**
+             * Création : Hydratation du formulaire
+             */
+            handlerNew() {
                 this.formData = {
                     id: 0,
                     type: JSON.parse(JSON.stringify(this.types[0])),
                     dateStart: this.getMoment()().format('YYYY-MM-DD'),
-                    comment: "Commentaire par defaut"
+                    comment: ""
                 };
-                console.log(this.formData.dateStart);
             },
 
-            getMoment(){
-                return this.moment;
+
+            ////////////////////////////////////////////////////////////////
+            //
+            // OPERATIONS REST
+            //
+            ////////////////////////////////////////////////////////////////
+
+            /**
+             * Suppression : Envoi REST
+             */
+            preformDelete() {
+                this.pendingMsg = "Suppression du jalon";
+                this.$http.delete(this.url + "?id=" + this.deleteMilestone.id).then(
+                    success => {
+                        this.getMilestones();
+                    },
+                    error => {
+                        this.error = "Impossible de supprimer le jalon " + error.body;
+                    }
+                ).then(foo => {
+                    this.pendingMsg = null;
+                    this.deleteMilestone = null;
+                })
             },
 
-            saveFormData(){
+            /**
+             * Marquer le jalon comme terminé.
+             */
+            performValid(action){
+                this.pendingMsg = action == 'valid' ? "Validation du jalon" : "Réinitialisation du jalon";
 
 
+                var datas = new FormData(),
+                    milestone = (action == 'valid' ? this.validMilestone : this.unvalidMilestone);
+
+                console.log(action, milestone);
+
+                datas.append('id', milestone.id)
+                datas.append('action', action)
+
+                this.$http.post(this.url, datas).then(
+                    success => {
+                        this.getMilestones();
+                    },
+                    error => {
+                        this.error = "Impossible de modifier l'état du jalon : " + error.body;
+                    }
+                ).then(foo => {
+                    this.pendingMsg = null;
+                    this.validMilestone = null;
+                    this.unvalidMilestone = null;
+                })
+            },
+
+            /**
+             * Enregistrement des données (Création ou édition)
+             */
+            performSave() {
                 var datas = new FormData();
+
                 datas.append('id', this.formData.id)
                 datas.append('type', this.formData.type.id)
                 datas.append('comment', this.formData.comment)
                 datas.append('dateStart', this.formData.dateStart)
 
-                if( this.formData.id ){
-                    this.pendingMsg = "Enregistrement des modifications";
-                    this.$http.post(this.url, datas).then(
-                        success => {
-                            this.getMilestones();
-                        },
-                        error => {
-                            this.error = "Impossible d'enregistrer le jalon " + error;
-                        }
-                    ).then( foo => {
-                        this.pendingMsg = null;
-                        this.formData = null;
-                    })
-                }else{
-                    this.pendingMsg = "Création du nouveau jalon";
-                    this.$http.put(this.url, datas).then(
-                        success => {
-                            this.getMilestones();
-                        },
-                        error => {
-                            this.error = "Impossible de créer le jalon " + error;
-                        }
-                    ).then( foo => { this.pendingMsg = null; this.formData = null; })
-                }
+                var method = this.formData.id ?'post' : 'put';
+                this.pendingMsg = this.formData.id ? "Enregistrement des modifications" : "Création du nouveau jalon";
+
+                this.$http[method](this.url, datas).then(
+                    success => {
+                        this.getMilestones();
+                    },
+                    error => {
+                        this.error = "Impossible d'enregistrer le jalon " + error;
+                    }
+                ).then(foo => {
+                    this.pendingMsg = null;
+                    this.formData = null;
+                })
             },
 
             /**
              * Chargement des jalons depuis l'API
              */
-            getMilestones(){
+            getMilestones() {
 
                 this.pendingMsg = "Chargement des jalons : " + this.url;
 
                 this.$http.get(this.url).then(
                     success => {
-                        console.log('Données chargée', success.data);
                         this.milestones = success.data.milestones;
                         this.types = success.data.types;
+                        this.creatable = success.data.creatable;
                     },
                     error => {
                         this.error = "Impossible de charger les jalons de cette activités : " + error
                     }
-                ).then( n => this.pendingMsg = "");
-            }
+                ).then(n => this.pendingMsg = "");
+            },
+
+            ////////////////////////////////////////////////////////////////
+            //
+            // DEPENDENCIES
+            //
+            ////////////////////////////////////////////////////////////////
+
+            /**
+             * @return moment
+             */
+            getMoment() {
+                return this.moment;
+            },
         },
 
-        mounted(){
+        mounted() {
             this.getMilestones()
         }
     }

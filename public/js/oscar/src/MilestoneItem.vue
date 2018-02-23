@@ -6,18 +6,29 @@
         <strong class="card-title">{{ milestone.type.label }}</strong>
         <p class="details" v-if="milestone.comment">{{ milestone.comment }}</p>
         <nav>
-            <a href="#"
-                    class="btn-valid"
-                    v-if="milestone.validable"
-                    title="Marquer comme terminé"
-                    @click.prevent="$emit('valid', milestone)"
-                    >
+
+            <a href="#" v-if="cancelFinish"
+               title="Marquer comme non-terminé"
+               @click.prevent="$emit('unvalid', milestone)">
+                <i class="icon-cancel-outline"></i>
+            </a>
+
+            <a href="#" v-if="finishable"
+               title="Marquer comme terminé"
+               @click.prevent="$emit('valid', milestone)">
                 <i class="icon-ok-circled"></i>
             </a>
-            <a href="#" class="btn-delete" title="Supprimer ce jalon" @click.prevent="$emit('remove', milestone)" v-if="milestone.deletable">
+
+            <a href="#"
+                    title="Supprimer ce jalon"
+                    @click.prevent="$emit('remove', milestone)"
+                    v-if="milestone.deletable">
                 <i class="icon-trash"></i>
             </a>
-            <a href="#" class="btn-edit" title="Modifier ce jalon" @click.prevent="$emit('edit', milestone)" v-if="milestone.editable">
+            <a href="#"
+                    title="Modifier ce jalon"
+                    @click.prevent="$emit('edit', milestone)"
+                    v-if="milestone.editable">
                 <i class="icon-edit"></i>
             </a>
         </nav>
@@ -35,11 +46,16 @@
         },
         computed: {
             finishable(){
-                return this.milestone.type.finishable == true
+                return this.milestone.type.finishable == true && this.milestone.finished < 100;
+            },
+
+            cancelFinish(){
+                console.log(this.milestone.type.label, this.milestone.type.finishable, this.milestone.finished > 0)
+                return this.milestone.type.finishable == true && this.milestone.finished > 0
             },
 
             finished(){
-                return this.milestone.finished == 100
+                return this.milestone.type.finishable == true && this.milestone.finished == 100
             },
 
             late(){
@@ -51,27 +67,14 @@
             },
 
             cssClass(){
-//                let css = {}
-//                css.past = this.milestone.past;
-//
-//                if( this.milestone.type && this.milestone.type.facet )
-//                    css[this.milestone.type.facet] = true;
-//
-//                if( this.finishable ){
-//                    if( this.finished == 100 )
-//                        css['finished'] = true;
-//                    else
-//                        css['unfinished'] = true;
-//                }
-
-
-                return {
+                let css = {
                     'finishable': this.finishable,
                     'finished': this.finished,
                     'late': this.late,
                     'past': this.past,
-
                 };
+                css[this.milestone.type.facet] = true;
+                return css;
             }
         }
     }

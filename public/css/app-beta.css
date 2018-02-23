@@ -5362,6 +5362,13 @@ button.close {
 .openable.open .icon-openable:before {
   content: '\e860'; }
 
+.oscar-link {
+  color: #404040;
+  text-decoration: underline; }
+  .oscar-link:hover {
+    color: black;
+    text-decoration: none; }
+
 .link {
   color: #7f0027;
   text-decoration: underline; }
@@ -7070,7 +7077,7 @@ body .tv {
 
 .form-checker-handler:before {
   display: block;
-  transition: left .3s,  background 1s;
+  transition: left .3s, background 1s;
   content: ' ';
   width: 17px;
   height: 17px;
@@ -7187,9 +7194,11 @@ form .help {
   align-items: center; }
 
 .jalon {
+  border-left: 4px #AAA solid;
+  /** Apparence des jalons non terminé (en retard) **/
   position: relative; }
   .jalon:before {
-    content: '\e871';
+    content: '\e885';
     font-family: fontello; }
   .jalon.jalon-warn {
     background: #f0ad4e; }
@@ -7197,22 +7206,45 @@ form .help {
     opacity: .5; }
     .jalon.past .details {
       display: none; }
-  .jalon.unfinished {
-    background: #DD423E !important; }
+  .jalon.late {
+    border-left-color: #DD423E;
+    color: black;
+    text-shadow: -1px 1px 0 rgba(255, 255, 255, 0.25);
+    opacity: 1;
+    background: #e15754 !important; }
+    .jalon.late:before {
+      content: '\e865 ';
+      font-family: fontello; }
+  .jalon.finished {
+    border-left-color: #499D1F;
+    background: #53b223;
+    text-shadow: -1px 1px 0 rgba(255, 255, 255, 0.25); }
+    .jalon.finished:before {
+      content: '\f274 ';
+      font-family: fontello; }
   .jalon.payment:before {
     content: '\e875';
     font-family: fontello; }
+  .jalon.payment {
+    border-right: 4px #999 solid; }
+  .jalon .card-title {
+    border-bottom: rgba(255, 255, 255, 0.25) solid thin; }
   .jalon time {
     display: inline-block;
-    font-size: .9em; }
+    font-size: .9em;
+    font-weight: 100;
+    padding-left: .5em; }
   .jalon nav {
+    opacity: .3;
     text-align: right; }
     .jalon nav a {
       border-radius: 4px;
-      color: #64817A; }
+      color: #1F180D; }
     .jalon nav .btn-delete:hover {
       color: white;
       background-color: #DD423E; }
+  .jalon:hover nav {
+    opacity: 1; }
 
 .direction-desc .icon-angle-up {
   display: none; }
@@ -7518,13 +7550,13 @@ time.date-missing {
 
 .organization {
   /* // TYPE_ETABLISSEMENT
-  &.type-7 h2:before { content: "\e876";}
+   &.type-7 h2:before { content: "\e876";}
 
-  // TYPE_INSTITUTION
-  &.type-8 h2:before { content: "\e876";}
+   // TYPE_INSTITUTION
+   &.type-8 h2:before { content: "\e876";}
 
-  // TYPE_INCONNU
-  &.type-9 h2:before { content: "\e87f";}/***/ }
+   // TYPE_INCONNU
+   &.type-9 h2:before { content: "\e87f";}/***/ }
   .organization.closed > * {
     opacity: .5; }
   .organization h2:before {
@@ -7861,7 +7893,8 @@ time.date-missing {
   .overlay .overlay-content {
     width: 80%;
     margin: 100px auto;
-    text-align: center; }
+    max-height: 80vh;
+    overflow-y: auto; }
 
 /*
 // ######################################################### ACTIVITY FICHE v2.0

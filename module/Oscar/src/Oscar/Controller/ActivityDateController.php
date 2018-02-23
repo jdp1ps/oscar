@@ -26,7 +26,7 @@ class ActivityDateController extends AbstractOscarController
     public function indexAction()
     {
         $idActivity = $this->params()->fromRoute('idactivity');
-        if( $idActivity ) {
+        if ($idActivity) {
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
             $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
             $view = new JsonModel(array_values($this->getActivityService()->getMilestones($idActivity)));
@@ -53,7 +53,7 @@ class ActivityDateController extends AbstractOscarController
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
 
-        if( $idActivity ) {
+        if ($idActivity) {
 
             $method = $this->getHttpXMethod();
 
@@ -65,14 +65,16 @@ class ActivityDateController extends AbstractOscarController
 
             $milestones = array_values($this->getActivityService()->getMilestones($idActivity));
 
-
+            // Données envoyées
             $data = [
                 'milestones' => $milestones,
-                'types' => $types
+                'types' => $types,
+                'creatable' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity)
             ];
-            switch( $method ){
+
+            switch ($method) {
                 case 'DELETE':
-                    $id =  $this->params()->fromQuery('id');
+                    $id = $this->params()->fromQuery('id');
                     $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
                     $this->getEntityManager()->remove($milestone);
                     $this->getEntityManager()->flush();
@@ -92,8 +94,7 @@ class ActivityDateController extends AbstractOscarController
                     $milestone->setDateStart($date)
                         ->setActivity($activity)
                         ->setComment($comment)
-                        ->setType($type)
-                        ;
+                        ->setType($type);
                     $this->getEntityManager()->flush($milestone);
 
                     return $this->ajaxResponse($milestone->toArray());
@@ -101,18 +102,45 @@ class ActivityDateController extends AbstractOscarController
 
                     break;
                 case 'POST':
-                    $id = $_POST['id'];
-                    $type = $this->getEntityManager()->getRepository(DateType::class)->find($_POST['type']);
-                    $comment = $_POST['comment'];
-                    $date = new \DateTime($_POST['dateStart']);
+                    $action = $this->params()->fromPost('action', 'update');
+                    $id = $this->params()->fromPost('id');
 
-                    $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
+                    // Récupération du jalon
+                    try {
+                        /** @var ActivityDate $jalon */
+                        $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
+                    } catch ( \Exception $e ){
+                        return $this->getResponseNotFound("Impossible de trouver ce jalon.");
+                    }
 
-                    $milestone->setDateStart($date)
-                        ->setActivity($activity)
-                        ->setComment($comment)
-                        ->setType($type)
-                    ;
+
+                    // Marquer le jalon comme terminé / non-terminé
+                    if ($action == 'valid' || $action == 'unvalid') {
+                        $milestone->setFinished($action == 'valid' ? ActivityDate::FINISH_VALUE : 0);
+                    }
+
+                    // Mise à jour
+                    else if ($action == 'update') {
+                        $typeId = $this->params()->fromPost('type');
+                        $comment = $this->params()->fromPost('comment');
+                        $date = new \DateTime($this->params()->fromPost('dateStart'));
+
+                        try {
+                            $type = $this->getEntityManager()->getRepository(DateType::class)->find($typeId);
+                            $milestone->setDateStart($date)
+                                ->setActivity($activity)
+                                ->setComment($comment)
+                                ->setType($type);
+
+                        } catch ( \Exception $e ){
+                            return $this->getResponseNotFound("Type de jalon non-trouvé.");
+                        }
+                    }
+
+                    else {
+                        return $this->getResponseBadRequest("Cette action n'est pas supportée.");
+                    }
+
                     $this->getEntityManager()->flush($milestone);
 
                     return $this->ajaxResponse($milestone->toArray());
@@ -121,8 +149,6 @@ class ActivityDateController extends AbstractOscarController
                     return $this->getResponseBadRequest("Protocol bullshit");
 
             }
-
-
 
             $view = new JsonModel($data);
 
@@ -144,7 +170,7 @@ class ActivityDateController extends AbstractOscarController
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activityDate->getActivity());
 
 
-        if( $request->getMethod() === "DELETE" ){
+        if ($request->getMethod() === "DELETE") {
             try {
                 $activityDate->getActivity()->touch();
                 $this->getActivityService()->deleteActivityDate($activityDate);
@@ -154,8 +180,7 @@ class ActivityDateController extends AbstractOscarController
                     $activityDate->getActivity()->getId()
                 );
                 $this->getEntityManager()->flush();
-            }
-            catch( \Exception $e ){
+            } catch (\Exception $e) {
                 $this->getResponse()->setStatusCode(500);
                 $response->setVariable('error', 'Impossible de supprimer cette échéance');
             }
@@ -171,9 +196,9 @@ class ActivityDateController extends AbstractOscarController
             $form->bind($activityDate);
             $message = false;
 
-            if( $request->isPost() ){
+            if ($request->isPost()) {
                 $form->setData($request->getPost());
-                if($form->isValid()){
+                if ($form->isValid()) {
                     $this->getEntityManager()->flush($activityDate);
                     $message = "Je jalon a bien été enregistré";
                 }
@@ -186,7 +211,7 @@ class ActivityDateController extends AbstractOscarController
                 'form' => $form,
             ]);
 
-            if( $request->isXmlHttpRequest() ){
+            if ($request->isXmlHttpRequest()) {
                 $view->setTerminal(true);
             }
 
@@ -194,7 +219,6 @@ class ActivityDateController extends AbstractOscarController
 
             return $view;
         }
-
 
 
         die('Traitement ' . $request->getMethod());
@@ -209,8 +233,7 @@ class ActivityDateController extends AbstractOscarController
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
         $activityDate = new ActivityDate();
         $activityDate->setActivity($activity)
-            ->setDateStart(new \DateTime())
-        ;
+            ->setDateStart(new \DateTime());
 
         $form->setServiceLocator($this->getServiceLocator());
         $form->setObject($activityDate);
@@ -219,9 +242,9 @@ class ActivityDateController extends AbstractOscarController
         /** @var Request $request */
         $request = $this->getRequest();
 
-        if( $request->isPost() ){
+        if ($request->isPost()) {
             $form->setData($request->getPost());
-            if( $form->isValid() ){
+            if ($form->isValid()) {
                 $this->getEntityManager()->persist($activityDate);
                 $activity->touch();
                 $this->getEntityManager()->flush();
@@ -240,7 +263,7 @@ class ActivityDateController extends AbstractOscarController
             'form' => $form,
         ]);
 
-        if( $request->isXmlHttpRequest() ){
+        if ($request->isXmlHttpRequest()) {
             $view->setTerminal(true);
         }
 

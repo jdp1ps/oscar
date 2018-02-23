@@ -180,6 +180,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $action = $match->getParam('action');
                 $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
                 $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+                $method = $request->getMethod();
 
                 if( $userContext->getLdapUser() ){
                     $user = $userContext->getLdapUser()->getDisplayName();
@@ -192,7 +193,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
                 $userid = $userContext->getDbUser() ? $userContext->getDbUser()->getid() : -1;
                 $contextId = $match->getParam('id', '?');
-                $message = sprintf('%s@%s:(%s) %s:%s %s', $ip, $userid, $user, $controller, $action, $uri);
+                $message = sprintf('%s@%s:(%s) [%s] %s:%s %s', $ip, $userid, $user, $method, $controller, $action, $uri);
 
                 if( $controller != 'Console')
                     $sm->get('Logger')->info($message);

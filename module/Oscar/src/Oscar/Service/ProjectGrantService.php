@@ -466,6 +466,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $data['deletable'] = $deletable;
             $data['editable'] = $editable;
             $data['validable'] = $editable;
+            $data['isPayment'] = false;
 
             $out[$data['dateStart']->format('YmdHis').$data['id']] = $data;
         }
@@ -499,6 +500,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
                 'id' => $v->getId(),
                 'deletable' => false,
                 'editable' => false,
+                'isPayment' => true,
                 'validable' => false,
                 'type' => [
                     'label' => 'Versement de ' . $currencyFormatter->format($v->getAmount()). ' ' . $v->getSymbol(),

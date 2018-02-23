@@ -162,8 +162,8 @@ gulp.task('watch', function () {
     gulp.watch('./public/js/modules/unicaen/src/css/*.scss', ['modules-css']);
     gulp.watch('./public/js/modules/unicaen/src/js/*.js', ['modules-js']);
 
-    gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);
-    gulp.watch(['./public/js/oscar/src/Milestone*'], ['module-oscar-milestones']);
+    // gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);
+    // gulp.watch(['./public/js/oscar/src/Milestone*'], ['module-oscar-milestones']);
 });
 
 
