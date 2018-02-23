@@ -118,6 +118,14 @@
     "libelle": "Peut voir les jalons",
     "fullcode": "ACTIVITY-MILESTONE_SHOW"
   },
+  "ACTIVITY-MILESTONE_PROGRESSION": {
+    "category_id": 2,
+    "root": "ACTIVITY-MILESTONE_SHOW",
+    "spot": 7,
+    "code": "MILESTONE_PROGRESSION",
+    "libelle": "Peut g\u00e9rer l'état d'avancement des jalons",
+    "fullcode": "ACTIVITY-MILESTONE_PROGRESSION"
+  },
   "ACTIVITY-MILESTONE_MANAGE": {
     "category_id": 2,
     "root": "ACTIVITY-MILESTONE_SHOW",
