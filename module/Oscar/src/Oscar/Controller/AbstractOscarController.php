@@ -141,6 +141,10 @@ class AbstractOscarController extends AbstractActionController
     {
         return $this->getResponseBadRequest("Cette action est 'dépréciée.");
     }
+    protected function getResponseUnauthorized($message = "Vous n'avez pas les droits suffisants")
+    {
+        return $this->getHttpResponse(Response::STATUS_CODE_401, $message);
+    }
 
 
     /**

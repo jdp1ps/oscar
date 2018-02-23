@@ -444,9 +444,12 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         /** @var OscarUserContext $oscarUserContext */
         $oscarUserContext = $this->getServiceLocator()->get('OscarUserContext');
 
+        // Check générale du la visibilité
         $oscarUserContext->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
 
+        // Droits plus précis à transmettre aux objets
         $deletable = $editable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+        $progression =  $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
 
         $qb = $this->getEntityManager()->getRepository(ActivityDate::class)->createQueryBuilder('d')
             ->addSelect('t')
@@ -465,7 +468,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $data['css'] = ($data['dateStart']<$now) ? 'past' : '';
             $data['deletable'] = $deletable;
             $data['editable'] = $editable;
-            $data['validable'] = $editable;
+            $data['validable'] = $progression;
             $data['isPayment'] = false;
 
             $out[$data['dateStart']->format('YmdHis').$data['id']] = $data;

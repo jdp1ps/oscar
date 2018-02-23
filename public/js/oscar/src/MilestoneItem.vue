@@ -46,12 +46,11 @@
         },
         computed: {
             finishable(){
-                return this.milestone.type.finishable == true && this.milestone.finished < 100;
+                return this.milestone.validable && this.milestone.type.finishable == true && this.milestone.finished < 100;
             },
 
             cancelFinish(){
-                console.log(this.milestone.type.label, this.milestone.type.finishable, this.milestone.finished > 0)
-                return this.milestone.type.finishable == true && this.milestone.finished > 0
+                return this.milestone.validable && this.milestone.type.finishable == true && this.milestone.finished > 0
             },
 
             finished(){
@@ -59,7 +58,7 @@
             },
 
             late(){
-                return this.finishable && this.milestone.past && !this.finished;
+                return this.finishable == true && this.milestone.past && !this.finished;
             },
 
             past(){

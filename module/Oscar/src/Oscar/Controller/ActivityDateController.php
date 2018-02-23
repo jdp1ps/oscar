@@ -8,6 +8,7 @@
 namespace Oscar\Controller;
 
 
+use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
@@ -49,112 +50,115 @@ class ActivityDateController extends AbstractOscarController
      */
     public function activityAction()
     {
-        $idActivity = $this->params()->fromRoute('idactivity');
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
+        try {
+            $idActivity = $this->params()->fromRoute('idactivity');
+            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
+            $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
 
-        if ($idActivity) {
+            if ($idActivity) {
 
-            $method = $this->getHttpXMethod();
+                $method = $this->getHttpXMethod();
 
-            $types = $this->getEntityManager()->createQueryBuilder()
-                ->select('t')
-                ->from(DateType::class, 't')
-                ->getQuery()
-                ->getResult(Query::HYDRATE_ARRAY);
+                $types = $this->getEntityManager()->createQueryBuilder()
+                    ->select('t')
+                    ->from(DateType::class, 't')
+                    ->getQuery()
+                    ->getResult(Query::HYDRATE_ARRAY);
 
-            $milestones = array_values($this->getActivityService()->getMilestones($idActivity));
+                $milestones = array_values($this->getActivityService()->getMilestones($idActivity));
 
-            // Données envoyées
-            $data = [
-                'milestones' => $milestones,
-                'types' => $types,
-                'creatable' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity)
-            ];
+                // Données envoyées
+                $data = [
+                    'milestones' => $milestones,
+                    'types' => $types,
+                    'creatable' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity)
+                ];
 
-            switch ($method) {
-                case 'DELETE':
-                    $id = $this->params()->fromQuery('id');
-                    $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
-                    $this->getEntityManager()->remove($milestone);
-                    $this->getEntityManager()->flush();
-                    return $this->getResponseOk("Jalon supprimé");
-                    break;
-
-                case 'GET':
-
-                    break;
-                case 'PUT':
-                    $type = $this->getEntityManager()->getRepository(DateType::class)->find($_POST['type']);
-                    $comment = $_POST['comment'];
-                    $date = new \DateTime($_POST['dateStart']);
-
-                    $milestone = new ActivityDate();
-                    $this->getEntityManager()->persist($milestone);
-                    $milestone->setDateStart($date)
-                        ->setActivity($activity)
-                        ->setComment($comment)
-                        ->setType($type);
-                    $this->getEntityManager()->flush($milestone);
-
-                    return $this->ajaxResponse($milestone->toArray());
-
-
-                    break;
-                case 'POST':
-                    $action = $this->params()->fromPost('action', 'update');
-                    $id = $this->params()->fromPost('id');
-
-                    // Récupération du jalon
-                    try {
-                        /** @var ActivityDate $jalon */
+                switch ($method) {
+                    case 'DELETE':
+                        $id = $this->params()->fromQuery('id');
                         $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
-                    } catch ( \Exception $e ){
-                        return $this->getResponseNotFound("Impossible de trouver ce jalon.");
-                    }
+                        $this->getEntityManager()->remove($milestone);
+                        $this->getEntityManager()->flush();
+                        return $this->getResponseOk("Jalon supprimé");
+                        break;
+
+                    case 'GET':
+
+                        break;
+                    case 'PUT':
+                        $type = $this->getEntityManager()->getRepository(DateType::class)->find($_POST['type']);
+                        $comment = $_POST['comment'];
+                        $date = new \DateTime($_POST['dateStart']);
+
+                        $milestone = new ActivityDate();
+                        $this->getEntityManager()->persist($milestone);
+                        $milestone->setDateStart($date)
+                            ->setActivity($activity)
+                            ->setComment($comment)
+                            ->setType($type);
+                        $this->getEntityManager()->flush($milestone);
+
+                        return $this->ajaxResponse($milestone->toArray());
 
 
-                    // Marquer le jalon comme terminé / non-terminé
-                    if ($action == 'valid' || $action == 'unvalid') {
-                        $milestone->setFinished($action == 'valid' ? ActivityDate::FINISH_VALUE : 0);
-                    }
+                        break;
+                    case 'POST':
+                        $action = $this->params()->fromPost('action', 'update');
+                        $id = $this->params()->fromPost('id');
 
-                    // Mise à jour
-                    else if ($action == 'update') {
-                        $typeId = $this->params()->fromPost('type');
-                        $comment = $this->params()->fromPost('comment');
-                        $date = new \DateTime($this->params()->fromPost('dateStart'));
-
+                        // Récupération du jalon
                         try {
-                            $type = $this->getEntityManager()->getRepository(DateType::class)->find($typeId);
-                            $milestone->setDateStart($date)
-                                ->setActivity($activity)
-                                ->setComment($comment)
-                                ->setType($type);
-
-                        } catch ( \Exception $e ){
-                            return $this->getResponseNotFound("Type de jalon non-trouvé.");
+                            /** @var ActivityDate $jalon */
+                            $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
+                        } catch (\Exception $e) {
+                            return $this->getResponseNotFound("Impossible de trouver ce jalon.");
                         }
-                    }
 
-                    else {
-                        return $this->getResponseBadRequest("Cette action n'est pas supportée.");
-                    }
+                        ////////////////////////////////////////////////////////////
+                        // Marquer le jalon comme terminé / non-terminé
+                        if ($action == 'valid' || $action == 'unvalid') {
+                            $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
+                            $milestone->setFinished($action == 'valid' ? ActivityDate::FINISH_VALUE : 0);
+                        } // Mise à jour
+                        else if ($action == 'update') {
+                            $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+                            $typeId = $this->params()->fromPost('type');
+                            $comment = $this->params()->fromPost('comment');
+                            $date = new \DateTime($this->params()->fromPost('dateStart'));
 
-                    $this->getEntityManager()->flush($milestone);
+                            try {
+                                $type = $this->getEntityManager()->getRepository(DateType::class)->find($typeId);
+                                $milestone->setDateStart($date)
+                                    ->setActivity($activity)
+                                    ->setComment($comment)
+                                    ->setType($type);
 
-                    return $this->ajaxResponse($milestone->toArray());
-                    break;
-                default:
-                    return $this->getResponseBadRequest("Protocol bullshit");
+                            } catch (\Exception $e) {
+                                return $this->getResponseNotFound("Type de jalon non-trouvé.");
+                            }
+                        } else {
+                            return $this->getResponseBadRequest("Cette action n'est pas supportée.");
+                        }
 
+                        $this->getEntityManager()->flush($milestone);
+
+                        return $this->ajaxResponse($milestone->toArray());
+                        break;
+                    default:
+                        return $this->getResponseBadRequest("Protocol bullshit");
+
+                }
+
+                $view = new JsonModel($data);
+
+                return $view;
+            } else {
+                return $this->getResponseInternalError();
             }
-
-            $view = new JsonModel($data);
-
-            return $view;
-        } else {
-            return $this->getResponseInternalError();
+        }
+        catch( UnAuthorizedException $e ){
+            return $this->getResponseBadRequest();
         }
     }
 
