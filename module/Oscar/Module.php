@@ -177,9 +177,14 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $match = $event->getParams()['route-match'];
 
                 $controller = $match->getParam('controller');
+
+                if( $controller == 'Console')
+                    return;
+
                 $action = $match->getParam('action');
                 $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
                 $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+
                 $method = $request->getMethod();
 
                 if( $userContext->getLdapUser() ){
@@ -195,8 +200,6 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $contextId = $match->getParam('id', '?');
                 $message = sprintf('%s@%s:(%s) [%s] %s:%s %s', $ip, $userid, $user, $method, $controller, $action, $uri);
 
-                if( $controller != 'Console')
-                    $sm->get('Logger')->info($message);
             } catch (\Exception $e) {
                 error_log($e->getMessage());
             }
