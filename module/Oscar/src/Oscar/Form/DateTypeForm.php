@@ -56,7 +56,7 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
             'type'=>'Select'
         ]);
 
-        $label = 'Complétude';
+        $label = 'Progression';
         $this->add([
             'name'   => 'finishable',
             'options' => [
