@@ -160,6 +160,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             'core' => Activity::csvHeaders(),
             'organizations' => [],
             'persons' => [],
+            'milestones' => []
         ];
 
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
@@ -172,10 +173,18 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $headers['organizations'][] = $role['label'];
         }
 
-
         $rolesOrga = $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray();
+
+
         foreach( $rolesOrga as $role ){
             $headers['persons'][] = $role;
+        }
+
+        $dateTypes = $this->getEntityManager()->getRepository(DateType::class)->findAll();
+
+
+        foreach( $dateTypes as $dateType ){
+            $headers['milestones'][] = $dateType->getLabel();
         }
 
         return $headers;

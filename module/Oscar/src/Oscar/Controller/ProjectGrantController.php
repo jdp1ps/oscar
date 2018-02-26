@@ -13,12 +13,14 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\DateType;
 use Oscar\Entity\Notification;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
@@ -276,7 +278,8 @@ class ProjectGrantController extends AbstractOscarController
         if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
 
         } else {
-            $this->organizationsPerimeter = $this->getOscarUserContext()->getOrganisationsPersonPrincipal($this->getOscarUserContext()->getCurrentPerson(),
+            $this->organizationsPerimeter = $this->getOscarUserContext()
+                ->getOrganisationsPersonPrincipal($this->getOscarUserContext()->getCurrentPerson(),
                 true);
 
             $qb->leftJoin('a.project', 'pr')
@@ -363,12 +366,36 @@ class ProjectGrantController extends AbstractOscarController
             }
             $rolesPersons[$role] = [];
         }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // --- JALONS
+        // Récupération des différents types de jalons
+        $jalonsQuery = $this->getEntityManager()->getRepository(DateType::class)->findAll();
+        $jalons = [];
+
+        /** @var DateType $jalon */
+        foreach ($jalonsQuery as $jalon) {
+            $jalons[$jalon->getLabel()] = [];
+
+            $header = $jalon->getLabel();
+            if( $keep === true || in_array($header, $keep) ){
+                $columns[$header] = true;
+                $headers[] = $header;
+            } else {
+                $columns[$header] = false;
+            }
+            $jalons[$header] = [];
+        }
+
+
+
         fputcsv($handler, $headers);
         /** @var Activity $entity */
         foreach ($entities as $entity) {
             $datas = [];
             $rolesCurrent = $rolesOrganisations;
             $rolesPersonsCurrent = $rolesPersons;
+            $jalonsCurrent = $jalons;
 
             if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
                 $entity)
@@ -380,6 +407,14 @@ class ProjectGrantController extends AbstractOscarController
                 foreach( $entity->getPersonsDeep() as $per ){
                      $rolesPersonsCurrent[$per->getRole()][] = (string)$per->getPerson();
                 }
+                /** @var ActivityDate $mil */
+                foreach( $entity->getMilestones() as $mil ){
+
+                    $jalonsCurrent[$mil->getType()->getLabel()][] = $mil->getDateStart() ?
+                        $mil->getDateStart()->format('Y-m-d') :
+                        'nop';
+                }
+
 
 
                 foreach ( $entity->csv() as $col=>$value ){
@@ -396,6 +431,12 @@ class ProjectGrantController extends AbstractOscarController
                 foreach( $rolesPersonsCurrent as $role=>$persons ){
                     if( $columns[$role] === true )
                         $datas[] = $persons ? implode('|', array_unique($persons)) : ' ';
+                }
+
+
+                foreach( $jalonsCurrent as $jalon2=>$date ){
+                    if( $columns[$jalon2] === true )
+                        $datas[] = $date ? implode('|', array_unique($date)) : ' ';
                 }
                 fputcsv($handler, $datas);
             }
@@ -489,10 +530,10 @@ class ProjectGrantController extends AbstractOscarController
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
             $docDt = $doc->toJson([
-                'urlDelete' => $deletable ? $this->url()->fromRoute('contractdocument/delete',
-                    ['id' => $doc->getId()]) : false,
-                'urlDownload' => $this->url()->fromRoute('contractdocument/download',
-                    ['id' => $doc->getId()]),
+                'urlDelete' => $deletable ?
+                    $this->url()->fromRoute('contractdocument/delete',['id' => $doc->getId()])
+                    : false,
+                'urlDownload' => $this->url()->fromRoute('contractdocument/download', ['id' => $doc->getId()]),
                 'urlReupload' => $this->url()->fromRoute('contractdocument/upload',
                         ['idactivity' => $entity->getId()]) . "?id=" . $doc->getId(),
                 'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute('person/show',

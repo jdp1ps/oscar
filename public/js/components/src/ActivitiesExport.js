@@ -37,6 +37,13 @@ var ActivitiesExport = Vue.extend({
                         {{ field.label }}
                     </label>
                 </div>
+                <h3><i class="icon-calendar"></i>Jalons</h3>
+                <div class="cols">
+                    <label v-for="field, i in fieldsUI.milestones" class="col3">
+                        <input type="checkbox" :checked="field.selected"  @click="toggleField(field.label)"/>
+                        {{ field.label }}
+                    </label>
+                </div>
                 <hr>
                 <button class="btn btn-default" type="button" @click="showConfiguration = false">Fermer</button>
                 <button class="btn btn-primary" type="submit" @click="showConfiguration = false">Exporter</button>
