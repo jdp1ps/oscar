@@ -7195,17 +7195,34 @@ form .help {
 
 .jalon {
   border-left: 4px #AAA solid;
+  display: block;
   /** Apparence des jalons non terminé (en retard) **/
   position: relative; }
+  .jalon .details {
+    font-size: .9em; }
+  .jalon .card-title {
+    font-size: 1em; }
   .jalon:before {
     content: '\e885';
     font-family: fontello; }
   .jalon.jalon-warn {
     background: #f0ad4e; }
   .jalon.past {
-    opacity: .5; }
+    background: rgba(255, 255, 255, 0.8);
+    border-left-color: #CCC; }
+    .jalon.past:hover > * {
+      opacity: 1; }
+    .jalon.past > *:not(time) {
+      opacity: .3; }
     .jalon.past .details {
       display: none; }
+  .jalon.inprogress {
+    border-left-color: #30b0d5; }
+    .jalon.inprogress:before {
+      content: '\f0e4 ';
+      font-family: fontello; }
+    .jalon.inprogress.late {
+      background: #C69951 !important; }
   .jalon.late {
     border-left-color: #DD423E;
     color: black;
@@ -7217,7 +7234,7 @@ form .help {
       font-family: fontello; }
   .jalon.finished {
     border-left-color: #499D1F;
-    background: #53b223;
+    background: #f5fcf2;
     text-shadow: -1px 1px 0 rgba(255, 255, 255, 0.25); }
     .jalon.finished:before {
       content: '\f274 ';
@@ -7228,21 +7245,24 @@ form .help {
   .jalon.payment {
     border-right: 4px #999 solid; }
   .jalon .card-title {
-    border-bottom: rgba(255, 255, 255, 0.25) solid thin; }
+    border-bottom: rgba(255, 255, 255, 0.25) solid thin;
+    display: block !important; }
+    .jalon .card-title > * {
+      flex: none;
+      display: inline-block; }
   .jalon time {
     display: inline-block;
     font-size: .9em;
     font-weight: 100;
     padding-left: .5em; }
   .jalon nav {
-    opacity: .3;
-    text-align: right; }
+    opacity: .25;
+    text-align: right;
+    position: absolute;
+    top: 0;
+    right: 0; }
     .jalon nav a {
-      border-radius: 4px;
       color: #1F180D; }
-    .jalon nav .btn-delete:hover {
-      color: white;
-      background-color: #DD423E; }
   .jalon:hover nav {
     opacity: 1; }
 

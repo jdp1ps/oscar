@@ -117,9 +117,18 @@ class ActivityDateController extends AbstractOscarController
 
                         ////////////////////////////////////////////////////////////
                         // Marquer le jalon comme terminé / non-terminé
-                        if ($action == 'valid' || $action == 'unvalid') {
+                        if ($action == 'valid' || $action == 'unvalid' || $action == 'inprogress') {
                             $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
-                            $milestone->setFinished($action == 'valid' ? ActivityDate::FINISH_VALUE : 0);
+                            if( $action == 'valid' )
+                                $milestone->setFinished(ActivityDate::FINISH_VALUE);
+
+                            else if ($action == 'unvalid')
+                                $milestone->setFinished(0);
+
+                            else
+                                $milestone->setFinished(50);
+
+
                         } // Mise à jour
                         else if ($action == 'update') {
                             $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);

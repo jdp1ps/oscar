@@ -190,6 +190,7 @@ class ContractDocument extends AbstractVersionnedDocument
         return [
             'id' => $this->getId(),
             'version' => $this->getVersion(),
+            'information' => $this->getInformation(),
             'fileName' => $this->getFileName(),
             'fileSize' => $this->getFileSize(),
             'typeMime' => $this->getFileTypeMime(),

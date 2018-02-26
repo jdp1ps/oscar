@@ -7195,8 +7195,13 @@ form .help {
 
 .jalon {
   border-left: 4px #AAA solid;
+  display: block;
   /** Apparence des jalons non terminé (en retard) **/
   position: relative; }
+  .jalon .details {
+    font-size: .9em; }
+  .jalon .card-title {
+    font-size: 1em; }
   .jalon:before {
     content: '\e885';
     font-family: fontello; }
@@ -7211,8 +7216,15 @@ form .help {
       opacity: .3; }
     .jalon.past .details {
       display: none; }
+  .jalon.inprogress {
+    border-left-color: #30b0d5; }
+    .jalon.inprogress:before {
+      content: '\f0e4 ';
+      font-family: fontello; }
+    .jalon.inprogress.late {
+      background: #C69951 !important; }
   .jalon.late {
-    border-left-color: #DD423E;
+    border-left-color: #9a1e1b;
     color: black;
     text-shadow: -1px 1px 0 rgba(255, 255, 255, 0.25);
     opacity: 1;
@@ -7231,9 +7243,14 @@ form .help {
     content: '\e875';
     font-family: fontello; }
   .jalon.payment {
+    margin-left: .5em;
     border-right: 4px #999 solid; }
   .jalon .card-title {
-    border-bottom: rgba(255, 255, 255, 0.25) solid thin; }
+    border-bottom: rgba(255, 255, 255, 0.25) solid thin;
+    display: block !important; }
+    .jalon .card-title > * {
+      flex: none;
+      display: inline-block; }
   .jalon time {
     display: inline-block;
     font-size: .9em;

@@ -3,14 +3,23 @@
         <time :datetime="milestone.dateStart">
             {{ milestone.dateStart | moment }}
         </time>
-        <strong class="card-title">{{ milestone.type.label }}</strong>
+        <strong class="card-title">
+            {{ milestone.type.label }}
+            <small v-if="inProgress"> (En cours)</small>
+        </strong>
         <p class="details" v-if="milestone.comment">{{ milestone.comment }}</p>
         <nav>
 
             <a href="#" v-if="cancelFinish"
-               title="Marquer comme non-terminé"
+               title="Réinitialiser la progression"
                @click.prevent="$emit('unvalid', milestone)">
-                <i class="icon-cancel-outline"></i>
+                <i class="icon-rewind-outline"></i>
+            </a>
+
+            <a href="#" v-if="progressable"
+               title="Marquer comme en cours"
+               @click.prevent="$emit('inprogress', milestone)">
+                <i class="icon-cw-outline"></i>
             </a>
 
             <a href="#" v-if="finishable"
@@ -53,6 +62,16 @@
                 return this.milestone.validable && this.milestone.type.finishable == true && this.milestone.finished > 0
             },
 
+            progressable(){
+                return this.milestone.validable && this.milestone.type.finishable == true &&
+                    (this.milestone.finished == null || this.milestone.finished == 0 || this.milestone.finished == 100);
+            },
+
+            inProgress(){
+                return this.milestone.validable && this.milestone.type.finishable == true &&
+                    ( this.milestone.finished > 0 && this.milestone.finished < 100);
+            },
+
             finished(){
                 return this.milestone.type.finishable == true && this.milestone.finished == 100
             },
@@ -70,6 +89,7 @@
                     'finishable': this.finishable,
                     'finished': this.finished,
                     'late': this.late,
+                    'inprogress': this.inProgress,
                     'past': this.past,
                 };
                 css[this.milestone.type.facet] = true;

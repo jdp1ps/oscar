@@ -2673,6 +2673,9 @@ form {
 
 .jalon {
   border-left: 4px $colorGreyLight solid;
+  .details { font-size: .9em }
+  .card-title { font-size: 1em }
+  display: block;
 
 
   &:before {
@@ -2695,9 +2698,18 @@ form {
       display: none;
     }
   }
+  &.inprogress {
+    border-left-color: $colorBlue;
+    &:before {
+      content: '\f0e4 ';
+      font-family: fontello;
+    }
+
+    &.late {background: $colorOrange !important; }
+  }
   /** Apparence des jalons non terminé (en retard) **/
   &.late {
-    border-left-color: $colorRed;
+    border-left-color: darken($colorRed, 20%);
     color: black;
     text-shadow: -1px 1px 0 rgba(255, 255, 255, .25);
     opacity: 1;
@@ -2724,6 +2736,7 @@ form {
     font-family: fontello;
   }
   &.payment {
+    margin-left: .5em;
     border-right: 4px $colorGreyMedium solid;
   }
 
@@ -2731,6 +2744,9 @@ form {
 
   .card-title {
     border-bottom: rgba(255, 255, 255, .25) solid thin;
+    display: block !important;
+
+    >*{ flex: none; display: inline-block }
   }
 
   time {

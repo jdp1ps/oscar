@@ -112,6 +112,30 @@
         </transition>
 
         <transition name="fade">
+            <div class="inprogressconfirm overlay" v-if="inProgressMilestone">
+                <div class="overlay-content">
+                    <h3>
+                        <i class="icon-help-circled"></i>
+                        Marquer ce jalon "en cours" ?
+                    </h3>
+                    <p> </p>
+                    <nav>
+                        <button class="btn btn-default" @click="performValid('inprogress')">
+                            <i class="icon-cw-outline"></i>
+                            Marquer ce jalon comme en cours
+                        </button>
+                        <button class="btn btn-default" @click="validMilestone = null">
+                            <i class="icon-cancel-outline"></i>
+                            Annuler
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
+
+
+        <transition name="fade">
             <div class="validconfirm overlay" v-if="unvalidMilestone">
                 <div class="overlay-content">
                     <h3>
@@ -122,7 +146,7 @@
                     <nav>
                         <button class="btn btn-default" @click="performValid('unvalid')">
                             <i class="icon-ok-circled"></i>
-                            Marquer ce jalon comme non-terminé
+                            Réinitialiser la progression de ce jalon
                         </button>
                         <button class="btn btn-default" @click="unvalidMilestone = null">
                             <i class="icon-cancel-outline"></i>
@@ -136,10 +160,11 @@
         <section class="list" v-if="milestones != null">
             <p><small>Il y'a {{ milestones.length }} jalon(s)</small></p>
             <milestone :milestone="m" v-for="m in milestones" :key="m.id"
-                       @valid="handlerValid"
-                       @unvalid="handlerUnvalid"
-                       @remove="handlerRemove"
-                       @edit="handlerEdit"
+                    @valid="handlerValid"
+                    @unvalid="handlerUnvalid"
+                    @inprogress="handlerInProgress"
+                    @remove="handlerRemove"
+                    @edit="handlerEdit"
             />
         </section>
 
@@ -175,6 +200,7 @@
                 editMilestone: null,
                 validMilestone: null,
                 unvalidMilestone: null,
+                inProgressMilestone: null,
                 types: null
             }
         },
@@ -214,6 +240,10 @@
              */
             handlerValid(milestone) {
                 this.validMilestone = milestone;
+            },
+
+            handlerInProgress(milestone) {
+                this.inProgressMilestone = milestone;
             },
 
             handlerUnvalid(milestone) {
@@ -282,13 +312,32 @@
              * Marquer le jalon comme terminé.
              */
             performValid(action){
-                this.pendingMsg = action == 'valid' ? "Validation du jalon" : "Réinitialisation du jalon";
-
-
                 var datas = new FormData(),
-                    milestone = (action == 'valid' ? this.validMilestone : this.unvalidMilestone);
 
-                console.log(action, milestone);
+                    // Donnèes à traiter
+                    milestone;
+
+                switch (action) {
+                    case 'valid':
+                        this.pendingMsg = "Validation du jalon";
+                        milestone = this.validMilestone;
+                        break;
+
+                    case 'unvalid':
+                        this.pendingMsg = "Réinitialisation du jalon";
+                        milestone = this.unvalidMilestone;
+                        break;
+
+                    case 'inprogress':
+                        this.pendingMsg = "Marquage du jalon comme en cours";
+                        milestone = this.inProgressMilestone;
+                        break;
+
+                    default :
+                        this.error = "Action incorrecte";
+                        return;
+                        break;
+                }
 
                 datas.append('id', milestone.id)
                 datas.append('action', action)
@@ -304,6 +353,7 @@
                     this.pendingMsg = null;
                     this.validMilestone = null;
                     this.unvalidMilestone = null;
+                    this.inProgressMilestone = null;
                 })
             },
 
