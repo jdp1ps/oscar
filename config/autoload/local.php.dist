@@ -9,11 +9,6 @@ if( file_exists($pathSocketConfig = __DIR__.'/../../socket/config.json') ){
     $socket = $socketConf['socket'];
 }
 
-// Rétro compatibilité avec le module Doctrine
-if(  !defined('APP_DIR') ){
-    define('APP_DIR', realpath(__DIR__.'/../../'));
-}
-
 return array(
     'view_manager' => array(
         'display_not_found_reason' => getenv('APPLICATION_ENV') == 'development',
@@ -27,7 +22,7 @@ return array(
 
         ////////////////////////////////////////////////////////////////////////
         //
-        // PATHS
+        // PATHS  (Optionnel)
         //
         // Emplacements utilisés par oscar pour stoquer des fichiers.
         // Ces emplacements doivent être accessibles et ouvert en écriture.
@@ -35,18 +30,22 @@ return array(
         ////////////////////////////////////////////////////////////////////////
         'paths' => [
             // Emplacement où sont stoqués les documents Oscar
-            'document_oscar' => APP_DIR . '/data/documents/oscar/',
+            'document_oscar' => realpath(__DIR__) . '/../../data/documents/oscar/',
 
             // Emplacement où sont stoqués les documents administratifs Oscar
-            'document_admin_oscar' => APP_DIR . '/data/documents/administratifs/',
+            'document_admin_oscar' => realpath(__DIR__) . '/../../data/documents/administratifs/',
 
             // Emplacement de l'index de recherche (emplacement où Lucene écrit
             // sont index de recherche - un DOSSIER).
-            'search_activity' => APP_DIR . '/data/luceneindex',
+            'search_activity' => realpath(__DIR__) . '/../../data/luceneindex',
+
+            // Modèle de feuille de temps
+            'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
         ],
+
         ////////////////////////////////////////////////////////////////////////
         //
-        // CONNECTORS
+        // CONNECTORS (Optionnel)
         //
         // Les connecteurs sont les points d'entrées pour les données utilisées
         // dans Oscar.
@@ -60,14 +59,14 @@ return array(
             'organization' => [
                'rest' => [
                   'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
-                  'params'    => APP_DIR . '/config/connectors/organization_rest.yml',
+                  'params'    => realpath(__DIR__) . '/../connectors/organization_rest.yml',
                   'editable'  => false
                ]
             ],
             'person' => [
                'rest' => [
                   'class'     => \Oscar\Connector\ConnectorPersonREST::class,
-                  'params'    => APP_DIR . '/config/connectors/person_rest.yml',
+                  'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
                   'editable'  => false
                ]
             ]
