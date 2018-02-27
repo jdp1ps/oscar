@@ -2673,7 +2673,7 @@ form {
 
 .jalon {
   border-left: 4px $colorGreyLight solid;
-  .details { font-size: .9em }
+  //.details { font-size: .9em }
   .card-title { font-size: 1em }
   display: block;
 
@@ -2959,6 +2959,32 @@ form {
     justify-content: center;
     flex: auto;
     border-radius: 4px;
+  }
+}
+
+[class*="oscar-form-message"] {
+  background: black;
+  color: white;
+  font-size: .9em;
+  padding: 8px;
+  margin-top: 4px;
+  position: relative;
+  text-shadow: -1px 1px 0 rgba(0,0,0,.5);
+
+  &.error {
+    background: $colorRed;
+    &:before { background: $colorRed }
+  }
+
+  &:before {
+    content: '';
+    background: red;
+    transform: rotate(45deg);
+    position: absolute;
+    top: -4px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
   }
 }
 

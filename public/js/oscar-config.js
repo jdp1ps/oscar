@@ -56,7 +56,8 @@ requirejs.config({
         'notifications' : 'components/build/notifications',
         'activity' : 'components/build/activity',
         'Typedocument' : 'components/build/Typedocument',
-        'milestones' : 'oscar/dist/Milestones'
+        'milestones' : 'oscar/dist/Milestones',
+        'payments' : 'oscar/dist/Payments'
     },
     shim: {
         "bootstrap": {

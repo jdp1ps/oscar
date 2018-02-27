@@ -496,30 +496,31 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         ])->getQuery()->getResult();
 
 
-        $currencyFormatter = new \Oscar\View\Helpers\Currency();
-        /** @var ActivityPayment $v */
-        foreach( $versements as $v ){
 
-            /** @var \DateTime $dateRef */
-            $dateRef = $v->getDatePayment() ? $v->getDatePayment() : $v->getDatePredicted();
-
-            $out[$dateRef->format('YmdHis'.'v'.$v->getId())] = [
-                'dateStart' => $dateRef,
-                'deletable' => false,
-                'css' => ($v->getDatePredicted()<$now) ? 'jalon-warn' : '',
-                'past' => ($v->getDatePredicted()<$now),
-                'comment' => ($v->getDatePredicted()<$now) ? 'Ce versement aurait dû être réalisé.' : 'Versement prévu',
-                'id' => $v->getId(),
-                'deletable' => false,
-                'editable' => false,
-                'isPayment' => true,
-                'validable' => false,
-                'type' => [
-                    'label' => 'Versement de ' . $currencyFormatter->format($v->getAmount()). ' ' . $v->getSymbol(),
-                    'facet' => 'payment'
-                ]
-            ];
-        }
+//        $currencyFormatter = new \Oscar\View\Helpers\Currency();
+//        /** @var ActivityPayment $v */
+//        foreach( $versements as $v ){
+//
+//            /** @var \DateTime $dateRef */
+//            $dateRef = $v->getDatePayment() ? $v->getDatePayment() : $v->getDatePredicted();
+//
+//            $out[$dateRef->format('YmdHis'.'v'.$v->getId())] = [
+//                'dateStart' => $dateRef,
+//                'deletable' => false,
+//                'css' => ($v->getDatePredicted()<$now) ? 'jalon-warn' : '',
+//                'past' => ($v->getDatePredicted()<$now),
+//                'comment' => ($v->getDatePredicted()<$now) ? 'Ce versement aurait dû être réalisé.' : 'Versement prévu',
+//                'id' => $v->getId(),
+//                'deletable' => false,
+//                'editable' => false,
+//                'isPayment' => true,
+//                'validable' => false,
+//                'type' => [
+//                    'label' => 'Versement de ' . $currencyFormatter->format($v->getAmount()). ' ' . $v->getSymbol(),
+//                    'facet' => 'payment'
+//                ]
+//            ];
+//        }
 
 
         ksort($out, SORT_STRING);

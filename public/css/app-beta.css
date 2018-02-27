@@ -7224,7 +7224,7 @@ form .help {
     .jalon.inprogress.late {
       background: #C69951 !important; }
   .jalon.late {
-    border-left-color: #DD423E;
+    border-left-color: #9a1e1b;
     color: black;
     text-shadow: -1px 1px 0 rgba(255, 255, 255, 0.25);
     opacity: 1;
@@ -7243,6 +7243,7 @@ form .help {
     content: '\e875';
     font-family: fontello; }
   .jalon.payment {
+    margin-left: .5em;
     border-right: 4px #999 solid; }
   .jalon .card-title {
     border-bottom: rgba(255, 255, 255, 0.25) solid thin;
@@ -7397,6 +7398,10 @@ form .help {
     justify-content: center;
     flex: auto;
     border-radius: 4px; }
+
+[class*="oscar-form-message-"] {
+  background: black;
+  color: white; }
 
 .workpackage {
   background: white;

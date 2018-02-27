@@ -312,40 +312,69 @@
                 Initialisation...
             </div>
             <script>
-                require(['vue','vue-resource', 'mm','milestones'], function(Vue, VueResource, moment, milestone){
+                require(['ActivityModel', 'vue','vue-resource', 'mm','milestones'], function(
+                        ActivityModel,
+                        Vue,
+                        VueResource,
+                        moment,
+                        milestone)
+                {
                     Vue.use(VueResource);
+
+
+                    new Vue({ data: ActivityModel });
+
                     Vue.filter('moment', function(value){
                         var m = moment(value.date);
                        return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
                     });
-                    new Vue({
+
+                    var milestonesVue = new Vue({
                         render(h){
                             return h(milestone.default, {
                                 props: {
                                     url: '<?= $this->url("milestones/activity", ['idactivity' => $entity->getId()]) ?>',
-                                    moment: moment
+                                    moment: moment,
+                                    model: ActivityModel
                                 }
                             })
                         }
-                    }).$mount('#milestones')
+                    }).$mount('#milestones');
 
                 })
             </script>
             <?php endif; ?>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
-                <div id="depenses-area" class="has-btn lc"></div>
-                <script>
-                    require(['OscarDepenses'], function(OscarDepense){
-                        var depenses = new OscarDepense({
-                            el: '#depenses-area',
-                            data: { url: '<?= $this->url('depense/activity', ['idactivity' => $entity->getId()]) ?>' }
-                        });
-                    })
-                </script>
-            <?php endif ?>
-
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
+                <div id="payments">Initialization...</div>
+                <script>
+                    require(['ActivityModel', 'vue','vue-resource', 'mm','payments'], function(ActivityModel, Vue, VueResource, moment, payments){
+                        Vue.use(VueResource);
+
+                        Vue.filter('moment', function(value){
+                            var m = moment(value.date);
+                            return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
+                        });
+
+                        new Vue({ data: ActivityModel });
+
+                        new Vue({
+                            render(h){
+                                return h(payments.default, {
+                                    props: {
+                                        url: '<?= $this->url("activitypayment", ['idactivity' => $entity->getId()]) ?>',
+                                        moment: moment,
+                                        amount: <?= $entity->getAmount() ?>,
+                                        model: ActivityModel
+                                    }
+                                })
+                            }
+                        }).$mount('#payments')
+                    });
+                </script>
+
+
+
             <div id="payments-area" class="has-btn">
                 <h2><i class="icon-bank"></i>Versements</h2>
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE, $entity) ): ?>
@@ -366,30 +395,15 @@
                         </div>
                     </div>
                     <div class="lc-content"></div>
-                    <article class="payment total">
-                        <div class="heading">
-                            <strong class="amount">
-                                0
-                            </strong>
-                            <span class="date">/<strong><?= $this->currency($entity->getAmount()) ?></strong></span>
-                        </div>
-                    </article>
-                    <div class="alert alert-danger alertAmount">
-                        <p><i class="icon-attention-1"></i>
-                        Le total des versements prévus et réalisés ne
-                        semble pas correspondre avec le montant prévu
-                        initialement, Somme des versements :</p>
-                        <ul>
-                            <li><strong class="amountPrevu">?</strong> en versement,</li>
-                            <li><strong title="Valeur exacte : <?= $entity->getAmount() ?>"><?= $this->currency($entity->getAmount()) ?></strong> prévu</li>
-                        </ul>
-                    </div>
+
                 </div>
             </div>
+
                 <script>
+                    /*
                     var payments;
 
-                    require(['Payments'], function(Payments){
+                    require(['ActivityModel', 'Payments'], function(ActivityModel, Payments){
 
                         payments = new Payments.Collection();
                         payments.token = '<?= $tokenValue ?>';
@@ -406,12 +420,17 @@
                             var total = 0.0,
                                 totalPrevu = 0.0;
 
+
+
                             payments.each(function(payment){
+
                                 if( payment.get('status') == 2 ){
                                     total += Math.round(payment.get('amount')*1000);
                                 }
                                 totalPrevu += Math.round(payment.get('amount')*1000);
                             });
+
+                            ActivityModel.trigger('payments');
 
                             $('#payments .total .amount').text(formatCurrency((total/1000))+' €');
                             $('#payments .amountPrevu').text(formatCurrency((totalPrevu/1000))+' €');
@@ -436,7 +455,7 @@
 
                         payments.fetch();
                     });
-
+*/
                 </script>
             <?php endif; ?>
         </div>

@@ -8,6 +8,7 @@
             <small v-if="inProgress"> (En cours)</small>
         </strong>
         <p class="details" v-if="milestone.comment">{{ milestone.comment }}</p>
+
         <nav>
 
             <a href="#" v-if="cancelFinish"

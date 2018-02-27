@@ -157,7 +157,7 @@
             </div>
         </transition>
 
-        <section class="list" v-if="milestones != null">
+        <section class="list" v-if="model.milestones != null">
             <p><small>Il y'a {{ milestones.length }} jalon(s)</small></p>
             <milestone :milestone="m" v-for="m in milestones" :key="m.id"
                     @valid="handlerValid"
@@ -183,7 +183,7 @@
     import MilestoneItem from './MilestoneItem.vue'
 
     export default {
-        props: ['moment', 'url'],
+        props: ['moment', 'url', 'model'],
 
         components: {
             'milestone': MilestoneItem
@@ -195,26 +195,93 @@
                 formData: null,
                 pendingMsg: "",
                 creatable: false,
-                milestones: null,
                 deleteMilestone: null,
                 editMilestone: null,
                 validMilestone: null,
                 unvalidMilestone: null,
-                inProgressMilestone: null,
-                types: null
+                inProgressMilestone: null
+
+            }
+        },
+
+        watcher: {
+            payments: {
+                deep: true,
+                handler(){
+                    console.log('Payments a changé !!!')
+                }
             }
         },
 
         computed: {
+            //// MODEL
+            types(){
+                return this.model.types;
+            },
+
+            milestones(){
+                let milestones = [];
+
+                this.model.payments.forEach( payment => {
+
+                    // Récupération de la bonne date
+                    let datePayment = new Date();
+                    switch( payment.status ){
+                        case 1 :
+                            datePayment = payment.datePredicted;
+                            break;
+                        case 2 :
+                            datePayment = payment.datePayment;
+                            break;
+                    }
+                    if( !datePayment )
+                        datePayment = new Date();
+                  milestones.push({
+                      dateStart: datePayment,
+                      comment: 'VERSEMENT',
+                      deletable: false,
+                      editable: false,
+                      validable: false,
+                      isPayment: true,
+                      type: {
+                          label: 'Versement de ' + payment.amount,
+                          facet: 'payment'
+                      }
+                  });
+                });
+
+                this.model.milestones.forEach( milestone => {
+                    milestones.push(milestone);
+                });
+
+
+                milestones.sort( (a, b) => {
+                    let vA = this.moment(a.dateStart.date).unix();
+                    let vB = this.moment(b.dateStart.date).unix();
+
+
+                    return vA - vB;
+
+                });
+
+
+               return milestones;
+            },
+
+            payments(){
+                return this.model.payments;
+            },
+
             formTypeFinishable(){
                 if( !this.formData )
                     return false;
 
                 return this.types.find( type => type.id == this.formData.type.id && type.finishable );
             },
+
             groupedTypes(){
                 let groupedTypes = {};
-                this.types.forEach( type => {
+                this.model.types.forEach( type => {
                     let facet = type.facet;
                     if(!groupedTypes.hasOwnProperty(facet) ){
                         groupedTypes[facet] = {
@@ -388,19 +455,18 @@
              * Chargement des jalons depuis l'API
              */
             getMilestones() {
-
                 this.pendingMsg = "Chargement des jalons : " + this.url;
 
                 this.$http.get(this.url).then(
                     success => {
-                        this.milestones = success.data.milestones;
-                        this.types = success.data.types;
+                        this.model.milestones = success.data.milestones;
+                        this.model.types = success.data.types;
                         this.creatable = success.data.creatable;
                     },
                     error => {
                         this.error = "Impossible de charger les jalons de cette activités : " + error
                     }
-                ).then(n => this.pendingMsg = "");
+                ).then(n => { this.pendingMsg = ""; console.log(this.model); });
             },
 
             ////////////////////////////////////////////////////////////////
