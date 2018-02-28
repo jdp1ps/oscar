@@ -22,7 +22,8 @@
     "zendframework/zend-text": "^2.6",
     "jacksay/php-file-extension": "^0.0.1",
     "mpdf/mpdf": "^7.0",
-    "phpoffice/phpexcel": "^1.8"
+    "phpoffice/phpexcel": "^1.8",
+    "elasticsearch/elasticsearch": "^6.0"
   },
   "require-dev": {
     "phpmd/phpmd": "@stable",
