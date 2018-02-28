@@ -405,64 +405,7 @@
                 </div>
             </div>
 
-                <script>
-                    /*
-                    var payments;
 
-                    require(['ActivityModel', 'Payments'], function(ActivityModel, Payments){
-
-                        payments = new Payments.Collection();
-                        payments.token = '<?= $tokenValue ?>';
-                        payments.urlEdit = '<?= $this->url('activitypayment/edit', ['idactivity'=>$entity->getId(), 'id'=>'']) ?>';
-                        payments.urlNew = '<?= $this->url('activitypayment/new', ['idactivity'=>$entity->getId()]) ?>';
-                        payments.url = '<?= $this->url("activitypayment", ['idactivity' => $entity->getId()]) ?>';
-
-                        var view = new Payments.View({
-                            model: payments,
-                            el: '#payments'
-                        });
-
-                        payments.on('update destroy sync', function(){
-                            var total = 0.0,
-                                totalPrevu = 0.0;
-
-
-
-                            payments.each(function(payment){
-
-                                if( payment.get('status') == 2 ){
-                                    total += Math.round(payment.get('amount')*1000);
-                                }
-                                totalPrevu += Math.round(payment.get('amount')*1000);
-                            });
-
-                            ActivityModel.trigger('payments');
-
-                            $('#payments .total .amount').text(formatCurrency((total/1000))+' €');
-                            $('#payments .amountPrevu').text(formatCurrency((totalPrevu/1000))+' €');
-
-                            if ( total === <?= $entity->getAmount() ?> ){
-                                $('#payments .total .amount').addClass('accountOK');
-                            } else {
-                                $('#payments .total .amount').removeClass('accountOK');
-                            }
-
-                            if ( totalPrevu/1000 === <?= $entity->getAmount() ?> ){
-                                $('#payments .alertAmount').hide();
-                            } else {
-                                $('#payments .alertAmount').show();
-                            }
-                        });
-
-                        $('[data-activitypayment-add]').on('click', function(e){
-                            e.preventDefault();
-                            view.formNew();
-                        });
-
-                        payments.fetch();
-                    });
-*/
-                </script>
             <?php endif; ?>
         </div>
     </div>

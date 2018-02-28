@@ -1142,7 +1142,6 @@ class ProjectGrantController extends AbstractOscarController
                 // Traitement : Champ de recherche libre
 
                 if ($search) {
-
                     // La saisie est un PFI
                     if (preg_match($this->getServiceLocator()->get("Config")['oscar']['validation']['pfi'], $search)) {
                         $parameters['search'] = $search;

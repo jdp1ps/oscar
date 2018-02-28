@@ -28,11 +28,11 @@ use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Utils\StringUtils;
 use Oscar\Validator\EOTP;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenLdap\Exception;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -380,63 +380,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     public function searchIndex_addToIndex(Activity $activity)
     {
-
-        $this->getServiceLocator()->get('Logger')->info("Ajout de $activity à l'index");
-
-        $members = [];
-        /** @var ActivityPerson $p */
-        foreach ($activity->getPersonsDeep() as $p) {
-            $members[] = $p->getPerson()->getCorpus();
-        }
-        $members = implode(', ', $members);
-
-        $partners = [];
-        /** @var ActivityOrganization $o */
-        foreach ($activity->getOrganizationsDeep() as $o ) {
-            $partners[] = $o->getOrganization()->getCorpus();
-        }
-        $partners = implode(', ', $partners);
-
-        $project = '';
-        $acronym = '';
-        if( $activity->getProject() ){
-            $project = $activity->getProject()->getCorpus();
-            $acronym = $activity->getProject()->getAcronym();
-        }
-
-        $corpus = new \Zend_Search_Lucene_Document();
-
-        $corpus->addField(\Zend_Search_Lucene_Field::text('acronym', StringUtils::transliterateString($acronym), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('label', StringUtils::transliterateString($activity->getLabel()), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('description', StringUtils::transliterateString($activity->getDescription()), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('saic', $activity->getCentaureId(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('oscar', $activity->getOscarNum(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('eotp', $activity->getCodeEOTP(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('members', $members, 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('partners', $partners, 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('project', $project, 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('key', md5($activity->getId()), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::UnIndexed('ID', $activity->getId(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::UnIndexed('project_id', $activity->getProject() ? $activity->getProject()->getId() : '', 'UTF-8'));
-
-
-        $this->searchIndex_getIndex()->addDocument($corpus);
-    }
-
-
-    private function searchIndex_getPath(){
-        return $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.search_activity');
-    }
-
-    public function searchIndex_reset()
-    {
-        $this->index = \Zend_Search_Lucene::create($this->searchIndex_getPath());
-    }
-
-    private function searchIndex_checkPath()
-    {
-        $path = $this->searchIndex_getPath();
-        return file_exists($path) && is_readable($path) && ($resources = scandir($path)) && (count($resources) > 2);
+        $this->getSearchEngineStrategy()->addActivity($activity);
     }
 
     /**
@@ -570,61 +514,44 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         return true;
     }
 
+
+    /**
+     * @return ActivitySearchStrategy
+     */
+    private function getSearchEngineStrategy()
+    {
+        static $searchStrategy;
+        if( $searchStrategy === null ){
+            $opt = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('strategy.activity.search_engine');
+            $class = new \ReflectionClass($opt['class']);
+            $searchStrategy = $class->newInstanceArgs($opt['params']);
+        }
+        return $searchStrategy;
+    }
+
     public function search($what)
     {
-        // try {
-            $what = StringUtils::transliterateString($what);
-            $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
-            $this->getServiceLocator()->get('Logger')->info(sprintf('Search for "%s"',
-                $what));
-            $hits = $this->searchIndex_getIndex()->find($query);
-            $ids = [];
-            foreach ($hits as $hit) {
-                $ids[] = $hit->ID;
-            }
-
-            return $ids;
-//        } catch( \Exception $e ){
-//            throw new OscarException(sprintf("Recherche invalide, Lucene a retourné : %s (%s)", $e->getMessage(), get_class($e)));
-//        }
+        return $this->getSearchEngineStrategy()->search($what);
     }
 
     public function searchProject($what)
     {
-        $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
-        $hits = $this->searchIndex_getIndex()->find($query);
-        $ids = [];
-        foreach ($hits as $hit) {
-            if( $hit->project_id && !in_array($hit->project_id, $ids) ){
-                $ids[] = $hit->project_id;
-            }
-        }
-        return $ids;
+        return $this->getSearchEngineStrategy()->searchProject($what);
     }
 
     public function searchDelete( $id )
     {
-        $hits = $this->searchIndex_getIndex()->find('key:'.md5($id));
-        if( count($hits) !== 1 ){
-            //throw new \Exception(sprintf("Incohérence de l'index de recherche avec l'objet %s, il n'est probablement pas encore indexé", $id));
-        }
-
-        foreach ($hits as $hit) {
-            $this->getServiceLocator()->get('Logger')->info("Suppression de l'index $id");
-            $this->searchIndex_getIndex()->delete($hit->id);
-        }
+        $this->getSearchEngineStrategy()->searchDelete($id);
     }
 
     public function searchUpdate( Activity $activity )
     {
-        $this->getServiceLocator()->get('Logger')->info(sprintf("Mise à jour de l'index de recherche pour [%s]%s", $activity->getId(), $activity));
-        try {
-            $this->searchDelete($activity->getId());
-        } catch(\Exception $e ){
-            $this->getServiceLocator()->get('Logger')->error(sprintf("Impossible de supprimer l'ancien index de [%s]%s : %s", $activity->getId(), $activity, $e->getMessage()));
-        }
+        $this->getSearchEngineStrategy()->searchUpdate($activity);
+    }
 
-        $this->searchIndex_addToIndex($activity);
+    public function searchIndex_reset()
+    {
+        $this->getSearchEngineStrategy()->resetIndex();
     }
 
 
@@ -671,8 +598,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     public function getStatusByKey( $key )
     {
-        var_dump(Activity::getStatusSelect());
-        die();
         return Activity::getStatusSelect()[$key];
     }
 

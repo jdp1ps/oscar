@@ -22,12 +22,14 @@ class SearchService
 
     public function find($expression)
     {
+        die("$expression");
         $query = \Zend_Search_Lucene_Search_QueryParser::parse($expression);
         $hits = $this->getIndex()->find($query);
         $ids = [];
         foreach ($hits as $hit) {
             $ids[] = $hit->ID;
         }
+
 
         return $ids;
     }
