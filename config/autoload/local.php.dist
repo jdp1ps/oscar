@@ -35,12 +35,19 @@ return array(
             // Emplacement où sont stoqués les documents administratifs Oscar
             'document_admin_oscar' => realpath(__DIR__) . '/../../data/documents/administratifs/',
 
-            // Emplacement de l'index de recherche (emplacement où Lucene écrit
-            // sont index de recherche - un DOSSIER).
-            'search_activity' => realpath(__DIR__) . '/../../data/luceneindex',
-
             // Modèle de feuille de temps
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
+        ],
+
+        // Système de recherche
+        'strategy' => [
+            'activity' => [
+                'search_engine' => [
+                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
+                    // Ce paramètre correspond à la clef 'oscar.paths.search_activity'
+                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
+                ]
+            ]
         ],
 
         ////////////////////////////////////////////////////////////////////////
