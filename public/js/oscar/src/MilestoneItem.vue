@@ -88,8 +88,8 @@
             cssClass(){
                 let css = {
                     'finishable': this.finishable,
-                    'finished': this.finished,
-                    'late': this.late,
+                    'finished': this.finished || this.milestone.done,
+                    'late': this.late || this.milestone.late,
                     'inprogress': this.inProgress,
                     'past': this.past,
                 };

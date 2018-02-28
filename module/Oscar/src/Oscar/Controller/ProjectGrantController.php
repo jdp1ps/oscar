@@ -20,6 +20,7 @@ use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
 use Oscar\Entity\Notification;
 use Oscar\Entity\OrganizationRole;
@@ -654,8 +655,16 @@ class ProjectGrantController extends AbstractOscarController
             $involvedPersonsJSON = json_encode($involvedPersons);
         }
 
+        $currencies = [];
+        /** @var Currency $currency */
+        foreach( $this->getEntityManager()->getRepository(Currency::class)->findAll() as $currency ){
+            $currencies[] = $currency->asArray();
+        }
+
         return [
             'entity' => $activity,
+
+            'currencies' => $currencies,
 
             // Jeton de sécurité
             'tokenValue' => $this->getOscarUserContext()->getTokenValue(true),

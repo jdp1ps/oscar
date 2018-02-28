@@ -15,7 +15,6 @@
             </div>
         </transition>
 
-
         <transition name="fade">
             <div class="pending overlay" v-if="pendingMsg">
                 <div class="overlay-content">
@@ -24,7 +23,6 @@
                 </div>
             </div>
         </transition>
-
 
         <transition name="fade">
             <div class="deleteconfirm overlay" v-if="deletePayment">
@@ -44,7 +42,6 @@
             </div>
         </transition>
 
-
         <transition name="fade">
             <div class="overlay" v-if="formData">
                 <div class="overlay-content">
@@ -57,7 +54,9 @@
                             <div class="col-xs-6">
                                 <div class="form-group  ">
                                     <label class="control-label" for="amount">Montant</label>
-                                    <input name="amount" class="form-control input-lg form-control" v-model="formData.amount" type="text">
+                                    <input name="amount" class="form-control input-lg form-control"
+                                           v-model="formData.amount"
+                                           type="text" />
                                     <div class="oscar-form-message error" v-if="!formData.amount">
                                         Vous devez indiquer un montant.
                                     </div>
@@ -66,11 +65,10 @@
                             <div class="col-xs-3">
                                 <div class="form-group  ">
                                     <label class=" control-label" for="currency">Devise pour le versement</label>
-                                    <select name="currency" class="form-control form-control" v-model="formData.currencyId">
-                                        <option value="1">Euro</option>
-                                        <option value="4">Yens</option>
-                                        <option value="3">Livre</option>
-                                        <option value="2">Dollars</option>
+                                    <select name="currency" class="form-control form-control"
+                                            v-model="formData.currencyId"
+                                            @change="handlerFormUpdateRate">
+                                        <option v-for="c in currencies" :value="c.id">{{ c.label }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -162,9 +160,9 @@
         <article class="payment total">
             <div class="heading">
                 <strong class="amount">
-                    {{ total }}
+                    {{ total | money }} {{ currencySymbol }}
                 </strong>
-                <span class="date">/<strong>{{ amount }}</strong></span>
+                <span class="date">/<strong>{{ amount | money }} {{ currencySymbol }}</strong></span>
             </div>
         </article>
 
@@ -174,9 +172,9 @@
                 semble pas correspondre avec le montant prévu
                 initialement, Somme des versements :</p>
             <ul>
-                <li><strong class="amountPrevu">{{ total }}</strong> en versement,</li>
+                <li><strong class="amountPrevu">{{ total | money }} {{ currencySymbol }}</strong> en versement,</li>
                 <li><strong title="Valeur exacte : <?= $entity->getAmount() ?>">
-                    {{ amount }}</strong> prévu</li>
+                    {{ amount | money}} {{ currencySymbol }}</strong> prévu</li>
             </ul>
         </div>
 
@@ -191,7 +189,7 @@
     import Payment from './PaymentItem.vue';
 
     export default {
-        props: ['model', 'moment', 'url', 'amount'],
+        props: ['model', 'moment', 'url', 'amount', 'currency', 'currencies'],
 
         data(){
             return {
@@ -218,10 +216,29 @@
             total(){
                 let total = 0.0;
                 this.model.payments.forEach( payment => {
-                    total += payment.amount;
+                    let rate = 1;
+                    if( payment.currency ){
+                        rate = payment.rate;
+                    }
+                    total += payment.amount / rate;
                 })
                 return total;
+            },
+
+            /**
+             * Retourne le symbole de la devise.
+             *
+             * @returns {any}
+             */
+            currencySymbol(){
+                return this.currency ? this.currency.symbol : "?";
             }
+        },
+
+        filters: {
+          money(value){
+              return Number.parseFloat(value).toFixed(2);
+          }
         },
 
         methods: {
@@ -260,6 +277,22 @@
                 console.log(JSON.parse(JSON.stringify(this.formData)));
             },
 
+            /**
+             * En cas de changment de devise, on actualise automatiquement le taux de conversion en EURO.
+             */
+            handlerFormUpdateRate(){
+                console.log('UPDATE CURRENCY');
+                let currency = this.currencies.find( (c)=> {
+                    return c.id == this.formData.currencyId
+                })
+                if( currency ){
+                    this.formData.rate = currency.rate;
+                }
+            },
+
+            /**
+             * Enregistrement du formulaire
+             */
             performSave(){
 
                 var datas = new FormData();
@@ -287,9 +320,11 @@
                     this.pendingMsg = "";
                     this.formData = null;
                 })
-
             },
 
+            /**
+             * Suppression effective du versement.
+             */
             performDelete(){
                 this.$http.delete(this.url + '?id=' + this.deletePayment.id).then(
                     (success) => {
@@ -304,6 +339,9 @@
                 });
             },
 
+            /**
+             * Chargement des versements depuis l'API
+             */
             fetch(){
                 this.$http.get(this.url).then(
                     (success) => {

@@ -225,29 +225,44 @@
                 this.model.payments.forEach( payment => {
 
                     // Récupération de la bonne date
-                    let datePayment = new Date();
+                    let datePayment = new Date(),
+                        late = false,
+                        done = false,
+                        comment;
                     switch( payment.status ){
                         case 1 :
                             datePayment = payment.datePredicted;
+                            comment = "PRÉVU";
+                            late = this.moment(payment.datePredicted.date).unix() < this.moment().unix();
+                            if( late )  comment += " EN RETARD";
                             break;
                         case 2 :
                             datePayment = payment.datePayment;
+                            comment = "RÉALISÉ";
+                            done = true;
                             break;
+                        default:
+                            return;
                     }
                     if( !datePayment )
                         datePayment = new Date();
-                  milestones.push({
-                      dateStart: datePayment,
-                      comment: 'VERSEMENT',
-                      deletable: false,
-                      editable: false,
-                      validable: false,
-                      isPayment: true,
-                      type: {
-                          label: 'Versement de ' + payment.amount,
+
+
+
+                    milestones.push({
+                        dateStart: datePayment,
+                        comment: 'VERSEMENT ' + comment,
+                        deletable: false,
+                        late: late,
+                        done: done,
+                        editable: false,
+                        validable: false,
+                        isPayment: true,
+                        type: {
+                          label: 'Versement de ' + payment.amount + payment.currency.symbol,
                           facet: 'payment'
-                      }
-                  });
+                        }
+                    });
                 });
 
                 this.model.milestones.forEach( milestone => {

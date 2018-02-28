@@ -3,19 +3,25 @@
         <div class="heading">
             <strong class="amount">
                 <i class="icon-attention-1" v-if="late" title="Ce versment prévisionnel est en retard" style="color: darkred"></i>
-                {{ payment.amount }} {{ payment.currency.symbol }}
+                {{ payment.amount | money }} {{ payment.currency.symbol }}
+                <div v-if="payment.currency.symbol != '€'">
+                    <small style="font-weight: 100">soit <strong>{{ payment.amount / payment.rate | money }} €</strong></small>
+                </div>
             </strong>
 
-            <div class="date">
-
+            <div class="date" v-if="payment.status == 3">
+                Écart de payment
+            </div>
+            <div class="date" v-else>
                     <time v-if="useDate" :datetime="useDate.date" class="date">
                         <i class="icon-calendar"></i> {{ useDate | moment }}</time>
-                    <span class="error" v-else="">
+                    <span class="error" v-else>
                         Problème avec la date <code>{{ useDate }}</code>
                     </span>
                 <br>
                 N° <strong>{{ payment.codeTransaction }}</strong>
             </div>
+
             <nav>
                 <a href="#" class="btn-delete" @click.prevent="$emit('delete', payment)">
                     <i class="icon-trash"></i>
