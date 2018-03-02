@@ -14,7 +14,7 @@ Notez que toutes les valeurs présentes dans ce fichier peuvent être surchargé
 Ce fichier va contenir la configuration technique et métier de l'application. Les paramètres spécifiques à Oscar sont situés dans le clef **oscar**. Un fichier d'exemple `config/autoload/local.php.dist` est disponible dans le dépôt. Ce fichier propose les paramètres obligatoires ainsi que ceux facultatifs (commentés).
 
 
-### Emplacements des documents administratifs et activités
+## Emplacements des documents administratifs et activités
 
 Les emplacements physiques pour le stoquage des documents est situé dans la clef `oscar > paths` : 
 
@@ -44,11 +44,12 @@ return array(
 );
 ```
 
-### Formalisme du PFI
+## Formalisme du PFI
 
 La règle de contrôle du PFI est précisée dans la clef `oscar > validation > pfi` (Il s'agit d'une expression régulière utilisé par Oscar pour valider les donnnées non-nulles saisie dans Oscar).
 
 ```php
+// config/autoload/local.php
 return array(
     // (...)
 
@@ -63,3 +64,84 @@ return array(
 );
 
 ``` 
+
+## Recherche des activités
+
+Oscar propose 2 système de recherche des activités, le premier est basé sur **Zend Lucene** (full PHP), l'autre est basé sur **Elastic Search** (Java).
+
+
+### Zend Lucene
+
+Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne necessite pas d'application tiers ou d'installations complémentaires.
+
+```php
+// config/autoload/local.php
+return array(
+    // (...)
+
+    // Oscar
+    'oscar' => [
+        // (...)
+        'strategy' => [
+            'activity' => [
+                'search_engine' => [
+                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
+                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
+                ]
+            ]
+        ],
+    ],
+);
+``` 
+
+### Elastic Search
+
+Le deuxième système s'appuis sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible.
+
+#### Installation de java JRE
+
+Elastic search est un serveur Java : 
+
+```bash
+$ apt-get install default-jre
+$ java -version 
+openjdk version "1.8.0_151"
+OpenJDK Runtime Environment (build 1.8.0_151-8u151-b12-0ubuntu0.16.04.2-b12)
+OpenJDK 64-Bit Server VM (build 25.151-b12, mixed mode)
+```
+
+#### Installation d'Elastic Search : Debian
+
+Vous pouvez installer **Elastice Search** en tant que service à partir des dépôts Debian officiels : 
+
+```bash
+$ sudo apt-get install elasticsearch
+```
+
+
+#### Configurer Oscar
+
+On indique ensuite à Oscar l'adresse de l'instance **Elastic Search** : 
+
+```php
+// config/autoload/local.php
+return array(
+    // (...)
+
+    // Oscar
+    'oscar' => [
+        'strategy' => [
+            'activity' => [
+                'search_engine' => [
+                    'class' => \Oscar\Strategy\Search\ActivityElasticSearch::class,
+                    'params' => [['127.0.0.1:9200']]
+                ]
+            ]
+        ],
+    ],
+);
+``` 
+
+> la clef `params` prends bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
+
+> Lors de la reconstruction de l'index en ligne de commande, assurez-vous de ne pas l'executer en tant que ROOT.
