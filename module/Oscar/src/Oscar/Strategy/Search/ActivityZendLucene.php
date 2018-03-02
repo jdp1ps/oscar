@@ -33,10 +33,7 @@ class ActivityZendLucene implements ActivitySearchStrategy
 
     public function searchIndex_rebuild( $activities )
     {
-        $this->searchIndex_reset();
-        foreach($activities as $activity) {
-            $this->searchIndex_addToIndex($activity);
-        }
+        $this->rebuildIndex($activities);
     }
 
     /**
@@ -200,5 +197,14 @@ class ActivityZendLucene implements ActivitySearchStrategy
     {
         $path = $this->searchIndex_getPath();
         return file_exists($path) && is_readable($path) && ($resources = scandir($path)) && (count($resources) > 2);
+    }
+
+    public function rebuildIndex($activities)
+    {
+        $this->resetIndex();
+        foreach($activities as $activity) {
+            $this->addActivity($activity);
+        }
+        // TODO: Implement rebuildIndex() method.
     }
 }

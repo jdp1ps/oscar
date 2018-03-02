@@ -481,9 +481,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         $this->searchIndex_reset();
         $activities = $this->getEntityManager()->getRepository(Activity::class)->findAll();
         echo sprintf("%s activités vont être indexées...\n", count($activities));
-        foreach($activities as $activity) {
-            $this->searchIndex_addToIndex($activity);
-        }
+        $this->getSearchEngineStrategy()->rebuildIndex($activities);
     }
 
 

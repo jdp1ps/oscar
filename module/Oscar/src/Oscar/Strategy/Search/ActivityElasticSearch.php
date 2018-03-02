@@ -9,6 +9,7 @@
 namespace Oscar\Strategy\Search;
 
 
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Oscar\Entity\Activity;
 use Elasticsearch\ClientBuilder;
 
@@ -54,6 +55,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             'index' => $this->getIndex(),
             'type' => $this->getType(),
             'body' => [
+                'size' => 1000,
                 'query' => [
                     'query_string' => [
                         'query' => $search
@@ -100,6 +102,44 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         return $this->getClient()->bulk($params);
     }
 
+    /**
+     * La reconstruction d'index utilise BULK pour des raisons de performance.
+     *
+     * @param $activities
+     */
+    public function rebuildIndex( $activities ){
+
+        $this->resetIndex();
+
+        $i = 0;
+        /** @var Activity $activity */
+        foreach ($activities as $activity ){
+            $i++;
+            $params['body'][] = [
+                'index' => [
+                    '_index' => $this->getIndex(),
+                    '_type' => $this->getType(),
+                    '_id' => $activity->getId()
+                ]
+            ];
+
+            $params['body'][] = $this->getIndexableDatas($activity);
+
+            // On envoi par paquet de 1000
+            if ($i % 1000 == 0) {
+                $responses = $this->getClient()->bulk($params);
+
+                // clean datas
+                $params = ['body' => []];
+                unset($responses);
+            }
+        }
+
+        if (!empty($params['body'])) {
+            $this->getClient()->bulk($params);
+        }
+    }
+
     protected function getIndexableDatas( Activity $activity ){
         $project_body = "";
         $project_id = null;
@@ -137,7 +177,29 @@ class ActivityElasticSearch implements ActivitySearchStrategy
 
     public function searchProject($what)
     {
-        // TODO: Implement searchProject() method.
+
+        $params = [
+            'index' => $this->getIndex(),
+            'type' => $this->getType(),
+            'body' => [
+                'size' => 1000,
+                'query' => [
+                    'query_string' => [
+                        'query' => $what
+                    ]
+                ]
+            ]
+        ];
+
+        $response = $this->getClient()->search($params);
+        $ids = [];
+
+        if( $response && $response['hits'] && $response['hits']['total'] > 0 ){
+            foreach ($response['hits']['hits'] as $hit) {
+                $ids[] = $hit["_source"]["project_id"];
+            }
+        }
+        return $ids;
     }
 
     public function searchDelete($id)
@@ -163,9 +225,13 @@ class ActivityElasticSearch implements ActivitySearchStrategy
     public function resetIndex()
     {
         $params = [
-            'index' => 'oscar'
+            'index' => $this->getIndex()
         ];
 
-        $this->getClient()->indices()->delete($params);
+        try {
+            $this->getClient()->indices()->delete($params);
+        } catch ( Missing404Exception $e ){
+        }
+
     }
 }

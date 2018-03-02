@@ -59,4 +59,9 @@ interface ActivitySearchStrategy
      * @return mixed
      */
     public function resetIndex();
+
+    /**
+     * @return mixed
+     */
+    public function rebuildIndex( $activities );
 }
