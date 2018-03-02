@@ -231,6 +231,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         try {
             $this->getClient()->indices()->delete($params);
         } catch ( Missing404Exception $e ){
+            echo "Nouvel index...";
         }
 
     }
