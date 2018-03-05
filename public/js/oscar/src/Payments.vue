@@ -86,10 +86,10 @@
                             <div class="col-xs-6">
                                 <div class="form-group  ">
                                     <label class=" control-label" for="datePredicted">Date prévue</label>
-                                    <input name="datePredicted" class="form-control datepicker form-control"
-                                           placeholder="Date prévue"
-                                           v-model="formData.datePredicted"
-                                           type="date" />
+                                    <datepicker :moment="moment"
+                                                :value="formData.datePredicted"
+                                                @input="value => {formData.datePredicted = value}"/>
+
                                     <div class="oscar-form-message error" v-if="formData.status == 1 && !formData.datePredicted">
                                         Les versements prévisionnels necessitent une date.
                                     </div>
@@ -114,10 +114,10 @@
                                 <div class="col-xs-6">
                                     <div class="form-group  ">
                                         <label class=" control-label" for="datePayment">Date effective</label>
-                                        <input name="datePayment" class="form-control datepicker form-control"
-                                               placeholder="Date effective"
-                                               v-model="formData.datePayment"
-                                               type="date">
+                                        <datepicker :moment="moment"
+                                                    :value="formData.datePayment"
+                                                    @input="value => {formData.datePayment = value}"/>
+
                                         <div class="oscar-form-message error" v-if="formData.status == 2 && !formData.datePayment">
                                             Les versements réalisés necessitent une date effective
                                         </div>
@@ -187,6 +187,7 @@
 </template>
 <script>
     import Payment from './PaymentItem.vue';
+    import Datepicker from './Datepicker.vue';
 
     export default {
         props: ['model', 'moment', 'url', 'amount', 'currency', 'currencies'],
@@ -201,7 +202,8 @@
         },
 
         components: {
-            'payment': Payment
+            'payment': Payment,
+            'datepicker': Datepicker,
         },
 
         computed: {

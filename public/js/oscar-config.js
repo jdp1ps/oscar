@@ -57,7 +57,8 @@ requirejs.config({
         'activity' : 'components/build/activity',
         'Typedocument' : 'components/build/Typedocument',
         'milestones' : 'oscar/dist/Milestones',
-        'payments' : 'oscar/dist/Payments'
+        'payments' : 'oscar/dist/Payments',
+        'Datepicker2' : 'oscar/dist/Datepicker',
     },
     shim: {
         "bootstrap": {

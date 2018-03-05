@@ -145,14 +145,56 @@ gulp.task('oscar-model', function(){
         .pipe(gulp.dest(directories.jsModels+'build'))
 })
 
+var reportOptions = {
+    err: true, // default = true, false means don't write err
+    stderr: true, // default = true, false means don't write stderr
+    stdout: true // default = true, false means don't write stdout
+};
 
-gulp.task('module-oscar-milestones', function(){
-    exec('poi build --format umd --moduleName milestones public/js/oscar/src/Milestones.vue --filename.js Milestones.js --dist public/js/oscar/dist');
+gulp.task('module-oscar-milestones', function(cb){
+    exec('poi build --format umd --moduleName milestones public/js/oscar/src/Milestones.vue --filename.js Milestones.js --dist public/js/oscar/dist',
+        function (err, stdout, stderr) {
+            console.log("STDOUT : ", stdout);
+            console.log("STDERR : ", stderr);
+            cb(err);
+        }
+    );
 });
 
-gulp.task('module-oscar-timesheet', function(){
-    exec('poi build --format umd --moduleName timesheetleader public/js/oscar/src/TimesheetLeader.vue --filename.js TimesheetLeader.js --dist public/js/oscar/dist');
+gulp.task('module-oscar-timesheet', function(cb){
+    exec('poi build --format umd --moduleName timesheetleader public/js/oscar/src/TimesheetLeader.vue --filename.js TimesheetLeader.js --dist public/js/oscar/dist',
+        function (err, stdout, stderr) {
+            console.log("STDOUT : ", stdout);
+            console.log("STDERR : ", stderr);
+            cb(err);
+        });
 });
+
+gulp.task('module-oscar-payments', function(cb){
+    exec('poi build --format umd --moduleName payments public/js/oscar/src/Payments.vue --filename.js Payments.js --dist public/js/oscar/dist',
+        function (err, stdout, stderr) {
+            console.log("STDOUT : ", stdout);
+            console.log("STDERR : ", stderr);
+            cb(err);
+        });
+});
+
+gulp.task('module-oscar-datepicker', function(cb){
+    exec('poi build --format umd --moduleName datepicker public/js/oscar/src/Datepicker.vue --filename.js Datepicker.js --dist public/js/oscar/dist',
+        function (err, stdout, stderr) {
+            console.log("STDOUT : ", stdout);
+            console.log("STDERR : ", stderr);
+            cb(err);
+        });
+});
+
+gulp.task('build-oscar', ['module-oscar-payments','module-oscar-timesheet','module-oscar-milestones'], function(){
+    gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);
+    gulp.watch(['./public/js/oscar/src/Milestone*'], ['module-oscar-milestones']);
+    gulp.watch(['./public/js/oscar/src/Payment*'], ['module-oscar-payments']);
+    gulp.watch(['./public/js/oscar/src/Datepicker*'], ['module-oscar-payments', 'module-oscar-milestones']);
+});
+
 
 
 gulp.task('watch', function () {
@@ -162,8 +204,7 @@ gulp.task('watch', function () {
     gulp.watch('./public/js/modules/unicaen/src/css/*.scss', ['modules-css']);
     gulp.watch('./public/js/modules/unicaen/src/js/*.js', ['modules-js']);
 
-    // gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);
-    // gulp.watch(['./public/js/oscar/src/Milestone*'], ['module-oscar-milestones']);
+
 });
 
 

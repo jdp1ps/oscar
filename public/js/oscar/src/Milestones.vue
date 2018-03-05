@@ -47,7 +47,7 @@
 
                     <div class="form-group">
                         <label for="">Date prévu pour le jalon</label>
-                        <input v-model="formData.dateStart" class="form-control" type="date"/>
+                        <datepicker :moment="moment" :value="formData.dateStart" @input="value => {formData.dateStart = value}"/>
                     </div>
 
                     <div class="form-group">
@@ -181,12 +181,14 @@
 <script>
     //////////////////////////////////////////////////////////////
     import MilestoneItem from './MilestoneItem.vue'
+    import Datepicker from './Datepicker.vue'
 
     export default {
         props: ['moment', 'url', 'model'],
 
         components: {
-            'milestone': MilestoneItem
+            'milestone': MilestoneItem,
+            'datepicker': Datepicker
         },
 
         data() {

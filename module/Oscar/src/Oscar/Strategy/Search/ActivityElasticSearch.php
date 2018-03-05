@@ -45,8 +45,21 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         return $this->type;
     }
 
-    public function getHosts(){
+    public function getHosts()
+    {
         return $this->hosts;
+    }
+
+    /**
+     * @return \Elasticsearch\Client
+     */
+    protected function getClient()
+    {
+        if (!$this->elasticSearchClient)
+            $this->elasticSearchClient = ClientBuilder::create()
+                ->setHosts($this->getHosts())
+                ->build();
+        return $this->elasticSearchClient;
     }
 
     public function search($search)
@@ -66,7 +79,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
 
         $response = $this->getClient()->search($params);
         $ids = [];
-        if( $response && $response['hits'] && $response['hits']['total'] > 0 ){
+        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
             foreach ($response['hits']['hits'] as $hit) {
                 $ids[] = $hit["_id"];
             }
@@ -74,19 +87,8 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         return $ids;
     }
 
-    protected function getClient()
-    {
-        if( !$this->elasticSearchClient )
-            $this->elasticSearchClient = ClientBuilder::create()
-                ->setHosts($this->getHosts())
-                ->build();
-        return $this->elasticSearchClient;
-    }
-
     public function addActivity(Activity $activity)
     {
-
-
         $params = ['body' => []];
 
         $params['body'][] = [
@@ -107,13 +109,14 @@ class ActivityElasticSearch implements ActivitySearchStrategy
      *
      * @param $activities
      */
-    public function rebuildIndex( $activities ){
+    public function rebuildIndex($activities)
+    {
 
         $this->resetIndex();
 
         $i = 0;
         /** @var Activity $activity */
-        foreach ($activities as $activity ){
+        foreach ($activities as $activity) {
             $i++;
             $params['body'][] = [
                 'index' => [
@@ -140,11 +143,12 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         }
     }
 
-    protected function getIndexableDatas( Activity $activity ){
+    protected function getIndexableDatas(Activity $activity)
+    {
         $project_body = "";
         $project_id = null;
 
-        if( $activity->getProject() ){
+        if ($activity->getProject()) {
             $project_body = $activity->getProject()->getCorpus();
             $project_id = $activity->getProject()->getId();
         }
@@ -152,12 +156,12 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         $members = [];
         $partners = [];
 
-        foreach ( $activity->getPersonsDeep() as $personRoled ){
-            $members[] = (string) $personRoled->getPerson();
+        foreach ($activity->getPersonsDeep() as $personRoled) {
+            $members[] = (string)$personRoled->getPerson();
         }
 
-        foreach ( $activity->getOrganizationsDeep() as $organizationRolead ){
-            $partners[] = (string) $organizationRolead->getOrganization();
+        foreach ($activity->getOrganizationsDeep() as $organizationRolead) {
+            $partners[] = (string)$organizationRolead->getOrganization();
         }
 
         return [
@@ -177,7 +181,6 @@ class ActivityElasticSearch implements ActivitySearchStrategy
 
     public function searchProject($what)
     {
-
         $params = [
             'index' => $this->getIndex(),
             'type' => $this->getType(),
@@ -194,11 +197,12 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         $response = $this->getClient()->search($params);
         $ids = [];
 
-        if( $response && $response['hits'] && $response['hits']['total'] > 0 ){
+        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
             foreach ($response['hits']['hits'] as $hit) {
                 $ids[] = $hit["_source"]["project_id"];
             }
         }
+
         return $ids;
     }
 
@@ -230,12 +234,11 @@ class ActivityElasticSearch implements ActivitySearchStrategy
 
         try {
             $this->getClient()->indices()->delete($params);
-        } catch ( Missing404Exception $e ){
+        } catch (Missing404Exception $e) {
             echo "Nouvel index...";
-	} catch ( \Exception $e ){
-		echo $e->getMessage();
-		die();
-	}
-
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            die();
+        }
     }
 }

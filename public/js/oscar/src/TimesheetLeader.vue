@@ -44,6 +44,7 @@
             <section v-for="group in structuredTimesheets" class="organization-timesheets" v-if="group.timesheets.length">
 
                 <timesheetorganization :timesheets="group.timesheets" :label="group.label" :role="group.role"
+                       :moment="moment"
                        @validsci="handlerValidSci"
                        @validadm="handlerValidAdm"
                        @rejectsci="handlerRejectSci"
@@ -64,6 +65,9 @@
     export default {
         name: "timesheetleader",
         props: {
+            moment: {
+                required: true
+            },
             validsci: {
                 default: false
             },

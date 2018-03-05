@@ -47,6 +47,7 @@
         <section class="timesheets">
             <transition-group name="list" tag="article">
                 <timesheet v-for="timesheet in filteredTimesheets" :timesheet="timesheet" :key="timesheet.id"
+                           :moment="moment"
                            @validsci="$emit('validsci', $event)"
                            @validadm="$emit('validadm', $event)"
                            @rejectsci="$emit('rejectsci', $event)"
@@ -61,7 +62,7 @@
     import Timesheet from './Timesheet.vue';
 
     export default {
-        props: ['timesheets', 'label', 'role'],
+        props: ['timesheets', 'label', 'role', 'moment'],
         components: {
             'timesheet': Timesheet
         },

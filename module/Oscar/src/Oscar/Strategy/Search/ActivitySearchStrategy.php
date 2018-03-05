@@ -61,6 +61,9 @@ interface ActivitySearchStrategy
     public function resetIndex();
 
     /**
+     * Lance la reconstruction complète de l'index de recherche à partir
+     * de la liste des activitès fournie.
+     *
      * @return mixed
      */
     public function rebuildIndex( $activities );

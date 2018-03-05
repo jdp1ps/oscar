@@ -4,7 +4,7 @@
 <div id="app"></div>
 </section>
 <script>
-    require(['vue', 'vue-resource', '/js/oscar/dist/TimesheetLeader.js'], function(Vue, VueResource, TimesheetLeader){
+    require(['vue', 'vue-resource', 'mm', '/js/oscar/dist/TimesheetLeader.js'], function(Vue, VueResource, moment, TimesheetLeader){
 
         Vue.use(VueResource);
 
@@ -14,7 +14,11 @@
         var vue = new Vue({
             el: "#app",
             render(h){
-                return h(TimesheetLeader.default)
+                return h(TimesheetLeader.default, {
+                    props: {
+                        'moment': moment
+                    }
+                })
             }
         });
     })

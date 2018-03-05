@@ -83,27 +83,24 @@
 
 <script>
     // Externe
-    const moment = import('moment');
-
-    moment.locale('FR_fr');
 
     export default {
         name:'timesheet',
-        props: ['timesheet'],
+        props: ['timesheet', 'moment'],
         computed: {
             start(){
-              return moment(this.timesheet.start).format('HH:mm')
+              return this.moment(this.timesheet.start).format('HH:mm')
             },
             end(){
-                return moment(this.timesheet.end).format('HH:mm')
+                return this.moment(this.timesheet.end).format('HH:mm')
             },
             jour(){
-              return moment(this.timesheet).format('dddd D MMMM YYYY')
+              return this.moment(this.timesheet).format('dddd D MMMM YYYY')
             },
             duree(){
-                let fin = moment(this.timesheet.end),
-                    debut = moment(this.timesheet.start);
-                return moment(fin.diff(debut)).format('HH:mm')
+                let fin = this.moment(this.timesheet.end),
+                    debut = this.moment(this.timesheet.start);
+                return this.moment(fin.diff(debut)).format('HH:mm')
             }
         }
     }
