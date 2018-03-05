@@ -146,7 +146,11 @@
                         <nav class="text-center">
                             <nav class="btn-group">
                                 <a class="btn btn-default button-back" href="#" @click.prevent="formData = null">Annuler</a>
-                                <button class="btn btn-primary" @click.prevent="performSave">Enregistrer</button>
+                                <button class="btn btn-primary"
+                                        @click.prevent="performSave"
+                                        :class="{ 'disabled': formHasError }">
+                                    Enregistrer
+                                </button>
                             </nav>
                         </nav>
                     </form>
@@ -234,6 +238,12 @@
              */
             currencySymbol(){
                 return this.currency ? this.currency.symbol : "?";
+            },
+
+            formHasError(){
+                return !this.formData.amount ||
+                    (this.formData.status == 2 && !this.formData.datePayment) ||
+                    (this.formData.status == 1 && !this.formData.datePredicted);
             }
         },
 

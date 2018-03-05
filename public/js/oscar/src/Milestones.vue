@@ -41,12 +41,12 @@
                         </select>
                         <p v-show="formTypeFinishable" class="help">
                             <i class="icon-info-circled"></i>
-                            Ce type de jalon inclu des méchanismes de validation pour marquer le jalon comme terminé
+                            Ce type de jalon inclut des méchanismes de validation pour marquer le jalon comme terminé
                         </p>
                     </div>
 
                     <div class="form-group">
-                        <label for="">Date prévu pour le jalon</label>
+                        <label for="">Date prévue pour le jalon</label>
                         <datepicker :moment="moment" :value="formData.dateStart" @input="value => {formData.dateStart = value}"/>
                     </div>
 

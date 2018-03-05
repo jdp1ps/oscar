@@ -87,7 +87,6 @@ var Workpackage = {
             </div>
             <div class="form-group">
                 <label for="">Période</label>
-                <p class="help">Le code est utilisé pour l'affichage des créneaux</p>
                 <div class="row">
                     <div class="col-md-6">
                         du <input type="date" placeholder="Début" v-model="formData.start" class="form-control" />

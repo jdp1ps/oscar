@@ -10,7 +10,7 @@
             </strong>
 
             <div class="date" v-if="payment.status == 3">
-                Écart de payment
+                Écart de paiement
             </div>
             <div class="date" v-else>
                     <time v-if="useDate" :datetime="useDate.date" class="date">

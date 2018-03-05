@@ -2,9 +2,9 @@
     <div @mouseenter="handlerShow" @mouseleave="handlerHide">
 
         <div class="input-group">
-            <input type="text" class="form-control" :value="renderValue"/>
+            <input type="text" class="form-control" v-model="renderValue" />
             <div class="input-group-addon">
-                <i class="glyphicon glyphicon-calendar"></i>
+                <i class="icon-calendar"></i>
             </div>
         </div>
 
@@ -13,61 +13,58 @@
                 <div class="datepicker-wrapper">
                     <header>
                         <nav>
-              <span href="#" @click.stop.prevent="pickerPrevMonth">
-                <i class="glyphicon glyphicon-chevron-left"></i>
-              </span>
+                          <span href="#" @click.stop.prevent="pickerPrevMonth">
+                            <i class="glyphicon glyphicon-chevron-left"></i>
+                          </span>
                             <strong class="heading">
-                  <span class="currentMonth"
-                        @click.stop="handlerPickerMonth">
-                    {{ currentMonth }}
-                  </span>
-                                <span class="currentYear"
-                                      @click.stop="handlerPickerYear">
-                   {{ currentYear }}
-                   </span>
+                                <span class="currentMonth" @click.stop="handlerPickerMonth">{{ currentMonth }}</span>
+                                <span class="currentYear" @click.stop="handlerPickerYear">{{ currentYear }}</span>
                             </strong>
                             <span href="#" @click.stop="pickerNextMonth">
-                <i class="glyphicon glyphicon-chevron-right"></i>
-              </span>
+                                <i class="glyphicon glyphicon-chevron-right"></i>
+                            </span>
                         </nav>
-
                         <div class="day-labels week" v-if="pickerMode == 'day'">
                             <span class="week-label">&nbsp;</span>
-                            <span class="day-label" v-for="d in pickerData.dayslabels">
-                {{ d }}
-              </span>
+                            <span class="day-label" v-for="d in pickerData.dayslabels">{{ d }}</span>
                         </div>
-
                     </header>
 
                     <section v-if="pickerMode == 'day'">
                         <div class="weeks" v-for="week in pickerData.weeks">
-              <span class="week">
-                <span class="week-label">{{ week.num }}</span>
-                <span class="week-day" v-for="d in week.days" :class="{ active: d.active, disabled: !d.enabled }"
-                      @click.prevent.stop="changeDate(d.date)">
-                  {{ d.day }}
-                </span>
-              </span>
+                            <span class="week">
+                                <span class="week-label">{{ week.num }}</span>
+                                <span class="week-day" v-for="d in week.days" :class="{ active: d.active, disabled: !d.enabled }"
+                                      @click.prevent.stop="changeDate(d.date)">
+                                  {{ d.day }}
+                                </span>
+                            </span>
                         </div>
                     </section>
 
                     <section v-if="pickerMode == 'month'" class="months">
-            <span class="month" @click.prevent.stop="handlerSelectMonth(month)" v-for="month in months"
-                  :class="{ active: pickerMonthRef == month }">
-              {{ month }}
-            </span>
+                        <span class="month" @click.prevent.stop="handlerSelectMonth(month)"
+                              v-for="month in months"
+                              :class="{ active: pickerMonthRef == month }">
+                          {{ month }}
+                        </span>
                     </section>
 
                     <section v-if="pickerMode == 'year'" class="years">
-                        <span class="year" @click.prevent.stop="pickerYearRef -= 22">&lt;&lt;</span>
-                        <span class="year" @click.prevent.stop="handlerSelectYear(year)" v-for="year in years"
+                        <span class="year"
+                              @click.prevent.stop="pickerYearRef -= 22">&lt;&lt;</span>
+                        <span class="year"
+                              @click.prevent.stop="handlerSelectYear(year)"
+                              v-for="year in years"
                               :class="{ active: pickerYearRef == year }">
-              {{ year }}
-            </span>
+                          {{ year }}
+                        </span>
                         <span class="year" @click.prevent.stop="pickerYearRef += 22">&gt;&gt;</span>
                     </section>
-
+                </div>
+                <div style="text-align: center" @click="handlerClear">
+                    <i class="icon-cancel-alt"></i>
+                    Supprimer la date
                 </div>
             </div>
         </transition>
@@ -225,14 +222,29 @@
              *
              * @returns {string}
              */
-            renderValue() {
-                return !this.realValue ? '' : this.mmValue.format(this.valueFormat);
+            renderValue: {
+                get() {
+                    return !this.realValue ? '' : this.mmValue.format(this.valueFormat);
+                },
+                set( text ){
+                    if( text == '' ){
+                        this.changeDate(null);
+                    }
+                }
             }
         },
 
         ////////////////////////////////////////////////////////////////////: METHODES
         methods: {
             /////////////////////////////////////////////////////////////////// HANDLERS
+            handlerClear(){
+                console.log(this.realValue);
+                this.changeDate(null);
+            },
+
+            handlerInputChange(e){
+                console.log(e, this.value);
+            },
 
             /**
              * Déclenché quand un mois un selectionné.
@@ -407,12 +419,6 @@
             padding: .3em 0;
         }
     }
-
-
-
-
-
-
 
     .datepicker-selector .months .month, .datepicker-selector .months .year, .datepicker-selector .months .week-day, .datepicker-selector .years .month, .datepicker-selector .years .year, .datepicker-selector .years .week-day, .datepicker-selector .week .month, .datepicker-selector .week .year, .datepicker-selector .week .week-day {
         padding: .3em;
