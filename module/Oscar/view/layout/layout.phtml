@@ -219,7 +219,11 @@ $this->headScript();
                                 <li><a href="<?= $this->url('contract/advancedsearch') ?>?criteria[]=pp%3Bnull%3Bnull">Activités sans projet</a></li>
                                 <li><a href="<?= $this->url('project/empty') ?>">Projets sans activité</a></li>
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
-                                <li><a href="<?= $this->url('administration/connectors_home') ?>">Connecteurs disponibles</a></li>
+                                <li><a href="<?= $this->url('administration/connectors_home') ?>">Synchronisation des donnèes</a></li>
+                                <?php endif; ?>
+
+                                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD) ):?>
+                                    <li><a href="<?= $this->url('administration/activity_index') ?>">Mise à jour de l'index de recherche</a></li>
                                 <?php endif; ?>
 
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ): ?>
@@ -335,7 +339,11 @@ $this->headScript();
                         <li><a href="<?= $this->url('contract/advancedsearch') ?>?criteria[]=pp%3Bnull%3Bnull">Activités sans projet</a></li>
                         <li><a href="<?= $this->url('project/empty') ?>">Projets sans activité</a></li>
                         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
-                            <li><a href="<?= $this->url('administration/connectors_home') ?>">Connecteurs disponibles</a></li>
+                            <li><a href="<?= $this->url('administration/connectors_home') ?>">Synchronisation des donnèes</a></li>
+                        <?php endif; ?>
+
+                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD) ):?>
+                            <li><a href="<?= $this->url('administration/activity_index') ?>">Mise à jour de l'index de recherche</a></li>
                         <?php endif; ?>
                         <li><a href="<?= $this->url('changelog') ?>">Quoi de neuf ?</a></li>
                     </ul>
@@ -359,17 +367,8 @@ $this->headScript();
                 // Panneau latéral
                 $('.handler-collapse').click(function(e) {
                     $('.navbar-admin').toggleClass('collapsed');
-                    window.localStorage.setItem('adminmenu', !$('.navbar-admin').hasClass('collapsed'));
-                    console.log(localStorage.getItem('adminmenu'))
-
                     e.preventDefault();
                 });
-                console.log(localStorage.getItem('adminmenu'))
-                if( localStorage.getItem('adminmenu') == 'true' ){
-                    $('.navbar-admin').removeClass('collapsed');
-                }
-
-//                $('.navbar-admin').on('clickoutside')
             })
         </script>
         <?php endif; ?>
