@@ -51,14 +51,27 @@ var Privilege = Vue.extend({
     <div class="vue-loader" v-if="loading">
         <span>Chargement</span>
     </div>
-
-    <nav class="oscar-sorter">
+    
+    <div class="row">
+        <div class="col-md-6">
+        <nav class="oscar-sorter">
             <i class="icon-sort"></i>
             Filtres :
                <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 4) > 0 }" @click="toggleFilter(4)">Application</a>
                <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 2) > 0 }" @click="toggleFilter(2)">Organization</a>
                <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 1) > 0 }" @click="toggleFilter(1)">Projet/Activité</a>
+              
         </nav>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group input">
+                <input type="search" v-model="filter" class="form-control input-sm" placeholder="Recherche dans les privilèges" />
+                <div class="input-group-addon"><i class="icon-search-outline"></i></div>
+            </div>
+        </div>
+    </div>
+    
+    <hr>
 
     <section v-for="group in grouped" class="card group-privilege">
         <h1 class="card-title" @click="toggleGroup(group.categorie.id)">
@@ -74,7 +87,7 @@ var Privilege = Vue.extend({
                 :key="'p'+privilege.id" 
                 :class="{'discret': (privilege.spot & activeSpots) == 0}">
             <section class="droits">    
-                <strong class="privilege-label-heading">{{ privilege.libelle }}</strong><br>
+                <strong class="privilege-label-heading" :title="'CODE: ' + privilege.categorie.code + '_' + privilege.code">{{ privilege.libelle }}</strong><br>
                 <roles :roleHighLight="roleHighLight" :roleSelected="roleSelected" :activeSpots="activeSpots" :selected="privilege.roles" :roles="roles" @toggle="toggle(privilege.id, $event)" @hover="handlerRoleHover"></roles>
             </section>
             <section>
@@ -83,7 +96,7 @@ var Privilege = Vue.extend({
                 :key="'p'+sub.id" 
                 :class="{'discret': (sub.spot & activeSpots) == 0}">
             <section class="droits">    
-                <strong class="privilege-label">{{ sub.libelle }}</strong><br>
+                <strong class="privilege-label" :title="'CODE: ' + sub.categorie.code + '_' + sub.code">{{ sub.libelle }}</strong><br>
                 <roles :roleHighLight="roleHighLight" :roleSelected="roleSelected" :activeSpots="activeSpots" :selected="sub.roles" :roles="roles" @toggle="toggle(sub.id, $event)" @hover="handlerRoleHover"></roles>
             </section>
             <section>
@@ -105,6 +118,7 @@ var Privilege = Vue.extend({
             roles: [],
             loading: true,
             ready: false,
+            filter: "",
             groupBy: 'categorie',
             activeSpots: prefs.get('activeSpots'),
             openedGroup: prefs.get('openedGroup')
@@ -112,7 +126,7 @@ var Privilege = Vue.extend({
     },
     watch: {
         roleHighLight(){
-            console.log(this.roleHighLight)
+
         },
         openedGroup(){
             prefs.set('openedGroup', this.openedGroup);
@@ -125,9 +139,14 @@ var Privilege = Vue.extend({
         grouped(){
             var grouped = {};
             this.privileges.forEach((p) => {
+                var forceOpen = false;
+                if( this.filter ){
+                    if( p.libelle.toLowerCase().indexOf(this.filter.toLowerCase()) == -1 ) return;
+                    forceOpen = true;
+                }
                 if( !grouped[p.categorie.id] ){
                     grouped[p.categorie.id] = {
-                        open: this.openedGroup.indexOf(p.categorie.id) > -1,
+                        open: this.openedGroup.indexOf(p.categorie.id) > -1 || forceOpen,
                         privileges: [],
                         categorie: p.categorie
                     }
@@ -152,7 +171,7 @@ var Privilege = Vue.extend({
         },
 
         handlerRoleHover: function(){
-          console.log(arguments);
+
         },
 
         toggleGroup: function( idCategory ){
@@ -201,11 +220,9 @@ var Privilege = Vue.extend({
 
             this.$http.patch(this.$http.$options.root, {privilegeid, roleid}).then(
                 (res) => {
-                    console.log(res)
                     this.updateRecursive(this.privileges, res.body);
                 },
                 (err) => {
-                    console.error(err)
                     this.errors.push(err.body);
                 }
             ).then(()=>{

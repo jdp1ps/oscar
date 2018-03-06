@@ -39,7 +39,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
         components: {
             'roles': Roles
         },
-        template: '<section>\n    <transition name="fade">\n        <div class="vue-loader" v-if="errors.length">\n            <div class="alert alert-danger" v-for="error, i in errors">\n                {{ error }}\n                <a href="" @click.prevent="errors.splice(i,1)"><i class="glyphicon glyphicon-remove"></i></a>\n            </div>\n        </div>\n    </transition>\n\n    <div class="vue-loader" v-if="loading">\n        <span>Chargement</span>\n    </div>\n\n    <nav class="oscar-sorter">\n            <i class="icon-sort"></i>\n            Filtres :\n               <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 4) > 0 }" @click="toggleFilter(4)">Application</a>\n               <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 2) > 0 }" @click="toggleFilter(2)">Organization</a>\n               <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 1) > 0 }" @click="toggleFilter(1)">Projet/Activit\xE9</a>\n        </nav>\n\n    <section v-for="group in grouped" class="card group-privilege">\n        <h1 class="card-title" @click="toggleGroup(group.categorie.id)">\n            <strong>\n               <i class="icon-right-dir" v-show="!group.open"></i>\n                <i class="icon-down-dir" v-show="group.open"></i>\n                {{ group.categorie.libelle }}\n            </strong>\n        </h1>\n        <article v-for="privilege in group.privileges" \n                class="privilege" \n                v-show="group.open" \n                :key="\'p\'+privilege.id" \n                :class="{\'discret\': (privilege.spot & activeSpots) == 0}">\n            <section class="droits">    \n                <strong class="privilege-label-heading">{{ privilege.libelle }}</strong><br>\n                <roles :roleHighLight="roleHighLight" :roleSelected="roleSelected" :activeSpots="activeSpots" :selected="privilege.roles" :roles="roles" @toggle="toggle(privilege.id, $event)" @hover="handlerRoleHover"></roles>\n            </section>\n            <section>\n                 <article v-for="sub in privilege.children" \n                class="privilege" \n                :key="\'p\'+sub.id" \n                :class="{\'discret\': (sub.spot & activeSpots) == 0}">\n            <section class="droits">    \n                <strong class="privilege-label">{{ sub.libelle }}</strong><br>\n                <roles :roleHighLight="roleHighLight" :roleSelected="roleSelected" :activeSpots="activeSpots" :selected="sub.roles" :roles="roles" @toggle="toggle(sub.id, $event)" @hover="handlerRoleHover"></roles>\n            </section>\n            <section>\n                \n            </section>\n        </article>\n            </section>\n        </article>\n    </section>\n\n    </section>',
+        template: '<section>\n    <transition name="fade">\n        <div class="vue-loader" v-if="errors.length">\n            <div class="alert alert-danger" v-for="error, i in errors">\n                {{ error }}\n                <a href="" @click.prevent="errors.splice(i,1)"><i class="glyphicon glyphicon-remove"></i></a>\n            </div>\n        </div>\n    </transition>\n\n    <div class="vue-loader" v-if="loading">\n        <span>Chargement</span>\n    </div>\n    \n    <div class="row">\n        <div class="col-md-6">\n        <nav class="oscar-sorter">\n            <i class="icon-sort"></i>\n            Filtres :\n               <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 4) > 0 }" @click="toggleFilter(4)">Application</a>\n               <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 2) > 0 }" @click="toggleFilter(2)">Organization</a>\n               <a href="#" class="oscar-sorter-item" :class="{ active: (activeSpots & 1) > 0 }" @click="toggleFilter(1)">Projet/Activit\xE9</a>\n              \n        </nav>\n        </div>\n        <div class="col-md-6">\n            <div class="input-group input">\n                <input type="search" v-model="filter" class="form-control input-sm" placeholder="Recherche dans les privil\xE8ges" />\n                <div class="input-group-addon"><i class="icon-search-outline"></i></div>\n            </div>\n        </div>\n    </div>\n    \n    <hr>\n\n    <section v-for="group in grouped" class="card group-privilege">\n        <h1 class="card-title" @click="toggleGroup(group.categorie.id)">\n            <strong>\n               <i class="icon-right-dir" v-show="!group.open"></i>\n                <i class="icon-down-dir" v-show="group.open"></i>\n                {{ group.categorie.libelle }}\n            </strong>\n        </h1>\n        <article v-for="privilege in group.privileges" \n                class="privilege" \n                v-show="group.open" \n                :key="\'p\'+privilege.id" \n                :class="{\'discret\': (privilege.spot & activeSpots) == 0}">\n            <section class="droits">    \n                <strong class="privilege-label-heading" :title="\'CODE: \' + privilege.categorie.code + \'_\' + privilege.code">{{ privilege.libelle }}</strong><br>\n                <roles :roleHighLight="roleHighLight" :roleSelected="roleSelected" :activeSpots="activeSpots" :selected="privilege.roles" :roles="roles" @toggle="toggle(privilege.id, $event)" @hover="handlerRoleHover"></roles>\n            </section>\n            <section>\n                 <article v-for="sub in privilege.children" \n                class="privilege" \n                :key="\'p\'+sub.id" \n                :class="{\'discret\': (sub.spot & activeSpots) == 0}">\n            <section class="droits">    \n                <strong class="privilege-label" :title="\'CODE: \' + sub.categorie.code + \'_\' + sub.code">{{ sub.libelle }}</strong><br>\n                <roles :roleHighLight="roleHighLight" :roleSelected="roleSelected" :activeSpots="activeSpots" :selected="sub.roles" :roles="roles" @toggle="toggle(sub.id, $event)" @hover="handlerRoleHover"></roles>\n            </section>\n            <section>\n                \n            </section>\n        </article>\n            </section>\n        </article>\n    </section>\n\n    </section>',
 
         data: function data() {
             return {
@@ -50,6 +50,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
                 roles: [],
                 loading: true,
                 ready: false,
+                filter: "",
                 groupBy: 'categorie',
                 activeSpots: prefs.get('activeSpots'),
                 openedGroup: prefs.get('openedGroup')
@@ -57,9 +58,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
         },
 
         watch: {
-            roleHighLight: function roleHighLight() {
-                console.log(this.roleHighLight);
-            },
+            roleHighLight: function roleHighLight() {},
             openedGroup: function openedGroup() {
                 prefs.set('openedGroup', this.openedGroup);
             },
@@ -73,9 +72,14 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
 
                 var grouped = {};
                 this.privileges.forEach(function (p) {
+                    var forceOpen = false;
+                    if (_this.filter) {
+                        if (p.libelle.toLowerCase().indexOf(_this.filter.toLowerCase()) == -1) return;
+                        forceOpen = true;
+                    }
                     if (!grouped[p.categorie.id]) {
                         grouped[p.categorie.id] = {
-                            open: _this.openedGroup.indexOf(p.categorie.id) > -1,
+                            open: _this.openedGroup.indexOf(p.categorie.id) > -1 || forceOpen,
                             privileges: [],
                             categorie: p.categorie
                         };
@@ -101,9 +105,7 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
             },
 
 
-            handlerRoleHover: function handlerRoleHover() {
-                console.log(arguments);
-            },
+            handlerRoleHover: function handlerRoleHover() {},
 
             toggleGroup: function toggleGroup(idCategory) {
                 if (this.openedGroup.indexOf(idCategory) > -1) {
@@ -144,10 +146,8 @@ define(['exports', 'vue', 'vue-resource', 'LocalDB'], function (exports, _vue, _
                 this.loading = true;
 
                 this.$http.patch(this.$http.$options.root, { privilegeid: privilegeid, roleid: roleid }).then(function (res) {
-                    console.log(res);
                     _this2.updateRecursive(_this2.privileges, res.body);
                 }, function (err) {
-                    console.error(err);
                     _this2.errors.push(err.body);
                 }).then(function () {
                     _this2.loading = false;
