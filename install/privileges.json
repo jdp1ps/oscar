@@ -541,6 +541,14 @@
     "fullcode": "MAINTENANCE-CONNECTOR_ACCESS"
   },
 
+  "MAINTENANCE-SEARCH_BUILD": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "SEARCH_BUILD",
+    "libelle": "Peut lancer la réindexation des données",
+    "fullcode": "MAINTENANCE-SEARCH_BUILD"
+  },
+
   "MAINTENANCE-NOTIFICATION_PERSON": {
     "spot": 7,
     "category_id": 6,
