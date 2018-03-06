@@ -477,11 +477,9 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     public function searchIndex_rebuild()
     {
-        echo " # Reconstruction de l'index de recherche\n";
         $this->searchIndex_reset();
         $activities = $this->getEntityManager()->getRepository(Activity::class)->findAll();
-        echo sprintf("%s activités vont être indexées...\n", count($activities));
-        $this->getSearchEngineStrategy()->rebuildIndex($activities);
+        return $this->getSearchEngineStrategy()->rebuildIndex($activities);
     }
 
 

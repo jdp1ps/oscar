@@ -85,6 +85,7 @@ class ProjectGrantController extends AbstractOscarController
             $form->setData($request->getPost());
             if ($form->isValid()) {
                 $this->getEntityManager()->flush($projectGrant);
+                $this->getActivityService()->searchUpdate($projectGrant);
                 $this->redirect()->toRoute(
                     'contract/show',
                     ['id' => $projectGrant->getId()]
@@ -186,20 +187,25 @@ class ProjectGrantController extends AbstractOscarController
             $this->getOscarUserContext()->check(Privileges::ACTIVITY_DELETE,
                 $projectGrant);
             $project = $projectGrant->getProject();
+            $this->getLogger()->info(sprintf('Suppression de %s - %s', $projectGrant, $projectGrant->getId()));
+            $activity_id = $projectGrant->getId();
+            try {
+                $this->getActivityService()->searchDelete($activity_id);
+            } catch ( \Exception $e ) {}
             $this->getEntityManager()->remove($projectGrant);
+
             $this->getEntityManager()->flush();
-            $this->getActivityService()->searchDelete($projectGrant->getId());
 
             if (!$project) {
                 $this->redirect()->toRoute('contract/advancedsearch');
             } else {
                 $this->getEntityManager()->refresh($project);
-                $this->getProjectService()->searchUpdate($project);
+
                 $this->redirect()->toRoute('project/show',
                     ['id' => $projectGrant->getProject()->getId()]);
             }
         } catch (\Exception $e) {
-            die("<pre>ERROR\n : " . $e->getTraceAsString());
+            throw $e;
         }
     }
 
@@ -492,8 +498,8 @@ class ProjectGrantController extends AbstractOscarController
                 if ($project) {
                     $project->touch();
                 }
-                $this->getEntityManager()->flush();
-                $this->getActivityService()->searchUpdate($projectGrant);
+                $this->getEntityManager()->flush($projectGrant);
+
                 $this->redirect()->toRoute('contract/show',
                     ['id' => $projectGrant->getId()]);
             }

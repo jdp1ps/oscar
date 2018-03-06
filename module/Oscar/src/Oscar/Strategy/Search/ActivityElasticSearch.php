@@ -10,6 +10,7 @@ namespace Oscar\Strategy\Search;
 
 
 use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Activity;
 use Elasticsearch\ClientBuilder;
 
@@ -111,13 +112,15 @@ class ActivityElasticSearch implements ActivitySearchStrategy
      */
     public function rebuildIndex($activities)
     {
-
+        $repport = new ConnectorRepport();
         $this->resetIndex();
+        $repport->addnotice("Index réinitialisé");
 
         $i = 0;
         /** @var Activity $activity */
         foreach ($activities as $activity) {
             $i++;
+            $repport->addadded((string)$activity);
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->getIndex(),
@@ -141,6 +144,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         if (!empty($params['body'])) {
             $this->getClient()->bulk($params);
         }
+        return $repport;
     }
 
     protected function getIndexableDatas(Activity $activity)
@@ -208,11 +212,12 @@ class ActivityElasticSearch implements ActivitySearchStrategy
 
     public function searchDelete($id)
     {
-        return $this->getClient()->delete([
+        $parms = [
             'index' => $this->getIndex(),
             'type' => $this->getType(),
-            'id' => $id
-        ]);
+            'id' => "$id"
+        ];
+        return $this->getClient()->delete($parms);
     }
 
     public function searchUpdate(Activity $activity)
@@ -221,7 +226,9 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             'index' => $this->getIndex(),
             'type' => $this->getType(),
             'id' => $activity->getId(),
-            'body' => $this->getIndexableDatas()
+            'body' => [
+                'doc' => $this->getIndexableDatas($activity)
+            ]
         ];
         return $this->getClient()->update($params);
     }
@@ -235,10 +242,8 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         try {
             $this->getClient()->indices()->delete($params);
         } catch (Missing404Exception $e) {
-            echo "Nouvel index...";
         } catch (\Exception $e) {
-            echo $e->getMessage();
-            die();
+            throw $e;
         }
     }
 }

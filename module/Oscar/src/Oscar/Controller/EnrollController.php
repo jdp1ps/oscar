@@ -160,12 +160,27 @@ class EnrollController extends AbstractOscarController
 
             $enroll->getEnroller()->touch();
 
+
+
             $this->getEntityManager()->flush($enroll);
+
+            // Mise à jour de l'index
+            if( get_class($enroll->getEnroller()) == Activity::class ){
+                $this->getActivityService()->searchUpdate($enroll->getEnroller());
+            }
+            if( get_class($enroll->getEnroller()) == Project::class ){
+                foreach ($enroll->getEnroller()->getActivities() as $activity) {
+                    $this->getActivityService()->searchUpdate($activity);
+                }
+            }
+
             $reflect = new \ReflectionClass($enroll);
 
             $this->getActivityLogService()->addUserInfo(sprintf(
                 " a modifié %s, nouveau rôle '%s' dans %s", $enroll->getEnrolled()->log(), $role, $enroll->getEnroller()->log())
                 , $reflect->getShortName(), $enroll->getEnroller()->getId());
+
+            $activities = [];
 
             switch ($class) {
                 case ProjectPartner::class:

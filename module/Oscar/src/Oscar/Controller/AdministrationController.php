@@ -30,6 +30,12 @@ class AdministrationController extends AbstractOscarController
         return [];
     }
 
+    public function activityIndexBuildAction(){
+        return [
+            'repport' => $this->getActivityService()->searchIndex_rebuild()
+        ];
+    }
+
     public function connectorsHomeAction(){
         $configOscar = $this->getServiceLocator()->get('OscarConfig');
         $configConnectors = $configOscar->getConfiguration('connectors');
