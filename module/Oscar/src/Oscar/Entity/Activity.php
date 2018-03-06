@@ -1429,10 +1429,10 @@ class Activity implements ResourceInterface
         return false;
     }
 
-    public function hasPaymentAt( $amount, \DateTime $date ){
+    public function hasPaymentAt( $amount, $datePayment, $datePredicted ){
         /** @var ActivityPayment $payment */
         foreach ($this->getPayments() as $payment ){
-            if( $payment->getDatePayment() == $date  && $payment->getAmount() == $amount ){
+            if( $payment->getDatePayment() == $datePayment  && $payment->getAmount() == $amount && $payment->getDatePredicted() == $datePredicted){
                 return true;
             }
         }
