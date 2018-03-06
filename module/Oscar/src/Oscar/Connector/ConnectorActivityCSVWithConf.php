@@ -181,7 +181,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 "persons" => [],
                 "milestones" => [],
                 "payments" => [],
-                "project" => []
             ];
 
             foreach ($datas as $index => $value ){
@@ -255,11 +254,16 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 else if( $key == "dateSigned" ){ $json['datesigned'] = $value; }
                 else if( $key == "label" ){ $json['label'] = $value; }
                 else if( $key == "uid" ){ $json['uid'] = $value; }
-                else if( $key == "project.acronym" ){ $json['project']['acronym'] = $value; }
-                else if( $key == "project.label" ){ $json['project']['label'] = $value; }
+                else if( $key == "project.acronym" ){ $json['acronym'] = $value; }
+                else if( $key == "project.label" ){ $json['projectlabel'] = $value; }
 
 
             }
+
+            if( !array_key_exists('projectLabel', $json) && array_key_exists('acronym', $json) ){
+                $json['projectLabel' = $json['acronym']];
+            }
+
             $out[] = $json;
         }
 
