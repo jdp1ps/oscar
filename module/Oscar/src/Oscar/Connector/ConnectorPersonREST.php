@@ -122,6 +122,12 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         curl_close($curl);
 
         foreach( json_decode($return) as $personData ){
+
+            if( ! property_exists($personData, 'uid') ){
+                $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData->uid, true)));
+                continue;
+            }
+
             try {
                 /** @var Person $personOscar */
                 $personOscar = $personRepository->getPersonByConnectorID($this->getName(),
@@ -130,10 +136,14 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             } catch( NoResultException $e ){
                 $personOscar = $personRepository->newPersistantPerson();
                 $action = "add";
+
             } catch( NonUniqueResultException $e ){
                 $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
                 continue;
             }
+
+
+
             if($personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null
                     || $personOscar->getDateSyncLdap() < $personData->dateupdated
