@@ -8,15 +8,23 @@
  */
 return [
     0 => "uid",
-    // 0 => "connectorId",
+
+    2   => 'project.acronym',
+    4   => "project.label",
+
     3   => "label",
-    4   => "project.",
-    5   => "persons.Chargé d'affaire",
-    6   => "codeEOTP",
-    7   => "persons.Préposé à la ventilation",
-    8   => "organizations.Laboratoire",
-    9   => "persons.Responsable scientifique",
-    10  => "amount",
-    11  => "payments.",
-    13  => "milestones.Rapport financier"
+    5   => "codeEOTP",
+
+    6   => "organizations.Composante Responsable",
+    7   => "organizations.Laboratoire",
+
+    8   => "persons.Responsable Scientifique",
+    9   => "persons.Ingénieur",
+
+    11  => "amount",
+
+    12  => "payments.1.2",
+    15  => "payments.1.2",
+
+    18  => "milestones.Rapport financier"
 ];

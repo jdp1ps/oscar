@@ -1,37 +1,73 @@
 [
   {
-    "uid": "ED209",
+    "uid": "R1",
     "organizations": {
+      "Composante Responsable": [
+        "Universit\u00e9 des sciences de Berne"
+      ],
       "Laboratoire": [
-        "Cyberdyne Corp"
+        "Olympia"
       ]
     },
     "persons": {
-      "Charg\u00e9 d'affaire": [
-        "Jean-marcel Acheval"
+      "Responsable Scientifique": [
+        "Albert Einstein"
       ],
-      "Pr\u00e9pos\u00e9 \u00e0 la ventilation": [
-        "Gontran Pouille"
+      "Ing\u00e9nieur": [
+        "Marcel Grossmann"
+      ]
+    },
+    "milestones": [],
+    "payments": [],
+    "project": {
+      "acronym": "RELATIV",
+      "label": "Th\u00e9orie de la gravitation"
+    },
+    "label": "Relativit\u00e9 restreinte",
+    "pfi": "EOTP201400002"
+  },
+  {
+    "uid": "R2",
+    "organizations": {
+      "Composante Responsable": [
+        "Universit\u00e9 des sciences de Berne"
       ],
-      "Responsable scientifique": [
-        "Responsable Scientifique"
+      "Laboratoire": [
+        "Universit\u00e9 des sciences de Berlin"
+      ]
+    },
+    "persons": {
+      "Responsable Scientifique": [
+        "Albert Einstein"
+      ],
+      "Ing\u00e9nieur": [
+        "Marcel Grossmann"
       ]
     },
     "milestones": [
       {
         "type": "Rapport financier",
-        "date": "2017-08-22"
+        "date": "2018-04-15"
       }
     ],
     "payments": [
       {
-        "amount": 42589.5,
-        "date": "2017-01-01"
+        "amount": 20000,
+        "date": "2018-01-01",
+        "predicted": "2018-01-01"
+      },
+      {
+        "amount": 25000,
+        "date": "",
+        "predicted": "2018-06-01"
       }
     ],
-    "label": "Activit\u00e91",
-    "acronym": "Projet1",
-    "projectlabel": "Projet1",
-    "pfi": "EOTP201400002"
+    "project": {
+      "acronym": "RELATIV",
+      "label": "Th\u00e9orie de la gravitation"
+    },
+    "label": "Relativit\u00e9 g\u00e9n\u00e9rale",
+    "pfi": "EOTP201400003",
+    "amount": "45000"
   }
 ]
