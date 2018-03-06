@@ -181,6 +181,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 "persons" => [],
                 "milestones" => [],
                 "payments" => [],
+                "project" => []
             ];
 
             foreach ($datas as $index => $value ){
@@ -231,16 +232,19 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                         "date" => $value
                     ];
                 }
-                else if( preg_match("/payments\.?(-?[\d]*)/", $key, $matches) ){
+                else if( preg_match("/payments\.([.\d]*)/", $key, $matches) ){
 
-                    $amountPosition = $index+1;
-                    if( count($matches) === 2 ){
-                        if( $matches[2] != "" )
-                            $amountPosition = $index + intval($matches[1]);
-                    }
+                    $datesPos = explode('.', $matches[1]);
+
+                    // Calcule des positions pour les données
+                    $paymentAmountPosition = $index;
+                    $paymentDatePaymentPosition = $index + intval($datesPos[0]);
+                    $paymentDatePredictedPosition = $index + intval($datesPos[1]);
+
                     $json['payments'][] = [
-                        "amount" => doubleval($datas[$amountPosition]),
-                        "date" => $value
+                        "amount" => doubleval($datas[$paymentAmountPosition]),
+                        "date" => $this->getCheckedDateString($datas[$paymentDatePaymentPosition]),
+                        "predicted" => $this->getCheckedDateString($datas[$paymentDatePredictedPosition]),
                     ];
                 }
 
@@ -251,15 +255,26 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 else if( $key == "dateSigned" ){ $json['datesigned'] = $value; }
                 else if( $key == "label" ){ $json['label'] = $value; }
                 else if( $key == "uid" ){ $json['uid'] = $value; }
-                else if( $key == "project." ){
-                    $json['acronym'] = $value;
-                    $json['projectlabel'] = $value;
-                }
+                else if( $key == "project.acronym" ){ $json['project']['acronym'] = $value; }
+                else if( $key == "project.label" ){ $json['project']['label'] = $value; }
+
+
             }
             $out[] = $json;
         }
 
         return $out;
+    }
+
+    /**
+     * Évalutation d'un date avant de la retourner correctement formattée.
+     *
+     * @param $string
+     */
+    protected function getCheckedDateString( $string ){
+        if( $string == "" ) return "";
+        $date = new \DateTime($string);
+        return $date->format('Y-m-d');
     }
 
     public function syncOne($key)
