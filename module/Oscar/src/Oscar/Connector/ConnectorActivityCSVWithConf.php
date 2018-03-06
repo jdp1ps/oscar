@@ -248,20 +248,20 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 }
 
                 else if( $key == "codeEOTP" ){ $json['pfi'] = $value; }
-                else if( $key == "amount" ){ $json['amount'] = $value; }
+                else if( $key == "amount" ){ $json['amount'] = doubleval($value); }
                 else if( $key == "dateStart" ){ $json['datestart'] = $value; }
                 else if( $key == "dateEnd" ){ $json['dateend'] = $value; }
                 else if( $key == "dateSigned" ){ $json['datesigned'] = $value; }
                 else if( $key == "label" ){ $json['label'] = $value; }
                 else if( $key == "uid" ){ $json['uid'] = $value; }
                 else if( $key == "project.acronym" ){ $json['acronym'] = $value; }
-                else if( $key == "project.label" ){ $json['projectlabel'] = $value; }
+                else if( $key == "project.label" ){ $json['projectLabel'] = $value; }
 
 
             }
 
             if( !array_key_exists('projectLabel', $json) && array_key_exists('acronym', $json) ){
-                $json['projectLabel' = $json['acronym']];
+                $json['projectLabel'] = $json['acronym'];
             }
 
             $out[] = $json;

@@ -1,45 +1,69 @@
-======================================================================
-   The application has thrown an exception!
-======================================================================
- ParseError
- syntax error, unexpected '=', expecting ']'
-----------------------------------------------------------------------
-/home/jacksay/Projects/Unicaen/oscar/module/Oscar/src/Oscar/Connector/ConnectorActivityCSVWithConf.php:264
-#0 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-loader/src/StandardAutoloader.php(215): Zend\Loader\StandardAutoloader->loadClass('Oscar\\Connector...', 'namespaces')
-#1 [internal function]: Zend\Loader\StandardAutoloader->autoload('Oscar\\Connector...')
-#2 /home/jacksay/Projects/Unicaen/oscar/module/Oscar/src/Oscar/Controller/ConsoleController.php(333): spl_autoload_call('Oscar\\Connector...')
-#3 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-mvc/src/Controller/AbstractActionController.php(84): Oscar\Controller\ConsoleController->importActivity2Action()
-#4 [internal function]: Zend\Mvc\Controller\AbstractActionController->onDispatch(Object(Zend\Mvc\MvcEvent))
-#5 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-eventmanager/src/EventManager.php(490): call_user_func(Array, Object(Zend\Mvc\MvcEvent))
-#6 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-eventmanager/src/EventManager.php(260): Zend\EventManager\EventManager->triggerListeners('dispatch', Object(Zend\Mvc\MvcEvent), Object(Closure))
-#7 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-mvc/src/Controller/AbstractController.php(118): Zend\EventManager\EventManager->triggerEventUntil(Object(Closure), Object(Zend\Mvc\MvcEvent))
-#8 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-mvc/src/DispatchListener.php(118): Zend\Mvc\Controller\AbstractController->dispatch(Object(Zend\Console\Request), Object(Zend\Console\Response))
-#9 [internal function]: Zend\Mvc\DispatchListener->onDispatch(Object(Zend\Mvc\MvcEvent))
-#10 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-eventmanager/src/EventManager.php(490): call_user_func(Array, Object(Zend\Mvc\MvcEvent))
-#11 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-eventmanager/src/EventManager.php(260): Zend\EventManager\EventManager->triggerListeners('dispatch', Object(Zend\Mvc\MvcEvent), Object(Closure))
-#12 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-mvc/src/Application.php(340): Zend\EventManager\EventManager->triggerEventUntil(Object(Closure), Object(Zend\Mvc\MvcEvent))
-#13 /home/jacksay/Projects/Unicaen/oscar/public/index.php(112): Zend\Mvc\Application->run()
-#14 {main}
-======================================================================
-   Previous Exception(s):
-======================================================================
- ParseError
- syntax error, unexpected '=', expecting ']'
-----------------------------------------------------------------------
-/home/jacksay/Projects/Unicaen/oscar/module/Oscar/src/Oscar/Connector/ConnectorActivityCSVWithConf.php:264
-#0 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-loader/src/StandardAutoloader.php(215): Zend\Loader\StandardAutoloader->loadClass('Oscar\\Connector...', 'namespaces')
-#1 [internal function]: Zend\Loader\StandardAutoloader->autoload('Oscar\\Connector...')
-#2 /home/jacksay/Projects/Unicaen/oscar/module/Oscar/src/Oscar/Controller/ConsoleController.php(333): spl_autoload_call('Oscar\\Connector...')
-#3 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-mvc/src/Controller/AbstractActionController.php(84): Oscar\Controller\ConsoleController->importActivity2Action()
-#4 [internal function]: Zend\Mvc\Controller\AbstractActionController->onDispatch(Object(Zend\Mvc\MvcEvent))
-#5 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-eventmanager/src/EventManager.php(490): call_user_func(Array, Object(Zend\Mvc\MvcEvent))
-#6 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-eventmanager/src/EventManager.php(260): Zend\EventManager\EventManager->triggerListeners('dispatch', Object(Zend\Mvc\MvcEvent), Object(Closure))
-#7 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-mvc/src/Controller/AbstractController.php(118): Zend\EventManager\EventManager->triggerEventUntil(Object(Closure), Object(Zend\Mvc\MvcEvent))
-#8 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-mvc/src/DispatchListener.php(118): Zend\Mvc\Controller\AbstractController->dispatch(Object(Zend\Console\Request), Object(Zend\Console\Response))
-#9 [internal function]: Zend\Mvc\DispatchListener->onDispatch(Object(Zend\Mvc\MvcEvent))
-#10 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-eventmanager/src/EventManager.php(490): call_user_func(Array, Object(Zend\Mvc\MvcEvent))
-#11 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-eventmanager/src/EventManager.php(260): Zend\EventManager\EventManager->triggerListeners('dispatch', Object(Zend\Mvc\MvcEvent), Object(Closure))
-#12 /home/jacksay/Projects/Unicaen/oscar/vendor/zendframework/zend-mvc/src/Application.php(340): Zend\EventManager\EventManager->triggerEventUntil(Object(Closure), Object(Zend\Mvc\MvcEvent))
-#13 /home/jacksay/Projects/Unicaen/oscar/public/index.php(112): Zend\Mvc\Application->run()
-#14 {main}
-
+[
+  {
+    "uid": "R1",
+    "organizations": {
+      "Composante Responsable": [
+        "Universit\u00e9 des sciences de Berne"
+      ],
+      "Laboratoire": [
+        "Olympia"
+      ]
+    },
+    "persons": {
+      "Responsable Scientifique": [
+        "Albert Einstein"
+      ],
+      "Ing\u00e9nieur": [
+        "Marcel Grossmann"
+      ]
+    },
+    "milestones": [],
+    "payments": [],
+    "acronym": "RELATIV",
+    "label": "Relativit\u00e9 restreinte",
+    "projectLabel": "Th\u00e9orie de la gravitation",
+    "pfi": "EOTP201400002"
+  },
+  {
+    "uid": "R2",
+    "organizations": {
+      "Composante Responsable": [
+        "Universit\u00e9 des sciences de Berne"
+      ],
+      "Laboratoire": [
+        "Universit\u00e9 des sciences de Berlin"
+      ]
+    },
+    "persons": {
+      "Responsable Scientifique": [
+        "Albert Einstein"
+      ],
+      "Ing\u00e9nieur": [
+        "Marcel Grossmann"
+      ]
+    },
+    "milestones": [
+      {
+        "type": "Rapport financier",
+        "date": "2018-04-15"
+      }
+    ],
+    "payments": [
+      {
+        "amount": 20000,
+        "date": "2018-01-01",
+        "predicted": "2018-01-01"
+      },
+      {
+        "amount": 25000,
+        "date": "",
+        "predicted": "2018-06-01"
+      }
+    ],
+    "acronym": "RELATIV",
+    "label": "Relativit\u00e9 g\u00e9n\u00e9rale",
+    "projectLabel": "Th\u00e9orie de la gravitation",
+    "pfi": "EOTP201400003",
+    "amount": 45000
+  }
+]
