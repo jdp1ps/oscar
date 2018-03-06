@@ -10,51 +10,56 @@
                 <i class="icon-cancel-circled-outline" @click="filtreActivite = ''"></i>
                 </span>
         </p>
-        <div class="timesheet timesheet-header">
 
-            <div class="activity">
-                <i class="icon-cube"></i>
-                Activité
-                <input v-model="filtreActivite" class="form-control input-sm" placeholder="Filtrer sur les activités" />
-            </div>
-
-            <div class="wp">
-                <i class="icon-archive"></i>
-                Lot de travail
-            </div>
-
-            <div class="date">
-                <i class="icon-calendar"></i>
-                Créneau
-            </div>
-
-
-            <div class="declarant">
-                <i class="icon-user"></i>
-                Déclarant
-                <input v-model="filtreDeclarant" class="form-control input-sm" placeholder="Filtrer sur les déclarants" />
-            </div>
-
-            <div>
-                Validation scientifique
-            </div>
-
-            <div>
-                Validation administrative
-            </div>
+        <div class="alert alert-info" v-if="!timesheets.length">
+            Il n'y a pas de déclaration en attente pour <strong>{{ label }}</strong>
         </div>
+        <div v-else>
+            <div class="timesheet timesheet-header">
+                <div class="activity">
+                    <i class="icon-cube"></i>
+                    Activité
+                    <input v-model="filtreActivite" class="form-control input-sm" placeholder="Filtrer sur les activités" />
+                </div>
 
-        <section class="timesheets">
-            <transition-group name="list" tag="article">
-                <timesheet v-for="timesheet in filteredTimesheets" :timesheet="timesheet" :key="timesheet.id"
-                           :moment="moment"
-                           @validsci="$emit('validsci', $event)"
-                           @validadm="$emit('validadm', $event)"
-                           @rejectsci="$emit('rejectsci', $event)"
-                           @rejectadm="$emit('rejectadm', $event)"
-                />
-            </transition-group>
-        </section>
+                <div class="wp">
+                    <i class="icon-archive"></i>
+                    Lot de travail
+                </div>
+
+                <div class="date">
+                    <i class="icon-calendar"></i>
+                    Créneau
+                </div>
+
+
+                <div class="declarant">
+                    <i class="icon-user"></i>
+                    Déclarant
+                    <input v-model="filtreDeclarant" class="form-control input-sm" placeholder="Filtrer sur les déclarants" />
+                </div>
+
+                <div>
+                    Validation scientifique
+                </div>
+
+                <div>
+                    Validation administrative
+                </div>
+            </div>
+
+            <section class="timesheets">
+                <transition-group name="list" tag="article">
+                    <timesheet v-for="timesheet in filteredTimesheets" :timesheet="timesheet" :key="timesheet.id"
+                               :moment="moment"
+                               @validsci="$emit('validsci', $event)"
+                               @validadm="$emit('validadm', $event)"
+                               @rejectsci="$emit('rejectsci', $event)"
+                               @rejectadm="$emit('rejectadm', $event)"
+                    />
+                </transition-group>
+            </section>
+        </div>
     </section>
 </template>
 

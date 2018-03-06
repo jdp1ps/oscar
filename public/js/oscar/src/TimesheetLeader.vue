@@ -10,7 +10,9 @@
             </div>
         </transition>
 
-        <h1>Déclarations en attente de validation</h1>
+        <h1>
+            <i class="icon-calendar"></i>
+            Déclarations en attente de validation</h1>
 
         <div class="alert-danger alert" v-show="error">
             <i class="icon-warning-empty"></i>
@@ -41,7 +43,7 @@
             </div>
         </div>
         <div v-else>
-            <section v-for="group in structuredTimesheets" class="organization-timesheets" v-if="group.timesheets.length">
+            <section v-for="group in structuredTimesheets" class="organization-timesheets">
 
                 <timesheetorganization :timesheets="group.timesheets" :label="group.label" :role="group.role"
                        :moment="moment"
