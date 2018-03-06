@@ -277,16 +277,19 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
     "milestones": [
         {
             "amount": 249.5,
-            "date": "2014-07-03"
+            "date": "2014-07-03",
+            "predicted": null
         },
         {
             "amount": 3249.5,
-            "date": "2018-01-31"
+            "date": null,
+            "predicted": "2018-01-31"
         }
     ]
 }
 ```
 
+> Les versements sans valeur dans la clef `date` mais avec une clef `predicted` seront tagué comme prévisionnel.
 
 
 # Importation depuis un fichier Excel
