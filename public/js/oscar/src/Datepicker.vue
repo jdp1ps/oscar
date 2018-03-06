@@ -62,7 +62,7 @@
                         <span class="year" @click.prevent.stop="pickerYearRef += 22">&gt;&gt;</span>
                     </section>
                 </div>
-                <div style="text-align: center" @click="handlerClear">
+                <div style="text-align: center; cursor: pointer" @click="handlerClear">
                     <i class="icon-cancel-alt"></i>
                     Supprimer la date
                 </div>
