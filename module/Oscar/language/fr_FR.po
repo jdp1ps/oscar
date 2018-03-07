@@ -151,3 +151,30 @@ msgstr "résout en %s"
 msgid "Exception"
 msgstr "Exception"
 
+
+msgid "Oscar"
+msgstr "Oscar"
+
+msgid "OSCAR"
+msgstr "OSCAR"
+
+msgid "Organisation et Suivi des Contrats et des Activités de Recherche"
+msgstr "Organisation et Suivi des Contrats et des Activités de Recherche"
+
+# Authentification
+
+msgid "Votre identifiant"
+msgstr "Votre identifiant"
+
+msgid "Votre mot de passe"
+msgstr "Votre mot de passe"
+
+msgid "Vous n'êtes pas connecté(e)"
+msgstr "Vous n'êtes pas connecté(e)"
+
+msgid "Connexion"
+msgstr "Connexion"
+
+
+
+

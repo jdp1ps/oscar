@@ -101,7 +101,9 @@ return array(
                 // ACTIVITÉS
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Activity',
-                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate', 'delete', 'visualization', 'documentsJson', 'activitiesOrganizations', 'notifications', 'generateNotifications'],
+                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate',
+                        'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
+                        'notifications', 'generateNotifications'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',

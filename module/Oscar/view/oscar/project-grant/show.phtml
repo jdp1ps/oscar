@@ -380,34 +380,6 @@
                         }).$mount('#payments')
                     });
                 </script>
-
-
-
-            <div id="payments-area" class="has-btn">
-                <h2><i class="icon-bank"></i>Versements</h2>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE, $entity) ): ?>
-                <nav class="btn-area">
-                    <a data-activitypayment-add href="<?= $this->url('activitypayment/new', ['idactivity'=>$entity->getId()]) ?>"  class="smoke">
-                        <i class="icon icon-plus"></i>
-                        Ajouter</a>
-                </nav>
-                <?php endif; ?>
-
-                <div id="payments" class="lc">
-                    <div class="lc-mask">
-                        <div class="lc-alert">
-                            Error message
-                        </div>
-                        <div class="lc-loader">
-                            <span class="text">Chargement</span>
-                        </div>
-                    </div>
-                    <div class="lc-content"></div>
-
-                </div>
-            </div>
-
-
             <?php endif; ?>
         </div>
     </div>

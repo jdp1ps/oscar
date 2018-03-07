@@ -126,12 +126,17 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function generateNotificationsActivities( $silent = false )
     {
+        $this->getServiceLocator()->get('Logger')->info('Génération des notifications');
+
         $activities = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
-            ->where('a.dateEnd >= :now')
+            ->where('a.dateEnd IS NULL OR a.dateEnd >= :now')
             ->setParameter('now', (new \DateTime())->format('Y-m-d'))
             ->getQuery()
             ->getResult();
+
+
+        $this->getServiceLocator()->get('Logger')->info(sprintf("Il y'a %s activité(s) à traiter", count($activities)));
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
@@ -156,11 +161,15 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      */
     public function generateNotificationsForActivity( Activity $activity , $silent = false)
     {
+
+        $this->getServiceLocator()->get('Logger')->info(sprintf('Génération des notifications pour %s', $activity));
+
         /** @var PersonService $personsService */
         $personsService = $this->getServiceLocator()->get('PersonService');
 
         /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
         $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
+
         $personsIds = [];
 
         /** @var Person $person */
@@ -169,7 +178,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         $now = new \DateTime();
-
 
         // TODO Ne générer les notifications que pour les personnes ayant le privilège sur les payments (Voir)
 
