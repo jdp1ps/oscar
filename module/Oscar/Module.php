@@ -10,6 +10,7 @@
 namespace Oscar;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
@@ -145,6 +146,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $str = $person->log();
             } catch (NoResultException $e) {
                 $str = $dbUser->getUsername() . ' - DBUSER';
+            } catch (NonUniqueResultException $e ){
+                echo "<pre>" . $e->getTraceAsString()."\n";
+                die($e->getMessage());
             }
             $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
                 $str), $dbUser);

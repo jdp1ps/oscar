@@ -69,7 +69,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             'index' => $this->getIndex(),
             'type' => $this->getType(),
             'body' => [
-                'size' => 1000,
+                'size' => 100000,
                 'query' => [
                     'query_string' => [
                         'query' => $search

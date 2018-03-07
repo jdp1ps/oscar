@@ -310,9 +310,13 @@
         <div class="col-md-4">
 
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
-            <div id="milestones">
-                Initialisation...
-            </div>
+            <div id="milestones"></div>
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity) ): ?>
+                <a href="<?= $this->url('contract/notifications', ['id' => $entity->getId()]) ?>" class="btn btn-default">
+                    <i class="icon-bell"></i>
+                    Voir les notifications planifiées
+                </a>
+            <?php endif; ?>
             <script>
                 require(['ActivityModel', 'vue','vue-resource', 'mm','milestones'], function(
                         ActivityModel,
@@ -348,7 +352,7 @@
             <?php endif; ?>
 
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
-                <div id="payments">Initialization...</div>
+                <div id="payments"></div>
                 <script>
                     require(['ActivityModel', 'vue','vue-resource', 'mm','payments'], function(ActivityModel, Vue, VueResource, moment, payments){
                         Vue.use(VueResource);

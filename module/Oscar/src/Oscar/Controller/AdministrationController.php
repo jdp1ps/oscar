@@ -309,11 +309,15 @@ class AdministrationController extends AbstractOscarController
         /** @var Authentification $auth */
         foreach ($authenticated as $auth) {
             $d = $auth->toJson();
-            $p = $this->getOscarUserContext()->getPersonFromAuthentification($auth);
             $person = null;
-            if ($p) {
-                $person = $p->toJson();
+            try {
+                $p = $this->getOscarUserContext()->getPersonFromAuthentification($auth);
+                if( $p )
+                    $person = $p->toJson();
+            } catch ( \Exception $e ){
+               // Pas de Personne associée à cette authentification
             }
+
             $d['person'] = $person;
             $out['users'][] = $d;
         }
