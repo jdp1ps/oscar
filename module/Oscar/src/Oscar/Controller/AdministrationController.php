@@ -8,6 +8,7 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationRole;
@@ -328,6 +329,54 @@ class AdministrationController extends AbstractOscarController
         }
 
         return $out;
+    }
+
+    public function userRolesAction(){
+        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::DROIT_USER_EDITION) ){
+            return $this->getResponseUnauthorized();
+        }
+
+        $authentificationId = $this->params()->fromPost('authentification_id');
+        $roleId = $this->params()->fromPost('role_id');
+
+        try {
+            /** @var Authentification $authentification */
+            $authentification = $this->getEntityManager()->getRepository(Authentification::class)->find($authentificationId);
+
+            /** @var Role $role */
+            $role = $this->getEntityManager()->getRepository(Role::class)->find($roleId);
+            if( !$authentification ){
+                return $this->getResponseNotFound("Compte introuvable.");
+            }
+            if( !$role ){
+                return $this->getResponseNotFound("Rôle introuvable.");
+            }
+        } catch ( \Exception $e ){
+            return $this->getResponseInternalError("Rôle/Authentification introuvable.");
+        }
+
+        $method = $this->getHttpXMethod();
+
+        switch( $method ){
+            case 'POST':
+                try {
+                    $authentification->addRole($role);
+                    $this->getEntityManager()->flush();
+                } catch (UniqueConstraintViolationException $e ){
+                    return $this->getResponseInternalError("Ce compte a déjà ce rôle.");
+                }
+                return $this->ajaxResponse($authentification->toJson());
+            case 'DELETE':
+                try {
+                    $authentification->removeRole($role);
+                    $this->getEntityManager()->flush();
+                } catch (\Exception $e ){
+                    return $this->getResponseInternalError("Impossible de supprimer le role : " . $e->getMessage());
+                }
+                return $this->ajaxResponse($authentification->toJson());
+        }
+
+        return $this->getResponseBadRequest("Erreur");
     }
 
     public function userLogsAction(){

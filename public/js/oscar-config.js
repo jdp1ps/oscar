@@ -57,6 +57,7 @@ requirejs.config({
         'activity' : 'components/build/activity',
         'Typedocument' : 'components/build/Typedocument',
         'milestones' : 'oscar/dist/Milestones',
+        'authentification' : 'oscar/dist/Authentification',
         'payments' : 'oscar/dist/Payments',
         'Datepicker2' : 'oscar/dist/Datepicker',
     },

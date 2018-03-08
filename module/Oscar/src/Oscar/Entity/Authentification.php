@@ -292,6 +292,18 @@ class Authentification implements UserInterface, ProviderInterface
     }
 
     /**
+     * Add a role to the user.
+     *
+     * @param Role $role
+     *
+     * @return void
+     */
+    public function removeRole($role)
+    {
+        $this->roles->removeElement($role);
+    }
+
+    /**
      * @return array
      */
     public function getSettings()

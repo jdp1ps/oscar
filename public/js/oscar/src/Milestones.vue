@@ -124,7 +124,7 @@
                             <i class="icon-cw-outline"></i>
                             Marquer ce jalon comme en cours
                         </button>
-                        <button class="btn btn-default" @click="validMilestone = null">
+                        <button class="btn btn-default" @click="inProgressMilestone = null">
                             <i class="icon-cancel-outline"></i>
                             Annuler
                         </button>
@@ -158,7 +158,7 @@
         </transition>
 
         <section class="list" v-if="model.milestones != null">
-            <p><small>Il y'a {{ milestones.length }} jalon(s)</small></p>
+            <p><small>Il y a {{ milestones.length }} jalon(s)</small></p>
             <milestone :milestone="m" v-for="m in milestones" :key="m.id"
                     @valid="handlerValid"
                     @unvalid="handlerUnvalid"

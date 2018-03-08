@@ -188,10 +188,22 @@ gulp.task('module-oscar-datepicker', function(cb){
         });
 });
 
-gulp.task('build-oscar', ['module-oscar-payments','module-oscar-timesheet','module-oscar-milestones'], function(){
+gulp.task('module-oscar-authentification', function(cb){
+    exec('poi build --format umd --moduleName authentification public/js/oscar/src/Authentification.vue --filename.js Authentification.js --dist public/js/oscar/dist',
+        function (err, stdout, stderr) {
+            console.log("STDOUT : ", stdout);
+            console.log("STDERR : ", stderr);
+            cb(err);
+        });
+});
+
+gulp.task('oscar-build', ['module-oscar-timesheet', 'module-oscar-milestones', 'module-oscar-payments', 'module-oscar-authentification', 'module-oscar-payments', 'module-oscar-milestones']);
+
+gulp.task('watch-oscar', ['module-oscar-payments','module-oscar-timesheet','module-oscar-milestones'], function(){
     gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);
     gulp.watch(['./public/js/oscar/src/Milestone*'], ['module-oscar-milestones']);
     gulp.watch(['./public/js/oscar/src/Payment*'], ['module-oscar-payments']);
+    gulp.watch(['./public/js/oscar/src/Authentification*'], ['module-oscar-authentification']);
     gulp.watch(['./public/js/oscar/src/Datepicker*'], ['module-oscar-payments', 'module-oscar-milestones']);
 });
 

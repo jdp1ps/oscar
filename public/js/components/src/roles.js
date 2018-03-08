@@ -71,7 +71,7 @@ var Roles = Vue.extend({
                       <p class="help">
                         L'utilisation d'un filtre LDap affectera le rôle automatiquement sur l'application entière, peut importe le réglage de la portée.
                       </p>
-                      <textarea class="form-control" v-model="form.ldapFilter"></textarea>
+                      <textarea class="form-control" v-model="form.ldapFilter" style="whitespace: wrap"></textarea>
                     </div>
 
                     <footer class="buttons-bar">

@@ -1298,6 +1298,14 @@ administration:
                         defaults:
                             controller: Administration
                             action: userLogs
+                roles:
+                    type: segment
+                    may_terminate: true
+                    options:
+                        route: /roles
+                        defaults:
+                            controller: Administration
+                            action: userRoles
 
         organizationrole:
             type: segment

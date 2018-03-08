@@ -137,7 +137,8 @@
   padding: 2px 4px;
   white-space: normal;
   font-size: 12px;
-  margin: 0 .5em; }
+  margin: 0 .5em;
+  word-wrap: break-word; }
 
 .privilege {
   font-size: .9em;

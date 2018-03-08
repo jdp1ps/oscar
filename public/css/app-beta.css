@@ -7198,8 +7198,6 @@ form .help {
   display: block;
   /** Apparence des jalons non terminé (en retard) **/
   position: relative; }
-  .jalon .details {
-    font-size: .9em; }
   .jalon .card-title {
     font-size: 1em; }
   .jalon:before {
@@ -7399,9 +7397,27 @@ form .help {
     flex: auto;
     border-radius: 4px; }
 
-[class*="oscar-form-message-"] {
+[class*="oscar-form-message"] {
   background: black;
-  color: white; }
+  color: white;
+  font-size: .9em;
+  padding: 8px;
+  margin-top: 4px;
+  position: relative;
+  text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.5); }
+  [class*="oscar-form-message"].error {
+    background: #DD423E; }
+    [class*="oscar-form-message"].error:before {
+      background: #DD423E; }
+  [class*="oscar-form-message"]:before {
+    content: '';
+    background: red;
+    transform: rotate(45deg);
+    position: absolute;
+    top: -4px;
+    left: 4px;
+    width: 8px;
+    height: 8px; }
 
 .workpackage {
   background: white;

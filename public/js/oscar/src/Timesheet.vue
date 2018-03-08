@@ -95,7 +95,7 @@
                 return this.moment(this.timesheet.end).format('HH:mm')
             },
             jour(){
-              return this.moment(this.timesheet).format('dddd D MMMM YYYY')
+              return this.moment(this.timesheet.start).format('dddd D MMMM YYYY')
             },
             duree(){
                 let fin = this.moment(this.timesheet.end),

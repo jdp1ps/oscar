@@ -18,6 +18,8 @@
         cursor: pointer;
     }
 </style>
+
+<?php /*
 <div class="container">
 
 
@@ -231,4 +233,38 @@
         });
     })
 </script>
-</div>
+</div> */ ?>
+<section class="container">
+    <div id="authentification"></div>
+</section>
+<script>
+
+    require(['vue', 'vue-resource', 'mm', 'authentification'], function(Vue, VueResource, moment, Authentification){
+        Vue.use(VueResource);
+
+        const regex = /\[\w*:[0-9]*:([^\]]*)\]/g;
+
+        Vue.filter('logMessage', function (message) {
+            return message.replace(regex, "$1");
+        });
+
+        Vue.filter('sinceFull', function(date){
+            var m = moment(date);
+            return "le " + m.format('dddd D MMMM YYYY') + ', ' + m.fromNow();
+        });
+
+        new Vue({
+            render(h) {
+                return h(Authentification.default, {
+                    props: {
+                        'users': <?= json_encode($users) ?>,
+                        'roles': <?= json_encode($roles) ?>,
+                        'urlLogs': '<?= $this->url('administration/users/logs') ?>',
+                        'urlRoles': '<?= $this->url('administration/users/roles') ?>',
+                        'moment': moment
+                    }
+                })
+            }
+        }).$mount('#authentification')
+    })
+</script>
