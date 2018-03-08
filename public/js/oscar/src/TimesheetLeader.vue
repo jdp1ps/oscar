@@ -133,15 +133,15 @@
             },
 
             refreshTimesheet(timesheet){
-                console.log('Refresh timesheet', timesheet);
                 for( let i=0; i<this.timesheets.length; i++ ){
                     for( let j=0; j<this.timesheets[i].timesheets.length; j++ ){
-                        console.log('Refresh timesheet', this.timesheets[i].timesheets[j].id , ' < ', timesheet.id);
-
                         if( this.timesheets[i].timesheets[j].id == timesheet.id ){
                             if( timesheet.status == 'reject' ){
                                 this.timesheets[i].timesheets.splice(j, 1);
                             } else {
+                                timesheet.url_project = this.timesheets[i].timesheets[j].url_project;
+                                timesheet.url_activity = this.timesheets[i].timesheets[j].url_activity;
+
                                 this.timesheets[i].timesheets.splice(j, 1, timesheet);
                             }
                             return;

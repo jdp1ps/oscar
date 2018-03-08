@@ -117,3 +117,7 @@
         }
     }
 </script>
+
+<style>
+    .small-note { white-space: nowrap}
+</style>
