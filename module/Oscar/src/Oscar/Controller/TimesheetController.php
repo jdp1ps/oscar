@@ -266,7 +266,10 @@ class TimesheetController extends AbstractOscarController
                 if( $this->isAjax() ){
                     $result = [];
 
-                    //$organizations
+                    $urlActivity = [];
+                    $urlProject = [];
+
+
 
                     /** @var OrganizationPerson $organizationPerson */
                     foreach ($organizationsTimesheets as $data ){
@@ -276,9 +279,36 @@ class TimesheetController extends AbstractOscarController
                           'role'  => (string)$data['role'],
                           'timesheets' => []
                         ];
+
+
+                        /** @var TimeSheet $timesheet */
                         foreach ($timesheetsService->getTimesheetToValidateByOrganization( $data['organization']) as $timesheet ){
+
+                            $activity = $timesheet->getActivity();
+                            $project = $activity->getProject();
+                            $activityId = $activity->getId();
+                            $projectId = $project->getId();
+
+                            if( !array_key_exists($activityId, $urlActivity) ){
+                                if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity) ){
+                                    $urlActivity[$activityId] = $this->url()->fromRoute('contract/show', ['id' => $activityId]);
+                                } else {
+                                    $urlActivity[$activityId] = null;
+                                }
+                            }
+
+                            if( !array_key_exists($projectId, $urlProject) ){
+                                if( $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_SHOW, $activity->get) ){
+                                    $urlProject[$projectId] = $this->url()->fromRoute('project/show', ['id' => $projectId]);
+                                } else {
+                                    $urlProject[$projectId] = null;
+                                }
+                            }
+
                             $json = $timesheet->toJson();
                             $json = array_merge($json, $timesheetsService->resolveTimeSheetCredentials($timesheet));
+                            $json['url_activity'] = $urlActivity[$activityId];
+                            $json['url_project'] = $urlProject[$projectId];
                             $organisationDatas['timesheets'][] = $json;
                             //$this->
                         }

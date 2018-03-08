@@ -2,11 +2,23 @@
     <div class="timesheet">
 
         <div class="activity">
-            <strong>
+
+            <a v-if="timesheet.url_project" :href="timesheet.url_project" style="font-weight: 600">
+                <i class="icon-cubes"></i>
+                {{ timesheet.project_acronym }}
+            </a>
+            <strong v-else>
                 <i class="icon-cubes"></i>
                 {{ timesheet.project_acronym }}
             </strong>
-            <small>
+
+            <a v-if="timesheet.url_activity" :href="timesheet.url_activity">
+                <small>
+                    <i class="icon-cube"></i>
+                    {{ timesheet.activity_label }}
+                </small>
+            </a>
+            <small v-else>
                 <i class="icon-cube"></i>
                 {{ timesheet.activity_label }}
             </small>
