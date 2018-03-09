@@ -15,11 +15,14 @@ use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
+use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Role;
+use Oscar\Entity\TimeSheet;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
@@ -43,6 +46,11 @@ class PersonController extends AbstractOscarController
     public function apiLdapAction()
     {
         $this->getResponseDeprecated();
+    }
+
+    public function personFusionAction()
+    {
+
     }
 
 
@@ -472,21 +480,49 @@ class PersonController extends AbstractOscarController
 
                 //
                 $this->getEntityManager()->persist($newPerson);
+                $this->getEntityManager()->flush($newPerson);
 
+                $conn = $this->getEntityManager()->getConnection();
+
+
+                /** @var Person $person */
                 foreach( $persons as $person){
-                    $person->mergeTo($newPerson);
+                    // $person->mergeTo($newPerson);
 
-                    $documents = $this->getEntityManager()->getRepository(ContractDocument::class)->findBy([
-                        'person' => $person
-                    ]);
-                    /** @var ContractDocument $doc */
-                    foreach( $documents as $doc ){
-                        $doc->setPerson($newPerson);
-                    }
+                    $this->getLogger()->info('Transfert de ' . $person->getId() . ' vers ' . $newPerson->getId());
+                    // Notification
+                    $conn->executeUpdate(
+                        'UPDATE notificationperson SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE activityperson SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE administrativedocument SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE contractdocument SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE notificationperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE organizationperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE projectmember SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
 
-                    $this->getEntityManager()->remove($person);
+                    // Feuille de temps
+                    $conn->executeUpdate(
+                        'UPDATE timesheet SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE timesheet SET createdby_id = ? WHERE createdby_id = ?', [$newPerson->getId(), $person->getId()]);
+                    
+                    $conn->executeUpdate(
+                        'UPDATE workpackageperson SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+
+                    $conn->executeQuery('DELETE FROM person WHERE id = ? ', [$person->getId()]);
+
+
                 }
-                $this->getEntityManager()->flush();
+
                 $this->redirect()->toRoute('person/show', ['id'=>$newPerson->getId()]);
             }
         }

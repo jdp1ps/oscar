@@ -891,4 +891,17 @@ class TimeSheet implements ITrackable
         return $this->getValidatedSciAt() == null && $this->getStatus() == self::STATUS_TOVALIDATE;
     }
 
+    public function __toString()
+    {
+        return sprintf("[%s] %s %s %s (%s, %s) %s",
+            $this->getId(),
+            $this->getActivity()->getProject()->getAcronym(),
+            $this->getActivity(),
+            $this->getWorkpackage()->getCode(),
+            $this->getDateFrom()->format('Y-m-d'),
+            $this->getDuration(),
+            $this->getPerson());
+    }
+
+
 }

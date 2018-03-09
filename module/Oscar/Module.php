@@ -15,6 +15,7 @@ use Doctrine\ORM\NoResultException;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\Authentification;
+use Oscar\Exception\OscarException;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\PersonService;
 use UnicaenAuth\Authentication\Adapter\Ldap;
@@ -147,9 +148,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             } catch (NoResultException $e) {
                 $str = $dbUser->getUsername() . ' - DBUSER';
             } catch (NonUniqueResultException $e ){
-                echo "<pre>" . $e->getTraceAsString()."\n";
-                die($e->getMessage());
+                throw new OscarException("Votre fiche personne apparaît en double dans la base de données, veuillez contacter l'administrateur pour que le problème soit corrigé.");
             }
+
             $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
                 $str), $dbUser);
         }

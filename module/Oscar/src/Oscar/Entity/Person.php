@@ -683,6 +683,9 @@ class Person implements ResourceInterface
 
 
     public function mergeTo( Person $person ){
+
+        $activititesWithWP = [];
+
         /** @var ProjectMember $projectMember */
         foreach($this->getProjectAffectations() as $projectMember ){
             $projectMember->setPerson($person);
@@ -695,6 +698,12 @@ class Person implements ResourceInterface
         /** @var OrganizationPerson $organizationPerson */
         foreach($this->getOrganizations() as $organizationPerson ){
             $organizationPerson->setPerson($person);
+        }
+
+        /** @var WorkPackagePerson $organizationPerson */
+        foreach($this->getWorkPackages() as $workPackage ){
+            $workPackage->setPerson($person);
+
         }
     }
 

@@ -160,6 +160,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
 
         if( !isset($this->_cachePersonLdapLogin[$login]) ){
+
+            $this->getServiceLocator()->get('Logger')->info('Récupération de PERSON via ' . $login);
             $this->_cachePersonLdapLogin[$login] = $this->getBaseQuery()
                 ->where('p.ladapLogin = :login')
                 ->setParameter('login', $login)
