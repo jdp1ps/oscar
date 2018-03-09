@@ -29,6 +29,14 @@
                     <?php endforeach; ?>
                 </select>
             </div>
+            <div class="col-md-6">
+                <h5>Trie</h5>
+                <select name="orderby">
+                    <?php foreach( $this->orders as $value=>$order ):?>
+                        <option value="<?= $value ?>"<?= ($orderBy == $value ? ' selected="selected"' : '') ?>><?= $order ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
         </div>
     </form>
 </div>

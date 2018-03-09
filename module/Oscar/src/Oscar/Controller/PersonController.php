@@ -134,8 +134,24 @@ class PersonController extends AbstractOscarController
         $page = (int) $this->params()->fromQuery('page', 1);
         $search = $this->params()->fromQuery('q', '');
         $filterRoles = $this->params()->fromQuery('filter_roles', []);
+
+        $orderBy = $this->params()->fromQuery('orderby', 'lastname');
+
+        $orders = [
+            'lastname' => 'Nom de famille',
+            'firstname' => 'Prénom',
+            'email' => 'Email',
+            'dateCreated' => 'Date de création',
+            'dateUpdated' => 'Date de mise à jour'
+        ];
+
+        if( !array_key_exists($orderBy, $orders) ){
+            $orderBy = $orders[0];
+        }
+
         $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
             'filter_roles' => $filterRoles,
+            'order_by' => $orderBy
         ]);
 
         if ($this->getRequest()->isXmlHttpRequest()) {
@@ -162,6 +178,8 @@ class PersonController extends AbstractOscarController
             'search' => $search,
             'persons' => $datas,
             'filter_roles' =>  $filterRoles,
+            'orderBy' => $orderBy,
+            'orders' =>$orders
         );
     }
 
@@ -492,13 +510,19 @@ class PersonController extends AbstractOscarController
                     $this->getLogger()->info('Transfert de ' . $person->getId() . ' vers ' . $newPerson->getId());
                     // Notification
                     $conn->executeUpdate(
-                        'UPDATE notificationperson SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                        'UPDATE notificationperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+
+                    // Affectation
                     $conn->executeUpdate(
-                        'UPDATE activityperson SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                        'UPDATE activityperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
                     $conn->executeUpdate(
-                        'UPDATE administrativedocument SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                        'UPDATE administrativedocument SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
                     $conn->executeUpdate(
-                        'UPDATE contractdocument SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                        'UPDATE contractdocument SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
                     $conn->executeUpdate(
                         'UPDATE notificationperson SET person_id = ? WHERE person_id = ?',
                         [$newPerson->getId(), $person->getId()]);
@@ -511,12 +535,16 @@ class PersonController extends AbstractOscarController
 
                     // Feuille de temps
                     $conn->executeUpdate(
-                        'UPDATE timesheet SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                        'UPDATE timesheet SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
                     $conn->executeUpdate(
-                        'UPDATE timesheet SET createdby_id = ? WHERE createdby_id = ?', [$newPerson->getId(), $person->getId()]);
-                    
+                        'UPDATE timesheet SET createdby_id = ? WHERE createdby_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+
+                    // Lot de travail
                     $conn->executeUpdate(
-                        'UPDATE workpackageperson SET person_id = ? WHERE person_id = ?', [$newPerson->getId(), $person->getId()]);
+                        'UPDATE workpackageperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
 
                     $conn->executeQuery('DELETE FROM person WHERE id = ? ', [$person->getId()]);
 

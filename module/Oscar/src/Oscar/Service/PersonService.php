@@ -246,6 +246,9 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     ) {
         $query = $this->getBaseQuery();
 
+        if( array_key_exists('order_by', $filters) ){
+            $query->addOrderBy('p.'.$filters['order_by'], 'ASC');
+        }
 
         // RECHERCHE sur le connector
         // Ex: rest:p00000001
@@ -266,6 +269,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                     ->setParameter('search', '%' . strtolower($search) . '%');
             }
         }
+
+
 
         // FILTRE : Application des filtres sur les rôles
         if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {
