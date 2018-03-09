@@ -180,7 +180,7 @@ gulp.task('module-oscar-payments', function(cb){
 });
 
 gulp.task('module-oscar-datepicker', function(cb){
-    exec('poi build --format umd --moduleName datepicker public/js/oscar/src/Datepicker.vue --filename.js Datepicker.js --dist public/js/oscar/dist',
+    exec('poi build --format umd --moduleName datepicker public/js/oscar/src/Datepicker.vue --filename.css datepicker.css --filename.js Datepicker.js --dist public/js/oscar/dist',
         function (err, stdout, stderr) {
             console.log("STDOUT : ", stdout);
             console.log("STDERR : ", stderr);
