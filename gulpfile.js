@@ -152,7 +152,7 @@ var reportOptions = {
 };
 
 gulp.task('module-oscar-milestones', function(cb){
-    exec('poi build --format umd --moduleName milestones public/js/oscar/src/Milestones.vue --filename.js Milestones.js --dist public/js/oscar/dist',
+    exec('poi build --format umd --moduleName milestones public/js/oscar/src/Milestones.vue --filename.css milestones.css --filename.js Milestones.js --dist public/js/oscar/dist',
         function (err, stdout, stderr) {
             console.log("STDOUT : ", stdout);
             console.log("STDERR : ", stderr);
@@ -162,7 +162,7 @@ gulp.task('module-oscar-milestones', function(cb){
 });
 
 gulp.task('module-oscar-timesheet', function(cb){
-    exec('poi build --format umd --moduleName timesheetleader public/js/oscar/src/TimesheetLeader.vue --filename.js TimesheetLeader.js --dist public/js/oscar/dist',
+    exec('poi build --format umd --moduleName timesheetleader public/js/oscar/src/TimesheetLeader.vue --filename.css timesheetleader.css --filename.js TimesheetLeader.js --dist public/js/oscar/dist',
         function (err, stdout, stderr) {
             console.log("STDOUT : ", stdout);
             console.log("STDERR : ", stderr);
@@ -171,7 +171,7 @@ gulp.task('module-oscar-timesheet', function(cb){
 });
 
 gulp.task('module-oscar-payments', function(cb){
-    exec('poi build --format umd --moduleName payments public/js/oscar/src/Payments.vue --filename.js Payments.js --dist public/js/oscar/dist',
+    exec('poi build --format umd --moduleName payments public/js/oscar/src/Payments.vue --filename.css payments.css --filename.js Payments.js --dist public/js/oscar/dist',
         function (err, stdout, stderr) {
             console.log("STDOUT : ", stdout);
             console.log("STDERR : ", stderr);
@@ -189,7 +189,7 @@ gulp.task('module-oscar-datepicker', function(cb){
 });
 
 gulp.task('module-oscar-authentification', function(cb){
-    exec('poi build --format umd --moduleName authentification public/js/oscar/src/Authentification.vue --filename.js Authentification.js --dist public/js/oscar/dist',
+    exec('poi build --format umd --moduleName authentification public/js/oscar/src/Authentification.vue --filename.css authentification.css --filename.js Authentification.js --dist public/js/oscar/dist',
         function (err, stdout, stderr) {
             console.log("STDOUT : ", stdout);
             console.log("STDERR : ", stderr);
