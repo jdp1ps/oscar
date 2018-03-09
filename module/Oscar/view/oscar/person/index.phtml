@@ -77,7 +77,7 @@ $markText = function( $text, $search ){
     }?>
     <?= $this->pager(
             $persons, $this->url().'?q='.urlencode($search)
-                .$filterRoleUrl.'&page=%s'
+                .$filterRoleUrl.'&page=%s&orderby='.$orderBy
 
     ) ?>
 </section>

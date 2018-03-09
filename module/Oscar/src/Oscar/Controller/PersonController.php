@@ -131,12 +131,13 @@ class PersonController extends AbstractOscarController
      */
     public function indexAction()
     {
+        // Donnèes GET
         $page = (int) $this->params()->fromQuery('page', 1);
         $search = $this->params()->fromQuery('q', '');
         $filterRoles = $this->params()->fromQuery('filter_roles', []);
-
         $orderBy = $this->params()->fromQuery('orderby', 'lastname');
 
+        // Liste des critères de trie disponibles
         $orders = [
             'lastname' => 'Nom de famille',
             'firstname' => 'Prénom',
