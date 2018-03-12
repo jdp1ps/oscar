@@ -1,7 +1,7 @@
 <header class="page-header">
     <h1 class="container">
         <i class="icon-group"></i>
-        Liste des personnes
+        Liste des <?= $leader ? 'responsables' : 'personnes' ?>
         <?php if( $search !== "" ): ?>
             pour la recherche <q><?= htmlentities($search) ?></q>
         <?php endif; ?>
