@@ -1,5 +1,6 @@
 <header class="page-header">
     <h1 class="container">
+        <i class="icon-group"></i>
         Liste des personnes
         <?php if( $search !== "" ): ?>
             pour la recherche <q><?= htmlentities($search) ?></q>
@@ -16,22 +17,35 @@
                    name="q"
                    value="<?= htmlentities($search) ?>"/>
                 <span class="input-group-btn">
-                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="icon-search-outline"></i>
+                        Rechercher</button>
                 </span>
         </div>
-        <h4>Filtres</h4>
+
         <div class="row">
-            <div class="col-md-6">
-                <h5>Rôle dans les activités de recherche</h5>
+            <div class="col-md-4">
+                <h5>Rôle</h5>
+                <p class="help">Filtre sur un rôle endossé par la personne (à tous les niveaux).</p>
                 <select placeholder="Choississez un ou plusieurs rôle" name="filter_roles[]" class="select2" id="filter_roles" multiple="multiple">
                     <?php foreach( $this->grant()->getAllRoleIdPerson() as $role ):?>
                         <option value="<?= $role ?>"<?= (in_array($role, $filter_roles) ? ' selected="selected"' : '') ?>><?= $role ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <h5>Responsable</h5>
+                <p class="help">
+                    N'affichera que les personnes ayant un rôle à responsabilité dans les organisations
+                </p>
+                <label for="leader">
+                    Uniquement les responsables
+                    <input id="leader" name="leader" value="on" type="checkbox" <?= $leader ? 'checked' : '' ?>/>
+                </label>
+            </div>
+            <div class="col-md-4">
                 <h5>Trie</h5>
-                <select name="orderby">
+                <select name="orderby" class="form-control">
                     <?php foreach( $this->orders as $value=>$order ):?>
                         <option value="<?= $value ?>"<?= ($orderBy == $value ? ' selected="selected"' : '') ?>><?= $order ?></option>
                     <?php endforeach; ?>

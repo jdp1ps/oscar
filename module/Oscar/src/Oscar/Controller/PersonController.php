@@ -109,6 +109,7 @@ class PersonController extends AbstractOscarController
                 }
             }
         }
+
         foreach ($persons as $key => $person) {
             echo 'Création de '.$person['displayname']." dans Oscar...\n";
             $new = new Person();
@@ -119,6 +120,7 @@ class PersonController extends AbstractOscarController
                 ->setLastname($person['nom']);
             $this->getEntityManager()->flush($new);
         }
+
         die('DONE');
     }
 
@@ -136,6 +138,7 @@ class PersonController extends AbstractOscarController
         $search = $this->params()->fromQuery('q', '');
         $filterRoles = $this->params()->fromQuery('filter_roles', []);
         $orderBy = $this->params()->fromQuery('orderby', 'lastname');
+        $leader = $this->params()->fromQuery('leader', '');
 
         // Liste des critères de trie disponibles
         $orders = [
@@ -152,7 +155,8 @@ class PersonController extends AbstractOscarController
 
         $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
             'filter_roles' => $filterRoles,
-            'order_by' => $orderBy
+            'order_by' => $orderBy,
+            'leader' => $leader
         ]);
 
         if ($this->getRequest()->isXmlHttpRequest()) {
@@ -170,7 +174,6 @@ class PersonController extends AbstractOscarController
 
         $roles = $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed();
 
-
         $dbroles =$this->getPersonService()->getRolesByAuthentification();
 
         return array(
@@ -180,7 +183,8 @@ class PersonController extends AbstractOscarController
             'persons' => $datas,
             'filter_roles' =>  $filterRoles,
             'orderBy' => $orderBy,
-            'orders' =>$orders
+            'orders' => $orders,
+            'leader' => $leader
         );
     }
 

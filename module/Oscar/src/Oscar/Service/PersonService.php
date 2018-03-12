@@ -244,7 +244,17 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $filters = [],
         $resultByPage = 50
     ) {
-        $query = $this->getBaseQuery();
+
+        if( $filters['leader'] ){
+            $query = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+                ->innerJoin('p.organizations', 'o')
+                ->innerJoin('o.roleObj', 'r')
+                ->where('r.principal = true')
+            ;
+        } else {
+
+            $query = $this->getBaseQuery();
+        }
 
         if( array_key_exists('order_by', $filters) ){
             $query->addOrderBy('p.'.$filters['order_by'], 'ASC');
