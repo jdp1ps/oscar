@@ -201,7 +201,7 @@ $this->headScript();
                                 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX)): ?>
                                 <li role="presentation" class="dropdown-header"><i class="icon-group"></i> Personnes</li>
                                 <li><a href="<?= $this->url('person') ?>">Liste des personnes</a></li>
-                                <li><a href="<?= $this->url('person/boss') ?>">Liste des responsables</a></li>
+                                <li><a href="<?= $this->url('person') ?>?q=&leader=on">Liste des responsables</a></li>
                                     <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                                     <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
                                     <?php endif; ?>
@@ -333,7 +333,7 @@ $this->headScript();
                         <h3><i class="icon-group"></i> Personnes</h3>
                         <ul>
                             <li><a href="<?= $this->url('person') ?>">Liste des personnes</a></li>
-                            <li><a href="<?= $this->url('person/boss') ?>">Liste des responsables</a></li>
+                            <li><a href="<?= $this->url('person') ?>?q=&leader=on">Liste des responsables</a></li>
                             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                                 <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
                             <?php endif; ?>
