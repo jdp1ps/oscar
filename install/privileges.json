@@ -503,6 +503,8 @@
     "libelle": "Voir les d\u00e9penses",
     "fullcode": "DEPENSE-SHOW"
   },
+
+
   "droit-USER_VISUALISATION": {
     "category_id": 7,
     "spot": 4,
@@ -521,7 +523,7 @@
     "spot": 4,
     "category_id": 7,
     "code": "ROLEORGA_VISUALISATION",
-    "libelle": "Voir les r\u00f4les des organisations",
+    "libelle": "Voir les rôles des organisations",
     "fullcode": "droit-ROLEORGA_VISUALISATION"
   },
   "droit-ROLEORGA_EDITION": {
@@ -529,7 +531,7 @@
     "category_id": 7,
     "root": "droit-ROLEORGA_VISUALISATION",
     "code": "ROLEORGA_EDITION",
-    "libelle": "G\u00e9rer les r\u00f4les des organisations",
+    "libelle": "Configurer les rôles des organisations",
     "fullcode": "droit-ROLEORGA_EDITION"
   },
 
@@ -541,11 +543,27 @@
     "fullcode": "MAINTENANCE-CONNECTOR_ACCESS"
   },
 
+  "MAINTENANCE-ACTIVITYTYPE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "ACTIVITYTYPE_MANAGE",
+    "libelle": "Configurer les types d'activités disponibles",
+    "fullcode": "MAINTENANCE-ACTIVITYTYPE_MANAGE"
+  },
+
+  "MAINTENANCE-MILESTONETYPE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "MILESTONETYPE_MANAGE",
+    "libelle": "Configurer les types de jalons disponibles",
+    "fullcode": "MAINTENANCE-MILESTONETYPE_MANAGE"
+  },
+
   "MAINTENANCE-SEARCH_BUILD": {
     "spot": 7,
     "category_id": 6,
     "code": "SEARCH_BUILD",
-    "libelle": "Peut lancer la réindexation des données",
+    "libelle": "Peut lancer la reconstruction de l'index de recherche des activités",
     "fullcode": "MAINTENANCE-SEARCH_BUILD"
   },
 
