@@ -210,8 +210,14 @@ $this->headScript();
 
                                 <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Activités</li>
                                 <li><a href="<?= $this->url('contractdocument') ?>">Liste des documents téléversés</a></li>
+
+                                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)) : ?>
                                 <li><a href="<?= $this->url('activitytype') ?>">Gérer les types d'activité</a></li>
+                                <?php endif; ?>
+
+                                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE)) : ?>
                                 <li><a href="<?= $this->url('datetype') ?>">Gérer les types de jalon</a></li>
+                                <?php endif; ?>
 
 
 
@@ -285,7 +291,13 @@ $this->headScript();
                             <li><a href="<?= $this->url('contract/almostdone') ?>">Bientôt terminées</a></li>
                             <li><a href="<?= $this->url('contract/almoststart') ?>">Débutant prochainement</a></li>
                             <li><a href="<?= $this->url('contractdocument') ?>">Liste des documents téléversés</a></li>
-                            <li><a href="<?= $this->url('activitytype') ?>">Gérer les types d'activité</a></li>
+                            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)) : ?>
+                                <li><a href="<?= $this->url('activitytype') ?>">Gérer les types d'activité</a></li>
+                            <?php endif; ?>
+
+                            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE)) : ?>
+                                <li><a href="<?= $this->url('datetype') ?>">Gérer les types de jalon</a></li>
+                            <?php endif; ?>
                         </ul>
                     </section>
                 <?php endif; ?>

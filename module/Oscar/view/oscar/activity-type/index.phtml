@@ -1,19 +1,22 @@
 <?php /** @var $entity \Oscar\Entity\ActivityType */ ?>
 <section id="activity-types" class="container">
-    <h1>Types d'activités de recherche</h1>
+    <h1>
+        <i class="icon-tags"></i>
+        Types d'activités de recherche</h1>
     <?php if( count($entities) <= 0 ): ?>
     <div class="alert alert-danger">
         Aucun type d'activité trouvé
     </div>
     <?php else: ?>
+
+    <p class="alert alert-info">
+        Vous pouvez réorganiser les types d'activités en utilisant les <em>glisser/déposer</em>
+    </p>
+
     <section class="tree" style="position: relative">
     <?php $level = 0; $opened = [];
     foreach( $entities as $entity ):
-        if( $entity->getLabel() === 'ROOT' ) { continue; }
-
-        ?>
-
-
+        if( $entity->getLabel() === 'ROOT' ) { continue; } ?>
     <?php
     foreach( $opened as $index=>$open ){
         if( $open < $entity->getLft() ){
@@ -34,21 +37,35 @@
         <small>[<?= $entity->getId() ?>]</small>
         <?= $entity->getLabel() ?>
 
-        <span class="label label-info">
+        <?php if( $distribution[$entity->getId()] ): ?>
+            <a href="<?= $this->url('contract/advancedsearch') ?>?q=&criteria[]=at%3B<?= $entity->getId() ?>%3B"
+                title="Liste des activités de ce type"
+                class="label label-info">
             <?= $distribution[$entity->getId()] ?>
-        </span>
+            </a>
+        <?php else: ?>
+            <span class="label label-default">
+                <?= $distribution[$entity->getId()] ?>
+            </span>
+        <?php endif; ?>
 
         <nav class="btn-group" aria-label="Administration" role="group">
 
             <input data-mergesource type="checkbox" value="<?= $entity->getId() ?>">
 
-            <a href="<?= $this->url('activitytype/new', ['idparent' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
+            <a href="<?= $this->url('activitytype/new', ['idparent' => $entity->getId()]) ?>"
+               title="Ajouter un type d'activité"
+               class="btn btn-default btn-xs">
                 <i class="icon-doc-add"></i>
             </a>
-            <a href="<?= $this->url('activitytype/delete', ['id' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
+            <a href="<?= $this->url('activitytype/delete', ['id' => $entity->getId()]) ?>"
+               title="Supprimer ce type d'activité"
+               class="btn btn-default btn-xs">
                 <i class="icon-trash"></i>
             </a>
-            <a href="<?= $this->url('activitytype/edit', ['id' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
+            <a href="<?= $this->url('activitytype/edit', ['id' => $entity->getId()]) ?>"
+               title="Modifier ce type d'activité"
+               class="btn btn-default btn-xs">
                 <i class="icon-pencil"></i>
             </a>
             <a data-mergeto href="<?= $this->url('activitytype/merge', ['id' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
@@ -70,7 +87,10 @@
         </article>
     <?php endif; ?>
     <nav class="admin-bar text-right">
-        <a href="<?= $this->url('activitytype/new') ?>" class="btn btn-default btn-xs">
+        <a href="<?= $this->url('activitytype/new') ?>"
+           title="Nouveau type racine"
+           class="btn btn-default btn">
+            <i class="icon-doc-add"></i>
             Nouveau
         </a>
     </nav>
@@ -82,7 +102,6 @@
         var mouseDown = false,
             $nodeOver = null,
             $nodeDrag = null;
-
 
         $('[data-mergeto]').on('click', function(e){
             e.preventDefault();
@@ -121,7 +140,6 @@
                            beforeLimit = handlerTop + handlerHeight/ 3,
                            afterLimit = handlerTop + handlerHeight/3*2;
 
-
                        $nodeOver.on('mousemove', function(e){
                            if( e.pageY < beforeLimit ){
                                $node.addClass('before').removeClass('in after');
@@ -131,7 +149,6 @@
                            } else {
                                $node.addClass('in').removeClass('after before');
                            }
-
                        });
                    }
                } else {
@@ -175,7 +192,6 @@
                     $nodeOver = null;
                 }
             }
-
         });
     });
 </script>
@@ -218,7 +234,4 @@
         font-weight: lighter;
         margin-left: 20px;
         }
-
-
-
 </style>
