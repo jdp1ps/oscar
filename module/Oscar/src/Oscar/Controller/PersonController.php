@@ -139,6 +139,7 @@ class PersonController extends AbstractOscarController
         $filterRoles = $this->params()->fromQuery('filter_roles', []);
         $orderBy = $this->params()->fromQuery('orderby', 'lastname');
         $leader = $this->params()->fromQuery('leader', '');
+        $format = $this->params()->fromQuery('format', '');
 
         // Liste des critères de trie disponibles
         $orders = [
@@ -158,6 +159,45 @@ class PersonController extends AbstractOscarController
             'order_by' => $orderBy,
             'leader' => $leader
         ]);
+
+        if( $format == "csv" ){
+            // Fichier temporaire
+            $baseFileName = 'oscar-export-persons';
+            $filename = uniqid($baseFileName) . '.csv';
+            $handler = fopen('/tmp/' . $filename, 'w');
+
+            fputcsv($handler, [
+                'ID Oscar',
+                'Prénom',
+                'Nom',
+                'Courriel',
+                'Téléphone',
+                'Affectation',
+                'Localisation'
+            ]);
+            /** @var Person $person */
+            foreach ($datas->getQueryBuilder()->getQuery()->getResult() as $person) {
+                fputcsv($handler, [
+                    $person->getFirstname(),
+                    $person->getLastname(),
+                    $person->getEmail(),
+                    $person->getPhone(),
+                    $person->getLdapAffectation(),
+                    $person->getLdapSiteLocation()
+                ]);
+            }
+
+            fclose($handler);
+
+            header('Content-Disposition: attachment; filename='.$baseFileName.'.csv');
+            header('Content-Length: ' . filesize('/tmp/' . $filename));
+            header('Content-type: plain/text');
+            echo file_get_contents('/tmp/' . $filename);
+            @unlink('/tmp/' . $filename);
+            die();
+        }
+
+
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             $json = [
