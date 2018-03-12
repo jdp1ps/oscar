@@ -8,7 +8,9 @@ $markText = function( $text, $search ){
 };
 ?>
 <section class="container">
-    <h1 class="container">Liste des organisations</h1>
+    <h1>
+        <i class="icon-building-filled"></i>
+        Liste des organisations</h1>
     <form action="<?= $this->url() ?>" method="get" class="form">
         <div class="row">
             <div class="col-md-6">
@@ -20,7 +22,7 @@ $markText = function( $text, $search ){
 
             </div>
             <div class="col-md-5">
-                <select class="form-control" name="t[]" id="" multiple="true" placeholder="Type d'organisation">
+                <select class="form-control select2" name="t[]" id="" multiple="true" placeholder="Type d'organisation">
                     <option value="">Tous</option>
                     <?php foreach(\Oscar\Entity\Organization::getTypes() as $key=>$label ): ?>
                         <option value="<?= $key ?>" <?= in_array($key, $type) ? ' selected="selected"' : '' ?>><?= $label ?></option>
@@ -29,6 +31,20 @@ $markText = function( $text, $search ){
             </div>
             <div class="col-md-1">
                 <button type="submit" class="btn btn-primary">Rechercher</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label>Filtres :</label>
+                <select name="active" class="form-control">
+                    <option value="">Toutes les organisations</option>
+                    <option value="ON" <?= ($active == 'ON') ? 'selected' : '' ?>>Organisations actives uniquement</option>
+                    <option value="OFF" <?= ($active == 'OFF') ? 'selected' : '' ?>>Organisations inactives uniquement</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+
             </div>
         </div>
 
@@ -145,7 +161,7 @@ $markText = function( $text, $search ){
 </div>
 <script>
     require(['jquery', 'select2'], function($){
-        $('select').select2({placeholder:"Type d'organisation"});
+        $('.select2').select2({placeholder:"Type d'organisation"});
         $('#fuzzion').on('click', function(){
             var checked = $('.ids:checked'),
                 ids = [];

@@ -123,6 +123,15 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
             $qb->andWhere('o.type IN(:type)')->setParameter('type', $filter['type']);
         }
 
+        if (isset($filter['active']) && $filter['active']){
+            if( $filter['active'] == 'ON' ){
+                $qb->andWhere('o.dateEnd IS NULL OR o.dateEnd > :now')->setParameter('now', new \DateTime());
+            }
+            else if( $filter['active'] == 'OFF' ){
+                $qb->andWhere('o.dateEnd < :now')->setParameter('now', new \DateTime());
+            }
+        }
+
         if (isset($filter['roles']) && count($filter['roles'])) {
             $ids = [];
             $roles = $this->getEntityManager()->getRepository(ProjectPartner::class)->createQueryBuilder('r')

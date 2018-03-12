@@ -52,10 +52,12 @@ class OrganizationController extends AbstractOscarController
         $page = (int) $this->params()->fromQuery('page', 1);
         $search = $this->params()->fromQuery('q', '');
         $type = $this->params()->fromQuery('t', []);
+        $active = $this->params()->fromQuery('active', '');
 
         $filter = [
             'roles' => $this->params()->fromQuery('roles', []),
-            'type' => $type
+            'type' => $type,
+            'active' => $active,
         ];
 
         $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search, $page, $filter);
@@ -76,6 +78,7 @@ class OrganizationController extends AbstractOscarController
             'entities' => $organizations,
             'search' => $search,
             'type' => $type,
+            'active' => $active,
         );
     }
 
