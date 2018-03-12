@@ -23,10 +23,10 @@
             </div>
 
             <nav>
-                <a href="#" class="btn-delete" @click.prevent="$emit('delete', payment)">
+                <a href="#" class="btn-delete" @click.prevent="$emit('delete', payment)" title="Supprimer ce versement">
                     <i class="icon-trash"></i>
                 </a>
-                <a href="#" class="btn-edit" @click.prevent="$emit('edit', payment)">
+                <a href="#" class="btn-edit" @click.prevent="$emit('edit', payment)" title="Modifier ce versement">
                     <i class="icon-pencil"></i>
                 </a>
             </nav>
