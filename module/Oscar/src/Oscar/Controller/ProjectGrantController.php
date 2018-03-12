@@ -1427,6 +1427,8 @@ class ProjectGrantController extends AbstractOscarController
                 }
             }
 
+            $projectview = $this->params()->fromQuery('projectview', '');
+
             $activities = null;
             if( $startEmpty === false ) {
                 $qbIds = $qb->select('DISTINCT c.id');
@@ -1436,8 +1438,17 @@ class ProjectGrantController extends AbstractOscarController
                 foreach ($qbIds->getQuery()->getResult() as $row) {
                     $ids[] = $row['id'];
                 }
+                if ( $projectview == 'on' )
+                    $qb = $this->getEntityManager()
+                        ->getRepository(Project::class)
+                        ->createQueryBuilder('pr')
+                        ->innerJoin('pr.grants', 'c')
+                        ->where('c.id IN (:ids)')
+                        ->setParameter('ids', $ids);
 
-                $qb->select('c');
+                else
+                    $qb->select('c');
+
                 $qb->orderBy('c.' . $sort, $sortDirection);
                 if( $sortIgnoreNull ){
                     $qb->andWhere('c.' . $sort . ' IS NOT NULL');
@@ -1447,6 +1458,7 @@ class ProjectGrantController extends AbstractOscarController
 
 
             $view = new ViewModel([
+                'projectview' => $projectview,
                 'exportIds' => implode(',', $ids),
                 'filtersType' => $filtersType,
                 'error' => $error,

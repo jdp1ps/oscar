@@ -318,6 +318,7 @@
         <div class="criteria-add row">
 
             <div class="col-md-4">
+                <small>Filtres</small>
                 <select name="" id="criteria-adder" class="form-control">
                     <option value="">Ajouter un filtre...</option>
                     <?php foreach ($filtersType as $key => $label): ?>
@@ -325,10 +326,13 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-2 text-right">
-                <small>Trier</small>
+            <div class="col-md-2">
+                <small>Affichage</small><br>
+                <label for="projectview">Mode de vue projet</label>
+                <input id="projectview" type="checkbox" name="projectview" value="on" <?= $projectview == 'on' ? 'checked' : '' ?> />
             </div>
             <div class="col-md-2">
+                <small>Trier par</small>
                 <select name="sort" class="form-control">
                     <?php foreach ($sortCriteria as $key => $label): ?>
                         <option value="<?= $key ?>"<?= $sort == $key ? ' selected' : '' ?>><?= $label ?></option>
@@ -336,20 +340,25 @@
                 </select>
             </div>
             <div class="col-md-2">
+                <small>Valeur nulle</small>
+                <label for="sortIgnoreNull">Ignorer si non-renseignée</label>
+                <input id="sortIgnoreNull" name="sortIgnoreNull" type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?>/>
+            </div>
+            <div class="col-md-2">
+                <small>Ordre</small>
                 <select name="sortDirection" class="form-control">
                     <option value="asc"<?= $sortDirection == 'asc' ? ' selected' : '' ?>>Croissant</option>
                     <option value="desc"<?= $sortDirection == 'desc' ? ' selected' : '' ?>>Décroissant</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label for="sortIgnoreNull">Ignorer si non-renseignée</label>
-                <input id="sortIgnoreNull" name="sortIgnoreNull" type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?>/>
-            </div>
+
         </div>
 
         <section id="criterias">
             <!-- JS -->
         </section>
+
+        <hr style="opacity: .3">
 
         <nav class="text-right">
             <a class="btn btn-default" href="<?= $this->url('contract/advancedsearch') ?>">
@@ -365,7 +374,15 @@
     <div id="activities" style="opacity: 0">
     <?php if(count($activities) > 0): ?>
         <h3 class="text-center"><?= count($activities) ?> résultat(s)</h3>
-    <?php /** @var \Oscar\Entity\Activity $contract **/ foreach ($activities as $activity): echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity]) ?><?php endforeach; /**/?>
+
+
+    <?php /** @var \Oscar\Entity\Activity $contract **/ foreach ($activities as $activity):
+        if( $projectview == true ) {
+            echo $this->partial('/oscar/project/project-item-openable.phtml', ['project' => $activity]);
+        } else {
+            echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity]);
+        }
+        endforeach; /**/?>
     <?php
     if( stripos($_SERVER['REQUEST_URI'], '?') === false ){
         $url = $_SERVER['REQUEST_URI'].'?';
