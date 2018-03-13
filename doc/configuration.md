@@ -98,24 +98,19 @@ return array(
 
 Le deuxième système s'appuis sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible.
 
-#### Installation de java JRE
-
-Elastic search est un serveur Java : 
-
-```bash
-$ apt-get install default-jre
-$ java -version 
-openjdk version "1.8.0_151"
-OpenJDK Runtime Environment (build 1.8.0_151-8u151-b12-0ubuntu0.16.04.2-b12)
-OpenJDK 64-Bit Server VM (build 25.151-b12, mixed mode)
-```
-
 #### Installation d'Elastic Search : Debian
 
 Vous pouvez installer **Elastice Search** en tant que service à partir des dépôts Debian officiels : 
 
 ```bash
+# Installation
 $ sudo apt-get install elasticsearch
+
+# Configuration en service
+$ sudo update-rc.d elasticsearch defaults 95 10
+
+# Lancement du service
+$ sudo /etc/init.d/elasticsearch start
 ```
 
 
