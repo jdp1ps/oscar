@@ -327,9 +327,14 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <small>Affichage</small><br>
-                <label for="projectview">Mode de vue projet</label>
-                <input id="projectview" type="checkbox" name="projectview" value="on" <?= $projectview == 'on' ? 'checked' : '' ?> />
+                <small>Affichage en mode projet</small><br>
+                <div class="material-switch">
+                    <input id="projectview"
+                           name="projectview"
+                           value="on"
+                           type="checkbox"  <?= $projectview == 'on' ? 'checked' : '' ?> />
+                    <label for="projectview" class="label-primary"></label>
+                </div>
             </div>
             <div class="col-md-2">
                 <small>Trier par</small>
@@ -340,9 +345,19 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <small>Valeur nulle</small>
+                <small>Ignorer si la valeur est nulle</small>
+                <br>
+
+                <div class="material-switch">
+                    <input id="sortIgnoreNull" value="on"
+                           name="sortIgnoreNull"
+                           type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?> />
+                    <label for="sortIgnoreNull" class="label-primary"></label>
+                </div>
+                <?php /*
                 <label for="sortIgnoreNull">Ignorer si non-renseignée</label>
                 <input id="sortIgnoreNull" name="sortIgnoreNull" type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?>/>
+                */ ?>
             </div>
             <div class="col-md-2">
                 <small>Ordre</small>

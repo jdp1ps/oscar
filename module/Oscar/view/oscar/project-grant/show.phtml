@@ -53,7 +53,7 @@
                     </li>
                     <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DUPLICATE, $entity)): ?>
                         <li>
-                            <a href="<?= $this->url('contract/duplicate', ['id'=>$entity->getId()]) ?>" class="smoke">
+                            <a href="#" class="smoke" id="cloneBtn">
                                 Dupliquer cette activité
                             </a>
                         </li>
@@ -564,4 +564,37 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
         });
     </script>
 </div>
+
+<div id="activityclone"></div>
+<script>
+    require(['activityclone', 'vue'], function(Activityclone, Vue){
+        console.log('Clonage');
+
+        var activityClone = new Vue({
+            render(h){
+                return h(Activityclone.default, {
+                    props: {
+                        foo: this.foo,
+                        displayed: false,
+                        activity: <?= json_encode($entity->toArray()) ?>,
+                        urlPost: '<?= $this->url('contract/duplicate', ['id'=>$entity->getId()]) ?>'
+                    }
+                });
+            }
+        }).$mount('#activityclone');
+
+        activityClone.$on('test', function(){
+            console.log('test déclenché');
+        })
+
+        document.querySelector('#cloneBtn').addEventListener('click', function(e){
+            console.log(activityClone.$children[0]);
+            console.log(activityClone.$children[0].$data);
+            console.log(activityClone.$children[0].$data.displayed);
+            e.preventDefault();
+            activityClone.$children[0].$data.displayed = true;
+//            activityClone.$.default.displayed = true;
+        });
+    });
+</script>
 

@@ -197,7 +197,16 @@ gulp.task('module-oscar-authentification', function(cb){
         });
 });
 
-gulp.task('oscar-build', ['module-oscar-timesheet', 'module-oscar-milestones', 'module-oscar-payments', 'module-oscar-authentification', 'module-oscar-payments', 'module-oscar-milestones']);
+gulp.task('module-oscar-activityclone', function(cb){
+    exec('poi build --format umd --moduleName activityclone public/js/oscar/src/Activityclone.vue --filename.css activityclone.css --filename.js Activityclone.js --dist public/js/oscar/dist',
+        function (err, stdout, stderr) {
+            console.log("STDOUT : ", stdout);
+            console.log("STDERR : ", stderr);
+            cb(err);
+        });
+});
+
+gulp.task('oscar-build', ['module-oscar-timesheet', 'module-oscar-milestones', 'module-oscar-payments', 'module-oscar-authentification', 'module-oscar-payments', 'module-oscar-milestones', 'module-oscar-activityclone']);
 
 gulp.task('watch-oscar', ['module-oscar-payments','module-oscar-timesheet','module-oscar-milestones'], function(){
     gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);

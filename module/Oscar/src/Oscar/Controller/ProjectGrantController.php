@@ -108,10 +108,17 @@ class ProjectGrantController extends AbstractOscarController
      */
     public function duplicateAction()
     {
+        $options = [
+            'organizations' => $this->params()->fromQuery('keeporganizations', false),
+            'persons' => $this->params()->fromQuery('keeppersons', false),
+            'milestones' => $this->params()->fromQuery('keepmilestones', false),
+            'workpackages' => $this->params()->fromQuery('keepworkpackage', false),
+        ];
+
         try {
             $id = $this->params()->fromRoute('id');
             $projectGrant = $this->getProjectGrantService()->getGrant($id);
-            $duplicated = $this->getActivityService()->duplicate($projectGrant);
+            $duplicated = $this->getActivityService()->duplicate($projectGrant, $options);
             $this->redirect()->toRoute('contract/edit',
                 ['id' => $duplicated->getId()]);
 

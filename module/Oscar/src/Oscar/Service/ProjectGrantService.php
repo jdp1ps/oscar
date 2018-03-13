@@ -26,6 +26,8 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
+use Oscar\Entity\WorkPackage;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
@@ -682,7 +684,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             ->getQuery()->getSingleResult();
     }
 
-    public function duplicate( Activity $source )
+    public function duplicate( Activity $source, $options )
     {
         $qb = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
@@ -695,8 +697,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             ->leftJoin('pe.person', 'pr')
             ->leftJoin('a.organizations', 'or')
             ->leftJoin('or.organization', 'og')
-            ->where('a.id = :id')
-        ;
+            ->where('a.id = :id');
 
         /** @var Activity $source */
         $source = $qb->setParameter('id', $source->getId())->getQuery()->getSingleResult();
@@ -716,28 +717,77 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
         $this->getEntityManager()->flush($newActivity);
 
-        /** @var ActivityOrganization $partner */
-        foreach($source->getOrganizations() as $partner ){
-            $newPartner = new ActivityOrganization();
-            $this->getEntityManager()->persist($newPartner);
-            $newPartner->setOrganization($partner->getOrganization())
-                ->setRoleObj($partner->getRoleObj())
-                ->setActivity($newActivity)
-                ->setDateStart($partner->getDateStart())
-                ->setDateEnd($partner->getDateEnd());
-            $this->getEntityManager()->flush($newPartner);
+        if ($options['organizations']) {
+            /** @var ActivityOrganization $partner */
+            foreach ($source->getOrganizations() as $partner) {
+                $newPartner = new ActivityOrganization();
+                $this->getEntityManager()->persist($newPartner);
+                $newPartner->setOrganization($partner->getOrganization())
+                    ->setRoleObj($partner->getRoleObj())
+                    ->setActivity($newActivity)
+                    ->setDateStart($partner->getDateStart())
+                    ->setDateEnd($partner->getDateEnd());
+                $this->getEntityManager()->flush($newPartner);
+            }
         }
 
-        /** @var ActivityPerson $partner */
-        foreach($source->getPersons() as $member ){
-            $newMember = new ActivityPerson();
-            $this->getEntityManager()->persist($newMember);
-            $newMember->setPerson($member->getPerson())
-                ->setActivity($newActivity)
-                ->setRoleObj($member->getRoleObj())
-                ->setDateStart($member->getDateStart())
-                ->setDateEnd($member->getDateEnd());
-            $this->getEntityManager()->flush($newMember);
+        if ($options['persons']) {
+            /** @var ActivityPerson $member */
+            foreach ($source->getPersons() as $member) {
+                $newMember = new ActivityPerson();
+                $this->getEntityManager()->persist($newMember);
+                $newMember->setPerson($member->getPerson())
+                    ->setActivity($newActivity)
+                    ->setRoleObj($member->getRoleObj())
+                    ->setDateStart($member->getDateStart())
+                    ->setDateEnd($member->getDateEnd());
+                $this->getEntityManager()->flush($newMember);
+            }
+        }
+
+        if ($options['milestones']) {
+            /** @var ActivityDate $milestone */
+            foreach ($source->getMilestones() as $milestone) {
+                $new = new ActivityDate();
+                $this->getEntityManager()->persist($new);
+                $new->setStatus($milestone->getStatus())
+                    ->setActivity($newActivity)
+                    ->setDateStart($milestone->getDateStart())
+                    ->setDateFinish($milestone->getDateFinish())
+                    ->setType($milestone->getType())
+                    ->setComment($milestone->getComment())
+                ;
+                $this->getEntityManager()->flush($new);
+            }
+        }
+
+        if ($options['workpackages']) {
+
+            /** @var WorkPackage $workpackage */
+            foreach ($source->getWorkPackages() as $workpackage) {
+                $new = new WorkPackage();
+                $this->getEntityManager()->persist($new);
+                $new->setCode($workpackage->getCode())
+                    ->setLabel($workpackage->getLabel())
+                    ->setActivity($newActivity)
+                    ->setDateStart($workpackage->getDateStart())
+                    ->setDateEnd($workpackage->getDateEnd());
+
+                $this->getEntityManager()->flush($new);
+
+                /** @var WorkPackagePerson $workpackagePerson */
+                foreach ( $workpackage->getPersons() as $workpackagePerson ){
+                    $wpPerson = new WorkPackagePerson();
+                    $this->getEntityManager()->persist($wpPerson);
+                    $wpPerson->setPerson($workpackagePerson->getPerson())
+                        ->setDuration($workpackagePerson->getDuration())
+                        ->setWorkPackage($new);
+
+                    $this->getEntityManager()->flush($wpPerson);
+                }
+
+
+            }
         }
 
 
