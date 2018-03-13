@@ -230,7 +230,11 @@ class ActivityElasticSearch implements ActivitySearchStrategy
                 'doc' => $this->getIndexableDatas($activity)
             ]
         ];
-        return $this->getClient()->update($params);
+        try {
+            return $this->getClient()->update($params);
+        } catch (Missing404Exception $e){
+            return $this->addActivity($activity);
+        }
     }
 
     public function resetIndex()
