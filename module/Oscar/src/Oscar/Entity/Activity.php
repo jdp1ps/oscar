@@ -618,7 +618,7 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return mixed
+     * @return ContractType
      */
     public function getType()
     {

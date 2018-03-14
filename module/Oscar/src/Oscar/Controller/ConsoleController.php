@@ -1261,7 +1261,10 @@ class ConsoleController extends AbstractOscarController
     public function buildSearchActivityAction()
     {
         try {
-            $this->getActivityService()->searchIndex_rebuild();
+            $repport = $this->getActivityService()->searchIndex_rebuild();
+            $output = new ConnectorRepportToPlainText();
+            $output->format($repport);
+
         } catch (\Exception $e) {
             die(sprintf("ERROR '%s' : \n %s\nDONE\n", $e->getMessage(),
                 $e->getTraceAsString()));
