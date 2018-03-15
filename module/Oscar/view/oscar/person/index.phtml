@@ -84,12 +84,9 @@ $markText = function( $text, $search ){
         ]) ?>
     <?php endforeach; ?>
         <script>
-            Initer.ready(function(){
-                require(['select2'], function(){
-                    $('.select2').select2();
-                });
-            })
-
+            require(['select2'], function(select2){
+                $('.select2').select2({ width: '100%' });
+            });
         </script>
     <?php
     $filterRoleUrl = "";
