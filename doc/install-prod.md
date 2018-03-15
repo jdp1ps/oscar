@@ -129,6 +129,7 @@ Création de l'utilisateur/bdd locale si besoin :
 
 ```bash
 su - postgres
+psql
 ```
 
 Puis création de l'utilisateur/bdd :
@@ -153,10 +154,10 @@ psql -h localhost -U oscar < data/backup_oscar-empty.sql
 
 La configuration de la BDD est spécifiée dans le fichier `config/autoload/local.php`.
 
-Si le fichier n'existe pas, un modèle est présent dans `config/autoload/unicaen-app.local.php.dist` :
+Si le fichier n'existe pas, un modèle est présent dans `config/autoload/local.php.dist` :
 
 ```bash
-cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
+cp config/autoload/local.php.dist config/autoload/local.php
 vi !$
 ```
 Exemple de configuration :
@@ -183,6 +184,10 @@ return array(
     ),
 );
 ```
+
+Ce fichier contient également des configurations spécifiques métier approfondi dans le fichier [Configuration métier](./configuration.md)
+
+
 ### Configurer le serveur web (Apache)
 
 Activer les modules Apache si besoin :

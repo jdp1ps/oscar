@@ -275,8 +275,11 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         // RECHERCHE sur le nom/prenom/email
         else {
             if ($search !== null) {
+
+                $searchR = str_replace('*', '%', $search);
+
                 $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
-                    ->setParameter('search', '%' . strtolower($search) . '%');
+                    ->setParameter('search', '%' . strtolower($searchR) . '%');
             }
         }
 
