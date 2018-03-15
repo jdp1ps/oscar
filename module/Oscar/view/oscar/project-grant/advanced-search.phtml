@@ -7,18 +7,13 @@
     </h1>
 
     <?php else: ?>
-    <h1><i class="icon-cube"></i>Activités de recherche</h1>
+    <h1><i class="icon-cube"></i>Activités de recherche <?= ($projectview ? ' (Projets)' : '') ?></h1>
     <?php endif; ?>
     <style>
         .criteria {
-            /*border: thin #ccc solid;
-
-            background: white;
-            border-radius: 4px;*/
             padding: 4px 16px;
             margin: 8px 0;
             display: flex;
-            /*flex: 1 1;*/
             align-items: center;
             justify-content: space-between;
         }
