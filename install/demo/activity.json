@@ -73,5 +73,39 @@
         "Marcel Grossmann"
       ]
     }
+  },
+  {
+    "uid": "A0003",
+    "acronym": "MECAQUAN",
+    "projectlabel": "Mécanique quantique",
+    "label": "Étude des quanta",
+    "datestart": "2012-01-01",
+    "dateend": "2020-12-31",
+    "datesigned": "2014-02-01",
+    "pfi": "",
+    "type": "ANR",
+    "amount": 9990,
+    "milestones": [
+
+    ],
+    "payments": [
+
+    ],
+    "organizations": {
+      "Laboratoire": [
+        "US Robots"
+      ],
+      "Composante responsable": [
+        "ACME"
+      ]
+    },
+    "persons": {
+      "Responsable scientifique": [
+        "Max Plank"
+      ],
+      "Chercheur": [
+        "Erwin Schrödinger"
+      ]
+    }
   }
 ]
