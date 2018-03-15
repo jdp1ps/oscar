@@ -167,9 +167,9 @@ $this->headScript();
                             <ul class="dropdown-menu" role="menu">
                                 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX)): ?>
                                     <li role="presentation" class="dropdown-header"><i class="icon-cubes"></i> Projets</li>
-                                    <li><a href="<?= $this->url('project') ?>">Liste des projets</a></li>
+                                    <li><a href="<?= $this->url('contract/advancedsearch') ?>?projectview=on">Liste des projets</a></li>
                                     <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_CREATE)): ?>
-                                        <li><a href="<?= $this->url('project/new') ?>">Créer un projet</a></li>
+                                        <li><a href="<?= $this->url('project/new') ?>?projectview=on">Créer un projet</a></li>
                                     <?php endif; ?>
                                 <?php endif; ?>
 
@@ -306,7 +306,7 @@ $this->headScript();
                     <section>
                         <h3><i class="icon-cubes"></i> Projets</h3>
                         <ul>
-                            <li><a href="<?= $this->url('project') ?>">Liste des projets</a></li>
+                            <li><a href="<?= $this->url('contract/advancedsearch') ?>?projectview=on">Liste des projets</a></li>
                             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_CREATE)): ?>
                                 <li><a href="<?= $this->url('project/new') ?>">Créer un projet</a></li>
                             <?php endif; ?>
