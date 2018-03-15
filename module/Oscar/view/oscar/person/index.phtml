@@ -38,13 +38,16 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <h5>Responsable</h5>
+                <h5>Responsable uniquement</h5>
                 <p class="help">
                     N'affichera que les personnes ayant un rôle à responsabilité dans les organisations
                 </p>
                 <label for="leader">
-                    Uniquement les responsables
-                    <input id="leader" name="leader" value="on" type="checkbox" <?= $leader ? 'checked' : '' ?>/>
+                    <div class="material-switch">
+                        <input id="leader" name="leader" value="on" type="checkbox" <?= $leader ? 'checked' : '' ?>/>
+                        <label for="leader" class="label-primary"></label>
+                    </div>
+
                 </label>
             </div>
             <div class="col-md-4">
