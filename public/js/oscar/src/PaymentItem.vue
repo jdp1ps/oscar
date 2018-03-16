@@ -47,6 +47,7 @@
         computed: {
             late(){
                 if( this.payment.status == 1 ){
+                    if( !this.payment.datePredicted ) return true;
                     let now = this.moment().unix();
                     let predicted = this.moment(this.payment.datePredicted.date).unix();
                     return predicted < now;
