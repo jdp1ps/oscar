@@ -206,6 +206,15 @@ gulp.task('module-oscar-activityclone', function(cb){
         });
 });
 
+gulp.task('module-oscar-notification', function(cb){
+    exec('poi build --format umd --moduleName notification public/js/oscar/src/Notification.vue --filename.css notification.css --filename.js Notification.js --dist public/js/oscar/dist',
+        function (err, stdout, stderr) {
+            console.log("STDOUT : ", stdout);
+            console.log("STDERR : ", stderr);
+            cb(err);
+        });
+});
+
 gulp.task('oscar-build', ['module-oscar-timesheet', 'module-oscar-milestones', 'module-oscar-payments', 'module-oscar-authentification', 'module-oscar-payments', 'module-oscar-milestones', 'module-oscar-activityclone']);
 
 gulp.task('watch-oscar', ['module-oscar-payments','module-oscar-timesheet','module-oscar-milestones'], function(){

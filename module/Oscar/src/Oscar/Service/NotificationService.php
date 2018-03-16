@@ -8,6 +8,7 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\NoResultException;
+use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNotification;
@@ -121,12 +122,12 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     }
 
     private function debug($str){
-        echo " [debug] $str\n";
+        $this->getServiceLocator()->get('Logger')->info($str);
     }
 
     public function generateNotificationsActivities( $silent = false )
     {
-        $this->getServiceLocator()->get('Logger')->info("=====================\nGénération des notifications\n=====================");
+        $this->debug("=====================\nGénération des notifications\n=====================");
 
         $activities = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
@@ -136,7 +137,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ->getResult();
 
 
-        $this->getServiceLocator()->get('Logger')->info(sprintf("Il y'a %s activité(s) à traiter", count($activities)));
+        $this->debug(sprintf("Il y'a %s activité(s) à traiter", count($activities)));
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
@@ -154,14 +155,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     }
 
-    /**
-     * Génère les notifications pour une activité.
-     *
-     * @param Activity $activity
-     */
-    public function generateNotificationsForActivity( Activity $activity , $silent = false)
-    {
-        $this->getServiceLocator()->get('Logger')->info(sprintf('### Génération des notifications pour %s', $activity));
+    public function generateMilestonesNotificationsForActivity( Activity $activity ){
 
         /** @var PersonService $personsService */
         $personsService = $this->getServiceLocator()->get('PersonService');
@@ -169,57 +163,103 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
         $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
 
+        $this->debug(count($persons) . ' personne(s) impliquées : ');
+
         $personsIds = [];
 
         /** @var Person $person */
         foreach ($persons as $person){
-            $personsIds[] = $person->getId();
-        }
-
-        $now = new \DateTime();
-
-        // TODO Ne générer les notifications que pour les personnes ayant le privilège sur les payments (Voir)
-
-        /** @var ActivityPayment $payment */
-        foreach( $activity->getPayments() as $payment ){
-            if( $payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_REALISE ){
-                $message = "$payment";
-                $context = "payment:" . $payment->getId();
-                $dateEffective = $payment->getDatePredicted();
-
-                if( $payment->getDatePredicted() < $now ){
-                    $message .= " est en retard";
-                    $dateEffective = $now;
-                }
-
-                $this->notification($message, $persons,
-                    Notification::OBJECT_ACTIVITY, $activity->getId(),
-                    $context, $dateEffective, $payment->getDatePredicted(), false);
+            if( !in_array($person->getId(), $personsIds) ){
+                $this->debug(' - ' . $person);
+                $personsIds[] = $person->getId();
             }
         }
 
         /** @var ActivityDate $milestone */
         foreach( $activity->getMilestones() as $milestone ){
             $context = "milestone-" . $milestone->getId();
-            $notificationMessage = sprintf("L'échéance %s pour l'activité %s",
+
+            // Dates de notification
+            $dates = [];
+
+            $this->debug('# ' . $context . ' ' . $milestone->getType());
+
+            $message = sprintf("Le jalon %s de l'activité %s arrive à échéance",
                 $milestone->getType()->getLabel(),
-                $activity->log()
-                );
-            foreach ($milestone->getRecursivityDate() as $date) {
-                if( $date > $this->getLimitNotificationDate() ){
-                    $this->notification($notificationMessage, $persons,
-                        Notification::OBJECT_ACTIVITY, $activity->getId(),
-                        $context, $date, $milestone->getDateStart(), false);
-                }
+                $activity->log());
+
+            $dates[$milestone->getDateStart()->format('Y-m-d')] = $message;
+
+
+            foreach ($milestone->getRecursivityDate() as $dateRappel) {
+                $this->notification($message, $persons, Notification::OBJECT_ACTIVITY, $activity->getId(), $context, $dateRappel, $milestone->getDateStart(), false);
             }
         }
 
-        ////////// Déclarations en attentes
-        // TODO Générer les notifications pour les déclarations
+
+        die();
+    }
+
+    /**
+     * Génère les notifications pour une activité.
+     *
+     * @param Activity $activity
+     */
+    public function generateNotificationsForActivity( Activity $activity , $silent = false)
+    {
+        $logger = $this->getServiceLocator()->get('Logger');
+
+        $logger->info(sprintf('### Génération des notifications pour %s', $activity));
+
+        $this->generateMilestonesNotificationsForActivity($activity);
 
 
-        if( $silent == true )
-            $this->triggerSocket();
+
+
+//        $now = new \DateTime();
+//
+//        // TODO Ne générer les notifications que pour les personnes ayant le privilège sur les payments (Voir)
+//
+//        /** @var ActivityPayment $payment */
+//        foreach( $activity->getPayments() as $payment ){
+//            if( $payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_REALISE ){
+//                $message = "$payment";
+//                $context = "payment:" . $payment->getId();
+//                $dateEffective = $payment->getDatePredicted();
+//
+//                if( $payment->getDatePredicted() < $now ){
+//                    $message .= " est en retard";
+//                    $dateEffective = $now;
+//                }
+//
+//                $this->notification($message, $persons,
+//                    Notification::OBJECT_ACTIVITY, $activity->getId(),
+//                    $context, $dateEffective, $payment->getDatePredicted(), false);
+//            }
+//        }
+//
+//        /** @var ActivityDate $milestone */
+//        foreach( $activity->getMilestones() as $milestone ){
+//            $context = "milestone-" . $milestone->getId();
+//            $notificationMessage = sprintf("L'échéance %s pour l'activité %s",
+//                $milestone->getType()->getLabel(),
+//                $activity->log()
+//                );
+//            foreach ($milestone->getRecursivityDate() as $date) {
+//                if( $date > $this->getLimitNotificationDate() ){
+//                    $this->notification($notificationMessage, $persons,
+//                        Notification::OBJECT_ACTIVITY, $activity->getId(),
+//                        $context, $date, $milestone->getDateStart(), false);
+//                }
+//            }
+//        }
+//
+//        ////////// Déclarations en attentes
+//        // TODO Générer les notifications pour les déclarations
+//
+//
+//        if( $silent == true )
+//            $this->triggerSocket();
     }
 
     /**
@@ -330,11 +370,14 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         // Code unique
         $hash = $serie.':'.$dateEffective->format('Ymd');
 
+        $this->debug("Traitement de la notification $hash");
+
         /** @var Notification $notif */
         $notif = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
 
         // Création de la notification
         if( !$notif ){
+            /** @var Notification $notif */
             $notif = new Notification();
             $this->getEntityManager()->persist($notif);
             $notif->setMessage($message)

@@ -234,9 +234,14 @@
                     switch( payment.status ){
                         case 1 :
                             datePayment = payment.datePredicted;
-                            comment = "PRÉVU";
-                            late = this.moment(payment.datePredicted.date).unix() < this.moment().unix();
-                            if( late )  comment += " EN RETARD";
+                            if( !datePayment ) {
+                                comment = "ERREUR DE DATE"
+                            } else {
+                                comment = "PRÉVU";
+                                late = this.moment(payment.datePredicted.date).unix() < this.moment().unix();
+                                if( late )  comment += " EN RETARD";
+                            }
+
                             break;
                         case 2 :
                             datePayment = payment.datePayment;

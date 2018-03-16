@@ -77,6 +77,10 @@ class ActivityDate implements ITrackable
         return false;
     }
 
+    public function isFinished(){
+        return $this->getFinished() == self::FINISH_VALUE;
+    }
+
     /**
      * @return integer
      */
@@ -112,11 +116,6 @@ class ActivityDate implements ITrackable
 
         return $this;
     }
-
-
-
-
-
 
     /**
      * Test
@@ -183,7 +182,7 @@ class ActivityDate implements ITrackable
     }
 
     /**
-     * @return Activ
+     * @return Activity
      */
     public function getActivity()
     {

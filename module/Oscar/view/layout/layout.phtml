@@ -478,18 +478,24 @@ $this->headScript();
         <script>
 		    var socket, notifications;
 	
-            require(['notifications'], (notifications) => {
-                notifications = new notifications.default({
-                    el: '#notifications-area',
-                    data: {
-                        urlHistory: '<?= $this->url('notification/history') ?>'
-                    },
-                    http: {
-                        root: '/notification'
-                    },
+            require(['vue', 'mm', 'vue-resource', 'notifications'], function(Vue, moment, VueResource, notifications) {
+                Vue.use(VueResource);
+                Vue.filter('displayDate', function( data ){
+                    let m = moment(data);
+                    return m.format('dddd D MMMM YYYY') + ", " + m.fromNow();
                 });
-                notifications.fetch();
-		<?php if( $this->grant()->hasSocket() ): ?>
+                new Vue({
+                    render: function (h) {
+                        return h(notifications.default, {
+                            props: {
+                                urlHistory: '<?= $this->url('notification/history') ?>',
+                                url: '/notification'
+                            }
+                        })
+                    }
+                }).$mount('#notifications-area');
+
+		<?php /*if( $this->grant()->hasSocket() ): ?>
 
             requirejs.config({ paths: {
                 "io":  "/js/socket.io"
@@ -528,7 +534,7 @@ $this->headScript();
                     console.log('disconnect');
                 });
             });
-            <?php endif; ?>
+            <?php endif;*/ ?>
             });
         </script>
         <?php endif; ?>
