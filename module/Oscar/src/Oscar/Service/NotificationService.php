@@ -188,9 +188,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 $milestone->getType()->getLabel(),
                 $activity->log());
 
-            $dates[$milestone->getDateStart()->format('Y-m-d')] = $message;
 
-
+            $this->notification($message, $persons, Notification::OBJECT_ACTIVITY, $activity->getId(), $context, $milestone->getDateStart(), $milestone->getDateStart(), false);
             foreach ($milestone->getRecursivityDate() as $dateRappel) {
                 $this->notification($message, $persons, Notification::OBJECT_ACTIVITY, $activity->getId(), $context, $dateRappel, $milestone->getDateStart(), false);
             }
