@@ -215,7 +215,7 @@ gulp.task('module-oscar-notification', function(cb){
         });
 });
 
-gulp.task('oscar-build', ['module-oscar-timesheet', 'module-oscar-milestones', 'module-oscar-payments', 'module-oscar-authentification', 'module-oscar-payments', 'module-oscar-milestones', 'module-oscar-activityclone']);
+gulp.task('oscar-build', ['module-oscar-timesheet', 'module-oscar-milestones', 'module-oscar-payments', 'module-oscar-authentification', 'module-oscar-payments', 'module-oscar-milestones', 'module-oscar-activityclone', 'module-oscar-notification']);
 
 gulp.task('watch-oscar', ['module-oscar-payments','module-oscar-timesheet','module-oscar-milestones'], function(){
     gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);
@@ -223,6 +223,7 @@ gulp.task('watch-oscar', ['module-oscar-payments','module-oscar-timesheet','modu
     gulp.watch(['./public/js/oscar/src/Payment*'], ['module-oscar-payments']);
     gulp.watch(['./public/js/oscar/src/Authentification*'], ['module-oscar-authentification']);
     gulp.watch(['./public/js/oscar/src/Datepicker*'], ['module-oscar-payments', 'module-oscar-milestones']);
+    gulp.watch(['./public/js/oscar/src/Notification*'], ['module-oscar-notification']);
 });
 
 
