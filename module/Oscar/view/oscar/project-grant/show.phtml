@@ -377,7 +377,8 @@
                                         amount: <?= $entity->getAmount() ?>,
                                         currencies: <?= json_encode($currencies) ?>,
                                         currency: <?= json_encode($entity->getCurrency()->asArray()) ?>,
-                                        model: ActivityModel
+                                        model: ActivityModel,
+                                        manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE, $entity) ? 'true' : 'false' ?>
                                     }
                                 })
                             }

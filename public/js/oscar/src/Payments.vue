@@ -157,7 +157,7 @@
                 </div>
             </div>
         </transition>
-        <payment v-for="p in payments" :payment="p" :moment="moment" :key="p.id"
+        <payment v-for="p in payments" :payment="p" :moment="moment" :key="p.id" :manage="manage"
                 @delete="handlerDelete"
                 @edit="handlerEdit" />
 
@@ -182,7 +182,7 @@
             </ul>
         </div>
 
-        <nav class="text-right">
+        <nav class="text-right" v-if="manage">
             <a href="#" @click.prevent="handlerNewPayment" class="oscar-link">
                 <i class="icon-bank"></i>
                 Nouveau versement</a>
@@ -194,7 +194,7 @@
     import Datepicker from './Datepicker.vue';
 
     export default {
-        props: ['model', 'moment', 'url', 'amount', 'currency', 'currencies'],
+        props: ['model', 'moment', 'url', 'amount', 'currency', 'currencies', 'manage'],
 
         data(){
             return {

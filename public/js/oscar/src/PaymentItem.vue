@@ -22,7 +22,7 @@
                 N° <strong>{{ payment.codeTransaction }}</strong>
             </div>
 
-            <nav>
+            <nav v-if="manage">
                 <a href="#" class="btn-delete" @click.prevent="$emit('delete', payment)" title="Supprimer ce versement">
                     <i class="icon-trash"></i>
                 </a>
@@ -36,7 +36,7 @@
 </template>
 <script>
     export default {
-        props: ['payment', 'moment'],
+        props: ['payment', 'moment', 'manage'],
 
         data(){
             return {
