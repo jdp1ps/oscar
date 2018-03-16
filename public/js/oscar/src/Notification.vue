@@ -91,7 +91,7 @@
                 notifs.forEach((n) => {
                     ids.push(n.id);
                 })
-                this.$http.delete(this.$http.$options.root+'?ids=' + ids.join(',')).then(
+                this.$http.delete(this.url+'?ids=' + ids.join(',')).then(
                     (res) => {
                         console.log("A supprimer",notifs, "notifications", this.notifications);
                         this.fetch();

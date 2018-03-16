@@ -194,9 +194,43 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 $this->notification($message, $persons, Notification::OBJECT_ACTIVITY, $activity->getId(), $context, $dateRappel, $milestone->getDateStart(), false);
             }
         }
+    }
 
+    public function generatePaymentsNotificationsForActivity( Activity $activity ){
+        /** @var PersonService $personsService */
+        $personsService = $this->getServiceLocator()->get('PersonService');
 
-        die();
+        /** @var Person[] $persons Liste des personnes impliquéesJalons */
+        $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
+
+        $personsIds = [];
+
+        $now = new \DateTime();
+
+        /** @var Person $person */
+        foreach ($persons as $person){
+            if( !in_array($person->getId(), $personsIds) ){
+                $this->debug(' - ' . $person);
+                $personsIds[] = $person->getId();
+            }
+        }
+
+        foreach( $activity->getPayments() as $payment ){
+            if( $payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_REALISE ){
+                $message = "$payment";
+                $context = "payment:" . $payment->getId();
+                $dateEffective = $payment->getDatePredicted();
+
+                if( $payment->getDatePredicted() < $now ){
+                    $message .= " est en retard";
+                    $dateEffective = $now;
+                }
+
+                $this->notification($message, $persons,
+                    Notification::OBJECT_ACTIVITY, $activity->getId(),
+                    $context, $dateEffective, $payment->getDatePredicted(), false);
+            }
+        }
     }
 
     /**
@@ -211,6 +245,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $logger->info(sprintf('### Génération des notifications pour %s', $activity));
 
         $this->generateMilestonesNotificationsForActivity($activity);
+        $this->generatePaymentsNotificationsForActivity($activity);
 
 
 
