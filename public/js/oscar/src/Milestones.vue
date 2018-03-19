@@ -74,7 +74,7 @@
                 <div class="overlay-content">
                     <h3><i class="icon-help-circled"></i>
                         Supprimer ce jalon ?</h3>
-                    <p>Cette suppression sera <strong>définitive</strong>, si vous souaitez signifier que ce jalon est réalisé, utilisez plutôt l'option <em>Marquer comme terminé</em>. Si cette option n'est pas disponible, demandez à l'administrateur Oscar si vous avez les privilèges pour faire ça ou si le type de jalon <strong>{{ deleteMilestone.type.label }}</strong> est correctement configuré.</p>
+                    <p>Cette suppression sera <strong>définitive</strong>, si vous souhaitez signifier que ce jalon est réalisé, utilisez plutôt l'option <em>Marquer comme terminé</em>. Si cette option n'est pas disponible, demandez à l'administrateur Oscar si vous avez les privilèges pour réaliser cette action ou si le type de jalon <strong>{{ deleteMilestone.type.label }}</strong> est correctement configuré.</p>
                     <nav>
                         <button class="btn btn-default" @click="preformDelete">
                             <i class="icon-trash"></i>
