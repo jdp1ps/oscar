@@ -262,6 +262,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             '# ORGANISATIONS',
             'oscar organizations:sync <connectorkey>' => 'Lance la synchronisation des organization depuis les différents connecteurs.',
 
+            '# NOTIFICATIONS',
+            'oscar notifications:generate <tagid>' => 'Génère les notifications pour l\'activité, la valeur \'all\' permet de générer les notifications pour toutes les activités',
+
             '# ACTIVTÉS',
             'oscar activity:search:build' => "Reconsruction de l'index de recherche",
             'oscar activity:search <expression> <objet>' => "Recherche l'<objet>(activity|person|project) avec l'expression <expression> dans les activités",
