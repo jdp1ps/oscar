@@ -121,15 +121,9 @@ class ActivityDateController extends AbstractOscarController
                         // Marquer le jalon comme terminé / non-terminé
                         if ($action == 'valid' || $action == 'unvalid' || $action == 'inprogress') {
                             $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
-                            if( $action == 'valid' )
-                                $milestone->setFinished(ActivityDate::FINISH_VALUE);
 
-                            else if ($action == 'unvalid')
-                                $milestone->setFinished(0);
-
-                            else
-                                $milestone->setFinished(50);
-
+                            $milestone = $this->getMilestoneService()->setMilestoneProgression($milestone, $action);
+                            return $this->ajaxResponse($milestone->toArray());
 
                         } // Mise à jour
                         else if ($action == 'update') {
@@ -138,46 +132,16 @@ class ActivityDateController extends AbstractOscarController
                             $comment = $this->params()->fromPost('comment');
                             $date = new \DateTime($this->params()->fromPost('dateStart'));
 
-                            try {
-                                /** @var DateType $type */
-                                $type = $this->getEntityManager()
-                                    ->getRepository(DateType::class)->find($typeId);
+                            $milestone = $this->getMilestoneService()->updateFromArray($milestone, [
+                               'type_id' => $typeId,
+                               'comment' => $comment,
+                               'date' => $date,
+                            ]);
 
-                                // Changement de type
-                                $rebuildNotifications = false;
-                                if( $milestone->getType()->getId() != $type->getId() ){
-                                    $rebuildNotifications = true;
-                                    $milestone->setType($type);
-                                }
-
-                                if( $milestone->getDateStart() != $date ){
-                                    $rebuildNotifications = true;
-                                    $milestone->setDateStart($date);
-                                }
-
-
-                                $milestone
-                                    //->setActivity($activity)
-                                    ->setComment($comment)
-                                    ;
-
-                                if( $rebuildNotifications ){
-                                    /** @var NotificationService $notificationService */
-                                    $notificationService = $this->getServiceLocator()->get('NotificationService');
-                                    $notificationService->purgeNotificationMilestone($milestone);
-                                    $notificationService->generateMilestoneNotifications($milestone);
-                                }
-
-                            } catch (\Exception $e) {
-                                return $this->getResponseNotFound("Type de jalon non-trouvé.");
-                            }
+                            return $this->ajaxResponse($milestone->toArray());
                         } else {
                             return $this->getResponseBadRequest("Cette action n'est pas supportée.");
                         }
-
-                        $this->getEntityManager()->flush($milestone);
-
-                        return $this->ajaxResponse($milestone->toArray());
                         break;
                     default:
                         return $this->getResponseBadRequest("Protocol bullshit");

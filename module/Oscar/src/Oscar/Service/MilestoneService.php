@@ -103,6 +103,68 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->getEntityManager()->flush();
     }
 
+    public function updateFromArray( ActivityDate $milestone, array $dataArray ){
+        $typeId = $dataArray['type_id'];
+        $comment = $dataArray['comment'];
+        $date = new \DateTime($dataArray['dateStart']);
+
+        try {
+            /** @var DateType $type */
+            $type = $this->getEntityManager()
+                ->getRepository(DateType::class)->find($typeId);
+
+            // Changement de type
+            $rebuildNotifications = false;
+            if( $milestone->getType()->getId() != $type->getId() ){
+                $rebuildNotifications = true;
+                $milestone->setType($type);
+            }
+
+            if( $milestone->getDateStart() != $date ){
+                $rebuildNotifications = true;
+                $milestone->setDateStart($date);
+            }
+
+
+            $milestone
+                //->setActivity($activity)
+                ->setComment($comment)
+            ;
+
+            if( $rebuildNotifications ){
+                /** @var NotificationService $notificationService */
+                $this->getNotificationService()->purgeNotificationMilestone($milestone);
+                $this->getNotificationService()->generateMilestoneNotifications($milestone);
+            }
+
+            $this->getEntityManager()->flush($milestone);
+
+            return $milestone;
+
+        } catch (\Exception $e) {
+            return $this->getResponseNotFound("Type de jalon non-trouvé.");
+        }
+    }
+
+    public function setMilestoneProgression( ActivityDate $milestone, $progressionName ){
+        if( $progressionName == 'valid' )
+            $milestone->setFinished(ActivityDate::FINISH_VALUE);
+
+        else if ($progressionName == 'unvalid')
+            $milestone->setFinished(0);
+
+        else
+            $milestone->setFinished(50);
+
+        $this->getEntityManager()->flush($milestone);
+        $this->getNotificationService()->purgeNotificationMilestone($milestone);
+        $this->getNotificationService()->generateMilestoneNotifications($milestone);
+
+        // TODO Mise à jour des notifications en fonction de l'évolution de la progression
+
+        return $milestone;
+    }
+
     public function createFromArray( $dataArray ){
 
         // Récupération du type

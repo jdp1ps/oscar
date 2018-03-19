@@ -207,6 +207,10 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      */
     public function generateMilestoneNotifications( ActivityDate $milestone )
     {
+
+        if( $milestone->isFinishable() && $milestone->isFinished() ){
+            return;
+        }
         $context = "milestone-" . $milestone->getId();
         $activity = $milestone->getActivity();
 
