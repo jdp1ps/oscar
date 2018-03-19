@@ -109,20 +109,16 @@ class ActivityDateController extends AbstractOscarController
                         $notificationService = $this->getServiceLocator()->get('NotificationService');
 
                         $notificationService->generateMilestoneNotifications($milestone);
-
-
-
                         return $this->ajaxResponse($milestone->toArray());
-
-
                         break;
+
                     case 'POST':
                         $action = $this->params()->fromPost('action', 'update');
                         $id = $this->params()->fromPost('id');
 
                         // Récupération du jalon
                         try {
-                            /** @var ActivityDate $jalon */
+                            /** @var ActivityDate $milestone */
                             $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
                         } catch (\Exception $e) {
                             return $this->getResponseNotFound("Impossible de trouver ce jalon.");
@@ -150,11 +146,34 @@ class ActivityDateController extends AbstractOscarController
                             $date = new \DateTime($this->params()->fromPost('dateStart'));
 
                             try {
-                                $type = $this->getEntityManager()->getRepository(DateType::class)->find($typeId);
-                                $milestone->setDateStart($date)
-                                    ->setActivity($activity)
+                                /** @var DateType $type */
+                                $type = $this->getEntityManager()
+                                    ->getRepository(DateType::class)->find($typeId);
+
+                                // Changement de type
+                                $rebuildNotifications = false;
+                                if( $milestone->getType()->getId() != $type->getId() ){
+                                    $rebuildNotifications = true;
+                                    $milestone->setType($type);
+                                }
+
+                                if( $milestone->getDateStart() != $date ){
+                                    $rebuildNotifications = true;
+                                    $milestone->setDateStart($date);
+                                }
+
+
+                                $milestone
+                                    //->setActivity($activity)
                                     ->setComment($comment)
-                                    ->setType($type);
+                                    ;
+
+                                if( $rebuildNotifications ){
+                                    /** @var NotificationService $notificationService */
+                                    $notificationService = $this->getServiceLocator()->get('NotificationService');
+                                    $notificationService->purgeNotificationMilestone($milestone);
+                                    $notificationService->generateMilestoneNotifications($milestone);
+                                }
 
                             } catch (\Exception $e) {
                                 return $this->getResponseNotFound("Type de jalon non-trouvé.");
