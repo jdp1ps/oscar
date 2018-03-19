@@ -260,6 +260,18 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
     }
 
+    public function purgeNotificationMilestone( ActivityDate $milestone ){
+        $context = "milestone-" . $milestone->getId();
+        $notifications = $this->getEntityManager()->getRepository(Notification::class)
+            ->findBy(['context' => $context]);
+
+        foreach ($notifications as $notification ){
+            $this->getEntityManager()->remove($notification);
+        }
+
+        $this->getEntityManager()->flush();
+    }
+
     /**
      * Génère les notifications pour une activité.
      *

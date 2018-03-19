@@ -18,6 +18,7 @@ use Oscar\Entity\DateType;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
+use Oscar\Service\NotificationService;
 use Zend\Http\Request;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
@@ -78,6 +79,11 @@ class ActivityDateController extends AbstractOscarController
                     case 'DELETE':
                         $id = $this->params()->fromQuery('id');
                         $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
+                        /** @var NotificationService $notificationService */
+                        $notificationService = $this->getServiceLocator()->get('NotificationService');
+
+                        $notificationService->purgeNotificationMilestone($milestone);
+
                         $this->getEntityManager()->remove($milestone);
                         $this->getEntityManager()->flush();
                         return $this->getResponseOk("Jalon supprimé");
@@ -98,6 +104,13 @@ class ActivityDateController extends AbstractOscarController
                             ->setComment($comment)
                             ->setType($type);
                         $this->getEntityManager()->flush($milestone);
+
+                        /** @var NotificationService $notificationService */
+                        $notificationService = $this->getServiceLocator()->get('NotificationService');
+
+                        $notificationService->generateMilestoneNotifications($milestone);
+
+
 
                         return $this->ajaxResponse($milestone->toArray());
 
