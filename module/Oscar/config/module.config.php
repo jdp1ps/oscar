@@ -717,6 +717,7 @@ return array(
             'ConnectorService' => \Oscar\Service\ConnectorService::class,
             'TimesheetService' => \Oscar\Service\TimesheetService::class,
             'NotificationService' => \Oscar\Service\NotificationService::class,
+            'MilestoneService' => \Oscar\Service\MilestoneService::class,
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             // Droits
             //'RoleProvider' => \Oscar\Provider\RoleProvider::class,

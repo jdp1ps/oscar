@@ -18,6 +18,7 @@ use Oscar\Entity\DateType;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
+use Oscar\Service\MilestoneService;
 use Oscar\Service\NotificationService;
 use Zend\Http\Request;
 use Zend\View\Model\JsonModel;
@@ -25,6 +26,14 @@ use Zend\View\Model\ViewModel;
 
 class ActivityDateController extends AbstractOscarController
 {
+    /**
+     * @return MilestoneService
+     */
+    protected function getMilestoneService(){
+        return $this->getServiceLocator()->get('MilestoneService');
+    }
+
+
     public function indexAction()
     {
         $idActivity = $this->params()->fromRoute('idactivity');
