@@ -157,42 +157,79 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function generateMilestonesNotificationsForActivity( Activity $activity ){
 
-        /** @var PersonService $personsService */
-        $personsService = $this->getServiceLocator()->get('PersonService');
-
-        /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
-        $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
-
-        $this->debug(count($persons) . ' personne(s) impliquées : ');
-
-        $personsIds = [];
-
-        /** @var Person $person */
-        foreach ($persons as $person){
-            if( !in_array($person->getId(), $personsIds) ){
-                $this->debug(' - ' . $person);
-                $personsIds[] = $person->getId();
-            }
-        }
+        $this->debug(sprintf("Génération de notifications pour les JALONS dans %s", $activity));
 
         /** @var ActivityDate $milestone */
         foreach( $activity->getMilestones() as $milestone ){
-            $context = "milestone-" . $milestone->getId();
+            $this->generateMilestoneNotifications($milestone);
+        }
+    }
 
-            // Dates de notification
-            $dates = [];
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// CACHE
+    private $_object_privilege_persons = [];
 
-            $this->debug('# ' . $context . ' ' . $milestone->getType());
+    /**
+     * Retourne la liste des personnes ayant le privilège $privilège dans l'activité $activité.
+     *
+     * @param $privilege
+     * @param Activity $activity
+     */
+    public function getPersonsIdFor( $privilege, Activity $activity ){
 
-            $message = sprintf("Le jalon %s de l'activité %s arrive à échéance",
-                $milestone->getType()->getLabel(),
-                $activity->log());
+        $activityId = $activity->getId();
+
+        if( !array_key_exists($activityId, $this->_object_privilege_persons) ){
+            $_object_privilege_persons[$activityId] = [];
+        }
+
+        if( !array_key_exists($privilege, $this->_object_privilege_persons[$activityId]) ){
+
+            $personsIds = [];
+
+            /** @var PersonService $personsService */
+            $personsService = $this->getServiceLocator()->get('PersonService');
+
+            /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
+            $persons = $personsService->getAllPersonsWithPrivilegeInActivity($privilege, $activity);
+
+            $_object_privilege_persons[$activityId][$privilege] = $persons;
+        }
+
+        return $_object_privilege_persons[$activityId][$privilege];
+    }
 
 
-            $this->notification($message, $persons, Notification::OBJECT_ACTIVITY, $activity->getId(), $context, $milestone->getDateStart(), $milestone->getDateStart(), false);
-            foreach ($milestone->getRecursivityDate() as $dateRappel) {
-                $this->notification($message, $persons, Notification::OBJECT_ACTIVITY, $activity->getId(), $context, $dateRappel, $milestone->getDateStart(), false);
-            }
+    /**
+     * Génération des notifications pour le jalon $milestone.
+     *
+     * @param ActivityDate $milestone
+     */
+    public function generateMilestoneNotifications( ActivityDate $milestone )
+    {
+        $context = "milestone-" . $milestone->getId();
+        $activity = $milestone->getActivity();
+
+        $this->debug('# ' . $context . ' ' . $milestone->getType());
+
+        $message = sprintf("Le jalon %s de l'activité %s arrive à échéance",
+            $milestone->getType()->getLabel(),
+            $activity->log());
+
+        $persons = $this->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $milestone->getActivity());
+
+        // Notification de base à la date D
+        $this->notification($message,
+            $persons, Notification::OBJECT_ACTIVITY,
+            $activity->getId(), $context, $milestone->getDateStart(),
+            $milestone->getDateStart(), false);
+
+        // Les rappels configurés dans le le type de jalon
+        foreach ($milestone->getRecursivityDate() as $dateRappel) {
+            $this->notification($message, $persons,
+                Notification::OBJECT_ACTIVITY, $activity->getId(),
+                $context, $dateRappel,
+                $milestone->getDateStart(), false);
         }
     }
 
