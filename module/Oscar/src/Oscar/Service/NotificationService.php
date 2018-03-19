@@ -157,7 +157,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function generateMilestonesNotificationsForActivity( Activity $activity ){
 
-        $this->debug(sprintf("Génération de notifications pour les JALONS dans %s", $activity));
+        $this->debug(sprintf("# Génération de notifications pour les JALONS dans %s", $activity));
 
         /** @var ActivityDate $milestone */
         foreach( $activity->getMilestones() as $milestone ){
@@ -210,7 +210,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $context = "milestone-" . $milestone->getId();
         $activity = $milestone->getActivity();
 
-        $this->debug('# ' . $context . ' ' . $milestone->getType());
+        $this->debug('## Génération pour le jalon ' . $context . ' ' . $milestone->getType());
 
         $message = sprintf("Le jalon %s de l'activité %s arrive à échéance",
             $milestone->getType()->getLabel(),

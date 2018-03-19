@@ -13,6 +13,8 @@ use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
+use Oscar\Entity\DateType;
+use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -81,4 +83,61 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $out;
     }
 
+    /**
+     * Suppression d'un jalon
+     * @param $id
+     */
+    public function deleteMilestoneById( $id ){
+        $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
+        if( $milestone)
+            return $this->deleteMilestone($milestone);
+    }
+
+    /**
+     * Suppression d'un jalon
+     * @param $id
+     */
+    public function deleteMilestone( ActivityDate $milestone ){
+        $this->getNotificationService()->purgeNotificationMilestone($milestone);
+        $this->getEntityManager()->remove($milestone);
+        $this->getEntityManager()->flush();
+    }
+
+    public function createFromArray( $dataArray ){
+
+        // Récupération du type
+        $type = $this->getEntityManager()->getRepository(DateType::class)->find($dataArray['type_id']);
+        if( !$type )
+            throw new OscarException("Ce type de jalon est introuvable");
+
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($dataArray['activity_id']);
+
+        $comment = $dataArray['comment'];
+
+        $date = new \DateTime($dataArray['dateStart']);
+
+        $milestone = new ActivityDate();
+
+        $this->getEntityManager()->persist($milestone);
+
+        $milestone->setDateStart($date)
+            ->setActivity($activity)
+            ->setComment($comment)
+            ->setType($type);
+        $this->getEntityManager()->flush($milestone);
+
+        /** @var NotificationService $notificationService */
+        $notificationService = $this->getServiceLocator()->get('NotificationService');
+
+        $notificationService->generateMilestoneNotifications($milestone);
+
+        return $milestone;
+    }
+
+    /**
+     * @return NotificationService
+     */
+    protected function getNotificationService(){
+        return $this->getServiceLocator()->get('NotificationService');
+    }
 }

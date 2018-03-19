@@ -87,37 +87,21 @@ class ActivityDateController extends AbstractOscarController
                 switch ($method) {
                     case 'DELETE':
                         $id = $this->params()->fromQuery('id');
-                        $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
-                        /** @var NotificationService $notificationService */
-                        $notificationService = $this->getServiceLocator()->get('NotificationService');
-
-                        $notificationService->purgeNotificationMilestone($milestone);
-
-                        $this->getEntityManager()->remove($milestone);
-                        $this->getEntityManager()->flush();
+                        $this->getMilestoneService()->deleteMilestoneById($id);
                         return $this->getResponseOk("Jalon supprimé");
                         break;
 
                     case 'GET':
 
                         break;
+
                     case 'PUT':
-                        $type = $this->getEntityManager()->getRepository(DateType::class)->find($_POST['type']);
-                        $comment = $_POST['comment'];
-                        $date = new \DateTime($_POST['dateStart']);
-
-                        $milestone = new ActivityDate();
-                        $this->getEntityManager()->persist($milestone);
-                        $milestone->setDateStart($date)
-                            ->setActivity($activity)
-                            ->setComment($comment)
-                            ->setType($type);
-                        $this->getEntityManager()->flush($milestone);
-
-                        /** @var NotificationService $notificationService */
-                        $notificationService = $this->getServiceLocator()->get('NotificationService');
-
-                        $notificationService->generateMilestoneNotifications($milestone);
+                        $milestone = $this->getMilestoneService()->createFromArray([
+                           'type_id' => $_POST['type'],
+                           'comment' => $_POST['comment'],
+                           'dateStart' => $_POST['dateStart'],
+                           'activity_id' => $activity->getId(),
+                        ]);
                         return $this->ajaxResponse($milestone->toArray());
                         break;
 
