@@ -1102,10 +1102,10 @@ class Activity implements ResourceInterface
      * Retourne la liste des personnes ayant le rôle.
      * @param string $role
      */
-    public function getPersonsRoled( array $roles )
+    public function getPersonsRoled( array $roles, $includeInactives = true )
     {
         $persons = [];
-        foreach( $this->getPersons() as $p ){
+        foreach( $this->getPersons($includeInactives) as $p ){
             if( in_array($p->getRole(), $roles ) ) {
                 $persons[] = $p;
             }

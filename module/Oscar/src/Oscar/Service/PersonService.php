@@ -98,7 +98,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             }
 
             // Selection des personnes associées via le Projet/Activité
-            foreach ($activity->getPersonsRoled($rolesIds) as $p ){
+            foreach ($activity->getPersonsRoled($rolesIds, false) as $p ){
                 $persons[$p->getPerson()->getId()] = $p->getPerson(); ;
             }
 
@@ -107,7 +107,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             foreach ($activity->getOrganizationsDeep() as $organization ){
                 /** @var OrganizationPerson $personOrganization */
                 if( $organization->isPrincipal() ) {
-                    foreach ($organization->getOrganization()->getPersons() as $personOrganization) {
+                    foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
                         if (in_array($personOrganization->getRole(), $rolesIds)) {
                             $persons[$personOrganization->getPerson()->getId()] = $personOrganization->getPerson();
                         }

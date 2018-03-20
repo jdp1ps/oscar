@@ -307,8 +307,18 @@ class Organization implements ResourceInterface, IConnectedObject
     /**
      * @return ArrayCollection
      */
-    public function getPersons()
+    public function getPersons( $includeInactive = true )
     {
+        if( $includeInactive == false ){
+            $out = [];
+            /** @var OrganizationPerson $member */
+            foreach( $this->getPersons() as $member ){
+                if( !$member->isOutOfDate() ){
+                    $out[] = $member;
+                }
+            }
+            return $out;
+        }
         return $this->persons;
     }
 
