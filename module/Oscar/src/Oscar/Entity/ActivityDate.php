@@ -82,6 +82,14 @@ class ActivityDate implements ITrackable
     }
 
     /**
+     * Retourne TRUE sie le jalon doit être complété et qu'il est en retard.
+     */
+    public function isLate(){
+        $now = new \DateTime('now');
+        return  $this->isFinishable() && !$this->isFinished() && ($now > $this->getDateStart());
+    }
+
+    /**
      * @return integer
      */
     public function getFinished()
