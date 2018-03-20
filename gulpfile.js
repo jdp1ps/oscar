@@ -217,7 +217,7 @@ gulp.task('module-oscar-notification', function(cb){
 
 gulp.task('oscar-build', ['module-oscar-timesheet', 'module-oscar-milestones', 'module-oscar-payments', 'module-oscar-authentification', 'module-oscar-payments', 'module-oscar-milestones', 'module-oscar-activityclone', 'module-oscar-notification']);
 
-gulp.task('watch-oscar', ['module-oscar-payments','module-oscar-timesheet','module-oscar-milestones'], function(){
+gulp.task('watch-oscar', [], function(){
     gulp.watch(['./public/js/oscar/src/Timesheet*'], ['module-oscar-timesheet']);
     gulp.watch(['./public/js/oscar/src/Milestone*'], ['module-oscar-milestones']);
     gulp.watch(['./public/js/oscar/src/Payment*'], ['module-oscar-payments']);

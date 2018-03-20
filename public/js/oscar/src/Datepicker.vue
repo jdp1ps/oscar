@@ -8,30 +8,27 @@
             </div>
         </div>
 
-        <transition name="fade">
-            <div class="datepicker-selector" @mouseleave="handlerHide" v-show="picker">
-                <div class="datepicker-wrapper">
-                    <header>
-                        <nav>
-                          <span href="#" @click.stop.prevent="pickerPrevMonth">
-                            <i class="glyphicon glyphicon-chevron-left"></i>
-                          </span>
-                            <strong class="heading">
-                                <span class="currentMonth" @click.stop="handlerPickerMonth">{{ currentMonth }}</span>
-                                <span class="currentYear" @click.stop="handlerPickerYear">{{ currentYear }}</span>
-                            </strong>
-                            <span href="#" @click.stop="pickerNextMonth">
-                                <i class="glyphicon glyphicon-chevron-right"></i>
-                            </span>
-                        </nav>
-                        <div class="day-labels week" v-if="pickerMode == 'day'">
-                            <span class="week-label">&nbsp;</span>
-                            <span class="day-label" v-for="d in pickerData.dayslabels">{{ d }}</span>
-                        </div>
-                    </header>
+        <div class="datepicker-selector" @mouseleave="handlerHide" v-show="picker">
+            <div class="datepicker-wrapper">
+                <header>
+                    <nav>
+                        <span href="#" @click.stop.prevent="pickerPrevMonth">
+                            <i class="icon-angle-left"></i></span>
+                        <strong class="heading">
+                            <span class="currentMonth" @click.stop="handlerPickerMonth">{{ currentMonth }}</span>
+                            <span class="currentYear" @click.stop="handlerPickerYear">{{ currentYear }}</span>
+                        </strong>
+                        <span href="#" @click.stop="pickerNextMonth">
+                            <i class="icon-angle-right"></i></span>
+                    </nav>
+                    <div class="day-labels week" v-if="pickerMode == 'day'">
+                        <span class="week-label">&nbsp;</span>
+                        <span class="day-label" v-for="d in pickerData.dayslabels">{{ d }}</span>
+                    </div>
+                </header>
 
-                    <section v-if="pickerMode == 'day'">
-                        <div class="weeks" v-for="week in pickerData.weeks">
+                <section v-if="pickerMode == 'day'">
+                    <div class="weeks" v-for="week in pickerData.weeks">
                             <span class="week">
                                 <span class="week-label">{{ week.num }}</span>
                                 <span class="week-day" v-for="d in week.days" :class="{ active: d.active, disabled: !d.enabled }"
@@ -39,35 +36,34 @@
                                   {{ d.day }}
                                 </span>
                             </span>
-                        </div>
-                    </section>
+                    </div>
+                </section>
 
-                    <section v-if="pickerMode == 'month'" class="months">
+                <section v-if="pickerMode == 'month'" class="months">
                         <span class="month" @click.prevent.stop="handlerSelectMonth(month)"
                               v-for="month in months"
                               :class="{ active: pickerMonthRef == month }">
                           {{ month }}
                         </span>
-                    </section>
+                </section>
 
-                    <section v-if="pickerMode == 'year'" class="years">
+                <section v-if="pickerMode == 'year'" class="years">
                         <span class="year"
                               @click.prevent.stop="pickerYearRef -= 22">&lt;&lt;</span>
-                        <span class="year"
-                              @click.prevent.stop="handlerSelectYear(year)"
-                              v-for="year in years"
-                              :class="{ active: pickerYearRef == year }">
+                    <span class="year"
+                          @click.prevent.stop="handlerSelectYear(year)"
+                          v-for="year in years"
+                          :class="{ active: pickerYearRef == year }">
                           {{ year }}
                         </span>
-                        <span class="year" @click.prevent.stop="pickerYearRef += 22">&gt;&gt;</span>
-                    </section>
-                </div>
-                <div style="text-align: center; cursor: pointer" @click="handlerClear">
-                    <i class="icon-cancel-alt"></i>
-                    Supprimer la date
-                </div>
+                    <span class="year" @click.prevent.stop="pickerYearRef += 22">&gt;&gt;</span>
+                </section>
             </div>
-        </transition>
+            <div style="text-align: center; cursor: pointer" @click="handlerClear">
+                <i class="icon-cancel-alt"></i>
+                Supprimer la date
+            </div>
+        </div>
     </div>
 
 </template>
