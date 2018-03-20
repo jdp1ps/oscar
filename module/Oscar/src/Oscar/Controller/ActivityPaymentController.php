@@ -77,14 +77,12 @@ class ActivityPaymentController extends AbstractOscarController
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
             $this->getOscarUserContext()->check(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
 
-
             $method = $this->getHttpXMethod();
             $this->getLogger()->info($method);
 
             if( $method != "GET" && !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity) ){
                 $this->getResponseBadRequest("Vous ne disposez pas des droits suffisants pour gérer les versements");
             }
-
 
             switch($method){
                 case 'DELETE':
@@ -166,11 +164,7 @@ class ActivityPaymentController extends AbstractOscarController
                     $this->getNotificationService()->generatePaymentsNotifications($payment);
 
                     return $this->getResponseOk("Le versement a bien été modifié");
-
             }
-
-
-
 
             $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
                 ->addSelect('c')
