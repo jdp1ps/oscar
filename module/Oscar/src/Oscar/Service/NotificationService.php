@@ -344,6 +344,29 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
     }
 
+    /**
+     * Supprime les notification d'une personne dans une activité
+     *
+     * @param Activity $activity
+     * @param Person $person
+     */
+    public function purgeNotificationsPersonActivity(Activity $activity, Person $person){
+        // objectid = $activityId
+        // object = activity
+        $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
+            ->createQueryBuilder('p')
+            ->innerJoin('p.notification', 'n')
+            ->where('p.person = :person AND n.object = :object AND n.objectId = :activityid')
+            ->setParameters(['person' => $person->getId(), 'activityid' => $activity->getId(), 'object' => Notification::OBJECT_ACTIVITY]);
+
+        /** @var NotificationPerson $r */
+        foreach ($query->getQuery()->getResult() as $r ){
+            $this->getEntityManager()->remove($r);
+        }
+        $this->getEntityManager()->flush();
+
+    }
+
     public function purgeNotificationPayment(ActivityPayment $payment)
     {
         $context = "payment:" . $payment->getId();
@@ -362,13 +385,13 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      *
      * @param Activity $activity
      */
-    public function generateNotificationsForActivity(Activity $activity, $silent = false)
+    public function generateNotificationsForActivity(Activity $activity, $person = null)
     {
-        $this->generateMilestonesNotificationsForActivity($activity);
-        $this->generatePaymentsNotificationsForActivity($activity);
+        $this->generateMilestonesNotificationsForActivity($activity, $person);
+        $this->generatePaymentsNotificationsForActivity($activity, $person);
     }
 
-    
+
 
     /**
      * Marque les notifications comme lues
@@ -405,8 +428,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 foreach ($member->getOrganization()->getActivities() as $activity) {
                     if($activity->isPrincipal() && !in_array($activity->getActivity(), $activities)){
                         $activities[] = $activity->getActivity();
-                        $this->generateMilestonesNotificationsForActivity($activity->getActivity(), $person);
-                        $this->generatePaymentsNotificationsForActivity($activity->getActivity(), $person);
+                        $this->generateNotificationsForActivity($activity->getActivity(), $person);
                     }
                 }
             }
@@ -415,9 +437,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         /** @var ActivityPerson $activityPerson */
         foreach ($person->getActivities() as $activityPerson ){
             if($activityPerson->isPrincipal() && !in_array($activityPerson->getActivity(), $activities)){
-
-                $this->generateMilestonesNotificationsForActivity($activityPerson->getActivity(), $person);
-                $this->generatePaymentsNotificationsForActivity($activityPerson->getActivity(), $person);
+                $this->generateNotificationsForActivity($activityPerson->getActivity(), $person);
             }
         }
 

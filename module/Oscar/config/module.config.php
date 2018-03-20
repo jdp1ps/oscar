@@ -653,6 +653,16 @@ return array(
                     ),
                 ],
 
+                'notification_person_remove' => [
+                    'options' => array(
+                        'route' => 'oscar notifications:person:purge <idperson> <idactivity>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'notificationsPersonActivityPurge',
+                        ),
+                    ),
+                ],
+
                 ////////////////////////////////////////////////////////////////
                 'console_syncldap' => array(
                     'options' => array(
