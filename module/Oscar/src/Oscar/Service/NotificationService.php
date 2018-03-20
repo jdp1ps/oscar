@@ -285,6 +285,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
 
 
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// PAYMENTS
@@ -323,6 +325,18 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 Notification::OBJECT_ACTIVITY, $activity->getId(),
                 $context, $dateEffective, $payment->getDatePredicted(), false);
         }
+    }
+
+    public function purgeNotificationPayment( ActivityPayment $payment ){
+        $context = "payment:" . $payment->getId();
+        $notifications = $this->getEntityManager()->getRepository(Notification::class)
+            ->findBy(['context' => $context]);
+
+        foreach ($notifications as $notification) {
+            $this->getEntityManager()->remove($notification);
+        }
+
+        $this->getEntityManager()->flush();
     }
 
     /**
