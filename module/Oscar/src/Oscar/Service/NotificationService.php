@@ -12,10 +12,13 @@ use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNotification;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -156,14 +159,11 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     }
 
-    public function generateMilestonesNotificationsForActivity(Activity $activity)
+    public function generateMilestonesNotificationsForActivity(Activity $activity, $person = null)
     {
-
-        $this->debug(sprintf("# Génération de notifications pour les JALONS dans %s", $activity));
-
         /** @var ActivityDate $milestone */
         foreach ($activity->getMilestones() as $milestone) {
-            $this->generateMilestoneNotifications($milestone);
+            $this->generateMilestoneNotifications($milestone, $person);
         }
     }
 
@@ -215,7 +215,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      *
      * @param ActivityDate $milestone
      */
-    public function generateMilestoneNotifications(ActivityDate $milestone)
+    public function generateMilestoneNotifications(ActivityDate $milestone, $person = null)
     {
         $context = "milestone-" . $milestone->getId();
         $activity = $milestone->getActivity();
@@ -223,6 +223,15 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $this->debug('## Génération pour le jalon ' . $context . ' ' . $milestone->getType());
 
         $persons = $this->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $milestone->getActivity());
+
+        if( $person !== null ){
+            if( !in_array($person, $persons) ){
+                return;
+            } else {
+                $persons = [$person];
+            }
+        }
+
 
         // Si le jalon peut être complété
         if ($milestone->isFinishable()) {
@@ -247,7 +256,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         // Si le jalon est passé, on passe
-        if( $milestone->getDateStart() < new \DateTime('now') ){
+        if ($milestone->getDateStart() < new \DateTime('now')) {
             return;
         }
 
@@ -298,18 +307,26 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      *
      * @param Activity $activity
      */
-    public function generatePaymentsNotificationsForActivity(Activity $activity)
+    public function generatePaymentsNotificationsForActivity(Activity $activity, $person = null)
     {
         foreach ($activity->getPayments() as $payment) {
-            $this->generatePaymentsNotifications($payment);
+            $this->generatePaymentsNotifications($payment, $person);
         }
     }
 
-    public function generatePaymentsNotifications(ActivityPayment $payment)
+    public function generatePaymentsNotifications(ActivityPayment $payment, $person = null)
     {
         $activity = $payment->getActivity();
         $now = new \DateTime();
         $persons = $this->getPersonsIdFor(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
+
+        if( $person !== null ){
+            if( !in_array($person, $persons) ){
+                return;
+            } else {
+                $persons = [$person];
+            }
+        }
 
         if ($payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_PREVISIONNEL) {
             $message = "$payment dans l'activité " . $activity->log();
@@ -327,7 +344,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
     }
 
-    public function purgeNotificationPayment( ActivityPayment $payment ){
+    public function purgeNotificationPayment(ActivityPayment $payment)
+    {
         $context = "payment:" . $payment->getId();
         $notifications = $this->getEntityManager()->getRepository(Notification::class)
             ->findBy(['context' => $context]);
@@ -350,6 +368,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $this->generatePaymentsNotificationsForActivity($activity);
     }
 
+    
+
     /**
      * Marque les notifications comme lues
      *
@@ -371,6 +391,37 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ])
             ->getQuery()
             ->execute();
+    }
+
+    public function generateNotificationsPerson(Person $person)
+    {
+        // Récupération des activités dans lesquelles la personne est impliquée
+        $activities = [];
+
+        /** @var OrganizationPerson $member */
+        foreach ($person->getOrganizations() as $member) {
+            if (!$member->isOutOfDate() && $member->isPrincipal()) {
+                /** @var ActivityOrganization $activity */
+                foreach ($member->getOrganization()->getActivities() as $activity) {
+                    if($activity->isPrincipal() && !in_array($activity->getActivity(), $activities)){
+                        $activities[] = $activity->getActivity();
+                        $this->generateMilestonesNotificationsForActivity($activity->getActivity(), $person);
+                        $this->generatePaymentsNotificationsForActivity($activity->getActivity(), $person);
+                    }
+                }
+            }
+        }
+
+        /** @var ActivityPerson $activityPerson */
+        foreach ($person->getActivities() as $activityPerson ){
+            if($activityPerson->isPrincipal() && !in_array($activityPerson->getActivity(), $activities)){
+
+                $this->generateMilestonesNotificationsForActivity($activityPerson->getActivity(), $person);
+                $this->generatePaymentsNotificationsForActivity($activityPerson->getActivity(), $person);
+            }
+        }
+
+
     }
 
     /**

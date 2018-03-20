@@ -241,6 +241,14 @@ class ConsoleController extends AbstractOscarController
 
     }
 
+    public function notificationsPersonAction()
+    {
+        $personId = $this->params('idperson');
+        $person = $this->getPersonService()->getPerson($personId);
+        $this->getNotificationService()->generateNotificationsPerson($person);
+        die("$person");
+    }
+
 
     public function notificationsActivityGenerateAction()
     {

@@ -571,14 +571,6 @@ class ProjectGrantController extends AbstractOscarController
         /** @var Activity $entity */
         $entity = $this->getActivityFromRoute();
 
-        /*foreach ($this->getNotificationService()->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $entity) as $person){
-            echo "$person<br>";
-        }
-
-
-        die('NOTIFICATIONS');
-        */
-
         // Check access
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_MENU_ADMIN);
 

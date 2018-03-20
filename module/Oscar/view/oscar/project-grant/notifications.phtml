@@ -12,7 +12,9 @@
     <header>
         <h1>
             <strong>Notification planifiées </strong> dans
-            <em><?= $activity ?></em>
+            <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
+                <i class="icon-cube"></i>
+                <?= $activity ?></a>
         </h1>
 
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_GENERATE) ):?>

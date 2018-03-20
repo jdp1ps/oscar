@@ -643,6 +643,16 @@ return array(
                     ),
                 ],
 
+                'notification_person' => [
+                    'options' => array(
+                        'route' => 'oscar notifications:person <idperson>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'notificationsPerson',
+                        ),
+                    ),
+                ],
+
                 ////////////////////////////////////////////////////////////////
                 'console_syncldap' => array(
                     'options' => array(
