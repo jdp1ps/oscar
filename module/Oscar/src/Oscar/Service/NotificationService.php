@@ -311,7 +311,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $now = new \DateTime();
         $persons = $this->getPersonsIdFor(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
 
-        if ($payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_REALISE) {
+        if ($payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_PREVISIONNEL) {
             $message = "$payment dans l'activité " . $activity->log();
             $context = "payment:" . $payment->getId();
             $dateEffective = $payment->getDatePredicted();

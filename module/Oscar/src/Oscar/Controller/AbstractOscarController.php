@@ -17,6 +17,7 @@ use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\ProjectRepository;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityTypeService;
+use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
@@ -169,6 +170,13 @@ class AbstractOscarController extends AbstractActionController
     protected function getOscarUserContext()
     {
         return $this->getServiceLocator()->get('OscarUserContext');
+    }
+
+    /**
+     * @return NotificationService
+     */
+    protected function getNotificationService(){
+        return $this->getServiceLocator()->get('NotificationService');
     }
 
     /***

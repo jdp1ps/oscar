@@ -61,6 +61,8 @@ class ActivityPaymentController extends AbstractOscarController
         ];
     }
 
+
+
     /**
      * @return JsonModel
      */
@@ -88,8 +90,10 @@ class ActivityPaymentController extends AbstractOscarController
                 case 'DELETE':
                     /** @var ActivityPayment $payment */
                     $payment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($this->params()->fromQuery('id'));
+                    $this->getNotificationService()->purgeNotificationPayment($payment);
                     $this->getEntityManager()->remove($payment);
                     $this->getEntityManager()->flush();
+
                     return $this->getResponseOk("Le versement a bien été supprimé");
 
                 case 'PUT':
@@ -121,6 +125,7 @@ class ActivityPaymentController extends AbstractOscarController
 
 
                     $this->getEntityManager()->flush($payment);
+                    $this->getNotificationService()->generatePaymentsNotifications($payment);
                     return $this->getResponseOk("Le versement a bien été ajouté");
 
                 case 'POST':
@@ -156,6 +161,10 @@ class ActivityPaymentController extends AbstractOscarController
 
 
                     $this->getEntityManager()->flush($payment);
+
+                    $this->getNotificationService()->purgeNotificationPayment($payment);
+                    $this->getNotificationService()->generatePaymentsNotifications($payment);
+
                     return $this->getResponseOk("Le versement a bien été modifié");
 
             }
