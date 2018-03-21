@@ -20,6 +20,7 @@ use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
+use Oscar\Entity\Project;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -129,6 +130,13 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $this->getServiceLocator()->get('Logger')->info($str);
     }
 
+    /**
+     * @return OrganizationService
+     */
+    protected function getOrganizationService(){
+        return $this->getServiceLocator()->get('OrganizationService');
+    }
+
     public function generateNotificationsActivities($silent = false)
     {
         $this->debug("=====================\nGénération des notifications\n=====================");
@@ -145,7 +153,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
-            $this->generateNotificationsForActivity($activity, $silent);
+            $this->generateNotificationsForActivity($activity);
         }
     }
 
@@ -226,6 +234,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         if( $person !== null ){
             if( !in_array($person, $persons) ){
+                $this->getServiceLocator()->get('Logger')->warning(sprintf("La personne %s n'est pas associée à l'activité %s", $person, $milestone->getActivity()));
                 return;
             } else {
                 $persons = [$person];
@@ -367,6 +376,25 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// PROJET
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Supprime les notifications d'une personne d'un Projet
+     *
+     * @param Project $project
+     * @param Person $person
+     */
+    public function purgeNotificationsPersonProject(Project $project, Person $person){
+        /** @var Activity $activity */
+        foreach ($project->getActivities() as $activity) {
+            $this->purgeNotificationsPersonActivity($activity, $person);
+        }
+    }
+
     public function purgeNotificationPayment(ActivityPayment $payment)
     {
         $context = "payment:" . $payment->getId();
@@ -389,6 +417,19 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     {
         $this->generateMilestonesNotificationsForActivity($activity, $person);
         $this->generatePaymentsNotificationsForActivity($activity, $person);
+    }
+
+    /**
+     * Génère les notifications pour un projet.
+     *
+     * @param Project $project
+     * @param null|Person $person
+     */
+    public function generateNotificationsForProject(Project $project, $person = null)
+    {
+        foreach ($project->getActivities() as $activity ) {
+            $this->generateNotificationsForActivity($activity, $person);
+        }
     }
 
 
@@ -425,11 +466,9 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         foreach ($person->getOrganizations() as $member) {
             if (!$member->isOutOfDate() && $member->isPrincipal()) {
                 /** @var ActivityOrganization $activity */
-                foreach ($member->getOrganization()->getActivities() as $activity) {
-                    if($activity->isPrincipal() && !in_array($activity->getActivity(), $activities)){
-                        $activities[] = $activity->getActivity();
-                        $this->generateNotificationsForActivity($activity->getActivity(), $person);
-                    }
+
+                foreach ($this->getOrganizationService()->getOrganizationActivititiesPrincipalActive($member->getOrganization()) as $activity) {
+                    $this->generateNotificationsForActivity($activity->getActivity(), $person);
                 }
             }
         }

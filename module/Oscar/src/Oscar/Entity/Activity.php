@@ -1077,6 +1077,34 @@ class Activity implements ResourceInterface
     private $_personsActives;
 
     /**
+     * Retourne la liste des personnes ayant un rôle principale direct.
+     *
+     * @return array
+     */
+    public function getPersonPrincipalActive(){
+
+        $persons = [];
+
+        /** @var ActivityPerson $member */
+        foreach ($this->getPersons() as $member) {
+            if (!$member->isOutOfDate()) {
+                $persons[] = $member;
+            }
+        }
+
+        if( $this->getProject() ){
+            /** @var ProjectMember $projectMember */
+            foreach ($this->getProject()->getPersons() as $projectMember) {
+                if (!$projectMember->isOutOfDate()) {
+                    $persons[] = $projectMember;
+                }
+            }
+        }
+
+        return $persons;
+    }
+
+    /**
      * @return ArrayCollection
      */
     public function getPersons($includeInactives = true)

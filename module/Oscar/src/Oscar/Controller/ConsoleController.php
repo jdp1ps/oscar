@@ -251,7 +251,8 @@ class ConsoleController extends AbstractOscarController
 
 //'route' => 'oscar notifications:person:purge <idperson> <idactivity></idactivity>',
 
-    public function notificationsPersonActivityPurgeAction(){
+    public function notificationsPersonActivityPurgeAction()
+    {
         $personId = $this->params('idperson');
         $activityId = $this->params('idactivity');
 
@@ -259,7 +260,6 @@ class ConsoleController extends AbstractOscarController
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
 
         $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
-
     }
 
     public function notificationsActivityGenerateAction()

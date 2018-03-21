@@ -9,6 +9,7 @@
 namespace Oscar\Service;
 
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
@@ -85,6 +86,35 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
             ->setParameter('id', $organizationId)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Retourne la liste des activités d'un organisation où elle a un role principal actif.
+     *
+     * @param Organization $o
+     * @return array
+     */
+    public function getOrganizationActivititiesPrincipalActive( Organization $o ){
+        $activities = [];
+        /** @var ActivityOrganization $activity */
+        foreach ($o->getActivities() as $activity ){
+            if( $activity->isPrincipal() && !$activity->isOutOfDate() ){
+                if( !in_array($activity->getActivity(), $activities) )
+                    $activities[] = $activity->getActivity();
+            }
+        }
+
+        /** @var ProjectPartner $p */
+        foreach ($o->getProjects() as $p ){
+            if( $p->isPrincipal() && !$p->isOutOfDate() ){
+                foreach ($p->getProject()->getActivities() as $activity) {
+                    if( !in_array($activity->getActivity(), $activities) )
+                        $activities[] = $activity->getActivity();
+                }
+            }
+        }
+
+        return $activities;
     }
 
     /**

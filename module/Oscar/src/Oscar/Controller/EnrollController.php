@@ -189,10 +189,12 @@ class EnrollController extends AbstractOscarController
 
                 case ProjectMember::class :
                     $urlEnrollerShow = 'project/show';
+                    $this->getNotificationService()->generateNotificationsForProject($enroll->getProject(), $enroll->getPerson());
                     break;
 
                 case ActivityPerson::class :
                     $urlEnrollerShow = 'contract/show';
+                    $this->getNotificationService()->generateNotificationsForActivity($enroll->getProject(), $enroll->getPerson());
                     break;
 
                 case ActivityOrganization::class :
@@ -273,6 +275,7 @@ class EnrollController extends AbstractOscarController
                 break;
 
             case OrganizationPerson::class :
+
                 $urlEnrollerShow = 'organization/show';
 
                 if( $enrolledId ){
@@ -366,6 +369,31 @@ class EnrollController extends AbstractOscarController
                     $dateEnd = null;
                 }
 
+                switch ($class) {
+                    case ProjectMember::class :
+                        $this->getPersonService()->personProjectAdd($enroller, $enrolled, $roleObj);
+                        $this->redirect()->toRoute('project/show', ['id' => $enroller->getId()]);
+                        return;
+                        break;
+
+                    case ActivityPerson::class :
+                        $this->getPersonService()->personActivityAdd($enroller, $enrolled, $roleObj);
+                        $this->redirect()->toRoute('contract/show', ['id' => $enroller->getId()]);
+                        return;
+                        break;
+
+                    case OrganizationPerson::class :
+                        $this->getPersonService()->personOrganizationAdd($enroller, $enrolled, $roleObj);
+                        $this->redirect()->toRoute('organization/show', ['id' => $enroller->getId()]);
+                        return;
+                        break;
+
+                    default:
+
+                }
+
+
+
                 $enrole = new $class();
                 $this->getEntityManager()->persist($enrole);
                 $enrole->setRole($role)
@@ -375,11 +403,17 @@ class EnrollController extends AbstractOscarController
                     ->setDateStart($dateStart)
                     ->setDateEnd($dateEnd);
                 $enroller->touch();
-                $this->getEntityManager()->flush();
+
+                $this->getEntityManager()->flush($enrole);
+
+
+
+
 
                 $this->updateIndex($context, $enroller);
 
                 $this->getActivityLogService()->addUserInfo(sprintf("a ajouté %s", $enrole->log()), $context, $enroller->getId());
+
 
             }
             $this->redirect()->toRoute($urlEnrollerShow, ['id'=> $enroller->getId()]);
@@ -405,15 +439,32 @@ class EnrollController extends AbstractOscarController
 
     private function deleteEnroll($type)
     {
+        $idEnroll = $this->params()->fromRoute('idenroll');
+        $enroll = $this->getEntityManager()->getRepository($type)->find($idEnroll);
+
         switch ($type) {
+
             case ProjectPartner::class:
-            case ProjectMember::class :
                 $getEnroller = 'getProject';
                 $url = 'project/show';
                 $context = 'Project';
+
+                break;
+
+            case ProjectMember::class :
+                $project = $enroll->getProject();
+                $this->getPersonService()->personProjectRemove($enroll);
+                $this->updateIndex('Project', $project);
+                return $this->redirect()->toRoute( 'project/show', ['id'=>$project->getId()]);
                 break;
 
             case ActivityPerson::class :
+                $activity = $enroll->getActivity();
+                $this->getPersonService()->personActivityRemove($enroll);
+                $this->updateIndex('Activity', $activity);
+                return $this->redirect()->toRoute( 'contract/show', ['id'=>$activity->getId()]);
+                break;
+
             case ActivityOrganization::class :
                 $getEnroller = 'getActivity';
                 $url = 'contract/show';
@@ -421,9 +472,9 @@ class EnrollController extends AbstractOscarController
                 break;
 
             case OrganizationPerson::class :
-                $getEnroller = 'getOrganization';
-                $url = 'organization/show';
-                $context = 'Organization';
+                $organization = $enroll->getOrganization();
+                $this->getPersonService()->personOrganizationRemove($enroll);
+                return $this->redirect()->toRoute( 'organization/show', ['id'=>$organization->getId()]);
                 break;
 
             default:
@@ -431,20 +482,23 @@ class EnrollController extends AbstractOscarController
                 break;
         }
         try {
-            $idEnroll = $this->params()->fromRoute('idenroll');
-            $enroll = $this->getEntityManager()->getRepository($type)->find($idEnroll);
-            $this->getLogger()->info("Role $type $idEnroll");
+
             $enroller = $enroll->$getEnroller();
             $this->getEntityManager()->remove($enroll);
             $enroller->touch();
+
             $this->getActivityLogService()->addUserInfo(sprintf("a supprimé %s ", $enroll->log()), $context, $enroller->getId());
 
             $this->getEntityManager()->flush();
 
+
+
             if( in_array($context, ['Project', 'Activity'] ) ){
                 $this->updateIndex($context, $enroller);
             }
-            $this->redirect()->toRoute($url, ['id'=>$enroller->getId()]);
+
+            return $this->redirect()->toRoute($url, ['id'=>$enroller->getId()]);
+
         } catch (\Exception $e) {
             $this->getResponseInternalError("Impossible de supprimer");
         }
