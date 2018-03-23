@@ -354,6 +354,20 @@ person:
                 route: '/show/:id'
                 defaults:
                     action: show
+
+        notification:
+            type: segment
+            options:
+                route: '/notification/:id'
+                defaults:
+                    action: notificationPerson
+
+        notification_generate:
+            type: segment
+            options:
+                route: '/notification-generate/:id'
+                defaults:
+                    action: notificationPersonGenerate
         boss:
             type: segment
             options:

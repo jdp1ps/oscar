@@ -18,6 +18,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
+use Zend\Log\Logger;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -84,6 +85,32 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     /**
+     * @return Logger
+     */
+    protected function getLogger(){
+        return $this->getServiceLocator()->get('Logger');
+    }
+
+    /**
+     * @param $milestoneId
+     * @return ActivityDate
+     * @throws OscarException
+     */
+    public function getMilestone( $milestoneId ){
+        try {
+            $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(['id' => $milestoneId]);
+        } catch ( \Exception $e ){
+            $message = sprintf("Erreur BDD, Impossible de charger le jalon '%s' : %s !", $milestoneId, $e->getMessage());
+            $this->getLogger()->err($message);
+            throw new OscarException($message);
+        }
+        if( !$milestone ){
+            throw new OscarException("Ce jalon($milestoneId) est introuvable");
+        }
+        return $milestone;
+    }
+
+    /**
      * Suppression d'un jalon
      * @param $id
      */
@@ -127,7 +154,6 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
             $milestone
-                //->setActivity($activity)
                 ->setComment($comment)
             ;
 

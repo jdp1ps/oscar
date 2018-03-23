@@ -189,6 +189,12 @@
                                 <i class="icon-pencil"></i>
                                 Éditer les informations
                             </a>
+                            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
+                            <a class="btn btn-default btn-xs" href="<?= $this->url('person/notification', ['id'=>$entity->getId()]) ?>">
+                                <i class="icon-bell"></i>
+                                Voir les notifications
+                            </a>
+                            <?php endif; ?>
                         </div>
                     </nav>
                     <hr>

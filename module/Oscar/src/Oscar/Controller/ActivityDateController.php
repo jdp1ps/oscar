@@ -84,68 +84,64 @@ class ActivityDateController extends AbstractOscarController
                     'creatable' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity)
                 ];
 
-                switch ($method) {
-                    case 'DELETE':
-                        $id = $this->params()->fromQuery('id');
-                        $this->getMilestoneService()->deleteMilestoneById($id);
-                        return $this->getResponseOk("Jalon supprimé");
-                        break;
+                try {
+                    switch ($method) {
+                        case 'DELETE':
+                                $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+                                $milestone = $this->getMilestoneService()->getMilestone($this->params()->fromQuery('id'));
+                                $this->getMilestoneService()->deleteMilestoneById($milestone->getId());
+                                return $this->getResponseOk("Jalon supprimé");
+                            break;
 
-                    case 'GET':
+                        case 'GET':
+                            // Default
+                            break;
 
-                        break;
-
-                    case 'PUT':
-                        $milestone = $this->getMilestoneService()->createFromArray([
-                           'type_id' => $_POST['type'],
-                           'comment' => $_POST['comment'],
-                           'dateStart' => $_POST['dateStart'],
-                           'activity_id' => $activity->getId(),
-                        ]);
-                        return $this->ajaxResponse($milestone->toArray());
-                        break;
-
-                    case 'POST':
-                        $action = $this->params()->fromPost('action', 'update');
-                        $id = $this->params()->fromPost('id');
-
-                        // Récupération du jalon
-                        try {
-                            /** @var ActivityDate $milestone */
-                            $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
-                        } catch (\Exception $e) {
-                            return $this->getResponseNotFound("Impossible de trouver ce jalon.");
-                        }
-
-                        ////////////////////////////////////////////////////////////
-                        // Marquer le jalon comme terminé / non-terminé
-                        if ($action == 'valid' || $action == 'unvalid' || $action == 'inprogress') {
-                            $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
-
-                            $milestone = $this->getMilestoneService()->setMilestoneProgression($milestone, $action);
-                            return $this->ajaxResponse($milestone->toArray());
-
-                        } // Mise à jour
-                        else if ($action == 'update') {
-                            $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
-                            $typeId = $this->params()->fromPost('type');
-                            $comment = $this->params()->fromPost('comment');
-                            $date = new \DateTime($this->params()->fromPost('dateStart'));
-
-                            $milestone = $this->getMilestoneService()->updateFromArray($milestone, [
-                               'type_id' => $typeId,
-                               'comment' => $comment,
-                               'date' => $date,
+                        case 'PUT':
+                            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+                            $milestone = $this->getMilestoneService()->createFromArray([
+                               'type_id' => $_POST['type'],
+                               'comment' => $_POST['comment'],
+                               'dateStart' => $_POST['dateStart'],
+                               'activity_id' => $activity->getId(),
                             ]);
-
                             return $this->ajaxResponse($milestone->toArray());
-                        } else {
-                            return $this->getResponseBadRequest("Cette action n'est pas supportée.");
-                        }
-                        break;
-                    default:
-                        return $this->getResponseBadRequest("Protocol bullshit");
+                            break;
 
+                        case 'POST':
+                            $action = $this->params()->fromPost('action', 'update');
+                            $milestone = $this->getMilestoneService()->getMilestone($this->params()->fromPost('id'));
+
+                            ////////////////////////////////////////////////////////////
+                            // Marquer le jalon comme terminé / non-terminé
+                            if ($action == 'valid' || $action == 'unvalid' || $action == 'inprogress') {
+                                $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
+                                $milestone = $this->getMilestoneService()->setMilestoneProgression($milestone, $action);
+                                return $this->ajaxResponse($milestone->toArray());
+
+                            } // Mise à jour
+                            else if ($action == 'update') {
+                                $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+                                $typeId = $this->params()->fromPost('type');
+                                $comment = $this->params()->fromPost('comment');
+                                $date = new \DateTime($this->params()->fromPost('dateStart'));
+
+                                $milestone = $this->getMilestoneService()->updateFromArray($milestone, [
+                                   'type_id' => $typeId,
+                                   'comment' => $comment,
+                                   'date' => $date,
+                                ]);
+                                return $this->ajaxResponse($milestone->toArray());
+                            } else {
+                                return $this->getResponseBadRequest("Cette action n'est pas supportée.");
+                            }
+                            break;
+                        default:
+                            return $this->getResponseBadRequest("Protocol bullshit");
+
+                    }
+                } catch (\Exception $e ){
+                    return $this->getResponseInternalError($e->getMessage());
                 }
 
                 $view = new JsonModel($data);

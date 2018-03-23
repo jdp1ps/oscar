@@ -24,6 +24,7 @@ use Oscar\Entity\Project;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
+use Zend\Log\Logger;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -293,7 +294,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $context = "milestone-" . $milestone->getId();
         $notifications = $this->getEntityManager()->getRepository(Notification::class)
             ->findBy(['context' => $context]);
-
+        $this->getLogger()->info(sprintf('Purge milestone : %s jalon(s) vont être supprimé(s)', count($notifications)));
         foreach ($notifications as $notification) {
             $this->getEntityManager()->remove($notification);
         }
@@ -301,6 +302,12 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * @return Logger
+     */
+    protected function getLogger(){
+        return $this->getServiceLocator()->get('Logger');
+    }
 
 
 
@@ -566,7 +573,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         // Code de série
         $serie = sprintf('%s:%s:%s', $object, $objectId, $context);
 
-        $this->getServiceLocator()->get('Logger')->info("Add $serie");
+
 
         // Code unique
         $hash = $serie . ':' . $dateEffective->format('Ymd');
@@ -576,6 +583,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         // Création de la notification
         if (!$notif) {
+            $this->getLogger()->info(" [+] notification ($serie)");
+
             /** @var Notification $notif */
             $notif = new Notification();
             $this->getEntityManager()->persist($notif);
@@ -588,6 +597,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 ->setSerie($serie)
                 ->setHash($hash);
         } else {
+            $this->getLogger()->info(" [~] notification ($serie)");
             $notif->setDateReal($dateReal)
                 ->setDateEffective($dateEffective);
         }

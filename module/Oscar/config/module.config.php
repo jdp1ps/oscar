@@ -233,7 +233,7 @@ return array(
                     'privileges' => \Oscar\Provider\Privileges::PERSON_SHOW
                 ],
                 [ 'controller' =>   'Person',
-                    'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole'],
+                    'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
                 ],
                 // Membre

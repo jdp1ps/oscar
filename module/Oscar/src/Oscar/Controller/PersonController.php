@@ -124,6 +124,22 @@ class PersonController extends AbstractOscarController
         die('DONE');
     }
 
+    public function notificationPersonAction(){
+        $id = $this->params()->fromRoute('id');
+        $person = $this->getPersonService()->getPerson($id);
+        return [
+            'person' => $person,
+            'notifications' => $this->getNotificationService()->getAllNotificationsPerson($person->getId())
+        ];
+    }
+
+    public function notificationPersonGenerateAction(){
+        $id = $this->params()->fromRoute('id');
+        $person = $this->getPersonService()->getPerson($id);
+        $this->getNotificationService()->generateNotificationsPerson($person);
+        $this->redirect()->toRoute('person/notification', ['id'=>$person->getId()]);
+    }
+
 
 
     /**
