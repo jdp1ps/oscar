@@ -53,6 +53,9 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
             ->setFullName($this->getFieldValue($jsonData, 'longname'))
             ->setPhone($this->getFieldValue($jsonData, 'phone'))
             ->setDescription($this->getFieldValue($jsonData, 'description'))
+            ->setEmail($this->getFieldValue($jsonData, 'email'))
+            ->setUrl($this->getFieldValue($jsonData, 'url'))
+            ->setSiret($this->getFieldValue($jsonData, 'siret'))
 
             // La partie qui suit devrait être mieux sécurisée
             ->setStreet1(property_exists($jsonData,

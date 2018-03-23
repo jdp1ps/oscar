@@ -99,9 +99,19 @@
   },
   {
     "uid": "LABO1",
-    "code": "LABO1",
+    "code": "",
     "shortname": "Olympia",
-    "longname": "Groupe Olympia"
+    "longname": "Groupe Olympia",
+    "url": "http://www.jacksay.com",
+    "email": "olympia@jacksay.com",
+    "siret": "SIRETOLYMPIA",
+    "phone": "0231530344",
+    "address": {
+      "adress1": "",
+      "zipcode": "25478",
+      "city": "Berne",
+      "country": "Suisse"
+    }
   },
   {
     "uid": "UNIV1",

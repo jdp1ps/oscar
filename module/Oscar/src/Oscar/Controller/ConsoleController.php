@@ -730,24 +730,35 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// SYNCHRONISATION DES DONNÉES
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////// ORGANIZATION
     /**
-     * Synchronisation des personnes depuis un fichier JSON.
+     * Synchronisation des organisations depuis un fichier JSON.
      */
     public function organizationJsonSyncAction()
     {
         try {
             $fichier = $this->getRequest()->getParam('fichier');
 
-            if (!$fichier) {
+            if (!$fichier)
                 die("Vous devez spécifier le chemin complet vers le fichier JSON");
-            }
 
             echo "Synchronisation depuis le fichier $fichier\n";
             $sourceJSONFile = new GetJsonDataFromFileStrategy($fichier);
             try {
                 $datas = $sourceJSONFile->getAll();
             } catch (\Exception $e) {
-                die("Impossible de charger les ogranizations depuis $fichier : " . $e->getMessage());
+                die("ERR : Impossible de charger les ogranizations depuis $fichier : " . $e->getMessage());
             }
 
             $connector = new ConnectorOrganizationJSON($datas,
@@ -757,10 +768,14 @@ class ConsoleController extends AbstractOscarController
 
             $connectorFormatter->format($repport);
         } catch (\Exception $e) {
-            die("ERROR : " . $e->getMessage());
+            die("ERR : " . $e->getMessage());
         }
     }
 
+
+
+    ///
+    /////////////////////////////////////////////////////////////////////////////////////////////////// AUTHENTIFICATION
 
     /**
      * Synchronisation des authentifications depuis un fichier JSON.
@@ -769,131 +784,36 @@ class ConsoleController extends AbstractOscarController
     {
         try {
             $jsonpath = $this->getRequest()->getParam('jsonpath');
-            $force = $this->getRequest()->getParam('force', false);
 
-            if (!$jsonpath) {
-                die("Vous devez spécifier le chemin complet vers le fichier JSON");
-            }
+            if (!$jsonpath)
+                die("ERR : Vous devez spécifier le chemin complet vers le fichier JSON");
 
-            echo "Read $jsonpath:\n";
+
             $fileContent = file_get_contents($jsonpath);
-            if (!$fileContent) {
-                die("Oscar n'a pas réussi à charger le contenu du fichier");
-            }
+            if (!$fileContent)
+                die("ERR : Oscar n'a pas réussi à charger le contenu du fichier '$jsonpath'");
 
-            echo "Convert $jsonpath:\n";
             $datas = json_decode($fileContent);
-            if (!$datas) {
-                die("les données du fichier $jsonpath n'ont pas pu être converties.");
-            }
+            if (!$datas)
+                die("ERR : Les données du fichier '$jsonpath' n'ont pas pu être converties au format JSON.");
 
-            echo "Process datas...\n";
+            // Système pour crypter les mots de pass (Zend)
             $options = $this->getServiceLocator()->get('zfcuser_module_options');
             $bcrypt = new Bcrypt();
             $bcrypt->setCost($options->getPasswordCost());
 
             $connectorAuthentification = new ConnectorAuthentificationJSON($datas,
                 $this->getEntityManager(), $bcrypt);
+
             $repport = $connectorAuthentification->syncAll();
             $connectorFormatter = new ConnectorRepportToPlainText();
+
             echo $connectorFormatter->format($repport);
 
         } catch (\Exception $ex) {
-            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
+            die("ERR : " . $ex->getMessage());
         }
     }
-
-
-    public function shuffleAction()
-    {
-        /** @var ShuffleDataService $serviceShuffle */
-        $serviceShuffle = $this->getServiceLocator()->get('ShuffleService');
-
-        //$serviceShuffle->shufflePersons();
-        $serviceShuffle->shuffleOrganizations();
-//        $serviceShuffle->shuffleProjects();
-//        $serviceShuffle->shuffleActivity();
-        // Mélange des personnes
-
-        // Mélange des sociétés
-
-        // Mélange des projets
-
-        // Mélange des activités
-        die("SUFFLE");
-    }
-
-    /**
-     * @return AdapterInterface
-     */
-    protected function getConsole()
-    {
-        return $this->getServiceLocator()->get('console');
-    }
-
-    /**
-     * @param $msg Succes à afficher
-     */
-    protected function consoleSuccess($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::BLACK,
-            ColorInterface::GREEN);
-    }
-
-    /**
-     * @param $msg Succes à afficher
-     */
-    protected function consoleUpdateToDo($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
-            ColorInterface::YELLOW);
-    }
-
-    protected function consoleNothingToDo($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
-            ColorInterface::GRAY);
-    }
-
-    protected function consoleDeleteToDo($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
-            ColorInterface::RED);
-    }
-
-
-    /**
-     * @param $msg Succes à afficher
-     */
-    protected function consoleHeader($msg)
-    {
-        $this->getConsole()->write('# ', ColorInterface::WHITE);
-        $this->getConsole()->writeLine($msg, ColorInterface::GRAY);
-    }
-
-    /**
-     * @param $msg Succes à afficher
-     */
-    protected function consoleKeyValue($key, $value)
-    {
-        $this->getConsole()->write($key . ' ', ColorInterface::GRAY);
-        $this->getConsole()->writeLine($value, ColorInterface::CYAN);
-    }
-
-    /**
-     * @param $msg Erreur à afficher
-     */
-    protected function consoleError($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
-            ColorInterface::RED);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // AUTHENTIFICATION
-    //
-    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * Affiche la liste des authentification présentes dans Oscar.
@@ -1006,6 +926,9 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * Modification du mot de passe
+     */
     public function authPassAction()
     {
         try {
@@ -1062,6 +985,9 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * Ajouter un rôle à une authentification
+     */
     public function authPromoteAction()
     {
         try {
@@ -1129,6 +1055,9 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * Afficher les informations d'un compte
+     */
     public function authInfoAction()
     {
         try {
@@ -1194,6 +1123,105 @@ class ConsoleController extends AbstractOscarController
             die($ex->getMessage() . "\n" . $ex->getTraceAsString());
         }
     }
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// CADUCQUE
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @deprecated
+     * @throws \Exception
+     */
+    public function shuffleAction()
+    {
+        throw new \Exception("Fonctionnalité dépréciée");
+    }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// CONSOLE
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @return AdapterInterface
+     */
+    protected function getConsole()
+    {
+        return $this->getServiceLocator()->get('console');
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleSuccess($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::BLACK,
+            ColorInterface::GREEN);
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleUpdateToDo($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
+            ColorInterface::YELLOW);
+    }
+
+    /**
+     * @param $msg
+     */
+    protected function consoleNothingToDo($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
+            ColorInterface::GRAY);
+    }
+
+    /**
+     * @param $msg
+     */
+    protected function consoleDeleteToDo($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
+            ColorInterface::RED);
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleHeader($msg)
+    {
+        $this->getConsole()->write('# ', ColorInterface::WHITE);
+        $this->getConsole()->writeLine($msg, ColorInterface::GRAY);
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleKeyValue($key, $value)
+    {
+        $this->getConsole()->write($key . ' ', ColorInterface::GRAY);
+        $this->getConsole()->writeLine($value, ColorInterface::CYAN);
+    }
+
+    /**
+     * @param $msg Erreur à afficher
+     */
+    protected function consoleError($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
+            ColorInterface::RED);
+    }
+
+
 
     ////////////////////////////////////////////////////////////////////////////
     //
