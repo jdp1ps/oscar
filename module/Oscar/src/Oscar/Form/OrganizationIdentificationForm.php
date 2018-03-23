@@ -56,13 +56,13 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
         $this->add([
             'name'   => 'type',
             'options' => [
-                'label' => "Type",
-                'value_options' => Organization::getTypesSelect()
+                'label' => "Type"
             ],
             'attributes' => [
-                'class' => 'form-control'
+                'class' => 'form-control',
+                'list' => 'types'
             ],
-            'type'=>'Select'
+            'type'=>'Text'
         ]);
 
         // DateStart

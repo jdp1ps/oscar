@@ -8,6 +8,7 @@
  */
 namespace Oscar\Service;
 
+use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
@@ -115,6 +116,25 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         return $activities;
+    }
+
+    public function getTypes(){
+
+        $types = Organization::getTypes();
+
+        $query = $this->getEntityManager()->createQueryBuilder('o')
+            ->select('o.type')
+            ->from(Organization::class, 'o')
+            ->distinct()
+            ->getQuery();
+
+        foreach ($query->getResult(Query::HYDRATE_ARRAY) as $type ) {
+            $t = $type['type'];
+            if (!in_array($t, $types) && $t != null)
+                $types[] = $t;
+        }
+        sort($types);
+        return $types;
     }
 
     /**

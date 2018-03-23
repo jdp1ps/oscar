@@ -106,6 +106,7 @@
     "email": "olympia@jacksay.com",
     "siret": "SIRETOLYMPIA",
     "phone": "0231530344",
+    "type": "Fake Corp",
     "address": {
       "adress1": "",
       "zipcode": "25478",
@@ -122,6 +123,7 @@
   {
     "uid": "UNIV2",
     "code": "UNIV2",
+    "type": "Université",
     "shortname": "USB",
     "longname": "Université des sciences de Berlin"
   }

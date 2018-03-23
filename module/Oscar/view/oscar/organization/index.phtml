@@ -22,10 +22,11 @@ $markText = function( $text, $search ){
 
             </div>
             <div class="col-md-5">
+                <?= $type ?>
                 <select class="form-control select2" name="t[]" id="" multiple="true" placeholder="Type d'organisation">
                     <option value="">Tous</option>
-                    <?php foreach(\Oscar\Entity\Organization::getTypes() as $key=>$label ): ?>
-                        <option value="<?= $key ?>" <?= in_array($key, $type) ? ' selected="selected"' : '' ?>><?= $label ?></option>
+                    <?php foreach($types as $t ): ?>
+                        <option value="<?= $t ?>" <?= in_array($t, $type) ? ' selected="selected"' : '' ?>><?= $t ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

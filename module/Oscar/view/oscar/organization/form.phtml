@@ -22,8 +22,13 @@
     <div class="form-group">
         <div class="input-group input-group-lg">
             <span class="input-group-addon">Type </span>
-            <?= $this->formSelect($form->get('type')) ?>
+            <?= $this->formInput($form->get('type')) ?>
         </div>
+        <datalist id="types">
+            <?php foreach ($types as $type): ?>
+            <option value="<?= $type ?>">
+            <?php endforeach; ?>
+        </datalist>
     </div>
 
     <div class="form-group">
@@ -180,7 +185,9 @@
 
     <script>
         require(['select2'], function(select2){
-            $('select').select2();
+            $('[name="type"]').select2({
+                results: <?= json_encode($types) ?>
+            });
         });
     </script>
 <?php

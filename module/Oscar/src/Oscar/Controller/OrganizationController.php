@@ -77,6 +77,7 @@ class OrganizationController extends AbstractOscarController
         return array(
             'entities' => $organizations,
             'search' => $search,
+            'types' => $this->getOrganizationService()->getTypes(),
             'type' => $type,
             'active' => $active,
         );
@@ -354,6 +355,7 @@ class OrganizationController extends AbstractOscarController
         $view = new ViewModel(array(
             'form' => $form,
             'id' => null,
+            'types' => $this->getOrganizationService()->getTypes(),
             'connectors' => $this->getOrganizationService()->getConnectorsList(),
         ));
         $view->setTemplate('oscar/organization/form');
@@ -370,7 +372,6 @@ class OrganizationController extends AbstractOscarController
                 if( $connector instanceof ServiceLocatorAwareInterface ){
                     $connector->setServiceLocator($this->getServiceLocator());
                 }
-
 
                 return [ 'repport' => $connector->syncOrganizations($this->getEntityManager()->getRepository(Organization::class), false ) ];
             }
@@ -756,12 +757,10 @@ class OrganizationController extends AbstractOscarController
             $form->setData($datas);
         }
 
-//        $this->saveIfNeeded($entity, $this->getRequest(), $form);
-
-
         $view = new ViewModel(array(
             'id' => $id,
             'organization' => $entity,
+            'types' => $this->getOrganizationService()->getTypes(),
             'form' => $form,
             'connectors' => $this->getOrganizationService()->getConnectorsList()
         ));
