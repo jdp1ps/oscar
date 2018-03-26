@@ -1347,17 +1347,19 @@ class ConsoleController extends AbstractOscarController
         try {
             /** @var ConnectorRepport $repport */
             $repport = $connector->execute($force);
+            echo "Completed \n";
         } catch (\Exception $e) {
-            die($e->getMessage() . "\n" . $e->getTraceAsString());
+            die('ERR: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
         }
 
         foreach ($repport->getRepportStates() as $type => $out) {
+            $short = substr($type, 0, 3);
             echo "Opération " . strtoupper($type) . " : \n";
             if ($type == "notices") {
                 echo " - " . count($out) . " notice(s) - Rien à faire\n";
             } else {
                 foreach ($out as $line) {
-                    echo date('Y-m-d H:i:s',
+                    echo $short . "\t" . date('Y-m-d H:i:s',
                             $line['time']) . "\t" . $line['message'] . "\n";
                 }
             }
@@ -1459,9 +1461,10 @@ class ConsoleController extends AbstractOscarController
             $repport = $connector->execute($force);
 
             foreach ($repport->getRepportStates() as $type => $out) {
+                $short = substr($type, 0, 3);
                 echo "Opération " . strtoupper($type) . " : \n";
                 foreach ($out as $line) {
-                    echo date('Y-m-d H:i:s',
+                    echo "$short\t " . date('Y-m-d H:i:s',
                             $line['time']) . "\t" . $line['message'] . "\n";
                 }
             }
