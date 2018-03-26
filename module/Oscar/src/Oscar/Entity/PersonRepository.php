@@ -177,7 +177,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         $qb->select('p')
             ->from(Person::class, 'p')
             ->where('p.connectors LIKE :search')
-            ->setParameter('search', '%"' . $connector . '";s:%:"' . $value . '";%');
+            ->setParameter('search', '%"' . $connector . '";s:'.count($connector).':"' . $value . '";%');
         return $qb;
     }
 
