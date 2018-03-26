@@ -445,6 +445,17 @@ return array(
                     ),
                 ),
 
+                // Procédure d'anonymisation des données
+                'oscar_version' => array(
+                    'options' => array(
+                        'route' => 'oscar version',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'version',
+                        ),
+                    ),
+                ),
+
                 // -------------------------------------------------------------
                 //////////////// PERSON(S)
                 'oscar_persons_search_by_connector' => array(

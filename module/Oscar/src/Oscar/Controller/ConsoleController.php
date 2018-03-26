@@ -35,6 +35,7 @@ use Oscar\Entity\RoleOrganization;
 use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\ConnectorRepportToPlainText;
+use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\NotificationService;
@@ -463,6 +464,11 @@ class ConsoleController extends AbstractOscarController
 
     }
 
+    public function versionAction()
+    {
+        $this->consoleKeyValue("Version", OscarVersion::getBuild());
+    }
+
     public function patch_checkPrivilegesJSON()
     {
         $cheminFichier = realpath(__DIR__ . '/../../../../../install/privileges.json');
@@ -617,83 +623,6 @@ class ConsoleController extends AbstractOscarController
     }
 
     /**
-     * Synchronisation des activités depuis un fichier.
-     */
-    public function activityFileSyncAction()
-    {
-        echo "Synchronisation des activités : \n";
-
-        try {
-            $file = $this->getReadablePath($this->getRequest()->getParam('fichier'));
-        } catch (\Exception $e ){
-            $this->consoleError("Impossible de lire le fichier source : " . $e->getMessage());
-        }
-
-        echo "Importation des activités depuis $file : \n";
-
-        $options = [
-            'create-missing-project' => $this->getRequest()->getParam('create-missing-project',
-                false),
-            'create-missing-person' => $this->getRequest()->getParam('create-missing-person',
-                false),
-            'create-missing-person-role' => $this->getRequest()->getParam('create-missing-person-role',
-                false),
-            'create-missing-organization' => $this->getRequest()->getParam('create-missing-organization',
-                false),
-            'create-missing-organization-role' => $this->getRequest()->getParam('create-missing-organization-role',
-                false),
-            'create-missing-activity-type' => $this->getRequest()->getParam('create-missing-activity-type',
-                false),
-        ];
-
-        $fileExtension = pathinfo($file)['extension'];
-
-        if ($fileExtension == "csv") {
-            $handler = fopen($file, 'r');
-            $headers = fgetcsv($handler);
-
-            /** @var RoleRepository $repositoryRole */
-            $repositoryRole = $this->getEntityManager()->getRepository(Role::class);
-
-            // Construction de la correspondance role > colonne
-            $rolesPersons = $repositoryRole->getRolesAtActivityArray();
-            $correspondanceRolesActivites = [];
-            /** @var Role $role */
-            foreach ($rolesPersons as $role) {
-                $correspondanceRolesActivites[$role] = array_search($role,
-                    $headers);
-            }
-
-            // Construction de la correspondance role > colonne
-            $rolesOrganizations = $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
-            $correspondanceRolesOrga = [];
-            /** @var OrganizationRole $role */
-            foreach ($rolesOrganizations as $role) {
-                $correspondanceRolesOrga[$role->getLabel()] = array_search($role->getLabel(),
-                    $headers);
-            }
-
-            $converteur = new ActivityCSVToObject($correspondanceRolesActivites,
-                $correspondanceRolesOrga);
-            $json = $converteur->convert($file);
-        } elseif ($fileExtension == "json") {
-            $json = json_decode(file_get_contents($file));
-        } else {
-            die("ERROR : Format non pris en charge.");
-        }
-
-        $importer = new ConnectorActivityJSON($json, $this->getEntityManager(),
-            $options);
-        $repport = $importer->syncAll();
-
-        $output = new ConnectorRepportToPlainText();
-        $output->format($repport);
-        /****/
-
-    }
-
-
-    /**
      * Synchronisation des personnes depuis un fichier JSON.
      */
     public function personJsonSyncAction()
@@ -772,9 +701,85 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
-
-
     ///
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////// ACTIVITÉ
+    /**
+     * Synchronisation des activités depuis un fichier.
+     */
+    public function activityFileSyncAction()
+    {
+        echo "Synchronisation des activités : \n";
+
+        try {
+            $file = $this->getReadablePath($this->getRequest()->getParam('fichier'));
+        } catch (\Exception $e ){
+            $this->consoleError("Impossible de lire le fichier source : " . $e->getMessage());
+        }
+
+        echo "Importation des activités depuis $file : \n";
+
+        $options = [
+            'create-missing-project' => $this->getRequest()->getParam('create-missing-project',
+                false),
+            'create-missing-person' => $this->getRequest()->getParam('create-missing-person',
+                false),
+            'create-missing-person-role' => $this->getRequest()->getParam('create-missing-person-role',
+                false),
+            'create-missing-organization' => $this->getRequest()->getParam('create-missing-organization',
+                false),
+            'create-missing-organization-role' => $this->getRequest()->getParam('create-missing-organization-role',
+                false),
+            'create-missing-activity-type' => $this->getRequest()->getParam('create-missing-activity-type',
+                false),
+        ];
+
+        $fileExtension = pathinfo($file)['extension'];
+
+        if ($fileExtension == "csv") {
+            $handler = fopen($file, 'r');
+            $headers = fgetcsv($handler);
+
+            /** @var RoleRepository $repositoryRole */
+            $repositoryRole = $this->getEntityManager()->getRepository(Role::class);
+
+            // Construction de la correspondance role > colonne
+            $rolesPersons = $repositoryRole->getRolesAtActivityArray();
+            $correspondanceRolesActivites = [];
+            /** @var Role $role */
+            foreach ($rolesPersons as $role) {
+                $correspondanceRolesActivites[$role] = array_search($role,
+                    $headers);
+            }
+
+            // Construction de la correspondance role > colonne
+            $rolesOrganizations = $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
+            $correspondanceRolesOrga = [];
+            /** @var OrganizationRole $role */
+            foreach ($rolesOrganizations as $role) {
+                $correspondanceRolesOrga[$role->getLabel()] = array_search($role->getLabel(),
+                    $headers);
+            }
+
+            $converteur = new ActivityCSVToObject($correspondanceRolesActivites,
+                $correspondanceRolesOrga);
+            $json = $converteur->convert($file);
+        } elseif ($fileExtension == "json") {
+            $json = json_decode(file_get_contents($file));
+        } else {
+            die("ERROR : Format non pris en charge.");
+        }
+
+        $importer = new ConnectorActivityJSON($json, $this->getEntityManager(),
+            $options);
+        $repport = $importer->syncAll();
+
+        $output = new ConnectorRepportToPlainText();
+        $output->format($repport);
+        /****/
+
+    }
+
+
     /////////////////////////////////////////////////////////////////////////////////////////////////// AUTHENTIFICATION
 
     /**
