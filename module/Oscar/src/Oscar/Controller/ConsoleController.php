@@ -25,6 +25,7 @@ use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\CategoriePrivilege;
 use Oscar\Entity\Notification;
+use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
@@ -56,23 +57,20 @@ use Zend\Crypt\Password\Bcrypt;
 
 class ConsoleController extends AbstractOscarController
 {
-    public function patch_debug()
+
+    public function patch_typeOrganisationsUpdate()
     {
-        /*$privileges = $this->getEntityManager()->getRepository(Privilege::class)->findAll();
-
-        foreach ( $privileges as $p ){
-            echo $p->getId()." - ";
+        $types = Organization::getTypes();
+        $organisations = $this->getOrganizationService()->getOrganizations();
+        $this->getLogger()->info(sprintf("%s organisation(s) à traiter : ", count($organisations)));
+        foreach ($organisations as $organisation) {
+            if( array_key_exists($organisation->getType(), $types) ){
+                $this->getLogger()->info(sprintf("Mise à jour du type pour %s", $organisation));
+                $organisation->setType($types[$organisation->getType()]);
+                $this->getEntityManager()->flush($organisation);
+            }
         }
-
-        //
-        $privilege = new Privilege();
-        $privilege->setLibelle("TEST_PRIVILEGE")
-            ->setCode("TEST_PRIVILEGE");
-        $this->getEntityManager()->persist($privilege);
-        $this->getEntityManager()->flush($privilege);
-
-        die("OK");
-        */
+        $this->getLogger()->info("Terminé");
     }
 
 
