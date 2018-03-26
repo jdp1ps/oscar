@@ -751,6 +751,10 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     public function getType()
     {
+        // Fix : gestion des anciens types (index numérique depuis une liste fixe).
+        if( $this->type && array_key_exists($this->type, self::getTypes()) ){
+            return self::getTypes()[$this->type];
+        }
         return $this->type;
     }
 
