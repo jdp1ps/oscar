@@ -43,6 +43,7 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
 ## Administration/Maintenance/Privilège
 
  - Le privilège Maintenance > Peut notifier ... a été étendu à la gestion des notifications d'une personne. Elle débloque l'accès à la gestion des notifications d'une personne
+ - Ajout d'un privilège dans la catégorie "Administration" pour la gestion des types d'activitès
 
  
 ## Fix
@@ -51,6 +52,7 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
  - Les liens d'activités dans l'UI des notifications refonctionnent
  - Erreur d'enregistrement dans le versement sans date
  - Les utilisateurs ne disposant pas des droits d'édition sur les versements ne voient plus les boutons de gestion des versements
+ - Type d'activitès : Le merge fonctionne à nouveau (à documenter)
 
 ## Dev
 

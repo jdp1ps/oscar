@@ -3226,46 +3226,59 @@ time.date-missing {
   }
   h2:before {
     font-family: fontello;
+    line-height: 1.6em;
+    padding: 0 4px 0 0;
   }
+
   &.interne {
     border-left: solid 4px #0b58a2;
   }
-  // Logos
+
   // Composante
-  &.type-1 h2:before {
+  &.type-composante h2:before {
     content: "\e877";
   }
 
   // Laboratoire
-  &.type-2 h2:before {
+  &.type-2 h2:before,
+  &.type-laboratoire h2:before {
     content: "\e891";
   }
 
   // Société
-  &.type-3 h2:before {
-    content: "\e876";
+  &.type-3 h2:before,
+  &.type-societe h2:before {
+    content: "\e8a1";
   }
 
   // TYPE_ASSOCIATION
   //&.type-3 h2:before { content: "\e876";}
 
-  // Société
-  &.type-5 h2:before {
+  // Association
+  &.type-5 h2:before,
+  &.type-association h2:before {
     content: "\e876";
   }
 
-  // TYPE_GIE
-  &.type-6 h2:before {
+  // Financier
+  &.type-6 h2:before,
+  &.type-groupement-d-interet-financier h2:before {
     content: "\e88f";
   }
 
-  // TYPE_COLLECTIVITE
+  // institution
+  // collectivite-territoriale
+  // etablissement-publique
+
+  // TYPE_COLLECTIVITE/PUBLIQUE
   &.type-7 h2:before {
     content: "\e899";
   }
 
   // TYPE_COLLECTIVITE
-  &.type-8 h2:before {
+  &.type-institution h2:before,
+  &.type-collectivite-territoriale h2:before,
+  &.type-etablissement-publique h2:before {
     content: "\e875";
   }
 
