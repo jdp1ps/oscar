@@ -30,8 +30,21 @@ L'application doit maintenant proposer un écran d'accueil "Oscar est en mainten
 Mettre ensuite les sources à jour :
 
 ```bash
+git fetch
 git pull
 ```
+Si des conflits de fichiers surviennent, vous pouvez utiliser la commande
+
+```bash
+git reset --hard origin/master
+``` 
+
+ou si vous êtes sur la branche **develop** : 
+
+```bash
+git reset --hard origin/develop
+``` 
+
 
 ## Mise à jour des vendors (Librairies tiers)
 
@@ -67,6 +80,7 @@ php public/index.php oscar patch checkPrivilegesJSON
 ```
 
 > Cette commande executera automatiquement la requète de mise à jour de la séquence d'index des privilèges : `select setval('privilege_id_seq',(select max(id)+1 from privilege), false)`.
+
 
 
 # Requètes de maintenance
