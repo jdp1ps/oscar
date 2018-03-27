@@ -81,15 +81,15 @@ class Activity implements ResourceInterface
         static $statusSelect;
         if ($statusSelect === null) {
             $statusSelect = [
-                self::STATUS_PROGRESS => 'Brouillon',
                 self::STATUS_ACTIVE => 'Actif',
-                self::STATUS_CLOSED => 'Terminé',
-                self::STATUS_TERMINATED => 'Résilié',
-                self::STATUS_ABORDED => 'Dossier abandonné',
-                self::STATUS_DISPUTE => 'Litige',
+                self::STATUS_PROGRESS => 'Brouillon',
                 self::STATUS_ERROR_STATUS => 'Conflit : pas de statut',
                 self::STATUS_DEPOSIT => 'Déposé',
+                self::STATUS_ABORDED => 'Dossier abandonné',
+                self::STATUS_DISPUTE => 'Litige',
                 self::STATUS_REFUSED => 'Refusé',
+                self::STATUS_TERMINATED => 'Résilié',
+                self::STATUS_CLOSED => 'Terminé',
             ];
         }
 

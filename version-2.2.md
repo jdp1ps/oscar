@@ -31,13 +31,15 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
  ```
 
 
-## Améliorations
+## Améliorations / Mise à jour
 
  - Lors de l'execution de la **synchronisation** des personnes/organisations en ligne de commande, le rapport de rendu préfixe les lignes du rapport avec les 3 premières lettres du status de la ligne : (err : erreur, war : alerte, inf : info, not : notice).
  - Ajout de la branche dans les informations de version ainsi qu'une commande `php public/index.php oscar version` pour visualiser la version en ligne de commande
  - Le **Connecteur Organisation** prends en charge les champs : siret, email, url et type (chaîne de charactère facultative)
  - Licence ajoutée au dépôt
  - Les selecteurs de date des versements/jalons ont maintenant des flèches latérales en vue semaine pour faire défiler les mois
+ - Documentation technique : Mise à jour du document de mise à jour
+ 
 
 
 ## Administration/Maintenance/Privilège
@@ -53,6 +55,7 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
  - Erreur d'enregistrement dans le versement sans date
  - Les utilisateurs ne disposant pas des droits d'édition sur les versements ne voient plus les boutons de gestion des versements
  - Type d'activitès : Le merge fonctionne à nouveau (à documenter)
+ - Liste des organisations : Les icônes ont été mis à jour
 
 ## Dev
 
