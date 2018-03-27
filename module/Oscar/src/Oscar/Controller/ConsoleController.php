@@ -54,6 +54,7 @@ use Zend\Console\Prompt\Password;
 use Zend\Console\Prompt\PromptInterface;
 use Zend\Console\Prompt\Select;
 use Zend\Crypt\Password\Bcrypt;
+use Zend\Diactoros\Exception\DeprecatedMethodException;
 
 class ConsoleController extends AbstractOscarController
 {
@@ -358,22 +359,12 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function patch_generatePrivilegesJSON()
     {
-
-        $privileges = [];
-        /** @var Privilege $p */
-        foreach ($this->getEntityManager()->getRepository(Privilege::class)->findAll() as $p) {
-            $privilege = [
-                'categorie_id' => $p->getCategorie()->getId(),
-                'code' => $p->getCode(),
-                'libelle' => $p->getLibelle(),
-                'fullcode' => $p->getFullCode(),
-            ];
-            $privileges[$p->getFullCode()] = $privilege;
-        }
-        echo json_encode($privileges);
-        die('Génération du fichier JSON à partir des données de la BDD courante.');
+        throw new DeprecatedMethodException();
     }
 
 
