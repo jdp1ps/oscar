@@ -58,7 +58,7 @@ $markText = function( $text, $search ){
         $nbrActivities = count($entity->getActivities()) ?>
 
 
-        <article class="card xs organization <?= $entity->isClose() ? "closed" : "" ?> type-<?= strtolower($entity->getType()) ?> <?= $entity->getCode() ? 'interne' : '' ?>">
+        <article class="card xs organization <?= $entity->isClose() ? "closed" : "" ?> type-<?= $entity->getTypeSlug() ?> <?= $entity->getCode() ? 'interne' : '' ?>">
           <h2 class="card-title  layout-row">
               <span>
               <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>

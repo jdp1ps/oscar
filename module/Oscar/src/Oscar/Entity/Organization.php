@@ -7,6 +7,7 @@
 
 namespace Oscar\Entity;
 
+use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Oscar\Connector\IConnectedObject;
@@ -52,6 +53,21 @@ class Organization implements ResourceInterface, IConnectedObject
         }
         return $types;
     }
+
+    public function getTypeSlug(){
+        return self::getTypesSlug($this->getType());
+    }
+
+    public static function getTypesSlug( $typeStr )
+    {
+        static $slugs;
+        if( !$slugs ) $slugs = [];
+        if( !array_key_exists($typeStr, $slugs) ){
+            $slugs[$typeStr] = Slugify::create()->slugify($typeStr);
+        }
+        return $slugs[$typeStr];
+    }
+
     public static function getTypesSelect(){
         return self::getTypes();
     }
@@ -280,6 +296,10 @@ class Organization implements ResourceInterface, IConnectedObject
     {
         return $this->getDateEnd() && $this->getDateEnd() <= new \DateTime();
     }
+
+
+
+
 
     /**
      * @return array
