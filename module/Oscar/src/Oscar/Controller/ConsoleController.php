@@ -303,17 +303,36 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
-    public function patch_test()
+    public function testMailingAction()
     {
         /** @var MailingService $mailer */
         $mailer = $this->getServiceLocator()->get('MailingService');
 
-        $message = $mailer->newMessage("Test de mail", [
-            'body' => "Si vous lisez ce message, c'est que la configuration des envoi de courriel fonctionne."
-            // Ou que vous êtes entrains de lire le code source
-        ])->setTo($this->getConfiguration('oscar.mailer.administrators'));
+        $administrators = $this->getConfiguration('oscar.mailer.administrators');
+        $mails = implode(',', $administrators);
 
-        $mailer->send($message);
+        $confirm = Confirm::prompt(
+            sprintf(
+                "Le mail de test va être envoyé %s %s, confirmer ? ",
+                count($administrators) == 1 ? "à l'adresse" : "aux adresses",
+                $mails
+            )
+        );
+
+        if ($confirm) {
+            try {
+                $message = $mailer->newMessage("Test de mail", [
+                    'body' => "Si vous lisez ce message, c'est que la configuration de l'envoi de courriel fonctionne."
+                    // Ou que vous êtes entrains de lire le code source
+                ])->setTo($this->getConfiguration('oscar.mailer.administrators'));
+                $mailer->send($message);
+                $this->consoleSuccess("Oscar a bien envoyé le mail de test");
+            } catch (\Exception $err) {
+                $this->consoleError($err->getMessage() . "\n" . $err->getTraceAsString());
+            }
+        } else {
+            $this->consoleNothingToDo('Opération annulée');
+        }
     }
 
     private function getReadablePath($path)

@@ -360,6 +360,16 @@ return array(
         'router' => array(
             'routes' => array(
 
+                'test_mailing' => [
+                    'options' => [
+                        'route' => 'oscar test:mailing',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'testMailing',
+                        ],
+                    ]
+                ],
+
                 'tokens_with_privilege' => [
                     'options' => [
                         'route' => 'oscar tokens:with-privilege <privilege>',

@@ -46,6 +46,7 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
 
  - Le privilège Maintenance > Peut notifier ... a été étendu à la gestion des notifications d'une personne. Elle débloque l'accès à la gestion des notifications d'une personne
  - Ajout d'un privilège dans la catégorie "Administration" pour la gestion des types d'activitès
+ - La commande `php public/index.php oscar test:mailing` permet de tester la configuration pour l'envoi de mail
 
  
 ## Fix
@@ -59,6 +60,7 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
 
 ## Dev
 
+ - MailingService
  - Ajout des notifications au compilateur JS
  - Le calcule des privilèges - personnes - activités utilise un cache pour le calcule des notifications
  - Refactoring : Service de traitement des Jalons
