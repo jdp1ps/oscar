@@ -17,6 +17,7 @@ use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\ProjectRepository;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityTypeService;
+use Oscar\Service\ConfigurationParser;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarUserContext;
@@ -38,18 +39,17 @@ use Zend\View\Model\JsonModel;
  */
 class AbstractOscarController extends AbstractActionController
 {
+
+    /**
+     * @param $key
+     * @return mixed
+     */
     protected function getConfiguration($key){
-        $config = $this->getServiceLocator()->get('Config');
-        if( $key ){
-            $paths = explode('.', $key);
-            foreach ($paths as $path) {
-                if( !isset($config[$path]) ){
-                    throw new \Exception("Clef $path absente dans la configuration");
-                }
-                $config = $config[$path];
-            }
+        static $config;
+        if( $config == null ){
+            $config = new ConfigurationParser($this->getServiceLocator()->get('Config'));
         }
-        return $config;
+        return $config->getConfiguration($key);
     }
 
     protected function checkToken(){

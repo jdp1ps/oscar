@@ -1,7 +1,27 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: jacksay
- * Date: 28/03/18
- * Time: 14:50
- */
+<body style="background:#EFEFEF; font-family: Helvetica, Arial, sans-serif">
+<table border="0" style="border: none; width: 90%; margin: 14px 5%; tab" cellpadding="0" cellspacing="0" width="90%">
+    <tr style="background: #455790">
+        <td width="32" style="border: none; padding: 8px">
+            <img src="https://oscar.unicaen.fr/images/oscar-white.png" alt="OSCAR" style="height: 32px;">
+        </td>
+        <td style="font-size: 22px;">
+            <span style="color: #EEE; text-shadow: -1px 1px 2px #000000"><?= $title ? : 'Rapport' ?></span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="padding: 1em 4em; background: white"><?= $body ?></td>
+    </tr>
+
+    <tr>
+        <td colspan="2" style="padding: 2em 4em; background: white">
+            <div style="width: 75%; border-top: dotted 1px #999999; padding: .5em; font-size: .75em; color: #777777; margin: 0 auto; text-align: center">
+                <p>Ceci est un mail automatique, merci de <strong>ne pas y répondre.</strong>
+                Pour ne plus recevoir des notifications, vous pouvez vous rendre dans la paramètres de votre compte pour ajuster la fréquence des envois des courriels.</p>
+            </div>
+    </tr>
+
+    <tr style="background: #455790; font-size: 12px; color: #efefef;  text-shadow: -1px 1px 2px #000000">
+        <td colspan="2" style="padding: 1em 4em; text-align: center">Oscar<sup>©</sup>, 2015-2018 - Université de Normandie </td>
+    </tr>
+</table>
+</body>

@@ -11,6 +11,7 @@ namespace Oscar\Controller;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
+use Moment\Moment;
 use Oscar\Connector\ConnectorActivityCSVWithConf;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
@@ -39,6 +40,7 @@ use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConnectorService;
+use Oscar\Service\MailingService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\ShuffleDataService;
 use Oscar\Utils\ActivityCSVToObject;
@@ -303,8 +305,15 @@ class ConsoleController extends AbstractOscarController
 
     public function patch_test()
     {
-        echo "TEST:\n";
+        /** @var MailingService $mailer */
+        $mailer = $this->getServiceLocator()->get('MailingService');
 
+        $message = $mailer->newMessage("Test de mail", [
+            'body' => "Si vous lisez ce message, c'est que la configuration des envoi de courriel fonctionne."
+            // Ou que vous êtes entrains de lire le code source
+        ])->setTo($this->getConfiguration('oscar.mailer.administrators'));
+
+        $mailer->send($message);
     }
 
     private function getReadablePath($path)

@@ -750,6 +750,7 @@ return array(
             'NotificationService' => \Oscar\Service\NotificationService::class,
             'MilestoneService' => \Oscar\Service\MilestoneService::class,
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
+            'MailingService' => \Oscar\Service\MailingService::class,
             // Droits
             //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
 
@@ -814,12 +815,12 @@ return array(
                 return new Swift_Mailer($sm->get('MailTransport'));
             },
 
-            'OscarMailer' => function( $sm ){
-                $mailer = new \Oscar\Service\OscarMailerService(
-                    $sm->get('Mailer'), $sm->get('Config')['oscar']['mailer']
-                );
-                return $mailer;
-            },
+//            'OscarMailer' => function( $sm ){
+//                $mailer = new \Oscar\Service\OscarMailerService(
+//                    $sm->get('Mailer'), $sm->get('Config')['oscar']['mailer']
+//                );
+//                return $mailer;
+//            },
 
             'OscarConfig' => function( $sm ){
                 return new \Oscar\Service\ConfigurationParser($sm->get('Config')['oscar']);
