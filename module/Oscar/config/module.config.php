@@ -362,7 +362,7 @@ return array(
 
                 'test_mailing' => [
                     'options' => [
-                        'route' => 'oscar test:mailing',
+                        'route' => 'oscar test:mailer',
                         'defaults' => [
                             'controller' => 'Console',
                             'action' => 'testMailing',

@@ -188,6 +188,62 @@ return array(
 Ce fichier contient également des configurations spécifiques métier approfondi dans le fichier [Configuration métier](./configuration.md)
 
 
+### Configurer le mailer
+
+La configuration du mailer est située dans le fichier `config/autoload/local.php` : 
+
+```php
+<?php
+//config/autoload/local.php
+return array(
+    // ...
+    // Accès BDD
+    'oscar' => [
+        'mailer' => [
+            /**** TRANSPORT (smtp) ****/
+            'transport' => [
+                'type' => 'smtp',
+                'host' => 'smtp.domain.tld',
+                'port' => 465,
+                'username' => 'smithagent',
+                'password' => '@m4S!n9 P4$VV0rd',
+                'security' => 'ssl',
+            ],
+        ]
+    ],
+    // ...
+);
+```
+
+Ou : 
+
+```php
+<?php
+//config/autoload/local.php
+return array(
+    // ...
+    // Accès BDD
+    'oscar' => [
+        'mailer' => [
+            /**** TRANSPORT (sendmail) ****/
+            'transport' => [
+                'type' => 'sendmail',
+                'cmd' => '/usr/sbin/sendmail -bs',
+            ],
+            /****/
+        ]
+    ],
+    // ...
+);
+```
+
+Vous pouvez lancer le test de la configuration en tappant la commande : 
+
+```bash
+$ php public/index.php oscar test:mailer
+```
+        
+
 ### Configurer le serveur web (Apache)
 
 Activer les modules Apache si besoin :

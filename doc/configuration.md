@@ -109,8 +109,9 @@ $ sudo apt-get install elasticsearch
 # Configuration en service
 $ sudo update-rc.d elasticsearch defaults 95 10
 
-# Lancement du service
-$ sudo /etc/init.d/elasticsearch start
+# Lancer/Interrompre le service
+$ sudo -i service elasticsearch start
+$ sudo -i service elasticsearch st
 ```
 
 

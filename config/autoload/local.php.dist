@@ -81,25 +81,41 @@ return array(
 
         // Système d'envoi des mails
         'mailer' => [
-            // Assure la distribution
+            /**** TRANSPORT (smtp)
             'transport' => [
-                'host' => 'smtp.host.tld',
+                'type' => 'smtp',
+                'host' => 'smtp.domain.tld',
                 'port' => 465,
-                'username' => 'jean-claude.dus@unicaen.fr',
-                'password' => 'XXXXXXXXXX',
+                'username' => 'smithagent',
+                'password' => '@m4S!n9 P4$VV0rd',
                 'security' => 'ssl',
             ],
-            // Use for FROM email, same as transport maybe
+            /****/
+
+            /**** TRANSPORT (sendmail)
+            'transport' => [
+                'type' => 'sendmail',
+                'cmd' => '/usr/sbin/sendmail -bs',
+            ],
+            /****/
+
+            // Expéditeur
             'from' => [ 'oscar-bot@unicaen.fr' => 'Oscar Bot'],
 
-            // Envoi d'une copy
+            // Envoi d'une copy (Non effectif)
             'copy' => ['stephane.bouvry@unicaen.fr'],
 
             // Envoi activé
-            'send' => false,
+            'send' => true,
 
             // Préfixe ajouté dans les sujets
-            'subjectPrefix' => '[OSCAR DEV]'
+            'subjectPrefix' => '[OSCAR DEV] ',
+
+            // Emplacement du fichier de layout pour les mails
+            'template' => realpath(__DIR__.'/../../module/Oscar/view/mail.phtml'),
+
+            // Mails utilisé pour les tests / rapport
+            'administrators' => ['stephane.bouvry@unicaen.fr', 'jacksay14@gmail.com']
         ]
     ],
 
