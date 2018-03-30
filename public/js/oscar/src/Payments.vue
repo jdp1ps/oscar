@@ -286,14 +286,12 @@
                 this.formData.datePayment = payment.datePayment ? this.moment(payment.datePayment.date).format('YYYY-MM-DD') : "";
                 this.formData.datePredicted = payment.datePredicted ? this.moment(payment.datePredicted.date).format('YYYY-MM-DD') : "";
                 this.formData.currencyId = payment.currency.id;
-                console.log(JSON.parse(JSON.stringify(this.formData)));
             },
 
             /**
              * En cas de changment de devise, on actualise automatiquement le taux de conversion en EURO.
              */
             handlerFormUpdateRate(){
-                console.log('UPDATE CURRENCY');
                 let currency = this.currencies.find( (c)=> {
                     return c.id == this.formData.currencyId
                 })

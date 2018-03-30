@@ -33,7 +33,7 @@ return array(
                     'roles' => [],
                 ],
                 [ 'controller' =>  'Public',
-                    'action' => ['documentation'],
+                    'action' => ['documentation', 'parameters'],
                     'roles' => ['user'],
                 ],
 

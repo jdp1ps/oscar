@@ -3388,6 +3388,46 @@ time.date-missing {
   }
 }
 
+.uc-frequency {
+  text-align: center;
+  .heading {
+    .hours {
+      background: rgba(255,255,255,.5);
+      background: $brand-primary;
+      color: white;
+      font-weight: 100;
+      padding: .5em 1em;
+      cursor: pointer;
+    }
+  }
+  .content {
+    .line {
+      background: rgba(255,255,255,.5);
+      &:hover {
+        background: rgba(255,255,255,.75);
+      }
+    }
+    .hours-label {
+      text-align: right;
+      padding: .5em 1em;
+      font-size: 1em;
+      font-weight: 100;
+      cursor: pointer;
+    }
+    .hours-selector {
+        cursor: pointer;
+        .icon-ok-circled { opacity: .3; }
+
+      &.selected {
+        .icon-ok-circled { opacity: 1; color: $colorGreen }
+      }
+      &:hover {
+        background: white;
+      }
+    }
+  }
+}
+
 .repport {
   border-left: solid 4px #7f7f7f;
   &.repport-add {

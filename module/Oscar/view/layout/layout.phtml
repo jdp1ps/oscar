@@ -247,10 +247,13 @@ $this->headScript();
                         <?php endif; ?><!-- /Menu admin -->
                     </ul>
                     <?php if( $this->grant()->connected() ): ?>
-                    <p class="navbar-text navbar-right" id="notifications-area" ></p>
+                        <p class="navbar-text navbar-right" id="notifications-area" ></p>
                     <?php endif; ?>
                     <p class="navbar-text navbar-right">
-                    <?php echo $this->appConnection(); ?>
+                        <a href="<?= $this->url('user_parameters') ?>">
+                            <i class="icon-cog"></i> Paramètres</a> |
+
+                        <?php echo $this->appConnection(); ?>
                     </p>
                 </div><!--/.nav-collapse -->
             </div>

@@ -1,0 +1,145 @@
+<div class="container">
+    <h1>
+        <i class="icon-cog"></i> Paramètres
+    </h1>
+
+    <h2>
+        <i class="icon-bell"></i>
+        Notifications par courriel</h2>
+    <form action="">
+        <div class="row">
+            <div class="col-md-3">
+                <h3>Activer les notifications par mail</h3>
+                <div class="material-switch">
+                    <input id="projectview" name="projectview" value="on" type="checkbox">
+                    <label for="projectview" class="label-primary"></label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <h3>Fréquence des envois</h3>
+
+                <div class="uc-cron" id="parameters-nf">
+
+                </div>
+
+            </div>
+        </div>
+    </form>
+    <style>
+
+    </style>
+    <script>
+        require(['vue', 'vue-resource'], function(Vue, VueResource){
+            Vue.use(VueResource);
+            Vue.http.options.emulateJSON = true;
+            Vue.http.options.emulateHTTP = true;
+            new Vue({
+                data: {
+                    'frequency': <?= array_key_exists('frequency', $parameters) ? json_encode($parameters['frequency']) : '[]' ?>,
+                    'days': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                    'hours': ['6', '8', '10', '12', '14', '16', '18'],
+                    'errors' : null
+                },
+                el: '#parameters-nf',
+                template: `<form action="" @submit.prevent="save">
+                    <div class="alert alert-danger" v-if="errors">{{ errors }}</div>
+                    <input type="hidden" :value="frequency.join(',')" name="frequency" />
+                    <table class="uc-frequency">
+                        <thead class="heading">
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th class="hours" v-for="day in days"  @click="toogleDay(day)">
+                                    {{ day }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="content">
+                            <tr class="line" v-for="hour in hours">
+                                <th class="hours-label" @click="toogleHour(hour)">
+                                    {{ hour }}:00
+                                </th>
+                                <td class="hours-selector"
+                                    :class="{ 'selected': frequency.indexOf(day+hour) >= 0 }"
+                                    v-for="day in days"
+                                    @click="toogleFrequency(day+hour)">
+                                    <i class="icon-ok-circled"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="submit">Enregistrer</button>
+                </form>`,
+                methods: {
+
+
+
+                    /** Retourne TRUE si des féquences sont configurés le jour D */
+                    hasFrequencyInDay(d){
+                        for( var i=0; i<this.frequency.length; i++ ){
+                            if( this.frequency[i].indexOf(d) == 0 )
+                                return true
+                        }
+                        return false;
+                    },
+
+                    /** Retourne TRUE si des féquences sont configurés à l'heure H */
+                    hasFrequencyInHour(h){
+                        console.log("Recherche d'une fréquence à ", h);
+                        for( var i=0; i<this.frequency.length; i++ ){
+                            if( this.frequency[i].indexOf(h) == 3 )
+                                return true
+                        }
+                        return false;
+                    },
+
+                    removeFrequency(f){
+                        var index = this.frequency.indexOf(f);
+                        if( index >= 0 )
+                            this.frequency.splice(index, 1);
+                    },
+
+                    toogleFrequency( f ){
+                        if( this.frequency.indexOf(f) < 0 )
+                            this.frequency.push(f);
+                        else
+                            this.frequency.splice(this.frequency.indexOf(f), 1);
+                    },
+
+                    toogleDay( d ){
+                        // On détermine si des créneaux sont selectionnés ?
+                        var remove = this.hasFrequencyInDay(d);
+                        for( var i=0; i<this.hours.length; i++ ){
+                            if( remove )
+                                this.removeFrequency(d+this.hours[i]);
+                            else
+                                this.frequency.push(d+this.hours[i]);
+                        }
+                    },
+
+                    toogleHour( h ){
+                        var remove = this.hasFrequencyInHour(h);
+
+                        for( var i=0; i<this.days.length; i++ ){
+                            if( remove )
+                                this.removeFrequency(this.days[i]+h);
+                            else
+                                this.frequency.push(this.days[i]+h);
+                        }
+                    },
+
+                    save(){
+                        this.$http.post('', { "frequency":  this.frequency.join(',') }).then(
+                            success => {
+                                console.log('OK');
+                            },
+                            fail => {
+                                console.log(fail);
+                                this.errors = "Erreur : " + fail.body;
+                            }
+                        );
+                    }
+                }
+            })
+        })
+    </script>
+</div>
