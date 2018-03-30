@@ -109,9 +109,11 @@ $ sudo apt-get install elasticsearch
 # Configuration en service
 $ sudo update-rc.d elasticsearch defaults 95 10
 
-# Lancer/Interrompre le service
+# Lancer le service
 $ sudo -i service elasticsearch start
-$ sudo -i service elasticsearch st
+
+# Interrompre le service
+$ sudo -i service elasticsearch stop
 ```
 
 
@@ -141,3 +143,58 @@ return array(
 > la clef `params` prends bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
 
 > Lors de la reconstruction de l'index en ligne de commande, assurez-vous de ne pas l'executer en tant que ROOT.
+
+## Mailer
+
+La configuration du mailer est située dans le fichier `config/autoload/local.php` : 
+
+```php
+<?php
+//config/autoload/local.php
+return array(
+    // ...
+    // Accès BDD
+    'oscar' => [
+        'mailer' => [
+            /**** TRANSPORT (smtp) ****/
+            'transport' => [
+                'type' => 'smtp',
+                'host' => 'smtp.domain.tld',
+                'port' => 465,
+                'username' => 'smithagent',
+                'password' => '@m4S!n9 P4$VV0rd',
+                'security' => 'ssl',
+            ],
+        ]
+    ],
+    // ...
+);
+```
+
+Ou : 
+
+```php
+<?php
+//config/autoload/local.php
+return array(
+    // ...
+    // Accès BDD
+    'oscar' => [
+        'mailer' => [
+            /**** TRANSPORT (sendmail) ****/
+            'transport' => [
+                'type' => 'sendmail',
+                'cmd' => '/usr/sbin/sendmail -bs',
+            ],
+            /****/
+        ]
+    ],
+    // ...
+);
+```
+
+Vous pouvez lancer le test de la configuration en tappant la commande : 
+
+```bash
+$ php public/index.php oscar test:mailer
+```

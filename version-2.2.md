@@ -2,6 +2,16 @@
 
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
+
+## Moteur de recherche Elastic Search
+
+Dans cette version, la recherche dans les activités a été découplée et propose maintenant 2 stratégies possibles :
+ 
+ - **Zend Lucene**, une implémentation du moteur Lucene en PHP (Technologie utilisée à l'origine)
+ - **Elastic Search**, Un server dédié à la recherche *plain text** (Plus performant et rapide)
+ 
+Cette évolution necessite d'adapter la configuration dans Oscar, tout est détaillé dans le fichier [Configuration](./doc/configuration.md#recherche-des-activit%C3%A9s)  
+
 ## Type d'organisation
 
 Les types d'organisation sont maintenant libres à la saisie et lors de la synchronisation. 
@@ -28,7 +38,7 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
  
  ```bash
  php public/index.php oscar notifications:generate <idactivity|all>
- ```
+```
 
 
 ## Améliorations / Mise à jour
@@ -40,7 +50,6 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
  - Les selecteurs de date des versements/jalons ont maintenant des flèches latérales en vue semaine pour faire défiler les mois
  - Documentation technique : Mise à jour du document de mise à jour
  
-
 
 ## Administration/Maintenance/Privilège
 
@@ -60,11 +69,10 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
 
 ## Dev
 
- - MailingService
+ - MailingService : Mailer qui sera utilisé par Oscar pour distribuer des mails
  - Ajout des notifications au compilateur JS
  - Le calcule des privilèges - personnes - activités utilise un cache pour le calcule des notifications
  - Refactoring : Service de traitement des Jalons
  - Refactoring : Service de traitement des notifications
  - Refactoring : Service Person (affectation aux activités, projet, organisation) EN COURS
  - Refactoring : Service Organization (affectation aux activités, projet) EN COURS
- 
