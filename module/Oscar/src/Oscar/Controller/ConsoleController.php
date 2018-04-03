@@ -8,9 +8,12 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Driver\PDOException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\ORM\Tools\SchemaValidator;
 use Moment\Moment;
 use Oscar\Connector\ConnectorActivityCSVWithConf;
 use Oscar\Connector\ConnectorActivityJSON;
@@ -39,10 +42,13 @@ use Oscar\Exception\OscarException;
 use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\MailingService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\ShuffleDataService;
+use Oscar\Strategy\Search\ActivityElasticSearch;
+use Oscar\Strategy\Search\ActivityZendLucene;
 use Oscar\Utils\ActivityCSVToObject;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
@@ -60,6 +66,21 @@ use Zend\Diactoros\Exception\DeprecatedMethodException;
 
 class ConsoleController extends AbstractOscarController
 {
+
+    public function updateAction()
+    {
+//        $tool = new SchemaTool($this->getEntityManager());
+//        $tool->getUpdateSchemaSql($this->getEntityManager()->getClassMetadata($this->getEntityManager()->));
+        $validator = new SchemaValidator($this->getEntityManager());
+        $errors = $validator->validateMapping();
+
+        if (count($errors) > 0) {
+            var_dump($errors);
+            // Lots of errors!
+            echo implode("\n\n", $errors);
+        }
+        die('UPDATE');
+    }
 
     public function patch_typeOrganisationsUpdate()
     {
@@ -301,6 +322,217 @@ class ConsoleController extends AbstractOscarController
         } else {
             die("Le patch '$patchName' n'existe pas/plus.");
         }
+    }
+
+
+    protected function checkPath($path, $text, $level = 'error', $allowed = 'rw'){
+
+        $badOut = $level == 'warn' ? 'consoleWarn' : 'consoleError';
+
+        $msg = $level == 'warn' ? "WARNING" : "ERROR";
+        $color = $level == 'warn' ? ColorInterface::YELLOW : ColorInterface::RED;
+
+        $this->getConsole()->write(" * Check '$text' ", ColorInterface::WHITE);
+        $this->getConsole()->write(realpath($path), ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+        if( !file_exists($path) ){
+            $this->$badOut("Le chemin n'existe pas / inaccessible");
+            return false;
+        }
+
+        if( !is_readable($path) ){
+            $this->$badOut("Chemin inaccessible en lecture.");
+            return false;
+        }
+
+        if( strpos($allowed, 'w') > -1 && !is_writable($path) ){
+            $this->$badOut("Chemin inacessible en écriture.");
+            return false;
+        }
+
+        $this->consoleSuccess("OK");
+        return true;
+    }
+
+    public function testConfigAction()
+    {
+        $configPath = realpath(__DIR__ . '/../../../../../config/autoload/local.php');
+
+        $this->getConsole()->clear();
+        $this->getConsole()->writeLine("##################################################################", ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine("###", ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine("### CONFIGURATION OSCAR", ColorInterface::LIGHT_WHITE);
+
+        $this->getConsole()->writeLine("### " . OscarVersion::getBuild(), ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine("###", ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine("##################################################################", ColorInterface::LIGHT_WHITE);
+
+        $this->getConsole()->write(" * Fichier de configuration ", ColorInterface::WHITE);
+        $this->getConsole()->write($configPath, ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+        if( !file_exists($configPath) ){
+            $this->getConsole()->writeLine("ERROR", ColorInterface::WHITE, ColorInterface::RED);
+            $this->consoleError("Le fichier de configuration 'config/config/autoload/local.php' n'existe pas/n'est pas accessible");
+            return;
+        }
+        $this->getConsole()->writeLine("OK", ColorInterface::BLACK, ColorInterface::GREEN);
+
+        // Chargement de la configuration
+        $example = require($configPath);
+        $config = new ConfigurationParser($example);
+
+        try {
+            $this->getConsole()->write(" * Accès à la base de données ", ColorInterface::WHITE);
+            $this->getConsole()->write($config->getConfiguration('doctrine.connection.orm_default.params.host'), ColorInterface::LIGHT_WHITE);
+            $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+            if ($this->getEntityManager()->getConnection()->isConnected()) {
+                $this->getConsole()->writeLine("OK", ColorInterface::BLACK, ColorInterface::GREEN);
+            }
+
+        } catch (\Exception $e ){
+            $this->getConsole()->writeLine("ERROR " . $e->getMessage(), ColorInterface::WHITE, ColorInterface::RED);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // DOSSIERS / FICHIERS
+        try {
+            $this->getConsole()->writeLine("");
+            $this->getConsole()->writeLine(" ### Emplacements des fichiers/Dossiers : ", ColorInterface::LIGHT_WHITE);
+
+            $pathDocuments = $config->getConfiguration('oscar.paths.document_oscar');
+            $this->checkPath($pathDocuments, "Stoquage des documents > ACTIVITÉS");
+
+            $pathDocuments = $config->getConfiguration('oscar.paths.document_admin_oscar');
+            $this->checkPath($pathDocuments, "Stoquage des documents > ADMINISTRATIFS");
+
+            $pathDocuments = $config->getConfiguration('oscar.paths.timesheet_modele');
+            $this->checkPath($pathDocuments, "Modèle de document > FEUILLE DE TEMPS", 'warn');
+
+
+        } catch ( OscarException $e ){
+            $this->consoleError(sprintf("Configuration manquante : %s", $e->getMessage()));
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// MOTEUR de RECHERCHE
+        $this->getConsole()->writeLine("");
+        $this->getConsole()->writeLine(" ### Système d'indexation des activités : ", ColorInterface::LIGHT_WHITE);
+
+        try {
+            $searchClass = $config->getConfiguration('oscar.strategy.activity.search_engine.class');
+
+            // ELASTIC SEARCH
+            if( $searchClass == ActivityElasticSearch::class ){
+                $this->getConsole()->write(" * Moteur Elastic Search ", ColorInterface::WHITE);
+                $nodesUrl = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
+
+
+                foreach ($nodesUrl[0] as $url ){
+                    $this->getConsole()->write("Noeud $nodesUrl ", ColorInterface::LIGHT_WHITE);
+
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, $url);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                    $infos = curl_exec($curl);
+                    if( ($error = curl_error($curl)) ){
+                        $this->consoleError("Error : " . $error);
+                    } else {
+                        $this->consoleSuccess("OK (Response 200)");
+                    }
+                    curl_close($curl);
+                }
+            }
+            // LUCENE
+            elseif ($searchClass == ActivityZendLucene::class ){
+                $params = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
+                $this->checkPath($params[0], "Dossier pour l'index de recherche LUCENE");
+            }
+            else {
+                $this->consoleWarn(" ~ INDEXEUR : Système de recherche non testable...");
+            }
+        } catch ( OscarException $e ){
+            $this->consoleError(sprintf(" ! INDEXEUR : Configuration du système de recherche incomplet : %s", $e->getMessage()));
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// CONNECTORS
+        try {
+            $connectorsOrganisation = $config->getConfiguration('oscar.connectors.organization');
+            foreach ($connectorsOrganisation as $conn=>$params) {
+                $connecteurName = sprintf(" * CONNECTEUR ORGANISATION '%s'", $conn);
+                $this->getConsole()->writeLine("");
+                $this->getConsole()->writeLine(" ### Connecteur ORGANIZATION $conn : ", ColorInterface::LIGHT_WHITE);
+                $class = $config->getConfiguration("oscar.connectors.organization.$conn.class");
+                $params = $config->getConfiguration("oscar.connectors.organization.$conn.params");
+
+                if ($this->checkPath($params, "Fichier de configuration", 'r') ){
+                    $paramsPhp = Yaml::parse(file_get_contents($params));
+
+                    $this->getConsole()->write(" * Accès au connecteur ", ColorInterface::WHITE);
+                    $this->getConsole()->write($url, ColorInterface::LIGHT_WHITE);
+                    $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, $paramsPhp['url_organizations']);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                    $infos = curl_exec($curl);
+                    if( ($error = curl_error($curl)) ){
+                        $this->consoleError($error);
+                    } else {
+                        $this->consoleSuccess("OK");
+                    }
+                    curl_close($curl);
+                }
+            }
+
+        } catch ( OscarException $e ){
+            $this->consoleWarn(sprintf(" ~ CONNECTOR > ORGANIZATION : Pas de connecteur organisation : %s", $e->getMessage()));
+        }
+
+        try {
+            $connectors = $config->getConfiguration('oscar.connectors.person');
+            foreach ($connectors as $conn=>$params) {
+                $connecteurName = sprintf(" * CONNECTEUR PERSON '%s'", $conn);
+
+                $this->getConsole()->writeLine("");
+                $this->getConsole()->writeLine(" ### Connecteur PERSON $conn : ", ColorInterface::LIGHT_WHITE);
+
+
+                $class = $config->getConfiguration("oscar.connectors.person.$conn.class");
+                $params = $config->getConfiguration("oscar.connectors.person.$conn.params");
+
+                if ($this->checkPath($params, "Fichier de configuration", 'r') ){
+                    $paramsPhp = Yaml::parse(file_get_contents($params));
+
+                    $this->getConsole()->write(" * Accès au connecteur ", ColorInterface::WHITE);
+                    $this->getConsole()->write($url, ColorInterface::LIGHT_WHITE);
+                    $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, $paramsPhp['url_persons']);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                    $infos = curl_exec($curl);
+                    if( ($error = curl_error($curl)) ){
+                        $this->consoleError(" ! Connector no response : " . $error);
+                    } else {
+                        $this->consoleSuccess(sprintf(" * Connecteur '%s' : OK", $url));
+                    }
+                    curl_close($curl);
+                }
+            }
+
+        } catch ( OscarException $e ){
+            $this->consoleWarn(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
+        }
+
+
+
+
+
+
     }
 
     public function testMailingAction()
@@ -1241,6 +1473,15 @@ class ConsoleController extends AbstractOscarController
     {
         $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
             ColorInterface::RED);
+    }
+
+    /**
+     * @param $msg Erreur à afficher
+     */
+    protected function consoleWarn($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::BLACK,
+            ColorInterface::YELLOW);
     }
 
 

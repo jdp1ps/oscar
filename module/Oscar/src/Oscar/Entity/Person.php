@@ -151,6 +151,12 @@ class Person implements ResourceInterface
 
     /**
      * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="TimeSheet", mappedBy="person")
+     */
+    protected $timesheets;
+
+    /**
+     * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="WorkPackagePerson", mappedBy="person")
      */
     protected $workPackages;
@@ -167,6 +173,7 @@ class Person implements ResourceInterface
         $this->activities = new ArrayCollection();
         $this->organizations = new ArrayCollection();
         $this->workPackages = new ArrayCollection();
+        $this->timesheets = new ArrayCollection();
         $this->centaureId = [];
         $this->setDateCreated(new \DateTime());
     }

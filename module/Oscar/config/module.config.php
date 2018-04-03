@@ -360,12 +360,32 @@ return array(
         'router' => array(
             'routes' => array(
 
+                'update' => [
+                    'options' => [
+                        'route' => 'oscar update',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'update',
+                        ],
+                    ]
+                ],
+
                 'test_mailing' => [
                     'options' => [
                         'route' => 'oscar test:mailer',
                         'defaults' => [
                             'controller' => 'Console',
                             'action' => 'testMailing',
+                        ],
+                    ]
+                ],
+
+                'test_config' => [
+                    'options' => [
+                        'route' => 'oscar test:config',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'testConfig',
                         ],
                     ]
                 ],
