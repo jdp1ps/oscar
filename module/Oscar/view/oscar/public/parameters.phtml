@@ -3,20 +3,130 @@
         <i class="icon-cog"></i> Paramètres
     </h1>
 
-    <h2>
-        <i class="icon-bell"></i>
-        Notifications par courriel</h2>
+
     <form action="">
         <div class="row">
-            <div class="col-md-3">
+
+            <div class="col-md-6">
+                <h3>
+                    <i class="icon-user"></i>
+                    Informations personnelles
+                </h3>
+
+                <?php if( $person ): ?>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <img src="//www.gravatar.com/avatar/<?= md5($person->getEmail()) ?>?s=250"
+                                 style="border-radius: 20px; width: 100%"
+                                 alt="" />
+                        </div>
+                        <div class="col-md-9">
+                            <p class="text-highlight text-small">
+                                Dernière mise à jour :
+                                <?php if($person->getDateSyncLdap()): ?>
+                                    <strong class="text-success">
+                                        <i class="icon-ok-circled"></i>
+                                        <?= $this->moment($person->getDateSyncLdap()) ?>
+                                        <span class="text-light">(<?= $this->moment($person->getDateSyncLdap())->since() ?>)</span>
+                                    </strong>
+                                <?php else: ?>
+                                    <i class="icon-cancel-circled-outline"></i>
+                                    <em>Jamais</em>
+                                <?php endif; ?>
+                                <br/>
+                                Créé le <time><?= $this->moment($person->getDateCreated())->full() ?></time>
+                            </p>
+
+                            <table class="table table-bordered small">
+                                <tbody>
+                                <tr>
+                                    <th>#ID</th>
+                                    <td><?= $person->getId() ?></td>
+                                </tr>
+                                <tr>
+                                    <th>displayname</th>
+                                    <td><?= $person->getDisplayName() ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Prénom</th>
+                                    <td><?= $person->getFirstName() ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Nom</th>
+                                    <td><?= $person->getLastname() ?></td>
+                                </tr>
+                                <tr>
+                                    <th>email</th>
+                                    <td><?= $person->getEmail() ?></td>
+                                </tr>
+                                <?php /*
+                                <tr>
+                                    <th colspan="2">Groupes (LDAP)</th>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+
+                                        <?php if( $person->getLdapMemberOf() ): ?>
+                                            <ul style="margin:0; list-style: none; font-size: 10px;">
+                                                <?php foreach( $person->getLdapMemberOf() as $memberOf ): ?>
+                                                    <?php if( array_key_exists($memberOf, $ldapRoles) ):?>
+                                                        <li>
+                                                            <i class="icon-group"></i><code><?= $memberOf ?></code>
+                                                            <span class="cartouche <?= $ldapRoles[$memberOf]['principal'] ? 'primary' : '' ?>"><?= $ldapRoles[$memberOf]['roleId'] ?></span>
+                                                        </li>
+                                                    <?php else: ?>
+                                                        <li style="opacity: .5"><i class="icon-group"></i><code><?= $memberOf ?></code></li>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php else: ?>
+                                            <div class="alert alert-info">
+                                                Aucun groupe LDAP
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr> */ ?>
+                                <tr>
+                                    <th>Statut</th>
+                                    <td><?= $person->getLdapStatus() ?></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Localisation (LDAP)</th>
+                                    <td><?= $person->getLdapSiteLocation() ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Affectation (LDAP)</th>
+                                    <td><?= $person->getLdapAffectation() ?></td>
+                                </tr>
+                                <tr>
+                                    <th>phone</th>
+                                    <td><?= $person->getPhone() ?></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <p class="alert alert-warning">
+                        Votre compte n'est pas associé à une personne dans les activités
+                    </p>
+                <?php endif; ?>
+                <!--
                 <h3>Activer les notifications par mail</h3>
                 <div class="material-switch">
                     <input id="projectview" name="projectview" value="on" type="checkbox">
                     <label for="projectview" class="label-primary"></label>
                 </div>
+                -->
             </div>
-            <div class="col-md-9">
-                <h3>Fréquence des envois</h3>
+            <div class="col-md-6">
+                <h3><i class="icon-history"></i>
+                    Fréquence des envois</h3>
+
+                <p class="help">
+                    L'envoi des notifications par mail n'est pas active sur cette version.
+                </p>
 
                 <div class="uc-cron" id="parameters-nf">
 
@@ -35,6 +145,7 @@
             Vue.http.options.emulateHTTP = true;
             new Vue({
                 data: {
+                    'loading': false,
                     'frequency': <?= array_key_exists('frequency', $parameters) ? json_encode($parameters['frequency']) : '[]' ?>,
                     'days': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
                     'hours': ['6', '8', '10', '12', '14', '16', '18'],
@@ -67,7 +178,11 @@
                             </tr>
                         </tbody>
                     </table>
-                    <button type="submit">Enregistrer</button>
+                    <br>
+                    <button type="submit" :class="{ 'disabled': loading }" class="btn btn-default">
+                        <i class="icon-floppy" v-if="!loading"></i>
+                        <i class="icon-spinner animate-spin" v-if="loading"></i>
+                    Enregistrer</button>
                 </form>`,
                 methods: {
 
@@ -128,15 +243,19 @@
                     },
 
                     save(){
-                        this.$http.post('', { "frequency":  this.frequency.join(',') }).then(
-                            success => {
-                                console.log('OK');
-                            },
-                            fail => {
-                                console.log(fail);
-                                this.errors = "Erreur : " + fail.body;
-                            }
-                        );
+                        this.loading = true;
+                        this.$http.post('', { "frequency":  this.frequency.join(',') })
+                            .then(
+                                success => {
+                                    console.log('OK');
+                                },
+                                fail => {
+                                    console.log(fail);
+                                    this.errors = "Erreur : " + fail.body;
+                                }
+                            ).then( (foo) => {
+                                this.loading = false;
+                            });
                     }
                 }
             })

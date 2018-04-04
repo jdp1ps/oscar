@@ -47,6 +47,7 @@ class PublicController extends AbstractOscarController
         $this->getLogger()->debug("FREQUENCY = " . print_r($auth->getSettings(), true));
 
         return [
+            'person' => $this->getCurrentPerson(),
             'parameters' => $auth->getSettings()
         ];
     }
