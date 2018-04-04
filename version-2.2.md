@@ -65,6 +65,7 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
  - La commande `php public/index.php oscar test:config` permet de tester la configuration du système/oscar
  - La commande `php public/index.php oscar test:mailing` permet de tester la configuration pour l'envoi de mail
  - La commande `php public/index.php oscar auth:list` permet de voir la liste des authentifications actives
+ - Les dépendances PHP peuvent maintenant être géré avec [Composer](https://getcomposer.org)
   
 
  
