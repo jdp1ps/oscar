@@ -21,7 +21,7 @@
     "payments": [],
     "acronym": "RELATIV",
     "label": "Relativit\u00e9 restreinte",
-    "projectLabel": "Th\u00e9orie de la gravitation",
+    "projectlabel": "Th\u00e9orie de la gravitation",
     "pfi": "EOTP201400002"
   },
   {
@@ -62,7 +62,7 @@
     ],
     "acronym": "RELATIV",
     "label": "Relativit\u00e9 g\u00e9n\u00e9rale",
-    "projectLabel": "Th\u00e9orie de la gravitation",
+    "projectlabel": "Th\u00e9orie de la gravitation",
     "pfi": "EOTP201400003",
     "amount": 45000
   }
