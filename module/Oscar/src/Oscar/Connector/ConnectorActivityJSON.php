@@ -189,7 +189,7 @@ class ConnectorActivityJSON implements ConnectorInterface
      * @param bool $doNotCreate
      * @return Project
      */
-    protected function getProjectOrCreate( $acronym, $label, ConnectorRepport $repport, $doNotCreate = false ){
+    protected function getProjectOrCreate( $acronym, $label="", ConnectorRepport $repport, $doNotCreate = false ){
         try {
             // Obtention du projet si il existe
             $project = $this->entityManager->getRepository(Project::class)->createQueryBuilder('p')
@@ -350,7 +350,7 @@ class ConnectorActivityJSON implements ConnectorInterface
             // -----------------------------------------------------------------
             // Projet de l'activité
             $projectAcronym = $data->acronym;
-            $projectLabel = $data->projectlabel;
+            $projectLabel = $data->projectLabel;
 
             $project = $this->getProjectOrCreate( $projectAcronym, $projectLabel, $repport);
 

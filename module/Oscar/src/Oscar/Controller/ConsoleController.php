@@ -455,6 +455,20 @@ class ConsoleController extends AbstractOscarController
                 $this->getConsole()->writeLine("OK", ColorInterface::BLACK, ColorInterface::GREEN);
             }
 
+            $validator = new SchemaValidator($this->getEntityManager());
+            $errors = $validator->validateMapping();
+
+            $this->getConsole()->write(" * Modèle de donnée ", ColorInterface::WHITE);
+            if (count($errors) > 0) {
+                $this->consoleError("Obsolète");
+                foreach( $errors as $error ){
+                    $this->consoleError(" - " . $error);
+                }
+                $this->consoleError("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
+            } else {
+                $this->consoleSuccess("OK");
+            }
+
         } catch (\Exception $e ){
             $this->getConsole()->writeLine("ERROR " . $e->getMessage(), ColorInterface::WHITE, ColorInterface::RED);
         }
@@ -609,6 +623,7 @@ class ConsoleController extends AbstractOscarController
         $administrators = $this->getConfiguration('oscar.mailer.administrators');
         $mails = implode(',', $administrators);
 
+        $this->consoleKeyValue("Envoi effectif", $this->getConfiguration('oscar.mailer.send') ? 'OUI' : 'NON');
         $this->getConsole()->writeLine("Le mail de test va être envoyé aux adresses : ", ColorInterface::WHITE);
 
         foreach ($administrators as $mail) {
@@ -623,7 +638,7 @@ class ConsoleController extends AbstractOscarController
                     'body' => "Si vous lisez ce message, c'est que la configuration de l'envoi de courriel fonctionne."
                     // Ou que vous êtes entrains de lire le code source
                 ])->setTo($this->getConfiguration('oscar.mailer.administrators'));
-                $mailer->send($message);
+                $mailer->send($message, true);
                 $this->consoleSuccess("Oscar a bien envoyé le mail de test");
             } catch (\Exception $err) {
                 $this->consoleError($err->getMessage() . "\n" . $err->getTraceAsString());

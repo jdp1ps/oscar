@@ -173,6 +173,11 @@ class Activity implements ResourceInterface
      */
     private $codeEOTP;
 
+//    /**
+//     * @ORM\Column(type="string", length=64, nullable=true)
+//     */
+//    private $tauxFonctionnement;
+
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
@@ -362,6 +367,21 @@ class Activity implements ResourceInterface
      */
     protected $numbers = [];
 
+//    /**
+//     * @return mixed
+//     */
+//    public function getTauxFonctionnement()
+//    {
+//        return $this->tauxFonctionnement;
+//    }
+//
+//    /**
+//     * @param mixed $tauxFonctionnement
+//     */
+//    public function setTauxFonctionnement($tauxFonctionnement)
+//    {
+//        $this->tauxFonctionnement = $tauxFonctionnement;
+//    }
 
     /**
      * Retourne l'acronyme du projet si disponible.

@@ -2,7 +2,7 @@
     <article class="card xs payment" :class="cssClass">
         <div class="heading">
             <strong class="amount">
-                <i class="icon-attention-1" v-if="late" title="Ce versment prévisionnel est en retard" style="color: darkred"></i>
+                <i class="icon-attention-1" v-if="late" title="Ce versement prévisionnel est en retard" style="color: darkred"></i>
                 {{ payment.amount | money }} {{ payment.currency.symbol }}
                 <div v-if="payment.currency.symbol != '€'">
                     <small style="font-weight: 100">soit <strong>{{ payment.amount / payment.rate | money }} €</strong></small>
