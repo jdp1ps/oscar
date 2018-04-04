@@ -472,7 +472,10 @@ class ConsoleController extends AbstractOscarController
             $this->checkPath($pathDocuments, "Stoquage des documents > ADMINISTRATIFS");
 
             $pathDocuments = $config->getConfiguration('oscar.paths.timesheet_modele');
-            $this->checkPath($pathDocuments, "Modèle de document > FEUILLE DE TEMPS", 'warn');
+            $this->checkPath($pathDocuments, "Modèle de document > FEUILLE DE TEMPS");
+
+            $pathDocuments = $config->getConfiguration('oscar.mailer.template');
+            $this->checkPath($pathDocuments, "Modèle de mail > TEMPLATE");
 
 
         } catch ( OscarException $e ){
