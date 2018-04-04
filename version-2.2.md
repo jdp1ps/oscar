@@ -2,6 +2,13 @@
 
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
+## Paramètres personnels
+
+Cet écran permet de :
+
+ - voir les informations personnelles si elles sont disponibles,
+ - configurer la fréquence des rappels
+
 
 ## Moteur de recherche Elastic Search
 
@@ -55,7 +62,10 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
 
  - Le privilège Maintenance > Peut notifier ... a été étendu à la gestion des notifications d'une personne. Elle débloque l'accès à la gestion des notifications d'une personne
  - Ajout d'un privilège dans la catégorie "Administration" pour la gestion des types d'activités
+ - La commande `php public/index.php oscar test:config` permet de tester la configuration du système/oscar
  - La commande `php public/index.php oscar test:mailing` permet de tester la configuration pour l'envoi de mail
+ - La commande `php public/index.php oscar auth:list` permet de voir la liste des authentifications actives
+  
 
  
 ## Fix
