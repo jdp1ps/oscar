@@ -355,6 +355,27 @@ class ConsoleController extends AbstractOscarController
         return true;
     }
 
+    protected function checkModule($module, $level = 'error'){
+
+        $badOut = $level == 'warn' ? 'consoleWarn' : 'consoleError';
+
+        $msg = $level == 'warn' ? "WARNING" : "ERROR";
+        $color = $level == 'warn' ? ColorInterface::YELLOW : ColorInterface::RED;
+
+        $this->getConsole()->write(" * Module PHP ", ColorInterface::WHITE);
+        $this->getConsole()->write($module, ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(' ('.phpversion($module).')', ColorInterface::WHITE);
+        $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+        if( !extension_loaded($module) ){
+            $this->$badOut("Uninstalled");
+            return false;
+        }
+
+        $this->consoleSuccess("Installed");
+        return true;
+    }
+
     public function testConfigAction()
     {
         $configPath = realpath(__DIR__ . '/../../../../../config/autoload/local.php');
@@ -364,9 +385,49 @@ class ConsoleController extends AbstractOscarController
         $this->getConsole()->writeLine("###", ColorInterface::LIGHT_WHITE);
         $this->getConsole()->writeLine("### CONFIGURATION OSCAR", ColorInterface::LIGHT_WHITE);
 
-        $this->getConsole()->writeLine("### " . OscarVersion::getBuild(), ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write("### ", ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine(OscarVersion::getBuild(), ColorInterface::WHITE);
         $this->getConsole()->writeLine("###", ColorInterface::LIGHT_WHITE);
         $this->getConsole()->writeLine("##################################################################", ColorInterface::LIGHT_WHITE);
+
+
+        $this->getConsole()->writeLine("");
+        $this->getConsole()->writeLine(" ### PHP requirements : ", ColorInterface::LIGHT_WHITE);
+
+        //php_ini_loaded_file
+        $this->getConsole()->write(" - System ", ColorInterface::WHITE);
+        $this->getConsole()->writeLine(php_uname(), ColorInterface::LIGHT_WHITE);
+
+        $this->getConsole()->write(" - PHP version ", ColorInterface::WHITE);
+        $this->getConsole()->write(PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION, ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(' (' . phpversion() .')', ColorInterface::WHITE);
+        if( PHP_VERSION_ID < 70000 )
+            $this->consoleError('Major version required !');
+        else
+            $this->consoleSuccess('OK');
+
+        $this->getConsole()->write(" - php.ini ", ColorInterface::WHITE);
+        $this->getConsole()->writeLine(php_ini_loaded_file(), ColorInterface::LIGHT_WHITE);
+
+        $this->getConsole()->writeLine("");
+
+        $this->checkModule('bz2');
+        $this->checkModule('curl');
+        $this->checkModule('fileinfo');
+        $this->checkModule('gd');
+        $this->checkModule('iconv');
+        $this->checkModule('json');
+        $this->checkModule('ldap', 'warn');
+        $this->checkModule('mbstring');
+        $this->checkModule('mcrypt');
+        $this->checkModule('openssl');
+        $this->checkModule('pdo_pgsql');
+        $this->checkModule('posix', 'warn');
+        $this->checkModule('Reflection');
+        $this->checkModule('session');
+
+        $this->getConsole()->writeLine("");
+        $this->getConsole()->writeLine(" ### OSCAR configuration : ", ColorInterface::LIGHT_WHITE);
 
         $this->getConsole()->write(" * Fichier de configuration ", ColorInterface::WHITE);
         $this->getConsole()->write($configPath, ColorInterface::LIGHT_WHITE);
@@ -431,7 +492,7 @@ class ConsoleController extends AbstractOscarController
 
 
                 foreach ($nodesUrl[0] as $url ){
-                    $this->getConsole()->write("Noeud $nodesUrl ", ColorInterface::LIGHT_WHITE);
+                    $this->getConsole()->write("Noeud $url ", ColorInterface::LIGHT_WHITE);
 
                     $curl = curl_init();
                     curl_setopt($curl, CURLOPT_URL, $url);
