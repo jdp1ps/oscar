@@ -248,6 +248,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 }
 
                 else if( $key == "codeEOTP" ){ $json['pfi'] = $value; }
+                else if( $key == "type" ){ $json['type'] = $value; }
                 else if( $key == "amount" ){ $json['amount'] = doubleval($value); }
                 else if( $key == "dateStart" ){ $json['datestart'] = $value; }
                 else if( $key == "dateEnd" ){ $json['dateend'] = $value; }

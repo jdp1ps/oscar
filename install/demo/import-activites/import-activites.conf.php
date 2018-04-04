@@ -26,5 +26,7 @@ return [
     12  => "payments.1.2",
     15  => "payments.1.2",
 
-    18  => "milestones.Rapport financier"
+    18  => "milestones.Rapport financier",
+    19  => "dateSigned",
+    20  => "type",
 ];
