@@ -7700,6 +7700,21 @@ time.date-missing {
     animation-iteration-count: infinite;
     animation-direction: alternate; }
 
+.uc-frequency {
+  background: rgba(255, 255, 255, 0.5); }
+  .uc-frequency .heading .hours {
+    background: #790629;
+    color: white; }
+  .uc-frequency .content .hours-selector {
+    cursor: pointer; }
+    .uc-frequency .content .hours-selector .icon-ok-circled {
+      opacity: .3; }
+    .uc-frequency .content .hours-selector.selected .icon-ok-circled {
+      opacity: 1;
+      color: #499D1F; }
+    .uc-frequency .content .hours-selector:hover {
+      background: white; }
+
 .repport {
   border-left: solid 4px #7f7f7f; }
   .repport.repport-add {

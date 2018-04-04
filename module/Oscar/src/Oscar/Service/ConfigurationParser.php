@@ -29,7 +29,7 @@ class ConfigurationParser
             $paths = explode('.', $key);
             foreach ($paths as $path) {
                 if( !isset($config[$path]) ){
-                    throw new OscarException("Clef $path absente dans la configuration");
+                    throw new OscarException("Clef '$path' absente dans la configuration");
                 }
                 $config = $config[$path];
             }

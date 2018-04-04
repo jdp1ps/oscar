@@ -4,6 +4,7 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\Authentification;
 use Oscar\Entity\Person;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OscarUserContext;
@@ -23,6 +24,33 @@ class PublicController extends AbstractOscarController
         return ['log' => $log];
     }
 
+    public function parametersAction()
+    {
+        $this->getLogger()->debug("PARAMETERS");
+        /** @var Authentification $auth */
+        $auth = $this->getEntityManager()->getRepository(Authentification::class)->find($this->getOscarUserContext()->getDbUser()->getId());
+
+        if( $this->getHttpXMethod() == "POST" ){
+
+            $this->getLogger()->debug("Reçu = " . $this->params()->fromPost('frequency'));
+            $parameters = explode(',', $this->params()->fromPost('frequency'));
+
+            $this->getLogger()->debug("Save for = " . $auth->getDisplayName());
+            $settings = $auth->getSettings() ?: [];
+            $settings['frequency'] = $parameters;
+
+
+            $auth->setSettings($settings);
+            $this->getEntityManager()->flush($auth);
+            return $this->getResponseOk();
+        }
+        $this->getLogger()->debug("FREQUENCY = " . print_r($auth->getSettings(), true));
+
+        return [
+            'person' => $this->getCurrentPerson(),
+            'parameters' => $auth->getSettings()
+        ];
+    }
 
     public function accessAction()
     {
