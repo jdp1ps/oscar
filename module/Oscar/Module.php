@@ -252,8 +252,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             'oscar auth:list' => 'Liste des utilisateurs.',
 
             '# CONFIGURATION',
-            //'oscar check:config' => 'Évaluation de la configuration',
-            'oscar check:authentification <login> <pass>' => "Évaluation de l'authentification",
+            'oscar test:config' => 'Évaluation de la configuration',
+            'oscar test:mailer' => 'Lance le test du mailer',
+//            'oscar check:authentification <login> <pass>' => "Évaluation de l'authentification",
             //'oscar check:connector' => 'Cré un nouvel utilisateur.',
 
             '# PERSONNES',

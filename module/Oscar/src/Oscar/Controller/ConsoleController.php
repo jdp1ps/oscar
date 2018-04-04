@@ -604,13 +604,13 @@ class ConsoleController extends AbstractOscarController
         $administrators = $this->getConfiguration('oscar.mailer.administrators');
         $mails = implode(',', $administrators);
 
-        $confirm = Confirm::prompt(
-            sprintf(
-                "Le mail de test va être envoyé %s %s, confirmer ? ",
-                count($administrators) == 1 ? "à l'adresse" : "aux adresses",
-                $mails
-            )
-        );
+        $this->getConsole()->writeLine("Le mail de test va être envoyé aux adresses : ", ColorInterface::WHITE);
+
+        foreach ($administrators as $mail) {
+            $this->getConsole()->writeLine(" * " . $mail, ColorInterface::LIGHT_WHITE);
+        }
+
+        $confirm = Confirm::prompt("Confirmer l'envoi ? ");
 
         if ($confirm) {
             try {
