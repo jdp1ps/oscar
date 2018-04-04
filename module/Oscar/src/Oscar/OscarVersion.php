@@ -15,7 +15,7 @@ class OscarVersion
     const PATCH = 1;
 
     public static function getBuild(){
-        $commitHash = trim(exec('git log --pretty="%h" -n1 HEAD'));
+        $commitHash = trim(exec('git log -1 --pretty="%h" -n1 HEAD'));
         $branch = trim(exec('git branch | grep \* | cut -d \' \' -f2'));
 
         $commitDate = new \DateTime(trim(exec('git log -n1 --pretty=%ci HEAD')));
