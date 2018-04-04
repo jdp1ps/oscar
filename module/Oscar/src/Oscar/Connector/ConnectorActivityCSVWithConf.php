@@ -255,13 +255,13 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 else if( $key == "label" ){ $json['label'] = $value; }
                 else if( $key == "uid" ){ $json['uid'] = $value; }
                 else if( $key == "project.acronym" ){ $json['acronym'] = $value; }
-                else if( $key == "project.label" ){ $json['projectLabel'] = $value; }
+                else if( $key == "project.label" ){ $json['projectlabel'] = $value; }
 
 
             }
 
-            if( !array_key_exists('projectLabel', $json) && array_key_exists('acronym', $json) ){
-                $json['projectLabel'] = $json['acronym'];
+            if( !array_key_exists('projectlabel', $json) && array_key_exists('acronym', $json) ){
+                $json['projectlabel'] = $json['acronym'];
             }
 
             $out[] = $json;
