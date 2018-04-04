@@ -425,6 +425,8 @@ class ConsoleController extends AbstractOscarController
         $this->checkModule('posix', 'warn');
         $this->checkModule('Reflection');
         $this->checkModule('session');
+        $this->checkModule('xml');
+        $this->checkModule('zip');
 
         $this->getConsole()->writeLine("");
         $this->getConsole()->writeLine(" ### OSCAR configuration : ", ColorInterface::LIGHT_WHITE);
