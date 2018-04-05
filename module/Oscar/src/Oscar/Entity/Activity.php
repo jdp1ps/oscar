@@ -367,21 +367,21 @@ class Activity implements ResourceInterface
      */
     protected $numbers = [];
 
-//    /**
-//     * @return mixed
-//     */
-//    public function getTauxFonctionnement()
-//    {
-//        return $this->tauxFonctionnement;
-//    }
-//
-//    /**
-//     * @param mixed $tauxFonctionnement
-//     */
-//    public function setTauxFonctionnement($tauxFonctionnement)
-//    {
-//        $this->tauxFonctionnement = $tauxFonctionnement;
-//    }
+    /**
+     * @return mixed
+     */
+    public function getTauxFonctionnement()
+    {
+        return $this->tauxFonctionnement;
+    }
+
+    /**
+     * @param mixed $tauxFonctionnement
+     */
+    public function setTauxFonctionnement($tauxFonctionnement)
+    {
+        $this->tauxFonctionnement = $tauxFonctionnement;
+    }
 
     /**
      * Retourne l'acronyme du projet si disponible.

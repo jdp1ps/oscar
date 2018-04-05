@@ -306,8 +306,9 @@ Ce script implique de configurer la correspondance entre les colonnes de la sour
 <?php
 //
 return [
-    0 =>    "project.",
+    0 =>    "project.acronym",
     1 =>    "label",
+    3 =>    "project.label",
     120 =>  "amount",
     166 =>  "dateStart",
     167 =>  "dateEnd",

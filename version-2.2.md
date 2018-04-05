@@ -2,6 +2,22 @@
 
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
+## Import des activités
+
+La configuration pour la conversion CSV > JSON a changé. Les données du projet permet maintenant de spécifier l'intitulé du projet (*label*) : 
+
+```php
+<?php
+//
+return [
+    // Acronyme / Intitulé du projet de l'activité
+    0 =>    "project.acronym",
+    3 =>    "project.label",
+    // ...
+];
+
+```
+
 ## Paramètres personnels
 
 Cet écran permet de :
