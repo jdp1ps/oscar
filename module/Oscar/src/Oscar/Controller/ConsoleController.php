@@ -552,7 +552,7 @@ class ConsoleController extends AbstractOscarController
                     $paramsPhp = Yaml::parse(file_get_contents($params));
 
                     $this->getConsole()->write(" * Accès au connecteur ", ColorInterface::WHITE);
-                    $this->getConsole()->write($url, ColorInterface::LIGHT_WHITE);
+                    $this->getConsole()->write($paramsPhp['url_organizations'], ColorInterface::LIGHT_WHITE);
                     $this->getConsole()->write(" ... ", ColorInterface::WHITE);
 
                     $curl = curl_init();
@@ -588,7 +588,7 @@ class ConsoleController extends AbstractOscarController
                     $paramsPhp = Yaml::parse(file_get_contents($params));
 
                     $this->getConsole()->write(" * Accès au connecteur ", ColorInterface::WHITE);
-                    $this->getConsole()->write($url, ColorInterface::LIGHT_WHITE);
+                    $this->getConsole()->write($paramsPhp['url_persons'], ColorInterface::LIGHT_WHITE);
                     $this->getConsole()->write(" ... ", ColorInterface::WHITE);
 
                     $curl = curl_init();
@@ -598,7 +598,7 @@ class ConsoleController extends AbstractOscarController
                     if( ($error = curl_error($curl)) ){
                         $this->consoleError(" ! Connector no response : " . $error);
                     } else {
-                        $this->consoleSuccess(sprintf(" * Connecteur '%s' : OK", $url));
+                        $this->consoleSuccess("OK");
                     }
                     curl_close($curl);
                 }
