@@ -173,10 +173,11 @@ class Activity implements ResourceInterface
      */
     private $codeEOTP;
 
-//    /**
-//     * @ORM\Column(type="string", length=64, nullable=true)
-//     */
-//    private $tauxFonctionnement;
+    /**
+     * @var double
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $fraisDeGestion;
 
     /**
      * @var string
@@ -368,19 +369,20 @@ class Activity implements ResourceInterface
     protected $numbers = [];
 
     /**
-     * @return mixed
+     * @return float
      */
-    public function getTauxFonctionnement()
+    public function getFraisDeGestion()
     {
-        return $this->tauxFonctionnement;
+        return $this->fraisDeGestion;
     }
 
     /**
-     * @param mixed $tauxFonctionnement
+     * @param float $fraisDeGestion
      */
-    public function setTauxFonctionnement($tauxFonctionnement)
+    public function setFraisDeGestion($fraisDeGestion)
     {
-        $this->tauxFonctionnement = $tauxFonctionnement;
+        $this->fraisDeGestion = $fraisDeGestion;
+        return $this;
     }
 
     /**

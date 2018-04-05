@@ -20,6 +20,10 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
 
     use ServiceLocatorAwareTrait;
 
+    protected function decimalPointComma($in){
+        return doubleval(str_replace(',', '.', $in));
+    }
+
     /**
      * @param array $data
      * @param Activity $object
@@ -34,7 +38,8 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             ->setCodeEOTP($data['codeEOTP'])
             ->setStatus($data['status'])
             ->setTimesheetFormat($data['timesheetFormat'])
-            ->setAmount(floatval($data['amount']))
+            ->setAmount($this->decimalPointComma($data['amount']))
+            ->setFraisDeGestion($this->decimalPointComma($data['fraisDeGestion']))
             ->setTva($this->getTVA($data['tva']))
             ->setFinancialImpact($this->getFinancialImpact($data['financialImpact']))
             ->setCentaureNumConvention($data['centaureNumConvention'])
@@ -106,6 +111,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             'disciplines' => $object->getDisciplinesIds(),
             'timesheetFormat' => $object->getTimesheetFormat(),
             'amount' => $object->getAmount(),
+            'fraisDeGestion' => $object->getFraisDeGestion(),
             'financialImpact' => array_search($object->getFinancialImpact(), Activity::getFinancialImpactValues()),
             'dateStart' => $object->getDateStart(),
             'dateEnd' => $object->getDateEnd(),

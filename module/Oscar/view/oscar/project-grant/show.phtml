@@ -85,6 +85,14 @@
             <div class="budget">
                 <em>Budget</em>
                 <strong><?= $this->currency($entity) ?></strong>
+                <?php if( $entity->getFraisDegestion() ): ?>
+                    <div><small>
+                            Frais de gestion :
+                            <b><?= $entity->getFraisDeGestion() ?></b>
+                            %
+                        </small>
+                    </div>
+                <?php endif ?>
             </div>
             <?php endif; ?>
         </h1>
