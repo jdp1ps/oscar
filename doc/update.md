@@ -70,7 +70,7 @@ php vendor/bin/orm:schema-tool:update --force
 
 ## Vérifier la configuration
 
-Selon la mise à jour, la configuration peut avoir été mise à jour, controler le fichier `./config/autoload/local.php.dist`. Si une mise à jour implique des changements plus spécifiques, ces derniers seront documentés en détails dans un document dédié.
+Selon la mise à jour, la configuration peut avoir été mise à jour, contrôler le fichier `./config/autoload/local.php.dist`. Si une mise à jour implique des changements plus spécifiques, ces derniers seront documentés en détails dans un document dédié.
 
 # Mise à jour des privilèges
 
