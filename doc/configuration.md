@@ -1,10 +1,10 @@
 # Configuration métier
 
-La configuration métier de Oscar est placé dans le fichier `config/autoload/local.php`. 
+La configuration métier de Oscar est placée dans le fichier `config/autoload/local.php`. 
 
 
 ## Rappel
-Techniquement, Oscar commence par charger la configuration par défaut présente dans le fichier `config/autoload/global.php`. **Attention**, ce fichier est versionné et permet de renseigner des valeurs par défaut, **il est susceptible d'être écrasé lors d'une mise à jour et ne dois donc pas être modifié**.
+Techniquement, Oscar commence par charger la configuration par défaut présente dans le fichier `config/autoload/global.php`. **Attention**, ce fichier est versionné et permet de renseigner des valeurs par défaut, **il est susceptible d'être écrasé lors d'une mise à jour et ne doit donc pas être modifié**.
 
 Notez que toutes les valeurs présentes dans ce fichier peuvent être surchargées par celles présentes dans le fichier `local.php`, dans ce sens, elles seront largement commentées.
 
@@ -16,7 +16,7 @@ Ce fichier va contenir la configuration technique et métier de l'application. L
 
 ## Emplacements des documents administratifs et activités
 
-Les emplacements physiques pour le stoquage des documents est situé dans la clef `oscar > paths` : 
+Les emplacements physiques pour le stockage des documents est situé dans la clef `oscar > paths` : 
 
 ```php
 return array(
@@ -46,7 +46,7 @@ return array(
 
 ## Formalisme du PFI
 
-La règle de contrôle du PFI est précisée dans la clef `oscar > validation > pfi` (Il s'agit d'une expression régulière utilisé par Oscar pour valider les donnnées non-nulles saisie dans Oscar).
+La règle de contrôle du PFI est précisée dans la clef `oscar > validation > pfi` (Il s'agit d'une expression régulière utilisée par Oscar pour valider les donnnées non-nulles saisies dans Oscar).
 
 ```php
 // config/autoload/local.php
@@ -67,12 +67,12 @@ return array(
 
 ## Recherche des activités
 
-Oscar propose 2 système de recherche des activités, le premier est basé sur **Zend Lucene** (full PHP), l'autre est basé sur **Elastic Search** (Java).
+Oscar propose 2 systèmes de recherche des activités, le premier est basé sur **Zend Lucene** (full PHP), l'autre est basé sur **Elastic Search** (Java).
 
 
 ### Zend Lucene
 
-Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne necessite pas d'application tiers ou d'installations complémentaires.
+Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installations complémentaires.
 
 ```php
 // config/autoload/local.php
@@ -96,7 +96,7 @@ return array(
 
 ### Elastic Search
 
-Le deuxième système s'appuis sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible.
+Le deuxième système s'appuie sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible.
 
 #### Installation d'Elastic Search : Debian
 
@@ -140,7 +140,7 @@ return array(
 );
 ``` 
 
-> la clef `params` prends bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
+> la clef `params` prend bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
 
 > Lors de la reconstruction de l'index en ligne de commande, assurez-vous de ne pas l'executer en tant que ROOT.
 
@@ -193,7 +193,7 @@ return array(
 );
 ```
 
-Vous pouvez lancer le test de la configuration en tappant la commande : 
+Vous pouvez lancer le test de la configuration en tapant la commande : 
 
 ```bash
 $ php public/index.php oscar test:mailer
