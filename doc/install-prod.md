@@ -1,6 +1,6 @@
 # Installation en production/pré-production
 
-L'installation a été testé sous Debian et Ubuntu Server
+L'installation a été testée sous Debian et Ubuntu Server
 
 ## Prérequis
 
@@ -85,7 +85,7 @@ Faire un *checkout* de la copie de travail,
 git clone https://<USER>@git.unicaen.fr/bouvry/oscar
 ```
 
-> L'accès au dépôt sur le Gitlab Unicaen necessite la création d'un compte nominatif. Un fois le compte activé, vous aurez accès aux dépôts complets (inculant cette documentation technique)
+> L'accès au dépôt sur le Gitlab Unicaen nécessite la création d'un compte nominatif. Un fois le compte activé, vous aurez accès aux dépôts complets (inculant cette documentation technique)
 
 ## Vendor (librairies tiers)
 
@@ -100,7 +100,7 @@ Pour une installation en production/démo/développement **hors unicaen**, une a
 tar xvfz install/vendor.tar.gz
 ```
 
-Ou pour les développeurs situé dans le **réseau unicaen** :
+Ou pour les développeurs située dans le **réseau unicaen** :
 
 ```bash
 php composer.phar update
@@ -109,7 +109,7 @@ php composer.phar update
 
 ## Configuration d'oscar
 
-### Base de donnée
+### Base de données
 
 Oscar est conçu pour fonctionner avec une base de données *Postgresql*.
 
@@ -123,7 +123,7 @@ cp config/autoload/local.php.dist config/autoload/local.php
 vi !$
 ```
 
-### Installation de la base de donnée vide
+### Installation de la base de données vide
 
 Création de l'utilisateur/bdd locale si besoin :
 
@@ -185,7 +185,7 @@ return array(
 );
 ```
 
-Ce fichier contient également des configurations spécifiques métier approfondi dans le fichier [Configuration métier](./configuration.md)
+Ce fichier contient également des configurations spécifiques métier approfondies dans le fichier [Configuration métier](./configuration.md)
 
 
 ### Configurer le mailer
@@ -314,7 +314,7 @@ S'assurer que les dossiers :
 
  - `./data/`
  - Le dossier choisi pour l'index Lucene
- - Le dossier de stoquage des documents
+ - Le dossier de stockge des documents
  - Le fichier de log
 
 Sont bien accessibles en écriture.
@@ -322,7 +322,7 @@ Sont bien accessibles en écriture.
 ### Unicaen App (ldap & mail)
 
 La configuration de **UnicaenApp** et **UnicaenAuth** (surcouches utilisées dans
-Oscar) on leurs fichiers de configuration respectifs dans le dossier `/config/autoload` :
+Oscar) ont leurs fichiers de configuration respectifs dans le dossier `/config/autoload` :
 
  - Pour UnicaenApp, `config/autoload/unicaen-app.local.php`
  - Pour UnicaenAuth, `config/autoload/unicaen-auth.local.php`
@@ -388,13 +388,13 @@ Puis on commence par créer un compte d'autentification :
 php public/index.php oscar auth:add
 ```
 
-Puis lon lui attribut le rôle "Administrateur" :
+Puis on lui attribue le rôle "Administrateur" :
 
 ```bash
 php public/index.php oscar auth:promote <USER> Administrateur
 ```
 
-Utiliser ensuite la navigateur pour vous rendre sur oscar et utiliser l'identifiant **admin** avec la mot de passe **password** pour vous connecter en tant qu'administrateur.
+Utiliser ensuite le navigateur pour vous rendre sur oscar et utiliser l'identifiant **admin** avec la mot de passe **password** pour vous connecter en tant qu'administrateur.
 
   
 **UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*. 
@@ -434,7 +434,7 @@ cp config.json.dist config.json
 vim !$
 ```
 
-Remplissez les informations de connection à la base de donnée et d'accès au serveur.
+Remplissez les informations de connexion à la base de données et d'accès au serveur.
 
 Vous pouvez lancer le serveur node avec la commande : 
 
@@ -453,7 +453,7 @@ TODO (feat. Nico)
 
 Info : Le serveur doit être lancé dans un screen.
 
-Si le fichier *socket/config.json* est présent, **OscarLive** devrait être automatiquement disponible (voir clef socket dans le fichier *config/autoload/local.php*).
+Si le fichier *socket/config.json* est présent, **OscarLive** devrait être automatiquement disponible (voir clef sockée dans le fichier *config/autoload/local.php*).
 
 
 

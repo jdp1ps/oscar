@@ -7,9 +7,9 @@ Il propose des utilitaires en ligne de commande pour **importer des données** d
 
 ## Principe de Connectors
 
-Les connectors permettent de *brancher* Oscar sur des sources de donnée et d'automatiser la maintenance de ces données.
+Les connectors permettent de *brancher* Oscar sur des sources de données et d'automatiser la maintenance de ces données.
 
-Les connectors dans version 2.0 de Oscar s'appuie sur un service REST distant qui va livrer les données à Oscar sous un format standardisé.
+Les connectors dans version 2.0 de Oscar s'appuient sur un service REST distant qui va livrer les données à Oscar sous un format standardisé.
 
 Il est possible de développer ces propres services si les informations sont réparties de façon plus spécifique dans le SI.
 
@@ -19,7 +19,7 @@ Il est possible de développer ces propres services si les informations sont ré
 
 Données utilisées dans l'application pour les personnes qui participent aux activités de recherche.
 
-Note : Attention, dans Oscar, les comptes pour s'authentifier et les personnes sont des données distinctes, une personne peut être présente dans Oscar sans pour autant avoir de compte pour s'authentifier dessus. Par contre, il existe une relation facultative entre les personnes et les authentifications. Cette relation est établit côté Oscar via les champs **ldapLogin** dans **Person** et **username** dans **Authentification**.
+Note : Attention, dans Oscar, les comptes pour s'authentifier et les personnes sont des données distinctes, une personne peut être présente dans Oscar sans pour autant avoir de compte pour s'authentifier dessus. Par contre, il existe une relation facultative entre les personnes et les authentifications. Cette relation est établie côté Oscar via les champs **ldapLogin** dans **Person** et **username** dans **Authentification**.
 
 La configuration suivante dans le fichier `/config/autoload/local.php` permet d'activer le connecteur REST pour les personnes.
 
@@ -96,7 +96,7 @@ Les URL correspondent à l'API REST qui devra retourner un JSON standard, pour l
 ```
 
 Voici les données minimales attendues :
-(les valeurs terminées par un \* sont obligatoire)
+(les valeurs terminées par un \* sont obligatoires)
 
 ```JSON
 {
@@ -124,7 +124,7 @@ Voici les données minimales attendues :
 }
 ```
 
-Important : Oscar gère l'authentification séparément, il établie la jonction entre
+Important : Oscar gère l'authentification séparément, il établit la jonction entre
 la Personne (donnée) et l'authentification en utilisant la valeur présente dans login
 qui doit correspondre au champ username, cette valeur provient généralement du champ **upannAliasLogin** côté LDAP.
 
@@ -163,7 +163,7 @@ Elle se présente sous cette forme :
 
 La clef rôle est un objet composé de clef, une clef pour chaque structure. Dans cet exemple, il y'a 2 structures identifiées ayant pour **Code de structure** : *STRUCTUREA* et *STRUCTUREB* (ces codes correspondent aux valeur du champ **code** dans le connecteur des organisations - voir plus bas).
 
-La valeur de chaque clef *structure* est un tableau de chaîne de caractère contenant le rôle tel que définit dans Oscar.
+La valeur de chaque clef *structure* est un tableau de chaîne de caractères contenant le rôle tel que défini dans Oscar.
 
 La liste des rôles est disponible en base de données dans la table **user_role** ou via l'interface avec le menu `Administration > Gestion des droits`
 
@@ -172,11 +172,11 @@ La liste des rôles est disponible en base de données dans la table **user_role
 
 ### La clef GROUPS
 
-Cette clef est liée à la gestion des rôles. En effet, un rôle peut être définit avec un filtre *Ldap*. Dans l'exemple ci dessous, les rôles **utilisateur** et **responsable financier** ont des filtres LDAP.
+Cette clef est liée à la gestion des rôles. En effet, un rôle peut être défini avec un filtre *Ldap*. Dans l'exemple ci dessous, les rôles **utilisateur** et **responsable financier** ont des filtres LDAP.
 
 ![Rôle avec des filtres LDAP](images/ui-role-ldap.png)
 
-Si un utilisateur se connecte à Oscar, et qu'il appartiend a un rôle correspondant côté LDAP(généralement, le champ **memberOf** dans un LDAP supann), il va endosser automatiquement dans oscar ce rôle **sur la totalité de l'application** (toutes les activités).
+Si un utilisateur se connecte à Oscar, et qu'il appartient a un rôle correspondant côté LDAP(généralement, le champ **memberOf** dans un LDAP supann), il va endosser automatiquement dans oscar ce rôle **sur la totalité de l'application** (toutes les activités).
 
 ## Connector ORGANIZATIONS
 

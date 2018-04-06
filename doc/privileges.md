@@ -6,7 +6,7 @@ Les privilèges permettent d'accorder à un rôle précis l'accès à une foncti
 
 ![Interface de gestion des privilèges](images/ui-privileges.png)
 
-La gestion des privilèges est gérée en base de donnée via les tables : 
+La gestion des privilèges est gérée en base de données via les tables : 
 
  - **privilege**, qui liste les privilèges disponibles
  - **categorie_privilege** qui permet d'organiser ces privilèges en catégorie
@@ -24,7 +24,7 @@ Une procédure automatique existe pour effectuer la mise à jour des privilèges
 2. Se rendre à la racine de oscar
 3. Taper la commande `php public/index.php oscar patch checkPrivilegesJSON`
 
-L'invite en ligne de commande vous indiquera les opérations qui seront réalisée
+L'invite en ligne de commande vous indiquera les opérations qui seront réalisées
 
 ### Note
 
@@ -32,7 +32,7 @@ La liste des privilèges utilisées dans l'application est présente dans le fic
 
 ### Erreur connue
 
-Il est possible (si les privilèges ont été gérés manuellement), que l'indexation postgesql ne soit pas à jour. Pour le vérifier, se connecter à la base de donnée posgresql : 
+Il est possible (si les privilèges ont été gérés manuellement), que l'indexation postgesql ne soit pas à jour. Pour le vérifier, se connecter à la base de données posgresql : 
 
 ```bash
 psql -h <url du serveur postgresl> -U <utilisateur> <base de donnée>
@@ -108,7 +108,7 @@ Puis dans le fichier `install/privileges.json`
 }
 ```
 
-Enfin lancer la commande suivant pour mettre à jour la base de donnée : 
+Enfin lancer la commande suivante pour mettre à jour la base de données : 
 
 `php public/index.php oscar patch checkprivilegesJSON`
 
@@ -129,7 +129,7 @@ TODO
 
 ### Configurer des gardes
 
-Par défaut, les nouvelles méthodes ajoutée dans un controlleur ne peuvent pas être exécutées (même en tant qu'administrateur). Il faut au préalable indiquer à *Zend* les autorisations d'accès à cette méthode.
+Par défaut, les nouvelles méthodes ajoutées dans un controlleur ne peuvent pas être exécutées (même en tant qu'administrateur). Il faut au préalable indiquer à *Zend* les autorisations d'accès à cette méthode.
  
 ```php
 // Fichier module/Oscar/config/module.config.php
@@ -149,7 +149,7 @@ Par défaut, les nouvelles méthodes ajoutée dans un controlleur ne peuvent pas
         // ...
 ```
 
-Le contrôle des gardes permet également de vérifier si la personne authentifié dispose des privilèges qui vont bien. 
+Le contrôle des gardes permet également de vérifier si la personne authentifiée dispose des privilèges qui vont bien. 
 
 ```php
 // Fichier module/Oscar/config/module.config.php

@@ -91,8 +91,8 @@ Voici la liste des clefs attendues :
 Clef          | Type      | PÊ Vide   | Unique | Description
 ------|------|------|------|------------------------------------------
 uid             | String    | Non       | Oui    | Identifiant d'import (évite les doublons et permet de mettre à jour les données importées
-acronym         | String    | Non       | Non    | Acronyme du projet, Si Oscar trouve pas de projet existant avec cet acronyme, il le créera automatiquement
-projectlabel | String    | Oui       | Non    | Utiliser pour créer le projet si il n'existe pas
+acronym         | String    | Non       | Non    | Acronyme du projet, Si Oscar ne trouve pas de projet existant avec cet acronyme, il le créera automatiquement
+projectlabel | String    | Oui       | Non    | Utilisé pour créer le projet si il n'existe pas
 label           | String    | NR        | Non    | Intitulé de l'activité
 datestart       | Date ISO  | Oui       | Non    | Date de début de l'activité
 dateend         | Date ISO  | Oui       | Non    | Date de fin de l'activité
@@ -138,18 +138,18 @@ Cette clef contient une valeur unique permettant à oscar de maintenir le lien l
 
 ### Donnée projet (les clefs `acronym` et `projectlabel`)
 
-La clef `acronym` correspond à l'acronyme du projet. Elle est utilisée par Oscar pour retrouver le projet dans la base de donnée.
+La clef `acronym` correspond à l'acronyme du projet. Elle est utilisée par Oscar pour retrouver le projet dans la base de données.
 
-Si plusieurs activité ont la même valeur `acronym`, elles sont agrégées dans le même projet.
+Si plusieurs activités ont la même valeur `acronym`, elles sont agrégées dans le même projet.
 
-Si oscar ne trouve pas le projet dans la base de donnée, il tentera de le créer. Il utilisera alors la clef `projectlabel` pour renseigner l'intitulé du projet.
+Si oscar ne trouve pas le projet dans la base de données, il tentera de le créer. Il utilisera alors la clef `projectlabel` pour renseigner l'intitulé du projet.
 
 
 ### la clef `type`
 
 La valeur doit correspondre à l'intitulé d'un type d'activité, si Oscar ne trouve pas de type correspondant, il n'affecte pas de type à l'activité.
 
-On peut voir la liste des type d'activité dans le menu **Administration > Gérer les types d'activités**.
+On peut voir la liste des types d'activités dans le menu **Administration > Gérer les types d'activités**.
 
 
 <a id="organizations"></a>
@@ -252,7 +252,7 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 
 
 
-> Si oscar trouve un Jalon de même type à la même date, il ne cré pas le jalon.
+> Si oscar trouve un Jalon de même type à la même date, il ne crée pas le jalon.
 
 
 <a id="payments"></a>
@@ -289,7 +289,7 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 }
 ```
 
-> Les versements sans valeur dans la clef `date` mais avec une clef `predicted` seront tagué comme prévisionnel.
+> Les versements sans valeur dans la clef `date` mais avec une clef `predicted` seront tagués comme prévisionnels.
 
 
 # Importation depuis un fichier Excel
