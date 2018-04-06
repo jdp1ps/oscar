@@ -557,6 +557,7 @@ generate:
             action: generate
     may_terminate: true
 
+
 ################################################################################
 # GESTION des CONTRACTS
 contract:
@@ -1237,6 +1238,7 @@ administration:
                 route: /connectors
                 defaults:
                     action: connectorsHome
+
         # Affiche la configuration d'un connecteur
         connectors:
             type: segment
@@ -1322,6 +1324,7 @@ administration:
                             controller: Administration
                             action: userRoles
 
+        # Rôles des organisations
         organizationrole:
             type: segment
             options:
@@ -1338,6 +1341,16 @@ administration:
                         defaults:
                             action: organizationRoleApi
 
+        # Types d'organisation
+        organizationtype:
+            type: segment
+            options:
+                route: /organizationtype[/:id]
+                defaults:
+                    action: organizationType
+            may_terminate: true
+
+        # Types de document
         typedocument:
              type: segment
              options:

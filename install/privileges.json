@@ -559,6 +559,14 @@
     "fullcode": "MAINTENANCE-MILESTONETYPE_MANAGE"
   },
 
+  "MAINTENANCE-ORGANIZATIONTYPE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "ORGANIZATIONTYPE_MANAGE",
+    "libelle": "Configurer les types d'organisation disponibles",
+    "fullcode": "MAINTENANCE-ORGANIZATIONTYPE_MANAGE"
+  },
+
   "MAINTENANCE-SEARCH_BUILD": {
     "spot": 7,
     "category_id": 6,

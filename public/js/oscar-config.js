@@ -61,6 +61,7 @@ requirejs.config({
         'payments' : 'oscar/dist/Payments',
         'Datepicker2' : 'oscar/dist/Datepicker',
         'activityclone' : 'oscar/dist/Activityclone',
+        'OrganizationType' : 'oscar/dist/OrganizationType'
     },
     shim: {
         "bootstrap": {

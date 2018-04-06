@@ -350,7 +350,39 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $timesheets[] = $json;
         }
 
+        foreach ($this->getExternal( $person ) as $data) {
+            $timesheets[] = $data;
+        }
+
         return $timesheets;
+    }
+
+    /**
+     * Charge les emplois du temps "extérieurs"
+     * @param Person $person
+     */
+    public function getExternal( Person $person ){
+        // TODO Récupération des créneaux 'externes'
+        return [/*
+            [
+                'id'                => null,
+                'activity_id'       => null,
+                'activity_label'    => null,
+                'label'             => 'conges',
+                'status'             => 'info',
+                'owner'    => "Stéphane Bouvry",
+                'owner_id'    => 5063,
+                'start' => "2018-04-05T09:00:00+02:00",
+                'end' => "2018-04-05T16:30:00+02:00",
+                'credentials'    => [
+                    'deletable' => false,
+                    'editable' => false,
+                    'sendable' => false,
+                    'validableAdm' => false,
+                    'validableSci' => false,
+                ],
+            ]*/
+        ];
     }
 
     public function allByActivity( Activity $activity ){

@@ -1,0 +1,23 @@
+<section class="container">
+    <h1>Gestion des types d'oganisation</h1>
+    <div id="app"></div>
+</section>
+<script>
+    require(["vue", "vue-resource", 'OrganizationType'], function(Vue, VueResource, OrganizationType){
+        Vue.use(VueResource);
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true;
+
+        new Vue({
+            render(h){
+                return h(OrganizationType.default, {
+                       props: {
+                           creatable: true,
+                           url: '<?= $this->url('administration/organizationtype') ?>'
+                       }
+                    }
+                )
+            }
+       }).$mount('#app')
+    });
+</script>

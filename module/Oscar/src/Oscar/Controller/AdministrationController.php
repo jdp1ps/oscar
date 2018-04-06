@@ -12,6 +12,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
@@ -19,6 +20,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Zend\Diactoros\Response\JsonResponse;
 use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
 use Zend\View\Model\ViewModel;
@@ -37,6 +39,79 @@ class AdministrationController extends AbstractOscarController
         return [
             'repport' => $this->getActivityService()->searchIndex_rebuild()
         ];
+    }
+
+    public function organizationTypeAction(){
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE);
+        $datas = [];
+
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            switch( $method ){
+                case 'GET' :
+                    $datas['organizationtypes'] = $this->getOrganizationService()->getOrganizationTypes();
+                    return $this->ajaxResponse($datas);
+
+                case 'DELETE' :
+                    $id = $this->params()->fromRoute('id');
+                    $this->getLogger()->debug("Suppression du type " + $id);
+                    if( $id ){
+                        $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+                        if( $type ){
+                            foreach ($type->getChildren() as $t ){
+                                $t->setRoot(null);
+                            }
+                            $this->getEntityManager()->remove($type);
+                            $this->getEntityManager()->flush();
+                            return $this->getResponseOk("Type supprimé");
+                        } else {
+                           return $this->getResponseInternalError("Impossible de supprimer de type");
+                        }
+
+                    }
+                    return $this->getResponseNotImplemented("En cours de développement");
+
+                case 'POST' :
+                    $this->getLogger()->debug(print_r($_POST, true));
+                    $id = $this->params()->fromPost('id', null);
+
+                    $type = null;
+                    if( $id ){
+                        $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+                    }
+
+                    if( !$type ){
+                        $type = new OrganizationType();
+                        $this->getEntityManager()->persist($type);
+                    }
+
+
+                    $type->setLabel($this->params()->fromPost('label'));
+                    $type->setDescription($this->params()->fromPost('description'));
+                    $root = null;
+                    $root_id = intval($this->params()->fromPost('root_id'));
+
+                    $this->getLogger()->debug(print_r($type->toJson(), true));
+                    $this->getLogger()->debug($root_id);
+
+                    if( $root_id && $root_id != $type->getId() )
+                            $root = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $root_id]);
+
+                    $type->setRoot($root);
+                    $this->getEntityManager()->flush();
+                    return $this->ajaxResponse([$type->toJson()]);
+
+                case 'PUT' :
+                    return $this->getResponseInternalError("La mise à jour n'est pas prise en charge.");
+
+                default:
+                    return $this->getResponseInternalError("Mauvaise utilisation de l'API");
+            }
+
+        }
+
+
+        return $datas;
     }
 
     public function connectorsHomeAction(){

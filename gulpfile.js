@@ -183,6 +183,7 @@ gulp.task('module-oscar-datepicker', function(cb){
     exec('poi build --format umd --moduleName datepicker public/js/oscar/src/Datepicker.vue --filename.css datepicker.css --filename.js Datepicker.js --dist public/js/oscar/dist',
         function (err, stdout, stderr) {
             console.log("STDOUT : ", stdout);
+            console.log("STDOUT : ", stdout);
             console.log("STDERR : ", stderr);
             cb(err);
         });
@@ -208,6 +209,15 @@ gulp.task('module-oscar-activityclone', function(cb){
 
 gulp.task('module-oscar-notification', function(cb){
     exec('poi build --format umd --moduleName notification public/js/oscar/src/Notification.vue --filename.css notification.css --filename.js Notification.js --dist public/js/oscar/dist',
+        function (err, stdout, stderr) {
+            console.log("STDOUT : ", stdout);
+            console.log("STDERR : ", stderr);
+            cb(err);
+        });
+});
+
+gulp.task('module-oscar-organizationtype', function(cb){
+    exec('poi build --format umd --moduleName organizationtype public/js/oscar/src/OrganizationType.vue --filename.css organizationtype.css --filename.js OrganizationType.js --dist public/js/oscar/dist',
         function (err, stdout, stderr) {
             console.log("STDOUT : ", stdout);
             console.log("STDERR : ", stderr);

@@ -425,12 +425,12 @@ var TimeEvent = {
             @mouseleave="handlerTooltipOff(event, $event)"
             @mousedown="handlerMouseDown"
             :title="event.label"
-            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci, 'reject-adm': isRejectAdm}">
+            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-external': isExternal,'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci, 'reject-adm': isRejectAdm}">
         <div class="label" data-uid="UID">
           {{ event.label }}
         </div>
         
-        <div class="description" v-if="!isInfo">
+        <div class="description" v-if="!(isInfo || isExternal) ">
             <div class="submit-status">
                 <span class="admin-status">
                     <i class="icon-archive icon-admin" :class="adminState"></i> Admin
@@ -592,8 +592,19 @@ var TimeEvent = {
         isReject(){
             return this.event.status == "reject";
         },
+
         isInfo(){
             return this.event.status == "info";
+        },
+
+        isExternal(){
+
+            return (
+                this.event.status == "conges" ||
+                this.event.status == "formation" ||
+                this.event.status == "enseignement" ||
+                this.event.status == "external"
+            );
         },
 
         colorLabel(){
@@ -1300,6 +1311,7 @@ var ListItemView = {
     template: `<article class="list-item" :style="css" :class="{
                     'event-editable': event.editable, 
                     'status-info': event.isInfo, 
+                    'status-external': event.isExternal,
                     'status-draft': event.isDraft, 
                     'status-send' : event.isSend, 
                     'status-valid': event.isValid, 

@@ -12,6 +12,7 @@ use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationType;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
 use Oscar\Utils\UnicaenDoctrinePaginator;
@@ -116,6 +117,19 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         return $activities;
+    }
+
+    public function getOrganizationTypes(){
+
+        $types = [];
+        $result = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy(['root' => null], ['label' => 'DESC']);
+
+        /** @var OrganizationType $type */
+        foreach ($result as $type ) {
+            $types[$type->getId()] = $type->toJson();
+        }
+
+        return $types;
     }
 
     public function getTypes(){
