@@ -37,7 +37,9 @@ Cette évolution nécessite d'adapter la configuration dans Oscar, tout est dét
 
 ## Type d'organisation
 
-Les types d'organisation sont maintenant libres à la saisie et lors de la synchronisation. 
+Les types d'organisation sont maintenant gérés avec un objet `OrganizationType`.
+
+Le types d'oganisation sont administrables via le privilège **ORGANIZATIONTYPE_MANAGE**. Une interface dédié permet de configurer les types disponibles dans Oscar.
 
 Le connector `organization` permet de fixer le type via une chaîne de caractères. Les anciennes valeurs étaient des entiers correspondant à l'index d'une valeur fixée *en dure* dans le code source de Oscar. Les valeur s'affichent telles quelles. Un script en ligne de commande permet de convertir les valeurs entières du champ type avec les valeurs du tableau : 
 
@@ -66,6 +68,7 @@ Le système de notification est maintenant étendu aux Jalons/Versements. Il con
 
 ## Améliorations / Mise à jour
 
+ - Le moteur de recherche des organisations permet maintenant de chercher via les connectors en utilisant la syntaxe `nom_connecteur=valeur_connector`
  - Lors de l'execution de la **synchronisation** des personnes/organisations en ligne de commande, le rapport de rendu préfixe les lignes du rapport avec les 3 premières lettres du statut de la ligne : (err : erreur, war : alerte, inf : info, not : notice).
  - Ajout de la branche dans les informations de version ainsi qu'une commande `php public/index.php oscar version` pour visualiser la version en ligne de commande
  - Le **Connecteur Organisation** prends en charge les champs : siret, email, url et type (chaîne de charactère facultative)

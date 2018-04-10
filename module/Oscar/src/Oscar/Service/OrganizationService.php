@@ -14,6 +14,7 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationType;
 use Oscar\Entity\ProjectPartner;
+use Oscar\Exception\OscarException;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\Structure;
@@ -174,22 +175,38 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     {
         $qb = $this->getBaseQuery();
         if ($search) {
-            $qb->orderBy('o.code', 'ASC')
-                ->orWhere('LOWER(o.shortName) LIKE :search')
-                ->orWhere('LOWER(o.fullName) LIKE :search')
-                ->orWhere('LOWER(o.city) LIKE :search')
-                ->orWhere('o.zipCode = :searchStrict')
-                ->orWhere('LOWER(o.code) LIKE :search');
 
-            if( strlen($search) == 14 )
-                $qb->orWhere('o.siret = :searchStrict');
+            // Recherche sur le connector
+            $reg = preg_match('/([a-z]*)=(.*)/', $search, $matches);
+            if( $reg ){
+                $connectors = $this->getConnectorsList();
+                $connectorName = $matches[1];
+                if( !in_array($connectorName, $connectors) ){
+                    throw new OscarException("Le connecteur $connectorName n'existe pas.");
+                }
+                $connectorValue = $matches[2].'%';
+                $where = 'o.connectors LIKE \'%"'.$connectorName.'";s:%:"'.$connectorValue.'"%\'';
+                $qb->orWhere($where);
+            }
+            else {
+
+                $qb->orderBy('o.code', 'ASC')
+                    ->orWhere('LOWER(o.shortName) LIKE :search')
+                    ->orWhere('LOWER(o.fullName) LIKE :search')
+                    ->orWhere('LOWER(o.city) LIKE :search')
+                    ->orWhere('o.zipCode = :searchStrict')
+                    ->orWhere('LOWER(o.code) LIKE :search');
+
+                if (strlen($search) == 14)
+                    $qb->orWhere('o.siret = :searchStrict');
 
 
-            $qb->setParameters([
-                'search' => '%'.strtolower($search).'%',
-                'searchStrict' => strtolower($search),
-                ]
-            );
+                $qb->setParameters([
+                        'search' => '%' . strtolower($search) . '%',
+                        'searchStrict' => strtolower($search),
+                    ]
+                );
+            }
 
         } else {
             $qb->orderBy('o.id', 'DESC');
