@@ -253,17 +253,20 @@
                 data: {
                   shortName: "",
                     lastsearch: null,
+                    show: true,
                     filter: "",
                     organizations: [{id: 1, label:"Test1"}, {id: 2, label:"Test2"}]
                 },
                 template: `<div class="input-group input-group-lg">
     <span class="input-group-addon">Nom court / Acronyme</span>
-    <input type="text" class="form-control" v-model="shortName">
+    <input type="text" class="form-control" v-model="shortName" name="shortName">
     <span class="input-group-addon">
     <span v-show="filteredOrganizations.length && filter.length > 2" class="already">
-        <i class="icon-building-filled"></i>
-        <span class="counter">{{ filteredOrganizations.length }}</span>
-        <section v-if="filteredOrganizations.length" class="organizations">
+        <span @click="show = !show">
+            <i class="icon-building-filled"></i>
+            <span class="label label-danger">{{ filteredOrganizations.length }}</span>
+        </span>
+        <section v-show="filteredOrganizations.length && show" class="organizations">
         <small>Cette organisation existe probablement déjà : </small>
         <div v-for="o in filteredOrganizations" :class="{'disbaled': o.closed}">
             <small>
