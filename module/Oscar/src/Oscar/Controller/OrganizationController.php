@@ -78,7 +78,7 @@ class OrganizationController extends AbstractOscarController
         return array(
             'entities' => $organizations,
             'search' => $search,
-            'types' => $this->getOrganizationService()->getTypes(),
+            'types' => $this->getOrganizationService()->getOrganizationTypesSelect(),
             'type' => $type,
             'active' => $active,
         );
@@ -717,7 +717,6 @@ class OrganizationController extends AbstractOscarController
             $entity = $result->getQuery()->getSingleResult();
         }
 
-        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList(), $this->getOrganizationService()->getOrganizationTypesSelect());
         $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList(), $this->getOrganizationService()->getOrganizationTypesSelect());
         $form->init();
         $form->bind($entity);

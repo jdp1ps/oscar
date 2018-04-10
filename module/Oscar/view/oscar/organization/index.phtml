@@ -24,8 +24,8 @@ $markText = function( $text, $search ){
             <div class="col-md-5">
                 <select class="form-control select2" name="t[]" id="" multiple="true" placeholder="Type d'organisation">
                     <option value="">Tous</option>
-                    <?php foreach($types as $t ): ?>
-                        <option value="<?= $t ?>" <?= in_array($t, $type) ? ' selected="selected"' : '' ?>><?= $t ?></option>
+                    <?php foreach($types as $id => $t ): ?>
+                        <option value="<?= $id ?>" <?= in_array($id, $type) ? ' selected="selected"' : '' ?>><?= $t ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

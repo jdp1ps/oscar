@@ -196,7 +196,14 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         if (isset($filter['type']) && $filter['type']){
-            $qb->andWhere('o.type IN(:type)')->setParameter('type', $filter['type']);
+            $types = $this->getEntityManager()->getRepository(OrganizationType::class)->createQueryBuilder('t')
+                ->where('t.id IN (:types)')
+                ->setParameter('types', $filter['type'])
+                ->getQuery()
+                ->getResult();
+
+            $qb->leftJoin('o.typeObj', 't')
+                ->andWhere('t.id IN(:type)')->setParameter('type', $types);
         }
 
         if (isset($filter['active']) && $filter['active']){
