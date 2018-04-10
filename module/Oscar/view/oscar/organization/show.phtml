@@ -4,7 +4,7 @@
         <a href="javascript:history.back()" class="link">Retour</a>
     </div>
     <header class="header jumbotron organization type-<?= $organization->getType() ?>">
-        <h2><?= $organization->getType() ?></h2>
+        <h2><?= $organization->getTypeObj() ?></h2>
         <h1>
             <?php if( $organization->getCode() ): ?>
                 <abbr><?= $organization->getCode() ?></abbr>
