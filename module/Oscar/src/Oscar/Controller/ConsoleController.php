@@ -32,6 +32,7 @@ use Oscar\Entity\Notification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
@@ -86,6 +87,7 @@ class ConsoleController extends AbstractOscarController
     {
         $types = Organization::getTypes();
         $organisations = $this->getOrganizationService()->getOrganizations();
+        $this->consoleHeader("Mise à jour des organisations (Étape 1) : ");
         $this->getLogger()->info(sprintf("%s organisation(s) à traiter : ", count($organisations)));
         foreach ($organisations as $organisation) {
             if( array_key_exists($organisation->getType(), $types) ){
@@ -94,7 +96,45 @@ class ConsoleController extends AbstractOscarController
                 $this->getEntityManager()->flush($organisation);
             }
         }
-        $this->getLogger()->info("Terminé");
+        $this->getConsole()->writeLine("DONE", ColorInterface::GRAY);
+
+        // Récupération des types définit en dur dans les Organisations
+        $typesStr = $this->getOrganizationService()->getTypes();
+
+        $toCreate = [];
+        $exists = [];
+
+        /** @var OrganizationType $exist */
+        foreach ($this->getEntityManager()->getRepository(OrganizationType::class)->findAll() as $exist) {
+            $exists[] = $exist->getLabel();
+        }
+
+        $toCreate = array_diff($typesStr, $exists);
+        $this->consoleHeader("Mise à jour des types d'organisation : ");
+
+        foreach ($toCreate as $label) {
+            $type = new OrganizationType();
+            $this->getEntityManager()->persist($type);
+            $type->setLabel($label);
+            $this->getEntityManager()->flush($type);
+            $this->consoleSuccess("Création du type '$label'");
+        }
+        $this->getConsole()->writeLine("DONE", ColorInterface::GRAY);
+
+        $this->consoleHeader("Mise à jour des organisations : ");
+        foreach ($organisations as $organisation) {
+            if( $organisation->getType() ){
+                $typeStr = $organisation->getType();
+                $typeObj = $organisation->getTypeObj();
+                if( $typeObj && $typeObj->getLabel() == $typeStr ){
+                    continue;
+                }
+                $organisation->setTypeObj($this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(["label" => $typeStr]));
+                $this->getConsole()->writeLine("Mise à jour du type $typeStr vers : " . $organisation->getTypeObj());
+            }
+        }
+        $this->getEntityManager()->flush();
+
     }
 
 

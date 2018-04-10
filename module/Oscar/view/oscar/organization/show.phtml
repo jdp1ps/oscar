@@ -51,19 +51,7 @@
                 <?= $organization->getDescription() ? $organization->getDescription() : '<i class="missing-data">Aucun</i>' ?>
 
                 <h5>Synchronisation</h5>
-                <dl>
-                    <dt>Identifiant LDAP</dt>
-                    <dd><?= $organization->getLdapSupannCodeEntite() ?> </dd>
-                </dl>
-                <dl>
-                    <dt>Identifiant SIFAC</dt>
-                    <dd>
-                        <?= $organization->getSifacId() ?>
-                        <?php if( $organization->getSifacGroup() ): ?>
-                            <small class="text-light"> (group : <?= $organization->getSifacGroup() ?>)</small>
-                        <?php endif; ?>
-                    </dd>
-                </dl>
+
                 <dl>
                     <dt>SIRET</dt>
                     <dd><?= $organization->getSiret() ?> </dd>
@@ -71,22 +59,27 @@
                 <dl>
                     <dt>CONNECTOR</dt>
                     <dd>
-                        <?php if( count($organization->getConnectors()) ): ?>
+
                             <ul>
-                            <?php foreach($organization->getConnectors() as $connector=>$value): ?>
-                                <?php if( $value ): ?>
+                            <?php foreach($connectors as $connector): ?>
+
                                 <li>
-                                    <?= $connector ?> : <strong><?= $value ?></strong>
+                                    <?= $connector ?> : <strong><?= $organization->getConnectorID($connector) ?></strong>
+
+                                    <?php if( $organization->getConnectorID($connector)): ?>
                                     <a href="<?= $this->url('organization/synchronize', ['id' => $organization->getId(), 'connector' => $connector]) ?>"
                                             class="btn btn-primary btn-xs">
                                         <i class="icon-cw-outline"></i>
                                         Synchroniser
                                     </a>
+                                    <?php else: ?>
+                                    <em>Non synchronisé</em>
+                                    <?php endif; ?>
                                 </li>
-                                <?php endif; ?>
+
                             <?php endforeach; ?>
                             </ul>
-                        <?php endif; ?>
+
                 </dl>
             </div>
         </div>

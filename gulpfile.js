@@ -237,6 +237,10 @@ gulp.task('watch-oscar', [], function(){
 });
 
 
+gulp.task('watch-sass', function () {
+    gulp.watch(directories.css + '**/*.scss', ['sass']);
+});
+
 
 gulp.task('watch', function () {
     gulp.watch(directories.css + '**/*.scss', ['sass']);
@@ -244,8 +248,6 @@ gulp.task('watch', function () {
     gulp.watch(directories.jsModels + 'src/*.js', ['oscar-model']);
     gulp.watch('./public/js/modules/unicaen/src/css/*.scss', ['modules-css']);
     gulp.watch('./public/js/modules/unicaen/src/js/*.js', ['modules-js']);
-
-
 });
 
 

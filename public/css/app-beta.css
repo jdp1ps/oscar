@@ -7589,6 +7589,13 @@ time.date-missing {
   .keyvalue-line button {
     flex: 1; }
 
+.organizationtype {
+  margin-left: 1em; }
+  .organizationtype small {
+    display: inline-block;
+    margin-left: 2em;
+    line-height: 2em; }
+
 .organization {
   /* // TYPE_ETABLISSEMENT
    &.type-7 h2:before { content: "\e876";}
@@ -7701,10 +7708,24 @@ time.date-missing {
     animation-direction: alternate; }
 
 .uc-frequency {
-  background: rgba(255, 255, 255, 0.5); }
+  text-align: center; }
   .uc-frequency .heading .hours {
+    background: rgba(255, 255, 255, 0.5);
     background: #790629;
-    color: white; }
+    color: white;
+    font-weight: 100;
+    padding: .5em 1em;
+    cursor: pointer; }
+  .uc-frequency .content .line {
+    background: rgba(255, 255, 255, 0.5); }
+    .uc-frequency .content .line:hover {
+      background: rgba(255, 255, 255, 0.75); }
+  .uc-frequency .content .hours-label {
+    text-align: right;
+    padding: .5em 1em;
+    font-size: 1em;
+    font-weight: 100;
+    cursor: pointer; }
   .uc-frequency .content .hours-selector {
     cursor: pointer; }
     .uc-frequency .content .hours-selector .icon-ok-circled {

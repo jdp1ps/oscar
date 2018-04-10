@@ -3220,6 +3220,22 @@ time.date-missing {
   }
 }
 
+.organizationtype {
+  .card-title {
+    small {
+      display: inline-block;
+      margin-left: 2em;
+      line-height: 2em;
+      flex: 1;
+      flex-grow: 1;
+    }
+  }
+  .sub {
+    font-size: .8em;
+    margin-left: 2em;
+  }
+}
+
 .organization {
   &.closed > * {
     opacity: .5;

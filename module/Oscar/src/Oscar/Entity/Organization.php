@@ -254,6 +254,14 @@ class Organization implements ResourceInterface, IConnectedObject
     protected $type;
 
     /**
+     * Type d'organisation (Objet).
+     *
+     * @var OrganizationType
+     * @ORM\ManyToOne(targetEntity="OrganizationType")
+     */
+    protected $typeObj;
+
+    /**
      * Groupe (SIFAC).
      *
      * @var string
@@ -295,6 +303,22 @@ class Organization implements ResourceInterface, IConnectedObject
     public function isClose()
     {
         return $this->getDateEnd() && $this->getDateEnd() <= new \DateTime();
+    }
+
+    /**
+     * @return OrganizationType
+     */
+    public function getTypeObj()
+    {
+        return $this->typeObj;
+    }
+
+    /**
+     * @param OrganizationType $typeObj
+     */
+    public function setTypeObj($typeObj)
+    {
+        $this->typeObj = $typeObj;
     }
 
 

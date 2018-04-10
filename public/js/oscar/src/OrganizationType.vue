@@ -1,7 +1,5 @@
 <template>
     <section class="organizationtype">
-        LISTE
-
         <transition name="fade">
             <div class="error overlay" v-if="error">
                 <div class="overlay-content">
@@ -52,25 +50,13 @@
             </div>
         </transition>
 
-        <article class="card card-xs" v-for="type in organizationtypes" draggable="true">
-            <h3 class="card-title">
-                {{ type.label }}
-                <small>
-                    <a href="#" @click.prevent="edit(type)"><i class="icon-floppy"></i> Modifier</a>
-                    <a href="#" @click.prevent="remove(type)"><i class="icon-trash"></i> Supprimer</a>
-                </small>
-            </h3>
-
-                <article v-for="subtype in type.children" class="card card-xs">
-                    {{ subtype.label }}
-                    <small>
-                        <a href="#" @click.prevent="edit(subtype)"><i class="icon-floppy"></i> Modifier</a>
-                        <a href="#" @click.prevent="remove(subtype)"><i class="icon-trash"></i> Supprimer</a>
-                    </small>
-                </article>
-
-        </article>
-
+        <organizationtypeitem :organizationtype="type"
+                :key="type.id"
+                :creatable="creatable"
+                v-for="type in organizationtypes"
+                @edit="edit"
+                @remove="remove"
+        />
 
         <nav class="text-right">
             <a href="#" @click.prevent="handlerNew" v-show="creatable" class="oscar-link">
@@ -78,19 +64,17 @@
                 Nouveau type d'organisation
             </a>
         </nav>
-
     </section>
-
 </template>
 <script>
+    //import OrganizationTypeItem from './OrganizationTypeItem.vue';
+    import OrganizationTypeItem from './OrganizationTypeItem.vue';
 
     export default {
         props: ['url', 'creatable'],
-
         components: {
-
+            organizationtypeitem: OrganizationTypeItem
         },
-
         data() {
             return {
                 organizationtypes: [],
@@ -112,10 +96,9 @@
         },
 
         methods: {
-            getTypeById(id){
-
-            },
-
+            /**
+             * Suppression du type.
+             */
             remove(type){
                 let promise = this.$http.delete(this.url+'/'+type.id);
 
@@ -138,9 +121,7 @@
 
             save(){
                 this.pendingMsg = "Enregistrement";
-
                 let promise = this.$http.post(this.url, this.formData);
-
                 promise.then(
                     success => {
                         this.getOrganizationtypes();
@@ -160,7 +141,6 @@
                     label: "",
                     description: "",
                     root_id: ""
-
                 };
             },
 

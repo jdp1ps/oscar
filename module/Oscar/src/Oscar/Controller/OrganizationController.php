@@ -13,6 +13,7 @@ use Oscar\Connector\IConnector;
 use Oscar\Connector\IConnectorOrganization;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Project;
@@ -320,6 +321,7 @@ class OrganizationController extends AbstractOscarController
         $organizationId = $this->params()->fromRoute('id');
         $page = $this->params()->fromQuery('page', 1);
         return [
+            'connectors' => $this->getOrganizationService()->getConnectorsList(),
             'organization' => $this->getOrganizationService()->getOrganization($organizationId),
             'projects' => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectOrganization($organizationId), $page),
             'activities' => $this->getActivityService()->byOrganizationWithoutProject($organizationId),
@@ -328,28 +330,18 @@ class OrganizationController extends AbstractOscarController
 
     public function newAction()
     {
-        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList());
+        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList(), $this->getOrganizationService()->getOrganizationTypesSelect());
+        $form->init();
 
         if ($this->getRequest()->isPost()) {
             $posted = $this->getRequest()->getPost();
             $form->setData($posted);
-            $entity = new Organization();
-            $this->getEntityManager()->persist($entity);
-
-            // VALIDATION
-
-            // HYDRATATION
-            $hydrator = new EntityHydrator();
-
-            $connectorsFields = [];
-            foreach( $this->getOrganizationService()->getConnectorsList() as $connector ){
-                $connectorsFields[] = 'connector_' . $connector;
-                $entity->setConnectorID($connector, $posted['connector_' . $connector]);
+            if( $form->isValid() ){
+                $entity = new Organization();
+                $this->getEntityManager()->persist($entity);
+                $this->getEntityManager()->flush($entity);
+                $this->redirect()->toRoute('organization/show', ['id'=>$entity->getId()]);
             }
-            $hydrator->hydrateAuto($posted->toArray(), $entity, $connectorsFields);
-
-            $this->getEntityManager()->flush($entity);
-            $this->redirect()->toRoute('organization/show', ['id'=>$entity->getId()]);
         }
 
         $view = new ViewModel(array(
@@ -725,29 +717,24 @@ class OrganizationController extends AbstractOscarController
             $entity = $result->getQuery()->getSingleResult();
         }
 
-        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList());
+        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList(), $this->getOrganizationService()->getOrganizationTypesSelect());
+        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList(), $this->getOrganizationService()->getOrganizationTypesSelect());
+        $form->init();
+        $form->bind($entity);
 
         if ($this->getRequest()->isPost()) {
-            $posted = $this->getRequest()->getPost();
-
-            $form->setData($posted);
-
-            // VALIDATION
-
-            // HYDRATATION
-            $hydrator = new EntityHydrator();
-            $connectorsFields = [];
-            foreach( $this->getOrganizationService()->getConnectorsList() as $connector ){
-                $connectorsFields[] = 'connector_' . $connector;
-                $entity->setConnectorID($connector, $posted['connector_' . $connector]);
+            $form->setData($this->getRequest()->getPost());
+            if( $form->isValid() ){
+                $this->getEntityManager()->flush($entity);
+                $this->getActivityLogService()->addUserInfo(
+                    sprintf('a modifié les informations pour %s', $entity->log()),
+                    $this->getDefaultContext(), $entity->getId(),
+                    LogActivity::LEVEL_INCHARGE
+                );
+                $em->flush($entity);
+                $this->flashMessenger()->addSuccessMessage(_('Données sauvegardées.'));
+                $this->redirect()->toRoute('organization/show', ['id' => $id]);
             }
-            $hydrator->hydrateAuto($posted->toArray(), $entity, $connectorsFields);
-
-            $em->flush($entity);
-
-            $this->redirect()->toRoute('organization/show', ['id' => $id]);
-
-            //$this->getSearchProjectService()->update($entity);
         } // Affichage
         else {
             $datas = $result->getQuery()->getResult(Query::HYDRATE_ARRAY)[0];

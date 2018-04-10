@@ -45,6 +45,31 @@ class AdministrationController extends AbstractOscarController
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE);
         $datas = [];
 
+        if( ($action = $this->params()->fromQuery('action')) ){
+            if( $action == 'generate' ){
+                $typesStr = $this->getOrganizationService()->getTypes();
+
+                $toCreate = [];
+                $exists = [];
+
+                /** @var OrganizationType $exist */
+                foreach ($this->getEntityManager()->getRepository(OrganizationType::class)->findAll() as $exist) {
+                    $exists[] = $exist->getLabel();
+                }
+
+                $toCreate = array_diff($typesStr, $exists);
+
+                foreach ($toCreate as $label) {
+                    $type = new OrganizationType();
+                    $this->getEntityManager()->persist($type);
+                    $type->setLabel($label);
+                    $this->getEntityManager()->flush($type);
+                }
+                die("Generate");
+            }
+            return $this->getResponseBadRequest();
+        }
+
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();
             switch( $method ){

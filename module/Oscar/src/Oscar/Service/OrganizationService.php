@@ -151,6 +151,18 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         return $types;
     }
 
+    public function getOrganizationTypesSelect(){
+        $options = [];
+
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'DESC']);
+        foreach ($types as $type) {
+            $options[$type->getId()] = $type;
+        }
+        return $options;
+
+
+    }
+
     /**
      * Retourne le résultat de la recherche $search.
      *
