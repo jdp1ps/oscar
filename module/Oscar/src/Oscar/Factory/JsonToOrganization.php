@@ -71,6 +71,5 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
                 'address') ? $jsonData->address->country : null)
             ->setBp(property_exists($jsonData,
                 'address') ? $jsonData->address->address3 : null);
-
     }
 }

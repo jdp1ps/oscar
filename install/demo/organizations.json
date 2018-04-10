@@ -26,7 +26,8 @@
     "uid": "COGIP",
     "code": "COGIP",
     "shortname": "COGIP",
-    "longname": "Bureau de la COGIP"
+    "longname": "Bureau de la COGIP",
+    "type": "Charlot"
   },
   {
     "uid": "DICOC",

@@ -122,7 +122,7 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
 
                 try {
                     /** @var Person $personOscar */
-                    $organization = $repository->getObjectByConnectorID($this->getName(), $data->code);
+                    $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
                     $action = "update";
                 } catch( NoResultException $e ){
                     $organization = $repository->newPersistantObject();
@@ -132,6 +132,7 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
                 if($organization->getDateUpdated() < new \DateTime($data->dateupdated) || $force == true ){
 
                     $organization = $this->hydrateWithDatas($organization, $data);
+                    $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
 
                     $repository->flush($organization);
                     if( $action == 'add' ){

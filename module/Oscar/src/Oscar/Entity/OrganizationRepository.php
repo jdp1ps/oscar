@@ -25,6 +25,10 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $this->getEntityManager()->flush($personOrganization);
     }
 
+    public function getTypeObjByLabel($label){
+        return $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['label' => $label]);
+    }
+
     /**
      * @param $fullName
      * @return Organization
