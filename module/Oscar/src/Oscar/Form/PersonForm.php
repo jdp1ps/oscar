@@ -52,17 +52,6 @@ class PersonForm extends Form implements InputFilterProviderInterface
         ]);
 
         $this->add([
-            'name'   => 'codeHarpege',
-            'attributes' => [
-                'class' => 'form-control'
-            ],
-            'options' => [
-                'label' => 'Code dans Harpège'
-            ],
-            'type'=>'Text'
-        ]);
-
-        $this->add([
             'name'   => 'ladapLogin',
             'attributes' => [
                 'class' => 'form-control'
@@ -124,7 +113,7 @@ class PersonForm extends Form implements InputFilterProviderInterface
                     'label' => $connector
                 ],
                 'attributes' => [
-                    'class' => 'form-input'
+                    'class' => 'form-control'
                 ],
                 'type'=>'Text'
             ]);

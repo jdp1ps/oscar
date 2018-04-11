@@ -662,6 +662,8 @@ class PersonController extends AbstractOscarController
         try {
             $connectors =  $this->getConfiguration('oscar.connectors.person');
             $personConnector = array_keys($connectors);
+
+
             $form->setConnectors($personConnector);
         } catch( \Exception $e ){
 
@@ -686,6 +688,7 @@ class PersonController extends AbstractOscarController
         }
 
         $view = new ViewModel([
+            'connectors' => $personConnector,
             'person'    => $person,
             'id'        => $id,
             'form'      => $form

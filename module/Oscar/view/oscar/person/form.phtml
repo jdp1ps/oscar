@@ -12,20 +12,144 @@
 
 </style>
 <div class="container">
+    <?php if($person && $person->isConnected()): ?>
+        <div class="modal fade" tabindex="-1" role="dialog" id="infos">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">
+                            <i class="icon-attention-1"></i>
+                            Attention</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Les données de la personne <strong><?= $person ?></strong> sont mises à jour via le système d'information, vos modifications seront écrasées lors de la prochaine synchronisation des données&hellip;</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+        <script>
+            require(['jquery', 'bootstrap'], function($){
+                $('#infos').modal('show');
+            })
+        </script>
+    <?php endif; ?>
     <?= $this->form()->openTag($form->prepare()); ?>
-    <?php /*$this->formControlGroup($form->get('firstname')); ?>
-    <?= $this->formControlGroup($form->get('lastname')); ?>
-    <?= $this->formControlGroup($form->get('email')); ?>
-    <?= $this->formControlGroup($form->get('phone')); ?>
-    <?= $this->formControlGroup($form->get('codeHarpege')); ?>
-    <?= $this->formControlGroup($form->get('codeLdap')); ?>
-    <?= $this->formControlGroup($form->get('codeLdap'));*/ ?>
-    <?= $this->formCollection($form); ?>
-    <?php /*
-    <?= $this->formControlGroup($form->get('ldapSiteLocation')); ?>
-    <?= $this->formControlGroup($form->get('ldapAffectation')); ?>
-    */ ?>
+
+
+
+    <ul class="errors">
+        <?php foreach ($form->getMessages() as $msg): ?>
+            <li><?= $msg ?></li>
+        <?php endforeach; ?>
+    </ul>
+
+    <h1>
+        <?php if( $person->getId() ): ?>
+        Modification de <strong><?= $person ?></strong>
+        <?php else: ?>
+        Nouvelle personne
+        <?php endif; ?>
+    </h1>
+
+    <h3>Information civiles</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Prénom</span>
+                    <?= $this->formInput($form->get('firstname')) ?>
+                    <?= $this->formElementErrors($form->get('firstname')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Nom</span>
+                    <?= $this->formInput($form->get('lastname')) ?>
+                    <?= $this->formElementErrors($form->get('lastname')); ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h3>Contact</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Courriel</span>
+                    <?= $this->formInput($form->get('email')) ?>
+                    <?= $this->formElementErrors($form->get('email')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Téléphone</span>
+                    <?= $this->formInput($form->get('phone')) ?>
+                    <?= $this->formElementErrors($form->get('phone')); ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Authentification / Accès</h3>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Identifiant</span>
+                    <?= $this->formInput($form->get('ladapLogin')) ?>
+                    <?= $this->formElementErrors($form->get('ladapLogin')); ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Informations administratives</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Localisation</span>
+                    <?= $this->formInput($form->get('ldapSiteLocation')) ?>
+                    <?= $this->formElementErrors($form->get('ldapSiteLocation')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Affectation</span>
+                    <?= $this->formInput($form->get('ldapAffectation')) ?>
+                    <?= $this->formElementErrors($form->get('ldapAffectation')); ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Synchronisation</h3>
+    <div class="row">
+        <?php foreach($connectors as $connector): ?>
+        <div class="col-md-12">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon"><?= $connector ?></span>
+                    <?= $this->formInput($form->get('connector_'.$connector)) ?>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
     <?= $this->formHidden($form->get('id')); ?>
+
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
     <!--<nav class="btn-group">
         <a href="javascript:history.back()" class="btn btn-default">Annuler</a>
         <?= $this->formRow($form->get('submit')); ?>
