@@ -6,8 +6,11 @@
     <h1>Nouvelle organisation</h1>
     <?php endif; ?>
 
+    <pre>
+        <?php var_dump($organization->getConnectors()) ?>
+    </pre>
 
-    <?php if($organization && $organization->getConnectors()): ?>
+    <?php if($organization && count($organization->getConnectors())): ?>
         <div class="modal fade" tabindex="-1" role="dialog" id="infos">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">

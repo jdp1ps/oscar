@@ -42,6 +42,20 @@ return array(
 );
 ```
 
+Si votre copie de Oscar n'utilise pas les connectors pour synchroniser des données, vous devez renseigner les différents connectors avec des tableaux vides : 
+
+```php
+<?php
+return array(
+    'oscar' => [
+        'connectors' => [
+            'organization' => [],
+            'person' => []
+        ],
+    ]
+);
+```
+
 Pour information, la clef `class` permet de choisir une classe à utiliser pour traiter les données. Cette class implémente l'interface `IConnectorPerson`, il est possible d'implémenter vos propres connectors si besoin.
 
 le fichier `/config/connectors/person_rest.yml` contient les URL utilisées par le connecteur pour obtenir les données :

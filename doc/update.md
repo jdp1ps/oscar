@@ -48,6 +48,14 @@ git reset --hard origin/develop
 
 ## Mise à jour des vendors (Librairies tiers)
 
+En utilisant **composer** : 
+
+```bash
+composer install
+```
+
+Ou en utilisant l'archive fournis dans l'installation : 
+
 ```bash
 # On supprime les anciennes
 rm -Rf vendor
