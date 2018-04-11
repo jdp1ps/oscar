@@ -178,6 +178,18 @@ class Person implements ResourceInterface
         $this->setDateCreated(new \DateTime());
     }
 
+    /**
+     * Return TRUE si l'objet a un connector.
+     */
+    public function isConnected(){
+        foreach ($this->getConnectors() as $connector ){
+            if( $this->getConnectorID($connector) ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function getRolesFromConnector( $connectorName ){
 //        $roles = [];
 //        /** @var OrganizationPerson $organizationPerson */

@@ -58,6 +58,18 @@ class Organization implements ResourceInterface, IConnectedObject
         return self::getTypesSlug($this->getType());
     }
 
+    /**
+     * Return TRUE si l'objet a un connector.
+     */
+    public function isConnected(){
+        foreach ($this->getConnectors() as $connector=>$value ){
+            if( $value ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static function getTypesSlug( $typeStr )
     {
         static $slugs;
