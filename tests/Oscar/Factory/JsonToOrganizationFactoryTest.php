@@ -28,12 +28,13 @@ class JsonToOrganizationFactoryTest extends TestCase {
 
 
         $organization = $this->getFactory()->getInstance((object) [
+            'uid' => 'T1',
             'code' => 'ED209',
             'shortname' => 'Etude Directive 20 Al 9'],
             'GetJsonDataFromFileStrategyTest');
 
         $this->assertEquals('Etude Directive 20 Al 9', $organization->getShortName());
-        $this->assertEquals('ED209', $organization->getConnectorID('GetJsonDataFromFileStrategyTest'));
+        $this->assertEquals('T1', $organization->getConnectorID('GetJsonDataFromFileStrategyTest'));
         $this->assertEquals('ED209', $organization->getCode());
         $this->assertNull( $organization->getConnectorID('unknown'), "Getter sur un connector absent retourne NULL");
     }
