@@ -368,6 +368,11 @@ class Activity implements ResourceInterface
      */
     protected $numbers = [];
 
+    public function isActive()
+    {
+        return $this->getStatus() == self::STATUS_ACTIVE;
+    }
+
     /**
      * @return float
      */

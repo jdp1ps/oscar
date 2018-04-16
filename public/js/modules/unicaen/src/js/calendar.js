@@ -3023,32 +3023,37 @@ var Calendar = {
 
     mounted(){
         var allowState = ['week', 'list', 'timesheet'];
+
+
+        this.state = 'week';
         if( allowState.indexOf(window.location.hash.substring(1)) >= 0 ){
             this.state = window.location.hash.substring(1);
-        } else {
-            this.state = 'week';
         }
 
         if (this.customDatas) {
             var customs = this.customDatas();
             this.wps = customs;
+
             for (var k in customs) {
                 if (customs.hasOwnProperty(k)) {
                     store.activities.pushIfNot({
                         id: customs[k].idactivity,
                         label: customs[k].activity
-                    }, 'id')
-                    let wp = customs[k];
+                    }, 'id');
+
                     colorLabels[k] = colorpool[customs[k].color];
-                    if (!store.defaultLabel) {
-                        store.defaultLabel = k;
+
+                    if( customs[k].active ){
+                        if (!store.defaultLabel) {
+                            store.defaultLabel = k;
+                        }
+                        store.labels.push(k);
                     }
-                    store.labels.push(k);
                 }
             }
             colorIndex++;
-
         }
+
         if (this.ownersList) {
             store.owners = this.ownersList();
         }
