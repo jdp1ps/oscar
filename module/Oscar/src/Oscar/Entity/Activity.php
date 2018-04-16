@@ -1197,8 +1197,6 @@ class Activity implements ResourceInterface
                 'enrollerLabel'     => $activityPerson->getEnroller()->__toString(),
                 'role'              => $activityPerson->getRole(),
                 'roleLabel'         => $activityPerson->getRole(),
-
-
             ];
         }
         return $json;
@@ -1640,6 +1638,7 @@ class Activity implements ResourceInterface
             'source' => $this->getSource() ? (string)$this->getSource() : "",
             'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, ',', ' '),
             'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ' '),
+            'Frais de gestion' => number_format($this->getFraisDeGestion(), 2, ',', ''),
         );
     }
 
@@ -1663,6 +1662,7 @@ class Activity implements ResourceInterface
             'source',
             'versement effectué',
             'versement prévu',
+            'Frais de gestion',
         );
     }
 
