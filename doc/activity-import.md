@@ -30,7 +30,8 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
     "datestart": "",
     "dateend": "",
     "datesigned": "2017-06-01",
-    "pfi": "",
+    "pfi": "12PFI3456",
+    "datePFI": "2017-07-04",
     "type": "ANR",
     "amount": "0.0",
     "organizations": {
@@ -97,6 +98,7 @@ label           | String    | NR        | Non    | Intitulé de l'activité
 datestart       | Date ISO  | Oui       | Non    | Date de début de l'activité
 dateend         | Date ISO  | Oui       | Non    | Date de fin de l'activité
 pfi             | String    | Oui       | Non    | EOTP/PFI de l'activité de recherche
+datePFI         | Date ISO  | Oui       | Non    | Date d'ouverture du PFI
 type            | String    | Oui       | Non    | Type d'activité, si Oscar ne trouve pas de type correspondant, la donnée est ignorée
 amount          | Double    | Oui       | Non    | Montant de la convention
 organizations   | Object    | Oui       | Non    | Voir détails dans [Gestion des organisations](#organizations)

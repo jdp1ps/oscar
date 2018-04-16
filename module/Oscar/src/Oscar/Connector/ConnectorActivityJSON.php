@@ -385,6 +385,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                 ->setCodeEOTP($data->pfi)
                 ->setActivityType($type)
                 ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
+                ->setDateOpened($data->datePFI ? new \DateTime($data->datePFI) : null)
                 ->setAmount(((double)$data->amount));
 
             if( $data->datestart ){

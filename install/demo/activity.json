@@ -7,7 +7,8 @@
     "datestart": "",
     "dateend": "",
     "datesigned": "2017-06-01",
-    "pfi": "",
+    "pfi": "99PFI1234",
+    "datePFI":"2018-01-01",
     "type": "ANR",
     "amount": "0.0",
     "milestones": [

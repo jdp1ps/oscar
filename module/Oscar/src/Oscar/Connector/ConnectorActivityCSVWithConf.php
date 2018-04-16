@@ -253,6 +253,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 else if( $key == "dateStart" ){ $json['datestart'] = $value; }
                 else if( $key == "dateEnd" ){ $json['dateend'] = $value; }
                 else if( $key == "dateSigned" ){ $json['datesigned'] = $value; }
+                else if( $key == "datePFI" ){ $json['datePFI'] = $value; }
                 else if( $key == "label" ){ $json['label'] = $value; }
                 else if( $key == "uid" ){ $json['uid'] = $value; }
                 else if( $key == "project.acronym" ){ $json['acronym'] = $value; }
