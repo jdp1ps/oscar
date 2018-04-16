@@ -178,7 +178,7 @@
     "category_id": 2,
     "spot": 4,
     "code": "STATUS_OFF",
-    "libelle": "Peut modifier le status vers \"D\u00e9sactiv\u00e9\"",
+    "libelle": "Peut modifier le statut vers \"D\u00e9sactiv\u00e9\"",
     "fullcode": "ACTIVITY-STATUS_OFF"
   },
 
@@ -376,7 +376,7 @@
     "category_id": 6,
     "spot": 4,
     "code": "MENU_ADMIN",
-    "libelle": "Acc\u00e8s aux menu d'administration",
+    "libelle": "Acc\u00e8s au menu d'administration",
     "fullcode": "MAINTENANCE-MENU_ADMIN"
   },
 

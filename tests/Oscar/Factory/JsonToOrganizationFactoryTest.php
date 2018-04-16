@@ -38,4 +38,15 @@ class JsonToOrganizationFactoryTest extends TestCase {
         $this->assertEquals('ED209', $organization->getCode());
         $this->assertNull( $organization->getConnectorID('unknown'), "Getter sur un connector absent retourne NULL");
     }
+
+    public function testThrowMissingUid(){
+        try {
+            $organization = $this->getFactory()->getInstance((object) null,
+                'GetJsonDataFromFileStrategyTest');
+            throw PHPUnitException('Un objet sans les champs requis doit lever une exception');
+        } catch (\Oscar\Exception\OscarException $e ){
+            $this->assertTrue(True);
+        }
+
+    }
 }
