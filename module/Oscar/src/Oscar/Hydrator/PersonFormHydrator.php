@@ -9,7 +9,6 @@ namespace Oscar\Hydrator;
 
 
 use Oscar\Entity\Person;
-use Zend\Stdlib\Hydrator\HydrationInterface;
 use Zend\Stdlib\Hydrator\HydratorInterface;
 
 class PersonFormHydrator implements HydratorInterface

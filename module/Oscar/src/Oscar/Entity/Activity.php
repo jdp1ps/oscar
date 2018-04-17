@@ -1593,7 +1593,6 @@ class Activity implements ResourceInterface
                 'done' => $done
             ];
             if( $todo > 0 ) {
-
                 $percent = 100 / $todo * $done;
             }
             $this->_cachedTodoDone['percent'] = $percent;
