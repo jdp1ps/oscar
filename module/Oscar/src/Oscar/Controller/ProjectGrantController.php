@@ -53,6 +53,42 @@ use Zend\View\Model\ViewModel;
  */
 class ProjectGrantController extends AbstractOscarController
 {
+
+
+
+    public function generatedDocumentAction(){
+        $id = $this->params()->fromRoute('id');
+        $doc = $this->params()->fromRoute('doc');
+
+        $configDocuments = $this->getConfiguration('oscar.generated-documents.activity');
+        if( !array_key_exists($doc, $configDocuments) ){
+             throw new OscarException("Modèle de document non disponible (problème de configuration");
+        }
+        $config = $configDocuments[$doc];
+
+        $activity = $this->getProjectGrantService()->getGrant($id);
+
+        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
+
+
+        foreach ($activity->documentDatas() as $key=>$value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        $filename = 'oscar-' . $activity->getOscarNum().'-' . $doc. '.docx';
+        $filelocation = '/tmp/' . $filename;
+        $templateProcessor->saveAs($filelocation);
+
+
+        header('Content-Disposition: attachment; filename='.$filename);
+        header('Content-Length: ' . filesize($filelocation));
+        header('Content-type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+        echo file_get_contents($filelocation);
+        unlink($filelocation);
+        die();
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // ACTIONS
     ////////////////////////////////////////////////////////////////////////////
@@ -675,6 +711,7 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         return [
+            'generatedDocuments' => $this->getConfiguration('oscar.generated-documents.activity'),
             'entity' => $activity,
 
             'currencies' => $currencies,

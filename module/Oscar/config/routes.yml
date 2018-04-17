@@ -593,6 +593,15 @@ contract:
                 route: /fiche-detaillee/:id
                 defaults:
                     action: show
+
+        generatedocument:
+            type: segment
+            options:
+                route: /generer-document/:id/:doc
+                defaults:
+                    action: generatedDocument
+
+
         show2:
             type: segment
             options:

@@ -1617,6 +1617,60 @@ class Activity implements ResourceInterface
         return $this->getTodoDone()['tovalidate'];
     }
 
+    /**
+     * Retourne les données préparées pour le génération des documents
+     */
+    public function documentDatas(){
+
+        //
+        $datas = [
+            'id' => $this->getId(),
+            'amount' => $this->getAmount(),
+            'pfi' => $this->getCodeEOTP(),
+            'oscar' => $this->getOscarNum(),
+            'montant' => number_format((double)$this->getAmount(), 2, ',', ' ') . $this->getCurrency()->getSymbol(),
+            'annee-debut' => $this->getDateStart()->format('Y'),
+            'annee-fin' => $this->getDateEnd()->format('Y'),
+            'debut' => $this->getDateStart()->format('d/m/Y'),
+            'fin' => $this->getDateEnd()->format('d/m/Y'),
+            'intitule' => $this->getLabel(),
+            'label' => $this->getLabel(),
+            'acronym' => $this->getAcronym(),
+            'type' => (string)$this->getActivityType(),
+        ];
+
+        $sluger = Slugify::create();
+
+
+        $persons = [];
+        foreach ($this->getPersonsDeep() as $personActivity){
+            $roleStr = (string)$personActivity->getRoleObj();
+            if( !array_key_exists($roleStr, $persons) ){
+                $persons[$roleStr] = [];
+            }
+            $persons[$roleStr][] = (string) $personActivity->getPerson();
+        }
+        foreach ($persons as $role=>$ps) {
+            $datas[$sluger->slugify($role)] = implode(', ', $ps);
+        }
+
+        $organizations = [];
+        foreach ($this->getOrganizationsDeep() as $organisationActivity){
+            $roleStr = (string)$organisationActivity->getRoleObj();
+            if( !array_key_exists($roleStr, $organizations) ){
+                $organizations[$roleStr] = [];
+            }
+            $organizations[$roleStr][] = (string) $organisationActivity->getOrganization();
+        }
+        foreach ($organizations as $role=>$ps) {
+            $datas[$sluger->slugify($role)] = implode(', ', $ps);
+        }
+
+        return $datas;
+
+
+    }
+
     public function csv()
     {
         return array(

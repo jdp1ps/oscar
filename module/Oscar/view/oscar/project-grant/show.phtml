@@ -265,6 +265,17 @@
                             </a>
                         </div>
                     <?php endif; ?>
+                    
+                    <nav>
+                        <?php foreach($generatedDocuments as $key=>$infos ): ?>
+                            <a href="<?= $this->url('contract/generatedocument', ['id' => $entity->getId(), 'doc' => $key]) ?>" class="btn btn-primary">
+                                <?= $infos['label'] ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </nav>
+                    <pre><?php var_dump() ?></pre>
+
+
                     <script id="documents-list-template" type="text/x-template">
                         <div>
                             <div class="oscar-sorter">

@@ -22,7 +22,8 @@
     "phpoffice/phpexcel": "^1.8",
     "elasticsearch/elasticsearch": "^6.0",
     "swiftmailer/swiftmailer": "^6.0",
-    "zendframework/zend-text": "^2.4"
+    "zendframework/zend-text": "^2.4",
+    "phpoffice/phpword": "^0.14.0"
   },
   "require-dev": {
     "phpmd/phpmd": "@stable",
