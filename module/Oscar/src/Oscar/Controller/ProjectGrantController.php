@@ -13,12 +13,15 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\Currency;
+use Oscar\Entity\DateType;
 use Oscar\Entity\Notification;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
@@ -82,6 +85,7 @@ class ProjectGrantController extends AbstractOscarController
             $form->setData($request->getPost());
             if ($form->isValid()) {
                 $this->getEntityManager()->flush($projectGrant);
+                $this->getActivityService()->searchUpdate($projectGrant);
                 $this->redirect()->toRoute(
                     'contract/show',
                     ['id' => $projectGrant->getId()]
@@ -104,10 +108,17 @@ class ProjectGrantController extends AbstractOscarController
      */
     public function duplicateAction()
     {
+        $options = [
+            'organizations' => $this->params()->fromQuery('keeporganizations', false),
+            'persons' => $this->params()->fromQuery('keeppersons', false),
+            'milestones' => $this->params()->fromQuery('keepmilestones', false),
+            'workpackages' => $this->params()->fromQuery('keepworkpackage', false),
+        ];
+
         try {
             $id = $this->params()->fromRoute('id');
             $projectGrant = $this->getProjectGrantService()->getGrant($id);
-            $duplicated = $this->getActivityService()->duplicate($projectGrant);
+            $duplicated = $this->getActivityService()->duplicate($projectGrant, $options);
             $this->redirect()->toRoute('contract/edit',
                 ['id' => $duplicated->getId()]);
 
@@ -183,20 +194,25 @@ class ProjectGrantController extends AbstractOscarController
             $this->getOscarUserContext()->check(Privileges::ACTIVITY_DELETE,
                 $projectGrant);
             $project = $projectGrant->getProject();
+            $this->getLogger()->info(sprintf('Suppression de %s - %s', $projectGrant, $projectGrant->getId()));
+            $activity_id = $projectGrant->getId();
+            try {
+                $this->getActivityService()->searchDelete($activity_id);
+            } catch ( \Exception $e ) {}
             $this->getEntityManager()->remove($projectGrant);
+
             $this->getEntityManager()->flush();
-            $this->getActivityService()->searchDelete($projectGrant->getId());
 
             if (!$project) {
                 $this->redirect()->toRoute('contract/advancedsearch');
             } else {
                 $this->getEntityManager()->refresh($project);
-                $this->getProjectService()->searchUpdate($project);
+
                 $this->redirect()->toRoute('project/show',
                     ['id' => $projectGrant->getProject()->getId()]);
             }
         } catch (\Exception $e) {
-            die("<pre>ERROR\n : " . $e->getTraceAsString());
+            throw $e;
         }
     }
 
@@ -276,7 +292,8 @@ class ProjectGrantController extends AbstractOscarController
         if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
 
         } else {
-            $this->organizationsPerimeter = $this->getOscarUserContext()->getOrganisationsPersonPrincipal($this->getOscarUserContext()->getCurrentPerson(),
+            $this->organizationsPerimeter = $this->getOscarUserContext()
+                ->getOrganisationsPersonPrincipal($this->getOscarUserContext()->getCurrentPerson(),
                 true);
 
             $qb->leftJoin('a.project', 'pr')
@@ -363,12 +380,36 @@ class ProjectGrantController extends AbstractOscarController
             }
             $rolesPersons[$role] = [];
         }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // --- JALONS
+        // Récupération des différents types de jalons
+        $jalonsQuery = $this->getEntityManager()->getRepository(DateType::class)->findAll();
+        $jalons = [];
+
+        /** @var DateType $jalon */
+        foreach ($jalonsQuery as $jalon) {
+            $jalons[$jalon->getLabel()] = [];
+
+            $header = $jalon->getLabel();
+            if( $keep === true || in_array($header, $keep) ){
+                $columns[$header] = true;
+                $headers[] = $header;
+            } else {
+                $columns[$header] = false;
+            }
+            $jalons[$header] = [];
+        }
+
+
+
         fputcsv($handler, $headers);
         /** @var Activity $entity */
         foreach ($entities as $entity) {
             $datas = [];
             $rolesCurrent = $rolesOrganisations;
             $rolesPersonsCurrent = $rolesPersons;
+            $jalonsCurrent = $jalons;
 
             if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
                 $entity)
@@ -380,6 +421,14 @@ class ProjectGrantController extends AbstractOscarController
                 foreach( $entity->getPersonsDeep() as $per ){
                      $rolesPersonsCurrent[$per->getRole()][] = (string)$per->getPerson();
                 }
+                /** @var ActivityDate $mil */
+                foreach( $entity->getMilestones() as $mil ){
+
+                    $jalonsCurrent[$mil->getType()->getLabel()][] = $mil->getDateStart() ?
+                        $mil->getDateStart()->format('Y-m-d') :
+                        'nop';
+                }
+
 
 
                 foreach ( $entity->csv() as $col=>$value ){
@@ -396,6 +445,12 @@ class ProjectGrantController extends AbstractOscarController
                 foreach( $rolesPersonsCurrent as $role=>$persons ){
                     if( $columns[$role] === true )
                         $datas[] = $persons ? implode('|', array_unique($persons)) : ' ';
+                }
+
+
+                foreach( $jalonsCurrent as $jalon2=>$date ){
+                    if( $columns[$jalon2] === true )
+                        $datas[] = $date ? implode('|', array_unique($date)) : ' ';
                 }
                 fputcsv($handler, $datas);
             }
@@ -450,8 +505,8 @@ class ProjectGrantController extends AbstractOscarController
                 if ($project) {
                     $project->touch();
                 }
-                $this->getEntityManager()->flush();
-                $this->getActivityService()->searchUpdate($projectGrant);
+                $this->getEntityManager()->flush($projectGrant);
+
                 $this->redirect()->toRoute('contract/show',
                     ['id' => $projectGrant->getId()]);
             }
@@ -489,10 +544,10 @@ class ProjectGrantController extends AbstractOscarController
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
             $docDt = $doc->toJson([
-                'urlDelete' => $deletable ? $this->url()->fromRoute('contractdocument/delete',
-                    ['id' => $doc->getId()]) : false,
-                'urlDownload' => $this->url()->fromRoute('contractdocument/download',
-                    ['id' => $doc->getId()]),
+                'urlDelete' => $deletable ?
+                    $this->url()->fromRoute('contractdocument/delete',['id' => $doc->getId()])
+                    : false,
+                'urlDownload' => $this->url()->fromRoute('contractdocument/download', ['id' => $doc->getId()]),
                 'urlReupload' => $this->url()->fromRoute('contractdocument/upload',
                         ['idactivity' => $entity->getId()]) . "?id=" . $doc->getId(),
                 'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute('person/show',
@@ -613,8 +668,16 @@ class ProjectGrantController extends AbstractOscarController
             $involvedPersonsJSON = json_encode($involvedPersons);
         }
 
+        $currencies = [];
+        /** @var Currency $currency */
+        foreach( $this->getEntityManager()->getRepository(Currency::class)->findAll() as $currency ){
+            $currencies[] = $currency->asArray();
+        }
+
         return [
             'entity' => $activity,
+
+            'currencies' => $currencies,
 
             // Jeton de sécurité
             'tokenValue' => $this->getOscarUserContext()->getTokenValue(true),
@@ -1092,7 +1155,6 @@ class ProjectGrantController extends AbstractOscarController
                 // Traitement : Champ de recherche libre
 
                 if ($search) {
-
                     // La saisie est un PFI
                     if (preg_match($this->getServiceLocator()->get("Config")['oscar']['validation']['pfi'], $search)) {
                         $parameters['search'] = $search;
@@ -1372,6 +1434,8 @@ class ProjectGrantController extends AbstractOscarController
                 }
             }
 
+            $projectview = $this->params()->fromQuery('projectview', '');
+
             $activities = null;
             if( $startEmpty === false ) {
                 $qbIds = $qb->select('DISTINCT c.id');
@@ -1381,8 +1445,17 @@ class ProjectGrantController extends AbstractOscarController
                 foreach ($qbIds->getQuery()->getResult() as $row) {
                     $ids[] = $row['id'];
                 }
+                if ( $projectview == 'on' )
+                    $qb = $this->getEntityManager()
+                        ->getRepository(Project::class)
+                        ->createQueryBuilder('pr')
+                        ->innerJoin('pr.grants', 'c')
+                        ->where('c.id IN (:ids)')
+                        ->setParameter('ids', $ids);
 
-                $qb->select('c');
+                else
+                    $qb->select('c');
+
                 $qb->orderBy('c.' . $sort, $sortDirection);
                 if( $sortIgnoreNull ){
                     $qb->andWhere('c.' . $sort . ' IS NOT NULL');
@@ -1392,6 +1465,7 @@ class ProjectGrantController extends AbstractOscarController
 
 
             $view = new ViewModel([
+                'projectview' => $projectview,
                 'exportIds' => implode(',', $ids),
                 'filtersType' => $filtersType,
                 'error' => $error,
@@ -1449,6 +1523,192 @@ class ProjectGrantController extends AbstractOscarController
         return $this->applyAdvancedSearch($qb);
     }
 
+    /**
+     * Liste des activités de recherche.
+     */
+    public function indexAction()
+    {
+        $page = $this->params()->fromQuery('page', 1);
+        $search = $this->params()->fromQuery('q', '');
+        $filterStatus = $this->params()->fromQuery('filter_status', []);
+        $filterType = $this->params()->fromQuery('filter_type', []);
+        $filterYears = $this->params()->fromQuery('filter_year', []);
+        $filterPersons = $this->params()->fromQuery('persons', []);
+
+        $datefilter_type = $this->params()->fromQuery('datefilter_type', '');
+        $datefilter_from = $this->params()->fromQuery('datefilter_from', '');
+        $datefilter_to = $this->params()->fromQuery('datefilter_to', '');
+
+
+        $sortCriteria = [
+            'dateCreated' => 'Date de création',
+            'dateStart' => 'Date début',
+            'dateEnd' => 'Date fin',
+            'dateUpdated' => 'Date de mise à jour',
+            'dateSigned' => 'Date de signature',
+            'dateOpened' => "Date d'ouverture",
+        ];
+
+        $sortDirections = [
+            'desc' => 'Décroissant',
+            'asc' => 'Croissant'
+        ];
+
+        $sort = $this->params()->fromQuery('sort', 'dateUpdated');
+        $sortDirection = $this->params()->fromQuery('sortDirection', 'desc');
+
+        if (!key_exists($sort, $sortCriteria)) {
+            $sort = 'dateCreated';
+        }
+        if (!key_exists($datefilter_type, $sortCriteria)) {
+            $datefilter_type = '';
+        }
+
+        if (!key_exists($sortDirection, $sortDirections)) {
+            $sortDirection = 'desc';
+        }
+
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('c')
+            ->from(Activity::class, 'c')
+            ->orderBy('c.' . $sort, $sortDirection);
+
+        $displayFilters = false;
+
+        if ($search) {
+            $displayFilters = true;
+            if (preg_match(EOTP::REGEX_EOTP, $search)) {
+                $qb->where('c.codeEOTP = :search')
+                    ->setParameter('search', $search);
+            } else {
+                if (preg_match("/^[0-9]{4}SAIC.*/mi", $search)) {
+                    $qb->where('c.centaureNumConvention LIKE :search')
+                        ->setParameter('search', $search . '%');
+                } elseif (preg_match("/^[0-9]{4}DRI.*/mi", $search)) {
+                    $qb->where('c.oscarNum LIKE :search')
+                        ->setParameter('search', $search . '%');
+                } else {
+
+                    $qb->where('c.id IN(:ids)')
+                        ->setParameter('ids',
+                            $this->getActivityService()->search($search));
+                }
+            }
+        }
+
+        // Filtre sur le status de l'activités
+        if (count($filterStatus)) {
+            $displayFilters = true;
+            $qb->andWhere('c.status IN(:status)')
+                ->setParameter('status', $filterStatus);
+        }
+
+        // Filtre sur les types d'activités
+        if (count($filterType)) {
+            $displayFilters = true;
+            $selectedTypes = $this->getActivityTypeService()->getActivityTypesById($filterType);
+            $qb->innerJoin('c.activityType', 't');
+            /** @var ActivityType $selectedType */
+            foreach ($selectedTypes as $selectedType) {
+                $qb->andWhere('t.lft >= :lft AND t.rgt <= :rgt')
+                    ->setParameter('lft', $selectedType->getLft())
+                    ->setParameter('rgt', $selectedType->getRgt());
+
+            }
+        }
+
+        // Filtre sur les types d'activités
+        if (count($filterYears)) {
+            $displayFilters = true;
+            $clause = [];
+            $values = [];
+
+            foreach ($filterYears as $year) {
+                $values['start_' . $year] = $year . '-01-01';
+                $values['end_' . $year] = $year . '-12-31';
+                $clause[] = "(c.dateStart <= '$year-12-31' AND c.dateEnd >= '$year-01-01')";
+            }
+
+            $qb->andWhere(implode(' OR ', $clause));
+        }
+
+        // Persons
+        $persons = [];
+        if (count($filterPersons)) {
+            $displayFilters = true;
+            foreach ($this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')->where('p.id IN (:persons)')->setParameter('persons',
+                $filterPersons)->getQuery()->getResult() as $p) {
+                $persons[] = $p;
+            }
+            $qb->innerJoin('c.persons', 'm')
+                ->leftJoin('m.person', 'p')
+                ->leftJoin('c.project', 'pr')
+                ->leftJoin('pr.members', 'pm')
+                ->leftJoin('pm.person', 'p2')
+                ->andWhere('p.id in (:personIds) OR p2.id IN (:personIds)')
+                ->setParameter('personIds', $filterPersons);
+        }
+
+        if ($datefilter_type != '' && ($datefilter_from != '' || $datefilter_to != '')) {
+            $displayFilters = true;
+            if ($datefilter_from != '') {
+                $qb->andWhere('c.' . $datefilter_type . ' >= :from')
+                    ->setParameter('from', $datefilter_from);
+            }
+            if ($datefilter_to != '') {
+                $qb->andWhere('c.' . $datefilter_type . ' <= :to')
+                    ->setParameter('to', $datefilter_to);
+            }
+        }
+        try {
+            // IDS
+            $qbIds = $qb->select('c.id');
+            $ids = [];
+            foreach ($qbIds->getQuery()->getResult() as $row) {
+                $ids[] = $row['id'];
+            }
+            $qb->select('c');
+
+            $paginator = new UnicaenDoctrinePaginator($qb, $page, 20);
+
+        } catch (\Exception $e) {
+            die(sprintf("<h1>%s</h1><pre>%s</pre>", $e->getMessage(),
+                $e->getTraceAsString()));
+        }
+
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            $json = [
+                'datas' => []
+            ];
+            /** @var Activity $activity */
+            foreach ($paginator as $activity) {
+                $json['datas'][] = $activity->toJson();
+            }
+
+            return $this->ajaxResponse($json);
+            // die('Recherche');
+        }
+
+
+        return [
+            'exportIds' => implode(',', $ids),
+            'contracts' => $paginator,
+            'search' => $search,
+            'filterStatus' => $filterStatus,
+            'filterType' => $filterType,
+            'filterYear' => $filterYears,
+            'sorts' => $sortCriteria,
+            'directions' => $sortDirections,
+            'sort' => $sort,
+            'sortDirection' => $sortDirection,
+            'filterPersons' => $persons,
+            'displayFilters' => $displayFilters,
+            'datefilter_type' => $datefilter_type,
+            'datefilter_from' => $datefilter_from,
+            'datefilter_to' => $datefilter_to,
+            'types' => $this->getActivityTypeService()->getActivityTypes(true),
+        ];
+    }
 
 
 

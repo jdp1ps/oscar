@@ -151,6 +151,12 @@ class Person implements ResourceInterface
 
     /**
      * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="TimeSheet", mappedBy="person")
+     */
+    protected $timesheets;
+
+    /**
+     * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="WorkPackagePerson", mappedBy="person")
      */
     protected $workPackages;
@@ -167,8 +173,33 @@ class Person implements ResourceInterface
         $this->activities = new ArrayCollection();
         $this->organizations = new ArrayCollection();
         $this->workPackages = new ArrayCollection();
+        $this->timesheets = new ArrayCollection();
         $this->centaureId = [];
         $this->setDateCreated(new \DateTime());
+    }
+
+    /**
+     * Return TRUE si l'objet a un connector.
+     */
+    public function isConnected(){
+        foreach ($this->getConnectors() as $connector=>$value ){
+            if( $value ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function getRolesFromConnector( $connectorName ){
+//        $roles = [];
+//        /** @var OrganizationPerson $organizationPerson */
+//        foreach ($this->getOrganizations() as $organizationPerson ){
+//            if( $organizationPerson->getFrom() == $connectorName ){
+//                $roles[$organizationPerson->getRole()] = $organizationPerson;
+//            }
+//        }
+//        return $roles;
+        return [];
     }
 
     /**
@@ -216,8 +247,8 @@ class Person implements ResourceInterface
 
         /** @var OrganizationPerson $organizationPerson */
         foreach( $this->getOrganizations() as $organizationPerson ){
-            if( $organizationPerson->getRole() == 'Responsable' ){
-                $organizations[] = $organizations;
+            if( $organizationPerson->getRoleObj()->isPrincipal() ){
+                $organizations[] = $organizationPerson;
             }
         }
         return $organizations;
@@ -671,6 +702,9 @@ class Person implements ResourceInterface
 
 
     public function mergeTo( Person $person ){
+
+        $activititesWithWP = [];
+
         /** @var ProjectMember $projectMember */
         foreach($this->getProjectAffectations() as $projectMember ){
             $projectMember->setPerson($person);
@@ -683,6 +717,12 @@ class Person implements ResourceInterface
         /** @var OrganizationPerson $organizationPerson */
         foreach($this->getOrganizations() as $organizationPerson ){
             $organizationPerson->setPerson($person);
+        }
+
+        /** @var WorkPackagePerson $organizationPerson */
+        foreach($this->getWorkPackages() as $workPackage ){
+            $workPackage->setPerson($person);
+
         }
     }
 

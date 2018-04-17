@@ -152,7 +152,7 @@ $this->headScript();
 
                                     <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX)): ?>
                                     <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Activités</li>
-                                    <li><a href="<?= $this->url('contract/almostdone') ?>">Bientôt terminés</a></li>
+                                    <li><a href="<?= $this->url('contract/almostdone') ?>">Bientôt terminées</a></li>
                                     <li><a href="<?= $this->url('contract/almoststart') ?>">Débutant prochainement</a></li>
                                     <?php endif; ?>
                                 </ul>
@@ -167,9 +167,9 @@ $this->headScript();
                             <ul class="dropdown-menu" role="menu">
                                 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX)): ?>
                                     <li role="presentation" class="dropdown-header"><i class="icon-cubes"></i> Projets</li>
-                                    <li><a href="<?= $this->url('project') ?>">Liste des projets</a></li>
+                                    <li><a href="<?= $this->url('contract/advancedsearch') ?>?projectview=on">Liste des projets</a></li>
                                     <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_CREATE)): ?>
-                                        <li><a href="<?= $this->url('project/new') ?>">Créer un projet</a></li>
+                                        <li><a href="<?= $this->url('project/new') ?>?projectview=on">Créer un projet</a></li>
                                     <?php endif; ?>
                                 <?php endif; ?>
 
@@ -201,7 +201,7 @@ $this->headScript();
                                 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX)): ?>
                                 <li role="presentation" class="dropdown-header"><i class="icon-group"></i> Personnes</li>
                                 <li><a href="<?= $this->url('person') ?>">Liste des personnes</a></li>
-                                <li><a href="<?= $this->url('person/boss') ?>">Liste des responsables</a></li>
+                                <li><a href="<?= $this->url('person') ?>?q=&leader=on">Liste des responsables</a></li>
                                     <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                                     <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
                                     <?php endif; ?>
@@ -209,9 +209,15 @@ $this->headScript();
 
 
                                 <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Activités</li>
-                                <li><a href="<?= $this->url('contractdocument') ?>">Liste des documents téléversé</a></li>
-                                <li><a href="<?= $this->url('activitytype') ?>">Gérer les types d'activités</a></li>
-                                <li><a href="<?= $this->url('datetype') ?>">Gérer les types de date</a></li>
+                                <li><a href="<?= $this->url('contractdocument') ?>">Liste des documents téléversés</a></li>
+
+                                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)) : ?>
+                                <li><a href="<?= $this->url('activitytype') ?>">Gérer les types d'activité</a></li>
+                                <?php endif; ?>
+
+                                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE)) : ?>
+                                <li><a href="<?= $this->url('datetype') ?>">Gérer les types de jalon</a></li>
+                                <?php endif; ?>
 
 
 
@@ -219,7 +225,11 @@ $this->headScript();
                                 <li><a href="<?= $this->url('contract/advancedsearch') ?>?criteria[]=pp%3Bnull%3Bnull">Activités sans projet</a></li>
                                 <li><a href="<?= $this->url('project/empty') ?>">Projets sans activité</a></li>
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
-                                <li><a href="<?= $this->url('administration/connectors_home') ?>">Connecteurs disponibles</a></li>
+                                <li><a href="<?= $this->url('administration/connectors_home') ?>">Synchronisation des donnèes</a></li>
+                                <?php endif; ?>
+
+                                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD) ):?>
+                                    <li><a href="<?= $this->url('administration/activity_index') ?>">Mise à jour de l'index de recherche</a></li>
                                 <?php endif; ?>
 
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ): ?>
@@ -237,10 +247,13 @@ $this->headScript();
                         <?php endif; ?><!-- /Menu admin -->
                     </ul>
                     <?php if( $this->grant()->connected() ): ?>
-                    <p class="navbar-text navbar-right" id="notifications-area" ></p>
+                        <p class="navbar-text navbar-right" id="notifications-area" ></p>
                     <?php endif; ?>
                     <p class="navbar-text navbar-right">
-                    <?php echo $this->appConnection(); ?>
+                        <a href="<?= $this->url('user_parameters') ?>">
+                            <i class="icon-cog"></i></a> |
+
+                        <?php echo $this->appConnection(); ?>
                     </p>
                 </div><!--/.nav-collapse -->
             </div>
@@ -267,7 +280,7 @@ $this->headScript();
                     <h3><i class="icon-calendar"></i> Jalons</h3>
                     <ul>
                         <li><a href="<?= $this->url('milestones') ?>">Tous les jalons</a></li>
-                        <li><a href="<?= $this->url('datetype') ?>">Gérer les types de date</a></li>
+                        <li><a href="<?= $this->url('datetype') ?>">Gérer les types de jalon</a></li>
                     </ul>
                 </section>
                 <?php endif; ?>
@@ -278,10 +291,16 @@ $this->headScript();
                         <ul>
                             <li><a href="<?= $this->url('contract/advancedsearch') ?>">Liste des activités<i class="icon-asterisk"></i></a></li>
                             <li><a href="<?= $this->url('contract/new') ?>">Nouvelle activité</a></li>
-                            <li><a href="<?= $this->url('contract/almostdone') ?>">Bientôt terminés</a></li>
+                            <li><a href="<?= $this->url('contract/almostdone') ?>">Bientôt terminées</a></li>
                             <li><a href="<?= $this->url('contract/almoststart') ?>">Débutant prochainement</a></li>
-                            <li><a href="<?= $this->url('contractdocument') ?>">Liste des documents téléversé</a></li>
-                            <li><a href="<?= $this->url('activitytype') ?>">Gérer les types d'activités</a></li>
+                            <li><a href="<?= $this->url('contractdocument') ?>">Liste des documents téléversés</a></li>
+                            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)) : ?>
+                                <li><a href="<?= $this->url('activitytype') ?>">Gérer les types d'activité</a></li>
+                            <?php endif; ?>
+
+                            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE)) : ?>
+                                <li><a href="<?= $this->url('datetype') ?>">Gérer les types de jalon</a></li>
+                            <?php endif; ?>
                         </ul>
                     </section>
                 <?php endif; ?>
@@ -290,7 +309,7 @@ $this->headScript();
                     <section>
                         <h3><i class="icon-cubes"></i> Projets</h3>
                         <ul>
-                            <li><a href="<?= $this->url('project') ?>">Liste des projets</a></li>
+                            <li><a href="<?= $this->url('contract/advancedsearch') ?>?projectview=on">Liste des projets</a></li>
                             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_CREATE)): ?>
                                 <li><a href="<?= $this->url('project/new') ?>">Créer un projet</a></li>
                             <?php endif; ?>
@@ -317,7 +336,7 @@ $this->headScript();
                         <h3><i class="icon-group"></i> Personnes</h3>
                         <ul>
                             <li><a href="<?= $this->url('person') ?>">Liste des personnes</a></li>
-                            <li><a href="<?= $this->url('person/boss') ?>">Liste des responsables</a></li>
+                            <li><a href="<?= $this->url('person') ?>?q=&leader=on">Liste des responsables</a></li>
                             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                                 <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
                             <?php endif; ?>
@@ -335,8 +354,17 @@ $this->headScript();
                         <li><a href="<?= $this->url('contract/advancedsearch') ?>?criteria[]=pp%3Bnull%3Bnull">Activités sans projet</a></li>
                         <li><a href="<?= $this->url('project/empty') ?>">Projets sans activité</a></li>
                         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
-                            <li><a href="<?= $this->url('administration/connectors_home') ?>">Connecteurs disponibles</a></li>
+                            <li><a href="<?= $this->url('administration/connectors_home') ?>">Synchronisation des donnèes</a></li>
                         <?php endif; ?>
+
+                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD) ):?>
+                            <li><a href="<?= $this->url('administration/activity_index') ?>">Mise à jour de l'index de recherche</a></li>
+                        <?php endif; ?>
+
+                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ):?>
+                            <li><a href="<?= $this->url('administration/organizationtype') ?>">Gérer les types d'organisation</a></li>
+                        <?php endif; ?>
+
                         <li><a href="<?= $this->url('changelog') ?>">Quoi de neuf ?</a></li>
                     </ul>
                 </section>
@@ -359,17 +387,8 @@ $this->headScript();
                 // Panneau latéral
                 $('.handler-collapse').click(function(e) {
                     $('.navbar-admin').toggleClass('collapsed');
-                    window.localStorage.setItem('adminmenu', !$('.navbar-admin').hasClass('collapsed'));
-                    console.log(localStorage.getItem('adminmenu'))
-
                     e.preventDefault();
                 });
-                console.log(localStorage.getItem('adminmenu'))
-                if( localStorage.getItem('adminmenu') == 'true' ){
-                    $('.navbar-admin').removeClass('collapsed');
-                }
-
-//                $('.navbar-admin').on('clickoutside')
             })
         </script>
         <?php endif; ?>
@@ -467,18 +486,24 @@ $this->headScript();
         <script>
 		    var socket, notifications;
 	
-            require(['notifications'], (notifications) => {
-                notifications = new notifications.default({
-                    el: '#notifications-area',
-                    data: {
-                        urlHistory: '<?= $this->url('notification/history') ?>'
-                    },
-                    http: {
-                        root: '/notification'
-                    },
+            require(['vue', 'mm', 'vue-resource', 'notifications'], function(Vue, moment, VueResource, notifications) {
+                Vue.use(VueResource);
+                Vue.filter('displayDate', function( data ){
+                    let m = moment(data);
+                    return m.format('dddd D MMMM YYYY') + ", " + m.fromNow();
                 });
-                notifications.fetch();
-		<?php if( $this->grant()->hasSocket() ): ?>
+                new Vue({
+                    render: function (h) {
+                        return h(notifications.default, {
+                            props: {
+                                urlHistory: '<?= $this->url('notification/history') ?>',
+                                url: '/notification'
+                            }
+                        })
+                    }
+                }).$mount('#notifications-area');
+
+		<?php /*if( $this->grant()->hasSocket() ): ?>
 
             requirejs.config({ paths: {
                 "io":  "/js/socket.io"
@@ -517,7 +542,7 @@ $this->headScript();
                     console.log('disconnect');
                 });
             });
-            <?php endif; ?>
+            <?php endif;*/ ?>
             });
         </script>
         <?php endif; ?>

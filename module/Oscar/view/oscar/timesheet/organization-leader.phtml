@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/oscar/dist/client.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/css/fontello/css/animation.css' ?>" />
+<section class="container">
+<div id="app"></div>
+</section>
+<script>
+    require(['vue', 'vue-resource', 'mm', '/js/oscar/dist/TimesheetLeader.js'], function(Vue, VueResource, moment, TimesheetLeader){
+
+        Vue.use(VueResource);
+
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true;
+
+        var vue = new Vue({
+            el: "#app",
+            render(h){
+                return h(TimesheetLeader.default, {
+                    props: {
+                        'moment': moment
+                    }
+                })
+            }
+        });
+    })
+</script>

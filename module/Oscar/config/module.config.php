@@ -33,7 +33,7 @@ return array(
                     'roles' => [],
                 ],
                 [ 'controller' =>  'Public',
-                    'action' => ['documentation'],
+                    'action' => ['documentation', 'parameters'],
                     'roles' => ['user'],
                 ],
 
@@ -48,7 +48,7 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'organizationRole', 'organizationRoleApi'],
+                    'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'userRoles', 'organizationRole', 'organizationRoleApi', 'activityIndexBuild', 'organizationType'],
                     'roles' => ['user']
                 ],
 
@@ -93,7 +93,7 @@ return array(
                 ],
                 // Partenaires (Orgnaization)
                 [ 'controller' =>   'Enroll',
-                    'action' => ['organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit'],
+                    'action' => ['organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit', 'organizationPersonClose'],
                     'privileges' => \Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE
                 ],
 
@@ -101,7 +101,9 @@ return array(
                 // ACTIVITÉS
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Activity',
-                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate', 'delete', 'visualization', 'documentsJson', 'activitiesOrganizations', 'notifications', 'generateNotifications'],
+                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate',
+                        'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
+                        'notifications', 'generateNotifications'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
@@ -140,7 +142,7 @@ return array(
 
                 // --- DATES CLEFS
                 [ 'controller' =>   'ActivityDate',
-                    'action' => ['index'],
+                    'action' => ['index', 'activity'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'ActivityDate',
@@ -203,8 +205,12 @@ return array(
 
                 // TIMESHEET
                 ['controller' => 'Timesheet',
-                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet", 'usurpation', 'declarers', 'excel'],
+                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet", 'usurpation', 'excel', 'organizationLeader'],
                     'roles' => ['user']
+                ],
+                ['controller' => 'Timesheet',
+                    'action' => ['declarers'],
+                    'roles' => ['Administrateur']
                 ],
 
                 ////////////////////////////////////////////////////////////////
@@ -227,7 +233,7 @@ return array(
                     'privileges' => \Oscar\Provider\Privileges::PERSON_SHOW
                 ],
                 [ 'controller' =>   'Person',
-                    'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole'],
+                    'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
                 ],
                 // Membre
@@ -354,6 +360,36 @@ return array(
         'router' => array(
             'routes' => array(
 
+                'update' => [
+                    'options' => [
+                        'route' => 'oscar update',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'update',
+                        ],
+                    ]
+                ],
+
+                'test_mailing' => [
+                    'options' => [
+                        'route' => 'oscar test:mailer',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'testMailing',
+                        ],
+                    ]
+                ],
+
+                'test_config' => [
+                    'options' => [
+                        'route' => 'oscar test:config',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'testConfig',
+                        ],
+                    ]
+                ],
+
                 'tokens_with_privilege' => [
                     'options' => [
                         'route' => 'oscar tokens:with-privilege <privilege>',
@@ -435,6 +471,17 @@ return array(
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'shuffle',
+                        ),
+                    ),
+                ),
+
+                // Procédure d'anonymisation des données
+                'oscar_version' => array(
+                    'options' => array(
+                        'route' => 'oscar version',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'version',
                         ),
                     ),
                 ),
@@ -637,6 +684,26 @@ return array(
                     ),
                 ],
 
+                'notification_person' => [
+                    'options' => array(
+                        'route' => 'oscar notifications:person <idperson>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'notificationsPerson',
+                        ),
+                    ),
+                ],
+
+                'notification_person_remove' => [
+                    'options' => array(
+                        'route' => 'oscar notifications:person:purge <idperson> <idactivity>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'notificationsPersonActivityPurge',
+                        ),
+                    ),
+                ],
+
                 ////////////////////////////////////////////////////////////////
                 'console_syncldap' => array(
                     'options' => array(
@@ -711,7 +778,9 @@ return array(
             'ConnectorService' => \Oscar\Service\ConnectorService::class,
             'TimesheetService' => \Oscar\Service\TimesheetService::class,
             'NotificationService' => \Oscar\Service\NotificationService::class,
+            'MilestoneService' => \Oscar\Service\MilestoneService::class,
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
+            'MailingService' => \Oscar\Service\MailingService::class,
             // Droits
             //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
 
@@ -776,12 +845,12 @@ return array(
                 return new Swift_Mailer($sm->get('MailTransport'));
             },
 
-            'OscarMailer' => function( $sm ){
-                $mailer = new \Oscar\Service\OscarMailerService(
-                    $sm->get('Mailer'), $sm->get('Config')['oscar']['mailer']
-                );
-                return $mailer;
-            },
+//            'OscarMailer' => function( $sm ){
+//                $mailer = new \Oscar\Service\OscarMailerService(
+//                    $sm->get('Mailer'), $sm->get('Config')['oscar']['mailer']
+//                );
+//                return $mailer;
+//            },
 
             'OscarConfig' => function( $sm ){
                 return new \Oscar\Service\ConfigurationParser($sm->get('Config')['oscar']);

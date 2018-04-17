@@ -81,15 +81,15 @@ class Activity implements ResourceInterface
         static $statusSelect;
         if ($statusSelect === null) {
             $statusSelect = [
-                self::STATUS_PROGRESS => 'Brouillon',
                 self::STATUS_ACTIVE => 'Actif',
-                self::STATUS_CLOSED => 'Terminé',
-                self::STATUS_TERMINATED => 'Résilié',
-                self::STATUS_ABORDED => 'Dossier abandonné',
-                self::STATUS_DISPUTE => 'Litige',
+                self::STATUS_PROGRESS => 'Brouillon',
                 self::STATUS_ERROR_STATUS => 'Conflit : pas de statut',
                 self::STATUS_DEPOSIT => 'Déposé',
+                self::STATUS_ABORDED => 'Dossier abandonné',
+                self::STATUS_DISPUTE => 'Litige',
                 self::STATUS_REFUSED => 'Refusé',
+                self::STATUS_TERMINATED => 'Résilié',
+                self::STATUS_CLOSED => 'Terminé',
             ];
         }
 
@@ -172,6 +172,12 @@ class Activity implements ResourceInterface
      * @ORM\Column(type="string", length=64, nullable=true)
      */
     private $codeEOTP;
+
+    /**
+     * @var double
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $fraisDeGestion;
 
     /**
      * @var string
@@ -362,6 +368,27 @@ class Activity implements ResourceInterface
      */
     protected $numbers = [];
 
+    public function isActive()
+    {
+        return $this->getStatus() == self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return float
+     */
+    public function getFraisDeGestion()
+    {
+        return $this->fraisDeGestion;
+    }
+
+    /**
+     * @param float $fraisDeGestion
+     */
+    public function setFraisDeGestion($fraisDeGestion)
+    {
+        $this->fraisDeGestion = $fraisDeGestion;
+        return $this;
+    }
 
     /**
      * Retourne l'acronyme du projet si disponible.
@@ -618,7 +645,7 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return mixed
+     * @return ContractType
      */
     public function getType()
     {
@@ -1077,6 +1104,34 @@ class Activity implements ResourceInterface
     private $_personsActives;
 
     /**
+     * Retourne la liste des personnes ayant un rôle principale direct.
+     *
+     * @return array
+     */
+    public function getPersonPrincipalActive(){
+
+        $persons = [];
+
+        /** @var ActivityPerson $member */
+        foreach ($this->getPersons() as $member) {
+            if (!$member->isOutOfDate()) {
+                $persons[] = $member;
+            }
+        }
+
+        if( $this->getProject() ){
+            /** @var ProjectMember $projectMember */
+            foreach ($this->getProject()->getPersons() as $projectMember) {
+                if (!$projectMember->isOutOfDate()) {
+                    $persons[] = $projectMember;
+                }
+            }
+        }
+
+        return $persons;
+    }
+
+    /**
      * @return ArrayCollection
      */
     public function getPersons($includeInactives = true)
@@ -1102,10 +1157,10 @@ class Activity implements ResourceInterface
      * Retourne la liste des personnes ayant le rôle.
      * @param string $role
      */
-    public function getPersonsRoled( array $roles )
+    public function getPersonsRoled( array $roles, $includeInactives = true )
     {
         $persons = [];
-        foreach( $this->getPersons() as $p ){
+        foreach( $this->getPersons($includeInactives) as $p ){
             if( in_array($p->getRole(), $roles ) ) {
                 $persons[] = $p;
             }
@@ -1142,8 +1197,6 @@ class Activity implements ResourceInterface
                 'enrollerLabel'     => $activityPerson->getEnroller()->__toString(),
                 'role'              => $activityPerson->getRole(),
                 'roleLabel'         => $activityPerson->getRole(),
-
-
             ];
         }
         return $json;
@@ -1429,10 +1482,10 @@ class Activity implements ResourceInterface
         return false;
     }
 
-    public function hasPaymentAt( $amount, \DateTime $date ){
+    public function hasPaymentAt( $amount, $datePayment, $datePredicted ){
         /** @var ActivityPayment $payment */
         foreach ($this->getPayments() as $payment ){
-            if( $payment->getDatePayment() == $date  && $payment->getAmount() == $amount ){
+            if( $payment->getDatePayment() == $datePayment  && $payment->getAmount() == $amount && $payment->getDatePredicted() == $datePredicted){
                 return true;
             }
         }
@@ -1540,7 +1593,6 @@ class Activity implements ResourceInterface
                 'done' => $done
             ];
             if( $todo > 0 ) {
-
                 $percent = 100 / $todo * $done;
             }
             $this->_cachedTodoDone['percent'] = $percent;
@@ -1585,6 +1637,7 @@ class Activity implements ResourceInterface
             'source' => $this->getSource() ? (string)$this->getSource() : "",
             'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, ',', ' '),
             'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ' '),
+            'Frais de gestion' => number_format($this->getFraisDeGestion(), 2, ',', ''),
         );
     }
 
@@ -1608,6 +1661,7 @@ class Activity implements ResourceInterface
             'source',
             'versement effectué',
             'versement prévu',
+            'Frais de gestion',
         );
     }
 

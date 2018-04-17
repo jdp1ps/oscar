@@ -21,9 +21,6 @@ return array(
             // Documents 'publiques"
             'document_admin_oscar' => realpath( __DIR__.'/../../data/documents/public'),
 
-            // Index de recherche
-            'search_activity' => realpath( __DIR__.'/../../data/luceneindex'),
-
             // Modèle de feuille de temps
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
         ],

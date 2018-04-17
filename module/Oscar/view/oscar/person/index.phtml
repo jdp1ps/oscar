@@ -1,6 +1,7 @@
 <header class="page-header">
     <h1 class="container">
-        Liste des personnes
+        <i class="icon-group"></i>
+        Liste des <?= $leader ? 'responsables' : 'personnes' ?>
         <?php if( $search !== "" ): ?>
             pour la recherche <q><?= htmlentities($search) ?></q>
         <?php endif; ?>
@@ -9,23 +10,51 @@
 
 <div class="container">
     <form action="<?= $this->url() ?>" method="get" class="form">
-        <div class="input-group input-group-lg">
+        <div class="input-group input-group-lg" style="">
             <input placeholder="Rechercher dans le nom ou le prénom&hellip;"
                    type="search"
                    class="form-control input-lg"
                    name="q"
                    value="<?= htmlentities($search) ?>"/>
                 <span class="input-group-btn">
-                    <button type="submit" class="btn btn-primary">Rechercher</button>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="icon-search-outline"></i>
+                        Rechercher</button>
+                    <button type="submit" class="btn btn-info" name="format" value="csv">
+                        <i class="icon-download"></i>
+                        CSV</button>
                 </span>
         </div>
-        <h4>Filtres</h4>
+
         <div class="row">
-            <div class="col-md-6">
-                <h5>Rôle dans les activités de recherche</h5>
+            <div class="col-md-4">
+                <h5>Rôle</h5>
+                <p class="help">Filtre sur un rôle endossé par la personne (à tous les niveaux).</p>
                 <select placeholder="Choississez un ou plusieurs rôle" name="filter_roles[]" class="select2" id="filter_roles" multiple="multiple">
                     <?php foreach( $this->grant()->getAllRoleIdPerson() as $role ):?>
                         <option value="<?= $role ?>"<?= (in_array($role, $filter_roles) ? ' selected="selected"' : '') ?>><?= $role ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <h5>Responsable uniquement</h5>
+                <p class="help">
+                    N'affichera que les personnes ayant un rôle à responsabilité dans les organisations
+                </p>
+                <label for="leader">
+                    <div class="material-switch">
+                        <input id="leader" name="leader" value="on" type="checkbox" <?= $leader ? 'checked' : '' ?>/>
+                        <label for="leader" class="label-primary"></label>
+                    </div>
+
+                </label>
+            </div>
+            <div class="col-md-4">
+                <h5>Tri</h5>
+                <select name="orderby" class="form-control">
+                    <?php foreach( $this->orders as $value=>$order ):?>
+                        <option value="<?= $value ?>"<?= ($orderBy == $value ? ' selected="selected"' : '') ?>><?= $order ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -55,12 +84,9 @@ $markText = function( $text, $search ){
         ]) ?>
     <?php endforeach; ?>
         <script>
-            Initer.ready(function(){
-                require(['select2'], function(){
-                    $('.select2').select2();
-                });
-            })
-
+            require(['select2'], function(select2){
+                $('.select2').select2({ width: '100%' });
+            });
         </script>
     <?php
     $filterRoleUrl = "";
@@ -69,7 +95,7 @@ $markText = function( $text, $search ){
     }?>
     <?= $this->pager(
             $persons, $this->url().'?q='.urlencode($search)
-                .$filterRoleUrl.'&page=%s'
+                .$filterRoleUrl.'&page=%s&orderby='.$orderBy
 
     ) ?>
 </section>

@@ -4,16 +4,23 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\PrivilegeRepository;
+use Oscar\Entity\Project;
+use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
+use Zend\Log\Logger;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -98,7 +105,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             }
 
             // Selection des personnes associées via le Projet/Activité
-            foreach ($activity->getPersonsRoled($rolesIds) as $p ){
+            foreach ($activity->getPersonPrincipalActive($rolesIds, false) as $p ){
                 $persons[$p->getPerson()->getId()] = $p->getPerson(); ;
             }
 
@@ -107,7 +114,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             foreach ($activity->getOrganizationsDeep() as $organization ){
                 /** @var OrganizationPerson $personOrganization */
                 if( $organization->isPrincipal() ) {
-                    foreach ($organization->getOrganization()->getPersons() as $personOrganization) {
+                    foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
                         if (in_array($personOrganization->getRole(), $rolesIds)) {
                             $persons[$personOrganization->getPerson()->getId()] = $personOrganization->getPerson();
                         }
@@ -160,6 +167,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
 
         if( !isset($this->_cachePersonLdapLogin[$login]) ){
+
+            $this->getServiceLocator()->get('Logger')->info('Récupération de PERSON via ' . $login);
             $this->_cachePersonLdapLogin[$login] = $this->getBaseQuery()
                 ->where('p.ladapLogin = :login')
                 ->setParameter('login', $login)
@@ -242,8 +251,21 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $filters = [],
         $resultByPage = 50
     ) {
-        $query = $this->getBaseQuery();
 
+        if( $filters['leader'] ){
+            $query = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+                ->innerJoin('p.organizations', 'o')
+                ->innerJoin('o.roleObj', 'r')
+                ->where('r.principal = true')
+            ;
+        } else {
+
+            $query = $this->getBaseQuery();
+        }
+
+        if( array_key_exists('order_by', $filters) ){
+            $query->addOrderBy('p.'.$filters['order_by'], 'ASC');
+        }
 
         // RECHERCHE sur le connector
         // Ex: rest:p00000001
@@ -260,10 +282,15 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         // RECHERCHE sur le nom/prenom/email
         else {
             if ($search !== null) {
+
+                $searchR = str_replace('*', '%', $search);
+
                 $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
-                    ->setParameter('search', '%' . strtolower($search) . '%');
+                    ->setParameter('search', '%' . strtolower($searchR) . '%');
             }
         }
+
+
 
         // FILTRE : Application des filtres sur les rôles
         if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {
@@ -658,6 +685,33 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
     }
 
+    public function getPersonsPrincipalInActivityIncludeOrganization( Activity $activity ){
+        $persons = [];
+
+        /** @var ActivityPerson $activityperson */
+        foreach( $activity->getPersonsDeep() as $activityperson ){
+            if( $activityperson->isPrincipal() && !$activityperson->isOutOfDate() ){
+                if( !in_array($activityperson->getPerson(), $persons))
+                    $persons[] = $activityperson->getPerson();
+            }
+        }
+
+        /** @var ActivityOrganization $activityOrganization */
+        foreach( $activity->getOrganizationsDeep() as $activityOrganization ){
+            if( $activityOrganization->isPrincipal() && !$activityOrganization->isOutOfDate() ){
+
+                /** @var OrganizationPerson $organizationPerson */
+                foreach( $activityOrganization->getOrganization()->getPersons() as $organizationPerson ){
+                    if( $organizationPerson->isPrincipal() && !$organizationPerson->isOutOfDate() && !in_array($organizationPerson->getPerson(), $persons) ){
+                        $persons[] = $organizationPerson->getPerson();
+                    }
+                }
+            }
+        }
+
+        return $persons;
+    }
+
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -681,5 +735,260 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     protected function getServiceLdap()
     {
         return $this->getServiceLocator()->get('ldap_people_service')->getMapper();
+    }
+
+    /**
+     * @return NotificationService
+     */
+    protected function getNotificationService(){
+        return $this->getServiceLocator()->get('NotificationService');
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLoggerService(){
+        return $this->getServiceLocator()->get('Logger');
+    }
+
+
+    /**
+     * @return ActivityLogService
+     */
+    protected function getActivityLogService()
+    {
+        return $this->getServiceLocator()->get('ActivityLogService');
+    }
+
+    /**
+     * @return OscarUserContext
+     */
+    protected function getOscarUserContext()
+    {
+        return $this->getServiceLocator()->get('OscarUserContext');
+    }
+
+    /**
+     * @return Person
+     */
+    protected function getCurrentPerson()
+    {
+        return $this->getOscarUserContext()->getCurrentPerson();
+    }
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// AFFECTATIONS
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Organization
+    public function personOrganizationAdd( Organization $organization, Person $person, Role $role, $dateStart=null, $dateEnd=null ){
+        if( !$organization->hasPerson($person, $role) ){
+            $message = sprintf("a ajouté %s(%s) dans l'organisation %s", $person->log(), $role->getRoleId(), $organization->log());
+            $this->getLoggerService()->info($message);
+            $op = new OrganizationPerson();
+            $this->getEntityManager()->persist($op);
+
+            $op->setPerson($person)
+                ->setOrganization($organization)
+                ->setRoleObj($role)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd);
+
+            $this->getEntityManager()->flush($op);
+            $this->getEntityManager()->refresh($organization);
+            $this->getEntityManager()->refresh($person);
+
+            if( $role->isPrincipal() ){
+                $this->getLoggerService()->info("Role principal");
+                /** @var ActivityOrganization $oa */
+                foreach ($organization->getActivities() as $oa){
+                    $this->getLoggerService()->info("Activité : " . $oa->getActivity());
+                    if( $oa->isPrincipal() ){
+                        $this->getLoggerService()->info("Activités, rôle principal");
+                        $this->getEntityManager()->refresh($oa->getActivity());
+                        $this->getNotificationService()->generateNotificationsForActivity($oa->getActivity(), $person);
+                    }
+                }
+                foreach ($organization->getProjects() as $op){
+                    $this->getLoggerService()->info("Projet : " . $op->getProject);
+                    if( $op->isPrincipal() ){
+                        foreach ($op->getProject()->getActivities() as $a){
+                            $this->getLoggerService()->info("Project > Activités, rôle principal");
+                            $this->getEntityManager()->refresh($a);
+                            $this->getNotificationService()->generateNotificationsForActivity($a, $person);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function personOrganizationRemove( OrganizationPerson $organizationPerson ){
+        if( $organizationPerson->isPrincipal() ){
+            /** @var OrganizationService $os */
+            $os = $this->getServiceLocator()->get('OrganizationService');
+
+            foreach ( $os->getOrganizationActivititiesPrincipalActive($organizationPerson->getOrganization()) as $activity ){
+                $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $organizationPerson->getPerson());
+            }
+
+            $this->getEntityManager()->remove($organizationPerson);
+            $this->getEntityManager()->flush();
+        }
+    }
+
+
+
+    /// ACTIVITY
+    public function personActivityAdd( Activity $activity, Person $person, Role $role, $dateStart=null, $dateEnd=null ){
+        if( !$activity->hasPerson($person, $role, $dateStart, $dateEnd) ){
+
+
+            $personActivity = new ActivityPerson();
+            $this->getEntityManager()->persist($personActivity);
+
+            $personActivity->setPerson($person)
+                ->setActivity($activity)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd)
+                ->setRoleObj($role);
+
+            $this->getEntityManager()->flush($personActivity);
+
+            // LOG
+            $this->getActivityLogService()->addUserInfo(
+                sprintf("a ajouté %s(%s) dans l'activité %s ", $person->log(), $role->getRoleId(), $activity->log()),
+                'Activity:person', $activity->getId()
+            );
+
+            // Si le rôle est principal, on actualise les notifications de la personne
+            if( $role->isPrincipal() ){
+                $this->getEntityManager()->refresh($activity);
+                $this->getNotificationService()->generateNotificationsForActivity($activity, $person);
+            }
+        }
+    }
+
+    public function personActivityRemove( ActivityPerson $activityPerson )
+    {
+        $person = $activityPerson->getPerson();
+        $activity = $activityPerson->getActivity();
+        $roleId = $activityPerson->getRole();
+        $updateNotification = $activityPerson->isPrincipal();
+        $this->getEntityManager()->remove($activityPerson);
+
+        // LOG
+        $this->getActivityLogService()->addUserInfo(
+            sprintf("a supprimé %s(%s) dans l'activité %s ", $person->log(), $roleId, $activity->log()),
+            'Activity:person', $activity->getId()
+        );
+
+        // Si le rôle est principal, on actualise les notifications de la personne
+        if( $updateNotification ){
+            $this->getEntityManager()->refresh($activity);
+            $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
+            $this->getNotificationService()->generateNotificationsForActivity($activity, $person);
+        }
+    }
+
+    public function personActivityChangeRole( ActivityPerson $activityPerson, Role $newRole )
+    {
+        $person = $activityPerson->getPerson();
+        $activity = $activityPerson->getActivity();
+
+        // TODO Faire un contrôle sur les dates
+
+
+        $updateNotification = $activityPerson->isPrincipal() || $newRole->isPrincipal();
+        $activityPerson->setRoleObj($newRole);
+        $this->getEntityManager()->flush($activityPerson);
+        $this->getLoggerService()->info(sprintf("Le rôle de personne %s a été modifié dans l'activité %s", $person, $activity));
+
+        // Si le rôle est principal, on actualise les notifications de la personne
+        if( $updateNotification ){
+            $this->getEntityManager()->refresh($activity);
+            $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
+            $this->getNotificationService()->generateNotificationsForActivity($activity, $person);
+        }
+    }
+
+    // PROJECT
+    public function personProjectAdd( Project $project, Person $person, Role $role, $dateStart=null, $dateEnd=null ){
+        if( !$project->hasPerson($person, $role, $dateStart, $dateEnd) ){
+
+            $personProject = new ProjectMember();
+            $this->getEntityManager()->persist($personProject);
+
+            $personProject->setPerson($person)
+                ->setProject($project)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd)
+                ->setRoleObj($role);
+
+            $this->getEntityManager()->flush($personProject);
+            $this->getLoggerService()->info(sprintf("La personne %s a été ajouté au projet %s", $person, $project));
+
+            // Si le rôle est principal, on actualise les notifications de la personne
+            if( $role->isPrincipal() ){
+                $this->getEntityManager()->refresh($project);
+                foreach ($project->getActivities() as $activity) {
+                    $this->getEntityManager()->refresh($activity);
+                    $this->getNotificationService()->generateNotificationsForActivity($activity, $person);
+                }
+            }
+        }
+    }
+
+    public function personProjectRemove( ProjectMember $projectPerson ){
+        $person = $projectPerson->getPerson();
+        $project = $projectPerson->getProject();
+
+        $roleId = $projectPerson->getRole();
+        $updateNotification = $projectPerson->isPrincipal();
+
+        $this->getEntityManager()->remove($projectPerson);
+
+        // LOG
+        $this->getActivityLogService()->addUserInfo(
+            sprintf("a supprimé %s(%s) dans l'activité %s ", $person->log(), $roleId, $project->log()),
+            'Project:person', $project->getId()
+        );
+
+        // Si le rôle est principal, on actualise les notifications de la personne
+        if( $updateNotification ){
+            $this->getEntityManager()->refresh($project);
+            $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
+            $this->getNotificationService()->generateNotificationsForProject($project, $person);
+        }
+    }
+
+    // PROJECT
+    public function personProjectChangeRole( ProjectMember $personProject, Role $newRole, $dateStart=null, $dateEnd=null ){
+
+        if( $newRole == $personProject->getRoleObj() ) return;
+
+        $person = $personProject->getPerson();
+        $project = $personProject->getProject();
+
+        $updateNotification = $personProject->isPrincipal() || $newRole->isPrincipal();
+        $personProject->setRoleObj($newRole);
+        $project->touch();
+
+        $this->getEntityManager()->flush($personProject);
+        $this->getEntityManager()->flush($project);
+
+        $this->getLoggerService()->info(sprintf("Le rôle de personne %s a été modifié dans le projet %s", $person, $project));
+
+        // Si le rôle est principal, on actualise les notifications de la personne
+        if( $updateNotification ){
+            $this->getEntityManager()->refresh($project);
+            $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
+            $this->getNotificationService()->generateNotificationsForProject($project, $person);
+        }
     }
 }

@@ -8,9 +8,13 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Driver\PDOException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\ORM\Tools\SchemaValidator;
+use Moment\Moment;
 use Oscar\Connector\ConnectorActivityCSVWithConf;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
@@ -25,8 +29,10 @@ use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\CategoriePrivilege;
 use Oscar\Entity\Notification;
+use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
@@ -35,10 +41,15 @@ use Oscar\Entity\RoleOrganization;
 use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\ConnectorRepportToPlainText;
+use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
+use Oscar\Service\MailingService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\ShuffleDataService;
+use Oscar\Strategy\Search\ActivityElasticSearch;
+use Oscar\Strategy\Search\ActivityZendLucene;
 use Oscar\Utils\ActivityCSVToObject;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
@@ -52,26 +63,78 @@ use Zend\Console\Prompt\Password;
 use Zend\Console\Prompt\PromptInterface;
 use Zend\Console\Prompt\Select;
 use Zend\Crypt\Password\Bcrypt;
+use Zend\Diactoros\Exception\DeprecatedMethodException;
 
 class ConsoleController extends AbstractOscarController
 {
-    public function patch_debug()
-    {
-        /*$privileges = $this->getEntityManager()->getRepository(Privilege::class)->findAll();
 
-        foreach ( $privileges as $p ){
-            echo $p->getId()." - ";
+    public function updateAction()
+    {
+//        $tool = new SchemaTool($this->getEntityManager());
+//        $tool->getUpdateSchemaSql($this->getEntityManager()->getClassMetadata($this->getEntityManager()->));
+        $validator = new SchemaValidator($this->getEntityManager());
+        $errors = $validator->validateMapping();
+
+        if (count($errors) > 0) {
+            var_dump($errors);
+            // Lots of errors!
+            echo implode("\n\n", $errors);
+        }
+        die('UPDATE');
+    }
+
+    public function patch_typeOrganisationsUpdate()
+    {
+        $types = Organization::getTypes();
+        $organisations = $this->getOrganizationService()->getOrganizations();
+        $this->consoleHeader("Mise à jour des organisations (Étape 1) : ");
+        $this->getLogger()->info(sprintf("%s organisation(s) à traiter : ", count($organisations)));
+        foreach ($organisations as $organisation) {
+            if( array_key_exists($organisation->getType(), $types) ){
+                $this->getLogger()->info(sprintf("Mise à jour du type pour %s", $organisation));
+                $organisation->setType($types[$organisation->getType()]);
+                $this->getEntityManager()->flush($organisation);
+            }
+        }
+        $this->getConsole()->writeLine("DONE", ColorInterface::GRAY);
+
+        // Récupération des types définit en dur dans les Organisations
+        $typesStr = $this->getOrganizationService()->getTypes();
+
+        $toCreate = [];
+        $exists = [];
+
+        /** @var OrganizationType $exist */
+        foreach ($this->getEntityManager()->getRepository(OrganizationType::class)->findAll() as $exist) {
+            $exists[] = $exist->getLabel();
         }
 
-        //
-        $privilege = new Privilege();
-        $privilege->setLibelle("TEST_PRIVILEGE")
-            ->setCode("TEST_PRIVILEGE");
-        $this->getEntityManager()->persist($privilege);
-        $this->getEntityManager()->flush($privilege);
+        $toCreate = array_diff($typesStr, $exists);
+        $this->consoleHeader("Mise à jour des types d'organisation : ");
 
-        die("OK");
-        */
+        foreach ($toCreate as $label) {
+            $type = new OrganizationType();
+            $this->getEntityManager()->persist($type);
+            $type->setLabel($label);
+            $this->getEntityManager()->flush($type);
+            $this->consoleSuccess("Création du type '$label'");
+        }
+        $this->getConsole()->writeLine("DONE", ColorInterface::GRAY);
+
+        $this->consoleHeader("Mise à jour des organisations : ");
+        foreach ($organisations as $organisation) {
+            if( $organisation->getType() ){
+                $typeStr = $organisation->getType();
+                $typeObj = $organisation->getTypeObj();
+                if( $typeObj && $typeObj->getLabel() == $typeStr ){
+                    continue;
+                }
+                $organisation->setTypeObj($this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(["label" => $typeStr]));
+                $this->getConsole()->writeLine("Mise à jour du type $typeStr vers : " . $organisation->getTypeObj());
+            }
+        }
+        $this->getEntityManager()->flush();
+
     }
 
 
@@ -241,6 +304,26 @@ class ConsoleController extends AbstractOscarController
 
     }
 
+    public function notificationsPersonAction()
+    {
+        $personId = $this->params('idperson');
+        $person = $this->getPersonService()->getPerson($personId);
+        $this->getNotificationService()->generateNotificationsPerson($person);
+        die("$person");
+    }
+
+//'route' => 'oscar notifications:person:purge <idperson> <idactivity></idactivity>',
+
+    public function notificationsPersonActivityPurgeAction()
+    {
+        $personId = $this->params('idperson');
+        $activityId = $this->params('idactivity');
+
+        $person = $this->getPersonService()->getPerson($personId);
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+
+        $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
+    }
 
     public function notificationsActivityGenerateAction()
     {
@@ -281,10 +364,328 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
-    public function patch_test()
-    {
-        echo "TEST:\n";
 
+    protected function checkPath($path, $text, $level = 'error', $allowed = 'rw'){
+
+        $badOut = $level == 'warn' ? 'consoleWarn' : 'consoleError';
+
+        $msg = $level == 'warn' ? "WARNING" : "ERROR";
+        $color = $level == 'warn' ? ColorInterface::YELLOW : ColorInterface::RED;
+
+        $this->getConsole()->write(" * Check '$text' ", ColorInterface::WHITE);
+        $this->getConsole()->write(realpath($path), ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+        if( !file_exists($path) ){
+            $this->$badOut("Le chemin n'existe pas / inaccessible");
+            return false;
+        }
+
+        if( !is_readable($path) ){
+            $this->$badOut("Chemin inaccessible en lecture.");
+            return false;
+        }
+
+        if( strpos($allowed, 'w') > -1 && !is_writable($path) ){
+            $this->$badOut("Chemin inacessible en écriture.");
+            return false;
+        }
+
+        $this->consoleSuccess("OK");
+        return true;
+    }
+
+    protected function checkModule($module, $level = 'error'){
+
+        $badOut = $level == 'warn' ? 'consoleWarn' : 'consoleError';
+
+        $msg = $level == 'warn' ? "WARNING" : "ERROR";
+        $color = $level == 'warn' ? ColorInterface::YELLOW : ColorInterface::RED;
+
+        $this->getConsole()->write(" * Module PHP ", ColorInterface::WHITE);
+        $this->getConsole()->write($module, ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(' ('.phpversion($module).')', ColorInterface::WHITE);
+        $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+        if( !extension_loaded($module) ){
+            $this->$badOut("Uninstalled");
+            return false;
+        }
+
+        $this->consoleSuccess("Installed");
+        return true;
+    }
+
+    public function testConfigAction()
+    {
+        $configPath = realpath(__DIR__ . '/../../../../../config/autoload/local.php');
+
+        $this->getConsole()->clear();
+        $this->getConsole()->writeLine("##################################################################", ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine("###", ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine("### CONFIGURATION OSCAR", ColorInterface::LIGHT_WHITE);
+
+        $this->getConsole()->write("### ", ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine(OscarVersion::getBuild(), ColorInterface::WHITE);
+        $this->getConsole()->writeLine("###", ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->writeLine("##################################################################", ColorInterface::LIGHT_WHITE);
+
+
+        $this->getConsole()->writeLine("");
+        $this->getConsole()->writeLine(" ### PHP requirements : ", ColorInterface::LIGHT_WHITE);
+
+        //php_ini_loaded_file
+        $this->getConsole()->write(" - System ", ColorInterface::WHITE);
+        $this->getConsole()->writeLine(php_uname(), ColorInterface::LIGHT_WHITE);
+
+        $this->getConsole()->write(" - PHP version ", ColorInterface::WHITE);
+        $this->getConsole()->write(PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION, ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(' (' . phpversion() .')', ColorInterface::WHITE);
+        if( PHP_VERSION_ID < 70000 )
+            $this->consoleError('Major version required !');
+        else
+            $this->consoleSuccess('OK');
+
+        $this->getConsole()->write(" - php.ini ", ColorInterface::WHITE);
+        $this->getConsole()->writeLine(php_ini_loaded_file(), ColorInterface::LIGHT_WHITE);
+
+        $this->getConsole()->writeLine("");
+
+        $this->checkModule('bz2');
+        $this->checkModule('curl');
+        $this->checkModule('fileinfo');
+        $this->checkModule('gd');
+        $this->checkModule('iconv');
+        $this->checkModule('json');
+        $this->checkModule('ldap', 'warn');
+        $this->checkModule('mbstring');
+        $this->checkModule('mcrypt');
+        $this->checkModule('openssl');
+        $this->checkModule('pdo_pgsql');
+        $this->checkModule('posix', 'warn');
+        $this->checkModule('Reflection');
+        $this->checkModule('session');
+        $this->checkModule('xml');
+        $this->checkModule('zip');
+
+        $this->getConsole()->writeLine("");
+        $this->getConsole()->writeLine(" ### OSCAR configuration : ", ColorInterface::LIGHT_WHITE);
+
+        $this->getConsole()->write(" * Fichier de configuration ", ColorInterface::WHITE);
+        $this->getConsole()->write($configPath, ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+        if( !file_exists($configPath) ){
+            $this->getConsole()->writeLine("ERROR", ColorInterface::WHITE, ColorInterface::RED);
+            $this->consoleError("Le fichier de configuration 'config/config/autoload/local.php' n'existe pas/n'est pas accessible");
+            return;
+        }
+        $this->getConsole()->writeLine("OK", ColorInterface::BLACK, ColorInterface::GREEN);
+
+        // Chargement de la configuration
+        $example = require($configPath);
+        $config = new ConfigurationParser($example);
+
+        try {
+            $this->getConsole()->write(" * Accès à la base de données ", ColorInterface::WHITE);
+            $this->getConsole()->write($config->getConfiguration('doctrine.connection.orm_default.params.host'), ColorInterface::LIGHT_WHITE);
+            $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+            if ($this->getEntityManager()->getConnection()->isConnected()) {
+                $this->getConsole()->writeLine("OK", ColorInterface::BLACK, ColorInterface::GREEN);
+            }
+
+            $validator = new SchemaValidator($this->getEntityManager());
+            $errors = $validator->validateMapping();
+
+            $this->getConsole()->write(" * Modèle de donnée ", ColorInterface::WHITE);
+            if (count($errors) > 0) {
+                $this->consoleError("Obsolète");
+                foreach( $errors as $error ){
+                    $this->consoleError(" - " . $error);
+                }
+                $this->consoleError("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
+            } else {
+                $this->consoleSuccess("OK");
+            }
+
+        } catch (\Exception $e ){
+            $this->getConsole()->writeLine("ERROR " . $e->getMessage(), ColorInterface::WHITE, ColorInterface::RED);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // DOSSIERS / FICHIERS
+        try {
+            $this->getConsole()->writeLine("");
+            $this->getConsole()->writeLine(" ### Emplacements des fichiers/Dossiers : ", ColorInterface::LIGHT_WHITE);
+
+            $pathDocuments = $config->getConfiguration('oscar.paths.document_oscar');
+            $this->checkPath($pathDocuments, "Stoquage des documents > ACTIVITÉS");
+
+            $pathDocuments = $config->getConfiguration('oscar.paths.document_admin_oscar');
+            $this->checkPath($pathDocuments, "Stoquage des documents > ADMINISTRATIFS");
+
+            $pathDocuments = $config->getConfiguration('oscar.paths.timesheet_modele');
+            $this->checkPath($pathDocuments, "Modèle de document > FEUILLE DE TEMPS");
+
+            $pathDocuments = $config->getConfiguration('oscar.mailer.template');
+            $this->checkPath($pathDocuments, "Modèle de mail > TEMPLATE");
+
+
+        } catch ( OscarException $e ){
+            $this->consoleError(sprintf("Configuration manquante : %s", $e->getMessage()));
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// MOTEUR de RECHERCHE
+        $this->getConsole()->writeLine("");
+        $this->getConsole()->writeLine(" ### Système d'indexation des activités : ", ColorInterface::LIGHT_WHITE);
+
+        try {
+            $searchClass = $config->getConfiguration('oscar.strategy.activity.search_engine.class');
+
+            // ELASTIC SEARCH
+            if( $searchClass == ActivityElasticSearch::class ){
+                $this->getConsole()->write(" * Moteur Elastic Search ", ColorInterface::WHITE);
+                $nodesUrl = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
+
+
+                foreach ($nodesUrl[0] as $url ){
+                    $this->getConsole()->write("Noeud $url ", ColorInterface::LIGHT_WHITE);
+
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, $url);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                    $infos = curl_exec($curl);
+                    if( ($error = curl_error($curl)) ){
+                        $this->consoleError("Error : " . $error);
+                    } else {
+                        $this->consoleSuccess("OK (Response 200)");
+                    }
+                    curl_close($curl);
+                }
+            }
+            // LUCENE
+            elseif ($searchClass == ActivityZendLucene::class ){
+                $params = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
+                $this->checkPath($params[0], "Dossier pour l'index de recherche LUCENE");
+            }
+            else {
+                $this->consoleWarn(" ~ INDEXEUR : Système de recherche non testable...");
+            }
+        } catch ( OscarException $e ){
+            $this->consoleError(sprintf(" ! INDEXEUR : Configuration du système de recherche incomplet : %s", $e->getMessage()));
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// CONNECTORS
+        try {
+            $connectorsOrganisation = $config->getConfiguration('oscar.connectors.organization');
+            foreach ($connectorsOrganisation as $conn=>$params) {
+                $connecteurName = sprintf(" * CONNECTEUR ORGANISATION '%s'", $conn);
+                $this->getConsole()->writeLine("");
+                $this->getConsole()->writeLine(" ### Connecteur ORGANIZATION $conn : ", ColorInterface::LIGHT_WHITE);
+                $class = $config->getConfiguration("oscar.connectors.organization.$conn.class");
+                $params = $config->getConfiguration("oscar.connectors.organization.$conn.params");
+
+                if ($this->checkPath($params, "Fichier de configuration", 'r') ){
+                    $paramsPhp = Yaml::parse(file_get_contents($params));
+
+                    $this->getConsole()->write(" * Accès au connecteur ", ColorInterface::WHITE);
+                    $this->getConsole()->write($paramsPhp['url_organizations'], ColorInterface::LIGHT_WHITE);
+                    $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, $paramsPhp['url_organizations']);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                    $infos = curl_exec($curl);
+                    if( ($error = curl_error($curl)) ){
+                        $this->consoleError($error);
+                    } else {
+                        $this->consoleSuccess("OK");
+                    }
+                    curl_close($curl);
+                }
+            }
+
+        } catch ( OscarException $e ){
+            $this->consoleWarn(sprintf(" ~ CONNECTOR > ORGANIZATION : Pas de connecteur organisation : %s", $e->getMessage()));
+        }
+
+        try {
+            $connectors = $config->getConfiguration('oscar.connectors.person');
+            foreach ($connectors as $conn=>$params) {
+                $connecteurName = sprintf(" * CONNECTEUR PERSON '%s'", $conn);
+
+                $this->getConsole()->writeLine("");
+                $this->getConsole()->writeLine(" ### Connecteur PERSON $conn : ", ColorInterface::LIGHT_WHITE);
+
+
+                $class = $config->getConfiguration("oscar.connectors.person.$conn.class");
+                $params = $config->getConfiguration("oscar.connectors.person.$conn.params");
+
+                if ($this->checkPath($params, "Fichier de configuration", 'r') ){
+                    $paramsPhp = Yaml::parse(file_get_contents($params));
+
+                    $this->getConsole()->write(" * Accès au connecteur ", ColorInterface::WHITE);
+                    $this->getConsole()->write($paramsPhp['url_persons'], ColorInterface::LIGHT_WHITE);
+                    $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, $paramsPhp['url_persons']);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                    $infos = curl_exec($curl);
+                    if( ($error = curl_error($curl)) ){
+                        $this->consoleError(" ! Connector no response : " . $error);
+                    } else {
+                        $this->consoleSuccess("OK");
+                    }
+                    curl_close($curl);
+                }
+            }
+
+        } catch ( OscarException $e ){
+            $this->consoleWarn(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
+        }
+
+
+
+
+
+
+    }
+
+    public function testMailingAction()
+    {
+        /** @var MailingService $mailer */
+        $mailer = $this->getServiceLocator()->get('MailingService');
+
+        $administrators = $this->getConfiguration('oscar.mailer.administrators');
+        $mails = implode(',', $administrators);
+
+        $this->consoleKeyValue("Envoi effectif", $this->getConfiguration('oscar.mailer.send') ? 'OUI' : 'NON');
+        $this->getConsole()->writeLine("Le mail de test va être envoyé aux adresses : ", ColorInterface::WHITE);
+
+        foreach ($administrators as $mail) {
+            $this->getConsole()->writeLine(" * " . $mail, ColorInterface::LIGHT_WHITE);
+        }
+
+        $confirm = Confirm::prompt("Confirmer l'envoi ? ");
+
+        if ($confirm) {
+            try {
+                $message = $mailer->newMessage("Test de mail", [
+                    'body' => "Si vous lisez ce message, c'est que la configuration de l'envoi de courriel fonctionne."
+                    // Ou que vous êtes entrains de lire le code source
+                ])->setTo($this->getConfiguration('oscar.mailer.administrators'));
+                $mailer->send($message, true);
+                $this->consoleSuccess("Oscar a bien envoyé le mail de test");
+            } catch (\Exception $err) {
+                $this->consoleError($err->getMessage() . "\n" . $err->getTraceAsString());
+            }
+        } else {
+            $this->consoleNothingToDo('Opération annulée');
+        }
     }
 
     private function getReadablePath($path)
@@ -319,7 +720,7 @@ class ConsoleController extends AbstractOscarController
         try {
             $sourceFilePath = $this->getReadablePath($this->params('fichier'));
             $configurationFilePath = $this->getReadablePath($this->params('config'));
-            $skip = 2;
+            $skip = 1;
 
 
             $configuration = require($configurationFilePath);
@@ -339,22 +740,12 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function patch_generatePrivilegesJSON()
     {
-
-        $privileges = [];
-        /** @var Privilege $p */
-        foreach ($this->getEntityManager()->getRepository(Privilege::class)->findAll() as $p) {
-            $privilege = [
-                'categorie_id' => $p->getCategorie()->getId(),
-                'code' => $p->getCode(),
-                'libelle' => $p->getLibelle(),
-                'fullcode' => $p->getFullCode(),
-            ];
-            $privileges[$p->getFullCode()] = $privilege;
-        }
-        echo json_encode($privileges);
-        die('Génération du fichier JSON à partir des données de la BDD courante.');
+        throw new DeprecatedMethodException();
     }
 
 
@@ -443,6 +834,11 @@ class ConsoleController extends AbstractOscarController
 
     }
 
+    public function versionAction()
+    {
+        $this->consoleKeyValue("Version", OscarVersion::getBuild());
+    }
+
     public function patch_checkPrivilegesJSON()
     {
         $cheminFichier = realpath(__DIR__ . '/../../../../../install/privileges.json');
@@ -457,6 +853,12 @@ class ConsoleController extends AbstractOscarController
         if (!$datas) {
             die("ERREUR : Impossible de traiter les données du fichier ". json_last_error_msg()."\n");
         }
+
+        // Mise à jour de la séquence
+        $rsm = new Query\ResultSetMapping();
+        $query = $this->getEntityManager()->createNativeQuery("select setval('privilege_id_seq',(select max(id)+1 from privilege), false)", $rsm);
+        $query->execute();
+
         $toRemove = [];
         $toAdd = [];
         $toUpdate = [];
@@ -591,13 +993,99 @@ class ConsoleController extends AbstractOscarController
     }
 
     /**
+     * Synchronisation des personnes depuis un fichier JSON.
+     */
+    public function personJsonSyncAction()
+    {
+        try {
+            $fichier = $this->getRequest()->getParam('fichier');
+
+            if (!$fichier) {
+                die("Vous devez spécifier le chemin complet vers le fichier JSON");
+            }
+
+            echo "Synchronisation depuis le fichier $fichier\n";
+            echo "Lecture du fichier $fichier:\n";
+            $fileContent = file_get_contents($fichier);
+            if (!$fileContent) {
+                die("Oscar n'a pas réussi à charger le contenu du fichier");
+            }
+
+            echo "Conversion du contenu de $fichier:\n";
+            $datas = json_decode($fileContent);
+            if (!$datas) {
+                die("les données du fichier $fichier n'ont pas pu être converties.");
+            }
+
+
+            $connector = new ConnectorPersonJSON($datas,
+                $this->getEntityManager());
+            $repport = $connector->syncAll();
+            $connectorFormatter = new ConnectorRepportToPlainText();
+
+            $connectorFormatter->format($repport);
+        } catch (\Exception $e) {
+            die("ERROR : " . $e->getMessage() . $e->getTraceAsString());
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// SYNCHRONISATION DES DONNÉES
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////// ORGANIZATION
+    /**
+     * Synchronisation des organisations depuis un fichier JSON.
+     */
+    public function organizationJsonSyncAction()
+    {
+        try {
+            $fichier = $this->getRequest()->getParam('fichier');
+
+            if (!$fichier)
+                die("Vous devez spécifier le chemin complet vers le fichier JSON");
+
+            echo "Synchronisation depuis le fichier $fichier\n";
+            $sourceJSONFile = new GetJsonDataFromFileStrategy($fichier);
+            try {
+                $datas = $sourceJSONFile->getAll();
+            } catch (\Exception $e) {
+                die("ERR : Impossible de charger les ogranizations depuis $fichier : " . $e->getMessage());
+            }
+
+            $connector = new ConnectorOrganizationJSON($datas,
+                $this->getEntityManager(), 'json');
+            $repport = $connector->syncAll();
+            $connectorFormatter = new ConnectorRepportToPlainText();
+
+            $connectorFormatter->format($repport);
+        } catch (\Exception $e) {
+            die("ERR : " . $e->getMessage());
+        }
+    }
+
+    ///
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////// ACTIVITÉ
+    /**
      * Synchronisation des activités depuis un fichier.
      */
     public function activityFileSyncAction()
     {
         echo "Synchronisation des activités : \n";
 
-        $file = realpath($this->getRequest()->getParam('fichier'));
+        try {
+            $file = $this->getReadablePath($this->getRequest()->getParam('fichier'));
+        } catch (\Exception $e ){
+            $this->consoleError("Impossible de lire le fichier source : " . $e->getMessage());
+        }
+
         echo "Importation des activités depuis $file : \n";
 
         $options = [
@@ -662,74 +1150,7 @@ class ConsoleController extends AbstractOscarController
     }
 
 
-    /**
-     * Synchronisation des personnes depuis un fichier JSON.
-     */
-    public function personJsonSyncAction()
-    {
-        try {
-            $fichier = $this->getRequest()->getParam('fichier');
-
-            if (!$fichier) {
-                die("Vous devez spécifier le chemin complet vers le fichier JSON");
-            }
-
-            echo "Synchronisation depuis le fichier $fichier\n";
-            echo "Lecture du fichier $fichier:\n";
-            $fileContent = file_get_contents($fichier);
-            if (!$fileContent) {
-                die("Oscar n'a pas réussi à charger le contenu du fichier");
-            }
-
-            echo "Conversion du contenu de $fichier:\n";
-            $datas = json_decode($fileContent);
-            if (!$datas) {
-                die("les données du fichier $fichier n'ont pas pu être converties.");
-            }
-
-
-            $connector = new ConnectorPersonJSON($datas,
-                $this->getEntityManager());
-            $repport = $connector->syncAll();
-            $connectorFormatter = new ConnectorRepportToPlainText();
-
-            $connectorFormatter->format($repport);
-        } catch (\Exception $e) {
-            die("ERROR : " . $e->getMessage());
-        }
-    }
-
-    /**
-     * Synchronisation des personnes depuis un fichier JSON.
-     */
-    public function organizationJsonSyncAction()
-    {
-        try {
-            $fichier = $this->getRequest()->getParam('fichier');
-
-            if (!$fichier) {
-                die("Vous devez spécifier le chemin complet vers le fichier JSON");
-            }
-
-            echo "Synchronisation depuis le fichier $fichier\n";
-            $sourceJSONFile = new GetJsonDataFromFileStrategy($fichier);
-            try {
-                $datas = $sourceJSONFile->getAll();
-            } catch (\Exception $e) {
-                die("Impossible de charger les ogranizations depuis $fichier : " . $e->getMessage());
-            }
-
-            $connector = new ConnectorOrganizationJSON($datas,
-                $this->getEntityManager(), 'json');
-            $repport = $connector->syncAll();
-            $connectorFormatter = new ConnectorRepportToPlainText();
-
-            $connectorFormatter->format($repport);
-        } catch (\Exception $e) {
-            die("ERROR : " . $e->getMessage());
-        }
-    }
-
+    /////////////////////////////////////////////////////////////////////////////////////////////////// AUTHENTIFICATION
 
     /**
      * Synchronisation des authentifications depuis un fichier JSON.
@@ -738,131 +1159,36 @@ class ConsoleController extends AbstractOscarController
     {
         try {
             $jsonpath = $this->getRequest()->getParam('jsonpath');
-            $force = $this->getRequest()->getParam('force', false);
 
-            if (!$jsonpath) {
-                die("Vous devez spécifier le chemin complet vers le fichier JSON");
-            }
+            if (!$jsonpath)
+                die("ERR : Vous devez spécifier le chemin complet vers le fichier JSON");
 
-            echo "Read $jsonpath:\n";
+
             $fileContent = file_get_contents($jsonpath);
-            if (!$fileContent) {
-                die("Oscar n'a pas réussi à charger le contenu du fichier");
-            }
+            if (!$fileContent)
+                die("ERR : Oscar n'a pas réussi à charger le contenu du fichier '$jsonpath'");
 
-            echo "Convert $jsonpath:\n";
             $datas = json_decode($fileContent);
-            if (!$datas) {
-                die("les données du fichier $jsonpath n'ont pas pu être converties.");
-            }
+            if (!$datas)
+                die("ERR : Les données du fichier '$jsonpath' n'ont pas pu être converties au format JSON.");
 
-            echo "Process datas...\n";
+            // Système pour crypter les mots de pass (Zend)
             $options = $this->getServiceLocator()->get('zfcuser_module_options');
             $bcrypt = new Bcrypt();
             $bcrypt->setCost($options->getPasswordCost());
 
             $connectorAuthentification = new ConnectorAuthentificationJSON($datas,
                 $this->getEntityManager(), $bcrypt);
+
             $repport = $connectorAuthentification->syncAll();
             $connectorFormatter = new ConnectorRepportToPlainText();
+
             echo $connectorFormatter->format($repport);
 
         } catch (\Exception $ex) {
-            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
+            die("ERR : " . $ex->getMessage());
         }
     }
-
-
-    public function shuffleAction()
-    {
-        /** @var ShuffleDataService $serviceShuffle */
-        $serviceShuffle = $this->getServiceLocator()->get('ShuffleService');
-
-        //$serviceShuffle->shufflePersons();
-        $serviceShuffle->shuffleOrganizations();
-//        $serviceShuffle->shuffleProjects();
-//        $serviceShuffle->shuffleActivity();
-        // Mélange des personnes
-
-        // Mélange des sociétés
-
-        // Mélange des projets
-
-        // Mélange des activités
-        die("SUFFLE");
-    }
-
-    /**
-     * @return AdapterInterface
-     */
-    protected function getConsole()
-    {
-        return $this->getServiceLocator()->get('console');
-    }
-
-    /**
-     * @param $msg Succes à afficher
-     */
-    protected function consoleSuccess($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::BLACK,
-            ColorInterface::GREEN);
-    }
-
-    /**
-     * @param $msg Succes à afficher
-     */
-    protected function consoleUpdateToDo($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
-            ColorInterface::YELLOW);
-    }
-
-    protected function consoleNothingToDo($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
-            ColorInterface::GRAY);
-    }
-
-    protected function consoleDeleteToDo($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
-            ColorInterface::RED);
-    }
-
-
-    /**
-     * @param $msg Succes à afficher
-     */
-    protected function consoleHeader($msg)
-    {
-        $this->getConsole()->write('# ', ColorInterface::WHITE);
-        $this->getConsole()->writeLine($msg, ColorInterface::GRAY);
-    }
-
-    /**
-     * @param $msg Succes à afficher
-     */
-    protected function consoleKeyValue($key, $value)
-    {
-        $this->getConsole()->write($key . ' ', ColorInterface::GRAY);
-        $this->getConsole()->writeLine($value, ColorInterface::CYAN);
-    }
-
-    /**
-     * @param $msg Erreur à afficher
-     */
-    protected function consoleError($msg)
-    {
-        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
-            ColorInterface::RED);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // AUTHENTIFICATION
-    //
-    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * Affiche la liste des authentification présentes dans Oscar.
@@ -975,6 +1301,9 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * Modification du mot de passe
+     */
     public function authPassAction()
     {
         try {
@@ -1031,6 +1360,9 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * Ajouter un rôle à une authentification
+     */
     public function authPromoteAction()
     {
         try {
@@ -1098,6 +1430,9 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    /**
+     * Afficher les informations d'un compte
+     */
     public function authInfoAction()
     {
         try {
@@ -1163,6 +1498,114 @@ class ConsoleController extends AbstractOscarController
             die($ex->getMessage() . "\n" . $ex->getTraceAsString());
         }
     }
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// CADUCQUE
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @deprecated
+     * @throws \Exception
+     */
+    public function shuffleAction()
+    {
+        throw new \Exception("Fonctionnalité dépréciée");
+    }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// CONSOLE
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @return AdapterInterface
+     */
+    protected function getConsole()
+    {
+        return $this->getServiceLocator()->get('console');
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleSuccess($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::BLACK,
+            ColorInterface::GREEN);
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleUpdateToDo($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
+            ColorInterface::YELLOW);
+    }
+
+    /**
+     * @param $msg
+     */
+    protected function consoleNothingToDo($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
+            ColorInterface::GRAY);
+    }
+
+    /**
+     * @param $msg
+     */
+    protected function consoleDeleteToDo($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
+            ColorInterface::RED);
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleHeader($msg)
+    {
+        $this->getConsole()->write('# ', ColorInterface::WHITE);
+        $this->getConsole()->writeLine($msg, ColorInterface::GRAY);
+    }
+
+    /**
+     * @param $msg Succes à afficher
+     */
+    protected function consoleKeyValue($key, $value)
+    {
+        $this->getConsole()->write($key . ' ', ColorInterface::GRAY);
+        $this->getConsole()->writeLine($value, ColorInterface::CYAN);
+    }
+
+    /**
+     * @param $msg Erreur à afficher
+     */
+    protected function consoleError($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::WHITE,
+            ColorInterface::RED);
+    }
+
+    /**
+     * @param $msg Erreur à afficher
+     */
+    protected function consoleWarn($msg)
+    {
+        $this->getConsole()->writeLine($msg, ColorInterface::BLACK,
+            ColorInterface::YELLOW);
+    }
+
+
 
     ////////////////////////////////////////////////////////////////////////////
     //
@@ -1250,7 +1693,10 @@ class ConsoleController extends AbstractOscarController
     public function buildSearchActivityAction()
     {
         try {
-            $this->getActivityService()->searchIndex_rebuild();
+            $repport = $this->getActivityService()->searchIndex_rebuild();
+            $output = new ConnectorRepportToPlainText();
+            $output->format($repport);
+
         } catch (\Exception $e) {
             die(sprintf("ERROR '%s' : \n %s\nDONE\n", $e->getMessage(),
                 $e->getTraceAsString()));
@@ -1280,17 +1726,19 @@ class ConsoleController extends AbstractOscarController
         try {
             /** @var ConnectorRepport $repport */
             $repport = $connector->execute($force);
+            echo "Completed \n";
         } catch (\Exception $e) {
-            die($e->getMessage() . "\n" . $e->getTraceAsString());
+            die('ERR: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
         }
 
         foreach ($repport->getRepportStates() as $type => $out) {
+            $short = substr($type, 0, 3);
             echo "Opération " . strtoupper($type) . " : \n";
             if ($type == "notices") {
                 echo " - " . count($out) . " notice(s) - Rien à faire\n";
             } else {
                 foreach ($out as $line) {
-                    echo date('Y-m-d H:i:s',
+                    echo $short . "\t" . date('Y-m-d H:i:s',
                             $line['time']) . "\t" . $line['message'] . "\n";
                 }
             }
@@ -1392,9 +1840,10 @@ class ConsoleController extends AbstractOscarController
             $repport = $connector->execute($force);
 
             foreach ($repport->getRepportStates() as $type => $out) {
+                $short = substr($type, 0, 3);
                 echo "Opération " . strtoupper($type) . " : \n";
                 foreach ($out as $line) {
-                    echo date('Y-m-d H:i:s',
+                    echo "$short\t " . date('Y-m-d H:i:s',
                             $line['time']) . "\t" . $line['message'] . "\n";
                 }
             }

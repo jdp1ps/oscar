@@ -42,7 +42,7 @@
   "ACTIVITY-EXPORT": {
     "category_id": 2,
     "spot": 4,
-    "root": "ACTIVITY_INDEX",
+    "root": "ACTIVITY-INDEX",
     "code": "EXPORT",
     "libelle": "Exporter les donn\u00e9es des activit\u00e9s",
     "fullcode": "ACTIVITY-EXPORT"
@@ -118,6 +118,14 @@
     "libelle": "Peut voir les jalons",
     "fullcode": "ACTIVITY-MILESTONE_SHOW"
   },
+  "ACTIVITY-MILESTONE_PROGRESSION": {
+    "category_id": 2,
+    "root": "ACTIVITY-MILESTONE_SHOW",
+    "spot": 7,
+    "code": "MILESTONE_PROGRESSION",
+    "libelle": "Peut g\u00e9rer l'état d'avancement des jalons",
+    "fullcode": "ACTIVITY-MILESTONE_PROGRESSION"
+  },
   "ACTIVITY-MILESTONE_MANAGE": {
     "category_id": 2,
     "root": "ACTIVITY-MILESTONE_SHOW",
@@ -170,7 +178,7 @@
     "category_id": 2,
     "spot": 4,
     "code": "STATUS_OFF",
-    "libelle": "Peut modifier le status vers \"D\u00e9sactiv\u00e9\"",
+    "libelle": "Peut modifier le statut vers \"D\u00e9sactiv\u00e9\"",
     "fullcode": "ACTIVITY-STATUS_OFF"
   },
 
@@ -368,7 +376,7 @@
     "category_id": 6,
     "spot": 4,
     "code": "MENU_ADMIN",
-    "libelle": "Acc\u00e8s aux menu d'administration",
+    "libelle": "Acc\u00e8s au menu d'administration",
     "fullcode": "MAINTENANCE-MENU_ADMIN"
   },
 
@@ -398,9 +406,19 @@
     "fullcode": "ACTIVITY-WORKPACKAGE_COMMIT"
   },
 
+
+  "ACTIVITY-TIMESHEET_VIEW": {
+    "spot": 7,
+    "category_id": 2,
+    "code": "TIMESHEET_VIEW",
+    "libelle": "Voir les feuilles de temps",
+    "fullcode": "ACTIVITY-TIMESHEET_VIEW"
+  },
+
   "ACTIVITY-TIMESHEET_VALIDATE_SCI": {
     "spot": 7,
     "category_id": 2,
+    "root": "ACTIVITY-TIMESHEET_VIEW",
     "code": "TIMESHEET_VALIDATE_SCI",
     "libelle": "Validation scientifique des feuilles de temps",
     "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_SCI"
@@ -408,6 +426,7 @@
   "ACTIVITY-TIMESHEET_VALIDATE_ADM": {
     "spot": 7,
     "category_id": 2,
+    "root": "ACTIVITY-TIMESHEET_VIEW",
     "code": "TIMESHEET_VALIDATE_ADM",
     "libelle": "Validation administrative des feuilles de temps",
     "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_ADM"
@@ -484,6 +503,8 @@
     "libelle": "Voir les d\u00e9penses",
     "fullcode": "DEPENSE-SHOW"
   },
+
+
   "droit-USER_VISUALISATION": {
     "category_id": 7,
     "spot": 4,
@@ -502,7 +523,7 @@
     "spot": 4,
     "category_id": 7,
     "code": "ROLEORGA_VISUALISATION",
-    "libelle": "Voir les r\u00f4les des organisations",
+    "libelle": "Voir les rôles des organisations",
     "fullcode": "droit-ROLEORGA_VISUALISATION"
   },
   "droit-ROLEORGA_EDITION": {
@@ -510,7 +531,7 @@
     "category_id": 7,
     "root": "droit-ROLEORGA_VISUALISATION",
     "code": "ROLEORGA_EDITION",
-    "libelle": "G\u00e9rer les r\u00f4les des organisations",
+    "libelle": "Configurer les rôles des organisations",
     "fullcode": "droit-ROLEORGA_EDITION"
   },
 
@@ -520,6 +541,38 @@
     "code": "CONNECTOR_ACCESS",
     "libelle": "Peut ex\u00e9cuter la synchronisation des donn\u00e9es",
     "fullcode": "MAINTENANCE-CONNECTOR_ACCESS"
+  },
+
+  "MAINTENANCE-ACTIVITYTYPE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "ACTIVITYTYPE_MANAGE",
+    "libelle": "Configurer les types d'activités disponibles",
+    "fullcode": "MAINTENANCE-ACTIVITYTYPE_MANAGE"
+  },
+
+  "MAINTENANCE-MILESTONETYPE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "MILESTONETYPE_MANAGE",
+    "libelle": "Configurer les types de jalons disponibles",
+    "fullcode": "MAINTENANCE-MILESTONETYPE_MANAGE"
+  },
+
+  "MAINTENANCE-ORGANIZATIONTYPE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "ORGANIZATIONTYPE_MANAGE",
+    "libelle": "Configurer les types d'organisation disponibles",
+    "fullcode": "MAINTENANCE-ORGANIZATIONTYPE_MANAGE"
+  },
+
+  "MAINTENANCE-SEARCH_BUILD": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "SEARCH_BUILD",
+    "libelle": "Peut lancer la reconstruction de l'index de recherche des activités",
+    "fullcode": "MAINTENANCE-SEARCH_BUILD"
   },
 
   "MAINTENANCE-NOTIFICATION_PERSON": {

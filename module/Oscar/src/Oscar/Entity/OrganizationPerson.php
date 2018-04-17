@@ -38,6 +38,32 @@ class OrganizationPerson  implements ILoggable
     private $roleObj;
 
     /**
+     * Permet de stoquer l'origine du rôle.
+     *
+     * @var string
+     * @ORM\Column(type="string", nullable=true, name="origin")
+     */
+    private $origin;
+
+    /**
+     * @return mixed
+     */
+    public function getOrigin()
+    {
+        return $this->origin;
+    }
+
+    /**
+     * @param mixed $origin
+     */
+    public function setOrigin($origin)
+    {
+        $this->origin = $origin;
+
+        return $this;
+    }
+
+    /**
      * @return Role
      */
     public function getRoleObj()

@@ -49,7 +49,7 @@ class ActivityPaymentForm extends Form implements ServiceLocatorAwareInterface, 
         $this->add([
             'name'   => 'status',
             'options' => [
-                'label' => 'Status',
+                'label' => 'Statut',
                 'value_options' => ActivityPayment::getStatusPayments()
             ],
             'attributes' => [
@@ -125,7 +125,7 @@ class ActivityPaymentForm extends Form implements ServiceLocatorAwareInterface, 
         ]);
 
         // DESCRIPTION
-        $label = 'Comment';
+        $label = 'Commentaire';
         $this->add([
             'name'   => 'comment',
             'options' => [

@@ -17,6 +17,8 @@ use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\ProjectRepository;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityTypeService;
+use Oscar\Service\ConfigurationParser;
+use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
@@ -37,18 +39,17 @@ use Zend\View\Model\JsonModel;
  */
 class AbstractOscarController extends AbstractActionController
 {
+
+    /**
+     * @param $key
+     * @return mixed
+     */
     protected function getConfiguration($key){
-        $config = $this->getServiceLocator()->get('Config');
-        if( $key ){
-            $paths = explode('.', $key);
-            foreach ($paths as $path) {
-                if( !isset($config[$path]) ){
-                    throw new \Exception("Clef $path absente dans la configuration");
-                }
-                $config = $config[$path];
-            }
+        static $config;
+        if( $config == null ){
+            $config = new ConfigurationParser($this->getServiceLocator()->get('Config'));
         }
-        return $config;
+        return $config->getConfiguration($key);
     }
 
     protected function checkToken(){
@@ -141,6 +142,10 @@ class AbstractOscarController extends AbstractActionController
     {
         return $this->getResponseBadRequest("Cette action est 'dépréciée.");
     }
+    protected function getResponseUnauthorized($message = "Vous n'avez pas les privilèges suffisants")
+    {
+        return $this->getHttpResponse(Response::STATUS_CODE_401, $message);
+    }
 
 
     /**
@@ -165,6 +170,13 @@ class AbstractOscarController extends AbstractActionController
     protected function getOscarUserContext()
     {
         return $this->getServiceLocator()->get('OscarUserContext');
+    }
+
+    /**
+     * @return NotificationService
+     */
+    protected function getNotificationService(){
+        return $this->getServiceLocator()->get('NotificationService');
     }
 
     /***

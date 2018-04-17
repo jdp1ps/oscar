@@ -1,5 +1,5 @@
 <section class="container-fluid">
-    <h1>Nouveau Jalon</h1>
+    <h1 style="display: none"><?= $title ?></h1>
     <div class="form">
         <?= $this->form()->openTag($form->prepare()); ?>
         <?= $this->formControlGroup($form->get('type')); ?>

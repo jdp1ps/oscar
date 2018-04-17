@@ -45,7 +45,7 @@
                 </span>
             </h3>
 
-            <p><?= $n->getNotification()->getMessage() ?></p>
+            <p><?= $this->activity($n->getNotification()->getMessage()) ?></p>
         </article>
         <?php endforeach; ?>
     </section>

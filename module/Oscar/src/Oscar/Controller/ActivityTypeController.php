@@ -11,13 +11,16 @@ namespace Oscar\Controller;
 use Doctrine\ORM\Query\Expr\Join;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityType;
+use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityTypeForm;
+use Oscar\Provider\Privileges;
 use Zend\View\Model\ViewModel;
 
 class ActivityTypeController extends AbstractOscarController
 {
     public function indexAction()
     {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);
         return [
             'distribution' => $this->getActivityTypeService()->distribution(),
             'entities' => $this->getActivityTypeService()->getActivityTypes()
@@ -26,18 +29,30 @@ class ActivityTypeController extends AbstractOscarController
 
     public function mergeAction()
     {
+
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);
+
         /** @var ActivityType $destination */
         $destination = $this->getActivityTypeService()->getActivityType($this->params()->fromRoute('id'));
         if( !$destination ){
-            die("Error, destination introuvable");
+            throw new OscarException("Impossible de charger le type d'activité");
         }
 
         //$test = $this->getActivityTypeService()->getActivityTypeByCentaureId('ANR');
 
         $merged = explode(',', $this->params()->fromQuery('merged'));
 
+        $reducted = [];
+        foreach ($merged as $id) {
+            if($id == $destination->getId())
+                continue;
+
+            $reducted[] = $id;
+        }
+        $merged = $reducted;
+
         if( !$merged ){
-            die("Rien à déplacer");
+            throw new OscarException("Vous devez selectionner plusieurs types à fusionner");
         }
 
         $mergedEntities = $this->getEntityManager()->getRepository(ActivityType::class)
@@ -46,8 +61,6 @@ class ActivityTypeController extends AbstractOscarController
             ->setParameter('merged', $merged)
             ->getQuery()
             ->getResult();
-
-
 
         // Récupération des activités à fusionner
         $activities = $this->getEntityManager()->getRepository(Activity::class)

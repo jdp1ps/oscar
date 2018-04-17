@@ -1,5 +1,8 @@
 <?php /** @var $entity Oscar\Entity\Activity */ ?>
 <link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css" />
+<link rel="stylesheet" href="/js/oscar/dist/milestones.css" />
+<link rel="stylesheet" href="/js/oscar/dist/payments.css" />
+
 
 <div class="container activity-full">
 
@@ -51,7 +54,7 @@
                     </li>
                     <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DUPLICATE, $entity)): ?>
                         <li>
-                            <a href="<?= $this->url('contract/duplicate', ['id'=>$entity->getId()]) ?>" class="smoke">
+                            <a href="#" class="smoke" id="cloneBtn">
                                 Dupliquer cette activité
                             </a>
                         </li>
@@ -82,6 +85,14 @@
             <div class="budget">
                 <em>Budget</em>
                 <strong><?= $this->currency($entity) ?></strong>
+                <?php if( $entity->getFraisDegestion() ): ?>
+                    <div><small>
+                            Frais de gestion :
+                            <b><?= $entity->getFraisDeGestion() ?></b>
+                            %
+                        </small>
+                    </div>
+                <?php endif ?>
             </div>
             <?php endif; ?>
         </h1>
@@ -306,175 +317,88 @@
             <?php endif; ?>
         </div>
         <div class="col-md-4">
+
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
-            <div id="jalons-area" class="has-btn">
-                <h2><i class="icon-calendar-outlilne"></i>Jalons</h2>
-                <?php if( $this->grant()->privileges(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_MANAGE, $entity) ): ?>
-                <nav class="btn-area">
-                    <a data-activitydate-add href="<?= $this->url('activitydate/new', ['idactivity'=>$entity->getId()]) ?>" class="smoke">Ajouter</a>
-                </nav>
-                <?php endif; ?>
-                <div id="milestones" class="lc">
-                    <div class="lc-mask">
-                        <div class="lc-alert">
-                            Error message
-                        </div>
-                        <div class="lc-loader">
-                            <span class="text">Chargement</span>
-                        </div>
-                    </div>
-                    <div class="lc-content"></div>
-                </div>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity) ): ?>
+            <div id="milestones"></div>
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity) ): ?>
                 <a href="<?= $this->url('contract/notifications', ['id' => $entity->getId()]) ?>" class="btn btn-default">
                     <i class="icon-bell"></i>
                     Voir les notifications planifiées
                 </a>
-                <?php endif; ?>
-            </div>
+            <?php endif; ?>
             <script>
-                var milestones;
-                require(['Milestone'], function(Milestone){
-                    milestones = new Milestone.Collection();
-                    milestones.url = '<?= $this->url("activitydate", ['idactivity' => $entity->getId()]) ?>';
-                    milestones.urlEdit = '<?= $this->url('activitydate/edit', ['idactivity'=>$entity->getId(), 'id'=>'']) ?>';
-                    var view = new Milestone.View({
-                        model: milestones,
-                        el: '#milestones'
+                require(['ActivityModel', 'vue','vue-resource', 'mm','milestones'], function(
+                        ActivityModel,
+                        Vue,
+                        VueResource,
+                        moment,
+                        milestone)
+                {
+                    Vue.use(VueResource);
+
+
+                    new Vue({ data: ActivityModel });
+
+                    Vue.filter('moment', function(value){
+                        var m = moment(value.date);
+                       return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
                     });
 
-                    milestones.fetch();
-                });
+                    var milestonesVue = new Vue({
+                        render(h){
+                            return h(milestone.default, {
+                                props: {
+                                    url: '<?= $this->url("milestones/activity", ['idactivity' => $entity->getId()]) ?>',
+                                    moment: moment,
+                                    model: ActivityModel
+                                }
+                            })
+                        }
+                    }).$mount('#milestones');
+
+                })
             </script>
             <?php endif; ?>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
-                <div id="depenses-area" class="has-btn lc"></div>
-                <script>
-                    require(['OscarDepenses'], function(OscarDepense){
-                        var depenses = new OscarDepense({
-                            el: '#depenses-area',
-                            data: { url: '<?= $this->url('depense/activity', ['idactivity' => $entity->getId()]) ?>' }
-                        });
-                    })
-                </script>
-            <?php endif ?>
-
-            <?php /* if( DEBUG_OSCAR ): ?>
-                <div id="TEST" class="has-btn lc">TEST</div>
-                <script>
-                    require(['components/build/versements'], function(OscarVersements){
-                        var v = new OscarVersements.default({
-                            el: "#TEST",
-                            data: {
-                                url: '<?= $this->url("activitypayment_rest", ['idactivity' => $entity->getId()]) ?>'
-                            }
-                        });
-                        v.$on('notifications', function(type, message, err){
-                            flashMessage(type, message + ' (' +err.status +' : ' +err.statusText +')');
-                        });
-                    })
-                </script>
-            <?php endif*/ ?>
-
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
-            <div id="payments-area" class="has-btn">
-                <h2><i class="icon-bank"></i>Versements</h2>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE, $entity) ): ?>
-                <nav class="btn-area">
-                    <a data-activitypayment-add href="<?= $this->url('activitypayment/new', ['idactivity'=>$entity->getId()]) ?>"  class="smoke">
-                        <i class="icon icon-plus"></i>
-                        Ajouter</a>
-                </nav>
-                <?php endif; ?>
-
-                <div id="payments" class="lc">
-                    <div class="lc-mask">
-                        <div class="lc-alert">
-                            Error message
-                        </div>
-                        <div class="lc-loader">
-                            <span class="text">Chargement</span>
-                        </div>
-                    </div>
-                    <div class="lc-content"></div>
-                    <article class="payment total">
-                        <div class="heading">
-                            <strong class="amount">
-                                0
-                            </strong>
-                            <span class="date">/<strong><?= $this->currency($entity->getAmount()) ?></strong></span>
-                        </div>
-                    </article>
-                    <div class="alert alert-danger alertAmount">
-                        <p><i class="icon-attention-1"></i>
-                        Le total des versements prévus et réalisés ne
-                        semble pas correspondre avec le montant prévu
-                        initialement, Somme des versements :</p>
-                        <ul>
-                            <li><strong class="amountPrevu">?</strong> en versement,</li>
-                            <li><strong title="Valeur exacte : <?= $entity->getAmount() ?>"><?= $this->currency($entity->getAmount()) ?></strong> prévu</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+                <div id="payments"></div>
                 <script>
-                    var payments;
+                    require(['ActivityModel', 'vue','vue-resource', 'mm','payments'], function(ActivityModel, Vue, VueResource, moment, payments){
+                        Vue.use(VueResource);
 
-                    require(['Payments'], function(Payments){
-
-                        payments = new Payments.Collection();
-                        payments.token = '<?= $tokenValue ?>';
-                        payments.urlEdit = '<?= $this->url('activitypayment/edit', ['idactivity'=>$entity->getId(), 'id'=>'']) ?>';
-                        payments.urlNew = '<?= $this->url('activitypayment/new', ['idactivity'=>$entity->getId()]) ?>';
-                        payments.url = '<?= $this->url("activitypayment", ['idactivity' => $entity->getId()]) ?>';
-
-                        var view = new Payments.View({
-                            model: payments,
-                            el: '#payments'
+                        Vue.filter('moment', function(value){
+                            var m = moment(value.date);
+                            return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
                         });
 
-                        payments.on('update destroy sync', function(){
-                            var total = 0.0,
-                                totalPrevu = 0.0;
+                        Vue.filter('money', function(value){
+                            return Number.parseFloat(value).toFixed(2);
+                        });
 
-                            payments.each(function(payment){
-                                if( payment.get('status') == 2 ){
-                                    total += Math.round(payment.get('amount')*1000);
-                                }
-                                totalPrevu += Math.round(payment.get('amount')*1000);
-                            });
+                        new Vue({ data: ActivityModel });
 
-                            $('#payments .total .amount').text(formatCurrency((total/1000))+' €');
-                            $('#payments .amountPrevu').text(formatCurrency((totalPrevu/1000))+' €');
-
-                            if ( total === <?= $entity->getAmount() ?> ){
-                                $('#payments .total .amount').addClass('accountOK');
-                            } else {
-                                $('#payments .total .amount').removeClass('accountOK');
+                        new Vue({
+                            render(h){
+                                return h(payments.default, {
+                                    props: {
+                                        url: '<?= $this->url("activitypayment", ['idactivity' => $entity->getId()]) ?>',
+                                        moment: moment,
+                                        amount: <?= $entity->getAmount() ?>,
+                                        currencies: <?= json_encode($currencies) ?>,
+                                        currency: <?= json_encode($entity->getCurrency()->asArray()) ?>,
+                                        model: ActivityModel,
+                                        manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE, $entity) ? 'true' : 'false' ?>
+                                    }
+                                })
                             }
-
-                            if ( totalPrevu/1000 === <?= $entity->getAmount() ?> ){
-                                $('#payments .alertAmount').hide();
-                            } else {
-                                $('#payments .alertAmount').show();
-                            }
-                        });
-
-                        $('[data-activitypayment-add]').on('click', function(e){
-                            e.preventDefault();
-                            view.formNew();
-                        });
-
-                        payments.fetch();
+                        }).$mount('#payments')
                     });
-
                 </script>
             <?php endif; ?>
         </div>
     </div>
     <hr>
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_VIEW_TIMESHEET, $entity) ): ?>
+    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
         <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
         <h3>Visualiser les feuilles de temps</h3>
         <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
@@ -544,7 +468,7 @@
                                     <?= $person->getPerson() ?>
 
                                     <?php if(!$entity->hasDeclarant($person)): ?>
-                                        <small> (N'est identifié comme déclarant dans aucun lot de travail)</small>
+                                        <small> (N'est pas identifié(e) comme déclarant(e) dans un lot de travail)</small>
                                     <?php endif; ?>
                                 </a>
                             </li>
@@ -650,4 +574,37 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
         });
     </script>
 </div>
+
+<div id="activityclone"></div>
+<script>
+    require(['activityclone', 'vue'], function(Activityclone, Vue){
+        console.log('Clonage');
+
+        var activityClone = new Vue({
+            render(h){
+                return h(Activityclone.default, {
+                    props: {
+                        foo: this.foo,
+                        displayed: false,
+                        activity: <?= json_encode($entity->toArray()) ?>,
+                        urlPost: '<?= $this->url('contract/duplicate', ['id'=>$entity->getId()]) ?>'
+                    }
+                });
+            }
+        }).$mount('#activityclone');
+
+        activityClone.$on('test', function(){
+            console.log('test déclenché');
+        })
+
+        document.querySelector('#cloneBtn').addEventListener('click', function(e){
+            console.log(activityClone.$children[0]);
+            console.log(activityClone.$children[0].$data);
+            console.log(activityClone.$children[0].$data.displayed);
+            e.preventDefault();
+            activityClone.$children[0].$data.displayed = true;
+//            activityClone.$.default.displayed = true;
+        });
+    });
+</script>
 

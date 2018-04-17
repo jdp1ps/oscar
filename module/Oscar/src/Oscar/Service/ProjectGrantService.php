@@ -26,13 +26,15 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
+use Oscar\Entity\WorkPackage;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Utils\StringUtils;
 use Oscar\Validator\EOTP;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenLdap\Exception;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -160,6 +162,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             'core' => Activity::csvHeaders(),
             'organizations' => [],
             'persons' => [],
+            'milestones' => []
         ];
 
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
@@ -172,10 +175,18 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $headers['organizations'][] = $role['label'];
         }
 
-
         $rolesOrga = $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray();
+
+
         foreach( $rolesOrga as $role ){
             $headers['persons'][] = $role;
+        }
+
+        $dateTypes = $this->getEntityManager()->getRepository(DateType::class)->findAll();
+
+
+        foreach( $dateTypes as $dateType ){
+            $headers['milestones'][] = $dateType->getLabel();
         }
 
         return $headers;
@@ -371,133 +382,24 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     public function searchIndex_addToIndex(Activity $activity)
     {
-
-        $this->getServiceLocator()->get('Logger')->info("Ajout de $activity à l'index");
-
-        $members = [];
-        /** @var ActivityPerson $p */
-        foreach ($activity->getPersonsDeep() as $p) {
-            $members[] = $p->getPerson()->getCorpus();
-        }
-        $members = implode(', ', $members);
-
-        $partners = [];
-        /** @var ActivityOrganization $o */
-        foreach ($activity->getOrganizationsDeep() as $o ) {
-            $partners[] = $o->getOrganization()->getCorpus();
-        }
-        $partners = implode(', ', $partners);
-
-        $project = '';
-        $acronym = '';
-        if( $activity->getProject() ){
-            $project = $activity->getProject()->getCorpus();
-            $acronym = $activity->getProject()->getAcronym();
-        }
-
-        $corpus = new \Zend_Search_Lucene_Document();
-
-        $corpus->addField(\Zend_Search_Lucene_Field::text('acronym', StringUtils::transliterateString($acronym), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('label', StringUtils::transliterateString($activity->getLabel()), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('description', StringUtils::transliterateString($activity->getDescription()), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('saic', $activity->getCentaureId(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('oscar', $activity->getOscarNum(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('eotp', $activity->getCodeEOTP(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('members', $members, 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('partners', $partners, 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('project', $project, 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::text('key', md5($activity->getId()), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::UnIndexed('ID', $activity->getId(), 'UTF-8'));
-        $corpus->addField(\Zend_Search_Lucene_Field::UnIndexed('project_id', $activity->getProject() ? $activity->getProject()->getId() : '', 'UTF-8'));
-
-
-        $this->searchIndex_getIndex()->addDocument($corpus);
+        $this->getSearchEngineStrategy()->addActivity($activity);
     }
 
-
-    private function searchIndex_getPath(){
-        return $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.search_activity');
-    }
-
-    public function searchIndex_reset()
-    {
-        $this->index = \Zend_Search_Lucene::create($this->searchIndex_getPath());
-    }
-
-    private function searchIndex_checkPath()
-    {
-        $path = $this->searchIndex_getPath();
-        return file_exists($path) && is_readable($path) && ($resources = scandir($path)) && (count($resources) > 2);
-    }
-
-
+    /**
+     * Retourne les jalons de l'activités.
+     *
+     * @param $idActivity
+     * @return array
+     */
     public function getMilestones( $idActivity ){
-        $qb = $this->getEntityManager()->getRepository(ActivityDate::class)->createQueryBuilder('d')
-            ->addSelect('t')
-            ->innerJoin('d.activity', 'a')
-            ->innerJoin('d.type', 't')
-            ->where('a.id = :idactivity')
-            ->orderBy('d.dateStart');
-
-        $dates = $qb->setParameter('idactivity', $idActivity)->getQuery()->getResult(Query::HYDRATE_ARRAY);
-
-        $out = [];
-        $now = new \DateTime();
-        foreach( $dates as $data ){
-            $data['deletable'] = true;
-            $data['past'] = ($data['dateStart']<$now);
-            $data['css'] = ($data['dateStart']<$now) ? 'past' : '';
-            $out[$data['dateStart']->format('YmdHis').$data['id']] = $data;
-        }
-
-        //  versements sous la forme JALON
-        $versementsQB = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
-            ->addSelect('p')
-            ->innerJoin('p.activity', 'a')
-            ->where('p.status = :status')
-            ->andWhere('a.id = :idactivity');
-
-        $versements = $versementsQB->setParameters([
-            'idactivity' => $idActivity,
-            'status' => ActivityPayment::STATUS_PREVISIONNEL
-        ])->getQuery()->getResult();
-
-
-        $currencyFormatter = new \Oscar\View\Helpers\Currency();
-        /** @var ActivityPayment $v */
-        foreach( $versements as $v ){
-            $out[$v->getDatePredicted()->format('YmdHis'.'v'.$v->getId())] = [
-                'dateStart' => $v->getDatePredicted(),
-                'deletable' => false,
-                'css' => ($v->getDatePredicted()<$now) ? 'jalon-warn' : '',
-                'past' => ($v->getDatePredicted()<$now),
-                'comment' => ($v->getDatePredicted()<$now) ? 'Ce versement aurait dû être réalisé.' : 'Versement prévu',
-                'id' => $v->getId(),
-                'type' => [
-                    'label' => 'Versement de ' . $currencyFormatter->format($v->getAmount()). ' ' . $v->getCurrency()->getSymbol(),
-                    'facet' => 'payment'
-                ]
-            ];
-        }
-
-
-        ksort($out, SORT_STRING);
-
-
-
-
-        return $out;
+        return $this->getServiceLocator()->get('MilestoneService')->getMilestonesByActivityId( $idActivity );
     }
 
     public function searchIndex_rebuild()
     {
-        echo " # Reconstruction de l'index de recherche\n";
         $this->searchIndex_reset();
         $activities = $this->getEntityManager()->getRepository(Activity::class)->findAll();
-        echo sprintf("%s activités vont être indexées...\n", count($activities));
-        foreach($activities as $activity) {
-            $this->searchIndex_addToIndex($activity);
-        }
+        return $this->getSearchEngineStrategy()->rebuildIndex($activities);
     }
 
 
@@ -528,61 +430,44 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         return true;
     }
 
+
+    /**
+     * @return ActivitySearchStrategy
+     */
+    private function getSearchEngineStrategy()
+    {
+        static $searchStrategy;
+        if( $searchStrategy === null ){
+            $opt = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('strategy.activity.search_engine');
+            $class = new \ReflectionClass($opt['class']);
+            $searchStrategy = $class->newInstanceArgs($opt['params']);
+        }
+        return $searchStrategy;
+    }
+
     public function search($what)
     {
-        // try {
-            $what = StringUtils::transliterateString($what);
-            $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
-            $this->getServiceLocator()->get('Logger')->info(sprintf('Search for "%s"',
-                $what));
-            $hits = $this->searchIndex_getIndex()->find($query);
-            $ids = [];
-            foreach ($hits as $hit) {
-                $ids[] = $hit->ID;
-            }
-
-            return $ids;
-//        } catch( \Exception $e ){
-//            throw new OscarException(sprintf("Recherche invalide, Lucene a retourné : %s (%s)", $e->getMessage(), get_class($e)));
-//        }
+        return $this->getSearchEngineStrategy()->search($what);
     }
 
     public function searchProject($what)
     {
-        $query = \Zend_Search_Lucene_Search_QueryParser::parse($what);
-        $hits = $this->searchIndex_getIndex()->find($query);
-        $ids = [];
-        foreach ($hits as $hit) {
-            if( $hit->project_id && !in_array($hit->project_id, $ids) ){
-                $ids[] = $hit->project_id;
-            }
-        }
-        return $ids;
+        return $this->getSearchEngineStrategy()->searchProject($what);
     }
 
     public function searchDelete( $id )
     {
-        $hits = $this->searchIndex_getIndex()->find('key:'.md5($id));
-        if( count($hits) !== 1 ){
-            //throw new \Exception(sprintf("Incohérence de l'index de recherche avec l'objet %s, il n'est probablement pas encore indexé", $id));
-        }
-
-        foreach ($hits as $hit) {
-            $this->getServiceLocator()->get('Logger')->info("Suppression de l'index $id");
-            $this->searchIndex_getIndex()->delete($hit->id);
-        }
+        $this->getSearchEngineStrategy()->searchDelete($id);
     }
 
     public function searchUpdate( Activity $activity )
     {
-        $this->getServiceLocator()->get('Logger')->info(sprintf("Mise à jour de l'index de recherche pour [%s]%s", $activity->getId(), $activity));
-        try {
-            $this->searchDelete($activity->getId());
-        } catch(\Exception $e ){
-            $this->getServiceLocator()->get('Logger')->error(sprintf("Impossible de supprimer l'ancien index de [%s]%s : %s", $activity->getId(), $activity, $e->getMessage()));
-        }
+        $this->getSearchEngineStrategy()->searchUpdate($activity);
+    }
 
-        $this->searchIndex_addToIndex($activity);
+    public function searchIndex_reset()
+    {
+        $this->getSearchEngineStrategy()->resetIndex();
     }
 
 
@@ -629,8 +514,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     public function getStatusByKey( $key )
     {
-        var_dump(Activity::getStatusSelect());
-        die();
         return Activity::getStatusSelect()[$key];
     }
 
@@ -719,7 +602,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             ->getQuery()->getSingleResult();
     }
 
-    public function duplicate( Activity $source )
+    public function duplicate( Activity $source, $options )
     {
         $qb = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
@@ -732,8 +615,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             ->leftJoin('pe.person', 'pr')
             ->leftJoin('a.organizations', 'or')
             ->leftJoin('or.organization', 'og')
-            ->where('a.id = :id')
-        ;
+            ->where('a.id = :id');
 
         /** @var Activity $source */
         $source = $qb->setParameter('id', $source->getId())->getQuery()->getSingleResult();
@@ -753,28 +635,77 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
         $this->getEntityManager()->flush($newActivity);
 
-        /** @var ActivityOrganization $partner */
-        foreach($source->getOrganizations() as $partner ){
-            $newPartner = new ActivityOrganization();
-            $this->getEntityManager()->persist($newPartner);
-            $newPartner->setOrganization($partner->getOrganization())
-                ->setRoleObj($partner->getRoleObj())
-                ->setActivity($newActivity)
-                ->setDateStart($partner->getDateStart())
-                ->setDateEnd($partner->getDateEnd());
-            $this->getEntityManager()->flush($newPartner);
+        if ($options['organizations']) {
+            /** @var ActivityOrganization $partner */
+            foreach ($source->getOrganizations() as $partner) {
+                $newPartner = new ActivityOrganization();
+                $this->getEntityManager()->persist($newPartner);
+                $newPartner->setOrganization($partner->getOrganization())
+                    ->setRoleObj($partner->getRoleObj())
+                    ->setActivity($newActivity)
+                    ->setDateStart($partner->getDateStart())
+                    ->setDateEnd($partner->getDateEnd());
+                $this->getEntityManager()->flush($newPartner);
+            }
         }
 
-        /** @var ActivityPerson $partner */
-        foreach($source->getPersons() as $member ){
-            $newMember = new ActivityPerson();
-            $this->getEntityManager()->persist($newMember);
-            $newMember->setPerson($member->getPerson())
-                ->setActivity($newActivity)
-                ->setRoleObj($member->getRoleObj())
-                ->setDateStart($member->getDateStart())
-                ->setDateEnd($member->getDateEnd());
-            $this->getEntityManager()->flush($newMember);
+        if ($options['persons']) {
+            /** @var ActivityPerson $member */
+            foreach ($source->getPersons() as $member) {
+                $newMember = new ActivityPerson();
+                $this->getEntityManager()->persist($newMember);
+                $newMember->setPerson($member->getPerson())
+                    ->setActivity($newActivity)
+                    ->setRoleObj($member->getRoleObj())
+                    ->setDateStart($member->getDateStart())
+                    ->setDateEnd($member->getDateEnd());
+                $this->getEntityManager()->flush($newMember);
+            }
+        }
+
+        if ($options['milestones']) {
+            /** @var ActivityDate $milestone */
+            foreach ($source->getMilestones() as $milestone) {
+                $new = new ActivityDate();
+                $this->getEntityManager()->persist($new);
+                $new->setStatus($milestone->getStatus())
+                    ->setActivity($newActivity)
+                    ->setDateStart($milestone->getDateStart())
+                    ->setDateFinish($milestone->getDateFinish())
+                    ->setType($milestone->getType())
+                    ->setComment($milestone->getComment())
+                ;
+                $this->getEntityManager()->flush($new);
+            }
+        }
+
+        if ($options['workpackages']) {
+
+            /** @var WorkPackage $workpackage */
+            foreach ($source->getWorkPackages() as $workpackage) {
+                $new = new WorkPackage();
+                $this->getEntityManager()->persist($new);
+                $new->setCode($workpackage->getCode())
+                    ->setLabel($workpackage->getLabel())
+                    ->setActivity($newActivity)
+                    ->setDateStart($workpackage->getDateStart())
+                    ->setDateEnd($workpackage->getDateEnd());
+
+                $this->getEntityManager()->flush($new);
+
+                /** @var WorkPackagePerson $workpackagePerson */
+                foreach ( $workpackage->getPersons() as $workpackagePerson ){
+                    $wpPerson = new WorkPackagePerson();
+                    $this->getEntityManager()->persist($wpPerson);
+                    $wpPerson->setPerson($workpackagePerson->getPerson())
+                        ->setDuration($workpackagePerson->getDuration())
+                        ->setWorkPackage($new);
+
+                    $this->getEntityManager()->flush($wpPerson);
+                }
+
+
+            }
         }
 
 
@@ -1058,6 +989,16 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
     {
         return $this->getBaseQuery()
             ->where('per.id = :personId')
+            ->setParameter('personId', $personId)
+            ->orderBy('c.dateCreated', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function personActivitiesWithoutProject($personId)
+    {
+        return $this->getBaseQuery()
+            ->where('per.id = :personId AND c.project IS NULL')
             ->setParameter('personId', $personId)
             ->orderBy('c.dateCreated', 'DESC')
             ->getQuery()

@@ -425,12 +425,12 @@ var TimeEvent = {
             @mouseleave="handlerTooltipOff(event, $event)"
             @mousedown="handlerMouseDown"
             :title="event.label"
-            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci, 'reject-adm': isRejectAdm}">
+            :class="{'event-changing': changing, 'event-moving': moving, 'event-selected': selected, 'event-locked': isLocked, 'status-external': isExternal,'status-info': isInfo, 'status-draft': isDraft, 'status-send' : isSend, 'status-valid': isValid, 'status-reject': isReject, 'valid-sci': isValidSci, 'valid-adm': isValidAdm, 'reject-sci':isRejectSci, 'reject-adm': isRejectAdm}">
         <div class="label" data-uid="UID">
           {{ event.label }}
         </div>
         
-        <div class="description" v-if="!isInfo">
+        <div class="description" v-if="!(isInfo || isExternal) ">
             <div class="submit-status">
                 <span class="admin-status">
                     <i class="icon-archive icon-admin" :class="adminState"></i> Admin
@@ -592,8 +592,19 @@ var TimeEvent = {
         isReject(){
             return this.event.status == "reject";
         },
+
         isInfo(){
             return this.event.status == "info";
+        },
+
+        isExternal(){
+
+            return (
+                this.event.status == "conges" ||
+                this.event.status == "formation" ||
+                this.event.status == "enseignement" ||
+                this.event.status == "external"
+            );
         },
 
         colorLabel(){
@@ -1300,6 +1311,7 @@ var ListItemView = {
     template: `<article class="list-item" :style="css" :class="{
                     'event-editable': event.editable, 
                     'status-info': event.isInfo, 
+                    'status-external': event.isExternal,
                     'status-draft': event.isDraft, 
                     'status-send' : event.isSend, 
                     'status-valid': event.isValid, 
@@ -2242,7 +2254,7 @@ var Calendar = {
             <transition name="fade">
                 <div class="calendar-tooltip" :class="'status-'+tooltip.event.status" v-if="tooltip">
                     <h3><i class="picto"></i> {{ tooltip.event.label }}</h3>
-                    <p>Status : <strong>{{ tooltip.event.status }}</strong></p>
+                    <p>Statut : <strong>{{ tooltip.event.status }}</strong></p>
                     <p>Déclarant : <strong>{{ tooltip.event.owner }}</strong>
                         <span v-if="tooltip.event.sendAt">Envoyé le {{ tooltip.event.sendAt | moment }}</span>
                     </p>
@@ -3011,32 +3023,37 @@ var Calendar = {
 
     mounted(){
         var allowState = ['week', 'list', 'timesheet'];
+
+
+        this.state = 'week';
         if( allowState.indexOf(window.location.hash.substring(1)) >= 0 ){
             this.state = window.location.hash.substring(1);
-        } else {
-            this.state = 'week';
         }
 
         if (this.customDatas) {
             var customs = this.customDatas();
             this.wps = customs;
+
             for (var k in customs) {
                 if (customs.hasOwnProperty(k)) {
                     store.activities.pushIfNot({
                         id: customs[k].idactivity,
                         label: customs[k].activity
-                    }, 'id')
-                    let wp = customs[k];
+                    }, 'id');
+
                     colorLabels[k] = colorpool[customs[k].color];
-                    if (!store.defaultLabel) {
-                        store.defaultLabel = k;
+
+                    if( customs[k].active ){
+                        if (!store.defaultLabel) {
+                            store.defaultLabel = k;
+                        }
+                        store.labels.push(k);
                     }
-                    store.labels.push(k);
                 }
             }
             colorIndex++;
-
         }
+
         if (this.ownersList) {
             store.owners = this.ownersList();
         }

@@ -31,7 +31,7 @@ pbanner a été créé avec succès.
 
 ## Modifier le mot de passe d'un utilisateur
 
-La commande `php public/index.php oscar auth:pass LOGIN` permet de lancer la procédure de modifiction d'un mot de passe en base de donnée. Elle propose une série d'invite permettant de vérifier l'utilisteur et le mot de passe : 
+La commande `php public/index.php oscar auth:pass LOGIN` permet de lancer la procédure de modifiction d'un mot de passe en base de données. Elle propose une série d'invite permettant de vérifier l'utilisteur et le mot de passe : 
 
 ```
 $ php public/index.php oscar auth:pass bohr
@@ -132,7 +132,7 @@ Olympia : Responsable scientifique
 
 ### Personnes (Person)
 
-Rechercher la/les personne par connector ID : 
+Rechercher la/les personne(s) par connector ID : 
 
 ```
 php public/index.php oscar persons:search:connector CONNECTOR VALUE
@@ -190,9 +190,9 @@ Les données sont sous la forme :
 ]
 ```
 
-## Importation de donnée PERSON
+## Importation de données PERSON
 
-On peut égalementimporter des personnes en BDD.
+On peut également importer des personnes en BDD.
 
 ```bash
 php public/index.php oscar personsjson:sync install/demo/persons.json

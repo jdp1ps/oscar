@@ -9,11 +9,6 @@ if( file_exists($pathSocketConfig = __DIR__.'/../../socket/config.json') ){
     $socket = $socketConf['socket'];
 }
 
-// Rétro compatibilité avec le module Doctrine
-if(  !defined('APP_DIR') ){
-    define('APP_DIR', realpath(__DIR__.'/../../'));
-}
-
 return array(
     'view_manager' => array(
         'display_not_found_reason' => getenv('APPLICATION_ENV') == 'development',
@@ -27,7 +22,7 @@ return array(
 
         ////////////////////////////////////////////////////////////////////////
         //
-        // PATHS
+        // PATHS  (Optionnel)
         //
         // Emplacements utilisés par oscar pour stoquer des fichiers.
         // Ces emplacements doivent être accessibles et ouvert en écriture.
@@ -35,18 +30,29 @@ return array(
         ////////////////////////////////////////////////////////////////////////
         'paths' => [
             // Emplacement où sont stoqués les documents Oscar
-            'document_oscar' => APP_DIR . '/data/documents/oscar/',
+            'document_oscar' => realpath(__DIR__) . '/../../data/documents/oscar/',
 
             // Emplacement où sont stoqués les documents administratifs Oscar
-            'document_admin_oscar' => APP_DIR . '/data/documents/administratifs/',
+            'document_admin_oscar' => realpath(__DIR__) . '/../../data/documents/administratifs/',
 
-            // Emplacement de l'index de recherche (emplacement où Lucene écrit
-            // sont index de recherche - un DOSSIER).
-            'search_activity' => APP_DIR . '/data/luceneindex',
+            // Modèle de feuille de temps
+            'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
         ],
+
+        // Système de recherche
+        'strategy' => [
+            'activity' => [
+                'search_engine' => [
+                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
+                    // Ce paramètre correspond à la clef 'oscar.paths.search_activity'
+                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
+                ]
+            ]
+        ],
+
         ////////////////////////////////////////////////////////////////////////
         //
-        // CONNECTORS
+        // CONNECTORS (Optionnel)
         //
         // Les connecteurs sont les points d'entrées pour les données utilisées
         // dans Oscar.
@@ -60,14 +66,14 @@ return array(
             'organization' => [
                'rest' => [
                   'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
-                  'params'    => APP_DIR . '/config/connectors/organization_rest.yml',
+                  'params'    => realpath(__DIR__) . '/../connectors/organization_rest.yml',
                   'editable'  => false
                ]
             ],
             'person' => [
                'rest' => [
                   'class'     => \Oscar\Connector\ConnectorPersonREST::class,
-                  'params'    => APP_DIR . '/config/connectors/person_rest.yml',
+                  'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
                   'editable'  => false
                ]
             ]
@@ -75,25 +81,41 @@ return array(
 
         // Système d'envoi des mails
         'mailer' => [
-            // Assure la distribution
+            /**** TRANSPORT (smtp)
             'transport' => [
-                'host' => 'smtp.host.tld',
+                'type' => 'smtp',
+                'host' => 'smtp.domain.tld',
                 'port' => 465,
-                'username' => 'jean-claude.dus@unicaen.fr',
-                'password' => 'XXXXXXXXXX',
+                'username' => 'smithagent',
+                'password' => '@m4S!n9 P4$VV0rd',
                 'security' => 'ssl',
             ],
-            // Use for FROM email, same as transport maybe
+            /****/
+
+            /**** TRANSPORT (sendmail)
+            'transport' => [
+                'type' => 'sendmail',
+                'cmd' => '/usr/sbin/sendmail -bs',
+            ],
+            /****/
+
+            // Expéditeur
             'from' => [ 'oscar-bot@unicaen.fr' => 'Oscar Bot'],
 
-            // Envoi d'une copy
+            // Envoi d'une copy (Non effectif)
             'copy' => ['stephane.bouvry@unicaen.fr'],
 
             // Envoi activé
-            'send' => false,
+            'send' => true,
 
             // Préfixe ajouté dans les sujets
-            'subjectPrefix' => '[OSCAR DEV]'
+            'subjectPrefix' => '[OSCAR DEV] ',
+
+            // Emplacement du fichier de layout pour les mails
+            'template' => realpath(__DIR__.'/../../module/Oscar/view/mail.phtml'),
+
+            // Mails utilisé pour les tests / rapport
+            'administrators' => ['stephane.bouvry@unicaen.fr', 'jacksay14@gmail.com']
         ]
     ],
 

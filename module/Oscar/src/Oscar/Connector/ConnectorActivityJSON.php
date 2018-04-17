@@ -189,7 +189,7 @@ class ConnectorActivityJSON implements ConnectorInterface
      * @param bool $doNotCreate
      * @return Project
      */
-    protected function getProjectOrCreate( $acronym, $label, ConnectorRepport $repport, $doNotCreate = false ){
+    protected function getProjectOrCreate( $acronym, $label="", ConnectorRepport $repport, $doNotCreate = false ){
         try {
             // Obtention du projet si il existe
             $project = $this->entityManager->getRepository(Project::class)->createQueryBuilder('p')
@@ -202,6 +202,7 @@ class ConnectorActivityJSON implements ConnectorInterface
 
             return $project;
         } catch ( NoResultException $e ){
+
             try {
                 // Création du projet
                 $project = new Project();
@@ -212,6 +213,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                 $repport->addadded(sprintf("Le projet '%s' a été créé", $project));
                 return $project;
             } catch (\Exception $e ){
+                die("PAS DE PROJET " . $e->getMessage());
                 $repport->adderror(sprintf("Impossible de créé le projet '[%s] %s' : %s", $acronym, $label, $e->getMessage()));
             }
 
@@ -352,8 +354,6 @@ class ConnectorActivityJSON implements ConnectorInterface
 
             $project = $this->getProjectOrCreate( $projectAcronym, $projectLabel, $repport);
 
-
-
             // todo Traiter les erreurs liées à la récupération du projet
 
             /** @var Activity $activity */
@@ -364,8 +364,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                     $activity = new Activity();
                     $this->entityManager->persist($activity);
                     $activity->setCentaureId($data->uid)
-                        ->setProject($project)
-                    ;
+                        ->setProject($project);
 
                     $repport->addadded(sprintf("Création de l'activité '%s'.", $activity));
 
@@ -386,13 +385,15 @@ class ConnectorActivityJSON implements ConnectorInterface
                 ->setCodeEOTP($data->pfi)
                 ->setActivityType($type)
                 ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
+                ->setDateOpened($data->datePFI ? new \DateTime($data->datePFI) : null)
                 ->setAmount(((double)$data->amount));
 
             if( $data->datestart ){
                 try {
                     $dateStart = new \DateTime($data->datestart);
                 } catch (\Exception $e ){
-                    $repport->adderror(sprintf("Impossible d'extraire une date depuis la valeur %s pour l'activité %s", $data->datestart, $activity));
+                    $repport->adderror(sprintf("Impossible d'extraire une date depuis la valeur %s pour l'activité %s",
+                        $data->datestart, $activity));
                 }
             }
 
@@ -400,7 +401,8 @@ class ConnectorActivityJSON implements ConnectorInterface
                 try {
                     $dateEnd = new \DateTime($data->dateend);
                 } catch (\Exception $e ){
-                    $repport->adderror(sprintf("Impossible d'extraire une date depuis la valeur %s pour l'activité %s", $data->dateend, $activity));
+                    $repport->adderror(sprintf("Impossible d'extraire une date depuis la valeur %s pour l'activité %s",
+                        $data->dateend, $activity));
                 }
             }
 
@@ -510,17 +512,39 @@ class ConnectorActivityJSON implements ConnectorInterface
                             $paymentData->amount));
                     }
 
+
+
                     try {
-                        $date = new \DateTime($paymentData->date);
+                        $datePayment = $paymentData->date ?
+                            new \DateTime($paymentData->date) :
+                            null;
+
+                        $datePredicted = $paymentData->predicted ?
+                            new \DateTime($paymentData->predicted) :
+                            null;
                     } catch (\Exception $e) {
                         throw new \Exception(sprintf("Impossible de convertir '%s' en objet Date : %s",
                             $paymentData->date, $e->getMessage()));
                     }
 
-                    if( !$activity->hasPaymentAt( $amount, $date) ){
+                    if( !$datePayment && !$datePredicted ){
+                        throw new \Exception("Impossible de créer un versement sans date");
+                    }
+
+                    if( $datePredicted && !$datePayment){
+                        $paymentStatus = ActivityPayment::STATUS_PREVISIONNEL;
+                    } else {
+                        $paymentStatus = ActivityPayment::STATUS_REALISE;
+                    }
+
+
+                    if( !$activity->hasPaymentAt( $amount, $datePayment, $datePredicted) ){
                         $payment = new ActivityPayment();
                         $this->entityManager->persist($payment);
-                        $payment->setDatePayment($date)
+                        $payment->setDatePayment($datePayment)
+                            ->setDatePredicted($datePredicted)
+                            ->setCurrency($defaultCurrency)
+                            ->setStatus($paymentStatus)
                             ->setActivity($activity)
                             ->setAmount($amount);
                         $this->entityManager->flush($payment);

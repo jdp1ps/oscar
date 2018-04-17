@@ -7,18 +7,13 @@
     </h1>
 
     <?php else: ?>
-    <h1><i class="icon-cube"></i>Activités de recherche</h1>
+    <h1><i class="icon-cube"></i>Activités de recherche <?= ($projectview ? ' (Projets)' : '') ?></h1>
     <?php endif; ?>
     <style>
         .criteria {
-            /*border: thin #ccc solid;
-
-            background: white;
-            border-radius: 4px;*/
             padding: 4px 16px;
             margin: 8px 0;
             display: flex;
-            /*flex: 1 1;*/
             align-items: center;
             justify-content: space-between;
         }
@@ -258,13 +253,13 @@
             <h3><i class="icon-lifebuoy-1"></i> Rechercher dans les activités</h3>
             <p>La recherche va analyser le contenu de votre recherche en isolant les <strong>termes</strong>,
                 par défaut les termes sont des contenus approchant,
-                par exemple la recherche <q>reseau normand</q> va rechercher les mots <em>reseau</em> et <em>normand</em> en classant les résultats par pertinence (d'abord les activités contenant les 2 termes stricts, puis celle contenant au moins un des 2 termes ou approchant)</p>
+                par exemple la recherche <q>reseau normand</q> va rechercher les mots <em>reseau</em> et <em>normand</em> en classant les résultats par pertinence (d'abord les activités contenant les 2 termes stricts, puis celle contenant au moins un des 2 termes)</p>
 
             <p>Vous pouvez utiliser des <em>expressions de recherche</em> en spécifiant les <strong>termes</strong> plus finement : </p>
             <ul>
                 <li><strong>"Recherche stricte"</strong>, vous pouvez entourer de guillemets double un terme, par exemple en entourant votre recherche de guillemets double <em>"reseau normand"</em>, le moteur cherchera ce terme précis</li>
-                <li><strong>Wildcard *</strong> le caractère <em>*</em> en fin de terme permet d'élargir les résultats, ex : Normand* fera remonter les résultats avec Normandie, Normand, etc... (Un terme se terminant par une wildcard doit commencer par au moins 3 caractères standards)</li>
-                <li><strong>ET/OU</strong> Les mots clefs OR et AND permettent de préciser les termes à recherche : NORMAND* OR RESEAU, cherchera les activité contenant des termes commençant par "NORMAND..." ou contenant le terme RESEAU</li>
+                <li><strong>Wildcard *</strong> le caractère <em>*</em> en fin de terme permet d'élargir les résultats, ex : Normand* fera remonter les résultats avec Normandie, Normand, etc... (Un terme se terminant par une wildcard doit commencer par au moins 2 caractères standards)</li>
+                <li><strong>ET/OU</strong> Les mots clefs <strong>OR</strong> et <strong>AND</strong> permettent de préciser les termes à rechercher : NORMAND* OR RESEAU, cherchera les activités contenant des termes commençant par "NORMAND..." ou contenant le terme RESEAU</li>
                 <li><strong>PFI</strong> Saisissez directement le PFI.</li>
                 <li><strong>XXXXDRI</strong> Recherche sur le système de numérotation Oscar (2017DRI...).</li>
                 <li><strong>num=valeur</strong> Permet de chercher sur la numérotation libre proposée dans les activités de recherche.</li>
@@ -318,6 +313,7 @@
         <div class="criteria-add row">
 
             <div class="col-md-4">
+                <small>Filtres</small>
                 <select name="" id="criteria-adder" class="form-control">
                     <option value="">Ajouter un filtre...</option>
                     <?php foreach ($filtersType as $key => $label): ?>
@@ -325,10 +321,18 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-2 text-right">
-                <small>Trier</small>
+            <div class="col-md-2">
+                <small>Affichage en mode projet</small><br>
+                <div class="material-switch">
+                    <input id="projectview"
+                           name="projectview"
+                           value="on"
+                           type="checkbox"  <?= $projectview == 'on' ? 'checked' : '' ?> />
+                    <label for="projectview" class="label-primary"></label>
+                </div>
             </div>
             <div class="col-md-2">
+                <small>Trier par</small>
                 <select name="sort" class="form-control">
                     <?php foreach ($sortCriteria as $key => $label): ?>
                         <option value="<?= $key ?>"<?= $sort == $key ? ' selected' : '' ?>><?= $label ?></option>
@@ -336,20 +340,35 @@
                 </select>
             </div>
             <div class="col-md-2">
+                <small>Ignorer si la valeur est nulle</small>
+                <br>
+
+                <div class="material-switch">
+                    <input id="sortIgnoreNull" value="on"
+                           name="sortIgnoreNull"
+                           type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?> />
+                    <label for="sortIgnoreNull" class="label-primary"></label>
+                </div>
+                <?php /*
+                <label for="sortIgnoreNull">Ignorer si non-renseignée</label>
+                <input id="sortIgnoreNull" name="sortIgnoreNull" type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?>/>
+                */ ?>
+            </div>
+            <div class="col-md-2">
+                <small>Ordre</small>
                 <select name="sortDirection" class="form-control">
                     <option value="asc"<?= $sortDirection == 'asc' ? ' selected' : '' ?>>Croissant</option>
                     <option value="desc"<?= $sortDirection == 'desc' ? ' selected' : '' ?>>Décroissant</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label for="sortIgnoreNull">Ignorer si non-renseignée</label>
-                <input id="sortIgnoreNull" name="sortIgnoreNull" type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?>/>
-            </div>
+
         </div>
 
         <section id="criterias">
             <!-- JS -->
         </section>
+
+        <hr style="opacity: .3">
 
         <nav class="text-right">
             <a class="btn btn-default" href="<?= $this->url('contract/advancedsearch') ?>">
@@ -365,7 +384,15 @@
     <div id="activities" style="opacity: 0">
     <?php if(count($activities) > 0): ?>
         <h3 class="text-center"><?= count($activities) ?> résultat(s)</h3>
-    <?php /** @var \Oscar\Entity\Activity $contract **/ foreach ($activities as $activity): echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity]) ?><?php endforeach; /**/?>
+
+
+    <?php /** @var \Oscar\Entity\Activity $contract **/ foreach ($activities as $activity):
+        if( $projectview == true ) {
+            echo $this->partial('/oscar/project/project-item-openable.phtml', ['project' => $activity]);
+        } else {
+            echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity]);
+        }
+        endforeach; /**/?>
     <?php
     if( stripos($_SERVER['REQUEST_URI'], '?') === false ){
         $url = $_SERVER['REQUEST_URI'].'?';
@@ -565,7 +592,6 @@
                     };
 
                 var addcriterie = function (datas) {
-console.log(datas);
                     datas.typeLabel = (labelsType[datas.type]);
                     datas.criteria = datas.type + ";" + datas.val1 + ";" + datas.val2;
 

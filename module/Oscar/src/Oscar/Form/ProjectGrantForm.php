@@ -206,6 +206,22 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'type'=>'Text'
         ]);
 
+        // Amount
+        $this->add([
+            'name'   => 'fraisDeGestion',
+            'help' => '% du montant consacré aux frais de gestion',
+            'options' => [
+                'label' => 'Frais de Gestion'
+            ],
+            'attributes' => [
+                'class' => 'form-control',
+                'placeholder' => 'Frais de gestion (ex: 12.5)'
+            ],
+            'type'=>'Text'
+        ]);
+
+
+
         // DateStart
         $this->add([
             'name'   => 'dateStart',

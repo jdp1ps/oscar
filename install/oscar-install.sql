@@ -49,6 +49,7 @@ ALTER TABLE ONLY public.currency DROP CONSTRAINT fk_9020ea6965ff1aec;
 ALTER TABLE ONLY public.currency DROP CONSTRAINT fk_9020ea6963d8c20e;
 ALTER TABLE ONLY public.currency DROP CONSTRAINT fk_9020ea693174800f;
 ALTER TABLE ONLY public.privilege DROP CONSTRAINT fk_87209a87bcf5e72d;
+ALTER TABLE ONLY public.privilege DROP CONSTRAINT fk_87209a8779066886;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT fk_8115848c81c06096;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT fk_8115848c65ff1aec;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT fk_8115848c63d8c20e;
@@ -162,6 +163,7 @@ DROP INDEX public.idx_9020ea6965ff1aec;
 DROP INDEX public.idx_9020ea6963d8c20e;
 DROP INDEX public.idx_9020ea693174800f;
 DROP INDEX public.idx_87209a87bcf5e72d;
+DROP INDEX public.idx_87209a8779066886;
 DROP INDEX public.idx_8115848c81c06096;
 DROP INDEX public.idx_8115848c65ff1aec;
 DROP INDEX public.idx_8115848c63d8c20e;
@@ -1070,16 +1072,16 @@ CREATE SEQUENCE logactivity_id_seq
 CREATE TABLE notification (
     id integer NOT NULL,
     dateeffective date NOT NULL,
-    message text NOT NULL,
-    context character varying(255) NOT NULL,
-    object character varying(255) DEFAULT NULL::character varying,
-    objectid integer,
-    level integer NOT NULL,
-    datas text,
-    hash character varying(255) NOT NULL,
     datereal date NOT NULL,
     datecreated timestamp(0) with time zone NOT NULL,
-    serie character varying(255) DEFAULT NULL::character varying
+    message text NOT NULL,
+    object character varying(255) DEFAULT NULL::character varying,
+    objectid integer,
+    hash character varying(255) NOT NULL,
+    context character varying(255) NOT NULL,
+    serie character varying(255) DEFAULT NULL::character varying,
+    level integer NOT NULL,
+    datas text
 );
 
 
@@ -1353,7 +1355,9 @@ CREATE TABLE privilege (
     categorie_id integer,
     code character varying(150) NOT NULL,
     libelle character varying(200) NOT NULL,
-    ordre integer
+    ordre integer,
+    root_id integer,
+    spot integer DEFAULT 7
 );
 
 
@@ -1535,7 +1539,6 @@ CREATE TABLE timesheet (
     deletedby_id integer,
     activity_id integer,
     label text,
-    sendby character varying(255) DEFAULT NULL::character varying,
     icsuid text,
     icsfileuid text,
     icsfilename text,
@@ -1553,7 +1556,8 @@ CREATE TABLE timesheet (
     rejectedadminby character varying(255) DEFAULT NULL::character varying,
     rejectedadminbyid integer,
     rejectedadminat timestamp(0) with time zone DEFAULT NULL::timestamp with time zone,
-    rejectedadmincomment text
+    rejectedadmincomment text,
+    sendby character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1769,7 +1773,7 @@ COPY activity_discipline (activity_id, discipline_id) FROM stdin;
 -- Name: activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activity_id_seq', 1, false);
+SELECT pg_catalog.setval('activity_id_seq', 9839, true);
 
 
 --
@@ -1784,7 +1788,7 @@ COPY activitydate (id, type_id, activity_id, datestart, comment, status, datecre
 -- Name: activitydate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitydate_id_seq', 1, false);
+SELECT pg_catalog.setval('activitydate_id_seq', 1114, true);
 
 
 --
@@ -1799,7 +1803,7 @@ COPY activityorganization (id, organization_id, activity_id, main, role, status,
 -- Name: activityorganization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityorganization_id_seq', 1, false);
+SELECT pg_catalog.setval('activityorganization_id_seq', 83929, true);
 
 
 --
@@ -1814,7 +1818,7 @@ COPY activitypayment (id, activity_id, currency_id, datepayment, comment, status
 -- Name: activitypayment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitypayment_id_seq', 1, false);
+SELECT pg_catalog.setval('activitypayment_id_seq', 2466, true);
 
 
 --
@@ -1829,7 +1833,7 @@ COPY activityperson (id, person_id, activity_id, main, role, status, datecreated
 -- Name: activityperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityperson_id_seq', 1, false);
+SELECT pg_catalog.setval('activityperson_id_seq', 20984, true);
 
 
 --
@@ -1846,19 +1850,22 @@ COPY activitytype (id, lft, rgt, status, datecreated, dateupdated, datedeleted, 
 -- Name: activitytype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activitytype_id_seq', 412, false);
+SELECT pg_catalog.setval('activitytype_id_seq', 411, true);
 
 
 --
 -- Data for Name: administrativedocument; Type: TABLE DATA; Schema: public; Owner: -
 --
 
+COPY administrativedocument (id, person_id, dateupdoad, path, information, filetypemime, filesize, filename, version, status) FROM stdin;
+\.
+
 
 --
 -- Name: administrativedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('administrativedocument_id_seq', 11, false);
+SELECT pg_catalog.setval('administrativedocument_id_seq', 14, true);
 
 
 --
@@ -1873,7 +1880,7 @@ COPY authentification (id, username, email, display_name, password, state, datel
 -- Name: authentification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('authentification_id_seq', 1, false);
+SELECT pg_catalog.setval('authentification_id_seq', 120, true);
 
 
 --
@@ -1920,7 +1927,7 @@ COPY contractdocument (id, grant_id, person_id, dateupdoad, path, information, c
 -- Name: contractdocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('contractdocument_id_seq', 1, false);
+SELECT pg_catalog.setval('contractdocument_id_seq', 55696, true);
 
 
 --
@@ -2185,7 +2192,7 @@ COPY currency (id, status, datecreated, dateupdated, datedeleted, createdby_id, 
 -- Name: currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('currency_id_seq', 5, false);
+SELECT pg_catalog.setval('currency_id_seq', 1, false);
 
 
 --
@@ -2221,7 +2228,7 @@ COPY datetype (id, label, description, status, datecreated, dateupdated, datedel
 -- Name: datetype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('datetype_id_seq', 55, false);
+SELECT pg_catalog.setval('datetype_id_seq', 54, true);
 
 
 --
@@ -2265,7 +2272,7 @@ COPY discipline (id, label, centaureid) FROM stdin;
 -- Name: discipline_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('discipline_id_seq', 120, false);
+SELECT pg_catalog.setval('discipline_id_seq', 122, true);
 
 
 --
@@ -2321,14 +2328,14 @@ COPY logactivity (id, datecreated, message, context, contextid, userid, level, t
 -- Name: logactivity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('logactivity_id_seq', 1, false);
+SELECT pg_catalog.setval('logactivity_id_seq', 29164, true);
 
 
 --
 -- Data for Name: notification; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY notification (id, dateeffective, message, context, object, objectid, level, datas, hash, datereal, datecreated, serie) FROM stdin;
+COPY notification (id, dateeffective, datereal, datecreated, message, object, objectid, hash, context, serie, level, datas) FROM stdin;
 \.
 
 
@@ -2336,7 +2343,7 @@ COPY notification (id, dateeffective, message, context, object, objectid, level,
 -- Name: notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('notification_id_seq', 4, false);
+SELECT pg_catalog.setval('notification_id_seq', 1, false);
 
 
 --
@@ -2351,7 +2358,7 @@ COPY notificationperson (id, notification_id, person_id, read) FROM stdin;
 -- Name: notificationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('notificationperson_id_seq', 14, false);
+SELECT pg_catalog.setval('notificationperson_id_seq', 1, false);
 
 
 --
@@ -2366,7 +2373,7 @@ COPY organization (id, centaureid, shortname, fullname, code, email, url, descri
 -- Name: organization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organization_id_seq', 1, false);
+SELECT pg_catalog.setval('organization_id_seq', 12932, true);
 
 
 --
@@ -2396,7 +2403,7 @@ COPY organizationperson (id, person_id, organization_id, main, role, datestart, 
 -- Name: organizationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organizationperson_id_seq', 1, false);
+SELECT pg_catalog.setval('organizationperson_id_seq', 181, true);
 
 
 --
@@ -2438,83 +2445,81 @@ COPY person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, 
 -- Name: person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('person_id_seq', 1, true);
+SELECT pg_catalog.setval('person_id_seq', 11691, true);
 
 
 --
 -- Data for Name: privilege; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY privilege (id, categorie_id, code, libelle, ordre) FROM stdin;
-4	7	role-visualisation	Visualisation des rôles	\N
-5	7	role-edition	Édition des rôles	\N
-6	7	privilege-visualisation	Privilèges - Visualisation	\N
-7	7	privilege-edition	Privilèges - Édition	\N
-8	1	CREATE	Création d'un nouveau projet	\N
-9	1	EDIT	Modifier la description d'un projet	\N
-10	1	ACTIVITY-ADD	Ajouter une activité dans le projet	\N
-11	1	PERSON_MANAGE	Gérer les membres d'un projet	\N
-12	1	ORGANIZATION_MANAGE	Gérer les partenaires d'un projet	\N
-1	1	DASHBOARD	Tableau de bord	\N
-2	1	INDEX	Lister et recherche dans les projets	\N
-13	2	EXPORT	Exporter les données des activités	\N
-16	2	PAYMENT_MANAGE	Gestion des versements d'une activités	\N
-15	2	ORGANIZATION_MANAGE	Gestion des partenaires d'une activité	\N
-19	2	EDIT	Modifier les informations générales d'une activité	\N
-17	2	INDEX	Afficher / recherche dans les activités	\N
-18	2	SHOW	Afficher la fiche d'une activité	\N
-21	2	NUMBER	Peut numéroter l'activité	\N
-20	2	PAYMENT_SHOW	Voir les versements et le budget	\N
-22	2	MILESTONE_SHOW	Peut voir les jalons	\N
-23	2	MILESTONE_MANAGE	Peut gérer les jalons	\N
-24	2	DOCUMENT_SHOW	Peut voir les documents	\N
-25	2	DOCUMENT_MANAGE	Peut gérer les documents (Ajouter)	\N
-26	2	DUPLICATE	Peut dupliquer l'activité	\N
-27	2	CHANGE_PROJECT	Peut modifier le projet d'une activité	\N
-28	2	DELETE	Peut supprimer définitivement une activité	\N
-29	2	STATUS_OFF	Peut modifier le status vers "Désactivé"	\N
-30	2	PERSON_SHOW	Peut voir les membres d'une activité	\N
-31	2	ORGANIZATION_SHOW	Peut voir les partenaires d'un projet	\N
-3	1	SHOW	Voir les détails d'un projet	\N
-32	1	PERSON_SHOW	Voir les membres d'un projet	\N
-33	1	ORGANIZATION_SHOW	Voir les partenaires d'un projet	\N
-34	1	DOCUMENT_SHOW	Voir les documents d'un projet	\N
-35	1	ACTIVITY_SHOW	Voir les activités d'un projet	\N
-36	3	SHOW	Voir la fiche d'une personne	\N
-37	3	EDIT	Modifier la fiche d'une personne	\N
-38	3	SYNC_LDAP	Synchroniser les données avec LDAP	\N
-41	4	SHOW	Voir la fiche d'une organisation	\N
-42	4	EDIT	Modifier la fiche d'une organisation	\N
-43	4	SYNC_LDAP	Synchroniser les données avec LDAP	\N
-14	2	PERSON_MANAGE	Gestion des membres d'une activité	\N
-51	6	MENU_ADMIN	Accès aux menu d'administration	\N
-40	4	INDEX	Voir la liste des organisations	\N
-39	3	INDEX	Voir la liste des personnes	\N
-50	4	TEST	Test de requète	\N
-53	3	PROJECTS	Voir les projets d'une personnes	\N
-52	3	INFOS_RH	Voir les données administratives	\N
-54	2	WORKPACKAGE_SHOW	Voir les lots de travail d'une activité	\N
-55	2	WORKPACKAGE_MANAGE	Gérer les lots de travail d'une activité	\N
-56	2	WORKPACKAGE_COMMIT	Déclarer des heures pour un lot de travail	\N
-57	2	WORKPACKAGE_VALIDATE	Valider une déclaration d'heure pour un lot de travail	\N
-58	8	DOCUMENT_INDEX	Voir les documents adminstratifs	\N
-60	8	DOCUMENT_DELETE	Supprimer un document	\N
-61	8	DOCUMENT_DOWNLOAD	Télécharger un document	\N
-59	8	DOCUMENT_NEW	Téléverser un nouveau document	\N
-62	9	SHOW	Voir les dépenses	\N
-63	7	USER_VISUALISATION	Voir les authentifications utilisateur	\N
-64	7	USER_EDITION	Gérer les authentifications des utilisateurs	\N
-65	7	ROLEORGA_VISUALISATION	Voir les rôles des organisations	\N
-66	7	ROLEORGA_EDITION	Gérer les rôles des organisations	\N
-67	2	TIMESHEET_VALIDATE_SCI	Validation scientifique des déclarations	\N
-68	2	TIMESHEET_VALIDATE_ADM	Validation administrative des déclarations	\N
-69	6	CONNECTOR_ACCESS	Permet de configurer et d'exécuter les connecteurs	\N
-70	2	TIMESHEET_USURPATION	Peut remplir les feuilles de temps des déclarants d'une activité	\N
-71	3	NOTIFICATION_MENU	La personne peut voir le menu notification	\N
-72	2	NOTIFICATIONS_SHOW	Peut voir les notifications planifiées dans la fiche activité	\N
-73	2	NOTIFICATIONS_GENERATE	Peut regénérer manuellement les notifications d'une activité	\N
-74	6	NOTIFICATION_PERSON	Peut notifier manuellement un personne	\N
-75	2	PERSON_ACCESS	Voir les personnes qui ont la vision sur l'activité	\N
+COPY privilege (id, categorie_id, code, libelle, ordre, root_id, spot) FROM stdin;
+6	7	privilege-visualisation	Privilèges - Visualisation	\N	\N	7
+18	2	SHOW	Afficher la fiche d'une activité	\N	\N	7
+20	2	PAYMENT_SHOW	Voir les versements et le budget	\N	\N	7
+22	2	MILESTONE_SHOW	Peut voir les jalons	\N	\N	7
+24	2	DOCUMENT_SHOW	Peut voir les documents	\N	\N	7
+30	2	PERSON_SHOW	Peut voir les membres d'une activité	\N	\N	7
+31	2	ORGANIZATION_SHOW	Peut voir les partenaires d'un projet	\N	\N	7
+3	1	SHOW	Voir les détails d'un projet	\N	\N	7
+32	1	PERSON_SHOW	Voir les membres d'un projet	\N	\N	7
+33	1	ORGANIZATION_SHOW	Voir les partenaires d'un projet	\N	\N	7
+34	1	DOCUMENT_SHOW	Voir les documents d'un projet	\N	\N	7
+35	1	ACTIVITY_SHOW	Voir les activités d'un projet	\N	\N	7
+54	2	WORKPACKAGE_SHOW	Voir les lots de travail d'une activité	\N	\N	7
+56	2	WORKPACKAGE_COMMIT	Déclarer des heures pour un lot de travail	\N	\N	7
+62	9	SHOW	Voir les dépenses	\N	\N	7
+67	3	VIEW_TIMESHEET	Peut voir les feuilles de temps de n'importe quelle personne	\N	\N	7
+68	2	TIMESHEET_VIEW	Voir les feuilles de temps	\N	\N	7
+71	2	TIMESHEET_USURPATION	Peut remplir les feuilles de temps des déclarants d'une activité	\N	\N	7
+72	2	NOTIFICATIONS_SHOW	Peut voir les notifications planifiées dans la fiche activité	\N	\N	7
+74	2	PERSON_ACCESS	Voir les personnes qui ont la vision sur l'activité	\N	\N	7
+75	6	CONNECTOR_ACCESS	Peut exécuter la synchronisation des données	\N	\N	7
+76	6	NOTIFICATION_PERSON	Peut notifier manuellement un personne	\N	\N	7
+4	7	role-visualisation	Visualisation des rôles	\N	\N	4
+5	7	role-edition	Édition des rôles	\N	4	4
+7	7	privilege-edition	Privilèges - Édition	\N	6	4
+8	1	CREATE	Création d'un nouveau projet	\N	\N	4
+9	1	EDIT	Modifier un projet	\N	3	4
+10	1	ACTIVITY-ADD	Ajouter une activité dans le projet	\N	\N	4
+11	1	PERSON_MANAGE	Gérer les membres d'un projet	\N	32	7
+12	1	ORGANIZATION_MANAGE	Gérer les partenaires d'un projet	\N	33	7
+1	1	DASHBOARD	Tableau de bord	\N	\N	4
+2	1	INDEX	Lister et recherche dans les projets	\N	\N	6
+13	2	EXPORT	Exporter les données des activités	\N	17	4
+16	2	PAYMENT_MANAGE	Gestion des versements d'une activités	\N	20	7
+15	2	ORGANIZATION_MANAGE	Gestion des partenaires d'une activité	\N	31	7
+19	2	EDIT	Modifier les informations générales d'une activité	\N	18	7
+17	2	INDEX	Afficher / rechercher dans les activités	\N	\N	4
+23	2	MILESTONE_MANAGE	Peut gérer les jalons	\N	22	7
+25	2	DOCUMENT_MANAGE	Peut gérer les documents (Ajouter)	\N	24	7
+26	2	DUPLICATE	Peut dupliquer l'activité	\N	\N	3
+27	2	CHANGE_PROJECT	Peut modifier le projet d'une activité	\N	\N	4
+28	2	DELETE	Peut supprimer définitivement une activité	\N	\N	4
+29	2	STATUS_OFF	Peut modifier le status vers "Désactivé"	\N	\N	4
+36	3	SHOW	Voir la fiche d'une personne	\N	\N	4
+37	3	EDIT	Modifier la fiche d'une personne	\N	36	4
+38	3	SYNC_LDAP	Synchroniser les données avec LDAP	\N	36	4
+41	4	SHOW	Voir la fiche d'une organisation	\N	\N	4
+42	4	EDIT	Modifier la fiche d'une organisation	\N	41	4
+43	4	SYNC_LDAP	Synchroniser les données avec LDAP	\N	41	4
+14	2	PERSON_MANAGE	Gestion des membres d'une activité	\N	30	7
+51	6	MENU_ADMIN	Accès aux menu d'administration	\N	\N	4
+40	4	INDEX	Voir la liste des organisations	\N	\N	4
+39	3	INDEX	Voir la liste des personnes	\N	\N	4
+53	3	PROJECTS	Voir les projets d'une personnes	\N	36	7
+52	3	INFOS_RH	Voir les données administratives	\N	36	4
+55	2	WORKPACKAGE_MANAGE	Gérer les lots de travail d'une activité	\N	54	7
+58	8	DOCUMENT_INDEX	Voir les documents adminstratifs	\N	\N	4
+60	8	DOCUMENT_DELETE	Supprimer un document	\N	58	4
+61	8	DOCUMENT_DOWNLOAD	Télécharger un document	\N	58	4
+59	8	DOCUMENT_NEW	Téléverser un nouveau document	\N	58	4
+63	7	USER_VISUALISATION	Voir les authentifications utilisateur	\N	\N	4
+64	7	USER_EDITION	Gérer les authentifications des utilisateurs	\N	\N	4
+65	7	ROLEORGA_VISUALISATION	Voir les rôles des organisations	\N	\N	4
+66	7	ROLEORGA_EDITION	Gérer les rôles des organisations	\N	65	4
+69	2	TIMESHEET_VALIDATE_SCI	Validation scientifique des feuilles de temps	\N	68	7
+70	2	TIMESHEET_VALIDATE_ADM	Validation administrative des feuilles de temps	\N	68	7
+73	2	NOTIFICATIONS_GENERATE	Peut regénérer manuellement les notifications d'une activité	\N	72	7
 \.
 
 
@@ -2522,7 +2527,7 @@ COPY privilege (id, categorie_id, code, libelle, ordre) FROM stdin;
 -- Name: privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('privilege_id_seq', 75, true);
+SELECT pg_catalog.setval('privilege_id_seq', 77, false);
 
 
 --
@@ -2545,7 +2550,7 @@ COPY project_discipline (project_id, discipline_id) FROM stdin;
 -- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('project_id_seq', 8637, false);
+SELECT pg_catalog.setval('project_id_seq', 8634, true);
 
 
 --
@@ -2607,9 +2612,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 31	10
 25	10
 54	1
-57	1
 53	9
-57	10
 2	9
 32	9
 34	9
@@ -2631,7 +2634,6 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 41	15
 51	15
 55	7
-57	7
 6	16
 2	16
 32	16
@@ -2677,7 +2679,6 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 22	18
 30	18
 54	18
-57	18
 61	18
 61	10
 61	15
@@ -2767,7 +2768,6 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 18	1
 18	7
 18	14
-21	1
 20	1
 20	7
 20	14
@@ -2968,16 +2968,6 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 52	22
 40	22
 61	22
-67	1
-68	1
-67	7
-68	23
-68	24
-68	21
-68	22
-67	10
-67	18
-69	1
 \.
 
 
@@ -2985,7 +2975,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 -- Data for Name: timesheet; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activity_id, label, sendby, icsuid, icsfileuid, icsfilename, icsfiledateadded, validatedsciby, validatedscibyid, validatedsciat, validatedadminby, validatedadminbyid, validatedadminat, rejectedsciby, rejectedscibyid, rejectedsciat, rejectedscicomment, rejectedadminby, rejectedadminbyid, rejectedadminat, rejectedadmincomment) FROM stdin;
+COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activity_id, label, icsuid, icsfileuid, icsfilename, icsfiledateadded, validatedsciby, validatedscibyid, validatedsciat, validatedadminby, validatedadminbyid, validatedadminat, rejectedsciby, rejectedscibyid, rejectedsciat, rejectedscicomment, rejectedadminby, rejectedadminbyid, rejectedadminat, rejectedadmincomment, sendby) FROM stdin;
 \.
 
 
@@ -2993,7 +2983,7 @@ COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status
 -- Name: timesheet_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('timesheet_id_seq', 1, true);
+SELECT pg_catalog.setval('timesheet_id_seq', 11, true);
 
 
 --
@@ -3108,7 +3098,7 @@ COPY workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted
 -- Name: workpackage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackage_id_seq', 28, true);
+SELECT pg_catalog.setval('workpackage_id_seq', 22, true);
 
 
 --
@@ -3123,7 +3113,7 @@ COPY workpackageperson (id, person_id, duration, status, datecreated, dateupdate
 -- Name: workpackageperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackageperson_id_seq', 6, true);
+SELECT pg_catalog.setval('workpackageperson_id_seq', 1, true);
 
 
 --
@@ -3897,6 +3887,13 @@ CREATE INDEX idx_8115848c65ff1aec ON activitypayment USING btree (updatedby_id);
 --
 
 CREATE INDEX idx_8115848c81c06096 ON activitypayment USING btree (activity_id);
+
+
+--
+-- Name: idx_87209a8779066886; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX idx_87209a8779066886 ON privilege USING btree (root_id);
 
 
 --
@@ -4758,6 +4755,14 @@ ALTER TABLE ONLY activitypayment
 
 
 --
+-- Name: fk_87209a8779066886; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY privilege
+    ADD CONSTRAINT fk_87209a8779066886 FOREIGN KEY (root_id) REFERENCES privilege(id);
+
+
+--
 -- Name: fk_87209a87bcf5e72d; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4930,7 +4935,7 @@ ALTER TABLE ONLY workpackage
 --
 
 ALTER TABLE ONLY role_privilege
-    ADD CONSTRAINT fk_d6d4495b32fb8aea FOREIGN KEY (privilege_id) REFERENCES privilege(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_d6d4495b32fb8aea FOREIGN KEY (privilege_id) REFERENCES privilege(id);
 
 
 --
@@ -4938,7 +4943,7 @@ ALTER TABLE ONLY role_privilege
 --
 
 ALTER TABLE ONLY role_privilege
-    ADD CONSTRAINT fk_d6d4495bd60322ac FOREIGN KEY (role_id) REFERENCES user_role(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_d6d4495bd60322ac FOREIGN KEY (role_id) REFERENCES user_role(id);
 
 
 --

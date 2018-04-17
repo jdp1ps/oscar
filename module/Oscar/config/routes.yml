@@ -84,6 +84,12 @@ timesheet:
                 route: /declarers
                 defaults:
                     action: declarers
+        organization:
+            type: segment
+            options:
+                route: /organizations
+                defaults:
+                    action: organizationLeader
         # Déclarations d'une personne pour une activité
         declaration:
             type: segment
@@ -348,6 +354,20 @@ person:
                 route: '/show/:id'
                 defaults:
                     action: show
+
+        notification:
+            type: segment
+            options:
+                route: '/notification/:id'
+                defaults:
+                    action: notificationPerson
+
+        notification_generate:
+            type: segment
+            options:
+                route: '/notification-generate/:id'
+                defaults:
+                    action: notificationPersonGenerate
         boss:
             type: segment
             options:
@@ -537,6 +557,7 @@ generate:
             action: generate
     may_terminate: true
 
+
 ################################################################################
 # GESTION des CONTRACTS
 contract:
@@ -685,13 +706,6 @@ contract:
                 route: /bientot-termine
                 defaults:
                     action: almostDone
-access:
-    type: literal
-    options:
-        route: /grant
-        defaults:
-            controller: Public
-            action: access
 
 doc:
     type: segment
@@ -700,6 +714,14 @@ doc:
         defaults:
             controller: Public
             action: documentation
+
+user_parameters:
+    type: segment
+    options:
+        route: /parameters
+        defaults:
+            controller: Public
+            action: parameters
 
 ################################################################################
 # GESTION des DOCUMENTS (administratifs)
@@ -838,6 +860,13 @@ organizationperson:
                 route: /delete/:idenroll
                 defaults:
                     action: organizationPersonDelete
+        close:
+            type: segment
+            options:
+                route: /close/:idenroll
+                defaults:
+                    action: organizationPersonClose
+
         edit:
             type: segment
             options:
@@ -980,6 +1009,13 @@ milestones:
             controller: ActivityDate
             action: index
     may_terminate: true
+    child_routes:
+        activity:
+            type: segment
+            options:
+                route: /:idactivity
+                defaults:
+                    action: activity
 
 activitydate:
     type: segment
@@ -1202,6 +1238,7 @@ administration:
                 route: /connectors
                 defaults:
                     action: connectorsHome
+
         # Affiche la configuration d'un connecteur
         connectors:
             type: segment
@@ -1238,6 +1275,14 @@ administration:
                 defaults:
                     action: connectorConfigure
 
+        # Lance la procédure de test d'un connecteur
+        activity_index:
+            type: segment
+            may_terminate: true
+            options:
+                route: /activity-index/build
+                defaults:
+                    action: activityIndexBuild
         privileges:
             type: segment
             may_terminate: true
@@ -1270,7 +1315,16 @@ administration:
                         defaults:
                             controller: Administration
                             action: userLogs
+                roles:
+                    type: segment
+                    may_terminate: true
+                    options:
+                        route: /roles
+                        defaults:
+                            controller: Administration
+                            action: userRoles
 
+        # Rôles des organisations
         organizationrole:
             type: segment
             options:
@@ -1287,6 +1341,16 @@ administration:
                         defaults:
                             action: organizationRoleApi
 
+        # Types d'organisation
+        organizationtype:
+            type: segment
+            options:
+                route: /organizationtype[/:id]
+                defaults:
+                    action: organizationType
+            may_terminate: true
+
+        # Types de document
         typedocument:
              type: segment
              options:

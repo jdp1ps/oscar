@@ -1,17 +1,16 @@
 {
   "repositories": [
-    {
-      "type": "composer",
-      "url": "https://dev.unicaen.fr/packagist"
-    }
+    { "type": "vcs", "url": "https://git.unicaen.fr/lib/unicaen/app" },
+    { "type": "vcs", "url": "https://git.unicaen.fr/lib/unicaen/auth" }
   ],
   "name": "unicaen/oscar",
   "license": "proprietary",
   "description": "",
+
   "require": {
-    "unicaen/unicaen-auth": "dev-extract_ldap_params",
+    "unicaen/auth": "^1.2",
+    "unicaen/app": "^1.3.10",
     "symfony/yaml": "^3.3",
-    "unicaen/unicaen-app": "dev-extract_ldap_params",
     "monolog/monolog": "^1.23",
     "kmelia/monolog-stdout-handler": "^1.2",
     "fightbulc/moment": "^1.26",
@@ -19,10 +18,11 @@
     "cocur/slugify": "^3.0",
     "erusev/parsedown": "^1.6",
     "zf1/zend-search-lucene": "^1.12",
-    "zendframework/zend-text": "^2.6",
     "jacksay/php-file-extension": "^0.0.1",
-    "mpdf/mpdf": "^7.0",
-    "phpoffice/phpexcel": "^1.8"
+    "phpoffice/phpexcel": "^1.8",
+    "elasticsearch/elasticsearch": "^6.0",
+    "swiftmailer/swiftmailer": "^6.0",
+    "zendframework/zend-text": "^2.4"
   },
   "require-dev": {
     "phpmd/phpmd": "@stable",

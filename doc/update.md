@@ -30,10 +30,31 @@ L'application doit maintenant proposer un écran d'accueil "Oscar est en mainten
 Mettre ensuite les sources à jour :
 
 ```bash
+git fetch
 git pull
 ```
+Si des conflits de fichiers surviennent, vous pouvez utiliser la commande
+
+```bash
+git reset --hard origin/master
+``` 
+
+ou si vous êtes sur la branche **develop** : 
+
+```bash
+git reset --hard origin/develop
+``` 
+
 
 ## Mise à jour des vendors (Librairies tiers)
+
+En utilisant **composer** : 
+
+```bash
+composer install
+```
+
+Ou en utilisant l'archive fournis dans l'installation : 
 
 ```bash
 # On supprime les anciennes
@@ -61,7 +82,7 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 
 ## Vérifier la configuration
 
-Selon la mise à jour, la configuration peut avoir été mise à jour, controler le fichier `./config/autoload/local.php.dist`. Si une mise à jour implique des changements plus spécifiques, ces derniers seront documentés en détails dans un document dédié.
+Selon la mise à jour, la configuration peut avoir été mise à jour, contrôler le fichier `./config/autoload/local.php.dist`. Si une mise à jour implique des changements plus spécifiques, ces derniers seront documentés en détails dans un document dédié.
 
 # Mise à jour des privilèges
 
@@ -70,7 +91,8 @@ Selon la mise à jour, la configuration peut avoir été mise à jour, controler
 php public/index.php oscar patch checkPrivilegesJSON
 ```
 
-> La séquence qui gère les ID n'est pas à jour (dans les données initiales). Connectez vous à la base Postegresql pour exécuter cette requète pour metre à jour les ID. `select setval('privilege_id_seq',(select max(id)+1 from privilege), false)`.
+> Cette commande executera automatiquement la requète de mise à jour de la séquence d'index des privilèges : `select setval('privilege_id_seq',(select max(id)+1 from privilege), false)`.
+
 
 
 # Requètes de maintenance

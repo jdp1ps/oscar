@@ -53,9 +53,15 @@ requirejs.config({
         'KeySelectEditor' : 'components/build/KeySelectEditor',
         'ActivitiesExport' : 'components/build/ActivitiesExport',
         'io' : 'http://127.0.0.1:3000/socket.io/socket.io.js',
-        'notifications' : 'components/build/notifications',
+        'notifications' : 'oscar/dist/Notification',
         'activity' : 'components/build/activity',
-        'Typedocument' : 'components/build/Typedocument'
+        'Typedocument' : 'components/build/Typedocument',
+        'milestones' : 'oscar/dist/Milestones',
+        'authentification' : 'oscar/dist/Authentification',
+        'payments' : 'oscar/dist/Payments',
+        'Datepicker2' : 'oscar/dist/Datepicker',
+        'activityclone' : 'oscar/dist/Activityclone',
+        'OrganizationType' : 'oscar/dist/OrganizationType'
     },
     shim: {
         "bootstrap": {
@@ -212,8 +218,13 @@ define('hbs', ['handlebars', 'mm'], function (Handlebars, moment) {
     });
 
     Handlebars.registerHelper('past', function(context, options){
-        if(context.status == 1 && context.datePredicted.date < new Date().toISOString()){
-            return "past";
+
+        if(context.status == 1){
+            if( !context.datePredicted )
+                return 'error';
+
+            if( context.datePredicted.date < new Date().toISOString() )
+                return "past";
         }
         return "";
     });

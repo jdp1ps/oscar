@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
+use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Factory\JsonToOrganization;
@@ -46,7 +47,7 @@ class ConnectorOrganizationJSON implements ConnectorInterface
      * @return mixed
      */
     public function getJsonData(){
-        return $this->jsonDatas();
+        return $this->jsonDatas;
     }
 
     public function getEntityManager(){
@@ -66,6 +67,10 @@ class ConnectorOrganizationJSON implements ConnectorInterface
         $repo = $this->getEntityManager()->getRepository(Organization::class);
 
         return $repo->getObjectByConnectorID($this->connectorName, $uid);
+    }
+
+    protected function getOrganizationType( $label ){
+        return $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['label' => $label]);
     }
 
     public function syncAll()
@@ -88,6 +93,12 @@ class ConnectorOrganizationJSON implements ConnectorInterface
 
             try {
                 $this->organizationJsonFactory->hydrateWithDatas($organization, $data, $this->connectorName);
+                if( $data->type ){
+                    $type = $this->getOrganizationType($data->type);
+                    if( $type ){
+                        $organization->setTypeObj($type);
+                    }
+                }
             } catch (\Exception $e ){
                 $repport->adderror($e->getMessage());
                 continue;

@@ -8,17 +8,23 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\NoResultException;
+use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNotification;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
+use Oscar\Entity\Project;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
+use Zend\Log\Logger;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -29,25 +35,26 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     /** @var array Contiens la liste des ID des notifications créée pendant l'exécution */
     private $notificationsToTrigger = [];
 
-    public function getAllNotificationsPerson( $personId )
+    public function getAllNotificationsPerson($personId)
     {
         $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
             ->createQueryBuilder('p')
             ->innerJoin('p.notification', 'n')
             ->orderBy('n.dateEffective', 'DESC')
             ->where('p.person = :person')
-            ->setParameters(['person'=> $personId]);
+            ->setParameters(['person' => $personId]);
 
 
         return $query->getQuery()->getResult();
     }
+
     /**
      * Retourne la liste des notifications programmées pour une activités.
      *
      * @param Activity $activity
      * @return Activity[]
      */
-    public function notificationsActivity( Activity $activity )
+    public function notificationsActivity(Activity $activity)
     {
         return $this->getEntityManager()->getRepository(Notification::class)
             ->findBy([
@@ -58,12 +65,12 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ]);
     }
 
-    public function addNotificationTrigerrable( Notification $n )
+    public function addNotificationTrigerrable(Notification $n)
     {
         /** @var NotificationPerson $p */
         foreach ($n->getPersons() as $p) {
             $person = $p->getPerson();
-            if( $person->getLadapLogin() && !in_array($person->getLadapLogin(), $this->notificationsToTrigger) ){
+            if ($person->getLadapLogin() && !in_array($person->getLadapLogin(), $this->notificationsToTrigger)) {
                 $this->notificationsToTrigger[] = $person->getLadapLogin();
             }
         }
@@ -73,8 +80,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     {
         // Push vers le socket si besoin
         $configSocket = $this->getServiceLocator()->get('Config')['oscar']['socket'];
-        if (count($this->notificationsToTrigger) && $configSocket)
-        {
+        if (count($this->notificationsToTrigger) && $configSocket) {
             $this->getServiceLocator()->get('Logger')->info("TRIGGER !");
             $auths = $this->getEntityManager()->getRepository(Authentification::class)->createQueryBuilder('a')
                 ->where('a.username IN (:logins)')
@@ -88,7 +94,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 $keys[] = $auth->getSecret();
             }
             // todo Faire un truc plus propre pour générer l'URL
-            $url = $configSocket['url'].$configSocket['push_path'];
+            $url = $configSocket['url'] . $configSocket['push_path'];
             $this->getServiceLocator()->get('Logger')->info("PUSH " . $url . " WITH " . implode(",", $keys));
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
@@ -110,32 +116,45 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     public function getLimitNotificationDate()
     {
         static $limitNotificationDate;
-        if( $limitNotificationDate === null ){
+        if ($limitNotificationDate === null) {
             $limit = 30;
             $limitNotificationDate = new \DateTime();
-            $interval = new \DateInterval('P'.$limit.'D');
+            $interval = new \DateInterval('P' . $limit . 'D');
             $interval->invert = 1;
             $limitNotificationDate->add($interval);
         }
         return $limitNotificationDate;
     }
 
-    private function debug($str){
-        echo " [debug] $str\n";
+    private function debug($str)
+    {
+        $this->getServiceLocator()->get('Logger')->info($str);
     }
 
-    public function generateNotificationsActivities( $silent = false )
+    /**
+     * @return OrganizationService
+     */
+    protected function getOrganizationService(){
+        return $this->getServiceLocator()->get('OrganizationService');
+    }
+
+    public function generateNotificationsActivities($silent = false)
     {
+        $this->debug("=====================\nGénération des notifications\n=====================");
+
         $activities = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
-            ->where('a.dateEnd >= :now')
+            ->where('a.dateEnd IS NULL OR a.dateEnd >= :now')
             ->setParameter('now', (new \DateTime())->format('Y-m-d'))
             ->getQuery()
             ->getResult();
 
+
+        $this->debug(sprintf("Il y'a %s activité(s) à traiter", count($activities)));
+
         /** @var Activity $activity */
         foreach ($activities as $activity) {
-            $this->generateNotificationsForActivity($activity, $silent);
+            $this->generateNotificationsForActivity($activity);
         }
     }
 
@@ -144,9 +163,256 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      *
      * @param Activity $activity
      */
-    public function createOrUpdateMilestoneNotifications( Activity $activity )
+    public function createOrUpdateMilestoneNotifications(Activity $activity)
     {
 
+    }
+
+    public function generateMilestonesNotificationsForActivity(Activity $activity, $person = null)
+    {
+        /** @var ActivityDate $milestone */
+        foreach ($activity->getMilestones() as $milestone) {
+            $this->generateMilestoneNotifications($milestone, $person);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// CACHE
+    private $_object_privilege_persons = [];
+
+    /**
+     * Retourne la liste des personnes ayant le privilège $privilège dans l'activité $activité.
+     *
+     * @param $privilege
+     * @param Activity $activity
+     */
+    public function getPersonsIdFor($privilege, Activity $activity)
+    {
+
+        $activityId = $activity->getId();
+
+        if (!array_key_exists($activityId, $this->_object_privilege_persons)) {
+            $_object_privilege_persons[$activityId] = [];
+        }
+
+        if (!array_key_exists($privilege, $this->_object_privilege_persons[$activityId])) {
+
+            $personsIds = [];
+
+            /** @var PersonService $personsService */
+            $personsService = $this->getServiceLocator()->get('PersonService');
+
+            /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
+            $persons = $personsService->getAllPersonsWithPrivilegeInActivity($privilege, $activity);
+
+            $_object_privilege_persons[$activityId][$privilege] = $persons;
+        }
+
+        return $_object_privilege_persons[$activityId][$privilege];
+    }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// JALONS
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Génération des notifications pour le jalon $milestone.
+     *
+     * @param ActivityDate $milestone
+     */
+    public function generateMilestoneNotifications(ActivityDate $milestone, $person = null)
+    {
+        $context = "milestone-" . $milestone->getId();
+        $activity = $milestone->getActivity();
+
+        $this->debug('## Génération pour le jalon ' . $context . ' ' . $milestone->getType());
+
+        $persons = $this->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $milestone->getActivity());
+
+        if( $person !== null ){
+            if( !in_array($person, $persons) ){
+                $this->getServiceLocator()->get('Logger')->warning(sprintf("La personne %s n'est pas associée à l'activité %s", $person, $milestone->getActivity()));
+                return;
+            } else {
+                $persons = [$person];
+            }
+        }
+
+
+        // Si le jalon peut être complété
+        if ($milestone->isFinishable()) {
+
+            // Si il est fini, on passe
+            if ($milestone->isFinishable() && $milestone->isFinished())
+                return;
+
+
+            // Si il est en retard
+            if ($milestone->isLate()) {
+                $message = sprintf("Le jalon %s de l'activité %s est en retard.",
+                    $milestone->getType()->getLabel(),
+                    $activity->log());
+
+                $this->notification($message,
+                    $persons, Notification::OBJECT_ACTIVITY,
+                    $activity->getId(), $context, new \DateTime('now'),
+                    $milestone->getDateStart(), false);
+
+            }
+        }
+
+        // Si le jalon est passé, on passe
+        if ($milestone->getDateStart() < new \DateTime('now')) {
+            return;
+        }
+
+        // Notification de base à la date D
+        $message = sprintf("Le jalon %s de l'activité %s arrive à échéance",
+            $milestone->getType()->getLabel(),
+            $activity->log());
+
+        $this->notification($message,
+            $persons, Notification::OBJECT_ACTIVITY,
+            $activity->getId(), $context, $milestone->getDateStart(),
+            $milestone->getDateStart(), false);
+
+        // Les rappels configurés dans le le type de jalon
+        foreach ($milestone->getRecursivityDate() as $dateRappel) {
+            $this->notification($message, $persons,
+                Notification::OBJECT_ACTIVITY, $activity->getId(),
+                $context, $dateRappel,
+                $milestone->getDateStart(), false);
+        }
+    }
+
+    public function purgeNotificationMilestone(ActivityDate $milestone)
+    {
+        $context = "milestone-" . $milestone->getId();
+        $notifications = $this->getEntityManager()->getRepository(Notification::class)
+            ->findBy(['context' => $context]);
+        $this->getLogger()->info(sprintf('Purge milestone : %s jalon(s) vont être supprimé(s)', count($notifications)));
+        foreach ($notifications as $notification) {
+            $this->getEntityManager()->remove($notification);
+        }
+
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLogger(){
+        return $this->getServiceLocator()->get('Logger');
+    }
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// PAYMENTS
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Génération des notifications pour les payments.
+     *
+     * @param Activity $activity
+     */
+    public function generatePaymentsNotificationsForActivity(Activity $activity, $person = null)
+    {
+        foreach ($activity->getPayments() as $payment) {
+            $this->generatePaymentsNotifications($payment, $person);
+        }
+    }
+
+    public function generatePaymentsNotifications(ActivityPayment $payment, $person = null)
+    {
+        $activity = $payment->getActivity();
+        $now = new \DateTime();
+        $persons = $this->getPersonsIdFor(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
+
+        if( $person !== null ){
+            if( !in_array($person, $persons) ){
+                return;
+            } else {
+                $persons = [$person];
+            }
+        }
+
+        if ($payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_PREVISIONNEL) {
+            $message = "$payment dans l'activité " . $activity->log();
+            $context = "payment:" . $payment->getId();
+            $dateEffective = $payment->getDatePredicted();
+
+            if ($payment->getDatePredicted() < $now) {
+                $message .= " est en retard";
+                $dateEffective = $now;
+            }
+
+            $this->notification($message, $persons,
+                Notification::OBJECT_ACTIVITY, $activity->getId(),
+                $context, $dateEffective, $payment->getDatePredicted(), false);
+        }
+    }
+
+    /**
+     * Supprime les notification d'une personne dans une activité
+     *
+     * @param Activity $activity
+     * @param Person $person
+     */
+    public function purgeNotificationsPersonActivity(Activity $activity, Person $person){
+        // objectid = $activityId
+        // object = activity
+        $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
+            ->createQueryBuilder('p')
+            ->innerJoin('p.notification', 'n')
+            ->where('p.person = :person AND n.object = :object AND n.objectId = :activityid')
+            ->setParameters(['person' => $person->getId(), 'activityid' => $activity->getId(), 'object' => Notification::OBJECT_ACTIVITY]);
+
+        /** @var NotificationPerson $r */
+        foreach ($query->getQuery()->getResult() as $r ){
+            $this->getEntityManager()->remove($r);
+        }
+        $this->getEntityManager()->flush();
+
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// PROJET
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Supprime les notifications d'une personne d'un Projet
+     *
+     * @param Project $project
+     * @param Person $person
+     */
+    public function purgeNotificationsPersonProject(Project $project, Person $person){
+        /** @var Activity $activity */
+        foreach ($project->getActivities() as $activity) {
+            $this->purgeNotificationsPersonActivity($activity, $person);
+        }
+    }
+
+    public function purgeNotificationPayment(ActivityPayment $payment)
+    {
+        $context = "payment:" . $payment->getId();
+        $notifications = $this->getEntityManager()->getRepository(Notification::class)
+            ->findBy(['context' => $context]);
+
+        foreach ($notifications as $notification) {
+            $this->getEntityManager()->remove($notification);
+        }
+
+        $this->getEntityManager()->flush();
     }
 
     /**
@@ -154,59 +420,26 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      *
      * @param Activity $activity
      */
-    public function generateNotificationsForActivity( Activity $activity , $silent = false)
+    public function generateNotificationsForActivity(Activity $activity, $person = null)
     {
-        /** @var PersonService $personsService */
-        $personsService = $this->getServiceLocator()->get('PersonService');
-
-        /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
-        $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
-        $personsIds = [];
-
-        /** @var Person $person */
-        foreach ($persons as $person){
-            $personsIds[] = $person->getId();
-        }
-
-        $now = new \DateTime();
-        /** @var ActivityPayment $payment */
-        foreach( $activity->getPayments() as $payment ){
-            if( $payment->getDatePredicted() ){
-                $message = "$payment";
-                $context = "payment:" . $payment->getId();
-                $dateEffective = $payment->getDatePredicted();
-
-                if( $payment->getDatePredicted() < $now ){
-                    $message .= " est en retard";
-                    $dateEffective = $now;
-                }
-
-                $this->notification($message, $persons,
-                    Notification::OBJECT_ACTIVITY, $activity->getId(),
-                    $context, $dateEffective, $payment->getDatePredicted(), false);
-            }
-        }
-
-        //die("TEST");
-
-        /** @var ActivityDate $milestone */
-        foreach( $activity->getMilestones() as $milestone ){
-            $context = "milestone-" . $milestone->getId();
-            $notificationMessage = sprintf("L'échéance %s pour l'activité %s",
-                $milestone->getType()->getLabel(),
-                $activity->log()
-                );
-            foreach ($milestone->getRecursivityDate() as $date) {
-                if( $date > $this->getLimitNotificationDate() ){
-                    $this->notification($notificationMessage, $persons,
-                        Notification::OBJECT_ACTIVITY, $activity->getId(),
-                        $context, $date, $milestone->getDateStart(), false);
-                }
-            }
-        }
-        if( $silent == true )
-            $this->triggerSocket();
+        $this->generateMilestonesNotificationsForActivity($activity, $person);
+        $this->generatePaymentsNotificationsForActivity($activity, $person);
     }
+
+    /**
+     * Génère les notifications pour un projet.
+     *
+     * @param Project $project
+     * @param null|Person $person
+     */
+    public function generateNotificationsForProject(Project $project, $person = null)
+    {
+        foreach ($project->getActivities() as $activity ) {
+            $this->generateNotificationsForActivity($activity, $person);
+        }
+    }
+
+
 
     /**
      * Marque les notifications comme lues
@@ -215,7 +448,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      * @param Person $person Personne consernée
      * @return mixed
      */
-    public function deleteNotificationsPersonById( array $ids, Person $person ){
+    public function deleteNotificationsPersonById(array $ids, Person $person)
+    {
         return $this->getEntityManager()->getRepository(NotificationPerson::class, 'np')
             ->createQueryBuilder('np')
             ->update(NotificationPerson::class, 'np')
@@ -230,11 +464,37 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ->execute();
     }
 
+    public function generateNotificationsPerson(Person $person)
+    {
+        // Récupération des activités dans lesquelles la personne est impliquée
+        $activities = [];
+
+        /** @var OrganizationPerson $member */
+        foreach ($person->getOrganizations() as $member) {
+            if (!$member->isOutOfDate() && $member->isPrincipal()) {
+                /** @var ActivityOrganization $activity */
+
+                foreach ($this->getOrganizationService()->getOrganizationActivititiesPrincipalActive($member->getOrganization()) as $activity) {
+                    $this->generateNotificationsForActivity($activity->getActivity(), $person);
+                }
+            }
+        }
+
+        /** @var ActivityPerson $activityPerson */
+        foreach ($person->getActivities() as $activityPerson ){
+            if($activityPerson->isPrincipal() && !in_array($activityPerson->getActivity(), $activities)){
+                $this->generateNotificationsForActivity($activityPerson->getActivity(), $person);
+            }
+        }
+
+
+    }
+
     /**
      * @param $personId
      * @return array
      */
-    public function getNotificationsPerson( $personId, $onlyFresh = false)
+    public function getNotificationsPerson($personId, $onlyFresh = false)
     {
         $result = [
             'personid' => $personId,
@@ -242,20 +502,20 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         ];
 
         $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
-                ->createQueryBuilder('p')
-                ->innerJoin('p.notification', 'n')
-                ->orderBy('n.dateEffective', 'DESC')
-                ->where('p.person = :person AND n.dateEffective <= :now')
-                ->setParameters(['person'=> $personId, 'now'=>date('Y-m-d')]);
+            ->createQueryBuilder('p')
+            ->innerJoin('p.notification', 'n')
+            ->orderBy('n.dateEffective', 'DESC')
+            ->where('p.person = :person AND n.dateEffective <= :now')
+            ->setParameters(['person' => $personId, 'now' => date('Y-m-d')]);
 
-        if( $onlyFresh === true ){
+        if ($onlyFresh === true) {
             $query->andWhere("p.read IS NULL");
         }
 
         $notificationsPerson = $query->getQuery()->getResult();
 
         /** @var NotificationPerson $notificationPerson */
-        foreach ($notificationsPerson as $notificationPerson ){
+        foreach ($notificationsPerson as $notificationPerson) {
             $dt = $notificationPerson->getNotification()->toArray();
             $dt['read'] = $notificationPerson->getRead();
             $dt['person_id'] = $notificationPerson->getPerson()->getId();
@@ -269,7 +529,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     }
 
 
-    public function notifyActivitiesTimesheetSend( $activities ){
+    public function notifyActivitiesTimesheetSend($activities)
+    {
 
         $this->getServiceLocator()->get('Logger')->info("Notification timesheet send !");
 
@@ -293,7 +554,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         $this->triggerSocket();
     }
 
-    public function notifyActivitiesTimesheetReject( $activities ){
+    public function notifyActivitiesTimesheetReject($activities)
+    {
 
     }
 
@@ -306,21 +568,24 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
      * @param null $key
      * @param bool $trigger
      */
-    public function notification( $message, $persons, $object, $objectId, $context, \DateTime $dateEffective, \DateTime $dateReal, $trigger=true)
+    public function notification($message, $persons, $object, $objectId, $context, \DateTime $dateEffective, \DateTime $dateReal, $trigger = true)
     {
         // Code de série
         $serie = sprintf('%s:%s:%s', $object, $objectId, $context);
 
-        $this->getServiceLocator()->get('Logger')->info("Add $serie");
+
 
         // Code unique
-        $hash = $serie.':'.$dateEffective->format('Ymd');
+        $hash = $serie . ':' . $dateEffective->format('Ymd');
 
         /** @var Notification $notif */
         $notif = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
 
         // Création de la notification
-        if( !$notif ){
+        if (!$notif) {
+            $this->getLogger()->info(" [+] notification ($serie)");
+
+            /** @var Notification $notif */
             $notif = new Notification();
             $this->getEntityManager()->persist($notif);
             $notif->setMessage($message)
@@ -332,6 +597,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 ->setSerie($serie)
                 ->setHash($hash);
         } else {
+            $this->getLogger()->info(" [~] notification ($serie)");
             $notif->setDateReal($dateReal)
                 ->setDateEffective($dateEffective);
         }
@@ -342,7 +608,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         $this->getEntityManager()->flush();
 
-        if( $trigger === true )
+        if ($trigger === true)
             $this->triggerSocket();
     }
 }

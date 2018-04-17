@@ -10,10 +10,12 @@
 namespace Oscar;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\Authentification;
+use Oscar\Exception\OscarException;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\PersonService;
 use UnicaenAuth\Authentication\Adapter\Ldap;
@@ -145,7 +147,10 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $str = $person->log();
             } catch (NoResultException $e) {
                 $str = $dbUser->getUsername() . ' - DBUSER';
+            } catch (NonUniqueResultException $e ){
+                throw new OscarException("Votre fiche personne apparaît en double dans la base de données, veuillez contacter l'administrateur pour que le problème soit corrigé.");
             }
+
             $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
                 $str), $dbUser);
         }
@@ -177,9 +182,15 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $match = $event->getParams()['route-match'];
 
                 $controller = $match->getParam('controller');
+
+                if( $controller == 'Console')
+                    return;
+
                 $action = $match->getParam('action');
                 $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
                 $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+
+                $method = $request->getMethod();
 
                 if( $userContext->getLdapUser() ){
                     $user = $userContext->getLdapUser()->getDisplayName();
@@ -192,10 +203,8 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
                 $userid = $userContext->getDbUser() ? $userContext->getDbUser()->getid() : -1;
                 $contextId = $match->getParam('id', '?');
-                $message = sprintf('%s@%s:(%s) %s:%s %s', $ip, $userid, $user, $controller, $action, $uri);
+                $message = sprintf('%s@%s:(%s) [%s] %s:%s %s', $ip, $userid, $user, $method, $controller, $action, $uri);
 
-                if( $controller != 'Console')
-                    $sm->get('Logger')->info($message);
             } catch (\Exception $e) {
                 error_log($e->getMessage());
             }
@@ -240,10 +249,12 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             'oscar auth:promote <login> [<role>]' => 'Ajoute Un rôle <role> au compte <login>, si le role n\'est pas précisé, une liste de choix s\'affiche',
             'oscar auth:pass <login> [--ldap]' => 'Mets à jour le mot de passe du compte <login>, l\'option --ldap permet de déléger le contrôle du mot de passe à ldap' ,
             'oscar auth:add' => 'Cré un nouvel utilisateur.',
+            'oscar auth:list' => 'Liste des utilisateurs.',
 
             '# CONFIGURATION',
-            //'oscar check:config' => 'Évaluation de la configuration',
-            'oscar check:authentification <login> <pass>' => "Évaluation de l'authentification",
+            'oscar test:config' => 'Évaluation de la configuration',
+            'oscar test:mailer' => 'Lance le test du mailer',
+//            'oscar check:authentification <login> <pass>' => "Évaluation de l'authentification",
             //'oscar check:connector' => 'Cré un nouvel utilisateur.',
 
             '# PERSONNES',
@@ -252,6 +263,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
             '# ORGANISATIONS',
             'oscar organizations:sync <connectorkey>' => 'Lance la synchronisation des organization depuis les différents connecteurs.',
+
+            '# NOTIFICATIONS',
+            'oscar notifications:generate <tagid>' => 'Génère les notifications pour l\'activité, la valeur \'all\' permet de générer les notifications pour toutes les activités',
 
             '# ACTIVTÉS',
             'oscar activity:search:build' => "Reconsruction de l'index de recherche",

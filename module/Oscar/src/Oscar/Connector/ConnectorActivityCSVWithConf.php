@@ -182,22 +182,30 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 "milestones" => [],
                 "payments" => [],
             ];
-//            $activity = new Activity();
-//            $this->entityManager->persist($activity);
-            foreach ($datas as $index => $value ){
-                if( !$value ) continue;
 
-                if( !array_key_exists($index, $this->config) )
-                    continue;
+            foreach ($datas as $index => $value ){
+
+
+
+                if( !$value ) {
+                    continue 1;
+                }
+
+                if( !array_key_exists($index, $this->config) ){
+                    continue 1;
+                }
 
                 // Si la clef existe mais que la valeur de conf est vide on passe
-                if( !$this->config[$index] )
-                    continue;
+                if( !$this->config[$index] ){
+                    continue 1;
+                }
+                /****/
 
                 // Si la clef est une chaîne, on détermine si c'est un appel de setter
                 // simple ou un mécanisme plus "avancé"
-                $key = $this->config[$index];
 
+
+                $key = $this->config[$index];
 
                 if( preg_match("/organizations\.(.*)/", $key, $matches) ){
                     $role = $matches[1];
@@ -208,7 +216,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                         $json['organizations'][$role][] = $value;
                     }
                 }
-
                 else if( preg_match("/persons\.(.*)/", $key, $matches) ){
                     $role = $matches[1];
                     if( !array_key_exists($role, $json['persons']) ){
@@ -218,49 +225,62 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                         $json['persons'][$role][] = $value;
                     }
                 }
-
                 else if( preg_match("/milestones\.(.*)/", $key, $matches) ){
                     $json['milestones'][] = [
                         "type" => $matches[1],
                         "date" => $value
                     ];
                 }
+                else if( preg_match("/payments\.([.\d]*)/", $key, $matches) ){
 
-                else if( preg_match("/payments\.?(-?[\d]*)/", $key, $matches) ){
+                    $datesPos = explode('.', $matches[1]);
 
-                    $amountPosition = $index+1;
-                    if( count($matches) === 2 ){
-                        if( $matches[2] != "" )
-                            $amountPosition = $index + intval($matches[1]);
-                    }
+                    // Calcule des positions pour les données
+                    $paymentAmountPosition = $index;
+                    $paymentDatePaymentPosition = $index + intval($datesPos[0]);
+                    $paymentDatePredictedPosition = $index + intval($datesPos[1]);
+
                     $json['payments'][] = [
-                        "amount" => doubleval($datas[$amountPosition]),
-                        "date" => $value
+                        "amount" => doubleval($datas[$paymentAmountPosition]),
+                        "date" => $this->getCheckedDateString($datas[$paymentDatePaymentPosition]),
+                        "predicted" => $this->getCheckedDateString($datas[$paymentDatePredictedPosition]),
                     ];
                 }
 
                 else if( $key == "codeEOTP" ){ $json['pfi'] = $value; }
-                else if( $key == "amount" ){ $json['amount'] = $value; }
+                else if( $key == "type" ){ $json['type'] = $value; }
+                else if( $key == "amount" ){ $json['amount'] = doubleval($value); }
                 else if( $key == "dateStart" ){ $json['datestart'] = $value; }
                 else if( $key == "dateEnd" ){ $json['dateend'] = $value; }
                 else if( $key == "dateSigned" ){ $json['datesigned'] = $value; }
+                else if( $key == "datePFI" ){ $json['datePFI'] = $value; }
                 else if( $key == "label" ){ $json['label'] = $value; }
-
-                else if( $key == "project." ){
-                    $json['acronym'] = $value;
-                    $json['projectlabel'] = $value;
-                }
-
-                else {
-                    echo "\n### Traitement de la colonne $index => $key ///////// $value \n";
-                }
+                else if( $key == "uid" ){ $json['uid'] = $value; }
+                else if( $key == "project.acronym" ){ $json['acronym'] = $value; }
+                else if( $key == "project.label" ){ $json['projectlabel'] = $value; }
 
 
             }
+
+            if( !array_key_exists('projectlabel', $json) && array_key_exists('acronym', $json) ){
+                $json['projectlabel'] = $json['acronym'];
+            }
+
             $out[] = $json;
         }
 
         return $out;
+    }
+
+    /**
+     * Évalutation d'un date avant de la retourner correctement formattée.
+     *
+     * @param $string
+     */
+    protected function getCheckedDateString( $string ){
+        if( $string == "" ) return "";
+        $date = new \DateTime($string);
+        return $date->format('Y-m-d');
     }
 
     public function syncOne($key)

@@ -117,6 +117,10 @@ class NotificationPerson
         return $this->read;
     }
 
+    public function isRead(){
+        return $this->read;
+    }
+
     /**
      * @param \DateTime $read
      */

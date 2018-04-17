@@ -1,0 +1,55 @@
+<section class="container">
+    <h1>Rapport de réindexation</h1>
+    <section class="container">
+
+        <?php /** @var $repport \Oscar\Connector\ConnectorRepport */ ?>
+
+        <h2>Ajout <?= count($repport->getAdded()) ?></h2>
+
+        <section>
+            <?php foreach( $repport->getAdded() as $d ): ?>
+                <article class="card xsc repport repport-add">
+                    <i class="icon-repport"></i> <?= $d['message'] ?>
+                </article>
+            <?php endforeach; ?>
+        </section>
+
+        <?php /* <h2>Mise à jour <?= count($repport->getUpdated()) ?></h2>
+        <section>
+            <?php foreach( $repport->getUpdated() as $d ): ?>
+                <article class="card xsc repport repport-update">
+                    <i class="icon-repport"></i> <?= $d['message'] ?>
+                </article>
+            <?php endforeach; ?>
+        </section>*/ ?>
+
+        <h2>Notice <?= count($repport->getNotices()) ?></h2>
+        <section>
+            <?php foreach( $repport->getNotices() as $d ): ?>
+                <article class="card xsc repport repport-notice">
+                    <i class="icon-repport"></i> <?= $d['message'] ?>
+                </article>
+            <?php endforeach; ?>
+        </section>
+
+        <h2>Alertes <?= count($repport->getWarnings()) ?></h2>
+        <section>
+            <?php foreach( $repport->getWarnings() as $d ): ?>
+                <article class="card xsc repport repport-warning">
+                    <i class="icon-repport"></i> <?= $d['message'] ?>
+                </article>
+            <?php endforeach; ?>
+
+            <h2>Erreurs <?= count($repport->getErrors()) ?></h2>
+            <section>
+                <?php foreach( $repport->getErrors() as $d ): ?>
+                    <article class="card xsc repport repport-error">
+                        <i class="icon-repport"></i> <?= $d['message'] ?>
+                    </article>
+                <?php endforeach; ?>
+            </section>
+
+        </section>
+
+
+    </section>

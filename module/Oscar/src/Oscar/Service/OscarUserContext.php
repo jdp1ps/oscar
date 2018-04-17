@@ -85,8 +85,14 @@ class OscarUserContext extends UserContext
         static $_ROLES_IDS;
         if ($_ROLES_IDS === null) {
             $_ROLES_IDS = [];
+
+            // Récupération des rôles triés par LABEL
+            $roles = $this->getEntityManager()
+                ->getRepository(Role::class)
+                ->findBy([], ['roleId' => 'ASC']);
+
             /** @var Role $role */
-            foreach ($this->getEntityManager()->getRepository(Role::class)->findAll() as $role) {
+            foreach ( $roles as $role) {
                 $_ROLES_IDS[$role->getId()] = $role->getRoleId();
             }
         }

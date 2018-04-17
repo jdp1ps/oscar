@@ -105,7 +105,7 @@ class ConnectorPersonHydrator
     }
 
 
-    public function hydratePerson(
+    public function     hydratePerson(
         Person $personOscar,
         $personData,
         $connectorName
@@ -119,6 +119,7 @@ class ConnectorPersonHydrator
             $this->repport->adderror($e->getMessage());
             return;
         }
+
 
         if (property_exists($personData, 'roles')) {
             foreach ($personData->roles as $organizationCode => $roles) {
@@ -136,6 +137,7 @@ class ConnectorPersonHydrator
                                     $this->entityManager->persist($roleOscar);
                                     $roleOscar->setPerson($personOscar)
                                         ->setOrganization($organization)
+                                        ->setOrigin($connectorName)
                                         ->setRoleObj($rolesOscar[$roleId]);
                                     $personOscar->getOrganizations()->add($roleOscar);
                                     $this->repport->addupdated(sprintf("%s a le role '%s' dans %s",

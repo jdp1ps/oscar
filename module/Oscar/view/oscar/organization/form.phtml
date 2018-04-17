@@ -6,10 +6,46 @@
     <h1>Nouvelle organisation</h1>
     <?php endif; ?>
 
-    <div class="form-group">
+
+
+    <?php if($organization && $organization->isConnected()): ?>
+        <div class="modal fade" tabindex="-1" role="dialog" id="infos">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">
+                            <i class="icon-attention-1"></i>
+                            Attention</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Les données de l'organisation <strong><?= $organization ?></strong> sont mises à jour via le système d'information, vos modifications seront écrasées lors de la prochaine synchronisation des données&hellip;</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+        <script>
+            require(['jquery', 'bootstrap'], function($){
+                $('#infos').modal('show');
+            })
+        </script>
+    <?php endif; ?>
+    <?= $this->formHidden($form->get('secure')) ?>
+
+    <ul class="errors">
+        <?php foreach ($form->getMessages() as $msg): ?>
+            <li><?= $msg ?></li>
+        <?php endforeach; ?>
+    </ul>
+
+    <div class="form-group" id="short">
         <div class="input-group input-group-lg">
             <span class="input-group-addon">Nom court / Acronyme</span>
             <?= $this->formInput($form->get('shortName')) ?>
+            <?= $this->formElementErrors($form->get('shortName')); ?>
         </div>
     </div>
 
@@ -17,19 +53,33 @@
         <div class="input-group input-group-lg">
             <span class="input-group-addon">Code interne</span>
             <?= $this->formInput($form->get('code')) ?>
+            <?= $this->formElementErrors($form->get('code')); ?>
         </div>
     </div>
     <div class="form-group">
         <div class="input-group input-group-lg">
-            <span class="input-group-addon">Type </span>
-            <?= $this->formSelect($form->get('type')) ?>
+            <span class="input-group-addon">Type</span>
+            <?= $this->formSelect($form->get('typeObj')) ?>
+            <?= $this->formElementErrors($form->get('typeObj')); ?>
         </div>
+        <?php /*
+        <div class="input-group input-group-lg">
+            <span class="input-group-addon">Type </span>
+            <?= $this->formInput($form->get('type')) ?>
+        </div>
+        <datalist id="types">
+            <?php foreach ($types as $type): ?>
+            <option value="<?= $type ?>">
+            <?php endforeach; ?>
+        </datalist>
+         */?>
     </div>
 
     <div class="form-group">
         <div class="input-group">
             <span class="input-group-addon">SIRET</span>
             <?= $this->formInput($form->get('siret')) ?>
+            <?= $this->formElementErrors($form->get('siret')); ?>
         </div>
     </div>
 
@@ -129,6 +179,7 @@
                 <span class="input-group-addon">ID dans <strong><?= $connector ?></strong></span>
                 <?= $this->formInput($form->get('connector_' . $connector)) ?>
             </div>
+            <?= $this->formElementErrors($form->get('connector_' . $connector)); ?>
         </div>
     <?php endforeach; ?>
 
@@ -158,6 +209,20 @@
     </div>
 </div>
 <hr/>
+    <style>
+        .already  {
+            position: relative;
+            text-align: right;
+        }
+        .already .organizations {
+            position: absolute;
+            z-index: 10;
+            right: 0;
+            text-align: left;
+            background: white;
+            box-shadow: 0 0 8px rgba(0,0,0,.25);
+        }
+    </style>
 <nav class="text-center">
     <div class="btn-group">
         <?php if( $id ): ?>
@@ -179,8 +244,92 @@
 <?= $this->form()->closeTag(); ?>
 
     <script>
+
+
+
+        <?php if( !$id ): ?>
+        require(['vue', 'vue-resource'], function(Vue, VueResource){
+            Vue.use(VueResource);
+            new Vue({
+                data: {
+                  shortName: "",
+                    lastsearch: null,
+                    show: true,
+                    filter: "",
+                    organizations: [{id: 1, label:"Test1"}, {id: 2, label:"Test2"}]
+                },
+                template: `<div class="input-group input-group-lg">
+    <span class="input-group-addon">Nom court / Acronyme</span>
+    <input type="text" class="form-control" v-model="shortName" name="shortName">
+    <span class="input-group-addon">
+    <span v-show="filteredOrganizations.length && filter.length > 2" class="already">
+        <span @click="show = !show">
+            <i class="icon-building-filled"></i>
+            <span class="label label-danger">{{ filteredOrganizations.length }}</span>
+        </span>
+        <section v-show="filteredOrganizations.length && show" class="organizations">
+        <small>Cette organisation existe probablement déjà : </small>
+        <div v-for="o in filteredOrganizations" :class="{'disbaled': o.closed}">
+            <small>
+                <i class="icon-building-filled"></i> {{ o.label }}
+
+                <a :href="'/organization/show/'+o.id">
+                    <i class="icon-target"></i>
+                    Fiche</a>
+
+            </small>
+        </div>
+    </section>
+    </span>
+    </span>
+
+ </div>`,
+
+                el: "#short",
+
+                computed: {
+                    filteredOrganizations(){
+                        var filtered = [];
+                        this.organizations.forEach((o)=>{
+                            if(o.label.toLowerCase().indexOf(this.filter.toLowerCase()) >= 0){
+                                filtered.push(o);
+                            }
+                        });
+                        return filtered;
+                    }
+                },
+
+                watch: {
+                    shortName: function(newval, oldval){
+                        this.filter = newval;
+                        if( newval.length > 2 ){
+                            if( newval.indexOf(this.lastsearch) != 0 ){
+                                console.log('Search for ', newval);
+                                this.lastsearch = newval;
+                                this.$http.get('/organization?q=' +newval).then(
+                                    (success) => {
+                                        this.organizations = success.data.datas;
+                                    },
+                                    (fail) => {
+                                        console.log("error", fail);
+                                    }
+                                )
+                            } else {
+                                console.log('Les résultats précédents inclus la saisie actuel')
+                            }
+                        }
+                    }
+                }
+            })
+        });
+
+
+        <?php endif; ?>
+
         require(['select2'], function(select2){
-            $('select').select2();
+            $('[name="type"]').select2({
+                results: <?= json_encode($types) ?>
+            });
         });
     </script>
 <?php

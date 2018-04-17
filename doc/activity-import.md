@@ -30,7 +30,8 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
     "datestart": "",
     "dateend": "",
     "datesigned": "2017-06-01",
-    "pfi": "",
+    "pfi": "12PFI3456",
+    "datePFI": "2017-07-04",
     "type": "ANR",
     "amount": "0.0",
     "organizations": {
@@ -91,12 +92,13 @@ Voici la liste des clefs attendues :
 Clef          | Type      | PÊ Vide   | Unique | Description
 ------|------|------|------|------------------------------------------
 uid             | String    | Non       | Oui    | Identifiant d'import (évite les doublons et permet de mettre à jour les données importées
-acronym         | String    | Non       | Non    | Acronyme du projet, Si Oscar trouve pas de projet existant avec cet acronyme, il le créera automatiquement
-projectlabel | String    | Oui       | Non    | Utiliser pour créer le projet si il n'existe pas
+acronym         | String    | Non       | Non    | Acronyme du projet, Si Oscar ne trouve pas de projet existant avec cet acronyme, il le créera automatiquement
+projectlabel | String    | Oui       | Non    | Utilisé pour créer le projet si il n'existe pas
 label           | String    | NR        | Non    | Intitulé de l'activité
 datestart       | Date ISO  | Oui       | Non    | Date de début de l'activité
 dateend         | Date ISO  | Oui       | Non    | Date de fin de l'activité
 pfi             | String    | Oui       | Non    | EOTP/PFI de l'activité de recherche
+datePFI         | Date ISO  | Oui       | Non    | Date d'ouverture du PFI
 type            | String    | Oui       | Non    | Type d'activité, si Oscar ne trouve pas de type correspondant, la donnée est ignorée
 amount          | Double    | Oui       | Non    | Montant de la convention
 organizations   | Object    | Oui       | Non    | Voir détails dans [Gestion des organisations](#organizations)
@@ -138,18 +140,18 @@ Cette clef contient une valeur unique permettant à oscar de maintenir le lien l
 
 ### Donnée projet (les clefs `acronym` et `projectlabel`)
 
-La clef `acronym` correspond à l'acronyme du projet. Elle est utilisée par Oscar pour retrouver le projet dans la base de donnée.
+La clef `acronym` correspond à l'acronyme du projet. Elle est utilisée par Oscar pour retrouver le projet dans la base de données.
 
-Si plusieurs activité ont la même valeur `acronym`, elles sont agrégées dans le même projet.
+Si plusieurs activités ont la même valeur `acronym`, elles sont agrégées dans le même projet.
 
-Si oscar ne trouve pas le projet dans la base de donnée, il tentera de le créer. Il utilisera alors la clef `projectlabel` pour renseigner l'intitulé du projet.
+Si oscar ne trouve pas le projet dans la base de données, il tentera de le créer. Il utilisera alors la clef `projectlabel` pour renseigner l'intitulé du projet.
 
 
 ### la clef `type`
 
 La valeur doit correspondre à l'intitulé d'un type d'activité, si Oscar ne trouve pas de type correspondant, il n'affecte pas de type à l'activité.
 
-On peut voir la liste des type d'activité dans le menu **Administration > Gérer les types d'activités**.
+On peut voir la liste des types d'activités dans le menu **Administration > Gérer les types d'activités**.
 
 
 <a id="organizations"></a>
@@ -252,7 +254,7 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 
 
 
-> Si oscar trouve un Jalon de même type à la même date, il ne cré pas le jalon.
+> Si oscar trouve un Jalon de même type à la même date, il ne crée pas le jalon.
 
 
 <a id="payments"></a>
@@ -277,16 +279,19 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
     "milestones": [
         {
             "amount": 249.5,
-            "date": "2014-07-03"
+            "date": "2014-07-03",
+            "predicted": null
         },
         {
             "amount": 3249.5,
-            "date": "2018-01-31"
+            "date": null,
+            "predicted": "2018-01-31"
         }
     ]
 }
 ```
 
+> Les versements sans valeur dans la clef `date` mais avec une clef `predicted` seront tagués comme prévisionnels.
 
 
 # Importation depuis un fichier Excel
@@ -303,8 +308,9 @@ Ce script implique de configurer la correspondance entre les colonnes de la sour
 <?php
 //
 return [
-    0 =>    "project.",
+    0 =>    "project.acronym",
     1 =>    "label",
+    3 =>    "project.label",
     120 =>  "amount",
     166 =>  "dateStart",
     167 =>  "dateEnd",

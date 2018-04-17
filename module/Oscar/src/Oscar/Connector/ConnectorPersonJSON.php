@@ -57,6 +57,7 @@ class ConnectorPersonJSON implements ConnectorInterface
                 $person = $this->getPerson($data->uid);
                 $action = 'Mise à jour';
             } catch (NoResultException $e) {
+                //echo $e->getMessage();
                 $action = 'Création';
                 $person = new Person();
                 $this->entityManager->persist($person);
@@ -64,8 +65,8 @@ class ConnectorPersonJSON implements ConnectorInterface
 
             $this->connectorPersonHydrator->hydratePerson($person, $data, 'json');
             $repport->addRepport($this->connectorPersonHydrator->getRepport());
-            if( $this->connectorPersonHydrator->isSuspect() ){
 
+            if( $this->connectorPersonHydrator->isSuspect() ){
                 continue;
             }
 
@@ -79,6 +80,7 @@ class ConnectorPersonJSON implements ConnectorInterface
                 }
             }
             catch( \Exception $e ){
+                echo $e->getMessage();
                 $repport->adderror($message . " a échoué : " . $e->getMessage());
             }
         }

@@ -8,9 +8,11 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
@@ -18,6 +20,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Zend\Diactoros\Response\JsonResponse;
 use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
 use Zend\View\Model\ViewModel;
@@ -28,6 +31,112 @@ class AdministrationController extends AbstractOscarController
     {
         $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
         return [];
+    }
+
+    public function activityIndexBuildAction(){
+
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SEARCH_BUILD);
+        return [
+            'repport' => $this->getActivityService()->searchIndex_rebuild()
+        ];
+    }
+
+    public function organizationTypeAction(){
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE);
+        $datas = [];
+
+        if( ($action = $this->params()->fromQuery('action')) ){
+            if( $action == 'generate' ){
+                $typesStr = $this->getOrganizationService()->getTypes();
+
+                $toCreate = [];
+                $exists = [];
+
+                /** @var OrganizationType $exist */
+                foreach ($this->getEntityManager()->getRepository(OrganizationType::class)->findAll() as $exist) {
+                    $exists[] = $exist->getLabel();
+                }
+
+                $toCreate = array_diff($typesStr, $exists);
+
+                foreach ($toCreate as $label) {
+                    $type = new OrganizationType();
+                    $this->getEntityManager()->persist($type);
+                    $type->setLabel($label);
+                    $this->getEntityManager()->flush($type);
+                }
+                die("Generate");
+            }
+            return $this->getResponseBadRequest();
+        }
+
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            switch( $method ){
+                case 'GET' :
+                    $datas['organizationtypes'] = $this->getOrganizationService()->getOrganizationTypes();
+                    return $this->ajaxResponse($datas);
+
+                case 'DELETE' :
+                    $id = $this->params()->fromRoute('id');
+                    $this->getLogger()->debug("Suppression du type " + $id);
+                    if( $id ){
+                        $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+                        if( $type ){
+                            foreach ($type->getChildren() as $t ){
+                                $t->setRoot(null);
+                            }
+                            $this->getEntityManager()->remove($type);
+                            $this->getEntityManager()->flush();
+                            return $this->getResponseOk("Type supprimé");
+                        } else {
+                           return $this->getResponseInternalError("Impossible de supprimer de type");
+                        }
+
+                    }
+                    return $this->getResponseNotImplemented("En cours de développement");
+
+                case 'POST' :
+                    $this->getLogger()->debug(print_r($_POST, true));
+                    $id = $this->params()->fromPost('id', null);
+
+                    $type = null;
+                    if( $id ){
+                        $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+                    }
+
+                    if( !$type ){
+                        $type = new OrganizationType();
+                        $this->getEntityManager()->persist($type);
+                    }
+
+
+                    $type->setLabel($this->params()->fromPost('label'));
+                    $type->setDescription($this->params()->fromPost('description'));
+                    $root = null;
+                    $root_id = intval($this->params()->fromPost('root_id'));
+
+                    $this->getLogger()->debug(print_r($type->toJson(), true));
+                    $this->getLogger()->debug($root_id);
+
+                    if( $root_id && $root_id != $type->getId() )
+                            $root = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $root_id]);
+
+                    $type->setRoot($root);
+                    $this->getEntityManager()->flush();
+                    return $this->ajaxResponse([$type->toJson()]);
+
+                case 'PUT' :
+                    return $this->getResponseInternalError("La mise à jour n'est pas prise en charge.");
+
+                default:
+                    return $this->getResponseInternalError("Mauvaise utilisation de l'API");
+            }
+
+        }
+
+
+        return $datas;
     }
 
     public function connectorsHomeAction(){
@@ -302,11 +411,15 @@ class AdministrationController extends AbstractOscarController
         /** @var Authentification $auth */
         foreach ($authenticated as $auth) {
             $d = $auth->toJson();
-            $p = $this->getOscarUserContext()->getPersonFromAuthentification($auth);
             $person = null;
-            if ($p) {
-                $person = $p->toJson();
+            try {
+                $p = $this->getOscarUserContext()->getPersonFromAuthentification($auth);
+                if( $p )
+                    $person = $p->toJson();
+            } catch ( \Exception $e ){
+               // Pas de Personne associée à cette authentification
             }
+
             $d['person'] = $person;
             $out['users'][] = $d;
         }
@@ -317,6 +430,54 @@ class AdministrationController extends AbstractOscarController
         }
 
         return $out;
+    }
+
+    public function userRolesAction(){
+        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::DROIT_USER_EDITION) ){
+            return $this->getResponseUnauthorized();
+        }
+
+        $authentificationId = $this->params()->fromPost('authentification_id');
+        $roleId = $this->params()->fromPost('role_id');
+
+        try {
+            /** @var Authentification $authentification */
+            $authentification = $this->getEntityManager()->getRepository(Authentification::class)->find($authentificationId);
+
+            /** @var Role $role */
+            $role = $this->getEntityManager()->getRepository(Role::class)->find($roleId);
+            if( !$authentification ){
+                return $this->getResponseNotFound("Compte introuvable.");
+            }
+            if( !$role ){
+                return $this->getResponseNotFound("Rôle introuvable.");
+            }
+        } catch ( \Exception $e ){
+            return $this->getResponseInternalError("Rôle/Authentification introuvable.");
+        }
+
+        $method = $this->getHttpXMethod();
+
+        switch( $method ){
+            case 'POST':
+                try {
+                    $authentification->addRole($role);
+                    $this->getEntityManager()->flush();
+                } catch (UniqueConstraintViolationException $e ){
+                    return $this->getResponseInternalError("Ce compte a déjà ce rôle.");
+                }
+                return $this->ajaxResponse($authentification->toJson());
+            case 'DELETE':
+                try {
+                    $authentification->removeRole($role);
+                    $this->getEntityManager()->flush();
+                } catch (\Exception $e ){
+                    return $this->getResponseInternalError("Impossible de supprimer le role : " . $e->getMessage());
+                }
+                return $this->ajaxResponse($authentification->toJson());
+        }
+
+        return $this->getResponseBadRequest("Erreur");
     }
 
     public function userLogsAction(){

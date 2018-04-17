@@ -7,7 +7,6 @@
 
 namespace Oscar\Hydrator;
 
-
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\DateType;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -43,6 +42,4 @@ class DateTypeHydrator implements HydratorInterface, ServiceLocatorAwareInterfac
             ->setFacet($data['facet'])
             ->setRecursivity($data['recursivity']);
     }
-
-
 }

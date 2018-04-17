@@ -18,6 +18,7 @@
             'activity'      => $wpd->getActivity()->__toString(),
             'activity_code' => $wpd->getActivity()->getOscarNum(),
             'idactivity'    => $wpd->getActivity()->getId(),
+            'active'        => $wpd->getActivity()->isActive(),
             'code' => $wpd->getCode(),
             'idworkpackage' => $wpd->getId(),
             'color' => $colorActivity[$wpd->getActivity()->getId()]

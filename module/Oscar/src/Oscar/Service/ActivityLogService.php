@@ -46,7 +46,6 @@ class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManager
             ->setContextId($contextId)
             ->setDatas($data)
         ;
-        error_log($activity);
         $this->getEntityManager()->persist($activity);
         $this->getEntityManager()->flush($activity);
     }

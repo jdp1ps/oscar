@@ -66,17 +66,25 @@
 
         <h3>Informations financières</h3>
         <div class="row">
-            <div class="col-md-3">
-                <?= $this->formControlGroup($form->get('financialImpact')); ?>
+                <div class="col-md-4">
+                    <?= $this->formControlGroup($form->get('financialImpact')); ?>
+                </div>
+                <div class="col-md-4">
+                    <?= $this->formControlGroup($form->get('amount')); ?>
+                </div>
+                <div class="col-md-4">
+                    <?= $this->formControlGroup($form->get('currency')); ?>
+                </div>
             </div>
-            <div class="col-md-3">
-                <?= $this->formControlGroup($form->get('amount')); ?>
-            </div>
-            <div class="col-md-3">
-                <?= $this->formControlGroup($form->get('currency')); ?>
-            </div>
-            <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-4">
                 <?= $this->formControlGroup($form->get('tva')); ?>
+            </div>
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('fraisDeGestion')); ?>
+            </div>
+            <div class="col-md-4">
+                &nbsp;
             </div>
         </div>
 

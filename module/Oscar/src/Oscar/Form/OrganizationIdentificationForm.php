@@ -2,21 +2,37 @@
 
 namespace Oscar\Form;
 
-use Oscar\Entity\Organization;
+use Oscar\Hydrator\OrganizationFormHydrator;
 use Zend\Form\Element;
+use Zend\InputFilter\InputFilterProviderInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @copyright Certic (c) 2015
  */
-class OrganizationIdentificationForm extends \Zend\Form\Form
+class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFilterProviderInterface
 {
-    private $connectors = [];
+    use ServiceLocatorAwareTrait;
 
-    function __construct($connectors = [])
+    private $connectors = [];
+    private $types = [];
+
+    function __construct($connectors = [], $types = [])
     {
-        parent::__construct('project');
+        parent::__construct('organization');
         $this->connectors = $connectors;
+        $this->types = $types;
+    }
+
+    public function init(){
+        $this->setHydrator(new OrganizationFormHydrator($this->connectors, $this->types));
+
+        $typesSelect = [];
+        $typesSelect[] = "";
+        foreach ($this->types as $t ){
+            $typesSelect[$t->getId()] = (string)$t;
+        }
 
         $this->add(array(
             'name'  => 'id',
@@ -38,6 +54,20 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
             )
         ));
 
+        // Type
+        $this->add([
+            'name'   => 'typeObj',
+            'options' => [
+                'label' => 'Type d\'organisation',
+                'value_options' => $typesSelect
+            ],
+            'attributes' => [
+                'class' => 'form-control'
+            ],
+            'type'=>'Select'
+        ]);
+
+
         $shortName = new Element\Text('shortName');
         $shortName->setAttributes([
             'class'       => 'form-control',
@@ -48,7 +78,7 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
         $fullName = new Element\Text('fullName');
         $fullName->setAttributes([
             'class'       => 'form-control',
-            'placeholder'   => 'Nom complet'
+            'placeholder'   => 'Nom complet',
         ]);
         $this->add($fullName);
 
@@ -56,13 +86,13 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
         $this->add([
             'name'   => 'type',
             'options' => [
-                'label' => "Type",
-                'value_options' => Organization::getTypesSelect()
+                'label' => "Type"
             ],
             'attributes' => [
-                'class' => 'form-control'
+                'class' => 'form-control',
+                'list' => 'types'
             ],
-            'type'=>'Select'
+            'type'=>'Text'
         ]);
 
         // DateStart
@@ -192,8 +222,21 @@ class OrganizationIdentificationForm extends \Zend\Form\Form
         $this->add($description);
 
         $this->add(array(
-            'name'  => 's€cure',
+            'name'  => 'secure',
             'type'  => 'Csrf',
         ));
+    }
+
+    public function getInputFilterSpecification()
+    {
+        return [
+            'dateStart'=> [
+                'required' => false,
+            ],
+
+            'dateEnd'=> [
+                'required' => false,
+            ],
+        ];
     }
 }

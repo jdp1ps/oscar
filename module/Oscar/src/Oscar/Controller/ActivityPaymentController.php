@@ -13,6 +13,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityType;
+use Oscar\Entity\Currency;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityPaymentForm;
 use Oscar\Form\ActivityTypeForm;
@@ -60,6 +61,8 @@ class ActivityPaymentController extends AbstractOscarController
         ];
     }
 
+
+
     /**
      * @return JsonModel
      */
@@ -73,10 +76,100 @@ class ActivityPaymentController extends AbstractOscarController
         if( $idActivity ) {
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
             $this->getOscarUserContext()->check(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
+
+            $method = $this->getHttpXMethod();
+            $this->getLogger()->info($method);
+
+            if( $method != "GET" && !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity) ){
+                $this->getResponseBadRequest("Vous ne disposez pas des droits suffisants pour gérer les versements");
+            }
+
+            switch($method){
+                case 'DELETE':
+                    /** @var ActivityPayment $payment */
+                    $payment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($this->params()->fromQuery('id'));
+                    $this->getNotificationService()->purgeNotificationPayment($payment);
+                    $this->getEntityManager()->remove($payment);
+                    $this->getEntityManager()->flush();
+
+                    return $this->getResponseOk("Le versement a bien été supprimé");
+
+                case 'PUT':
+                    /** @var ActivityPayment $payment */
+                    $payment = new ActivityPayment();
+                    $this->getEntityManager()->persist($payment);
+
+                    $payment->setAmount($this->params()->fromPost('amount'))
+                        ->setComment($this->params()->fromPost('comment'))
+                        ->setActivity($activity)
+                        ->setCodeTransaction($this->params()->fromPost('codeTransaction'))
+                        ->setCurrency($this->getEntityManager()
+                            ->getRepository(Currency::class)
+                            ->find($this->params()->fromPost('currencyId')));
+
+
+                    $status = $this->params()->fromPost('status');
+                    $rate = $this->params()->fromPost('rate');
+                    $datePredicted = $this->params()->fromPost('datePredicted');
+                    $datePayment = $this->params()->fromPost('datePayment');
+                    if( $datePayment )
+                        $payment->setDatePayment(new \DateTime($datePayment));
+
+                    if( $datePredicted )
+                        $payment->setDatePredicted(new \DateTime($datePredicted));
+
+                    $payment->setRate($rate)
+                        ->setStatus($status);
+
+
+                    $this->getEntityManager()->flush($payment);
+                    $this->getNotificationService()->generatePaymentsNotifications($payment);
+                    return $this->getResponseOk("Le versement a bien été ajouté");
+
+                case 'POST':
+                    /** @var ActivityPayment $payment */
+                    $payment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($this->params()->fromPost('id'));
+
+                    $payment->setAmount($this->params()->fromPost('amount'))
+                        ->setComment($this->params()->fromPost('comment'))
+                        ->setActivity($activity)
+                        ->setCodeTransaction($this->params()->fromPost('codeTransaction'))
+                        ->setCurrency($this->getEntityManager()
+                            ->getRepository(Currency::class)
+                            ->find($this->params()->fromPost('currencyId')));
+
+
+                    $status = $this->params()->fromPost('status');
+                    $rate = $this->params()->fromPost('rate');
+                    $datePredicted = $this->params()->fromPost('datePredicted');
+                    $datePayment = $this->params()->fromPost('datePayment');
+
+                    if( $datePayment )
+                        $payment->setDatePayment(new \DateTime($datePayment));
+                    else
+                        $payment->setDatePayment(null);
+
+                    if( $datePredicted )
+                        $payment->setDatePredicted(new \DateTime($datePredicted));
+                    else
+                        $payment->setDatePredicted(null);
+
+                    $payment->setRate($rate)
+                        ->setStatus($status);
+
+
+                    $this->getEntityManager()->flush($payment);
+
+                    $this->getNotificationService()->purgeNotificationPayment($payment);
+                    $this->getNotificationService()->generatePaymentsNotifications($payment);
+
+                    return $this->getResponseOk("Le versement a bien été modifié");
+            }
+
             $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
                 ->addSelect('c')
                 ->innerJoin('p.activity', 'a')
-                ->innerJoin('p.currency', 'c')
+                ->leftJoin('p.currency', 'c')
                 ->where('a.id = :idactivity')
                 ->orderBy('p.status', 'DESC')
                 ->addOrderBy('p.datePayment');
@@ -87,6 +180,10 @@ class ActivityPaymentController extends AbstractOscarController
 
         // Page "Liste"
         else {
+
+
+
+
             $search = $this->params()->fromQuery('q', '');
 
             $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')

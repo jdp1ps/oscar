@@ -4,9 +4,7 @@
         <a href="javascript:history.back()" class="link">Retour</a>
     </div>
     <header class="header jumbotron organization type-<?= $organization->getType() ?>">
-        <?php if( $organization->getType() ): ?>
-        <h2> <?= \Oscar\Entity\Organization::getTypes()[$organization->getType()] ?></h2>
-        <?php endif; ?>
+        <h2><?= $organization->getTypeObj() ?></h2>
         <h1>
             <?php if( $organization->getCode() ): ?>
                 <abbr><?= $organization->getCode() ?></abbr>
@@ -53,19 +51,7 @@
                 <?= $organization->getDescription() ? $organization->getDescription() : '<i class="missing-data">Aucun</i>' ?>
 
                 <h5>Synchronisation</h5>
-                <dl>
-                    <dt>Identifiant LDAP</dt>
-                    <dd><?= $organization->getLdapSupannCodeEntite() ?> </dd>
-                </dl>
-                <dl>
-                    <dt>Identifiant SIFAC</dt>
-                    <dd>
-                        <?= $organization->getSifacId() ?>
-                        <?php if( $organization->getSifacGroup() ): ?>
-                            <small class="text-light"> (group : <?= $organization->getSifacGroup() ?>)</small>
-                        <?php endif; ?>
-                    </dd>
-                </dl>
+
                 <dl>
                     <dt>SIRET</dt>
                     <dd><?= $organization->getSiret() ?> </dd>
@@ -73,22 +59,27 @@
                 <dl>
                     <dt>CONNECTOR</dt>
                     <dd>
-                        <?php if( count($organization->getConnectors()) ): ?>
+
                             <ul>
-                            <?php foreach($organization->getConnectors() as $connector=>$value): ?>
-                                <?php if( $value ): ?>
+                            <?php foreach($connectors as $connector): ?>
+
                                 <li>
-                                    <?= $connector ?> : <strong><?= $value ?></strong>
+                                    <?= $connector ?> : <strong><?= $organization->getConnectorID($connector) ?></strong>
+
+                                    <?php if( $organization->getConnectorID($connector)): ?>
                                     <a href="<?= $this->url('organization/synchronize', ['id' => $organization->getId(), 'connector' => $connector]) ?>"
                                             class="btn btn-primary btn-xs">
                                         <i class="icon-cw-outline"></i>
                                         Synchroniser
                                     </a>
+                                    <?php else: ?>
+                                    <em>Non synchronisé</em>
+                                    <?php endif; ?>
                                 </li>
-                                <?php endif; ?>
+
                             <?php endforeach; ?>
                             </ul>
-                        <?php endif; ?>
+
                 </dl>
             </div>
         </div>
@@ -96,6 +87,8 @@
             <a href="<?= $this->url('organization/edit', array('id' => $organization->getId())) ?>" class="btn btn-default btn-sm">
                 Éditer les informations
             </a>
+
+            <a href="<?= $this->url('timesheet/organization') ?>?id=<?= $organization->getId() ?>" class="btn btn-primary">Déclarations en attente</a>
         </nav>
 
     </header>
@@ -109,11 +102,12 @@
                 <?= $this->partial('/partials/person-enrolled-card.phtml', array(
                     'enroll'    => $person,
                     'urlDelete' => $this->url('organizationperson/delete', ['idenroll' => $person->getId()]),
+                    'urlClose'  => $this->url('organizationperson/close', ['idenroll' => '']),
                 )); ?>
             <?php endforeach; ?>
             <hr>
             <a href="<?= $this->url('organizationperson/new', ['idenroller' => $organization->getId()]) ?>" class="btn btn-primary">
-                <i class="icon-plus-circled"></i> Lié une personne
+                <i class="icon-plus-circled"></i> Lier une personne
             </a>
         </div>
 
@@ -145,5 +139,46 @@
         </section>
  */ ?>
     </section>
+
+    <div class="overlay" id="overlay" style="display: none">
+        <div class="overlay-content">
+            <form action="" method="post" id="formResiliation">
+                Selectionnez la date de résilation (par défaut aujourd'hui) :
+                <input type="text" class="form-control datepicker" name="at" />
+                <nav>
+                    <button type="reset" id="cancel" class="btn btn-default">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Confirmer</button>
+                </nav>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        require(['jquery', 'datepicker'], function($){
+
+            var idEnroll = null;
+
+            $('.datepicker').datepicker({
+                format: "yyyy-mm-dd",
+                todayBtn: "linked",
+                clearBtn: true,
+                language: "fr",
+                autoclose: true,
+                toggleActive: true
+            });
+
+
+            $('#cancel').on("click", function(){
+                $("#overlay").hide();
+            })
+
+            $('[data-enrollid]').on('click', function(e){
+
+                idEnroll = $(e.target).data('enrollid');
+                $('#formResiliation').attr('action', '<?= $this->url('organizationperson/close', ['idenroll' => '']) ?>' + idEnroll)
+                $("#overlay").show();
+            })
+        })
+    </script>
 </div>
 

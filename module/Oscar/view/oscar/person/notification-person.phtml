@@ -1,0 +1,30 @@
+<div class="container">
+    <h1>Notification pour
+        <strong><?= $person ?></strong></h1>
+    <nav>
+        <a href="<?= $this->url('person/show', ['id' => $person->getId() ]) ?>" class="btn btn-default">
+            <i class="icon-user"></i>
+            Revenir sur la fiche personne
+        </a>
+
+        <a href="<?= $this->url('person/notification_generate', ['id' => $person->getId() ]) ?>" class="btn btn-default">
+            <i class="icon-bell"></i>
+            Regénérer les notifications
+        </a>
+
+    </nav>
+    <hr>
+    <div class="notification">
+        <?php foreach($notifications as $notification): ?>
+        <article class="card xs" <?= $notification->isRead() ? 'style="opacity: .5"' : '' ?>>
+            <h3 class="card-title">Pour l'événement du <?= $this->moment($notification->getNotification()->getDateReal()) ?></h3>
+            <p>
+                <em>Date d'affichage : </em>
+                <strong><?= $this->moment($notification->getNotification()->getDateEffective()) ?></strong>
+            </p>
+            <p><?= $this->activity($notification->getNotification()->getMessage()) ?></p>
+        </article>
+        <?php endforeach; ?>
+
+    </div>
+</div>

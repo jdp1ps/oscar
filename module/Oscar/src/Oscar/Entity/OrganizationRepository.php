@@ -25,6 +25,10 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $this->getEntityManager()->flush($personOrganization);
     }
 
+    public function getTypeObjByLabel($label){
+        return $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['label' => $label]);
+    }
+
     /**
      * @param $fullName
      * @return Organization
@@ -93,11 +97,12 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @return \Doctrine\ORM\QueryBuilder
      */
     public function getOrganizationByConnectorQuery( $connector, $value ){
+
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('o')
             ->from(Organization::class, 'o')
             ->where('o.connectors LIKE :search')
-            ->setParameter('search', '%"'.$connector.'";s:%:"'.$value.'";%');
+            ->setParameter('search', '%"'.$connector.'";s:'.strlen($value).':"'.$value.'";%');
         return $qb;
     }
 }

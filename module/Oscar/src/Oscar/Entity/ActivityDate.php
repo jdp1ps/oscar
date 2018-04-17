@@ -45,6 +45,87 @@ class ActivityDate implements ITrackable
     private $comment;
 
     /**
+     * Un entier représentant le niveau de complétion (en %)
+     *
+     * @var integer
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $finished;
+
+    /**
+     * Date à laquelle le jalon a été complété.
+     *
+     * @var \DateTime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $dateFinish;
+
+
+    const FINISH_VALUE = 100;
+
+    public function finish( $value = 100, $date = null ){
+        $this->finished = $value;
+        if( $this->finished >= self::FINISH_VALUE ){
+            $this->dateFinish = $date === null ? new \DateTime() : $date;
+        }
+    }
+
+    public function isFinishable(){
+        if( $this->getType() ){
+            return $this->getType()->isFinishable();
+        }
+        return false;
+    }
+
+    public function isFinished(){
+        return $this->getFinished() == self::FINISH_VALUE;
+    }
+
+    /**
+     * Retourne TRUE sie le jalon doit être complété et qu'il est en retard.
+     */
+    public function isLate(){
+        $now = new \DateTime('now');
+        return  $this->isFinishable() && !$this->isFinished() && ($now > $this->getDateStart());
+    }
+
+    /**
+     * @return integer
+     */
+    public function getFinished()
+    {
+        return $this->finished;
+    }
+
+    /**
+     * @param Un $finished
+     */
+    public function setFinished($finished)
+    {
+        $this->finished = $finished;
+
+        return $this;
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getDateFinish()
+    {
+        return $this->dateFinish;
+    }
+
+    /**
+     * @param datetime $dateFinish
+     */
+    public function setDateFinish($dateFinish)
+    {
+        $this->dateFinish = $dateFinish;
+
+        return $this;
+    }
+
+    /**
      * Test
      * @return array
      */
@@ -109,7 +190,7 @@ class ActivityDate implements ITrackable
     }
 
     /**
-     * @return Activ
+     * @return Activity
      */
     public function getActivity()
     {

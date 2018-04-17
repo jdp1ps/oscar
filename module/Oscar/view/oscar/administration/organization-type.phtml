@@ -1,0 +1,30 @@
+<section class="container">
+    <h1>
+        <i class="icon-building-filled"></i>
+        Gestion des types d'oganisation
+    </h1>
+    <p>
+        Vous pouvez lancer la génération des types par défaut à partir des données initiales ainsi que ceux utilisés dans les organisations avec l'ancien système.
+        <a href="?action=generate" class="btn btn-primary">Générer</a>
+    </p>
+    <div id="app"></div>
+</section>
+<script>
+    require(["vue", "vue-resource", 'OrganizationType'], function(Vue, VueResource, OrganizationType){
+        Vue.use(VueResource);
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true;
+
+        new Vue({
+            render(h){
+                return h(OrganizationType.default, {
+                       props: {
+                           creatable: true,
+                           url: '<?= $this->url('administration/organizationtype') ?>'
+                       }
+                    }
+                )
+            }
+       }).$mount('#app')
+    });
+</script>

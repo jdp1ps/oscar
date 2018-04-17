@@ -122,6 +122,12 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         curl_close($curl);
 
         foreach( json_decode($return) as $personData ){
+
+            if( ! property_exists($personData, 'uid') ){
+                $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData->uid, true)));
+                continue;
+            }
+
             try {
                 /** @var Person $personOscar */
                 $personOscar = $personRepository->getPersonByConnectorID($this->getName(),
@@ -130,20 +136,27 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             } catch( NoResultException $e ){
                 $personOscar = $personRepository->newPersistantPerson();
                 $action = "add";
+
             } catch( NonUniqueResultException $e ){
                 $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
                 continue;
             }
+
+
+
             if($personData->dateupdated == null
-                || $personOscar->getDateSyncLdap() == null
-                || $personOscar->getDateSyncLdap() < $personData->dateupdated
-                || $force == true ){
+                    || $personOscar->getDateSyncLdap() == null
+                    || $personOscar->getDateSyncLdap() < $personData->dateupdated
+                    || $force == true )
+            {
                 $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
+
                 if( $this->getPersonHydrator()->isSuspect() ){
                     $repport->addRepport($this->getPersonHydrator()->getRepport());
                 }
 
                 $personRepository->flush($personOscar);
+
                 if( $action == 'add' ){
                     $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
                 } else {
@@ -158,6 +171,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
     function syncPerson(Person $person)
     {
+        $this->getLogger()->debug(sprintf("Synchronisation de %s", $person));
         if ($person->getConnectorID($this->getName())) {
 
             $url = sprintf($this->getParameter('url_person'), $person->getConnectorID($this->getName()));

@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack:///./public/js/oscar/src/Timesheet.vue"],"names":[],"mappings":"AACA,YAAc,kBAAmB","file":"client.css","sourcesContent":["\n.small-note { white-space: nowrap\n}\n\n\n\n// WEBPACK FOOTER //\n// ./public/js/oscar/src/Timesheet.vue"],"sourceRoot":""}

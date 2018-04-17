@@ -6,7 +6,7 @@
  */
 ?>
 <div class="container">
-    <h1>Type de date</h1>
+    <h1><i class="icon-calendar"></i>Type de jalon</h1>
     <p class="info">
         <?= count($entities) ?> type(s)
     </p>
@@ -16,20 +16,27 @@
         <h2 class="card-title">
             <small class="id">[<?= $entity->getId() ?>]</small>
             <span>
-            <strong><?= $entity->getLabel() ?></strong>
-            <i><?= $entity->getFacet() ?></i>
-            <span class="recursivity">
-                <i class="icon-history"></i>
-                <?php if( $entity->getRecursivity() ): ?>
-                    <?php foreach( $entity->getRecursivityArray() as $days ): ?>
-                    <span class="cartouche"><?= $days ?></span>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <i>Aucune notification</i>
-                <?php endif; ?>
-            </span>
+                <strong><?= $entity->getLabel() ?></strong>
+                <i><?= $entity->getFacet() ?></i>
+                <span class="recursivity">
+                    <i class="icon-history"></i>
+                    <?php if( $entity->getRecursivity() ): ?>
+                        <?php foreach( $entity->getRecursivityArray() as $days ): ?>
+                        <span class="cartouche"><?= $days ?></span>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <i>Aucune notification</i>
+                    <?php endif; ?>
+                </span>
+                <span>
+                    <?php if( $entity->isFinishable() ): ?>
+                    <i class="icon-ok-circled" title="Gestion de la complétude"></i>
+                    <?php endif; ?>
+                </span>
+
             <span class="description"><?= $entity->getDescription() ?></span>
                 </span>
+
             <nav class="text-right">
                 <small>
                     <a href="<?= $this->url('datetype/edit', ['id' => $entity->getId()]) ?>" class="link">

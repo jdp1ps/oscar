@@ -26,7 +26,8 @@
     "uid": "COGIP",
     "code": "COGIP",
     "shortname": "COGIP",
-    "longname": "Bureau de la COGIP"
+    "longname": "Bureau de la COGIP",
+    "type": "Charlot"
   },
   {
     "uid": "DICOC",
@@ -99,9 +100,20 @@
   },
   {
     "uid": "LABO1",
-    "code": "LABO1",
-    "shortname": "OLYMPIA",
-    "longname": "Groupe Olympia"
+    "code": "",
+    "shortname": "Olympia",
+    "longname": "Groupe Olympia",
+    "url": "http://www.jacksay.com",
+    "email": "olympia@jacksay.com",
+    "siret": "SIRETOLYMPIA",
+    "phone": "0231530344",
+    "type": "Fake Corp",
+    "address": {
+      "adress1": "",
+      "zipcode": "25478",
+      "city": "Berne",
+      "country": "Suisse"
+    }
   },
   {
     "uid": "UNIV1",
@@ -112,6 +124,7 @@
   {
     "uid": "UNIV2",
     "code": "UNIV2",
+    "type": "Université",
     "shortname": "USB",
     "longname": "Université des sciences de Berlin"
   }

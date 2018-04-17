@@ -7,6 +7,7 @@
 
 namespace Oscar\Entity;
 
+use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Oscar\Connector\IConnectedObject;
@@ -52,6 +53,33 @@ class Organization implements ResourceInterface, IConnectedObject
         }
         return $types;
     }
+
+    public function getTypeSlug(){
+        return self::getTypesSlug($this->getType());
+    }
+
+    /**
+     * Return TRUE si l'objet a un connector.
+     */
+    public function isConnected(){
+        foreach ($this->getConnectors() as $connector=>$value ){
+            if( $value ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function getTypesSlug( $typeStr )
+    {
+        static $slugs;
+        if( !$slugs ) $slugs = [];
+        if( !array_key_exists($typeStr, $slugs) ){
+            $slugs[$typeStr] = Slugify::create()->slugify($typeStr);
+        }
+        return $slugs[$typeStr];
+    }
+
     public static function getTypesSelect(){
         return self::getTypes();
     }
@@ -238,6 +266,14 @@ class Organization implements ResourceInterface, IConnectedObject
     protected $type;
 
     /**
+     * Type d'organisation (Objet).
+     *
+     * @var OrganizationType
+     * @ORM\ManyToOne(targetEntity="OrganizationType")
+     */
+    protected $typeObj;
+
+    /**
      * Groupe (SIFAC).
      *
      * @var string
@@ -282,6 +318,26 @@ class Organization implements ResourceInterface, IConnectedObject
     }
 
     /**
+     * @return OrganizationType
+     */
+    public function getTypeObj()
+    {
+        return $this->typeObj;
+    }
+
+    /**
+     * @param OrganizationType $typeObj
+     */
+    public function setTypeObj($typeObj)
+    {
+        $this->typeObj = $typeObj;
+    }
+
+
+
+
+
+    /**
      * @return array
      */
     public function getConnectors()
@@ -307,8 +363,18 @@ class Organization implements ResourceInterface, IConnectedObject
     /**
      * @return ArrayCollection
      */
-    public function getPersons()
+    public function getPersons( $includeInactive = true )
     {
+        if( $includeInactive == false ){
+            $out = [];
+            /** @var OrganizationPerson $member */
+            foreach( $this->getPersons() as $member ){
+                if( !$member->isOutOfDate() ){
+                    $out[] = $member;
+                }
+            }
+            return $out;
+        }
         return $this->persons;
     }
 

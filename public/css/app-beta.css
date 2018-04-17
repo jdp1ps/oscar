@@ -5362,6 +5362,13 @@ button.close {
 .openable.open .icon-openable:before {
   content: '\e860'; }
 
+.oscar-link {
+  color: #404040;
+  text-decoration: underline; }
+  .oscar-link:hover {
+    color: black;
+    text-decoration: none; }
+
 .link {
   color: #7f0027;
   text-decoration: underline; }
@@ -7070,7 +7077,7 @@ body .tv {
 
 .form-checker-handler:before {
   display: block;
-  transition: left .3s,  background 1s;
+  transition: left .3s, background 1s;
   content: ' ';
   width: 17px;
   height: 17px;
@@ -7187,30 +7194,76 @@ form .help {
   align-items: center; }
 
 .jalon {
+  border-left: 4px #AAA solid;
+  display: block;
+  /** Apparence des jalons non terminé (en retard) **/
   position: relative; }
+  .jalon .card-title {
+    font-size: 1em; }
   .jalon:before {
-    content: '\e871';
+    content: '\e885';
     font-family: fontello; }
   .jalon.jalon-warn {
     background: #f0ad4e; }
   .jalon.past {
-    opacity: .5; }
+    background: rgba(255, 255, 255, 0.8);
+    border-left-color: #CCC; }
+    .jalon.past:hover > * {
+      opacity: 1; }
+    .jalon.past > *:not(time) {
+      opacity: .3; }
     .jalon.past .details {
       display: none; }
+  .jalon.inprogress {
+    border-left-color: #30b0d5; }
+    .jalon.inprogress:before {
+      content: '\f0e4 ';
+      font-family: fontello; }
+    .jalon.inprogress.late {
+      background: #C69951 !important; }
+  .jalon.late {
+    border-left-color: #9a1e1b;
+    color: black;
+    text-shadow: -1px 1px 0 rgba(255, 255, 255, 0.25);
+    opacity: 1;
+    background: #e15754 !important; }
+    .jalon.late:before {
+      content: '\e865 ';
+      font-family: fontello; }
+  .jalon.finished {
+    border-left-color: #499D1F;
+    background: #f5fcf2;
+    text-shadow: -1px 1px 0 rgba(255, 255, 255, 0.25); }
+    .jalon.finished:before {
+      content: '\f274 ';
+      font-family: fontello; }
   .jalon.payment:before {
     content: '\e875';
     font-family: fontello; }
+  .jalon.payment {
+    margin-left: .5em;
+    border-right: 4px #999 solid; }
+  .jalon .card-title {
+    border-bottom: rgba(255, 255, 255, 0.25) solid thin;
+    display: block !important; }
+    .jalon .card-title > * {
+      flex: none;
+      display: inline-block; }
   .jalon time {
     display: inline-block;
-    font-size: .9em; }
+    font-size: .9em;
+    font-weight: 100;
+    padding-left: .5em; }
   .jalon nav {
-    text-align: right; }
+    opacity: .25;
+    text-align: right;
+    position: absolute;
+    top: 0;
+    right: 0; }
     .jalon nav a {
-      border-radius: 4px;
-      color: #64817A; }
-    .jalon nav .btn-delete:hover {
-      color: white;
-      background-color: #DD423E; }
+      color: #1F180D; }
+  .jalon:hover nav {
+    opacity: 1; }
 
 .direction-desc .icon-angle-up {
   display: none; }
@@ -7343,6 +7396,28 @@ form .help {
     justify-content: center;
     flex: auto;
     border-radius: 4px; }
+
+[class*="oscar-form-message"] {
+  background: black;
+  color: white;
+  font-size: .9em;
+  padding: 8px;
+  margin-top: 4px;
+  position: relative;
+  text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.5); }
+  [class*="oscar-form-message"].error {
+    background: #DD423E; }
+    [class*="oscar-form-message"].error:before {
+      background: #DD423E; }
+  [class*="oscar-form-message"]:before {
+    content: '';
+    background: red;
+    transform: rotate(45deg);
+    position: absolute;
+    top: -4px;
+    left: 4px;
+    width: 8px;
+    height: 8px; }
 
 .workpackage {
   background: white;
@@ -7514,34 +7589,49 @@ time.date-missing {
   .keyvalue-line button {
     flex: 1; }
 
+.organizationtype {
+  margin-left: 1em; }
+  .organizationtype small {
+    display: inline-block;
+    margin-left: 2em;
+    line-height: 2em; }
+
 .organization {
   /* // TYPE_ETABLISSEMENT
-  &.type-7 h2:before { content: "\e876";}
+   &.type-7 h2:before { content: "\e876";}
 
-  // TYPE_INSTITUTION
-  &.type-8 h2:before { content: "\e876";}
+   // TYPE_INSTITUTION
+   &.type-8 h2:before { content: "\e876";}
 
-  // TYPE_INCONNU
-  &.type-9 h2:before { content: "\e87f";}/***/ }
+   // TYPE_INCONNU
+   &.type-9 h2:before { content: "\e87f";}/***/ }
   .organization.closed > * {
     opacity: .5; }
   .organization h2:before {
-    font-family: fontello; }
+    font-family: fontello;
+    line-height: 1.6em;
+    padding: 0 4px 0 0; }
   .organization.interne {
     border-left: solid 4px #0b58a2; }
-  .organization.type-1 h2:before {
+  .organization.type-composante h2:before {
     content: "\e877"; }
-  .organization.type-2 h2:before {
+  .organization.type-2 h2:before,
+  .organization.type-laboratoire h2:before {
     content: "\e891"; }
-  .organization.type-3 h2:before {
+  .organization.type-3 h2:before,
+  .organization.type-societe h2:before {
+    content: "\e8a1"; }
+  .organization.type-5 h2:before,
+  .organization.type-association h2:before {
     content: "\e876"; }
-  .organization.type-5 h2:before {
-    content: "\e876"; }
-  .organization.type-6 h2:before {
+  .organization.type-6 h2:before,
+  .organization.type-groupement-d-interet-financier h2:before {
     content: "\e88f"; }
   .organization.type-7 h2:before {
     content: "\e899"; }
-  .organization.type-8 h2:before {
+  .organization.type-institution h2:before,
+  .organization.type-collectivite-territoriale h2:before,
+  .organization.type-etablissement-publique h2:before {
     content: "\e875"; }
 
 .organization-full .header h2 {
@@ -7616,6 +7706,35 @@ time.date-missing {
     animation-name: fadeinout;
     animation-iteration-count: infinite;
     animation-direction: alternate; }
+
+.uc-frequency {
+  text-align: center; }
+  .uc-frequency .heading .hours {
+    background: rgba(255, 255, 255, 0.5);
+    background: #790629;
+    color: white;
+    font-weight: 100;
+    padding: .5em 1em;
+    cursor: pointer; }
+  .uc-frequency .content .line {
+    background: rgba(255, 255, 255, 0.5); }
+    .uc-frequency .content .line:hover {
+      background: rgba(255, 255, 255, 0.75); }
+  .uc-frequency .content .hours-label {
+    text-align: right;
+    padding: .5em 1em;
+    font-size: 1em;
+    font-weight: 100;
+    cursor: pointer; }
+  .uc-frequency .content .hours-selector {
+    cursor: pointer; }
+    .uc-frequency .content .hours-selector .icon-ok-circled {
+      opacity: .3; }
+    .uc-frequency .content .hours-selector.selected .icon-ok-circled {
+      opacity: 1;
+      color: #499D1F; }
+    .uc-frequency .content .hours-selector:hover {
+      background: white; }
 
 .repport {
   border-left: solid 4px #7f7f7f; }
@@ -7714,6 +7833,62 @@ time.date-missing {
 .fade-enter, .fade-leave-to, .fade-leave-active {
   opacity: 0; }
 
+.list-item {
+  display: inline-block;
+  margin-right: 10px; }
+
+.list-enter-active, .list-leave-active {
+  transition: all .25s; }
+
+.list-enter, .list-leave-to {
+  opacity: 0;
+  transform: translateX(-50px); }
+
+.organization-timesheets .timesheet {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: solid thin #999;
+  background: rgba(255, 255, 255, 0.75);
+  padding: .5em; }
+  .organization-timesheets .timesheet:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.5); }
+  .organization-timesheets .timesheet:hover {
+    background: white; }
+  .organization-timesheets .timesheet > div {
+    flex: 2;
+    vertical-align: center;
+    border-right: thin dotted #999;
+    align-self: stretch;
+    padding: 0 .5em; }
+  .organization-timesheets .timesheet .activity {
+    flex: 3; }
+    .organization-timesheets .timesheet .activity small {
+      display: block; }
+  .organization-timesheets .timesheet .declarant, .organization-timesheets .timesheet .jour {
+    font-size: .8em;
+    font-weight: normal;
+    flex: 2; }
+  .organization-timesheets .timesheet .wp {
+    flex: 1; }
+  .organization-timesheets .timesheet .declarant {
+    font-weight: 600; }
+  .organization-timesheets .timesheet .small-note {
+    background: rgba(255, 255, 255, 0.7);
+    border: thin solid #ccc;
+    color: #777;
+    padding: .25em 1em;
+    border-radius: 4px;
+    font-size: .75em;
+    margin: 0 .5em; }
+  .organization-timesheets .timesheet.timesheet-header {
+    background: #790629;
+    color: white;
+    font-weight: bold;
+    text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.5); }
+    .organization-timesheets .timesheet.timesheet-header .declarant {
+      font-size: 1em; }
+
 #notifications-area {
   position: relative; }
   #notifications-area .notifications-total {
@@ -7788,6 +7963,70 @@ time.date-missing {
     background: #30b0d5; }
   to {
     background: #ffffff; } }
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center; }
+  .overlay .overlay-content {
+    width: 80%;
+    margin: 100px auto;
+    max-height: 80vh;
+    overflow-y: auto; }
+
+.separator-bottom {
+  padding-bottom: .3em;
+  margin-bottom: .3em;
+  border-bottom: dotted rgba(0, 0, 0, 0.5) thin; }
+
+.material-switch > input[type="checkbox"] {
+  display: none; }
+
+.material-switch > label {
+  cursor: pointer;
+  height: 0px;
+  position: relative;
+  width: 40px; }
+
+.material-switch > label::before {
+  background: black;
+  box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  content: '';
+  height: 16px;
+  margin-top: -8px;
+  position: absolute;
+  opacity: 0.3;
+  transition: all 0.4s ease-in-out;
+  width: 40px; }
+
+.material-switch > label::after {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  content: '';
+  height: 24px;
+  left: -4px;
+  margin-top: -8px;
+  position: absolute;
+  top: -4px;
+  transition: all 0.3s ease-in-out;
+  width: 24px; }
+
+.material-switch > input[type="checkbox"]:checked + label::before {
+  background: inherit;
+  opacity: 0.5; }
+
+.material-switch > input[type="checkbox"]:checked + label::after {
+  background: inherit;
+  left: 20px; }
 
 /*
 // ######################################################### ACTIVITY FICHE v2.0

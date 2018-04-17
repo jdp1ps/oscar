@@ -9,7 +9,6 @@ namespace Oscar\Hydrator;
 
 
 use Oscar\Entity\Person;
-use Zend\Stdlib\Hydrator\HydrationInterface;
 use Zend\Stdlib\Hydrator\HydratorInterface;
 
 class PersonFormHydrator implements HydratorInterface
@@ -32,7 +31,8 @@ class PersonFormHydrator implements HydratorInterface
             ->setLastname($data['lastname'])
             ->setCodeHarpege($data['codeHarpege'])
             ->setLadapLogin($data['ladapLogin'])
-            ->setCodeHarpege($data['codeHarpege'])
+            ->setLdapAffectation($data['ldapAffectation'])
+            ->setLdapSiteLocation($data['ldapSiteLocation'])
             ->setEmail($data['email'])
             ->setPhone($data['phone']);
 
@@ -55,7 +55,8 @@ class PersonFormHydrator implements HydratorInterface
             'lastname' => $object->getLastname(),
             'ladapLogin' => $object->getLadapLogin(),
             'phone' => $object->getPhone(),
-            'codeHarpege' => $object->getCodeHarpege(),
+            'ldapAffectation' => $object->getLdapAffectation(),
+            'ldapSiteLocation' => $object->getLdapSiteLocation(),
             'email' => $object->getEmail(),
         ];
 

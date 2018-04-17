@@ -8,9 +8,13 @@
  */
 namespace Oscar\Service;
 
+use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationType;
 use Oscar\Entity\ProjectPartner;
+use Oscar\Exception\OscarException;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\Structure;
@@ -88,6 +92,79 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     }
 
     /**
+     * Retourne la liste des activités d'un organisation où elle a un role principal actif.
+     *
+     * @param Organization $o
+     * @return array
+     */
+    public function getOrganizationActivititiesPrincipalActive( Organization $o ){
+        $activities = [];
+        /** @var ActivityOrganization $activity */
+        foreach ($o->getActivities() as $activity ){
+            if( $activity->isPrincipal() && !$activity->isOutOfDate() ){
+                if( !in_array($activity->getActivity(), $activities) )
+                    $activities[] = $activity->getActivity();
+            }
+        }
+
+        /** @var ProjectPartner $p */
+        foreach ($o->getProjects() as $p ){
+            if( $p->isPrincipal() && !$p->isOutOfDate() ){
+                foreach ($p->getProject()->getActivities() as $activity) {
+                    if( !in_array($activity->getActivity(), $activities) )
+                        $activities[] = $activity->getActivity();
+                }
+            }
+        }
+
+        return $activities;
+    }
+
+    public function getOrganizationTypes(){
+
+        $types = [];
+        $result = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy(['root' => null], ['label' => 'DESC']);
+
+        /** @var OrganizationType $type */
+        foreach ($result as $type ) {
+            $types[$type->getId()] = $type->toJson();
+        }
+
+        return $types;
+    }
+
+    public function getTypes(){
+
+        $types = Organization::getTypes();
+
+        $query = $this->getEntityManager()->createQueryBuilder('o')
+            ->select('o.type')
+            ->from(Organization::class, 'o')
+            ->distinct()
+            ->getQuery();
+
+        foreach ($query->getResult(Query::HYDRATE_ARRAY) as $type ) {
+            $t = $type['type'];
+            if (!in_array($t, $types) && $t != null)
+                $types[] = $t;
+        }
+        sort($types);
+        return $types;
+    }
+
+    public function getOrganizationTypesSelect(){
+        $options = [];
+
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'DESC']);
+        foreach ($types as $type) {
+            $options[$type->getId()] = $type;
+        }
+        return $options;
+
+
+    }
+
+    /**
      * Retourne le résultat de la recherche $search.
      *
      * @param string $search
@@ -98,29 +175,61 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     {
         $qb = $this->getBaseQuery();
         if ($search) {
-            $qb->orderBy('o.code', 'ASC')
-                ->orWhere('LOWER(o.shortName) LIKE :search')
-                ->orWhere('LOWER(o.fullName) LIKE :search')
-                ->orWhere('LOWER(o.city) LIKE :search')
-                ->orWhere('o.zipCode = :searchStrict')
-                ->orWhere('LOWER(o.code) LIKE :search');
 
-            if( strlen($search) == 14 )
-                $qb->orWhere('o.siret = :searchStrict');
+            // Recherche sur le connector
+            $reg = preg_match('/([a-z]*)=(.*)/', $search, $matches);
+            if( $reg ){
+                $connectors = $this->getConnectorsList();
+                $connectorName = $matches[1];
+                if( !in_array($connectorName, $connectors) ){
+                    throw new OscarException("Le connecteur $connectorName n'existe pas.");
+                }
+                $connectorValue = $matches[2].'%';
+                $where = 'o.connectors LIKE \'%"'.$connectorName.'";s:%:"'.$connectorValue.'"%\'';
+                $qb->orWhere($where);
+            }
+            else {
+
+                $qb->orderBy('o.code', 'ASC')
+                    ->orWhere('LOWER(o.shortName) LIKE :search')
+                    ->orWhere('LOWER(o.fullName) LIKE :search')
+                    ->orWhere('LOWER(o.city) LIKE :search')
+                    ->orWhere('o.zipCode = :searchStrict')
+                    ->orWhere('LOWER(o.code) LIKE :search');
+
+                if (strlen($search) == 14)
+                    $qb->orWhere('o.siret = :searchStrict');
 
 
-            $qb->setParameters([
-                'search' => '%'.strtolower($search).'%',
-                'searchStrict' => strtolower($search),
-                ]
-            );
+                $qb->setParameters([
+                        'search' => '%' . strtolower($search) . '%',
+                        'searchStrict' => strtolower($search),
+                    ]
+                );
+            }
 
         } else {
             $qb->orderBy('o.id', 'DESC');
         }
 
         if (isset($filter['type']) && $filter['type']){
-            $qb->andWhere('o.type IN(:type)')->setParameter('type', $filter['type']);
+            $types = $this->getEntityManager()->getRepository(OrganizationType::class)->createQueryBuilder('t')
+                ->where('t.id IN (:types)')
+                ->setParameter('types', $filter['type'])
+                ->getQuery()
+                ->getResult();
+
+            $qb->leftJoin('o.typeObj', 't')
+                ->andWhere('t.id IN(:type)')->setParameter('type', $types);
+        }
+
+        if (isset($filter['active']) && $filter['active']){
+            if( $filter['active'] == 'ON' ){
+                $qb->andWhere('o.dateEnd IS NULL OR o.dateEnd > :now')->setParameter('now', new \DateTime());
+            }
+            else if( $filter['active'] == 'OFF' ){
+                $qb->andWhere('o.dateEnd < :now')->setParameter('now', new \DateTime());
+            }
         }
 
         if (isset($filter['roles']) && count($filter['roles'])) {

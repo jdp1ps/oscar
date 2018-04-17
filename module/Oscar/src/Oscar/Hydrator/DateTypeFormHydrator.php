@@ -25,14 +25,18 @@ class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInte
      */
     public function extract($object)
     {
-
-        return [
+        $data = [
             'id' => $object->getId(),
             'description' => $object->getDescription(),
             'facet' => array_search($object->getFacet(), OscarFacet::getFacets()),
             'label' => $object->getLabel(),
-            'recursivity' => $object->getRecursivity()
+            'recursivity' => $object->getRecursivity(),
         ];
+        if( $object->isFinishable() ){
+            $data['finishable'] = 1;
+        }
+
+        return $data;
     }
 
     /**
@@ -44,8 +48,7 @@ class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInte
         return $object->setDescription($data['description'])
             ->setFacet(OscarFacet::getFacets()[$data['facet']])
             ->setRecursivity($data['recursivity'])
+            ->setFinishable(array_key_exists('finishable', $data) ? true : false)
             ->setLabel($data['label']);
     }
-
-
 }

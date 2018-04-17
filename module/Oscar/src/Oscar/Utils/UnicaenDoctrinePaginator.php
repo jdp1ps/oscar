@@ -27,10 +27,21 @@ class UnicaenDoctrinePaginator implements \Countable, \IteratorAggregate
     /** @var null Iterator */
     private $iterator = null;
 
+    /** @var QueryBuilder  */
+    private $query;
+
+    /**
+     * @return QueryBuilder
+     */
+    public function getQueryBuilder(){
+        return $this->query;
+    }
+
     function __construct(QueryBuilder $qb, $currentPage=1, $resultsByPage=50, Query $countQuery = null )
     {
         $this->currentPage = $currentPage;
         $this->resultsByPage = $resultsByPage;
+        $this->query = $qb;
 
         $paginator = new Paginator($qb, true);
         $paginator->getQuery()
@@ -39,16 +50,6 @@ class UnicaenDoctrinePaginator implements \Countable, \IteratorAggregate
 
         $this->iterator = $paginator->getIterator();
         $this->count = $paginator->count();
-
-        /*
-        if( $countQuery ) {
-            $this->count = $countQuery->getSingleScalarResult();
-            $this->iterator = $paginator->getIterator();
-        } else {
-            //die('nop');
-            $this->iterator = $paginator->getIterator();
-            $this->count = $paginator->count();
-        }*/
     }
 
 

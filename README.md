@@ -11,6 +11,7 @@
 
 ## Notes complémentaires
 
+ - [Configuration métier](./doc/configuration.md)
  - [Fonctionnement des privilèges](./doc/privileges.md)
  - [Personnaliser l'apparence](./doc/custom-ui.md)
  - [Installer les drivers Oracle OCI](./doc/install-oracle-pp.md)

@@ -8,16 +8,21 @@
  */
 namespace Oscar\Controller;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
+use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Role;
+use Oscar\Entity\TimeSheet;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
@@ -41,6 +46,11 @@ class PersonController extends AbstractOscarController
     public function apiLdapAction()
     {
         $this->getResponseDeprecated();
+    }
+
+    public function personFusionAction()
+    {
+
     }
 
 
@@ -99,6 +109,7 @@ class PersonController extends AbstractOscarController
                 }
             }
         }
+
         foreach ($persons as $key => $person) {
             echo 'Création de '.$person['displayname']." dans Oscar...\n";
             $new = new Person();
@@ -109,7 +120,24 @@ class PersonController extends AbstractOscarController
                 ->setLastname($person['nom']);
             $this->getEntityManager()->flush($new);
         }
+
         die('DONE');
+    }
+
+    public function notificationPersonAction(){
+        $id = $this->params()->fromRoute('id');
+        $person = $this->getPersonService()->getPerson($id);
+        return [
+            'person' => $person,
+            'notifications' => $this->getNotificationService()->getAllNotificationsPerson($person->getId())
+        ];
+    }
+
+    public function notificationPersonGenerateAction(){
+        $id = $this->params()->fromRoute('id');
+        $person = $this->getPersonService()->getPerson($id);
+        $this->getNotificationService()->generateNotificationsPerson($person);
+        $this->redirect()->toRoute('person/notification', ['id'=>$person->getId()]);
     }
 
 
@@ -121,12 +149,71 @@ class PersonController extends AbstractOscarController
      */
     public function indexAction()
     {
+        // Donnèes GET
         $page = (int) $this->params()->fromQuery('page', 1);
         $search = $this->params()->fromQuery('q', '');
         $filterRoles = $this->params()->fromQuery('filter_roles', []);
+        $orderBy = $this->params()->fromQuery('orderby', 'lastname');
+        $leader = $this->params()->fromQuery('leader', '');
+        $format = $this->params()->fromQuery('format', '');
+
+        // Liste des critères de trie disponibles
+        $orders = [
+            'lastname' => 'Nom de famille',
+            'firstname' => 'Prénom',
+            'email' => 'Email',
+            'dateCreated' => 'Date de création',
+            'dateUpdated' => 'Date de mise à jour'
+        ];
+
+        if( !array_key_exists($orderBy, $orders) ){
+            $orderBy = $orders[0];
+        }
+
         $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
             'filter_roles' => $filterRoles,
+            'order_by' => $orderBy,
+            'leader' => $leader
         ]);
+
+        if( $format == "csv" ){
+            // Fichier temporaire
+            $baseFileName = 'oscar-export-persons';
+            $filename = uniqid($baseFileName) . '.csv';
+            $handler = fopen('/tmp/' . $filename, 'w');
+
+            fputcsv($handler, [
+                'ID Oscar',
+                'Prénom',
+                'Nom',
+                'Courriel',
+                'Téléphone',
+                'Affectation',
+                'Localisation'
+            ]);
+            /** @var Person $person */
+            foreach ($datas->getQueryBuilder()->getQuery()->getResult() as $person) {
+                fputcsv($handler, [
+                    $person->getFirstname(),
+                    $person->getLastname(),
+                    $person->getEmail(),
+                    $person->getPhone(),
+                    $person->getLdapAffectation(),
+                    $person->getLdapSiteLocation()
+                ]);
+            }
+
+            fclose($handler);
+
+            header('Content-Disposition: attachment; filename='.$baseFileName.'.csv');
+            header('Content-Length: ' . filesize('/tmp/' . $filename));
+            header('Content-type: plain/text');
+            echo file_get_contents('/tmp/' . $filename);
+            @unlink('/tmp/' . $filename);
+            die();
+        }
+
+
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             $json = [
@@ -143,7 +230,6 @@ class PersonController extends AbstractOscarController
 
         $roles = $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed();
 
-
         $dbroles =$this->getPersonService()->getRolesByAuthentification();
 
         return array(
@@ -152,6 +238,9 @@ class PersonController extends AbstractOscarController
             'search' => $search,
             'persons' => $datas,
             'filter_roles' =>  $filterRoles,
+            'orderBy' => $orderBy,
+            'orders' => $orders,
+            'leader' => $leader
         );
     }
 
@@ -421,12 +510,27 @@ class PersonController extends AbstractOscarController
             }
         }
 
+        $ldapRoles = $this->getEntityManager()
+            ->createQueryBuilder('r', 'r.ldapFilter')
+            ->select('r')
+            ->from(Role::class, 'r', 'r.ldapFilter')
+            ->where('r.ldapFilter IS NOT NULL')
+            ->getQuery()
+            ->getResult(AbstractQuery::HYDRATE_ARRAY);
+
+        $roles = [];
+        $re = '/\(memberOf=(.*)\)/';
+        foreach ($ldapRoles as $role ){
+            $roles[preg_replace($re, '$1', $role['ldapFilter'])] = $role;
+        }
 
         return [
-            'entity' => $this->getPersonService()->getPerson($id),
+            'entity' => $person,
+            'ldapRoles' => $roles,
+            'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
             'auth' => $auth,
             'projects'  => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
-            'activities' => $this->getProjectGrantService()->personActivities($person->getId()),
+            'activities' => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),
             'traces' => $traces,
             'connectors' =>array_keys($this->getConfiguration('oscar.connectors.person'))
         ];
@@ -455,21 +559,59 @@ class PersonController extends AbstractOscarController
 
                 //
                 $this->getEntityManager()->persist($newPerson);
+                $this->getEntityManager()->flush($newPerson);
 
+                $conn = $this->getEntityManager()->getConnection();
+
+
+                /** @var Person $person */
                 foreach( $persons as $person){
-                    $person->mergeTo($newPerson);
+                    // $person->mergeTo($newPerson);
 
-                    $documents = $this->getEntityManager()->getRepository(ContractDocument::class)->findBy([
-                        'person' => $person
-                    ]);
-                    /** @var ContractDocument $doc */
-                    foreach( $documents as $doc ){
-                        $doc->setPerson($newPerson);
-                    }
+                    $this->getLogger()->info('Transfert de ' . $person->getId() . ' vers ' . $newPerson->getId());
+                    // Notification
+                    $conn->executeUpdate(
+                        'UPDATE notificationperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
 
-                    $this->getEntityManager()->remove($person);
+                    // Affectation
+                    $conn->executeUpdate(
+                        'UPDATE activityperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE administrativedocument SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE contractdocument SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE notificationperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE organizationperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE projectmember SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+
+                    // Feuille de temps
+                    $conn->executeUpdate(
+                        'UPDATE timesheet SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+                    $conn->executeUpdate(
+                        'UPDATE timesheet SET createdby_id = ? WHERE createdby_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+
+                    // Lot de travail
+                    $conn->executeUpdate(
+                        'UPDATE workpackageperson SET person_id = ? WHERE person_id = ?',
+                        [$newPerson->getId(), $person->getId()]);
+
+                    $conn->executeQuery('DELETE FROM person WHERE id = ? ', [$person->getId()]);
+
+
                 }
-                $this->getEntityManager()->flush();
+
                 $this->redirect()->toRoute('person/show', ['id'=>$newPerson->getId()]);
             }
         }
@@ -520,6 +662,8 @@ class PersonController extends AbstractOscarController
         try {
             $connectors =  $this->getConfiguration('oscar.connectors.person');
             $personConnector = array_keys($connectors);
+
+
             $form->setConnectors($personConnector);
         } catch( \Exception $e ){
 
@@ -544,6 +688,7 @@ class PersonController extends AbstractOscarController
         }
 
         $view = new ViewModel([
+            'connectors' => $personConnector,
             'person'    => $person,
             'id'        => $id,
             'form'      => $form

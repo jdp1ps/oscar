@@ -14,68 +14,71 @@ use Zend\View\Model\ViewModel;
 
 class DateTypeController extends AbstractOscarController
 {
-    public function indexAction(){
+    public function indexAction()
+    {
         return [
             'entities' => $this->getEntityManager()->getRepository(DateType::class)->findAll()
         ];
     }
 
-    public function newAction(){
+    public function newAction()
+    {
         $form = new DateTypeForm();
-        //$entity = $this->getEntityManager()->getRepository(DateType::class)->find($this->params()->fromRoute('id'));
         $request = $this->getRequest();
         $entity = new DateType();
         $form->setObject($entity);
         $form->setAttribute('action', $this->url()->fromRoute('datetype/new'));
 
-
-
         // Traitement des données envoyées
-        if( $request->isPost() ){
+        if ($request->isPost()) {
             $form->setData($request->getPost());
-            if( $form->isValid() ){
+            if ($form->isValid()) {
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush();
                 $this->redirect()->toRoute('datetype');
             }
         }
+
         $view = new ViewModel([
             'entity' => $entity,
             'form' => $form,
         ]);
+
         $view->setTemplate('oscar/date-type/form.phtml');
         return $view;
     }
 
-    public function deleteAction(){
+    public function deleteAction()
+    {
         die('TODO');
     }
 
-    public function editAction(){
-
+    public function editAction()
+    {
         $form = new DateTypeForm();
         $entity = $this->getEntityManager()->getRepository(DateType::class)->find($this->params()->fromRoute('id'));
         $request = $this->getRequest();
-//        $form->setObject($entity);
         $form->setAttribute('action', $this->url()->fromRoute('datetype/edit', ['id' => $entity->getId()]));
-
-        $form->init();
+        //$form->init();
         $form->bind($entity);
+        $form->get('finishable')->setAttribute('checked', ($form->get('finishable')->getValue()) ? 'checked' : '');
 
         // Traitement des données envoyées
-        if( $request->isPost() ){
-
+        if ($request->isPost()) {
             $form->setData($request->getPost());
-            if( $form->isValid() ){
+            if ($form->isValid()) {
+                var_dump($form->getData());
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush();
                 $this->redirect()->toRoute('datetype');
             }
         }
+
         $view = new ViewModel([
             'entity' => $entity,
             'form' => $form,
         ]);
+
         $view->setTemplate('oscar/date-type/form.phtml');
         return $view;
     }

@@ -72,7 +72,7 @@ class Authentification implements UserInterface, ProviderInterface
 
     /**
      * @var array
-     * @ORM\Column(type="array", nullable=true)
+     * @ORM\Column(type="object", nullable=true)
      */
     protected $settings;
 
@@ -88,6 +88,7 @@ class Authentification implements UserInterface, ProviderInterface
     public function __construct()
     {
         $this->roles = new ArrayCollection();
+        $this->settings = [];
     }
 
     public function hasRole( $roleId ){
@@ -289,6 +290,18 @@ class Authentification implements UserInterface, ProviderInterface
     public function addRole($role)
     {
         $this->roles[] = $role;
+    }
+
+    /**
+     * Add a role to the user.
+     *
+     * @param Role $role
+     *
+     * @return void
+     */
+    public function removeRole($role)
+    {
+        $this->roles->removeElement($role);
     }
 
     /**

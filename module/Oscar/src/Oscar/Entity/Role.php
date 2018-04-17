@@ -157,7 +157,15 @@ class Role implements HierarchicalRoleInterface
      * @throws \Exception
      */
     public function hasPrivilege( $privilege ){
-        throw new \Exception('NOT IMPLEMENTED');
+
+        /** @var Privilege $privilege */
+        foreach ( $this->getPrivileges() as $p ){
+
+            if( $p->getFullCode() == $privilege ){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

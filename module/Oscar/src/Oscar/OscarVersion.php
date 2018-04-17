@@ -11,18 +11,19 @@ namespace Oscar;
 class OscarVersion
 {
     const MAJOR = 2;
-    const MINOR = 1;
+    const MINOR = 2;
     const PATCH = 1;
 
     public static function getBuild(){
-        $commitHash = trim(exec('git log --pretty="%h" -n1 HEAD'));
+        $commitHash = trim(exec('git log -1 --pretty="%h" -n1 HEAD'));
+        $branch = trim(exec('git branch | grep \* | cut -d \' \' -f2'));
 
         $commitDate = new \DateTime(trim(exec('git log -n1 --pretty=%ci HEAD')));
         $commitDate->setTimezone(new \DateTimeZone('UTC'));
 
         exec('git rev-list HEAD | wc -l', $commit);
 
-        return sprintf('v%s.%s.%s#%s-dev.%s (%s)', self::MAJOR, self::MINOR, self::PATCH, $commit[0], $commitHash, $commitDate->format('Y-m-d H:m:s'));
+        return sprintf('v%s.%s.%s-%s#%s (%s)', self::MAJOR, self::MINOR, self::PATCH, $branch, $commitHash, $commitDate->format('Y-m-d H:m:s'));
 
     }
 }
