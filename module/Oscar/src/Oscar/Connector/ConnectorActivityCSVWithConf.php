@@ -48,7 +48,13 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
     }
 
 
-    public function __construct( $csvDatas, array $config, EntityManager $entityManager )
+    /**
+     * ConnectorActivityCSVWithConf constructor.
+     * @param $csvDatas
+     * @param array $config
+     * @param $entityManager
+     */
+    public function __construct( $csvDatas, array $config, $entityManager )
     {
         $this->csvDatas = $csvDatas;
         $this->config = $config;
@@ -167,7 +173,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
 
 
         // Devise par défaut
-        $defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
+        //$defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
         $out = [];
 
 

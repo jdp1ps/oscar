@@ -144,10 +144,10 @@ GRANT ALL PRIVILEGES ON DATABASE oscar to oscar_dev;
 ### Données initiales
 
 Les données "de base" sont à disposition dans
-le dépôt dans le fichier : `data/backup_oscar-empty.sql`.
+le dépôt dans le fichier : `install/oscar-install.sql`.
 
 ```bash
-psql -h localhost -U oscar < data/backup_oscar-empty.sql
+psql -h localhost -U oscar < install/oscar-install.sql
 ```
 
 ### Configuration de la BDD dans Oscar
@@ -186,6 +186,12 @@ return array(
 ```
 
 Ce fichier contient également des configurations spécifiques métier approfondies dans le fichier [Configuration métier](./configuration.md)
+
+Vous pouvez tester la configuration avec la commande :
+
+```bash
+$ php public/index.php oscar test:config
+```
 
 
 ### Configurer le mailer
