@@ -78,7 +78,5 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         // MILESTONES
         $this->assertEquals('Rapport financier', $datas[1]['milestones'][0]['type']);
         $this->assertEquals('2018-04-15', $datas[1]['milestones'][0]['date']);
-
-
     }
 }
