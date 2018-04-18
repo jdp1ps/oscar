@@ -63,7 +63,22 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals("Olympia", $datas[0]['organizations']['Laboratoire'][0]);
         $this->assertEquals("US Robot", $datas[0]['organizations']['Laboratoire'][1]);
 
+        // Deuxième activité
+        $this->assertEquals(45000.0, $datas[1]['amount']);
 
-//        $converter = new ConnectorActivityCSVWithConf($source,  )
+        /// PAYMENTS
+        $this->assertEquals(2, count($datas[1]['payments']));
+        $this->assertEquals(20000, $datas[1]['payments'][0]['amount']);
+        $this->assertEquals('2018-01-01', $datas[1]['payments'][0]['date']);
+        $this->assertEquals('2018-01-01', $datas[1]['payments'][0]['predicted']);
+        $this->assertEquals(25000, $datas[1]['payments'][1]['amount']);
+        $this->assertEquals('', $datas[1]['payments'][1]['date']);
+        $this->assertEquals('2018-06-01', $datas[1]['payments'][1]['predicted']);
+
+        // MILESTONES
+        $this->assertEquals('Rapport financier', $datas[1]['milestones'][0]['type']);
+        $this->assertEquals('2018-04-15', $datas[1]['milestones'][0]['date']);
+
+
     }
 }
