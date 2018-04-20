@@ -25,6 +25,10 @@ return array(
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
         ],
 
+        'generated-documents' => [
+            'activity' => []
+        ],
+
         ////////////////////////////////////////////////////////////////////////
         // Validation des données
         'validation' => [
