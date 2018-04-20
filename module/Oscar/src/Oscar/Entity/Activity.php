@@ -265,13 +265,20 @@ class Activity implements ResourceInterface
      */
     private $financialImpact = self::FINANCIAL_IMPACT_TAKE;
 
+
     /**
-     * Date de dépôt du dossier (envoi à l'autorité de type de demande de financement)
-     *
-     * @var datetime
-     * @ORM\Column(type="date", nullable=true)
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
      */
-    // private $dateDépôt;
+    private $noteFinanciere;
+
+
+    /**
+     * @var double
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $assietteSubventionnable;
+
 
     /**
      * @var
@@ -1413,6 +1420,43 @@ class Activity implements ResourceInterface
     {
         return $this->documents;
     }
+
+    /**
+     * @return string
+     */
+    public function getNoteFinanciere(): string
+    {
+        return $this->noteFinanciere;
+    }
+
+    /**
+     * @param string $noteFinanciere
+     */
+    public function setNoteFinanciere($noteFinanciere)
+    {
+        $this->noteFinanciere = $noteFinanciere;
+
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getAssietteSubventionnable(): float
+    {
+        return $this->assietteSubventionnable;
+    }
+
+    /**
+     * @param float $assietteSubventionnable
+     */
+    public function setAssietteSubventionnable($assietteSubventionnable)
+    {
+        $this->assietteSubventionnable = $assietteSubventionnable;
+
+        return $this;
+    }
+    
 
     /**
      * @param ArrayCollection $documents
