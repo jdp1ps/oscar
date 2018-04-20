@@ -5,6 +5,8 @@ config/autoload/unicaen-auth.local.php
 
 tmp
 sandbox
+debug
+DEV.md
 
 # Prototype
 prototype/timesheet/*

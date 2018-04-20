@@ -17,6 +17,7 @@ return [
 
     6   => "organizations.Composante Responsable",
     7   => "organizations.Laboratoire",
+    21   => "organizations.Laboratoire",
 
     8   => "persons.Responsable Scientifique",
     9   => "persons.Ingénieur",
