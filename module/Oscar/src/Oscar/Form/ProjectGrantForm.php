@@ -169,6 +169,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'type'=>'Select'
         ]);
 
+
         // Tune
         $this->add([
             'name'   => 'tva',
@@ -186,7 +187,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         $this->add([
             'name'   => 'codeEOTP',
             'options' => [
-                'label' => 'N°PFI'
+                'label' => 'EOTP'
             ],
             'attributes' => [
                 'class' => 'form-control'
@@ -220,6 +221,32 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'type'=>'Text'
         ]);
 
+        // Amount
+        $this->add([
+            'name'   => 'assietteSubventionnable',
+            'help' => "% de l'assiette subventionnable",
+            'options' => [
+                'label' => 'Assiette subventionnable'
+            ],
+            'attributes' => [
+                'class' => 'form-control',
+                'placeholder' => 'Assiette subventionnable (ex: 5.5)'
+            ],
+            'type'=>'Text'
+        ]);
+
+        $label = "Note financière";
+        $this->add([
+            'name'   => 'noteFinanciere',
+            'options' => [
+                'label' => $label,
+            ],
+            'attributes' => [
+                'class' => 'form-control input-xs',
+                'placeholder' => $label,
+            ],
+            'type'=>'Textarea'
+        ]);
 
 
         // DateStart

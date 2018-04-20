@@ -42,6 +42,8 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             ->setFraisDeGestion($this->decimalPointComma($data['fraisDeGestion']))
             ->setTva($this->getTVA($data['tva']))
             ->setFinancialImpact($this->getFinancialImpact($data['financialImpact']))
+            ->setNoteFinanciere($data['noteFinanciere'])
+            ->setAssietteSubventionnable($this->decimalPointComma($data['assietteSubventionnable']))
             ->setCentaureNumConvention($data['centaureNumConvention'])
             ->setDateStart(DateTimeUtils::toDatetime($data['dateStart']))
             ->setDateEnd(DateTimeUtils::toDatetime($data['dateEnd']))
@@ -114,6 +116,8 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             'fraisDeGestion' => $object->getFraisDeGestion(),
             'financialImpact' => array_search($object->getFinancialImpact(), Activity::getFinancialImpactValues()),
             'dateStart' => $object->getDateStart(),
+            'noteFinanciere' => $object->getNoteFinanciere(),
+            'assietteSubventionnable' => $object->getAssietteSubventionnable(),
             'dateEnd' => $object->getDateEnd(),
             'dateSigned' => $object->getDateSigned(),
             'dateOpened' => $object->getDateOpened(),

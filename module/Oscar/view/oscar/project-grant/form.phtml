@@ -75,6 +75,7 @@
                 <div class="col-md-4">
                     <?= $this->formControlGroup($form->get('currency')); ?>
                 </div>
+
             </div>
         <div class="row">
             <div class="col-md-4">
@@ -84,7 +85,12 @@
                 <?= $this->formControlGroup($form->get('fraisDeGestion')); ?>
             </div>
             <div class="col-md-4">
-                &nbsp;
+                <?= $this->formControlGroup($form->get('assietteSubventionnable')); ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $this->formControlGroup($form->get('noteFinanciere')); ?>
             </div>
         </div>
 

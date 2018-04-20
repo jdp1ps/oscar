@@ -1456,7 +1456,7 @@ class Activity implements ResourceInterface
 
         return $this;
     }
-    
+
 
     /**
      * @param ArrayCollection $documents

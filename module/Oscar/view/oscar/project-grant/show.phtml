@@ -273,7 +273,6 @@
                             </a>
                         <?php endforeach; ?>
                     </nav>
-                    <pre><?php var_dump() ?></pre>
 
 
                     <script id="documents-list-template" type="text/x-template">
@@ -373,6 +372,12 @@
 
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
                 <div id="payments"></div>
+                <div>
+                    <h3>Assiette Subventionnable : <strong><?= $entity->getAssietteSubventionnable() ?></strong></h3>
+                    <h3>Note financière</h3>
+                    <blockquote><?= $entity->getNoteFinanciere() ?></blockquote>
+                </div>
+
                 <script>
                     require(['ActivityModel', 'vue','vue-resource', 'mm','payments'], function(ActivityModel, Vue, VueResource, moment, payments){
                         Vue.use(VueResource);
