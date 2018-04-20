@@ -131,6 +131,8 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     public function updateFromArray( ActivityDate $milestone, array $dataArray ){
+
+        $this->getLogger()->debug("Update with : " . print_r($dataArray, true));
         $typeId = $dataArray['type_id'];
         $comment = $dataArray['comment'];
         $date = new \DateTime($dataArray['dateStart']);

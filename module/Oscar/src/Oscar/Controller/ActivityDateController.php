@@ -121,15 +121,16 @@ class ActivityDateController extends AbstractOscarController
 
                             } // Mise à jour
                             else if ($action == 'update') {
+                                $this->getLogger()->debug("Mise à jour : " . print_r($this->params()->fromPost(), true));
                                 $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
                                 $typeId = $this->params()->fromPost('type');
                                 $comment = $this->params()->fromPost('comment');
-                                $date = new \DateTime($this->params()->fromPost('dateStart'));
+                                $date = $this->params()->fromPost('dateStart');
 
                                 $milestone = $this->getMilestoneService()->updateFromArray($milestone, [
                                    'type_id' => $typeId,
                                    'comment' => $comment,
-                                   'date' => $date,
+                                   'dateStart' => $date,
                                 ]);
                                 return $this->ajaxResponse($milestone->toArray());
                             } else {

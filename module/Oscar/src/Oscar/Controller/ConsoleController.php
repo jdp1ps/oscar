@@ -70,8 +70,6 @@ class ConsoleController extends AbstractOscarController
 
     public function updateAction()
     {
-//        $tool = new SchemaTool($this->getEntityManager());
-//        $tool->getUpdateSchemaSql($this->getEntityManager()->getClassMetadata($this->getEntityManager()->));
         $validator = new SchemaValidator($this->getEntityManager());
         $errors = $validator->validateMapping();
 
@@ -83,6 +81,15 @@ class ConsoleController extends AbstractOscarController
         die('UPDATE');
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    /// PATCH
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+    /**
+     * v2.2.1
+     * Mise à jour des types d'organisation
+     */
     public function patch_typeOrganisationsUpdate()
     {
         $types = Organization::getTypes();
@@ -101,7 +108,6 @@ class ConsoleController extends AbstractOscarController
         // Récupération des types définit en dur dans les Organisations
         $typesStr = $this->getOrganizationService()->getTypes();
 
-        $toCreate = [];
         $exists = [];
 
         /** @var OrganizationType $exist */
@@ -134,10 +140,12 @@ class ConsoleController extends AbstractOscarController
             }
         }
         $this->getEntityManager()->flush();
-
     }
 
 
+    /**
+     * Maintenance : Recalcule les indices de séquence pour les IDs.
+     */
     public function patch_fixSequenceAutoNum()
     {
         $sequences = [

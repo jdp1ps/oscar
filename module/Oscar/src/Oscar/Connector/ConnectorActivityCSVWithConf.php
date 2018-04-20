@@ -172,7 +172,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
 
 
         $i = 1;
-
         while($datas = fgetcsv($this->csvDatas)){
 
             $json = [
