@@ -17,7 +17,7 @@ Matériel (Recommandation)
 
 
 
-> Prévoyez plus d'espace si vous stoquez des documents directement sur la machine hébergant Oscar.  
+> Prévoyez plus d'espace si vous stoquez des documents directement sur la machine hébergeant Oscar.  
 
 
 ## Installation du système
