@@ -8,6 +8,7 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
@@ -471,8 +472,10 @@ class AdministrationController extends AbstractOscarController
                 try {
                     $authentification->removeRole($role);
                     $this->getEntityManager()->flush();
-                } catch (\Exception $e ){
+                } /*catch (Doct $e ){
                     return $this->getResponseInternalError("Impossible de supprimer le role : " . $e->getMessage());
+                }*/ catch (\Exception $e ){
+                    return $this->getResponseInternalError(get_class($e) . " - Impossible de supprimer le role : " . $e->getMessage());
                 }
                 return $this->ajaxResponse($authentification->toJson());
         }
@@ -567,10 +570,14 @@ class AdministrationController extends AbstractOscarController
                         $this->getActivityLogService()->addUserInfo(
                             "a supprimé le rôle " . $role->getRoleId()
                         );
-                        $this->getEntityManager()->remove($role);
-                        $this->getEntityManager()->flush();
+                        try {
+                            $this->getEntityManager()->remove($role);
+                            $this->getEntityManager()->flush();
+                            return $this->getResponseOk("Rôle supprimé");
+                        } catch (ForeignKeyConstraintViolationException $e ){
+                            return $this->getResponseInternalError("Impossible de supprimer le rôle '$role', il est encore utilisé et doit être conservé pour préserver l'historique");
+                        }
 
-                        return $this->getResponseOk("Rôle supprimé");
                         break;
                 }
 
