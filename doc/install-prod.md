@@ -9,6 +9,15 @@ L'installation a été testée sous Debian et Ubuntu Server
  - PHP 7.0+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql, mcrypt, intl, DOM/XML)
  - Postgresql 9.4+
  - Annuaire LDAP (supann)
+ 
+Matériel (Recommandation)
+ - CPU 2 Core 2.4 Ghz
+ - RAM 4 Go
+ - Espace disque 20G (Application seule, hors documents)
+
+
+
+> Prévoyez plus d'espace si vous stoquez des documents directement sur la machine hébergant Oscar.  
 
 
 ## Installation du système

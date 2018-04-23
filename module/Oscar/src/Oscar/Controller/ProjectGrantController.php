@@ -543,6 +543,7 @@ class ProjectGrantController extends AbstractOscarController
                 }
                 $this->getEntityManager()->flush($projectGrant);
 
+                // Mise à jour de l'index de recherche
                 $this->getActivityService()->searchUpdate($projectGrant);
 
                 $this->redirect()->toRoute('contract/show',
