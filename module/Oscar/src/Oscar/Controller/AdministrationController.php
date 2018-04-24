@@ -48,25 +48,7 @@ class AdministrationController extends AbstractOscarController
 
         if( ($action = $this->params()->fromQuery('action')) ){
             if( $action == 'generate' ){
-                $typesStr = $this->getOrganizationService()->getTypes();
-
-                $toCreate = [];
-                $exists = [];
-
-                /** @var OrganizationType $exist */
-                foreach ($this->getEntityManager()->getRepository(OrganizationType::class)->findAll() as $exist) {
-                    $exists[] = $exist->getLabel();
-                }
-
-                $toCreate = array_diff($typesStr, $exists);
-
-                foreach ($toCreate as $label) {
-                    $type = new OrganizationType();
-                    $this->getEntityManager()->persist($type);
-                    $type->setLabel($label);
-                    $this->getEntityManager()->flush($type);
-                }
-                die("Generate");
+                return $this->getResponseDeprecated("Cette fonctionnalité a été retiré");
             }
             return $this->getResponseBadRequest();
         }
@@ -84,11 +66,16 @@ class AdministrationController extends AbstractOscarController
                     if( $id ){
                         $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
                         if( $type ){
-                            foreach ($type->getChildren() as $t ){
-                                $t->setRoot(null);
+                            try {
+                                foreach ($type->getChildren() as $t ){
+                                    $t->setRoot(null);
+                                }
+                                $this->getEntityManager()->flush();
+                                $this->getEntityManager()->remove($type);
+                                $this->getEntityManager()->flush();
+                            } catch (ForeignKeyConstraintViolationException $e ){
+                                return $this->getResponseInternalError("Erreur : ce type d'organisation est encore utilisé.");
                             }
-                            $this->getEntityManager()->remove($type);
-                            $this->getEntityManager()->flush();
                             return $this->getResponseOk("Type supprimé");
                         } else {
                            return $this->getResponseInternalError("Impossible de supprimer de type");
