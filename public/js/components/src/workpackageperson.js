@@ -16,6 +16,7 @@ var WorkpackagePerson = {
   template: `<article class="workpackage-person">
                 <div class="displayname">
                     <strong>{{ person.person.displayname }}</strong>
+                    <a href="#" @click.prevent="handlerRemove(person)" class="link" v-if="editable && mode == 'read'" title="Supprimer ce déclarant"><i class="icon-trash"></i></a>
                 </div>
                 <div class="tempsdeclare temps">
                     <div v-if="editable && mode == 'edit'">
@@ -25,11 +26,17 @@ var WorkpackagePerson = {
                         <a href="#" @click.prevent="handlerCancel" title="Annuler la modification des heures prévues"><i class="icon-cancel-outline"></i></a>
                     </div>
                     <span v-else>
-                        <strong >{{person.hours}}/{{ person.duration }}</strong> heure(s)
+                        <strong class="wp-hours">
+                            <span title="Heure(s) validée(s)" class="wp-hour validate">{{person.validate}}</span>
+                            <span title="Heure(s) en cours de validation" class="wp-hour validating" v-if="person.validating > 0">{{person.validating}}</span>
+                            <span title="Heure(s) en conflit" class="wp-hour conflicts" v-if="person.conflicts > 0">{{person.conflicts}}</span>
+                            <span title="Heure(s) à valider" class="wp-hour duration"> 
+                                / {{person.duration}}
+                                <a href="#" @click.prevent="handlerEdit" v-if="editable && mode == 'read'" title="Modifier les heures prévues"><i class="icon-pencil"></i></a>
+                            </span>
+                        </strong>
                     </span>
-                    <a href="#" @click.prevent="handlerEdit" v-if="editable && mode == 'read'" title="Modifier les heures prévues"><i class="icon-pencil"></i></a>
                 </div>
-                <a href="#" @click.prevent="handlerRemove(person)" class="link" v-if="editable && mode == 'read'"><i class="icon-trash"></i> Retirer</a>
             </article>`,
     props: {
         'person': { default: function(){ return {} } },

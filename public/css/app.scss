@@ -3853,6 +3853,47 @@ $oscar-line: dotted thin $colorGreyLight;
   left: 20px;
 }
 
+
+// Décaration
+.wp-hours {
+  // border: solid thin black;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  .wp-hour {
+    text-shadow: -1px 1x 0 rgba(0,0,0,.2);
+    display: inline-block; padding: 2px 4px; border-right: thin dotted $colorDark;
+    &:hover {
+      color: white;
+    }
+  }
+  //.wp-hour:first-child { border-radius: 2px 0 0 2px; }
+  .wp-hour:last-child { /*border-radius: 0 2px 2px 0;*/  border-right: none; }
+
+
+  .validate {
+    background: rgba($colorGreen, .5);
+    &:hover {
+      background: $colorGreen;
+    }
+  }
+  .conflicts {
+    background: rgba($colorRed, .5);
+    &:hover {
+      background: $colorRed;
+    }
+  }
+  .validating {
+    color: rgba(0,0,0,.5);
+    background: rgba(lighten($colorGreen, 25%), .5);
+    &:hover {
+      background: $colorGreen;
+    }
+  }
+
+  .duration { background: $colorGreyLight }
+}
+
 /*
 // ######################################################### ACTIVITY FICHE v2.0
 .activity {

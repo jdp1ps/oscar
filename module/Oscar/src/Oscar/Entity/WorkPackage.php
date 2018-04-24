@@ -249,6 +249,7 @@ class WorkPackage
             switch( $timesheet->getStatus() ){
                 case TimeSheet::STATUS_TOVALIDATE_SCI:
                 case TimeSheet::STATUS_TOVALIDATE_ADMIN:
+                case TimeSheet::STATUS_TOVALIDATE:
                     $timesPersons[$timesheet->getPerson()->getId()]['validating'] += $timesheet->getHours();
                     break;
 
