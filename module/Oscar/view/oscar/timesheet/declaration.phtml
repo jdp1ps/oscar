@@ -15,7 +15,7 @@
         $crenaux[((string)$wpd)] = [
             'label'         => (string)$wpd,
             'acronym'       => $wpd->getActivity()->getAcronym(),
-            'activity'      => $wpd->getActivity()->__toString(),
+            'activity'      => (string)$wpd->getActivity(),
             'activity_code' => $wpd->getActivity()->getOscarNum(),
             'idactivity'    => $wpd->getActivity()->getId(),
             'active'        => $wpd->getActivity()->isActive(),

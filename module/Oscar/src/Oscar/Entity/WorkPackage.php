@@ -240,11 +240,30 @@ class WorkPackage
         /** @var TimeSheet $timesheet */
         foreach( $this->getTimesheets() as $timesheet ){
             if( !array_key_exists($timesheet->getPerson()->getId(), $timesPersons) ){
-                $timesPersons[$timesheet->getPerson()->getId()] = 0;
+                $timesPersons[$timesheet->getPerson()->getId()] = [
+                    'validating' => 0,
+                    'conflicts' => 0,
+                    'validate' => 0,
+                ];
             }
-            $timesPersons[$timesheet->getPerson()->getId()] += $timesheet->getHours();
+            switch( $timesheet->getStatus() ){
+                case TimeSheet::STATUS_TOVALIDATE_SCI:
+                case TimeSheet::STATUS_TOVALIDATE_ADMIN:
+                    $timesPersons[$timesheet->getPerson()->getId()]['validating'] += $timesheet->getHours();
+                    break;
+
+                case TimeSheet::STATUS_CONFLICT:
+                    $timesPersons[$timesheet->getPerson()->getId()]['conflicts'] += $timesheet->getHours();
+                    break;
+
+                case TimeSheet::STATUS_ACTIVE:
+                    $timesPersons[$timesheet->getPerson()->getId()]['validate'] += $timesheet->getHours();
+                    break;
+            }
+//            $timesPersons[$timesheet->getPerson()->getId()] += $timesheet->getHours();
 
         }
+
 
         /** @var WorkPackagePerson $person */
         foreach( $this->getPersons() as $person ){
@@ -252,12 +271,15 @@ class WorkPackage
                 'id' => $person->getId(),
                 'person' => $person->getPerson()->toArray(),
                 'duration' => $person->getDuration(),
-                'hours' => array_key_exists($person->getPerson()->getId(), $timesPersons) ? $timesPersons[$person->getPerson()->getId()] : 0
+                'validating' => array_key_exists($person->getPerson()->getId(), $timesPersons) ? $timesPersons[$person->getPerson()->getId()]['validating'] : 0,
+                'conflicts' => array_key_exists($person->getPerson()->getId(), $timesPersons) ? $timesPersons[$person->getPerson()->getId()]['conflicts'] : 0,
+                'validate' => array_key_exists($person->getPerson()->getId(), $timesPersons) ? $timesPersons[$person->getPerson()->getId()]['validate'] : 0,
             ];
         }
         return [
             'id'            => $this->getId(),
             'persons'       => $persons,
+            'status'        => $this->getStatus(),
             'code'          => $this->getCode(),
             'start'         => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : "",
             'end'           => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : "",

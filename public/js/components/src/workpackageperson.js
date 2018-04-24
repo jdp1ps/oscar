@@ -85,7 +85,8 @@ var Workpackage = {
                 <p class="help">Le code est utilisé pour l'affichage des créneaux</p>
                 <input type="text" placeholder="Intitulé" v-model="formData.code" class="form-control" />
             </div>
-            <div class="form-group">
+            
+            <div class="form-group" style="display: none">
                 <label for="">Période</label>
                 <div class="row">
                     <div class="col-md-6">
@@ -96,8 +97,8 @@ var Workpackage = {
                         du <input type="date" placeholder="Fin" v-model="formData.end" class="form-control" />
                     </div>
                 </div>
-
             </div>
+            
             <div class="form-group">
                 <label for="">Description</label>
                 <textarea type="text" placeholder="Description" v-model="formData.description" class="form-control"></textarea>
@@ -110,7 +111,7 @@ var Workpackage = {
         </form>
         <div v-if="mode == 'read'">
             <h3>[{{ workpackage.code }}] {{ workpackage.label }}</h3>
-            <small>Du
+            <small style="display: none">Du
                 <strong v-if="!workpackage.start">début de l'activité</strong>
                 <strong v-else>{{ workpackage.start }}</strong>
                 au
