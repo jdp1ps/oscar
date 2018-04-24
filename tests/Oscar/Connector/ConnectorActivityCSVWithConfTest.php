@@ -33,7 +33,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
     {
         $config = $this->getDemoConfig();
         $this->assertTrue(is_array($config));
-        $this->assertEquals(16, count($this->getDemoConfig()));
+        $this->assertEquals(17, count($this->getDemoConfig()));
     }
 
 
@@ -52,12 +52,16 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $converter = new ConnectorActivityCSVWithConf($source, $config, null);
         $datas = $converter->syncAll();
 
+
         $this->assertNotNull($datas);
         $this->assertEquals(2, count($datas));
 
         $this->assertEquals('R1', $datas[0]['uid']);
         $this->assertEquals('RELATIV', $datas[0]['acronym']);
+
         $this->assertEquals('EOTP201400002', $datas[0]['pfi']);
+
+
         $this->assertEquals(2, count($datas[0]['organizations']['Laboratoire']));
 
         $this->assertEquals("Olympia", $datas[0]['organizations']['Laboratoire'][0]);
@@ -65,6 +69,8 @@ class ConnectorActivityCSVWithConfTest extends TestCase
 
         // Deuxième activité
         $this->assertEquals(45000.0, $datas[1]['amount']);
+        $this->assertEquals('2017-12-24', $datas[1]['datepfi']);
+        $this->assertEquals('2017-12-31', $datas[1]['datesigned']);
 
         /// PAYMENTS
         $this->assertEquals(2, count($datas[1]['payments']));

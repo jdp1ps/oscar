@@ -13,7 +13,9 @@ return [
     4   => "project.label",
 
     3   => "label",
-    5   => "codeEOTP",
+    5   => "PFI",
+    19  => "datePFI",
+    22  => "dateSigned",
 
     6   => "organizations.Composante Responsable",
     7   => "organizations.Laboratoire",
@@ -28,6 +30,5 @@ return [
     15  => "payments.1.2",
 
     18  => "milestones.Rapport financier",
-    19  => "dateSigned",
     20  => "type",
 ];

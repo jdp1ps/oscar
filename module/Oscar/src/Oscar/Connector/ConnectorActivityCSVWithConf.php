@@ -169,11 +169,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
      */
     public function syncAll()
     {
-        $repport = new ConnectorRepport();
-
-
-        // Devise par défaut
-        //$defaultCurrency = $this->entityManager->getRepository(Currency::class)->find(1);
         $out = [];
 
 
@@ -252,17 +247,25 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                     ];
                 }
 
-                else if( $key == "codeEOTP" ){ $json['pfi'] = $value; }
+                // PFI
+                else if( $key == "PFI" ){ $json['pfi'] = $value; }
+
+                else if( $key == "datePFI" ){ $json['datepfi'] = $value;}
+
                 else if( $key == "type" ){ $json['type'] = $value; }
                 else if( $key == "amount" ){ $json['amount'] = doubleval($value); }
                 else if( $key == "dateStart" ){ $json['datestart'] = $value; }
                 else if( $key == "dateEnd" ){ $json['dateend'] = $value; }
                 else if( $key == "dateSigned" ){ $json['datesigned'] = $value; }
-                else if( $key == "datePFI" ){ $json['datePFI'] = $value; }
+
                 else if( $key == "label" ){ $json['label'] = $value; }
                 else if( $key == "uid" ){ $json['uid'] = $value; }
                 else if( $key == "project.acronym" ){ $json['acronym'] = $value; }
                 else if( $key == "project.label" ){ $json['projectlabel'] = $value; }
+
+                else {
+                    throw new OscarException("La clef '$key' n'est pas géré dans la configuration");
+                }
 
 
             }

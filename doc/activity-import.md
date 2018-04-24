@@ -97,6 +97,7 @@ projectlabel | String    | Oui       | Non    | Utilisé pour créer le projet s
 label           | String    | NR        | Non    | Intitulé de l'activité
 datestart       | Date ISO  | Oui       | Non    | Date de début de l'activité
 dateend         | Date ISO  | Oui       | Non    | Date de fin de l'activité
+datesigned         | Date ISO  | Oui       | Non    | Date de la signsture de la convention
 pfi             | String    | Oui       | Non    | EOTP/PFI de l'activité de recherche
 datePFI         | Date ISO  | Oui       | Non    | Date d'ouverture du PFI
 type            | String    | Oui       | Non    | Type d'activité, si Oscar ne trouve pas de type correspondant, la donnée est ignorée
@@ -120,6 +121,7 @@ Le corps vide d'un objet se présente ainsi :
     "datestart": "",
     "dateend": "",
     "datesigned": "",
+    "datePFI": "",
     "pfi": "",
     "type": "",
     "amount": "",
@@ -314,7 +316,10 @@ return [
     120 =>  "amount",
     166 =>  "dateStart",
     167 =>  "dateEnd",
-    427 =>  "codeEOTP",
+    
+    427 =>  "PFI",
+    428 =>  "datePFI",
+    429 =>  "dateSigned",
 
     // Organizations
     3 =>    "organizations.Porteur du projet",
@@ -352,7 +357,7 @@ La valeur de la clef correspond à un code qui sera utilisé pour savoir comment
 | amount | Montant
 | dateStart | Date de début au format YYYY-MM-DD
 | dateEnd | Date de fin au format YYYY-MM-DD
-| codeEOTP | PFI
+| PFI | PFI
 
 Les objets plus complexes comme les organisations, les personnes, les versements et les jalons sont gérés avec des code "pointés". Ils sont sous la forme **objet.paramètre**.
 
