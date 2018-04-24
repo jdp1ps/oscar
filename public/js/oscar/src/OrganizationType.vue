@@ -67,7 +67,6 @@
     </section>
 </template>
 <script>
-    //import OrganizationTypeItem from './OrganizationTypeItem.vue';
     import OrganizationTypeItem from './OrganizationTypeItem.vue';
 
     export default {
