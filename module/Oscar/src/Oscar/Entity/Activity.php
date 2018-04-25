@@ -1442,7 +1442,7 @@ class Activity implements ResourceInterface
     /**
      * @return float
      */
-    public function getAssietteSubventionnable(): float
+    public function getAssietteSubventionnable()
     {
         return $this->assietteSubventionnable;
     }
