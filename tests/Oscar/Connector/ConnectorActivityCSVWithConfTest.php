@@ -58,6 +58,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
 
         $this->assertEquals('R1', $datas[0]['uid']);
         $this->assertEquals('RELATIV', $datas[0]['acronym']);
+        $this->assertEquals('Théorie de la gravitation', $datas[0]['projectlabel']);
 
         $this->assertEquals('EOTP201400002', $datas[0]['pfi']);
 
