@@ -28,6 +28,7 @@ return [
 
     12  => "payments.1.2",
     15  => "payments.1.2",
+    24  => "payments.-1",
 
     18  => "milestones.Rapport financier",
     20  => "type",

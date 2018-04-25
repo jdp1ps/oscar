@@ -728,7 +728,7 @@ class ConsoleController extends AbstractOscarController
         try {
             $sourceFilePath = $this->getReadablePath($this->params('fichier'));
             $configurationFilePath = $this->getReadablePath($this->params('config'));
-            $skip = 1;
+            $skip = $this->params('skip', 1);
 
 
             $configuration = require($configurationFilePath);
@@ -741,7 +741,16 @@ class ConsoleController extends AbstractOscarController
 
             $sync = new ConnectorActivityCSVWithConf($source, $configuration,
                 $this->getEntityManager());
-            echo json_encode($sync->syncAll());
+
+            $datas = $sync->syncAll();
+            $json = json_encode($datas);
+            $error =  json_last_error();
+
+            if( $error ){
+                $this->consoleError($error);
+            } else {
+                echo $json;
+            }
 
         } catch (\Exception $e) {
             $this->consoleError($e->getMessage());

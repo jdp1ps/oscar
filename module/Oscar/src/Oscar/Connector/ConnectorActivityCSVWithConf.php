@@ -231,19 +231,27 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                         "date" => $value
                     ];
                 }
-                else if( preg_match("/payments\.([.\d]*)/", $key, $matches) ){
+                else if( preg_match("/payments\.([\-.\d]*)/", $key, $matches) ){
 
                     $datesPos = explode('.', $matches[1]);
 
                     // Calcule des positions pour les données
                     $paymentAmountPosition = $index;
+
                     $paymentDatePaymentPosition = $index + intval($datesPos[0]);
-                    $paymentDatePredictedPosition = $index + intval($datesPos[1]);
+                    $paymentDatePayment = $this->getCheckedDateString($datas[$paymentDatePaymentPosition]);
+
+                    if( count($datesPos) == 2 ){
+                        $paymentDatePredictedPosition = $index + intval($datesPos[1]);
+                        $paymentDatePredicted = $this->getCheckedDateString($datas[$paymentDatePredictedPosition]);
+                    } else {
+                        $paymentDatePredicted = null;
+                    }
 
                     $json['payments'][] = [
-                        "amount" => doubleval($datas[$paymentAmountPosition]),
-                        "date" => $this->getCheckedDateString($datas[$paymentDatePaymentPosition]),
-                        "predicted" => $this->getCheckedDateString($datas[$paymentDatePredictedPosition]),
+                        "amount" => doubleval(str_replace(',', '.', $datas[$paymentAmountPosition])),
+                        "date" => $paymentDatePayment,
+                        "predicted" => $paymentDatePredicted,
                     ];
                 }
 
@@ -287,6 +295,9 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
      */
     protected function getCheckedDateString( $string ){
         if( $string == "" ) return "";
+        if( !preg_match('/(\d{4})-(\d{2})-(\d{2})/', $string) ){
+            throw new OscarException("Format de date '$string' inattendu, assurez vous que la forme ISO YYYY-MM-JJ est respectée.");
+        }
         $date = new \DateTime($string);
         return $date->format('Y-m-d');
     }

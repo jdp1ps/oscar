@@ -33,7 +33,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
     {
         $config = $this->getDemoConfig();
         $this->assertTrue(is_array($config));
-        $this->assertEquals(17, count($this->getDemoConfig()));
+        $this->assertEquals(18, count($this->getDemoConfig()));
     }
 
 
@@ -74,13 +74,20 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals('2017-12-31', $datas[1]['datesigned']);
 
         /// PAYMENTS
-        $this->assertEquals(2, count($datas[1]['payments']));
+        $this->assertEquals(3, count($datas[1]['payments']));
+
         $this->assertEquals(20000, $datas[1]['payments'][0]['amount']);
         $this->assertEquals('2018-01-01', $datas[1]['payments'][0]['date']);
         $this->assertEquals('2018-01-01', $datas[1]['payments'][0]['predicted']);
+
         $this->assertEquals(25000, $datas[1]['payments'][1]['amount']);
         $this->assertEquals('', $datas[1]['payments'][1]['date']);
         $this->assertEquals('2018-06-01', $datas[1]['payments'][1]['predicted']);
+
+        $this->assertEquals(666.66, $datas[1]['payments'][2]['amount']);
+        $this->assertNull($datas[1]['payments'][2]['predicted']);
+        $this->assertEquals('2020-12-31', $datas[1]['payments'][2]['date']);
+
 
         // MILESTONES
         $this->assertEquals('Rapport financier', $datas[1]['milestones'][0]['type']);

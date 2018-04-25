@@ -302,7 +302,14 @@ class OscarUserContext extends UserContext
 
         try {
             if ($this->getLdapUser()) {
-                return $personService->getPersonByLdapLogin($this->getLdapUser()->getSupannAliasLogin());
+
+                // PATCH Limoges
+                // au cas ou le supannAliasLogin n'est pas fournis...
+                $pseudo = $this->getLdapUser()->getSupannAliasLogin();
+                if( !$pseudo ){
+                    $pseudo = $this->getLdapUser()->getUid();
+                }
+                return $personService->getPersonByLdapLogin($pseudo);
             } elseif ($this->getDbUser()) {
                 return $personService->getPersonByLdapLogin($this->getDbUser()->getUsername());
             }

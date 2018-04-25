@@ -588,7 +588,7 @@ return array(
 
                 'oscar_activityfile_sync2' => [
                     'options' => array(
-                        'route' => 'oscar activity:csvtojson <fichier> <config> [-f|--force] [--cp] [--co] [--cpr] [--cor]',
+                        'route' => 'oscar activity:csvtojson <fichier> <config> [<skip>] [-f|--force] [--cp] [--co] [--cpr] [--cor]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'importActivity2',
