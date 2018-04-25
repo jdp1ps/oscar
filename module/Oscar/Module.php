@@ -277,7 +277,11 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             'oscar activity:csvtojson <fichier> <config> [-f|--force] [--cp] [--co] [--cpr] [--cor]' => "Converti les données CSV au format JSON à partir de la configuration",
             'oscar organizationsjson:sync <fichier>' => "Charge les organisations depuis le fichier source JSON",
             'oscar activity:sync <fichier>' => "Charge les activités depuis le fichier CSV spécifié",
-            'oscar patch checkPrivilegesJSON' => "Mise à jour automatique de la liste des privilèges"
-            ];
+
+            '# MAINTENANCE',
+            'oscar patch checkPrivilegesJSON'   => "Mise à jour automatique de la liste des privilèges",
+            'oscar patch fixSequenceAutoNum'    => "Recalcule les sequencesID des tables",
+
+        ];
     }
 }
