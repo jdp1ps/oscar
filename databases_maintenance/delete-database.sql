@@ -3,6 +3,7 @@ DELETE FROM activityperson;
 DELETE FROM activityorganization;
 DELETE FROM contractdocument;
 DELETE FROM activitypayment;
+DELETE FROM organizationperson;
 DELETE FROM activitydate;
 DELETE FROM projectmember;
 DELETE FROM projectpartner;
