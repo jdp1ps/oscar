@@ -8,26 +8,29 @@
     "uid": "ACME",
     "code": "ACME",
     "shortname": "ACME",
-    "longname": "ACME Corporation"
+    "longname": "ACME Corporation",
+    "type": "Corporation"
   },
   {
     "uid": "Aperture",
     "code": "Aperture",
     "shortname": "Aperture",
-    "longname": "Aperture Science"
+    "longname": "Aperture Science",
+    "type": "Laboratoire"
   },
   {
     "uid": "BNL",
     "code": "BNL",
     "shortname": "BNL",
-    "longname": "Big And Large"
+    "longname": "Big And Large",
+    "type": "Corporation"
   },
   {
     "uid": "COGIP",
     "code": "COGIP",
     "shortname": "COGIP",
     "longname": "Bureau de la COGIP",
-    "type": "Charlot"
+    "type": "Société"
   },
   {
     "uid": "DICOC",
@@ -37,7 +40,8 @@
   {
     "uid": "FONDA",
     "code": "FONDA",
-    "shortname": "Fondation"
+    "shortname": "Fondation",
+    "type": "Fondation"
   },
   {
     "uid": "GROUPW",
@@ -61,13 +65,15 @@
     "uid": "UMBRE",
     "code": "UMBRE",
     "shortname": "Umbrella",
-    "longname": "Umbrella Corporation"
+    "longname": "Umbrella Corporation",
+    "type": "Corporation"
   },
   {
     "uid": "OSCORP",
     "code": "OSCORP",
     "shortname": "Oscorp",
     "longname": "Oscorp Industries",
+    "type": "Société",
     "address": {
       "city": "New York",
       "country": "United States Of America"
@@ -76,7 +82,8 @@
   {
     "uid": "BLACKM",
     "code": "BLACKM",
-    "shortname": "BLACK MESSA"
+    "shortname": "BLACK MESSA",
+    "type": "Laboratoire"
   },
   {
     "uid": "WAYNE",
@@ -85,29 +92,32 @@
     "longname": "Wayne Enterprises",
     "address": {
       "city": "Gotham"
-    }
+    },
+    "type": "Société"
   },
   {
     "uid": "USR",
     "code": "USR",
-    "shortname": "US Robots"
+    "shortname": "US Robots",
+    "type": "Société"
   },
   {
     "uid": "CBD",
     "code": "CBD",
     "shortname": "Cyberdyne",
-    "longname": "Cyberdyne Systems"
+    "longname": "Cyberdyne Systems",
+    "type": "Société"
   },
   {
     "uid": "LABO1",
-    "code": "",
+    "code": "LABO1",
     "shortname": "Olympia",
     "longname": "Groupe Olympia",
     "url": "http://www.jacksay.com",
     "email": "olympia@jacksay.com",
     "siret": "SIRETOLYMPIA",
     "phone": "0231530344",
-    "type": "Fake Corp",
+    "type": "Laboratoire",
     "address": {
       "adress1": "",
       "zipcode": "25478",
@@ -119,13 +129,14 @@
     "uid": "UNIV1",
     "code": "UNIV1",
     "shortname": "USB",
-    "longname": "Université des sciences de Berne"
+    "longname": "Université des sciences de Berne",
+    "type": "Établissement publique"
   },
   {
     "uid": "UNIV2",
     "code": "UNIV2",
-    "type": "Université",
     "shortname": "USB",
-    "longname": "Université des sciences de Berlin"
+    "longname": "Université des sciences de Berlin",
+    "type": "Établissement publique"
   }
 ]

@@ -160,7 +160,8 @@
       box-shadow: inset -2px 2px 4px rgba(0, 0, 0, 0.1); }
     .privilege .droits strong {
       font-weight: 400;
-      flex: 1;
-      padding-left: .5em; }
+      flex: 1; }
     .privilege .droits .roles {
       flex: 3; }
+      .privilege .droits .roles .role {
+        font-size: 12px; }

@@ -8032,20 +8032,35 @@ time.date-missing {
   background: inherit;
   left: 20px; }
 
-.wp-hours .hour {
-  display: inline-block; }
-
-.wp-hours .validate {
-  background: #499D1F; }
-
-.wp-hours .conflicts {
-  background: #DD423E; }
-
-.wp-hours .validating {
-  background: #88df5d; }
-
-.wp-hours .duration {
-  background: #AAA; }
+.wp-hours {
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex; }
+  .wp-hours .wp-hour {
+    text-shadow: -1px 1x 0 rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    padding: 2px 4px;
+    border-right: thin dotted #1F180D; }
+    .wp-hours .wp-hour:hover {
+      color: white; }
+  .wp-hours .wp-hour:last-child {
+    /*border-radius: 0 2px 2px 0;*/
+    border-right: none; }
+  .wp-hours .validate {
+    background: rgba(73, 157, 31, 0.5); }
+    .wp-hours .validate:hover {
+      background: #499D1F; }
+  .wp-hours .conflicts {
+    background: rgba(221, 66, 62, 0.5); }
+    .wp-hours .conflicts:hover {
+      background: #DD423E; }
+  .wp-hours .validating {
+    color: rgba(0, 0, 0, 0.5);
+    background: rgba(136, 223, 93, 0.5); }
+    .wp-hours .validating:hover {
+      background: #499D1F; }
+  .wp-hours .duration {
+    background: #AAA; }
 
 /*
 // ######################################################### ACTIVITY FICHE v2.0

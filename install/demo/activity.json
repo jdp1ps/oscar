@@ -34,7 +34,7 @@
         "Albert Einstein"
       ],
       "Ingénieur": [
-        "John Doe"
+        "John Doe", "Sarah Déclarant"
       ]
     }
   },
@@ -71,7 +71,8 @@
       ],
       "Ingénieur": [
         "John Doe",
-        "Marcel Grossmann"
+        "Marcel Grossmann",
+        "Sarah Déclarant"
       ]
     }
   },
@@ -106,6 +107,10 @@
       ],
       "Chercheur": [
         "Erwin Schrödinger"
+      ],
+      "Ingénieur": [
+        "Marcel Grossmann",
+        "Sarah Déclarant"
       ]
     }
   }

@@ -218,10 +218,12 @@ $brand-info: #5bc0de !default;
     strong {
       font-weight: 400;
       flex: 1;
-      padding-left: .5em;
     }
     .roles {
       flex: 3;
+      .role {
+        font-size: 12px;
+      }
     }
   }
 }
