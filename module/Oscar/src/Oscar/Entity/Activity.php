@@ -1424,7 +1424,7 @@ class Activity implements ResourceInterface
     /**
      * @return string
      */
-    public function getNoteFinanciere(): string
+    public function getNoteFinanciere()
     {
         return $this->noteFinanciere;
     }
