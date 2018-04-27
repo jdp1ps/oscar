@@ -101,13 +101,13 @@ return array(
                 // ACTIVITÉS
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Activity',
-                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate',
+                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
                         'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
                         'notifications', 'generateNotifications', 'generatedDocument'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
-                    'action' => ['index', 'advancedSearch'],
+                    'action' => ['index', 'advancedSearch', 'exportJSON', 'almostDone', 'almostStart'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
                 ],
                 [ 'controller' =>   'Activity',
@@ -115,12 +115,8 @@ return array(
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
                 ],
                 [ 'controller' =>   'Activity',
-                    'action' => ['almostDone', 'almostStart'],
+                    'action' => [],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
-                ],
-                [ 'controller' =>   'Activity',
-                    'action' => ['persons', 'organizations'],
-                    'roles' => ['user']
                 ],
 
                 // DEPENSES

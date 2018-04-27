@@ -204,6 +204,18 @@ class ProjectGrantController extends AbstractOscarController
         return $activity;
     }
 
+
+    public function exportJSONAction(){
+        $activity = $this->getActivityFromRoute();
+        $json = $this->getActivityService()->exportJson($activity);
+
+//        header('Content-Disposition: attachment; filename=activity-'.$activity->getOscarNum().'.json');
+//        header('Content-Length: ' . filesize('/tmp/' . $filename));
+        header('Content-type: application/json');
+        die(json_encode($json));
+    }
+
+
     public function generateNotificationsAction(){
 
         $entity = $this->getActivityFromRoute();

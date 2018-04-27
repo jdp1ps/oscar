@@ -50,6 +50,10 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
             <a href="<?= $this->url('contract/show', ['id'=>$activity->getId()]) ?>" class="more">Fiche</a>
             <?php endif; ?>
 
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EXPORT, $activity)): ?>
+            <a href="<?= $this->url('contract/exportjson', ['id'=>$activity->getId()]) ?>" class="more">Export(JSON)</a>
+            <?php endif; ?>
+
             <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DELETE, $activity)): ?>
             <a data-confirm="Supprimer définitivement cette activité ?" data-href="<?= $this->url('contract/delete', ['id'=>$activity->getId()]) ?>" class="del">Supprimer</a>
             <?php endif; ?>

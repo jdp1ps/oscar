@@ -594,6 +594,13 @@ contract:
                 defaults:
                     action: show
 
+        exportjson:
+            type: segment
+            options:
+                route: /export-json/:id
+                defaults:
+                    action: exportJSON
+
         generatedocument:
             type: segment
             options:
