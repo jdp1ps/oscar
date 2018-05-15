@@ -178,7 +178,6 @@ class ActivityPaymentController extends AbstractOscarController
             $entities = $qb->setParameter('idactivity', $idActivity)->getQuery()->getResult(Query::HYDRATE_ARRAY);
             $view = new JsonModel($entities);
 
-            return $this->getResponseInternalError("ERREUR TEST");
             return $view;
         }
 
