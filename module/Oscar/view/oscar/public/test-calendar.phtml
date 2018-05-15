@@ -1,16 +1,54 @@
-<div id="calendar"></div>
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/modules/unicaen/dist/css/calendar.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/js/modules/unicaen/dist/css/datepicker.css' ?>" />
+<link rel="stylesheet" href="<?= $this->basePath() . '/css/icons/css/fontello.css' ?>" />
+<div class="container">
+    <?php
+    $crenaux = [];
+    $color = 0;
+    $colorActivity = [];
+
+
+    ?>
+    <div id="app">
+        <calendar :create-new="true" calendar-label="Déclaration de vos activités" :moment="moment"></calendar>
+    </div>
+</div>
+
 <script>
-    require(["vue", "calendar2", "mm"], function(Vue, Calendar, moment){
-        console.log(Calendar);
-        new Vue({
-            render(h){
-                return h(Calendar.default, {
-                    props: {
-                        url: '',
-                        moment: moment
-                    }
-                })
+    require(['vue', 'vue-resource', 'calendar2', 'mm'], function(Vue, VueResource, Calendar, mm){
+
+        Vue.use(VueResource);
+
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true
+
+        var customDatas = [];
+
+        var mixins = {
+            methods: {
+                restUrl(){
+                    return '<?= $this->url('timesheet/api') ?>'
+                },
+                customDatas(){
+                    return customDatas;
+                }
             }
-        }).$mount('#calendar');
+        }
+
+        Calendar.default.mixins = [
+            mixins
+        ];
+
+        var vue = new Vue({
+            el: "#app",
+            computed: {
+                moment(){
+                    return mm;
+                }
+            },
+            components: {
+                'calendar': Calendar.default
+            }
+        });
     })
 </script>

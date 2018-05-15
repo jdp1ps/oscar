@@ -386,7 +386,7 @@
                 var minutes = Math.round((time - hours)*60);
                 var start = this.moment(this.currentDay).day(day).hour(time).minutes(minutes);
                 var end = this.moment(start).add(duration, 'minutes');
-                var newEvent = new EventDT({
+                this.$emit('createevent', {
                     id: null,
                     label: this.defaultLabel,
                     start: start.format(),
@@ -397,7 +397,6 @@
                         deletable: true
                     }
                 });
-                this.$emit('createevent', newEvent);
             },
 
             copyDay(dt){
