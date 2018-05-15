@@ -310,9 +310,9 @@
                 datas.append('amount', this.formData.amount);
                 datas.append('currencyId', this.formData.currencyId);
                 datas.append('rate', this.formData.rate);
-                datas.append('datePredicted', this.formData.datePredicted);
+                datas.append('datePredicted', this.formData.datePredicted ? this.formData.datePredicted : "");
                 datas.append('status', this.formData.status);
-                datas.append('datePayment', this.formData.datePayment);
+                datas.append('datePayment', this.formData.datePayment ? this.formData.datePayment : "");
                 datas.append('codeTransaction', this.formData.codeTransaction);
                 datas.append('comment', this.formData.comment);
 
@@ -341,7 +341,6 @@
                         this.fetch();
                     },
                     (fail) => {
-                        console.log(fail);
                         this.error = "Impossible de supprimer le versement : " + fail.body;
                     }
                 ).then( () => {
@@ -355,11 +354,10 @@
             fetch(){
                 this.$http.get(this.url).then(
                     (success) => {
-                        console.log('SUCCESS', success.data, this.model)
                         this.model.payments = success.data;
                     },
                     (fail) => {
-                        console.log('FAIL', fail)
+                        this.error = "Impossible de charger les versements : " + fail.body;
                     }
                 );
             }
