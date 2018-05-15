@@ -22,6 +22,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\Person;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Role;
@@ -48,6 +49,72 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
     protected function getActivityRepository()
     {
        return $this->getEntityManager()->getRepository(Activity::class);
+    }
+
+    public function exportJsonPerson( Person $person ){
+        $datas = $person->toJson();
+        $datas['uid'] = $person->getId();
+        return $datas;
+    }
+
+    public function exportJsonOrganization( Organization $organization ){
+        $datas = $organization->toArray();
+        $datas['uid'] = $organization->getId();
+        return $datas;
+    }
+
+    public function exportJsonActivity( Activity $activity ){
+        $datas = $activity->toArray();
+        $datas['uid'] = $activity->getOscarNum();
+
+        $datas['persons'] = [];
+        foreach ($activity->getPersonsDeep() as $activityPerson) {
+            $role = $activityPerson->getRole();
+            if( !array_key_exists($role, $datas['persons']) ){
+                $datas['persons'][$role] = [];
+            }
+            $datas['persons'][$role][] = $activityPerson->getPerson()->getDisplayName();
+        }
+
+        $datas['organizations'] = [];
+        foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
+            $role = $activityOrganization->getRole();
+            if( !array_key_exists($role, $datas['organizations']) ){
+                $datas['organizations'][$role] = [];
+            }
+            $datas['organizations'][$role][] = (string) $activityOrganization->getOrganization();
+        }
+
+        $datas['payments'] = [];
+        /** @var ActivityPayment $payment */
+        foreach ($activity->getPayments() as $payment) {
+            $datas['payments'][] = [
+                'amount' => $payment->getAmount(),
+                'date' => $payment->getDatePayment() ? $payment->getDatePayment()->format('Y-m-d') : null,
+                'predicted' => $payment->getDatePredicted() ? $payment->getDatePredicted()->format('Y-m-d') : null
+
+            ];
+        }
+
+        $datas['milestones'] = [];
+        /** @var ActivityDate $milestone */
+        foreach ($activity->getMilestones() as $milestone) {
+            $type = (string) $milestone->getType();
+            $datas['milestones'][] = [
+                'type' => $type,
+                'date' => $milestone->getDateStart()->format('Y-m-d')
+            ];
+        }
+
+
+        return $datas;
+    }
+
+    public function exportJson( $object ){
+        switch( get_class($object) ){
+            case Activity::class:
+                return $this->exportJsonActivity($object);
+        }
     }
 
     /**

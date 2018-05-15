@@ -40,6 +40,9 @@ data/*
 !data/documents/activity/.gitkeep
 !data/documents/public/.gitkeep
 
+# Residus
+public/js/oscar/dist/index.html
+
 # Librairies
 /vendor
 node_modules

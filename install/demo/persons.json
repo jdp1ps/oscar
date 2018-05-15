@@ -79,10 +79,7 @@
     "lastname": "Responsable",
     "mail": "raphaelle.responsable@jacksay.com",
     "login": "responsable",
-    "uid": "responsable",
-    "roles": {
-      "LABO1": ["Directeur de laboratoire"]
-    }
+    "uid": "responsable"
   },
   {
     "firstname": "Sarah",
@@ -90,5 +87,15 @@
     "mail": "sarah.declarant@jacksay.com",
     "login": "declarant",
     "uid": "declarant"
+  },
+  {
+    "firstname": "Emmanuelle",
+    "lastname": "Direction",
+    "mail": "emmanuelle.direction@jacksay.com",
+    "login": "direction",
+    "uid": "direction",
+    "roles": {
+      "LABO1": ["Directeur de composante"]
+    }
   }
 ]

@@ -12,6 +12,13 @@ home:
             controller: Public
             action: index
 
+testcalendar:
+    type: literal
+    options:
+        route: /testcalendar
+        defaults:
+            controller: Public
+            action: testCalendar
 
 changelog:
     type: literal
@@ -593,6 +600,13 @@ contract:
                 route: /fiche-detaillee/:id
                 defaults:
                     action: show
+
+        exportjson:
+            type: segment
+            options:
+                route: /export-json/:id
+                defaults:
+                    action: exportJSON
 
         generatedocument:
             type: segment
