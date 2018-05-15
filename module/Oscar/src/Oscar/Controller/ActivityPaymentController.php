@@ -14,6 +14,7 @@ use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\Currency;
+use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityPaymentForm;
 use Oscar\Form\ActivityTypeForm;
@@ -112,6 +113,7 @@ class ActivityPaymentController extends AbstractOscarController
                     $rate = $this->params()->fromPost('rate');
                     $datePredicted = $this->params()->fromPost('datePredicted');
                     $datePayment = $this->params()->fromPost('datePayment');
+
                     if( $datePayment )
                         $payment->setDatePayment(new \DateTime($datePayment));
 
@@ -175,6 +177,8 @@ class ActivityPaymentController extends AbstractOscarController
                 ->addOrderBy('p.datePayment');
             $entities = $qb->setParameter('idactivity', $idActivity)->getQuery()->getResult(Query::HYDRATE_ARRAY);
             $view = new JsonModel($entities);
+
+            return $this->getResponseInternalError("ERREUR TEST");
             return $view;
         }
 
