@@ -554,7 +554,7 @@ class AdministrationController extends AbstractOscarController
                         $this->hydrateRolewithPost($role, $request);
                         /** @var Role $otherRole */
                         $otherRole = $this->getEntityManager()->getRepository(Role::class)->findOneBy(['roleId' => $role->getRoleId()]);
-                        if ($role->getId() != $otherRole->getId()) {
+                        if ($otherRole && $role->getId() != $otherRole->getId()) {
                             return $this->getResponseBadRequest("Un rôle a déjà cet identifiant.");
                         }
 
