@@ -1,0 +1,16 @@
+<div id="calendar"></div>
+<script>
+    require(["vue", "calendar2", "mm"], function(Vue, Calendar, moment){
+        console.log(Calendar);
+        new Vue({
+            render(h){
+                return h(Calendar.default, {
+                    props: {
+                        url: '',
+                        moment: moment
+                    }
+                })
+            }
+        }).$mount('#calendar');
+    })
+</script>

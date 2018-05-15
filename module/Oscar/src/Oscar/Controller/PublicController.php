@@ -24,6 +24,10 @@ class PublicController extends AbstractOscarController
         return ['log' => $log];
     }
 
+    public function testCalendarAction(){
+        return [];
+    }
+
     public function parametersAction()
     {
         $this->getLogger()->debug("PARAMETERS");

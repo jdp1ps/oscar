@@ -36,6 +36,10 @@ return array(
                     'action' => ['documentation', 'parameters'],
                     'roles' => ['user'],
                 ],
+                [ 'controller' =>  'Public',
+                    'action' => ['testCalendar'],
+                    'roles' => ['Administrateur'],
+                ],
 
                 [ 'controller' =>  'Notification',
                     'action' => ['indexPerson', 'index', 'test'],

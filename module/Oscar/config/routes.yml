@@ -12,6 +12,13 @@ home:
             controller: Public
             action: index
 
+testcalendar:
+    type: literal
+    options:
+        route: /testcalendar
+        defaults:
+            controller: Public
+            action: testCalendar
 
 changelog:
     type: literal
