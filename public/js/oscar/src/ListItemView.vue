@@ -17,7 +17,7 @@
         <strong>{{ event.label }}</strong>
         <div class="details">
             <h4>
-                <i class="picto" :style="{background: colorLabel}"></i>
+                <i class="picto" :style="{background: color}"></i>
                 {{ event.label }} {{ event.status }}</h4>
             <p class="time">
                 de <time class="start">{{ beginAt }}</time> à <time class="end">{{ endAt }}</time>, <em>{{ event.duration }}</em> heure(s) ~ état : <em>{{ event.status }}</em>
@@ -81,8 +81,8 @@
 
                 return 'status-' + this.event.status;
             },
-            colorLabel(){
-                return colorLabel(this.event.label);
+            color(){
+                return this.colorLabel(this.event.label);
             },
             css(){
                 var percentUnit = 100 / (18 * 60)
@@ -93,7 +93,7 @@
                     top: this.event.decaleY*1.75 +"em",
                     left: (percentUnit * start) + '%',
                     width: (percentUnit * (end - start)) + '%',
-                    background: this.colorLabel
+                    background: this.color
                 }
             }
         }

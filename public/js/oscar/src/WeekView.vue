@@ -65,6 +65,7 @@
                         <div class="gost" :style="gostStyle" v-show="gostDatas.drawing">&nbsp;</div>
                         <timeevent v-for="event in weekEvents"
                                    :with-owner="withOwner"
+                                   :store="store"
                                    :weekDayRef="currentDay"
                                    v-if="inCurrentWeek(event)"
                                    @deleteevent="$emit('deleteevent', event)"
@@ -98,6 +99,9 @@
     </div>
 </template>
 <script>
+
+    import TimeEvent from './TimeEvent.vue';
+
     export default {
         data(){
             return this.store

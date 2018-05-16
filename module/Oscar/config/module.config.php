@@ -38,7 +38,7 @@ return array(
                 ],
                 [ 'controller' =>  'Public',
                     'action' => ['testCalendar'],
-                    'roles' => ['Administrateur'],
+                    'roles' => ['user'],
                 ],
 
                 [ 'controller' =>  'Notification',

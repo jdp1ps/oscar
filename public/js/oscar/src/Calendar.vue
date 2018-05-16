@@ -1,6 +1,5 @@
 <template>
     <div class="calendar">
-
     <transition name="fade">
 
         <div class="calendar-tooltip" :class="'status-'+tooltip.event.status" v-if="tooltip">
@@ -63,7 +62,7 @@
         </div>
     </transition>
 
-    <importview :creneaux="labels"
+    <importview :creneaux="labels" :store="store" :moment="moment"
                 @cancel="importInProgress = false"
                 @import="importEvents"
                 v-if="importInProgress"
@@ -107,9 +106,10 @@
 
     <div class="editor" v-show="eventEditDataVisible">
         <form @submit.prevent="editSave">
+            <pre style="max-height: 300px; overflow: scroll">{{ eventEditData }}</pre>
             <div class="form-group">
                 <label for="">Intitulé</label>
-                <selecteditable v-model="eventEditData.label" :chooses="labels"></selecteditable>
+                <selecteditable v-model="eventEditData.label" :chooses="labels" @input="updateLabel"></selecteditable>
             </div>
             <div v-if="withOwner">
                 {{ eventEditData.owner_id }}
@@ -213,7 +213,7 @@
               @rejectshow="handlerRejectShow"
               @saveevent="restSave"></weekview>
 
-    <!-- <listview v-if="state == 'list'"
+    <listview v-if="state == 'list'"
               :with-owner="withOwner"
               :store="store"
               :moment="moment"
@@ -221,7 +221,7 @@
               @deleteevent="handlerDeleteEvent"
               @validateevent="handlerValidateEvent"
               @rejectevent="handlerRejectEvent"
-              @submitevent="handlerSubmitEvent"></listview> -->
+              @submitevent="handlerSubmitEvent"></listview>
 </div>
 </template>
 <script>
@@ -231,7 +231,6 @@
     import ImportICSView from './ImportICSView.vue';
     import SelectEditable from './SelectEditable.vue';
 
-    import Datepicker from './Datepicker.vue';
     import TimeEvent from './TimeEvent.vue';
     import moment from 'moment';
 
@@ -438,6 +437,7 @@
     }
 
     EventDT.UID = 1;
+    moment.locale('fr');
 
     class CalendarDatas {
         constructor() {
@@ -839,7 +839,6 @@
     }
 
     var store = new CalendarDatas();
-    console.log(store);
 
     export default {
 
@@ -848,10 +847,6 @@
         },
 
         props: {
-            moment: {
-                required: true
-            },
-
             withOwner: {
                 default: false
             },
@@ -884,6 +879,9 @@
         computed: {
             store(){
                 return store
+            },
+            moment(){
+                return moment;
             }
         },
 
@@ -903,6 +901,10 @@
         },
 
         methods: {
+            updateLabel(v){
+                console.log(v);
+                this.eventEditData.label = v;
+            },
             /**
              * Envoi des données (de la semaine), @todo Faire la variante pour les mois.
              * @param status
@@ -1400,23 +1402,13 @@
 
         mounted(){
             var allowState = ['week', 'list', 'timesheet'];
-
-            var colorLabels = {};
-            var colorIndex = 0;
-            var colorpool = ['#fcdc80', '#a6cef8', '#9fd588', '#fb90bb', '#e5fbed', '#99a0ce', '#bca078', '#f3cafd', '#d9f4c1', '#60e3bb', '#f2c7f5', '#f64bc0', '#ffc1b2', '#fc9175', '#d7fc74', '#e3d7f8', '#9ffab3', '#d6cbac', '#4dd03c', '#f8f3be'];
-
-            var colorLabel = (label) => {
-                if (!colorLabels[label]) {
-                    colorLabels[label] = colorpool[++colorIndex];
-                    colorIndex = colorIndex % colorpool.length;
-                }
-                return colorLabels[label];
-            };
-
-
             this.state = 'week';
             if( allowState.indexOf(window.location.hash.substring(1)) >= 0 ){
                 this.state = window.location.hash.substring(1);
+            }
+
+            if (this.ownersList) {
+                this.store.owners = this.ownersList();
             }
 
             if (this.customDatas) {
@@ -1425,31 +1417,36 @@
 
                 for (var k in customs) {
                     if (customs.hasOwnProperty(k)) {
-                        store.activities.pushIfNot({
+                        this.store.activities.pushIfNot({
                             id: customs[k].idactivity,
                             label: customs[k].activity
                         }, 'id');
 
-                        colorLabels[k] = colorpool[customs[k].color];
+//                        colorLabels[k] = colorpool[customs[k].color];
 
                         if( customs[k].active ){
-                            if (!store.defaultLabel) {
-                                store.defaultLabel = k;
+                            if (!this.store.defaultLabel) {
+                                this.store.defaultLabel = k;
                             }
-                            store.labels.push(k);
+                            this.store.labels.push(k);
                         }
                     }
                 }
-                colorIndex++;
-            }
-
-            if (this.ownersList) {
-                store.owners = this.ownersList();
             }
 
             if (this.restUrl) {
                 this.fetch();
             }
         }
+    }
+
+    Array.prototype.pushIfNot = function(obj, testField){
+        var add = true,
+            val = obj[testField];
+        for( var i=0; i<this.length; i++ ){
+            if(this[i][testField] == obj[testField]) add = false;
+        }
+        if( add )
+            this.push(obj)
     }
 </script>

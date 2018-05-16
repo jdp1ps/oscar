@@ -7,6 +7,8 @@
     $color = 0;
     $colorActivity = [];
 
+
+
     /** @var \Oscar\Entity\WorkPackage $wpd */
     foreach( $wpDeclarants as $wpd ){
         if( !array_key_exists($wpd->getActivity()->getId(), $colorActivity) ){
@@ -26,12 +28,12 @@
     }
     ?>
     <div id="app">
-        <calendar :create-new="true" calendar-label="Déclaration de vos activités"></calendar>
+        <calendar :create-new="true" calendar-label="Déclaration de vos activités" :moment="moment"></calendar>
     </div>
 </div>
 
 <script>
-    require(['vue', 'vue-resource', 'calendar'], function(Vue, VueResource, Calendar){
+    require(['vue', 'vue-resource', 'calendar2', 'mm'], function(Vue, VueResource, Calendar, mm){
 
         Vue.use(VueResource);
 
@@ -40,6 +42,28 @@
 
         var customDatas = <?= json_encode($crenaux) ?>;
 
+        console.log(customDatas);
+
+        var colorLabels = {};
+        var colorIndex = 0;
+        var colorpool = ['#fcdc80', '#a6cef8', '#9fd588', '#fb90bb', '#e5fbed', '#99a0ce', '#bca078', '#f3cafd', '#d9f4c1', '#60e3bb', '#f2c7f5', '#f64bc0', '#ffc1b2', '#fc9175', '#d7fc74', '#e3d7f8', '#9ffab3', '#d6cbac', '#4dd03c', '#f8f3be'];
+
+        Vue.mixin({
+            methods: {
+                getMoment(){
+                    return mm;
+                },
+
+                colorLabel: function(label) {
+                    if (!colorLabels[label]) {
+                        colorLabels[label] = colorpool[++colorIndex];
+                        colorIndex = colorIndex % colorpool.length;
+                    }
+                    return colorLabels[label];
+                }
+            }
+        });
+
         var mixins = {
             methods: {
                 restUrl(){
@@ -47,19 +71,64 @@
                 },
                 customDatas(){
                     return customDatas;
+                },
+                formatDuration: function(milliseconde){
+                        var h = Math.floor(milliseconde / 60 / 60);
+                        var m = (milliseconde - (h * 60 * 60)) / 60;
+                        return h + (m ? 'h' + m : '');
+
                 }
             }
-        }
+        };
 
-        Calendar.mixins = [
+        Calendar.default.mixins = [
             mixins
         ];
 
         var vue = new Vue({
             el: "#app",
+            computed: {
+                moment(){
+                    return mm;
+                }
+            },
             components: {
-                'calendar': Calendar
+                'calendar': Calendar.default
+            },
+            mounted: function(){
+                console.log(this.getMoment());
             }
         });
     })
+//    require(['vue', 'vue-resource', 'calendar'], function(Vue, VueResource, Calendar){
+//
+//        Vue.use(VueResource);
+//
+//        Vue.http.options.emulateJSON = true;
+//        Vue.http.options.emulateHTTP = true
+//
+//        var customDatas = <?//= json_encode($crenaux) ?>//;
+//
+//        var mixins = {
+//            methods: {
+//                restUrl(){
+//                    return '<?//= $this->url('timesheet/api') ?>//'
+//                },
+//                customDatas(){
+//                    return customDatas;
+//                }
+//            }
+//        }
+//
+//        Calendar.mixins = [
+//            mixins
+//        ];
+//
+//        var vue = new Vue({
+//            el: "#app",
+//            components: {
+//                'calendar': Calendar
+//            }
+//        });
+//    })
 </script>

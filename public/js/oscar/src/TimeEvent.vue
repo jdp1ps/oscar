@@ -95,8 +95,10 @@
     </div>
 </template>
 <script>
+    import moment from 'moment';
+
     export default {
-        props: ['event', 'weekDayRef', 'withOwner'],
+        props: ['event', 'weekDayRef', 'withOwner', 'store'],
 
         data(){
             return {
@@ -153,7 +155,7 @@
                 return {
                     'pointer-events': this.changing ? 'none' : 'auto',
                     height: (this.pixelEnd - this.pixelStart) + 'px',
-                    background: this.withOwner ? colorLabel(this.event.owner) : colorLabel(this.event.label),
+                    background: this.withOwner ? this.colorLabel(this.event.owner) : this.colorLabel(this.event.label),
                     position: "absolute",
                     //'opacity': (this.changing ? '1' : 'inherit'),
                     top: this.pixelStart + 'px',
@@ -203,10 +205,6 @@
                 );
             },
 
-            colorLabel(){
-                return colorLabel(this.event.label);
-            },
-
             isLocked(){
                 return this.event.isLocked;
             },
@@ -242,8 +240,16 @@
         },
 
         methods: {
+            formatDuration: function(milliseconde){
+                var h = Math.floor(milliseconde / 60 / 60);
+                var m = (milliseconde - (h * 60 * 60)) / 60;
+                return h + (m ? 'h' + m : '');
+
+            },
+
             handlerTooltipOn(event, e){
-                store.tooltip = {
+                console.log(this.store);
+                this.store.tooltip = {
                     title: '<h3>' + event.label +'</h3>',
                     event: event,
                     x: '50px',
@@ -251,7 +257,7 @@
                 };
             },
             handlerTooltipOff(event, e){
-                store.tooltip = "";
+                this.store.tooltip = "";
             },
             /**
              * Déclenche l'affichage du rejet.
@@ -394,7 +400,7 @@
                     startMinutes: startMinutes,
                     endHours: endHours,
                     endMinutes: endMinutes,
-                    duration: formatDuration(((endHours * 60 + endMinutes) - (startHours * 60 + startMinutes)) * 60),
+                    duration: this.formatDuration(((endHours * 60 + endMinutes) - (startHours * 60 + startMinutes)) * 60),
                     startLabel: this.formatZero(startHours) + ':' + this.formatZero(startMinutes),
                     endLabel: this.formatZero(endHours) + ':' + this.formatZero(endMinutes)
                 };
@@ -402,9 +408,10 @@
         },
 
         mounted(){
+            console.log("TEST", this.formatDuration);
             this.labelStart = this.dateStart.format('H:mm');
             this.labelEnd = this.dateEnd.format('H:mm');
-            this.labelDuration = formatDuration(this.dateEnd.unix() - this.dateStart.unix());
+            this.labelDuration = this.formatDuration(this.dateEnd.unix() - this.dateStart.unix());
         }
     }
 </script>

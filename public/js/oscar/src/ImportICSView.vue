@@ -43,12 +43,12 @@
                     <section class="etape1 row" v-if="etape == 1">
                         <div class="col-md-1">Du</div>
                         <div class="col-md-5">
-                            <datepicker v-model="periodStart"></datepicker>
+                            <datepicker v-model="periodStart" :moment="moment"></datepicker>
                         </div>
 
                         <div class="col-md-1">au</div>
                         <div class="col-md-5">
-                            <datepicker v-model="periodEnd"></datepicker>
+                            <datepicker v-model="periodEnd" :moment="moment"></datepicker>
                         </div>
                         <p>Choisissez un fichier ICS : </p>
                         <input type="file" @change="loadIcsFile">
@@ -100,6 +100,8 @@
 
     export default {
         props: {
+            'store': { require: true },
+            'moment': { require: true },
             'creneaux': {
                 default: ['test A', 'test B', 'test C']
             }
@@ -120,7 +122,7 @@
 
         filters: {
             moment( str ){
-                let m = moment(str);
+                let m = this.moment(str);
                 return m.format('DD MMMM YYYY') + '(' + m.fromNow() +')';
             }
         },
@@ -132,10 +134,10 @@
 
         computed: {
             workpackages(){
-                return store.wps;
+                return this.store.wps;
             },
             existingIcs(){
-                return store.ics;
+                return this.store.ics;
             },
             packs(){
                 var packs = [];
@@ -206,21 +208,21 @@
                     [{startTime: '9:00', endTime: '12:30'}, {startTime: '14:00', endTime: '17:30'}]
                 );
                 var events = analyser.parse(ICAL.parse(content));
-                var after = this.periodStart ? moment(this.periodStart) : null;
-                var before = this.periodEnd ? moment(this.periodEnd) : null;
+                var after = this.periodStart ? this.moment(this.periodStart) : null;
+                var before = this.periodEnd ? this.moment(this.periodEnd) : null;
                 var icsName  =  "";
                 this.importedEvents = [];
                 this.labels = [];
 
                 // On précalcule les correspondances possibles entre les créneaux trouvés
                 // et les informations disponibles sur les Workpackage
-                console.log(store.wps);
+                console.log(this.store.wps);
 
 
                 events.forEach(item => {
                     icsName = item.icsfilename;
-                    item.mmStart = moment(item.start);
-                    item.mmEnd = moment(item.end);
+                    item.mmStart = this.moment(item.start);
+                    item.mmEnd = this.moment(item.end);
                     item.imported = false;
                     item.useLabel = "";
                     if( (after == null || (item.mmStart > after)) && (before == null || (item.mmEnd < before ))) {
@@ -240,8 +242,8 @@
                     let out = "";
                     label = label.toLowerCase();
 
-                    Object.keys(store.wps).map((objectKey, index) => {
-                        let wpDatas = store.wps[objectKey],
+                    Object.keys(this.store.wps).map((objectKey, index) => {
+                        let wpDatas = this.store.wps[objectKey],
                             wpCode = wpDatas.code.toLowerCase(),
                             acronym = wpDatas.acronym.toLowerCase(),
                             code = wpDatas.activity_code.toLowerCase()
@@ -283,9 +285,9 @@
                 }
 
                 /*
-                if( store.wps  ){
-                    Object.keys(store.wps).map((objectKey, index) => {
-                        associations[objectKey] = associationParser(store.wps[objectKey], this.labels);
+                if( this.store.wps  ){
+                    Object.keys(this.store.wps).map((objectKey, index) => {
+                        associations[objectKey] = associationParser(this.store.wps[objectKey], this.labels);
                     });
                 }
                 /****/

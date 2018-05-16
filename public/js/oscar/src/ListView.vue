@@ -1,11 +1,12 @@
 <template>
     <div class="calendar calendar-list">
-        <section v-for="eventsYear, year in listEvents" class="year-pack">
+
+        <section v-for="eventsYear, year in listEvents" class="year-pack" v-if="store">
             <h2 class="flex-position">
                 <strong>
                     <span @click="toggle(year)">
-                        <i class="icon-right-dir" v-show="listEventsOpen.indexOf(year) == -1"></i>
-                        <i class="icon-down-dir" v-show="listEventsOpen.indexOf(year) >= 0"></i>
+                        <i class="icon-right-dir" v-show="store.listEventsOpen.indexOf(year) == -1"></i>
+                        <i class="icon-down-dir" v-show="store.listEventsOpen.indexOf(year) >= 0"></i>
                         {{year}}
                     </span>
                     <nav class="reject-valid-group" v-if="eventsYear.credentials.actions">
@@ -22,12 +23,13 @@
                 </strong>
                 <span class="onright total">{{ eventsYear.total }} heure(s)</span>
             </h2>
-            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack" v-show="listEventsOpen.indexOf(year) >= 0">
+
+            <section v-for="eventsMonth, month in eventsYear.months" class="month-pack" v-show="store.listEventsOpen.indexOf(year) >= 0">
                 <h3 class="flex-position">
                     <strong>
                     <span  @click="toggle(year+'-'+month)">
-                        <i class="icon-right-dir" v-show="listEventsOpen.indexOf(year+'-'+month) == -1"></i>
-                        <i class="icon-down-dir" v-show="listEventsOpen.indexOf(year+'-'+month) >= 0"></i>
+                        <i class="icon-right-dir" v-show="store.listEventsOpen.indexOf(year+'-'+month) == -1"></i>
+                        <i class="icon-down-dir" v-show="store.listEventsOpen.indexOf(year+'-'+month) >= 0"></i>
                         {{month}}
                     </span>
                         <nav class="reject-valid-group" v-if="eventsMonth.credentials.actions">
@@ -43,7 +45,7 @@
                     </strong>
                     <span class="onright total">{{eventsMonth.total}} heure(s)</span>
                 </h3>
-                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack" v-show="listEventsOpen.indexOf(year+'-'+month) >= 0">
+                <section v-for="eventsWeek, week in eventsMonth.weeks" class="week-pack" v-show="store.listEventsOpen.indexOf(year+'-'+month) >= 0">
                     <h4 class="flex-position">
                         <strong>Semaine {{week}} ~
                             <nav class="reject-valid-group" v-if="eventsWeek.credentials.actions">
@@ -102,22 +104,29 @@
 
     export default {
         data(){
-            return store
+            return {
+
+            }
         },
 
         computed: {
             firstDate(){
-                return store.firstEvent;
+                return this.store.firstEvent;
             },
             lastDate(){
-                return store.lastEvent;
+                return this.store.lastEvent;
             },
             open(){
-                return store.listEventsOpen;
+                return this.store.listEventsOpen;
             }
         },
 
-        props: ['withOwner'],
+        props: {
+            'withOwner': {},
+
+            'moment': { require: true},
+            'store': { require: true}
+        },
 
         components: {
             listitem: ListItemView
@@ -126,16 +135,16 @@
         methods: {
 
             toggle(tag){
-                if( store.listEventsOpen.indexOf(tag) == -1 ){
-                    store.listEventsOpen.push(tag);
+                if( this.store.listEventsOpen.indexOf(tag) == -1 ){
+                    this.store.listEventsOpen.push(tag);
                 } else {
-                    store.listEventsOpen.splice(store.listEventsOpen.indexOf(tag), 1);
+                    this.store.listEventsOpen.splice(this.store.listEventsOpen.indexOf(tag), 1);
                 }
             },
 
             selectEvent(event){
-                store.currentDay = moment(event.start);
-                store.state = "week";
+                this.store.currentDay = moment(event.start);
+                this.store.state = "week";
             },
 
             getMonthPack(pack){
@@ -204,24 +213,25 @@
             }
         },
 
+
         computed: {
             listEvents(){
 
-                if (!store.listEvents) {
+                if (!this.store.listEvents) {
                     return null
                 }
 
                 var structure = {};
                 var owners = [];
-                var events = store.listEvents;
+                var events = this.store.listEvents;
 
 
 
                 for (let i = 0; i < events.length; i++) {
                     let event = events[i];
-                    if (!(store.filterActivity == '' || store.filterActivity == event.activityId) ) continue;
-                    if (!(store.filterOwner == '' || store.filterOwner == event.owner_id)) continue;
-                    if (!(store.filterType == '' || store.filterType == event.status )) continue;
+                    if (!(this.store.filterActivity == '' || this.store.filterActivity == event.activityId) ) continue;
+                    if (!(this.store.filterOwner == '' || this.store.filterOwner == event.owner_id)) continue;
+                    if (!(this.store.filterType == '' || this.store.filterType == event.status )) continue;
 
                     let currentYear, currentMonth, currentWeek, currentDay;
                     let duration = event.duration;
