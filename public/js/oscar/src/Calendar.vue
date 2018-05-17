@@ -232,7 +232,6 @@
     import SelectEditable from './SelectEditable.vue';
 
     import TimeEvent from './TimeEvent.vue';
-    import moment from 'moment';
 
     class EventDT {
 
@@ -438,7 +437,6 @@
     }
 
     EventDT.UID = 1;
-    moment.locale('fr');
 
     class CalendarDatas {
         constructor() {
@@ -840,12 +838,10 @@
         }
     }
 
-    var store = new CalendarDatas();
-
     export default {
 
         data(){
-            return store
+            return new CalendarDatas()
         },
 
         props: {
@@ -880,7 +876,7 @@
 
         computed: {
             store(){
-                return store
+                return this.$data
             },
             moment(){
                 return moment;
@@ -922,10 +918,10 @@
                     });
                 }
                 if (events.length) {
-//                    bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
-//                        if (confirm)
-//                            this.restStep(events, status);
-//                    });
+                    bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
+                        if (confirm)
+                            this.restStep(events, status);
+                    });
                 }
             },
 
@@ -950,10 +946,10 @@
 
                 // Envoi
                 if (events.length) {
-//                    bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
-//                        if (confirm)
-//                            this.restStep(events, 'send');
-//                    });
+                    bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
+                        if (confirm)
+                            this.restStep(events, 'send');
+                    });
                 }
             },
 
@@ -1072,7 +1068,7 @@
                 if (events.length) {
                     this.showRejectModal(events, 'reject' + type);
                 } else {
-                    // bootbox.alert("Aucun créneaux ne peut être rejeté");
+                    bootbox.alert("Aucun créneaux ne peut être rejeté");
                 }
             },
 
@@ -1090,14 +1086,14 @@
 
                 if (events.length) {
                     let message = events.length == 1 ? " du créneau " : " des " + events.length + " créneaux ";
-//                    bootbox.confirm(type == 'sci' ?
-//                        '<i class="icon-beaker"></i> Validation scientifique ' + message
-//                        : '<i class="icon-archive"></i>   Validation administrative' + message
-//                        , (response) => {
-//                            if (response) {
-//                                this.restStep(events, 'validate' + type)
-//                            }
-//                        })
+                    bootbox.confirm(type == 'sci' ?
+                        '<i class="icon-beaker"></i> Validation scientifique ' + message
+                        : '<i class="icon-archive"></i>   Validation administrative' + message
+                        , (response) => {
+                            if (response) {
+                                this.restStep(events, 'validate' + type)
+                            }
+                        })
                 } else {
                     // bootbox.alert("Aucun créneau ne peut être validé");
                 }
@@ -1149,10 +1145,10 @@
                     }
                     data.append('events', JSON.stringify(datas));
 
-                    store.loading = true;
+                    this.loading = true;
                     this.$http.post(this.restUrl(), data).then(
                         response => {
-                            store.sync(response.body.timesheets);
+                            this.store.sync(response.body.timesheets);
                             this.handlerEditCancelEvent();
                         },
                         error => {
@@ -1160,7 +1156,7 @@
                         }
                     ).then(() => {
                         this.transmission = "";
-                        store.loading = false;
+                        this.loading = false;
                     });
                     ;
                 }
@@ -1194,7 +1190,7 @@
                     this.loading = true;
                     this.$http.post(this.restUrl(), data).then(
                         response => {
-                            store.sync(response.body.timesheets);
+                            this.store.sync(response.body.timesheets);
                             this.displayRejectModal = false;
                             this.handlerEditCancelEvent();
                         },
@@ -1215,11 +1211,11 @@
                 this.transmission = "Suppression...";
                 this.$http.delete(this.restUrl() + "?icsuid=" + icsuid).then(
                     response => {
-                        store.events = [];
+                        this.events = [];
                         this.fetch();
                     },
                     error => {
-                        store.errors.push(error);
+                        this.errors.push(error);
                     }
                 ).then(() => {
                     this.transmission = "";
@@ -1262,7 +1258,7 @@
                 if (event.length) {
                     events = event;
                 } else {
-                    store.defaultLabel = event.label;
+                    this.defaultLabel = event.label;
                     events = [event];
                 }
 
@@ -1275,12 +1271,12 @@
                 }
 
                 if (eventsSend.length) {
-//                    bootbox.confirm("Soumettre le(s) " + eventsSend.length + " créneau(x) ?", (confirm) => {
-//                        if (confirm)
-//                            this.restSend(eventsSend);
-//                    });
+                    bootbox.confirm("Soumettre le(s) " + eventsSend.length + " créneau(x) ?", (confirm) => {
+                        if (confirm)
+                            this.restSend(eventsSend);
+                    });
                 } else {
-                    //bootbox.alert("Aucun créneau à envoyer.");
+                    bootbox.alert("Aucun créneau à envoyer.");
                 }
             },
 
@@ -1380,25 +1376,21 @@
             fetch(){
                 this.ics = [];
                 this.transmission = "Chargement des créneaux...";
-                store.loading = true;
+                this.loading = true;
 
                 this.$http.get(this.restUrl()).then(
                     ok => {
-                        store.sync(ok.body.timesheets);
-                        store.loading = false;
+                        this.store.sync(ok.body.timesheets);
+                        this.store.loading = false;
                     },
                     ko => {
                         this.errors.push("Impossible de charger les données : " + ko);
-                        store.remoteError = "Impossible de charger des créneaux";
+                        this.store.remoteError = "Impossible de charger des créneaux";
                     }
                 ).then(() => {
                     this.transmission = "";
-                    store.loading = false;
+                    this.store.loading = false;
                 });
-            },
-
-            post(event){
-                console.log("POST", event);
             }
         },
 

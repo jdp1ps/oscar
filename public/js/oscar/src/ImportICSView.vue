@@ -97,6 +97,8 @@
 <script>
     import Datepicker from './Datepicker.vue';
     import EventItemImport from './EventItemImport.vue';
+    import ICalAnalyser from './ICalAnalyser';
+    import EventDT from './EventDT';
 
     export default {
         props: {
@@ -164,7 +166,7 @@
 
         methods: {
             background(label){
-                return colorLabel(label);
+                return this.colorLabel(label);
             },
             updateLabel(from, to){
                 if (to == 'ignorer') {

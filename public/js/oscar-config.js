@@ -62,6 +62,7 @@ requirejs.config({
         'payments' : 'oscar/dist/Payments',
         'Datepicker2' : 'oscar/dist/Datepicker',
         'activityclone' : 'oscar/dist/Activityclone',
+        'polyfill' : 'oscar/dist/Polyfill',
         'OrganizationType' : 'oscar/dist/OrganizationType'
     },
     shim: {
@@ -78,11 +79,6 @@ requirejs.config({
             deps: ['underscore'],
             exports: 'Backbone'
         },
-
-        calendar2: {
-          deps:['mm', 'EventDT']
-        },
-
         jquery: {
             exports: '$'
         },
@@ -131,6 +127,9 @@ requirejs.config({
         },
         'calendar': {
             deps: ['EventDT', 'vue', 'ICalAnalyser', 'Datepicker', 'bootbox']
+        },
+        'calendar2': {
+            deps: ['moment', 'EventDT', 'vue', 'ICalAnalyser', 'Datepicker', 'bootbox']
         },
         'Datepicker': {
             deps: ['moment-tz']

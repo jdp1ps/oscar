@@ -18,9 +18,6 @@
             endAt(){
                 return this.event.mmEnd.format('HH:mm');
             },
-            colorLabel(){
-                return colorLabel(this.event.label);
-            },
             css(){
                 var percentUnit = 100 / (18 * 60)
                     , start = (this.event.mmStart.hour() - 6) * 60 + this.event.mmStart.minutes()
@@ -30,7 +27,7 @@
                     position: "absolute",
                     left: (percentUnit * start) + '%',
                     width: (percentUnit * (end - start)) + '%',
-                    background: this.colorLabel
+                    background: this.colorLabel(this.event.label)
                 }
             }
         }
