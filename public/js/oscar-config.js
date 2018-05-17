@@ -78,6 +78,11 @@ requirejs.config({
             deps: ['underscore'],
             exports: 'Backbone'
         },
+
+        calendar2: {
+          deps:['mm', 'EventDT']
+        },
+
         jquery: {
             exports: '$'
         },
@@ -159,6 +164,7 @@ define('datepicker', ['jquery', 'bootstrap', 'bt-datepicker'], function ($) {
 });
 
 define('mm', ['moment-tz'], function (moment) {
+    console.log('Require MOMENT');
     moment.locale('fr');
     return moment;
 });

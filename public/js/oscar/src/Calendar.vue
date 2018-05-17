@@ -235,6 +235,7 @@
     import moment from 'moment';
 
     class EventDT {
+
         constructor(data) {
             this.sync(data);
         }
@@ -473,6 +474,7 @@
                 { startHours: 8, startMinutes: 0, endHours: 12, endMinutes: 0 },
                 { startHours: 13, startMinutes: 0, endHours: 17, endMinutes: 0 }
             ];
+
             this.defaultDescription = "";
             this.status = {
                 "draft": "Brouillon",
@@ -1401,6 +1403,7 @@
         },
 
         mounted(){
+
             var allowState = ['week', 'list', 'timesheet'];
             this.state = 'week';
             if( allowState.indexOf(window.location.hash.substring(1)) >= 0 ){

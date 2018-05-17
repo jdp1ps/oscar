@@ -26,6 +26,7 @@
     "gulp-shell": "^0.6.5",
     "gulp-umd": "^0.2.0",
     "mocha": "^3.2.0",
+    "moment": "^2.22.1",
     "node-sass": "^4.7.2",
     "requirejs": "^2.3.3",
     "sass-loader": "^6.0.7"

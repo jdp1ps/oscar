@@ -33,7 +33,7 @@
 </div>
 
 <script>
-    require(['vue', 'vue-resource', 'calendar2', 'mm'], function(Vue, VueResource, Calendar, mm){
+    require(['underscore', 'vue', 'vue-resource', 'calendar2'], function(underscore, Vue, VueResource, Calendar){
 
         Vue.use(VueResource);
 
@@ -42,7 +42,8 @@
 
         var customDatas = <?= json_encode($crenaux) ?>;
 
-        console.log(customDatas);
+        console.log('moment', window);
+        moment.locale('fr');
 
         var colorLabels = {};
         var colorIndex = 0;
@@ -50,9 +51,6 @@
 
         Vue.mixin({
             methods: {
-                getMoment(){
-                    return mm;
-                },
 
                 colorLabel: function(label) {
                     if (!colorLabels[label]) {
@@ -87,11 +85,6 @@
 
         var vue = new Vue({
             el: "#app",
-            computed: {
-                moment(){
-                    return mm;
-                }
-            },
             components: {
                 'calendar': Calendar.default
             },
@@ -99,36 +92,6 @@
                 console.log(this.getMoment());
             }
         });
-    })
-//    require(['vue', 'vue-resource', 'calendar'], function(Vue, VueResource, Calendar){
-//
-//        Vue.use(VueResource);
-//
-//        Vue.http.options.emulateJSON = true;
-//        Vue.http.options.emulateHTTP = true
-//
-//        var customDatas = <?//= json_encode($crenaux) ?>//;
-//
-//        var mixins = {
-//            methods: {
-//                restUrl(){
-//                    return '<?//= $this->url('timesheet/api') ?>//'
-//                },
-//                customDatas(){
-//                    return customDatas;
-//                }
-//            }
-//        }
-//
-//        Calendar.mixins = [
-//            mixins
-//        ];
-//
-//        var vue = new Vue({
-//            el: "#app",
-//            components: {
-//                'calendar': Calendar
-//            }
-//        });
-//    })
+    });
+
 </script>
