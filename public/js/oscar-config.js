@@ -48,6 +48,7 @@ requirejs.config({
         'colorpicker' : 'vendor/bootstrapcolorpicker/dist/js/bootstrap-colorpicker.min',
         'calendar' : 'modules/unicaen/dist/js/calendar',
         'calendar2' : 'oscar/dist/Calendar',
+        'CalendarModel' : 'oscar/dist/CalendarModel',
         'EventDT' : 'modules/unicaen/dist/js/EventDT',
         'ICalAnalyser' : 'modules/unicaen/dist/js/ICalAnalyser',
         'Datepicker' : 'modules/unicaen/dist/js/Datepicker',
@@ -71,6 +72,9 @@ requirejs.config({
         },
         "oscar-auto": {
             deps: ['bootstrap']
+        },
+        "CalendarModel": {
+            exports: 'CalendarModel'
         },
         "modalform": {
             deps: ['bootstrap']

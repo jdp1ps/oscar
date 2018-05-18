@@ -20,4 +20,8 @@ Les commandes qui suivent permettent d'utiliser POI pour travailler sur les diff
 ```bash
 # Compilation du calandrier (DEBUG)
 poi watch --format umd --moduleName  Calendar --filename.css Calendar.css --filename.js Calendar.js --dist public/js/oscar/dist public/js/oscar/src/Calendar.vue 
+
+# Polyfill JS
+poi watch --format umd --moduleName  Polyfill --filename.css Polyfill.css --filename.js Polyfill.js --dist public/js/oscar/dist public/js/oscar/src/Polyfill.js 
+
 ```

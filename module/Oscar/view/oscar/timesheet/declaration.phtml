@@ -33,14 +33,21 @@
 </div>
 
 <script>
-    require(['underscore', 'vue', 'vue-resource', 'mm', 'bootbox', 'calendar2', 'polyfill'], function(underscore, Vue, VueResource, moment, bootbox, Calendar){
+    require(['underscore', 'vue', 'vue-resource',
+        'mm', 'bootbox', 'calendar2',
+        'CalendarModel', 'polyfill'], function(underscore, Vue, VueResource, moment, bootbox, Calendar, CalendarModel){
 
         Vue.use(VueResource);
 
         Vue.http.options.emulateJSON = true;
-        Vue.http.options.emulateHTTP = true
+        Vue.http.options.emulateHTTP = true;
+
+        window.moment = moment;
+        window.bootbox = bootbox;
+        window.CalendarModel = CalendarModel.default;
 
         var customDatas = <?= json_encode($crenaux) ?>;
+
         window.moment = moment;
         window.bootbox = bootbox;
 
@@ -87,6 +94,7 @@
                 'calendar': Calendar.default
             }
         });
+        /****/
     });
 
 </script>

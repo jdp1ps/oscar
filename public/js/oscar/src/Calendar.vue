@@ -106,7 +106,6 @@
 
     <div class="editor" v-show="eventEditDataVisible">
         <form @submit.prevent="editSave">
-            <pre style="max-height: 300px; overflow: scroll">{{ eventEditData }}</pre>
             <div class="form-group">
                 <label for="">Intitulé</label>
                 <selecteditable v-model="eventEditData.label" :chooses="labels" @input="updateLabel"></selecteditable>
@@ -230,7 +229,6 @@
     import EventItemImport from './EventItemImport.vue';
     import ImportICSView from './ImportICSView.vue';
     import SelectEditable from './SelectEditable.vue';
-
     import TimeEvent from './TimeEvent.vue';
 
     class EventDT {
@@ -1396,6 +1394,8 @@
 
         mounted(){
 
+            console.log(CalendarModel.getInstance());
+
             var allowState = ['week', 'list', 'timesheet'];
             this.state = 'week';
             if( allowState.indexOf(window.location.hash.substring(1)) >= 0 ){
@@ -1433,15 +1433,5 @@
                 this.fetch();
             }
         }
-    }
-
-    Array.prototype.pushIfNot = function(obj, testField){
-        var add = true,
-            val = obj[testField];
-        for( var i=0; i<this.length; i++ ){
-            if(this[i][testField] == obj[testField]) add = false;
-        }
-        if( add )
-            this.push(obj)
     }
 </script>
