@@ -69,15 +69,13 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $settings = $auth->getSettings();
 
             if( $settings && array_key_exists('frequency', $settings) && in_array($cron, $settings['frequency']) ){
-                //$this->mailNotificationsPerson($person);
+                $this->getLoggerService()->debug("Envoi des notifications $person");
+                $this->mailNotificationsPerson($person);
             }
-            $this->mailNotificationsPerson($person);
         }
     }
 
     public function mailNotificationsPerson( $person ){
-        echo "Envoi des notifications à $person\n";
-
         /** @var ConfigurationParser $configOscar */
         $configOscar = $this->getServiceLocator()->get('OscarConfig');
 
@@ -94,10 +92,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             ->get('viewhelpermanager')
             ->get('url');
 
-        $link = $url('contract/show',array('id' => 2));
-
         $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
-
 
         $content = "Bonjour $person\n";
         $content .= "Vous avez des notifications non-lues sur Oscar : \n";
@@ -113,9 +108,11 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $mailer = $this->getServiceLocator()->get("mailingService");
         $content .= "</ul>\n";
         $mail = $mailer->newMessage("Notifications en attente sur Oscar", $content);
+
+        // @todo Remplacer par l'email de la personne (pour le moment c'est en test)
         $mail->setTo('stephane.bouvry@unicaen.fr');
+
         $mailer->send($mail);
-        die($content);
     }
 
     /**
