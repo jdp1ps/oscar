@@ -7,9 +7,12 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\Notification;
+use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
+use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\PrivilegeRepository;
 use Oscar\Entity\Project;
@@ -32,6 +35,88 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+
+    /**
+     * @return PersonRepository
+     */
+    public function getRepository(){
+        return $this->getEntityManager()->getRepository(Person::class);
+    }
+
+    public function mailPersonsWithUnreadNotification( $dateRef = "" ){
+        $date = new \DateTime($dateRef);
+        $rel = [
+          'Mon' => 'Lun',
+          'Tue' => 'Mar',
+          'Wed' => 'Mer',
+          'Thu' => 'Jeu',
+          'Fri' => 'Ven',
+          'Sat' => 'Sam',
+          'Sun' => 'Dim',
+        ];
+
+        $jour = $rel[$date->format('D')];
+        $heure = $date->format('H');
+
+        $cron = $jour.$heure;
+        $persons = $this->getRepository()->getPersonsWithNotifications();
+        $mailingDatas = [];
+        /** @var Person $person */
+        foreach ($persons as $person) {
+            /** @var Authentification $auth */
+            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]);
+            $settings = $auth->getSettings();
+
+            if( $settings && array_key_exists('frequency', $settings) && in_array($cron, $settings['frequency']) ){
+                //$this->mailNotificationsPerson($person);
+            }
+            $this->mailNotificationsPerson($person);
+        }
+    }
+
+    public function mailNotificationsPerson( $person ){
+        echo "Envoi des notifications à $person\n";
+
+        /** @var ConfigurationParser $configOscar */
+        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+
+
+        $qb = $this->getEntityManager()->getRepository(Notification::class)->createQueryBuilder('n');
+        $qb->select('n')
+            ->innerJoin('n.persons', 'p')
+            ->where('p.person = :person')
+            ->setParameter('person', $person);
+
+        $notifications = $qb->getQuery()->getResult();
+
+        $url = $this->getServiceLocator()
+            ->get('viewhelpermanager')
+            ->get('url');
+
+        $link = $url('contract/show',array('id' => 2));
+
+        $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
+
+
+        $content = "Bonjour $person\n";
+        $content .= "Vous avez des notifications non-lues sur Oscar : \n";
+        $content .= "<ul>\n";
+
+        foreach ($notifications as $n) {
+            if( preg_match($reg, $n->getMessage(), $matches) ){
+                $link = $configOscar->getConfiguration("urlAbsolute").$url('contract/show',array('id' => $matches[2]));
+                $content .= "<li>" .preg_replace($reg, '$1 <a href="'.$link.'">$3</a>$4', $n->getMessage())."</li>\n";
+            }
+        }
+        /** @var MailingService $mailer */
+        $mailer = $this->getServiceLocator()->get("mailingService");
+        $content .= "</ul>\n";
+        $mail = $mailer->newMessage("Notifications en attente sur Oscar", $content);
+        $mail->setTo('stephane.bouvry@unicaen.fr');
+        $mailer->send($mail);
+        die($content);
+    }
 
     /**
      * Charge en profondeur la liste des personnes disposant du privilége sur une

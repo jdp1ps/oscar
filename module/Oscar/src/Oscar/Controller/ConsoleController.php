@@ -655,12 +655,11 @@ class ConsoleController extends AbstractOscarController
         } catch ( OscarException $e ){
             $this->consoleWarn(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
         }
+    }
 
-
-
-
-
-
+    public function notificationsMailsAction()
+    {
+        $this->getPersonService()->mailPersonsWithUnreadNotification();
     }
 
     public function testMailingAction()

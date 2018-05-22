@@ -360,6 +360,16 @@ return array(
         'router' => array(
             'routes' => array(
 
+                'notifications_mails' => [
+                    'options' => [
+                        'route' => 'oscar notifications:mails',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'notificationsMails',
+                        ],
+                    ]
+                ],
+
                 'update' => [
                     'options' => [
                         'route' => 'oscar update',

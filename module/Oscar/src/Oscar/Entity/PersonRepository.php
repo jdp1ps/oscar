@@ -9,6 +9,7 @@ namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Oscar\Connector\IConnectedRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Data\DataExtractorFullname;
@@ -21,6 +22,23 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
 
+    /**
+     * Retourne la liste des personnes qui ont des notifications non-lues et ayant un compte d'authentification.
+     *
+     * @return mixed
+     */
+    public function getPersonsWithNotifications(){
+        $qb = $this->createQueryBuilder('p');
+        $persons = $qb
+            ->select('p')
+            ->innerJoin(Authentification::class, 'a', Join::WITH, $qb->expr()->eq('p.ladapLogin', 'a.username'))
+            ->innerJoin(NotificationPerson::class, 'n', Join::WITH, $qb->expr()->eq('p.id', 'n.person'))
+            ->where('n.read IS NULL')
+            ->getQuery()
+            ->getResult();
+
+        return $persons;
+    }
 
     function getPersonByDisplayName($displayName)
     {

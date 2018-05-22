@@ -132,7 +132,8 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
             $administrators = $this->getConfig()->getConfiguration('administrators');
             $admins = [];
             foreach ($msg->getTo() as $mail=>$text) {
-                if( in_array($mail, $administrators) ){
+                echo $mail.' --- ' . $text;
+                if( array_key_exists($mail, $administrators) ){
                     $admins[$mail] = $text;
                 }
             }
