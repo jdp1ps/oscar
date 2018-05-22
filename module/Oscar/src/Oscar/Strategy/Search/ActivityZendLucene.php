@@ -8,6 +8,7 @@
 
 namespace Oscar\Strategy\Search;
 
+use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Activity;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\StringUtils;
@@ -201,10 +202,17 @@ class ActivityZendLucene implements ActivitySearchStrategy
 
     public function rebuildIndex($activities)
     {
+        $repport = new ConnectorRepport();
         $this->resetIndex();
+        $repport->addnotice("Index réinitialisé");
         foreach($activities as $activity) {
-            $this->addActivity($activity);
+            try {
+                $this->addActivity($activity);
+                $repport->addadded(sprintf("Indexation de l'activité *%s*", $activity));
+            } catch (\Exception $e ){
+                $repport->adderror(sprintf("Erreur, impossible d'indexer l'activité *%s*", $activity));
+            }
         }
-        // TODO: Implement rebuildIndex() method.
+        return $repport;
     }
 }
