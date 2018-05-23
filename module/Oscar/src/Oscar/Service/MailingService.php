@@ -123,7 +123,7 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
      * @param \Swift_Message $msg
      * @param boolean $force Force l'envoi si le mail du destinataire est un mail administrateur.
      */
-    public function send( \Swift_Message $msg, $force=true ){
+    public function send( \Swift_Message $msg ){
 
         if( $this->getConfig()->getConfiguration('send') ) {
             $this->getMailer()->send($msg);
@@ -132,7 +132,6 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
             $administrators = $this->getConfig()->getConfiguration('administrators');
             $admins = [];
             foreach ($msg->getTo() as $mail=>$text) {
-                echo $mail.' --- ' . $text;
                 if( array_key_exists($mail, $administrators) ){
                     $admins[$mail] = $text;
                 }
@@ -141,6 +140,7 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
                 $msg->setTo($admins)->setCc([]);
                 $this->getMailer()->send($msg);
             } else {
+                $this->getServiceLocator()->get('Logger')->debug('MAIL NON ENVOYé (Envoi désactivé)');
                 $this->getServiceLocator()->get('Logger')->debug($msg->toString());
             }
 

@@ -1,6 +1,6 @@
 # Configuration métier
 
-La configuration métier de Oscar est placée dans le fichier `config/autoload/local.php`. 
+La configuration métier de Oscar est placée dans le fichier `config/autoload/local.php`.
 
 
 ## Rappel
@@ -16,7 +16,7 @@ Ce fichier va contenir la configuration technique et métier de l'application. L
 
 ## Emplacements des documents administratifs et activités
 
-Les emplacements physiques pour le stockage des documents est situé dans la clef `oscar > paths` : 
+Les emplacements physiques pour le stockage des documents est situé dans la clef `oscar > paths` :
 
 ```php
 return array(
@@ -36,7 +36,7 @@ return array(
             // Emplacement de l'index de recherche (emplacement où Lucene écrit
             // sont index de recherche - un DOSSIER).
             'search_activity' => APP_DIR . '/data/luceneindex',
-            
+
             // Modèle de feuille de temps
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
         ],
@@ -63,7 +63,7 @@ return array(
     ],
 );
 
-``` 
+```
 
 ## Recherche des activités
 
@@ -92,7 +92,7 @@ return array(
         ],
     ],
 );
-``` 
+```
 
 ### Elastic Search
 
@@ -109,19 +109,19 @@ OpenJDK Runtime Environment (build 1.8.0_162-8u162-b12-1~deb9u1-b12)
 OpenJDK 64-Bit Server VM (build 25.162-b12, mixed mode)
 ```
 
-S'il n'est pas installé, vous devez **installer Java depuis les dépôts officiels** : 
+S'il n'est pas installé, vous devez **installer Java depuis les dépôts officiels** :
 
 ```bash
 $ apt-get install default-jre
 ```
 
-Puis **installer ElasticSearch** à partir des dépôts Debian officiels : 
+Puis **installer ElasticSearch** à partir des dépôts Debian officiels :
 
 ```bash
 $ sudo apt-get install elasticsearch
 ```
 
-Pour **configurer ElasticSearch en tant que service** : 
+Pour **configurer ElasticSearch en tant que service** :
 
 ```bash
 $ sudo update-rc.d elasticsearch defaults 95 10
@@ -146,7 +146,7 @@ $ sudo systemctl start elasticsearch.service
 ```
 
 Pour **interrompre le service ElasticSearch** :
- 
+
 ```bash
 $ sudo -i service elasticsearch stop
 ```
@@ -157,7 +157,7 @@ ou bien
 $ sudo systemctl stop elasticsearch.service
 ```
 
-Enfin, pour **tester si ElasticSearch réponds** : 
+Enfin, pour **tester si ElasticSearch réponds** :
 
 ```bash
 $ curl localhost:9200
@@ -179,7 +179,7 @@ $ curl localhost:9200
 
 #### Configurer Oscar
 
-On indique ensuite à Oscar l'adresse de l'instance **Elastic Search** : 
+On indique ensuite à Oscar l'adresse de l'instance **Elastic Search** :
 
 ```php
 // config/autoload/local.php
@@ -198,7 +198,7 @@ return array(
         ],
     ],
 );
-``` 
+```
 
 > la clef `params` prend bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
 
@@ -206,7 +206,7 @@ return array(
 
 ## Mailer
 
-La configuration du mailer est située dans le fichier `config/autoload/local.php` : 
+La configuration du mailer est située dans le fichier `config/autoload/local.php` :
 
 ```php
 <?php
@@ -225,13 +225,32 @@ return array(
                 'password' => '@m4S!n9 P4$VV0rd',
                 'security' => 'ssl',
             ],
+
+            // Ces personnes vont recevoir les mails de test
+            'administrators' => [
+              'robert.paulson@unicaen.fr' => 'Robert Paulson',
+              'raymond.hessel' => 'Raymons Hessel'
+            ],
+
+            // Contenu des mails envoyés
+            'from' => [ 'oscar-bot@unicaen.fr' => 'Oscar Bot'],
+            'copy' => ['stephane.bouvry@unicaen.fr'],
+
+            // Envoi effectif (en PROD à true)
+            'send' => false,
+
+            // Gabarit commun
+            'template' => realpath(__DIR__.'/../../module/Oscar/view/mail.phtml'),
+
+            // Préfix de l'objet des mails
+            'subjectPrefix' => '[OSCAR]'
         ]
     ],
     // ...
 );
 ```
 
-Ou : 
+Ou :
 
 ```php
 <?php
@@ -253,7 +272,7 @@ return array(
 );
 ```
 
-Vous pouvez lancer le test de la configuration en tapant la commande : 
+Vous pouvez lancer le test de la configuration en tapant la commande :
 
 ```bash
 $ php public/index.php oscar test:mailer

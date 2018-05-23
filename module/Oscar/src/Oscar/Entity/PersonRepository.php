@@ -27,7 +27,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      *
      * @return mixed
      */
-    public function getPersonsWithNotifications(){
+    public function getPersonsWithUnreadNotificationsAndAuthentification(){
         $qb = $this->createQueryBuilder('p');
         $persons = $qb
             ->select('p')

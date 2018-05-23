@@ -360,12 +360,32 @@ return array(
         'router' => array(
             'routes' => array(
 
-                'notifications_mails' => [
+                'notification_activity_generate' => [
                     'options' => [
-                        'route' => 'oscar notifications:mails',
+                        'route' => 'oscar notifications:generate <idactivity>',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'notificationsActivityGenerate',
+                        ],
+                    ]
+                ],
+
+                'notifications_mail_persons' => [
+                    'options' => [
+                        'route' => 'oscar notifications:mails:persons',
                         'defaults' => [
                             'controller' => 'Console',
                             'action' => 'notificationsMails',
+                        ],
+                    ]
+                ],
+
+                'notifications_mail_person' => [
+                    'options' => [
+                        'route' => 'oscar notifications:mails:person <idperson> [-f|--force]',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'notificationsMailsPerson',
                         ],
                     ]
                 ],
@@ -420,15 +440,7 @@ return array(
                     ]
                 ],
 
-                'notification_activity_generate' => [
-                    'options' => [
-                        'route' => 'oscar notifications:generate <idactivity>',
-                        'defaults' => [
-                            'controller' => 'Console',
-                            'action' => 'notificationsActivityGenerate',
-                        ],
-                    ]
-                ],
+
 
                 'json_auth_token' => [
                     'options' => [

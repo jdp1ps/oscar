@@ -44,6 +44,12 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $this->getEntityManager()->getRepository(Person::class);
     }
 
+    /**
+     * Lance la procédure de relance par email pour les personnes ayant souscrit à
+     * la relance automatique et ayant des notifications non-lues.
+     *
+     * @param string $dateRef
+     */
     public function mailPersonsWithUnreadNotification( $dateRef = "" ){
         $date = new \DateTime($dateRef);
         $rel = [
@@ -56,12 +62,12 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
           'Sun' => 'Dim',
         ];
 
-        $jour = $rel[$date->format('D')];
-        $heure = $date->format('H');
+        // Fromat du cron
+        $cron = $rel[$date->format('D')].$date->format('H');
 
-        $cron = $jour.$heure;
-        $persons = $this->getRepository()->getPersonsWithNotifications();
-        $mailingDatas = [];
+        // Liste des personnes ayant des notifications non-lues
+        $persons = $this->getRepository()->getPersonsWithUnreadNotificationsAndAuthentification();
+
         /** @var Person $person */
         foreach ($persons as $person) {
             /** @var Authentification $auth */
@@ -75,9 +81,21 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
     }
 
-    public function mailNotificationsPerson( $person ){
+
+
+    public function mailNotificationsPerson( $person, $debug = true ){
         /** @var ConfigurationParser $configOscar */
         $configOscar = $this->getServiceLocator()->get('OscarConfig');
+
+        if( $debug ){
+            $log = function($msg){
+                $this->getLoggerService()->debug($msg);
+            };
+        } else {
+            $log = function(){};
+        }
+
+        $log("####### MAIL pour $person");
 
 
         $qb = $this->getEntityManager()->getRepository(Notification::class)->createQueryBuilder('n');
@@ -87,6 +105,12 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             ->setParameter('person', $person);
 
         $notifications = $qb->getQuery()->getResult();
+
+        if( count($notifications) ==  0 ){
+            $log(" - Aucune notification en attente");
+            $log("#######");
+            return;
+        }
 
         $url = $this->getServiceLocator()
             ->get('viewhelpermanager')
@@ -104,13 +128,22 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                 $content .= "<li>" .preg_replace($reg, '$1 <a href="'.$link.'">$3</a>$4', $n->getMessage())."</li>\n";
             }
         }
+
         /** @var MailingService $mailer */
         $mailer = $this->getServiceLocator()->get("mailingService");
+        $to = $person->getEmail();
         $content .= "</ul>\n";
-        $mail = $mailer->newMessage("Notifications en attente sur Oscar", $content);
+        $mail = $mailer->newMessage("Notifications en attente sur Oscar", ['body' => $content]);
 
-        // @todo Remplacer par l'email de la personne (pour le moment c'est en test)
-        $mail->setTo('stephane.bouvry@unicaen.fr');
+
+        if( $debug ){
+            // @todo Remplacer par l'email de la personne (pour le moment c'est en test)
+            $mail->setTo('stephane.bouvry@unicaen.fr');
+        }
+
+        $log(" - Envoi prévu pour $to");
+        $log(" - Envoyé à " . print_r($mail->getTo(), true));
+        $log("#######");
 
         $mailer->send($mail);
     }

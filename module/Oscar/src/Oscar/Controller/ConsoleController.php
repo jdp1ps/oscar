@@ -662,6 +662,15 @@ class ConsoleController extends AbstractOscarController
         $this->getPersonService()->mailPersonsWithUnreadNotification();
     }
 
+    public function notificationsMailsPersonAction()
+    {
+        $idPerson = $this->params('idperson', null);
+        $force = $this->params('force');
+
+        $person = $this->getPersonService()->getPerson($idPerson);
+        $this->getPersonService()->mailNotificationsPerson($person, !$force);
+    }
+
     public function testMailingAction()
     {
         /** @var MailingService $mailer */
@@ -673,8 +682,8 @@ class ConsoleController extends AbstractOscarController
         $this->consoleKeyValue("Envoi effectif", $this->getConfiguration('oscar.mailer.send') ? 'OUI' : 'NON');
         $this->getConsole()->writeLine("Le mail de test va être envoyé aux adresses : ", ColorInterface::WHITE);
 
-        foreach ($administrators as $mail) {
-            $this->getConsole()->writeLine(" * " . $mail, ColorInterface::LIGHT_WHITE);
+        foreach ($administrators as $mail => $text) {
+            $this->getConsole()->writeLine(" * $text <$mail>", ColorInterface::LIGHT_WHITE);
         }
 
         $confirm = Confirm::prompt("Confirmer l'envoi ? ");
