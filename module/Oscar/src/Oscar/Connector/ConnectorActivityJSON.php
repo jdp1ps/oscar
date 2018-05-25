@@ -295,7 +295,7 @@ class ConnectorActivityJSON implements ConnectorInterface
     protected function getPropertyObject( $object, $property, $required = true, $type=null ){
         if( !property_exists($object, $property) ){
             if( $required === true )
-                throw new ConnectorException("La propriété '%s' attendue n'est pas disponible !", $property);
+                throw new ConnectorException(sprintf("La propriété '%s' attendue n'est pas disponible !", $property));
 
             $value = null;
         } else {
