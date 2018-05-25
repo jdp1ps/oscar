@@ -525,7 +525,7 @@ nodejs server.js
 
 ### ProxyPass Apache
 
-Il faut enfin déléger à Apache le soin de relayer les requètes déstinées à NodeJS en utilisant le module **proxy** : 
+Il faut enfin déléguer à Apache le soin de relayer les requètes déstinées à NodeJS en utilisant le module **proxy** : 
 
 TODO (feat. Nico)
 
