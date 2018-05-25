@@ -11,6 +11,8 @@ namespace Oscar\Service;
 
 use Moment\Moment;
 use Oscar\Exception\OscarException;
+use Oscar\Strategy\Mailer\Swift_Transport_FileOutput;
+use Oscar\Strategy\Mailer\SwiftTransportFileOutput;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -76,6 +78,10 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
                 case 'sendmail':
                     $transport = new \Swift_SendmailTransport($this->getConfig()->getConfiguration('transport.cmd'));
                     break;
+
+                case 'file':
+                    return new SwiftTransportFileOutput('/tmp');
+
 
                 default:
                     throw new OscarException("Le système de mailing n'est pas configuré.");

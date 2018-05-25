@@ -125,7 +125,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         foreach ($notifications as $n) {
             if( preg_match($reg, $n->getMessage(), $matches) ){
                 $link = $configOscar->getConfiguration("urlAbsolute").$url('contract/show',array('id' => $matches[2]));
-                $content .= "<li>" .preg_replace($reg, '$1 <a href="'.$link.'">$3</a>$4', $n->getMessage())."</li>\n";
+                $content .= "<li>" .preg_replace($reg, '$1 <a href="'.$link.'">$3</a> ['. $n->getId() .'] $4', $n->getMessage())."</li>\n";
             }
         }
 
