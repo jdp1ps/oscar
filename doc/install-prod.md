@@ -207,6 +207,9 @@ $ php public/index.php oscar test:config
 
 La configuration du mailer est située dans le fichier `config/autoload/local.php` : 
 
+
+#### Envoi SMTP
+
 ```php
 <?php
 //config/autoload/local.php
@@ -230,7 +233,7 @@ return array(
 );
 ```
 
-Ou : 
+#### Envoi Sendmail 
 
 ```php
 <?php
@@ -251,6 +254,32 @@ return array(
     // ...
 );
 ```
+
+#### Envoi DEBUG/PreProd (v2.5.x)
+
+Cette dernière option permet de ne pas envoyer les mails, mais de copier les mails sous la forme de fichier dans le chemin indiqué : 
+
+```php
+<?php
+//config/autoload/local.php
+return array(
+    // ...
+    // Accès BDD
+    'oscar' => [
+        'mailer' => [
+            /**** TRANSPORT (Fichier) ****/
+            'transport' => [
+                'type' => 'file',
+                'path' => realpath(__DIR__.'/../../data/mails'),
+            ],
+            /****/
+        ]
+    ],
+    // ...
+);
+```
+
+#### Tester le mailer
 
 Vous pouvez lancer le test de la configuration en tappant la commande : 
 
@@ -344,19 +373,20 @@ Oscar) ont leurs fichiers de configuration respectifs dans le dossier `/config/a
 
 Des fichiers d'exemple sont disponibles avec l'extension `.dist`.
 
-**UnicaenApp** :
- - Configuration de l'authentification avec LDAP
- - Paramètre pour le *Mailer*
+#### Configurer l'authentification LDAP
+
+Copier le fichier d'exemple : 
 
 ```bash
 cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
 vi !$
 ```
 
-Voici un exemple de configuration LDAP :
+Puis compléter la configuration : 
 
 ```php
 <?php
+//config/autoload/unicaen-app.local.php
 $settings = array(
   // LDAP    
   'ldap' => array(
@@ -378,10 +408,45 @@ $settings = array(
 );
 ```
 
+#### Configurer l'authentification CAS
 
 **UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*.
 Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
 permet de s'identifier à la place d'un utilisateur.
+
+Exemple de configuration du CAS : 
+
+```php
+<?php
+//config/autoload/unicaen-auth.local.php
+$settings = array(
+    'cas' => array(
+        'connection' => array(
+            'default' => array(
+                'params' => array(
+                    'hostname' => 'cas.domain.fr',
+                    'port' => 443,
+                    'version' => "2.0",
+                    'uri' => "",
+                    'debug' => false,
+                ),
+            ),
+        ),
+    ),
+    /**
+     * Identifiants de connexion LDAP autorisés à faire de l'usurpation d'identité.
+     * NB: à réserver exclusivement aux tests.
+     */
+    'usurpation_allowed_usernames' => array('brucebanner', 'dieu'),
+);
+
+/**
+ * You do not need to edit below this line
+ */
+return array(
+    'unicaen-auth' => $settings,
+);
+```
 
 
 ## Première connexion
