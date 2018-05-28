@@ -201,7 +201,7 @@ h2.tv-serie-label { border-bottom: none; }
         <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_SHOW, $project)): ?>
             <section class="subsection has-btn">
                 <h3 class="h4">Membres du projet</h3>
-                <?php if (count($project->getMembers()/*getPersonsDeep()*/)): ?>
+                <?php if (count($project->getPersonsDeep())): ?>
                     <?= $this->partial('/partials/timewalker-pack.phtml', [
                         'enroler' => $project,
                         'type' => 'Person',
@@ -232,7 +232,7 @@ h2.tv-serie-label { border-bottom: none; }
                 <h3 class="h4">
                     <!--<i class="icon-building-filled">--></i> Partenaires
                 </h3>
-                <?php if (count($project->getPartners())): ?>
+                <?php if (count($project->getOrganisationsDeep())): ?>
                     <?= $this->partial('/partials/timewalker-pack.phtml', [
                         'enroler' => $project,
                         'type' => 'Organization',

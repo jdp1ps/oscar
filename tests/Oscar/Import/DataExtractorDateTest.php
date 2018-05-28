@@ -13,21 +13,25 @@ use PHPUnit\Framework\TestCase;
 
 class DataExtractorDateTest extends TestCase
 {
+
     public function testStandardValueExtract(){
+        setlocale(E_ALL, 'FR_fr');
         $data = '2014-01-01';
         $date = (new DataExtractorDate())->extract($data);
         $this->assertNotNull($date);
-        $this->assertEquals(1388534400, $date->getTimestamp());
+        $this->assertEquals(1388530800, $date->getTimestamp());
     }
 
     public function testSlashYearEndValueExtract(){
+        setlocale(E_ALL, 'FR_fr');
         $data = '01/01/2014';
         $date = (new DataExtractorDate())->extract($data);
         $this->assertNotNull($date);
-        $this->assertEquals(1388534400, $date->getTimestamp());
+        $this->assertEquals(1388530800, $date->getTimestamp());
     }
 
     public function testBadDateValueExtract(){
+        setlocale(E_ALL, 'FR_fr');
         $data = '19/14/2014';
         $extractor = new DataExtractorDate();
         $date = $extractor->extract($data);
