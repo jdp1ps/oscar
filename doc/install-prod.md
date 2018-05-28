@@ -207,6 +207,30 @@ $ php public/index.php oscar test:config
 
 La configuration du mailer est située dans le fichier `config/autoload/local.php` : 
 
+Le paramètre `urlAbsolute` permet à l'utilitaire en ligne de commande de générer des URLs absolues.
+
+```php
+<?php
+//config/autoload/local.php
+return array(
+    // ...
+    'oscar' => [
+        // (...)
+        
+        // Utilisé pour la génération des URLs dans les mails en ligne de commande
+        'urlAbsolute' => 'http://localhost:8080',
+        
+        'mailer' => [
+            'transport' => [
+                // (...)
+            ],
+        ]
+    ],
+);
+```
+
+La clef `transport` va permettre de configurer le mode d'envoi des mails : SMTP, sendmail et file pour le debug.
+
 
 #### Envoi SMTP
 
@@ -215,7 +239,6 @@ La configuration du mailer est située dans le fichier `config/autoload/local.ph
 //config/autoload/local.php
 return array(
     // ...
-    // Accès BDD
     'oscar' => [
         'mailer' => [
             /**** TRANSPORT (smtp) ****/
