@@ -266,6 +266,8 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
             '# NOTIFICATIONS',
             'oscar notifications:generate <tagid>' => 'Génère les notifications pour l\'activité, la valeur \'all\' permet de générer les notifications pour toutes les activités',
+            'oscar notifications:mails:persons' => 'Génère les mails pour les personnes ayant des notifications non-lues et les envois',
+            'oscar notifications:mails:person <idperson> [-f|--force]' => 'Génère les mails pour la personne ayant des notifications non-lues et les envois',
 
             '# ACTIVTÉS',
             'oscar activity:search:build' => "Reconsruction de l'index de recherche",
