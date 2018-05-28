@@ -20,6 +20,7 @@ return array(
         // Oscar Live
         'socket' => $socket,
 
+
         ////////////////////////////////////////////////////////////////////////
         //
         // PATHS  (Optionnel)
@@ -79,7 +80,11 @@ return array(
             ]
         ],
 
-        // Système d'envoi des mails
+        /*** Système d'envoi des mails ***/
+
+        // Utilisé pour la génération des URLs dans les mails en ligne de commande
+        'urlAbsolute' => 'http://localhost:8080',
+
         'mailer' => [
             /**** TRANSPORT (smtp)
             'transport' => [
@@ -105,7 +110,7 @@ return array(
                 'path' => realpath(__DIR__.'/../../data/mails'),
             ],
             /****/
-            
+
             // Expéditeur
             'from' => [ 'oscar-bot@unicaen.fr' => 'Oscar Bot'],
 
