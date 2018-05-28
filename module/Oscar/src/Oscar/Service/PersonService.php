@@ -52,6 +52,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
      */
     public function mailPersonsWithUnreadNotification( $dateRef = "" ){
         $date = new \DateTime($dateRef);
+
         $rel = [
           'Mon' => 'Lun',
           'Tue' => 'Mar',
@@ -65,8 +66,11 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         // Fromat du cron
         $cron = $rel[$date->format('D')].$date->format('H');
 
+        $this->getLoggerService()->debug("Notifications des inscriptions à '$cron'");
+
         // Liste des personnes ayant des notifications non-lues
         $persons = $this->getRepository()->getPersonsWithUnreadNotificationsAndAuthentification();
+        $this->getLoggerService()->debug(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
 
         /** @var Person $person */
         foreach ($persons as $person) {
@@ -74,9 +78,21 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]);
             $settings = $auth->getSettings();
 
-            if( $settings && array_key_exists('frequency', $settings) && in_array($cron, $settings['frequency']) ){
+            if( !$settings ){
+                $settings = [];
+            }
+
+            if( !array_key_exists('frequency', $settings) ){
+                $settings['frequency'] = [];
+            }
+
+            $settings['frequency'] = array_merge($settings['frequency'], $this->getServiceLocator()->get('OscarConfig')->getConfiguration('notifications.fixed'));
+
+            if( in_array($cron, $settings['frequency']) ){
                 $this->getLoggerService()->debug("Envoi des notifications $person");
                 $this->mailNotificationsPerson($person);
+            } else {
+                $this->getLoggerService()->debug(sprintf(" %s n'est pas inscrite pour ce timecode.", $person));
             }
         }
     }
@@ -98,13 +114,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $log("####### MAIL pour $person");
 
 
-        $qb = $this->getEntityManager()->getRepository(Notification::class)->createQueryBuilder('n');
-        $qb->select('n')
-            ->innerJoin('n.persons', 'p')
-            ->where('p.person = :person')
-            ->setParameter('person', $person);
-
-        $notifications = $qb->getQuery()->getResult();
+        $datas = $this->getNotificationService()->getNotificationsPerson($person->getId(), true);
+        $notifications = $datas['notifications'];
 
         if( count($notifications) ==  0 ){
             $log(" - Aucune notification en attente");
@@ -123,9 +134,10 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $content .= "<ul>\n";
 
         foreach ($notifications as $n) {
-            if( preg_match($reg, $n->getMessage(), $matches) ){
+            //echo " - Notification " . print_r($n, true) ."\n";
+            if( preg_match($reg, $n['message'], $matches) ){
                 $link = $configOscar->getConfiguration("urlAbsolute").$url('contract/show',array('id' => $matches[2]));
-                $content .= "<li>" .preg_replace($reg, '$1 <a href="'.$link.'">$3</a> ['. $n->getId() .'] $4', $n->getMessage())."</li>\n";
+                $content .= "<li>" .preg_replace($reg, '$1 <a href="'.$link.'">$3</a> $4', $n['message'])."</li>\n";
             }
         }
 
@@ -134,12 +146,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $to = $person->getEmail();
         $content .= "</ul>\n";
         $mail = $mailer->newMessage("Notifications en attente sur Oscar", ['body' => $content]);
-
-
-        if( $debug ){
-            // @todo Remplacer par l'email de la personne (pour le moment c'est en test)
-            $mail->setTo('stephane.bouvry@unicaen.fr');
-        }
+        $mail->setTo([$to => (string) $person]);
 
         $log(" - Envoi prévu pour $to");
         $log(" - Envoyé à " . print_r($mail->getTo(), true));

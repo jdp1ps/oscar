@@ -503,7 +503,9 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
             ->createQueryBuilder('p')
+//            ->select('MAX(n.dateEffective) as lastedDate')
             ->innerJoin('p.notification', 'n')
+//            ->groupBy('n.serie')
             ->orderBy('n.dateEffective', 'DESC')
             ->where('p.person = :person AND n.dateEffective <= :now')
             ->setParameters(['person' => $personId, 'now' => date('Y-m-d')]);
@@ -513,18 +515,22 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         $notificationsPerson = $query->getQuery()->getResult();
+        $series = [];
 
         /** @var NotificationPerson $notificationPerson */
         foreach ($notificationsPerson as $notificationPerson) {
-            $dt = $notificationPerson->getNotification()->toArray();
-            $dt['read'] = $notificationPerson->getRead();
-            $dt['person_id'] = $notificationPerson->getPerson()->getId();
-            $dt['person'] = (string)$notificationPerson->getPerson();
-            $dt['notificationperson_id'] = $notificationPerson->getId();
-
-            $result['notifications'][] = $dt;
+            $serie = $notificationPerson->getNotification()->getSerie();
+            if( !in_array($serie, $series) ){
+//                $this->getLogger()->debug('NOTIFICATION : ' . $notificationPerson->getNotification()->getDateEffective()->format('Y-m-d'));
+                $dt = $notificationPerson->getNotification()->toArray();
+                $dt['read'] = $notificationPerson->getRead();
+                $dt['person_id'] = $notificationPerson->getPerson()->getId();
+                $dt['person'] = (string)$notificationPerson->getPerson();
+                $dt['notificationperson_id'] = $notificationPerson->getId();
+                $result['notifications'][] = $dt;
+                $series[] = $serie;
+            }
         }
-
         return $result;
     }
 
