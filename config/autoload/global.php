@@ -29,6 +29,14 @@ return array(
             'activity' => []
         ],
 
+        // Notification par défaut
+        /*** Notifications ***/
+        'notifications' => [
+
+            // Envoi automatique
+            'fixed' => []
+        ],
+
         ////////////////////////////////////////////////////////////////////////
         // Validation des données
         'validation' => [
