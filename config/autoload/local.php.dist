@@ -99,6 +99,13 @@ return array(
             ],
             /****/
 
+            /**** TRANSPORT (file)
+            'transport' => [
+                'type' => 'file',
+                'path' => realpath(__DIR__.'/../../data/mails'),
+            ],
+            /****/
+            
             // Expéditeur
             'from' => [ 'oscar-bot@unicaen.fr' => 'Oscar Bot'],
 
