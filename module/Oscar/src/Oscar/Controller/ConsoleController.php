@@ -424,6 +424,9 @@ class ConsoleController extends AbstractOscarController
         return true;
     }
 
+    /**
+     * test:config
+     */
     public function testConfigAction()
     {
         $configPath = realpath(__DIR__ . '/../../../../../config/autoload/local.php');
@@ -539,6 +542,59 @@ class ConsoleController extends AbstractOscarController
             $pathDocuments = $config->getConfiguration('oscar.mailer.template');
             $this->checkPath($pathDocuments, "Modèle de mail > TEMPLATE");
 
+        } catch ( OscarException $e ){
+            $this->consoleError(sprintf("Configuration manquante : %s", $e->getMessage()));
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // MAILER
+        try {
+            $this->getConsole()->writeLine("");
+            $this->getConsole()->writeLine(" ### Configuration du mailer : ", ColorInterface::LIGHT_WHITE);
+
+            $urlAbsolute = $config->getConfiguration('oscar.urlAbsolute');
+            $this->getConsole()->write(" * URL absolue : ", ColorInterface::WHITE);
+            if( $urlAbsolute == "http://localhost:8080" ){
+                $this->getConsole()->write(' !DEV! ' . $urlAbsolute, ColorInterface::YELLOW);
+            } else {
+                $this->getConsole()->write($urlAbsolute, ColorInterface::GREEN);
+            }
+            $this->getConsole()->writeLine("");
+
+            $this->getConsole()->write(" * Transport : ", ColorInterface::LIGHT_WHITE);
+            $typeTransport = $config->getConfiguration('oscar.mailer.transport.type');
+            $typeTransportValid = in_array($typeTransport, ['sendmail', 'smtp', 'file']);
+
+            if( $typeTransportValid ){
+                $this->getConsole()->writeLine($typeTransport, ColorInterface::WHITE, ColorInterface::GREEN);
+                switch ($typeTransport) {
+                    case 'sendmail' :
+                        $this->getConsole()->writeLine("Attention, l'utilisation de SENDMAIL n'est pas testée dans cette version", ColorInterface::YELLOW);
+                        //
+                        break;
+
+                    case 'smtp' :
+                        $this->getConsole()->writeLine("Attention, l'utilisation d'un serveur SMTP n'est pas testée dans cette version", ColorInterface::YELLOW);
+                        //
+                        break;
+
+                    case 'file' :
+                        $pathDocuments = $config->getConfiguration('oscar.mailer.transport.path');
+                        $this->checkPath($pathDocuments, "Dossier où sont archivés les mails (DEBUG)");
+                        break;
+                }
+            } else {
+                $this->getConsole()->writeLine("Type de transport inconnu '$typeTransport''",  ColorInterface::WHITE, ColorInterface::RED);
+            }
+
+
+            if( $typeTransportValid ){
+
+            }
+
+
+            $this->getConsole()->writeLine("");
+            die();
 
         } catch ( OscarException $e ){
             $this->consoleError(sprintf("Configuration manquante : %s", $e->getMessage()));
@@ -554,6 +610,7 @@ class ConsoleController extends AbstractOscarController
 
             // ELASTIC SEARCH
             if( $searchClass == ActivityElasticSearch::class ){
+
                 $this->getConsole()->write(" * Moteur Elastic Search ", ColorInterface::WHITE);
                 $nodesUrl = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
 
@@ -655,12 +712,20 @@ class ConsoleController extends AbstractOscarController
         } catch ( OscarException $e ){
             $this->consoleWarn(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
         }
+    }
 
+    public function notificationsMailsAction()
+    {
+        $this->getPersonService()->mailPersonsWithUnreadNotification();
+    }
 
+    public function notificationsMailsPersonAction()
+    {
+        $idPerson = $this->params('idperson', null);
+        $force = $this->params('force');
 
-
-
-
+        $person = $this->getPersonService()->getPerson($idPerson);
+        $this->getPersonService()->mailNotificationsPerson($person, !$force);
     }
 
     public function testMailingAction()
@@ -674,8 +739,8 @@ class ConsoleController extends AbstractOscarController
         $this->consoleKeyValue("Envoi effectif", $this->getConfiguration('oscar.mailer.send') ? 'OUI' : 'NON');
         $this->getConsole()->writeLine("Le mail de test va être envoyé aux adresses : ", ColorInterface::WHITE);
 
-        foreach ($administrators as $mail) {
-            $this->getConsole()->writeLine(" * " . $mail, ColorInterface::LIGHT_WHITE);
+        foreach ($administrators as $mail => $text) {
+            $this->getConsole()->writeLine(" * $text <$mail>", ColorInterface::LIGHT_WHITE);
         }
 
         $confirm = Confirm::prompt("Confirmer l'envoi ? ");

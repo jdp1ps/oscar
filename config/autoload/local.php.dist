@@ -20,6 +20,7 @@ return array(
         // Oscar Live
         'socket' => $socket,
 
+
         ////////////////////////////////////////////////////////////////////////
         //
         // PATHS  (Optionnel)
@@ -78,8 +79,18 @@ return array(
                ]
             ]
         ],
+        /*** Notifications ***/
+        'notifications' => [
 
-        // Système d'envoi des mails
+            // Envoi automatique
+            'fixed': ['mer8'] // ex: IMPOSE une notification chaque mercredis à 8 heure
+        ],
+
+
+        /*** Système d'envoi des mails ***/
+        // Utilisé pour la génération des URLs dans les mails en ligne de commande
+        'urlAbsolute' => 'http://localhost:8080',
+
         'mailer' => [
             /**** TRANSPORT (smtp)
             'transport' => [
@@ -96,6 +107,13 @@ return array(
             'transport' => [
                 'type' => 'sendmail',
                 'cmd' => '/usr/sbin/sendmail -bs',
+            ],
+            /****/
+
+            /**** TRANSPORT (file)
+            'transport' => [
+                'type' => 'file',
+                'path' => realpath(__DIR__.'/../../data/mails'),
             ],
             /****/
 
