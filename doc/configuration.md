@@ -208,12 +208,43 @@ return array(
 
 La configuration du mailer est située dans le fichier `config/autoload/local.php` :
 
+
+### URL dans les mails
+
+Le paramètre `urlAbsolute` permet à l'utilitaire en ligne de commande de générer des URLs absolues. Ce paramètre est requis si vous avez configurer l'envoi des notifications par email.
+
 ```php
 <?php
 //config/autoload/local.php
 return array(
     // ...
-    // Accès BDD
+    'oscar' => [
+        // (...)
+        
+        // Utilisé pour la génération des URLs dans les mails en ligne de commande
+        'urlAbsolute' => 'http://localhost:8080',
+        
+        'mailer' => [
+            'transport' => [
+                // (...)
+            ],
+        ]
+    ],
+);
+```
+
+La clef `transport` va permettre de configurer le mode d'envoi des mails : SMTP, sendmail et file pour le debug.
+
+
+#### Envoi SMTP
+
+Le type de transport **smtp** permet d'utiliser un serveur SMTP pour distribuer les mails.
+
+```php
+<?php
+//config/autoload/local.php
+return array(
+    // ...
     'oscar' => [
         'mailer' => [
             /**** TRANSPORT (smtp) ****/
@@ -225,32 +256,15 @@ return array(
                 'password' => '@m4S!n9 P4$VV0rd',
                 'security' => 'ssl',
             ],
-
-            // Ces personnes vont recevoir les mails de test
-            'administrators' => [
-              'robert.paulson@unicaen.fr' => 'Robert Paulson',
-              'raymond.hessel' => 'Raymons Hessel'
-            ],
-
-            // Contenu des mails envoyés
-            'from' => [ 'oscar-bot@unicaen.fr' => 'Oscar Bot'],
-            'copy' => ['stephane.bouvry@unicaen.fr'],
-
-            // Envoi effectif (en PROD à true)
-            'send' => false,
-
-            // Gabarit commun
-            'template' => realpath(__DIR__.'/../../module/Oscar/view/mail.phtml'),
-
-            // Préfix de l'objet des mails
-            'subjectPrefix' => '[OSCAR]'
         ]
     ],
     // ...
 );
 ```
 
-Ou :
+#### Envoi Sendmail 
+
+Le type de transport **sendmail** permet d'utiliser SENDMAIL/EXIM pour distribuer les mails.
 
 ```php
 <?php
@@ -264,6 +278,8 @@ return array(
             'transport' => [
                 'type' => 'sendmail',
                 'cmd' => '/usr/sbin/sendmail -bs',
+                // EXIM
+                // 'cmd' => '/usr/sbin/exim -bs',
             ],
             /****/
         ]
@@ -272,8 +288,36 @@ return array(
 );
 ```
 
-Vous pouvez lancer le test de la configuration en tapant la commande :
+#### Envoi DEBUG/PreProd (v2.5.x)
+
+Cette dernière option permet de ne pas envoyer les mails, mais de copier les mails sous la forme de fichier dans le chemin indiqué, cette méthode permet de tester les mails générer avant un passage en production : 
+
+```php
+<?php
+//config/autoload/local.php
+return array(
+    // ...
+    // Accès BDD
+    'oscar' => [
+        'mailer' => [
+            /**** TRANSPORT (Fichier) ****/
+            'transport' => [
+                'type' => 'file',
+                'path' => realpath(__DIR__.'/../../data/mails'),
+            ],
+            /****/
+        ]
+    ],
+    // ...
+);
+```
+
+#### Tester le mailer
+
+Vous pouvez lancer le test de la configuration en tappant la commande : 
 
 ```bash
 $ php public/index.php oscar test:mailer
 ```
+
+## Notifications
