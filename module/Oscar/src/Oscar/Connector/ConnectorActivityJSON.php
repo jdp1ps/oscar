@@ -76,7 +76,8 @@ class ConnectorActivityJSON implements ConnectorInterface
         try {
             return $this->entityManager->getRepository(Organization::class)
                 ->createQueryBuilder('o')
-                ->where('o.fullName = :fullname OR o.shortName = :fullname')
+//                ->where('o.fullName = :fullname OR o.shortName = :fullname')
+                ->where('o.fullName = :fullname')
                 ->getQuery()
                 ->setParameter('fullname', $fullname)
                 ->getSingleResult();
