@@ -34,6 +34,8 @@ class AdministrationController extends AbstractOscarController
         return [];
     }
 
+
+
     public function activityIndexBuildAction(){
 
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SEARCH_BUILD);

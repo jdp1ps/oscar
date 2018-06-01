@@ -288,7 +288,7 @@ return array(
 );
 ```
 
-#### Envoi DEBUG/PreProd (v2.5.x)
+#### Envoi DEBUG/PreProd (v2.4.x)
 
 Cette dernière option permet de ne pas envoyer les mails, mais de copier les mails sous la forme de fichier dans le chemin indiqué, cette méthode permet de tester les mails générer avant un passage en production : 
 
