@@ -13,6 +13,7 @@ use Moment\Moment;
 use Oscar\Exception\OscarException;
 use Oscar\Strategy\Mailer\Swift_Transport_FileOutput;
 use Oscar\Strategy\Mailer\SwiftTransportFileOutput;
+use Oscar\Utils\StringUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -80,7 +81,7 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
                     break;
 
                 case 'file':
-                    return new SwiftTransportFileOutput('/tmp');
+                    return new SwiftTransportFileOutput($this->getConfig()->getConfiguration('transport.path', '/tmp'));
 
 
                 default:
@@ -131,25 +132,31 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
      */
     public function send( \Swift_Message $msg ){
 
-        if( $this->getConfig()->getConfiguration('send') ) {
-            $this->getMailer()->send($msg);
-        }
-        else {
-            $administrators = $this->getConfig()->getConfiguration('administrators');
-            $admins = [];
-            foreach ($msg->getTo() as $mail=>$text) {
-                if( array_key_exists($mail, $administrators) ){
-                    $admins[$mail] = $text;
-                }
-            }
-            if( count($admins) ){
-                $msg->setTo($admins)->setCc([]);
-                $this->getMailer()->send($msg);
-            } else {
-                $this->getServiceLocator()->get('Logger')->debug('MAIL NON ENVOYé (Envoi désactivé)');
-                $this->getServiceLocator()->get('Logger')->debug($msg->toString());
-            }
+        $send = $this->getConfig()->getConfiguration('send', false);
+        $exceptions = $this->getConfig()->getConfiguration('send_false_exception', []);
 
+        if( $send == false ){
+            // On test si le mail est dans l'exception
+            if( count($exceptions) > 0 ){
+                $newTo = [];
+                foreach ($msg->getTo() as $mail=>$text) {
+                    if( in_array($mail, $exceptions) ){
+                        $newTo[$mail] = $text;
+                    }
+                }
+                if( count($newTo) ){
+                    $msg->setTo($newTo)->setCc([]);
+                    $this->getMailer()->send($msg);
+                    $this->getServiceLocator()->get('Logger')->info(sprintf(' + MAIL DISTRIBUÉ : %s', StringUtils::formatMail($msg->getTo())));
+                } else {
+                    $this->getServiceLocator()->get('Logger')->info(sprintf(' ~ Email pour %s non-distribué (Hors exceptions)', StringUtils::formatMail($msg->getTo())));
+                }
+            } else {
+                $this->getServiceLocator()->get('Logger')->info(sprintf(' ~ Email pour %s non distribué (Pas d\'exception)', StringUtils::formatMail($msg->getTo())));
+                // $this->getServiceLocator()->get('Logger')->debug($msg->toString());
+            }
+        } else {
+            $this->getMailer()->send($msg);
         }
     }
 }

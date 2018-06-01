@@ -66,11 +66,11 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         // Fromat du cron
         $cron = $rel[$date->format('D')].$date->format('H');
 
-        $this->getLoggerService()->debug("Notifications des inscriptions à '$cron'");
+        $this->getLoggerService()->info("Notifications des inscrits à '$cron'");
 
         // Liste des personnes ayant des notifications non-lues
         $persons = $this->getRepository()->getPersonsWithUnreadNotificationsAndAuthentification();
-        $this->getLoggerService()->debug(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
+        $this->getLoggerService()->info(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
 
         /** @var Person $person */
         foreach ($persons as $person) {
@@ -89,10 +89,9 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $settings['frequency'] = array_merge($settings['frequency'], $this->getServiceLocator()->get('OscarConfig')->getConfiguration('notifications.fixed'));
 
             if( in_array($cron, $settings['frequency']) ){
-                $this->getLoggerService()->debug("Envoi des notifications $person");
                 $this->mailNotificationsPerson($person);
             } else {
-                $this->getLoggerService()->debug(sprintf(" %s n'est pas inscrite pour ce timecode.", $person));
+                $this->getLoggerService()->info(sprintf('%s n\'est pas inscrite à ce crénaux', $person));
             }
         }
     }
@@ -111,15 +110,11 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $log = function(){};
         }
 
-        $log("####### MAIL pour $person");
-
-
         $datas = $this->getNotificationService()->getNotificationsPerson($person->getId(), true);
         $notifications = $datas['notifications'];
 
         if( count($notifications) ==  0 ){
-            $log(" - Aucune notification en attente");
-            $log("#######");
+            $log(sprintf(" - Pas de notifications non-lues pour %s", $person));
             return;
         }
 
@@ -129,7 +124,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
         $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
 
-        $content = "Bonjour $person\n";
+        $content = "Bonjour $person, <br>\n";
         $content .= "Vous avez des notifications non-lues sur Oscar : \n";
         $content .= "<ul>\n";
 
@@ -147,11 +142,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $content .= "</ul>\n";
         $mail = $mailer->newMessage("Notifications en attente sur Oscar", ['body' => $content]);
         $mail->setTo([$to => (string) $person]);
-
-        $log(" - Envoi prévu pour $to");
-        $log(" - Envoyé à " . print_r($mail->getTo(), true));
-        $log("#######");
-
         $mailer->send($mail);
     }
 

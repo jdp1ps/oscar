@@ -32,9 +32,25 @@ return array(
         // Notification par défaut
         /*** Notifications ***/
         'notifications' => [
-
-            // Envoi automatique
+            // Envoi automatique (ex: Lun8 (Lundis à 8 heure), Mer22 (Mercredis à 22 heures)
             'fixed' => []
+        ],
+
+        'urlAbsolute' => 'http://localhost:8080',
+
+        // Système d'envoi des mails
+        'mailer' => [
+            'transport' => [
+                'type' => 'file',
+                'path' => realpath(__DIR__.'/../../data/mails'),
+            ],
+            'administrators' => [],
+            'from' => [ 'oscar-bot@oscar.fr' => 'Oscar Bot'],
+            'copy' => [],
+            'send' => false,
+            'send_false_exception' => [],
+            'template' => realpath(__DIR__.'/../../module/Oscar/view/mail.phtml'),
+            'subjectPrefix' => '[OSCAR DEV]'
         ],
 
         ////////////////////////////////////////////////////////////////////////
