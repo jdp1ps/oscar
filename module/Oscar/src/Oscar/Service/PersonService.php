@@ -64,7 +64,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         ];
 
         // Fromat du cron
-        $cron = $rel[$date->format('D')].$date->format('H');
+        $cron = $rel[$date->format('D')].$date->format('G');
 
         $this->getLoggerService()->info("Notifications des inscrits à '$cron'");
 
