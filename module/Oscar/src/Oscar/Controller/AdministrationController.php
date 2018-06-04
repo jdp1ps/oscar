@@ -10,7 +10,9 @@ namespace Oscar\Controller;
 
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Monolog\Formatter\JsonFormatter;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\Discipline;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationType;
@@ -32,6 +34,70 @@ class AdministrationController extends AbstractOscarController
     {
         $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
         return [];
+    }
+
+    public function disciplineAction()
+    {
+
+        $disciplines = $this->getEntityManager()->getRepository(Discipline::class)->getDisciplinesCounted();
+        $method = $this->getHttpXMethod();
+
+        $this->getLogger()->debug($method);
+
+        switch ($method) {
+            case 'PUT' :
+                $label = $this->params()->fromPost('label');
+                $this->getLogger()->debug($label);
+
+                $discipline = new Discipline();
+                $this->getEntityManager()->persist($discipline);
+                $discipline->setLabel($label);
+
+                try {
+                    $this->getEntityManager()->flush($discipline);
+                    $data = $discipline->toJson();
+                    $data['actyivitiesLng'] = 0;
+                    return $this->ajaxResponse(['discipline' => $data]);
+                } catch (\Exception $e ) {
+                    return $this->getResponseInternalError("Impossible d'ajouter la discipline : " . $e->getMessage());
+                }
+
+
+                break;
+
+            case 'POST' :
+                $label = $this->params()->fromPost('label');
+                $id = $this->params()->fromPost('id');
+
+                try {
+                    $discipline = $this->getEntityManager()->getRepository(Discipline::class)->find($id);
+                    $discipline->setLabel($label);
+                    $this->getEntityManager()->flush($discipline);
+                    $data = $discipline->toJson();
+                    return $this->ajaxResponse(['discipline' => $data]);
+                } catch (\Exception $e ) {
+                    return $this->getResponseInternalError("Impossible d'ajouter la discipline : " . $e->getMessage());
+                }
+                return $this->getResponseNotImplemented("MODIFICATION Pas encore implanté");
+                break;
+
+            case 'DELETE' :
+                $id = $this->params()->fromQuery('id');
+                try {
+                    $discipline = $this->getEntityManager()->getRepository(Discipline::class)->find($id);
+                    $this->getEntityManager()->remove($discipline);
+                    $this->getEntityManager()->flush();
+                    return $this->getResponseOk();
+                } catch (\Exception $exception) {
+                    return $this->getResponseInternalError("Impossible de supprimer la discipline : " . $exception->getMessage());
+                }
+
+        }
+
+        $datas = [
+          'disciplines' => $disciplines
+        ];
+        return $datas;
     }
 
 

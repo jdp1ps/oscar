@@ -1306,6 +1306,15 @@ administration:
                 route: /activity-index/build
                 defaults:
                     action: activityIndexBuild
+
+        discipline:
+            type: segment
+            may_terminate: true
+            options:
+                route: /discipline
+                defaults:
+                    action: discipline
+
         privileges:
             type: segment
             may_terminate: true

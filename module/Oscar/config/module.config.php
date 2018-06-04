@@ -52,7 +52,7 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'userRoles', 'organizationRole', 'organizationRoleApi', 'activityIndexBuild', 'organizationType'],
+                    'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'userRoles', 'organizationRole', 'organizationRoleApi', 'activityIndexBuild', 'organizationType', 'discipline'],
                     'roles' => ['user']
                 ],
 

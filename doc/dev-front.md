@@ -24,4 +24,7 @@ poi watch --format umd --moduleName  Calendar --filename.css Calendar.css --file
 # Polyfill JS
 poi watch --format umd --moduleName  Polyfill --filename.css Polyfill.css --filename.js Polyfill.js --dist public/js/oscar/dist public/js/oscar/src/Polyfill.js 
 
+
+# Compilation de l'interface de gestion des disciplines
+poi watch --format umd --moduleName DisciplineUI public/js/oscar/src/DisciplineUI.vue --filename.css DisciplineUI.css --filename.js DisciplineUI.js --dist public/js/oscar/dist
 ```

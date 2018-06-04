@@ -64,7 +64,8 @@ requirejs.config({
         'Datepicker2' : 'oscar/dist/Datepicker',
         'activityclone' : 'oscar/dist/Activityclone',
         'polyfill' : 'oscar/dist/Polyfill',
-        'OrganizationType' : 'oscar/dist/OrganizationType'
+        'OrganizationType' : 'oscar/dist/OrganizationType',
+        'DisciplineUI' : 'oscar/dist/DisciplineUI'
     },
     shim: {
         "bootstrap": {

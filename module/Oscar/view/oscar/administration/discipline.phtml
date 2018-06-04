@@ -1,0 +1,31 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 18-06-04 11:58
+ * @copyright Certic (c) 2018
+ */
+?>
+<div class="container">
+<div id="disciplines"></div>
+</div>
+<script>
+    require(['vue', 'vue-resource', 'DisciplineUI'], function(Vue, VueResource, DisciplineUI){
+        Vue.use(VueResource);
+
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true;
+
+        new Vue({
+            el: "#disciplines",
+            render(h){
+
+                return h(DisciplineUI.default, {
+                    props: {
+                        disc: <?= json_encode($disciplines) ?>,
+                        url: '<?= $this->url('administration/discipline') ?>'
+                    }
+                });
+            }
+        })
+    })
+</script>
