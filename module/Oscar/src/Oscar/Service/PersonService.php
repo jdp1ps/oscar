@@ -64,7 +64,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         ];
 
         // Fromat du cron
-        $cron = $rel[$date->format('D')].$date->format('H');
+        $cron = $rel[$date->format('D')].$date->format('G');
 
         $this->getLoggerService()->info("Notifications des inscrits à '$cron'");
 
@@ -129,7 +129,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $content .= "<ul>\n";
 
         foreach ($notifications as $n) {
-            //echo " - Notification " . print_r($n, true) ."\n";
             if( preg_match($reg, $n['message'], $matches) ){
                 $link = $configOscar->getConfiguration("urlAbsolute").$url('contract/show',array('id' => $matches[2]));
                 $content .= "<li>" .preg_replace($reg, '$1 <a href="'.$link.'">$3</a> $4', $n['message'])."</li>\n";

@@ -35,6 +35,12 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     /** @var array Contiens la liste des ID des notifications créée pendant l'exécution */
     private $notificationsToTrigger = [];
 
+    /**
+     * Retourne les notifications d'une personne.
+     *
+     * @param $personId
+     * @return array
+     */
     public function getAllNotificationsPerson($personId)
     {
         $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
@@ -43,7 +49,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ->orderBy('n.dateEffective', 'DESC')
             ->where('p.person = :person')
             ->setParameters(['person' => $personId]);
-
 
         return $query->getQuery()->getResult();
     }
@@ -235,13 +240,14 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         if( $person !== null ){
             if( !in_array($person, $persons) ){
-                $this->getServiceLocator()->get('Logger')->warning(sprintf("La personne %s n'est pas associée à l'activité %s", $person, $milestone->getActivity()));
+                $this->getServiceLocator()->get('Logger')
+                    ->warning(sprintf("La personne %s n'est pas associée à l'activité %s",
+                        $person, $milestone->getActivity()));
                 return;
             } else {
                 $persons = [$person];
             }
         }
-
 
         // Si le jalon peut être complété
         if ($milestone->isFinishable()) {
@@ -250,18 +256,15 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             if ($milestone->isFinishable() && $milestone->isFinished())
                 return;
 
-
             // Si il est en retard
             if ($milestone->isLate()) {
                 $message = sprintf("Le jalon %s de l'activité %s est en retard.",
                     $milestone->getType()->getLabel(),
                     $activity->log());
-
                 $this->notification($message,
                     $persons, Notification::OBJECT_ACTIVITY,
                     $activity->getId(), $context, new \DateTime('now'),
                     $milestone->getDateStart(), false);
-
             }
         }
 
@@ -405,7 +408,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     public function purgeNotificationPayment(ActivityPayment $payment)
     {
         $context = "payment:" . $payment->getId();
-        $notifications = $this->getEntityManager()->getRepository(Notification::class)
+        $notifications = $this->getEntityManager()
+            ->getRepository(Notification::class)
             ->findBy(['context' => $context]);
 
         foreach ($notifications as $notification) {
@@ -473,7 +477,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         foreach ($person->getOrganizations() as $member) {
             if (!$member->isOutOfDate() && $member->isPrincipal()) {
                 /** @var ActivityOrganization $activity */
-
                 foreach ($this->getOrganizationService()->getOrganizationActivititiesPrincipalActive($member->getOrganization()) as $activity) {
                     $this->generateNotificationsForActivity($activity->getActivity(), $person);
                 }
@@ -486,8 +489,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
                 $this->generateNotificationsForActivity($activityPerson->getActivity(), $person);
             }
         }
-
-
     }
 
     /**
@@ -537,7 +538,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function notifyActivitiesTimesheetSend($activities)
     {
-
         $this->getServiceLocator()->get('Logger')->info("Notification timesheet send !");
 
         /** @var PersonService $personsService */
@@ -545,7 +545,8 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
-            $persons = $personsService->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+            $persons = $personsService
+                ->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
             $this->notification(
                 sprintf("Déclaration en attente de validation dans l'activité %s.", $activity->log()),
                 $persons,

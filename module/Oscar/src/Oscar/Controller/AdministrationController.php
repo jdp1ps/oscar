@@ -35,14 +35,18 @@ class AdministrationController extends AbstractOscarController
     }
 
 
-
     public function activityIndexBuildAction(){
-
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SEARCH_BUILD);
         return [
             'repport' => $this->getActivityService()->searchIndex_rebuild()
         ];
     }
+
+
+    public function disciplineAction(){
+        die("DISCIPLINE");
+    }
+
 
     public function organizationTypeAction(){
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE);
@@ -66,7 +70,9 @@ class AdministrationController extends AbstractOscarController
                     $id = $this->params()->fromRoute('id');
                     $this->getLogger()->debug("Suppression du type " + $id);
                     if( $id ){
-                        $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+                        $type = $this->getEntityManager()
+                            ->getRepository(OrganizationType::class)
+                            ->findOneBy(['id' => $id]);
                         if( $type ){
                             try {
                                 foreach ($type->getChildren() as $t ){
@@ -92,7 +98,9 @@ class AdministrationController extends AbstractOscarController
 
                     $type = null;
                     if( $id ){
-                        $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+                        $type = $this->getEntityManager()
+                            ->getRepository(OrganizationType::class)
+                            ->findOneBy(['id' => $id]);
                     }
 
                     if( !$type ){
