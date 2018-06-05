@@ -106,12 +106,12 @@ class Project implements ResourceInterface
      */
     protected $partners;
 
-    /**
-     * Discipline
-     * @var Discipline
-     * @ORM\ManyToOne(targetEntity="Discipline")
-     */
-    protected $discipline;
+//    /**
+//     * Discipline
+//     * @var Discipline
+//     * @ORM\ManyToOne(targetEntity="Discipline")
+//     */
+//    protected $discipline;
 
     /**
      * Discipline
@@ -128,7 +128,7 @@ class Project implements ResourceInterface
         $this->grants = new ArrayCollection();
         $this->members = new ArrayCollection();
         $this->partners = new ArrayCollection();
-        $this->disciplines = new ArrayCollection();
+//        $this->disciplines = new ArrayCollection();
     }
 
 
@@ -172,35 +172,35 @@ class Project implements ResourceInterface
         return $end;
     }
 
-    /**
-     * @param Discipline $discipline
-     * @return $this
-     */
-    public function addDiscipline(Discipline $discipline)
-    {
-        if( !$this->disciplines->contains($discipline) ){
-            $this->disciplines->add($discipline);
-        }
-        return $this;
-    }
-
-    /**
-     * @param Discipline $discipline
-     * @return $this
-     */
-    public function removeDiscipline(Discipline $discipline)
-    {
-        $this->disciplines->removeElement($discipline);
-        return $this;
-    }
-
-    /**
-     * @return ArrayCollection|Discipline
-     */
-    public function getDisciplines()
-    {
-        return $this->disciplines;
-    }
+//    /**
+//     * @param Discipline $discipline
+//     * @return $this
+//     */
+//    public function addDiscipline(Discipline $discipline)
+//    {
+//        if( !$this->disciplines->contains($discipline) ){
+//            $this->disciplines->add($discipline);
+//        }
+//        return $this;
+//    }
+//
+//    /**
+//     * @param Discipline $discipline
+//     * @return $this
+//     */
+//    public function removeDiscipline(Discipline $discipline)
+//    {
+//        $this->disciplines->removeElement($discipline);
+//        return $this;
+//    }
+//
+//    /**
+//     * @return ArrayCollection|Discipline
+//     */
+//    public function getDisciplines()
+//    {
+//        return $this->disciplines;
+//    }
 
     /**
      * @param \Oscar\Entity\ProjectMember $projectMember
@@ -426,23 +426,23 @@ class Project implements ResourceInterface
     }
 
 
-    /**
-     * @return mixed
-     */
-    public function getDiscipline()
-    {
-        return $this->discipline;
-    }
+//    /**
+//     * @return mixed
+//     */
+//    public function getDiscipline()
+//    {
+//        return $this->discipline;
+//    }
 
-    /**
-     * @param mixed $discipline
-     */
-    public function setDiscipline($discipline)
-    {
-        $this->discipline = $discipline;
-
-        return $this;
-    }
+//    /**
+//     * @param mixed $discipline
+//     */
+//    public function setDiscipline($discipline)
+//    {
+//        $this->discipline = $discipline;
+//
+//        return $this;
+//    }
 
     /**
      * @return string

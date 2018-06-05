@@ -82,6 +82,10 @@ if(
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ): ?>
         <li><a href="<?= $this->url('administration/organizationtype') ?>">Types d'organisation</a></li>
         <?php endif; ?>
+
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DISCIPLINE_MANAGE) ):?>
+            <li><a href="<?= $this->url('administration/discipline') ?>">Gérer les disciplines</a></li>
+        <?php endif; ?>
     </ul>
 </li>
 <?php endif; ?>

@@ -290,7 +290,7 @@ class Activity implements ResourceInterface
      * Discipline
      *
      * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Discipline")
+     * @ORM\ManyToMany(targetEntity="Discipline", cascade={"detach"})
      */
     protected $disciplines;
 

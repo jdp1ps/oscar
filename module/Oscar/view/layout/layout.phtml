@@ -247,6 +247,10 @@ $this->headScript();
                             <li><a href="<?= $this->url('administration/organizationtype') ?>">Gérer les types d'organisation</a></li>
                         <?php endif; ?>
 
+                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DISCIPLINE_MANAGE) ):?>
+                            <li><a href="<?= $this->url('administration/discipline') ?>">Gérer les disciplines</a></li>
+                        <?php endif; ?>
+
                         <li><a href="<?= $this->url('changelog') ?>">Quoi de neuf ?</a></li>
                     </ul>
                 </section>

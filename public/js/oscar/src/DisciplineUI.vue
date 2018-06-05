@@ -175,12 +175,12 @@
                         });
 
                         this.disc = disciplines;
-                        this.deleteData = null;
+//                        this.deleteData = null;
                     },
                     ko => {
                         this.error = ko.body;
                     }
-                );
+                ).then( foo => this.deleteData = null );
             }
         },
         mounted(){

@@ -108,12 +108,6 @@ class AdministrationController extends AbstractOscarController
         ];
     }
 
-
-    public function disciplineAction(){
-        die("DISCIPLINE");
-    }
-
-
     public function organizationTypeAction(){
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE);
         $datas = [];
