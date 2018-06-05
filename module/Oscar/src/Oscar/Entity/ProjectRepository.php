@@ -106,13 +106,13 @@ class ProjectRepository extends EntityRepository {
     protected function getCoreQuery()
     {
         $query = $this->getEntityManager()->createQueryBuilder();
-        $query->select('p, pg, s, d, gt, m, mp, pr, o')
+        $query->select('p, pg, s, gt, m, mp, pr, o')
             ->from('Oscar\Entity\Project', 'p')
             ->leftJoin('p.grants', 'pg')
             ->leftJoin('p.members', 'm')
             ->leftJoin('m.person', 'mp')
             ->leftJoin('pg.type', 'gt')
-            ->leftJoin('p.discipline', 'd')
+//            ->leftJoin('p.discipline', 'd')
             ->leftJoin('p.partners', 'pr')
             ->leftJoin('pr.organization', 'o')
             ->leftJoin('pg.source', 's')

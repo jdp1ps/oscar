@@ -286,7 +286,7 @@ class ProjectController extends AbstractOscarController
 	try {
 		$projects = $projectRepo->getByUserEmail($email);
 	} catch( \Exception $e ) {
-		die($e->getMessage());
+		$this->getLogger()->error($e->getMessage() . "\n" . $e->getTraceAsString());
 		$projects = [];
 	}
 
