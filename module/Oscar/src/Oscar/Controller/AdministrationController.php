@@ -38,7 +38,8 @@ class AdministrationController extends AbstractOscarController
 
     public function disciplineAction()
     {
-
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
+        
         $disciplines = $this->getEntityManager()->getRepository(Discipline::class)->getDisciplinesCounted();
         $method = $this->getHttpXMethod();
 
