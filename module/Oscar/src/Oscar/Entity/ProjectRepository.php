@@ -112,7 +112,6 @@ class ProjectRepository extends EntityRepository {
             ->leftJoin('p.members', 'm')
             ->leftJoin('m.person', 'mp')
             ->leftJoin('pg.type', 'gt')
-//            ->leftJoin('p.discipline', 'd')
             ->leftJoin('p.partners', 'pr')
             ->leftJoin('pr.organization', 'o')
             ->leftJoin('pg.source', 's')
@@ -168,7 +167,6 @@ class ProjectRepository extends EntityRepository {
     public function all()
     {
         return $this->baseQuery()
-            ->orderBy('p.discipline','DESC')
             ->addOrderBy('p.dateCreated', 'DESC')
             ->getQuery()
             ->execute();
