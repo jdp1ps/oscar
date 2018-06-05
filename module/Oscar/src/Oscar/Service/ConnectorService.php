@@ -38,9 +38,16 @@ class ConnectorService implements ServiceLocatorAwareInterface, EntityManagerAwa
             // Configuration du connecteur
             $connectorConfig = $oscarConfig->getConfiguration('connectors.'.$connectorName);
 
+            // Slip pour garder le nom "simple"
+            $spliName = explode('.', $connectorName);
+            $connectorShortName = $spliName[count($spliName)-1];
+
             // Création de l'instance
             $_CONNECTORS_INSTANCE[$connectorName] = new $connectorConfig['class'];
-            $_CONNECTORS_INSTANCE[$connectorName]->init($this->getServiceLocator(), $connectorConfig['params']);
+            $_CONNECTORS_INSTANCE[$connectorName]->init(
+                $this->getServiceLocator(),
+                $connectorConfig['params'],
+                $connectorShortName);
 
             if( array_key_exists('editable', $connectorConfig) ){
                 $_CONNECTORS_INSTANCE[$connectorName]->setEditable($connectorConfig['editable'] === true);

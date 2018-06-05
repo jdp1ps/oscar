@@ -27,6 +27,12 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
 
     private $editable = false;
 
+    // Nom du connecteur,
+    // En BDD, ce nom sert de clef pour stoquer
+    // dans le champs 'connectors' la valeur donnée
+    // par la source comme UID.
+    private $name = 'rest';
+
     public function setEditable($editable){
         $this->editable = $editable;
     }
@@ -37,7 +43,7 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
 
     function getName()
     {
-        return "rest";
+        return $this->name;
     }
 
     function getRemoteID()
@@ -60,8 +66,9 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
         return null;
     }
 
-    public function init(ServiceManager $sm, $configFilePath)
+    public function init(ServiceManager $sm, $configFilePath, $connectorName='rest')
     {
+        $this->name = $connectorName;
         $this->setServiceLocator($sm);
         $this->loadParameters($configFilePath);
     }
