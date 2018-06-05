@@ -12,6 +12,12 @@ return array(
         // Par défaut, pas de socket
         'socket' => false,
 
+        // ./doc/connectors.md
+        'connectors' => [
+            'organization' => [],
+            'person' => []
+        ],
+
         ////////////////////////////////////////////////////////////// DOCUMENTS
         // Emplacement des dossiers pour les documents
         'paths' => [
