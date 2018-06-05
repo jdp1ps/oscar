@@ -111,7 +111,7 @@ return array(
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
-                    'action' => ['index', 'advancedSearch', 'exportJSON', 'almostDone', 'almostStart'],
+                    'action' => ['advancedSearch', 'exportJSON', 'almostDone', 'almostStart'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
                 ],
                 [ 'controller' =>   'Activity',
