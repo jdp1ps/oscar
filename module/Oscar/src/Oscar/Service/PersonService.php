@@ -75,7 +75,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         /** @var Person $person */
         foreach ($persons as $person) {
             /** @var Authentification $auth */
-            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]); 
+            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]);
             $settings = $auth->getSettings();
 
             if( !$settings ){
