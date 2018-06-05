@@ -559,6 +559,14 @@
     "fullcode": "MAINTENANCE-MILESTONETYPE_MANAGE"
   },
 
+  "MAINTENANCE-DISCIPLINE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "DISCIPLINE_MANAGE",
+    "libelle": "Configurer les disciplines disponibles pour les activités",
+    "fullcode": "MAINTENANCE-DISCIPLINE_MANAGE"
+  },
+
   "MAINTENANCE-ORGANIZATIONTYPE_MANAGE": {
     "spot": 7,
     "category_id": 6,
