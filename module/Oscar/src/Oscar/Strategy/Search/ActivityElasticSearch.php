@@ -177,6 +177,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             'eotp' => $activity->getCodeEOTP(),
             'acronym' => $activity->getAcronym(),
             'activity_id' => $activity->getId(),
+            'disciplines' => $activity->getDisciplinesArray(),
             'members' => $members,
             'partners' => $partners,
             'project_id' => $project_id,

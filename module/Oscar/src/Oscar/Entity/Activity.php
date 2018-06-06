@@ -1020,6 +1020,20 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * Retourne la liste des disciplines sous la forme d'un tableau de chaînes.
+     *
+     * @return array
+     */
+    public function getDisciplinesArray()
+    {
+        $disciplines = [];
+        foreach ($this->getDisciplines() as $d) {
+            $disciplines[] = (string)$d;
+        }
+        return $disciplines;
+    }
+
+    /**
      * @return Discipline[]
      */
     public function setDisciplines( $disciplines )
