@@ -316,7 +316,7 @@
     "spot": 4,
     "root": "PERSON-SHOW",
     "code": "SYNC_LDAP",
-    "libelle": "Synchroniser les donn\u00e9es avec LDAP",
+    "libelle": "Synchroniser les donn\u00e9es depuis les connecteurs",
     "fullcode": "PERSON-SYNC_LDAP"
   },
   "PERSON-INFOS_RH": {
@@ -367,7 +367,7 @@
     "spot": 4,
     "root": "ORGANIZATION-SHOW",
     "code": "SYNC_LDAP",
-    "libelle": "Synchroniser les donn\u00e9es avec LDAP",
+    "libelle": "Synchroniser les donn\u00e9es avec les connecteurs",
     "fullcode": "ORGANIZATION-SYNC_LDAP"
   },
 
