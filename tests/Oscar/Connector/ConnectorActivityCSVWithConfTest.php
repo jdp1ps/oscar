@@ -33,7 +33,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
     {
         $config = $this->getDemoConfig();
         $this->assertTrue(is_array($config));
-        $this->assertEquals(18, count($this->getDemoConfig()));
+        $this->assertEquals(20, count($this->getDemoConfig()), "La configuration de démo contient 20 entrées.");
     }
 
 
@@ -52,7 +52,6 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $converter = new ConnectorActivityCSVWithConf($source, $config, null);
         $datas = $converter->syncAll();
 
-
         $this->assertNotNull($datas);
         $this->assertEquals(2, count($datas));
 
@@ -68,10 +67,19 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals("Olympia", $datas[0]['organizations']['Laboratoire'][0]);
         $this->assertEquals("US Robot", $datas[0]['organizations']['Laboratoire'][1]);
 
+        $this->assertEquals(2, count($datas[0]['persons']['Participants']), 'Valeurs multiples séparées par une virgule');
+        $this->assertEquals("Batman", $datas[0]['persons']['Participants'][0]);
+        $this->assertEquals("Robin", $datas[0]['persons']['Participants'][1]);
+
+        $this->assertEquals(1, count($datas[0]['persons']['Ingénieur']), 'Valeurs multiples sur plusieurs colonnes, une des colonne vide');
+
         // Deuxième activité
         $this->assertEquals(45000.0, $datas[1]['amount']);
         $this->assertEquals('2017-12-24', $datas[1]['datepfi']);
         $this->assertEquals('2017-12-31', $datas[1]['datesigned']);
+
+        $this->assertEquals(2, count($datas[1]['persons']['Ingénieur']), 'Valeurs multiples sur plusieurs colonnes');
+        $this->assertTrue(in_array("Marcel Grossmann", $datas[1]['persons']['Ingénieur']), "Marcel Grossmann est dans l'activité 2");
 
         /// PAYMENTS
         $this->assertEquals(3, count($datas[1]['payments']));

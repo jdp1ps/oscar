@@ -164,13 +164,35 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
     }
 
     /**
+     * Extraction automatique des chaînes de caractère, avec un séparateur optionnel
+     * pour le cas des données multiples.
+     *
+     * 2018-06-06 : Ajout d'un trim
+     *
+     * @param $value
+     * @param $separator
+     * @return array
+     */
+    private function extractArrayString( $value, $separator ){
+        $out = [];
+        if( $separator === null ){
+            $out = [trim($value)];
+        } else {
+            $values = explode($separator, $value);
+            foreach ($values as $v) {
+                $out[] = trim($v);
+            }
+        }
+        return $out;
+    }
+
+    /**
      * @return ConnectorRepport
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function syncAll()
     {
         $out = [];
-
 
         $i = 1;
         while($datas = fgetcsv($this->csvDatas)){
@@ -184,9 +206,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
             ];
 
             foreach ($datas as $index => $value ){
-
-
-
                 if( !$value ) {
                     continue 1;
                 }
@@ -203,26 +222,36 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
 
                 // Si la clef est une chaîne, on détermine si c'est un appel de setter
                 // simple ou un mécanisme plus "avancé"
-
-
                 $key = $this->config[$index];
+                $separator = null;
+
+                // On check si la valeur est un tableau
+                // pour les configurations plus complexe
+                if( is_array($key) ){
+                    $key = $this->config[$index]['key'];
+                    $separator = $this->config[$index]['separator'];
+                }
 
                 if( preg_match("/organizations\.(.*)/", $key, $matches) ){
                     $role = $matches[1];
+
+                    // Création de la clef si besoin
                     if( !array_key_exists($role, $json['organizations']) ){
                         $json['organizations'][$role] = [];
                     }
                     if( !in_array($value, $json['organizations'][$role]) ){
-                        $json['organizations'][$role][] = $value;
+                        $json['organizations'][$role] = array_merge($json['organizations'][$role], $this->extractArrayString($value, $separator));
                     }
                 }
                 else if( preg_match("/persons\.(.*)/", $key, $matches) ){
                     $role = $matches[1];
+
+                    // Création de la clef si besoin
                     if( !array_key_exists($role, $json['persons']) ){
                         $json['persons'][$role] = [];
                     }
                     if( !in_array($value, $json['persons'][$role]) ){
-                        $json['persons'][$role][] = $value;
+                        $json['persons'][$role] = array_merge($json['persons'][$role], $this->extractArrayString($value, $separator));
                     }
                 }
                 else if( preg_match("/milestones\.(.*)/", $key, $matches) ){

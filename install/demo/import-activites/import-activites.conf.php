@@ -23,6 +23,7 @@ return [
 
     8   => "persons.Responsable Scientifique",
     9   => "persons.Ingénieur",
+    10   => "persons.Ingénieur",
 
     11  => "amount",
 
@@ -32,4 +33,9 @@ return [
 
     18  => "milestones.Rapport financier",
     20  => "type",
+
+    25  => [
+        'key' => "persons.Participants",
+        'separator' => ','
+    ]
 ];
