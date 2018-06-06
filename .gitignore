@@ -33,7 +33,9 @@ socket/config.json
 !/public/custom/.gitkeep
 
 # Data & Cache
-data/*
+data/**.*
+data/DoctrineORMModule
+data/luceneindex
 !data/timesheet_model.xls
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
