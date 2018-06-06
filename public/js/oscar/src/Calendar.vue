@@ -907,16 +907,17 @@
              * @param period
              */
             submitall(status, period){
+                console.log('Soumettre la semaine', this.store);
                 var events = [];
                 if (period == 'week') {
                     this.events.forEach(event => {
-                        if (store.inCurrentWeek(event) && event.sendable) {
+                        if (this.store.inCurrentWeek(event) && event.sendable) {
                             events.push(event);
                         }
                     });
                 }
                 if (events.length) {
-                    bootbox.confirm("Soumettre le(s) créneau(x) ?", (confirm) => {
+                    bootbox.confirm("Soumettre le(s) " + events.length + " créneau(x) ?", (confirm) => {
                         if (confirm)
                             this.restStep(events, status);
                     });

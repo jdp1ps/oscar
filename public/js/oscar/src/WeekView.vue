@@ -227,12 +227,15 @@
             handlerValidateSciWeek(){
                 this.$emit('validateevent', this.weekEvents, 'sci');
             },
+
             handlerRejectSciWeek(){
                 this.$emit('rejectevent', this.weekEvents, 'sci');
             },
+
             handlerValidateAdmWeek(){
                 this.$emit('validateevent', this.weekEvents, 'adm');
             },
+
             handlerRejectAdmWeek(){
                 this.$emit('rejectevent', this.weekEvents, 'adm');
             },
