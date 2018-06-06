@@ -4,6 +4,8 @@
  * @date: 27/01/16 14:59
  * @copyright Certic (c) 2016
  */
+
+$facet;
 ?>
 <div class="container">
     <h1><i class="icon-calendar"></i>Type de jalon</h1>
@@ -11,40 +13,67 @@
         <?= count($entities) ?> type(s)
     </p>
 
-    <?php foreach( $entities as $entity ): ?>
+    <?php foreach( $entities as $entity ):
+        if( $facet != $entity['facet'] ){
+            $text = $facet = $entity['facet'];
+            if( !$text ) $text = '<i>Non définit</i>';
+
+            echo "<h3>$text</h3>";
+        }
+
+        ?>
     <article class="card xs">
         <h2 class="card-title">
-            <small class="id">[<?= $entity->getId() ?>]</small>
+
             <span>
-                <strong><?= $entity->getLabel() ?></strong>
-                <i><?= $entity->getFacet() ?></i>
-                <span class="recursivity">
-                    <i class="icon-history"></i>
-                    <?php if( $entity->getRecursivity() ): ?>
-                        <?php foreach( $entity->getRecursivityArray() as $days ): ?>
-                        <span class="cartouche"><?= $days ?></span>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <i>Aucune notification</i>
-                    <?php endif; ?>
-                </span>
-                <span>
-                    <?php if( $entity->isFinishable() ): ?>
-                    <i class="icon-ok-circled" title="Gestion de la complétude"></i>
-                    <?php endif; ?>
-                </span>
+                <small><?= $entity['facet'] ?> /</small>
+                <strong><?= $entity['label'] ?></strong>
 
-            <span class="description"><?= $entity->getDescription() ?></span>
-                </span>
-
+            </span>
             <nav class="text-right">
                 <small>
-                    <a href="<?= $this->url('datetype/edit', ['id' => $entity->getId()]) ?>" class="link">
+                    <a href="<?= $this->url('datetype/delete', ['id' => $entity['id']]) ?>" class="link">
+                        <i class="icon-trash"></i>
+                        Supprimer</a>
+                    <a href="<?= $this->url('datetype/edit', ['id' => $entity['id']]) ?>" class="link">
                         <i class="icon-pencil"></i>
                         Modifier</a>
                 </small>
             </nav>
         </h2>
+        <div class="card-content">
+            <?php if( $entity['description']): ?>
+                <span class="description"><?= $entity['description'] ?></span><br>
+            <?php endif; ?>
+            <i class="icon-cube"></i>
+            Usage :  <?php if( $entity['used'] ): ?>
+                <span class="label label-primary"><?= $entity['used'] ?></span>
+            <?php else: ?>
+                <span class="label label-default">Inutilisé</span>
+            <?php endif; ?>
+
+            <span class="recursivity">
+                    <i class="icon-history"></i>  Rappel avant échéance :
+                    <?php if( $entity['recursivity'] ): ?>
+                        <?php foreach( explode(',', $entity['recursivity']) as $days ): ?>
+                            <span class="cartouche"><?= $days ?> jours</span>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <i>Aucun</i>
+                    <?php endif; ?>
+            </span>
+
+            <span>
+                    <?php if( $entity['finishable'] ): ?>
+                        <i class="icon-ok-circled" title="Gestion de la complétude"></i>
+                        Ce type doit être marqué comme terminé
+                    <?php endif; ?>
+                </span>
+
+
+
+
+        </div>
     </article>
     <?php endforeach; ?>
 

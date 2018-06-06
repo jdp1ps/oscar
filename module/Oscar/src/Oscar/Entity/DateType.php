@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class DateType
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\DateTypeRepository")
  */
 class DateType implements ITrackable
 {
@@ -57,6 +58,12 @@ class DateType implements ITrackable
      * @ORM\Column(type="boolean", nullable=false, options={"default"=false})
      */
     private $finishable = false;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     * @ORM\OneToMany(targetEntity="ActivityDate", mappedBy="type")
+     */
+    private $milestones;
 
     /**
      * @return bool

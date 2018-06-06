@@ -8,7 +8,11 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
+use Oscar\Entity\ActivityDate;
 use Oscar\Entity\DateType;
+use Oscar\Entity\DateTypeRepository;
+use Oscar\Exception\OscarException;
 use Oscar\Form\DateTypeForm;
 use Zend\View\Model\ViewModel;
 
@@ -17,7 +21,7 @@ class DateTypeController extends AbstractOscarController
     public function indexAction()
     {
         return [
-            'entities' => $this->getEntityManager()->getRepository(DateType::class)->findAll()
+            'entities' => $this->getEntityManager()->getRepository(DateType::class)->allWithUsage()
         ];
     }
 
@@ -50,7 +54,24 @@ class DateTypeController extends AbstractOscarController
 
     public function deleteAction()
     {
-        die('TODO');
+        $id = $this->params()->fromRoute('id');
+        $dateType = $this->getEntityManager()->getRepository(DateType::class)->find($id);
+
+        $jalons = $this->getEntityManager()->getRepository(ActivityDate::class)->findBy([
+            'type' => $dateType
+        ]);
+
+        if( count($jalons) > 0 ){
+            throw new OscarException("Impossible de supprimer un type de jalon utilisé dans les activités");
+        } else {
+            try {
+                $this->getEntityManager()->remove($dateType);
+                $this->getEntityManager()->flush();
+                return $this->redirect()->toRoute('datetype');
+            } catch ( ForeignKeyConstraintViolationException $e ){
+                throw new OscarException("Oscar n'a pas pu supprimer le type de jalon : " . $e->getMessage());
+            }
+        }
     }
 
     public function editAction()
@@ -67,7 +88,6 @@ class DateTypeController extends AbstractOscarController
         if ($request->isPost()) {
             $form->setData($request->getPost());
             if ($form->isValid()) {
-                var_dump($form->getData());
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush();
                 $this->redirect()->toRoute('datetype');

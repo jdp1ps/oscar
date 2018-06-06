@@ -183,8 +183,8 @@ return array(
 
                 // ---   - { controller: ActivityDate, action: [index, change, new], roles: [user] }
                 ['controller' => 'DateType',
-                    'action' => ['index', 'change', 'new', 'edit'],
-                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN,
+                    'action' => ['index', 'change', 'new', 'edit', 'delete'],
+                    'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE,
                 ],
 
                 // DOCUMENTS
