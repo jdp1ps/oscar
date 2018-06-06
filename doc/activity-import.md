@@ -339,7 +339,12 @@ return [
     // Persons
     423 => "persons.Responsable scientifique",
     424 => "persons.Chargé d'affaires",
-    425 => "persons.Ingénieur",
+    
+    // Cas de données multiple séparée par une virgule
+    425 => [
+        'key' => "persons.Ingénieur",
+        'separator' => ','
+    ]
 ];
 ```
 
