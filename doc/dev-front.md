@@ -27,4 +27,7 @@ poi watch --format umd --moduleName  Polyfill --filename.css Polyfill.css --file
 
 # Compilation de l'interface de gestion des disciplines
 poi watch --format umd --moduleName DisciplineUI public/js/oscar/src/DisciplineUI.vue --filename.css DisciplineUI.css --filename.js DisciplineUI.js --dist public/js/oscar/dist
+
+# Compilation des notifications
+poi watch --format umd --moduleName  Notification --filename.css Notification.css --filename.js Notification.js --dist public/js/oscar/dist public/js/oscar/src/Notification.vue
 ```

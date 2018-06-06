@@ -63,14 +63,16 @@
         methods: {
             handlerClickNotification(evt, notification){
                 var redirect = null;
-                console.log(evt.target.href);
+
                 if( evt.target.href )
                     redirect = evt.target.href;
 
+                console.log(redirect);
 
                 this.$http.delete(this.url+'?ids=' + notification.id).then(
                     (res) => {
-                        document.location = redirect;
+                        if( redirect )
+                            document.location = redirect;
                     },
                     (err) => {
                         console.log("ERROR");
