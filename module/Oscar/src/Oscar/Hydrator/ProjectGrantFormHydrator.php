@@ -37,7 +37,6 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             ->setCurrency($this->getCurrency($data['currency']))
             ->setCodeEOTP($data['codeEOTP'])
             ->setStatus($data['status'])
-            ->setTimesheetFormat($data['timesheetFormat'])
             ->setAmount($this->decimalPointComma($data['amount']))
             ->setFraisDeGestion($this->decimalPointComma($data['fraisDeGestion']))
             ->setTva($this->getTVA($data['tva']))
@@ -111,7 +110,6 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             'tva' => $object->getTva() ? $object->getTva()->getId() : -1,
             'codeEOTP' => $object->getCodeEOTP(),
             'disciplines' => $object->getDisciplinesIds(),
-            'timesheetFormat' => $object->getTimesheetFormat(),
             'amount' => $object->getAmount(),
             'fraisDeGestion' => $object->getFraisDeGestion(),
             'financialImpact' => array_search($object->getFinancialImpact(), Activity::getFinancialImpactValues()),

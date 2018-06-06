@@ -30,8 +30,6 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         $hydrator->setServiceLocator($this->getServiceLocator());
         $this->setHydrator($hydrator);
 
-
-
         /** @var ProjectGrantService $grantService */
         $grantService = $this->getServiceLocator()->get('ProjectGrantService');
 
@@ -40,16 +38,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'name' => 'id'
         ]);
 
-        // CentaureId
-        $this->add([
-            'name'   => 'centaureId',
-            'options' => [
-                'label' => 'Identifiant dans centaure'
-            ],
-            'type'=>'Text'
-        ]);
-
-        // CentaureId
+        // LABEL
         $label = "Intitulé de l'activité";
         $this->add([
             'name'   => 'label',
@@ -63,7 +52,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'type'=>'Text'
         ]);
 
-        // CentaureId
+        // DESCRIPTION
         $label = "Description";
         $this->add([
             'name'   => 'description',
@@ -75,32 +64,6 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
                 'placeholder' => $label,
             ],
             'type'=>'Textarea'
-        ]);
-
-        // CentaureNumConvention
-        $this->add([
-            'name'   => 'centaureNumConvention',
-            'options' => [
-                'label' => 'N° de convention',
-                //'value_options' =>
-            ],
-            'attributes' => [
-                'class' => 'form-control'
-            ],
-            'type'=>'Text'
-        ]);
-
-        // Source
-        $this->add([
-            'name'   => 'source',
-            'options' => [
-                'label' => 'Source du financement',
-                'value_options' => $this->getServiceLocator()->get('ProjectGrantService')->getSources()
-            ],
-            'attributes' => [
-                'class' => 'form-control'
-            ],
-            'type'=>'Select'
         ]);
 
         // Source
@@ -258,7 +221,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'attributes' => [
                 'class' => 'input-date'
             ],
-            'type'=>'Date'
+            'type'=>'Text'
         ]);
 
         // DateEnd
@@ -270,7 +233,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'attributes' => [
                 'class' => 'input-date'
             ],
-            'type'=>'Date'
+            'type'=>'Text'
         ]);
 
         // DateSigned
@@ -282,38 +245,25 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'attributes' => [
                 'class' => 'input-date'
             ],
-            'type'=>'Date'
+            'type'=>'Text'
         ]);
 
         // DateOpened
         $this->add([
             'name'   => 'dateOpened',
             'options' => [
-                'label' => "Création du PFI dans SIFAC"
+                'label' => "Création du PFI"
             ],
             'attributes' => [
                 'class' => 'input-date'
             ],
-            'type'=>'Date'
+            'type'=>'Text'
         ]);
 
         // DateOpened
         $this->add([
             'name'   => 'numbers',
             'type'=>KeyValue::class
-        ]);
-
-        // Type
-        $this->add([
-            'name'   => 'timesheetFormat',
-            'options' => [
-                'label' => 'Déclaration du temps',
-                'value_options' => TimeSheet::getFormatsSelect()
-            ],
-            'attributes' => [
-                'class' => 'form-control'
-            ],
-            'type'=>'Select'
         ]);
 
         // Type

@@ -53,9 +53,11 @@ use Zend\View\Model\ViewModel;
  */
 class ProjectGrantController extends AbstractOscarController
 {
-
-
-
+    /**
+     * Génération automatique de documents.
+     *
+     * @throws OscarException
+     */
     public function generatedDocumentAction(){
         $id = $this->params()->fromRoute('id');
         $doc = $this->params()->fromRoute('doc');
@@ -69,7 +71,6 @@ class ProjectGrantController extends AbstractOscarController
         $activity = $this->getProjectGrantService()->getGrant($id);
 
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
-
 
         foreach ($activity->documentDatas() as $key=>$value) {
             $templateProcessor->setValue($key, $value);
@@ -92,18 +93,7 @@ class ProjectGrantController extends AbstractOscarController
     ////////////////////////////////////////////////////////////////////////////
     // ACTIONS
     ////////////////////////////////////////////////////////////////////////////
-    /**
-     * Permet de lancer la numérotation automatique.
-     *
-     * @throws \Exception
-     * @deprecated
-     */
-    public function numberAction()
-    {
-        return $this->getResponseDeprecated();
-    }
-
-    /**
+      /**
      * @return \Zend\Http\Response
      */
     public function editAction()

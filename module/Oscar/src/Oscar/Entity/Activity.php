@@ -365,7 +365,7 @@ class Activity implements ResourceInterface
      * @var String
      * @ORM\Column(type="string", options={"default":"none"}, nullable=false)
      */
-    private $timesheetFormat;
+    private $timesheetFormat = self::TIMESHEET_FORMAT_NONE;
 
     private $_cachePersonsByRole;
 
