@@ -20,6 +20,23 @@ return array(
         // Oscar Live
         'socket' => $socket,
 
+        ////////////////////////////////////////////////////////////////////////
+        // ! EXPERIMENTAL !
+        'generated-documents' => [
+            'activity' => [
+                'sample' => [
+                    'label' => 'Exemple de document',
+                    'template' => __DIR__ . '/../../data/generated-documents/activity/sample.docx',
+                    'type' => 'Word'
+                ],
+                'bordereau' => [
+                    'label' => 'Exemple de bordereau',
+                    'template' => __DIR__ . '/../../data/generated-documents/activity/bordereau.docx',
+                    'type' => 'Word'
+                ]
+            ]
+        ],
+
 
         ////////////////////////////////////////////////////////////////////////
         //
@@ -83,7 +100,7 @@ return array(
         'notifications' => [
 
             // Envoi automatique
-            'fixed': ['mer8'] // ex: IMPOSE une notification chaque mercredis à 8 heure
+            'fixed' => ['Mer8', 'Lun20'] // ex: IMPOSE une notification chaque mercredis à 8 heure et Lundis à 20 heures
         ],
 
 

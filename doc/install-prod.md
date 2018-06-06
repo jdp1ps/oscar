@@ -205,7 +205,7 @@ $ php public/index.php oscar test:config
 
 ### Configurer les mails
 
-[Documentation du mailer](./configuration.md)
+[Documentation du mailer](./mailer.md)
         
 
 ### Configurer le serveur web (Apache)

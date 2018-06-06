@@ -84,18 +84,36 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 
 Selon la mise à jour, la configuration peut avoir été mise à jour, contrôler le fichier `./config/autoload/local.php.dist`. Si une mise à jour implique des changements plus spécifiques, ces derniers seront documentés en détails dans un document dédié.
 
-# Mise à jour des privilèges
+La commande : 
+
+```bash
+# Test de la configuration
+php public/index.php oscar test:config
+```
+
+va réaliser un diagnostique à partir de la configuration et détecter d'éventuels oublis.
+
+
+## Mise à jour des privilèges
+
+Lors d'ajout de fonctionnalité, les privilèges sont généralement enrichis, pour les mettre à jour : 
 
 ```bash
 # Mise à jour des privileges
 php public/index.php oscar patch checkPrivilegesJSON
 ```
 
+Pour des raisons techniques, cette commande doit être exécutée plusieurs fois jusqu'à obtenir un message : 
+
+**Les privilèges sont à jour**
+
 > Cette commande executera automatiquement la requète de mise à jour de la séquence d'index des privilèges : `select setval('privilege_id_seq',(select max(id)+1 from privilege), false)`.
 
 
 
-# Requètes de maintenance
+
+
+# ANNEXE : Requètes de maintenance
 
 > Les requêtes ici ne sont utilisées que dans le cadre du développement 
 
