@@ -150,6 +150,13 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
             </div>
         </div>
 
+            <?php if( $activity->getDisciplines() ): ?>
+            <?php foreach ($activity->getDisciplines() as $d) : ?>
+            <span class="cartouche xs"><?= $d ?></span>
+            <?php endforeach; ?>
+            <?php endif; ?>
+
+
         <?php if (count($activity->getPersonsDeep()) && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_SHOW, $activity)): ?>
                 <p class="text-highlight"><i class="icon-user grey"></i>Membres :
                 <?php foreach($activity->getPersonsDeep() as $activityperson ) {

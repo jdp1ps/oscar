@@ -111,7 +111,6 @@
 
         <p class="texthighlight baseline">
             N° Oscar : <strong><?= $entity->getOscarNum() ?></strong><br/>
-            N° : <strong><?= $entity->getCentaureNumConvention() ?></strong><br/>
             PFI :
             <?php if( $entity->getCodeEOTP() ): ?>
                 <strong><?= $entity->getCodeEOTP() ?></strong> -
@@ -121,6 +120,8 @@
             <?php else: ?>
                 non daté
             <?php endif; ?><br/>
+
+            <?php if( $entity->getNumbers() ): ?>
             Autre numérotation :
             <?php foreach( $entity->getNumbers() as $key=>$value ): ?>
                 <span class="number">
@@ -128,6 +129,12 @@
                         <span class="value"><?= $value ?></span>
                     </span>
             <?php endforeach; ?>
+            <?php endif; ?>
+            Disciplines:  <?php if( $entity->getDisciplines() ): ?>
+                <?php foreach ($entity->getDisciplines() as $d) : ?>
+                    <span class="cartouche xs"><?= $d ?></span>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </p>
     </header>
 
