@@ -574,7 +574,7 @@ contract:
         defaults:
             controller: Activity
             action: index
-
+    may_terminate: true
     child_routes:
         advancedsearch:
             type: segment
