@@ -60,10 +60,20 @@ apt-get install \
     php7.0-dom \
     php7.0-ldap \
     php7.0-mcrypt \
+    php7.0-mbstring \
+    php7.0-bz2 \
+    php7.0-zip \
     php7.0-pgsql
 ```
 
 Si la base de données est sur la même machine, installation de Postgresql : 
+
+```bash
+# Postgresql (ou autre selon le client de BDD utilisé)
+apt-get install postgresql-server-9.5
+```
+
+ainsi que le client (dans tous les cas) : 
 
 ```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
@@ -98,22 +108,64 @@ git clone https://<USER>@git.unicaen.fr/bouvry/oscar
 
 ## Vendor (librairies tiers)
 
-*Oscar* utilise des libraires PHP tiers (vendor).
+*Oscar* utilise des libraires PHP tiers (vendor). Les librairies tiers sont gérées via [Composer](https://getcomposer.org/).
 
-> Pour le développement, elles sont gérées via [Composer](https://getcomposer.org), son utilisation nécessite d'avoir accès aux librairies embarquées **Unicaen** : *UnicaenApp*, *UnicaenAuth*. 
 
-Pour une installation en production/démo/développement **hors unicaen**, une archive du dossier vendor est
- disponible dans le dossier `install` au format *.tar.gz* :
+### Installation de composer
 
-```bash
-tar xvfz install/vendor.tar.gz
-```
-
-Ou pour les développeurs située dans le **réseau unicaen** :
+Commencez par installer [Composer](https://getcomposer.org/) : 
 
 ```bash
-php composer.phar update
+# Récupération de la dernière version de composer
+wget https://getcomposer.org/composer.phar
+
+# On le place dans /bin
+mv composer.phar /bin/composer
+
+#On donne les droit d'accès
+chmod +X /bin/composer
 ```
+
+Vous pouvez tester le bon déroulement de l'installation de **composer** en saisissant la commande `composer`, vous devriez obtenir l'invite en ligne de commande : 
+
+```bash
+   ______
+  / ____/___  ____ ___  ____  ____  ________  _____
+ / /   / __ \/ __ `__ \/ __ \/ __ \/ ___/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ (__  )  __/ /
+\____/\____/_/ /_/ /_/ .___/\____/____/\___/_/
+                    /_/
+Composer version 1.7-dev (837ad7c14e8ce364296e0d0600d04c415b6e359d) 2018-06-07 09:15:18
+
+Usage:
+  command [options] [arguments]
+
+Options:
+  -h, --help                     Display this help message
+  -q, --quiet                    Do not output any message
+  -V, --version                  Display this application version
+      --ansi                     Force ANSI output
+      --no-ansi                  Disable ANSI output
+  -n, --no-interaction           Do not ask any interactive question
+      --profile                  Display timing and memory usage information
+      --no-plugins               Whether to disable plugins.
+  -d, --working-dir=WORKING-DIR  If specified, use the given directory as working directory.
+  -v|vv|vvv, --verbose           Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+etc...
+```
+
+### Installation des dépendances
+
+L'installation des dépendances se fait avec la commande :  
+
+```bash
+composer install --prefer-dist
+```
+
+Composer se chargera d'installer les dépendances PHP tel de définies dans le fichier `composer.json`.
+
+
 
 
 ## Configuration d'oscar
@@ -146,7 +198,7 @@ Puis création de l'utilisateur/bdd :
 ```sql
 CREATE USER oscar WITH PASSWORD 'azerty';
 CREATE DATABASE oscar_dev;
-GRANT ALL PRIVILEGES ON DATABASE oscar to oscar_dev;
+GRANT ALL PRIVILEGES ON DATABASE oscar_dev to oscar;
 \q
 ```
 
@@ -156,7 +208,7 @@ Les données "de base" sont à disposition dans
 le dépôt dans le fichier : `install/oscar-install.sql`.
 
 ```bash
-psql -h localhost -U oscar < install/oscar-install.sql
+psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 ```
 
 ### Configuration de la BDD dans Oscar
