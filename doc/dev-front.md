@@ -2,16 +2,22 @@
 
 ## UI
 
+### Présentation
+
 La compilation du code *front* est centralisée dans les tâches *Gulp* (fichier `gulpfile.js`). Il gère : 
 
  - La compilation des Fichiers `.Vue` (source `./public/js/oscar/src`)
  - Compilation des fichiers SCSS (Sass)
 
-> Cetraines parties historiques sont encore développées avec **BackboneJS**, elles seront progressivement remplacées.
+> Certaines parties historiques sont encore développées avec **BackboneJS**, elles seront progressivement remplacées.
 
 Les composants d'interface sont développées avec le *framework* **VueJS**.
  
 Le moteur de compilation **POI** (basé sur **Webpack**) est utilisé pour compilé les fichiers `**.vue`
+
+```bash
+npm i -g poi
+```
 
 ## Commandes de développement
 
