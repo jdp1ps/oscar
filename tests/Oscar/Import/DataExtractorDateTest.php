@@ -19,7 +19,7 @@ class DataExtractorDateTest extends TestCase
         $data = '2014-01-01';
         $date = (new DataExtractorDate())->extract($data);
         $this->assertNotNull($date);
-        $this->assertEquals(1388530800, $date->getTimestamp());
+        $this->assertEquals('2014-01-01', $date->format('Y-m-d'));
     }
 
     public function testSlashYearEndValueExtract(){
@@ -27,7 +27,7 @@ class DataExtractorDateTest extends TestCase
         $data = '01/01/2014';
         $date = (new DataExtractorDate())->extract($data);
         $this->assertNotNull($date);
-        $this->assertEquals(1388530800, $date->getTimestamp());
+        $this->assertEquals('2014-01-01', $date->format('Y-m-d'));
     }
 
     public function testBadDateValueExtract(){
