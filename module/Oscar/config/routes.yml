@@ -576,6 +576,20 @@ contract:
             action: index
     may_terminate: true
     child_routes:
+
+        api:
+            type: segment
+            options:
+                route: /api
+                defaults:
+                    action: api
+        apiui:
+            type: segment
+            options:
+                route: /api-ui
+                defaults:
+                    action: apiUi
+
         advancedsearch:
             type: segment
             options:

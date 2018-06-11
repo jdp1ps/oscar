@@ -33,6 +33,8 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
+use Oscar\Formatter\JSONFormatter;
+use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\NotificationService;
 use Oscar\Utils\DateTimeUtils;
@@ -53,6 +55,72 @@ use Zend\View\Model\ViewModel;
  */
 class ProjectGrantController extends AbstractOscarController
 {
+    public function apiUiAction(){
+        return [];
+    }
+
+    /**
+     * @url /activites-de-recherche/api
+     * @return JsonModel
+     */
+    public function apiAction(){
+
+        ////////////////////////////////////////////////////////////////////////
+        // Paramètres envoyés à l'API
+        $q = $this->params()->fromQuery('q', '');
+        $page = (int) $this->params()->fromQuery('p', 1);
+        $rbp = (int) $this->params()->fromQuery('rbp', 10);
+
+        // Récupération des IDS via l'indexeur
+        if( !$q ){
+            $activityIds = null;
+            $totalQuery = $this->getActivityService()->getTotalActivitiesInDb();
+        }
+        else {
+            $activityIds = $this->getActivityService()->search($q);
+            $totalQuery = count($activityIds);
+        }
+        $totalPages = ceil($totalQuery / $rbp);
+        $error = null;
+        ////////////////////////////////////////////////////////////////////////
+
+        if( $page > $totalPages ){
+            $error = "La page demandé dépasse des résultats possibles";
+        }
+
+        // Formatteur > JSON
+        $jsonFormatter = new JSONFormatter($this->getOscarUserContext());
+
+        // Récupération des activités effective
+        $activities = $this->getActivityService()->getActivitiesByIds($activityIds, $page, $rbp);
+        $totalQueryPage = count($activities);
+
+        // Réponse
+        $datas = [];
+
+        // Mise en forme
+        foreach ($activities as $activity) {
+            $datas[] = $jsonFormatter->format($activity, false);
+        }
+
+
+        return $this->ajaxResponse([
+            'oscar' => OscarVersion::getBuild(),
+            'date'  => date('Y-m-d H:i:s'),
+            'code'  => 200,
+            'totalResultQuery' => $totalQuery,
+            'totalResultPage' => $totalQueryPage,
+            'totalPages' => $totalPages,
+            'page' => $page,
+            'error' => $error,
+            'resultByPage' => $rbp,
+            'datas' => [
+                'ids' => $activityIds,
+                'content' => $datas
+            ]
+        ]);
+    }
+
     /**
      * Génération automatique de documents.
      *

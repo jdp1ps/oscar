@@ -4,7 +4,8 @@ La configuration métier de Oscar est placée dans le fichier `config/autoload/l
 
 
 ## Rappel
-Techniquement, Oscar commence par charger la configuration par défaut présente dans le fichier `config/autoload/global.php`. **Attention**, ce fichier est versionné et permet de renseigner des valeurs par défaut, **il est susceptible d'être écrasé lors d'une mise à jour et ne doit donc pas être modifié**.
+Techniquement,wrap
+ Oscar commence par charger la configuration par défaut présente dans le fichier `config/autoload/global.php`. **Attention**, ce fichier est versionné et permet de renseigner des valeurs par défaut, **il est susceptible d'être écrasé lors d'une mise à jour et ne doit donc pas être modifié**.
 
 Notez que toutes les valeurs présentes dans ce fichier peuvent être surchargées par celles présentes dans le fichier `local.php`, dans ce sens, elles seront largement commentées.
 
@@ -13,8 +14,10 @@ Notez que toutes les valeurs présentes dans ce fichier peuvent être surchargé
 
 Ce fichier va contenir la configuration technique et métier de l'application. Les paramètres spécifiques à Oscar sont situés dans le clef **oscar**. Un fichier d'exemple `config/autoload/local.php.dist` est disponible dans le dépôt. Ce fichier propose les paramètres obligatoires ainsi que ceux facultatifs (commentés).
 
+Vous pouvez utiliser la commande `php public/index.php oscar test:config` pour tester la conformité de votre configuration. Ce test, sans être exaustif, vous alertera si des paramètres sont manquants ou mal configurés.
 
-## Emplacements des documents administratifs et activités
+
+## *oscar.paths* Emplacements des documents administratifs et activités
 
 Les emplacements physiques pour le stockage des documents est situé dans la clef `oscar > paths` :
 
@@ -62,7 +65,6 @@ return array(
         ]
     ],
 );
-
 ```
 
 ## Recherche des activités
@@ -72,7 +74,7 @@ Oscar propose 2 systèmes de recherche des activités, le premier est basé sur 
 
 ### Zend Lucene
 
-Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installations complémentaires.
+Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installation complémentaire.
 
 ```php
 // config/autoload/local.php
@@ -96,7 +98,7 @@ return array(
 
 ### Elastic Search
 
-Le deuxième système s'appuie sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible.
+Le deuxième système s'appuie sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible. 
 
 #### Installation d'Elastic Search : Debian
 

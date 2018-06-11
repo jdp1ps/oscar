@@ -51,6 +51,43 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
        return $this->getEntityManager()->getRepository(Activity::class);
     }
 
+    /**
+     * Retourne le nombre d'activités total en BDD.
+     * @return mixed
+     */
+    public function getTotalActivitiesInDb()
+    {
+        $query = $activities = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
+        $query->select('COUNT(a.id)');
+        return $query->getQuery()->getSingleScalarResult();
+    }
+
+
+    /**
+     * @param $ids
+     * @param int $page
+     * @param int $resultByPage
+     * @return array
+     */
+    public function getActivitiesByIds( $ids, $page=1, $resultByPage=50 ) {
+
+        $offsetSQL = ($page-1) * $resultByPage;
+        $limitSQL = $resultByPage;
+
+        $query = $this->getEntityManager()->createQueryBuilder('a')
+            ->select('a')
+            ->from(Activity::class, 'a')
+            ->setMaxResults($limitSQL)
+            ->setFirstResult($offsetSQL);
+
+        if( $ids !== null ){
+            $query->where('a.id IN(:ids)')
+                ->setParameter('ids', $ids);
+        }
+
+        return $query->getQuery()->getResult();
+    }
+
     public function exportJsonPerson( Person $person ){
         $datas = $person->toJson();
         $datas['uid'] = $person->getId();

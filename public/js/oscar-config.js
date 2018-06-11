@@ -64,6 +64,8 @@ requirejs.config({
         'Datepicker2' : 'oscar/dist/Datepicker',
         'activityclone' : 'oscar/dist/Activityclone',
         'polyfill' : 'oscar/dist/Polyfill',
+        'ActivitySearchUi' : 'oscar/dist/ActivitySearchUi',
+        'VueFilters' : 'oscar/dist/VueFilters',
         'OrganizationType' : 'oscar/dist/OrganizationType',
         'DisciplineUI' : 'oscar/dist/DisciplineUI'
     },

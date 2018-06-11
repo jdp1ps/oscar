@@ -25,7 +25,6 @@
                 </span>
             </div>
         </form>
-        <personautocompleter />
 
         <section v-if="search !== null">
             <h2 class="text-right">{{ totalResultQuery }} résultat(s)</h2>
@@ -39,7 +38,7 @@
     import ActivitySearchItem from './ActivitySearchItem.vue';
     import OscarGrowl from './OscarGrowl.vue';
     import OscarBus from './OscarBus.js';
-    import PersonAutoCompleter from './PersonAutoCompleter.vue';
+    // import PersonAutoCompleter from './PersonAutoCompleter.vue';
 
     export default {
         props: {
@@ -49,7 +48,7 @@
         components: {
             activity: ActivitySearchItem,
             oscargrowl: OscarGrowl,
-            personautocompleter: PersonAutoCompleter,
+            // personautocompleter: PersonAutoCompleter,
         },
 
         data() {

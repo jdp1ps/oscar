@@ -2,7 +2,7 @@
 
 Le **Mailer** est le système permettant de configurer et gérer la distribution des messages électroniques par *Oscar*.
 
-Depuis la version **2.4.x**, les mails envois la liste des notifications non-lues dans l'application. [Système de notification](./notifications.md)
+Depuis la version **2.5.x**, les mails envois la liste des notifications non-lues dans l'application. [Système de notification](./notifications.md)
 
 
 ## Configuration
