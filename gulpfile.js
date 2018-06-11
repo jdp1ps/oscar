@@ -153,24 +153,27 @@ var reportOptions = {
 };
 
 gulp.task('modules-oscar', [], function() {
-    gulp.src('public/js/oscar/src/*.vue', { read: false})
+    gulp.src(['public/js/oscar/src/*.vue', 'public/js/oscar/src/*.js'], { read: false})
+        .pipe(debug(function(){
+            console.log('DEBUG')
+        }))
         .pipe(changed('public/js/oscar/dist', {extension: '.js'}))
         .pipe(shell([
             'poi build --format umd --moduleName  <%= modulename(file.relative) %> public/js/oscar/src/<%= file.relative %> --filename.css <%= modulename(file.relative) %>.css --filename.js <%= basename(file.relative) %>.js --dist public/js/oscar/dist'
         ], {
             templateData: {
                 basename: function(s) {
-                    return s.replace(/\.vue/, '');
+                    return s.replace(/\.(vue|js)/, '');
                 },
                 modulename: function(s) {
-                    return s.replace(/\.vue/, '').toLowerCase();
+                    return s.replace(/\.(vue|js)/, '').toLowerCase();
                 }
             }
         }));
 });
 
 gulp.task('modules-oscar-watch', [], function(){
-    gulp.watch(['./public/js/oscar/src/*.vue*'], ['modules-oscar']);
+    gulp.watch(['./public/js/oscar/src/*.vue'], ['modules-oscar']);
 });
 
 
