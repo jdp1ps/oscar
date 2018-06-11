@@ -7737,6 +7737,8 @@ time.date-missing {
     .uc-frequency .content .hours-selector.selected .icon-ok-circled {
       opacity: 1;
       color: #499D1F; }
+    .uc-frequency .content .hours-selector.forced {
+      cursor: not-allowed; }
     .uc-frequency .content .hours-selector:hover {
       background: white; }
 

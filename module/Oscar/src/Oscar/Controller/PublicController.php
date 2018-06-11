@@ -34,6 +34,9 @@ class PublicController extends AbstractOscarController
         /** @var Authentification $auth */
         $auth = $this->getEntityManager()->getRepository(Authentification::class)->find($this->getOscarUserContext()->getDbUser()->getId());
 
+        // Récupération des envois automatiques
+        $forceSend = $this->getConfiguration('oscar.notifications.fixed');
+
         if( $this->getHttpXMethod() == "POST" ){
 
             $this->getLogger()->debug("Reçu = " . $this->params()->fromPost('frequency'));
@@ -48,11 +51,13 @@ class PublicController extends AbstractOscarController
             $this->getEntityManager()->flush($auth);
             return $this->getResponseOk();
         }
+
         $this->getLogger()->debug("FREQUENCY = " . print_r($auth->getSettings(), true));
 
         return [
             'person' => $this->getCurrentPerson(),
-            'parameters' => $auth->getSettings()
+            'parameters' => $auth->getSettings(),
+            'forceSend' => $forceSend
         ];
     }
 

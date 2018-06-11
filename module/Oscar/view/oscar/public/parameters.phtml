@@ -63,33 +63,7 @@
                                     <th>email</th>
                                     <td><?= $person->getEmail() ?></td>
                                 </tr>
-                                <?php /*
-                                <tr>
-                                    <th colspan="2">Groupes (LDAP)</th>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
 
-                                        <?php if( $person->getLdapMemberOf() ): ?>
-                                            <ul style="margin:0; list-style: none; font-size: 10px;">
-                                                <?php foreach( $person->getLdapMemberOf() as $memberOf ): ?>
-                                                    <?php if( array_key_exists($memberOf, $ldapRoles) ):?>
-                                                        <li>
-                                                            <i class="icon-group"></i><code><?= $memberOf ?></code>
-                                                            <span class="cartouche <?= $ldapRoles[$memberOf]['principal'] ? 'primary' : '' ?>"><?= $ldapRoles[$memberOf]['roleId'] ?></span>
-                                                        </li>
-                                                    <?php else: ?>
-                                                        <li style="opacity: .5"><i class="icon-group"></i><code><?= $memberOf ?></code></li>
-                                                    <?php endif; ?>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        <?php else: ?>
-                                            <div class="alert alert-info">
-                                                Aucun groupe LDAP
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr> */ ?>
                                 <tr>
                                     <th>Statut</th>
                                     <td><?= $person->getLdapStatus() ?></td>
@@ -116,21 +90,18 @@
                         Votre compte n'est pas associé à une personne dans les activités
                     </p>
                 <?php endif; ?>
-                <!--
-                <h3>Activer les notifications par mail</h3>
-                <div class="material-switch">
-                    <input id="projectview" name="projectview" value="on" type="checkbox">
-                    <label for="projectview" class="label-primary"></label>
-                </div>
-                -->
+
             </div>
             <div class="col-md-6">
                 <h3><i class="icon-history"></i>
                     Fréquence des envois</h3>
 
+                <?php if( $forceSend ): ?>
                 <p class="help">
-                    L'envoi des notifications par mail n'est pas active sur cette version.
+                    Vous ne recevrez des courriels que si vous avez des notifications non-lues dans Oscar.
+                    Vous ne pouvez pas vous désinscrire des créneaux marqués avec un <i class="icon-lock"></i>.
                 </p>
+                <?php endif; ?>
 
                 <div class="uc-cron" id="parameters-nf">
 
@@ -142,27 +113,31 @@
     <style>
 
     </style>
-    <script>
-        require(['vue', 'vue-resource'], function(Vue, VueResource){
-            Vue.use(VueResource);
-            Vue.http.options.emulateJSON = true;
-            Vue.http.options.emulateHTTP = true;
-            new Vue({
-                data: {
-                    'loading': false,
-                    'frequency': <?= array_key_exists('frequency', $parameters) ? json_encode($parameters['frequency']) : '[]' ?>,
-                    'days': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-                    'hours': ['6', '8', '10', '12', '14', '16', '18'],
-                    'errors' : null
-                },
-                el: '#parameters-nf',
-                template: `<form action="" @submit.prevent="save">
+</div>
+<script>
+    require(['vue', 'vue-resource'], function(Vue, VueResource){
+        Vue.use(VueResource);
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true;
+        new Vue({
+            data: {
+                'loading': false,
+                'frequency': <?= array_key_exists('frequency', $parameters) ? json_encode($parameters['frequency']) : '[]' ?>,
+                'forced': <?= json_encode($forceSend) ?>,
+                'days': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                'hours': ['4', '6', '8', '10', '12', '14', '16', '18', '20', '22'],
+                'errors' : null,
+                'changed': false
+            },
+            el: '#parameters-nf',
+            template: `<form action="" @submit.prevent="save">
                     <div class="alert alert-danger" v-if="errors">{{ errors }}</div>
                     <input type="hidden" :value="frequency.join(',')" name="frequency" />
                     <table class="uc-frequency">
                         <thead class="heading">
                             <tr>
                                 <th>&nbsp;</th>
+
                                 <th class="hours" v-for="day in days"  @click="toogleDay(day)">
                                     {{ day }}
                                 </th>
@@ -173,96 +148,112 @@
                                 <th class="hours-label" @click="toogleHour(hour)">
                                     {{ hour }}:00
                                 </th>
+
                                 <td class="hours-selector"
-                                    :class="{ 'selected': frequency.indexOf(day+hour) >= 0 }"
+                                    :class="{ 'selected': frequency.indexOf(day+hour) >= 0, 'forced': isForced(day+hour) }"
                                     v-for="day in days"
+                                    :title="isForced(day+hours)?'Vous ne pouvez pas vous désinscrire de ce créneau': ''"
+                                    v-if="!isForced(days)"
                                     @click="toogleFrequency(day+hour)">
-                                    <i class="icon-ok-circled"></i>
+                                    <i class="icon-lock" v-if="isForced(day+hour)"></i>
+                                    <i class="icon-ok-circled" v-else></i>
                                 </td>
+
                             </tr>
                         </tbody>
                     </table>
                     <br>
-                    <button type="submit" :class="{ 'disabled': loading }" class="btn btn-default">
+                    <button type="submit" :class="{ 'disabled': loading || !changed, 'btn-primary': changed }" class="btn btn-default btn-save">
                         <i class="icon-floppy" v-if="!loading"></i>
                         <i class="icon-spinner animate-spin" v-if="loading"></i>
                     Enregistrer</button>
                 </form>`,
-                methods: {
 
-
-
-                    /** Retourne TRUE si des féquences sont configurés le jour D */
-                    hasFrequencyInDay(d){
-                        for( var i=0; i<this.frequency.length; i++ ){
-                            if( this.frequency[i].indexOf(d) == 0 )
-                                return true
-                        }
-                        return false;
-                    },
-
-                    /** Retourne TRUE si des féquences sont configurés à l'heure H */
-                    hasFrequencyInHour(h){
-                        console.log("Recherche d'une fréquence à ", h);
-                        for( var i=0; i<this.frequency.length; i++ ){
-                            if( this.frequency[i].indexOf(h) == 3 )
-                                return true
-                        }
-                        return false;
-                    },
-
-                    removeFrequency(f){
-                        var index = this.frequency.indexOf(f);
-                        if( index >= 0 )
-                            this.frequency.splice(index, 1);
-                    },
-
-                    toogleFrequency( f ){
-                        if( this.frequency.indexOf(f) < 0 )
-                            this.frequency.push(f);
-                        else
-                            this.frequency.splice(this.frequency.indexOf(f), 1);
-                    },
-
-                    toogleDay( d ){
-                        // On détermine si des créneaux sont selectionnés ?
-                        var remove = this.hasFrequencyInDay(d);
-                        for( var i=0; i<this.hours.length; i++ ){
-                            if( remove )
-                                this.removeFrequency(d+this.hours[i]);
-                            else
-                                this.frequency.push(d+this.hours[i]);
-                        }
-                    },
-
-                    toogleHour( h ){
-                        var remove = this.hasFrequencyInHour(h);
-
-                        for( var i=0; i<this.days.length; i++ ){
-                            if( remove )
-                                this.removeFrequency(this.days[i]+h);
-                            else
-                                this.frequency.push(this.days[i]+h);
-                        }
-                    },
-
-                    save(){
-                        this.loading = true;
-                        this.$http.post('', { "frequency":  this.frequency.join(',') })
-                            .then(
-                                success => {
-                                    console.log('OK');
-                                },
-                                fail => {
-                                    console.log(fail);
-                                    this.errors = "Erreur : " + fail.body;
-                                }
-                            ).then( (foo) => {
-                                this.loading = false;
-                            });
-                    }
+            watch: {
+                frequency(){
+                    this.changed = true;
                 }
-            })
+            },
+
+            methods: {
+                isForced(str){
+                    return this.forced.indexOf(str) >= 0
+                },
+
+
+                /** Retourne TRUE si des féquences sont configurés le jour D */
+                hasFrequencyInDay(d){
+                    for( var i=0; i<this.frequency.length; i++ ){
+                        if( this.frequency[i].indexOf(d) == 0 )
+                            return true
+                    }
+                    return false;
+                },
+
+                /** Retourne TRUE si des féquences sont configurés à l'heure H */
+                hasFrequencyInHour(h){
+                    for( var i=0; i<this.frequency.length; i++ ){
+                        if( this.frequency[i].indexOf(h) == 3 )
+                            return true
+                    }
+                    return false;
+                },
+
+                removeFrequency(f){
+                    var index = this.frequency.indexOf(f);
+                    if( index >= 0 )
+                        this.frequency.splice(index, 1);
+                },
+
+                toogleFrequency( f ){
+                    if (this.isForced(f)) {
+                        return;
+                    }
+                    if( this.frequency.indexOf(f) < 0 )
+                        this.frequency.push(f);
+                    else
+                        this.frequency.splice(this.frequency.indexOf(f), 1);
+                },
+
+                toogleDay( d ){
+                    // On détermine si des créneaux sont selectionnés ?
+                    var remove = this.hasFrequencyInDay(d);
+                    for( var i=0; i<this.hours.length; i++ ){
+                        if( remove )
+                            this.removeFrequency(d+this.hours[i]);
+                        else
+                            this.frequency.push(d+this.hours[i]);
+                    }
+                },
+
+                toogleHour( h ){
+                    var remove = this.hasFrequencyInHour(h);
+
+                    for( var i=0; i<this.days.length; i++ ){
+                        if( remove )
+                            this.removeFrequency(this.days[i]+h);
+                        else
+                            this.frequency.push(this.days[i]+h);
+                    }
+                },
+
+                save(){
+                    this.loading = true;
+                    this.$http.post('', { "frequency":  this.frequency.join(',') })
+                        .then(
+                            success => {
+                                console.log('OK');
+                            },
+                            fail => {
+                                console.log(fail);
+                                this.errors = "Erreur : " + fail.body;
+                            }
+                        ).then( (foo) => {
+                            this.loading = false;
+                            this.changed = false;
+                        });
+                }
+            }
         })
-    </script>
-</div>
+    })
+</script>

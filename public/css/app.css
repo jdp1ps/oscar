@@ -7711,6 +7711,9 @@ time.date-missing {
     animation-iteration-count: infinite;
     animation-direction: alternate; }
 
+.btn-save.disabled {
+  pointer-events: none; }
+
 .uc-frequency {
   text-align: center; }
   .uc-frequency .heading .hours {
@@ -7737,6 +7740,9 @@ time.date-missing {
     .uc-frequency .content .hours-selector.selected .icon-ok-circled {
       opacity: 1;
       color: #499D1F; }
+    .uc-frequency .content .hours-selector.forced {
+      pointer-events: none;
+      cursor: not-allowed; }
     .uc-frequency .content .hours-selector:hover {
       background: white; }
 
