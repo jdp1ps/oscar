@@ -2,8 +2,7 @@
 
 Le **Mailer** est le système permettant de configurer et gérer la distribution des messages électroniques par *Oscar*.
 
-Depuis la version **2.5.x**, les mails envois la liste des notifications non-lues dans l'application. [Système de notification](./notifications.md)
-
+Depuis la version **2.4.x**, les mails envoient la liste des notifications non-lues dans l'application. [Système de notification](./notifications.md)
 
 ## Configuration
 
@@ -36,7 +35,7 @@ return [
 
 ### urlAbsolute : URL dans les mails
 
-Le paramètre `urlAbsolute` permet à l'utilitaire en ligne de commande de générer des URLs absolues. Ce paramètre est requis si vous avez configurer l'envoi des notifications par email.
+Le paramètre `urlAbsolute` permet à l'utilitaire en ligne de commande de générer des URLs absolues. Ce paramètre est requis si vous avez configuré l'envoi des notifications par email.
 
 ```php
 <?php
@@ -115,7 +114,7 @@ return array(
 
 #### Envoi DEBUG/PreProd (v2.4.x)
 
-Cette dernière option permet de ne pas envoyer les mails, mais de copier les mails sous la forme de fichier dans le chemin indiqué, cette méthode permet de tester les mails générer avant un passage en production : 
+Cette dernière option permet de ne pas envoyer les mails, mais de copier les mails sous la forme de fichier dans le chemin indiqué, cette méthode permet de tester les mails générés avant un passage en production : 
 
 ```php
 <?php
@@ -141,7 +140,7 @@ return array(
 
 #### Tester le mailer
 
-Vous pouvez lancer le test de la configuration en tappant la commande : 
+Vous pouvez lancer le test de la configuration en tapant la commande : 
 
 ```bash
 $ php public/index.php oscar test:mailer

@@ -36,18 +36,18 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 ## Developpement
 
  - Mise à jour des outils de compilations JS/CSS
- - Fix : Bug des tests unitaires sur certaines date en raison d'un décalage d'une heure entre la version de développement et les tests automatiques côté Gitlab
+ - Fix : Bug des tests unitaires sur certaines dates en raison d'un décalage d'une heure entre la version de développement et les tests automatiques côté Gitlab
  - Factorisation du code de l'interface calendrier pour les déclarants
  - Mise à jour des dépendances Node/Js  
 
 
 ## Fix/Up : 
- - L'option soummettre le semaine fonctionne à nouveau
+ - L'option soumettre la semaine fonctionne à nouveau
  - Cliquer sur une notification contenant un lien marque la notification comme lue puis redirige vers le lien
  - Erreur de requête lors de la récupération des projets d'une personne
  - Le fichier de route a été nettoyé de certaines routes inutilisées
  - La clef de configuration des connecteurs est maintenant correctement reprise dans les données des personnes/organisations synchronisées
- - Suppression de la jointure PROJET-DISCIPLINE toujours présente en BDD mais supprimé dans l'usage (Les disciplines sont gérées côté activité)
+ - Suppression de la jointure PROJET-DISCIPLINE toujours présente en BDD mais supprimée dans l'usage (Les disciplines sont gérées côté activité)
  - Le système de regroupement des piles de notifications est plus efficace
  - Fix : Notifications dupliquées
  - Fix : Le message d'erreur de conversion CSV>JSON lorsque une clef est manquante est plus clair
