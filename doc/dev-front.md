@@ -21,6 +21,13 @@ npm i -g poi
 
 ## Commandes de développement
 
+Construction des fichiers JS : 
+
+```bash
+# Compilation
+gulp modules-oscar 
+```
+
 Les commandes qui suivent permettent d'utiliser POI pour travailler sur les différentes modules de l'interface en mode debug.
 
 ```bash
