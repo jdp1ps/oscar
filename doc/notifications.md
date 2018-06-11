@@ -1,8 +1,8 @@
 # Notifications
 
-Les notifications permettent d'informer les utilisateurs dans changement qui interviennent dans les activités dont ils ont la charge.
+Les notifications permettent d'informer les utilisateurs des changements qui interviennent dans les activités dont ils ont la charge.
 
-Si vous configurez le [Système de mail](./mailer.md), vous pourrez envoyer periodiquement un récapitulatif des notifications par mail aux utilisateurs.
+Si vous configurez le [Système de mail](./mailer.md), vous pourrez envoyer périodiquement un récapitulatif des notifications par mail aux utilisateurs.
 
 ## Configuration
 
