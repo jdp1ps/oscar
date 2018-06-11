@@ -11,7 +11,7 @@ namespace Oscar;
 class OscarVersion
 {
     const MAJOR = 2;
-    const MINOR = 4;
+    const MINOR = 5;
     const PATCH = 1;
 
     public static function getBuild(){

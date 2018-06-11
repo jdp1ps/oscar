@@ -1,3 +1,3 @@
 # Git : Pense-bête
 
-Commit + message auto : `git -a -m "Awsome message`
+Commit + message auto : `git commit -a -m "Awsome message`
