@@ -36,11 +36,13 @@ socket/config.json
 data/**.*
 data/DoctrineORMModule
 data/luceneindex
+data/mails
 !data/timesheet_model.xls
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
 !data/documents/activity/.gitkeep
 !data/documents/public/.gitkeep
+!data/mails/.gitkeep
 
 # Residus
 public/js/oscar/dist/index.html
