@@ -5,7 +5,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 ## Générale
 
- - L'interface des paramètres utilisateur a été améliorée, elle affiche les créneaux automatiques, le bouton enregistrement se vérrouille automatiquement si besoin et les messages d'informations ont été mis à jour.
+ - L'interface des paramètres utilisateur a été améliorée, elle affiche les créneaux automatiques, le bouton enregistrement se verrouille automatiquement si besoin et les messages d'informations ont été mis à jour.
  - La constitution des corpus pour l'indexeur prend maintenant en compte les disciplines des activités
  - Les notifications peuvent maintenant être envoyées par emails [Documentation des notifications](doc/notifications.md)
 
@@ -30,7 +30,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 ## Importation des données
  
  - Le convertisseur CSV > JSON pour les activités de recherche autorise maintenant une configuration "avancée" pour extraire des données multiples séparées par un séparateur (Voir documentation)
- - Le test d'existance des organisations test maintenant UNIQUEMENT le nom complet pour éviter le rejet d'organisation aux noms courts proches.
+ - Le test d'existence des organisations test maintenant UNIQUEMENT le nom complet pour éviter le rejet d'organisation aux noms courts proches.
 
 
 ## Developpement
