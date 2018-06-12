@@ -61,9 +61,13 @@ return array(
         'strategy' => [
             'activity' => [
                 'search_engine' => [
-                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
-                    // Ce paramètre correspond à la clef 'oscar.paths.search_activity'
-                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
+                    // PHP Lucene
+//                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
+//                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
+
+                    // Elasticsearch
+                    'class' => \Oscar\Strategy\Search\ActivityElasticSearch::class,
+                    'params' => [['127.0.0.1:9200']]
                 ]
             ]
         ],

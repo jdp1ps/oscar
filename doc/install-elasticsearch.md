@@ -2,6 +2,10 @@
 
 ## Installation sous DEBIAN
 
+Cette précédure d'installation a été téstée sur debian Stretch
+
+### Java 1.8.x
+
 Commencer par vérifier la présence de Java
 
 ```bash
@@ -17,47 +21,113 @@ S'il n'est pas installé, vous devez **installer Java depuis les dépôts offici
 $ apt-get install default-jre
 ```
 
-Puis **installer ElasticSearch** à partir des dépôts Debian officiels :
+
+### ElascticSearch
+
+Commencez par vérifier si le paquet est disponible :
 
 ```bash
-$ sudo apt-get install elasticsearch
+apt search elasticsearch
 ```
 
-Pour **configurer ElasticSearch en tant que service** :
+
+### Ajout du dépôt officiel
+
+Si le paquet n'est pas disponible, vous pouvez ajouter *ElasticSearch* au *sourcelist* debian :
+
+Installez d'abord *apt-transport-https* :
 
 ```bash
-$ sudo update-rc.d elasticsearch defaults 95 10
+apt-get install apt-transport-https
 ```
 
-ou bien
+Puis ajoutez la ligne au sourcelist :
 
 ```bash
-$ sudo systemctl enable elasticsearch.service
+echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-6.x.list
 ```
 
-Pour **lancer le service ElasicSearch** :
+Et chargé la clef :
 
 ```bash
-$ sudo -i service elasticsearch start
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
 ```
 
-ou bien
+
+### Installation
+
+Mettez à jour puis installez :
 
 ```bash
-$ sudo systemctl start elasticsearch.service
+apt update
+apt install elasticsearch
 ```
 
-Pour **interrompre le service ElasticSearch** :
+
+### Vérifier la présence de ElasticSearch
+
+La commande `service --status-all` va vous permettre de lister les services chargés par le système, vous devrier voir une ligne *ElasticSearch* :
+
+```
+[ - ] elasticsearch
+```
+
+> Attention : le [ - ] indique que le service est INACTIF
+
+
+### Elasticsearch en tant que service
+
+Utilisez la commande `ps -p 1` pour déterminer le système de gestion de service :
+
+```
+PID TTY          TIME CMD
+  1 ?        00:00:06 systemd
+```
+
+Normalement sous Debian/Ubuntu, vous serez sous **systemd**.
+
+### Service SYSTEMD
 
 ```bash
-$ sudo -i service elasticsearch stop
+# Installation
+systemctl daemon-reload
+systemctl enable elasticsearch.service
+
+# Démarrage/arrêt
+systemctl start elasticsearch.service
+systemctl stop elasticsearch.service
 ```
 
-ou bien
+Vous pouvez tester l'état du service avec la commande `service elasticsearch status` :
+
+```
+● elasticsearch.service - Elasticsearch
+   Loaded: loaded (/usr/lib/systemd/system/elasticsearch.service; enabled; vendor preset: enabled)
+   Active: active (running) since Tue 2018-06-12 13:58:45 CEST; 4min 9s ago
+     Docs: http://www.elastic.co
+ Main PID: 12727 (java)
+    Tasks: 58 (limit: 4915)
+   CGroup: /system.slice/elasticsearch.service
+           └─12727 /usr/bin/java -Xms1g -Xmx1g -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding
+
+juin 12 13:58:45 ED209 systemd[1]: Started Elasticsearch.
+```
+
+
+### Service SysV init
+
+(Cette configuration n'a pas été testé et s'appuie sur le documentation officielle d'ElasticSearch)
 
 ```bash
-$ sudo systemctl stop elasticsearch.service
+# Initialisation du service
+update-rc.d elasticsearch defaults 95 10
+
+# Démarrage/arrêt
+service elasticsearch start
+service elasticsearch stop
 ```
+
+### Tester le service
 
 Enfin, pour **tester si ElasticSearch réponds** :
 
