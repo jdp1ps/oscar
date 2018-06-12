@@ -146,6 +146,7 @@ return array(
 
             // Envoi activé
             'send' => true,
+            'send_false_exception' => [],
 
             // Préfixe ajouté dans les sujets
             'subjectPrefix' => '[OSCAR DEV] ',

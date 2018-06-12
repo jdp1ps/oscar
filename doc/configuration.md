@@ -22,6 +22,7 @@ Vous pouvez utiliser la commande `php public/index.php oscar test:config` pour t
 Les emplacements physiques pour le stockage des documents est situé dans la clef `oscar > paths` :
 
 ```php
+<?php
 return array(
     // (...)
 
@@ -52,6 +53,7 @@ return array(
 La règle de contrôle du PFI est précisée dans la clef `oscar > validation > pfi` (Il s'agit d'une expression régulière utilisée par Oscar pour valider les donnnées non-nulles saisies dans Oscar).
 
 ```php
+<?php
 // config/autoload/local.php
 return array(
     // (...)
@@ -98,7 +100,7 @@ return array(
 
 ### Elastic Search
 
-Le deuxième système s'appuie sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible. 
+Le deuxième système s'appuie sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible.
 
 
 ### Installation
