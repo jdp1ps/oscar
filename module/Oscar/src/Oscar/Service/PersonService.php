@@ -3,6 +3,7 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
+use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
@@ -97,6 +98,11 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     }
 
 
+    protected function getDateMoment($date){
+        $moment = new Moment($date);
+        return $moment->format('l d F Y');
+    }
+
 
     public function mailNotificationsPerson( $person, $debug = true ){
         /** @var ConfigurationParser $configOscar */
@@ -128,11 +134,19 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $content .= "Vous avez des notifications non-lues sur Oscar : \n";
         $content .= "<ul>\n";
 
+        Moment::setLocale('fr_FR');
+
         foreach ($notifications as $n) {
+            $moment = new Moment($n['dateEffective']);
+            $formatted = $moment->format('l d F Y');
+            $since = $moment->from('now')->getRelative();
+
+            $message = $n['message'];
             if( preg_match($reg, $n['message'], $matches) ){
                 $link = $configOscar->getConfiguration("urlAbsolute").$url('contract/show',array('id' => $matches[2]));
-                $content .= "<li>" .preg_replace($reg, '$1 <a href="'.$link.'">$3</a> $4', $n['message'])."</li>\n";
+                $message = preg_replace($reg, '$1 <a href="'.$link.'">$3</a> $4', $n['message']);
             }
+            $content .= "<li><strong>".$formatted." (".$since.") : </strong> " .$message."</li>\n";
         }
 
         /** @var MailingService $mailer */
