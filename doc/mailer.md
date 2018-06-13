@@ -33,6 +33,38 @@ return [
 ];
 ```
 
+### administrators
+
+Ce paramètre permet de renseigner les adresses des administrateurs technique de l'application : 
+
+```php
+<?php
+return [
+    // ...
+    'oscar' => [
+        'urlAbsolute' => 'http://localhost:8080',
+        'mailer' => [
+            // (...)
+            'administrators' => ['stephane.bouvry@unicaen.fr', 'karin.fery@unicaen.fr'],           
+            // (...)
+        ],
+    ]
+];
+```
+
+Ce paramètres est pour le moment utilisé par la commande `php pubic/index.php oscar test:mailer` pour distribuer un mail de test lors de la configuration du *mailer*.
+
+> Il sera probablement utilisé par la suite pour des outils de diagnostic
+
+### from, subjectPrefix et copy
+
+Le paramètre `òscar.mailer.from` permet d'indiquer l'expéditeur visible par l'utilisateur lors de la reception du mail.
+
+Le paramètre `òscar.mailer.subjectPrefix` permet d'indiquer un préfixe ajouté à tous les sujets des emails distribués. Cela peut être utile pour distinguer les mails si vous avez plusieurs instances d'Oscar actives simultanément.
+
+Le paramètre `òscar.mailer.copy` n'est pour le moment pas utilisé.
+
+
 ### Gabarit
 
 Dans la configuration `oscar.mailer`, la clef `template` permet spécifier le gabarit pour mettre en forme les emails.
@@ -179,4 +211,28 @@ Vous pouvez lancer le test de la configuration en tapant la commande :
 
 ```bash
 $ php public/index.php oscar test:mailer
+```
+
+Avant de passer en production, vous pouvez utiliser le paramètre `send` sur FALSE pour désactiver la distribution et utiliser le tableau `send_false_exception` pour renseigner les adresses à distribuer :
+wrap 
+```php
+<?php
+return [
+    // ...
+    'oscar' => [
+        'urlAbsolute' => 'http://localhost:8080',
+        'mailer' => [
+            // (...)
+            'copy' => [],
+            
+            // Distribution désactivée
+            'send' => false,
+            
+            // Sauf pour les adresses suivantes : 
+            'send_false_exception' => ['stephane.bouvry@unicaen.fr', 'karin.fery@unicaen.fr'],
+            
+            // (...)
+        ],
+    ]
+];
 ```
