@@ -25,6 +25,7 @@
         </transition>
 
         <transition name="fade">
+
             <div class="overlay" v-if="formData">
                 <div class="overlay-content">
 
@@ -183,6 +184,7 @@
     import MilestoneItem from './MilestoneItem.vue'
     import Datepicker from './Datepicker.vue'
 
+
     export default {
         props: ['moment', 'url', 'model'],
 
@@ -190,7 +192,6 @@
             'milestone': MilestoneItem,
             'datepicker': Datepicker
         },
-
         data() {
             return {
                 error: null,
@@ -206,11 +207,12 @@
             }
         },
 
+
         watcher: {
             payments: {
                 deep: true,
                 handler(){
-                    console.log('Payments a changé !!!')
+
                 }
             }
         },
@@ -336,7 +338,6 @@
             },
 
             handlerUnvalid(milestone) {
-                console.log("Confirmation d'invalidation de ", milestone)
                 this.unvalidMilestone = milestone;
             },
 
@@ -488,7 +489,7 @@
                     error => {
                         this.error = "Impossible de charger les jalons de cette activités : " + error
                     }
-                ).then(n => { this.pendingMsg = ""; console.log(this.model); });
+                ).then(n => { this.pendingMsg = ""; });
             },
 
             ////////////////////////////////////////////////////////////////

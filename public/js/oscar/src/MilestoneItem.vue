@@ -5,8 +5,9 @@
         </time>
         <strong class="card-title">
             {{ milestone.type.label }}
-            <small v-if="inProgress"> (En cours)</small>
+            <small v-if="inProgress"> (En cours par <strong>{{ finishedPerson }}</strong>)</small>
         </strong>
+        <p v-if="finished"><strong>{{ finishedPerson }}</strong> a complété ce jalon</p>
         <p class="details" v-if="milestone.comment">{{ milestone.comment }}</p>
 
         <nav>
@@ -48,13 +49,40 @@
     /**
      * Jalon (item de la liste)
      */
+    const regex = /\[Person:([0-9]*):(.*)\]/gm;
+
     export default {
         props:{
             milestone: {
                 required: true
             }
         },
+
         computed: {
+
+            finishedPerson(){
+                let regex = /\[Person:([0-9]*):(.*)\]/gm;
+                let reg = regex.exec(this.milestone.finishedBy);
+                if( reg !== null ){
+                    return reg[2];
+                }
+                return "";
+            },
+
+            owner(){
+                if( this.finishedPerson  ){
+                    return finishedPerson[2]
+                }
+                return "Unreadable data";
+            },
+
+            ownerId(){
+                if( this.finishedPerson  ){
+                    return finishedPerson[1]
+                }
+                return "Unreadble data";
+            },
+
             finishable(){
                 return this.milestone.validable && this.milestone.type.finishable == true && this.milestone.finished < 100;
             },

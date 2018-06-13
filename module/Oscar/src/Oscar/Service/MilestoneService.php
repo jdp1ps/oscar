@@ -14,6 +14,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\DateType;
+use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -31,6 +32,34 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
 
         return $this->getMiletonesByActivity($activity);
+    }
+
+
+    /**
+     * @return OscarUserContext
+     */
+    protected function getOscarUserContext(){
+        return $this->getServiceLocator()->get('OscarUserContext');
+    }
+
+    /**
+     * @return Person
+     */
+    public function getCurrentPerson(){
+        return $this->getOscarUserContext()->getCurrentPerson();
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrentPersonText(){
+        $person = $this->getCurrentPerson();
+        if( $person ){
+            return $person->log();
+        } else {
+            $dbUser = $this->getOscarUserContext()->getDbUser();
+            return 'BD ' . $dbUser->getDisplayName(). '(' . $dbUser->getEmail() . ')';
+        }
     }
 
     public function getMiletonesByActivity( Activity $activity ){
@@ -176,13 +205,13 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function setMilestoneProgression( ActivityDate $milestone, $progressionName ){
         if( $progressionName == 'valid' )
-            $milestone->setFinished(ActivityDate::FINISH_VALUE);
+            $milestone->setFinished(ActivityDate::FINISH_VALUE)->setFinishedBy($this->getCurrentPersonText());
 
         else if ($progressionName == 'unvalid')
-            $milestone->setFinished(0);
+            $milestone->setFinished(0)->setFinishedBy(null);
 
         else
-            $milestone->setFinished(50);
+            $milestone->setFinished(50)->setFinishedBy($this->getCurrentPersonText());
 
         $this->getEntityManager()->flush($milestone);
         $this->getNotificationService()->purgeNotificationMilestone($milestone);

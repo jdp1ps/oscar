@@ -53,6 +53,16 @@ class ActivityDate implements ITrackable
     private $finished;
 
     /**
+     * Chaîne contenant la personne [ID] DisplayName
+     *
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $finishedBy;
+
+
+
+    /**
      * Date à laquelle le jalon a été complété.
      *
      * @var \DateTime
@@ -76,6 +86,25 @@ class ActivityDate implements ITrackable
         }
         return false;
     }
+
+    /**
+     * @return string
+     */
+    public function getFinishedBy(): string
+    {
+        return $this->finishedBy;
+    }
+
+    /**
+     * @param string $finishedBy
+     */
+    public function setFinishedBy(string $finishedBy)
+    {
+        $this->finishedBy = $finishedBy;
+        return $this;
+    }
+
+
 
     public function isFinished(){
         return $this->getFinished() == self::FINISH_VALUE;

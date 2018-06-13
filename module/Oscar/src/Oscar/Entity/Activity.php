@@ -1733,12 +1733,12 @@ class Activity implements ResourceInterface
     {
         return array(
             'id' => $this->getId(),
-            'project acronym' => $this->getProject() ? $this->getProject()->getAcronym() : '',
-            'project' => $this->getProject() ? $this->getProject()->getLabel() : '',
-            'intitulé' => $this->getLabel(),
+            'Acronyme' => $this->getAcronym(),
+            'Projet' => $this->getProject() ? $this->getProject()->getLabel() : '',
+            'Intitulé' => $this->getLabel(),
             'PFI' => $this->getCodeEOTP(),
             'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format('Y-m-d') : '',
-            'amount' => number_format($this->getAmount(), 2, ',', ' '),
+            'Montant' => number_format($this->getAmount(), 2, ',', ' '),
             'numéro SAIC' => $this->getCentaureNumConvention(),
             'numéro oscar' => $this->getOscarNum(),
             'Type' => $this->getActivityType() ? (string)$this->getActivityType() : '',
@@ -1757,12 +1757,12 @@ class Activity implements ResourceInterface
     {
         return array(
             'id',
-            'project acronym',
-            'project',
-            'intitulé',
+            'Acronyme',
+            'Projet',
+            'Intitulé',
             'PFI',
             'Date du PFI',
-            'amount',
+            'Montant',
             'numéro SAIC',
             'numéro oscar',
             'Type',
