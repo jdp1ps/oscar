@@ -67,6 +67,8 @@ tar xvfz install/vendor.tar.gz
 chown -R <user>:<group> ./vendor/
 ```
 
+> ATTENTION : Depuis la version 2.5.x, la gestion des dépendances devra être réaliser avec [Composer](https://getcomposer.org).
+
 
 ## Mise à jour de la BDD
 

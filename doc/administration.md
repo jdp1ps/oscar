@@ -2,10 +2,24 @@
 
 ## Base de donnée
 
+Quelques requêtes utiles pour l'administration de la base de données Postgresql.
+
+### Création de la base de données / utilisateur
+
+```sql
+--- Création d'un utilisateur
+CREATE USER oscar WITH PASSWORD 'azerty';
+
+-- Création d'une base de données
+CREATE DATABASE oscar_dev;
+
+-- Accorder tous les privilèges sur une BASE à un Utilisateur
+GRANT ALL PRIVILEGES ON DATABASE oscar to oscar_dev;
+```
 
 ### Copie de la base de données
 
-Dupliquer la base de données (via le programme psql): 
+Dupliquer la base de données :
 
 ```sql
 CREATE DATABASE <copy> WITH TEMPLATE <original> OWNER <user>;
@@ -14,7 +28,7 @@ CREATE DATABASE <copy> WITH TEMPLATE <original> OWNER <user>;
 
 ### Vider la base
 
-Puis exécuter le script du fichier ./databases_maintenance/delete-database.sql : 
+Puis exécuter le script du fichier ./databases_maintenance/delete-database.sql :
 
 ```bash
 psql -U <USENAME> -h <HOST> -W -d <DATABASE> -a -f databases_maintenance/delete-database.sql
@@ -38,5 +52,11 @@ Ces commandes sont utilisables dans le client Postgresql (psql).
 \l
 
 # Selectionner une base de données
-\c <DATABASE>
+\c <DATABASE> [<USER>]
+
+# Liste des tables
+\dt
+
+# Quitter / déconnecter
+\q
 ```

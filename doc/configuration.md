@@ -74,41 +74,11 @@ return array(
 Oscar propose 2 systèmes de recherche des activités, le premier est basé sur **Zend Lucene** (full PHP), l'autre est basé sur **Elastic Search** (Java).
 
 
-### Zend Lucene
-
-Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installation complémentaire.
-
-```php
-// config/autoload/local.php
-return array(
-    // (...)
-
-    // Oscar
-    'oscar' => [
-        // (...)
-        'strategy' => [
-            'activity' => [
-                'search_engine' => [
-                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
-                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
-                ]
-            ]
-        ],
-    ],
-);
-```
-
 ### Elastic Search
 
 Le deuxième système s'appuie sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible.
 
-
-### Installation
-
 [Installation d'ElasticSearch sous Debian](./install-elasticsearch.md)
-
-
-#### Configurer Oscar
 
 On indique ensuite à Oscar l'adresse de l'instance **Elastic Search** :
 
@@ -133,7 +103,33 @@ return array(
 
 > la clef `params` prend bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
 
-> Lors de la reconstruction de l'index en ligne de commande, assurez-vous de ne pas l'executer en tant que ROOT.
+
+### Zend Lucene
+
+> Depuis la version 2.5.x, l'utilisation de Zend Lucene est dépréciée au profit de Elasticsearch.
+
+Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installation complémentaire.
+
+```php
+// config/autoload/local.php
+return array(
+    // (...)
+
+    // Oscar
+    'oscar' => [
+        // (...)
+        'strategy' => [
+            'activity' => [
+                'search_engine' => [
+                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
+                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
+                ]
+            ]
+        ],
+    ],
+);
+```
+
 
 ## Mailer
 
