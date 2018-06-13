@@ -410,15 +410,18 @@
 
             <div id="exporter"></div>
             <script>
-               require(['ActivitiesExport'], function(ActivitiesExport){
-                   var ae = new ActivitiesExport.default({
-                       el: '#exporter',
-                       data: {
-                           ids: [<?= $exportIds ?>],
-                           fields: <?= json_encode($fieldsCSV) ?>,
-                           urlPost: '<?= $this->url('contract/csv') . $perimeter ?>'
+               require(['vue', 'ActivitiesExport'], function(Vue, ActivitiesExport){
+
+                   new Vue({
+                       render(h){
+                           return h(ActivitiesExport.default, { props: {
+                                   ids: [<?= $exportIds ?>],
+                                   fields: <?= json_encode($fieldsCSV) ?>,
+                                   urlPost: '<?= $this->url('contract/csv') . $perimeter ?>'
+                               }})
                        }
-                   });
+                   }).$mount('#exporter');
+
                 });
             </script>
 

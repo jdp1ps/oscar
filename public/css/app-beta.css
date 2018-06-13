@@ -7110,8 +7110,6 @@ body .tv {
   #bottom-flash-menu .menu-handler {
     line-height: 50px;
     text-align: right; }
-  #bottom-flash-menu form button[type="submit"] {
-    display: block; }
   #bottom-flash-menu:hover {
     left: 0px; }
 
@@ -7711,6 +7709,9 @@ time.date-missing {
     animation-iteration-count: infinite;
     animation-direction: alternate; }
 
+.btn-save.disabled {
+  pointer-events: none; }
+
 .uc-frequency {
   text-align: center; }
   .uc-frequency .heading .hours {
@@ -7738,6 +7739,7 @@ time.date-missing {
       opacity: 1;
       color: #499D1F; }
     .uc-frequency .content .hours-selector.forced {
+      pointer-events: none;
       cursor: not-allowed; }
     .uc-frequency .content .hours-selector:hover {
       background: white; }

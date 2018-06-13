@@ -53,7 +53,7 @@ requirejs.config({
         'ICalAnalyser' : 'modules/unicaen/dist/js/ICalAnalyser',
         'Datepicker' : 'modules/unicaen/dist/js/Datepicker',
         'KeySelectEditor' : 'components/build/KeySelectEditor',
-        'ActivitiesExport' : 'components/build/ActivitiesExport',
+        'ActivitiesExport' : 'oscar/dist/ActivitiesExport',
         'io' : 'http://127.0.0.1:3000/socket.io/socket.io.js',
         'notifications' : 'oscar/dist/Notification',
         'activity' : 'components/build/activity',

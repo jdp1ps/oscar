@@ -7110,8 +7110,6 @@ body .tv {
   #bottom-flash-menu .menu-handler {
     line-height: 50px;
     text-align: right; }
-  #bottom-flash-menu form button[type="submit"] {
-    display: block; }
   #bottom-flash-menu:hover {
     left: 0px; }
 

@@ -42,4 +42,8 @@ poi watch --format umd --moduleName DisciplineUI public/js/oscar/src/DisciplineU
 
 # Compilation des notifications
 poi watch --format umd --moduleName  Notification --filename.css Notification.css --filename.js Notification.js --dist public/js/oscar/dist public/js/oscar/src/Notification.vue
+
+# Interface d'export des activités
+poi watch --format umd --moduleName  ActivitiesExport --filename.css ActivitiesExport.css --filename.js ActivitiesExport.js --dist public/js/oscar/dist public/js/oscar/src/ActivitiesExport.vue
+
 ```
