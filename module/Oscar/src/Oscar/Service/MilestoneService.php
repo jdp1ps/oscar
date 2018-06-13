@@ -208,7 +208,7 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $milestone->setFinished(ActivityDate::FINISH_VALUE)->setFinishedBy($this->getCurrentPersonText());
 
         else if ($progressionName == 'unvalid')
-            $milestone->setFinished(0)->setFinishedBy(null);
+            $milestone->setFinished(0)->setFinishedBy('');
 
         else
             $milestone->setFinished(50)->setFinishedBy($this->getCurrentPersonText());
