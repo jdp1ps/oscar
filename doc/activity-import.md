@@ -41,7 +41,7 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
       "Responsable scientifique": ["Albert Einstein"],
       "Ingénieur": ["Maurice Solovine", "Marcel Grossman"]
     },
-    "milestones": [],
+    "milestones": []
   },
   {
     "uid": "A0002",
@@ -340,6 +340,7 @@ return [
     423 => "persons.Responsable scientifique",
     424 => "persons.Chargé d'affaires",
     
+    // Nouveau (2.5.x)
     // Cas de données multiple séparée par une virgule
     425 => [
         'key' => "persons.Ingénieur",
@@ -365,6 +366,7 @@ La valeur de la clef correspond à un code qui sera utilisé pour savoir comment
 | PFI | PFI
 
 Les objets plus complexes comme les organisations, les personnes, les versements et les jalons sont gérés avec des code "pointés". Ils sont sous la forme **objet.paramètre**.
+
 
 ### organizations.Role
 
@@ -407,6 +409,41 @@ On obtiendra en JSON :
   }
 }
 ```
+
+<a id="data-composite-1"></a>   
+### Donnèes multiples persons/organizations (2.5.x)
+
+Les `persons` et les `organizations` autorisent un paramètrage avancès pour permettre d'extraire des données multiples depuis une même colonne : 
+
+```php
+<?php
+//
+return [
+    // (...)
+    425 => [
+        'key' => "persons.Ingénieur",
+        'separator' => ','
+    ]
+];
+```
+
+Le tableau associatif de configuration permet de spécifier le mode de traitement sous la forme `persons.Role` ou `organizations.Role`, ainsi que le séparateur utilisé dans la colonne pour isoler les informations.
+
+Dans l'exemple, la colonne va contenir des ingénieurs séparés par des virgules.
+
+La données de colonne `Max Plank, Albert Einstein` produirait : 
+
+```json
+{
+  "persons": {
+    "Ingénieur": [
+      "Max Plank",
+      "Albert Einstein"
+    ]
+  }
+}
+```
+
 
 ### milestones.Type
 
