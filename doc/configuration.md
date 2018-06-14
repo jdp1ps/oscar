@@ -31,10 +31,10 @@ return array(
         // (...)
         // Emplacement
         'paths' => [
-            // Emplacement où sont stoqués les documents Oscar
+            // Emplacement où sont stockés les documents Oscar
             'document_oscar' => dirname(__DIR__ . '/data/documents/oscar/',
 
-            // Emplacement où sont stoqués les documents administratifs Oscar
+            // Emplacement où sont stockés les documents administratifs Oscar
             'document_admin_oscar' => realpath(__DIR__) . '/../..//data/documents/administratifs/',
 
             // Emplacement de l'index de recherche (emplacement où Lucene écrit

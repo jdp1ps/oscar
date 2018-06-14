@@ -301,7 +301,7 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 Oscar propose un utilitaire en ligne de commande pour convertir une source de donnée CSV en un fichier JSON.
 
 ```bash
-oscar activity:csvtojson chemin/vers/source.csv chemin/vers/config.php
+php public/index.php oscar activity:csvtojson chemin/vers/source.csv chemin/vers/config.php
 ```
 
 Ce script implique de configurer la correspondance entre les colonnes de la source CSV et la destination de le JSON dans un fichier de configuration PHP.

@@ -67,7 +67,7 @@ Si la base de données est sur la même machine, installation de Postgresql :
 
 ```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
-apt-get install postgresql-client postgresql-client-common
+apt-get install postgresql postgresql-client postgresql-client-common
 ```
 
 ### Proxy (Si besoin)
@@ -156,7 +156,7 @@ Les données "de base" sont à disposition dans
 le dépôt dans le fichier : `install/oscar-install.sql`.
 
 ```bash
-psql -h localhost -U oscar < install/oscar-install.sql
+psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 ```
 
 ### Configuration de la BDD dans Oscar
@@ -401,9 +401,9 @@ Utiliser ensuite le navigateur pour vous rendre sur oscar et utiliser l'identifi
 Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames` 
 permet de s'identifier à la place d'un utilisateur.
 
-## Oscar Live (Oscar 2.2+)
+## Oscar Live
 
-**Fonctionnalité expérimentale** 
+**Fonctionnalité expérimentale** (ne pas utilisée en prod)
 
 Dans le cadre de l'utilisation des *Notification*, Oscar propose un système basé sur **NodeJS** pour actualiser les notifications en temps réél.
 
