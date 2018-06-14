@@ -1,6 +1,10 @@
 # Oscar en ligne de commande
 
-Oscar dispose d'un accès terminal pour lancer automatiquement certaines tâche de maintenance
+Oscar dispose d'un accès terminal pour lancer automatiquement certaines tâche de maintenance.
+
+La liste des commandes est disponible en tappant `php public/index.php`
+
+Toutes les commandes ne sont pas forcement documenté ici
 
 
 ## Accès / Droits
@@ -224,4 +228,3 @@ Les données sont sous la forme :
   }
 ]
 ```
-
