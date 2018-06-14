@@ -390,16 +390,6 @@ return array(
                     ]
                 ],
 
-                'update' => [
-                    'options' => [
-                        'route' => 'oscar update',
-                        'defaults' => [
-                            'controller' => 'Console',
-                            'action' => 'update',
-                        ],
-                    ]
-                ],
-
                 'test_mailing' => [
                     'options' => [
                         'route' => 'oscar test:mailer',
@@ -463,18 +453,6 @@ return array(
                 ],
 
 
-                ////////////////////////////////////////////////////////////////
-                // Procédure d'évaluation de la configuration
-                'oscar_check_config' => array(
-                    'options' => array(
-                        'route' => 'oscar check:authentification <login> <pass>',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'checkAuthentification',
-                        ),
-                    ),
-                ),
-
                 // Procédure pour lancer des patchs
                 'oscar_console_patch' => array(
                     'options' => array(
@@ -482,17 +460,6 @@ return array(
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'patch',
-                        ),
-                    ),
-                ),
-
-                // Procédure d'anonymisation des données
-                'oscar_console_shuffle' => array(
-                    'options' => array(
-                        'route' => 'oscar shuffle',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'shuffle',
                         ),
                     ),
                 ),
