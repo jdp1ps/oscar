@@ -587,14 +587,7 @@ class ConsoleController extends AbstractOscarController
                 $this->getConsole()->writeLine("Type de transport inconnu '$typeTransport''",  ColorInterface::WHITE, ColorInterface::RED);
             }
 
-
-            if( $typeTransportValid ){
-
-            }
-
-
             $this->getConsole()->writeLine("");
-            die();
 
         } catch ( OscarException $e ){
             $this->consoleError(sprintf("Configuration manquante : %s", $e->getMessage()));
