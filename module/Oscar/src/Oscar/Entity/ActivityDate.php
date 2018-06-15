@@ -28,7 +28,7 @@ class ActivityDate implements ITrackable
 
     /**
      * @var
-     * @ORM\ManyToOne(targetEntity="DateType")
+     * @ORM\ManyToOne(targetEntity="DateType", inversedBy="milestones")
      */
     private $type;
 

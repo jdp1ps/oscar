@@ -513,7 +513,7 @@ class ConsoleController extends AbstractOscarController
             if (count($errors) > 0) {
                 $this->consoleError("Obsolète");
                 foreach( $errors as $error ){
-                    $this->consoleError(" - " . $error);
+                    $this->consoleError(" - " . $error . " - " . print_r($error));
                 }
                 $this->consoleError("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
             } else {

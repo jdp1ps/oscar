@@ -7,6 +7,7 @@
 
 namespace Oscar\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -64,6 +65,16 @@ class DateType implements ITrackable
      * @ORM\OneToMany(targetEntity="ActivityDate", mappedBy="type")
      */
     private $milestones;
+
+    /**
+     * DateType constructor.
+     * @param \Doctrine\Common\Collections\Collection $milestones
+     */
+    public function __construct()
+    {
+        $this->milestones = new ArrayCollection();
+    }
+
 
     /**
      * @return bool
