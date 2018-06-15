@@ -736,7 +736,7 @@ class ConsoleController extends AbstractOscarController
             $this->getConsole()->writeLine(" * $text <$mail>", ColorInterface::LIGHT_WHITE);
         }
 
-        $confirm = Confirm::prompt("Confirmer l'envoi ? ");
+        $confirm = Confirm::prompt("Confirmer l'envoi ? (Y ou N)");
 
         if ($confirm) {
             try {
