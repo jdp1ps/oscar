@@ -13,6 +13,7 @@ use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
@@ -741,10 +742,103 @@ class TimesheetController extends AbstractOscarController
 
         $this->getLogger()->debug($method);
 
-        switch( $method ){
-            case 'GET' :
-                return $this->ajaxResponse([]);
-                break;
+        ///
+        ///
+        ///
+
+        /** @var Person $currentPerson */
+        $currentPerson = $this->getCurrentPerson();
+
+        $output['person'] = (string) $currentPerson;
+        $output['person_id'] = $currentPerson->getId();
+
+
+        if( $this->isAjax() ) {
+            switch ($method) {
+                case 'GET' :
+                    $dateFrom = new \DateTime();
+                    $year = $this->params()->fromQuery('year', $dateFrom->format('Y'));
+                    $month = $this->params()->fromQuery('month', $dateFrom->format('m'));
+                    $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
+
+                    $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
+                    $from = $dateRef->format('Y-m-01');
+                    $to = $dateRef->format('Y-m-' . $nbr);
+                    $output['from'] = $from;
+                    $output['to'] = $to;
+                    $output['timesheets'] = [];
+                    $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
+                    $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
+                        ->setParameters([
+                            'start' => $from,
+                            'end' => $to,
+                            'person' => $currentPerson,
+                        ]);
+                    $timesheets = $query->getQuery()->getResult();
+                    $output['days'] = $nbr;
+                    $output['projects'] = [];
+                    $output['infos'] = ['total' => 0.0];
+                    $output['vacations'] = ['total' => 0.0];
+                    $output['teaching'] = ['total' => 0.0];
+                    $output['training'] = ['total' => 0.0];
+                    $output['other'] = ['total' => 0.0];
+                    $output['nbrTS'] = count($timesheets);
+
+                    /** @var TimeSheet $t */
+                    foreach ($timesheets as $t) {
+
+                        $daysTimesheet = (int)($t->getDateFrom()->format('d'));
+
+                        if (!$t->getActivity()) {
+                            if ($t->getStatus() == TimeSheet::STATUS_INFO) {
+                                $output['infos'][$daysTimesheet] += $t->getDuration();
+                                $this->getLogger()->debug($t->getStatus());
+                            }
+                            continue;
+                        }
+
+                        $projectAcronym = $t->getActivity()->getAcronym();
+                        $project = $t->getActivity()->getProject();
+
+                        if (!array_key_exists($projectAcronym, $output['projects'])) {
+                            $output['projects'][$projectAcronym] = [
+                                'label' => $project->getLabel(),
+                                'acronym' => $project->getAcronym(),
+                                'activities' => [],
+                            ];
+                        }
+
+                        $activity = $t->getActivity();
+                        $activityCode = $activity->getOscarNum();
+
+                        if (!array_key_exists($activityCode, $output['projects'][$projectAcronym]['activities'])) {
+                            $output['projects'][$projectAcronym]['activities'][$activityCode] = [
+                                'label' => $activity->getLabel(),
+                                'code' => $activityCode,
+                                'wps' => [],
+                            ];
+                            /** @var WorkPackage $workPackage */
+                            foreach ($activity->getWorkPackages() as $workPackage) {
+                                $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()] = [];
+                                /*for( $i = 1; $i<=$nbr; $i++ ){
+                                   $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()][$i] = 0.0;
+                                   $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()]['total'] = 0.0;
+                                }*/
+                            }
+                        }
+
+                        $wpTimesheet = $t->getWorkpackage()->getCode();
+
+
+                        $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpTimesheet][$daysTimesheet] += $t->getDuration();
+                        $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpTimesheet]['total'] += $t->getDuration();
+
+
+                        //$output['timesheets'][] = $t->toJson();
+                    }
+                    return $this->ajaxResponse($output);
+                    break;
+            }
         }
 
 
