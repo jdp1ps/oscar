@@ -29,6 +29,7 @@ use Oscar\Service\TimesheetService;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\Http\Request;
 use Zend\Http\Response;
+use Zend\Mvc\Router\Http\Method;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
@@ -731,6 +732,23 @@ class TimesheetController extends AbstractOscarController
             'activity' => $activity,
             'declarants' => $declarants
         ];
+    }
+
+    public function declarantAction(){
+        $output = [];
+
+        $method = $this->getHttpXMethod();
+
+        $this->getLogger()->debug($method);
+
+        switch( $method ){
+            case 'GET' :
+                return $this->ajaxResponse([]);
+                break;
+        }
+
+
+        return $output;
     }
 
     /**

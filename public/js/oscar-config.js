@@ -67,7 +67,8 @@ requirejs.config({
         'ActivitySearchUi' : 'oscar/dist/ActivitySearchUi',
         'VueFilters' : 'oscar/dist/VueFilters',
         'OrganizationType' : 'oscar/dist/OrganizationType',
-        'DisciplineUI' : 'oscar/dist/DisciplineUI'
+        'DisciplineUI' : 'oscar/dist/DisciplineUI',
+        'TimesheetMonth' : 'oscar/dist/TimesheetMonth',
     },
     shim: {
         "bootstrap": {

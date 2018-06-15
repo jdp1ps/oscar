@@ -1,5 +1,9 @@
 # Développement
 
+Ce document regroupe des informations informelles lièes au développement des fonctionnalités dans Oscar.
+
+
+
 ## UI
 
 ### Présentation
@@ -21,12 +25,23 @@ npm i -g poi
 
 ## Commandes de développement
 
+Dans la mesure du possible, la plus part des opérations liés au traitement et à la compilation des modules d'interface ont été regroupé dans l'automatisateur de tache **Gulp** (`gulpfile.js`).
+
+
+### Compilations des modules JS basés sur VueJS
+
 Construction des fichiers JS : 
 
 ```bash
-# Compilation
-gulp modules-oscar 
+# Compilation des JS (VueJS)
+gulp modules-oscar
+
+# Compilation des CSS
+gulp sass 
 ```
+
+
+### Commandes spécifiques
 
 Les commandes qui suivent permettent d'utiliser POI pour travailler sur les différentes modules de l'interface en mode debug.
 
@@ -51,7 +66,7 @@ poi watch --format umd --moduleName  ActivitiesExport --filename.css ActivitiesE
 
 ## BUG Connus
 
-Erreur du watcher JS : 
+Erreur du watcher GULP : 
 
 ```
 $ gulp watch

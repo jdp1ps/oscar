@@ -1,0 +1,13 @@
+<div class="container">
+    <div id="app"></div>
+</div>
+<script>
+    require(['vue', 'vue-resource', 'TimesheetMonth'], function(Vue, VueResource, TimesheetMonth){
+        console.log("TOTO");
+        new Vue({
+            render: function(h){
+                return h(TimesheetMonth.default);
+            }
+        }).$mount('#app');
+    })
+</script>

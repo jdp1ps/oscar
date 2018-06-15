@@ -78,6 +78,12 @@ timesheet:
             controller: Timesheet
     may_terminate: false
     child_routes:
+        declarant:
+            type: segment
+            options:
+                route: /declarant
+                defaults:
+                    action: declarant
         excel:
             type: segment
             options:
