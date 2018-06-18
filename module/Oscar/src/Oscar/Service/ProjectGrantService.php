@@ -43,6 +43,29 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
+    public function getWorkPackagePersonPeriod( Person $person, $year, $month ){
+
+        // extraction de la période
+        $from = sprintf("%s-%s-01", $year, $month);
+        $to = sprintf("%s-%s-%s", $year, $month, cal_days_in_month(CAL_GREGORIAN, $month, $year));
+
+
+        $query = $this->getEntityManager()->createQueryBuilder()
+            ->select('wp')
+            ->from(WorkPackage::class, 'wp')
+            ->innerJoin('wp.persons', 'wpp')
+            ->innerJoin('wp.activity', 'a')
+            ->where('wpp.person = :person AND a.dateEnd >= :from AND a.dateStart <= :from AND a.dateEnd >= :to')
+            ->setParameters([
+                    'person' => $person,
+                    'from' => $from,
+                    'to' => $to
+            ])
+            ->getQuery();
+
+        return $query->getResult();
+    }
+
     /**
      * @return ProjectGrantRepository
      */
