@@ -178,7 +178,7 @@ class PersonController extends AbstractOscarController
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Export CSV
-        /// 
+        ///
         if( $format == "csv" ){
             // Fichier temporaire
             $baseFileName = 'oscar-export-persons';
