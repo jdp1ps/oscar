@@ -8,11 +8,28 @@
         new Vue({
             render: function(h){
                 return h(TimesheetMonth.default, { props: {
-                  year: 2017,
-                  month: 12,
+                  year: <?= date('Y') ?>,
+                  month: <?= date('m') ?>,
                   moment: moment
                 }});
             }
         }).$mount('#app');
     })
 </script>
+<style>
+    .wp {
+        display: flex;
+        align-items: stretch;
+    }
+    .wp > * {
+        display: block;
+        background: #efefef;
+        flex: 1;
+        padding: 4px;
+        text-align: right;
+    }
+
+    .wp > *:nth-child(2n) {
+        background: white;
+    }
+</style>

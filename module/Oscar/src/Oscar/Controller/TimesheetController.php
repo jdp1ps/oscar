@@ -748,10 +748,17 @@ class TimesheetController extends AbstractOscarController
 
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
+        $dateFrom = new \DateTime();
+        $year = $this->params()->fromQuery('year', $dateFrom->format('Y'));
+        $month = $this->params()->fromQuery('month', $dateFrom->format('m'));
+        $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
 
         $output['person'] = (string) $currentPerson;
         $output['person_id'] = $currentPerson->getId();
 
+
+
+        
 
         if( $this->isAjax() ) {
             switch ($method) {
@@ -820,10 +827,10 @@ class TimesheetController extends AbstractOscarController
                             /** @var WorkPackage $workPackage */
                             foreach ($activity->getWorkPackages() as $workPackage) {
                                 $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()] = [];
-                                /*for( $i = 1; $i<=$nbr; $i++ ){
+                                for( $i = 1; $i<=$nbr; $i++ ){
                                    $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()][$i] = 0.0;
                                    $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()]['total'] = 0.0;
-                                }*/
+                                }
                             }
                         }
 
