@@ -756,9 +756,7 @@ class TimesheetController extends AbstractOscarController
         $output['person'] = (string) $currentPerson;
         $output['person_id'] = $currentPerson->getId();
 
-
-
-        
+        $availableWorkPackages = $this->getActivityService()->getWorkPackagePersonPeriod($currentPerson, $year, $month);
 
         if( $this->isAjax() ) {
             switch ($method) {
@@ -791,6 +789,43 @@ class TimesheetController extends AbstractOscarController
                     $output['other'] = ['total' => 0.0];
                     $output['nbrTS'] = count($timesheets);
 
+                    /** @var WorkPackage $wp */
+                    foreach ($availableWorkPackages as $wp) {
+                        $activity = $wp->getActivity();
+                        $project = $activity->getProject();
+
+                        $projectAcronym = $activity->getAcronym();
+                        $activityCode = $activity->getOscarNum();
+                        $wpCode = $wp->getCode();
+
+                        if (!array_key_exists($projectAcronym, $output['projects'])) {
+                            $output['projects'][$projectAcronym] = [
+                                'label' => $project->getLabel(),
+                                'acronym' => $project->getAcronym(),
+                                'activities' => [],
+                            ];
+                        }
+
+                        if (!array_key_exists($activityCode, $output['projects'][$projectAcronym]['activities'])) {
+                            $output['projects'][$projectAcronym]['activities'][$activityCode] = [
+                                'label' => $activity->getLabel(),
+                                'code' => $activityCode,
+                                'wps' => [],
+                            ];
+                        }
+
+                        if (!array_key_exists($wpCode, $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'])) {
+                            $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpCode] = [
+                                'label' => $wp->getLabel(),
+                                'times' => [],
+                                'total' => 0.0
+                            ];
+                            for( $i = 1; $i<=$nbr; $i++ ){
+                                $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpCode]['times'][$i] = 0.0;
+                            }
+                        }
+                    }
+
                     /** @var TimeSheet $t */
                     foreach ($timesheets as $t) {
 
@@ -806,42 +841,13 @@ class TimesheetController extends AbstractOscarController
 
                         $projectAcronym = $t->getActivity()->getAcronym();
                         $project = $t->getActivity()->getProject();
-
-                        if (!array_key_exists($projectAcronym, $output['projects'])) {
-                            $output['projects'][$projectAcronym] = [
-                                'label' => $project->getLabel(),
-                                'acronym' => $project->getAcronym(),
-                                'activities' => [],
-                            ];
-                        }
-
                         $activity = $t->getActivity();
                         $activityCode = $activity->getOscarNum();
-
-                        if (!array_key_exists($activityCode, $output['projects'][$projectAcronym]['activities'])) {
-                            $output['projects'][$projectAcronym]['activities'][$activityCode] = [
-                                'label' => $activity->getLabel(),
-                                'code' => $activityCode,
-                                'wps' => [],
-                            ];
-                            /** @var WorkPackage $workPackage */
-                            foreach ($activity->getWorkPackages() as $workPackage) {
-                                $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()] = [];
-                                for( $i = 1; $i<=$nbr; $i++ ){
-                                   $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()][$i] = 0.0;
-                                   $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$workPackage->getCode()]['total'] = 0.0;
-                                }
-                            }
-                        }
-
                         $wpTimesheet = $t->getWorkpackage()->getCode();
 
-
-                        $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpTimesheet][$daysTimesheet] += $t->getDuration();
+                        
+                        $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpTimesheet]['times'][$daysTimesheet] += $t->getDuration();
                         $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpTimesheet]['total'] += $t->getDuration();
-
-
-                        //$output['timesheets'][] = $t->toJson();
                     }
                     return $this->ajaxResponse($output);
                     break;

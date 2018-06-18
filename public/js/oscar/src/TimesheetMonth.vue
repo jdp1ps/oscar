@@ -18,7 +18,7 @@
                             <section class="wps">
                                 <article class="wp" v-for="wp, wpCode in a.wps">
                                     <h4>{{ wpCode }}</h4>
-                                    <span v-for="heures, day in wp">
+                                    <span v-for="heures, day in wp.times">
                                         <strong v-if="heures">{{ heures }}</strong>
                                         <em v-else>0.0</em>
                                     </span>
