@@ -191,9 +191,11 @@ class PersonController extends AbstractOscarController
                 'Affectation',
                 'Localisation'
             ]);
+            
             /** @var Person $person */
             foreach ($datas->getQueryBuilder()->getQuery()->getResult() as $person) {
                 fputcsv($handler, [
+                    $person->getId(),
                     $person->getFirstname(),
                     $person->getLastname(),
                     $person->getEmail(),
