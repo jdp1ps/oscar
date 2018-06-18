@@ -624,7 +624,7 @@ contract:
         exportjson:
             type: segment
             options:
-                route: /export-json/:id
+                route: /export-json[/:id]
                 defaults:
                     action: exportJSON
 

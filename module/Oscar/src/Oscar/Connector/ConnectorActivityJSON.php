@@ -352,7 +352,10 @@ class ConnectorActivityJSON implements ConnectorInterface
             // -----------------------------------------------------------------
             // Projet de l'activité
             $projectAcronym = $data->acronym;
-            $projectLabel = $data->projectlabel;
+
+            if( $data->project || $data->projectlabel )
+                $projectLabel = $data->project ?: $data->projectlabel;
+
 
             $project = $this->getProjectOrCreate( $projectAcronym, $projectLabel, $repport);
 

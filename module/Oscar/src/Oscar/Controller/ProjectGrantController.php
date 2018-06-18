@@ -264,11 +264,37 @@ class ProjectGrantController extends AbstractOscarController
 
 
     public function exportJSONAction(){
-        $activity = $this->getActivityFromRoute();
-        $json = $this->getActivityService()->exportJson($activity);
 
-//        header('Content-Disposition: attachment; filename=activity-'.$activity->getOscarNum().'.json');
-//        header('Content-Length: ' . filesize('/tmp/' . $filename));
+        $id = $this->params()->fromRoute('id', null);
+        $ids = $this->params()->fromPost('ids', null);
+
+        if( $id == null && $ids == null ){
+            return $this->getResponseInternalError("Données d'exportation incomplètes.");
+        }
+
+        $json = [];
+
+        if( $id ){
+            $activity = $this->getActivityFromRoute();
+            $json[] = $this->getActivityService()->exportJson($activity);
+        }
+
+        if( $ids ){
+            $ids = explode(',', $ids);
+            $result = $this->getEntityManager()->createQueryBuilder()->select('a')
+                ->from(Activity::class, 'a')
+                ->where('a.id IN(:ids)')
+                ->setParameter('ids', $ids)
+                ->getQuery()
+                ->getResult();
+            foreach ($result as $activity) {
+                $json[] = $this->getActivityService()->exportJson($activity);
+            }
+        }
+
+        $filename = 'activity-json.json';
+
+        header('Content-Disposition: attachment; filename='.$filename);
         header('Content-type: application/json');
         die(json_encode($json));
     }
@@ -377,6 +403,7 @@ class ProjectGrantController extends AbstractOscarController
 
         die(file_get_contents('/tmp/' . $filename));
     }
+
 
     /** Export les données en CSV. */
     public function csvAction()

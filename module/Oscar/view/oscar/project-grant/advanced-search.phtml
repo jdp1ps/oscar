@@ -433,11 +433,11 @@
                 </button>
             </form>
 
-            <form action="<?= $this->url('contract/csv') ?>" class=" export-selection-area" style="display: none" method="post">
+            <form action="<?= $this->url('contract/exportjson') ?>" class=" export-selection-area" method="post">
                 <input type="hidden" name="ids" value="<?= $exportIds ?>">
                 <button type="submit" href="#" class="btn btn-primary">
                     <i class="icon-cube"></i>
-                    Exporter les <span class="total">X</span> activité(s) selectionée(s)
+                    Export JSON
                 </button>
             </form>
             <hr />

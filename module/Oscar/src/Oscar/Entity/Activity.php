@@ -133,7 +133,7 @@ class Activity implements ResourceInterface
 
     /**
      * => CONV_CLEUNIK
-     * @ORM\Column(type="string", length=10, nullable=true)
+     * @ORM\Column(type="string", length=128, nullable=true)
      */
     private $centaureId;
 
