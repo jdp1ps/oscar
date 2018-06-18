@@ -176,6 +176,9 @@ class PersonController extends AbstractOscarController
             'leader' => $leader
         ]);
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Export CSV
+        /// 
         if( $format == "csv" ){
             // Fichier temporaire
             $baseFileName = 'oscar-export-persons';
@@ -191,7 +194,7 @@ class PersonController extends AbstractOscarController
                 'Affectation',
                 'Localisation'
             ]);
-            
+
             /** @var Person $person */
             foreach ($datas->getQueryBuilder()->getQuery()->getResult() as $person) {
                 fputcsv($handler, [
