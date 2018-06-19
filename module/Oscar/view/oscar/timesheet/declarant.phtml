@@ -1,6 +1,7 @@
 <div class="container">
     <div id="app"></div>
 </div>
+<link rel="stylesheet" href="/js/oscar/dist/timesheetmonth.css" type="text/css" />
 <script>
     require(['vue', 'vue-resource', 'TimesheetMonth', 'mm'], function(Vue, VueResource, TimesheetMonth, moment){
         Vue.use(VueResource);
@@ -16,20 +17,3 @@
         }).$mount('#app');
     })
 </script>
-<style>
-    .wp {
-        display: flex;
-        align-items: stretch;
-    }
-    .wp > * {
-        display: block;
-        background: #efefef;
-        flex: 1;
-        padding: 4px;
-        text-align: right;
-    }
-
-    .wp > *:nth-child(2n) {
-        background: white;
-    }
-</style>
