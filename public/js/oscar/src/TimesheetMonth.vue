@@ -1,50 +1,66 @@
 <template>
     <section>
-        <h1>Feuille de temps mensuelle</h1>
-        <section v-if="ts">
-            <h2>Déclarations de temps pour <strong>{{ ts.person }}</strong></h2>
-            <h3>Période :
-                <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
-                <strong>{{ mois }}</strong>
-                <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
-            </h3>
-
-            {{ dayBeforeMonth }}
 
 
-            <div class="month">
-                <header class="month-header">
-                    <strong>Lundi</strong>
-                    <strong>Mardi</strong>
-                    <strong>Mercredi</strong>
-                    <strong>Jeudi</strong>
-                    <strong>Vendredi</strong>
-                    <strong>Samedi</strong>
-                    <strong>Dimanche</strong>
-                </header>
-                <div class="weeks">
-                    <section v-for="week in weeks" v-if="ts" class="week">
-                        <div class="days">
-                            <article class="day" v-for="day in week" :class="{ 'locked': day.locked }">
-                                {{ day.date }} ({{ day.day }})
 
-                                <nav v-if="!day.locked">
-                                    <i class="icon-doc-add"></i>
-                                    Déclarer
-                                </nav>
-                            </article>
-                        </div>
-                    </section>
+        <h1>
+            <span v-if="selectedDay">
+                <i class="icon-angle-left interactive-icon-big" @click="selectedDay = null"></i>
+                {{ selectedDay.date | date }}
+            </span>
+            <span v-else>Feuille de temps mensuelle</span>
+        </h1>
+
+        <div v-show="!selectedDay">
+            <section v-if="ts">
+                <h2>Déclarations de temps pour <strong>{{ ts.person }}</strong></h2>
+                <h3 class="periode">Période :
+                    <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
+                    <strong>{{ mois }}</strong>
+                    <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
+                </h3>
+
+                {{ dayBeforeMonth }}
+
+
+                <div class="month" style="border: solid thin green">
+                    <header class="month-header">
+                        <strong>Lundi</strong>
+                        <strong>Mardi</strong>
+                        <strong>Mercredi</strong>
+                        <strong>Jeudi</strong>
+                        <strong>Vendredi</strong>
+                        <strong>Samedi</strong>
+                        <strong>Dimanche</strong>
+                    </header>
+                    <div class="weeks">
+                        <section v-for="week in weeks" v-if="ts" class="week">
+                            <div class="days">
+                                <timesheetmonthday v-for="day in week"
+                                                   @selectDay="handlerSelectData"
+                                                   :day="day"
+                                                   :key="day.date"/>
+                            </div>
+                        </section>
+                    </div>
                 </div>
-            </div>
+            </section>
+        </div>
+        <article v-if="selectedDay">
 
-        </section>
+            <pre>{{ selectedDay }}</pre>
+        </article>
 
 
     </section>
 </template>
 
 <style lang="scss">
+    .interactive-icon-big {
+        font-size: 32px;
+        cursor: pointer;
+    }
+
     .month-header {
         display: flex;
         strong {
@@ -53,11 +69,35 @@
             flex: 0 0  14.285714286%;
         }
     }
+    .periode strong {
+        display: inline-block;
+        width: 10em;
+        text-align: center;
+    }
     .days {
         display: flex;
         height: 75px;
         .day {
-            background: rgba(#ff6600, .5);
+            .label {
+                position: absolute;
+                top: 0;
+                right: 0;
+                display: block;
+                font-size: 20px;
+                text-align: right;
+                text-shadow: -1px 1px 1px rgba(0,0,0,.2);
+            }
+
+            .cartouche em {
+                max-width: 3em;
+                overflow: hidden;
+                display: inline-block;
+                white-space: nowrap;
+            }
+
+            position: relative;
+            background: rgba(#ffffff, .25);
+            border: thin solid white;
             flex: 0 0 14.285714286%;
             cursor: pointer;
 
@@ -68,23 +108,24 @@
 
             &.locked {
                 cursor: not-allowed;
-                background: #0d3349;
+                background: #eee;
             }
         }
     }
 
     .week:first-child .days {
-        background: green;
         justify-content: flex-end;
     }
+
     .week:last-child .days {
-        background: orange;
-        align-items: flex-start;
         justify-content: flex-start;
     }
 </style>
 
 <script>
+
+    import TimesheetMonthDay from './TimesheetMonthDay.vue';
+
     let defaultDate = new Date();
     let moment = function(){};
 
@@ -97,11 +138,16 @@
             defaultYear: { default: defaultDate.getFullYear()}
         },
 
+        components: {
+            timesheetmonthday: TimesheetMonthDay
+        },
+
         data(){
             return {
                 ts: null,
                 month: null,
-                year: null
+                year: null,
+                selectedDay: null
             }
         },
 
@@ -152,6 +198,10 @@
         },
 
         methods: {
+            handlerSelectData(day){
+                this.selectedDay = day;
+            },
+
             nextYear(){
                 this.year +=1;
                 this.fetch();

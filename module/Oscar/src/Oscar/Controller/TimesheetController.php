@@ -854,9 +854,9 @@ class TimesheetController extends AbstractOscarController
                 'weekend' => $weekend,
                 'declarations' => [],
                 'infos' => [],
-                'vacations' => 0.0,
-                'training' => 0.0,
-                'teaching' => 0.0,
+                'vacations' => [],
+                'training' => [],
+                'teaching' => [],
                 'others' => $maxDays,
                 'locked' => $locked,
                 'lockedReason' => $lockedReason
@@ -871,11 +871,28 @@ class TimesheetController extends AbstractOscarController
 
             if (!$t->getActivity()) {
                 if ($t->getStatus() == TimeSheet::STATUS_INFO) {
-                    $output['days'][$dayTimesheet]['infos'][] = [
+
+                    $datas = [
                         'label' => $t->getLabel(),
                         'description' => $t->getComment(),
                         'duration' => $t->getDuration()
                     ];
+
+                    switch( $t->getLabel() ){
+                        case 'cours' :
+                            $output['days'][$dayTimesheet]['teaching'][] = $datas;
+                            break;
+                        case 'formation' :
+                            $output['days'][$dayTimesheet]['training'][] = $datas;
+                            break;
+                        case 'vacations' :
+                            $output['days'][$dayTimesheet]['vacations'][] = $datas;
+                            break;
+
+                        default:
+                            $output['days'][$dayTimesheet]['infos'][] = $datas;
+                    }
+
                 }
                 continue;
             }
@@ -890,6 +907,9 @@ class TimesheetController extends AbstractOscarController
             $output['days'][$dayTimesheet]['declarations'][] = [
                 'label' => $t->getLabel(),
                 'comment' => $t->getComment(),
+                'acronym' => $projectAcronym,
+                'project' => (string)$project,
+                'wpCode' => $wpCode,
                 'duration' => (float)$t->getDuration()
             ];
 
