@@ -9,54 +9,35 @@
                 <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
             </h3>
 
-            <article>
-                <section class="projets">
+            {{ dayBeforeMonth }}
 
-                    <article class="projet" v-for="p, acronym in ts.projects">
 
-                        <article class="activity" v-for="a, activityCode in p.activities">
-                            <header class="activity-header">
-                                <h3 class="activity-title">
-                                    <strong class="project-acronym">
-                                        <i class="icon-cubes"></i>
-                                        {{ acronym }}</strong>
-                                    <span class="activity-label">
-                                        <i class="icon-cube"></i>
-                                        <i>{{ activityCode }}</i> {{ a.label }}
-                                    </span>
-                                </h3>
-                                <small>
-                                    <i class="icon-calendar"></i>
-                                    du
-                                    <time>{{ a.dateStart | date }}</time>
-                                    au
-                                    <time>{{ a.dateEnd | date }}</time>
-                                </small>
-                            </header>
-                            <section class="wps">
-                                <div class="days wp">
-                                    <span>Lots</span>
-                                    <span v-for="d in ts.days" class="day day-header" :class="{ 'weekend': d.weekend, 'closed': d.closed, 'samedi': d.samedi }">{{ d.data | day }}</span>
-                                    <span>Total</span>
-                                </div>
-                                <article class="wp" v-for="wp, wpCode in a.wps">
-                                    <h4>{{ wpCode }}</h4>
-                                    <span v-for="heures, day in wp.times" class="day day-data">
-                                        <strong v-if="heures">{{ heures }}</strong>
-                                        <em v-else>0.0</em>
-                                    </span>
-                                </article>
-                            </section>
-                        </article>
-                    </article>
-                </section>
+            <div class="month">
+                <header class="month-header">
+                    <strong>Lundi</strong>
+                    <strong>Mardi</strong>
+                    <strong>Mercredi</strong>
+                    <strong>Jeudi</strong>
+                    <strong>Vendredi</strong>
+                    <strong>Samedi</strong>
+                    <strong>Dimanche</strong>
+                </header>
+                <div class="weeks">
+                    <section v-for="week in weeks" v-if="ts" class="week">
+                        <div class="days">
+                            <article class="day" v-for="day in week" :class="{ 'locked': day.locked }">
+                                {{ day.date }} ({{ day.day }})
 
-                <!--
-                <div class="line">
-
+                                <nav v-if="!day.locked">
+                                    <i class="icon-doc-add"></i>
+                                    Déclarer
+                                </nav>
+                            </article>
+                        </div>
+                    </section>
                 </div>
-                -->
-            </article>
+            </div>
+
         </section>
 
 
@@ -64,94 +45,42 @@
 </template>
 
 <style lang="scss">
-    .wp {
-        border-top: thin solid #ddd;
+    .month-header {
         display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-    }
-    .wp > * {
-        font-size: 1em;
-        background: #efefef;
-        flex-grow: 0;     /* do not grow   - initial value: 0 */
-        flex-shrink: 0;   /* do not shrink - initial value: 1 */
-        flex-basis: 40px; /* width/height  - initial value: auto */
-        overflow: hidden;
-        padding: 2px;
-        text-align: right;
-    }
-
-    .wp > *:nth-child(2n) {
-        background: white;
-    }
-
-    .day {
-        border-right: thin solid #ccc;
-    }
-
-    .day-header {
-        font-size: .75em;
-    }
-
-    .activity {
-        background: white;
-        text-shadow: 0 0 .5em rgba(0,0,0,.25);
-        margin: 0 0 .5em;
-        padding: 0;
-        border: thin solid #dedede;
-        font-size: 12px;
-    }
-
-    .activity-header {
-        border-bottom: solid thin #dedede;
-        margin-bottom: .5em;
-        small {
-            padding-left: .2em;
-            color: #999999;
-            font-weight: 100;
-            font-size: .8em;
+        strong {
+            display: block;
+            text-align: center;
+            flex: 0 0  14.285714286%;
         }
     }
+    .days {
+        display: flex;
+        height: 75px;
+        .day {
+            background: rgba(#ff6600, .5);
+            flex: 0 0 14.285714286%;
+            cursor: pointer;
 
-    .wp > .weekend {
-        background: #aaa !important;
-        text-shadow: -1px 1px 0 white;
-    }
-    .wp > .samedi {
-        background: #ccc !important;
-    }
+            &:hover {
+                background: white;
+            }
 
 
-    .activity-title {
-        margin: 0;
-        padding: 0;
-        font-weight: 300;
-        color: #000000;
-        font-size: 18px;
-        line-height: 1.25em;
-
-        .project-acronym {
-            font-weight: 400;
-            background: #999;
-            color: #fff;
-            padding-right: 1em;
-            position: relative;
-            &:after {
-                content: '';
-                display: block;
-                background: #999;
-                transform: rotate(45deg);
-                width: 1em;
-                height: 1em;
-                position: absolute;
-                right: -.2em;
-                top: .2em;
-
+            &.locked {
+                cursor: not-allowed;
+                background: #0d3349;
             }
         }
-        .activity-label {
-            padding-left: .25em;
-        }
+    }
+
+    .week:first-child .days {
+        background: green;
+        justify-content: flex-end;
+    }
+    .week:last-child .days {
+        background: orange;
+        align-items: flex-start;
+        justify-content: flex-start;
     }
 </style>
 
@@ -161,14 +90,18 @@
 
     export default {
         props: {
-            moment: { required: true }
+            moment: {
+                required: true
+            },
+            defaultMonth: { default: defaultDate.getMonth()+1},
+            defaultYear: { default: defaultDate.getFullYear()}
         },
 
         data(){
             return {
                 ts: null,
-                month: defaultDate.getMonth()+2,
-                year: defaultDate.getFullYear()
+                month: null,
+                year: null
             }
         },
 
@@ -186,6 +119,35 @@
         computed: {
             mois(){
                 return moment(this.ts.from).format('MMMM YYYY');
+            },
+
+            dayBeforeMonth(){
+                let d = 0;
+                let firstDay = this.ts.days[1].day;
+                return firstDay-1;
+            },
+
+            weeks(){
+                let weeks = [];
+                if( this.ts && this.ts.days ){
+
+                    let firstDay = this.ts.days[1];
+                    let currentWeekNum = firstDay.week;
+                    let currentWWeek = [];
+
+                    for( var d in this.ts.days ){
+                        let currentDay = this.ts.days[d];
+                        if( currentWeekNum != currentDay.week ){
+                            weeks.push(currentWWeek);
+                            currentWWeek = [];
+                        }
+                        currentWeekNum = currentDay.week;
+                        currentWWeek.push(currentDay);
+                    }
+                    if( currentWWeek.length )
+                        weeks.push(currentWWeek);
+                }
+                return weeks;
             }
         },
 
@@ -231,6 +193,9 @@
         },
         mounted(){
             moment = this.moment;
+            this.month = this.defaultMonth;
+            this.year = this.defaultYear;
+            console.log(this.month, this.year);
             this.fetch()
         }
     }

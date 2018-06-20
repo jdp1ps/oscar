@@ -735,7 +735,187 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+
+
     public function declarantAction(){
+        $output = [];
+
+        $method = $this->getHttpXMethod();
+
+
+        /** @var Person $currentPerson */
+        $currentPerson = $this->getCurrentPerson();
+
+
+        // Données sur la période
+        $today = new \DateTime();
+        $year = (int)$this->params()->fromQuery('year', $today->format('Y'));
+        $month = (int)$this->params()->fromQuery('month', $today->format('m'));
+        $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
+
+        // Nombre de jours dans le mois
+        $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
+        $from = $dateRef->format('Y-m-01');
+        $to = $dateRef->format('Y-m-' . $nbr);
+
+        $output['person'] = (string) $currentPerson;
+        $output['person_id'] = $currentPerson->getId();
+
+        $output['days'] = [];
+
+        // Mois / année (numérique)
+        $output['month'] = $month;
+        $output['year'] = $year;
+
+        // Dates complètes
+        $output['from'] = $from;
+        $output['to'] = $to;
+
+        // Récupération des lots
+        $availableWorkPackages = $this->getActivityService()->getWorkPackagePersonPeriod($currentPerson, $year, $month);
+
+        $activities = [];
+        $workPackages = [];
+
+        /** @var WorkPackagePerson $workPackagePerson */
+        foreach ($availableWorkPackages as $workPackagePerson){
+            $workPackage = $workPackagePerson->getWorkPackage();
+            $activity = $workPackage->getActivity();
+
+            if( !array_key_exists($activity->getId()) ){
+                $activities[$activity->getId()] = [
+                    'id' => $activity->getId(),
+                    'acronym' => $activity->getAcronym(),
+                    'project' => (string)$activity->getProject(),
+                    'project_id' => $activity->getProject()->getId(),
+                    'label' => $activity->getLabel()
+                ];
+            }
+
+            $workPackages[$workPackage->getId()] = [
+                'id' => $workPackage->getId(),
+                'label' => $workPackage->getLabel(),
+                'code' => $workPackage->getCode(),
+                'acronym' => $activity->getAcronym(),
+                'project' => (string)$activity->getProject(),
+                'project_id' => $activity->getProject()->getId(),
+                'activity' => (string)$activity,
+                'activity_id' => $activity->getId(),
+                'hours' => $workPackagePerson->getDuration()
+            ];
+        }
+
+        $output['activities'] = $activities;
+        $output['workPackages'] = $workPackages;
+
+
+        // Récupération des créneaux présents dans Oscar
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
+        $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
+            ->setParameters([
+                'start' => $from,
+                'end' => $to,
+                'person' => $currentPerson,
+            ]);
+
+        $timesheets = $query->getQuery()->getResult();
+
+
+        $maxDays = 7.0;
+
+        for( $i = 1; $i<=$nbr; $i++ ){
+            $data = sprintf('%s-%s-%s', $year, $month, $i);
+            $day = new \DateTime($data);
+
+            $locked = false;
+            $lockedReason = "";
+
+            $futur = $day->getTimestamp() > $today->getTimestamp();
+            if( $futur ){
+                $locked = true;
+                $lockedReason = "Vous ne pouvez pas anticiper une déclaration";
+            }
+
+            $wDay = $day->format('w');
+
+            $weekend = $wDay == 6 || $wDay == 0;
+            if( $weekend ){
+                $locked = true;
+                $lockedReason = "Vous ne pouvez pas déclarer le weekend";
+            }
+
+
+            $output['days'][$i] = [
+                'date' => $data,
+                'day' => $day->format('N'),
+                'week' => $day->format('W'),
+                'data' => $data,
+                'label' => $day->format('d'),
+                'weekend' => $weekend,
+                'declarations' => [],
+                'infos' => [],
+                'vacations' => 0.0,
+                'training' => 0.0,
+                'teaching' => 0.0,
+                'others' => $maxDays,
+                'locked' => $locked,
+                'lockedReason' => $lockedReason
+            ];
+
+        }
+
+        /** @var TimeSheet $t */
+        foreach ($timesheets as $t) {
+
+            $dayTimesheet = (int)($t->getDateFrom()->format('d'));
+
+            if (!$t->getActivity()) {
+                if ($t->getStatus() == TimeSheet::STATUS_INFO) {
+                    $output['days'][$dayTimesheet]['infos'][] = [
+                        'label' => $t->getLabel(),
+                        'description' => $t->getComment(),
+                        'duration' => $t->getDuration()
+                    ];
+                }
+                continue;
+            }
+
+            $projectAcronym = $t->getActivity()->getAcronym();
+            $project = $t->getActivity()->getProject();
+            $activity = $t->getActivity();
+            $activityCode = $activity->getOscarNum();
+            $workpackage = $t->getWorkpackage();
+            $wpCode = $workpackage->getCode();
+
+            $output['days'][$dayTimesheet]['declarations'][] = [
+                'label' => $t->getLabel(),
+                'comment' => $t->getComment(),
+                'duration' => (float)$t->getDuration()
+            ];
+
+
+        }
+
+        if( $this->isAjax() ) {
+            switch ($method) {
+                case 'GET' :
+
+
+
+
+
+                    return $this->ajaxResponse($output);
+                    break;
+            }
+        }
+
+
+        return $output;
+    }
+
+
+
+    public function declarantAction_backup(){
         $output = [];
 
         $method = $this->getHttpXMethod();
@@ -756,17 +936,25 @@ class TimesheetController extends AbstractOscarController
         $output['person_id'] = $currentPerson->getId();
 
         $output['days'] = [];
+
+
         $dateFrom = new \DateTime();
         $year = $this->params()->fromQuery('year', $dateFrom->format('Y'));
         $month = $this->params()->fromQuery('month', $dateFrom->format('m'));
         $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
+        $output['month'] = $month;
+        $output['year'] = $year;
 
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
         $from = $dateRef->format('Y-m-01');
         $to = $dateRef->format('Y-m-' . $nbr);
+
+
         $output['from'] = $from;
         $output['to'] = $to;
         $output['timesheets'] = [];
+
+        // Récupération des créneaux présents dans Oscar
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
         $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
             ->setParameters([

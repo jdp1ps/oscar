@@ -51,9 +51,9 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
 
         $query = $this->getEntityManager()->createQueryBuilder()
-            ->select('wp')
-            ->from(WorkPackage::class, 'wp')
-            ->innerJoin('wp.persons', 'wpp')
+            ->select('wpp')
+            ->from(WorkPackagePerson::class, 'wpp')
+            ->innerJoin('wpp.workPackage', 'wp')
             ->innerJoin('wp.activity', 'a')
             ->where('wpp.person = :person AND a.dateEnd >= :from AND a.dateStart <= :from AND a.dateEnd >= :to')
             ->setParameters([

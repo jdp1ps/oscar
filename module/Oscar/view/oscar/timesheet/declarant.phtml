@@ -9,8 +9,8 @@
         new Vue({
             render: function(h){
                 return h(TimesheetMonth.default, { props: {
-                  year: <?= date('Y') ?>,
-                  month: <?= date('m') ?>,
+                  defaultYear: <?= date('Y') ?>,
+                  defaultMonth: <?= date('m') ?>,
                   moment: moment
                 }});
             }
