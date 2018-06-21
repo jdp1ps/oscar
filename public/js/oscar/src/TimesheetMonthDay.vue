@@ -37,7 +37,7 @@
             </span>
         </span>
 
-        <span v-if="day.locked" :title="day.lockedReason">
+        <span v-if="day.locked" :title="day.lockedReason" style="font-size: .7em">
             <i class="icon-lock"></i>
             Verrouillé
         </span>

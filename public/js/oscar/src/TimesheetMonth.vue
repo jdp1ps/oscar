@@ -18,6 +18,10 @@
                         <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
                         <strong>{{ mois }}</strong>
                         <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
+                        <button class="btn btn-primary" style="margin-left: auto">
+                            <i class="icon-upload"></i>
+                            Envoyer
+                        </button>
                     </h3>
 
 
@@ -100,6 +104,10 @@
             color: #5c9ccc;
             border-left: solid thin #fff;
         }
+    }
+    .periode {
+        display: flex;
+        justify-content: flex-start;
     }
     .periode strong {
         display: inline-block;
