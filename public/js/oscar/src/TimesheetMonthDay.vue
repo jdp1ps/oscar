@@ -30,6 +30,13 @@
             </span>
         </span>
 
+        <span class="cartouche complementary xs" v-if="day.vacations.length" title="Infos">
+            Congès
+            <span class="addon">
+                {{totalVacations}}
+            </span>
+        </span>
+
         <span v-if="day.locked" :title="day.lockedReason">
             <i class="icon-lock"></i>
             Verrouillé
@@ -67,17 +74,24 @@
                 });
                 return t;
             },
+            totalVacations(){
+                let t = 0.0;
+                this.day.vacations.forEach(d => {
+                    t += d.duration;
+                });
+                return t;
+            },
            groupProject(){
                let groups = {};
                this.day.declarations.forEach(d => {
-                   if( !groups.hasOwnProperty(d.label) ){
-                       groups[d.label] = {
+                   if( !groups.hasOwnProperty(d.acronym) ){
+                       groups[d.acronym] = {
                            label: d.label,
                            acronym: d.acronym,
                            duration: 0.0
                        }
                    }
-                   groups[d.label].duration += d.duration;
+                   groups[d.acronym].duration += d.duration;
                });
                return groups;
            }

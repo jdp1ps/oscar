@@ -55,7 +55,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             ->from(WorkPackagePerson::class, 'wpp')
             ->innerJoin('wpp.workPackage', 'wp')
             ->innerJoin('wp.activity', 'a')
-            ->where('wpp.person = :person AND a.dateEnd >= :from AND a.dateStart <= :from AND a.dateEnd >= :to')
+            ->where('wpp.person = :person AND NOT(a.dateEnd < :from OR a.dateStart > :to)')
             ->setParameters([
                     'person' => $person,
                     'from' => $from,

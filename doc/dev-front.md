@@ -61,6 +61,7 @@ poi watch --format umd --moduleName  Notification --filename.css Notification.cs
 # Interface d'export des activités
 poi watch --format umd --moduleName  ActivitiesExport --filename.css ActivitiesExport.css --filename.js ActivitiesExport.js --dist public/js/oscar/dist public/js/oscar/src/ActivitiesExport.vue
 
+poi watch --format umd --moduleName  TimesheetMonth --filename.css TimesheetMonth.css --filename.js TimesheetMonth.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetMonth.vue
 ```
 
 

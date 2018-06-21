@@ -1,8 +1,6 @@
 <template>
     <section>
 
-
-
         <h1>
             <span v-if="selectedDay">
                 <i class="icon-angle-left interactive-icon-big" @click="selectedDay = null"></i>
@@ -12,45 +10,63 @@
         </h1>
 
         <div v-show="!selectedDay">
-            <section v-if="ts">
-                <h2>Déclarations de temps pour <strong>{{ ts.person }}</strong></h2>
-                <h3 class="periode">Période :
-                    <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
-                    <strong>{{ mois }}</strong>
-                    <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
-                </h3>
+            <section v-if="ts" >
 
-                {{ dayBeforeMonth }}
+                <div class="month col-lg-8">
+                    <h2>Déclarations de temps pour <strong>{{ ts.person }}</strong></h2>
+                    <h3 class="periode">Période :
+                        <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
+                        <strong>{{ mois }}</strong>
+                        <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
+                    </h3>
 
 
-                <div class="month" style="border: solid thin green">
-                    <header class="month-header">
-                        <strong>Lundi</strong>
-                        <strong>Mardi</strong>
-                        <strong>Mercredi</strong>
-                        <strong>Jeudi</strong>
-                        <strong>Vendredi</strong>
-                        <strong>Samedi</strong>
-                        <strong>Dimanche</strong>
-                    </header>
-                    <div class="weeks">
-                        <section v-for="week in weeks" v-if="ts" class="week">
-                            <div class="days">
-                                <timesheetmonthday v-for="day in week"
-                                                   @selectDay="handlerSelectData"
-                                                   :day="day"
-                                                   :key="day.date"/>
-                            </div>
-                        </section>
+                    <div class="month">
+                        <header class="month-header">
+                            <strong>Lundi</strong>
+                            <strong>Mardi</strong>
+                            <strong>Mercredi</strong>
+                            <strong>Jeudi</strong>
+                            <strong>Vendredi</strong>
+                            <strong>Samedi</strong>
+                            <strong>Dimanche</strong>
+                        </header>
+                        <div class="weeks">
+                            <section v-for="week in weeks" v-if="ts" class="week">
+                                <div class="days">
+                                    <timesheetmonthday v-for="day in week"
+                                                       @selectDay="handlerSelectData"
+                                                       :day="day"
+                                                       :key="day.date"/>
+                                </div>
+                            </section>
+                        </div>
                     </div>
                 </div>
+                <section class="col-lg-4">
+                    <h3>
+                        <i class="icon-archive"></i>
+                        Lot de travail</h3>
+                    <p class="help">Ne sont proposés que les lots de travail <strong>disponibles sur la période</strong>.</p>
+                    <article class="card xs wp" v-for="wp in ts.workPackages">
+                        <h3 class="">
+                            <small>
+                                <i class="icon-cubes"></i>[{{wp.acronym}}]
+                                <i class="icon-cube"></i>{{ wp.activity }}
+                            </small><br/>
+                            <abbr title="">{{ wp.code}}</abbr> {{ wp.label }}
+                        </h3>
+                        <div class="card-content">
+                            <i class="icon-calendar"></i> Du <strong>{{ wp.from | date}}</strong> au <strong>{{ wp.to|date }}</strong><br />
+                            <i class="icon-clock"></i> Heures prévues : {{ wp.hours }}
+                        </div>
+                    </article>
+                </section>
             </section>
+
         </div>
-        <article v-if="selectedDay">
 
-            <pre>{{ selectedDay }}</pre>
-        </article>
-
+        <timesheetmonthdaydetails v-if="selectedDay" :day="selectedDay" :workPackages="ts.workPackages"/>
 
     </section>
 </template>
@@ -61,12 +77,28 @@
         cursor: pointer;
     }
 
+    article.wp {
+        font-size: 1.2em;
+        h3 {
+            font-size: 1.2em;
+            margin: 0;
+            padding: 0;
+        }
+    }
+
     .month-header {
         display: flex;
+        height: 50px;
+        line-height: 45px;
+        justify-content: center;
+        justify-items: center;
         strong {
             display: block;
             text-align: center;
             flex: 0 0  14.285714286%;
+            background: #efefef;
+            color: #5c9ccc;
+            border-left: solid thin #fff;
         }
     }
     .periode strong {
@@ -125,6 +157,7 @@
 <script>
 
     import TimesheetMonthDay from './TimesheetMonthDay.vue';
+    import TimesheetMonthDayDetails from './TimesheetMonthDayDetails.vue';
 
     let defaultDate = new Date();
     let moment = function(){};
@@ -139,7 +172,8 @@
         },
 
         components: {
-            timesheetmonthday: TimesheetMonthDay
+            timesheetmonthday: TimesheetMonthDay,
+            timesheetmonthdaydetails: TimesheetMonthDayDetails
         },
 
         data(){
@@ -245,7 +279,6 @@
             moment = this.moment;
             this.month = this.defaultMonth;
             this.year = this.defaultYear;
-            console.log(this.month, this.year);
             this.fetch()
         }
     }

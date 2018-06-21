@@ -162,6 +162,9 @@ class WorkPackage
      */
     public function getDateStart()
     {
+        if( $this->dateStart == null ) {
+            return $this->getActivity()->getDateStart();
+        }
         return $this->dateStart;
     }
 
@@ -179,6 +182,9 @@ class WorkPackage
      */
     public function getDateEnd()
     {
+        if( $this->dateEnd == null ) {
+            return $this->getActivity()->getDateEnd();
+        }
         return $this->dateEnd;
     }
 
