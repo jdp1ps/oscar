@@ -7433,8 +7433,7 @@ form .help {
     border-bottom: solid thin rgba(0, 0, 0, 0.2);
     font-size: 1.4em; }
   .workpackage p {
-    font-size: .9em;
-    color: rgba(0, 0, 0, 0.5); }
+    font-size: .9em; }
   .workpackage .workpackage-persons {
     display: block; }
     .workpackage .workpackage-persons .workpackage-person {
