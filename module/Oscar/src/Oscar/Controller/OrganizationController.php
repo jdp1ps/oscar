@@ -331,13 +331,15 @@ class OrganizationController extends AbstractOscarController
     public function newAction()
     {
         $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList(), $this->getOrganizationService()->getOrganizationTypesSelect());
+        $entity = new Organization();
         $form->init();
+        $form->bind($entity);
+
 
         if ($this->getRequest()->isPost()) {
             $posted = $this->getRequest()->getPost();
             $form->setData($posted);
             if( $form->isValid() ){
-                $entity = new Organization();
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush($entity);
                 $this->redirect()->toRoute('organization/show', ['id'=>$entity->getId()]);

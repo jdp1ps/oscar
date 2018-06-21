@@ -13,7 +13,7 @@ La compilation du code *front* est centralisée dans les tâches *Gulp* (fichier
 
 Les composants d'interface sont développées avec le *framework* **VueJS**.
  
-Le moteur de compilation **POI** (basé sur **Webpack**) est utilisé pour compilé les fichiers `**.vue`
+Le moteur de compilation **POI** (basé sur **Webpack**) est utilisé pour compilé les fichiers `**.vue` Depuis la version 2.5.x, une version 10 de POI est disponible mais n'est pas compatible avec Oscar, les scripts fonctionnent bien avec la version 9.
 
 ```bash
 npm i -g poi

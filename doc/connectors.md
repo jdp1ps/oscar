@@ -140,7 +140,7 @@ Voici les données minimales attendues :
 
 Important : Oscar gère l'authentification séparément, il établit la jonction entre
 la Personne (donnée) et l'authentification en utilisant la valeur présente dans login
-qui doit correspondre au champ username, cette valeur provient généralement du champ **upannAliasLogin** côté LDAP.
+qui doit correspondre au champ username, cette valeur provient généralement du champ **supannAliasLogin** côté LDAP.
 
 Pour l'URL "liste", le service REST doit retourner un tableau composé d'objets organisés de la même façon.
 

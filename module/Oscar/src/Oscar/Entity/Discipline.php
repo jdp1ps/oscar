@@ -39,7 +39,7 @@ class Discipline
 
     /**
      * @var \Doctrine\Common\Collections\Collection
-     * @ORM\OneToMany(targetEntity="Activity", mappedBy="disciplines")
+     * @ORM\ManyToMany(targetEntity="Activity", mappedBy="disciplines")
      */
     private $activities;
 

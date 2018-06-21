@@ -513,7 +513,7 @@ class ConsoleController extends AbstractOscarController
             if (count($errors) > 0) {
                 $this->consoleError("Obsolète");
                 foreach( $errors as $error ){
-                    $this->consoleError(" - " . $error);
+                    $this->consoleError(" - " . $error . " - " . print_r($error));
                 }
                 $this->consoleError("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
             } else {
@@ -587,14 +587,7 @@ class ConsoleController extends AbstractOscarController
                 $this->getConsole()->writeLine("Type de transport inconnu '$typeTransport''",  ColorInterface::WHITE, ColorInterface::RED);
             }
 
-
-            if( $typeTransportValid ){
-
-            }
-
-
             $this->getConsole()->writeLine("");
-            die();
 
         } catch ( OscarException $e ){
             $this->consoleError(sprintf("Configuration manquante : %s", $e->getMessage()));
@@ -743,7 +736,7 @@ class ConsoleController extends AbstractOscarController
             $this->getConsole()->writeLine(" * $text <$mail>", ColorInterface::LIGHT_WHITE);
         }
 
-        $confirm = Confirm::prompt("Confirmer l'envoi ? ");
+        $confirm = Confirm::prompt("Confirmer l'envoi ? (Y ou N)");
 
         if ($confirm) {
             try {

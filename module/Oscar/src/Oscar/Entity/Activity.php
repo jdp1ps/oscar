@@ -133,7 +133,7 @@ class Activity implements ResourceInterface
 
     /**
      * => CONV_CLEUNIK
-     * @ORM\Column(type="string", length=10, nullable=true)
+     * @ORM\Column(type="string", length=128, nullable=true)
      */
     private $centaureId;
 
@@ -290,7 +290,7 @@ class Activity implements ResourceInterface
      * Discipline
      *
      * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Discipline", cascade={"detach"})
+     * @ORM\ManyToMany(targetEntity="Discipline", cascade={"detach"}, inversedBy="activities")
      */
     protected $disciplines;
 

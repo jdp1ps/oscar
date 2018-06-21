@@ -34,6 +34,7 @@ Puis exécuter le script du fichier ./databases_maintenance/delete-database.sql 
 psql -U <USENAME> -h <HOST> -W -d <DATABASE> -a -f databases_maintenance/delete-database.sql
 ```
 
+> Le script `databases_maintenance/delete-database.sql` est utilisé pour générer la structure minimale utilisée lors de l'installation initiale. 
 
 
 ### Dump de la base dans un fichier

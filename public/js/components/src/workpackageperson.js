@@ -82,15 +82,18 @@ var Workpackage = {
     },
     template: `<article class="workpackage">
         <form action="" @submit.prevent="handlerUpdateWorkPackage" v-if="mode == 'edit'">
+        
             <h4><span v-if="workpackage.id > 0">Modification du lot</span><span v-else>Nouveau lot</span> {{ formData.label }}</h4>
+            
+            <div class="form-group">
+                <label for="">Code</label>
+                <p class="text-danger">Le code est <strong>utilisé pour l'affichage des créneaux</strong> simplifiés, utilisez un code de préférence entre 3 et 5 caractères.</p>
+                <input type="text" placeholder="CODE" v-model="formData.code" class="form-control" />
+            </div>
+            
             <div class="form-group">
                 <label for="">Intitulé</label>
                 <input type="text" placeholder="Intitulé" v-model="formData.label" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label for="">Code</label>
-                <p class="help">Le code est utilisé pour l'affichage des créneaux</p>
-                <input type="text" placeholder="Intitulé" v-model="formData.code" class="form-control" />
             </div>
             
             <div class="form-group" style="display: none">
@@ -136,7 +139,7 @@ var Workpackage = {
                     @workpackagepersonupdate="handlerUpdate"></workpackageperson>
             </section>
 
-            <div class="buttons" v-if="editable">
+            <div class="buttons" v-if="editable && persons.length">
                 <div class="btn-group">
                     <button type="button" class="btn btn-default  btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Ajouter un déclarant <span class="caret"></span>
@@ -147,6 +150,9 @@ var Workpackage = {
                 </div>
                 <a href="#" class="btn btn-default btn-xs" @click.prevent="handlerEditWorkPackage"><i class="icon-pencil"></i>Modifier</a>
                 <a href="#" class="btn btn-default btn-xs" @click.prevent="handlerDeleteWorkPackage"><i class="icon-trash"></i>Supprimer</a>
+            </div>
+            <div class="text-danger" v-if="persons.length <= 0">
+                Vous n'avez pas encore ajouté de membre à cette activité. <strong>Seul les membres d'une activité peuvent être identifiés comme déclarant</strong>.
             </div>
         </div>
     </article>`,

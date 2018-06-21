@@ -250,6 +250,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             'oscar auth:pass <login> [--ldap]' => 'Mets à jour le mot de passe du compte <login>, l\'option --ldap permet de déléger le contrôle du mot de passe à ldap' ,
             'oscar auth:add' => 'Cré un nouvel utilisateur.',
             'oscar auth:list' => 'Liste des utilisateurs.',
+            'oscar auth:info <login> [--org] [--act]' => "Affiche les détails du compte. L'option --org affiche les organisations où la personne est identifiée avec un rôle, l'option --act fait la même chose au niveau activité.",
 
             '# CONFIGURATION',
             'oscar test:config' => 'Évaluation de la configuration',
@@ -283,6 +284,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             '# MAINTENANCE',
             'oscar patch checkPrivilegesJSON'   => "Mise à jour automatique de la liste des privilèges",
             'oscar patch fixSequenceAutoNum'    => "Recalcule les sequencesID des tables",
+            'oscar version'    => "Affiche la version courante de Oscar",
 
         ];
     }

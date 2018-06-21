@@ -12,24 +12,24 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 ## Administration 
 
- - La documentation technique (précédure d'installation, configuration ElasticSearch sous Debian) a été mise à jour
+ - La documentation technique mise à jour (procédure d'installation, configuration ElasticSearch sous Debian, configuration du mailer et des notifications)
  - L'interface d'administration des types de jalon a été mise à jour, une option permet maintenant de supprimer les types de jalon non-utilisés
  - Les privilèges ont été mis à jour
  - Le fichier de configuration d'exemple a été mis à jour
  - Par défaut, la configuration des connecteurs est vide pour éviter les erreurs d'affichage si rien n'est configuré dans la configuration local.php
- - Une interface d'administration a été ajoutée pour gérer les disciplines (ainsi que des privilèges d'accès)
+ - Une interface d'administration a été ajoutée pour gérer les disciplines (un privilège a été ajouté pour autoriser l'accès à cette vue)
  - Un paramètre a été ajouté pour forcer l'envoi de notification par mail [Documentation des notifications](doc/notifications.md)
  - La liste des commandes de *Oscar Command Line* a été mise à jour
  - Mise à jour de la commande `test:mailer` [voir documentation du mailer](doc/mailer.md)
  - Ajout d'un paramètre **urlAbsolute** pour la génération des mails (requis pour générer des mails avec des liens vers l'application)
  - Ajout d'un système de distribution de mail **FILE**, il permet de générer des mails physiques pour tester la mise en forme des mails à partir de fichier EML standards, permettra par la suite de concevoir un système de *spool*
- - Le mailer dispose maintenant d'un paramètre d'exclusion. Quand l'envoi des mails est désactivée, ce paramètre permet de configurer des mails d'exception vers lesquels seront distribués les courriels lors des phases de test ou pour les versions en préprod.
+ - Le mailer dispose maintenant d'un paramètre d'exclusion. Quand l'envoi des mails est désactivée, ce paramètre permet de configurer des mails d'exception qui seront distribués malgrès tout (utile lors des phases de test ou pour les versions en préprod).
  - Une commande a été ajoutée pour déclencher la distribution des notifications par email si besoin
  
 
 ## Importation des données
  
- - Le convertisseur CSV > JSON pour les activités de recherche autorise maintenant une configuration "avancée" pour extraire des données multiples séparées par un séparateur (Voir documentation)
+ - Le convertisseur CSV > JSON pour les activités de recherche autorise maintenant une configuration "avancée" pour extraire des données multiples séparées par un séparateur ([Voir documentation](./doc/activity-import.md#donnèes-multiples-personsorganizations-25x))
  - Le test d'existence des organisations test maintenant UNIQUEMENT le nom complet pour éviter le rejet d'organisation aux noms courts proches.
 
 
