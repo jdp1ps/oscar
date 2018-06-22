@@ -1,5 +1,5 @@
 <template>
-    <div class="day" @click="handlerClick" :class="{'locked': day.locked}">
+    <div class="day" @click="handlerClick" :class="{'locked': day.locked}" @contextmenu.prevent="handlerRightClick">
         <span class="label">{{ day.label }}</span>
 
         <span class="cartouche secondary1 xs" v-for="d in groupProject" :title="d.label">
@@ -100,6 +100,10 @@
         methods: {
             handlerClick(){
                 this.$emit('selectDay', this.day);
+            },
+
+            handlerRightClick(e){
+                this.$emit('daymenu', e, this.day);
             }
         }
 

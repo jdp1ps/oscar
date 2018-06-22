@@ -1,5 +1,5 @@
 <template>
-    <section>
+    <section @click="handlerClick">
 
         <h1>
             <span v-if="selectedDay">
@@ -8,6 +8,35 @@
             </span>
             <span v-else>Feuille de temps mensuelle</span>
         </h1>
+
+        <div :style="cssDayMenu" class="daymenu">
+            <div class="selector">
+                <div class="choose-wp">
+                    <ul class="menu-wps" v-if="ts">
+                        <li v-for="wp in ts.workPackages" class="menu-wps-item"
+                            :class="{ 'selected': wp == selectedWP }"
+                            @click.prevent.stop="handlerSelectWP($event, wp)">
+                            <i class="icon-cubes"></i>
+                            <span class="acronym">{{ wp.acronym }}</span>
+                            <span>{{ wp.code }}</span>
+                            <i class="icon-angle-right"></i>
+                        </li>
+                        <li><i class="icon-leaf"></i>Congès</li>
+                        <li><i class="icon-book-1"></i>Formation</li>
+                        <li><i class="icon-graduation-cap"></i>Enseignement</li>
+                        <li><i class="icon-beaker"></i>Autre recherche</li>
+                        <li><i class="icon-beaker"></i>Autre activités...</li>
+                    </ul>
+                </div>
+                <div class="choose-time" v-show="selectedWP">
+                    <timechooser />
+                </div>
+                <nav  v-show="selectedTime">
+                    <button class="btn primary">Enregistrer</button>
+                </nav>
+            </div>
+
+        </div>
 
         <div v-show="!selectedDay">
             <section v-if="ts" >
@@ -39,7 +68,8 @@
                             <section v-for="week in weeks" v-if="ts" class="week">
                                 <div class="days">
                                     <timesheetmonthday v-for="day in week"
-                                                       @selectDay="handlerSelectData"
+
+                                                       @daymenu="handlerDayMenu"
                                                        :day="day"
                                                        :key="day.date"/>
                                 </div>
@@ -87,6 +117,52 @@
             font-size: 1.2em;
             margin: 0;
             padding: 0;
+        }
+    }
+
+    .menu-wps {
+        padding: 2px 4px;
+        box-shadow: 0 0 1em rgba(0,0,0,.3);
+        font-size: 12px;
+        margin: 0;
+        padding: 0;
+        >li {
+            cursor: pointer;
+            display: flex;
+            transition: background-color .5s ease-out;
+            border-bottom: thin solid rgba(0,0,0,.4);
+            .icon-angle-right {
+                color: white;
+                position: relative;
+                left: -25px;
+                opacity: 0;
+                transition: left .3s ease-out, opacity .5s ease-out;
+                margin-left: auto;
+            }
+            .acronym {
+                font-weight: 700;
+                &:after {
+                    content: ':';
+                }
+            }
+
+
+            padding: 2px 4px;
+            text-shadow: -1px 1px 0 rgba(0,0,0,.1);
+            &:hover, &.selected {
+                background: #0b58a2;
+                color:white;
+                .icon-angle-right { left: 0px; opacity: 1; }
+            }
+        }
+    }
+
+    .daymenu {
+        position: fixed;
+        background: white;
+        z-index: 100;
+        .selector {
+            display: flex;
         }
     }
 
@@ -166,6 +242,7 @@
 
     import TimesheetMonthDay from './TimesheetMonthDay.vue';
     import TimesheetMonthDayDetails from './TimesheetMonthDayDetails.vue';
+    import UITimeChooser from './UITimeChooser.vue';
 
     let defaultDate = new Date();
     let moment = function(){};
@@ -181,7 +258,8 @@
 
         components: {
             timesheetmonthday: TimesheetMonthDay,
-            timesheetmonthdaydetails: TimesheetMonthDayDetails
+            timesheetmonthdaydetails: TimesheetMonthDayDetails,
+            timechooser: UITimeChooser
         },
 
         data(){
@@ -189,7 +267,12 @@
                 ts: null,
                 month: null,
                 year: null,
-                selectedDay: null
+                selectedDay: null,
+                dayMenuLeft: 50,
+                dayMenuTop: 50,
+                dayMenu: 'block',
+                selectedWP: null,
+                selectedTime: null
             }
         },
 
@@ -207,6 +290,14 @@
         computed: {
             mois(){
                 return moment(this.ts.from).format('MMMM YYYY');
+            },
+
+            cssDayMenu(){
+              return {
+                  display: this.dayMenu,
+                  top: this.dayMenuTop +'px',
+                  left: this.dayMenuLeft +'px'
+              }
             },
 
             dayBeforeMonth(){
@@ -240,6 +331,30 @@
         },
 
         methods: {
+
+            handlerSelectWP(e, wp){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                this.selectedWP = wp;
+            },
+
+            hideWpSelector(){
+                this.selectedWP = null;
+                this.selectedTime = null;
+                this.dayMenu = 'none';
+            },
+
+            handlerClick(){
+               this.hideWpSelector();
+            },
+
+            handlerDayMenu(event, day){
+                this.dayMenuLeft = event.clientX;
+                this.dayMenuTop = event.clientY;
+                this.dayMenu = 'block';
+            },
+
             handlerSelectData(day){
                 this.selectedDay = day;
             },
