@@ -1,14 +1,14 @@
 <template>
     <div class="ui-timechooser">
         <div class="percents">
-            <span>100%</span>
-            <span>75%</span>
-            <span>50%</span>
-            <span>25%</span>
+            <span @click.prevent.stop="applyPercent(100)">100%</span>
+            <span @click.prevent.stop="applyPercent(75)">75%</span>
+            <span @click.prevent.stop="applyPercent(50)">50%</span>
+            <span @click.prevent.stop="applyPercent(25)">25%</span>
         </div>
         <div class="hours">
-            <div class="hour">00</div>
-            <div class="minutes">00</div>
+            <div class="hour">{{ hours }}</div>
+            <div class="minutes">{{ minutes }}</div>
         </div>
     </div>
 </template>
@@ -36,3 +36,25 @@
         }
     }
 </style>
+<script>
+    export default {
+        props: {
+            baseTime: { default: 8.5 }
+        },
+        data(){
+            return {
+                hours: 0,
+                minutes: 0
+            }
+        },
+
+        methods: {
+            applyPercent(percent){
+                let t = this.baseTime * percent / 100;
+                this.hours = Math.floor(t);
+                this.minutes = Math.ceil((t - this.hours)*60);
+                this.$emit('timeupdate', { h: this.hours, m: 1/60*this.minutes })
+            }
+        }
+    }
+</script>

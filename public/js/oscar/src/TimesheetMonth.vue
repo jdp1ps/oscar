@@ -9,6 +9,8 @@
             <span v-else>Feuille de temps mensuelle</span>
         </h1>
 
+        <pre>{{ dayMenuTime }}</pre>
+
         <div :style="cssDayMenu" class="daymenu">
             <div class="selector">
                 <div class="choose-wp">
@@ -29,7 +31,7 @@
                     </ul>
                 </div>
                 <div class="choose-time" v-show="selectedWP">
-                    <timechooser />
+                    <timechooser @timeupdate="handlerDayUpdated"></timechooser>
                 </div>
                 <nav  v-show="selectedTime">
                     <button class="btn primary">Enregistrer</button>
@@ -272,7 +274,9 @@
                 dayMenuTop: 50,
                 dayMenu: 'block',
                 selectedWP: null,
-                selectedTime: null
+                selectedTime: null,
+                dayMenuSelected: null,
+                dayMenuTime: 0.0
             }
         },
 
@@ -331,6 +335,9 @@
         },
 
         methods: {
+            handlerDayUpdated(){
+              console.log(arguments);
+            },
 
             handlerSelectWP(e, wp){
                 e.preventDefault();
@@ -353,6 +360,7 @@
                 this.dayMenuLeft = event.clientX;
                 this.dayMenuTop = event.clientY;
                 this.dayMenu = 'block';
+                this.dayMenuSelected = day;
             },
 
             handlerSelectData(day){
