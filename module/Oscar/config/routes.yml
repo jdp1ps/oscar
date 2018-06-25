@@ -84,6 +84,12 @@ timesheet:
                 route: /declarant
                 defaults:
                     action: declarant
+        declarantapi:
+            type: segment
+            options:
+                route: /declarant-api
+                defaults:
+                    action: declarantAPI
         excel:
             type: segment
             options:

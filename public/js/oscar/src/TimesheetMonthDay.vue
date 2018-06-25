@@ -5,7 +5,7 @@
         <span class="cartouche secondary1 xs" v-for="d in groupProject" :title="d.label">
             <em>{{ d.acronym }}</em>
             <span class="addon">
-                {{d.duration}}
+                {{d.duration | duration}}
             </span>
         </span>
 
@@ -52,6 +52,16 @@
                require: true
             }
         },
+
+        filters: {
+            duration(v){
+                let h = Math.floor(v);
+                let m = Math.round((v - h)*60);
+                if( m < 10 ) m = '0'+m;
+                return h +':' +m;
+            }
+        },
+
         computed: {
             totalEnseignement(){
                 let t = 0.0;

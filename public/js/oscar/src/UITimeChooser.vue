@@ -7,19 +7,26 @@
             <span @click.prevent.stop="applyPercent(25)">25%</span>
         </div>
         <div class="hours">
-            <div class="hour">{{ hours }}</div>
-            <div class="minutes">{{ minutes }}</div>
+            <span class="hour" @mousewheel="crementHours">{{ hours }}</span>:<span class="minutes">{{ minutes }}</span>
         </div>
+        <pre>
+            {{ duration }}
+        </pre>
     </div>
 </template>
 <style scoped lang="scss">
     .ui-timechooser {
-        background: red;
+        background: white;
+        max-width: 450px;
+        margin: 0 auto;
         .percents {
             display: flex;
             span {
                 flex: 1 1 auto;
                 padding: 2px 4px;
+                text-align: center;
+                font-size: 2em;
+                cursor: pointer;
                 &:hover {
                     background-color: #0b58a2;
                     color: white;
@@ -27,11 +34,11 @@
             }
         }
         .hours {
-            display: flex;
+            font-size: 48px;
+            text-align: center;
+            font-weight: 700;
             div {
                 flex: 1 1 auto;
-                text-align: center;
-                font-size: 32px;
             }
         }
     }
@@ -39,7 +46,10 @@
 <script>
     export default {
         props: {
-            baseTime: { default: 8.5 }
+            duration: { default: 0 },
+            baseTime: { default: 7.5 },
+            // PAS en minutes
+            pas: 10
         },
         data(){
             return {
@@ -49,6 +59,16 @@
         },
 
         methods: {
+            crementHours(e){
+               console.log(e);
+               if( e.deltaY > 0 && this.hours > 0 ){
+                   this.hours -= 1;
+               }
+               else if( e.deltaY < 0 ){
+                   this.hours += 1;
+               }
+            },
+
             applyPercent(percent){
                 let t = this.baseTime * percent / 100;
                 this.hours = Math.floor(t);

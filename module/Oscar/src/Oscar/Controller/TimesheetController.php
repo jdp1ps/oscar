@@ -736,6 +736,59 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    /**
+     * API de validation des heures.
+     *
+     * @return Response
+     */
+    public function validatorAPIAction(){
+        return $this->getResponseNotImplemented();
+    }
+
+    /**
+     * API REST pour déclarer des heures.
+     *
+     */
+    public function declarantAPIAction()
+    {
+        /** @var Person $person */
+        $person = $this->getCurrentPerson();
+
+        // JOUR
+        $day = new \DateTime($this->params()->fromPost('day'));
+        $dayBase = $day->format('Y-m-d'). ' %s:%s:00';
+
+        $wpId = $this->params()->fromPost('wp');
+
+        /** @var WorkPackage $wp */
+        $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
+
+        $duration = (int)$this->params()->fromPost('duration');
+
+        $heures = floor($duration/60);
+        $minutes = $duration - ($heures*60);
+
+        $start = new \DateTime(sprintf($dayBase, 8, 0));
+        $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
+
+        $status = TimeSheet::STATUS_DRAFT;
+
+        $timesheet = new TimeSheet();
+        $this->getEntityManager()->persist($timesheet);
+
+        $timesheet->setWorkpackage($wp)
+            ->setDateFrom($start)
+            ->setDateTo($end)
+            ->setLabel((string)$wp)
+            ->setStatus($status)
+            ->setPerson($person);
+
+        $this->getEntityManager()->flush($timesheet);
+
+        return $this->getResponseOk();
+
+    }
+
 
 
     public function declarantAction(){
@@ -917,7 +970,8 @@ class TimesheetController extends AbstractOscarController
                 'acronym' => $projectAcronym,
                 'project' => (string)$project,
                 'wpCode' => $wpCode,
-                'duration' => (float)$t->getDuration()
+                'duration' => (float)$t->getDuration(),
+                'wp_id' => $t->getWorkpackage()->getId(),
             ];
 
 
