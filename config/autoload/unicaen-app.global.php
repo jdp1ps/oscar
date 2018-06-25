@@ -36,20 +36,7 @@ $settings = array(
             'FILTER_STRUCTURE_CODE_ENTITE_PARENT'   => '(supannCodeEntiteParent=%s)',
         ],
 
-        'log_path' => '/tmp/oscar-ldap.log',
-        'connection' => array(
-            'default' => array(
-                'params' => array(
-                    'host'                => 'ldap.unicaen.fr',
-                    'port'                => 389,
-                    'username'            => 'uid=applidev,ou=system,dc=unicaen,dc=fr',
-                    'password'            => 'Ifq1pdeS2of_7DC',
-                    'baseDn'              => 'ou=people,dc=unicaen,dc=fr',
-                    'bindRequiresDn'      => true,
-                    'accountFilterFormat' => '(&(objectClass=posixAccount)(supannAliasLogin=%s))',
-                )
-            )
-        )
+        'log_path' => '/tmp/oscar-ldap.log'
     ],
     'app_infos' => array(
         'nom'     => 'OSCAR',
