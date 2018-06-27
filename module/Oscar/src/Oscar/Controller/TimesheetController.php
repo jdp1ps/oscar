@@ -755,35 +755,39 @@ class TimesheetController extends AbstractOscarController
         $person = $this->getCurrentPerson();
 
         // JOUR
-        $day = new \DateTime($this->params()->fromPost('day'));
-        $dayBase = $day->format('Y-m-d'). ' %s:%s:00';
+        $datas = json_decode($this->params()->fromPost('timesheets'));
+        $timesheets = [];
 
-        $wpId = $this->params()->fromPost('wp');
+        foreach ($datas as $data){
+            $day = new \DateTime($data->day);
+            $dayBase = $day->format('Y-m-d'). ' %s:%s:00';
+            $wpId = $data->wp;
+            $duration = (int)$data->duration;
+            $heures = floor($duration/60);
+            $minutes = $duration - ($heures*60);
 
-        /** @var WorkPackage $wp */
-        $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
+            $start = new \DateTime(sprintf($dayBase, 8, 0));
+            $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
 
-        $duration = (int)$this->params()->fromPost('duration');
+            $status = TimeSheet::STATUS_DRAFT;
 
-        $heures = floor($duration/60);
-        $minutes = $duration - ($heures*60);
+            /** @var WorkPackage $wp */
+            $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
 
-        $start = new \DateTime(sprintf($dayBase, 8, 0));
-        $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
+            $timesheet = new TimeSheet();
+            $this->getEntityManager()->persist($timesheet);
 
-        $status = TimeSheet::STATUS_DRAFT;
+            $timesheet->setWorkpackage($wp)
+                ->setDateFrom($start)
+                ->setDateTo($end)
+                ->setLabel((string)$wp)
+                ->setStatus($status)
+                ->setPerson($person);
 
-        $timesheet = new TimeSheet();
-        $this->getEntityManager()->persist($timesheet);
+            $timesheets[] = $timesheet;
 
-        $timesheet->setWorkpackage($wp)
-            ->setDateFrom($start)
-            ->setDateTo($end)
-            ->setLabel((string)$wp)
-            ->setStatus($status)
-            ->setPerson($person);
-
-        $this->getEntityManager()->flush($timesheet);
+        }
+        $this->getEntityManager()->flush($timesheets);
 
         return $this->getResponseOk();
 
@@ -798,6 +802,9 @@ class TimesheetController extends AbstractOscarController
 
         // Durée d'un jour "normal"
         $dayLength = 37/5;
+
+        // Durée d'une journée de travail maximum légale
+        $maxDays = 12.0;
 
 
         /** @var Person $currentPerson */
@@ -891,7 +898,7 @@ class TimesheetController extends AbstractOscarController
 
         $timesheets = $query->getQuery()->getResult();
 
-        $maxDays = 7.0;
+
 
         for( $i = 1; $i<=$nbr; $i++ ){
             $data = sprintf('%s-%s-%s', $year, $month, $i);
@@ -936,7 +943,7 @@ class TimesheetController extends AbstractOscarController
                 'training' => [],
                 'teaching' => [],
                 'dayLength' => $dayLength,
-                'others' => $maxDays,
+                'maxDay' => $maxDays,
                 'locked' => $locked,
                 'closed' => $close,
                 'lockedReason' => $lockedReason
@@ -975,6 +982,8 @@ class TimesheetController extends AbstractOscarController
                         default:
                             $output['days'][$dayTimesheet]['infos'][] = $datas;
                     }
+                    $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
+                    $output['total'] += (float)$t->getDuration();
 
                 }
                 continue;
@@ -1034,171 +1043,6 @@ class TimesheetController extends AbstractOscarController
         return $output;
     }
 
-//
-//
-//    public function declarantAction_backup(){
-//        $output = [];
-//
-//        $method = $this->getHttpXMethod();
-//
-//        $this->getLogger()->debug($method);
-//
-//        // Ne fonctionne pas ....
-//        setlocale(LC_TIME, 'fr_FR.UTF-8');
-//
-//        /** @var Person $currentPerson */
-//        $currentPerson = $this->getCurrentPerson();
-//        $dateFrom = new \DateTime();
-//        $year = $this->params()->fromQuery('year', $dateFrom->format('Y'));
-//        $month = $this->params()->fromQuery('month', $dateFrom->format('m'));
-//        $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
-//
-//        $output['person'] = (string) $currentPerson;
-//        $output['person_id'] = $currentPerson->getId();
-//
-//        $output['days'] = [];
-//
-//
-//        $dateFrom = new \DateTime();
-//        $year = $this->params()->fromQuery('year', $dateFrom->format('Y'));
-//        $month = $this->params()->fromQuery('month', $dateFrom->format('m'));
-//        $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
-//        $output['month'] = $month;
-//        $output['year'] = $year;
-//
-//        $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
-//        $from = $dateRef->format('Y-m-01');
-//        $to = $dateRef->format('Y-m-' . $nbr);
-//
-//
-//        $output['from'] = $from;
-//        $output['to'] = $to;
-//        $output['timesheets'] = [];
-//
-//        // Récupération des créneaux présents dans Oscar
-//        $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
-//        $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
-//            ->setParameters([
-//                'start' => $from,
-//                'end' => $to,
-//                'person' => $currentPerson,
-//            ]);
-//
-//        $timesheets = $query->getQuery()->getResult();
-//
-//
-//        $output['projects'] = [];
-//        $output['infos'] = ['total' => 0.0];
-//        $output['vacations'] = ['total' => 0.0];
-//        $output['teaching'] = ['total' => 0.0];
-//        $output['training'] = ['total' => 0.0];
-//        $output['other'] = ['total' => 0.0];
-//        $output['nbrTS'] = count($timesheets);
-//
-//        for( $i = 1; $i<=$nbr; $i++ ){
-//            $data = sprintf('%s-%s-%s', $year, $month, $i);
-//            $day = new \DateTime($data);
-//            $wDay = $day->format('w');
-//            $output['days'][$i] = [
-//                'data' => $data,
-//                'label' => $day->format('d'),
-//                'weekend' => $wDay == 6 || $wDay == 0,
-//                'samedi' => $wDay == 6,
-//                'closed' => false
-//            ];
-//
-//        }
-//
-//        $availableWorkPackages = $this->getActivityService()->getWorkPackagePersonPeriod($currentPerson, $year, $month);
-//
-//        if( $this->isAjax() ) {
-//            switch ($method) {
-//                case 'GET' :
-//
-//
-//                    /** @var WorkPackage $wp */
-//                    foreach ($availableWorkPackages as $wp) {
-//                        $activity = $wp->getActivity();
-//                        $project = $activity->getProject();
-//
-//                        $projectAcronym = $activity->getAcronym();
-//                        $activityCode = $activity->getOscarNum();
-//                        $wpCode = $wp->getCode();
-//
-//                        if (!array_key_exists($projectAcronym, $output['projects'])) {
-//                            $output['projects'][$projectAcronym] = [
-//                                'label' => $project->getLabel(),
-//                                'acronym' => $project->getAcronym(),
-//                                'activities' => [],
-//                            ];
-//                        }
-//
-//                        if (!array_key_exists($activityCode, $output['projects'][$projectAcronym]['activities'])) {
-//                            $output['projects'][$projectAcronym]['activities'][$activityCode] = [
-//                                'label' => $activity->getLabel(),
-//                                'code' => $activityCode,
-//                                'dateStart' => $activity->getDateStart()->format('Y-m-d'),
-//                                'dateEnd' => $activity->getDateEnd()->format('Y-m-d'),
-//                                'wps' => [],
-//                            ];
-//                        }
-//
-//                        if (!array_key_exists($wpCode, $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'])) {
-//                            $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpCode] = [
-//                                'label' => $wp->getLabel(),
-//                                'times' => [],
-//                                'total' => 0.0
-//                            ];
-//                            for( $i = 1; $i<=$nbr; $i++ ){
-//                                $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpCode]['times'][$i] = 0.0;
-//                            }
-//                        }
-//                    }
-//
-//                    /** @var TimeSheet $t */
-//                    foreach ($timesheets as $t) {
-//
-//                        $daysTimesheet = (int)($t->getDateFrom()->format('d'));
-//
-//                        if (!$t->getActivity()) {
-//                            if ($t->getStatus() == TimeSheet::STATUS_INFO) {
-//                                $output['infos'][$daysTimesheet] += $t->getDuration();
-//                                $this->getLogger()->debug($t->getStatus());
-//                            }
-//                            continue;
-//                        }
-//
-//                        $projectAcronym = $t->getActivity()->getAcronym();
-//                        $project = $t->getActivity()->getProject();
-//                        $activity = $t->getActivity();
-//                        $activityCode = $activity->getOscarNum();
-//                        $workpackage = $t->getWorkpackage();
-//                        $wpCode = $workpackage->getCode();
-//
-//                        if (!array_key_exists($wpCode, $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'])) {
-//                            $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpCode] = [
-//                                'label' => $wp->getLabel(),
-//                                'times' => [],
-//                                'warning' => ["Le temps déclaré semble être hors de la période de l'activité"],
-//                                'total' => 0.0
-//                            ];
-//                            for( $i = 1; $i<=$nbr; $i++ ){
-//                                $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpCode]['times'][$i] = 0.0;
-//                            }
-//                        }
-//
-//
-//                        $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpCode]['times'][$daysTimesheet] += $t->getDuration();
-//                        $output['projects'][$projectAcronym]['activities'][$activityCode]['wps'][$wpCode]['total'] += $t->getDuration();
-//                    }
-//                    return $this->ajaxResponse($output);
-//                    break;
-//            }
-//        }
-//
-//
-//        return $output;
-//    }
 
     /**
      * @param $action

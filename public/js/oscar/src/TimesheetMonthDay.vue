@@ -12,28 +12,28 @@
         <span class="cartouche orange xs" v-if="day.teaching.length" title="Enseignement">
             Cours
             <span class="addon">
-                {{totalEnseignement}}
+                {{totalEnseignement | duration}}
             </span>
         </span>
 
         <span class="cartouche info xs" v-if="day.infos.length" title="Infos">
             Infos
             <span class="addon">
-                {{totalInfo}}
+                {{totalInfo | duration}}
             </span>
         </span>
 
         <span class="cartouche success xs" v-if="day.training.length" title="Infos">
             Formation
             <span class="addon">
-                {{totalFormation}}
+                {{totalFormation | duration}}
             </span>
         </span>
 
         <span class="cartouche complementary xs" v-if="day.vacations.length" title="Infos">
             Congès
             <span class="addon">
-                {{totalVacations}}
+                {{totalVacations | duration}}
             </span>
         </span>
 

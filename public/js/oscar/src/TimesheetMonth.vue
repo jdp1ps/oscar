@@ -16,7 +16,8 @@
             </div>
         </div>
 
-        <div class="overlay" v-if="selectedWP" style="z-index: 2001">
+
+        <div class="overlay" v-if="selectedWP && selectedDay" style="z-index: 2001">
             <div class="content container overlay-content">
                 <h2>Déclaration d'heures</h2>
                 <p>
@@ -28,7 +29,7 @@
                 </section>
 
                 <section>
-                    <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength"></timechooser>
+                    <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue"></timechooser>
                 </section>
 
                 <nav class="buttons">
@@ -37,6 +38,8 @@
                 </nav>
             </div>
         </div>
+
+
 
         <h1>
             <span v-if="selectedDay">
@@ -73,7 +76,7 @@
         <section v-if="ts" >
 
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-            <div class="month" :class="selectedDay?'col-lg-8':'col-lg-12'">
+            <div class="month col-lg-8">
 
                 <h2>Déclarations de temps pour <strong>{{ ts.person }}</strong></h2>
                 <h3 class="periode">Période :
@@ -98,7 +101,7 @@
                     </header>
                     <div class="weeks">
                         <section v-for="week in weeks" v-if="ts" class="week">
-                            <header class="week-header">
+                            <header class="week-header" @click="selectWeek(week)">
                                 Semaine {{ week.label }} <i class="icon-down-dir"></i>
                                 <small>
                                     <strong :class="(week.total > week.weekLength)?'has-titled-error':''"
@@ -127,8 +130,13 @@
                 </div>
             </div>
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-            <section class="col-lg-4" v-if="selectedDay">
-                <timesheetmonthdaydetails :day="selectedDay" :workPackages="ts.workPackages"
+            <section class="col-lg-4">
+                <div v-if="selectedWeek">
+                    <h1>Détails semaine</h1>
+                    <pre>{{ selectedWeek }}</pre>
+                </div>
+                <timesheetmonthdaydetails  v-if="selectedDay"
+                        :day="selectedDay" :workPackages="ts.workPackages"
                         @removetimesheet="deleteTimesheet"
                         @addtowp="handlerWpFromDetails($event)"
                 />
@@ -340,6 +348,7 @@
                 month: null,
                 year: null,
                 dayLength: null,
+                selectedWeek: null,
 
                 selectedDay: null,
                 dayMenuLeft: 50,
@@ -374,6 +383,17 @@
         },
 
         computed: {
+            /**
+             * Retourne la durée de remplissage d'une journée.
+             */
+            fillDayValue(){
+                let reste = this.selectedDay.dayLength - this.selectedDay.duration;
+                if( reste < 0 ){
+                    reste = 0;
+                }
+                return reste;
+            },
+
             mois(){
                 return moment(this.ts.from).format('MMMM YYYY');
             },
@@ -433,6 +453,24 @@
         },
 
         methods: {
+
+            fillMonth(){
+                // TODO Remplissage automatique du mois
+            },
+
+            fillWeek(){
+                // TODO Remplissage automatique de la semaine
+            },
+
+            fillDay(){
+
+            },
+
+            selectWeek(week){
+                this.selectedDay = null;
+                this.selectedWeek = week;
+            },
+
             deleteTimesheet(timesheet){
                 this.$http.delete('?id=' +timesheet.id).then(
                     ok => {
@@ -446,18 +484,26 @@
 
             handlerSaveMenuTime(){
 
+
+                let data = [{
+                    'day': this.selectedDay.date,
+                    'wp': this.selectedWP.id,
+                    'duration': this.dayMenuTime,
+                }];
+
+                this.performAddDays(data);
+            },
+
+            performAddDays(datas){
                 let formData = new FormData();
-                formData.append('day', this.selectedDay.date);
-                formData.append('wp', this.selectedWP.id);
-                formData.append('duration', this.dayMenuTime);
+                formData.append('timesheets', JSON.stringify(datas));
 
                 this.$http.post('/feuille-de-temps/declarant-api', formData).then(
                     ok => {
-                        console.log(ok);
                         this.fetch();
                     },
                     ko => {
-                        console.log(ko);
+                        this.error = "Impossible d'enregistrer les créneaux : " + ko.body;
                     }
                 );
             },
@@ -499,6 +545,7 @@
             },
 
             handlerSelectData(day){
+                this.selectedWeek = null;
                 this.selectedDay = day;
             },
 

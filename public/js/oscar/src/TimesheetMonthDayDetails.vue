@@ -113,8 +113,9 @@
                     &nbsp;
                 </div>
             </article>
-            <div class="alert-danger alert" v-if="total > day.dayLength">
-                Attention, le cumul des heures déclarées exéde la limite retenue dans le cadre des projets soumis aux déclarations.
+            <div class="alert-danger alert" v-if="total > day.maxDay">
+                <i class="icon-attention-circled"></i>
+                Attention, le cumul des heures déclarées exéde la limite légale de <strong>{{ day.maxDay | heures }} heures</strong> fixée par le droit du travail.
             </div>
         </section>
         <a href="#" @click="debug = !debug"><i class="icon-bug"></i> debug</a>

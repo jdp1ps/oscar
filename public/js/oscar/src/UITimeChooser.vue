@@ -1,6 +1,7 @@
 <template>
     <div class="ui-timechooser">
         <div class="percents">
+            <span @click.prevent.stop="applyDuration(fill)" v-if="fill > 0">Remplir</span>
             <span @click.prevent.stop="applyPercent(100)">100%</span>
             <span @click.prevent.stop="applyPercent(75)">75%</span>
             <span @click.prevent.stop="applyPercent(50)">50%</span>
@@ -78,7 +79,8 @@
             duration: { default: 0 },
             baseTime: { default: 7.5 },
             // PAS en minutes
-            pas: { default: 10 }
+            pas: { default: 10 },
+            fill: { default: 0 },
         },
         data(){
             return {
@@ -135,10 +137,15 @@
             },
 
             applyPercent(percent){
-                console.log(this.baseTime);
                 let t = this.baseTime * percent / 100;
                 this.hours = Math.floor(t);
                 this.minutes = Math.round((t - this.hours)*60);
+                this.emitUpdate();
+            },
+
+            applyDuration( duration ){
+                this.hours = Math.floor(duration);
+                this.minutes = Math.round((duration - this.hours)*60);
                 this.emitUpdate();
             },
 
