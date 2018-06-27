@@ -621,13 +621,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     public function delete($timesheetId, $currentPerson)
     {
-        $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
-        if (!$timesheet) {
+        if( !is_array($timesheetId) ){
+            $timesheetId = [$timesheetId];
+        }
+
+        $timesheets = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.id IN(:ids)')
+            ->setParameter('ids', $timesheetId)
+            ->getQuery()->getResult();
+
+        if (!$timesheets) {
             throw new OscarException("Créneau introuvable.");
         }
 
         try {
-            $this->getEntityManager()->remove($timesheet);
+            foreach( $timesheets as $t )
+                $this->getEntityManager()->remove($t);
+
             $this->getEntityManager()->flush();
         } catch (\Exception $e) {
             throw new OscarException("BD Error : Impossible de supprimer le créneau.");

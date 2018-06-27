@@ -1027,8 +1027,8 @@ class TimesheetController extends AbstractOscarController
 
                 case 'DELETE' :
                     try {
-                        $idCreneau = $this->params()->fromQuery('id');
-                        $timesheetService->delete($idCreneau, $currentPerson);
+                        $idsCreneaux = explode(',', $this->params()->fromQuery('id'));
+                        $timesheetService->delete($idsCreneaux, $currentPerson);
                         return $this->getResponseOk();
                     } catch (\Exception $e ){
                         return $this->getResponseNotImplemented($e->getMessage());

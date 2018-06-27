@@ -26,21 +26,18 @@
                     <li><a href="#">J'ai donné des enseignements</a></li>
                 </ul>
             </div>
-            <div v-if="formAdd">
-                <div class="">
-                    <input type="text" class="form-control lg" v-model="addHours" placeholder="Indiquez les heures réalisées"/>
-                </div>
-            </div>
         </div>
 
         <section>
             <h3><i class="icon-archive"></i> Heures identifiées sur des lots</h3>
 
             <article class="card card-xs xs wp-duration" v-for="d in day.declarations">
-                <div class="infos">
-                    <abbr :title="d.project">{{ d.acronym }}</abbr> <i class="icon-angle-right"></i> {{ d.wpCode }}<br>
+                <span class="infos">
+                    <strong>
+                        <i class="icon-archive"></i>
+                        <abbr :title="d.project">{{ d.acronym }}</abbr> <i class="icon-angle-right"></i> {{ d.wpCode }}</strong> <br>
                     <small><i class="icon-cubes"></i> {{ d.label }}</small>
-                </div>
+                </span>
 
                 <div class="total">
                     {{ d.duration | heures }}
@@ -54,54 +51,53 @@
 
             </article>
 
-            <article class="wp-duration">
-                <h3>
+            <article class="wp-duration card xs">
+                <strong>
                     <i class="icon-graduation-cap"></i> Enseignements
                     <a href="#" @click="addDuration('teaching')"><i class=" icon-cw-outline"></i></a>
-                </h3>
+                </strong>
                 <div class="total">{{ enseignements | heures }} <em>heure(s)</em></div>
                 <div class="left">
                     &nbsp;
                 </div>
             </article>
 
-            <article class="wp-duration">
-                <h3>
+            <article class="wp-duration card xs">
+                <strong>
                     <i class="icon-leaf-1"></i> Congès <br> <small>Absence, congès, RTT</small>
                     <a href="#" @click="addDuration('vacation')"><i class=" icon-cw-outline"></i></a>
-                </h3>
+                </strong>
                 <div class="total">{{ abs | heures }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash"></i>
-                    <i class="icon-pencil"></i>
-                    <i class="icon-ok-circled"></i>
                 </div>
             </article>
 
-            <article class="wp-duration">
-                <h3>
-                    <i class="icon-lightbulb"></i> Formation <a href="#" @click="addDuration('learning')"><i class=" icon-cw-outline"></i></a><br>
-                    <small>Période de formation</small>
+            <article class="wp-duration card xs">
+                <strong><i class="icon-stethoscope"></i> Arrêt maladie</strong>
+                <div class="total">TODO <em>heure(s)</em></div>
+                <div class="left">
+                    <i class="icon-trash"></i>
+                </div>
+            </article>
 
-                </h3>
+            <article class="wp-duration card xs">
+                <strong>
+                    <i class="icon-lightbulb"></i> Formation <a href="#" @click="addDuration('learning')"><i class=" icon-cw-outline"></i></a><br>
+                </strong>
                 <div class="total">{{ learn | heures }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash"></i>
-                    <i class="icon-pencil"></i>
-                    <i class="icon-ok-circled"></i>
                 </div>
             </article>
 
-            <article class="wp-duration">
-                <h3><i class="icon-pin-outline"></i> Autre</h3>
+            <article class="wp-duration card xs">
+                <strong><i class="icon-pin-outline"></i> Autre</strong>
                 <div class="total">{{ other | heures }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash"></i>
-                    <i class="icon-pencil"></i>
-                    <i class="icon-ok-circled"></i>
                 </div>
             </article>
-
 
             <article class="wp-duration">
                 <span>total</span>
@@ -139,13 +135,24 @@
     }
     .total {
         margin-left: auto;
-        font-size: 2em;
+        font-size: 1.4em;
         font-weight: 700;
         padding-right: .5em;
         em {
             font-size: .5em;
             font-weight: 100;
             line-height: 2em;
+        }
+    }
+    [class*="icon-"]{
+        text-align: center;
+    }
+    .icon-trash {
+        cursor: pointer;
+        text-align: center;
+        &:hover {
+            background: #0b58a2;
+            color: white;
         }
     }
 </style>
