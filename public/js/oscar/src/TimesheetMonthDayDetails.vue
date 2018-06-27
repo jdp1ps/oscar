@@ -14,7 +14,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                     <li v-for="wp in workPackages">
-                        <a href="#" @click.prevent="addToWorkpackage(wp)"><abbr :title="wp.activity">[{{wp.acronym}}]</abbr>
+                        <a href="#" @click.prevent.stop="addToWorkpackage($event, wp)"><abbr :title="wp.activity">[{{wp.acronym}}]</abbr>
                             <i class="icon-angle-right"></i>
                             <strong>{{wp.code}}</strong> <em>{{ wp.label }}</em><br/>
                             <small class="text-light">{{ wp.activity }}</small>
@@ -34,10 +34,9 @@
         </div>
 
         <section>
-            <h3>
-                <i class="icon-archive"></i>
-                Heures identifiées sur des lots</h3>
-            <article class="card wp-duration" v-for="d in day.declarations">
+            <h3><i class="icon-archive"></i> Heures identifiées sur des lots</h3>
+
+            <article class="card card-xs xs wp-duration" v-for="d in day.declarations">
                 <div class="infos">
                     <abbr :title="d.project">{{ d.acronym }}</abbr> <i class="icon-angle-right"></i> {{ d.wpCode }}<br>
                     <small><i class="icon-cubes"></i> {{ d.label }}</small>
@@ -49,8 +48,7 @@
                 </div>
 
                 <div class="left">
-                    <i class="icon-trash"></i>
-                    <i class="icon-pencil"></i>
+                    <i class="icon-trash" @click="$emit('removetimesheet', d)"></i>
                     <i class="icon-ok-circled"></i>
                 </div>
 
@@ -108,7 +106,7 @@
             <article class="wp-duration">
                 <span>total</span>
                 <div class="total" :class="{ 'text-danger': isExceed}">
-                    {{ total | heures }} / {{ day.dayLength }}
+                    {{ total | heures }} / {{ day.dayLength | heures }}
                     <em>heure(s)</em>
                 </div>
                 <div class="left">
@@ -229,9 +227,8 @@
         },
 
         methods: {
-            addToWorkpackage(wp){
-                this.formAdd = true;
-//                console.log("AJOUT à ", wp);
+            addToWorkpackage(e, wp){
+                this.$emit('addtowp', wp);
             }
         }
     }

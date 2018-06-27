@@ -37,7 +37,12 @@
             </span>
         </span>
 
-        <span v-if="day.locked" :title="day.lockedReason" style="font-size: .7em">
+        <span v-if="day.closed" :title="day.lockedReason" style="font-size: .7em">
+            <i class="icon-minus-circled"></i>
+            Fermé
+        </span>
+
+        <span v-else-if="day.locked" :title="day.lockedReason" style="font-size: .7em">
             <i class="icon-lock"></i>
             Verrouillé
         </span>

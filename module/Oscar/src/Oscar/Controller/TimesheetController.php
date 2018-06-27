@@ -796,6 +796,9 @@ class TimesheetController extends AbstractOscarController
 
         $method = $this->getHttpXMethod();
 
+        // Durée d'un jour "normal"
+        $dayLength = 37/5;
+
 
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
@@ -825,10 +828,20 @@ class TimesheetController extends AbstractOscarController
         $output['from'] = $from;
         $output['to'] = $to;
 
+        // Total du temps cummulé dans le mois
+        $output['total'] = 0.0;
+
+        // Durée d'une journée "normale"
+        $output['daylength'] = $dayLength;
+        $output['dayNbr'] = $nbr;
+
         // Récupération des lots
         $availableWorkPackages = $this->getActivityService()->getWorkPackagePersonPeriod($currentPerson, $year, $month);
 
+        // Liste des activités du mois
         $activities = [];
+
+        // Liste des lots du mois
         $workPackages = [];
 
         /** @var WorkPackagePerson $workPackagePerson */
@@ -842,7 +855,8 @@ class TimesheetController extends AbstractOscarController
                     'acronym' => $activity->getAcronym(),
                     'project' => (string)$activity->getProject(),
                     'project_id' => $activity->getProject()->getId(),
-                    'label' => $activity->getLabel()
+                    'label' => $activity->getLabel(),
+                    'total' => 0.0
                 ];
             }
 
@@ -857,7 +871,8 @@ class TimesheetController extends AbstractOscarController
                 'project_id' => $activity->getProject()->getId(),
                 'activity' => (string)$activity,
                 'activity_id' => $activity->getId(),
-                'hours' => $workPackagePerson->getDuration()
+                'hours' => $workPackagePerson->getDuration(),
+                'total' => 0.0
             ];
         }
 
@@ -876,14 +891,18 @@ class TimesheetController extends AbstractOscarController
 
         $timesheets = $query->getQuery()->getResult();
 
-
         $maxDays = 7.0;
 
         for( $i = 1; $i<=$nbr; $i++ ){
             $data = sprintf('%s-%s-%s', $year, $month, $i);
             $day = new \DateTime($data);
 
+            // Journée vérrouillé (future/passée)
             $locked = false;
+
+            // Journée fermée (feriès)
+            $close = false;
+
             $lockedReason = "";
 
             $futur = $day->getTimestamp() > $today->getTimestamp();
@@ -897,12 +916,14 @@ class TimesheetController extends AbstractOscarController
             $weekend = $wDay == 6 || $wDay == 0;
             if( $weekend ){
                 $locked = true;
+                $close = true;
                 $lockedReason = "Vous ne pouvez pas déclarer le weekend";
             }
 
 
             $output['days'][$i] = [
                 'date' => $data,
+                'i' => $i,
                 'day' => $day->format('N'),
                 'week' => $day->format('W'),
                 'data' => $data,
@@ -910,12 +931,14 @@ class TimesheetController extends AbstractOscarController
                 'weekend' => $weekend,
                 'declarations' => [],
                 'infos' => [],
+                'duration' => 0.0,
                 'vacations' => [],
                 'training' => [],
                 'teaching' => [],
-                'dayLength' => 7.5,
+                'dayLength' => $dayLength,
                 'others' => $maxDays,
                 'locked' => $locked,
+                'closed' => $close,
                 'lockedReason' => $lockedReason
             ];
 
@@ -964,32 +987,49 @@ class TimesheetController extends AbstractOscarController
             $workpackage = $t->getWorkpackage();
             $wpCode = $workpackage->getCode();
 
+            $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
+            $output['total'] += (float)$t->getDuration();
+
+            $output['activities'][$activity->getId()]['total'] += $t->getDuration();
+            $output['workPackages'][$workpackage->getId()]['total'] += $t->getDuration();
+
             $output['days'][$dayTimesheet]['declarations'][] = [
+                'id' => $t->getId(),
                 'label' => $t->getLabel(),
                 'comment' => $t->getComment(),
+                'activity' => (string) $activity,
+                'activity_code' => $activityCode,
                 'acronym' => $projectAcronym,
                 'project' => (string)$project,
                 'wpCode' => $wpCode,
                 'duration' => (float)$t->getDuration(),
                 'wp_id' => $t->getWorkpackage()->getId(),
             ];
-
-
         }
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
         if( $this->isAjax() ) {
             switch ($method) {
                 case 'GET' :
-
-
-
-
-
                     return $this->ajaxResponse($output);
                     break;
+
+                case 'DELETE' :
+                    try {
+                        $idCreneau = $this->params()->fromQuery('id');
+                        $timesheetService->delete($idCreneau, $currentPerson);
+                        return $this->getResponseOk();
+                    } catch (\Exception $e ){
+                        return $this->getResponseNotImplemented($e->getMessage());
+                    }
+
+                    break;
+
+
             }
         }
-
 
         return $output;
     }

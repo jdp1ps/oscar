@@ -1,20 +1,34 @@
 <template>
     <section @click="handlerClick">
 
-        <div class="overlay" v-if="selectedWP">
-            <div class="content container">
+        <div class="overlay" v-if="error"  style="z-index: 2002">
+            <div class="content container overlay-content">
+                <h2><i class="icon-attention-1"></i> Oups !</h2>
+                <p class="text-danger">
+                    Cette opération a provoqué une erreur. Après avoir refermé toutes les fenêtres Oscar, reconnectez
+                    vous et retentez l'opération. Si l'erreur persiste, veuillez transmettre le message ci dessous à
+                    l'administrateur de l'application :
+                </p>
+                <pre class="alert alert-danger">{{ error }}</pre>
+                <nav class="buttons">
+                    <button class="btn btn-primary" @click="error = ''">Fermer</button>
+                </nav>
+            </div>
+        </div>
+
+        <div class="overlay" v-if="selectedWP" style="z-index: 2001">
+            <div class="content container overlay-content">
                 <h2>Déclaration d'heures</h2>
                 <p>
-                    Journée : <strong>{{ dayMenuSelected.date }}</strong><br/>
+                    Journée : <strong>{{ selectedDay.date | datefull }}</strong><br/>
                 </p>
-                <section v-if="selectedWP">
+                <section>
                     <h3>[{{selectedWP.code}}] {{selectedWP.label}}</h3>
                     <small><i class="icon-cube"></i> {{ selectedWP.activity }}</small>
                 </section>
 
                 <section>
-                    TEMPS
-                    <timechooser @timeupdate="handlerDayUpdated"></timechooser>
+                    <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength"></timechooser>
                 </section>
 
                 <nav class="buttons">
@@ -32,15 +46,13 @@
             <span v-else>Feuille de temps mensuelle</span>
         </h1>
 
-        <pre>{{ dayMenuTime }}</pre>
-
         <div :style="cssDayMenu" class="daymenu">
             <div class="selector">
                 <div class="choose-wp">
                     <ul class="menu-wps" v-if="ts">
                         <li v-for="wp in ts.workPackages" class="menu-wps-item"
                             :class="{ 'selected': wp == selectedWP }"
-                            @click.prevent.stop="handlerSelectWP($event, wp)">
+                            @click.prevent.stop="handlerSelectWP(wp)">
                             <i class="icon-cubes"></i>
                             <span class="acronym">{{ wp.acronym }}</span>
                             <span>{{ wp.code }}</span>
@@ -53,12 +65,6 @@
                         <li><i class="icon-beaker"></i>Autre activités...</li>
                     </ul>
                 </div>
-                <div class="choose-time" v-show="selectedWP">
-                    <timechooser @timeupdate="handlerDayUpdated" :duration="dayMenuTime"></timechooser>
-                </div>
-                <nav  v-show="dayMenuTime">
-                    <button class="btn primary" @click="handlerSaveMenuTime">Enregistrer</button>
-                </nav>
             </div>
 
         </div>
@@ -66,7 +72,9 @@
 
         <section v-if="ts" >
 
-            <div class="month col-lg-8">
+            <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+            <div class="month" :class="selectedDay?'col-lg-8':'col-lg-12'">
+
                 <h2>Déclarations de temps pour <strong>{{ ts.person }}</strong></h2>
                 <h3 class="periode">Période :
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
@@ -77,7 +85,6 @@
                         Envoyer
                     </button>
                 </h3>
-
 
                 <div class="month">
                     <header class="month-header">
@@ -91,36 +98,40 @@
                     </header>
                     <div class="weeks">
                         <section v-for="week in weeks" v-if="ts" class="week">
+                            <header class="week-header">
+                                Semaine {{ week.label }} <i class="icon-down-dir"></i>
+                                <small>
+                                    <strong :class="(week.total > week.weekLength)?'has-titled-error':''"
+                                            :title="(week.total > week.weekLength)?
+                                                'Les heures excédentaires risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
+                                                :''">
+                                        <i class="icon-attention-1" v-if="week.total > week.weekLength"></i>{{ week.total | duration }}</strong>
+
+                                    / {{ week.weekLength | duration }}
+                                    <span  class="text-danger">
+
+
+                                    </span>
+                                </small>
+                            </header>
                             <div class="days">
-                                <timesheetmonthday v-for="day in week"
-                                                    @selectDay="handlerSelectData(day)"
-                                                   @daymenu="handlerDayMenu"
-                                                   :day="day"
-                                                   :key="day.date"/>
+                                <timesheetmonthday v-for="day in week.days"
+                                       :class="selectedDay == day ? 'selected':''"
+                                       @selectDay="handlerSelectData(day)"
+                                       @daymenu="handlerDayMenu"
+                                       :day="day"
+                                       :key="day.date"/>
                             </div>
                         </section>
                     </div>
                 </div>
             </div>
-            <section class="col-lg-4">
-                <timesheetmonthdaydetails v-if="selectedDay" :day="selectedDay" :workPackages="ts.workPackages"/>
-                <!--<h3>
-                    <i class="icon-archive"></i>
-                    Lot de travail</h3>
-                <p class="help">Ne sont proposés que les lots de travail <strong>disponibles sur la période</strong>.</p>
-                <article class="card xs wp" v-for="wp in ts.workPackages">
-                    <h3 class="">
-                        <small>
-                            <i class="icon-cubes"></i>[{{wp.acronym}}]
-                            <i class="icon-cube"></i>{{ wp.activity }}
-                        </small><br/>
-                        <abbr title="">{{ wp.code}}</abbr> {{ wp.label }}
-                    </h3>
-                    <div class="card-content">
-                        <i class="icon-calendar"></i> Du <strong>{{ wp.from | date}}</strong> au <strong>{{ wp.to|date }}</strong><br />
-                        <i class="icon-clock"></i> Heures prévues : {{ wp.hours }}
-                    </div>
-                </article>-->
+            <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+            <section class="col-lg-4" v-if="selectedDay">
+                <timesheetmonthdaydetails :day="selectedDay" :workPackages="ts.workPackages"
+                        @removetimesheet="deleteTimesheet"
+                        @addtowp="handlerWpFromDetails($event)"
+                />
             </section>
         </section>
 
@@ -143,6 +154,11 @@
             margin: 0;
             padding: 0;
         }
+    }
+
+    .has-titled-error {
+        color: darkred;
+        cursor: help;
     }
 
     .menu-wps {
@@ -215,9 +231,22 @@
         width: 10em;
         text-align: center;
     }
+
+    ///////////////////////////////////////////////////
+    /** EN TÊTE des SEMAINES **/
+    .week-header, .month-header .week-header {
+        background-color: white;
+        display: block;
+        text-align: left;
+        font-size: .8em;
+        padding: 0 .8em;
+    }
+    ///////////////////////////////////////////////////
+
     .days {
         display: flex;
-        height: 75px;
+        height: 100px;
+
         .day {
             .label {
                 position: absolute;
@@ -233,19 +262,24 @@
                 max-width: 3em;
                 overflow: hidden;
                 display: inline-block;
+                display: inline-block;
                 white-space: nowrap;
             }
 
             position: relative;
             background: rgba(#ffffff, .25);
+            transition: background-color linear .3s;
             border: thin solid white;
-            flex: 0 0 14.285714286%;
+            flex: 0 0  14.285714286%;
             cursor: pointer;
 
             &:hover {
                 background: white;
             }
 
+            &.selected {
+                background: #5c9ccc;
+            }
 
             &.locked {
                 cursor: not-allowed;
@@ -278,7 +312,8 @@
                 required: true
             },
             defaultMonth: { default: defaultDate.getMonth()+1},
-            defaultYear: { default: defaultDate.getFullYear()}
+            defaultYear: { default: defaultDate.getFullYear()},
+            defaultDayLength: { default: 8.0 }
         },
 
         components: {
@@ -289,19 +324,27 @@
 
         data(){
             return {
+                // Gestion de l'affichage de la fenêtre
+                // d'édition/ajout de créneaux
                 editWindow: {
                     display: false,
                     wp: null,
                     type: 'infos',
-
                 },
+
+                //
+                error: '',
+
+                // Données reçues
                 ts: null,
                 month: null,
                 year: null,
+                dayLength: null,
+
                 selectedDay: null,
                 dayMenuLeft: 50,
                 dayMenuTop: 50,
-                dayMenu: 'block',
+                dayMenu: 'none',
                 selectedWP: null,
                 selectedTime: null,
                 dayMenuSelected: null,
@@ -314,9 +357,19 @@
                 var m = moment(value);
                 return m.format(format);
             },
+            datefull(value, format="ddd DD MMMM  YYYY"){
+                var m = moment(value);
+                return m.format(format);
+            },
             day(value, format="ddd DD"){
                 var m = moment(value);
                 return m.format(format);
+            },
+            duration(v){
+                let h = Math.floor(v);
+                let m = Math.round((v - h)*60);
+                if( m < 10 ) m = '0'+m;
+                return h +':' +m;
             }
         },
 
@@ -344,18 +397,35 @@
 
                     let firstDay = this.ts.days[1];
                     let currentWeekNum = firstDay.week;
-                    let currentWWeek = [];
+
+                    let currentWWeek = {
+                        label: currentWeekNum,
+                        days: [],
+                        total: 0.0,
+                        weekLength: 0.0
+                    };
 
                     for( var d in this.ts.days ){
                         let currentDay = this.ts.days[d];
                         if( currentWeekNum != currentDay.week ){
                             weeks.push(currentWWeek);
-                            currentWWeek = [];
+                            currentWWeek = {
+                                label: currentDay.week,
+                                days: [],
+                                total: 0.0,
+                                weekLength: 0.0
+                            };
                         }
+
                         currentWeekNum = currentDay.week;
-                        currentWWeek.push(currentDay);
+                        currentWWeek.total += currentDay.duration;
+
+                        if( !currentDay.closed )
+                            currentWWeek.weekLength += currentDay.dayLength;
+
+                        currentWWeek.days.push(currentDay);
                     }
-                    if( currentWWeek.length )
+                    if( currentWWeek.days.length )
                         weeks.push(currentWWeek);
                 }
                 return weeks;
@@ -363,10 +433,21 @@
         },
 
         methods: {
+            deleteTimesheet(timesheet){
+                this.$http.delete('?id=' +timesheet.id).then(
+                    ok => {
+                        this.fetch();
+                    },
+                    ko => {
+                        this.error = 'Impossible de supprimer le créneau : ' + ko.body;
+                    }
+                )
+            },
+
             handlerSaveMenuTime(){
 
                 let formData = new FormData();
-                formData.append('day', this.dayMenuSelected.date);
+                formData.append('day', this.selectedDay.date);
                 formData.append('wp', this.selectedWP.id);
                 formData.append('duration', this.dayMenuTime);
 
@@ -382,28 +463,13 @@
             },
 
             handlerDayUpdated(){
-              console.log(arguments);
               let t = arguments[0];
               this.dayMenuTime = (t.h + t.m) * 60;
             },
 
-            handlerSelectWP(e, wp){
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-                let duration = 0;
-
-                let wpIdSelected = wp.id;
-
-                if( this.dayMenuSelected ){
-                    for( let i=0; i<this.dayMenuSelected.declarations.length; i++ ){
-                        if( this.dayMenuSelected.declarations[i].wp_id == wpIdSelected ){
-                            duration += this.dayMenuSelected.declarations[i].duration;
-                        }
-                    }
-                }
-
-                this.selectedWP = wp;
+            handlerSelectWP(w){
+                console.log('SELECTION DU LOT', w.label, w.id);
+                this.selectedWP = w;
                 this.dayMenu = 'none';
             },
 
@@ -417,12 +483,19 @@
                this.hideWpSelector();
             },
 
+
+            handlerWpFromDetails(wp){
+              console.log(wp.id)
+               this.handlerSelectWP(this.ts.workPackages[wp.id]);
+            },
+
             handlerDayMenu(event, day){
-                console.log("selection du jour", day);
+
                 this.dayMenuLeft = event.clientX;
                 this.dayMenuTop = event.clientY;
                 this.dayMenu = 'block';
-                this.dayMenuSelected = day;
+//                this.dayMenuSelected = day;
+                this.selectedDay = day;
             },
 
             handlerSelectData(day){
@@ -456,14 +529,22 @@
                 }
             },
             fetch(){
-                console.log("Chanrgement des données");
+                let daySelected;
+
+                if( this.selectedDay )
+                    daySelected = this.selectedDay.i;
+
+                console.log('daySelected', daySelected);
                 this.$http.get('?month=' +this.month +'&year=' + this.year).then(
                     ok => {
-                        console.log(ok);
+                        this.dayLength = ok.body.dayLength;
                         this.ts = ok.body
+                        if( daySelected ){
+                           this.selectedDay = this.ts.days[daySelected];
+                        }
                     },
                     ko => {
-
+                        this.error = 'Impossible de charger cette période (msg server : ' + ko.body +')';
                     }
                 )
             }
@@ -472,6 +553,8 @@
             moment = this.moment;
             this.month = this.defaultMonth;
             this.year = this.defaultYear;
+            this.dayLength = this.defaultDayLength;
+
             this.fetch()
         }
     }

@@ -3805,10 +3805,15 @@ $oscar-line: dotted thin $colorGreyLight;
   justify-content: center;
 
   .overlay-content {
-    width: 80%;
+    width: 75%;
     margin: 100px auto;
     max-height: 80vh;
     overflow-y: auto;
+    flex: 0 0 75%;
+    padding: .5em 1em;
+    border: thin solid #ddd;
+    background: rgba(255,255,255,.9);
+    box-shadow: 0 .7em 1em rgba(0,0,0,.15);
   }
 }
 
