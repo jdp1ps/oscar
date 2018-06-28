@@ -16,38 +16,50 @@
             </div>
         </div>
 
-
-        <div class="overlay" v-if="selectedWP && selectedDay" style="z-index: 2001">
+        <div class="overlay" v-if="selectedDay && selectionWP && selectionWP.code " style="z-index: 2001">
             <div class="content container overlay-content">
-                <h2>Déclaration d'heures</h2>
-                <p>
-                    Journée : <strong>{{ selectedDay.date | datefull }}</strong><br/>
-                </p>
                 <section>
-                    <h3>[{{selectedWP.code}}] {{selectedWP.label}}</h3>
-                    <small><i class="icon-cube"></i> {{ selectedWP.activity }}</small>
+                    <h3 v-if="selectionWP.id">
+                        <small>Déclaration pour le lot</small>
+                        <strong>
+                            <i  class="icon-archive"></i>
+                            <abbr>{{selectionWP.code}}</abbr> {{selectionWP.label}}
+                        </strong>
+                    </h3>
+                    <h3 v-else>
+                        <small>Déclaration hors-lot pour</small>
+                        <strong>
+                            <i :class="'icon-' + selectionWP.code"></i>
+                            {{ selectionWP.label }}
+                        </strong>
+                    </h3>
                 </section>
 
-                <section>
-                    <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue"></timechooser>
-                </section>
+                <div class="col">
+                    <div class="col-md-2">
+                        <h4>Infos</h4>
+                        <p>
+                            Journée : <strong>{{ selectedDay.date | datefull }}</strong><br/>
+                            Heures restantes : <strong>{{ (selectedDay.dayLength - selectedDay.duration) | duration}}</strong>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Temps</h4>
+                        <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue"></timechooser>
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Commentaire</h4>
+                        <textarea class="form-control textarea" v-model="commentaire"></textarea>
+                    </div>
+
+                </div>
 
                 <nav class="buttons">
-                    <button class="btn btn-default">Annuler</button>
+                    <button class="btn btn-default" @click="selectionWP = null">Annuler</button>
                     <button class="btn btn-primary" @click="handlerSaveMenuTime">Valider</button>
                 </nav>
             </div>
         </div>
-
-
-
-        <h1>
-            <span v-if="selectedDay">
-                <i class="icon-angle-left interactive-icon-big" @click="selectedDay = null"></i>
-                {{ selectedDay.date | date }}
-            </span>
-            <span v-else>Feuille de temps mensuelle</span>
-        </h1>
 
         <div :style="cssDayMenu" class="daymenu">
             <div class="selector">
@@ -69,12 +81,10 @@
                     </ul>
                 </div>
             </div>
-
         </div>
 
 
         <section v-if="ts" >
-
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
             <div class="month col-lg-8">
 
@@ -127,7 +137,7 @@
                 </div>
             </div>
             <section class="col-lg-4">
-                <transition name="fade">
+
                     <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS SEMAINE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
                     <div v-if="selectedWeek">
                         <h3>
@@ -137,47 +147,18 @@
                         </h3>
                         <p>
                             <i class="icon-clock"></i> <strong>{{ selectedWeek.total | duration }} heure(s) saisies</strong>
-                            <button class="btn btn-danger btn-xs" @click="deleteWeek(selectedWeek)">
+                            <button class="btn btn-danger btn-xs" @click="deleteWeek(selectedWeek)" v-if="selectedWeek.drafts > 0">
                                 <i class="icon-trash"></i>
                                 Supprimer les déclarations non-envoyées
                             </button>
                         </p>
+
                         <section v-if="selectedWeek.total < selectedWeek.weekLength">
                             <p>Vous pouvez compléter automatiquement cette semaine en affectant les
-                                <strong>{{ selectedWeek.weekLength - selectedWeek.total }} heure(s)</strong>
+                                <strong>{{ (selectedWeek.weekLength - selectedWeek.total) | duration }} heure(s)</strong>
                                 avec une des activités ci-dessous :
                             </p>
-                            <div class="dropdown">
-                                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                    <i class="icon-plus-circled"></i>
-                                    <template v-if="!fillSelectedWP">Selectionnez un lot</template>
-                                    <template v-else><strong>{{fillSelectedWP.code}}</strong> <em>{{ fillSelectedWP.label }}</em><br/>
-                                        <small class="text-light">{{ fillSelectedWP.activity }}</small></template>
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                                    <li v-for="wp in ts.workPackages">
-                                        <a href="#" @click.prevent="fillSelectedWP = wp"><abbr :title="wp.activity">[{{wp.acronym}}]</abbr>
-                                            <i class="icon-angle-right"></i>
-                                            <strong>{{wp.code}}</strong> <em>{{ wp.label }}</em><br/>
-                                            <small class="text-light">{{ wp.activity }}</small>
-                                        </a>
-                                    </li>
-                                    <li role="separator" class="divider"></li>
-                                    <li><a href="#">Je suis en congès</a></li>
-                                    <li><a href="#">Je suis en formation</a></li>
-                                    <li><a href="#">J'ai donné des enseignements</a></li>
-                                </ul>
-                            </div>
-
-                            <!--<article v-for="wp in ts.workPackages" class="card xs" @click="fillSelectedWP = wp" :class="fillSelectedWP == wp ? 'selected' : ''">
-                                <h4>
-                                    <abbr :title="'Projet : ' +wp.project">{{ wp.acronym }}</abbr>
-                                    <strong>{{ wp.code }}</strong>
-                                    {{ wp.label }}
-                                </h4>
-                                <small>{{ wp.activity }}</small>
-                            </article>-->
+                            <wpselector :workpackages="ts.workPackages" :selection="fillSelectedWP" @select="fillSelectedWP = $event"></wpselector>
                             <button class="btn btn-default" @click="fillWeek(selectedWeek, fillSelectedWP)" :class="fillSelectedWP ? 'btn-primary' : 'disabled'">
                                 <i class="icon-floppy"></i>
                                 Valider
@@ -187,21 +168,15 @@
                     </div>
                     <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
                     <timesheetmonthdaydetails  v-else-if="selectedDay"
-                            :day="selectedDay" :workPackages="ts.workPackages"
+                            :day="selectedDay" :workPackages="ts.workPackages" :selection="selectionWP"
                             @removetimesheet="deleteTimesheet"
                             @addtowp="handlerWpFromDetails($event)"
                     />
                     <div v-else>
                         <h3>Mois de TEST</h3>
                     </div>
-
-                </transition>
             </section>
         </section>
-
-
-
-
     </section>
 </template>
 
@@ -273,11 +248,12 @@
 
     .month-header {
         display: flex;
-        height: 50px;
-        line-height: 45px;
+
+        line-height: 30px;
         justify-content: center;
         justify-items: center;
         strong {
+        font-weight: 100;
             display: block;
             text-align: center;
             flex: 0 0  14.285714286%;
@@ -311,9 +287,6 @@
             }
         }
 
-        &:hover {
-            border-color: $weekHightlightColor;
-        }
         &.selected{
             background: rgba($weekHightlightColor, .25);
             border-color: $weekHightlightColor;
@@ -358,7 +331,7 @@
 
     .days {
         display: flex;
-        height: 100px;
+//        height: 100px;
 
         .day {
             .label {
@@ -384,7 +357,9 @@
             transition: background-color linear .3s;
             border: thin solid white;
             flex: 0 0  14.285714286%;
+            overflow: hidden;
             cursor: pointer;
+            min-height: 50px;
 
             &:hover {
                 background: white;
@@ -412,9 +387,10 @@
 
 <script>
 
-    import TimesheetMonthDay from './TimesheetMonthDay.vue';
+   // import TimesheetMonthDay from './TimesheetMonthDay.vue';
     import TimesheetMonthDayDetails from './TimesheetMonthDayDetails.vue';
     import UITimeChooser from './UITimeChooser.vue';
+    import TimesheetMonthWorkPackageSelector from './TimesheetMonthWorkPackageSelector.vue';
 
     let defaultDate = new Date();
     let moment = function(){};
@@ -430,9 +406,10 @@
         },
 
         components: {
-            timesheetmonthday: TimesheetMonthDay,
-            timesheetmonthdaydetails: TimesheetMonthDayDetails,
-            timechooser: UITimeChooser
+            timesheetmonthday: require('./TimesheetMonthDay.vue').default,
+            timesheetmonthdaydetails: require('./TimesheetMonthDayDetails.vue').default,
+            timechooser: require('./UITimeChooser.vue').default,
+            wpselector: require('./TimesheetMonthWorkPackageSelector.vue').default
         },
 
         data(){
@@ -447,6 +424,7 @@
 
                 //
                 error: '',
+                commentaire: '',
 
                 fillSelectedWP: null,
 
@@ -462,6 +440,7 @@
                 dayMenuTop: 50,
                 dayMenu: 'none',
                 selectedWP: null,
+                selectionWP: null,
                 selectedTime: null,
                 dayMenuSelected: null,
                 dayMenuTime: 0.0
@@ -529,7 +508,8 @@
                         label: currentWeekNum,
                         days: [],
                         total: 0.0,
-                        weekLength: 0.0
+                        weekLength: 0.0,
+                        drafts: 0
                     };
 
                     for( var d in this.ts.days ){
@@ -540,12 +520,16 @@
                                 label: currentDay.week,
                                 days: [],
                                 total: 0.0,
-                                weekLength: 0.0
+                                weekLength: 0.0,
+                                drafts: 0
                             };
                         }
 
                         currentWeekNum = currentDay.week;
                         currentWWeek.total += currentDay.duration;
+                        if( currentWWeek.status == "Brouillon" ){
+                            currentWWeek.drafts++;
+                        }
 
                         if( !currentDay.closed )
                             currentWWeek.weekLength += currentDay.dayLength;
@@ -569,11 +553,14 @@
                 let data = [];
 
                 week.days.forEach( d => {
-                   console.log(JSON.parse(JSON.stringify(d)));
+                   console.log("JOUR",JSON.parse(JSON.stringify(d)));
+                   console.log("LOT", JSON.parse(JSON.stringify(wp)));
                    if( !(d.closed || d.locked || d.duration >= d.dayLength) ){
                        data.push({
                            'day': d.date,
-                           'wp': wp.id,
+                           'wpId': wp.id,
+                           'code': wp.code,
+                           'commentaire': this.commentaire,
                            'duration':(d.dayLength - d.duration)*60
                        });
                    }
@@ -622,8 +609,10 @@
 
                 let data = [{
                     'day': this.selectedDay.date,
-                    'wp': this.selectedWP.id,
+                    'wpId': this.selectionWP.id,
                     'duration': this.dayMenuTime,
+                    'comment' : this.commentaire,
+                    'code': this.selectionWP.code
                 }];
 
                 this.performAddDays(data);
@@ -642,6 +631,7 @@
                     }
                 ).then(foo => {
                     this.selectedWeek = null;
+                    this.selectionWP = null;
                 });;
             },
 
@@ -651,8 +641,10 @@
             },
 
             handlerSelectWP(w){
-                console.log('SELECTION DU LOT', w.label, w.id);
                 this.selectedWP = w;
+                this.selectionWP = w;
+                console.log(this.selectedDay);
+                console.log(this.selectedWP);
                 this.dayMenu = 'none';
             },
 
@@ -668,8 +660,8 @@
 
 
             handlerWpFromDetails(wp){
-              console.log(wp.id)
-               this.handlerSelectWP(this.ts.workPackages[wp.id]);
+              console.log('TimesheetMonth', wp);
+               this.handlerSelectWP(wp);
             },
 
             handlerDayMenu(event, day){

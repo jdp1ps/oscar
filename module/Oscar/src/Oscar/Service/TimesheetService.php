@@ -604,6 +604,27 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
+    public function getLockedDays( $annee, $mois, $person=null ){
+
+        if( $mois == '5' ){
+            return [
+                $annee.'-5-1' => "Jour férié (Fête du travail)",
+                $annee.'-5-8' => "Jour ferié (Armistice 39-45)"
+            ];
+        }
+        if( $mois == '11' ){
+            return [
+                $annee.'-11-11' => "Jour ferié (Armistice 14-18)"
+            ];
+        }
+        if( $mois == '12' ){
+            return [
+                $annee.'-12-25' => "Noël"
+            ];
+        }
+        return [];
+    }
+
     /**
      * @return TimesheetRepository
      */

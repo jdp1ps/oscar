@@ -2,14 +2,14 @@
     <div class="day" @click="handlerClick" :class="{'locked': day.locked}" @contextmenu.prevent="handlerRightClick">
         <span class="label">{{ day.label }}</span>
 
-        <span class="cartouche secondary1 xs" v-for="d in groupProject" :title="d.label">
-            <em>{{ d.acronym }}</em>
+        <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label">
+            {{ d.acronym }}
             <span class="addon">
                 {{d.duration | duration}}
             </span>
         </span>
 
-        <span class="cartouche orange xs" v-if="day.teaching.length" title="Enseignement">
+        <span class="cartouche teaching xs" v-if="day.teaching.length" title="Enseignement">
             Cours
             <span class="addon">
                 {{totalEnseignement | duration}}
@@ -23,17 +23,38 @@
             </span>
         </span>
 
-        <span class="cartouche success xs" v-if="day.training.length" title="Infos">
+        <span class="cartouche training xs" v-if="day.training.length" title="Formation">
             Formation
             <span class="addon">
                 {{totalFormation | duration}}
             </span>
         </span>
 
-        <span class="cartouche complementary xs" v-if="day.vacations.length" title="Infos">
+        <span class="cartouche vacations xs" v-if="day.vacations.length" title="Congès">
             Congès
             <span class="addon">
                 {{totalVacations | duration}}
+            </span>
+        </span>
+
+        <span class="cartouche sickleave xs" v-if="day.sickleave.length" title="Arrêt maladie">
+            A.Maladie
+            <span class="addon">
+               {{ totalSickleave | duration }}
+            </span>
+        </span>
+
+        <span class="cartouche sickleave xs" v-if="day.absent.length" title="Absence">
+            Abs
+            <span class="addon">
+                 {{ totalAbsent | duration }}
+            </span>
+        </span>
+
+        <span class="cartouche research xs" v-if="day.research.length" title="Autre projet de recherche">
+            Recherche
+            <span class="addon">
+                 {{ totalResearch | duration }}
             </span>
         </span>
 
@@ -50,8 +71,25 @@
     </div>
 </template>
 
+<style scoped lang="scss">
+    .cartouche {
+        white-space: nowrap;
+        margin: 0;
+        border-radius: 2px;
+        box-shadow: none;
+        font-size: .75em;
+        &.training { background-color: #0b58a2; }
+        &.sickleave { background-color: #808000; }
+        &.wp { background-color: #6a5999; }
+    }
+
+</style>
+
 <script>
+
     export default {
+        name: 'TimesheetMonthDay',
+
         props: {
             day: {
                require: true
@@ -92,6 +130,27 @@
             totalVacations(){
                 let t = 0.0;
                 this.day.vacations.forEach(d => {
+                    t += d.duration;
+                });
+                return t;
+            },
+            totalSickleave(){
+                let t = 0.0;
+                this.day.sickleave.forEach(d => {
+                    t += d.duration;
+                });
+                return t;
+            },
+            totalAbsent(){
+                let t = 0.0;
+                this.day.absent.forEach(d => {
+                    t += d.duration;
+                });
+                return t;
+            },
+            totalResearch(){
+                let t = 0.0;
+                this.day.research.forEach(d => {
                     t += d.duration;
                 });
                 return t;

@@ -6,30 +6,13 @@
             {{ day.lockedReason }}
         </div>
         <div v-else>
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <i class="icon-plus-circled"></i>
-                    Déclarer des heures
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                    <li v-for="wp in workPackages">
-                        <a href="#" @click.prevent.stop="addToWorkpackage($event, wp)"><abbr :title="wp.activity">[{{wp.acronym}}]</abbr>
-                            <i class="icon-angle-right"></i>
-                            <strong>{{wp.code}}</strong> <em>{{ wp.label }}</em><br/>
-                            <small class="text-light">{{ wp.activity }}</small>
-                        </a>
-                    </li>
-                    <li role="separator" class="divider"></li>
-                    <li><a href="#">Je suis en congès</a></li>
-                    <li><a href="#">Je suis en formation</a></li>
-                    <li><a href="#">J'ai donné des enseignements</a></li>
-                </ul>
-            </div>
+            <wpselector :workpackages="workPackages" @select="addToWorkpackage" :selection="selection"></wpselector>
+            <pre>{{ selection }}</pre>
         </div>
 
         <section>
             <h3><i class="icon-archive"></i> Heures identifiées sur des lots</h3>
+
 
             <article class="card card-xs xs wp-duration" v-for="d in day.declarations">
                 <span class="infos">
@@ -51,55 +34,88 @@
 
             </article>
 
-            <article class="wp-duration card xs">
+
+            <article class="wp-duration card xs" v-for="t in day.teaching">
                 <strong>
-                    <i class="icon-graduation-cap"></i> Enseignements
-                    <a href="#" @click="addDuration('teaching')"><i class=" icon-cw-outline"></i></a>
+                    <i class="icon-teaching"></i> Enseignements<br>
+                    <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ enseignements | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
                 <div class="left">
-                    &nbsp;
+                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
             </article>
 
-            <article class="wp-duration card xs">
+            <article class="wp-duration card xs" v-for="t in day.training">
                 <strong>
-                    <i class="icon-leaf-1"></i> Congès <br> <small>Absence, congès, RTT</small>
-                    <a href="#" @click="addDuration('vacation')"><i class=" icon-cw-outline"></i></a>
+                    <i class="icon-training"></i> Formation<br>
+                    <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ abs | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
                 <div class="left">
-                    <i class="icon-trash"></i>
+                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
             </article>
 
-            <article class="wp-duration card xs">
-                <strong><i class="icon-stethoscope"></i> Arrêt maladie</strong>
-                <div class="total">TODO <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash"></i>
-                </div>
-            </article>
-
-            <article class="wp-duration card xs">
+            <article class="wp-duration card xs" v-for="t in day.vacations">
                 <strong>
-                    <i class="icon-lightbulb"></i> Formation <a href="#" @click="addDuration('learning')"><i class=" icon-cw-outline"></i></a><br>
+                    <i class="icon-vacation"></i> Congès<br>
+                    <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ learn | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
                 <div class="left">
-                    <i class="icon-trash"></i>
+                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
             </article>
+
+            <article class="wp-duration card xs" v-for="t in day.sickleave">
+                <strong>
+                    <i class="icon-sickleave"></i> Arrêt maladie<br>
+                    <small>{{ t.description }}</small>
+                </strong>
+                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="left">
+                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
+                </div>
+            </article>
+
+            <article class="wp-duration card xs" v-for="t in day.research">
+                <strong>
+                    <i class="icon-research"></i> Autre projet de recherche<br>
+                    <small>{{ t.description }}</small>
+                </strong>
+                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="left">
+                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
+                </div>
+            </article>
+
+            <article class="wp-duration card xs" v-for="t in day.absent">
+                <strong>
+                    <i class="icon-abs"></i> Absence<br>
+                    <small>{{ t.description }}</small>
+                </strong>
+                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="left">
+                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
+                </div>
+            </article>
+
+            <article class="wp-duration card xs" v-for="t in day.infos">
+                <strong>
+                    <i class="icon-infos"></i> Infos<br>
+                    <small>{{ t.description }}</small>
+                </strong>
+                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="left">
+                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
+                </div>
+            </article>
+
+
+
 
             <article class="wp-duration card xs">
-                <strong><i class="icon-pin-outline"></i> Autre</strong>
-                <div class="total">{{ other | heures }} <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash"></i>
-                </div>
-            </article>
-
-            <article class="wp-duration">
                 <span>total</span>
                 <div class="total" :class="{ 'text-danger': isExceed}">
                     {{ total | heures }} / {{ day.dayLength | heures }}
@@ -124,6 +140,9 @@
         display: flex;
         border-bottom: thin solid white;
         align-items: center;
+        strong small {
+            font-weight: 100;
+        }
         }
     .left {
         flex: 0 0 35px;
@@ -158,13 +177,22 @@
 </style>
 
 <script>
+    import TimesheetMonthWorkPackageSelector from './TimesheetMonthWorkPackageSelector.vue';
+
     export default {
+        components: {
+            wpselector: TimesheetMonthWorkPackageSelector
+        },
+
         props: {
             workPackages: {
                 require: true
             },
             day: {
                require: true
+            },
+            selection: {
+                require: true
             }
         },
 
@@ -231,11 +259,18 @@
                    t += ts.duration
                 });
                 return t;
+            },
+            sickleave(){
+                let t= 0.0;
+                this.day.sickleave.forEach( ts => {
+                    t += ts.sickleave
+                });
+                return t;
             }
         },
 
         methods: {
-            addToWorkpackage(e, wp){
+            addToWorkpackage( wp){
                 this.$emit('addtowp', wp);
             }
         }

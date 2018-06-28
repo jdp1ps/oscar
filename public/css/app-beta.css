@@ -6909,6 +6909,9 @@ span[class*="status-400"] .icon:before {
 [class*="icon-Organization"]:before {
   content: '\e876'; }
 
+[class*="icon-Organization"]:before {
+  content: '\e876'; }
+
 /*
 span[class*="status-102"] .icon:before{ content: '\e85e '}
 span[class*="status-4"] .icon:before{ content: '\e865 '}

@@ -745,6 +745,21 @@ class TimesheetController extends AbstractOscarController
         return $this->getResponseNotImplemented();
     }
 
+    protected function getOthersWP(){
+        static $others;
+        if( $others == null ){
+            $others = [
+               'conges' => [ 'code' => 'conges',  'label' => 'Congès',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
+               'learning' => [ 'code' => 'learning',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+               'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
+               'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
+               'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
+               'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+            ];
+        }
+        return $others;
+    }
+
     /**
      * API REST pour déclarer des heures.
      *
@@ -761,26 +776,51 @@ class TimesheetController extends AbstractOscarController
         foreach ($datas as $data){
             $day = new \DateTime($data->day);
             $dayBase = $day->format('Y-m-d'). ' %s:%s:00';
-            $wpId = $data->wp;
+
+
+            $wpId = $data->wpId;
+            $code = $data->code;
             $duration = (int)$data->duration;
             $heures = floor($duration/60);
             $minutes = $duration - ($heures*60);
+            $status = TimeSheet::STATUS_DRAFT;
+            $comment = $data->comment;
 
             $start = new \DateTime(sprintf($dayBase, 8, 0));
             $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
+            $wp = null;
+            $label = "error";
 
-            $status = TimeSheet::STATUS_DRAFT;
 
-            /** @var WorkPackage $wp */
-            $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
+            if( !$data->wpId ){
+                // Spécial
+                $other = $this->getOthersWP()[$data->code];
+                $status = TimeSheet::STATUS_INFO;
+                $label = $data->code;
+
+                if( !$other ){
+                    return $this->getResponseBadRequest(sprintf("Ce type de créneau '%s' n'est pas pris en charge dans cette version", $data->code));
+                }
+            } else {
+                /** @var WorkPackage $wp */
+                $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
+                $label = (string)$wp;
+            }
+
+
+
+
+
+
 
             $timesheet = new TimeSheet();
             $this->getEntityManager()->persist($timesheet);
 
             $timesheet->setWorkpackage($wp)
+                ->setComment($comment)
                 ->setDateFrom($start)
                 ->setDateTo($end)
-                ->setLabel((string)$wp)
+                ->setLabel($label)
                 ->setStatus($status)
                 ->setPerson($person);
 
@@ -851,6 +891,9 @@ class TimesheetController extends AbstractOscarController
         // Liste des lots du mois
         $workPackages = [];
 
+        $lockedDays = $this->getServiceLocator()->get('TimesheetService')->getLockedDays($year, $month);
+        $this->getLogger()->debug(print_r($lockedDays, true));
+
         /** @var WorkPackagePerson $workPackagePerson */
         foreach ($availableWorkPackages as $workPackagePerson){
             $workPackage = $workPackagePerson->getWorkPackage();
@@ -874,6 +917,7 @@ class TimesheetController extends AbstractOscarController
                 'label' => $workPackage->getLabel(),
                 'code' => $workPackage->getCode(),
                 'acronym' => $activity->getAcronym(),
+                'description' => 'Lot dans ' . (string)$activity,
                 'project' => (string)$activity->getProject(),
                 'project_id' => $activity->getProject()->getId(),
                 'activity' => (string)$activity,
@@ -927,6 +971,12 @@ class TimesheetController extends AbstractOscarController
                 $lockedReason = "Vous ne pouvez pas déclarer le weekend";
             }
 
+            if( array_key_exists($data, $lockedDays) ){
+                $locked = true;
+                $close = true;
+                $lockedReason = $lockedDays[$data];
+            }
+
 
             $output['days'][$i] = [
                 'date' => $data,
@@ -942,6 +992,9 @@ class TimesheetController extends AbstractOscarController
                 'vacations' => [],
                 'training' => [],
                 'teaching' => [],
+                'sickleave' => [],
+                'absent' => [],
+                'research' => [],
                 'dayLength' => $dayLength,
                 'maxDay' => $maxDays,
                 'locked' => $locked,
@@ -960,23 +1013,52 @@ class TimesheetController extends AbstractOscarController
                 if ($t->getStatus() == TimeSheet::STATUS_INFO) {
 
                     $datas = [
+                        'id' => $t->getId(),
                         'label' => $t->getLabel(),
                         'description' => $t->getComment(),
-                        'duration' => $t->getDuration()
+                        'duration' => $t->getDuration(),
+                        'status_id' => $t->getStatus(),
+                        'status' => TimeSheet::getStatusLabel($t->getStatus())
                     ];
+
+                    /**
+                    'conges' => [ 'code' => 'conges',  'label' => 'Congès',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
+                    'learning' => [ 'code' => 'learning',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+                    'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
+                    'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
+                    'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
+                    'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+                     *
+                     */
 
                     switch( $t->getLabel() ){
                         case 'cours' :
                         case 'enseignement' :
+                        case 'teaching' :
                             $output['days'][$dayTimesheet]['teaching'][] = $datas;
                             break;
+
                         case 'formation' :
+                        case 'learning' :
                         case 'training' :
                             $output['days'][$dayTimesheet]['training'][] = $datas;
                             break;
+
                         case 'vacations' :
                         case 'conges' :
                             $output['days'][$dayTimesheet]['vacations'][] = $datas;
+                            break;
+
+                        case 'sickleave' :
+                            $output['days'][$dayTimesheet]['sickleave'][] = $datas;
+                            break;
+
+                        case 'absent' :
+                            $output['days'][$dayTimesheet]['absent'][] = $datas;
+                            break;
+
+                        case 'research' :
+                            $output['days'][$dayTimesheet]['research'][] = $datas;
                             break;
 
                         default:
@@ -1010,6 +1092,8 @@ class TimesheetController extends AbstractOscarController
                 'activity_code' => $activityCode,
                 'acronym' => $projectAcronym,
                 'project' => (string)$project,
+                'status_id' => $t->getStatus(),
+                'status' => TimeSheet::getStatusLabel($t->getStatus()),
                 'wpCode' => $wpCode,
                 'duration' => (float)$t->getDuration(),
                 'wp_id' => $t->getWorkpackage()->getId(),
