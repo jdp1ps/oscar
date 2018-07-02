@@ -1,7 +1,7 @@
 # Lasted Build
 
 ## Déclarations
- - Il est maintenant possible de *synchroniser* un fichier ICS déjà importé préalablement. Si le déclarant retéléverse un ICS, Oscar analyse parmis les créneaux présent ceux issus d'un import et tente des les mettre à jour automatiquement. Oscar ajoute les nouveaux créneaux mais **il ne supprime pas les créneaux qui ont disparu**
+ - Il est maintenant possible de *synchroniser* un fichier ICS déjà importé préalablement. Si le déclarant retéléverse un ICS, Oscar analyse parmis les créneaux présents ceux issus d'un import et tente des les mettre à jour automatiquement. Oscar ajoute les nouveaux créneaux mais **il ne supprime pas les créneaux qui ont disparu**
  - Un nouvel onglet dans l'écran d'importation est disponible. Il affiche la liste des ICS importés. Il permet de supprimer les créneaux importés depuis un des imports (en cas d'erreur).
  - Lors de l'import d'un ICS, Oscar essaye de déterminer le lot de travail idéal pour un créneau en s'appyant sur le nom du calendrier (il doit contenir l'acronyme du projet ou CODE de l'activité) et l'intitulé (il doit contenire le code du lot de travail)
 
@@ -10,9 +10,9 @@
  - MaJ de la transmission du connectorID pour le connecteur LDAP
  - MaJ de la transmission du connectorID pour le connecteur Harpège
  - Activités > Export : L'export contient maintenant une colonne par rôle possible pour les personnes/organisations avec les données correspondant
- - Rôle LDAP des personnes : La synchros des personnes via LDAP intègre la copie des affectations (memberOf) pour l'affichage des rôle niveau application
+ - Rôle LDAP des personnes : La synchro des personnes via LDAP intègre la copie des affectations (memberOf) pour l'affichage des rôles niveau application
  - Personne (général) : Mise au propre de la localisation et le l'assignation administrative
- - Personne (liste) : On voit maintenant la rôle de la personne hérité des
+ - Personne (liste) : On voit maintenant le rôle de la personne hérité des
  - FIX : La mise à jour d'un rôle ne provoque plus la perte du filtre LDAP et des droits qui vont avec
  - Liste des organisations : La recherche se fait également sur le code
  - Liste des organisations : La recherche se fait également sur le siret
@@ -21,17 +21,17 @@
 
 # Build 451
  - Amélioration des performances sur la pages d'index des activités de recherche
- - FIX : Erreur de recherche sur les types d'activités sans préciser le type (mise à jour visuel) 
+ - FIX : Erreur de recherche sur les types d'activités sans préciser le type (mise à jour visuelle) 
  - Modification de l'export des versements (ajout d'informations et réagencement plus pertinent des colonnes)
  - Dédoublonnage des personnes/organisations dans l'exportation des activités de recherche
  - FIX : Bug identifié par Marc dans l'export (incohérence sur les organismes / personnes)
 
 # Semaine XX-XX
  - FIX : Reconstruction de l'index de recherche
- - Le status de l'activité apparaît maintenant dans l'en-tête de la fiche détaillée
- - Des icônes ont été ajoutés pour les status suivants et certains pictogramme ont été modifier pour éviter les confusions
+ - Le statut de l'activité apparaît maintenant dans l'en-tête de la fiche détaillée
+ - Des icônes ont été ajoutées pour les statuts suivants et certains pictogrammes ont été modifiés pour éviter les confusions
  - Le système d'affichage des messages sera plus clair
- - FIX : J'ajout d'un rôle à un acteur déjà présent affiche bien l'acteur dans le dialogue
+ - FIX : L'ajout d'un rôle à un acteur déjà présent affiche bien l'acteur dans le dialogue
  - UP : Ajouter un membre/partenaire sans spécifier une organisation/personne provoque une erreur
 
 
@@ -41,13 +41,13 @@
  - Synchronisation des organizations disponible dans l'interface (admin), les personnes sont déplacées correctement
  - Synchronisation des personnes disponible dans l'interface (admin) et mise à jour
  - Synchro Harpège : Synchronisation de l'INM (uniquement) pour éviter les conflicts avec les données LDAP
- - Ajout du champs pays dans le formulaire des organisation
- - Les status Déposé et Refusé ont été ajouté dans les activités
+ - Ajout du champs pays dans le formulaire des organisations
+ - Les statut Déposé et Refusé ont été ajoutés dans les activités
 
 
 # Semaine 25-26-27
 
- - Dans la vue Liste des activité de recherche, une option dans **les options de vue** permet d'**exporter les versements au format CSV**
+ - Dans la vue Liste des activités de recherche, une option dans **les options de vue** permet d'**exporter les versements au format CSV**
  - Première version des documents administratifs
  - Nouveau status dans les versements :**Écart**
  - FIX : Problème d'affichage des partenaires réglé
@@ -57,7 +57,7 @@
 
 ## Versement
 
-La mise en page des versements dans la fiche activité a été modifié :
+La mise en page des versements dans la fiche activité a été modifiée :
 
 ![Modification de la mise en page](/images/changelog/2016-06-versements.png)
 
@@ -68,18 +68,18 @@ Détails :
 1. Les versements ont une bordure de couleur, verte pour les versements effectués
 2. Rouge s'ils sont prévus mais que la date est dépassée
 3. Grise s'ils sont prévus
-4. Cet encart permet de voir si la somme des versements (prévus + effectués) ne correspond pas au montant initiale prévu
+4. Cet encart permet de voir si la somme des versements (prévus + effectués) ne correspond pas au montant initialement prévu
 
 
 
 # Semaine 22
 
-- Droits : dans les projets excéssibles en "traversée", seul l'intitulé des activités non-accessible est présentée.
+- Droits : dans les projets accessibles en "traversée", seul l'intitulé des activités non-accessibles est présenté.
 
 # Semaine 21
 
-- FIX : Bug de perte du status des activités lors d'une modification des informations
-- Ajout d'un champ pour préciser le format des déclarations de temps (par défaut "pas de déclarations")
+- FIX : Bug de perte du statut des activités lors d'une modification des informations
+- Ajout d'un champ pour préciser le format des déclarations de temps (par défaut "pas de déclaration")
 - FIX : Bug d'affichage des membres/partenaires dans les activités en fiche
 - UP : Ajout d'un champ de recherche dans la liste des versements pour filtrer par numéro oscar/SAIC
 - FIX : La recherche de la page d'accueil dirige vers la nouvelle liste de recherche
