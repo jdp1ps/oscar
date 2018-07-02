@@ -1,25 +1,37 @@
 <template>
     <div class="day-details" :class="{'locked': day.locked}">
 
-        <h2>Déclarer des heures</h2>
+        <h3>Déclarer des heures <strong>{{ label }}</strong></h3>
+        <a href="#" @click.prevent="$emit('cancel')">
+            <i class="icon-angle-left"></i> Retour
+        </a>
         <div class="alert alert-danger" v-if="day.locked">
             {{ day.lockedReason }}
         </div>
         <div v-else>
+            Compléter avec :
             <wpselector :workpackages="workPackages" @select="addToWorkpackage" :selection="selection"></wpselector>
-            <pre>{{ selection }}</pre>
         </div>
 
         <section>
             <h3><i class="icon-archive"></i> Heures identifiées sur des lots</h3>
 
 
-            <article class="card card-xs xs wp-duration" v-for="d in day.declarations">
+            <article class="card card-xs xs wp-duration" v-for="d in day.declarations" :class="'status-' + d.status_id">
                 <span class="infos">
                     <strong>
                         <i class="icon-archive"></i>
-                        <abbr :title="d.project">{{ d.acronym }}</abbr> <i class="icon-angle-right"></i> {{ d.wpCode }}</strong> <br>
+                        <abbr :title="d.project">{{ d.acronym }}</abbr>
+                        <i class="icon-angle-right"></i> {{ d.wpCode }}
+                    </strong><br>
                     <small><i class="icon-cubes"></i> {{ d.label }}</small>
+
+                    <div class="status">
+                        <small v-if="d.status_id == 2"><i class="icon-pencil"></i> Brouillon</small>
+                        <small v-if="d.status_id == 5"><i class="icon-paper-plane"></i> Créneau soumis à validation</small>
+                     </div>
+
+
                 </span>
 
                 <div class="total">
@@ -112,9 +124,6 @@
                 </div>
             </article>
 
-
-
-
             <article class="wp-duration card xs">
                 <span>total</span>
                 <div class="total" :class="{ 'text-danger': isExceed}">
@@ -136,44 +145,52 @@
 </template>
 
 <style lang="scss" scoped>
-    .wp-duration {
-        display: flex;
-        border-bottom: thin solid white;
-        align-items: center;
-        strong small {
-            font-weight: 100;
+
+        .wp-duration {
+            display: flex;
+            border-bottom: thin solid white;
+            align-items: center;
+            strong small {
+                font-weight: 100;
+            }
+            &[class*='status-'] {
+                border-left: solid 4px #ddd;
+            }
+            &.status-5 {
+                border-left-color: #0b58a2;
+            }
         }
+        .left {
+            flex: 0 0 35px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding-left: 8px;
+            border-left: solid #fff thin;
         }
-    .left {
-        flex: 0 0 35px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        padding-left: 8px;
-        border-left: solid #fff thin;
-    }
-    .total {
-        margin-left: auto;
-        font-size: 1.4em;
-        font-weight: 700;
-        padding-right: .5em;
-        em {
-            font-size: .5em;
-            font-weight: 100;
-            line-height: 2em;
+        .total {
+            margin-left: auto;
+            font-size: 1.4em;
+            font-weight: 700;
+            padding-right: .5em;
+            em {
+                font-size: .5em;
+                font-weight: 100;
+                line-height: 2em;
+            }
         }
-    }
-    [class*="icon-"]{
-        text-align: center;
-    }
-    .icon-trash {
-        cursor: pointer;
-        text-align: center;
-        &:hover {
-            background: #0b58a2;
-            color: white;
+        [class*="icon-"]{
+            text-align: center;
         }
-    }
+        .icon-trash {
+            cursor: pointer;
+            text-align: center;
+            &:hover {
+                background: #0b58a2;
+                color: white;
+            }
+        }
+
 </style>
 
 <script>
@@ -192,6 +209,9 @@
                require: true
             },
             selection: {
+                require: true
+            },
+            label: {
                 require: true
             }
         },

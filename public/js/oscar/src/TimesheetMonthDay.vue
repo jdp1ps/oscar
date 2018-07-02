@@ -1,8 +1,12 @@
 <template>
     <div class="day" @click="handlerClick" :class="{'locked': day.locked}" @contextmenu.prevent="handlerRightClick">
+
+
+
         <span class="label">{{ day.label }}</span>
 
         <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label">
+            <i :class="'icon-status-' + d.status_id"></i>
             {{ d.acronym }}
             <span class="addon">
                 {{d.duration | duration}}
@@ -162,9 +166,14 @@
                        groups[d.acronym] = {
                            label: d.label,
                            acronym: d.acronym,
-                           duration: 0.0
+                           duration: 0.0,
+                           status_id: d.status_id
                        }
                    }
+                   if( d.status_id != groups[d.acronym].status_id ){
+                       groups[d.acronym].status_id = 0;
+                   }
+                   //groups[d.acronym].status_id += d.duration;
                    groups[d.acronym].duration += d.duration;
                });
                return groups;

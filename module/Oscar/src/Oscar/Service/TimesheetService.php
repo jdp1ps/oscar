@@ -273,6 +273,25 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $timesheets->getQuery()->getResult();
     }
 
+    public function getTimesheetsPersonPeriodArrayId($currentPerson, \DateTime $from, \DateTime $to){
+
+        $this->getServiceLocator()->get('Logger')->debug(sprintf("Récupération des créneaux en brouillon entre %s et %s", $from->format('Y-m-d'), $to->format('Y-m-d')));
+
+        $query = $this->getEntityManager()->createQueryBuilder('t')
+            ->select('t.id')
+            ->from(TimeSheet::class, 't')
+            ->where('t.person = :owner AND t.status = :status AND t.dateFrom >= :from')
+            ->setParameters([
+                'owner' => $currentPerson,
+                'from' => $from,
+//                'to' => $to->format('Y-m-d'),
+                'status' => TimeSheet::STATUS_DRAFT,
+            ])
+            ->getQuery();
+        $this->getServiceLocator()->get('Logger')->debug($query->getSQL());
+        return $query->getArrayResult();
+    }
+
 
     /**
      * Envoi des déclarations.

@@ -846,10 +846,8 @@ class TimesheetController extends AbstractOscarController
         // Durée d'une journée de travail maximum légale
         $maxDays = 12.0;
 
-
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
-
 
         // Données sur la période
         $today = new \DateTime();
@@ -861,6 +859,29 @@ class TimesheetController extends AbstractOscarController
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
         $from = $dateRef->format('Y-m-01');
         $to = $dateRef->format('Y-m-' . $nbr);
+
+        $tsFrom = (new \DateTime($from))->getTimestamp();
+        $tsTo = (new \DateTime($to))->getTimestamp();
+        $tsNow = $today->getTimestamp();
+
+        $output['periodFutur'] = false;
+        $output['periodCurrent'] = false;
+        $output['periodFinished'] = false;
+
+        if( $tsFrom > $tsNow ){
+            $output['periodFutur'] = true;
+            $output['periodMessage'] = "Ce mois n'est pas encore passé";
+        }
+
+        if( $tsTo < $tsNow ){
+            $output['periodFinished'] = true;
+            $output['periodMessage'] = "Ce mois est passé";
+        }
+
+        if( $tsFrom <= $tsNow && $tsTo >= $tsNow ){
+            $output['periodCurrent'] = true;
+            $output['periodMessage'] = "Mois en cours";
+        }
 
         $output['person'] = (string) $currentPerson;
         $output['person_id'] = $currentPerson->getId();
@@ -930,7 +951,6 @@ class TimesheetController extends AbstractOscarController
         $output['activities'] = $activities;
         $output['workPackages'] = $workPackages;
 
-
         // Récupération des créneaux présents dans Oscar
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
         $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
@@ -941,8 +961,6 @@ class TimesheetController extends AbstractOscarController
             ]);
 
         $timesheets = $query->getQuery()->getResult();
-
-
 
         for( $i = 1; $i<=$nbr; $i++ ){
             $data = sprintf('%s-%s-%s', $year, $month, $i);
@@ -977,7 +995,6 @@ class TimesheetController extends AbstractOscarController
                 $lockedReason = $lockedDays[$data];
             }
 
-
             $output['days'][$i] = [
                 'date' => $data,
                 'i' => $i,
@@ -995,13 +1012,14 @@ class TimesheetController extends AbstractOscarController
                 'sickleave' => [],
                 'absent' => [],
                 'research' => [],
+
+                // Durée "normale" de la journée
                 'dayLength' => $dayLength,
                 'maxDay' => $maxDays,
                 'locked' => $locked,
                 'closed' => $close,
                 'lockedReason' => $lockedReason
             ];
-
         }
 
         /** @var TimeSheet $t */
@@ -1020,16 +1038,6 @@ class TimesheetController extends AbstractOscarController
                         'status_id' => $t->getStatus(),
                         'status' => TimeSheet::getStatusLabel($t->getStatus())
                     ];
-
-                    /**
-                    'conges' => [ 'code' => 'conges',  'label' => 'Congès',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
-                    'learning' => [ 'code' => 'learning',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
-                    'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
-                    'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
-                    'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
-                    'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
-                     *
-                     */
 
                     switch( $t->getLabel() ){
                         case 'cours' :
@@ -1107,6 +1115,38 @@ class TimesheetController extends AbstractOscarController
             switch ($method) {
                 case 'GET' :
                     return $this->ajaxResponse($output);
+                    break;
+
+                case 'POST' :
+                    $datas = json_decode($this->params()->fromPost('datas'));
+                    $this->getLogger()->debug("Données recues : " . print_r($datas, true));
+                    if( !$datas ){
+                        return $this->getResponseBadRequest('Problème de transmission des données');
+                    }
+
+                    if( !$datas->from || !$datas->to ){
+                        return $this->getResponseInternalError("La période soumise est incomplète");
+                    }
+
+                    try {
+                        $from = new \DateTime($datas->from);
+                        $to = new \DateTime($datas->to);
+
+                        $timesheets = $timesheetService->getTimesheetsPersonPeriodArrayId($currentPerson, $from, $to);
+
+                        if( count($timesheets) == 0 ){
+                            throw new \Exception("Aucun créneau à soumettre pour cette période.");
+                        }
+
+                        $this->getLogger()->debug(print_r($timesheets, true));
+                        $timesheetService->send($timesheets, $currentPerson);
+                        return $this->getResponseOk();
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError('Erreur de soumission de la période : ' . $e->getMessage());
+                    }
+
+                    $this->getLogger()->debug(print_r($datas, true));
+                    return $this->getResponseNotImplemented("Pas encore fait");
                     break;
 
                 case 'DELETE' :

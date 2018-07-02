@@ -16,6 +16,8 @@
             </div>
         </div>
 
+        <pre>{{ dayLabel }}</pre>
+
         <div class="overlay" v-if="selectedDay && selectionWP && selectionWP.code " style="z-index: 2001">
             <div class="content container overlay-content">
                 <section>
@@ -93,7 +95,7 @@
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
                     <strong>{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
-                    <button class="btn btn-primary" style="margin-left: auto">
+                    <button class="btn btn-primary" style="margin-left: auto" @click="sendMonth()">
                         <i class="icon-upload"></i>
                         Envoyer
                     </button>
@@ -145,16 +147,21 @@
                             Détails de la
                             <strong>semaine {{ selectedWeek.label }}</strong>
                         </h3>
+                        <button class="btn btn-default" @click="selectedWeek = null">
+                            <i class="icon-angle-left"></i> Retour
+                        </button>
                         <p>
-                            <i class="icon-clock"></i> <strong>{{ selectedWeek.total | duration }} heure(s) saisies</strong>
+                            <i class="icon-clock"></i> <strong>{{ selectedWeek.total | duration }} heure(s)</strong> saisies pour cette semaine
                             <button class="btn btn-danger btn-xs" @click="deleteWeek(selectedWeek)" v-if="selectedWeek.drafts > 0">
                                 <i class="icon-trash"></i>
                                 Supprimer les déclarations non-envoyées
                             </button>
                         </p>
 
-                        <section v-if="selectedWeek.total < selectedWeek.weekLength">
-                            <p>Vous pouvez compléter automatiquement cette semaine en affectant les
+                        <section v-if="selectedWeek.total < selectedWeek.totalOpen">
+                            <p>
+                                <i class="icon-help-circled"></i>
+                                Vous pouvez compléter automatiquement cette semaine en affectant les
                                 <strong>{{ (selectedWeek.weekLength - selectedWeek.total) | duration }} heure(s)</strong>
                                 avec une des activités ci-dessous :
                             </p>
@@ -165,16 +172,56 @@
                             </button>
                         </section>
 
+                        <p v-if="selectedWeek.totalOpen < selectedWeek.weekLength">
+                            <i class="icon-help-circled"></i>
+                            Cette semaine n'est pas encore terminée<br>
+                            OPEN : {{ selectedWeek.totalOpen }}<br>
+                            LENGTH : {{ selectedWeek.weekLength }}
+                        </p>
+
                     </div>
                     <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
                     <timesheetmonthdaydetails  v-else-if="selectedDay"
-                            :day="selectedDay" :workPackages="ts.workPackages" :selection="selectionWP"
+                            :day="selectedDay"
+                            :workPackages="ts.workPackages"
+                            :selection="selectionWP"
+                            :label="dayLabel"
+                            @cancel="selectedDay = null"
                             @removetimesheet="deleteTimesheet"
                             @addtowp="handlerWpFromDetails($event)"
                     />
                     <div v-else>
-                        <h3>Mois de TEST</h3>
+                        <h3>
+                            <i class="icon-calendar"></i>
+                            Mois de <strong>{{ mois }}</strong></h3>
+
+                        <section v-for="week in weeks" v-if="ts" :class="selectedWeek == week ? 'selected' : ''" class="card xs">
+                            <header class="week-header" @click="selectWeek(week)">
+                                <span>Semaine {{ week.label }}</span>
+                                <small>
+                                    <em>Cumul des heures : </em>
+                                    <strong :class="(week.total > week.weekLength)?'has-titled-error':''"
+                                            :title="(week.total > week.weekLength)?
+                                                'Les heures excédentaires risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
+                                                :''">
+                                        <i class="icon-attention-1" v-if="week.total > week.weekLength"></i>{{ week.total | duration }}</strong>
+
+                                    / {{ week.weekLength | duration }}
+                                </small>
+                            </header>
+                        </section>
+
+                        <p v-if="ts.periodCurrent">
+                            Mois en cours, vous ne pouvez soumettre vos heures qu'à la fin du mois.
+                        </p>
+                        <p v-else-if="ts.periodFutur">
+                            FUTUR
+                        </p>
+                        <p v-else-if="ts.periodFinished">
+                            PAST
+                        </p>
                     </div>
+
             </section>
         </section>
     </section>
@@ -469,6 +516,13 @@
         },
 
         computed: {
+            dayLabel(){
+                if( this.selectedDay )
+                    return moment(this.selectedDay.data).format('dddd DD MMMM YYYY');
+                else
+                    return "";
+            },
+
             /**
              * Retourne la durée de remplissage d'une journée.
              */
@@ -508,6 +562,7 @@
                         label: currentWeekNum,
                         days: [],
                         total: 0.0,
+                        totalOpen: 0.0,
                         weekLength: 0.0,
                         drafts: 0
                     };
@@ -520,6 +575,7 @@
                                 label: currentDay.week,
                                 days: [],
                                 total: 0.0,
+                                totalOpen: 0.0,
                                 weekLength: 0.0,
                                 drafts: 0
                             };
@@ -527,6 +583,12 @@
 
                         currentWeekNum = currentDay.week;
                         currentWWeek.total += currentDay.duration;
+
+
+                        if( !(currentDay.locked || currentDay.closed) ){
+                            currentWWeek.totalOpen += currentDay.dayLength;
+                        }
+
                         if( currentWWeek.status == "Brouillon" ){
                             currentWWeek.drafts++;
                         }
@@ -544,6 +606,27 @@
         },
 
         methods: {
+
+            sendMonth(){
+              console.log(this.ts);
+              var datas = new FormData();
+              datas.append('action', 'sendmonth');
+              datas.append('datas', JSON.stringify({
+                  from: this.ts.from,
+                  to: this.ts.to
+              }));
+              this.$http.post('', datas).then(
+                    ok => {
+                        console.log('DONE !');
+                        this.fetch();
+                    },
+                    ko => {
+                      this.error = 'Erreur lors de l\'envoi de la période : ' + ko.body;
+                    }
+              ).then(foo => {
+                  this.selectedWeek = null;
+              });
+            },
 
             fillMonth(){
                 // TODO Remplissage automatique du mois
