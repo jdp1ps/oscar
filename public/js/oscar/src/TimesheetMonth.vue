@@ -1,17 +1,55 @@
 <template>
     <section @click="handlerClick">
 
+        <transition name="fade">
+            <div class="loading-message" v-show="loading">
+                <i class="icon-spinner animate-spin"></i>
+                {{ loading }}
+            </div>
+        </transition>
+
         <div class="overlay" v-if="error"  style="z-index: 2002">
             <div class="content container overlay-content">
                 <h2><i class="icon-attention-1"></i> Oups !</h2>
-                <p class="text-danger">
-                    Cette opération a provoqué une erreur. Après avoir refermé toutes les fenêtres Oscar, reconnectez
-                    vous et retentez l'opération. Si l'erreur persiste, veuillez transmettre le message ci dessous à
-                    l'administrateur de l'application :
-                </p>
                 <pre class="alert alert-danger">{{ error }}</pre>
+                <p class="text-danger">
+                    Si ce message ne vous aide pas, transmettez le à l'administrateur Oscar.
+                </p>
                 <nav class="buttons">
                     <button class="btn btn-primary" @click="error = ''">Fermer</button>
+                </nav>
+            </div>
+        </div>
+
+        <div class="overlay" v-if="help"  style="z-index: 2002">
+            <div class="content container overlay-content">
+                <h2><i class="icon-help-circled"></i> Informations légales</h2>
+                <p>
+                    Dans le cadre des projets soumis aux feuilles de temps, l'organisme financeur impose la justification des heures,
+                    <strong>incluant les activités hors-projets</strong>.
+                    Le culum des heures déclarées doit respecter le cadre légale : <br>
+                </p>
+                <ul v-if="ts">
+                    <li>Durée <em>normal</em> d'une journée : <strong>{{ ts.daylength | duration }}</strong></li>
+                    <li>Durée <strong>maximum légale</strong> d'une journée : <strong>{{ ts.dayExcess | duration }}</strong></li>
+                    <li>Durée <strong>maximum légale</strong> d'une semaine : <strong>{{ ts.weekExcess | duration }}</strong></li>
+                    <li>Durée <strong>maximum légale</strong> d'un mois : <strong>{{ ts.monthExcess | duration }}</strong></li>
+                </ul>
+                <p>
+                    Selon les modalités de financement, les dépacements (même en éxcédent) peuvent être considérés comme des <em>irrégularité</em> pouvant déclencher la suspension ou le remboursement des financements engagés ou à venir.
+                </p>
+                <nav class="buttons">
+                    <button class="btn btn-primary" @click="help = ''">Fermer</button>
+                </nav>
+            </div>
+        </div>
+
+        <div class="overlay" v-if="debug"  style="z-index: 2002">
+            <div class="content container overlay-content">
+                <h2><i class="icon-bug"></i> Debug</h2>
+                <pre class="alert alert-info" style="white-space: pre; font-size: 12px">{{ debug }}</pre>
+                <nav class="buttons">
+                    <button class="btn btn-primary" @click="debug = ''">Fermer</button>
                 </nav>
             </div>
         </div>
@@ -61,29 +99,6 @@
             </div>
         </div>
 
-        <div :style="cssDayMenu" class="daymenu">
-            <div class="selector">
-                <div class="choose-wp">
-                    <ul class="menu-wps" v-if="ts">
-                        <li v-for="wp in ts.workPackages" class="menu-wps-item"
-                            :class="{ 'selected': wp == selectedWP }"
-                            @click.prevent.stop="handlerSelectWP(wp)">
-                            <i class="icon-cubes"></i>
-                            <span class="acronym">{{ wp.acronym }}</span>
-                            <span>{{ wp.code }}</span>
-                            <i class="icon-angle-right"></i>
-                        </li>
-                        <li><i class="icon-leaf"></i>Congès</li>
-                        <li><i class="icon-book-1"></i>Formation</li>
-                        <li><i class="icon-graduation-cap"></i>Enseignement</li>
-                        <li><i class="icon-beaker"></i>Autre recherche</li>
-                        <li><i class="icon-beaker"></i>Autre activités...</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-
         <section v-if="ts" >
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
             <div class="month col-lg-8">
@@ -94,6 +109,10 @@
                     <strong>{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
                 </h3>
+
+                <div class="help cursor-pointer" @click="help=true">
+                    <i class="icon-help-circled"></i> Informations légales sur les déclarations soumises aux feuilles de temps
+                </div>
 
                 <div class="month">
                     <header class="month-header">
@@ -111,11 +130,11 @@
                                 <span>Semaine {{ week.label }}</span>
                                 <small>
                                     <em>Cumul des heures : </em>
-                                    <strong :class="(week.total > week.weekLength)?'has-titled-error':''"
-                                            :title="(week.total > week.weekLength)?
+                                    <strong :class="(week.total > week.weekExcess)?'has-titled-error':''"
+                                            :title="(week.total > week.weekExcess)?
                                                 'Les heures excédentaires risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
                                                 :''">
-                                        <i class="icon-attention-1" v-if="week.total > week.weekLength"></i>{{ week.total | duration }}</strong>
+                                        <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>{{ week.total | duration }}</strong>
 
                                     / {{ week.weekLength | duration }}
                                 </small>
@@ -125,6 +144,7 @@
                                        :class="selectedDay == day ? 'selected':''"
                                        @selectDay="handlerSelectData(day)"
                                        @daymenu="handlerDayMenu"
+                                       @debug="debug = $event"
                                        :day="day"
                                        :key="day.date"/>
                             </div>
@@ -134,27 +154,44 @@
             </div>
             <section class="col-lg-4">
 
+                <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+                <timesheetmonthdaydetails  v-if="selectedDay"
+                                           :day="selectedDay"
+                                           :workPackages="ts.workPackages"
+                                           :selection="selectionWP"
+                                           :label="dayLabel"
+                                           :day-excess="ts.dayExcess"
+                                           @debug="debug = $event"
+                                           @cancel="selectedDay = null"
+                                           @removetimesheet="deleteTimesheet"
+                                           @addtowp="handlerWpFromDetails($event)"
+                />
+
                     <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS SEMAINE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-                    <div v-if="selectedWeek">
-                        <a class="link" @click="selectedWeek = null">
-                            <i class="icon-angle-left"></i> Revenir au mois
-                        </a>
-                        <h3>
-                            <i class="icon-calendar"></i> Détails de la
+                    <div v-else-if="selectedWeek">
+                        <h3 @click.shift="debug = selectedWeek">
+                            <i class="icon-calendar"></i>
+                            Détails de la
                             <strong>semaine {{ selectedWeek.label }}</strong>
                         </h3>
 
+                        <a class="link" @click="selectedWeek = null">
+                            <i class="icon-angle-left"></i> Revenir au mois
+                        </a>
+
                         <h4>Détails : </h4>
-                        <article class="card xs total" :class="{ 'locked': d.locked, 'closed': d.closed }"
+                        <article class="card xs total repport-item" :class="{ 'locked': d.locked, 'closed': d.closed, 'excess': d.duration > ts.dayExcess }"
                                  v-for="d in selectedWeek.days"
-                                 @click="handlerSelectData(d)"
-                        >
+                                 @click="handlerSelectData(d)">
+
                             <div class="week-header" :class="{ 'text-thin' : d.closed || d.locked }">
                                 <span class="" >
                                     <i class="icon-minus-circled" v-if="d.closed"></i>
                                     <i class="icon-lock" v-else-if="d.locked"></i>
                                     <i class="icon-calendar" v-else></i>
                                     {{ d.data | datefull }}
+
+                                    <i class="icon-attention-circled" style="color: red" title="Les heures déclarées dépassent la limite légales"></i>
                                 </span>
                                 <small>
                                     <strong class="text-large">{{ d.duration | duration }}</strong> /
@@ -178,6 +215,11 @@
                             </div>
                         </article>
 
+                        <div class="alert alert-danger" v-if="selectedWeek.total > ts.weekExcess">
+                            <i class="icon-attention-1"></i>
+                            Vos déclarations pour cette semaine dépasse la limite légale fixée à <strong>{{ ts.weekExcess | duration }}</strong> heures.
+                        </div>
+
                         <nav class="buttons-bar">
                             <button class="btn btn-danger btn-xs" @click="deleteWeek(selectedWeek)" v-if="selectedWeek.drafts > 0">
                                 <i class="icon-trash"></i>
@@ -189,7 +231,7 @@
                             <p>
                                 <i class="icon-help-circled"></i>
                                 Vous pouvez compléter automatiquement cette semaine en affectant les
-                                <strong>{{ (selectedWeek.totalOpen) | duration }} heure(s)</strong>
+                                <strong>{{ (selectedWeek.totalOpen - selectedWeek.total) | duration }} heure(s)</strong>
                                 avec une des activités ci-dessous :
                             </p>
                             <wpselector :workpackages="ts.workPackages" :selection="fillSelectedWP" @select="fillSelectedWP = $event"></wpselector>
@@ -198,43 +240,36 @@
                                 Valider
                             </button>
                         </section>
-
-
-                        <pre>{{ selectedWeek }}</pre>
-
                     </div>
-                    <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-                    <timesheetmonthdaydetails  v-else-if="selectedDay"
-                            :day="selectedDay"
-                            :workPackages="ts.workPackages"
-                            :selection="selectionWP"
-                            :label="dayLabel"
-                            @cancel="selectedDay = null"
-                            @removetimesheet="deleteTimesheet"
-                            @addtowp="handlerWpFromDetails($event)"
-                    />
-                    <div v-else>
-                        <h3>
-                            <i class="icon-calendar"></i>
-                            Mois de <strong>{{ mois }}</strong></h3>
 
-                        <section v-for="week in weeks" v-if="ts" :class="selectedWeek == week ? 'selected' : ''" class="card xs">
+                    <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS MOIS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+                    <div v-else>
+                        <h3 @click.prevent.shift.stop="debug = ts">
+                            <i class="icon-calendar"></i>
+                            Mois de <strong>{{ mois }}</strong>
+                        </h3>
+
+                        <section v-for="week in weeks" v-if="ts" class="card xs" >
                             <header class="week-header" @click="selectWeek(week)">
-                                <span>Semaine {{ week.label }}</span>
+                                <span>
+                                    Semaine {{ week.label }}
+                                    <i class="icon-ok-circled" style="color: #999" v-if="week.total < week.weekLength"></i>
+                                    <i class="icon-attention-circled" style="color: #993d00" v-else-if="week.total > week.weekExcess" title="La déclaration est incomplète pour cette période"></i>
+                                    <i class="icon-ok-circled" style="color: #5c9ccc" v-else></i>
+                                </span>
                                 <small>
-                                    <em>Cumul des heures : </em>
-                                    <strong :class="(week.total > week.weekLength)?'has-titled-error':''"
-                                            :title="(week.total > week.weekLength)?
-                                                'Les heures excédentaires risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
+                                    <strong :class="(week.total > week.weekExcess)?'has-titled-error':''"
+                                            :title="(week.total > week.weekExcess)?
+                                                'Les décalarations dépassent la limite légales et risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
                                                 :''">
-                                        <i class="icon-attention-1" v-if="week.total > week.weekLength"></i>{{ week.total | duration }}</strong>
+                                        <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>{{ week.total | duration }}</strong>
 
                                     / <span class="heure-total">{{ week.weekLength | duration }}</span>
                                 </small>
                             </header>
                         </section>
 
-                        <section class="card xs total">
+                        <section class="card xs total interaction-off">
                             <div class="week-header">
                                 <span class="text-big text-xxl">Total</span>
                                 <small>
@@ -244,11 +279,16 @@
                             </div>
                         </section>
 
+                        <div class="alert alert-danger" v-if="ts.total > ts.monthExcess">
+                            <i class="icon-attention-circled"></i>
+                            Les heures mensuelles dépassent le cadre légale fixé à <strong>{{ ts.monthExcess | duration }}</strong> heures.
+                        </div>
+
                         <hr>
 
                         <h4><i class="icon-cubes"></i> Par projet</h4>
                         <section class="card xs" v-for="a in ts.activities">
-                            <div class="week-header">
+                            <div class="week-header interaction-off">
                                 <span>
                                     <strong>{{ a.acronym }}</strong><br>
                                     <em class="text-thin">{{ a.label }}</em>
@@ -258,26 +298,39 @@
                                 </small>
                             </div>
                         </section>
+                        <section class="card xs total interaction-off">
+                            <div class="week-header">
+                                <span>
+                                    <strong class="text-big text-xxl">Total</strong><br>
+                                    <small>Pour les activités soumisses aux déclarations</small>
+                                </span>
+                                <small>
+                                    <strong class="text-large">XXX</strong> /
+                                    <span class="heure-total text-large">XXX</span>
+                                </small>
+                            </div>
+                        </section>
 
                         <nav class="buttons-bar">
                             <button class="btn btn-primary" style="margin-left: auto"
-                                    :class="{ 'disabled': !ts.submitable, 'enabled': ts.submitable }"
+                                    :class="{ 'disabled': !ts.submitable || !ts.hasUnsed, 'enabled': ts.submitable }"
                                     @click="sendMonth()">
                                 <i class="icon-upload"></i>
                                 <i class="icon-spinner animate-spin" v-show="loading"></i>
+                                <span v-if="ts.submitable && ts.hasUnsend">
                                 Soumettre mes déclarations
+                                </span>
+                                <span v-else-if="ts.submitable && !ts.hasUnsend">
+                                Aucune déclaration à envoyer
+                                </span>
+                                <span v-else>
+                                Vous ne pouvez pas soumettre cette période<br>
+                                    <small>{{ ts.submitableInfos }}</small>
+                                </span>
                             </button>
                         </nav>
 
-                        <p v-if="ts.periodCurrent">
-                            Mois en cours, vous ne pouvez soumettre vos heures qu'à la fin du mois.
-                        </p>
-                        <p v-else-if="ts.periodFutur">
-                            FUTUR
-                        </p>
-                        <p v-else-if="ts.periodFinished">
-                            PAST
-                        </p>
+
                     </div>
 
             </section>
@@ -286,6 +339,38 @@
 </template>
 
 <style lang="scss">
+    .repport-item {
+        .icon-attention-circled {
+            display: none;
+        }
+        &.excess {
+            color: #990000;
+            border-left: 4px solid red;
+            .icon-attention-circled {
+                display: inline-block;
+            }
+        }
+    }
+
+
+
+
+    .loading-message {
+        background: white;
+        font-size: 1em;
+        position: fixed;
+        z-index: 10000;
+        bottom: 0;
+        right: 0;
+        padding: .3em 1em;
+        border-radius: 8px 0 0 0 ;
+    }
+
+    .interaction-off {
+        cursor: default;
+        pointer-events: none;
+    }
+
     .interactive-icon-big {
         font-size: 32px;
         cursor: pointer;
@@ -543,6 +628,8 @@
                 },
 
                 loading: false,
+                debug: null,
+                help: false,
 
                 //
                 error: '',
@@ -639,7 +726,8 @@
                         total: 0.0,
                         totalOpen: 0.0,
                         weekLength: 0.0,
-                        drafts: 0
+                        drafts: 0,
+                        weekExcess: this.ts.weekExcess
                     };
 
                     for( var d in this.ts.days ){
@@ -653,7 +741,8 @@
                                 total: 0.0,
                                 totalOpen: 0.0,
                                 weekLength: 0.0,
-                                drafts: 0
+                                drafts: 0,
+                                weekExcess: this.ts.weekExcess
                             };
                         }
 
@@ -760,22 +849,7 @@
                 this.performDelete([timesheet.id]);
             },
 
-            performDelete( ids ){
-                this.$http.delete('?id=' +ids.join(',')).then(
-                    ok => {
-                        this.fetch();
-                    },
-                    ko => {
-                        this.error = 'Impossible de supprimer le créneau : ' + ko.body;
-                    }
-                ).then(foo => {
-                    this.selectedWeek = null;
-                });
-            },
-
             handlerSaveMenuTime(){
-
-
                 let data = [{
                     'day': this.selectedDay.date,
                     'wpId': this.selectionWP.id,
@@ -787,13 +861,20 @@
                 this.performAddDays(data);
             },
 
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // TRAITEMENT DES CRENEAUX
+
+            /**
+             * Déclenchement de l'envoi des créneaux à l'API.
+             */
             performAddDays(datas){
                 let formData = new FormData();
                 formData.append('timesheets', JSON.stringify(datas));
+                this.loading = "Enregistrement des créneaux";
 
                 this.$http.post('/feuille-de-temps/declarant-api', formData).then(
                     ok => {
-                        this.fetch();
+                        this.fetch(false);
                     },
                     ko => {
                         this.error = "Impossible d'enregistrer les créneaux : " + ko.body;
@@ -801,7 +882,23 @@
                 ).then(foo => {
                     this.selectedWeek = null;
                     this.selectionWP = null;
+                    this.loading = false;
                 });;
+            },
+
+            performDelete( ids ){
+                this.loading = "Suppression des créneaux";
+                this.$http.delete('?id=' +ids.join(',')).then(
+                    ok => {
+                        this.fetch(false);
+                    },
+                    ko => {
+                        this.error = 'Impossible de supprimer le créneau : ' + ko.body;
+                    }
+                ).then(foo => {
+                    this.selectedWeek = null;
+                    this.loading = false;
+                });
             },
 
             handlerDayUpdated(){
@@ -812,8 +909,6 @@
             handlerSelectWP(w){
                 this.selectedWP = w;
                 this.selectionWP = w;
-                console.log(this.selectedDay);
-                console.log(this.selectedWP);
                 this.dayMenu = 'none';
             },
 
@@ -827,59 +922,74 @@
                this.hideWpSelector();
             },
 
-
             handlerWpFromDetails(wp){
-              console.log('TimesheetMonth', wp);
                this.handlerSelectWP(wp);
             },
 
             handlerDayMenu(event, day){
-
                 this.dayMenuLeft = event.clientX;
                 this.dayMenuTop = event.clientY;
                 this.dayMenu = 'block';
-//                this.dayMenuSelected = day;
                 this.selectedDay = day;
             },
 
             handlerSelectData(day){
-                this.selectedWeek = null;
                 this.selectedDay = day;
             },
 
+            /**
+             * Chargement du mois suivant
+             */
             nextYear(){
                 this.year +=1;
-                this.fetch();
+                this.fetch(true);
             },
+
+            /**
+             * Chargement du mois suivant
+             */
             nextMonth(){
                 this.month +=1;
                 if( this.month > 12 ){
                     this.month = 1;
                     this.nextYear();
                 } else {
-                    this.fetch();
+                    this.fetch(true);
                 }
             },
+
+            /**
+             * Charement de l'année précédente.
+             */
             prevYear(){
                 this.year -=1;
-                this.fetch();
+                this.fetch(true);
             },
+
             prevMonth(){
                 this.month -=1;
                 if( this.month < 1 ){
                     this.month = 12;
                     this.prevYear();
                 } else {
-                    this.fetch();
+                    this.fetch(true);
                 }
             },
-            fetch(){
+            fetch(clear = true){
+
+                this.loading = "Chargement de la période";
+
+                if( clear ){
+                    this.selectedDay = null;
+                    this.selectedWeek = null;
+                }
+
                 let daySelected;
 
                 if( this.selectedDay )
                     daySelected = this.selectedDay.i;
 
-                console.log('daySelected', daySelected);
+
                 this.$http.get('?month=' +this.month +'&year=' + this.year).then(
                     ok => {
                         this.dayLength = ok.body.dayLength;
@@ -891,7 +1001,9 @@
                     ko => {
                         this.error = 'Impossible de charger cette période (msg server : ' + ko.body +')';
                     }
-                )
+                ).then( foo => {
+                    this.loading = false
+                });
             }
         },
         mounted(){
@@ -900,7 +1012,7 @@
             this.year = this.defaultYear;
             this.dayLength = this.defaultDayLength;
 
-            this.fetch()
+            this.fetch(true)
         }
     }
 </script>

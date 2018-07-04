@@ -1,8 +1,9 @@
 <template>
     <div class="day-details" :class="{'locked': day.locked}">
 
-        <h3>Déclarer des heures <strong>{{ label }}</strong></h3>
-        <a href="#" @click.prevent="$emit('cancel')">
+        <h3 @click.stop.prevent="$emit('debug', day)">Déclarer des heures <strong>{{ label }}</strong></h3>
+
+        <a href="#" @click.prevent="$emit('cancel')" class="link">
             <i class="icon-angle-left"></i> Retour
         </a>
         <div class="alert alert-danger" v-if="day.locked">
@@ -14,37 +15,45 @@
         </div>
 
         <section>
-            <h3><i class="icon-archive"></i> Heures identifiées sur des lots</h3>
 
+            <template v-if="day.declarations.length">
+                <h3><i class="icon-archive"></i> Heures identifiées sur des lots</h3>
+                <article class="card card-xs xs wp-duration" v-for="d in day.declarations" :class="'status-' + d.status_id">
+                    <span class="infos">
+                        <strong>
+                            <i class="icon-archive"></i>
+                            <abbr :title="d.project">{{ d.acronym }}</abbr>
+                            <i class="icon-angle-right"></i> {{ d.wpCode }}
+                        </strong><br>
+                        <small><i class="icon-cubes"></i> {{ d.label }}</small>
 
-            <article class="card card-xs xs wp-duration" v-for="d in day.declarations" :class="'status-' + d.status_id">
-                <span class="infos">
-                    <strong>
-                        <i class="icon-archive"></i>
-                        <abbr :title="d.project">{{ d.acronym }}</abbr>
-                        <i class="icon-angle-right"></i> {{ d.wpCode }}
-                    </strong><br>
-                    <small><i class="icon-cubes"></i> {{ d.label }}</small>
+                        <div class="status">
+                            <small v-if="d.status_id == 2"><i class="icon-pencil"></i> Brouillon</small>
+                            <small v-if="d.status_id == 5"><i class="icon-paper-plane"></i> Créneau soumis à validation</small>
+                         </div>
+                    </span>
+                    <div class="total">
+                        {{ d.duration | heures }}
+                        <em>heure(s)</em>
+                    </div>
+                    <div class="left">
+                        <i class="icon-trash" @click="$emit('removetimesheet', d)"></i>
+                        <i class="icon-ok-circled"></i>
+                    </div>
+                </article>
 
-                    <div class="status">
-                        <small v-if="d.status_id == 2"><i class="icon-pencil"></i> Brouillon</small>
-                        <small v-if="d.status_id == 5"><i class="icon-paper-plane"></i> Créneau soumis à validation</small>
-                     </div>
-
-
-                </span>
-
-                <div class="total">
-                    {{ d.duration | heures }}
-                    <em>heure(s)</em>
-                </div>
-
-                <div class="left">
-                    <i class="icon-trash" @click="$emit('removetimesheet', d)"></i>
-                    <i class="icon-ok-circled"></i>
-                </div>
-
-            </article>
+                <article class="wp-duration card xs">
+                    <span class="text-large text-xl">Total<br>
+                        <small class="text-thin text-small">Sur les activités soumises aux déclarations</small>
+                    </span>
+                    <div class="total">
+                        <span class="text-large text-xl">{{ totalWP | heures }}</span>
+                        <em>heure(s)</em>
+                    </div>
+                    <div class="left"></div>
+                </article>
+                <hr>
+            </template>
 
 
             <article class="wp-duration card xs" v-for="t in day.teaching">
@@ -123,18 +132,21 @@
                     <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
             </article>
+            <hr>
 
             <article class="wp-duration card xs">
-                <span>total</span>
-                <div class="total" :class="{ 'text-danger': isExceed}">
-                    {{ total | heures }} / {{ day.dayLength | heures }}
+                <span  class="text-large text-xl">Total journée</span>
+                <div class="total">
+                    <span class="text-large text-xl">{{ day.duration | heures }}</span>
                     <em>heure(s)</em>
                 </div>
                 <div class="left">
                     &nbsp;
                 </div>
             </article>
-            <div class="alert-danger alert" v-if="total > day.maxDay">
+
+
+            <div class="alert-danger alert" v-if="day.duration > day.maxDay">
                 <i class="icon-attention-circled"></i>
                 Attention, le cumul des heures déclarées exéde la limite légale de <strong>{{ day.maxDay | heures }} heures</strong> fixée par le droit du travail.
             </div>
@@ -213,6 +225,9 @@
             },
             label: {
                 require: true
+            },
+            dayExcess: {
+                require: true
             }
         },
 
@@ -247,11 +262,7 @@
                 return t;
 
             },
-            total(){
-                let t = this.enseignements + this.abs + this.learn + this.other + this.totalWP;
-                return t;
 
-            },
             enseignements(){
                 let t = 0.0;
                 this.day.teaching.forEach( ts => {
@@ -284,6 +295,13 @@
                 let t= 0.0;
                 this.day.sickleave.forEach( ts => {
                     t += ts.sickleave
+                });
+                return t;
+            },
+            research(){
+                let t= 0.0;
+                this.day.research.forEach( ts => {
+                    t += ts.research
                 });
                 return t;
             }

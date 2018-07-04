@@ -844,7 +844,7 @@ class TimesheetController extends AbstractOscarController
         $dayLength = 37/5;
 
         // Durée d'une journée de travail maximum légale
-        $maxDays = 12.0;
+        $maxDays = 10.0;
 
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
@@ -915,7 +915,20 @@ class TimesheetController extends AbstractOscarController
 
         // Durée d'une journée "normale"
         $output['daylength'] = $dayLength;
+
+        // Nombre de jour
         $output['dayNbr'] = $nbr;
+
+        // Limite légale d'une semaine de travail
+        $output['weekExcess'] = 44.0;
+
+        // Limite légale du mois
+        $output['monthExcess'] = 176.0;
+
+        // Limite légale du jour
+        $output['dayExcess'] = $maxDays;
+
+
 
         // Récupération des lots
         $availableWorkPackages = $this->getActivityService()->getWorkPackagePersonPeriod($currentPerson, $year, $month);
@@ -1124,6 +1137,7 @@ class TimesheetController extends AbstractOscarController
 
             $output['days'][$dayTimesheet]['declarations'][] = [
                 'id' => $t->getId(),
+                'credentials' => $timesheetService->resolveTimeSheetCredentials($t),
                 'label' => $t->getLabel(),
                 'comment' => $t->getComment(),
                 'activity' => (string) $activity,

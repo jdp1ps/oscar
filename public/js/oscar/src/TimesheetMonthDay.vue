@@ -1,5 +1,5 @@
 <template>
-    <div class="day" @click="handlerClick" :class="{'locked': day.locked}" @contextmenu.prevent="handlerRightClick">
+    <div class="day" @click="handlerClick" @click.shift.prevent.stop="$emit('debug', day)" :class="{'locked': day.locked}" @contextmenu.prevent="handlerRightClick">
 
 
 
