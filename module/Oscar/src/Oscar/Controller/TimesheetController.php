@@ -871,6 +871,8 @@ class TimesheetController extends AbstractOscarController
         $output['periodCurrent'] = false;
         $output['periodFinished'] = false;
         $output['submitable'] = false;
+        $output['hasUnsend'] = false;
+
 
         if( $tsFrom > $tsNow ){
             $output['periodFutur']      = true;
@@ -1113,10 +1115,12 @@ class TimesheetController extends AbstractOscarController
 
             $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
             $output['total'] += (float)$t->getDuration();
-
-
             $output['activities'][$activity->getId()]['total'] += $t->getDuration();
             $output['workPackages'][$workpackage->getId()]['total'] += $t->getDuration();
+
+            if( $t->getStatus() == TimeSheet::STATUS_DRAFT ){
+                $output['hasUnsend'] = true;
+            }
 
             $output['days'][$dayTimesheet]['declarations'][] = [
                 'id' => $t->getId(),
