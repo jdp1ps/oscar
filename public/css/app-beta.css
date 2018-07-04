@@ -6927,23 +6927,26 @@ span[class*="status-400"] .icon:before {
 [class*="icon-research"]:before {
   content: '\e891'; }
 
-[class*="icon-status2"]:before {
-  content: '\e8a2'; }
+[class*="icon-status-0"]:before {
+  content: '\e80b'; }
 
-[class*="icon-learning"]:before {
-  content: '\e88c'; }
+[class*="icon-status-1"]:before {
+  content: '\e85b'; }
 
-[class*="icon-teaching"]:before {
-  content: '\e877'; }
+[class*="icon-status-3"]:before {
+  content: '\e85a'; }
 
-[class*="icon-sickleave"]:before {
-  content: '\e874'; }
+[class*="icon-status-2"]:before {
+  content: '\e80e'; }
 
-[class*="icon-absent"]:before {
-  content: '\e886'; }
+[class*="icon-status-5"]:before {
+  content: '\e88d'; }
 
-[class*="icon-research"]:before {
+[class*="icon-status-6"]:before {
   content: '\e891'; }
+
+[class*="icon-status-7"]:before {
+  content: '\e87b'; }
 
 /*
 span[class*="status-102"] .icon:before{ content: '\e85e '}
@@ -6951,6 +6954,9 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 */
 .montant-total {
   border-top: #FEFEEF 2px solid; }
+
+.text-big {
+  font-size: 1.4em; }
 
 .role-line {
   border-bottom: dotted #64817A 1px;

@@ -860,6 +860,9 @@ class TimesheetController extends AbstractOscarController
         $from = $dateRef->format('Y-m-01');
         $to = $dateRef->format('Y-m-' . $nbr);
 
+        $periodLength = 0.0;
+        $periodOpened = 0.0;
+
         $tsFrom = (new \DateTime($from))->getTimestamp();
         $tsTo = (new \DateTime($to))->getTimestamp();
         $tsNow = $today->getTimestamp();
@@ -867,20 +870,28 @@ class TimesheetController extends AbstractOscarController
         $output['periodFutur'] = false;
         $output['periodCurrent'] = false;
         $output['periodFinished'] = false;
+        $output['submitable'] = false;
 
         if( $tsFrom > $tsNow ){
-            $output['periodFutur'] = true;
-            $output['periodMessage'] = "Ce mois n'est pas encore passé";
+            $output['periodFutur']      = true;
+            $output['periodMessage']    = "Ce mois n'est pas encore passé";
+            $output['submitableInfos']  = "Ce mois n'est pas encore passé";
         }
 
-        if( $tsTo < $tsNow ){
+        if( $tsTo <= $tsNow ){
             $output['periodFinished'] = true;
-            $output['periodMessage'] = "Ce mois est passé";
+
+            // TODO : Tester sur le période est validée
+            $output['submitable'] = true;
+
+            $output['submitableInfos'] = "Ce mois est passé";
         }
 
         if( $tsFrom <= $tsNow && $tsTo >= $tsNow ){
             $output['periodCurrent'] = true;
             $output['periodMessage'] = "Mois en cours";
+            $output['submitable'] = false;
+            $output['submitableInfos'] = "mois en cours, vous ne pouvez soumettre vos déclarations qu'à la fin du mois";
         }
 
         $output['person'] = (string) $currentPerson;
@@ -895,6 +906,7 @@ class TimesheetController extends AbstractOscarController
         // Dates complètes
         $output['from'] = $from;
         $output['to'] = $to;
+        //$output
 
         // Total du temps cummulé dans le mois
         $output['total'] = 0.0;
@@ -914,6 +926,8 @@ class TimesheetController extends AbstractOscarController
 
         $lockedDays = $this->getServiceLocator()->get('TimesheetService')->getLockedDays($year, $month);
         $this->getLogger()->debug(print_r($lockedDays, true));
+
+
 
         /** @var WorkPackagePerson $workPackagePerson */
         foreach ($availableWorkPackages as $workPackagePerson){
@@ -993,6 +1007,13 @@ class TimesheetController extends AbstractOscarController
                 $locked = true;
                 $close = true;
                 $lockedReason = $lockedDays[$data];
+            }
+
+            if( !$close )
+                $periodLength += $dayLength;
+
+            if( !($locked || $close) ){
+                $periodOpened += $dayLength;
             }
 
             $output['days'][$i] = [
@@ -1089,6 +1110,7 @@ class TimesheetController extends AbstractOscarController
             $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
             $output['total'] += (float)$t->getDuration();
 
+
             $output['activities'][$activity->getId()]['total'] += $t->getDuration();
             $output['workPackages'][$workpackage->getId()]['total'] += $t->getDuration();
 
@@ -1107,6 +1129,9 @@ class TimesheetController extends AbstractOscarController
                 'wp_id' => $t->getWorkpackage()->getId(),
             ];
         }
+
+        $output['periodLength'] = $periodLength;
+        $output['periodOpened'] = $periodOpened;
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');

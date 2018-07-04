@@ -2315,6 +2315,16 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
   border-top: $colorLight 2px solid;
 }
 
+.text-large { font-size: 1.4em; }
+.text-big   { font-size: 1.8em; }
+.text-hudge { font-size: 2.3em; }
+
+.text-thin      { font-weight: 100; }
+.text-light     { font-weight: 200; }
+.text-normal    { font-weight: 400; }
+.text-xl        { font-weight: 700; }
+.text-xxl       { font-weight: 900; }
+
 ////////////////////////////////////////////////////////////////////////////////
 // 4. Gestion des membres
 ////////////////////////////////////////////////////////////////////////////////
@@ -2813,6 +2823,10 @@ form {
     font-family: 'fontello';
     content: '\e865 '' '
   }
+}
+
+pre.alert {
+  white-space: normal;
 }
 
 .alert-help {
