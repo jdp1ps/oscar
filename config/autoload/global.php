@@ -18,6 +18,48 @@ return array(
             'person' => []
         ],
 
+        'closedDays' => function(&$joursFeries, $annee, $mois){
+            $feries = [
+                '1' => [
+                    "$annee-1-1"    => 'Jour férié  (Nouvel an)',
+                ],
+                '2' => [],
+                '3' => [],
+                '4' => [],
+                '5' => [
+                    "$annee-5-1"     => 'Jour férié (Fête du travail)',
+                    "$annee-5-8"    => 'Jour ferié (Armistice 39-45)',
+                ],
+                '6' => [],
+                '7' => [
+                    "$annee-7-14"    => 'Jour ferié (Fête nationnale)',
+                ],
+                '8' => [
+                    "$annee-8-15"    => 'Jour ferié (Assomption)',
+                ],
+                '8' => [],
+                '10' => [],
+                '11' => [
+                    "$annee-11-1"  => 'Jour ferié (La Toussaint)',
+                    "$annee-11-11"  => 'Jour ferié (Armistice 14-18)',
+                ],
+                '12' => [
+                    "$annee-12-25"   => 'Jour ferié (Noël)',
+                ]
+            ];
+
+            // TODO Lundi de pâque
+            // TODO Jeudi de l'assension
+            // TODO Lundi de pentcôte
+
+            foreach ($feries[$mois] as $jour => $message){
+                $joursFeries[$jour] = $message;
+            }
+        },
+
+        'closedDaysExtras' => function($loacked, $year, $month){},
+
+
         ////////////////////////////////////////////////////////////// DOCUMENTS
         // Emplacement des dossiers pour les documents
         'paths' => [

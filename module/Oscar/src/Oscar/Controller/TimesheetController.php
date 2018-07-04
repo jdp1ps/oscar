@@ -924,7 +924,11 @@ class TimesheetController extends AbstractOscarController
         // Liste des lots du mois
         $workPackages = [];
 
-        $lockedDays = $this->getServiceLocator()->get('TimesheetService')->getLockedDays($year, $month);
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        $lockedDays = $timesheetService->getLockedDays($year, $month);
+
         $this->getLogger()->debug(print_r($lockedDays, true));
 
 
