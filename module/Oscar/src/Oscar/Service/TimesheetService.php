@@ -671,17 +671,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         //
-
-
         try {
             $errors = "";
             /** @var TimeSheet $t */
             foreach( $timesheets as $t ){
-                $credential = $this->resolveTimeSheetCredentials($t);
-                if( !$credential['deletable'] ){
-                    $errors .= sprintf("Impossible de supprimer le créneau %s du %s, seul un créneau non-soumis peut être supprimé.\n", $t->getLabel(), $t->getDateFrom()->format('Y-m-d'));
-                } else {
-                    $this->getEntityManager()->remove($t);
+                try {
+                    $this->deleteTimesheet($t, $currentPerson, false);
+                } catch (\Exception $e) {
+                    $errors .= $e->getMessage()."\n";
                 }
             }
             $this->getEntityManager()->flush();
@@ -696,6 +693,31 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         return true;
     }
+
+
+    /**
+     * @param TimeSheet $timesheet
+     * @param null|Person $person
+     * @param bool $flush
+     * @throws OscarException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function deleteTimesheet( TimeSheet $timesheet, $person = null, $flush = true ){
+        // Récupération des droits
+        $credential = $this->resolveTimeSheetCredentials($timesheet, $person);
+
+        if( !$credential['deletable'] == true ){
+            throw new OscarException(sprintf("Impossible de supprimer le créneau %s du %s, seul un créneau non-soumis peut être supprimé.\n", $timesheet->getLabel(), $timesheet->getDateFrom()->format('Y-m-d')));
+        } else {
+            $this->getEntityManager()->remove($timesheet);
+            if( $flush ){
+                $this->getEntityManager()->flush($timesheet);
+            }
+        }
+    }
+
+
+
 
     public function rejectSci( $datas, $by ){
         $timesheets = [];
