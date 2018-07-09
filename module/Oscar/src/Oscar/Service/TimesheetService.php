@@ -426,6 +426,30 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $declaration;
     }
 
+    public function resolveTimeSheetValidation( TimeSheet $timeSheet ){
+        $validation = false;
+
+        if( $timeSheet->getStatus() != TimeSheet::STATUS_INFO ){
+            $validation = [
+                'prj' => [
+                    'date' => null,
+                    'by' => null
+                ],
+                'sci' => [
+                    'date' => $timeSheet->getValidatedSciAt() ? $timeSheet->getValidatedSciAt()->format('Y-m-d'): null,
+                    'validator' => $timeSheet->getValidatedSciBy() ? $timeSheet->getValidatedSciBy() : null,
+                    'validator_id' => $timeSheet->getValidatedSciById() ? $timeSheet->getValidatedSciById() : null,
+                ],
+                'adm' => [
+                    'date' => $timeSheet->getValidatedAdminAt() ? $timeSheet->getValidatedAdminAt()->format('Y-m-d'): null,
+                    'validator' => $timeSheet->getValidatedAdminBy() ? $timeSheet->getValidatedAdminBy() : null,
+                    'validator_id' => $timeSheet->getValidatedAdminById() ? $timeSheet->getValidatedAdminById() : null,
+                ]
+            ];
+        }
+        return $validation;
+    }
+
     /**
      * Résolution des droits sur une déclaration
      * @param TimeSheet $timeSheet
