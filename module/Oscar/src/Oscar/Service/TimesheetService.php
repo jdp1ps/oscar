@@ -670,13 +670,28 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             throw new OscarException("Créneau introuvable.");
         }
 
-        try {
-            foreach( $timesheets as $t )
-                $this->getEntityManager()->remove($t);
+        //
 
+
+        try {
+            $errors = "";
+            /** @var TimeSheet $t */
+            foreach( $timesheets as $t ){
+                $credential = $this->resolveTimeSheetCredentials($t);
+                if( !$credential['deletable'] ){
+                    $errors .= sprintf("Impossible de supprimer le créneau %s du %s, seul un créneau non-soumis peut être supprimé.\n", $t->getLabel(), $t->getDateFrom()->format('Y-m-d'));
+                } else {
+                    $this->getEntityManager()->remove($t);
+                }
+            }
             $this->getEntityManager()->flush();
+
         } catch (\Exception $e) {
             throw new OscarException("BD Error : Impossible de supprimer le créneau.");
+        }
+
+        if( $errors ){
+            throw new OscarException("Un ou plusieurs créneaux n'ont pas pu être supprimés : \n" . $errors);
         }
 
         return true;

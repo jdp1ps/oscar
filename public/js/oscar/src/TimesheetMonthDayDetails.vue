@@ -30,6 +30,7 @@
                         <div class="status">
                             <small v-if="d.status_id == 2"><i class="icon-pencil"></i> Brouillon</small>
                             <small v-if="d.status_id == 5"><i class="icon-paper-plane"></i> Créneau soumis à validation</small>
+                            <small v-else><i class="icon-help-circled"></i> Autre status ({{d.status_id}})</small>
                          </div>
                     </span>
                     <div class="total">

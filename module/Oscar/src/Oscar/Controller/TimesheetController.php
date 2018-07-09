@@ -1202,7 +1202,7 @@ class TimesheetController extends AbstractOscarController
                         $timesheetService->delete($idsCreneaux, $currentPerson);
                         return $this->getResponseOk();
                     } catch (\Exception $e ){
-                        return $this->getResponseNotImplemented($e->getMessage());
+                        return $this->getResponseInternalError($e->getMessage());
                     }
 
                     break;
