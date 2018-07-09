@@ -836,6 +836,12 @@ class TimesheetController extends AbstractOscarController
 
 
     public function declarantAction(){
+
+        if( !$this->getOscarUserContext()->getCurrentPerson() ){
+            return $this->getResponseInternalError("Vous avez été déconnecté de Oscar");
+        }
+
+
         $output = [];
 
         $method = $this->getHttpXMethod();
@@ -885,7 +891,6 @@ class TimesheetController extends AbstractOscarController
 
             // TODO : Tester sur le période est validée
             $output['submitable'] = true;
-
             $output['submitableInfos'] = "Ce mois est passé";
         }
 

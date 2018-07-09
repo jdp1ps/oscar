@@ -591,11 +591,8 @@
 </style>
 
 <script>
+    import AjaxResolve from "./AjaxResolve";
 
-   // import TimesheetMonthDay from './TimesheetMonthDay.vue';
-    import TimesheetMonthDayDetails from './TimesheetMonthDayDetails.vue';
-    import UITimeChooser from './UITimeChooser.vue';
-    import TimesheetMonthWorkPackageSelector from './TimesheetMonthWorkPackageSelector.vue';
 
     let defaultDate = new Date();
     let moment = function(){};
@@ -795,7 +792,7 @@
                         this.fetch();
                     },
                     ko => {
-                      this.error = 'Erreur lors de l\'envoi de la période : ' + ko.body;
+                        this.error = AjaxResolve.resolve('Impossible d\'envoyer la période',  ko);
                     }
                 ).then(foo => {
                   this.selectedWeek = null;
@@ -811,8 +808,6 @@
                 let data = [];
 
                 week.days.forEach( d => {
-                   console.log("JOUR",JSON.parse(JSON.stringify(d)));
-                   console.log("LOT", JSON.parse(JSON.stringify(wp)));
                    if( !(d.closed || d.locked || d.duration >= d.dayLength) ){
                        data.push({
                            'day': d.date,
@@ -877,7 +872,7 @@
                         this.fetch(false);
                     },
                     ko => {
-                        this.error = "Impossible d'enregistrer les créneaux : " + ko.body;
+                        this.error = AjaxResolve.resolve('Impossible d\'enregistrer les créneaux',  ko);
                     }
                 ).then(foo => {
                     this.selectedWeek = null;
@@ -893,7 +888,7 @@
                         this.fetch(false);
                     },
                     ko => {
-                        this.error = 'Impossible de supprimer le créneau : ' + ko.body;
+                        this.error = AjaxResolve.resolve('Impossible de supprimer le créneau',  ko);
                     }
                 ).then(foo => {
                     this.selectedWeek = null;
@@ -999,7 +994,7 @@
                         }
                     },
                     ko => {
-                        this.error = 'Impossible de charger cette période (msg server : ' + ko.body +')';
+                        this.error = AjaxResolve.resolve('Impossible de charger cette période', ko);
                     }
                 ).then( foo => {
                     this.loading = false
