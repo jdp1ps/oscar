@@ -1143,7 +1143,7 @@ class TimesheetController extends AbstractOscarController
             $output['days'][$dayTimesheet]['declarations'][] = [
                 'id' => $t->getId(),
                 'credentials' => $timesheetService->resolveTimeSheetCredentials($t),
-                'validattions' => $timesheetService->resolveTimeSheetValidation($t),
+                'validations' => $timesheetService->resolveTimeSheetValidation($t),
                 'label' => $t->getLabel(),
                 'comment' => $t->getComment(),
                 'activity' => (string) $activity,
