@@ -19,7 +19,7 @@
             <template v-if="day.declarations.length">
                 <h3><i class="icon-archive"></i> Heures identifiées sur des lots</h3>
 
-                <day :d="d" v-for="d in day.declarations" :key="d.id"
+                <day :d="d" v-for="d in day.declarations" :key="d.id" :day-length="day.dayLength"
                     @debug="$emit('debug', $event)"
                     @removetimesheet="$emit('removetimesheet', $event)"
                     @edittimesheet="$emit('edittimesheet', $event, day)"
@@ -30,7 +30,7 @@
                         <small class="text-thin text-small">Sur les activités soumises aux déclarations</small>
                     </span>
                     <div class="total">
-                        <span class="text-large text-xl">{{ totalWP | heures }}</span>
+                        <span class="text-large text-xl">{{ totalWP | duration2(day.dayLength) }}</span>
                         <em>heure(s)</em>
                     </div>
                     <div class="left"></div>
@@ -44,7 +44,7 @@
                     <i class="icon-teaching"></i> Enseignements<br>
                     <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
@@ -55,7 +55,7 @@
                     <i class="icon-training"></i> Formation<br>
                     <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
@@ -66,7 +66,7 @@
                     <i class="icon-vacation"></i> Congès<br>
                     <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
@@ -77,7 +77,7 @@
                     <i class="icon-sickleave"></i> Arrêt maladie<br>
                     <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
@@ -88,7 +88,7 @@
                     <i class="icon-research"></i> Autre projet de recherche<br>
                     <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
@@ -99,7 +99,7 @@
                     <i class="icon-abs"></i> Absence<br>
                     <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
@@ -110,7 +110,7 @@
                     <i class="icon-infos"></i> Infos<br>
                     <small>{{ t.description }}</small>
                 </strong>
-                <div class="total">{{ t.duration | heures }} <em>heure(s)</em></div>
+                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
                 <div class="left">
                     <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                 </div>
@@ -120,7 +120,7 @@
             <article class="wp-duration card xs">
                 <span  class="text-large text-xl">Total journée</span>
                 <div class="total">
-                    <span class="text-large text-xl">{{ day.duration | heures }}</span>
+                    <span class="text-large text-xl">{{ day.duration | duration2(day.dayLength) }}</span>
                     <em>heure(s)</em>
                 </div>
                 <div class="left">

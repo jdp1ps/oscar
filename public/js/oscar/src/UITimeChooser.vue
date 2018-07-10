@@ -3,10 +3,10 @@
         <pre>{{ duration }} / {{ baseTime }} / {{ displayPercent }}</pre>
         <div class="percents">
             <span @click.prevent.stop="applyDuration(fill)" v-if="fill > 0">Remplir</span>
-            <span @click.prevent.stop="applyPercent(100)">100%</span>
-            <span @click.prevent.stop="applyPercent(75)">75%</span>
-            <span @click.prevent.stop="applyPercent(50)">50%</span>
-            <span @click.prevent.stop="applyPercent(25)">25%</span>
+            <span @click.prevent.stop="applyPercent(100)" :class="displayPercent == '100' ? 'selected' : ''">100%</span>
+            <span @click.prevent.stop="applyPercent(75)" :class="displayPercent == '75' ? 'selected' : ''">75%</span>
+            <span @click.prevent.stop="applyPercent(50)" :class="displayPercent == '50' ? 'selected' : ''">50%</span>
+            <span @click.prevent.stop="applyPercent(25)" :class="displayPercent == '25' ? 'selected' : ''">25%</span>
         </div>
         <div class="hours">
 
@@ -39,10 +39,11 @@
                 text-align: center;
                 font-size: 2em;
                 cursor: pointer;
-                &:hover {
+                &:hover, &.selected {
                     background-color: #0b58a2;
                     color: white;
                 }
+
             }
         }
         .hours {
@@ -128,6 +129,11 @@
                 if( this.duration < 0.0 )
                     this.duration = 0.0;
 
+                this.emitUpdate();
+            },
+
+            applyDuration(fill){
+                this.duration = fill;
                 this.emitUpdate();
             },
 

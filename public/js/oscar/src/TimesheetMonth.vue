@@ -110,6 +110,8 @@
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
                 </h3>
 
+                <pre>{{ 10.0 | duration2 }}</pre>
+
                 <div class="help cursor-pointer" @click="help=true">
                     <i class="icon-help-circled"></i> Informations légales sur les déclarations soumises aux feuilles de temps
                 </div>
@@ -134,9 +136,8 @@
                                             :title="(week.total > week.weekExcess)?
                                                 'Les heures excédentaires risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
                                                 :''">
-                                        <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>{{ week.total | duration }}</strong>
+                                        <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>{{ week.total | duration2(week.weekLength) }}</strong>
 
-                                    / {{ week.weekLength | duration }}
                                 </small>
                             </header>
                             <div class="days">
@@ -195,8 +196,8 @@
                                     <i class="icon-attention-circled" style="color: red" title="Les heures déclarées dépassent la limite légales"></i>
                                 </span>
                                 <small>
-                                    <strong class="text-large">{{ d.duration | duration }}</strong> /
-                                    <span class="heure-total">{{ d.dayLength | duration }}</span>
+                                    <strong class="text-large">{{ d.duration | duration2(d.dayLength) }}</strong>
+                                    <!-- <span class="heure-total">{{ d.dayLength | duration }}</span>-->
                                 </small>
                             </div>
                         </article>
@@ -211,7 +212,7 @@
                                     </small>
                                 </span>
                                 <small class="text-big">
-                                    <strong>{{ selectedWeek.total | duration }}</strong>
+                                    <strong>{{ selectedWeek.total | duration2(selectedWeek.weekLength) }}</strong>
                                 </small>
                             </div>
                         </article>
@@ -658,6 +659,7 @@
         },
 
         filters: {
+
             date(value, format="ddd DD MMMM  YYYY"){
                 var m = moment(value);
                 return m.format(format);
@@ -669,12 +671,6 @@
             day(value, format="ddd DD"){
                 var m = moment(value);
                 return m.format(format);
-            },
-            duration(v){
-                let h = Math.floor(v);
-                let m = Math.round((v - h)*60);
-                if( m < 10 ) m = '0'+m;
-                return h +':' +m;
             }
         },
 
@@ -900,6 +896,7 @@
                     this.selectedWeek = null;
                     this.selectionWP = null;
                     this.loading = false;
+                    this.editedTimesheet = null;
                 });;
             },
 

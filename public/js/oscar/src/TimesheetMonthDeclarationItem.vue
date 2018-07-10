@@ -52,7 +52,7 @@
              </div>
         </span>
         <div class="total">
-            {{ d.duration | heures }}
+            {{ d.duration | duration2(dayLength) }}
             <em>heure(s)</em>
         </div>
         <div class="left">
@@ -66,7 +66,8 @@
     export default {
         name: 'TimesheetMonthDeclarationItem',
         props: {
-            'd': { require: true }
+            'd': { required: true },
+            'dayLength': { required: true }
         },
         filters: {
             heures(v){

@@ -9,56 +9,56 @@
             <i :class="'icon-status-' + d.status_id"></i>
             {{ d.acronym }}
             <span class="addon">
-                {{d.duration | duration}}
+                {{d.duration | duration2(day.dayLength)}}
             </span>
         </span>
 
         <span class="cartouche teaching xs" v-if="day.teaching.length" title="Enseignement">
             Cours
             <span class="addon">
-                {{totalEnseignement | duration}}
+                {{totalEnseignement | duration2(day.dayLength)}}
             </span>
         </span>
 
         <span class="cartouche info xs" v-if="day.infos.length" title="Infos">
             Infos
             <span class="addon">
-                {{totalInfo | duration}}
+                {{totalInfo | duration2(day.dayLength)}}
             </span>
         </span>
 
         <span class="cartouche training xs" v-if="day.training.length" title="Formation">
             Formation
             <span class="addon">
-                {{totalFormation | duration}}
+                {{totalFormation | duration2(day.dayLength)}}
             </span>
         </span>
 
         <span class="cartouche vacations xs" v-if="day.vacations.length" title="Congès">
             Congès
             <span class="addon">
-                {{totalVacations | duration}}
+                {{totalVacations | duration2(day.dayLength)}}
             </span>
         </span>
 
         <span class="cartouche sickleave xs" v-if="day.sickleave.length" title="Arrêt maladie">
             A.Maladie
             <span class="addon">
-               {{ totalSickleave | duration }}
+               {{ totalSickleave | duration2(day.dayLength) }}
             </span>
         </span>
 
         <span class="cartouche sickleave xs" v-if="day.absent.length" title="Absence">
             Abs
             <span class="addon">
-                 {{ totalAbsent | duration }}
+                 {{ totalAbsent | duration2(day.dayLength) }}
             </span>
         </span>
 
         <span class="cartouche research xs" v-if="day.research.length" title="Autre projet de recherche">
             Recherche
             <span class="addon">
-                 {{ totalResearch | duration }}
+                 {{ totalResearch | duration2(day.dayLength) }}
             </span>
         </span>
 
