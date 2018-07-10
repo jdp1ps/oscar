@@ -1,5 +1,6 @@
 <template>
     <div class="ui-timechooser">
+        <pre>{{ duration }} / {{ baseTime }} / {{ displayPercent }}</pre>
         <div class="percents">
             <span @click.prevent.stop="applyDuration(fill)" v-if="fill > 0">Remplir</span>
             <span @click.prevent.stop="applyPercent(100)">100%</span>
@@ -9,9 +10,9 @@
         </div>
         <div class="hours">
 
-            <span class="hour sel" @mousewheel="crementHours">
+            <span class="hour sel">
                 <span @click.prevent.stop="moreHours()"><i class="icon-angle-up"></i></span>
-                {{ hours }}
+                {{ displayHours }}
                 <span @click.prevent.stop="lessHours()"><i class="icon-angle-down"></i></span>
             </span>
 
@@ -19,7 +20,7 @@
 
             <span class="minutes sel">
                 <span @click.prevent.stop="moreMinutes()"><i class="icon-angle-up"></i></span>
-                {{ minutes }}
+                {{ displayMinutes }}
                 <span @click.prevent.stop="lessMinutes()"><i class="icon-angle-down"></i></span>
             </span>
         </div>
@@ -89,47 +90,45 @@
             }
         },
 
+        computed: {
+            displayHours(){
+                return Math.floor(this.duration);
+            },
+
+            displayMinutes(){
+                return Math.floor((this.duration - this.displayHours)*60);
+            },
+
+            displayPercent(){
+                return Math.round(100 / this.baseTime * this.duration);
+            }
+        },
+
         methods: {
             moreMinutes(){
-                console.log(this.minutes, this.pas);
-                this.minutes += this.pas;
-                if( this.minutes > 60 ){
-                    this.minutes -= 70;
-                    this.moreHours();
-                } else {this.emitUpdate();}
+                this.duration += 1/60*this.pas;
+                this.emitUpdate();
             },
 
             lessMinutes(){
-                this.minutes -= this.pas;
-                if( this.minutes < 0 ){
-                    this.minutes = 60 + this.minutes;
-                    this.lessHours();
-                } else {
-                    this.emitUpdate();
-                }
+                this.duration -= 1/60*this.pas;
+                if( this.duration < 0.0 )
+                    this.duration = 0.0;
 
+                this.emitUpdate();
             },
 
             moreHours(){
-                this.hours++;
+                this.duration += 1;
                 this.emitUpdate();
             },
 
             lessHours(){
-                if( this.hours > 0 ){
-                    this.hours--;
-                    this.emitUpdate();
-                }
-            },
+                this.duration -= 1;
+                if( this.duration < 0.0 )
+                    this.duration = 0.0;
 
-            crementHours(e){
-               console.log(e);
-               if( e.deltaY > 0 && this.hours > 0 ){
-                   this.hours -= 1;
-               }
-               else if( e.deltaY < 0 ){
-                   this.hours += 1;
-               }
+                this.emitUpdate();
             },
 
             roundMinutes(minutes){
@@ -137,20 +136,14 @@
             },
 
             applyPercent(percent){
-                let t = this.baseTime * percent / 100;
-                this.hours = Math.floor(t);
-                this.minutes = Math.round((t - this.hours)*60);
-                this.emitUpdate();
-            },
-
-            applyDuration( duration ){
-                this.hours = Math.floor(duration);
-                this.minutes = Math.round((duration - this.hours)*60);
+                this.duration = this.baseTime * percent / 100;
                 this.emitUpdate();
             },
 
             emitUpdate(){
-                this.$emit('timeupdate', { h: this.hours, m: 1/60*this.minutes })
+                let hours = Math.floor(this.duration);
+                let minutes = this.duration - hours;
+                this.$emit('timeupdate', { h: hours, m: minutes })
             }
         }
     }

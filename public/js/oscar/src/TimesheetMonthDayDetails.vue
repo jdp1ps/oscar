@@ -18,67 +18,12 @@
 
             <template v-if="day.declarations.length">
                 <h3><i class="icon-archive"></i> Heures identifiées sur des lots</h3>
-                <article class="card card-xs xs wp-duration" v-for="d in day.declarations" :class="'status-' + d.status_id">
-                    <span class="infos">
-                        <strong>
-                            <i class="icon-archive"></i>
-                            <abbr :title="d.project">{{ d.acronym }}</abbr>
-                            <i class="icon-angle-right"></i> {{ d.wpCode }}
-                        </strong><br>
-                        <small><i class="icon-cubes"></i> {{ d.label }}</small>
 
-                        <div class="status">
-                            <small v-if="d.status_id == 2"><i class="icon-pencil"></i> Brouillon</small>
-
-                            <small v-else-if="d.status_id == 5"><i class="icon-paper-plane"></i>
-                                En cours de validation <br>
-                                    <span v-if="d.validations.prj.date">
-                                        <i class="icon-cubes"></i>
-                                        Validation projet par <strong>{{ d.validations.prj.validator }}</strong>
-                                        le <time :datetime="d.validations.prj.date">{{ d.validations.prj.date }}</time>
-                                    </span>
-                                    <span v-else>
-                                        <i class="icon-book"></i>
-                                        Validation projet en attente...
-                                    </span>
-                                    <br>
-                                    <span v-if="d.validations.sci.date">
-                                        <i class="icon-beaker"></i>
-                                        Validé scientifiquement par <strong>{{ d.validations.sci.validator }}</strong>
-                                        le <time :datetime="d.validations.sci.date">{{ d.validations.sci.date }}</time>
-                                    </span>
-                                    <span v-else>
-                                        <i class="icon-beaker"></i>
-                                        Validation scientifique en attente...
-                                    </span>
-                                    <br>
-                                    <span v-if="d.validations.adm.date">
-                                        <i class="icon-book"></i>
-                                        Validé administrativement par <strong>{{ d.validations.adm.validator }}</strong>
-                                        le <time :datetime="d.validations.adm.date">{{ d.validations.adm.date }}</time>
-                                    </span>
-                                    <span v-else>
-                                        <i class="icon-book"></i>
-                                        Validation administrative en attente...
-                                    </span>
-
-
-                            </small>
-
-
-                            <small v-else><i class="icon-help-circled"></i> Autre status ({{d.status_id}})</small>
-                         </div>
-                    </span>
-                    <div class="total">
-                        {{ d.duration | heures }}
-                        <em>heure(s)</em>
-                    </div>
-                    <div class="left">
-                        <i class="icon-trash" @click="$emit('removetimesheet', d)" v-if="d.credentials.deletable"></i>
-                        <i class="icon-bug" @click="$emit('debug', d)"></i>
-                        <i class="icon-ok-circled"></i>
-                    </div>
-                </article>
+                <day :d="d" v-for="d in day.declarations" :key="d.id"
+                    @debug="$emit('debug', $event)"
+                    @removetimesheet="$emit('removetimesheet', $event)"
+                    @edittimesheet="$emit('edittimesheet', $event, day)"
+                ></day>
 
                 <article class="wp-duration card xs">
                     <span class="text-large text-xl">Total<br>
@@ -194,7 +139,7 @@
     </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 
         .wp-duration {
             display: flex;
@@ -208,6 +153,10 @@
             }
             &.status-5 {
                 border-left-color: #0b58a2;
+            }
+            .icon-comment {
+                color: #CCC;
+                &.with-comment { color: #000 }
             }
         }
         .left {
@@ -245,10 +194,14 @@
 
 <script>
     import TimesheetMonthWorkPackageSelector from './TimesheetMonthWorkPackageSelector.vue';
+    import TimesheetMonthDeclarationItem from './TimesheetMonthDeclarationItem.vue';
 
     export default {
+        name: 'TimesheetMonthDayDetails',
+
         components: {
-            wpselector: TimesheetMonthWorkPackageSelector
+            wpselector: TimesheetMonthWorkPackageSelector,
+            day: TimesheetMonthDeclarationItem
         },
 
         props: {

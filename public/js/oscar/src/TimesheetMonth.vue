@@ -83,7 +83,7 @@
                     </div>
                     <div class="col-md-6">
                         <h4>Temps</h4>
-                        <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue"></timechooser>
+                        <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue" :duration="editedTimesheet ? editedTimesheet.duration : 0"></timechooser>
                     </div>
                     <div class="col-md-4">
                         <h4>Commentaire</h4>
@@ -164,6 +164,7 @@
                                            @debug="debug = $event"
                                            @cancel="selectedDay = null"
                                            @removetimesheet="deleteTimesheet"
+                                           @edittimesheet="editTimesheet"
                                            @addtowp="handlerWpFromDetails($event)"
                 />
 
@@ -598,6 +599,8 @@
     let moment = function(){};
 
     export default {
+        name: 'TimesheetMonth',
+
         props: {
             moment: {
                 required: true
@@ -649,7 +652,8 @@
                 selectionWP: null,
                 selectedTime: null,
                 dayMenuSelected: null,
-                dayMenuTime: 0.0
+                dayMenuTime: 0.0,
+                editedTimesheet: null
             }
         },
 
@@ -770,6 +774,23 @@
 
         methods: {
 
+            editTimesheet( timesheet, day ){
+                console.log(arguments);
+
+              let workpackage = null;
+
+              this.editedTimesheet = timesheet;
+              this.selectedDay = day;
+
+              if( timesheet.wp_id ){
+                  this.selectionWP = this.getWorkpackageById(timesheet.wp_id);
+              }
+            },
+
+            getWorkpackageById( id ){
+                return this.ts.workPackages[id];
+            },
+
             sendMonth(){
 
                 if( this.ts.submitable == undefined || this.ts.submitable != true ){
@@ -846,6 +867,7 @@
 
             handlerSaveMenuTime(){
                 let data = [{
+                    'id': this.editedTimesheet ? this.editedTimesheet.id : null,
                     'day': this.selectedDay.date,
                     'wpId': this.selectionWP.id,
                     'duration': this.dayMenuTime,

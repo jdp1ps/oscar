@@ -650,6 +650,13 @@ class TimesheetController extends AbstractOscarController
     }
 
     /**
+     * @return TimesheetService
+     */
+    protected function getTimesheetService(){
+        return $this->getServiceLocator()->get('TimesheetService');
+    }
+
+    /**
      * todo Valide une déclaration de temps
      */
     public function validateTimesheetAction()
@@ -671,8 +678,7 @@ class TimesheetController extends AbstractOscarController
             throw new UnAuthorizedException();
         }
 
-        /** @var TimesheetService $timeSheetService */
-        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timeSheetService = $this->getTimesheetService();
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             if ($method == 'GET') {
@@ -785,12 +791,13 @@ class TimesheetController extends AbstractOscarController
             $minutes = $duration - ($heures*60);
             $status = TimeSheet::STATUS_DRAFT;
             $comment = $data->comment;
-
+            $timesheetId = $data->id;
             $start = new \DateTime(sprintf($dayBase, 8, 0));
             $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
             $wp = null;
             $label = "error";
 
+            $this->getLogger()->debug("ID reçu $timesheetId");
 
             if( !$data->wpId ){
                 // Spécial
@@ -807,14 +814,22 @@ class TimesheetController extends AbstractOscarController
                 $label = (string)$wp;
             }
 
+            if( $timesheetId ){
+                $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
+                $credentials = $this->getTimesheetService()->resolveTimeSheetCredentials($timesheet, $person);
+                if( !$credentials['editable'] ){
+                    return $this->getResponseInternalError("Vous n'avez pas le droit de modififier le créneau");
+                }
+
+                if( !$timesheet ){
+                    return $this->getResponseInternalError("Ce créneau n'existe plus.");
+                }
 
 
-
-
-
-
-            $timesheet = new TimeSheet();
-            $this->getEntityManager()->persist($timesheet);
+            } else {
+                $timesheet = new TimeSheet();
+                $this->getEntityManager()->persist($timesheet);
+            }
 
             $timesheet->setWorkpackage($wp)
                 ->setComment($comment)
