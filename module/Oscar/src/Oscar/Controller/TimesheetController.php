@@ -883,6 +883,7 @@ class TimesheetController extends AbstractOscarController
 
         $periodLength = 0.0;
         $periodOpened = 0.0;
+        $periodDeclarations = 0.0;
 
         $tsFrom = (new \DateTime($from))->getTimestamp();
         $tsTo = (new \DateTime($to))->getTimestamp();
@@ -1145,6 +1146,7 @@ class TimesheetController extends AbstractOscarController
             $activityCode = $activity->getOscarNum();
             $workpackage = $t->getWorkpackage();
             $wpCode = $workpackage->getCode();
+            $periodDeclarations += (float)$t->getDuration();
 
             $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
             $output['total'] += (float)$t->getDuration();
@@ -1175,6 +1177,7 @@ class TimesheetController extends AbstractOscarController
 
         $output['periodLength'] = $periodLength;
         $output['periodOpened'] = $periodOpened;
+        $output['periodDeclarations'] = $periodDeclarations;
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');

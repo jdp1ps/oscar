@@ -262,9 +262,7 @@
                                             :title="(week.total > week.weekExcess)?
                                                 'Les décalarations dépassent la limite légales et risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
                                                 :''">
-                                        <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>{{ week.total | duration }}</strong>
-
-                                    / <span class="heure-total">{{ week.weekLength | duration }}</span>
+                                        <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>{{ week.total | duration2(week.weekLength) }}</strong>
                                 </small>
                             </header>
                         </section>
@@ -273,8 +271,7 @@
                             <div class="week-header">
                                 <span class="text-big text-xxl">Total</span>
                                 <small>
-                                    <strong class="text-large">{{ ts.total | duration }}</strong> /
-                                    <span class="heure-total text-large">{{ ts.periodLength | duration }}</span>
+                                    <strong class="text-large">{{ ts.total | duration2(ts.periodLength) }}</strong>
                                 </small>
                             </div>
                         </section>
@@ -294,7 +291,7 @@
                                     <em class="text-thin">{{ a.label }}</em>
                                 </span>
                                 <small>
-                                    <strong class="text-large">{{ a.total | duration }}</strong>
+                                    <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>
                                 </small>
                             </div>
                         </section>
@@ -305,8 +302,7 @@
                                     <small>Pour les activités soumisses aux déclarations</small>
                                 </span>
                                 <small>
-                                    <strong class="text-large">XXX</strong> /
-                                    <span class="heure-total text-large">XXX</span>
+                                    <strong class="text-large">{{ ts.periodDeclarations | duration2(ts.periodLength) }}</strong>
                                 </small>
                             </div>
                         </section>
