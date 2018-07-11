@@ -10,54 +10,52 @@
             <small><i class="icon-cubes"></i> {{ d.label }}</small>
 
             <div class="status">
-                <small v-if="d.status_id == 2"><i class="icon-pencil"></i> Brouillon</small>
-
-                <small v-else-if="d.status_id == 5"><i class="icon-paper-plane"></i>
-                    En cours de validation <br>
-                        <span v-if="d.validations.prj.date">
-                            <i class="icon-cubes"></i>
-                            Validation projet par <strong>{{ d.validations.prj.validator }}</strong>
-                            le <time :datetime="d.validations.prj.date">{{ d.validations.prj.date }}</time>
-                        </span>
-                        <span v-else>
-                            <i class="icon-cubes"></i>
-                            Validation projet en attente...
-                        </span>
-                        <br>
-                        <span v-if="d.validations.sci.date">
-                            <i class="icon-beaker"></i>
-                            Validé scientifiquement par <strong>{{ d.validations.sci.validator }}</strong>
-                            le <time :datetime="d.validations.sci.date">{{ d.validations.sci.date }}</time>
-                        </span>
-                        <span v-else>
-                            <i class="icon-beaker"></i>
-                            Validation scientifique en attente...
-                        </span>
-                        <br>
-                        <span v-if="d.validations.adm.date">
-                            <i class="icon-book"></i>
-                            Validé administrativement par <strong>{{ d.validations.adm.validator }}</strong>
-                            le <time :datetime="d.validations.adm.date">{{ d.validations.adm.date }}</time>
-                        </span>
-                        <span v-else>
-                            <i class="icon-book"></i>
-                            Validation administrative en attente...
-                        </span>
-
-
-                </small>
-
-
+                <small v-if="d.status_id == 1"><i class="icon-ok-circled"></i>Validée</small>
+                <small v-else-if="d.status_id == 2"><i class="icon-pencil"></i> Brouillon</small>
+                <small v-else-if="d.status_id == 5"><i class="icon-paper-plane"></i>En cours de validation</small>
                 <small v-else><i class="icon-help-circled"></i> Autre status ({{d.status_id}})</small>
+
+                <div v-if="d.status_id != 2">
+                    <span v-if="d.validations.prj.date">
+                        <i class="icon-cubes"></i>
+                        Validation projet par <strong>{{ d.validations.prj.validator }}</strong>
+                        le <time :datetime="d.validations.prj.date">{{ d.validations.prj.date }}</time>
+                    </span>
+                    <span v-else>
+                        <i class="icon-cubes"></i>
+                        Validation projet en attente...
+                    </span>
+                    <br>
+                    <span v-if="d.validations.sci.date">
+                        <i class="icon-beaker"></i>
+                        Validé scientifiquement par <strong>{{ d.validations.sci.validator }}</strong>
+                        le <time :datetime="d.validations.sci.date">{{ d.validations.sci.date }}</time>
+                    </span>
+                    <span v-else>
+                        <i class="icon-beaker"></i>
+                        Validation scientifique en attente...
+                    </span>
+                    <br>
+                    <span v-if="d.validations.adm.date">
+                        <i class="icon-book"></i>
+                        Validé administrativement par <strong>{{ d.validations.adm.validator }}</strong>
+                        le <time :datetime="d.validations.adm.date">{{ d.validations.adm.date }}</time>
+                    </span>
+                    <span v-else>
+                        <i class="icon-book"></i>
+                        Validation administrative en attente...
+                    </span>
+                </div>
+
+
              </div>
         </span>
         <div class="total">
             {{ d.duration | duration2(dayLength) }}
-            <em>heure(s)</em>
         </div>
-        <div class="left">
-            <i class="icon-trash" @click="$emit('removetimesheet', d)" v-if="d.credentials.deletable"></i>
-            <i class="icon-edit" @click="$emit('edittimesheet', d)" ></i>
+       <div class="left buttons-icon">
+            <i class="icon-trash" @click="$emit('removetimesheet', d)" :class="d.credentials.deletable != true ? 'disabled':''"></i>
+            <i class="icon-edit" @click="$emit('edittimesheet', d)"  :class="d.credentials.editable != true ? 'disabled':''"></i>
             <i class="icon-bug" @click="$emit('debug', d)"></i>
         </div>
     </article>

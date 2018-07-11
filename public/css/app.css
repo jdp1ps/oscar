@@ -6955,6 +6955,21 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 .montant-total {
   border-top: #FEFEEF 2px solid; }
 
+.buttons-icon i {
+  padding: 2px;
+  text-align: center;
+  display: inline-block;
+  border-radius: 4px; }
+  .buttons-icon i.disabled {
+    opacity: .25;
+    pointer-events: none; }
+
+.buttons-icon i:not(.disabled) {
+  cursor: pointer; }
+  .buttons-icon i:not(.disabled):hover {
+    background: #30b0d5;
+    color: white; }
+
 .text-large {
   font-size: 1.4em; }
 
