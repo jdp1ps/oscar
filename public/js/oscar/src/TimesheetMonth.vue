@@ -72,20 +72,18 @@
                         </strong>
                     </h3>
                 </section>
+                <p>
+                    <i class="icon-calendar"></i>
+                    Journée : <strong>{{ selectedDay.date | datefull }}</strong><br/>
+                </p>
 
-                <div class="col">
-                    <div class="col-md-2">
-                        <h4>Infos</h4>
-                        <p>
-                            Journée : <strong>{{ selectedDay.date | datefull }}</strong><br/>
-                            Heures restantes : <strong>{{ (selectedDay.dayLength - selectedDay.duration) | duration}}</strong>
-                        </p>
-                    </div>
+                <div class="row">
+
                     <div class="col-md-6">
                         <h4>Temps</h4>
                         <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue" :duration="editedTimesheet ? editedTimesheet.duration : 0"></timechooser>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <h4>Commentaire</h4>
                         <textarea class="form-control textarea" v-model="commentaire"></textarea>
                     </div>
@@ -771,12 +769,11 @@
         methods: {
 
             editTimesheet( timesheet, day ){
-                console.log(arguments);
-
-              let workpackage = null;
 
               this.editedTimesheet = timesheet;
+              this.commentaire = timesheet.comment;
               this.selectedDay = day;
+              this.dayMenuTime = timesheet.duration;
 
               if( timesheet.wp_id ){
                   this.selectionWP = this.getWorkpackageById(timesheet.wp_id);
@@ -866,7 +863,7 @@
                     'id': this.editedTimesheet ? this.editedTimesheet.id : null,
                     'day': this.selectedDay.date,
                     'wpId': this.selectionWP.id,
-                    'duration': this.dayMenuTime,
+                    'duration': this.dayMenuTime * 60,
                     'comment' : this.commentaire,
                     'code': this.selectionWP.code
                 }];
@@ -917,7 +914,7 @@
 
             handlerDayUpdated(){
               let t = arguments[0];
-              this.dayMenuTime = (t.h + t.m) * 60;
+              this.dayMenuTime = (t.h + t.m);
             },
 
             handlerSelectWP(w){
