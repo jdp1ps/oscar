@@ -981,7 +981,9 @@ class TimesheetController extends AbstractOscarController
                     'project' => (string)$activity->getProject(),
                     'project_id' => $activity->getProject()->getId(),
                     'label' => $activity->getLabel(),
-                    'total' => 0.0
+                    'total' => 0.0,
+                    'validableSci' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity),
+                    'validableAdm' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity),
                 ];
             }
 

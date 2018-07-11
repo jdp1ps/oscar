@@ -34,7 +34,14 @@
                     </span>
                     <span v-else>
                         <i class="icon-beaker"></i>
-                        Validation scientifique en attente...
+                        <span v-if="d.credentials.validableSci">
+                            <a href="#" class="btn btn-xs btn-success">Valider scientifiquement</a>
+                            <a href="#" class="btn btn-xs btn-danger">Refuser scientifiquement</a>
+                        </span>
+                        <span v-else>
+                            Validation scientifique en attente...
+                        </span>
+
                     </span>
                     <br>
                     <span v-if="d.validations.adm.date">
@@ -44,14 +51,18 @@
                     </span>
                     <span v-else>
                         <i class="icon-book"></i>
-                        Validation administrative en attente...
+                        <span v-if="d.credentials.validableAdm">
+                           <a href="#" class="btn btn-xs btn-success">Valider administrativement</a>
+                            <a href="#" class="btn btn-xs btn-danger">Refuser administrativement</a>
+                        </span>
+                        <span v-else>
+                            Validation administrative en attente...
+                        </span>
                     </span>
                 </div>
                 <span v-if="d.validations.conflict" class="text-danger">
-                    
-                        {{ d.validations.conflict }}
-                    </span>
-
+                    {{ d.validations.conflict }}
+                </span>
              </div>
         </span>
         <div class="total">

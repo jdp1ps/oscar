@@ -294,6 +294,20 @@
                                     <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>
                                 </small>
                             </div>
+                            <button class="btn btn-success" v-if="a.validableSci">
+                                <i class="icon-beaker"></i>
+                                Validation scientifique
+                            </button>
+
+                            <button class="btn btn-success" v-if="a.validableAdm">
+                                <i class="icon-beaker"></i>
+                                Validation administrative
+                            </button>
+
+                            <button class="btn btn-success" v-if="a.validablePrj">
+                                <i class="icon-cube"></i>
+                                Validation projet
+                            </button>
                         </section>
                         <section class="card xs total interaction-off">
                             <div class="week-header">
@@ -308,6 +322,9 @@
                         </section>
 
                         <nav class="buttons-bar">
+
+
+
                             <button class="btn btn-primary" style="margin-left: auto"
                                     :class="{ 'disabled': !ts.submitable || !ts.hasUnsed, 'enabled': ts.submitable }"
                                     @click="sendMonth()">
