@@ -430,6 +430,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $validation = false;
 
         if( $timeSheet->getStatus() != TimeSheet::STATUS_INFO ){
+
+            $conflict = '';
+
+            if( $timeSheet->getRejectedAdminAt() ) {
+                $conflict .= sprintf("Rejet administratif par %s le %s : %s", $timeSheet->getRejectedAdminBy(), $timeSheet->getRejectedAdminAt()->format('Y-m-d'), $timeSheet->getRejectedAdminComment());
+            }
+            if( $timeSheet->getRejectedSciAt() ) {
+                $conflict .= sprintf("Rejet scientifique par %s le %s : %s", $timeSheet->getRejectedSciBy(), $timeSheet->getRejectedSciAt()->format('Y-m-d'), $timeSheet->getRejectedSciComment());
+            }
+
             $validation = [
                 'prj' => [
                     'date' => null,
@@ -444,7 +454,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'date' => $timeSheet->getValidatedAdminAt() ? $timeSheet->getValidatedAdminAt()->format('Y-m-d'): null,
                     'validator' => $timeSheet->getValidatedAdminBy() ? $timeSheet->getValidatedAdminBy() : null,
                     'validator_id' => $timeSheet->getValidatedAdminById() ? $timeSheet->getValidatedAdminById() : null,
-                ]
+                ],
+                'conflict' => $conflict ? $conflict : false
             ];
         }
         return $validation;
