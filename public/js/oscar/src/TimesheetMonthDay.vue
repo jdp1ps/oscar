@@ -5,7 +5,7 @@
 
         <span class="label">{{ day.label }}</span>
 
-        <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label">
+        <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label" :class="{ 'conflict': d.status_id == 3 }">
             <i :class="'icon-status-' + d.status_id"></i>
             {{ d.acronym }}
             <span class="addon">
@@ -85,6 +85,7 @@
         &.training { background-color: #0b58a2; }
         &.sickleave { background-color: #808000; }
         &.wp { background-color: #6a5999; }
+        &.conflict { background: #AA0000; }
     }
 
 </style>
