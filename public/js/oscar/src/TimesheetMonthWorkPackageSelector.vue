@@ -11,7 +11,7 @@
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <li v-for="wp in workpackages" :class="selected == wp ? 'selected' : ''">
+            <li v-for="wp in workpackages" :class="selection == wp ? 'selected' : ''">
                 <a href="#" @click.prevent="handlerSelectWP(wp)">
                     <i class="icon-archive"></i>
                     <abbr :title="wp.project">[{{wp.acronym}}]</abbr>
@@ -20,7 +20,7 @@
                 </a>
             </li>
             <li role="separator" class="divider"></li>
-            <li v-for="o in others" :class="selected == o ? 'selected' : ''">
+            <li v-for="o in others" :class="selection == o ? 'selected' : ''">
                 <a href="#" @click.prevent="handlerSelectOther(o)">
                     <i :class="'icon-' +o.code"></i>
                     {{ o.label }}
@@ -56,6 +56,7 @@
         text-align: left;
         padding: 2px 4px;
         line-height: 1em;
+        align-items: center;
         align-items: center;
         .info {
             padding-right: 4px;

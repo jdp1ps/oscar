@@ -8,6 +8,7 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\TimesheetRepository;
+use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\WorkPackage;
 use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
@@ -15,6 +16,7 @@ use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Form\Element\Time;
+use Zend\Log\Logger;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -275,21 +277,41 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function getTimesheetsPersonPeriodArrayId($currentPerson, \DateTime $from, \DateTime $to){
 
-        $this->getServiceLocator()->get('Logger')->debug(sprintf("Récupération des créneaux en brouillon entre %s et %s", $from->format('Y-m-d'), $to->format('Y-m-d')));
-
         $query = $this->getEntityManager()->createQueryBuilder('t')
             ->select('t.id')
             ->from(TimeSheet::class, 't')
-            ->where('t.person = :owner AND t.status = :status AND t.dateFrom >= :from')
+            ->where('t.person = :owner AND t.status = :status AND t.dateFrom >= :from AND t.dateTo <= :to')
             ->setParameters([
                 'owner' => $currentPerson,
                 'from' => $from,
-//                'to' => $to->format('Y-m-d'),
+                'to' => $to->format('Y-m-d'),
                 'status' => TimeSheet::STATUS_DRAFT,
             ])
             ->getQuery();
-        $this->getServiceLocator()->get('Logger')->debug($query->getSQL());
         return $query->getArrayResult();
+    }
+
+    /***
+     * @param $currentPerson
+     * @param \DateTime $from
+     * @param \DateTime $to
+     * @return Query
+     */
+    protected function getQueryTimesheetsPersonPeriod($currentPerson, \DateTime $from, \DateTime $to){
+        $query = $this->getEntityManager()->createQueryBuilder('t')
+            ->select('t')
+            ->from(TimeSheet::class, 't')
+            ->where('t.person = :owner AND t.dateFrom >= :from AND t.dateTo <= :to')
+            ->setParameters([
+                'owner' => $currentPerson,
+                'from' => $from,
+                'to' => $to
+            ])
+            ->getQuery();
+
+        $this->getLogger()->debug($query->getSQL());
+
+        return $query;
     }
 
 
@@ -402,6 +424,122 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ],
             ]*/
         ];
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLogger(){
+        return $this->getServiceLocator()->get('Logger');
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// TRAITMENT DES PÉRIODES
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Retourne les procédures de validation pour la période et la personne données.
+     *
+     * @param $year
+     * @param $month
+     * @param Person $person
+     * @return array
+     */
+    public function getValidationPeriods( $year, $month, Person $person ){
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('v')
+            ->where('v.year = :year AND v.month = :month AND v.declarer = :person')
+            ->setParameters([
+                'year' => $year,
+                'month' => $month,
+                'person' => $person,
+            ])
+            ->getQuery();
+        return $query->getResult();
+    }
+
+    public function sendPeriod( $from, $to, $sender ){
+
+
+        $fromMonth = $from->format('Y-m');
+        $toMonth = $to->format('Y-m');
+        $this->getLogger()->debug("Traitement pour $sender ($fromMonth - $toMonth)");
+
+        if( $fromMonth != $toMonth)
+            throw new Exception("La période à traiter n'est pas un mois...");
+
+        $mois = (integer)$from->format('m');
+        $annee = (integer)$from->format('Y');
+
+        // Créneaux de la périodes
+        $timesheets = $this->getQueryTimesheetsPersonPeriod($sender, $from, $to)->getResult();
+
+        if( count($timesheets) == 0 ){
+            throw new OscarException("Aucun créneau à soumettre pour cette période.");
+        }
+
+        // Déclarations de la période
+        $declarations = $this->getValidationPeriods($annee, $mois, $sender);
+        $this->getLogger()->debug("Déclarations trouvées = " . count($declarations));
+
+        if( count($declarations) > 0 ){
+            throw new OscarException("Vous avez déjà envoyé des déclarations pour cette période");
+        }
+
+        $declarations = [];
+        /** @var TimeSheet $timesheet */
+        foreach ($timesheets as $timesheet) {
+
+            $objectGroup = ValidationPeriod::GROUP_OTHER;
+            $object = $timesheet->getLabel();
+            $objectId = -1;
+
+            if( $timesheet->getActivity() ){
+                $object = ValidationPeriod::OBJECT_ACTIVITY;
+                $objectGroup = ValidationPeriod::GROUP_WORKPACKAGE;
+                $objectId = $timesheet->getActivity()->getId();
+            }
+
+            $key = sprintf("%s_%s", $object, $objectId);
+            if( !array_key_exists($key, $declarations) ){
+                $declarations[$key] = [
+                    'objectId'      => $objectId,
+                    'object' => $object,
+                    'objectGroup' => $objectGroup,
+                    'log' => "Déclaration envoyée",
+                ];
+                $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup);
+            }
+        }
+        $this->getLogger()->debug(print_r($declarations, true));
+    }
+
+    /**
+     * @param $sender
+     * @param $year
+     * @param $month
+     * @param $object
+     * @param $objectId
+     * @param $objectGroup
+     * @return ValidationPeriod
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    protected function createDeclaration($sender, $year, $month,  $object, $objectId, $objectGroup) {
+        $declaration = new ValidationPeriod();
+        $declaration->setStatus(ValidationPeriod::STATUS_STEP1)
+            ->setDateSend(new \DateTime())
+            ->setDeclarer($sender)
+            ->setLog("$sender vient d'envoyer sa déclaration")
+            ->setObject($object)
+            ->setObjectId($objectId)
+            ->setObjectGroup($objectGroup)
+            ->setYear($year)
+            ->setMonth($month);
+        $this->getEntityManager()->persist($declaration);
+        $this->getEntityManager()->flush($declaration);
+        return $declaration;
+
     }
 
     public function allByActivity( Activity $activity ){

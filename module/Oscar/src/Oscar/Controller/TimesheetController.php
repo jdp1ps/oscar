@@ -1201,24 +1201,16 @@ class TimesheetController extends AbstractOscarController
                         return $this->getResponseInternalError("La période soumise est incomplète");
                     }
 
+                    $this->getLogger()->debug("##### ENVOI DES DECLARATIONS");
+
                     try {
                         $from = new \DateTime($datas->from);
                         $to = new \DateTime($datas->to);
-
-                        $timesheets = $timesheetService->getTimesheetsPersonPeriodArrayId($currentPerson, $from, $to);
-
-                        if( count($timesheets) == 0 ){
-                            throw new \Exception("Aucun créneau à soumettre pour cette période.");
-                        }
-
-                        $this->getLogger()->debug(print_r($timesheets, true));
-                        $timesheetService->send($timesheets, $currentPerson);
+                        $timesheetService->sendPeriod($from, $to, $currentPerson);
                         return $this->getResponseOk();
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError('Erreur de soumission de la période : ' . $e->getMessage());
                     }
-
-                    $this->getLogger()->debug(print_r($datas, true));
                     return $this->getResponseNotImplemented("Pas encore fait");
                     break;
 

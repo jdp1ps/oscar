@@ -294,20 +294,6 @@
                                     <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>
                                 </small>
                             </div>
-                            <button class="btn btn-success" v-if="a.validableSci">
-                                <i class="icon-beaker"></i>
-                                Validation scientifique
-                            </button>
-
-                            <button class="btn btn-success" v-if="a.validableAdm">
-                                <i class="icon-beaker"></i>
-                                Validation administrative
-                            </button>
-
-                            <button class="btn btn-success" v-if="a.validablePrj">
-                                <i class="icon-cube"></i>
-                                Validation projet
-                            </button>
                         </section>
                         <section class="card xs total interaction-off">
                             <div class="week-header">
@@ -325,22 +311,19 @@
 
 
 
-                            <button class="btn btn-primary" style="margin-left: auto"
-                                    :class="{ 'disabled': !ts.submitable || !ts.hasUnsed, 'enabled': ts.submitable }"
+                            <button class="btn btn-primary" style="margin-left: auto" v-if="ts.submitable"
+                                    :class="{ 'disabled': !ts.submitable, 'enabled': ts.submitable }"
                                     @click="sendMonth()">
                                 <i class="icon-upload"></i>
                                 <i class="icon-spinner animate-spin" v-show="loading"></i>
-                                <span v-if="ts.submitable && ts.hasUnsend">
-                                Soumettre mes déclarations
-                                </span>
-                                <span v-else-if="ts.submitable && !ts.hasUnsend">
-                                Aucune déclaration à envoyer
-                                </span>
-                                <span v-else>
-                                Vous ne pouvez pas soumettre cette période<br>
-                                    <small>{{ ts.submitableInfos }}</small>
+                                <span>
+                                    Soumettre mes déclarations
                                 </span>
                             </button>
+                            <span v-else>
+                            Vous ne pouvez pas soumettre cette période<br>
+                                <small>{{ ts.submitableInfos }}</small>
+                            </span>
                         </nav>
 
 
