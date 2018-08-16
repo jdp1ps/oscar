@@ -37,7 +37,7 @@ return array(
                 '8' => [
                     "$annee-8-15"    => 'Jour ferié (Assomption)',
                 ],
-                '8' => [],
+                '9' => [],
                 '10' => [],
                 '11' => [
                     "$annee-11-1"  => 'Jour ferié (La Toussaint)',
