@@ -314,6 +314,26 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $query;
     }
 
+    public function setTimesheetToSend(TimeSheet &$timeSheet) {
+        $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE)
+            ->setSendBy((string)$this->getOscarUserContext()->getCurrentPerson())
+            ->setRejectedSciComment(null)
+            ->setRejectedSciAt(null)
+            ->setRejectedSciBy(null)
+            ->setRejectedSciById(null)
+            ->setRejectedAdminComment(null)
+            ->setRejectedAdminAt(null)
+            ->setRejectedAdminBy(null)
+            ->setRejectedAdminById(null)
+            ->setValidatedSciAt(null)
+            ->setValidatedSciBy(null)
+            ->setValidatedSciById(null)
+            ->setValidatedAdminAt(null)
+            ->setValidatedAdminBy(null)
+            ->setValidatedAdminById(null)
+        ;
+    }
+
 
     /**
      * Envoi des déclarations.
@@ -337,23 +357,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if ($data['id']) {
                 /** @var TimeSheet $timeSheet */
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-                $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE)
-                    ->setSendBy((string)$this->getOscarUserContext()->getCurrentPerson())
-                    ->setRejectedSciComment(null)
-                    ->setRejectedSciAt(null)
-                    ->setRejectedSciBy(null)
-                    ->setRejectedSciById(null)
-                    ->setRejectedAdminComment(null)
-                    ->setRejectedAdminAt(null)
-                    ->setRejectedAdminBy(null)
-                    ->setRejectedAdminById(null)
-                    ->setValidatedSciAt(null)
-                    ->setValidatedSciBy(null)
-                    ->setValidatedSciById(null)
-                    ->setValidatedAdminAt(null)
-                    ->setValidatedAdminBy(null)
-                    ->setValidatedAdminById(null)
-                ;
+                $this->setTimesheetToSend($timeSheet);
+
                 $activityNotification[$timeSheet->getActivity()->getId()] = $timeSheet->getActivity();
 
                 $this->getEntityManager()->flush($timeSheet);
@@ -488,6 +493,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         $declarations = [];
+
+        $this->getLogger()->debug("Traitments des " . count($timesheets) . ' créneaux.');
+
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
 
@@ -511,7 +519,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ];
                 $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup);
             }
+
+            $this->setTimesheetToSend($timesheet);
         }
+
+        $this->getEntityManager()->flush($timesheets);
         $this->getLogger()->debug(print_r($declarations, true));
     }
 
@@ -537,6 +549,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->setYear($year)
             ->setMonth($month);
         $this->getEntityManager()->persist($declaration);
+        $this->getEntityManager()->flush($declaration);
         $this->getEntityManager()->flush($declaration);
         return $declaration;
 
