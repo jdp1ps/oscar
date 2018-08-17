@@ -154,6 +154,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     /**
+     * Permet de savoir si la période peut être soumise à validation
+     * @param Person $person
+     * @param $month
+     * @param $year
+     */
+    public function periodSubmitable( Person $person, $month, $year){
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
+            ->createQueryBuilder('v')
+            ->where('v.month = :month AND v.year = :year AND v.declarer = :personId')
+            ->setParameters([
+                'personId' => $person->getId(),
+                'year' => $year,
+                'month' => $month
+            ]);
+        return count($query->getQuery()->getResult()) == 0;
+    }
+
+    /**
      * Retourne les créneaux de la personne regroupès par activité
      * @param Person $person
      */

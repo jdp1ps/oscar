@@ -910,6 +910,9 @@ class TimesheetController extends AbstractOscarController
         $output['submitable'] = false;
         $output['hasUnsend'] = false;
 
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
 
         if( $tsFrom > $tsNow ){
             $output['periodFutur']      = true;
@@ -921,8 +924,11 @@ class TimesheetController extends AbstractOscarController
             $output['periodFinished'] = true;
 
             // TODO : Tester sur le période est validée
-            $output['submitable'] = true;
+            $output['submitable'] = $timesheetService->periodSubmitable($currentPerson, $month, $year);
             $output['submitableInfos'] = "Ce mois est passé";
+            if( !$output['submitable'] ){
+                $output['submitableInfos'] = "Vous avez déja envoyé cette période pour validation";
+            }
         }
 
         if( $tsFrom <= $tsNow && $tsTo >= $tsNow ){
@@ -975,8 +981,7 @@ class TimesheetController extends AbstractOscarController
         // Liste des lots du mois
         $workPackages = [];
 
-        /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
 
         $lockedDays = $timesheetService->getLockedDays($year, $month);
 
