@@ -1141,4 +1141,29 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->sendStackedNotifications();
         return $timesheets;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// OUTPUT
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @param Person $person
+     * @param $from JOUR de début au format YYYY-MM-DD, ex: 2018-07-01
+     * @param $to JOUR de fin au format YYYY-MM-DD, ex: 2018-07-31
+     */
+    public function getTimesheetsPersonPeriod(Person $person, $from, $to){
+        // Récupération des créneaux présents dans Oscar
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
+        $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
+            ->setParameters([
+                // PATCH Aout 2018
+                // Ajout des heures pour récupérer les créneaux du dernier jour
+                // Note : DoctrineExtension ne semble pas fonctionner (usage de DATE(Champ))
+                'start' => $from .' 00:00:00',
+                'end' => $to.' 23:59:59',
+                'person' => $person,
+            ]);
+        return $query->getQuery()->getResult();
+    }
 }

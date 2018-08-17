@@ -1018,19 +1018,7 @@ class TimesheetController extends AbstractOscarController
         $output['activities'] = $activities;
         $output['workPackages'] = $workPackages;
 
-        // Récupération des créneaux présents dans Oscar
-        $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
-        $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
-            ->setParameters([
-                // PATCH Aout 2018
-                // Ajout des heures pour récupérer les créneaux du dernier jour
-                // Note : DoctrineExtension ne semble pas fonctionner (usage de DATE(Champ))
-                'start' => $from .' 00:00:00',
-                'end' => $to.' 23:59:59',
-                'person' => $currentPerson,
-            ]);
-
-        $timesheets = $query->getQuery()->getResult();
+        $timesheets = $timesheetService->getTimesheetsPersonPeriod($currentPerson, $from, $to);
 
         for( $i = 1; $i<=$nbr; $i++ ){
             $data = sprintf('%s-%s-%s', $year, $month, $i);
