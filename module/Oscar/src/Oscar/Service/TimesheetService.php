@@ -791,13 +791,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $this->getEntityManager()->remove($timesheet);
         }
         $this->getEntityManager()->flush();
-        $this->getServiceLocator()->get('Logger')->info("warnings : " . count($warnings));
         return $warnings;
     }
 
 
     public function getLockedDays( $annee, $mois, $loadInitiale = true, $person=null ){
-
         // Jours vérrouillés dans le mois
         $locked = [];
 
@@ -888,9 +886,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
         }
     }
-
-
-
 
     public function rejectSci( $datas, $by ){
         $timesheets = [];
@@ -1146,6 +1141,4 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->sendStackedNotifications();
         return $timesheets;
     }
-
-
 }

@@ -779,11 +779,14 @@ class TimesheetController extends AbstractOscarController
         $datas = json_decode($this->params()->fromPost('timesheets'));
         $timesheets = [];
 
+        //
+        if( count($datas) == 0 ){
+            return $this->getResponseBadRequest("Aucun créneau à traiter");
+        }
+
         foreach ($datas as $data){
             $day = new \DateTime($data->day);
             $dayBase = $day->format('Y-m-d'). ' %s:%s:00';
-
-
             $wpId = $data->wpId;
             $code = $data->code;
             $duration = (int)$data->duration;
@@ -794,29 +797,35 @@ class TimesheetController extends AbstractOscarController
             $timesheetId = $data->id;
             $start = new \DateTime(sprintf($dayBase, 8, 0));
             $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
+
             $wp = null;
             $label = "error";
 
-            $this->getLogger()->debug("ID reçu $timesheetId");
-
+            // Créneau "Hors-lot"
             if( !$data->wpId ){
-                // Spécial
                 $other = $this->getOthersWP()[$data->code];
                 $status = TimeSheet::STATUS_INFO;
-                $label = $data->code;
-
+                $label = $code;
                 if( !$other ){
-                    return $this->getResponseBadRequest(sprintf("Ce type de créneau '%s' n'est pas pris en charge dans cette version", $data->code));
+                    $msg = sprintf("Ce type de créneau '%s' n'est pas pris en charge dans cette version", $code);
+                    $this->getLogger()->error($msg);
+                    return $this->getResponseBadRequest($msg);
                 }
             } else {
                 /** @var WorkPackage $wp */
                 $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
+                if( !$wp ){
+                    $msg = sprintf("Le lot de travail 'N°%s' n'existe plus", $wpId);
+                    $this->getLogger()->error($msg);
+                    return $this->getResponseInternalError($msg);
+                }
                 $label = (string)$wp;
             }
 
             if( $timesheetId ){
                 $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
                 $credentials = $this->getTimesheetService()->resolveTimeSheetCredentials($timesheet, $person);
+
                 if( !$credentials['editable'] ){
                     return $this->getResponseInternalError("Vous n'avez pas le droit de modififier le créneau");
                 }
@@ -825,11 +834,11 @@ class TimesheetController extends AbstractOscarController
                     return $this->getResponseInternalError("Ce créneau n'existe plus.");
                 }
 
-
             } else {
                 $timesheet = new TimeSheet();
                 $this->getEntityManager()->persist($timesheet);
             }
+
 
             $timesheet->setWorkpackage($wp)
                 ->setComment($comment)
@@ -839,9 +848,11 @@ class TimesheetController extends AbstractOscarController
                 ->setStatus($status)
                 ->setPerson($person);
 
+            $this->getLogger()->debug("Traitement du créneau " . $timesheet . ' créneaux');
             $timesheets[] = $timesheet;
 
         }
+
         $this->getEntityManager()->flush($timesheets);
 
         return $this->getResponseOk();
@@ -849,13 +860,17 @@ class TimesheetController extends AbstractOscarController
     }
 
 
-
+    /**
+     * RÉCUPÉRATION des DÉCLARATIONS.
+     *
+     * @return array|Response
+     * @throws \Exception
+     */
     public function declarantAction(){
 
         if( !$this->getOscarUserContext()->getCurrentPerson() ){
             return $this->getResponseInternalError("Vous avez été déconnecté de Oscar");
         }
-
 
         $output = [];
 
@@ -965,10 +980,6 @@ class TimesheetController extends AbstractOscarController
 
         $lockedDays = $timesheetService->getLockedDays($year, $month);
 
-        $this->getLogger()->debug(print_r($lockedDays, true));
-
-
-
         /** @var WorkPackagePerson $workPackagePerson */
         foreach ($availableWorkPackages as $workPackagePerson){
             $workPackage = $workPackagePerson->getWorkPackage();
@@ -1011,8 +1022,11 @@ class TimesheetController extends AbstractOscarController
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
         $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
             ->setParameters([
-                'start' => $from,
-                'end' => $to,
+                // PATCH Aout 2018
+                // Ajout des heures pour récupérer les créneaux du dernier jour
+                // Note : DoctrineExtension ne semble pas fonctionner (usage de DATE(Champ))
+                'start' => $from .' 00:00:00',
+                'end' => $to.' 23:59:59',
                 'person' => $currentPerson,
             ]);
 
