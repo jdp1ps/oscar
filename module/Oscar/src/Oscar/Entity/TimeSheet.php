@@ -278,6 +278,8 @@ class TimeSheet implements ITrackable
             ->setStatus(self::STATUS_DRAFT);
     }
 
+
+
     const UNIT_MINUTE = 60;
     const UNIT_HOUR = 3600;
 
@@ -893,11 +895,20 @@ class TimeSheet implements ITrackable
 
     public function __toString()
     {
+        $acronym = "NONE";
+        $activity = "~";
+        $wpCode = "~";
+
+        if($this->getActivity()){
+            $activity = $this->getActivity();
+            $acronym = $this->getActivity()->getAcronym();
+            $wpCode = $this->getWorkpackage() ? $this->getWorkpackage()->getCode() : 'no WP';
+        }
         return sprintf("[%s] %s %s %s (%s, %s) %s",
             $this->getId(),
-            $this->getActivity()->getProject()->getAcronym(),
-            $this->getActivity(),
-            $this->getWorkpackage()->getCode(),
+            $acronym,
+            $activity,
+            $wpCode,
             $this->getDateFrom()->format('Y-m-d'),
             $this->getDuration(),
             $this->getPerson());
