@@ -112,6 +112,18 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $dateSync;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $syncId;
+
+    /**
+     * @var \DateTime
      * @ORM\Column(type="text", nullable=true)
      */
     private $comment;
@@ -172,9 +184,54 @@ class TimeSheet implements ITrackable
      */
     private $icsFileDateAdded;
 
+
+    //////////////////////////////////////////////////// VALIDATION PROJET
+    ///
+    /**
+     * @var string Personne ayant fait la validation projet.
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $validatedProjectBy;
+
+    /**
+     * @var int ID de la personne ayant fait la validation projet.
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $validatedProjectById;
+
+    /**
+     * @var \DateTime Date de la validation projet.
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $validatedProjectAt;
+
+    /**
+     * @var string Personne ayant refusé la validation projet.
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $rejectedProjectBy;
+
+    /**
+     * @var int ID de la personne ayant refusé la validation projet.
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $rejectedProjectById;
+
+    /**
+     * @var \DateTime Date du refuss de la validation projet.
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $rejectedProjectAt;
+
+    /**
+     * @var string Commentaire laisé par la personne ayant refusé la validation projet.
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $rejectedProjectComment;
+
+
     //////////////////////////////////////////////////// VALIDATION SCIENTIFIQUE
 
-    ////// VALIDATION
     /**
      * @var string Personne ayant fait la validation scientifique.
      * @ORM\Column(type="string", nullable=true)
@@ -193,25 +250,6 @@ class TimeSheet implements ITrackable
      */
     private $validatedSciAt;
 
-    /**
-     * @var string Personne ayant fait la validation administrative.
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $validatedAdminBy;
-
-    /**
-     * @var int ID de la personne ayant fait la validation administrative.
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $validatedAdminById;
-
-    /**
-     * @var \DateTime Date de la validation administrative.
-     * @ORM\Column(type="datetimetz", nullable=true)
-     */
-    private $validatedAdminAt;
-
-    ////// REFUS
     /**
      * @var string Personne ayant refusé la validation scientifique.
      * @ORM\Column(type="string", nullable=true)
@@ -236,7 +274,27 @@ class TimeSheet implements ITrackable
      */
     private $rejectedSciComment;
 
-    ////// REFUS
+
+    //////////////////////////////////////////////////// VALIDATION ADMINISTRATIVE
+    ///
+    /**
+     * @var string Personne ayant fait la validation administrative.
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $validatedAdminBy;
+
+    /**
+     * @var int ID de la personne ayant fait la validation administrative.
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $validatedAdminById;
+
+    /**
+     * @var \DateTime Date de la validation administrative.
+     * @ORM\Column(type="datetimetz", nullable=true)
+     */
+    private $validatedAdminAt;
+
     /**
      * @var string Personne ayant refusé la validation administrative.
      * @ORM\Column(type="string", nullable=true)
@@ -354,6 +412,159 @@ class TimeSheet implements ITrackable
             'rejectedAdminComment' => $this->getRejectedAdminComment(),
             'rejectedAdminBy' => $this->getRejectedAdminBy(),
         ];
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDateSync()
+    {
+        return $this->dateSync;
+    }
+
+    /**
+     * @param \DateTime $dateSync
+     */
+    public function setDateSync($dateSync)
+    {
+        $this->dateSync = $dateSync;
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getSyncId()
+    {
+        return $this->syncId;
+    }
+
+    /**
+     * @param \DateTime $syncId
+     */
+    public function setSyncId($syncId)
+    {
+        $this->syncId = $syncId;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidatedProjectBy()
+    {
+        return $this->validatedProjectBy;
+    }
+
+    /**
+     * @param string $validatedProjectBy
+     */
+    public function setValidatedProjectBy($validatedProjectBy)
+    {
+        $this->validatedProjectBy = $validatedProjectBy;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getValidatedProjectById()
+    {
+        return $this->validatedProjectById;
+    }
+
+    /**
+     * @param int $validatedProjectById
+     */
+    public function setValidatedProjectById($validatedProjectById)
+    {
+        $this->validatedProjectById = $validatedProjectById;
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getValidatedProjectAt()
+    {
+        return $this->validatedProjectAt;
+    }
+
+    /**
+     * @param \DateTime $validatedProjectAt
+     */
+    public function setValidatedProjectAt($validatedProjectAt)
+    {
+        $this->validatedProjectAt = $validatedProjectAt;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedProjectBy()
+    {
+        return $this->rejectedProjectBy;
+    }
+
+    /**
+     * @param string $rejectedProjectBy
+     */
+    public function setRejectedProjectBy($rejectedProjectBy)
+    {
+        $this->rejectedProjectBy = $rejectedProjectBy;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRejectedProjectById()
+    {
+        return $this->rejectedProjectById;
+    }
+
+    /**
+     * @param int $rejectedProjectById
+     */
+    public function setRejectedProjectById($rejectedProjectById)
+    {
+        $this->rejectedProjectById = $rejectedProjectById;
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getRejectedProjectAt()
+    {
+        return $this->rejectedProjectAt;
+    }
+
+    /**
+     * @param \DateTime $rejectedProjectAt
+     */
+    public function setRejectedProjectAt($rejectedProjectAt)
+    {
+        $this->rejectedProjectAt = $rejectedProjectAt;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedProjectComment()
+    {
+        return $this->rejectedProjectComment;
+    }
+
+    /**
+     * @param string $rejectedProjectComment
+     */
+    public function setRejectedProjectComment($rejectedProjectComment)
+    {
+        $this->rejectedProjectComment = $rejectedProjectComment;
+        return $this;
     }
 
     /**
