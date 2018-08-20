@@ -163,6 +163,40 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return count($this->getValidationPeriods($year, $month, $person)) == 0;
     }
 
+    public function getValidationPeriodsActivity( Activity $activity ){
+        $this->getLogger()->debug(sprintf('Récupération des validation pour %s', $activity));
+
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
+            ->createQueryBuilder('v')
+            ->where('v.object = :object AND v.object_id = :idactivity')
+            ->setParameters([
+                'idactivity' => $activity->getId(),
+                'object' => 'activity',
+            ]);
+
+        return $query->getQuery()->getResult();
+    }
+
+    public function getTimesheetsForValidationPeriod( ValidationPeriod $validationPeriod ){
+        $timesheets = [];
+
+        $this->getLogger()->debug("Récupération des créneaux pour la période " . $validationPeriod);
+        $year = $validationPeriod->getYear();
+        $month = $validationPeriod->getMonth();
+        $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
+
+        // Nombre de jours dans le mois
+        $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
+        $from = $dateRef->format('Y-m-01');
+        $to = $dateRef->format('Y-m-' . $nbr);
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($validationPeriod->getDeclarer()->getId());
+
+
+        $timesheets = $this->getTimesheetsPersonPeriod($person, $from, $to);
+
+        return $timesheets;
+    }
+
     /**
      * Récupération des validations actives pour la période donnée.
      *

@@ -144,6 +144,13 @@ timesheet:
                 defaults:
                     action: validateTimesheet
 
+        validationactivity:
+            type: segment
+            options:
+                route: /validation-activite/:idactivity
+                defaults:
+                    action: validationActivity
+
         # Déclarations d'une personne pour une activité
         activityperson:
             type: segment

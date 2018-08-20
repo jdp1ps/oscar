@@ -44,6 +44,39 @@ use Zend\View\Model\ViewModel;
  */
 class TimesheetController extends AbstractOscarController
 {
+    public function validationActivityAction(){
+
+        // Récupération de l'activité
+        $activityId = $this->params()->fromRoute('idactivity');
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+
+        if( !$activity )
+            return $this->getResponseInternalError(sprintf("L'activités '%s' n'existe pas", $activityId));
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+
+        //
+        $validationPeriods = $timesheetService->getValidationPeriodsActivity($activity);
+
+       foreach ($validationPeriods as $validationPeriod) {
+           echo "$validationPeriod\n";
+           echo "----\n";
+           foreach ($timesheetService->getTimesheetsForValidationPeriod($validationPeriod) as $timesheet){
+               echo "CRENEAU ! $timesheet<br>\n";
+           }
+       }
+
+        die();
+
+
+        return [
+            'activity' => $activity
+        ];
+    }
+
+
     /**
      * Exportation et visualisation des feuilles de temps.
      *
