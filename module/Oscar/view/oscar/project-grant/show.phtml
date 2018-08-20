@@ -421,7 +421,7 @@
         </div>
     </div>
     <hr>
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
+    <?php /*if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
         <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
         <h3>Visualiser les feuilles de temps</h3>
         <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
@@ -471,7 +471,7 @@
                 Validation des déclarations
             </a>
         <?php endif;*/ ?>
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION, $entity) ): ?>
+        <?php /*if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION, $entity) ): ?>
 
             <?php if( count($entity->getWorkPackages()) == 0 ): ?>
                 <p class="alert-infos">
@@ -501,7 +501,7 @@
             <?php endif; ?>
         <?php endif; ?>
 
-    <?php endif; ?>
+    <?php endif; */?>
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 
