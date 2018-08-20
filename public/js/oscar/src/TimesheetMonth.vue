@@ -717,6 +717,7 @@
                         total: 0.0,
                         totalOpen: 0.0,
                         weekLength: 0.0,
+                        editable: this.ts.editable,
                         drafts: 0,
                         weekExcess: this.ts.weekExcess
                     };

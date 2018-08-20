@@ -6,7 +6,7 @@
         <a href="#" @click.prevent="$emit('cancel')" class="link">
             <i class="icon-angle-left"></i> Retour
         </a>
-        <div class="alert alert-danger" v-if="day.locked">
+        <div class="alert alert-danger" v-if="!day.editable">
             {{ day.lockedReason }}
         </div>
         <div v-else>

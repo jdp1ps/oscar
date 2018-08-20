@@ -20,6 +20,7 @@ use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\TimeSheet;
+use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
@@ -907,35 +908,58 @@ class TimesheetController extends AbstractOscarController
         $output['periodFutur'] = false;
         $output['periodCurrent'] = false;
         $output['periodFinished'] = false;
+        $output['periodInfos']    = "Ce mois est hors des limite de l'espace-temps";
+
         $output['submitable'] = false;
+        $output['submitableInfos'] = 'Vous ne pouvez pas soumettre cette période pour une raison inconnue';
+
+        $output['editable'] = false;
+        $output['editableInfos'] = 'Vous ne pouvez pas éditer cette période pour une raison inconnue';
+
         $output['hasUnsend'] = false;
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
+        // Récupération des validations pour cette période
+        $periodValidations = $timesheetService->getPeriodValidation($currentPerson, $month, $year);
 
+        // Mois non-terminé ou futur
         if( $tsFrom > $tsNow ){
-            $output['periodFutur']      = true;
-            $output['periodMessage']    = "Ce mois n'est pas encore passé";
-            $output['submitableInfos']  = "Ce mois n'est pas encore passé";
+            $output['periodFutur']      = true;;
+            $output['periodInfos']    = "Ce mois n'a pas encore commencé";
+            $output['submitableInfos']  = "Ce mois n'a pas encore commencé";
+            $output['editableInfos']  = "Ce mois n'a pas encore commencé";
         }
 
+        // Mois passé
         if( $tsTo <= $tsNow ){
-            $output['periodFinished'] = true;
 
-            // TODO : Tester sur le période est validée
-            $output['submitable'] = $timesheetService->periodSubmitable($currentPerson, $month, $year);
-            $output['submitableInfos'] = "Ce mois est passé";
-            if( !$output['submitable'] ){
+            $output['periodFinished'] = true;
+            $output['periodInfos']    = "Ce mois est terminé.";
+
+            // Le mois a une/plusieurs procédure de validation en cours
+            if( count($periodValidations) ){
+                // TODO Afficher l'état générale de la validation
+                $output['submitable'] = false;
                 $output['submitableInfos'] = "Vous avez déja envoyé cette période pour validation";
+                $output['editable'] = false;
+                $output['editableInfos']  = "Vous avez déja envoyé cette période pour validation";
+            } else {
+                $output['submitable'] = true;
+                $output['submitableInfos'] = "Ce mois est terminé, complétez votre déclaration avant de la soumettre";
+                $output['editable'] = true;
+                $output['editableInfos']  = "Ce mois est terminé, complétez votre déclaration avant de la soumettre";
             }
         }
 
         if( $tsFrom <= $tsNow && $tsTo >= $tsNow ){
             $output['periodCurrent'] = true;
-            $output['periodMessage'] = "Mois en cours";
+            $output['periodInfos'] = "Mois en cours";
             $output['submitable'] = false;
             $output['submitableInfos'] = "mois en cours, vous ne pouvez soumettre vos déclarations qu'à la fin du mois";
+            $output['editable'] = true;
+            $output['editableInfos']  = "Mois en cours, vous pouvez commencer à compléter votre déclaration";
         }
 
         $output['person'] = (string) $currentPerson;
@@ -1035,12 +1059,15 @@ class TimesheetController extends AbstractOscarController
             // Journée fermée (feriès)
             $close = false;
 
+            $editable = true;
+
             $lockedReason = "";
 
             $futur = $day->getTimestamp() > $today->getTimestamp();
             if( $futur ){
                 $locked = true;
                 $lockedReason = "Vous ne pouvez pas anticiper une déclaration";
+                $editable = false;
             }
 
             $wDay = $day->format('w');
@@ -1049,14 +1076,25 @@ class TimesheetController extends AbstractOscarController
             if( $weekend ){
                 $locked = true;
                 $close = true;
+                $editable = false;
                 $lockedReason = "Vous ne pouvez pas déclarer le weekend";
             }
 
             if( array_key_exists($data, $lockedDays) ){
                 $locked = true;
                 $close = true;
+                $editable = false;
                 $lockedReason = $lockedDays[$data];
             }
+
+            if( $output['editable'] == false ){
+
+                $editable = false;
+                $lockedReason = $output['editableInfos'];
+            }
+
+
+
 
             if( !$close )
                 $periodLength += $dayLength;
@@ -1073,6 +1111,7 @@ class TimesheetController extends AbstractOscarController
                 'data' => $data,
                 'label' => $day->format('d'),
                 'weekend' => $weekend,
+                'editable' => $editable,
                 'declarations' => [],
                 'infos' => [],
                 'duration' => 0.0,
@@ -1098,6 +1137,7 @@ class TimesheetController extends AbstractOscarController
             $dayTimesheet = (int)($t->getDateFrom()->format('d'));
 
             if (!$t->getActivity()) {
+                $periodKey = ValidationPeriod::GROUP_OTHER;
                 if ($t->getStatus() == TimeSheet::STATUS_INFO) {
 
                     $datas = [
@@ -1147,6 +1187,8 @@ class TimesheetController extends AbstractOscarController
 
                 }
                 continue;
+            } else {
+                $periodKey = "activity-" . $t->getActivity()->getId();
             }
 
             $projectAcronym = $t->getActivity()->getAcronym();
