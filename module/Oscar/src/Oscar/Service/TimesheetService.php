@@ -184,7 +184,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // On organise les résultat avec des clefs correspondantes au type d'objet/ID
         $result = [];
         /** @var ValidationPeriod $validationPeriod */
-        foreach ($query as $validationPeriod) {
+        foreach ($query->getQuery()->getResult() as $validationPeriod) {
             if( array_key_exists($validationPeriod->getPeriodKey(), $result) ){
                 $this->getLogger()->err(sprintf("L'objet ValidationPeriod %s a un doublon !", $validationPeriod));
             }
