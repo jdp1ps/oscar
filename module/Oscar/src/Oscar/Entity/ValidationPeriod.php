@@ -852,5 +852,16 @@ class ValidationPeriod
         return $this;
     }
 
-
+    /**
+     * Retourne la clef de trie pour le rangement mensuel.
+     *
+     * @return string
+     */
+    public function getPeriodKey(){
+        if( $this->getObjectGroup() == self::GROUP_WORKPACKAGE ){
+            return $this->getObject().'-'.$this->getObjectId();
+        } else {
+            $key = $this->getObjectGroup();
+        }
+    }
 }
