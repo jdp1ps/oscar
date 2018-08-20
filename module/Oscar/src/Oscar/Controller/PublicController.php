@@ -30,7 +30,7 @@ class PublicController extends AbstractOscarController
 
     public function parametersAction()
     {
-        $this->getLogger()->debug("PARAMETERS");
+
         /** @var Authentification $auth */
         $auth = $this->getEntityManager()->getRepository(Authentification::class)->find($this->getOscarUserContext()->getDbUser()->getId());
 
@@ -51,8 +51,6 @@ class PublicController extends AbstractOscarController
             $this->getEntityManager()->flush($auth);
             return $this->getResponseOk();
         }
-
-        $this->getLogger()->debug("FREQUENCY = " . print_r($auth->getSettings(), true));
 
         return [
             'person' => $this->getCurrentPerson(),

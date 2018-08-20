@@ -85,6 +85,20 @@
                             </table>
                         </div>
                     </div>
+
+                    <h3>
+                        <i class="icon-building-filled"></i>
+                        Organisations
+                    </h3>
+
+                    <?php foreach ($person->getOrganizations() as $organizationPerson): ?>
+                    <article class="card xs">
+                        <h4 class="card-title">
+                            <i><?= $organizationPerson->getOrganization() ?></i>
+                            <strong><?= $organizationPerson->getRole() ?></strong>
+                        </h4>
+                    </article>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <p class="alert alert-warning">
                         Votre compte n'est pas associé à une personne dans les activités
