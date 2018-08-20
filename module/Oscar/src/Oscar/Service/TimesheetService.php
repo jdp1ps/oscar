@@ -160,6 +160,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param $year
      */
     public function periodSubmitable( Person $person, $month, $year){
+        return count($this->getValidationPeriods($year, $month, $person)) == 0;
+    }
+
+    /**
+     * Récupération des validations actives pour la période donnée.
+     *
+     * @param Person $person
+     * @param $month
+     * @param $year
+     * @return array
+     */
+    public function getPeriodValidation( Person $person, $month, $year){
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
             ->createQueryBuilder('v')
             ->where('v.month = :month AND v.year = :year AND v.declarer = :personId')
@@ -168,8 +180,20 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'year' => $year,
                 'month' => $month
             ]);
-        return count($query->getQuery()->getResult()) == 0;
+
+        // On organise les résultat avec des clefs correspondantes au type d'objet/ID
+        $result = [];
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($query as $validationPeriod) {
+            if( array_key_exists($validationPeriod->getPeriodKey(), $result) ){
+                $this->getLogger()->err(sprintf("L'objet ValidationPeriod %s a un doublon !", $validationPeriod));
+            }
+            $result[$validationPeriod->getPeriodKey()] = $validationPeriod;
+        }
+        return $result;
     }
+
+
 
     /**
      * Retourne les créneaux de la personne regroupès par activité

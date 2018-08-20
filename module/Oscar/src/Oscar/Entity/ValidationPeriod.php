@@ -864,4 +864,11 @@ class ValidationPeriod
             return $this->getObjectGroup();
         }
     }
+
+    public function __toString()
+    {
+        return sprintf('[ValidationPeriod:%s] %s-%s %s=%s, pid=%s', $this->getId(), $this->getYear(), $this->getMonth(), $this->getObject(), $this->getObjectId(), $this->getDeclarer());
+    }
+
+
 }
