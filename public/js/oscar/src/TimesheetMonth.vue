@@ -108,11 +108,11 @@
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
                 </h3>
 
-                <pre>{{ 10.0 | duration2 }}</pre>
-
+                <!--
                 <div class="help cursor-pointer" @click="help=true">
                     <i class="icon-help-circled"></i> Informations légales sur les déclarations soumises aux feuilles de temps
                 </div>
+                -->
 
                 <div class="month">
                     <header class="month-header">
@@ -325,10 +325,7 @@
                                 <small>{{ ts.submitableInfos }}</small>
                             </span>
                         </nav>
-
-
                     </div>
-
             </section>
         </section>
     </section>

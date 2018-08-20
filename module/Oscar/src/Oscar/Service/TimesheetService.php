@@ -1208,6 +1208,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param $to JOUR de fin au format YYYY-MM-DD, ex: 2018-07-31
      */
     public function getTimesheetsPersonPeriod(Person $person, $from, $to){
+        $this->getLogger()->debug(sprintf('Récupération des créneaux entre %s et %s pour %s', $from, $to
+        , $person));
         // Récupération des créneaux présents dans Oscar
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
         $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')

@@ -1138,7 +1138,7 @@ class TimesheetController extends AbstractOscarController
 
             if (!$t->getActivity()) {
                 $periodKey = ValidationPeriod::GROUP_OTHER;
-                if ($t->getStatus() == TimeSheet::STATUS_INFO) {
+
 
                     $datas = [
                         'id' => $t->getId(),
@@ -1185,7 +1185,7 @@ class TimesheetController extends AbstractOscarController
                     $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
                     $output['total'] += (float)$t->getDuration();
 
-                }
+
                 continue;
             } else {
                 $periodKey = "activity-" . $t->getActivity()->getId();
