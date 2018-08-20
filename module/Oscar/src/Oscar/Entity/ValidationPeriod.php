@@ -861,7 +861,7 @@ class ValidationPeriod
         if( $this->getObjectGroup() == self::GROUP_WORKPACKAGE ){
             return $this->getObject().'-'.$this->getObjectId();
         } else {
-            $key = $this->getObjectGroup();
+            return $this->getObjectGroup();
         }
     }
 }
