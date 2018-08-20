@@ -414,7 +414,14 @@
     "libelle": "Voir les feuilles de temps",
     "fullcode": "ACTIVITY-TIMESHEET_VIEW"
   },
-
+  "ACTIVITY-TIMESHEET_VALIDATE_ACTIVITY": {
+    "spot": 7,
+    "category_id": 2,
+    "root": "ACTIVITY-TIMESHEET_VIEW",
+    "code": "TIMESHEET_VALIDATE_ACTIVITY",
+    "libelle": "Validation niveau activité des feuilles de temps",
+    "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_ACTIVITY"
+  },
   "ACTIVITY-TIMESHEET_VALIDATE_SCI": {
     "spot": 7,
     "category_id": 2,
