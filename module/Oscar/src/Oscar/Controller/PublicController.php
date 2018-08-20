@@ -91,24 +91,26 @@ class PublicController extends AbstractOscarController
         $timesheetRejected = [];
         $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
 
-        /** @var Activity $activity */
-        foreach ($activityWithValidationUp as $activity ){
-            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) && $activity->hasTimesheetsUpForValidationSci() ){
-                $activitiesValidation[] = $activity;
-                continue;
-            }
-            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) && $activity->hasTimesheetsUpForValidationAdmin() ){
-                $activitiesValidation[] = $activity;
-                continue;
-            }
-        }
 
-
+        //// SUSPENDU en raison des modifications du système de validation
+        ///
+//        /** @var Activity $activity */
+//        foreach ($activityWithValidationUp as $activity ){
+//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) && $activity->hasTimesheetsUpForValidationSci() ){
+//                $activitiesValidation[] = $activity;
+//                continue;
+//            }
+//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) && $activity->hasTimesheetsUpForValidationAdmin() ){
+//                $activitiesValidation[] = $activity;
+//                continue;
+//            }
+//        }
+//
+//
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
-            if( $person )
-                $timesheetRejected = $timeSheetService->getTimesheetRejected($person);
 
+            // TODO Récupération des ValidationPeriod en conflict !
 
         } catch( \Exception $e ){
         }
