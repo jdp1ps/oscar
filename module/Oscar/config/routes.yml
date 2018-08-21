@@ -147,7 +147,7 @@ timesheet:
         validationactivity:
             type: segment
             options:
-                route: /validation-activite/:idactivity
+                route: /validation-activity/:idactivity
                 defaults:
                     action: validationActivity
 
