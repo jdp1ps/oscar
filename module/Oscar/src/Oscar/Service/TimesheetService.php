@@ -163,6 +163,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return count($this->getValidationPeriods($year, $month, $person)) == 0;
     }
 
+    /**
+     * Retourne la liste des ValidationPeriod pour une activité donnée.
+     *
+     * @param Activity $activity
+     * @return array
+     */
     public function getValidationPeriodsActivity( Activity $activity ){
         $this->getLogger()->debug(sprintf('Récupération des validation pour %s', $activity));
 
@@ -177,6 +183,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $query->getQuery()->getResult();
     }
 
+    /**
+     * Retourne l'ensemble des créneaux utils à la validation d'une période.
+     *
+     * @param ValidationPeriod $validationPeriod
+     * @return array
+     */
     public function getTimesheetsForValidationPeriod( ValidationPeriod $validationPeriod ){
         $timesheets = [];
 
@@ -187,14 +199,185 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         // Nombre de jours dans le mois
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
-        $from = $dateRef->format('Y-m-01');
-        $to = $dateRef->format('Y-m-' . $nbr);
+        $from = $dateRef->format('Y-m-01 00:00:00');
+        $to = $dateRef->format('Y-m-' . $nbr .' 23:59:59');
+
         $person = $this->getEntityManager()->getRepository(Person::class)->find($validationPeriod->getDeclarer()->getId());
 
+        // Autres périodes
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
+            ->createQueryBuilder('v')
+            ->where('v.month = :month AND v.year = :year AND v.declarer = :person')
+            ->setParameters([
+                'month' => $month,
+                'year' => $year,
+                'person' => $person,
+            ]);
 
-        $timesheets = $this->getTimesheetsPersonPeriod($person, $from, $to);
+        $periodsAtSameMoment = $query->getQuery()->getResult();
+        $output = [
+            'main'      => '',
+            'projects'  => [],
+            'others'    => [],
+            'total'     => [],
+            'nbrDays'   => $nbr
+        ];
 
-        return $timesheets;
+        $total = [];
+
+        /** @var ValidationPeriod $vp */
+        foreach ($periodsAtSameMoment as $vp) {
+
+            $timesheetsPeriod = $this->getTimesheetsValidationPeriod($vp);
+
+
+            if($vp->getId() == $validationPeriod->getId() ){
+                $output['main'] = $this->getArrayFormatedTimesheetsFull($timesheetsPeriod, $total);
+            } else {
+                if( $vp->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
+                    $output['projects'][] = $this->getArrayFormatedTimesheetsCompact($timesheetsPeriod, $total);
+                } else {
+                    $output['others'][] = $this->getArrayFormatedTimesheetsCompact($timesheetsPeriod, $total);
+                }
+            }
+        }
+        $output['total'] = $total;
+
+        return $output;
+    }
+
+    /**
+     * @param TimeSheet[] $timesheets
+     */
+    public function getArrayFormatedTimesheetsCompact( $timesheets, &$total ){
+        $output = [];
+        /** @var TimeSheet $timesheet */
+        foreach ($timesheets as $timesheet ){
+            if( $timesheet->getActivity() ) {
+                $pack = $timesheet->getActivity()->getLabel();
+                $code = $timesheet->getActivity()->getAcronym();
+                $objId = $timesheet->getId();
+            } else {
+                $pack = $timesheet->getLabel();
+                $code = $timesheet->getLabel();
+                $objId = 0;
+            }
+            if( !array_key_exists($pack, $output) ){
+                $output[$pack] = [
+                    'oid'   => $objId,
+                    'label' => $pack,
+                    'code' => $code,
+                    'days'  => []
+                ];
+            }
+
+            $day = $timesheet->getDateFrom()->format('d');
+
+            if( !array_key_exists($day, $output[$pack]) ){
+                $output[$pack]['days'][$day] = 0.0;
+            }
+
+            $output[$pack]['days'][$day] += $timesheet->getDuration();
+            $total[$day] += $timesheet->getDuration();
+        }
+        if( count($output) == 1 ){
+            return $output[$pack];
+        }
+
+        return $output;
+    }
+
+    /**
+     * @param TimeSheet[] $timesheets
+     */
+    public function getArrayFormatedTimesheetsFull( $timesheets, &$total ){
+        $output = [];
+        /** @var TimeSheet $timesheet */
+        foreach ($timesheets as $timesheet ){
+            if( $timesheet->getActivity() ) {
+                $packId = $timesheet->getActivity()->getId();
+                $pack = $timesheet->getActivity()->getLabel();
+                $num = $timesheet->getActivity()->getOscarNum();
+                $acronym = $timesheet->getActivity()->getAcronym();
+                $subpack = $timesheet->getWorkpackage()->getCode();
+                $subpackId = $timesheet->getWorkpackage()->getId();
+            } else {
+                $packId = 0;
+                $pack = 'Autres';
+                $acronym = 'other';
+                $num = null;
+                $subpack = $timesheet->getLabel();
+                $subpackId = 0;
+            }
+
+            if( !array_key_exists($pack, $output) ){
+                $output[$pack] = [
+                    'oid' => $packId,
+                    'acronym' => $acronym,
+                    'label' => $pack,
+                    'OscarId' => $num,
+                    'details' => [
+
+                    ]
+                ];
+            }
+
+            if( !array_key_exists($subpack, $output[$pack]['details']) ){
+                $output[$pack]['details'][$subpack] = [
+                    'oid' => $subpackId,
+                    'label' => $subpack,
+                    'days' => []
+                ];
+            }
+
+            $day = $timesheet->getDateFrom()->format('d');
+            if( !array_key_exists($day, $output[$pack]['details'][$subpack]['days']) ){
+                $output[$pack]['details'][$subpack]['days'][$day] = 0.0;
+            }
+
+            $output[$pack]['details'][$subpack]['days'][$day] += $timesheet->getDuration();
+            $total[$day] += $timesheet->getDuration();
+        }
+
+        return $output;
+    }
+
+    public function getTimesheetsValidationPeriod( ValidationPeriod $validationPeriod ){
+
+        // Récupération des dates de la périodes
+        $year = $validationPeriod->getYear();
+        $month = $validationPeriod->getMonth();
+        $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
+
+        // Nombre de jours dans le mois
+        $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
+        $from = $dateRef->format('Y-m-01 00:00:00');
+        $to = $dateRef->format('Y-m-' . $nbr .' 23:59:59');
+
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.person = :person AND t.dateFrom >= :from AND t.dateTo <= :to');
+
+        $parameters = [
+            'person' => $validationPeriod->getDeclarer(),
+            'from' => $from,
+            'to' => $to,
+        ];
+
+        if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER ){
+            $query->andWhere('t.label = :label');
+            $parameters['label'] = $validationPeriod->getObject();
+        }
+
+        if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
+            $query->andWhere('t.activity = :activity');
+            $parameters['activity'] = $validationPeriod->getObjectId();
+        }
+
+        $query->orderBy('t.dateFrom');
+
+        $query->setParameters($parameters);
+        return $query->getQuery()->getResult();
     }
 
     /**
@@ -596,7 +779,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup);
             }
 
-            $this->setTimesheetToSend($timesheet);
+            //$this->setTimesheetToSend($timesheet);
         }
 
         $this->getEntityManager()->flush($timesheets);
@@ -1247,6 +1430,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Récupération des créneaux présents dans Oscar
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
         $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
+            ->orderBy('t.dateFrom')
             ->setParameters([
                 // PATCH Aout 2018
                 // Ajout des heures pour récupérer les créneaux du dernier jour

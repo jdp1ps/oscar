@@ -60,19 +60,16 @@ class TimesheetController extends AbstractOscarController
         //
         $validationPeriods = $timesheetService->getValidationPeriodsActivity($activity);
 
-       foreach ($validationPeriods as $validationPeriod) {
-           echo "$validationPeriod\n";
-           echo "----\n";
-           foreach ($timesheetService->getTimesheetsForValidationPeriod($validationPeriod) as $timesheet){
-               echo "CRENEAU ! $timesheet<br>\n";
-           }
-       }
+        $periods = [];
 
-        die();
-
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod) {
+           $periods[sprintf('%s-%s', $validationPeriod->getYear(), $validationPeriod->getMonth())] = $timesheetService->getTimesheetsForValidationPeriod($validationPeriod);
+        }
 
         return [
-            'activity' => $activity
+            'activity' => $activity,
+            'periods' => $periods
         ];
     }
 
@@ -399,134 +396,135 @@ class TimesheetController extends AbstractOscarController
 
     public function usurpationAction()
     {
-        // Méthode réél
-        $method = $this->getHttpXMethod();
-
-        /** @var Activity $activity */
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
-
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_USURPATION, $activity);
-
-        $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
-
-        if (!$activity) {
-            return $this->getResponseNotFound("L'activité n'existe pas");
-        }
-
-        if (!$person) {
-            return $this->getResponseNotFound("La person %s n'existe pas");
-        }
-
-        /** @var TimesheetService $timeSheetService */
-        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
-
-        $timesheets = [];
-
-        if ($method == 'GET') {
-            $timesheets = $timeSheetService->allByPerson($person, $person);
-        }
-
-        if ($method == 'POST') {
-
-            $datas = json_decode($this->getRequest()->getPost()['events'], true);
-            $action = $this->getRequest()->getPost()['do'];
-
-            if ($action == 'send') {
-                $timesheets = $timeSheetService->send($datas, $person);
-            } else if ( $action ){
-                if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
-                    return $this->getResponseBadRequest('Opération inconnue !');
-                }
-
-                foreach ($datas as $data) {
-                    if ($data['id'] && $data['id'] != 'null') {
-                        /** @var TimeSheet $timeSheet */
-                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-                        $activity = null ;
-                        if( $timeSheet->getActivity() ){
-                            $activity = $timeSheet->getActivity();
-                        }
-                        elseif ($timeSheet->getWorkpackage()){
-                            $activity = $timeSheet->getWorkpackage()->getActivity();
-                        }
-                        if( !$activity ){
-                            // todo Ajouter un warning
-                            continue;
-                        }
-
-                        $timesheets = array_merge($timesheets, $this->processAction(
-                            $action, [$data], $timeSheetService, $activity, $person)
-                        );
-                    }
-                }
-            } else {
-                $timesheets = $timeSheetService->create($datas, $person);
-            }
-        }
-
-        if ($method == 'DELETE') {
-            $timesheetId = $this->params()->fromQuery('timesheet', null);
-
-            // UID de l'ICS
-            $icsUid = $this->params()->fromQuery('icsuid', null);
-
-            if ($timesheetId) {
-                if ($timeSheetService->delete($timesheetId,
-                    $this->getCurrentPerson())
-                ) {
-                    return $this->getResponseOk('Créneaux supprimé');
-                }
-            }
-            elseif ($icsUid) {
-                $this->getLogger()->info("Suppression d'un ICS");
-                try {
-                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $person);
-                    $this->getLogger()->info("Suppression OK warn = " . count($warnings));
-                    foreach ($warnings as $w){
-                        $this->getLogger()->info($w);
-                    }
-                    return $this->getResponseOk(json_encode($warnings));
-                }
-                catch (\Exception $e ){
-                    $this->getLogger()->err($e->getMessage());
-                    return $this->getResponseInternalError("Impossible de supprimer ce calendrier : " . $e->getMessage());
-                }
-            }
-
-            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
-        }
-
-        $wpDeclarants = [];
-        /** @var WorkPackage $workPackage */
-        foreach($activity->getWorkPackages() as $workPackage ){
-            if( $workPackage->hasPerson($person) ){
-                $wpDeclarants[$workPackage->getId()] = $workPackage;
-            }
-        }
-
-        foreach($timesheets as &$timesheet ){
-            if( !($timesheet['activity_id'] == null || $timesheet['activity_id'] == $activity->getId()) ){
-                $timesheet['credentials']['editable'] = false;
-                $timesheet['credentials']['deletable'] = false;
-                $timesheet['credentials']['sendable'] = false;
-            }
-        }
-
-        $datasView = [
-            'wpDeclarants' => $wpDeclarants,
-            'timesheets' => $timesheets,
-            'person' => $person,
-            'activity' => $activity,
-        ];
-
-        if ($this->getRequest()->isXmlHttpRequest()) {
-            $response = new JsonModel($datasView);
-            $response->setTerminal(true);
-
-            return $response;
-        }
-
-        return $datasView;
+        die("DESACTIVE");
+//        // Méthode réél
+//        $method = $this->getHttpXMethod();
+//
+//        /** @var Activity $activity */
+//        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
+//
+//        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_USURPATION, $activity);
+//
+//        $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
+//
+//        if (!$activity) {
+//            return $this->getResponseNotFound("L'activité n'existe pas");
+//        }
+//
+//        if (!$person) {
+//            return $this->getResponseNotFound("La person %s n'existe pas");
+//        }
+//
+//        /** @var TimesheetService $timeSheetService */
+//        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
+//
+//        $timesheets = [];
+//
+//        if ($method == 'GET') {
+//            $timesheets = $timeSheetService->allByPerson($person, $person);
+//        }
+//
+//        if ($method == 'POST') {
+//
+//            $datas = json_decode($this->getRequest()->getPost()['events'], true);
+//            $action = $this->getRequest()->getPost()['do'];
+//
+//            if ($action == 'send') {
+//                $timesheets = $timeSheetService->send($datas, $person);
+//            } else if ( $action ){
+//                if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
+//                    return $this->getResponseBadRequest('Opération inconnue !');
+//                }
+//
+//                foreach ($datas as $data) {
+//                    if ($data['id'] && $data['id'] != 'null') {
+//                        /** @var TimeSheet $timeSheet */
+//                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
+//                        $activity = null ;
+//                        if( $timeSheet->getActivity() ){
+//                            $activity = $timeSheet->getActivity();
+//                        }
+//                        elseif ($timeSheet->getWorkpackage()){
+//                            $activity = $timeSheet->getWorkpackage()->getActivity();
+//                        }
+//                        if( !$activity ){
+//                            // todo Ajouter un warning
+//                            continue;
+//                        }
+//
+//                        $timesheets = array_merge($timesheets, $this->processAction(
+//                            $action, [$data], $timeSheetService, $activity, $person)
+//                        );
+//                    }
+//                }
+//            } else {
+//                $timesheets = $timeSheetService->create($datas, $person);
+//            }
+//        }
+//
+//        if ($method == 'DELETE') {
+//            $timesheetId = $this->params()->fromQuery('timesheet', null);
+//
+//            // UID de l'ICS
+//            $icsUid = $this->params()->fromQuery('icsuid', null);
+//
+//            if ($timesheetId) {
+//                if ($timeSheetService->delete($timesheetId,
+//                    $this->getCurrentPerson())
+//                ) {
+//                    return $this->getResponseOk('Créneaux supprimé');
+//                }
+//            }
+//            elseif ($icsUid) {
+//                $this->getLogger()->info("Suppression d'un ICS");
+//                try {
+//                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $person);
+//                    $this->getLogger()->info("Suppression OK warn = " . count($warnings));
+//                    foreach ($warnings as $w){
+//                        $this->getLogger()->info($w);
+//                    }
+//                    return $this->getResponseOk(json_encode($warnings));
+//                }
+//                catch (\Exception $e ){
+//                    $this->getLogger()->err($e->getMessage());
+//                    return $this->getResponseInternalError("Impossible de supprimer ce calendrier : " . $e->getMessage());
+//                }
+//            }
+//
+//            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
+//        }
+//
+//        $wpDeclarants = [];
+//        /** @var WorkPackage $workPackage */
+//        foreach($activity->getWorkPackages() as $workPackage ){
+//            if( $workPackage->hasPerson($person) ){
+//                $wpDeclarants[$workPackage->getId()] = $workPackage;
+//            }
+//        }
+//
+//        foreach($timesheets as &$timesheet ){
+//            if( !($timesheet['activity_id'] == null || $timesheet['activity_id'] == $activity->getId()) ){
+//                $timesheet['credentials']['editable'] = false;
+//                $timesheet['credentials']['deletable'] = false;
+//                $timesheet['credentials']['sendable'] = false;
+//            }
+//        }
+//
+//        $datasView = [
+//            'wpDeclarants' => $wpDeclarants,
+//            'timesheets' => $timesheets,
+//            'person' => $person,
+//            'activity' => $activity,
+//        ];
+//
+//        if ($this->getRequest()->isXmlHttpRequest()) {
+//            $response = new JsonModel($datasView);
+//            $response->setTerminal(true);
+//
+//            return $response;
+//        }
+//
+//        return $datasView;
     }
 
 
@@ -538,6 +536,7 @@ class TimesheetController extends AbstractOscarController
     {
         // Méthode réél
         $method = $this->getHttpXMethod();
+
         // Déclarant
         $person = $this->getOscarUserContext()->getCurrentPerson();
 
@@ -553,7 +552,7 @@ class TimesheetController extends AbstractOscarController
                 $action = $this->getRequest()->getPost()['do'];
 
                 if ($action == 'send') {
-                    $timesheets = $timeSheetService->send($datas, $this->getCurrentPerson());
+                    $timesheets = $timeSheetService->send($datas, $person);
                 } else {
                     if ($action) {
                         if (!in_array($action, [

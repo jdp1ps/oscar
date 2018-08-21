@@ -1,0 +1,2 @@
+.days:nth-child(odd){background-color:hsla(0,0%,100%,.2)}.days{border-bottom:thin solid hsla(0,0%,100%,.25);background-color:hsla(0,0%,100%,.5);display:-webkit-box;display:-ms-flexbox;display:flex}.days .day{color:#000;font-weight:600;-webkit-box-flex:1;-ms-flex:1;flex:1;padding:.5em}.days .day.empty{font-weight:100;color:rgba(0,0,0,.5)}.days .label{padding:.5em;font-size:100%;color:#000;-webkit-box-flex:0;-ms-flex:0 0 150px;flex:0 0 150px}
+/*# sourceMappingURL=ValidationActivityVue.css.map*/

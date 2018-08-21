@@ -13,4 +13,36 @@
             <i class="icon-cube"></i>
             <?= $activity ?></strong>
     </h1>
+
+    <div id="app"></div>
+    <script>
+            require(['vue', 'vue-resource', 'ValidationActivityVue', 'mm'], function(Vue, VueResource, ValidationActivityVue, moment){
+                Vue.use(VueResource);
+
+
+                let mode = "POURCENT";
+
+                Vue.filter('duration2', function(duree, total){
+                    if( duree == 0 ) return 0.0;
+                    return Math.round( 100 / total * duree) + "%";
+                });
+
+                Vue.filter('duration', function(v){
+                    let h = Math.floor(v);
+                    let m = Math.round((v - h)*60);
+                    if( m < 10 ) m = '0'+m;
+                    return h +':' +m;
+                });
+
+                new Vue({
+                    render: function(h){
+                        return h(ValidationActivityVue.default, {
+                            props: {
+                                periods: <?= json_encode($periods) ?>
+                            }
+                        });
+                    }
+                }).$mount('#app');
+            })
+    </script>
 </section>
