@@ -1106,23 +1106,25 @@ class TimeSheet implements ITrackable
 
     public function __toString()
     {
-        $acronym = "NONE";
-        $activity = "~";
-        $wpCode = "~";
+        $acronym = "*";
+        $activity = "Hors-Lot";
+        $wpCode = $this->getLabel();
 
         if($this->getActivity()){
             $activity = $this->getActivity();
             $acronym = $this->getActivity()->getAcronym();
             $wpCode = $this->getWorkpackage() ? $this->getWorkpackage()->getCode() : 'no WP';
         }
-        return sprintf("[%s] %s %s %s (%s, %s) %s",
+
+        return sprintf("[timesheet:%s] %s = %s '%s':'%s':'%s' (%s)",
             $this->getId(),
+            $this->getDateFrom()->format('Y-m-d'),
+            $this->getDuration(),
             $acronym,
             $activity,
             $wpCode,
-            $this->getDateFrom()->format('Y-m-d'),
-            $this->getDuration(),
-            $this->getPerson());
+            $this->getPerson()
+        );
     }
 
 
