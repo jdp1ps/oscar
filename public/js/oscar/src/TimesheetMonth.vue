@@ -21,6 +21,16 @@
             </div>
         </div>
 
+        <div class="overlay" v-if="popup"  style="z-index: 2001">
+            <div class="content container overlay-content">
+                <h2>Historique</h2>
+                <pre class="alert alert-info">{{ popup }}</pre>
+                <nav class="buttons">
+                    <button class="btn btn-primary" @click="popup = ''">Fermer</button>
+                </nav>
+            </div>
+        </div>
+
         <div class="overlay" v-if="help"  style="z-index: 2002">
             <div class="content container overlay-content">
                 <h2><i class="icon-help-circled"></i> Informations légales</h2>
@@ -307,10 +317,15 @@
                             </div>
                         </section>
 
+                        <h3>VALIDATIONS en COURS</h3>
+
+                        <section v-for="periodValidation in ts.periodsValidations">
+                            <i v-if="periodValidation.status == 'valid'" class="icon-ok-circled"></i>
+                            {{ periodValidation.label }}
+                            <a href="#" @click="popup = periodValidation.log">Historique</a>
+                        </section>
+
                         <nav class="buttons-bar">
-
-
-
                             <button class="btn btn-primary" style="margin-left: auto" v-if="ts.submitable"
                                     :class="{ 'disabled': !ts.submitable, 'enabled': ts.submitable }"
                                     @click="sendMonth()">
@@ -622,6 +637,7 @@
                 loading: false,
                 debug: null,
                 help: false,
+                popup: "",
 
                 //
                 error: '',

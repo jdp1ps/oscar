@@ -856,18 +856,35 @@ class ValidationPeriod
         return $this;
     }
 
+    public function json(){
+        return $this->getState();
+    }
+
+    public function getLabel(){
+        if( $this->getObjectGroup() == self::GROUP_WORKPACKAGE ){
+            return "Déclaration sur une activité ";
+        }else {
+            return "Déclaration hors-lot " . $this->getObject();
+        }
+    }
+
     public function getState()
     {
         return [
             'id' => $this->getId(),
             'log' => $this->getLog(),
+
+            'label' => $this->getLabel(),
+
             'status' => $this->getStatus(),
             'validationactivity_at' => $this->getValidationActivityAt() ? $this->getValidationActivityAt()->format('Y-m-d') : null,
             'validationactivity_by' => $this->getValidationActivityBy(),
-            'validationsci_at' => $this->getValidationSciAt() ? $this->getValidationSciAt()->format('Y-m-d') : null,
+
             'validationsci_by' => $this->getValidationSciBy(),
-            'validationadm_at' => $this->getValidationAdmAt() ? $this->getValidationAdmAt()->format('Y-m-d') : null,
+            'validationsci_at' => $this->getValidationSciAt() ? $this->getValidationSciAt()->format('Y-m-d') : null,
+
             'validationadm_by' => $this->getValidationAdmBy(),
+            'validationadm_at' => $this->getValidationAdmAt() ? $this->getValidationAdmAt()->format('Y-m-d') : null,
         ];
     }
 

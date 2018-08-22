@@ -1044,11 +1044,29 @@ class TimesheetController extends AbstractOscarController
 
         $output['hasUnsend'] = false;
 
+
+
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
         // Récupération des validations pour cette période
         $periodValidations = $timesheetService->getPeriodValidation($currentPerson, $month, $year);
+
+
+        $periodValidationsDt = [];
+        /** @var ValidationPeriod $periodValidation */
+        foreach ($periodValidations as $periodValidation) {
+            $data = $periodValidation->json();
+
+            if( $periodValidation->getObjectId() > 0 ){
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($periodValidation->getObjectId());
+                $label = (string) $activity;
+                $data['label'] = "Déclaration pour " . $label;
+            }
+            $periodValidationsDt[] = $data;
+        }
+
+        $output['periodsValidations'] = $periodValidationsDt;
 
         // Mois non-terminé ou futur
         if( $tsFrom > $tsNow ){

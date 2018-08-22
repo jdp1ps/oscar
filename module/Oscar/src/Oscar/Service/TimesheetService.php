@@ -40,7 +40,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $log = $validationPeriod->getLog();
         $person = (string) $validator;
         $date = new \DateTime();
-        $msg = $date->format('Y-m-d') . "\tValidation PROJET par $person\n";
+        $msg = $date->format('Y-m-d H:i:s') . " : Validation PROJET par $person\n";
         $log .= $msg;
         $this->getLogger()->debug($msg);
 
@@ -64,7 +64,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $log = $validationPeriod->getLog();
         $person = (string) $validator;
         $date = new \DateTime();
-        $msg = $date->format('Y-m-d') . "\tValidation SCIENTIFIQUE par $person\n";
+        $msg = $date->format('Y-m-d H:i:s') . " : Validation SCIENTIFIQUE par $person\n";
         $log .= $msg;
         $this->getLogger()->debug($msg);
 
@@ -89,7 +89,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $log = $validationPeriod->getLog();
         $person = (string) $validator;
         $date = new \DateTime();
-        $msg = $date->format('Y-m-d') . "\tValidation ADMINISTRATIVE par $person\n";
+        $msg = $date->format('Y-m-d H:i:s') . " : Validation ADMINISTRATIVE par $person\n";
         $log .= $msg;
         $this->getLogger()->debug($msg);
 
@@ -880,11 +880,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     protected function createDeclaration($sender, $year, $month,  $object, $objectId, $objectGroup) {
+
+        $now = new \DateTime();
         $declaration = new ValidationPeriod();
         $declaration->setStatus(ValidationPeriod::STATUS_STEP1)
-            ->setDateSend(new \DateTime())
+            ->setDateSend($now)
             ->setDeclarer($sender)
-            ->setLog("$sender vient d'envoyer sa déclaration")
+            ->setLog($now->format('Y-m-d H:i:s') . " : $sender vient d'envoyer sa déclaration\n")
             ->setObject($object)
             ->setObjectId($objectId)
             ->setObjectGroup($objectGroup)
