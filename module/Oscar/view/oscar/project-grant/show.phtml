@@ -501,7 +501,8 @@
             <?php endif; ?>
         <?php endif; ?>
 
-    <?php endif; */?>
+    <?php endif; *//** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');?>
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 

@@ -6,6 +6,7 @@
  * Time: 15:49
  */
 ?>
+<link rel="stylesheet" href="/js/oscar/dist/ValidationActivityVue.css" />
 <section class="container">
     <h1>
         Validation pour l'activité <br>
@@ -16,8 +17,9 @@
 
     <div id="app"></div>
     <script>
-            require(['vue', 'vue-resource', 'ValidationActivityVue', 'mm'], function(Vue, VueResource, ValidationActivityVue, moment){
+            require(['vue', 'vue-resource', 'ValidationActivityVue', 'bootbox', 'mm'], function(Vue, VueResource, ValidationActivityVue, Bootbox, moment){
                 Vue.use(VueResource);
+
 
 
                 let mode = "POURCENT";
@@ -34,11 +36,14 @@
                     return h +':' +m;
                 });
 
+                console.log(<?= json_encode($periods) ?>);
+
                 new Vue({
                     render: function(h){
                         return h(ValidationActivityVue.default, {
                             props: {
-                                periods: <?= json_encode($periods) ?>
+                                periods: <?= json_encode($periods) ?>,
+                                bootbox: Bootbox
                             }
                         });
                     }

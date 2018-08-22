@@ -29,6 +29,84 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
+
+
+    //////////////////////////////////////////////////////////////////////// VALIDATION des PERIODES
+    public function validationProject( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
+        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP1 ){
+            throw new OscarException("Erreur d'état");
+        }
+
+        $log = $validationPeriod->getLog();
+        $person = (string) $validator;
+        $date = new \DateTime();
+        $msg = $date->format('Y-m-d') . "\tValidation PROJET par $person\n";
+        $log .= $msg;
+        $this->getLogger()->debug($msg);
+
+        $validationPeriod->setLog($log);
+        $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP2);
+        $validationPeriod->setValidationActivityAt($date)
+            ->setValidationActivityBy((string)$validator)
+            ->setValidationActivityById($validator->getId())
+            ->setValidationActivityMessage($message);
+
+        $this->getEntityManager()->flush($validationPeriod);
+
+        return true;
+    }
+
+    public function validationSci( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
+        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP2 ){
+            throw new OscarException("Erreur d'état");
+        }
+
+        $log = $validationPeriod->getLog();
+        $person = (string) $validator;
+        $date = new \DateTime();
+        $msg = $date->format('Y-m-d') . "\tValidation SCIENTIFIQUE par $person\n";
+        $log .= $msg;
+        $this->getLogger()->debug($msg);
+
+        $validationPeriod->setLog($log);
+        $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP3);
+        $validationPeriod->setValidationSciAt($date)
+            ->setValidationSciBy((string)$validator)
+            ->setValidationSciById($validator->getId())
+            ->setValidationSciMessage($message);
+
+        $this->getEntityManager()->flush($validationPeriod);
+
+        return true;
+    }
+
+
+    public function validationAdm( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
+        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP3 ){
+            throw new OscarException("Erreur d'état");
+        }
+
+        $log = $validationPeriod->getLog();
+        $person = (string) $validator;
+        $date = new \DateTime();
+        $msg = $date->format('Y-m-d') . "\tValidation ADMINISTRATIVE par $person\n";
+        $log .= $msg;
+        $this->getLogger()->debug($msg);
+
+        $validationPeriod->setLog($log);
+        $validationPeriod->setStatus(ValidationPeriod::STATUS_VALID);
+        $validationPeriod->setValidationAdmAt($date)
+            ->setValidationAdmBy((string)$validator)
+            ->setValidationAdmById($validator->getId())
+            ->setValidationAdmMessage($message);
+
+        $this->getEntityManager()->flush($validationPeriod);
+
+        return true;
+    }
+
+
+
     /**
      * @return OscarUserContext
      */
@@ -232,12 +310,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
             if($vp->getId() == $validationPeriod->getId() ){
-                $output['main'] = $this->getArrayFormatedTimesheetsFull($timesheetsPeriod, $total);
+                $output['main'] = $this->getArrayFormatedTimesheetsFull($vp, $timesheetsPeriod, $total);
             } else {
                 if( $vp->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
-                    $output['projects'][] = $this->getArrayFormatedTimesheetsCompact($timesheetsPeriod, $total);
+                    $output['projects'][] = $this->getArrayFormatedTimesheetsCompact($vp, $timesheetsPeriod, $total);
                 } else {
-                    $output['others'][] = $this->getArrayFormatedTimesheetsCompact($timesheetsPeriod, $total);
+                    $output['others'][] = $this->getArrayFormatedTimesheetsCompact($vp, $timesheetsPeriod, $total);
                 }
             }
         }
@@ -249,7 +327,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * @param TimeSheet[] $timesheets
      */
-    public function getArrayFormatedTimesheetsCompact( $timesheets, &$total ){
+    public function getArrayFormatedTimesheetsCompact( ValidationPeriod $validationPeriod, $timesheets, &$total ){
         $output = [];
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet ){
@@ -265,6 +343,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if( !array_key_exists($pack, $output) ){
                 $output[$pack] = [
                     'oid'   => $objId,
+                    'validationperiod_id' => $validationPeriod->getId(),
+                    'validationperiod_state' => $validationPeriod->getState(),
                     'label' => $pack,
                     'code' => $code,
                     'days'  => []
@@ -290,7 +370,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * @param TimeSheet[] $timesheets
      */
-    public function getArrayFormatedTimesheetsFull( $timesheets, &$total ){
+    public function getArrayFormatedTimesheetsFull(ValidationPeriod $validationPeriod, $timesheets, &$total ){
         $output = [];
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet ){
@@ -313,6 +393,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if( !array_key_exists($pack, $output) ){
                 $output[$pack] = [
                     'oid' => $packId,
+                    'validationperiod_id' => $validationPeriod->getId(),
+                    'validationperiod_status' => $validationPeriod->getStatus(),
+                    'validationperiod' => $validationPeriod->getState(),
                     'acronym' => $acronym,
                     'label' => $pack,
                     'OscarId' => $num,

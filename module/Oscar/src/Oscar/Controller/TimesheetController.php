@@ -53,8 +53,86 @@ class TimesheetController extends AbstractOscarController
         if( !$activity )
             return $this->getResponseInternalError(sprintf("L'activités '%s' n'existe pas", $activityId));
 
+        $method = $this->getHttpXMethod();
+        $currentPerson = $this->getCurrentPerson();
+
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        if( $this->isAjax() ){
+            switch ($method) {
+                case 'POST':
+                    $this->getLogger()->debug(print_r($_POST, true));
+
+                    $validationPeriodId = (int) $this->params()->fromPost('validationperiod_id');
+                    $action             = $this->params()->fromPost('action');
+
+                    // Récupération de la période
+                    $validationPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($validationPeriodId);
+                    if( !$validationPeriod ){
+                        return $this->getResponseInternalError('Aucune procédure de validation en cours disponible pour cette période');
+                    }
+
+                    if( $action == "valid-prj" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+
+                            if( $timesheetService->validationProject($validationPeriod, $currentPerson) ){
+                                return $this->getResponseOk("La période a bien été validée au niveau projet");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+                    if( $action == "valid-sci" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+
+                            if( $timesheetService->validationSci($validationPeriod, $currentPerson) ){
+                                return $this->getResponseOk("La période a bien été validée scientifiquement");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+                    if( $action == "valid-adm" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider administrativement la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+
+                            if( $timesheetService->validationAdm($validationPeriod, $currentPerson) ){
+                                return $this->getResponseOk("La période a bien été validée administrativement");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+
+
+                    return $this->getResponseNotImplemented("Cette fonctionnalité n'est pas encore disponible");
+                default:
+                    return $this->getResponseBadRequest("Méthode non disponible");
+            }
+        }
+
+
 
 
         //
@@ -64,12 +142,28 @@ class TimesheetController extends AbstractOscarController
 
         /** @var ValidationPeriod $validationPeriod */
         foreach ($validationPeriods as $validationPeriod) {
-           $periods[sprintf('%s-%s', $validationPeriod->getYear(), $validationPeriod->getMonth())] = $timesheetService->getTimesheetsForValidationPeriod($validationPeriod);
+            $periodInfos = $timesheetService->getTimesheetsForValidationPeriod($validationPeriod);
+            $activity = null;
+            if( $validationPeriod->isActivityValidation() ){
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($validationPeriod->getObjectId());
+            }
+
+            $validablePrj = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
+            $validableSci = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+            $validableAdm = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+
+            $periodInfos['validable_prj'] = $validablePrj;
+            $periodInfos['validable_sci'] = $validableSci;
+            $periodInfos['validable_adm'] = $validableAdm;
+
+
+
+            $periods[sprintf('%s-%s', $validationPeriod->getYear(), $validationPeriod->getMonth())] = $periodInfos;
         }
 
         return [
             'activity' => $activity,
-            'periods' => $periods
+            'periods' => count($periods) ? $periods : null
         ];
     }
 

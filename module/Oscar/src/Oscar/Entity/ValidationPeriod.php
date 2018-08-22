@@ -350,6 +350,10 @@ class ValidationPeriod
         return $this->objectGroup;
     }
 
+    public function isActivityValidation(){
+        return $this->getObjectGroup() == self::GROUP_WORKPACKAGE;
+    }
+
     /**
      * @param string $objectGroup
      */
@@ -850,6 +854,21 @@ class ValidationPeriod
     {
         $this->status = $status;
         return $this;
+    }
+
+    public function getState()
+    {
+        return [
+            'id' => $this->getId(),
+            'log' => $this->getLog(),
+            'status' => $this->getStatus(),
+            'validationactivity_at' => $this->getValidationActivityAt() ? $this->getValidationActivityAt()->format('Y-m-d') : null,
+            'validationactivity_by' => $this->getValidationActivityBy(),
+            'validationsci_at' => $this->getValidationSciAt() ? $this->getValidationSciAt()->format('Y-m-d') : null,
+            'validationsci_by' => $this->getValidationSciBy(),
+            'validationadm_at' => $this->getValidationAdmAt() ? $this->getValidationAdmAt()->format('Y-m-d') : null,
+            'validationadm_by' => $this->getValidationAdmBy(),
+        ];
     }
 
     /**

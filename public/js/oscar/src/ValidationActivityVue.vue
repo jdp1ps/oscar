@@ -1,8 +1,9 @@
 <template>
     <section>
-        Déclaration
-
-        <section class="period" v-for="datas,p in periods">
+        <div class="alert alert-danger" v-if="!periods">
+            Aucune déclaration trouvée pour cette activités
+        </div>
+        <section class="period" v-for="datas,p in periods" v-else>
             <h2>{{ p }}</h2>
             <section class="main" v-for="activity in datas.main">
                 <h3>
@@ -10,6 +11,73 @@
                     <abbr title="">{{ activity.acronym }}</abbr>
                     {{ activity.label }}
                 </h3>
+
+                <div class="valid">
+                    <span class="icon-cube"></span> Validation projet :
+                    <span v-if="activity.validationperiod.validationactivity_by">
+                        <i class="icon-ok-circled"></i>
+                        par <strong>{{ activity.validationperiod.validationactivity_by }}</strong>
+                    </span>
+                    <span v-else-if="activity.validationperiod.rejectactivity_by">
+                        <i class="icon-minus-circled"></i>
+                        par <strong>{{ activity.validationperiod.rejectactivity_by }}</strong>
+                    </span>
+                    <span v-else>
+                        <nav v-if="datas.validable_prj">
+                            <button class="btn btn-xs btn-success"  @click="sendValidationPrj(activity.validationperiod_id)">Validation de la déclaration</button>
+                            <button class="btn btn-xs btn-danger" @click="sendRejectPrj(activity.validationperiod_id)">Refus de la déclaration</button>
+                        </nav>
+                        <span v-else>
+                            <i class="icon-hourglass-3"></i>
+                            <em>en attente &hellip;</em>
+                        </span>
+                    </span>
+                </div>
+
+                <div class="valid">
+                    <span class="icon-beaker"></span> Validation scientifique :
+                    <span v-if="activity.validationperiod.validationsci_by">
+                        <i class="icon-ok-circled"></i>
+                        par <strong>{{ activity.validationperiod.validationsci_by }}</strong>
+                    </span>
+                    <span v-else-if="activity.validationperiod.rejectsci_by">
+                        <i class="icon-minus-circled"></i>
+                        par <strong>{{ activity.validationperiod.rejectsci_by }}</strong>
+                    </span>
+                    <span v-else>
+                        <nav v-if="datas.validable_sci">
+                            <button class="btn btn-xs btn-success"  @click="sendValidationSci(activity.validationperiod_id)">Validation scientifique de la déclaration</button>
+                            <button class="btn btn-xs btn-danger" @click="sendRejectSci(activity.validationperiod_id)">Refus scientifique de la déclaration</button>
+                        </nav>
+                        <span v-else>
+                            <i class="icon-hourglass-3"></i>
+                            <em>en attente &hellip;</em>
+                        </span>
+                    </span>
+                </div>
+
+                <div class="valid">
+                    <span class="icon-hammer"></span> Validation administrative :
+                    <span v-if="activity.validationperiod.validationadm_by">
+                        <i class="icon-ok-circled"></i>
+                        par <strong>{{ activity.validationperiod.validationadm_by }}</strong>
+                    </span>
+                    <span v-else-if="activity.validationperiod.rejectadm_by">
+                        <i class="icon-minus-circled"></i>
+                        par <strong>{{ activity.validationperiod.rejectadm_by }}</strong>
+                    </span>
+                    <span v-else>
+                        <nav v-if="datas.validable_adm">
+                            <button class="btn btn-xs btn-success"  @click="sendValidationAdm(activity.validationperiod_id)">Validation de la déclaration</button>
+                            <button class="btn btn-xs btn-danger" @click="sendRejectAdm(activity.validationperiod_id)">Refus de la déclaration</button>
+                        </nav>
+                        <span v-else>
+                            <i class="icon-hourglass-3"></i>
+                            <em>en attente &hellip;</em>
+                        </span>
+                    </span>
+                </div>
+
                 <section class="days">
                     <div class="label">&nbsp;</div>
                     <div class="day" v-for="i in nbrDays">
@@ -94,6 +162,9 @@
             days: {
                 default: 31
             },
+            bootbox: {
+              required: true
+            },
             periods: {
                 default: {}
             }
@@ -110,6 +181,54 @@
                     }
                 }
                 return days;
+            }
+        },
+
+        methods: {
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // VALIDATION des HEURES
+            sendValidationPrj(validationperiod_id){
+                console.log("Validation de la période", validationperiod_id);
+                this.bootbox.confirm("Confirmer la validation de la décaration pour cette période ?", (res) => {
+                    if( !res ) return;
+                    this.send('valid-prj', validationperiod_id);
+
+                });
+            },
+
+            sendValidationSci(validationperiod_id){
+                console.log('VALID ', validationperiod_id);
+                this.bootbox.confirm("Confirmer la validation scientifique de la décaration pour cette période ?", (res) => {
+                    if( !res ) return;
+                    this.send('valid-sci', validationperiod_id);
+                });
+            },
+
+            sendValidationAdm(validationperiod_id){
+                this.bootbox.confirm("Confirmer la validation administrative de la décaration pour cette période ?", (res) => {
+                    if( !res ) return;
+                    this.send('valid-adm', validationperiod_id);
+                });
+            },
+
+
+            send( action, validationperiod_id){
+                let data = new FormData();
+                data.append('action', action);
+                data.append('validationperiod_id', validationperiod_id);
+
+                this.$http.post('', data).then(
+                    (ok) => {
+                        console.log("OK", ok);
+                        document.location.reload();
+                    },
+                    (ko) => {
+                        this.bootbox.alert("ERREUR : " + ko.body);
+                        console.log("KO", ko);
+                    }
+                ).then( foo => {
+
+                })
             }
         },
 
