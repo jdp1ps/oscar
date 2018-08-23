@@ -15,51 +15,6 @@
                 <small v-else-if="d.status_id == 3"><i class="icon-attention-circled"></i> Rejeté</small>
                 <small v-else-if="d.status_id == 5"><i class="icon-paper-plane"></i>En cours de validation</small>
                 <small v-else><i class="icon-help-circled"></i> Autre status ({{d.status_id}})</small>
-
-                <div v-if="d.status_id != 2 && d.status_id != 3">
-                    <span v-if="d.validations.prj.date">
-                        <i class="icon-cubes"></i>
-                        Validation projet par <strong>{{ d.validations.prj.validator }}</strong>
-                        le <time :datetime="d.validations.prj.date">{{ d.validations.prj.date }}</time>
-                    </span>
-                    <span v-else>
-                        <i class="icon-cubes"></i>
-                        Validation projet en attente...
-                    </span>
-                    <br>
-                    <span v-if="d.validations.sci.date">
-                        <i class="icon-beaker"></i>
-                        Validé scientifiquement par <strong>{{ d.validations.sci.validator }}</strong>
-                        le <time :datetime="d.validations.sci.date">{{ d.validations.sci.date }}</time>
-                    </span>
-                    <span v-else>
-                        <i class="icon-beaker"></i>
-                        <span v-if="d.credentials.validableSci">
-                            <a href="#" class="btn btn-xs btn-success">Valider scientifiquement</a>
-                            <a href="#" class="btn btn-xs btn-danger">Refuser scientifiquement</a>
-                        </span>
-                        <span v-else>
-                            Validation scientifique en attente...
-                        </span>
-
-                    </span>
-                    <br>
-                    <span v-if="d.validations.adm.date">
-                        <i class="icon-book"></i>
-                        Validé administrativement par <strong>{{ d.validations.adm.validator }}</strong>
-                        le <time :datetime="d.validations.adm.date">{{ d.validations.adm.date }}</time>
-                    </span>
-                    <span v-else>
-                        <i class="icon-book"></i>
-                        <span v-if="d.credentials.validableAdm">
-                           <a href="#" class="btn btn-xs btn-success">Valider administrativement</a>
-                            <a href="#" class="btn btn-xs btn-danger">Refuser administrativement</a>
-                        </span>
-                        <span v-else>
-                            Validation administrative en attente...
-                        </span>
-                    </span>
-                </div>
                 <span v-if="d.validations.conflict" class="text-danger">
                     {{ d.validations.conflict }}
                 </span>

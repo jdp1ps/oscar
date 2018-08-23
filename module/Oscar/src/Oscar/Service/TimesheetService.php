@@ -1002,20 +1002,48 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $person = $this->getOscarUserContext()->getCurrentPerson();
         }
 
+        /** @var ValidationPeriod $periodValidation */
+        $periodValidation = $this->getPeriodValidationTimesheet($timeSheet);
+
+
         $deletable = false;
         $isOwner = $timeSheet->getPerson() == $person;
 
         // Le créneau ne peut être envoyé que par sont propriétaire et si
         // le status est "Bouillon"
-        $sendable = $isOwner && $timeSheet->getStatus() == TimeSheet::STATUS_DRAFT;
+        $sendable = $isOwner && $periodValidation == null;
 
         // Seul les déclarations en brouillon peuvent être éditées
-        $editable = in_array($timeSheet->getStatus(), [TimeSheet::STATUS_DRAFT, TimeSheet::STATUS_INFO]) && $isOwner;
+        $editable = $periodValidation == null && $isOwner;
 
         // Validation scientifique (déja validé ou la personne a les droits)
 
+        $validablePrj = false;
         $validableSci = false;
         $validableAdm = false;
+
+        if( $periodValidation ){
+
+
+            switch ($periodValidation->getStatus()) {
+                case ValidationPeriod::STATUS_STEP1 :
+                case ValidationPeriod::STATUS_STEP2 :
+                case ValidationPeriod::STATUS_STEP3 :
+                    $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE);
+                    break;
+                case ValidationPeriod::STATUS_VALID :
+                    $timeSheet->setStatus(TimeSheet::STATUS_ACTIVE);
+                    break;
+                case ValidationPeriod::STATUS_CONFLICT :
+                    $timeSheet->setStatus(TimeSheet::STATUS_CONFLICT);
+                    $deletable = true;
+                    $editable = true;
+                    break;
+            }
+        } else {
+            $deletable = true;
+            $editable = true;
+        }
 
         if ($timeSheet->getStatus() == TimeSheet::STATUS_TOVALIDATE){
             $validableSci = $timeSheet->getValidatedSciAt() ?
@@ -1030,31 +1058,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $timeSheet->getActivity());
         }
 
-        // En fonction du status
-        switch ($timeSheet->getStatus()) {
-            case TimeSheet::STATUS_DRAFT :
-                $deletable = $isOwner;
-                break;
-
-            case TimeSheet::STATUS_INFO :
-                $deletable = true;
-                break;
-
-            case TimeSheet::STATUS_CONFLICT :
-                $deletable = $isOwner;
-                $editable = $isOwner;
-                break;
-
-            case TimeSheet::STATUS_TOVALIDATE :
-                $deletable = false;
-                $editable = false;
-                break;
-        }
-
         return [
             'deletable' => $deletable,
             'editable' => $editable,
             'sendable' => $sendable,
+            'validablePrj' => $validablePrj,
             'validableSci' => $validableSci,
             'validableAdm' => $validableAdm
         ];
@@ -1220,9 +1228,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $periodRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
 
         if( $t->getActivity() ){
-            $objId = $t->getActivity()->getId();
-            $obj = ValidationPeriod::OBJECT_ACTIVITY;
-
             $period = $periodRepo->getValidationPeriodForActivity($year, $month, $t->getActivity()->getId(), $t->getPerson()->getId());
         } else {
             $period = $periodRepo->getValidationPeriodOutWP($year, $month, $t->getLabel(), $t->getPerson()->getId());
