@@ -1,135 +1,135 @@
 <template>
     <section>
-        <div class="alert alert-danger" v-if="!periods">
-            Aucune déclaration trouvée pour cette activités
-        </div>
-        <section class="period" v-for="datas,p in periods" v-else>
-            <h2>{{ p }}</h2>
-            <section class="main" v-for="activity in datas.main">
-                <h3>
-                    <strong>{{ activity.OscarId }}</strong>
-                    <abbr title="">{{ activity.acronym }}</abbr>
-                    {{ activity.label }}
-                </h3>
+        <section class="period" v-for="declarations,p in periods">
+            <h2>Période : <strong>{{ p }}</strong></h2>
 
-                <div class="valid">
-                    <span class="icon-cube"></span> Validation projet :
-                    <span v-if="activity.validationperiod.validationactivity_by">
-                        <i class="icon-ok-circled"></i>
-                        par <strong>{{ activity.validationperiod.validationactivity_by }}</strong>
-                    </span>
-                    <span v-else-if="activity.validationperiod.rejectactivity_by">
-                        <i class="icon-minus-circled"></i>
-                        par <strong>{{ activity.validationperiod.rejectactivity_by }}</strong>
-                    </span>
-                    <span v-else>
-                        <nav v-if="datas.validable_prj">
-                            <button class="btn btn-xs btn-success"  @click="sendValidationPrj(activity.validationperiod_id)">Validation de la déclaration</button>
-                            <button class="btn btn-xs btn-danger" @click="sendRejectPrj(activity.validationperiod_id)">Refus de la déclaration</button>
-                        </nav>
+            <section v-for="datas in declarations" class="card">
+                <section class="main" v-for="activity in datas.main">
+                    <h3>
+                        <i class="icon-user"></i>
+                        Déclaration de <strong>{{ datas.declarant }}</strong> <br/>
+                    </h3>
+
+                    <div class="valid">
+                        <span class="icon-cube"></span> Validation projet :
+                        <span v-if="activity.validationperiod.validationactivity_by">
+                       <i class="icon-ok-circled"></i>
+                       par <strong>{{ activity.validationperiod.validationactivity_by }}</strong>
+                   </span>
+                        <span v-else-if="activity.validationperiod.rejectactivity_by">
+                       <i class="icon-minus-circled"></i>
+                       par <strong>{{ activity.validationperiod.rejectactivity_by }}</strong>
+                   </span>
                         <span v-else>
-                            <i class="icon-hourglass-3"></i>
-                            <em>en attente &hellip;</em>
-                        </span>
-                    </span>
-                </div>
-
-                <div class="valid">
-                    <span class="icon-beaker"></span> Validation scientifique :
-                    <span v-if="activity.validationperiod.validationsci_by">
-                        <i class="icon-ok-circled"></i>
-                        par <strong>{{ activity.validationperiod.validationsci_by }}</strong>
-                    </span>
-                    <span v-else-if="activity.validationperiod.rejectsci_by">
-                        <i class="icon-minus-circled"></i>
-                        par <strong>{{ activity.validationperiod.rejectsci_by }}</strong>
-                    </span>
-                    <span v-else>
-                        <nav v-if="datas.validable_sci">
-                            <button class="btn btn-xs btn-success"  @click="sendValidationSci(activity.validationperiod_id)">Validation scientifique de la déclaration</button>
-                            <button class="btn btn-xs btn-danger" @click="sendRejectSci(activity.validationperiod_id)">Refus scientifique de la déclaration</button>
-                        </nav>
-                        <span v-else>
-                            <i class="icon-hourglass-3"></i>
-                            <em>en attente &hellip;</em>
-                        </span>
-                    </span>
-                </div>
-
-                <div class="valid">
-                    <span class="icon-hammer"></span> Validation administrative :
-                    <span v-if="activity.validationperiod.validationadm_by">
-                        <i class="icon-ok-circled"></i>
-                        par <strong>{{ activity.validationperiod.validationadm_by }}</strong>
-                    </span>
-                    <span v-else-if="activity.validationperiod.rejectadm_by">
-                        <i class="icon-minus-circled"></i>
-                        par <strong>{{ activity.validationperiod.rejectadm_by }}</strong>
-                    </span>
-                    <span v-else>
-                        <nav v-if="datas.validable_adm">
-                            <button class="btn btn-xs btn-success"  @click="sendValidationAdm(activity.validationperiod_id)">Validation de la déclaration</button>
-                            <button class="btn btn-xs btn-danger" @click="sendRejectAdm(activity.validationperiod_id)">Refus de la déclaration</button>
-                        </nav>
-                        <span v-else>
-                            <i class="icon-hourglass-3"></i>
-                            <em>en attente &hellip;</em>
-                        </span>
-                    </span>
-                </div>
-
-                <section class="days">
-                    <div class="label">&nbsp;</div>
-                    <div class="day" v-for="i in nbrDays">
-                        {{ i }}
+                       <nav v-if="datas.validable_prj">
+                           <button class="btn btn-xs btn-success"  @click="sendValidationPrj(activity.validationperiod_id)">Validation de la déclaration</button>
+                           <button class="btn btn-xs btn-danger" @click="sendRejectPrj(activity.validationperiod_id)">Refus de la déclaration</button>
+                       </nav>
+                       <span v-else>
+                           <i class="icon-hourglass-3"></i>
+                           <em>en attente &hellip;</em>
+                       </span>
+                   </span>
                     </div>
-                </section>
-                <section v-for="lot, wpCode in activity.details">
+
+                    <div class="valid">
+                        <span class="icon-beaker"></span> Validation scientifique :
+                        <span v-if="activity.validationperiod.validationsci_by">
+                       <i class="icon-ok-circled"></i>
+                       par <strong>{{ activity.validationperiod.validationsci_by }}</strong>
+                   </span>
+                        <span v-else-if="activity.validationperiod.rejectsci_by">
+                       <i class="icon-minus-circled"></i>
+                       par <strong>{{ activity.validationperiod.rejectsci_by }}</strong>
+                   </span>
+                        <span v-else>
+                       <nav v-if="datas.validable_sci">
+                           <button class="btn btn-xs btn-success"  @click="sendValidationSci(activity.validationperiod_id)">Validation scientifique de la déclaration</button>
+                           <button class="btn btn-xs btn-danger" @click="sendRejectSci(activity.validationperiod_id)">Refus scientifique de la déclaration</button>
+                       </nav>
+                       <span v-else>
+                           <i class="icon-hourglass-3"></i>
+                           <em>en attente &hellip;</em>
+                       </span>
+                   </span>
+                    </div>
+
+                    <div class="valid">
+                        <span class="icon-hammer"></span> Validation administrative :
+                        <span v-if="activity.validationperiod.validationadm_by">
+                       <i class="icon-ok-circled"></i>
+                       par <strong>{{ activity.validationperiod.validationadm_by }}</strong>
+                   </span>
+                        <span v-else-if="activity.validationperiod.rejectadm_by">
+                       <i class="icon-minus-circled"></i>
+                       par <strong>{{ activity.validationperiod.rejectadm_by }}</strong>
+                   </span>
+                        <span v-else>
+                       <nav v-if="datas.validable_adm">
+                           <button class="btn btn-xs btn-success"  @click="sendValidationAdm(activity.validationperiod_id)">Validation de la déclaration</button>
+                           <button class="btn btn-xs btn-danger" @click="sendRejectAdm(activity.validationperiod_id)">Refus de la déclaration</button>
+                       </nav>
+                       <span v-else>
+                           <i class="icon-hourglass-3"></i>
+                           <em>en attente &hellip;</em>
+                       </span>
+                   </span>
+                    </div>
+
                     <section class="days">
-                        <div class="label">{{ lot.label }}</div>
-                        <div class="day" v-for="i in nbrDays" :class="{'empty': !lot.days[i]}">
-                            {{ lot.days[i] ? lot.days[i] : '0.0' }}
+                        <div class="label">&nbsp;</div>
+                        <div class="day" v-for="i in nbrDays">
+                            {{ i }}
                         </div>
                     </section>
-                </section>
-            </section>
-
-            <section class="otherProjects">
-                <h3>Autres recherche</h3>
-                <section v-for="otherProject in datas.projects">
-                    <section class="days">
-                        <div class="label">{{ otherProject.code }}</div>
-                        <div class="day" v-for="i in nbrDays" :class="{'empty': !otherProject.days[i]}">
-                            {{ otherProject.days[i] ? otherProject.days[i] : '0.0' }}
-                        </div>
+                    <section v-for="lot, wpCode in activity.details">
+                        <section class="days">
+                            <div class="label">{{ lot.label }}</div>
+                            <div class="day" v-for="i in nbrDays" :class="{'empty': !lot.days[i]}">
+                                {{ lot.days[i] ? lot.days[i] : '0.0' }}
+                            </div>
+                        </section>
                     </section>
                 </section>
-            </section>
 
-            <section class="other">
-                <h3>Autres</h3>
+                <section class="otherProjects">
+                    <h3>Autres recherche</h3>
+                    <section v-for="otherProject in datas.projects">
+                        <section class="days">
+                            <div class="label">{{ otherProject.code }}</div>
+                            <div class="day" v-for="i in nbrDays" :class="{'empty': !otherProject.days[i]}">
+                                {{ otherProject.days[i] ? otherProject.days[i] : '0.0' }}
+                            </div>
+                        </section>
+                    </section>
+                </section>
 
-                <section class="days" v-for="other in datas.others">
-                    <div class="label">{{ other.label }}</div>
-                    <div class="day" v-for="i in nbrDays" :class="{'empty': !other.days[i]}">
-                        {{ other.days[i] ? other.days[i] : '0.0' }}
-                    </div>
+                <section class="other">
+                    <h3>Autres</h3>
+
+                    <section class="days" v-for="other in datas.others">
+                        <div class="label">{{ other.label }}</div>
+                        <div class="day" v-for="i in nbrDays" :class="{'empty': !other.days[i]}">
+                            {{ other.days[i] ? other.days[i] : '0.0' }}
+                        </div>
+                    </section>
+
+                </section>
+
+                <section class="total">
+                    <h3>Total pour cette période</h3>
+                    <section class="days">
+                        <div class="label">Total</div>
+                        <div class="day" v-for="i in nbrDays" :class="{'empty': !datas.total[i]}">
+                            {{ datas.total[i] ? datas.total[i] : '0.0' }}
+                        </div>
+                    </section>
+
                 </section>
 
             </section>
-
-            <section class="total">
-                <h3>Total pour cette période</h3>
-                <section class="days">
-                    <div class="label">Total</div>
-                    <div class="day" v-for="i in nbrDays" :class="{'empty': !datas.total[i]}">
-                        {{ datas.total[i] ? datas.total[i] : '0.0' }}
-                    </div>
-                </section>
-
-            </section>
+            <hr>
         </section>
-
     </section>
 </template>
 <style>

@@ -156,14 +156,17 @@ class TimesheetController extends AbstractOscarController
             $periodInfos['validable_sci'] = $validableSci;
             $periodInfos['validable_adm'] = $validableAdm;
 
+            $periodKey = sprintf('%s-%s', $validationPeriod->getYear(), $validationPeriod->getMonth());
+            if( !array_key_exists($periodKey, $periods) ){
+                $periods[$periodKey] = [];
+            }
 
-
-            $periods[sprintf('%s-%s', $validationPeriod->getYear(), $validationPeriod->getMonth())] = $periodInfos;
+            $periods[$periodKey][] = $periodInfos;
         }
 
         return [
             'activity' => $activity,
-            'periods' => count($periods) ? $periods : null
+            'periods' => $periods
         ];
     }
 

@@ -30,6 +30,8 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\TypeDocument;
+use Oscar\Entity\ValidationPeriod;
+use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
@@ -782,6 +784,12 @@ class ProjectGrantController extends AbstractOscarController
             // $orgas[] = $o->getOrganization()->displayName();
         }
         ////////////////////////////////////////////////////////////////////////
+        ///
+        ///
+        /// DECLARATIONS
+        /** @var ValidationPeriodRepository $pvRepo */
+        $pvRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
+        $declarations = $pvRepo->getValidationPeriodsByActivity($entity);
 
 
         $activityTypeChain = $this->getActivityTypeService()->getActivityTypeChain($entity->getActivityType());
@@ -815,6 +823,8 @@ class ProjectGrantController extends AbstractOscarController
             'entity' => $activity,
 
             'currencies' => $currencies,
+
+            'declarations' => $declarations,
 
             // Jeton de sécurité
             'tokenValue' => $this->getOscarUserContext()->getTokenValue(true),

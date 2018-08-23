@@ -9,6 +9,7 @@ use Oscar\Entity\Person;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\TimesheetRepository;
 use Oscar\Entity\ValidationPeriod;
+use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Entity\WorkPackage;
 use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
@@ -298,6 +299,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'projects'  => [],
             'others'    => [],
             'total'     => [],
+            'declarant' => (string)$person,
             'nbrDays'   => $nbr
         ];
 
@@ -601,11 +603,20 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
     public function getActivitiesWithTimesheetSend(){
+
+        // récupération des périodes
+        /** @var ValidationPeriodRepository $repositoryPeriod */
+        $repositoryPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class);
+
+        $activitiesIdsWithValidationProgress = $repositoryPeriod->getValidationPeriodsValidationProgressActivitiesIds();
+        $this->getLogger()->debug('ID:' . print_r($activitiesIdsWithValidationProgress, true));
+
+
         $activities = $this->getEntityManager()->createQueryBuilder()->select('a')
             ->from(Activity::class, 'a')
-            ->innerJoin('a.workPackages', 'w')
-            ->innerJoin('w.timesheets', 't');
-        return $activities->getQuery()->getResult();
+            ->where('a.id IN (:ids)');
+
+        return $activities->setParameter('ids', $activitiesIdsWithValidationProgress)->getQuery()->getResult();
     }
 
     public function getTimesheetRejected( Person $person ){

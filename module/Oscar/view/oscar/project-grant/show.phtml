@@ -501,16 +501,35 @@
             <?php endif; ?>
         <?php endif; ?>
 
-    <?php endif; *//** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');?>
+    <?php endif;  */ ?>
+
+<?php
+    if(     $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $entity) ||
+        $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ||
+        $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity )):?>
+        <section>
+            <h2>
+                <i class="icon-calendar"></i> Déclarations
+            </h2>
+            <p>Il y'a <?= count($declarations) ?> déclaration(s) pour cette activité.</p>
+            <a href="<?= $this->url('timesheet/validationactivity', ['idactivity' => $entity->getId()]) ?>">
+                <i class="icon-pencil"></i>
+                Voir les déclarations
+            </a>
+        </section>
+    <?php endif; ?>
+
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
-
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <section>
         <h2><i class="icon-archive"></i> Lot de travail</h2>
         <div id="workpackages"></div>
     </section>
+
+
+
+
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <script>
         require(['workpackageperson'], function(Workpackageperson){

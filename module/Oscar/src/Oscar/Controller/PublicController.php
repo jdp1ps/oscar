@@ -89,24 +89,29 @@ class PublicController extends AbstractOscarController
 
         $activitiesValidation = [];
         $timesheetRejected = [];
-        $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
+
 
 
         //// SUSPENDU en raison des modifications du système de validation
+        $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
         ///
-//        /** @var Activity $activity */
-//        foreach ($activityWithValidationUp as $activity ){
-//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) && $activity->hasTimesheetsUpForValidationSci() ){
-//                $activitiesValidation[] = $activity;
-//                continue;
-//            }
-//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) && $activity->hasTimesheetsUpForValidationAdmin() ){
-//                $activitiesValidation[] = $activity;
-//                continue;
-//            }
-//        }
-//
-//
+        /** @var Activity $activity */
+        foreach ($activityWithValidationUp as $activity ){
+            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)){
+                $activitiesValidation[] = $activity;
+                continue;
+            }
+            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity)){
+                $activitiesValidation[] = $activity;
+                continue;
+            }
+            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)){
+                $activitiesValidation[] = $activity;
+                continue;
+            }
+        }
+
+
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
 
