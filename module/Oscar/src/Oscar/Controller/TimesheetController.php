@@ -651,135 +651,7 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarationAction()
     {
-        // Méthode réél
-        $method = $this->getHttpXMethod();
-
-        // Déclarant
-        $person = $this->getOscarUserContext()->getCurrentPerson();
-
-        /** @var TimesheetService $timeSheetService */
-        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
-
-        // Retour
-        $timesheets = [];
-
-        try {
-            if ($method == 'POST') {
-                $datas = json_decode($this->getRequest()->getPost()['events'],true);
-                $action = $this->getRequest()->getPost()['do'];
-
-                if ($action == 'send') {
-                    $timesheets = $timeSheetService->send($datas, $person);
-                } else {
-                    if ($action) {
-                        if (!in_array($action, [
-                            'validatesci',
-                            'validateadm',
-                            'send',
-                            'rejectsci',
-                            'rejectadm'
-                        ])) {
-                            return $this->getResponseBadRequest('Opération inconnue !');
-                        }
-
-                        foreach ($datas as $data) {
-                            if ($data['id'] && $data['id'] != 'null') {
-                                /** @var TimeSheet $timeSheet */
-                                $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-                                $activity = null;
-
-                                // idactivity
-                                // idworkpackage
-
-
-                                if ($timeSheet->getActivity()) {
-                                    $activity = $timeSheet->getActivity();
-                                } elseif ($timeSheet->getWorkpackage()) {
-                                    $activity = $timeSheet->getWorkpackage()->getActivity();
-                                }
-                                if (!$activity) {
-                                    // todo Ajouter un warning
-                                    continue;
-                                }
-
-                                $timesheets = array_merge($timesheets,
-                                    $this->processAction(
-                                        $action, [$data], $timeSheetService,
-                                        $activity,
-                                        $this->getOscarUserContext()->getCurrentPerson())
-                                );
-                            }
-                        }
-                    } else {
-                        $this->getLogger()->info('CREATE OR UPDATE FROM IMPORT !');
-                        $timesheets = $timeSheetService->create($datas,
-                            $this->getCurrentPerson());
-                    }
-                }
-            }
-        } catch (\Exception $e ){
-            return $this->getResponseInternalError("ERROR : " . $e->getMessage() . " - " . $e->getTraceAsString());
-        }
-
-        if ($method == 'GET') {
-            $timesheets = $timeSheetService->allByPerson($this->getCurrentPerson());
-        }
-
-        if ($method == 'DELETE') {
-            // Identifiant de l'événement
-            $timesheetId = $this->params()->fromQuery('timesheet', null);
-
-            // UID de l'ICS
-            $icsUid = $this->params()->fromQuery('icsuid', null);
-
-            if ($timesheetId) {
-                if ($timeSheetService->delete($timesheetId,
-                    $this->getCurrentPerson())
-                ) {
-                    return $this->getResponseOk('Créneaux supprimé');
-                }
-            }
-            elseif ($icsUid) {
-                try {
-                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $this->getCurrentPerson());
-                    foreach ($warnings as $w){
-                        $this->getLogger()->info($w);
-                    }
-                    return $this->getResponseOk(json_encode($warnings));
-                }
-                catch (\Exception $e ){
-                    return $this->getResponseInternalError("Impossible de supprimer ce calendrier : " . $e->getMessage());
-                }
-            }
-
-            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
-        }
-
-
-        $wpDeclarants = $this->getEntityManager()->createQueryBuilder()
-            ->select('wp')
-            ->from(WorkPackage::class, 'wp')
-            ->innerJoin('wp.persons', 'wpp')
-            ->where('wpp.person = :person')
-            ->setParameters([
-                'person' => $this->getOscarUserContext()->getCurrentPerson()
-            ])
-            ->getQuery()
-            ->getResult();
-
-        $datasView = [
-            'wpDeclarants' => $wpDeclarants,
-            'timesheets' => $timesheets
-        ];
-
-        if ($this->getRequest()->isXmlHttpRequest()) {
-            $response = new JsonModel($datasView);
-            $response->setTerminal(true);
-
-            return $response;
-        }
-
-        return $datasView;
+        return $this->getResponseDeprecated("Cette fonctionnalité n'existe plus");
     }
 
 
@@ -1298,10 +1170,14 @@ class TimesheetController extends AbstractOscarController
             ];
         }
 
+        $periodsValidations = [];
+
         /** @var TimeSheet $t */
         foreach ($timesheets as $t) {
 
             $dayTimesheet = (int)($t->getDateFrom()->format('d'));
+            $period = $t->getDateFrom()->format('Y-m');
+
 
             if (!$t->getActivity()) {
                 $periodKey = ValidationPeriod::GROUP_OTHER;
@@ -1313,7 +1189,7 @@ class TimesheetController extends AbstractOscarController
                         'description' => $t->getComment(),
                         'duration' => $t->getDuration(),
                         'status_id' => $t->getStatus(),
-                        'status' => TimeSheet::getStatusLabel($t->getStatus())
+                        'status' => 'locked'
                     ];
 
                     switch( $t->getLabel() ){
@@ -1386,7 +1262,7 @@ class TimesheetController extends AbstractOscarController
                 'acronym' => $projectAcronym,
                 'project' => (string)$project,
                 'status_id' => $t->getStatus(),
-                'status' => TimeSheet::getStatusLabel($t->getStatus()),
+                'status' => 'locked',
                 'wpCode' => $wpCode,
                 'duration' => (float)$t->getDuration(),
                 'wp_id' => $t->getWorkpackage()->getId(),

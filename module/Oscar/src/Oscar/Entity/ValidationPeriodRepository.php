@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 
 
 use Doctrine\ORM\EntityRepository;
+use Oscar\Exception\OscarException;
 
 class ValidationPeriodRepository extends EntityRepository
 {
@@ -68,6 +69,50 @@ class ValidationPeriodRepository extends EntityRepository
             ->orderBy('vp.year, vp.month')
             ->getQuery()
             ->getResult();
+    }
+
+    public function getValidationPeriodForActivity( $year, $month, $activityId, $personId ){
+        $query = $this->createQueryBuilder('vp')
+            ->where('vp.month = :month AND vp.year = :year AND vp.object_id = :activityId AND vp.declarer = :personId');
+
+        $result = $query->setParameters([
+            'month' => $month,
+            'year' => $year,
+            'personId' => $personId,
+            'activityId' => $activityId,
+        ])->getQuery()->getResult();
+
+        if( count($result) == 1 ){
+            return $result[0];
+        }
+        elseif ( count($result) > 1 ){
+            throw new OscarException("ERREUR FATALE : plusieurs procédure de validation ont été trouvée pour cette activité ('$activityId') à la même période...");
+        }
+        else {
+            return null;
+        }
+    }
+
+    public function getValidationPeriodOutWP( $year, $month, $code, $personId ){
+        $query = $this->createQueryBuilder('vp')
+            ->where('vp.month = :month AND vp.year = :year AND vp.object = :code AND vp.declarer_id = :personId');
+
+        $result = $query->setParameters([
+            'month' => $month,
+            'year' => $year,
+            'personId' => $personId,
+            'code' => $code,
+        ]);
+
+        if( count($result) == 1 ){
+            return $result[0];
+        }
+        elseif ( count($result) > 1 ){
+            throw new OscarException("ERREUR FATALE : plusieurs procédure de validation ont été trouvée pour ce type de déclaration ('$code') ...");
+        }
+        else {
+            return null;
+        }
     }
 
 

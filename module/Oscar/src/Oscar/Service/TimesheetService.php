@@ -1209,6 +1209,27 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getEntityManager()->getRepository(TimeSheet::class);
     }
 
+
+
+    public function getPeriodValidationTimesheet( TimeSheet $t ){
+
+        $year = $t->getDateFrom()->format('Y');
+        $month = $t->getDateFrom()->format('m');
+
+        /** @var ValidationPeriodRepository $periodRepo */
+        $periodRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
+
+        if( $t->getActivity() ){
+            $objId = $t->getActivity()->getId();
+            $obj = ValidationPeriod::OBJECT_ACTIVITY;
+
+            $period = $periodRepo->getValidationPeriodForActivity($year, $month, $t->getActivity()->getId(), $t->getPerson()->getId());
+        } else {
+            $period = $periodRepo->getValidationPeriodOutWP($year, $month, $t->getLabel(), $t->getPerson()->getId());
+        }
+        return $period;
+    }
+
     /**
      * Suppression du créneau.
      *
@@ -1236,9 +1257,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         //
         try {
             $errors = "";
+
             /** @var TimeSheet $t */
             foreach( $timesheets as $t ){
+
                 try {
+                    if( $this->getPeriodValidationTimesheet($t) !== null ){
+                        throw new OscarException("Ce créneau a une procédure de validation active. Vous ne pouvez pas le modifier");
+                    }
                     $this->deleteTimesheet($t, $currentPerson, false);
                 } catch (\Exception $e) {
                     $errors .= $e->getMessage()."\n";
@@ -1247,7 +1273,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $this->getEntityManager()->flush();
 
         } catch (\Exception $e) {
-            throw new OscarException("BD Error : Impossible de supprimer le créneau.");
+            throw new OscarException("BD Error : " . $e->getMessage());
         }
 
         if( $errors ){
