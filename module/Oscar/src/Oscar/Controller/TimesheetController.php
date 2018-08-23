@@ -124,6 +124,26 @@ class TimesheetController extends AbstractOscarController
                         return $this->getResponseInternalError($error);
                     }
 
+                    if( $action == "reject-prj" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+                            $message = $this->params()->fromPost('message');
+                            if( !$message ){
+                                throw new \Exception('Vous devez renseigner une raison au rejet.');
+                            }
+                            if( $timesheetService->rejectPrj($validationPeriod, $currentPerson, $message) ){
+                                return $this->getResponseOk("La période a bien été rejetée");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de rejet pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
 
 
                     return $this->getResponseNotImplemented("Cette fonctionnalité n'est pas encore disponible");

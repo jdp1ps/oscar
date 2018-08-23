@@ -5,75 +5,89 @@
 
             <section v-for="datas in declarations" class="card">
                 <section class="main" v-for="activity in datas.main">
-                    <h3>
-                        <i class="icon-user"></i>
-                        Déclaration de <strong>{{ datas.declarant }}</strong> <br/>
+                    <h3 class="card-title">
+                        <span>
+                            <i class="icon-user"></i>
+                            Déclaration de <strong>{{ datas.declarant }}</strong>
+                        </span>
                     </h3>
 
-                    <div class="valid">
+                    <div class="validation" :class="{ 'valid' : activity.validationperiod.validationactivity_by, 'invalid' : activity.validationperiod.rejectactivity_by, }">
                         <span class="icon-cube"></span> Validation projet :
                         <span v-if="activity.validationperiod.validationactivity_by">
-                       <i class="icon-ok-circled"></i>
-                       par <strong>{{ activity.validationperiod.validationactivity_by }}</strong>
-                   </span>
+                            <i class="icon-ok-circled"></i>
+                            par <strong>{{ activity.validationperiod.validationactivity_by }}</strong>
+                        </span>
+
                         <span v-else-if="activity.validationperiod.rejectactivity_by">
-                       <i class="icon-minus-circled"></i>
-                       par <strong>{{ activity.validationperiod.rejectactivity_by }}</strong>
-                   </span>
+                           <i class="icon-minus-circled"></i>
+                           par <strong>{{ activity.validationperiod.rejectactivity_by }}</strong>
+                        </span>
+
                         <span v-else>
-                       <nav v-if="datas.validable_prj">
-                           <button class="btn btn-xs btn-success"  @click="sendValidationPrj(activity.validationperiod_id)">Validation de la déclaration</button>
-                           <button class="btn btn-xs btn-danger" @click="sendRejectPrj(activity.validationperiod_id)">Refus de la déclaration</button>
-                       </nav>
-                       <span v-else>
+                           <nav v-if="datas.validable_prj">
+                               <button class="btn btn-xs btn-success"  @click="sendValidationPrj(activity.validationperiod_id)">
+                                   <i class="icon-ok-circled"></i>Valider</button>
+                               <button class="btn btn-xs btn-danger" @click="sendRejectPrj(activity.validationperiod_id)">
+                                   <i class="icon-minus-circled"></i>Refuser</button>
+                           </nav>
+                        </span>
+                        <span v-else>
                            <i class="icon-hourglass-3"></i>
                            <em>en attente &hellip;</em>
-                       </span>
-                   </span>
+                        </span>
                     </div>
 
-                    <div class="valid">
+                    <div class="validation" :class="{ 'valid' : activity.validationperiod.validationsci_by, 'invalid' : activity.validationperiod.rejectsci_by, }">
                         <span class="icon-beaker"></span> Validation scientifique :
                         <span v-if="activity.validationperiod.validationsci_by">
-                       <i class="icon-ok-circled"></i>
-                       par <strong>{{ activity.validationperiod.validationsci_by }}</strong>
-                   </span>
+                            <i class="icon-ok-circled"></i>
+                            par <strong>{{ activity.validationperiod.validationsci_by }}</strong>
+                        </span>
+
                         <span v-else-if="activity.validationperiod.rejectsci_by">
-                       <i class="icon-minus-circled"></i>
-                       par <strong>{{ activity.validationperiod.rejectsci_by }}</strong>
-                   </span>
+                           <i class="icon-minus-circled"></i>
+                           par <strong>{{ activity.validationperiod.rejectsci_by }}</strong>
+                        </span>
+
                         <span v-else>
-                       <nav v-if="datas.validable_sci">
-                           <button class="btn btn-xs btn-success"  @click="sendValidationSci(activity.validationperiod_id)">Validation scientifique de la déclaration</button>
-                           <button class="btn btn-xs btn-danger" @click="sendRejectSci(activity.validationperiod_id)">Refus scientifique de la déclaration</button>
-                       </nav>
-                       <span v-else>
+                           <nav v-if="datas.validable_sci">
+                               <button class="btn btn-xs btn-success"  @click="sendValidationSci(activity.validationperiod_id)">
+                                   <i class="icon-ok-circled"></i>Valider</button>
+                               <button class="btn btn-xs btn-danger" @click="sendRejectSci(activity.validationperiod_id)">
+                                   <i class="icon-minus-circled"></i>Refuser</button>
+                           </nav>
+                        </span>
+                        <span v-else>
                            <i class="icon-hourglass-3"></i>
                            <em>en attente &hellip;</em>
-                       </span>
-                   </span>
+                        </span>
                     </div>
 
-                    <div class="valid">
-                        <span class="icon-hammer"></span> Validation administrative :
+                    <div class="validation" :class="{ 'valid' : activity.validationperiod.validationadm_by, 'invalid' : activity.validationperiod.rejectadm_by, }">
+                        <span class="icon-beaker"></span> Validation administrative :
                         <span v-if="activity.validationperiod.validationadm_by">
-                       <i class="icon-ok-circled"></i>
-                       par <strong>{{ activity.validationperiod.validationadm_by }}</strong>
-                   </span>
+                            <i class="icon-ok-circled"></i>
+                            par <strong>{{ activity.validationperiod.validationadm_by }}</strong>
+                        </span>
+
                         <span v-else-if="activity.validationperiod.rejectadm_by">
-                       <i class="icon-minus-circled"></i>
-                       par <strong>{{ activity.validationperiod.rejectadm_by }}</strong>
-                   </span>
+                           <i class="icon-minus-circled"></i>
+                           par <strong>{{ activity.validationperiod.rejectadm_by }}</strong>
+                        </span>
+
                         <span v-else>
-                       <nav v-if="datas.validable_adm">
-                           <button class="btn btn-xs btn-success"  @click="sendValidationAdm(activity.validationperiod_id)">Validation de la déclaration</button>
-                           <button class="btn btn-xs btn-danger" @click="sendRejectAdm(activity.validationperiod_id)">Refus de la déclaration</button>
-                       </nav>
-                       <span v-else>
+                           <nav v-if="datas.validable_adm">
+                               <button class="btn btn-xs btn-success"  @click="sendValidationAdm(activity.validationperiod_id)">
+                                   <i class="icon-ok-circled"></i>Valider</button>
+                               <button class="btn btn-xs btn-danger" @click="sendRejectAdm(activity.validationperiod_id)">
+                                   <i class="icon-minus-circled"></i>Refuser</button>
+                           </nav>
+                        </span>
+                        <span v-else>
                            <i class="icon-hourglass-3"></i>
                            <em>en attente &hellip;</em>
-                       </span>
-                   </span>
+                        </span>
                     </div>
 
                     <section class="days">
@@ -84,7 +98,7 @@
                     </section>
                     <section v-for="lot, wpCode in activity.details">
                         <section class="days">
-                            <div class="label">{{ lot.label }}</div>
+                            <div class="label"> {{ lot.label }}</div>
                             <div class="day" v-for="i in nbrDays" :class="{'empty': !lot.days[i]}">
                                 {{ lot.days[i] ? lot.days[i] : '0.0' }}
                             </div>
@@ -93,7 +107,7 @@
                 </section>
 
                 <section class="otherProjects">
-                    <h3>Autres recherche</h3>
+                    <h3>Autres projets</h3>
                     <section v-for="otherProject in datas.projects">
                         <section class="days">
                             <div class="label">{{ otherProject.code }}</div>
@@ -133,6 +147,25 @@
     </section>
 </template>
 <style>
+    .validation.valid {
+        border-color: green;
+        color: green;
+    }
+    .validation.invalid {
+        border-color: #990000;
+        color: #990000;
+    }
+    .validation {
+        display: inline-flex;
+        color: #999;
+        border: thin solid #999;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-size: 1em;
+        }
+    .validation .btn {
+        border-radius: 4px;
+    }
     .days:nth-child(odd){
         background-color: rgba(255,255,255,.2);
     }
@@ -211,20 +244,40 @@
                 });
             },
 
+            sendRejectPrj(validationperiod_id){
+                this.bootbox.prompt("Indiquez les raisons du rejet de la déclaration", (message) => {
+                    if( !message ) return;
+                    this.send('reject-prj', validationperiod_id, message);
+                });
+            },
 
-            send( action, validationperiod_id){
+            sendRejectSci(validationperiod_id){
+                this.bootbox.prompt("Indiquez les raisons du rejet scientifique de la déclaration", (message) => {
+                    if( !message ) return;
+                    this.send('reject-sci', validationperiod_id, message);
+                });
+            },
+
+            sendRejectAdm(validationperiod_id){
+                this.bootbox.prompt("Indiquez les raisons du rejet administratif de la déclaration", (message) => {
+                    if( !message ) return;
+                    this.send('reject-adm', validationperiod_id, message);
+                });
+            },
+
+
+            send( action, validationperiod_id, message=''){
                 let data = new FormData();
                 data.append('action', action);
                 data.append('validationperiod_id', validationperiod_id);
+                data.append('message', message);
 
                 this.$http.post('', data).then(
                     (ok) => {
-                        console.log("OK", ok);
                         document.location.reload();
                     },
                     (ko) => {
                         this.bootbox.alert("ERREUR : " + ko.body);
-                        console.log("KO", ko);
                     }
                 ).then( foo => {
 

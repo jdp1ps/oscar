@@ -878,6 +878,7 @@ class ValidationPeriod
             'label' => $this->getLabel(),
 
             'status' => $this->getStatus(),
+
             'validationactivity_at' => $this->getValidationActivityAt() ? $this->getValidationActivityAt()->format('Y-m-d') : null,
             'validationactivity_by' => $this->getValidationActivityBy(),
 
@@ -886,6 +887,17 @@ class ValidationPeriod
 
             'validationadm_by' => $this->getValidationAdmBy(),
             'validationadm_at' => $this->getValidationAdmAt() ? $this->getValidationAdmAt()->format('Y-m-d') : null,
+
+            'rejectactivity_at' => $this->getRejectActivityAt() ? $this->getRejectActivityAt()->format('Y-m-d') : null,
+            'rejectactivity_by' => $this->getRejectActivityBy(),
+
+            'rejectsci_by' => $this->getRejectSciBy(),
+            'rejectsci_at' => $this->getRejectSciAt() ? $this->getRejectSciAt()->format('Y-m-d') : null,
+
+            'rejectadm_by' => $this->getRejectAdmBy(),
+            'rejectadm_at' => $this->getRejectAdmAt() ? $this->getRejectAdmAt()->format('Y-m-d') : null,
+
+
         ];
     }
 

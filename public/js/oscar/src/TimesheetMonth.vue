@@ -317,13 +317,17 @@
                             </div>
                         </section>
 
-                        <h3>VALIDATIONS en COURS</h3>
 
-                        <section v-for="periodValidation in ts.periodsValidations">
-                            <i v-if="periodValidation.status == 'valid'" class="icon-ok-circled"></i>
-                            {{ periodValidation.label }}
-                            <a href="#" @click="popup = periodValidation.log">Historique</a>
-                        </section>
+                        <div v-if="ts.periodsValidations.length">
+                            <h3>Procédures de validation pour cette période</h3>
+                            <section v-for="periodValidation in ts.periodsValidations" class="card card-xs">
+                                <i v-if="periodValidation.status == 'valid'" class="icon-ok-circled"></i>
+                                <i v-else-if="periodValidation.status == 'conflict'" class="icon-minus-circled"></i>
+                                <i v-else class="icon-history"></i>
+                                {{ periodValidation.label }}
+                                <a href="#" @click="popup = periodValidation.log">Historique</a>
+                            </section>
+                        </div>
 
                         <nav class="buttons-bar">
                             <button class="btn btn-primary" style="margin-left: auto" v-if="ts.submitable"
