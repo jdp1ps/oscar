@@ -95,14 +95,14 @@ class ValidationPeriodRepository extends EntityRepository
 
     public function getValidationPeriodOutWP( $year, $month, $code, $personId ){
         $query = $this->createQueryBuilder('vp')
-            ->where('vp.month = :month AND vp.year = :year AND vp.object = :code AND vp.declarer_id = :personId');
+            ->where('vp.month = :month AND vp.year = :year AND vp.object = :code AND vp.declarer = :personId');
 
         $result = $query->setParameters([
             'month' => $month,
             'year' => $year,
             'personId' => $personId,
             'code' => $code,
-        ]);
+        ])->getQuery()->getResult();
 
         if( count($result) == 1 ){
             return $result[0];

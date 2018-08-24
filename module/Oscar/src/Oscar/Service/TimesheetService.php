@@ -140,6 +140,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get('OscarUserContext');
     }
 
+    /**
+     * @return ValidationPeriodRepository
+     */
+    protected function getValidationPeriodRepository(){
+        return $this->getEntityManager()->getRepository(ValidationPeriod::class);
+    }
+
     public function getTimesheetToValidateByOrganization( Organization $organization ){
         // Activities
 
@@ -284,6 +291,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ]);
 
         return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne la procédure de validation pour l'activité à la période donnée
+     *
+     * @param Activity $activity
+     * @return array
+     */
+    public function getValidationPeriodActivityAt( Activity $activity, Person $person,  $year, $month ){
+        $this->getLogger()->debug(sprintf('Récupération des validation pour %s au %s-%s', $activity, $year, $month));
+        return $this->getValidationPeriodRepository()->getValidationPeriodForActivity($year, $month, $activity->getId(), $person->getId());
     }
 
     /**
@@ -1267,9 +1285,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             foreach( $timesheets as $t ){
 
                 try {
-                    if( $this->getPeriodValidationTimesheet($t) !== null ){
-                        throw new OscarException("Ce créneau a une procédure de validation active. Vous ne pouvez pas le modifier");
+                    /** @var ValidationPeriod $validationPeriod */
+                    $validationPeriod = $this->getPeriodValidationTimesheet($t);
+
+                    if( $validationPeriod != null && $validationPeriod->getStatus() != ValidationPeriod::STATUS_CONFLICT ){
+                        throw new \Exception("Ce créneau a une procédure de validation active. Vous ne pouvez pas le modifier");
                     }
+
                     $this->deleteTimesheet($t, $currentPerson, false);
                 } catch (\Exception $e) {
                     $errors .= $e->getMessage()."\n";

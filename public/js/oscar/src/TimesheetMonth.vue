@@ -293,12 +293,24 @@
 
                         <hr>
 
-                        <h4><i class="icon-cubes"></i> Par projet</h4>
-                        <section class="card xs" v-for="a in ts.activities">
+                        <h4><i class="icon-cubes"></i> Activités pour cette période</h4>
+                        <p class="alert alert-info" v-if="ts.activities.length == 0">
+                            Vous n'être identifié comme déclarant sur aucune activité pour cette période. Si cette situation vous semble anormale, prenez contact avec votre responsable scientifique.
+                        </p>
+                        <section class="card xs" v-for="a in ts.activities" @click="debug = a" v-else>
                             <div class="week-header interaction-off">
+
                                 <span>
-                                    <strong>{{ a.acronym }}</strong><br>
+                                    <strong>{{ a.acronym }}</strong>
+                                    <i v-if="a.validation_state == null"></i>
+                                    <i class="icon-cube" v-else-if="a.validation_state.status == 'send-prj'" title="Validation projet en attente"></i>
+                                    <i class="icon-beaker" v-else-if="a.validation_state.status == 'send-sci'" title="Validation scientifique en attente"></i>
+                                    <i class="icon-hammer" v-else-if="a.validation_state.status == 'send-adm'" title="Validation administrative en attente"></i>
+                                    <i class="icon-minus-circled" v-else-if="a.validation_state.status == 'conflict'" title="Il y'a un problème dans la déclaration"></i>
+                                    <i class="icon-ok-circled" v-else-if="a.validation_state.status == 'valid'" title="Cette déclaration est valide"></i>
+                                    <br>
                                     <em class="text-thin">{{ a.label }}</em>
+
                                 </span>
                                 <small>
                                     <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>

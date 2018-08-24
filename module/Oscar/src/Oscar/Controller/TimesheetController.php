@@ -1053,6 +1053,9 @@ class TimesheetController extends AbstractOscarController
             $workPackage = $workPackagePerson->getWorkPackage();
             $activity = $workPackage->getActivity();
 
+            /** @var ValidationPeriod $period */
+            $period = $timesheetService->getValidationPeriodActivityAt($workPackage->getActivity(), $currentPerson, $year, $month);
+
             if( !array_key_exists($activity->getId()) ){
                 $activities[$activity->getId()] = [
                     'id' => $activity->getId(),
@@ -1061,8 +1064,7 @@ class TimesheetController extends AbstractOscarController
                     'project_id' => $activity->getProject()->getId(),
                     'label' => $activity->getLabel(),
                     'total' => 0.0,
-                    'validableSci' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity),
-                    'validableAdm' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity),
+                    'validation_state' => $period ? $period->json() : null
                 ];
             }
 
@@ -1079,7 +1081,8 @@ class TimesheetController extends AbstractOscarController
                 'activity' => (string)$activity,
                 'activity_id' => $activity->getId(),
                 'hours' => $workPackagePerson->getDuration(),
-                'total' => 0.0
+                'total' => 0.0,
+                'validation_state' => $period ? $period->json() : null
             ];
         }
 
