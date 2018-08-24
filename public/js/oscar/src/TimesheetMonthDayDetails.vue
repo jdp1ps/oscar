@@ -9,7 +9,7 @@
 
         <div>
             Compléter avec :
-            <wpselector :workpackages="workPackages" @select="addToWorkpackage" :selection="selection"></wpselector>
+            <wpselector :others="others" :workpackages="workPackages" @select="addToWorkpackage" :selection="selection"></wpselector>
         </div>
 
         <section>
@@ -36,17 +36,21 @@
                 <hr>
             </template>
 
+            <section v-for="o in others" v-if="day[o.code] && day[o.code].length">
+                <article class="wp-duration card xs" v-for="t in day[o.code]">
+                    <strong>
+                        <i class="icon-teaching"></i> {{ o.label }}<br>
+                        <small>{{ t.description }}</small>
+                    </strong>
+                    <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
+                    <div class="left">
+                        <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
+                    </div>
+                </article>
+            </section>
 
-            <article class="wp-duration card xs" v-for="t in day.teaching">
-                <strong>
-                    <i class="icon-teaching"></i> Enseignements<br>
-                    <small>{{ t.description }}</small>
-                </strong>
-                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                </div>
-            </article>
+<!--
+
 
             <article class="wp-duration card xs" v-for="t in day.training">
                 <strong>
@@ -125,6 +129,7 @@
                     &nbsp;
                 </div>
             </article>
+            -->
 
 
             <div class="alert-danger alert" v-if="day.duration > day.maxDay">
@@ -204,6 +209,9 @@
 
         props: {
             workPackages: {
+                require: true
+            },
+            others: {
                 require: true
             },
             day: {
@@ -299,6 +307,11 @@
         methods: {
             addToWorkpackage( wp){
                 this.$emit('addtowp', wp);
+            },
+
+            hasDeclarationHWP(code){
+                console.log(code, this.day[code], this.day);
+                return this.day[code] && this.day[code].length;
             }
         }
     }

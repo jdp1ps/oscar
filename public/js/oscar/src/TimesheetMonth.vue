@@ -168,6 +168,7 @@
                 <timesheetmonthdaydetails  v-if="selectedDay"
                                            :day="selectedDay"
                                            :workPackages="ts.workPackages"
+                                           :others="ts.otherWP"
                                            :selection="selectionWP"
                                            :label="dayLabel"
                                            :day-excess="ts.dayExcess"
@@ -245,7 +246,7 @@
                                 <strong>{{ (selectedWeek.totalOpen - selectedWeek.total) | duration }} heure(s)</strong>
                                 avec une des activités ci-dessous :
                             </p>
-                            <wpselector :workpackages="ts.workPackages" :selection="fillSelectedWP" @select="fillSelectedWP = $event"></wpselector>
+                            <wpselector :others="ts.otherWP" :workpackages="ts.workPackages" :selection="fillSelectedWP" @select="fillSelectedWP = $event"></wpselector>
                             <button class="btn btn-default" @click="fillWeek(selectedWeek, fillSelectedWP)" :class="fillSelectedWP ? 'btn-primary' : 'disabled'">
                                 <i class="icon-floppy"></i>
                                 Valider

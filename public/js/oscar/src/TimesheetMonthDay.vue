@@ -34,10 +34,10 @@
             </span>
         </span>
 
-        <span class="cartouche vacations xs" v-if="day.vacations.length" title="Congès">
+        <span class="cartouche vacations xs" v-if="day.conges.length" title="Congès">
             Congès
             <span class="addon">
-                {{totalVacations | duration2(day.dayLength)}}
+                {{totalConges | duration2(day.dayLength)}}
             </span>
         </span>
 
@@ -132,9 +132,9 @@
                 });
                 return t;
             },
-            totalVacations(){
+            totalConges(){
                 let t = 0.0;
-                this.day.vacations.forEach(d => {
+                this.day.conges.forEach(d => {
                     t += d.duration;
                 });
                 return t;

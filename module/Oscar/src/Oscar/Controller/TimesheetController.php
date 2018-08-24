@@ -778,7 +778,7 @@ class TimesheetController extends AbstractOscarController
         if( $others == null ){
             $others = [
                'conges' => [ 'code' => 'conges',  'label' => 'Congès',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
-               'learning' => [ 'code' => 'learning',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+               'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
                'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
                'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
                'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
@@ -1213,7 +1213,7 @@ class TimesheetController extends AbstractOscarController
                 'declarations' => [],
                 'infos' => [],
                 'duration' => 0.0,
-                'vacations' => [],
+                'conges' => [],
                 'training' => [],
                 'teaching' => [],
                 'sickleave' => [],
@@ -1264,9 +1264,9 @@ class TimesheetController extends AbstractOscarController
                             $output['days'][$dayTimesheet]['training'][] = $datas;
                             break;
 
-                        case 'vacations' :
+                        case 'vacation' :
                         case 'conges' :
-                            $output['days'][$dayTimesheet]['vacations'][] = $datas;
+                            $output['days'][$dayTimesheet]['conges'][] = $datas;
                             break;
 
                         case 'sickleave' :
@@ -1305,6 +1305,22 @@ class TimesheetController extends AbstractOscarController
             $output['total'] += (float)$t->getDuration();
             $output['activities'][$activity->getId()]['total'] += $t->getDuration();
             $output['workPackages'][$workpackage->getId()]['total'] += $t->getDuration();
+
+            $others = $this->getOthersWP();
+
+            foreach ($others as $key=>&$datas) {
+                $period = $this->getTimesheetService()->getValidationPeriosOutOfWorkpackageAt($currentPerson, $year, $month, $key);
+
+                if( $isPeriodSend ){
+                    $validationUp = $period && $period->isOpenForDeclaration();
+                } else {
+                    $validationUp = true;
+                }
+
+                $datas['validation_state'] = $period ? $period->json() : null;
+                $datas['validation_up'] = $validationUp;
+            }
+            $output['otherWP'] = $others;
 
             if( $t->getStatus() == TimeSheet::STATUS_DRAFT ){
                 $output['hasUnsend'] = true;
