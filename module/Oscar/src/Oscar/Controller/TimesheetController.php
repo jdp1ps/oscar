@@ -799,6 +799,14 @@ class TimesheetController extends AbstractOscarController
 
         // JOUR
         $datas = json_decode($this->params()->fromPost('timesheets'));
+        $action = $this->params()->fromPost('action');
+
+        // Réenvois d'une déclaration
+        if( $action == "fix-reject" ){
+            return $this->getResponseNotImplemented("Le FIX des rejets n'est pas encore implanté.");
+        }
+
+
         $timesheets = [];
 
         //
@@ -819,21 +827,35 @@ class TimesheetController extends AbstractOscarController
             $timesheetId = $data->id;
             $start = new \DateTime(sprintf($dayBase, 8, 0));
             $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
+            $month = (integer)$start->format('m');
+            $year = (integer)$start->format('Y');
 
             $wp = null;
             $label = "error";
+            $validationPeriod = null;
+
+            // Récupération des validations en cours pour la période
+            $validationPeriods = $this->getTimesheetService()->getValidationPeriods($year, $month, $person);
 
             // Créneau "Hors-lot"
             if( !$data->wpId ){
                 $other = $this->getOthersWP()[$data->code];
+
+                // Récupération de la procédure de validation en cours
+                $validationPeriod = $this->getTimesheetService()->getValidationPeriosOutOfWorkpackageAt($person, $year, $month, $label);
+
                 $status = TimeSheet::STATUS_INFO;
                 $label = $code;
+
+                // On contrôle le code
                 if( !$other ){
                     $msg = sprintf("Ce type de créneau '%s' n'est pas pris en charge dans cette version", $code);
                     $this->getLogger()->error($msg);
                     return $this->getResponseBadRequest($msg);
                 }
-            } else {
+            }
+            // Créneau sur un lot
+            else {
                 /** @var WorkPackage $wp */
                 $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
                 if( !$wp ){
@@ -841,7 +863,30 @@ class TimesheetController extends AbstractOscarController
                     $this->getLogger()->error($msg);
                     return $this->getResponseInternalError($msg);
                 }
+
+                $validationPeriod = $this->getTimesheetService()->getValidationPeriodActivityAt($wp->getActivity(), $person, $year, $month);
                 $label = (string)$wp;
+            }
+
+            // Il y'a une/plusieurs procédures de validation sur cette période ?
+            if( count($validationPeriods) > 0 ){
+
+                $hasConflict = false;
+                $unauthorizedError = "Vous ne pouvez pas modifier une déclaration en cours de validation.";
+
+
+                /** @var ValidationPeriod $vp */
+                foreach ($validationPeriods as $vp) {
+                    if( $vp->getStatus() == ValidationPeriod::STATUS_CONFLICT ){
+                        $unauthorizedError = "Vous ne pouvez pas modifier une déclaration en cours de validation. Seul les créneaux marqués en erreur peuvent être modifiés";
+                        $hasConflict = true;
+                    }
+                }
+
+                // Aucune procédure de validation spécifique pour ce type de créneau
+                if( !$validationPeriod || !$validationPeriod->hasConflict() ){
+                    return $this->getResponseBadRequest($unauthorizedError);
+                }
             }
 
             if( $timesheetId ){
@@ -946,6 +991,8 @@ class TimesheetController extends AbstractOscarController
 
         // Récupération des validations pour cette période
         $periodValidations = $timesheetService->getPeriodValidation($currentPerson, $month, $year);
+
+        $isPeriodSend = count($periodValidations);
 
 
         $periodValidationsDt = [];
@@ -1068,6 +1115,14 @@ class TimesheetController extends AbstractOscarController
                 ];
             }
 
+            $validationUp = false;
+
+            if( $isPeriodSend ){
+                $validationUp = $period && $period->isOpenForDeclaration();
+            } else {
+                $validationUp = true;
+            }
+
             $workPackages[$workPackage->getId()] = [
                 'id' => $workPackage->getId(),
                 'from' => DateTimeUtils::toStr($workPackage->getDateStart(), 'Y-m-d'),
@@ -1082,7 +1137,7 @@ class TimesheetController extends AbstractOscarController
                 'activity_id' => $activity->getId(),
                 'hours' => $workPackagePerson->getDuration(),
                 'total' => 0.0,
-                'validation_up' => !$period || $period->isOpenForDeclaration(),
+                'validation_up' => $validationUp, //!$period || $period->isOpenForDeclaration(),
                 'validation_state' => $period ? $period->json() : null
             ];
         }

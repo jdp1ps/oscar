@@ -311,7 +311,11 @@ class ValidationPeriod
 
 
     public function isOpenForDeclaration(){
-        return $this->getStatus() == self::STATUS_CONFLICT || !$this->getStatus();
+        return $this->hasConflict() || !$this->getStatus();
+    }
+
+    public function hasConflict(){
+        return $this->getStatus() == self::STATUS_CONFLICT;
     }
 
     /**

@@ -110,7 +110,7 @@ class ValidationPeriodRepository extends EntityRepository
      * @param $month
      * @param $code
      * @param $personId
-     * @return null[ValidationPeriod
+     * @return null|ValidationPeriod
      * @throws OscarException
      */
     public function getValidationPeriodOutWP( $year, $month, $code, $personId ){

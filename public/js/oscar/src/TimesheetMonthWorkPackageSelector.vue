@@ -11,7 +11,11 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                <li v-for="wp in workpackages" :class="{ 'selected' : selection == wp }">
+                <li v-for="wp in workpackages"
+                    :class="{ 'selected' : selection == wp, 'disabled': !wp.validation_up }"
+                    :title="wp.validation_up ? '': 'Vous ne pouvez pas ajouter de créneau pour ce lot'"
+
+                >
                     <a href="#" @click.prevent="handlerSelectWP(wp)">
                         <i class="icon-archive"></i>
                         <abbr :title="wp.project">[{{wp.acronym}}]</abbr>

@@ -82,6 +82,7 @@
                         </strong>
                     </h3>
                 </section>
+                <pre>{{ selectionWP }}</pre>
                 <p>
                     <i class="icon-calendar"></i>
                     Journée : <strong>{{ selectedDay.date | datefull }}</strong><br/>

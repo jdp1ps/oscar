@@ -369,6 +369,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     /**
+     * @param Person $person
+     * @param $year
+     * @param $month
+     * @param $code
+     * @return null|ValidationPeriod
+     * @throws OscarException
+     */
+    public function getValidationPeriosOutOfWorkpackageAt( Person $person, $year, $month, $code) {
+        return $this->getValidationPeriodRepository()->getValidationPeriodOutWP($year, $month, $code, $person->getId());
+    }
+
+    /**
      * @param TimeSheet[] $timesheets
      */
     public function getArrayFormatedTimesheetsCompact( ValidationPeriod $validationPeriod, $timesheets, &$total ){
