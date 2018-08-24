@@ -309,6 +309,11 @@ class ValidationPeriod
     const STATUS_CONFLICT   = 'conflict';
     const STATUS_VALID      = 'valid';
 
+
+    public function isOpenForDeclaration(){
+        return $this->getStatus() == self::STATUS_CONFLICT || !$this->getStatus();
+    }
+
     /**
      * @return mixed
      */

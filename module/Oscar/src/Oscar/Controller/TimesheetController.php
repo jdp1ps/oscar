@@ -1082,6 +1082,7 @@ class TimesheetController extends AbstractOscarController
                 'activity_id' => $activity->getId(),
                 'hours' => $workPackagePerson->getDuration(),
                 'total' => 0.0,
+                'validation_up' => !$period || $period->isOpenForDeclaration(),
                 'validation_state' => $period ? $period->json() : null
             ];
         }

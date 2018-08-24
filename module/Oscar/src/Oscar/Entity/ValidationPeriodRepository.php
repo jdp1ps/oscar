@@ -71,6 +71,16 @@ class ValidationPeriodRepository extends EntityRepository
             ->getResult();
     }
 
+    /**
+     * Retourne LA procédure de validation pour : La période, l'activité et la personne.
+     *
+     * @param $year
+     * @param $month
+     * @param $activityId
+     * @param $personId
+     * @return null|ValidationPeriod
+     * @throws OscarException
+     */
     public function getValidationPeriodForActivity( $year, $month, $activityId, $personId ){
         $query = $this->createQueryBuilder('vp')
             ->where('vp.month = :month AND vp.year = :year AND vp.object_id = :activityId AND vp.declarer = :personId');
@@ -93,6 +103,16 @@ class ValidationPeriodRepository extends EntityRepository
         }
     }
 
+    /**
+     * Retourne la procédure de validation en cours pour l'élément hors-lot
+     *
+     * @param $year
+     * @param $month
+     * @param $code
+     * @param $personId
+     * @return null[ValidationPeriod
+     * @throws OscarException
+     */
     public function getValidationPeriodOutWP( $year, $month, $code, $personId ){
         $query = $this->createQueryBuilder('vp')
             ->where('vp.month = :month AND vp.year = :year AND vp.object = :code AND vp.declarer = :personId');
