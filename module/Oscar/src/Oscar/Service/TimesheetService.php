@@ -360,7 +360,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->setParameters([
                 'idactivity' => $activity->getId(),
                 'object' => 'activity',
-            ]);
+            ])
+            ->addOrderBy('v.year', 'DESC')->addOrderBy('v.month', 'DESC');
 
         return $query->getQuery()->getResult();
     }
