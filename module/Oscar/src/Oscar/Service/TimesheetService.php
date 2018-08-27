@@ -130,6 +130,30 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
+    public function rejectSci( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
+        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP2 ){
+            throw new OscarException("Erreur d'état");
+        }
+
+        $log = $validationPeriod->getLog();
+        $person = (string) $validator;
+        $date = new \DateTime();
+        $msg = $date->format('Y-m-d H:i:s') . " : Rejet SCIENTIFIQUE par $person\n";
+        $log .= $msg;
+        $this->getLogger()->debug($msg);
+
+        $validationPeriod->setLog($log);
+        $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
+        $validationPeriod->setRejectSciAt($date)
+            ->setRejectSciBy((string)$validator)
+            ->setRejectSciById($validator->getId())
+            ->setRejectSciMessage($message);
+
+        $this->getEntityManager()->flush($validationPeriod);
+
+        return true;
+    }
+
 
 
     /**
@@ -1344,54 +1368,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
     }
 
-    public function rejectSci( $datas, $by ){
-        $timesheets = [];
 
-        $currentPersonName = "Oscar Bot";
-        $currentPersonId = -1;
-        if( $by ){
-            $currentPersonName = (string)$by;
-            $currentPersonId = $by->getId();
-        }
-
-        // Traitement
-        foreach ($datas as $data) {
-            if ( array_key_exists('id', $data) ) {
-                /** @var TimeSheet $timeSheet */
-                $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-
-                $timeSheet
-                    ->setStatus(TimeSheet::STATUS_CONFLICT)
-                    ->setRejectedSciAt(new \DateTime())
-                    ->setRejectedSciBy($currentPersonName)
-                    ->setRejectedSciById($currentPersonId)
-                    ->setRejectedSciComment($data['rejectedSciComment'])
-                    ->setValidatedSciAt(null)
-                    ->setValidatedSciBy(null)
-                    ->setValidatedSciById(null);
-
-                $this->getEntityManager()->flush($timeSheet);
-                $json = $timeSheet->toJson();
-                $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
-                $timesheets[] = $json;
-
-                $this->stackNotification(
-                    sprintf("Des déclarations ont été rejetées scientifiquement dans l'activité %s", $timeSheet->getActivity()->log()),
-                    $timeSheet->getActivity(),
-                    'rejectsci',
-                    [$timeSheet->getPerson()]
-                );
-
-            } else {
-                return $this->getResponseBadRequest("DOBEFORE");
-            }
-        }
-
-        $this->sendStackedNotifications();
-
-
-        return $timesheets;
-    }
 
 
     private $notificationsDatas;
