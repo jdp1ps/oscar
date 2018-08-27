@@ -889,27 +889,32 @@
                     return;
                 }
 
-                // Données à envoyer
-                var datas = new FormData();
-                datas.append('action', 'sendmonth');
-                datas.append('datas', JSON.stringify({
-                  from: this.ts.from,
-                  to: this.ts.to
-                }));
+                this.bootbox.confirm('Soumettre vos déclarations pour cette période ?', ok => {
+                   if( ok ){
+                       // Données à envoyer
+                       var datas = new FormData();
+                       datas.append('action', 'sendmonth');
+                       datas.append('datas', JSON.stringify({
+                           from: this.ts.from,
+                           to: this.ts.to
+                       }));
 
-                this.loading = true;
+                       this.loading = true;
 
-                this.$http.post('', datas).then(
-                    ok => {
-                        this.fetch();
-                    },
-                    ko => {
-                        this.error = AjaxResolve.resolve('Impossible d\'envoyer la période',  ko);
-                    }
-                ).then(foo => {
-                  this.selectedWeek = null;
-                    this.loading = false;
+                       this.$http.post('', datas).then(
+                           ok => {
+                               this.fetch();
+                           },
+                           ko => {
+                               this.error = AjaxResolve.resolve('Impossible d\'envoyer la période',  ko);
+                           }
+                       ).then(foo => {
+                           this.selectedWeek = null;
+                           this.loading = false;
+                       });
+                   }
                 });
+
             },
 
             fillMonth(){
