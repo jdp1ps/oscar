@@ -154,6 +154,30 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
+    public function rejectAdm( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
+        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP3 ){
+            throw new OscarException("Erreur d'état");
+        }
+
+        $log = $validationPeriod->getLog();
+        $person = (string) $validator;
+        $date = new \DateTime();
+        $msg = $date->format('Y-m-d H:i:s') . " : Rejet ADMINISTRATIF par $person\n";
+        $log .= $msg;
+        $this->getLogger()->debug($msg);
+
+        $validationPeriod->setLog($log);
+        $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
+        $validationPeriod->setRejectAdmAt($date)
+            ->setRejectAdmBy((string)$validator)
+            ->setRejectAdmById($validator->getId())
+            ->setRejectAdmMessage($message);
+
+        $this->getEntityManager()->flush($validationPeriod);
+
+        return true;
+    }
+
 
 
     /**
@@ -1467,58 +1491,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $this->sendStackedNotifications();
 
-
-        return $timesheets;
-    }
-
-    /**
-     * Déclenchement du rejet administratif.
-     *
-     * @param $datas
-     * @param $by
-     * @return array
-     */
-    public function rejectAdmin( $datas, $by ){
-        $timesheets = [];
-
-        $currentPersonName = "Oscar Bot";
-        $currentPersonId = -1;
-        if( $by ){
-            $currentPersonName = (string)$by;
-            $currentPersonId = $by->getId();
-        }
-
-        // Traitement
-        foreach ($datas as $data) {
-            if ( array_key_exists('id', $data) ) {
-                /** @var TimeSheet $timeSheet */
-                $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-
-                $timeSheet
-                    ->setStatus(TimeSheet::STATUS_CONFLICT)
-                    ->setRejectedAdminAt(new \DateTime())
-                    ->setRejectedAdminBy($currentPersonName)
-                    ->setRejectedAdminComment($data['rejectedAdminComment'])
-                    ->setRejectedAdminById($currentPersonId);
-
-                $this->getEntityManager()->flush($timeSheet);
-                $json = $timeSheet->toJson();
-                $json['credentials'] = $this->resolveTimeSheetCredentials($timeSheet);
-                $timesheets[] = $json;
-
-                $this->stackNotification(
-                    sprintf("Des déclarations ont été rejetées administrativement dans l'activité %s", $timeSheet->getActivity()->log()),
-                    $timeSheet->getActivity(),
-                    'rejectadmin',
-                    [$timeSheet->getPerson()]
-                );
-
-            } else {
-                return $this->getResponseBadRequest("DOBEFORE");
-            }
-        }
-
-        $this->sendStackedNotifications();
 
         return $timesheets;
     }

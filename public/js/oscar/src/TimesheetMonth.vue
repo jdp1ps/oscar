@@ -37,11 +37,11 @@
                     </p>
                     <pre><strong>Motif : </strong>{{ rejectPeriod.rejectsci_message }}</pre>
                 </div>
-                <div v-else-if="rejectPeriod.rejectactivity_at">
-                    <p>Déclaration rejetée par <strong>{{ rejectPeriod.rejectactivity_by }}</strong>
-                        le <time>{{ rejectPeriod.rejectactivity_at }}</time>
+                <div v-else-if="rejectPeriod.rejectadm_at">
+                    <p>Déclaration rejetée par <strong>{{ rejectPeriod.rejectadm_by }}</strong>
+                        le <time>{{ rejectPeriod.rejectadm_at }}</time>
                     </p>
-                    <pre><strong>Motif : </strong>{{ rejectPeriod.rejectactivity_message }}</pre>
+                    <pre><strong>Motif : </strong>{{ rejectPeriod.rejectadm_message }}</pre>
                 </div>
 
                 <nav class="buttons">

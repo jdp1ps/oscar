@@ -146,7 +146,7 @@ class TimesheetController extends AbstractOscarController
 
                     if( $action == "reject-sci" ){
                         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter scientifiquement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
@@ -158,7 +158,27 @@ class TimesheetController extends AbstractOscarController
                                 return $this->getResponseOk("La période a bien été rejetée");
                             }
                         } catch ( \Exception $e ){
-                            $error = "Erreur de rejet pour la période $validationPeriodId : " . $e->getMessage();
+                            $error = "Erreur de rejet scientifique pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+                    if( $action == "reject-adm" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter administrativement la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+                            $message = $this->params()->fromPost('message');
+                            if( !$message ){
+                                throw new \Exception('Vous devez renseigner une raison au rejet.');
+                            }
+                            if( $timesheetService->rejectAdm($validationPeriod, $currentPerson, $message) ){
+                                return $this->getResponseOk("La période a bien été rejetée");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de rejet administratif pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
