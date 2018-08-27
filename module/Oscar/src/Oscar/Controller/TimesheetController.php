@@ -1398,6 +1398,22 @@ class TimesheetController extends AbstractOscarController
                     break;
 
                 case 'POST' :
+                    $action = $this->params()->fromPost('action', 'send');
+                    if( $action == 'resend' ){
+                        $periodId = $this->params()->fromPost('period_id');
+                        $period = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($periodId);
+                        if( $period->getDeclarer() == $currentPerson ){
+                            try {
+                                $timesheetService->reSendValidation($period);
+                                return $this->getResponseOk();
+                            } catch (\Exception $e ){
+                                return $this->getResponseInternalError(sprintf('Impossible de réenvoyer la déclaration : %s', $e->getMessage()));
+                            }
+                        } else {
+                            return $this->getResponseUnauthorized("Cette déclaration n'est pas la votre.");
+                        }
+                    }
+
                     $datas = json_decode($this->params()->fromPost('datas'));
                     $this->getLogger()->debug("Données recues : " . print_r($datas, true));
                     if( !$datas ){

@@ -178,6 +178,30 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
+    public function reSendValidation(ValidationPeriod $validationPeriod) {
+        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_CONFLICT ){
+            throw new OscarException("Erreur d'état");
+        }
+
+        $log = $validationPeriod->getLog();
+        $person = (string) $validationPeriod->getDeclarer();
+        $date = new \DateTime();
+        $msg = $date->format('Y-m-d H:i:s') . " : Réenvoi de la déclaration par $person\n";
+        $log .= $msg;
+        $this->getLogger()->debug($msg);
+
+        $validationPeriod->setLog($log);
+        $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP1);
+        $validationPeriod->setRejectSciBy(null)->setRejectSciMessage('')->setRejectSciAt(null)->setRejectSciById(null)
+            ->setRejectAdmBy(null)->setRejectAdmMessage('')->setRejectAdmAt(null)->setRejectAdmById(null)
+            ->setRejectActivityBy(null)->setRejectActivityMessage('')->setRejectActivityAt(null)->setRejectActivityById(null)
+            ;
+
+        $this->getEntityManager()->flush($validationPeriod);
+
+        return true;
+    }
+
 
 
     /**

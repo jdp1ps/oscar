@@ -37,11 +37,11 @@
                     </p>
                     <pre><strong>Motif : </strong>{{ rejectPeriod.rejectsci_message }}</pre>
                 </div>
-                <div v-else-if="rejectPeriod.rejectadm_at">
-                    <p>Déclaration rejetée par <strong>{{ rejectPeriod.rejectadm_by }}</strong>
-                        le <time>{{ rejectPeriod.rejectadm_at }}</time>
+                <div v-else-if="rejectPeriod.rejectactivity_at">
+                    <p>Déclaration rejetée par <strong>{{ rejectPeriod.rejectactivity_by }}</strong>
+                        le <time>{{ rejectPeriod.rejectactivity_at }}</time>
                     </p>
-                    <pre><strong>Motif : </strong>{{ rejectPeriod.rejectadm_message }}</pre>
+                    <pre><strong>Motif : </strong>{{ rejectPeriod.rejectactivity_message }}</pre>
                 </div>
 
                 <nav class="buttons">
@@ -373,6 +373,7 @@
 
                                 <a href="#" @click="popup = periodValidation.log">Historique</a>
                                 <a href="#" @click="rejectPeriod = periodValidation" v-if="periodValidation.status == 'conflict'">Détails sur le rejet</a>
+                                <a href="#" @click="reSendPeriod(periodValidation)" v-if="periodValidation.status == 'conflict'">Réenvoyer</a>
                             </section>
                         </div>
 
@@ -663,6 +664,9 @@
             moment: {
                 required: true
             },
+            bootbox: {
+                required: true
+            },
             defaultMonth: { default: defaultDate.getMonth()+1},
             defaultYear: { default: defaultDate.getFullYear()},
             defaultDayLength: { default: 8.0 }
@@ -845,6 +849,37 @@
 
             getWorkpackageById( id ){
                 return this.ts.workPackages[id];
+            },
+
+            reSendPeriod(periodValidation){
+                console.log(periodValidation.status);
+                if( periodValidation.status != 'conflict' ){
+                    this.error = 'Vous ne pouvez pas soumettre cette déclaration, status incorrect';
+                    return;
+                }
+
+                this.bootbox.confirm('Réenvoyer la déclaration ?', ok => {
+                    if( ok ){
+                        // Données à envoyer
+                        var datas = new FormData();
+                        datas.append('action', 'resend');
+                        datas.append('period_id', periodValidation.id);
+
+                        this.loading = true;
+
+                        this.$http.post('', datas).then(
+                            ok => {
+                                this.fetch();
+                            },
+                            ko => {
+                                this.error = AjaxResolve.resolve('Impossible d\'envoyer la période',  ko);
+                            }
+                        ).then(foo => {
+                            this.selectedWeek = null;
+                            this.loading = false;
+                        });
+                    }
+                })
             },
 
             sendMonth(){
