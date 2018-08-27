@@ -31,7 +31,6 @@
                 </li>
             </ul>
         </div>
-        <pre>{{ selection }}</pre>
     </div>
 </template>
 
