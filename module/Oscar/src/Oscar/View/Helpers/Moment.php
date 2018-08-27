@@ -55,6 +55,10 @@ class Moment extends AbstractHtmlElement
         return $this;
     }
 
+    public function formatMonth( $monthString ){
+
+    }
+
     /**
      * Rendu sous forme de chaîne.
      *

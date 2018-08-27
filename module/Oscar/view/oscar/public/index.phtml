@@ -101,14 +101,26 @@
                                 </a>
                             <?php endif; ?>
 
-                            <?php if( count($timesheetRejected) ): ?>
+                            <?php if( count($periodsRejected) ): ?>
                                 <hr>
                                 <div class="alert alert-danger">
-                                    <i class="icon-warning-empty"></i>Vous avez des déclarations rejetées
-                                    <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>">
-                                        <i class="icon-pencil"></i>
-                                        Accéder à mes déclarations
-                                    </a>
+                                    <i class="icon-warning-empty"></i> Problème pour la/les déclaration(s) :
+                                    <?php foreach ($periodsRejected as $validationPeriod): ?>
+                                    <article>
+
+                                        <?php if( $validationPeriod['activity'] ): ?>
+                                        L'activité <strong><?= $validationPeriod['activity'] ?></strong>
+                                        <?php else: ?>
+                                        Les créneaux <strong><?= $validationPeriod['validation']->getLabel() ?> </strong>
+                                        <?php endif; ?>
+                                        pour la période <strong><?= $this->moment($validationPeriod['validation']->getFirstDayStr(), 'M Y') ?></strong>
+                                        <a class="btn btn-default btn-xs" href="<?= $this->url('timesheet/declarant') ?>?month=<?= $validationPeriod['validation']->getMonth() ?>&year=<?= $validationPeriod['validation']->getYear() ?>" >
+                                            <i class="icon-pencil"></i>
+                                            Modifier
+                                        </a>
+
+                                    </article>
+                                    <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
                             <?php if( count($activitiesValidation) ): ?>

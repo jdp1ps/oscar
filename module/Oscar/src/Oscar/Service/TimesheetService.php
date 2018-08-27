@@ -202,6 +202,23 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public function getValidationPeriodPersonConflict( Person $person ){
+        $out= [];
+        $validationsPeriods = $this->getValidationPeriodRepository()->getValidationPeriodPersonWithConflict($person->getId());
+        foreach ($validationsPeriods as $validationsPeriod) {
+            $activity = null;
+            if( $validationsPeriod->getObject() == ValidationPeriod::OBJECT_ACTIVITY ){
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($validationsPeriod->getObjectId());
+            }
+            $out[] = [
+                'validation' => $validationsPeriod,
+                'activity' => $activity
+            ];
+        }
+        return $out;
+    }
+
 
 
     /**

@@ -88,12 +88,11 @@ class PublicController extends AbstractOscarController
         $isValidateurAdministratif = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
 
         $activitiesValidation = [];
-        $timesheetRejected = [];
+        $periodsRejected = [];
 
 
-
-        //// SUSPENDU en raison des modifications du système de validation
         $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
+
         ///
         /** @var Activity $activity */
         foreach ($activityWithValidationUp as $activity ){
@@ -114,14 +113,19 @@ class PublicController extends AbstractOscarController
 
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
+            $this->getLogger()->debug("Récupération des déclarations en conflit pour $person");
+            if( $person )
+                $periodsRejected = $timeSheetService->getValidationPeriodPersonConflict($person);
 
-            // TODO Récupération des ValidationPeriod en conflict !
+
+            $this->getLogger()->debug("Périodes rejetées : " . count($periodsRejected));
 
         } catch( \Exception $e ){
+            $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
         }
         return [
             'activitiesValidation' => $activitiesValidation,
-            'timesheetRejected' => $timesheetRejected,
+            'periodsRejected' => $periodsRejected,
             'user' => $person
         ];
     }

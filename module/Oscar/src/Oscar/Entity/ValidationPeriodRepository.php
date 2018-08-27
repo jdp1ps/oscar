@@ -37,6 +37,14 @@ class ValidationPeriodRepository extends EntityRepository
             ]);
     }
 
+    public function getValidationPeriodsPersonQuery( $personId ){
+        return $this->createQueryBuilder('vp')
+            ->where('vp.declarer = :personId')
+            ->setParameters([
+                'personId' => $personId
+            ]);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// GET ENTITIES
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +141,13 @@ class ValidationPeriodRepository extends EntityRepository
         else {
             return null;
         }
+    }
+
+    public function getValidationPeriodPersonWithConflict( $personId ){
+        $status = ValidationPeriod::STATUS_CONFLICT;
+        $query = $this->getValidationPeriodsPersonQuery($personId)
+            ->andWhere("vp.status = '$status'");
+        return $query->getQuery()->getResult();
     }
 
 
