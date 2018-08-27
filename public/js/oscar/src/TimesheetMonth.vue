@@ -21,6 +21,37 @@
             </div>
         </div>
 
+        <div class="overlay" v-if="rejectPeriod"  style="z-index: 2002">
+            <div class="content container overlay-content">
+                <h2><i class="icon-attention-1"></i> Déclaration rejetée !</h2>
+
+                <div v-if="rejectPeriod.rejectadmin_at">
+                    <p>Déclaration rejetée administrativement par <strong>{{ rejectPeriod.rejectadmin_by }}</strong>
+                        le <time>{{ rejectPeriod.rejectadmin_at }}</time>
+                    </p>
+                    <pre><strong>Motif : </strong>{{ rejectPeriod.rejectadmin_message }}</pre>
+                </div>
+                <div v-else-if="rejectPeriod.rejectsci_at">
+                    <p>Déclaration rejetée scientifiquement par <strong>{{ rejectPeriod.rejectsci_by }}</strong>
+                        le <time>{{ rejectPeriod.rejectsci_at }}</time>
+                    </p>
+                    <pre><strong>Motif : </strong>{{ rejectPeriod.rejectsci_message }}</pre>
+                </div>
+                <div v-else-if="rejectPeriod.rejectactivity_at">
+                    <p>Déclaration rejetée par <strong>{{ rejectPeriod.rejectactivity_by }}</strong>
+                        le <time>{{ rejectPeriod.rejectactivity_at }}</time>
+                    </p>
+                    <pre><strong>Motif : </strong>{{ rejectPeriod.rejectactivity_message }}</pre>
+                </div>
+
+                <nav class="buttons">
+                    <button class="btn btn-primary" @click="rejectPeriod = null">Fermer</button>
+                </nav>
+            </div>
+        </div>
+
+
+
         <div class="overlay" v-if="popup"  style="z-index: 2001">
             <div class="content container overlay-content">
                 <h2>Historique</h2>
@@ -339,7 +370,9 @@
                                 <i v-else-if="periodValidation.status == 'conflict'" class="icon-minus-circled"></i>
                                 <i v-else class="icon-history"></i>
                                 {{ periodValidation.label }}
+
                                 <a href="#" @click="popup = periodValidation.log">Historique</a>
+                                <a href="#" @click="rejectPeriod = periodValidation" v-if="periodValidation.status == 'conflict'">Détails sur le rejet</a>
                             </section>
                         </div>
 
@@ -669,6 +702,8 @@
                 year: null,
                 dayLength: null,
                 selectedWeek: null,
+
+                rejectPeriod: null,
 
                 selectedDay: null,
                 dayMenuLeft: 50,
