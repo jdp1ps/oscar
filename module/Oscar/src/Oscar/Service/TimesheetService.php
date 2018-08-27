@@ -481,13 +481,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $day = $timesheet->getDateFrom()->format('d');
 
-            if( !array_key_exists($day, $output[$pack]) ){
+            if( !array_key_exists($day, $output[$pack]['days']) ){
                 $output[$pack]['days'][$day] = 0.0;
             }
 
             $output[$pack]['days'][$day] += $timesheet->getDuration();
             $total[$day] += $timesheet->getDuration();
         }
+
         if( count($output) == 1 ){
             return $output[$pack];
         }
