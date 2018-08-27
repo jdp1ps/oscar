@@ -267,6 +267,14 @@ class ValidationPeriod
      */
     private $rejectSciById;
 
+    /**
+     * Message
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $rejectSciMessage;
+
 
     // Rejet administratif
 
@@ -293,6 +301,14 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=true)
      */
     private $rejectAdmById;
+
+    /**
+     * Message
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $rejectAdmMessage;
 
     /**
      * Intitulé du valideur.
@@ -799,6 +815,25 @@ class ValidationPeriod
     }
 
     /**
+     * @return string
+     */
+    public function getRejectSciMessage()
+    {
+        return $this->rejectSciMessage;
+    }
+
+    /**
+     * @param string $rejectSciMessage
+     */
+    public function setRejectSciMessage($rejectSciMessage)
+    {
+        $this->rejectSciMessage = $rejectSciMessage;
+        return $this;
+    }
+
+
+
+    /**
      * @return datetime
      */
     public function getRejectAdmAt()
@@ -852,6 +887,25 @@ class ValidationPeriod
     /**
      * @return string
      */
+    public function getRejectAdmMessage()
+    {
+        return $this->rejectAdmMessage;
+    }
+
+    /**
+     * @param string $rejectAdmMessage
+     */
+    public function setRejectAdmMessage($rejectAdmMessage)
+    {
+        $this->rejectAdmMessage = $rejectAdmMessage;
+        return $this;
+    }
+
+    
+
+    /**
+     * @return string
+     */
     public function getStatus()
     {
         return $this->status;
@@ -899,12 +953,15 @@ class ValidationPeriod
 
             'rejectactivity_at' => $this->getRejectActivityAt() ? $this->getRejectActivityAt()->format('Y-m-d') : null,
             'rejectactivity_by' => $this->getRejectActivityBy(),
+            'rejectactivity_message' => $this->getRejectActivityMessage(),
 
             'rejectsci_by' => $this->getRejectSciBy(),
             'rejectsci_at' => $this->getRejectSciAt() ? $this->getRejectSciAt()->format('Y-m-d') : null,
+            'rejectsci_message' => $this->getRejectS(),
 
             'rejectadm_by' => $this->getRejectAdmBy(),
             'rejectadm_at' => $this->getRejectAdmAt() ? $this->getRejectAdmAt()->format('Y-m-d') : null,
+            'rejectadm_message' => $this->getRejectActivityMessage(),
 
 
         ];
