@@ -901,7 +901,7 @@ class ValidationPeriod
         return $this;
     }
 
-    
+
 
     /**
      * @return string
@@ -957,11 +957,11 @@ class ValidationPeriod
 
             'rejectsci_by' => $this->getRejectSciBy(),
             'rejectsci_at' => $this->getRejectSciAt() ? $this->getRejectSciAt()->format('Y-m-d') : null,
-            'rejectsci_message' => $this->getRejectS(),
+            'rejectsci_message' => $this->getRejectSciMessage(),
 
             'rejectadm_by' => $this->getRejectAdmBy(),
             'rejectadm_at' => $this->getRejectAdmAt() ? $this->getRejectAdmAt()->format('Y-m-d') : null,
-            'rejectadm_message' => $this->getRejectActivityMessage(),
+            'rejectadm_message' => $this->getRejectAdmMessage(),
 
 
         ];
