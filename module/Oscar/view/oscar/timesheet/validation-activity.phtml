@@ -36,6 +36,11 @@
                     return h +':' +m;
                 });
 
+                Vue.filter('monthyear', function(v){
+                    var m = moment(v);
+                    return m.format('MMMM YYYY');
+                });
+
                 console.log(<?= json_encode($periods) ?>);
 
                 new Vue({

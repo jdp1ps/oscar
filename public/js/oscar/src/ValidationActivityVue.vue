@@ -1,7 +1,7 @@
 <template>
     <section>
         <section class="period" v-for="declarations,p in periods">
-            <h2>Période : <strong>{{ p }}</strong></h2>
+            <h2>Période : <strong>{{ p | monthyear}}</strong></h2>
 
             <section v-for="datas in declarations" class="card">
                 <section class="main" v-for="activity in datas.main">

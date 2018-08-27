@@ -113,28 +113,40 @@
                         </strong>
                     </h3>
                 </section>
-                <pre>{{ selectionWP }}</pre>
-                <p>
-                    <i class="icon-calendar"></i>
-                    Journée : <strong>{{ selectedDay.date | datefull }}</strong><br/>
-                </p>
 
-                <div class="row">
+                <div v-if="selectionWP.validation_up != true" class="alert alert-danger">
+                    Vous ne pouvez plus ajouter de créneaux pour ce lot sur cette période
+                </div>
+                <div v-else>
+                    <p>
+                        <i class="icon-calendar"></i>
+                        Journée : <strong>{{ selectedDay.date | datefull }}</strong><br/>
+                    </p>
 
-                    <div class="col-md-6">
-                        <h4>Temps</h4>
-                        <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue" :duration="editedTimesheet ? editedTimesheet.duration : 0"></timechooser>
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <h4>Temps</h4>
+                            <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue" :duration="editedTimesheet ? editedTimesheet.duration : 0"></timechooser>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Commentaire</h4>
+                            <textarea class="form-control textarea" v-model="commentaire"></textarea>
+                        </div>
+
                     </div>
-                    <div class="col-md-6">
-                        <h4>Commentaire</h4>
-                        <textarea class="form-control textarea" v-model="commentaire"></textarea>
-                    </div>
-
                 </div>
 
+
+
                 <nav class="buttons">
-                    <button class="btn btn-default" @click="selectionWP = null">Annuler</button>
-                    <button class="btn btn-primary" @click="handlerSaveMenuTime">Valider</button>
+                    <button class="btn btn-default" @click="selectionWP = null">
+                        <i class="icon-block"></i>
+                        Annuler</button>
+                    <button class="btn btn-primary" @click="handlerSaveMenuTime" v-if="selectionWP.validation_up == true">
+                        <i class="icon-floppy"></i>
+                        <i class="icon-floppy"></i>
+                        Valider</button>
                 </nav>
             </div>
         </div>
