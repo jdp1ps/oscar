@@ -229,6 +229,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getValidationPeriodRepository()->getValidationPeriodsOutWPToValidate($person ? $person->getId() : null);
     }
 
+    public function getValidationPeriodsOutWP( $person = null ){
+        return $this->getValidationPeriodRepository()->getValidationPeriodsOutWP($person ? $person->getId() : null);
+    }
+
 
 
     /**
@@ -414,6 +418,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
                 'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
                 'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+                'other' => [ 'code' => 'other', 'label' => 'Divers',  'description' => 'Autre activité', 'icon' => true ],
             ];
         }
         return $others;
@@ -431,7 +436,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $timesheetFormatter = new TimesheetsMonthFormatter();
         $hwp = $this->getOthersWP();
-        $periods = $this->getValidationPeriodsOutWPToValidate($person);
+        $periods = $this->getValidationPeriodsOutWP($person);
         $out = [
             'label' => 'Déclaration hors-lot pour ' . (string)$person,
             'packages' => []
@@ -439,8 +444,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         foreach ($periods as $period) {
             $timesheets = $this->getTimesheetsValidationPeriod($period);
+            $code = array_key_exists($period->getObject(), $hwp) ? $period->getObject() : 'other';
+
             $periodDatas = $timesheetFormatter->format($timesheets, $period->getMonth(), $period->getMonth());
-            $periodDatas['label'] = $hwp[$period->getObject()]['label'];
+            $periodDatas['label'] = $hwp[$code]['label'];
+            $periodDatas['description'] = $hwp[$code]['description'];
+            $periodDatas['code'] = $code;
+            $periodDatas['validation'] = $period->json();
             $periodDatas['period_id'] = $period->getId();
             $out['packages'][] = $periodDatas;
         }

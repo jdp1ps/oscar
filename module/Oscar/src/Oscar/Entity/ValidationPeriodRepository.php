@@ -167,6 +167,26 @@ class ValidationPeriodRepository extends EntityRepository
         return $query->setParameters($parameters)->getQuery()->getResult();
     }
 
+    public function getValidationPeriodsOutWP( $idPerson = null ){
+        $parameters = [
+            'objectgroup' => ValidationPeriod::GROUP_OTHER
+        ];
+
+        $query = $this->createQueryBuilder('vp')
+            ->where('vp.objectGroup = :objectgroup');
+
+        if( $idPerson != null ){
+            $parameters['idPerson'] = $idPerson;
+            $query->andWhere('vp.declarer = :idPerson');
+        }
+
+        $query->addOrderBy('vp.year');
+        $query->addOrderBy('vp.month');
+        return $query->setParameters($parameters)->getQuery()->getResult();
+    }
+
+
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// GET DATAS
