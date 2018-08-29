@@ -180,8 +180,8 @@ class ValidationPeriodRepository extends EntityRepository
             $query->andWhere('vp.declarer = :idPerson');
         }
 
-        $query->addOrderBy('vp.year');
-        $query->addOrderBy('vp.month');
+        $query->addOrderBy('vp.year', 'DESC');
+        $query->addOrderBy('vp.month', 'DESC');
         return $query->setParameters($parameters)->getQuery()->getResult();
     }
 
