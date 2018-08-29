@@ -446,7 +446,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $timesheets = $this->getTimesheetsValidationPeriod($period);
             $code = array_key_exists($period->getObject(), $hwp) ? $period->getObject() : 'other';
 
-            $periodDatas = $timesheetFormatter->format($timesheets, $period->getMonth(), $period->getMonth());
+            $periodDatas = $timesheetFormatter->format($timesheets, $period->getMonth(), $period->getYear());
             $periodDatas['label'] = $hwp[$code]['label'];
             $periodDatas['description'] = $hwp[$code]['description'];
             $periodDatas['code'] = $code;

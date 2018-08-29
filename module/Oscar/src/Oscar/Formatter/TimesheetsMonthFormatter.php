@@ -42,7 +42,7 @@ class TimesheetsMonthFormatter
                 \IntlDateFormatter::FULL,
                 'Europe/Paris',
                 \IntlDateFormatter::GREGORIAN,
-                'd MMMM Y');
+                'd MMMM YYYY');
         }
         return $formatter;
     }
@@ -55,9 +55,10 @@ class TimesheetsMonthFormatter
      * @param $year
      */
     public function format( $timesheets, $month, $year ){
+
         $totalDays = $this->getMonthDaysLength($month, $year);
         $formatter = $this->getDateFormatter();
-        $formatter->setPattern('MMMM Y');
+        $formatter->setPattern('MMMM YYYY');
         $firstDay = new \DateTime(sprintf('%s-%s-01', $year, $month));
 
 

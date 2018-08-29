@@ -42,8 +42,17 @@
                                 <em v-else>-</em>
                             </td>
                             <td>
-                                <button class="btn btn-success btn-xs" @click="validate(d.period_id)">Valider</button>
-                                <button class="btn btn-danger btn-xs" @click="reject(d.period_id)">Rejeter</button>
+                                <span v-if="d.validation.status == 'valid'">
+                                    <i class="icon-ok-circled"></i> Validé
+                                </span>
+                                <span v-else-if="d.validation.status == 'conflict'">
+                                    <i class="icon-minus-circled"></i> Refusé
+                                </span>
+                                <span v-else>
+                                    <button class="btn btn-success btn-xs" @click="validate(d.period_id)">Valider</button>
+                                    <button class="btn btn-danger btn-xs" @click="reject(d.period_id)">Rejeter</button>
+                                </span>
+
                             </td>
                         </tr>
                     </tbody>
