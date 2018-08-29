@@ -144,10 +144,17 @@ timesheet:
                 defaults:
                     action: validateTimesheet
 
+        validationhwpperson:
+            type: segment
+            options:
+                route: /validation/hwp/:idperson
+                defaults:
+                    action: validationHWPPerson
+
         validationactivity:
             type: segment
             options:
-                route: /validation-activity/:idactivity
+                route: /validation/activity/:idactivity
                 defaults:
                     action: validationActivity
 

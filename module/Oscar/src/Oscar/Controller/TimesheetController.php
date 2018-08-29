@@ -230,6 +230,25 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function validationHWPPersonAction(){
+
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
+
+
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
+        if( !$person ){
+            return $this->getResponseBadRequest("Personne introuvable");
+        }
+
+        $periods = $this->getTimesheetService()->getValidationPeriodsOutWPToValidate($person);
+
+
+
+        echo "NBR for " . count($periods);
+        die("TODO");
+    }
+
 
     /**
      * Exportation et visualisation des feuilles de temps.
@@ -396,6 +415,8 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarersAction()
     {
+        die("Fonctionnalité désactivée");
+
         $datas = $this->getServiceLocator()->get('TimesheetService')->getDeclarers();
         return [
             'datas' => $datas
@@ -1447,8 +1468,6 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     break;
-
-
             }
         }
 
@@ -1466,39 +1485,7 @@ class TimesheetController extends AbstractOscarController
      * @throws OscarException
      */
     protected function processAction( $action, $events, $timeSheetService, $activity, $person ){
-        if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
-            return $this->getResponseBadRequest('Opération inconnue !');
-        }
-
-        if( in_array($action, ['validatesci', 'rejectsci' ]) &&
-            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) {
-            throw new OscarException("Vous n'avez les droits pour la validation scientifique.");
-        }
-
-        if( in_array($action, ['validateadm', 'rejectadm' ]) &&
-            !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)) {
-            throw new OscarException("Vous n'avez les droits pour la validation administrative.");
-        }
-
-        switch($action){
-            case 'validatesci';
-                $timesheets = $timeSheetService->validateSci($events, $person);
-                break;
-            case 'validateadm';
-                $timesheets = $timeSheetService->validateAdmin($events, $person);
-                break;
-            case 'rejectsci';
-                $timesheets = $timeSheetService->rejectSci($events, $person);
-                break;
-            case 'rejectadm';
-                $timesheets = $timeSheetService->rejectAdmin($events, $person);
-                break;
-            case 'send';
-                $timesheets = $timeSheetService->send($events, $person);
-                break;
-        }
-
-        return $timesheets;
+        return $this->getResponseDeprecated("Cette fonctionnalité a été désactivée");
     }
 
     /**

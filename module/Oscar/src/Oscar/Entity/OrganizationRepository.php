@@ -16,6 +16,39 @@ use Oscar\Import\Data\DataExtractorOrganization;
 
 class OrganizationRepository extends EntityRepository implements IConnectedRepository
 {
+
+    /**
+     * Retourne les IDS des organisations où la personne est impliquée avec un rôle principale.
+     *
+     * @param $personId
+     * @param bool $principale
+     * @return array
+     */
+    public function getOrganizationsIdsForPerson( $personId, $principale=true ){
+
+        $parameters = [
+            'personId' => $personId
+        ];
+
+        $query = $this->createQueryBuilder('o')
+            ->select('o.id')
+            ->innerJoin('o.persons', 'op')
+            ->innerJoin('op.roleObj', 'opr')
+            ->where('op.person = :personId');
+
+        if( $principale === true ){
+            $parameters['principale'] = true;
+            $query->andWhere('opr.principal = :principale');
+        }
+
+        $query->setParameters($parameters);
+
+
+        $result = $query->getQuery()->getResult();
+        return array_map('current', $result);
+    }
+
+
     public function saveOrganizationPerson(Person $person, Organization $organisation, $roleOscarId) {
         $personOrganization = new OrganizationPerson();
         $this->getEntityManager()->persist($personOrganization);

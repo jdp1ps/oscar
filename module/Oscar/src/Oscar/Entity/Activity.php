@@ -19,6 +19,7 @@ use Zend\Permissions\Acl\Resource\ResourceInterface;
  *
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\ActivityRepository")
  */
 class Activity implements ResourceInterface
 {

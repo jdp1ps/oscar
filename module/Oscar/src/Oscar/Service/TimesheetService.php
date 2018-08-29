@@ -219,6 +219,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $out;
     }
 
+    public function getValidationPeriodsOutWPToValidate( $person = null ){
+        return $this->getValidationPeriodRepository()->getValidationPeriodsOutWPToValidate($person ? $person->getId() : null);
+    }
+
 
 
     /**

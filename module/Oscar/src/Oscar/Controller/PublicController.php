@@ -4,7 +4,10 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OscarUserContext;
@@ -89,6 +92,7 @@ class PublicController extends AbstractOscarController
 
         $activitiesValidation = [];
         $periodsRejected = [];
+        $periodHorsLotsUnvalid = [];
 
 
         $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
@@ -111,14 +115,36 @@ class PublicController extends AbstractOscarController
         }
 
 
+
+
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
-            $this->getLogger()->debug("Récupération des déclarations en conflit pour $person");
-            if( $person )
+
+            if( $person ){
+
+
+                if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM) )
+                    $periodHorsLotsUnvalid = $timeSheetService->getValidationPeriodsOutWPToValidate();
+
+
+                // Déclaration en conflit
                 $periodsRejected = $timeSheetService->getValidationPeriodPersonConflict($person);
 
 
-            $this->getLogger()->debug("Périodes rejetées : " . count($periodsRejected));
+//                // Déclaration "Hors-Lot" en attente de validation
+//
+//                /** @var OrganizationRepository $organizationRepository */
+//                $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
+//
+//                /** @var ActivityRepository $activityRepository */
+//                $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
+//
+//
+//                $idsOrganizations = $organizationRepository->getOrganizationsIdsForPerson($person->getId());
+//                $idsActivities = $activityRepository->getActivitiesIdsForOrganizations($idsOrganizations);
+
+
+            }
 
         } catch( \Exception $e ){
             $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
@@ -126,6 +152,7 @@ class PublicController extends AbstractOscarController
         return [
             'activitiesValidation' => $activitiesValidation,
             'periodsRejected' => $periodsRejected,
+            'periodHorsLotsUnvalid' => $periodHorsLotsUnvalid,
             'user' => $person
         ];
     }

@@ -138,6 +138,20 @@
                                     <?php endforeach; ?>
                                 </section>
                             <?php endif; ?>
+                            <?php if( count($periodHorsLotsUnvalid) ): ?>
+                                <h1>Validation Hors-Lot</h1>
+                                <section>
+                                    <?php foreach ($periodHorsLotsUnvalid as $period): ?>
+                                        <article class="card card-xs">
+                                            <strong><?= $period->getLabel() ?></strong> pour <strong><?= $period->getDeclarer() ?></strong>
+                                            <a href="<?= $this->url('timesheet/validationhwpperson', ['idperson' => $period->getDeclarer()->getId()]) ?>">
+                                                <i class="icon-pencil"></i>
+                                                Valider les déclarations
+                                            </a>
+                                        </article>
+                                    <?php endforeach; ?>
+                                </section>
+                            <?php endif; ?>
                         </div>
                         <div class="col-md-12">
                             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX) ): ?>
