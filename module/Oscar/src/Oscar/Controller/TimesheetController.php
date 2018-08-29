@@ -261,6 +261,7 @@ class TimesheetController extends AbstractOscarController
                         if( !$period ){
                             throw new OscarException("Impossible de charger la période.");
                         }
+                        $this->getTimesheetService()->validationAdm($period, $this->getCurrentPerson(), $message);
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError($e->getMessage());
                     }

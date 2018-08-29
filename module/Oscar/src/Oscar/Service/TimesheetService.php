@@ -84,8 +84,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
     public function validationAdm( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
-        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP3 ){
-            throw new OscarException("Erreur d'état");
+        $this->getLogger()->debug($validationPeriod->getObjectGroup() . " == " . ValidationPeriod::GROUP_OTHER);
+        if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER ){
+            if( !in_array($validationPeriod->getStatus(), [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP3]) ){
+                throw new OscarException("Vous ne pouvez pas valider cette période (erreur de status - ". $validationPeriod->getStatus() .").");
+            }
+        } else if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP3 ){
+            throw new OscarException("Erreur d'état, la période doit être validée scientifiquement avant.");
         }
 
         $log = $validationPeriod->getLog();

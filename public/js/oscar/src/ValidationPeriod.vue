@@ -1,6 +1,17 @@
 <template>
     <div>
-
+        <div class="overlay" v-if="error"  style="z-index: 2002">
+            <div class="content container overlay-content">
+                <h2><i class="icon-attention-1"></i> Oups !</h2>
+                <pre class="alert alert-danger">{{ error }}</pre>
+                <p class="text-danger">
+                    Si ce message ne vous aide pas, transmettez le à l'administrateur Oscar.
+                </p>
+                <nav class="buttons">
+                    <button class="btn btn-primary" @click="error = ''">Fermer</button>
+                </nav>
+            </div>
+        </div>
         <section v-if="declarations">
 
             <a href="#" class="btn btn-xs btn-default" @click="group = 'label'">
@@ -128,27 +139,29 @@
             validate( period_id ){
                 this.bootbox.confirm("Valider cette déclaration ?", ok => {
                     if( ok ){
-                        this.send('valid', period_id);
+                        this.send('valid', period_id, '');
                     }
                 });
             },
 
             reject( period_id ){
-                this.bootbox.confirm("Refuser cette déclaration ?", ok => {
-                        this.send('reject', period_id);
+                this.bootbox.prompt("Refuser cette déclaration ?", ok => {
+                    if( ok )
+                        this.send('reject', period_id, ok);
                 });
             },
 
-            send(action, period_id){
+            send(action, period_id, message){
                 let dataSend = new FormData();
                 dataSend.append('period_id', period_id);
                 dataSend.append('action', action);
+                dataSend.append('message', message);
                 this.$http.post('', dataSend).then(
                     ok => {
                         this.fetch();
                     },
                     ko => {
-                        this.error = "Erreur : " + ko.bodyText;
+                        this.error = "Erreur : " + ko.body;
                     }
                 );
             }
