@@ -13,54 +13,22 @@
             </span>
         </span>
 
-        <span class="cartouche teaching xs" v-if="day.teaching.length" title="Enseignement">
-            Cours
-            <span class="addon">
-                {{totalEnseignement | duration2(day.dayLength)}}
+
+
+        <span v-for="other in others">
+            <span v-if="day[other.code] && day[other.code].length" class="cartouche xs" :class="other.code">
+                <i class="icon-status-2" v-if="day[other.code][0].validations == null"></i>
+                <i class="icon-status-1" v-else-if="day[other.code][0].validations.status == 'valid'"></i>
+                <i class="icon-status-3" v-else-if="day[other.code][0].validations.status == 'conflict'"></i>
+                <i class="icon-status-5" v-else></i>
+                {{ other.label }}
+                <span class="addon">
+                    {{totalOther(other.code) | duration2(day.dayLength)}}
+                </span>
             </span>
+
         </span>
 
-        <span class="cartouche info xs" v-if="day.infos.length" title="Infos">
-            Infos
-            <span class="addon">
-                {{totalInfo | duration2(day.dayLength)}}
-            </span>
-        </span>
-
-        <span class="cartouche training xs" v-if="day.training.length" title="Formation">
-            Formation
-            <span class="addon">
-                {{totalFormation | duration2(day.dayLength)}}
-            </span>
-        </span>
-
-        <span class="cartouche vacations xs" v-if="day.conges.length" title="Congès">
-            Congès
-            <span class="addon">
-                {{totalConges | duration2(day.dayLength)}}
-            </span>
-        </span>
-
-        <span class="cartouche sickleave xs" v-if="day.sickleave.length" title="Arrêt maladie">
-            A.Maladie
-            <span class="addon">
-               {{ totalSickleave | duration2(day.dayLength) }}
-            </span>
-        </span>
-
-        <span class="cartouche sickleave xs" v-if="day.absent.length" title="Absence">
-            Abs
-            <span class="addon">
-                 {{ totalAbsent | duration2(day.dayLength) }}
-            </span>
-        </span>
-
-        <span class="cartouche research xs" v-if="day.research.length" title="Autre projet de recherche">
-            Recherche
-            <span class="addon">
-                 {{ totalResearch | duration2(day.dayLength) }}
-            </span>
-        </span>
 
         <span v-if="day.closed" :title="day.lockedReason" style="font-size: .7em">
             <i class="icon-minus-circled"></i>
@@ -96,9 +64,8 @@
         name: 'TimesheetMonthDay',
 
         props: {
-            day: {
-               require: true
-            }
+            others: { required: true },
+            day: { require: true }
         },
 
         filters: {
@@ -182,6 +149,13 @@
         },
 
         methods: {
+            totalOther(code){
+                let t = 0.0;
+                this.day[code].forEach(d => {
+                    t += d.duration;
+                });
+                return t;
+            },
             handlerClick(){
                 this.$emit('selectDay', this.day);
             },

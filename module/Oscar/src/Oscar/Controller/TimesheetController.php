@@ -1326,8 +1326,28 @@ class TimesheetController extends AbstractOscarController
                         'description' => $t->getComment(),
                         'duration' => $t->getDuration(),
                         'status_id' => $t->getStatus(),
-                        'status' => 'locked'
+                        'status' => 'locked',
+                        'validations' => null,
                     ];
+
+                    $period = $timesheetService->getValidationPeriosOutOfWorkpackageAt( $t->getPerson(), $year, $month, $t->getLabel());
+                    if( $period ){
+                        if( $period->getStatus() == ValidationPeriod::STATUS_VALID ){
+                            $datas['status_id'] = TimeSheet::STATUS_ACTIVE;
+                            $datas['status_id'] = TimeSheet::STATUS_ACTIVE;
+                            $datas['validations'] = $period->json();
+                        }
+                        elseif ($period->getStatus() != ValidationPeriod::STATUS_CONFLICT) {
+                            $datas['status_id'] = TimeSheet::STATUS_TOVALIDATE_ADMIN;
+                            $datas['status_id'] = TimeSheet::STATUS_TOVALIDATE_ADMIN;
+                            $datas['validations'] = $period->json();
+                        }
+                        else {
+                            $datas['status_id'] = TimeSheet::STATUS_CONFLICT;
+                            $datas['status_id'] = TimeSheet::STATUS_CONFLICT;
+                            $datas['validations'] = $period->json();
+                        }
+                    }
 
                     switch( $t->getLabel() ){
                         case 'cours' :

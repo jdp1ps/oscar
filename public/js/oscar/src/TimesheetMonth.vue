@@ -152,6 +152,7 @@
         </div>
 
         <section v-if="ts" >
+           
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
             <div class="month col-lg-8">
 
@@ -195,6 +196,7 @@
                             <div class="days">
                                 <timesheetmonthday v-for="day in week.days"
                                        :class="selectedDay == day ? 'selected':''"
+                                       :others="ts.otherWP"
                                        @selectDay="handlerSelectData(day)"
                                        @daymenu="handlerDayMenu"
                                        @debug="debug = $event"
