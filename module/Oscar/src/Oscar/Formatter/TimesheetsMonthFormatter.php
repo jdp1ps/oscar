@@ -56,25 +56,37 @@ class TimesheetsMonthFormatter
      */
     public function format( $timesheets, $month, $year ){
         $totalDays = $this->getMonthDaysLength($month, $year);
+        $formatter = $this->getDateFormatter();
+        $formatter->setPattern('MMMM Y');
+        $firstDay = new \DateTime(sprintf('%s-%s-01', $year, $month));
+
+
         $output = [
             'totaltimesheets' => count($timesheets),
             'month' => $month,
             'year' => $year,
+            'monthLabel' => $formatter->format($firstDay),
             'totalDays' => $totalDays
         ];
+
+
+        $formatter->setPattern('eeee d');
 
         $days = [];
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet){
-            $day = $timesheet->getDateFrom()->format('d');
+            $day = (integer)$timesheet->getDateFrom()->format('d');
+
+
             if( !array_key_exists($day, $days) ){
                 $days[$day] = [
                     "label" => "$day",
+                    'dayname' => $formatter->format($timesheet->getDateFrom()),
                     "total" => 0.0,
                     'timesheets' => []
                 ];
                 $days[$day]['total'] += $timesheet->getDuration();
-                $days[$day]['timesheets'][] = $timesheet->toJson();
+                $days[$day]['timesheets'][] = $timesheet->toJson2();
             }
         }
 

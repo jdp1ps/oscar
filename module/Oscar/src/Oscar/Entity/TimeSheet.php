@@ -345,6 +345,60 @@ class TimeSheet implements ITrackable
         return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp()) / $unit;
     }
 
+    public function toJson2(){
+        $activityId = null;
+        $activityLabel = null;
+        $workpackageId = null;
+        $workpackageLabel = null;
+        $workpackageCode = null;
+
+        $projectAcronym = null;
+        $projectLabel = null;
+        $projectId = null;
+
+
+        if( $this->getWorkpackage() ){
+            $workpackageId = $this->getWorkpackage()->getId();
+            $workpackageLabel = (string)$this->getWorkpackage();
+            $workpackageCode = $this->getWorkpackage()->getCode();
+            $activityId = $this->getWorkpackage()->getActivity()->getId();
+            $activityLabel = (string)$this->getWorkpackage()->getActivity();
+
+            $projectId = $this->getWorkpackage()->getActivity()->getProject()->getId();
+            $projectAcronym = $this->getWorkpackage()->getActivity()->getProject()->getAcronym();
+            $projectLabel = $this->getWorkpackage()->getActivity()->getProject()->getLabel();
+
+        }
+        // Pas de lot, mais une activité ?
+        else if ( $this->getActivity() ){
+            $activityId = $this->getActivity()->getId();
+            $activityLabel = (string)$this->getActivity();
+        }
+
+
+        return [
+            'id' => $this->getId(),
+            'activity_id' => $activityId,
+            'activity_label' => $activityLabel,
+
+            'workpackage_id' => $workpackageId,
+            'workpackage_code' => $workpackageCode,
+            'workpackage_label' => $workpackageLabel,
+
+            'project_id' => $projectId,
+            'project_acronym' => $projectAcronym,
+            'project_label' => $projectLabel,
+
+            'label' => $this->getLabel(),
+            'description' => $this->getComment(),
+            'start' => $this->getDateFrom()->format('c'),
+            'end' => $this->getDateTo()->format('c'),
+            'status' => self::getStatusText()[$this->getStatus()],
+            'owner' => $this->getPerson()->getDisplayName(),
+            'owner_id' => $this->getPerson()->getId(),
+        ];
+    }
+
     public function toJson(){
         $activityId = null;
         $activityLabel = null;

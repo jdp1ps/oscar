@@ -26,6 +26,7 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
+use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
@@ -234,19 +235,45 @@ class TimesheetController extends AbstractOscarController
 
 
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
-
-
         $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
         if( !$person ){
             return $this->getResponseBadRequest("Personne introuvable");
         }
 
-        $periods = $this->getTimesheetService()->getValidationPeriodsOutWPToValidate($person);
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            $serviceTimesheet = $this->getTimesheetService();
 
+            switch ($method) {
+                case 'GET' :
+                    return $this->ajaxResponse($serviceTimesheet->getDatasOutOfWorkPackageToValidate($person));
+                    break;
 
+                case 'POST' :
+                    $action = $this->params()->fromPost('action');
+                    if( !in_array($action, ['valid', 'reject']) ){
+                        return $this->getResponseBadRequest("Mauvaise requête !");
+                    }
+                    $periodId = $this->params()->fromPost('period_id');
+                    $message = $this->params()->fromPost('message', '');
+                    try {
+                        $period = $this->getTimesheetService()->getValidationPeriod($periodId);
+                        if( !$period ){
+                            throw new OscarException("Impossible de charger la période.");
+                        }
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+                    break;
 
-        echo "NBR for " . count($periods);
-        die("TODO");
+                default:
+                    return $this->getResponseNotFound();
+            }
+        }
+
+        return [
+            'person' => $person
+        ];
     }
 
 
@@ -835,18 +862,7 @@ class TimesheetController extends AbstractOscarController
     }
 
     protected function getOthersWP(){
-        static $others;
-        if( $others == null ){
-            $others = [
-               'conges' => [ 'code' => 'conges',  'label' => 'Congès',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
-               'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
-               'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
-               'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
-               'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
-               'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
-            ];
-        }
-        return $others;
+        return $this->getTimesheetService()->getOthersWP();
     }
 
     /**

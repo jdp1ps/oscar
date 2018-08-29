@@ -13,6 +13,7 @@ use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Entity\WorkPackage;
 use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -396,6 +397,50 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function getValidationPeriodActivityAt( Activity $activity, Person $person,  $year, $month ){
         $this->getLogger()->debug(sprintf('Récupération des validation pour %s au %s-%s', $activity, $year, $month));
         return $this->getValidationPeriodRepository()->getValidationPeriodForActivity($year, $month, $activity->getId(), $person->getId());
+    }
+
+    public function getOthersWP(){
+        static $others;
+        if( $others == null ){
+            $others = [
+                'conges' => [ 'code' => 'conges',  'label' => 'Congès',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
+                'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+                'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
+                'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
+                'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
+                'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+            ];
+        }
+        return $others;
+    }
+
+    /**
+     * @param $idPeriod
+     * @return null|ValidationPeriod
+     */
+    public function getValidationPeriod( $idPeriod ){
+        return $this->getValidationPeriodRepository()->find($idPeriod);
+    }
+
+    public function getDatasOutOfWorkPackageToValidate( Person $person ){
+
+        $timesheetFormatter = new TimesheetsMonthFormatter();
+        $hwp = $this->getOthersWP();
+        $periods = $this->getValidationPeriodsOutWPToValidate($person);
+        $out = [
+            'label' => 'Déclaration hors-lot pour ' . (string)$person,
+            'packages' => []
+        ];
+
+        foreach ($periods as $period) {
+            $timesheets = $this->getTimesheetsValidationPeriod($period);
+            $periodDatas = $timesheetFormatter->format($timesheets, $period->getMonth(), $period->getMonth());
+            $periodDatas['label'] = $hwp[$period->getObject()]['label'];
+            $periodDatas['period_id'] = $period->getId();
+            $out['packages'][] = $periodDatas;
+        }
+
+        return $out;
     }
 
     /**

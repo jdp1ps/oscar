@@ -70,6 +70,7 @@ requirejs.config({
         'DisciplineUI' : 'oscar/dist/DisciplineUI',
         'TimesheetMonth' : 'oscar/dist/TimesheetMonth',
         'ValidationActivityVue' : 'oscar/dist/ValidationActivityVue',
+        'ValidationPeriod' : 'oscar/dist/ValidationPeriod',
     },
     shim: {
         "bootstrap": {
