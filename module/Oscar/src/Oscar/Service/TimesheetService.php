@@ -384,6 +384,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return count($this->getValidationPeriods($year, $month, $person)) == 0;
     }
 
+
+    public function validatePersonPeriod($person, $year, $month){
+        throw new \Exception("Non implémenté");
+    }
+
+
     /**
      * Retourne la liste des ValidationPeriod pour une activité donnée.
      *

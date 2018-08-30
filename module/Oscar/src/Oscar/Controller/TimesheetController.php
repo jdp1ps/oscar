@@ -45,6 +45,23 @@ use Zend\View\Model\ViewModel;
  */
 class TimesheetController extends AbstractOscarController
 {
+    /**
+     * @return \Doctrine\ORM\EntityRepository
+     */
+    protected function getPersonFromRoute(){
+        $idPerson = $this->params()->fromRoute('idperson');
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($idPerson);
+        return $person;
+    }
+
+    public function validatePersonPeriodAction(){
+        $person = $this->getPersonFromRoute();
+        // TODO
+        return [
+            'person' => $person
+        ];
+    }
+
     public function validationActivityAction(){
 
         // Récupération de l'activité

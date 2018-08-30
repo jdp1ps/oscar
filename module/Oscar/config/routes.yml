@@ -151,6 +151,13 @@ timesheet:
                 defaults:
                     action: validationHWPPerson
 
+        validatepersonperiod:
+            type: segment
+            options:
+                route: /validation/person/:idperson
+                defaults:
+                    action: validatePersonPeriod
+
         validationactivity:
             type: segment
             options:

@@ -114,36 +114,12 @@ class PublicController extends AbstractOscarController
             }
         }
 
-
-
-
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
 
             if( $person ){
-
-
-                if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM) )
-                    $periodHorsLotsUnvalid = $timeSheetService->getValidationPeriodsOutWPToValidate();
-
-
                 // Déclaration en conflit
                 $periodsRejected = $timeSheetService->getValidationPeriodPersonConflict($person);
-
-
-//                // Déclaration "Hors-Lot" en attente de validation
-//
-//                /** @var OrganizationRepository $organizationRepository */
-//                $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
-//
-//                /** @var ActivityRepository $activityRepository */
-//                $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
-//
-//
-//                $idsOrganizations = $organizationRepository->getOrganizationsIdsForPerson($person->getId());
-//                $idsActivities = $activityRepository->getActivitiesIdsForOrganizations($idsOrganizations);
-
-
             }
 
         } catch( \Exception $e ){
@@ -152,7 +128,6 @@ class PublicController extends AbstractOscarController
         return [
             'activitiesValidation' => $activitiesValidation,
             'periodsRejected' => $periodsRejected,
-            'periodHorsLotsUnvalid' => $periodHorsLotsUnvalid,
             'user' => $person
         ];
     }

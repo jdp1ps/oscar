@@ -6912,7 +6912,7 @@ span[class*="status-400"] .icon:before {
 [class*="icon-conges"]:before {
   content: '\e8a2'; }
 
-[class*="icon-learning"]:before {
+[class*="icon-training"]:before {
   content: '\e88c'; }
 
 [class*="icon-teaching"]:before {
@@ -6926,6 +6926,9 @@ span[class*="status-400"] .icon:before {
 
 [class*="icon-research"]:before {
   content: '\e891'; }
+
+[class*="icon-other"]:before {
+  content: '\f097'; }
 
 [class*="icon-status-0"]:before {
   content: '\e80b'; }
