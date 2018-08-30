@@ -921,6 +921,7 @@ class TimesheetController extends AbstractOscarController
 
             // Créneau "Hors-lot"
             if( !$data->wpId ){
+
                 $other = $this->getOthersWP()[$data->code];
 
                 // Récupération de la procédure de validation en cours
@@ -1177,6 +1178,24 @@ class TimesheetController extends AbstractOscarController
 
         $lockedDays = $timesheetService->getLockedDays($year, $month);
 
+        $others = $this->getOthersWP();
+
+
+        foreach ($others as $key=>&$datas) {
+            $period = $this->getTimesheetService()->getValidationPeriosOutOfWorkpackageAt($currentPerson, $year, $month, $key);
+
+            if( $isPeriodSend ){
+                $validationUp = $period && $period->isOpenForDeclaration();
+            } else {
+                $validationUp = true;
+            }
+
+            $others[$key]['validation_state'] = $period ? $period->json() : null;
+            $others[$key]['validation_up'] = $validationUp;
+        }
+
+        $output['otherWP'] = $others;
+
         /** @var WorkPackagePerson $workPackagePerson */
         foreach ($availableWorkPackages as $workPackagePerson){
             $workPackage = $workPackagePerson->getWorkPackage();
@@ -1228,6 +1247,9 @@ class TimesheetController extends AbstractOscarController
         $output['workPackages'] = $workPackages;
 
         $timesheets = $timesheetService->getTimesheetsPersonPeriod($currentPerson, $from, $to);
+
+
+
 
         for( $i = 1; $i<=$nbr; $i++ ){
             $data = sprintf('%s-%s-%s', $year, $month, $i);
@@ -1408,21 +1430,6 @@ class TimesheetController extends AbstractOscarController
             $output['activities'][$activity->getId()]['total'] += $t->getDuration();
             $output['workPackages'][$workpackage->getId()]['total'] += $t->getDuration();
 
-            $others = $this->getOthersWP();
-
-            foreach ($others as $key=>&$datas) {
-                $period = $this->getTimesheetService()->getValidationPeriosOutOfWorkpackageAt($currentPerson, $year, $month, $key);
-
-                if( $isPeriodSend ){
-                    $validationUp = $period && $period->isOpenForDeclaration();
-                } else {
-                    $validationUp = true;
-                }
-
-                $datas['validation_state'] = $period ? $period->json() : null;
-                $datas['validation_up'] = $validationUp;
-            }
-            $output['otherWP'] = $others;
 
             if( $t->getStatus() == TimeSheet::STATUS_DRAFT ){
                 $output['hasUnsend'] = true;

@@ -189,20 +189,23 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
+    /**
+     * Réenvoi une déclaration en conflit.
+     *
+     * @param ValidationPeriod $validationPeriod
+     * @return bool
+     * @throws OscarException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function reSendValidation(ValidationPeriod $validationPeriod) {
         if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_CONFLICT ){
             throw new OscarException("Erreur d'état");
         }
 
-        $log = $validationPeriod->getLog();
-        $person = (string) $validationPeriod->getDeclarer();
-        $date = new \DateTime();
-        $msg = $date->format('Y-m-d H:i:s') . " : Réenvoi de la déclaration par $person\n";
-        $log .= $msg;
-        $this->getLogger()->debug($msg);
-
-        $validationPeriod->setLog($log);
+        $validationPeriod->addLog('Réenvoi de la déclaration pour validation', (string)$validationPeriod->getDeclarer());
         $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP1);
+
+        // Reset des champs
         $validationPeriod->setRejectSciBy(null)->setRejectSciMessage('')->setRejectSciAt(null)->setRejectSciById(null)
             ->setRejectAdmBy(null)->setRejectAdmMessage('')->setRejectAdmAt(null)->setRejectAdmById(null)
             ->setRejectActivityBy(null)->setRejectActivityMessage('')->setRejectActivityAt(null)->setRejectActivityById(null)
@@ -417,11 +420,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         static $others;
         if( $others == null ){
             $others = [
-                'conges' => [ 'code' => 'conges',  'label' => 'Congès',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
+                'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
                 'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
                 'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
                 'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
-                'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
+              //  'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
                 'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
                 'other' => [ 'code' => 'other', 'label' => 'Divers',  'description' => 'Autre activité', 'icon' => true ],
             ];

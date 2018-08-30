@@ -937,6 +937,20 @@ class ValidationPeriod
         return sprintf('%s-%s-01', $this->getYear(), $month);
     }
 
+    /**
+     * Actualise les logs.
+     *
+     * @param $message
+     * @param string $by
+     */
+    public function addLog($message, $by='Anonymous'){
+        $log = $this->getLog();
+        $date = new \DateTime();
+        $msg = $date->format(sprintf('Y-m-d H:i:s %s %s', $by, $message));
+        $log .= $msg."\n";
+        $this->setLog($log);
+    }
+
     public function getState()
     {
         return [
