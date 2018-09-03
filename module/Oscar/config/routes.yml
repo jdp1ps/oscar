@@ -165,6 +165,13 @@ timesheet:
                 defaults:
                     action: validationActivity
 
+        validationactivity2:
+            type: segment
+            options:
+                route: /validation/activity2/:idactivity
+                defaults:
+                    action: validationActivity2
+
         # Déclarations d'une personne pour une activité
         activityperson:
             type: segment

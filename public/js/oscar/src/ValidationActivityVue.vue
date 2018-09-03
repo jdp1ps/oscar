@@ -102,6 +102,7 @@
                             <div class="day" v-for="i in nbrDays" :class="{'empty': !lot.days[i]}">
                                 {{ lot.days[i] ? lot.days[i] : '0.0' }}
                             </div>
+                            <div>{{ lot.total }}</div>
                         </section>
                     </section>
                 </section>
@@ -114,6 +115,7 @@
                             <div class="day" v-for="i in nbrDays" :class="{'empty': !otherProject.days[i]}">
                                 {{ otherProject.days[i] ? otherProject.days[i] : '0.0' }}
                             </div>
+                            <div>{{ otherProject.total }}</div>
                         </section>
                     </section>
                 </section>
@@ -126,6 +128,7 @@
                         <div class="day" v-for="i in nbrDays" :class="{'empty': !other.days[i]}">
                             {{ other.days[i] ? other.days[i] : '0.0' }}
                         </div>
+                        <div>{{ other.total }}</div>
                     </section>
 
                 </section>
@@ -136,6 +139,9 @@
                         <div class="label">Total</div>
                         <div class="day" v-for="i in nbrDays" :class="{'empty': !datas.total[i]}">
                             {{ datas.total[i] ? datas.total[i] : '0.0' }}
+                        </div>
+                        <div>
+                            {{ datas.totalFull }}
                         </div>
                     </section>
 

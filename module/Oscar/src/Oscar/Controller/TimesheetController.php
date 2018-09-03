@@ -256,6 +256,201 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function validationActivity2Action(){
+
+        // Récupération de l'activité
+        $activityId = $this->params()->fromRoute('idactivity');
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+
+        if( !$activity )
+            return $this->getResponseInternalError(sprintf("L'activités '%s' n'existe pas", $activityId));
+
+        $method = $this->getHttpXMethod();
+        $currentPerson = $this->getCurrentPerson();
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        if( $this->isAjax() ){
+            switch ($method) {
+                case 'POST':
+                    $this->getLogger()->debug(print_r($_POST, true));
+
+                    $validationPeriodId = (int) $this->params()->fromPost('validationperiod_id');
+                    $action             = $this->params()->fromPost('action');
+
+                    // Récupération de la période
+                    $validationPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($validationPeriodId);
+                    if( !$validationPeriod ){
+                        return $this->getResponseInternalError('Aucune procédure de validation en cours disponible pour cette période');
+                    }
+
+                    if( $action == "valid-prj" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+
+                            if( $timesheetService->validationProject($validationPeriod, $currentPerson) ){
+                                return $this->getResponseOk("La période a bien été validée au niveau projet");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+                    if( $action == "valid-sci" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
+                        }
+
+                        $this->getLogger()->debug("VALIDATION SCIENTIFIQUE");
+
+                        return $this->getResponseDeprecated("En cours de modification SCI");
+
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+
+                            if( $timesheetService->validationSci($validationPeriod, $currentPerson) ){
+                                return $this->getResponseOk("La période a bien été validée scientifiquement");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+                    if( $action == "valid-adm" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider administrativement la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+
+                        return $this->getResponseDeprecated("En cours de modification ADMIN");
+
+                        try {
+
+                            if( $timesheetService->validationAdm($validationPeriod, $currentPerson) ){
+                                return $this->getResponseOk("La période a bien été validée administrativement");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+                    if( $action == "reject-prj" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+                            $message = $this->params()->fromPost('message');
+                            if( !$message ){
+                                throw new \Exception('Vous devez renseigner une raison au rejet.');
+                            }
+                            if( $timesheetService->rejectPrj($validationPeriod, $currentPerson, $message) ){
+                                return $this->getResponseOk("La période a bien été rejetée");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de rejet pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+                    if( $action == "reject-sci" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter scientifiquement la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+                            $message = $this->params()->fromPost('message');
+                            if( !$message ){
+                                throw new \Exception('Vous devez renseigner une raison au rejet.');
+                            }
+                            if( $timesheetService->rejectSci($validationPeriod, $currentPerson, $message) ){
+                                return $this->getResponseOk("La période a bien été rejetée");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de rejet scientifique pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+                    if( $action == "reject-adm" ){
+                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
+                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter administrativement la déclaration");
+                        }
+                        $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+                        try {
+                            $message = $this->params()->fromPost('message');
+                            if( !$message ){
+                                throw new \Exception('Vous devez renseigner une raison au rejet.');
+                            }
+                            if( $timesheetService->rejectAdm($validationPeriod, $currentPerson, $message) ){
+                                return $this->getResponseOk("La période a bien été rejetée");
+                            }
+                        } catch ( \Exception $e ){
+                            $error = "Erreur de rejet administratif pour la période $validationPeriodId : " . $e->getMessage();
+                        }
+
+                        return $this->getResponseInternalError($error);
+                    }
+
+
+
+                    return $this->getResponseNotImplemented("Cette fonctionnalité n'est pas encore disponible");
+                default:
+                    return $this->getResponseBadRequest("Méthode non disponible");
+            }
+        }
+
+
+
+
+        //
+        $validationPeriods = $timesheetService->getValidationPeriodsActivity($activity);
+
+        $periods = [];
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod) {
+            $periodInfos = $timesheetService->getTimesheetsForValidationPeriod($validationPeriod);
+            $activity = null;
+            if( $validationPeriod->isActivityValidation() ){
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($validationPeriod->getObjectId());
+            }
+
+            $validablePrj = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
+            $validableSci = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+            $validableAdm = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+
+            $periodInfos['validable_prj'] = $validablePrj;
+            $periodInfos['validable_sci'] = $validableSci;
+            $periodInfos['validable_adm'] = $validableAdm;
+
+            $periodKey = sprintf('%s-%s', $validationPeriod->getYear(), $validationPeriod->getMonth());
+            if( !array_key_exists($periodKey, $periods) ){
+                $periods[$periodKey] = [];
+            }
+
+            $periods[$periodKey][] = $periodInfos;
+        }
+
+
+        return [
+            'activity' => $activity,
+            'periods' => $periods
+        ];
+    }
+
     public function validationHWPPersonAction(){
 
 

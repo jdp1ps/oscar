@@ -531,7 +531,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 }
             }
         }
+
         $output['total'] = $total;
+        $fullTotal = 0.0;
+
+        foreach( $total as $day=>$duration ){
+            $fullTotal += $duration;
+        }
+
+        $output['totalFull'] = $fullTotal;
+
 
         return $output;
     }
@@ -571,7 +580,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'validationperiod_state' => $validationPeriod->getState(),
                     'label' => $pack,
                     'code' => $code,
-                    'days'  => []
+                    'days'  => [],
+                    'total' => 0.0
                 ];
             }
 
@@ -582,6 +592,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             $output[$pack]['days'][$day] += $timesheet->getDuration();
+            $output[$pack]['total'] += $timesheet->getDuration();
             $total[$day] += $timesheet->getDuration();
         }
 
@@ -634,7 +645,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $output[$pack]['details'][$subpack] = [
                     'oid' => $subpackId,
                     'label' => $subpack,
-                    'days' => []
+                    'days' => [],
+                    'total' => 0.0
                 ];
             }
 
@@ -644,6 +656,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             $output[$pack]['details'][$subpack]['days'][$day] += $timesheet->getDuration();
+            $output[$pack]['details'][$subpack]['total'] += $timesheet->getDuration();
             $total[$day] += $timesheet->getDuration();
         }
 

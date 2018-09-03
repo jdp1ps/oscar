@@ -29,9 +29,11 @@
                             <th v-for="i in group.maxDays">
                                 {{i }}
                             </th>
+                            <th>Total</th>
                             <th>
                                 Actions
                             </th>
+                        </tr>
                         </tr>
                     </thead>
                     <tbody>
@@ -41,6 +43,7 @@
                                 <strong v-if="d.days[i]">{{ d.days[i].total }}</strong>
                                 <em v-else>-</em>
                             </td>
+                            <td><{{ d.total }}/td>
                             <td>
                                 <span v-if="d.validation.status == 'valid'">
                                     <i class="icon-ok-circled"></i> Validé
