@@ -145,7 +145,6 @@
                         Annuler</button>
                     <button class="btn btn-primary" @click="handlerSaveMenuTime" v-if="selectionWP.validation_up == true">
                         <i class="icon-floppy"></i>
-                        <i class="icon-floppy"></i>
                         Valider</button>
                 </nav>
             </div>
