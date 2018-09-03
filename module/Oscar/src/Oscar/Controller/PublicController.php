@@ -35,7 +35,7 @@ class PublicController extends AbstractOscarController
     {
 
         /** @var Authentification $auth */
-        $auth = $this->getEntityManager()->getRepository(Authentification::class)->find($this->getOscarUserContext()->getDbUser()->getId());
+        $auth = $this->getOscarUserContext()->getAuthentification();
 
 
         // Récupération des envois automatiques
@@ -52,20 +52,26 @@ class PublicController extends AbstractOscarController
 
             $this->getLogger()->debug("Reçu = " . $this->params()->fromPost('frequency'));
 
-            $declarationsHours = $this->params()->fromPost('declarationsHours', null);
+            $declarationsHours = $this->params()->fromPost('declarationsHours');
             if( $declarationsHours !== null ){
                 if( !$this->getConfiguration('oscar.declarationsHoursOverwriteByAuth', false) ){
                     return $this->getResponseInternalError("Cette option ne peut pas être modifiée");
                 }
 
-                $declarationsHours = (bool)$this->params()->fromPost('declarationsHours', false);
-                $auth->updateSetting('declarationsHours', $declarationsHours);
+                $settings = $auth->getSettings() ?: [];
+
+
+                $declarationsHours = $this->params()->fromPost('declarationsHours') == 'on' ? true : false;
+
+                $settings['declarationsHours'] = $declarationsHours;
+
+                $auth->setSettings($settings);
                 $this->getEntityManager()->flush($auth);
                 return $this->getResponseOk();
             }
 
 
-            $frequency = $this->params()->fromPost('frequency', false);
+            $frequency = $this->params()->fromPost('frequency', null);
 
             if( $frequency ) {
                 $parameters = explode(',', $this->params()->fromPost('frequency'));
@@ -80,10 +86,16 @@ class PublicController extends AbstractOscarController
             return $this->getResponseBadRequest("");
         }
 
-        $declarationsHours = $auth->getSetting('declarationsHours', $this->getConfiguration('oscar.declarationsHours'));
+        $declarationsHours = $auth->getSetting('declarationsHours', 'false');
+        $declarationsHours = $declarationsHours == 'true' ? true : false;
+
+
+        //, $this->getConfiguration('oscar.declarationsHours'));
         $declarationsHoursOverwriteByAuth = $this->getConfiguration('oscar.declarationsHoursOverwriteByAuth');
+        var_dump($declarationsHours);
 
         if( !$declarationsHoursOverwriteByAuth ){
+            die("Non modifiable");
             $declarationsHours = $this->getConfiguration('oscar.declarationsHours');
         }
 

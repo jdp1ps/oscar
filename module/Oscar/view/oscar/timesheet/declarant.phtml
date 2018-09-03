@@ -26,10 +26,11 @@
             return Math.round( 100 / total * duree) + "%";
         });
         <?php endif; ?>
+        <?php /*
         Vue.filter('duration', function(duree, total){
             if( duree == 0 ) return 0.0;
             return Math.round( 100 / total * duree) + "%";
-        });
+        });*/ ?>
 
         new Vue({
             render: function(h){

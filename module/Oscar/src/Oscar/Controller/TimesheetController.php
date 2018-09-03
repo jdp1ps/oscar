@@ -1059,6 +1059,13 @@ class TimesheetController extends AbstractOscarController
 
         $declarationInHours = $this->getConfiguration('oscar.declarationsHours');
 
+        if( NULL != ($auth = $this->getOscarUserContext()->getAuthentification()) ){
+            $declarationInHours = $auth->getSetting('declarationsHours', $this->getConfiguration('oscar.declarationsHours'));
+        } else {
+            return $this->getResponseUnauthorized("Vous n'est plus connecté");
+        }
+        // if( $this->getOscarUserContext()->)
+
 
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
