@@ -43,6 +43,16 @@ class OscarUserContext extends UserContext
 {
 
     /**
+     * @return null|Authentification
+     */
+    public function getAuthentification(){
+        if( $this->getDbUser() ){
+            return $this->getEntityManager()->getRepository(Authentification::class)->find($this->getDbUser()->getId());
+        }
+        return null;
+    }
+
+    /**
      * Retourne la liste des rôles disponibles.
      *
      * @return array
