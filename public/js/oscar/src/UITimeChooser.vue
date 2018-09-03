@@ -8,7 +8,7 @@
             <span @click.prevent.stop="applyPercent(50)" :class="displayPercent == '50' ? 'selected' : ''">50%</span>
             <span @click.prevent.stop="applyPercent(25)" :class="displayPercent == '25' ? 'selected' : ''">25%</span>
         </div>
-        <div class="hours" style="display: none">
+        <div class="hours" style="">
 
             <span class="hour sel">
                 <span @click.prevent.stop="moreHours()"><i class="icon-angle-up"></i></span>

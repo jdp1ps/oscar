@@ -13,16 +13,24 @@
 
         let mode = "POURCENT";
 
+        <?php if( $declarationInHours == true ): ?>
+        Vue.filter('duration2', function(duree, total){
+            let h = Math.floor(duree);
+            let m = Math.round((duree - h)*60);
+            if( m < 10 ) m = '0'+m;
+            return h +':' +m;
+        });
+        <?php else: ?>
         Vue.filter('duration2', function(duree, total){
             if( duree == 0 ) return 0.0;
             return Math.round( 100 / total * duree) + "%";
         });
-        Vue.filter('duration', function(v){
-            let h = Math.floor(v);
-            let m = Math.round((v - h)*60);
-            if( m < 10 ) m = '0'+m;
-            return h +':' +m;
+        <?php endif; ?>
+        Vue.filter('duration', function(duree, total){
+            if( duree == 0 ) return 0.0;
+            return Math.round( 100 / total * duree) + "%";
         });
+
         new Vue({
             render: function(h){
                 return h(TimesheetMonth.default, {

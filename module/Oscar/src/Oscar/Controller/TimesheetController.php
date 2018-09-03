@@ -112,6 +112,11 @@ class TimesheetController extends AbstractOscarController
                         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
                         }
+
+                        $this->getLogger()->debug("VALIDATION SCIENTIFIQUE");
+
+                        return $this->getResponseDeprecated("En cours de modification SCI");
+
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
 
@@ -130,6 +135,9 @@ class TimesheetController extends AbstractOscarController
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider administrativement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
+
+                        return $this->getResponseDeprecated("En cours de modification ADMIN");
+
                         try {
 
                             if( $timesheetService->validationAdm($validationPeriod, $currentPerson) ){
@@ -1049,6 +1057,9 @@ class TimesheetController extends AbstractOscarController
         // Durée d'une journée de travail maximum légale
         $maxDays = 10.0;
 
+        $declarationInHours = $this->getConfiguration('oscar.declarationsHours');
+
+
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
 
@@ -1074,6 +1085,7 @@ class TimesheetController extends AbstractOscarController
         $output['periodFutur'] = false;
         $output['periodCurrent'] = false;
         $output['periodFinished'] = false;
+        $output['declarationInHours'] = $declarationInHours;
         $output['periodInfos']    = "Ce mois est hors des limite de l'espace-temps";
 
         $output['submitable'] = false;

@@ -703,6 +703,8 @@
                     type: 'infos',
                 },
 
+                showHours: true,
+
                 loading: false,
                 debug: null,
                 help: false,

@@ -59,6 +59,11 @@ return array(
 
         'closedDaysExtras' => function($loacked, $year, $month){},
 
+        // Mode de déclaration
+        // FALSE => en pourcentage
+        // TRUE => en heure
+        'declarationsHours' => false,
+
 
         ////////////////////////////////////////////////////////////// DOCUMENTS
         // Emplacement des dossiers pour les documents
