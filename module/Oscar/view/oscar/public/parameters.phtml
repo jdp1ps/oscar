@@ -107,6 +107,12 @@
 
             </div>
             <div class="col-md-6">
+                <h3><i class="icon-calendar"></i>
+                    Mode de déclaration</h3>
+
+                <div id="declarationsHours"></div>
+
+
                 <h3><i class="icon-history"></i>
                     Fréquence des envois</h3>
 
@@ -130,9 +136,52 @@
 </div>
 <script>
     require(['vue', 'vue-resource'], function(Vue, VueResource){
+
+
+
         Vue.use(VueResource);
         Vue.http.options.emulateJSON = true;
         Vue.http.options.emulateHTTP = true;
+        new Vue({
+            data: {
+                declarationsHours: <?= $declarationsHours ? 'true':'false' ?>,
+                declarationsHoursOverwrite: <?= $declarationsHoursOverwriteByAuth ? 'true' : 'false'?>
+            },
+            el: '#declarationsHours',
+            template: `<div>TEST
+                <pre>{{ $data }}</pre>
+                <section>
+                    <p v-if="declarationsHoursOverwrite">
+                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en poucentage jour' }}</strong><br>
+                        <a @click="switchDeclarationMode()" href="#">
+                            {{ declarationsHours ? 'utiliser la déclaration en pourcentage jour' : 'utiliser la déclaration en heure' }}
+                        </a>
+                    </p>
+                    <p v-else class="alert alert-info">
+                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en poucentage jour' }}</strong>
+                    </p>
+                </section>
+                </div>`,
+            methods: {
+                switchDeclarationMode: function(){
+                    var formData = new FormData();
+                    formData.append('declarationsHours', !this.declarationsHours);
+
+                    this.$http.post('', formData)
+                        .then(
+                            success => {
+                                console.log('OK');
+                                this.declarationsHours = !this.declarationsHours;
+                            },
+                            fail => {
+                                console.log(fail);
+                            }
+                        ).then( (foo) => {
+                    });
+                }
+            }
+        });
+
         new Vue({
             data: {
                 'loading': false,

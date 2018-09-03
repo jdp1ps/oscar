@@ -63,6 +63,7 @@ return array(
         // FALSE => en pourcentage
         // TRUE => en heure
         'declarationsHours' => false,
+        'declarationsHoursOverwriteByAuth' => true,
 
 
         ////////////////////////////////////////////////////////////// DOCUMENTS

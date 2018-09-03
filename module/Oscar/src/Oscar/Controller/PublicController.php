@@ -37,26 +37,60 @@ class PublicController extends AbstractOscarController
         /** @var Authentification $auth */
         $auth = $this->getEntityManager()->getRepository(Authentification::class)->find($this->getOscarUserContext()->getDbUser()->getId());
 
+
         // Récupération des envois automatiques
         $forceSend = $this->getConfiguration('oscar.notifications.fixed');
 
+
+        //$saveDeclarationMode = $this->params()->fromPost('')
+
+
         if( $this->getHttpXMethod() == "POST" ){
 
+
+
+
             $this->getLogger()->debug("Reçu = " . $this->params()->fromPost('frequency'));
-            $parameters = explode(',', $this->params()->fromPost('frequency'));
 
-            $this->getLogger()->debug("Save for = " . $auth->getDisplayName());
-            $settings = $auth->getSettings() ?: [];
-            $settings['frequency'] = $parameters;
+            $declarationsHours = $this->params()->fromPost('declarationsHours', null);
+            if( $declarationsHours !== null ){
+                if( !$this->getConfiguration('oscar.declarationsHoursOverwriteByAuth', false) ){
+                    return $this->getResponseInternalError("Cette option ne peut pas être modifiée");
+                }
+
+                $declarationsHours = (bool)$this->params()->fromPost('declarationsHours', false);
+                $auth->updateSetting('declarationsHours', $declarationsHours);
+                $this->getEntityManager()->flush($auth);
+                return $this->getResponseOk();
+            }
 
 
-            $auth->setSettings($settings);
-            $this->getEntityManager()->flush($auth);
-            return $this->getResponseOk();
+            $frequency = $this->params()->fromPost('frequency', false);
+
+            if( $frequency ) {
+                $parameters = explode(',', $this->params()->fromPost('frequency'));
+                $this->getLogger()->debug("Save for = " . $auth->getDisplayName());
+                $settings = $auth->getSettings() ?: [];
+                $settings['frequency'] = $parameters;
+                $auth->setSettings($settings);
+                $this->getEntityManager()->flush($auth);
+                return $this->getResponseOk();
+            }
+
+            return $this->getResponseBadRequest("");
+        }
+
+        $declarationsHours = $auth->getSetting('declarationsHours', $this->getConfiguration('oscar.declarationsHours'));
+        $declarationsHoursOverwriteByAuth = $this->getConfiguration('oscar.declarationsHoursOverwriteByAuth');
+
+        if( !$declarationsHoursOverwriteByAuth ){
+            $declarationsHours = $this->getConfiguration('oscar.declarationsHours');
         }
 
         return [
             'person' => $this->getCurrentPerson(),
+            'declarationsHours' => $declarationsHours,
+            'declarationsHoursOverwriteByAuth' => $declarationsHoursOverwriteByAuth,
             'parameters' => $auth->getSettings(),
             'forceSend' => $forceSend
         ];
