@@ -608,6 +608,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     public function getArrayFormatedTimesheetsFull(ValidationPeriod $validationPeriod, $timesheets, &$total ){
         $output = [];
+        $totalByDays = [];
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet ){
             if( $timesheet->getActivity() ) {
@@ -635,6 +636,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'acronym' => $acronym,
                     'label' => $pack,
                     'OscarId' => $num,
+                    'totalPeriod' => 0.0,
+                    'totalDays' => [],
                     'details' => [
 
                     ]
@@ -655,10 +658,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $output[$pack]['details'][$subpack]['days'][$day] = 0.0;
             }
 
+            if( !array_key_exists($day,  $output[$pack]['totalDays']) ){
+                $output[$pack]['totalDays'][$day] = 0.0;
+            }
+
             $output[$pack]['details'][$subpack]['days'][$day] += $timesheet->getDuration();
             $output[$pack]['details'][$subpack]['total'] += $timesheet->getDuration();
+            $output[$pack]['totalPeriod'] += $timesheet->getDuration();
+            $output[$pack]['totalDays'][$day] += $timesheet->getDuration();
+
             $total[$day] += $timesheet->getDuration();
         }
+
 
         return $output;
     }

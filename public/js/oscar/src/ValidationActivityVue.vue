@@ -12,6 +12,8 @@
                         </span>
                     </h3>
 
+
+
                     <div class="validation" :class="{ 'valid' : activity.validationperiod.validationactivity_by, 'invalid' : activity.validationperiod.rejectactivity_by, }">
                         <span class="icon-cube"></span> Validation projet :
                         <span v-if="activity.validationperiod.validationactivity_by">
@@ -90,62 +92,115 @@
                         </span>
                     </div>
 
-                    <section class="days">
-                        <div class="label">&nbsp;</div>
-                        <div class="day" v-for="i in nbrDays">
-                            {{ i }}
-                        </div>
-                    </section>
-                    <section v-for="lot, wpCode in activity.details">
-                        <section class="days">
-                            <div class="label"> {{ lot.label }}</div>
-                            <div class="day" v-for="i in nbrDays" :class="{'empty': !lot.days[i]}">
-                                {{ lot.days[i] ? lot.days[i] : '0.0' }}
-                            </div>
-                            <div>{{ lot.total }}</div>
-                        </section>
-                    </section>
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr class="header-day" style="background-color: #5c9ccc">
+                                <th colspan="2">
+                                    {{ p | monthyear}}
+                                </th>
+                                <th class="day" v-for="i in nbrDays">
+                                    {{ i }}
+                                </th>
+                                <th>
+                                    Total
+                                </th>
+                                <th>
+                                    <i class="icon-cog"></i>
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr style="background-color: #8f97a0">
+                                <th :colspan="nbrDays.length + 4" class="subhead">
+                                    <i class="icon-cube"></i>
+                                    <strong>{{ activity.acronym }}</strong>
+                                    <small>{{ activity.label }}</small>
+                                </th>
+                            </tr>
+                            <tr v-for="lot, wpCode in activity.details" class="subgroup">
+                                <th>&nbsp;</th>
+                                <th><i class="icon-archive"></i>{{ lot.label }}</th>
+                                <td v-for="i in nbrDays" class="day" :class="{'empty': !lot.days[i]}">
+                                    {{ (lot.days[i] ? lot.days[i] : '0.0')|duration }}
+                                </td>
+                                <td class="soustotal">
+                                    {{ lot.total | duration }}
+                                </td>
+                                <th>
+                                   ~
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>Total</th>
+                                <td v-for="i in nbrDays" class="day soustotal" :class="{'empty': !activity.totalDays[i]}">
+                                    {{ (activity.totalDays[i] ? activity.totalDays[i] : '0.0')|duration }}
+                                </td>
+                                <td class="total">
+                                    {{ activity.totalPeriod | duration }}
+                                </td>
+                                <th>
+                                    actions
+                                </th>
+                            </tr>
+
+
+                            <tr class="interligne">
+                                <th :colspan="nbrDays.length + 4">
+                                    Autres projets de recherche
+                                </th>
+                            </tr>
+
+                            <tr v-for="otherProject in datas.projects" class="subgroup">
+                                <th>&nbsp;</th>
+                                <th>{{ otherProject.code }}</th>
+                                <td class="day" v-for="i in nbrDays" :class="{'empty': !otherProject.days[i]}">
+                                    {{ (otherProject.days[i] ? otherProject.days[i] : '0.0')|duration }}
+                                </td>
+                                <td class="soustotal">{{ otherProject.total|duration }}</td>
+                                <td>~</td>
+                            </tr>
+
+                            <tr class="interligne">
+                                <th :colspan="nbrDays.length + 4">
+                                    Hors-lot
+                                </th>
+                            </tr>
+
+                            <tr class="subgroup" v-for="other in datas.others">
+                                <th>&nbsp;</th>
+                                <th>{{ other.label }}</th>
+                                <td class="day" v-for="i in nbrDays" :class="{'empty': !other.days[i]}">
+                                    {{ (other.days[i] ? other.days[i] : '0.0')|duration }}
+                                </td>
+                                <td class="soustotal">{{ other.total|duration }}</td>
+                                <td>~</td>
+                            </tr>
+
+                            <tr class="interligne">
+                                <th :colspan="nbrDays.length + 4">
+                                    Total période
+                                </th>
+                            </tr>
+
+                            <tr class="">
+                                <th>&nbsp;</th>
+                                <th>{{ p | monthyear}}</th>
+                                <td class="day soustotal" v-for="i in nbrDays" :class="{'empty': !datas.total[i]}">
+                                    {{ (datas.total[i] ? datas.total[i] : '0.0')|duration }}
+                                </td>
+                                <td class="total">
+                                    {{ datas.totalFull|duration }}
+                                </td>
+                                <td>~</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
                 </section>
 
-                <section class="otherProjects">
-                    <h3>Autres projets</h3>
-                    <section v-for="otherProject in datas.projects">
-                        <section class="days">
-                            <div class="label">{{ otherProject.code }}</div>
-                            <div class="day" v-for="i in nbrDays" :class="{'empty': !otherProject.days[i]}">
-                                {{ otherProject.days[i] ? otherProject.days[i] : '0.0' }}
-                            </div>
-                            <div>{{ otherProject.total }}</div>
-                        </section>
-                    </section>
-                </section>
-
-                <section class="other">
-                    <h3>Autres</h3>
-
-                    <section class="days" v-for="other in datas.others">
-                        <div class="label">{{ other.label }}</div>
-                        <div class="day" v-for="i in nbrDays" :class="{'empty': !other.days[i]}">
-                            {{ other.days[i] ? other.days[i] : '0.0' }}
-                        </div>
-                        <div>{{ other.total }}</div>
-                    </section>
-
-                </section>
-
-                <section class="total">
-                    <h3>Total pour cette période</h3>
-                    <section class="days">
-                        <div class="label">Total</div>
-                        <div class="day" v-for="i in nbrDays" :class="{'empty': !datas.total[i]}">
-                            {{ datas.total[i] ? datas.total[i] : '0.0' }}
-                        </div>
-                        <div>
-                            {{ datas.totalFull }}
-                        </div>
-                    </section>
-
-                </section>
 
             </section>
             <hr>
@@ -172,27 +227,33 @@
     .validation .btn {
         border-radius: 4px;
     }
-    .days:nth-child(odd){
-        background-color: rgba(255,255,255,.2);
+
+    .day.empty {
+        font-weight: 100;
+        color: rgba(0,0,0,.333);
     }
-    .days {
-        border-bottom: thin rgba(255,255,255,.25) solid;
-        background-color: rgba(255,255,255,.5);
-        display: flex;}
-        .days .day {
-            color: black;
-            font-weight: 600;
-            flex: 1}
-        .days .day {
-            padding: .5em}
-        .days .day.empty {
-            font-weight: 100;
-            color: rgba(0,0,0,.5);}
-        .days .label {
-            padding: .5em;
-            font-size: 100%;
-            color: black;
-            flex: 0 0 150px;}
+
+    .interligne {
+
+    }
+    .interligne th {
+        font-weight: 100;
+        border-top: dotted thin #777;
+        padding-top: 1em;
+    }
+
+    .subgroup {
+        font-size: .8em;
+    }
+
+    .table tbody tr td {
+        text-align: right;
+        border-right: solid thin #ddd;
+    }
+
+    .soustotal { font-weight: 700;}
+    .total { font-weight: 900;}
+
 </style>
 <script>
     // poi watch --format umd --moduleName  ValidationActivityVue --filename.css ValidationActivityVue.css --filename.js ValidationActivityVue.js --dist public/js/oscar/dist public/js/oscar/src/ValidationActivityVue.vue
