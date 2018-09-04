@@ -2,6 +2,9 @@
     <section>
         <section class="period" v-for="declarations,p in periods">
             <h2>Période : <strong>{{ p | monthyear}}</strong></h2>
+            <pre>
+                {{ declarations }}
+            </pre>
 
             <section v-for="datas in declarations" class="card">
                 <section class="main" v-for="activity in datas.main">
@@ -197,6 +200,10 @@
                             </tr>
 
                         </tbody>
+
+                        <tfoot>
+
+                        </tfoot>
                     </table>
 
                 </section>

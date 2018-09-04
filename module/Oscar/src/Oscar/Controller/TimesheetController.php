@@ -68,6 +68,8 @@ class TimesheetController extends AbstractOscarController
         $activityId = $this->params()->fromRoute('idactivity');
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
 
+        // Mode de déclaration
+
         if( !$activity )
             return $this->getResponseInternalError(sprintf("L'activités '%s' n'existe pas", $activityId));
 
@@ -1247,23 +1249,17 @@ class TimesheetController extends AbstractOscarController
         $method = $this->getHttpXMethod();
 
         // Durée d'un jour "normal"
-        $dayLength = 37/5;
 
         // Durée d'une journée de travail maximum légale
         $maxDays = 10.0;
 
-        $declarationInHours = $this->getConfiguration('oscar.declarationsHours');
-
-        if( NULL != ($auth = $this->getOscarUserContext()->getAuthentification()) ){
-            $declarationInHours = $auth->getSetting('declarationsHours', $this->getConfiguration('oscar.declarationsHours'));
-        } else {
-            return $this->getResponseUnauthorized("Vous n'est plus connecté");
-        }
-        // if( $this->getOscarUserContext()->)
-
 
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
+
+
+        $dayLength = $this->getTimesheetService()->getDayDuration($currentPerson);
+        $declarationInHours = $this->getTimesheetService()->isDeclarationsHoursPerson($currentPerson);
 
         // Données sur la période
         $today = new \DateTime();

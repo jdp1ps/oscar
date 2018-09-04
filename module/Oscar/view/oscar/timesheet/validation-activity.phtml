@@ -30,6 +30,9 @@
                 });
 
                 Vue.filter('duration', function(v){
+                    if( v == 0 ){
+                        return '0';
+                    }
                     let h = Math.floor(v);
                     let m = Math.round((v - h)*60);
                     if( m < 10 ) m = '0'+m;
