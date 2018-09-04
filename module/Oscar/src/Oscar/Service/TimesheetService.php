@@ -4,6 +4,7 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
+use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\TimeSheet;
@@ -31,7 +32,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
-
+    /**
+     * @return ConfigurationParser
+     */
+    protected function getOscarConfig(){
+        return $this->getServiceLocator()->get('OscarConfig');
+    }
 
     //////////////////////////////////////////////////////////////////////// VALIDATION des PERIODES
     public function validationProject( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
@@ -601,6 +607,53 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         return $output;
+    }
+
+    /**
+     * Retourne TRUE si la personne déclare en heure, sinon retourne FALSE.
+     *
+     * @param Person $person
+     * @return bool
+     * @throws OscarException
+     */
+    public function isDeclarationsHoursPerson( Person $person ){
+
+        $declarationShours = $default = $this->getOscarConfig()->getConfiguration('declarationsHours');
+
+        if( $this->getOscarConfig()->getConfiguration('declarationsHoursOverwriteByAuth') ){
+            try {
+                if( !$person || !$person->getLadapLogin() ){
+                    throw new \Exception("Cette personne n'existe pas ou n'a pas de login valide.");
+                }
+
+                /** @var Authentification $auth */
+                $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]);
+                if( !$auth ){
+                    throw new \Exception("La personne '$person' n'a pas de compte actif sur Oscar.");
+                }
+
+                $declarationShours = $auth->getSetting('declarationsHours', $default);
+
+
+
+            } catch (\Exception $e ){
+                $this->getLogger()->err("ERROR : " . $e->getMessage());
+            }
+        }
+
+        return $declarationShours;
+    }
+
+
+    /**
+     * Retourne la durée standard d'une journée pour la personne.
+     *
+     * @param Person $person
+     * @return mixed
+     * @throws OscarException
+     */
+    public function getDayDuration( Person $person ){
+        return $this->getOscarConfig()->getConfiguration('declarationsDayDuration');
     }
 
     /**
