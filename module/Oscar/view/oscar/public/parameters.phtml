@@ -148,8 +148,7 @@
                 declarationsHoursOverwrite: <?= $declarationsHoursOverwriteByAuth ? 'true' : 'false'?>
             },
             el: '#declarationsHours',
-            template: `<div>TEST
-                <pre>{{ $data }}</pre>
+            template: `<div>
                 <section>
                     <p v-if="declarationsHoursOverwrite">
                         Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en poucentage jour' }}</strong><br>
