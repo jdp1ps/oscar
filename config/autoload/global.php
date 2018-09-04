@@ -68,7 +68,7 @@ return array(
         'declarationsHoursOverwriteByAuth' => true,
 
         // Durée standard d'une journée pour les déclarants (général)
-        'declarationsDayDuration' => 7.24,
+        'declarationsDayDuration' => 7.4,
 
 
         ////////////////////////////////////////////////////////////// DOCUMENTS
