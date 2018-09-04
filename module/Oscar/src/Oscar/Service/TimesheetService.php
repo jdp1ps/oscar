@@ -497,6 +497,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $from = $dateRef->format('Y-m-01 00:00:00');
         $to = $dateRef->format('Y-m-' . $nbr .' 23:59:59');
 
+        $daysFull = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+        $decaleDay = $dateRef->format('N') - 1;
+        $daysLabels = [];
+
+        for( $i=$decaleDay; $i<$nbr+$decaleDay; $i++ ){
+            $day = $i-$decaleDay+1;
+            $dayIndex = ($i%7);
+            $dayKey = $day < 10 ? '0'.$day : $day;
+            $daysLabels[$dayKey] =  $daysFull[$dayIndex];
+        }
+
         $person = $this->getEntityManager()->getRepository(Person::class)->find($validationPeriod->getDeclarer()->getId());
 
         // Autres périodes
@@ -515,6 +526,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'projects'  => [],
             'others'    => [],
             'total'     => [],
+            'daysLabels'=> $daysLabels,
             'declarant' => (string)$person,
             'nbrDays'   => $nbr
         ];

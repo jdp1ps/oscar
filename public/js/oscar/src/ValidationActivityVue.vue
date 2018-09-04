@@ -2,7 +2,7 @@
     <section>
         <section class="period" v-for="declarations,p in periods">
             <h2>Période : <strong>{{ p | monthyear}}</strong></h2>
-            <pre>
+            <pre style="display: none">
                 {{ declarations }}
             </pre>
 
@@ -102,6 +102,7 @@
                                     {{ p | monthyear}}
                                 </th>
                                 <th class="day" v-for="i in nbrDays">
+                                    <small>{{ datas.daysLabels[i] }}</small>
                                     {{ i }}
                                 </th>
                                 <th>

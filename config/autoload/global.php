@@ -67,7 +67,7 @@ return array(
         // Authorise la personnalisation du mode de déclaration
         'declarationsHoursOverwriteByAuth' => true,
 
-        // Durée standard d'une journée pour les déclarants
+        // Durée standard d'une journée pour les déclarants (général)
         'declarationsDayDuration' => 8.0,
 
 
