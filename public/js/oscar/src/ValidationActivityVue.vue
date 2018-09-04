@@ -15,8 +15,6 @@
                         </span>
                     </h3>
 
-
-
                     <div class="validation" :class="{ 'valid' : activity.validationperiod.validationactivity_by, 'invalid' : activity.validationperiod.rejectactivity_by, }">
                         <span class="icon-cube"></span> Validation projet :
                         <span v-if="activity.validationperiod.validationactivity_by">
@@ -95,15 +93,22 @@
                         </span>
                     </div>
 
+                    <pre>
+                        Afficher en heure : {{ datas.displayHours }}
+                        Durée jour : {{ datas.dayLength }}
+                        Durée mois : {{ datas.monthLength }}
+                    </pre>
+
                     <table class="table table-condensed">
                         <thead>
                             <tr class="header-day" style="background-color: #5c9ccc">
                                 <th colspan="2">
                                     {{ p | monthyear}}
                                 </th>
-                                <th class="day" v-for="i in nbrDays">
+                                <th class="day" v-for="i in nbrDays" :title="datas.daysInfos[i]" :class="{ 'closed': datas.daysClosed[i]  }">
                                     <small>{{ datas.daysLabels[i] }}</small>
-                                    {{ i }}
+                                    {{ i }}<br>
+                                    <small>{{ datas.daysLength[i] }}</small>
                                 </th>
                                 <th>
                                     Total
@@ -125,11 +130,11 @@
                             <tr v-for="lot, wpCode in activity.details" class="subgroup">
                                 <th>&nbsp;</th>
                                 <th><i class="icon-archive"></i>{{ lot.label }}</th>
-                                <td v-for="i in nbrDays" class="day" :class="{'empty': !lot.days[i]}">
-                                    {{ (lot.days[i] ? lot.days[i] : '0.0')|duration }}
+                                <td v-for="i in nbrDays" class="day" :class="{'empty': !lot.days[i]}" :title="(lot.days[i] ? lot.days[i] : '0.0') + ' heure(s)'">
+                                    {{ (lot.days[i] ? lot.days[i] : '0.0') | displayTime(datas.displayHours, datas.daysLength[i]) }}
                                 </td>
-                                <td class="soustotal">
-                                    {{ lot.total | duration }}
+                                <td class="soustotal" :title="lot.total + ' heure(s)'">
+                                    {{ lot.total | displayTime(datas.displayHours, datas.monthLength) }}
                                 </td>
                                 <th>
                                    ~
@@ -139,10 +144,10 @@
                                 <th>&nbsp;</th>
                                 <th>Total</th>
                                 <td v-for="i in nbrDays" class="day soustotal" :class="{'empty': !activity.totalDays[i]}">
-                                    {{ (activity.totalDays[i] ? activity.totalDays[i] : '0.0')|duration }}
+                                    {{ (activity.totalDays[i] ? activity.totalDays[i] : '0.0') | displayTime(datas.displayHours, datas.dayLength) }}
                                 </td>
                                 <td class="total">
-                                    {{ activity.totalPeriod | duration }}
+                                    {{ activity.totalPeriod | displayTime(datas.displayHours, datas.monthLength) }}
                                 </td>
                                 <th>
                                     actions
@@ -160,9 +165,9 @@
                                 <th>&nbsp;</th>
                                 <th>{{ otherProject.code }}</th>
                                 <td class="day" v-for="i in nbrDays" :class="{'empty': !otherProject.days[i]}">
-                                    {{ (otherProject.days[i] ? otherProject.days[i] : '0.0')|duration }}
+                                    {{ (otherProject.days[i] ? otherProject.days[i] : '0.0')|displayTime(datas.displayHours, datas.dayLength) }}
                                 </td>
-                                <td class="soustotal">{{ otherProject.total|duration }}</td>
+                                <td class="soustotal">{{ otherProject.total|displayTime(datas.displayHours, datas.monthLength) }}</td>
                                 <td>~</td>
                             </tr>
 
@@ -176,9 +181,9 @@
                                 <th>&nbsp;</th>
                                 <th>{{ other.label }}</th>
                                 <td class="day" v-for="i in nbrDays" :class="{'empty': !other.days[i]}">
-                                    {{ (other.days[i] ? other.days[i] : '0.0')|duration }}
+                                    {{ (other.days[i] ? other.days[i] : '0.0')|displayTime(datas.displayHours, datas.daylength) }}
                                 </td>
-                                <td class="soustotal">{{ other.total|duration }}</td>
+                                <td class="soustotal">{{ other.total|displayTime(datas.displayHours, datas.monthLength) }}</td>
                                 <td>~</td>
                             </tr>
 
@@ -192,10 +197,10 @@
                                 <th>&nbsp;</th>
                                 <th>{{ p | monthyear}}</th>
                                 <td class="day soustotal" v-for="i in nbrDays" :class="{'empty': !datas.total[i]}">
-                                    {{ (datas.total[i] ? datas.total[i] : '0.0')|duration }}
+                                    {{ (datas.total[i] ? datas.total[i] : '0.0')|displayTime(datas.displayHours, datas.dayLength) }}
                                 </td>
                                 <td class="total">
-                                    {{ datas.totalFull|duration }}
+                                    {{ datas.totalFull|displayTime(datas.displayHours, datas.monthLength) }}
                                 </td>
                                 <td>~</td>
                             </tr>
@@ -241,6 +246,10 @@
         color: rgba(0,0,0,.333);
     }
 
+    .closed {
+        background-color: #8f97a0 !important;
+    }
+
     .interligne {
 
     }
@@ -265,6 +274,7 @@
 </style>
 <script>
     // poi watch --format umd --moduleName  ValidationActivityVue --filename.css ValidationActivityVue.css --filename.js ValidationActivityVue.js --dist public/js/oscar/dist public/js/oscar/src/ValidationActivityVue.vue
+
     export default {
         props: {
             days: {
@@ -275,6 +285,23 @@
             },
             periods: {
                 default: {}
+            }
+        },
+
+        filters: {
+            displayTime(v, hours=true, total=8.0){
+                if( hours ){
+                    if( v == 0 ){
+                        return 0;
+                    }
+                    let h = Math.floor(v);
+                    let m = Math.round((v - h)*60);
+                    if( m < 10 ) m = '0'+m;
+                    return h +':' +m;
+                } else {
+                    if( v == 0 ) return 0.0;
+                    return Math.round( 100 / total * v) + "%";
+                }
             }
         },
 

@@ -488,27 +488,21 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $timesheets = [];
 
         $this->getLogger()->debug("Récupération des créneaux pour la période " . $validationPeriod);
+
+
+
         $year = $validationPeriod->getYear();
         $month = $validationPeriod->getMonth();
         $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
 
         // Nombre de jours dans le mois
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
-        $from = $dateRef->format('Y-m-01 00:00:00');
-        $to = $dateRef->format('Y-m-' . $nbr .' 23:59:59');
 
-        $daysFull = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-        $decaleDay = $dateRef->format('N') - 1;
-        $daysLabels = [];
 
-        for( $i=$decaleDay; $i<$nbr+$decaleDay; $i++ ){
-            $day = $i-$decaleDay+1;
-            $dayIndex = ($i%7);
-            $dayKey = $day < 10 ? '0'.$day : $day;
-            $daysLabels[$dayKey] =  $daysFull[$dayIndex];
-        }
+        // TODO marquer les jours feriès
 
         $person = $this->getEntityManager()->getRepository(Person::class)->find($validationPeriod->getDeclarer()->getId());
+
 
         // Autres périodes
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
@@ -520,15 +514,36 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'person' => $person,
             ]);
 
+        $daysDetails = $this->getDaysPeriodInfosPerson($person, $validationPeriod->getYear(), $validationPeriod->getMonth());
+
+        $daysLength = [];
+        $daysClosed = [];
+        $daysInfos  = [];
+        $daysLabels  = [];
+
+        foreach ($daysDetails as $date=>$data) {
+            $daysLength[$date] = $data['duration'];
+            $daysClosed[$date] = $data['close'];
+            $daysInfos[$date] = $data['infos'];
+            $daysLabels[$date] = $data['label'];
+        }
+
         $periodsAtSameMoment = $query->getQuery()->getResult();
         $output = [
-            'main'      => '',
-            'projects'  => [],
-            'others'    => [],
-            'total'     => [],
-            'daysLabels'=> $daysLabels,
-            'declarant' => (string)$person,
-            'nbrDays'   => $nbr
+            'main'          => '',
+            'displayHours'  => $this->isDeclarationsHoursPerson($person),
+            'dayLength'     => $this->getDayDuration($person),
+            'monthLength'   => $this->getMonthDuration($person, $year, $month),
+            'projects'      => [],
+            'others'        => [],
+            'total'         => [],
+            'daysLabels'    => $daysLabels,
+            'daysLabels'    => $daysLabels,
+            'daysClosed'    => $daysClosed,
+            'daysLength'    => $daysLength,
+            'daysInfos'     => $daysInfos,
+            'declarant'     => (string)$person,
+            'nbrDays'       => $nbr
         ];
 
         $total = [];
@@ -667,6 +682,64 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function getDayDuration( Person $person ){
         return $this->getOscarConfig()->getConfiguration('declarationsDayDuration');
     }
+
+    public function getMonthDuration( Person $person, $year, $month ){
+        $daysInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);
+        $total = 0.0;
+        foreach ($daysInfos as $dayInfo) {
+            $total += $dayInfo['duration'];
+        }
+        return $total;
+    }
+
+    public function getDaysPeriodInfosPerson(Person $person, $year, $month ){
+
+        $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
+        $locked = $this->getLockedDays($year, $month);
+
+
+
+        // Nombre de jours dans le mois
+        $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
+
+        $daysFull = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+        $decaleDay = $dateRef->format('N') - 1;
+        $daysLabels = [];
+
+        for( $i=$decaleDay; $i<$nbr+$decaleDay; $i++ ){
+            $duration = $this->getDayDuration($person);
+            $day = $i-$decaleDay+1;
+            $dayIndex = ($i%7);
+            $close = false;
+            $infos = "";
+            $dayKey = $day < 10 ? '0'.$day : $day;
+            $lockedKey = "$year-$month-$day";
+
+            if( array_key_exists($lockedKey, $locked) ){
+                $duration = 0.0;
+                $close = true;
+                $infos = "Ferié " . $locked[$lockedKey];
+            }
+            elseif ($dayIndex > 4) {
+                $duration = 0.0;
+                $close = true;
+                $infos = "Weekend";
+            }
+
+//            $daysLabels[$dayKey] =  $daysFull[$dayIndex];
+            $days[$dayKey] = [
+                'duration' => $duration,
+                'label' => $daysFull[$dayIndex],
+                'close' => $close,
+                'infos' => $infos,
+                'datefull' => $lockedKey,
+                ];
+        }
+
+        return $days;
+    }
+
+
 
     /**
      * @param TimeSheet[] $timesheets
