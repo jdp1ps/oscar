@@ -63,7 +63,12 @@ return array(
         // FALSE => en pourcentage
         // TRUE => en heure
         'declarationsHours' => false,
+
+        // Authorise la personnalisation du mode de déclaration
         'declarationsHoursOverwriteByAuth' => true,
+
+        // Durée standard d'une journée pour les déclarants
+        'declarationsDayDuration' => 8.0,
 
 
         ////////////////////////////////////////////////////////////// DOCUMENTS
