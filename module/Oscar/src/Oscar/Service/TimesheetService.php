@@ -16,6 +16,7 @@ use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
+use Oscar\Utils\ConfigurationMergable;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Form\Element\Time;
@@ -447,6 +448,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'description' => 'Créneaux érroné',
             'icon' => true,
         ];
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ACCÉS aux CONFIGURATION HORAIRES
+    ///
+
+
+
+    public function getDeclarationConfigurationPerson( Person $person ){
+        $conf = new ConfigurationMergable($this->getOscarConfig()->getConfiguration('declarationsDurations'));
+
     }
 
     /**

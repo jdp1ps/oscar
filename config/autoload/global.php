@@ -57,7 +57,7 @@ return array(
             }
         },
 
-        'closedDaysExtras' => function($loacked, $year, $month){},
+        'closedDaysExtras' => function($locked, $year, $month){},
 
         // Mode de déclaration
         // FALSE => en pourcentage
@@ -69,6 +69,29 @@ return array(
 
         // Durée standard d'une journée pour les déclarants (général)
         'declarationsDayDuration' => 7.4,
+
+        // Durée standards d'une semaine
+        'declarationsWeekDuration' => 7.4*5,
+
+        // Configuration des cas particuliers
+        'declarationsDurations' => [
+
+            'dayLength'     => [
+                'value' => 8.0,
+                'userChange' => false
+            ],
+
+            'weekLength'     => [
+                'value' => 35.0,
+                'userChange' => false
+            ],
+
+            'weekExceptions' => [
+                '3'         => 3.0,
+            ],
+        ],
+
+
 
         'horslots' => [
             'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => 'Congès, RTT, récupération', 'icon' => true ],

@@ -79,3 +79,12 @@ return [
     ]
 ];
 ```
+
+
+# Note de développement
+
+Ce qui suit sont des notes/idées pour l'amélioration de la configuration et de la personnalisation
+
+## Configuration des durées
+
+ - Ajouter une valeur de contrôle semaine, il faudra cependant réfléchir à la mise en place de ce control en proposant un calcule effectif (exemple semaine tronquées, ex: Jours feriè à soustraire) Solution actuel, soustraire à la semaine le temps configuré dans la journée standard.

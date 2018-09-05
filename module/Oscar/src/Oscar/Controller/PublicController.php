@@ -34,6 +34,8 @@ class PublicController extends AbstractOscarController
     public function parametersAction()
     {
 
+
+
         /** @var Authentification $auth */
         $auth = $this->getOscarUserContext()->getAuthentification();
 
@@ -82,6 +84,7 @@ class PublicController extends AbstractOscarController
         $declarationsHoursOverwriteByAuth = $this->getConfiguration('oscar.declarationsHoursOverwriteByAuth');
 
         return [
+            'declarationsConfiguration' => $timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
             'person' => $this->getCurrentPerson(),
             'declarationsHours' => $declarationsHours,
             'declarationsHoursOverwriteByAuth' => $declarationsHoursOverwriteByAuth,
