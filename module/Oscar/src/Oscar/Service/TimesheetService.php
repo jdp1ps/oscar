@@ -625,6 +625,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'oid'   => $objId,
                     'validationperiod_id' => $validationPeriod->getId(),
                     'validationperiod_state' => $validationPeriod->getState(),
+                    'validation_icon' => 'icon-'.$validationPeriod->getStatus(),
                     'label' => $label,
                     'code' => $code,
                     'days'  => [],

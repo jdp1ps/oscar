@@ -6936,6 +6936,9 @@ span[class*="status-400"] .icon:before {
 [class*="icon-status-1"]:before {
   content: '\e85b'; }
 
+[class*="icon-send-prj"]:before {
+  content: '\e85b'; }
+
 [class*="icon-status-3"]:before {
   content: '\e85a'; }
 

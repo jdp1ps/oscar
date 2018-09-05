@@ -156,7 +156,9 @@
 
                             <tr v-for="otherProject in datas.projects" class="subgroup">
                                 <th>&nbsp;</th>
-                                <th>{{ otherProject.code }}</th>
+                                <th>
+                                    <i :class=" otherProject.validation_icon"></i>
+                                    {{ otherProject.code }}</th>
                                 <td class="day" v-for="i in nbrDays" :class="{'empty': !otherProject.days[i]}">
                                     {{ (otherProject.days[i] ? otherProject.days[i] : '0.0')|displayTime(datas.displayHours, datas.dayLength) }}
                                 </td>
@@ -172,7 +174,10 @@
 
                             <tr class="subgroup" v-for="other in datas.others">
                                 <th>&nbsp;</th>
-                                <th>{{ other.label }}</th>
+                                <th>
+                                    <i :class=" other.validation_icon"></i>
+                                    {{ other.label }}
+                                </th>
                                 <td class="day" v-for="i in nbrDays" :class="{'empty': !other.days[i]}">
                                     {{ (other.days[i] ? other.days[i] : '0.0')|displayTime(datas.displayHours, datas.daylength) }}
                                 </td>
