@@ -22,7 +22,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
 
     /**
      * Traitement des montants saisis.
-     * 
+     *
      * @param $in
      * @return float
      */
