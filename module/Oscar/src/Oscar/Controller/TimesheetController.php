@@ -1135,11 +1135,18 @@ class TimesheetController extends AbstractOscarController
             $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
             $month = (integer)$start->format('m');
             $year = (integer)$start->format('Y');
+            $dayKey = $start->format('Y-n-j');
+
+            // Récupération des jours bloqués
+            $locked = $this->getTimesheetService()->getLockedDays($year, $month);
+
+            if( array_key_exists($dayKey, $locked) ){
+                return $this->getResponseBadRequest("Vous ne pouvez pas déclarer ce jour : " . $locked[$dayKey]);
+            }
 
             if( $start > $now ){
                 return $this->getResponseBadRequest('Vous ne pouvez pas anticiper votre déclaration');
             }
-
 
             $wp = null;
             $label = "error";
