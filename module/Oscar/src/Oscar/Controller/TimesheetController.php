@@ -1118,6 +1118,8 @@ class TimesheetController extends AbstractOscarController
             return $this->getResponseBadRequest("Aucun créneau à traiter");
         }
 
+        $now = new \DateTime();
+
         foreach ($datas as $data){
             $day = new \DateTime($data->day);
             $dayBase = $day->format('Y-m-d'). ' %s:%s:00';
@@ -1133,6 +1135,11 @@ class TimesheetController extends AbstractOscarController
             $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
             $month = (integer)$start->format('m');
             $year = (integer)$start->format('Y');
+
+            if( $start > $now ){
+                return $this->getResponseBadRequest('Vous ne pouvez pas anticiper votre déclaration');
+            }
+
 
             $wp = null;
             $label = "error";
