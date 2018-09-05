@@ -179,7 +179,8 @@
                                     {{ other.label }}
                                 </th>
                                 <td class="day" v-for="i in nbrDays" :class="{'empty': !other.days[i]}">
-                                    {{ (other.days[i] ? other.days[i] : '0.0')|displayTime(datas.displayHours, datas.daylength) }}
+                                    {{ (other.days[i] ? other.days[i] : '0.0')|displayTime(datas.displayHours, datas.dayLength) }}
+
                                 </td>
                                 <td class="soustotal">{{ other.total|displayTime(datas.displayHours, datas.monthLength) }}</td>
                                 <td>~</td>

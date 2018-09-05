@@ -73,7 +73,7 @@ return array(
         // Durée standards d'une semaine
         'declarationsWeekDuration' => 7.4*5,
 
-        // Configuration des cas particuliers
+        // Configuration des cas particuliers (LABS)
         'declarationsDurations' => [
 
             'dayLength'     => [
