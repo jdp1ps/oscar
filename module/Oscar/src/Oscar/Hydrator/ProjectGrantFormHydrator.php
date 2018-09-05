@@ -20,7 +20,15 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
 
     use ServiceLocatorAwareTrait;
 
+    /**
+     * Traitement des montants saisis.
+     * 
+     * @param $in
+     * @return float
+     */
     protected function decimalPointComma($in){
+        $in = trim($in);
+        $in = str_replace(' ', '', $in);
         return doubleval(str_replace(',', '.', $in));
     }
 
