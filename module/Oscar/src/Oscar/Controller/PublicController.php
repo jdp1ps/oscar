@@ -75,17 +75,11 @@ class PublicController extends AbstractOscarController
             return $this->getResponseBadRequest("");
         }
 
-        $declarationsHours = $auth->getSetting('declarationsHours', 'false');
-        $declarationsHours = $declarationsHours == 'true' ? true : false;
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
-
-        //, $this->getConfiguration('oscar.declarationsHours'));
+        $declarationsHours = $timesheetService->isDeclarationsHoursPerson($this->getCurrentPerson());
         $declarationsHoursOverwriteByAuth = $this->getConfiguration('oscar.declarationsHoursOverwriteByAuth');
-
-        if( !$declarationsHoursOverwriteByAuth ){
-            die("Non modifiable");
-            $declarationsHours = $this->getConfiguration('oscar.declarationsHours');
-        }
 
         return [
             'person' => $this->getCurrentPerson(),
