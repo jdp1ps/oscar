@@ -93,12 +93,6 @@
                         </span>
                     </div>
 
-                    <pre>
-                        Afficher en heure : {{ datas.displayHours }}
-                        Durée jour : {{ datas.dayLength }}
-                        Durée mois : {{ datas.monthLength }}
-                    </pre>
-
                     <table class="table table-condensed">
                         <thead>
                             <tr class="header-day" style="background-color: #5c9ccc">
@@ -108,7 +102,6 @@
                                 <th class="day" v-for="i in nbrDays" :title="datas.daysInfos[i]" :class="{ 'closed': datas.daysClosed[i]  }">
                                     <small>{{ datas.daysLabels[i] }}</small>
                                     {{ i }}<br>
-                                    <small>{{ datas.daysLength[i] }}</small>
                                 </th>
                                 <th>
                                     Total
@@ -241,6 +234,20 @@
         border-radius: 4px;
     }
 
+    .header-day th {
+        text-align: center;
+        text-shadow: -1px 1px 0 rgba(255,255,255,.5);
+        border-left: thin solid rgba(255,255,255,.3);
+    }
+    .header-day th small {
+        font-weight: 100;
+        display: block;
+    }
+
+    .table tbody tr:hover {
+        background-color: #deebef;
+    }
+
     .day.empty {
         font-weight: 100;
         color: rgba(0,0,0,.333);
@@ -265,7 +272,7 @@
 
     .table tbody tr td {
         text-align: right;
-        border-right: solid thin #ddd;
+        border-left: solid thin #ddd;
     }
 
     .soustotal { font-weight: 700;}

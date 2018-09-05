@@ -444,6 +444,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $others;
     }
 
+    public function getOthersWPByCode( $code ){
+        $conf = $this->getOthersWP();
+        if( array_key_exists($code, $conf) ){
+            return $conf[$code];
+        }
+        return [
+            'code' => 'invalid',
+            'label' => 'Invalide',
+            'description' => 'Créneaux érroné',
+            'icon' => true,
+        ];
+    }
+
     /**
      * @param $idPeriod
      * @return null|ValidationPeriod
@@ -598,12 +611,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet ){
             if( $timesheet->getActivity() ) {
-                $pack = $timesheet->getActivity()->getLabel();
+                $label = $pack = $timesheet->getActivity()->getLabel();
                 $code = $timesheet->getActivity()->getAcronym();
                 $objId = $timesheet->getId();
             } else {
-                $pack = $timesheet->getLabel();
-                $code = $timesheet->getLabel();
+                $pack = $code = $timesheet->getLabel();
+
+                $label = $this->getOthersWPByCode($code)['label'];
                 $objId = 0;
             }
             if( !array_key_exists($pack, $output) ){
@@ -611,7 +625,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'oid'   => $objId,
                     'validationperiod_id' => $validationPeriod->getId(),
                     'validationperiod_state' => $validationPeriod->getState(),
-                    'label' => $pack,
+                    'label' => $label,
                     'code' => $code,
                     'days'  => [],
                     'total' => 0.0
