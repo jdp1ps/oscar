@@ -1,6 +1,5 @@
 <template>
     <div class="ui-timechooser">
-
         <div class="percents">
             <span @click.prevent.stop="applyDuration(fill)" v-if="fill > 0">Remplir</span>
             <span @click.prevent.stop="applyPercent(100)" :class="displayPercent == '100' ? 'selected' : ''">100%</span>
@@ -8,8 +7,8 @@
             <span @click.prevent.stop="applyPercent(50)" :class="displayPercent == '50' ? 'selected' : ''">50%</span>
             <span @click.prevent.stop="applyPercent(25)" :class="displayPercent == '25' ? 'selected' : ''">25%</span>
         </div>
-        <div class="hours" style="">
 
+        <div class="hours" style="" v-if="declarationInHours">
             <span class="hour sel">
                 <span @click.prevent.stop="moreHours()"><i class="icon-angle-up"></i></span>
                 {{ displayHours }}
@@ -80,6 +79,7 @@
         props: {
             duration: { default: 0 },
             baseTime: { default: 7.5 },
+            declarationInHours: { required: true },
             // PAS en minutes
             pas: { default: 10 },
             fill: { default: 0 },

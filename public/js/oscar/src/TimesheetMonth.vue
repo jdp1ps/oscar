@@ -127,7 +127,10 @@
 
                         <div class="col-md-6">
                             <h4>Temps</h4>
-                            <timechooser @timeupdate="handlerDayUpdated" :baseTime="ts.daylength" :fill="fillDayValue" :duration="editedTimesheet ? editedTimesheet.duration : 0"></timechooser>
+                            <timechooser @timeupdate="handlerDayUpdated"
+                                         :declarationInHours="declarationInHours"
+                                         :baseTime="ts.daylength"
+                                         :fill="fillDayValue" :duration="editedTimesheet ? editedTimesheet.duration : 0"></timechooser>
                         </div>
                         <div class="col-md-6">
                             <h4>Commentaire</h4>
@@ -675,12 +678,9 @@
         name: 'TimesheetMonth',
 
         props: {
-            moment: {
-                required: true
-            },
-            bootbox: {
-                required: true
-            },
+            moment: { required: true },
+            bootbox: { required: true },
+            declarationInHours: { required: true },
             defaultMonth: { default: defaultDate.getMonth()+1},
             defaultYear: { default: defaultDate.getFullYear()},
             defaultDayLength: { default: 8.0 }
