@@ -5,7 +5,7 @@
 <!-- /////////////////////////////////////////////////////////////////////// -->
 <section class="informations">
     <div class="metas row">
-        <div class="col-md-6">
+        <div class="col-md-9">
             <i class="icon-flow-split"></i>
             <?= $project->getComposantePrincipal() ?> /
             <?= count($project->getComposantesResponsables()) ?
@@ -14,11 +14,6 @@
                 . $project->getComposantesResponsables()[0]->getOrganization()
                 . '</a>'
                 : '' ?>
-        </div>
-        <div class="text-center col-md-3">
-            <div class="discipline"><i
-                    class="icon-tag"></i> <?= $project->getDiscipline() ? $project->getDiscipline() : "<i>Sans discipline</i>" ?>
-            </div>
         </div>
 
         <div class="text-right code-saic col-md-3">
