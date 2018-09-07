@@ -669,11 +669,23 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarersAction()
     {
-        die("Fonctionnalité désactivée");
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            switch( $method ){
+                case 'GET' :
+                    $action = $this->params()->fromQuery('a');
+                    try {
+                        if( $action == "declarers")
+                            return $this->ajaxResponse(['declarers' => $this->getTimesheetService()->getDeclarersList() ]);
+                    } catch (\Exception $e) {
+                        return $this->getResponseInternalError("Impossible de charger les déclarants : " . $e->getMessage());
+                    }
+            }
+            return $this->getResponseBadRequest();
+        }
 
-        $datas = $this->getServiceLocator()->get('TimesheetService')->getDeclarers();
         return [
-            'datas' => $datas
+
         ];
     }
 

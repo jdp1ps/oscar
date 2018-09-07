@@ -6933,25 +6933,51 @@ span[class*="status-400"] .icon:before {
 [class*="icon-status-0"]:before {
   content: '\e80b'; }
 
+[class*="icon-draft"]:before {
+  content: '\e80b'; }
+
+/*
+const STATUS_STEP1      = 'send-prj';
+const STATUS_STEP2      = 'send-sci';
+const STATUS_STEP3      = 'send-adm';
+
+const STATUS_CONFLICT   = 'conflict';
+const STATUS_VALID      = 'valid';
+*/
 [class*="icon-status-1"]:before {
   content: '\e85b'; }
 
-[class*="icon-send-prj"]:before {
+[class*="icon-valid"]:before {
   content: '\e85b'; }
 
 [class*="icon-status-3"]:before {
   content: '\e85a'; }
 
+[class*="icon-conflict"]:before {
+  content: '\e85a'; }
+
 [class*="icon-status-2"]:before {
+  content: '\e80e'; }
+
+[class*="icon-draft"]:before {
   content: '\e80e'; }
 
 [class*="icon-status-5"]:before {
   content: '\e88d'; }
 
+[class*="icon-send-prj"]:before {
+  content: '\e88d'; }
+
 [class*="icon-status-6"]:before {
   content: '\e891'; }
 
+[class*="icon-send-sci"]:before {
+  content: '\e891'; }
+
 [class*="icon-status-7"]:before {
+  content: '\e87b'; }
+
+[class*="icon-send-adm"]:before {
   content: '\e87b'; }
 
 /*
@@ -8079,6 +8105,10 @@ time.date-missing {
     border: thin solid #ddd;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0.7em 1em rgba(0, 0, 0, 0.15); }
+    .overlay .overlay-content .overlay-closer {
+      position: absolute;
+      top: 1em;
+      right: 1em; }
 
 .separator-bottom {
   padding-bottom: .3em;

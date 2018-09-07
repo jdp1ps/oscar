@@ -57,6 +57,65 @@ class ValidationPeriodRepository extends EntityRepository
         return $this->getValidationPeriodsValidationProgressQuery()->getQuery()->getResult();
     }
 
+    public function getPredictedPeriods( Person $p ){
+
+        $activityBounds = [];
+
+        /** @var WorkPackagePerson $workPackage */
+        foreach ($p->getWorkPackages() as $workPackage){
+            $key = $workPackage->getWorkPackage()->getActivity()->getOscarNum();
+            $activityBounds[$key] = [
+                'activity' => $workPackage->getWorkPackage()->getActivity()->toJson(),
+                'periods' => $workPackage->getWorkPackage()->getActivity()->getPredictedPeriods(),
+                'declarations' => []
+            ];
+        }
+
+        return $activityBounds;
+    }
+
+    public function getPredictedPeriodsPack( Person $person ){
+        $activityBounds = [];
+        $warnings = [];
+        $periods = [];
+        $validationsPeriodsSorted = [];
+
+        $validationsPeriods = $this->getValidationPeriodsPersonQuery($person->getId())->getQuery()->getResult();
+
+        /** @var ValidationPeriod $vp */
+        foreach ($validationsPeriods as $vp) {
+            $month = $vp->getMonth() < 10 ? '0'.$vp->getMonth() : $vp->getMonth();
+            $key = $vp->getYear().'-'.$month;
+            if( !array_key_exists($key, $periods) ){
+                $periods[$key] = [];
+            }
+            $vpKey = $vp->getObject();
+
+            $periods[$key][] = $vpKey;
+        }
+
+
+        /** @var WorkPackagePerson $workPackage */
+        foreach ($person->getWorkPackages() as $workPackage){
+            $bounds = $workPackage->getWorkPackage()->getActivity()->getPredictedPeriods();
+
+            if( $bounds['warnings'] ) {
+                $warnings[] = $bounds['warnings'];
+            }
+            else {
+                foreach ($bounds['periods'] as $period) {
+                    if( !array_key_exists($period, $periods) ){
+                        $periods[$period] = [];
+                    }
+                }
+            }
+        }
+
+        ksort($periods);
+
+        return $periods;
+    }
+
     /**
      * @param Activity $activity
      * @see ValidationPeriodRepository->getValidationPeriodsByActivityId
@@ -77,6 +136,31 @@ class ValidationPeriodRepository extends EntityRepository
             ->orderBy('vp.year, vp.month')
             ->getQuery()
             ->getResult();
+    }
+
+    public function getValidationPersonStats( Person $person ){
+        $validationsPeriodPerson = $this->createQueryBuilder('vp')
+            ->where('vp.declarer = :person')
+            ->setParameters(['person' => $person]);
+        $out = [
+            "wait" => 0,
+            "conflict" => 0,
+            "valid" => 0
+        ];
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ( $validationsPeriodPerson as $validationPeriod ){
+            if( $validationPeriod->getStatus() == ValidationPeriod::STATUS_CONFLICT ){
+                $out['conflict']++;
+            }
+            elseif( $validationPeriod->getStatus() == ValidationPeriod::STATUS_VALID ){
+                $out['valid']++;
+            }
+            else {
+                $out['wait']++;
+            }
+        }
+        return $out;
     }
 
     /**

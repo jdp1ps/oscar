@@ -932,6 +932,14 @@ class ValidationPeriod
         }
     }
 
+    public function getText(){
+        if( $this->getObjectGroup() == self::GROUP_WORKPACKAGE ){
+            return $this->getObject();
+        }
+        else {
+        }
+    }
+
     public function getFirstDayStr(){
         $month = $this->getMonth()<10 ? '0'.$this->getMonth() : $this->getMonth();
         return sprintf('%s-%s-01', $this->getYear(), $month);

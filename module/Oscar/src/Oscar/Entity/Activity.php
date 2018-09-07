@@ -980,6 +980,33 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * Retourne la liste des périodes sous la forme Y-m prévues pour l'activité.
+     *
+     * @return array
+     */
+    public function getPredictedPeriods(){
+        $out = [
+            'warnings' => null,
+            'periods' => [],
+        ];
+        if( !$this->getDateStart() || !$this->getDateEnd()){
+            $out['warnings'] = "Les dates de début et de fin de l'activité doivent être renseignée";
+        }
+
+        $date1 = $this->getDateStart()->format('Y-m-d');
+        $date2 = $this->getDateEnd()->format('Y-m-d');
+
+        $d1 = strtotime($date1);
+        $d2 = strtotime($date2);
+
+        while ($d1 <= $d2) {
+            $out['periods'][] = date('Y-m', $d1);
+            $d1 = strtotime("+1 month", $d1);
+        }
+        return $out;
+    }
+
+    /**
      * @param Discipline $discipline
      * @return bool
      */

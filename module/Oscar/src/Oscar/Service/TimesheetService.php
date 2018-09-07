@@ -970,6 +970,42 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $datas;
     }
 
+    /**
+     * Retourne la liste des déclarants
+     */
+    public function getDeclarersList(){
+
+        $persons = $this->getEntityManager()->createQueryBuilder()->select('p')
+            ->from(Person::class, 'p')
+            ->orderBy('p.lastname', 'ASC')
+            ->innerJoin('p.workPackages', 'wp');
+
+        $output = [];
+
+        /** @var ValidationPeriodRepository $validationsPeriodRepo */
+        $validationsPeriodRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
+
+        /** @var Person $person */
+        foreach ($persons->getQuery()->getResult() as $person){
+            $personData = $person->toJson();
+            $personData['workpackages'] = count($person->getWorkPackages());
+            $personData['validationsStats'] = $validationsPeriodRepo->getValidationPersonStats($person);
+            //$personData['predictedPeriods'] = $validationsPeriodRepo->getPredictedPeriods($person);
+            $personData['periods'] = $validationsPeriodRepo->getPredictedPeriodsPack($person);
+            $output[] = $personData;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Retourne les données sur les déclarations de la personne
+     */
+    public function getDeclarerDetails(Person $person){
+        throw new OscarException("PAS FAIT");
+    }
+
+
     public function getDeclarers(){
         // Récupération des IDS des déclarants
         $timesheets = $this->getTimesheetRepository()->getTimesheetsWithWorkPackage();

@@ -3879,6 +3879,7 @@ $oscar-line: dotted thin $colorGreyLight;
   justify-content: center;
 
   .overlay-content {
+    position: relative;
     width: 75%;
     margin: 100px auto;
     max-height: 80vh;
@@ -3888,8 +3889,21 @@ $oscar-line: dotted thin $colorGreyLight;
     border: thin solid #ddd;
     background: rgba(255,255,255,.9);
     box-shadow: 0 .7em 1em rgba(0,0,0,.15);
+
+    .overlay-closer {
+      cursor: pointer;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 32px;
+      color: $colorGreyLight;
+      &:hover {
+        color: $colorGreyBlack;
+      }
+    }
   }
 }
+
 
 .separator-bottom {
   padding-bottom: .3em;

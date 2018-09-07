@@ -71,6 +71,7 @@ requirejs.config({
         'TimesheetMonth' : 'oscar/dist/TimesheetMonth',
         'ValidationActivityVue' : 'oscar/dist/ValidationActivityVue',
         'ValidationPeriod' : 'oscar/dist/ValidationPeriod',
+        'DeclarersList' : 'oscar/dist/DeclarersList',
     },
     shim: {
         "bootstrap": {
