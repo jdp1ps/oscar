@@ -72,6 +72,7 @@ requirejs.config({
         'ValidationActivityVue' : 'oscar/dist/ValidationActivityVue',
         'ValidationPeriod' : 'oscar/dist/ValidationPeriod',
         'DeclarersList' : 'oscar/dist/DeclarersList',
+        'ImportIcalUI' : 'oscar/dist/ImportIcalUI',
     },
     shim: {
         "bootstrap": {

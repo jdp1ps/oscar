@@ -664,6 +664,10 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function importIcalAction(){
+        return [];
+    }
+
     /**
      * Retourne la liste des déclarants actifs
      */

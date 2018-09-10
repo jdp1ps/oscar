@@ -8096,6 +8096,7 @@ time.date-missing {
   align-items: center;
   justify-content: center; }
   .overlay .overlay-content {
+    position: relative;
     width: 75%;
     margin: 100px auto;
     max-height: 80vh;
@@ -8106,9 +8107,14 @@ time.date-missing {
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0.7em 1em rgba(0, 0, 0, 0.15); }
     .overlay .overlay-content .overlay-closer {
+      cursor: pointer;
       position: absolute;
-      top: 1em;
-      right: 1em; }
+      top: 16px;
+      right: 16px;
+      font-size: 32px;
+      color: #AAA; }
+      .overlay .overlay-content .overlay-closer:hover {
+        color: #222; }
 
 .separator-bottom {
   padding-bottom: .3em;

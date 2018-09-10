@@ -78,6 +78,12 @@ timesheet:
             controller: Timesheet
     may_terminate: false
     child_routes:
+        import_ical:
+            type: segment
+            options:
+                route: /import-ical
+                defaults:
+                    action: importIcal
         declarant:
             type: segment
             options:

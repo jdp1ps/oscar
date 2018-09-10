@@ -1,0 +1,49 @@
+<section class="container">
+    <div id="app"></div>
+</section>
+
+<script>
+    require(['vue', 'vue-resource', 'mm', 'ical', 'ImportIcalUI'], function(Vue, VueResource, moment, ICAL, ImportIcalUI) {
+
+
+        console.log("MOMENT", moment);
+
+        Vue.use(VueResource);
+
+        Vue.filter('month', function(v){
+            return moment(v).format('MMMM YYYY');
+        });
+
+        Vue.filter('formatDay', function(v){
+            return moment(v).format('D MMMM YYYY');
+        });
+
+        /** Retourne le durée en minute **/
+        Vue.filter('itemDuration', function(item){
+            let start = moment(item.start);
+            let end = moment(item.end);
+            return Math.floor( (end.unix() - start.unix()) /60);
+        })
+
+        Vue.filter('displayMinutes', function(duration){
+            let hours = Math.floor(duration / 60);
+            let minutes = duration % 60;
+            if( minutes < 10 ) minutes = '0'+minutes;
+            return hours +":" +minutes;
+        });
+
+
+        new Vue({
+            el: '#app',
+            render(h){
+                return h(ImportIcalUI.default, {
+                    props: {
+                        ICAL: window.ICAL,
+                        moment: moment
+                    }
+                });
+            }
+        })
+
+    });
+</script>
