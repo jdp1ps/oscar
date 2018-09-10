@@ -106,13 +106,26 @@
                         };
                     }
 
-
-
                     out[period].days[day].timesheets.push(item);
                     out[period].total += total;
                     out[period].days[day].total += total;
                 });
-                return out;
+
+                let output = {};
+                // Sort
+                Object.keys(out)
+                    .sort()
+                    .forEach(function(v, i) {
+                        output[v] = out[v];
+                        let sortedDays = {};
+                        Object.keys(output[v].days)
+                            .sort()
+                            .forEach( dv  => {
+                                sortedDays[dv] = output[v].days[dv];
+                            });
+                        out[v].days = sortedDays;
+                    });
+                return output;
             }
         },
 
