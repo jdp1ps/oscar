@@ -32,6 +32,11 @@
             return hours +":" +minutes;
         });
 
+        // TODO transmettre à la vue les correspondances
+        var associations = {
+
+        };
+
 
         new Vue({
             el: '#app',
@@ -40,6 +45,7 @@
                     props: {
                         ICAL: window.ICAL,
                         moment: moment
+
                     }
                 });
             }

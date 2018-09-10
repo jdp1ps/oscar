@@ -12,7 +12,7 @@
                 <section v-for="p in byPeriod">
                     <h2>
                         <i class="icon-calendar"></i> {{ p.label }}
-                        <a href="#" class="btn xs" @click.prevent="handlerRemovePeriod(p.code)">Retirer</a>
+                        <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerRemovePeriod(p.code)"><i class="icon-trash"></i>Retirer</a>
                     </h2>
                     <article v-for="d in p.days" class="day">
                         <strong class="dayLabel">{{ d.label }}</strong>
@@ -25,9 +25,10 @@
             </div>
             <div class="col-md-4">
                 <h2>Intitulés et correspondance</h2>
+                <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter">
                 <div v-for="label in labels">
                     <i class="icon-tag"></i> {{ label }}
-                    <a href="#" class="btn xs" @click.prevent="handlerRemoveLabel(label)">Retirer</a>
+                    <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerRemoveLabel(label)"><i class="icon-trash"></i> Retirer</a>
                 </div>
             </div>
         </div>
@@ -50,7 +51,8 @@
             return {
                 selectedFile: null,
                 daysString: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
-                timesheets: []
+                timesheets: [],
+                labelFilter: ""
             }
         },
 
@@ -63,6 +65,7 @@
             labels(){
                 let labels = [];
                 this.timesheets.forEach( item => {
+                    if( this.labelFilter != "" && item.label.toLowerCase().indexOf(this.labelFilter.toLowerCase()) < 0 ) return;
                     if (labels.indexOf(item.label) < 0) {
                         labels.push(item.label);
                     }
