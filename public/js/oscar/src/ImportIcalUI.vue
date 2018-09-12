@@ -2,9 +2,9 @@
     <section class="oscar-ui import-ical">
         <h1>Imporation de calendrier</h1>
 
+        <pre>periodStart: {{ periodStart }}</pre>
+        <periodselector v-model="periodStart" />
         <input type="file" @change="handlerFileSelected">
-
-
 
         <div class="row">
             <div class="col-md-8">
@@ -52,8 +52,13 @@
                 selectedFile: null,
                 daysString: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
                 timesheets: [],
-                labelFilter: ""
+                labelFilter: "",
+                periodStart: "2018-05"
             }
+        },
+
+        components: {
+            'periodselector': require('./PeriodSelector.vue').default
         },
 
         props: {
