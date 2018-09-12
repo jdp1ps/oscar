@@ -2,14 +2,13 @@
     <span class="period-selector" :class="{ 'open': showYear || showMonth }" @mouseleave="handlerMouseLeave">
         <span class="visualizer" @click.prevent.stop="handlerToggleSelector">
             <i class="icon-calendar"></i>
-            <span class="month">
-                {{ displayedMonth }}
-            </span>
-            <span class="year">
-                {{ displayedYear }}
+            <span>
+                {{ displayedValue }}
             </span>
             <i class="icon-angle-down"></i>
         </span>
+
+
         <span class="selector selector-year" v-if="showYear">
             <span class="scroll-left scroll" @click.prevent.stop="setDefileYear(-1)">
                 <i class="icon-angle-left"></i>
@@ -18,16 +17,22 @@
                 <span v-for="y in selectableYear" @click.prevent.stop="handlerSelectYear(y)" :class="{ 'selected': y == selectedYear }">
                     {{ y }}
                 </span>
+                <nav class="selector-options">
+                    <a class="selector-option" @click="cleanUp">Vider</a>
+                    <a class="selector-option" @click="today">Période en cours</a>
+                </nav>
             </span>
             <span class="scroll-right scroll" @click.prevent.stop="setDefileYear(1)">
                 <i class="icon-angle-right"></i>
             </span>
         </span>
+
         <span class="selector selector-month" v-if="showMonth">
             <span class="selector-content">
                 <span v-for="m,i in selectableMonths" @click.prevent.stop="handlerSelectMonth(i)" :class="{ 'selected': i == selectedMonth-1 }">
                     {{ m }}
                 </span>
+                <nav class="selector-option">OPTIONS</nav>
             </span>
         </span>
     </span>
@@ -82,10 +87,18 @@
     }
     .selector .scroll {
         display: flex;
-        padding: 0 1em;
+        padding: 0 .5em;
         cursor: pointer;
         align-items: center;
     }
+
+    .scroll-left {
+        border-right: thin solid #8f97a0;
+    }
+    .scroll-right {
+        border-left: thin solid #8f97a0;
+    }
+
     .selector .scroll:hover {
         background: #5c9ccc;
     }
@@ -109,6 +122,26 @@
         color: white;
         text-shadow: -1px 1px 1px rgba(255,255,255,.5);
     }
+
+    .selector-options {
+        flex: 1 1 auto;
+        display: flex;
+        border-top: thin solid #8f97a0;
+    }
+    .selector-option {
+        flex: 1;
+        text-align: center;
+        padding: .5em;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .selector-option:hover {
+        background: #5c9ccc;
+        cursor: pointer;
+    }
+    .selector-option:first-child {
+        border-right: solid red thin;
+    }
 </style>
 
 <script>
@@ -131,7 +164,7 @@
               showYearSelector: false,
               showMonthSelector: false,
               showMonth: false,
-              showYear: false,
+              showYear: true,
               defileYear : null
           }
         },
@@ -160,6 +193,19 @@
                 } else {
                     let extract = this.period.match(regex);
                     return extract.length == 3 ? extract[1] : "INVALID";
+                }
+            },
+
+            displayedValue(){
+                if( !this.period ){
+                    return "Indéfini";
+                } else {
+                    let extract = this.period.match(regex);
+                    if( extract.length == 3 ){
+                        return this.months[parseInt(extract[2])-1] + " " + extract[1];
+                    } else {
+                        return "INVALID!";
+                    }
                 }
             },
 
@@ -204,6 +250,15 @@
             hideSelector(){
                 this.showYear = false;
                 this.showMonth = false;
+            },
+
+            cleanUp(){
+              this.$emit('change', "");
+            },
+
+            today(){
+                let now = new Date();
+                this.$emit('change', now.getFullYear()+'-'+now.getMonth());
             },
 
             setDefileYear(direction){
