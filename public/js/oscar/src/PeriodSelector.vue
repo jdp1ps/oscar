@@ -10,14 +10,24 @@
             </span>
             <i class="icon-angle-down"></i>
         </span>
-        <span class="selector selector-year" v-if="showMonth">
-            <span v-for="y in selectableYear" @click.prevent.stop="handlerSelectYear(y)" :class="{ 'selected': y == selectedYear }">
-                {{ y }}
+        <span class="selector selector-year" v-if="showYear">
+            <span class="scroll-left scroll" @click.prevent.stop="setDefileYear(-1)">
+                <i class="icon-angle-left"></i>
+            </span>
+            <span class="selector-content">
+                <span v-for="y in selectableYear" @click.prevent.stop="handlerSelectYear(y)" :class="{ 'selected': y == selectedYear }">
+                    {{ y }}
+                </span>
+            </span>
+            <span class="scroll-right scroll" @click.prevent.stop="setDefileYear(1)">
+                <i class="icon-angle-right"></i>
             </span>
         </span>
-        <span class="selector selector-month" v-if="showYear">
-            <span v-for="m,i in selectableMonths" @click.prevent.stop="handlerSelectMonth(i)" :class="{ 'selected': i == selectedMonth }">
-                {{ m }}
+        <span class="selector selector-month" v-if="showMonth">
+            <span class="selector-content">
+                <span v-for="m,i in selectableMonths" @click.prevent.stop="handlerSelectMonth(i)" :class="{ 'selected': i == selectedMonth-1 }">
+                    {{ m }}
+                </span>
             </span>
         </span>
     </span>
@@ -43,7 +53,8 @@
         line-height: 1.6em;
         display: inline-flex;
         flex-align: center;
-justify-content: center;    }
+        justify-content: center;
+    }
 
     .visualizer:hover {
         background: #5c9ccc;
@@ -58,28 +69,42 @@ justify-content: center;    }
 
     .selector {
         z-index: 10;
-        width: 30em;
-        height: 6em;
+        min-width: 30em;
+        min-height: 6em;
         position: absolute;
         display: flex;
-        flex-direction: row;
-        flex-flow: wrap;
         background: white;
         box-shadow: 0 .5em .3em rgba(0,0,0,.3);
         border: solid thin #8f97a0;
         margin-top: -1px;
+        align-items: stretch;
+        justify-content: center;
     }
-    .selector span {
+    .selector .scroll {
+        display: flex;
+        padding: 0 1em;
+        cursor: pointer;
+        align-items: center;
+    }
+    .selector .scroll:hover {
+        background: #5c9ccc;
+    }
+    .selector-content {
+        display: flex;
+        flex-direction: row;
+        flex-flow: wrap;
+    }
+    .selector-content span {
         flex: 0 0 25%;
         background: rgba(255,255,255,.5);
-        padding: 4px;
+        padding: 1em;
         text-align: center;
     }
-    .selector span:hover {
+    .selector-content span:hover {
         background: #5c9ccc;
         cursor: pointer;
     }
-    .selector span.selected {
+    .selector-content span.selected {
         background: #5c9ccc;
         color: white;
         text-shadow: -1px 1px 1px rgba(255,255,255,.5);
@@ -106,7 +131,8 @@ justify-content: center;    }
               showYearSelector: false,
               showMonthSelector: false,
               showMonth: false,
-              showYear: false
+              showYear: false,
+              defileYear : null
           }
         },
 
@@ -139,7 +165,9 @@ justify-content: center;    }
 
             selectableYear(){
                 let middleYear = (new Date()).getFullYear();
-                if( this.selectedYear ){
+                if( this.defileYear ){
+                    middleYear = this.defileYear;
+                } else if( this.selectedYear ){
                     middleYear = this.selectedYear;
                 }
                 return this.yearAround(middleYear);
@@ -152,20 +180,18 @@ justify-content: center;    }
 
         methods: {
             handlerMouseLeave(){
-                console.log("MouseLeave");
                 this.hideSelector();
             },
 
             handlerToggleSelector(){
-                console.log('TOTO');
-               this.showMonth = !this.showMonth;
-               this.showYear = false;
+               this.showYear = !this.showYear;
+               this.showMonth = false;
             },
 
             handlerSelectYear(year){
                 this.selectedYear = year;
-                this.showMonth = false;
-                this.showYear = true;
+                this.showMonth = true;
+                this.showYear = false;
             },
 
             handlerSelectMonth(month){
@@ -180,8 +206,20 @@ justify-content: center;    }
                 this.showMonth = false;
             },
 
+            setDefileYear(direction){
+                var base;
+                if( direction == 1 ){
+                    base = this.selectableYear[this.selectableYear.length-1];
+                    base += this.selectableYear.length/2;
+                } else {
+                    base = this.selectableYear[0];
+                    base -= this.selectableYear.length/2;
+                }
+                this.defileYear = base;
+
+            },
+
             yearAround(year){
-                console.log("Affichage des années autour de ", year);
                 let years = [];
                 for( let i = year-6; i < year+6; i++ ){
                     years.push(i);
@@ -194,7 +232,7 @@ justify-content: center;    }
         mounted(){
             if( window )
                 window.addEventListener('click', e => {
-                    this.showMonth = this.showYear = false;
+                    this.hideSelector();
                 })
         }
     }
