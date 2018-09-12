@@ -1,7 +1,7 @@
 <template>
-    <span class="period-selector" :class="{ 'open': showYear || showMonth }">
-        <pre>pre: {{ period }}</pre>
+    <span class="period-selector" :class="{ 'open': showYear || showMonth }" @mouseleave="handlerMouseLeave">
         <span class="visualizer" @click.prevent.stop="handlerToggleSelector">
+            <i class="icon-calendar"></i>
             <span class="month">
                 {{ displayedMonth }}
             </span>
@@ -40,7 +40,10 @@
     .open .visualizer {
         border-radius: 4px 4px 0 0;
         border-bottom: none;
-    }
+        line-height: 1.6em;
+        display: inline-flex;
+        flex-align: center;
+justify-content: center;    }
 
     .visualizer:hover {
         background: #5c9ccc;
@@ -110,21 +113,28 @@
         props: {
             value: { default: ""},
             months: { default: function(){ return ["Janvier", 'Février', "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"] } },
-            period: { default: null }
+            period: { default: null, required: true }
         },
 
         computed: {
             displayedMonth(){
-                console.log(regex.exec(this.period));
-                return "MOIS";
-                /*if( this.selectedMonth == null )
+                if( !this.period ){
                     return "MOIS";
-                return this.months[this.selectedMonth];
-                */
+                } else {
+                    let extract = this.period.match(regex);
+                    let indexMois =  extract.length == 3 ? parseInt(extract[2])-1 : "INVALID";
+                    console.log(indexMois);
+                    return extract.length == 3 ? this.months[parseInt(extract[2])-1] : "INVALID";
+                }
             },
 
             displayedYear(){
-                return "ANNÉE";
+                if( !this.period ){
+                    return "ANNÉE";
+                } else {
+                    let extract = this.period.match(regex);
+                    return extract.length == 3 ? extract[1] : "INVALID";
+                }
             },
 
             selectableYear(){
@@ -141,6 +151,11 @@
         },
 
         methods: {
+            handlerMouseLeave(){
+                console.log("MouseLeave");
+                this.hideSelector();
+            },
+
             handlerToggleSelector(){
                 console.log('TOTO');
                this.showMonth = !this.showMonth;
@@ -154,10 +169,15 @@
             },
 
             handlerSelectMonth(month){
-                this.selectedMonth = month;
+                this.selectedMonth = month + 1;
+                let periodEmit = (this.selectedMonth && this.selectedYear) ? this.selectedYear+'-'+this.selectedMonth : null;
+                this.hideSelector();
+                this.$emit('change', periodEmit);
+            },
+
+            hideSelector(){
                 this.showYear = false;
-                // this.period = (this.selectedMonth && this.selectedYear) ? this.selectedYear+'-'+this.selectedMonth : null;
-                this.trigger('change', this.period);
+                this.showMonth = false;
             },
 
             yearAround(year){

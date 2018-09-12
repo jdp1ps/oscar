@@ -2,9 +2,24 @@
     <section class="oscar-ui import-ical">
         <h1>Imporation de calendrier</h1>
 
-        <pre>periodStart: {{ periodStart }}</pre>
-        <periodselector v-model="periodStart" />
-        <input type="file" @change="handlerFileSelected">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Critères d'importation</h3>
+                <p>Vous pouvez choisir la limite d'importation entre 2 périodes (inclus)</p>
+                <div>
+                    Période de <periodselector :period="periodStart" @change="periodStart = $event" />
+                    à <periodselector :period="periodEnd" @change="periodEnd = $event" />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h3>Fichier ICS (Format ICAL)</h3>
+                <input type="file" @change="handlerFileSelected">
+            </div>
+        </div>
+
+
+
 
         <div class="row">
             <div class="col-md-8">
@@ -53,7 +68,8 @@
                 daysString: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
                 timesheets: [],
                 labelFilter: "",
-                periodStart: "2018-05"
+                periodStart: "",
+                periodEnd: ""
             }
         },
 
@@ -140,6 +156,10 @@
 
 
         methods: {
+
+            test(){
+              console.log(arguments);
+            },
 
             /**
              * Supprime les créneaux de la période.
