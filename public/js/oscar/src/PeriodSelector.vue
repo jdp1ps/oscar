@@ -1,5 +1,6 @@
 <template>
     <span class="period-selector" :class="{ 'open': showYear || showMonth }" @mouseleave="handlerMouseLeave">
+
         <span class="visualizer" @click.prevent.stop="handlerToggleSelector">
             <i class="icon-calendar"></i>
             <span>
@@ -14,7 +15,7 @@
                 <i class="icon-angle-left"></i>
             </span>
             <span class="selector-content">
-                <span v-for="y in selectableYear" @click.prevent.stop="handlerSelectYear(y)" :class="{ 'selected': y == selectedYear }">
+                <span v-for="y in selectableYear" @click.prevent.stop="handlerSelectYear(y)" :class="{ 'selected': y == selectedYear, 'disabled': y > maxYear || y < minYear }">
                     {{ y }}
                 </span>
                 <nav class="selector-options">
@@ -29,10 +30,13 @@
 
         <span class="selector selector-month" v-if="showMonth">
             <span class="selector-content">
-                <span v-for="m,i in selectableMonths" @click.prevent.stop="handlerSelectMonth(i)" :class="{ 'selected': i == selectedMonth-1 }">
+                <span v-for="m,i in selectableMonths" @click.prevent.stop="handlerSelectMonth(i)" :class="{ 'selected': i == selectedMonth-1, 'disabled': i > maxMonth || i < minMonth  }">
                     {{ m }}
                 </span>
-                <nav class="selector-option">OPTIONS</nav>
+                <nav class="selector-options">
+                    <a class="selector-option" @click="cleanUp">Vider</a>
+                    <a class="selector-option" @click="today">Période en cours</a>
+                </nav>
             </span>
         </span>
     </span>
@@ -117,6 +121,11 @@
         background: #5c9ccc;
         cursor: pointer;
     }
+    .selector-content span.disabled {
+        background: url(/css/bg.gif) #efefef;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
     .selector-content span.selected {
         background: #5c9ccc;
         color: white;
@@ -164,7 +173,7 @@
               showYearSelector: false,
               showMonthSelector: false,
               showMonth: false,
-              showYear: true,
+              showYear: false,
               defileYear : null
           }
         },
@@ -172,7 +181,9 @@
         props: {
             value: { default: ""},
             months: { default: function(){ return ["Janvier", 'Février', "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"] } },
-            period: { default: null, required: true }
+            period: { default: null, required: true },
+            max: { default: null },
+            min: { default: null },
         },
 
         computed: {
@@ -182,7 +193,6 @@
                 } else {
                     let extract = this.period.match(regex);
                     let indexMois =  extract.length == 3 ? parseInt(extract[2])-1 : "INVALID";
-                    console.log(indexMois);
                     return extract.length == 3 ? this.months[parseInt(extract[2])-1] : "INVALID";
                 }
             },
@@ -219,6 +229,60 @@
                 return this.yearAround(middleYear);
             },
 
+            maxYear(){
+                if( this.max ){
+                    let extract = this.max.match(regex);
+                    if( extract.length != 3 ) return Number.MAX_SAFE_INTEGER;
+                    let year = parseInt(extract[1]);
+                    let month = parseInt(extract[2]);
+                    if( month == 1 ){
+                        year -= 1;
+                    }
+
+                    return year;
+                }
+                return Number.MAX_SAFE_INTEGER;
+            },
+
+            maxMonth(){
+                if( this.max ){
+                    if( this.selectedYear == this.maxYear ){
+                        let extract = this.max.match(regex);
+                        let year = extract[1];
+                        let month = extract[2];
+                        if( this.maxYear+1 == year ){
+                           return 13;
+                        }
+                        return extract.length == 3 ? extract[2]-2 : 13;
+                    }
+                }
+                return 13;
+            },
+
+            minYear(){
+                if( this.min ){
+                    let extract = this.min.match(regex);
+                    let year = parseInt(extract[1]);
+                    let month = parseInt(extract[2]);
+                    if( month == 12 ){
+                        year += 1;
+                    }
+                    return year;
+                }
+                return Number.MIN_SAFE_INTEGER;
+            },
+
+            minMonth(){
+                if( this.min ){
+                    let extract = this.min.match(regex);
+                    let year = parseInt(extract[1]);
+                    let month = parseInt(extract[2]);
+                    if( this.selectedYear > year ) return -1;
+                    return month;
+                }
+                return -1;
+            },
+
             selectableMonths(){
                 return this.months;
             }
@@ -241,10 +305,17 @@
             },
 
             handlerSelectMonth(month){
-                this.selectedMonth = month + 1;
-                let periodEmit = (this.selectedMonth && this.selectedYear) ? this.selectedYear+'-'+this.selectedMonth : null;
+
+                this.selectedMonth = month + 1; // Up (début d'index à 0)
+                let value = null;
+                if( this.selectedMonth && this.selectedYear ){
+                    let year = this.selectedYear;
+                    let month = this.selectedMonth < 10 ? '0'+this.selectedMonth : this.selectedMonth;
+                    value = year+'-'+month;
+
+                }
                 this.hideSelector();
-                this.$emit('change', periodEmit);
+                this.$emit('change', value);
             },
 
             hideSelector(){
@@ -279,7 +350,6 @@
                 for( let i = year-6; i < year+6; i++ ){
                     years.push(i);
                 }
-                console.log(years);
                 return years;
             }
         },
