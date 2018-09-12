@@ -2,13 +2,20 @@
     <section class="oscar-ui import-ical">
         <h1>Imporation de calendrier</h1>
 
+        <div class="overlay" v-if="debug">
+            <div class="overlay-content">
+                <a href="#" @click="debug = null">CLOSE</a>
+                <pre>{{ debug }}</pre>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-6">
                 <h3>Critères d'importation</h3>
                 <p>Vous pouvez choisir la limite d'importation entre 2 périodes (inclus)</p>
                 <div>
-                    Période de <periodselector :period="periodStart" @change="periodStart = $event" />
-                    à <periodselector :period="periodEnd" @change="periodEnd = $event" />
+                    Période de <periodselector :period="periodStart" :max="periodEnd" @change="periodStart = $event" />
+                    à <periodselector :period="periodEnd" :min="periodStart" @change="periodEnd = $event" />
                 </div>
             </div>
 
@@ -17,9 +24,6 @@
                 <input type="file" @change="handlerFileSelected">
             </div>
         </div>
-
-
-
 
         <div class="row">
             <div class="col-md-8">
@@ -30,7 +34,7 @@
                         <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerRemovePeriod(p.code)"><i class="icon-trash"></i>Retirer</a>
                     </h2>
                     <article v-for="d in p.days" class="day">
-                        <strong class="dayLabel">{{ d.label }}</strong>
+                        <strong class="dayLabel" @click="debug = d">{{ d.label }}</strong>
                         <span v-for="t in d.timesheets">
                             {{ t.label }} ({{ t | itemDuration }} min)
                         </span>
@@ -69,7 +73,8 @@
                 timesheets: [],
                 labelFilter: "",
                 periodStart: "",
-                periodEnd: ""
+                periodEnd: "",
+                debug: null
             }
         },
 
@@ -79,7 +84,8 @@
 
         props: {
             ICAL: { required: true },
-            moment: { required: true }
+            moment: { required: true },
+            dayLength: { required: true }
         },
 
         computed: {
@@ -282,36 +288,18 @@
                             exceptions = exceptions.concat(this.generateItem(item));
                         }
                         else if (item.daily == "allday") {
-                            var itemStart = moment(item.start);
-                            if (this.dailyStrategy) {
-                                this.dailyStrategy.forEach((copy) => {
-                                    var startHourStr = copy.startTime.split(':');
-                                    var startHour = parseInt(startHourStr[0]);
-                                    var startMinute = parseInt(startHourStr[1]);
-                                    var endHourStr = copy.endTime.split(':');
-                                    var endHour = parseInt(endHourStr[0]);
-                                    var endMinute = parseInt(endHourStr[1]);
-                                    var event = {
-                                        uid: item.uid,
-                                        icsuid: item.icsuid,
-                                        icsfileuid: item.icsfileuid,
-                                        icsfilename: item.icsfilename,
-                                        icsfiledateadded: item.icsfiledateadded,
-                                        daily: "allday",
-                                        label: item.label,
-                                        summary: item.label,
-                                        description: item.description,
-                                        email: item.email,
-                                        start: itemStart.hours(startHour).minutes(startMinute).format(),
-                                        end: itemStart.hours(endHour).minutes(endMinute).format()
-                                    };
-                                    if (rrule) {
-                                        out = out.concat(this.repeat(event, rrule, exdate));
-                                    } else {
-                                        out = out.concat(this.generateItem(event));
-                                    }
-                                })
+                            console.log(item);
+                            let start = this.moment(item.start);
+                            let end = start.add(this.dayLength, 'hours');
+                            item.end = end.format();
+
+                            if (rrule) {
+                                out = out.concat(this.repeat(item, rrule, exdate));
+                            } else {
+                                out = out.concat(this.generateItem(item));
                             }
+
+                            // On va forcer les date de l'item
                         } else {
                             if (rrule) {
                                 out = out.concat(this.repeat(item, rrule, exdate));
@@ -322,7 +310,18 @@
                     }
                 });
 
-                this.timesheets = out;
+                // Exclusion
+                let result = [];
+
+                out.forEach(item => {
+                    if( this. periodStart && item.periodCode < this.periodStart ) return;
+                    if( this. periodEnd && item.periodCode > this.periodEnd ) return;
+                    result.push(item);
+                })
+
+                this.timesheets = result;
+
+
             },
 
             generateItem(item) {
