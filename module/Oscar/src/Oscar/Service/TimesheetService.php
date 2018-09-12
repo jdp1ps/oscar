@@ -899,6 +899,58 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $result;
     }
 
+    public function getPersonPeriods( Person $person ){
+        // Périodes
+        $periods = $this->getValidationPeriodRepository()->getValidationPeriodsPersonQuery($person->getId())->getQuery()->getResult();
+        $out = [];
+
+        /** @var ValidationPeriod $period */
+        foreach ($periods as $period) {
+
+            $key = $period->getYear().'-'.($period->getMonth()<10 ? '0'.$period->getMonth() : $period->getMonth());
+
+            if( !array_key_exists($key, $out) ){
+                $out[$key] = [
+                    'periodCode' => $key,
+                    'hasValidation' => true,
+                    'days' => []
+                ];
+            }
+        }
+
+        $timesheets = $query = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.person = :person')
+            ->setParameter('person', $person)
+            ->getQuery()
+            ->getResult();
+
+        /** @var TimeSheet $timesheet */
+        foreach ($timesheets as $timesheet) {
+
+            $key = $timesheet->getDateFrom()->format('Y-m');
+            $keyDay = $timesheet->getDateFrom()->format('Y-m-d');
+
+            if( !array_key_exists($key, $out) ){
+                $out[$key] = [
+                    'periodCode' => $key,
+                    'hasValidation' => false,
+                    'days' => []
+                ];
+            }
+
+            if( !array_key_exists($keyDay, $out[$key]['days']) ){
+                $out[$key]['days'][$keyDay] = 0.0;
+            }
+
+            $out[$key]['days'][$keyDay] += $timesheet->getDuration();
+
+
+        }
+
+        return $out;
+    }
+
 
 
     /**

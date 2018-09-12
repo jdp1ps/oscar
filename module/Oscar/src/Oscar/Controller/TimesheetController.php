@@ -665,7 +665,13 @@ class TimesheetController extends AbstractOscarController
     }
 
     public function importIcalAction(){
-        return [];
+
+        // Liste des types de créneau valide
+        $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson());
+
+        return [
+            'exists' => $resume
+        ];
     }
 
     /**

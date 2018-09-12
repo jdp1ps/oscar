@@ -33,10 +33,19 @@
                         <i class="icon-calendar"></i> {{ p.label }}
                         <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerRemovePeriod(p.code)"><i class="icon-trash"></i>Retirer</a>
                     </h2>
+                    <div class="alert alert-danger" v-if="exists[p.code].hasValidation">
+                        Vous avez déjà soumis cette période à validation
+                    </div>
                     <article v-for="d in p.days" class="day">
-                        <strong class="dayLabel" @click="debug = d">{{ d.label }}</strong>
+                        <div class="alert" v-if="exists[p.code] && exists[p.code][d.code]">
+                            EXIST !
+                        </div>
+                        <strong class="dayLabel" @click="debug = d">{{ d.label }} ({{ d.code }})</strong>
                         <span v-for="t in d.timesheets">
                             {{ t.label }} ({{ t | itemDuration }} min)
+                        </span>
+                        <span>
+                            0.0
                         </span>
                         <strong class="dayTotal">{{ d.total | displayMinutes }}</strong>
                     </article>
@@ -85,7 +94,8 @@
         props: {
             ICAL: { required: true },
             moment: { required: true },
-            dayLength: { required: true }
+            dayLength: { required: true },
+            exists: { default: {} }
         },
 
         computed: {

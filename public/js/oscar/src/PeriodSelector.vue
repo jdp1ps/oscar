@@ -77,7 +77,7 @@
     .period-selector .visualizer { display: inline-flex; }
 
     .selector {
-        z-index: 10;
+        z-index: 1;
         min-width: 30em;
         min-height: 6em;
         position: absolute;
