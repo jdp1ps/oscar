@@ -34,7 +34,6 @@
 
         };
 
-
         new Vue({
             el: '#app',
             render(h){
@@ -43,7 +42,8 @@
                         ICAL: window.ICAL,
                         moment: moment,
                         dayLength: 7.5,
-                        exists: <?= json_encode($exists) ?>
+                        exists: <?= json_encode($exists) ?>,
+                        correspondances: <?= json_encode($correspondances) ?>
 
                     }
                 });

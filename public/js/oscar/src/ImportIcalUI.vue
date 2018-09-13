@@ -2,6 +2,7 @@
     <section class="oscar-ui import-ical">
         <h1>Imporation de calendrier</h1>
 
+
         <div class="overlay" v-if="debug">
             <div class="overlay-content">
                 <a href="#" @click="debug = null">CLOSE</a>
@@ -25,31 +26,78 @@
             </div>
         </div>
 
+        <!--
         <div class="row">
+            <div class="col-md-6">
+                <pre>{{ correspondances }}</pre></div>
+
+            <div class="col-md-6">
+                <pre>{{ labelsCorrespondance }}</pre></div>
+        </div>
+-->
+        <div v-if="timesheets == null">
+            &nbsp;
+        </div>
+
+        <div v-else-if="timesheets.length == 0">
+            <div class="alert alert-info">
+                Aucun créneau chargé depuis le fichier ICS
+            </div>
+        </div>
+        <div class="row" v-else>
             <div class="col-md-8">
-                <h2>Créneaux trouvés</h2>
-                <section v-for="p in byPeriod">
-                    <h2>
-                        <i class="icon-calendar"></i> {{ p.label }}
-                        <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerRemovePeriod(p.code)"><i class="icon-trash"></i>Retirer</a>
-                    </h2>
-                    <div class="alert alert-danger" v-if="exists[p.code].hasValidation">
-                        Vous avez déjà soumis cette période à validation
-                    </div>
-                    <article v-for="d in p.days" class="day">
-                        <div class="alert" v-if="exists[p.code] && exists[p.code][d.code]">
-                            EXIST !
-                        </div>
-                        <strong class="dayLabel" @click="debug = d">{{ d.label }} ({{ d.code }})</strong>
-                        <span v-for="t in d.timesheets">
-                            {{ t.label }} ({{ t | itemDuration }} min)
-                        </span>
-                        <span>
-                            0.0
-                        </span>
-                        <strong class="dayTotal">{{ d.total | displayMinutes }}</strong>
-                    </article>
-                </section>
+                <h2 @click="debug = exists">Créneaux trouvés</h2>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Jours</th>
+                            <th>Créneaux</th>
+                            <th>Importables</th>
+                            <th>Existant</th>
+                            <th>TOTAL</th>
+                        </tr>
+                    </thead>
+
+                    <tbody v-for="p in byPeriod" class="period">
+                        <tr class="month-heading">
+                            <th colspan="6">
+                                <i class="icon-calendar"></i>
+                                {{ p.label }}
+                                <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerRemovePeriod(p.code)"><i class="icon-trash"></i>Retirer</a>
+                                <span class="alert alert-danger" colspan="4" v-if="exists[p.code] && exists[p.code].hasValidation">
+                                    Vous avez déjà soumis cette période à validation
+                                </span>
+                            </th>
+                        </tr>
+
+                        <tr v-for="d in p.days">
+                            <th>&nbsp;</th>
+                            <th @click="debug = d">{{ d.label }}</th>
+                            <td>
+                                <div v-for="t in d.timesheets" :class="{ 'ignored': !t.importable }">
+                                    <i class="icon-calendar"></i>{{ t.label }} ({{ t | itemDuration }} min)
+                                    <span v-if="t.destinationLabel" class="cartouche xs">
+                                        <i class="icon-cube" v-if="t.destinationCode == 'wp'"></i>
+                                        <i class="icon-link-ext" v-else></i>
+                                        {{ t.destinationLabel }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <strong>{{ d.totalImport | displayMinutes }}</strong>
+                            </td>
+
+                            <td>
+                                <em v-if="d.exists > 0.0">{{ d.exists | displayMinutes }}</em>
+                                <em v-else>~</em>
+                            </td>
+                            <td>{{ d.total | displayMinutes }}</td>
+
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="col-md-4">
                 <h2>Intitulés et correspondance</h2>
@@ -60,30 +108,40 @@
                 </div>
             </div>
         </div>
-
-
-        <!--
-        <section class="timesheets">
-            <article class="card card-xs xs" v-for="timesheet in timesheets">
-                <h3 class="card-title">{{ timesheet.summary }} - {{ timesheet.dateStart | formatDay }}</h3>
-                <p class="small">{{ timesheet.description }}</p>
-            </article>
-        </section>
-        -->
     </section>
 </template>
+<style>
+    .period {
+        background: white;
+
+    }
+    .ignored {
+        font-style: italic;
+        text-decoration: line-through;
+        color: #777;
+    }
+    .month-heading{
+        background: #5c9ccc;
+        color: white;
+        text-shadow: -1px 1px 0 rgba(0,0,0,.3);
+        border-top: 1em rgba(255,255,255,0) solid;
+    }
+</style>
 <script>
     // poi watch --format umd --moduleName  ImportIcalUI --filename.css ImportIcalUI.css --filename.js ImportIcalUI.js --dist public/js/oscar/dist public/js/oscar/src/ImportIcalUI.vue
+
+
     export default {
         data(){
             return {
                 selectedFile: null,
                 daysString: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
-                timesheets: [],
+                timesheets: null,
                 labelFilter: "",
-                periodStart: "",
-                periodEnd: "",
-                debug: null
+                periodStart: "2018-06",
+                periodEnd: "2018-12",
+                debug: null,
+                labelsCorrespondance: {}
             }
         },
 
@@ -95,76 +153,101 @@
             ICAL: { required: true },
             moment: { required: true },
             dayLength: { required: true },
-            exists: { default: {} }
+            exists: { default: {} },
+            correspondances: { required: true }
         },
 
         computed: {
             labels(){
                 let labels = [];
-                this.timesheets.forEach( item => {
-                    if( this.labelFilter != "" && item.label.toLowerCase().indexOf(this.labelFilter.toLowerCase()) < 0 ) return;
-                    if (labels.indexOf(item.label) < 0) {
-                        labels.push(item.label);
-                    }
-                });
+                if( this.timesheets ){
+                    this.timesheets.forEach( item => {
+                        if( this.labelFilter != "" && item.label.toLowerCase().indexOf(this.labelFilter.toLowerCase()) < 0 ) return;
+                        if (labels.indexOf(item.label) < 0) {
+                            labels.push(item.label);
+                        }
+                    });
+                    labels.sort();
+                }
 
-                labels.sort();
                 return labels;
             },
 
             /** Retourne les créneaux organisés par périodes MOIS-ANNEE > JOUR */
             byPeriod(){
-                let out = {};
+                let out = {}, output = {};
 
-                this.timesheets.forEach( item => {
 
-                    let m = this.moment(item.start);
-                    let e = this.moment(item.end);
-                    let total = Math.floor((e.unix() - m.unix())/60);
-                    let period = m.format('YYYY-MM');
-                    let periodLabel = m.format('MMMM YYYY');
-                    let day = m.format('YYYY-MM-DD');
-                    let dayLabel = m.format('dddd DD');
+                if( this.timesheets ) {
 
-                    if( !out.hasOwnProperty(period) ) {
-                        out[period] = {
-                            period: period,
-                            code: period,
-                            label: periodLabel,
-                            days: {},
-                            total: 0.0
-                        };
-                    }
+                    this.timesheets.forEach(item => {
 
-                    if( !out[period].days.hasOwnProperty(day) ) {
-                        out[period].days[day] = {
-                            day: day,
-                            code: day,
-                            label: dayLabel,
-                            timesheets: [],
-                            total: 0.0
-                        };
-                    }
+                        let m = this.moment(item.start);
+                        let e = this.moment(item.end);
+                        let total = Math.floor((e.unix() - m.unix()) / 60);
+                        let period = m.format('YYYY-MM');
+                        let periodLabel = m.format('MMMM YYYY');
+                        let day = m.format('YYYY-MM-DD');
+                        let dayLabel = m.format('dddd DD');
 
-                    out[period].days[day].timesheets.push(item);
-                    out[period].total += total;
-                    out[period].days[day].total += total;
-                });
+                        if (!out.hasOwnProperty(period)) {
+                            out[period] = {
+                                validation: false,
+                                existsDatas: this.exists[period],
+                                exists: 0.0,
+                                period: period,
+                                code: period,
+                                label: periodLabel,
+                                days: {},
+                                total: 0.0
+                            };
+                            if( this.exists.hasOwnProperty(period) ){
+                                out[period].validation = this.exists[period].hasValidation;
+                            }
+                        }
 
-                let output = {};
-                // Sort
-                Object.keys(out)
-                    .sort()
-                    .forEach(function(v, i) {
-                        output[v] = out[v];
-                        let sortedDays = {};
-                        Object.keys(output[v].days)
-                            .sort()
-                            .forEach( dv  => {
-                                sortedDays[dv] = output[v].days[dv];
-                            });
-                        out[v].days = sortedDays;
+                        if (!out[period].days.hasOwnProperty(day)) {
+
+                            let hasDeclaration = this.exists[period] ? this.exists[period].hasValidation : false;
+
+                            out[period].days[day] = {
+                                toto: 'tata',
+                                exists: 0.0,
+                                declaration: hasDeclaration,
+                                totalImport: 0.0,
+                                total: 0.0,
+                                day: day,
+                                code: day,
+                                label: dayLabel,
+                                timesheets: []
+                            };
+
+                            if( this.exists.hasOwnProperty(period) && this.exists[period].days.hasOwnProperty(day) ){
+                                out[period].days[day].exists += this.exists[period].days[day] * 60;
+                                out[period].days[day].total += this.exists[period].days[day] * 60;
+                            }
+                        }
+
+                        out[period].days[day].timesheets.push(item);
+                        out[period].total += total;
+                        out[period].days[day].total += total;
+                        out[period].days[day].totalImport += total;
                     });
+
+                    // Sort
+                    Object.keys(out)
+                        .sort()
+                        .forEach(function (v, i) {
+                            output[v] = out[v];
+                            let sortedDays = {};
+                            Object.keys(output[v].days)
+                                .sort()
+                                .forEach(dv => {
+                                    sortedDays[dv] = output[v].days[dv];
+                                });
+                            out[v].days = sortedDays;
+                        });
+                }
                 return output;
             }
         },
@@ -298,8 +381,10 @@
                             exceptions = exceptions.concat(this.generateItem(item));
                         }
                         else if (item.daily == "allday") {
-                            console.log(item);
+                            console.log("Traitement d'un créneau de type ALLDAY", rrule, item);
+
                             let start = this.moment(item.start);
+                            
                             let end = start.add(this.dayLength, 'hours');
                             item.end = end.format();
 
@@ -359,22 +444,98 @@
                     }
                     return [].concat(this.generateItem(part1)).concat(this.generateItem(part2));
                 }
+
+                let period = mmStart.format('YYYY-MM'),
+                    day = mmStart.format('YYYY-MM-DD'),
+                    importable = true,
+                    destinationCode = "",
+                    destinationId = -1,
+                    destinationLabel = "",
+                    correspondance = this.findCorrespondance(item.label);
+
+                if( this.hasValidationPeriod(period) ){
+                    importable = false;
+                }
+
+                if( correspondance ){
+                    destinationCode = correspondance.code;
+                    destinationId = correspondance.id;
+                    destinationLabel = correspondance.label;
+                }
+
+
+                // Détection du lot
+
+
                 return [{
                     uid: item.uid,
                     icsuid: item.icsuid,
                     icsfileuid: item.icsfileuid,
                     icsfilename: item.icsfilename,
                     icsfiledateaddedd: item.icsfiledateaddedd,
+                    destinationLabel: destinationLabel,
+                    destinationCode: destinationCode,
+                    destinationId: destinationId,
                     label: item.summary,
                     summary: item.summary,
+                    importable: importable,
                     lastimport: true,
                     start: item.start,
                     end: item.end,
-                    periodCode: mmStart.format('YYYY-MM'),
-                    dayCode: mmStart.format('YYYY-MM-DD'),
+                    periodCode: period,
+                    dayCode: day,
                     exception: item.exception ? item.exception : null,
                     description: item.description == undefined ? null : item.description
                 }];
+            },
+
+            findCorrespondance( text ){
+
+                let tofind = text.toLowerCase();
+
+                if( !this.labelsCorrespondance.hasOwnProperty(tofind) ){
+                    this.labelsCorrespondance[tofind] = null;
+
+                    let match = null;
+
+                    for( var i=0; i<this.correspondances.length; i++ ){
+
+                        let wps = this.correspondances[i];
+
+
+                        if( wps.code && (tofind.indexOf(wps.code.toLowerCase()) > -1 || tofind.indexOf(wps.label.toLowerCase()) > -1) ){
+                            match = {
+                                code: wps.code,
+                                id: null,
+                                label: wps.labek
+                            };
+                            this.labelsCorrespondance[tofind] = match;
+                            return this.labelsCorrespondance[tofind];
+                        }
+
+                        if( wps.acronym && tofind.indexOf(wps.acronym.toLowerCase()) > -1 ){
+                            match = {
+                                code: "wp",
+                                id: wps.wp_id,
+                                label: wps.label
+                            };
+                            if( tofind.indexOf(wps.wp_code.toLowerCase()) > -1 ){
+                                this.labelsCorrespondance[tofind] = match;
+                                return this.labelsCorrespondance[tofind];
+                            }
+                        }
+                    }
+
+                    this.labelsCorrespondance[tofind] = match;
+                }
+                return this.labelsCorrespondance[tofind];
+            },
+
+            hasValidationPeriod( period ){
+                if( this.exists && this.exists.hasOwnProperty(period) ){
+                    return this.exists[period].hasValidation;
+                }
+                return false;
             },
 
                 /**
@@ -393,6 +554,7 @@
 
 
                     item.recursive = true;
+
                     if (rrule.freq == 'DAILY' || rrule.freq == 'WEEKLY') {
                         var fromDate = new Date(item.start);
                         var toDate = new Date(item.end);
@@ -422,6 +584,7 @@
                             while (fromDate < end) {
                                 let currentDay = this.daysString[fromDate.getDay()];
                                 if( item.daily == "allday" && exdate.indexOf(moment(fromDate).format("YYYY-MM-DD")+'T00:00:00.000Z') > -1 ){
+                                    console.log('GROS CENEAU');
                                 } else if (!(byday.indexOf(currentDay) < 0 || exdate.indexOf(fromDate.toISOString()) > -1 )) {
                                     let copy = JSON.parse(JSON.stringify(item));
                                     copy.start = moment(fromDate).format();
@@ -446,130 +609,7 @@
                         console.log(' ================ ', items.length, ' créé(s)')
                     }
                     return items;
-                },
-
-
-
-            /////////////////////////////////////////////////////////////////////////////////////////////////// HISTORIC
-            /** Charge le fichier ICS depuis l'interface **/
-            loadIcsFile(e) {
-                var fr = new FileReader();
-                fr.onloadend = (result) => {
-                    this.parseFileContent(fr.result);
-                };
-                fr.readAsText(e.target.files[0]);
-            },
-
-            /** Parse le contenu ICS **/
-            parseFileContent(content) {
-
-                var analyser = new ICalAnalyser(
-                    new Date(),
-                    [{startTime: '9:00', endTime: '12:30'}, {startTime: '14:00', endTime: '17:30'}]
-                );
-                var events = analyser.parse(ICAL.parse(content));
-                var after = this.periodStart ? moment(this.periodStart) : null;
-                var before = this.periodEnd ? moment(this.periodEnd) : null;
-                var icsName = "";
-                this.importedEvents = [];
-                this.labels = [];
-
-                // On précalcule les correspondances possibles entre les créneaux trouvés
-                // et les informations disponibles sur les Workpackage
-                console.log(store.wps);
-
-
-                events.forEach(item => {
-                    icsName = item.icsfilename;
-                    item.mmStart = moment(item.start);
-                    item.mmEnd = moment(item.end);
-                    item.imported = false;
-                    item.useLabel = "";
-                    if ((after == null || (item.mmStart > after)) && (before == null || (item.mmEnd < before))) {
-                        this.importedEvents.push(item);
-                        if (this.labels.indexOf(item.label) < 0)
-                            this.labels.push(item.label);
-                    } else {
-                        console.log('Le créneau est hors limite');
-                    }
-                });
-
-                // En minuscule pour les test de proximité
-                let icsNameLC = icsName.toLowerCase();
-
-                var associationParser = (label) => {
-                    if (!label) return "";
-                    let out = "";
-                    label = label.toLowerCase();
-
-                    Object.keys(store.wps).map((objectKey, index) => {
-                        let wpDatas = store.wps[objectKey],
-                            wpCode = wpDatas.code.toLowerCase(),
-                            acronym = wpDatas.acronym.toLowerCase(),
-                            code = wpDatas.activity_code.toLowerCase()
-                        ;
-                        if ((icsNameLC.indexOf(acronym) >= 0 || icsNameLC.indexOf(code) >= 0) || (label.indexOf(acronym) >= 0 || label.indexOf(code) >= 0)) {
-                            if (label.indexOf(wpCode) >= 0) {
-                                out = objectKey;
-                            } else {
-                                console.log("Pas de code WP");
-                            }
-                        } else {
-                            // ou dans le label ...
-                            console.log(icsNameLC, acronym, code, label);
-                            console.log((icsNameLC.indexOf(acronym) >= 0 || icsNameLC.indexOf(code) >= 0));
-                            console.log((label.indexOf(acronym) >= 0 || label.indexOf(code) >= 0));
-                            console.log("Pas de code/acronyme");
-                        }
-                    });
-                    return out;
-                };
-
-                // 'acronym'       => $wpd->getActivity()->getAcronym(),
-                //     'activity'      => $wpd->getActivity()->__toString(),
-                //     'activity_code' => $wpd->getActivity()->getOscarNum(),
-                //     'idactivity'    => $wpd->getActivity()->getId(),
-                //     'code' => $wpd->getCode(),
-
-
-                var associations = {};
-                for (var i = 0; i < this.labels.length; i++) {
-                    var label = this.labels[i];
-                    var corre = associationParser(label);
-                    console.log(corre);
-                    associations[label] = corre ? corre : "";
-                    if (corre)
-                        this.updateLabel(label, corre);
-                    else
-                        associations[label] = "ignorer"
                 }
-
-                /*
-                if( store.wps  ){
-                    Object.keys(store.wps).map((objectKey, index) => {
-                        associations[objectKey] = associationParser(store.wps[objectKey], this.labels);
-                    });
-                }
-                /****/
-
-                this.associations = associations;
-
-
-                this.importedEvents = EventDT.sortByStart(this.importedEvents);
-
-                this.etape = 2;
-                /****/
-            },
-            applyImport() {
-                var imported = [];
-                this.importedEvents.forEach(event => {
-                    if (event.imported == true) {
-                        imported.push(event)
-                    }
-                });
-                if (imported.length > 0)
-                    this.$emit('import', imported);
-            }
         }
     }
 </script>

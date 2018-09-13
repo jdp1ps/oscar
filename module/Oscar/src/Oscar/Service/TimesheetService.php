@@ -12,6 +12,7 @@ use Oscar\Entity\TimesheetRepository;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Entity\WorkPackage;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\TimesheetsMonthFormatter;
@@ -949,6 +950,42 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         return $out;
+    }
+
+    public function getAllTimesheetTypes( Person $person ){
+        $all = [];
+        foreach ($this->getOthersWP() as $other) {
+            $all[] = [
+                'wp_id' => null,
+                'wp_code' => null,
+                'acronym' => null,
+                'code' => $other['code'],
+                'label' => $other['label'],
+                'description' => $other['description'],
+                'icon' => true,
+            ];
+        }
+
+        $wps = $this->getEntityManager()->getRepository(WorkPackagePerson::class)->createQueryBuilder('wpp')
+            ->where('wpp.person = :personId')
+            ->setParameter('personId', $person->getId())
+            ->getQuery()
+            ->getResult();
+
+        /** @var WorkPackagePerson $wp */
+        foreach ($wps as $wp) {
+            $all[] = [
+                'wp_id' => $wp->getWorkPackage()->getId(),
+                'wp_code' => $wp->getWorkPackage()->getCode(),
+                'acronym' => $wp->getWorkPackage()->getActivity()->getAcronym(),
+                'code' => null,
+                'label' => sprintf('%s - %s', $wp->getWorkPackage()->getActivity()->getAcronym(), $wp->getWorkPackage()->getCode()),
+                'description' => '',
+                'icon' => true,
+            ];
+        }
+
+        return $all;
     }
 
 

@@ -669,8 +669,11 @@ class TimesheetController extends AbstractOscarController
         // Liste des types de créneau valide
         $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson());
 
+        $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($this->getCurrentPerson());
+
         return [
-            'exists' => $resume
+            'exists' => $resume,
+            'correspondances' => $correspondances
         ];
     }
 
