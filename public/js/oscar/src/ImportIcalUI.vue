@@ -324,6 +324,7 @@
 
                     // Extraction des données brutes
                     if (d[0] == 'vevent') {
+                        console.log(d);
                         d[1].forEach((dd) => {
 
                             if (dd[0] == 'uid') {
@@ -361,6 +362,7 @@
                             }
 
                             else if (dd[0] == 'dtend') {
+
                                 var m = moment.tz(dd[3], dd[1].tzid);
                                 item.end = m.tz(defaultTimeZone).format();
                             }
@@ -384,7 +386,7 @@
                             console.log("Traitement d'un créneau de type ALLDAY", rrule, item);
 
                             let start = this.moment(item.start);
-                            
+
                             let end = start.add(this.dayLength, 'hours');
                             item.end = end.format();
 
