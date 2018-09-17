@@ -445,7 +445,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
         return [
             'code' => 'invalid',
-            'label' => 'Invalide',
+            'label' => $code . ' (invalide)',
             'description' => 'Créneaux érroné',
             'icon' => true,
         ];
