@@ -961,10 +961,9 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             foreach ( $os->getOrganizationActivititiesPrincipalActive($organizationPerson->getOrganization()) as $activity ){
                 $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $organizationPerson->getPerson());
             }
-
-            $this->getEntityManager()->remove($organizationPerson);
-            $this->getEntityManager()->flush();
         }
+        $this->getEntityManager()->remove($organizationPerson);
+        $this->getEntityManager()->flush();
     }
 
 
