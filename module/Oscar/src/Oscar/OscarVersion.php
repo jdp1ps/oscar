@@ -11,8 +11,9 @@ namespace Oscar;
 class OscarVersion
 {
     const MAJOR = 2;
-    const MINOR = 5;
+    const MINOR = 7;
     const PATCH = 1;
+    const NAME = "Lewis";
 
     public static function getBuild(){
         $commitHash = trim(exec('git log -1 --pretty="%h" -n1 HEAD'));
@@ -23,7 +24,7 @@ class OscarVersion
 
         exec('git rev-list HEAD | wc -l', $commit);
 
-        return sprintf('v%s.%s.%s-%s#%s (%s)', self::MAJOR, self::MINOR, self::PATCH, $branch, $commitHash, $commitDate->format('Y-m-d H:m:s'));
+        return sprintf('v%s.%s.%s-%s#%s "%s" (%s)', self::MAJOR, self::MINOR, self::PATCH, $branch, $commitHash, self::NAME, $commitDate->format('Y-m-d H:m:s'));
 
     }
 }
