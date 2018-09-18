@@ -499,10 +499,6 @@ class AdministrationController extends AbstractOscarController
         $authentificationId = $this->params()->fromPost('authentification_id');
         $roleId = $this->params()->fromPost('role_id');
 
-        $this->getLogger()->debug("RoleID : $roleId");
-        $this->getLogger()->debug("AuthentificationID : $authentificationId");
-        $this->getLogger()->debug(print_r($_POST, true));
-
         try {
             /** @var Authentification $authentification */
             $authentification = $this->getEntityManager()->getRepository(Authentification::class)->find($authentificationId);
