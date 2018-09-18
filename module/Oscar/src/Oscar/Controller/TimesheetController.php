@@ -568,11 +568,9 @@ class TimesheetController extends AbstractOscarController
 
             die(file_get_contents('/tmp/' . $filename));
         }
-        $datas = $timesheetService->getPersonTimesheets($person, false, $period, $activity);
-
 
         if( $action == "export" ){
-
+            $datas = $timesheetService->getPersonTimesheetsDatas($person, false, $period, null);
             $modele = $this->getConfiguration('oscar.paths.timesheet_modele');
             if( !$modele ){
                 throw new OscarException("Impossible de charger le modèle de feuille de temps");
@@ -591,6 +589,9 @@ class TimesheetController extends AbstractOscarController
 
             $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
             $lineWpFormula = '=SUM(C%s:AG%s)';
+            echo "<pre>";
+
+
             foreach( $datas[$activityId]['timesheets'] as $period=>$timesheetsPeriod ){
                 $lineWpStart = 10;
                 $lineWpCurent = $lineWpStart;
@@ -613,6 +614,11 @@ class TimesheetController extends AbstractOscarController
                 $spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
 
                 foreach ($timesheetsPeriod as $workpackage=>$timesheetsWorkpackage) {
+
+
+                    echo "$workpackage<br>";
+                    var_dump($timesheetsWorkpackage);
+
                     if( $workpackage == "unvalidate" || $workpackage == "total" )
                         continue;
 
@@ -649,12 +655,15 @@ class TimesheetController extends AbstractOscarController
 
                 $edited->save($filepath);
 
-                header('Content-Type: application/octet-stream');
-                header("Content-Transfer-Encoding: Binary");
-                header("Content-disposition: attachment; filename=\"" . $name . "\"");
-                die(readfile($filepath));
+//                header('Content-Type: application/octet-stream');
+//                header("Content-Transfer-Encoding: Binary");
+//                header("Content-disposition: attachment; filename=\"" . $name . "\"");
+//                die(readfile($filepath));
             }
-            die();
+
+            die("-------");
+        } else {
+            $datas = $timesheetService->getPersonTimesheets($person, false, $period, null);
         }
 
         return [
