@@ -97,7 +97,7 @@
             },
 
             displayMinutes(){
-                return Math.floor((this.duration - this.displayHours)*60);
+                return Math.round(((this.duration - this.displayHours)*60));
             },
 
             displayPercent(){
@@ -106,16 +106,24 @@
         },
 
         methods: {
+            /**
+             * Uniformisation de la valeur.
+             *
+             * @param durationMinutes
+             * @returns {number}
+             */
+            standardizeDuration(durationMinutes){
+                let standardized = (Math.round(durationMinutes/this.pas) * this.pas)/60;
+                return standardized;
+            },
+
             moreMinutes(){
-                this.duration += 1/60*this.pas;
+                this.duration = this.standardizeDuration(this.duration*60 + this.pas);
                 this.emitUpdate();
             },
 
             lessMinutes(){
-                this.duration -= 1/60*this.pas;
-                if( this.duration < 0.0 )
-                    this.duration = 0.0;
-
+                this.duration = this.standardizeDuration(this.duration*60 - this.pas);
                 this.emitUpdate();
             },
 
@@ -128,7 +136,6 @@
                 this.duration -= 1;
                 if( this.duration < 0.0 )
                     this.duration = 0.0;
-
                 this.emitUpdate();
             },
 
