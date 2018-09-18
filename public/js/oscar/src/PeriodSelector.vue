@@ -52,7 +52,7 @@
         border-radius: 4px;
         display: inline-flex;
         background: white;
-        z-index: 11;
+        z-index: 1;
         position: relative;
     }
 
@@ -77,7 +77,7 @@
     .period-selector .visualizer { display: inline-flex; }
 
     .selector {
-        z-index: 1;
+        z-index: 2;
         min-width: 30em;
         min-height: 6em;
         position: absolute;

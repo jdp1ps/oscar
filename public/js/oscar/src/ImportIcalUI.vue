@@ -10,6 +10,29 @@
             </div>
         </div>
 
+        <div class="overlay" v-if="editCorrespondance">
+            <div class="overlay-content">
+                <a href="#" @click="editCorrespondance = null">CLOSE</a>
+                <h3>
+                    <i class="tag"></i> Correspondance pour les créneaux <strong>{{ editCorrespondance }}</strong>
+                </h3>
+                <p>Selectionnez une correspondance pour ce type de créneau : </p>
+                <section>
+                    <article v-for="c in correspondances" class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance.toLowerCase()] == c }" @click="handlerChangeCorrespondance(editCorrespondance, c)">
+                        <em v-if="c.wp_code"><i class="icon-cube"></i>Lot de travail</em>
+                        <em v-else>Hors-lot</em>
+                        <small>{{ c.description }}</small>
+                        <h3>{{ c.label }}</h3>
+                    </article>
+                    <article class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance.toLowerCase()] == null }" @click="handlerChangeCorrespondance(editCorrespondance, null)">
+                        <em><i class="icon-cancel-circled"></i></em>
+                        <small>Ce type de créneau sera ignoré</small>
+                        <h3>Ignorer ces créneaux</h3>
+                    </article>
+                </section>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-6">
                 <h3>Critères d'importation</h3>
@@ -26,15 +49,6 @@
             </div>
         </div>
 
-        <!--
-        <div class="row">
-            <div class="col-md-6">
-                <pre>{{ correspondances }}</pre></div>
-
-            <div class="col-md-6">
-                <pre>{{ labelsCorrespondance }}</pre></div>
-        </div>
--->
         <div v-if="timesheets == null">
             &nbsp;
         </div>
@@ -102,9 +116,15 @@
             <div class="col-md-4">
                 <h2>Intitulés et correspondance</h2>
                 <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter">
-                <div v-for="label in labels">
-                    <i class="icon-tag"></i> {{ label }}
-                    <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerRemoveLabel(label)"><i class="icon-trash"></i> Retirer</a>
+                <div v-for="label in labels" class="card xs" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
+                    <i class="icon-tag"></i> <strong>{{ label }}</strong>
+                    <span v-if="labelsCorrespondance[label.toLowerCase()]" class="cartouche card-info" @click="debug = labelsCorrespondance[label.toLowerCase()]">
+                        <i class="icon-link-outline"></i>
+                        {{ labelsCorrespondance[label.toLowerCase()].label }}
+                    </span>
+                    <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
+                    <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
+
                 </div>
             </div>
         </div>
@@ -126,6 +146,28 @@
         text-shadow: -1px 1px 0 rgba(0,0,0,.3);
         border-top: 1em rgba(255,255,255,0) solid;
     }
+    .match { border-left: #5c9ccc 4px solid; }
+
+    .correspondance-choose {
+        border-top: solid #efede4 thin;
+        font-size: 10px;
+        cursor: pointer;
+        padding: 4px 1em;
+    }
+    .correspondance-choose.selected {
+        background: #5c9ccc;
+        color: white;
+    }
+    .correspondance-choose:hover {
+        background: #5c9ccc;
+        color: white;
+    }
+    .correspondance-choose h3 {
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
+        font-weight: 600;
+    }
 </style>
 <script>
     // poi watch --format umd --moduleName  ImportIcalUI --filename.css ImportIcalUI.css --filename.js ImportIcalUI.js --dist public/js/oscar/dist public/js/oscar/src/ImportIcalUI.vue
@@ -141,7 +183,8 @@
                 periodStart: "2018-06",
                 periodEnd: "2018-12",
                 debug: null,
-                labelsCorrespondance: {}
+                labelsCorrespondance: {},
+                editCorrespondance: null
             }
         },
 
@@ -255,6 +298,15 @@
 
 
         methods: {
+            handlerChangeCorrespondance(editCorrespondance, dest){
+                console.log(editCorrespondance, dest);
+                this.labelsCorrespondance[editCorrespondance.toLowerCase()] = dest;
+                this.editCorrespondance = null;
+            },
+
+            handlerEditCorrespondance( label ){
+                this.editCorrespondance = label;
+            },
 
             test(){
               console.log(arguments);
@@ -506,21 +558,13 @@
 
 
                         if( wps.code && (tofind.indexOf(wps.code.toLowerCase()) > -1 || tofind.indexOf(wps.label.toLowerCase()) > -1) ){
-                            match = {
-                                code: wps.code,
-                                id: null,
-                                label: wps.labek
-                            };
+                            match = wps;
                             this.labelsCorrespondance[tofind] = match;
                             return this.labelsCorrespondance[tofind];
                         }
 
                         if( wps.acronym && tofind.indexOf(wps.acronym.toLowerCase()) > -1 ){
-                            match = {
-                                code: "wp",
-                                id: wps.wp_id,
-                                label: wps.label
-                            };
+                            match = wps;
                             if( tofind.indexOf(wps.wp_code.toLowerCase()) > -1 ){
                                 this.labelsCorrespondance[tofind] = match;
                                 return this.labelsCorrespondance[tofind];
