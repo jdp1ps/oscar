@@ -18,7 +18,7 @@ OpenJDK 64-Bit Server VM (build 25.162-b12, mixed mode)
 S'il n'est pas installé, vous devez **installer Java depuis les dépôts officiels** :
 
 ```bash
-$ apt-get install default-jre
+apt-get install default-jre
 ```
 
 

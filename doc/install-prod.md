@@ -9,7 +9,7 @@ L'installation a été testée sous Debian et Ubuntu Server
  - PHP 7.0+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql, mcrypt, intl, DOM/XML)
  - Postgresql 9.4+
  - Annuaire LDAP (supann)
- 
+
 Matériel (Recommandation)
  - CPU 2 Core 2.4 Ghz
  - RAM 4 Go
@@ -47,14 +47,14 @@ export https_proxy=http://proxy.unicaen.fr:3128
 
 ### Installation des logiciels
 
-Pour récupérer le dépôt 
+Pour récupérer le dépôt
 
 ```bash
 # Installation de GIT
-apt-get install git-core
+apt-get install git-core wget
 ```
 
-Serveur web (Apache) et PHP7 : 
+Serveur web (Apache) et PHP7 :
 
 ```bash
 # Installation de APACHE2
@@ -73,11 +73,11 @@ apt-get install \
     php7.0-mbstring \
     php7.0-mcrypt \
     php7.0-pgsql \
-    php7.0-xml \ 
+    php7.0-xml \
     php7.0-zip
 ```
 
-Installez également le client postgresql qui sera necessaire pour importer la structure initale de la base de donnée : 
+Installez également le client postgresql qui sera necessaire pour importer la structure initale de la base de donnée :
 
 ```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
@@ -87,7 +87,7 @@ apt-get install postgresql postgresql-client postgresql-client-common
 
 ### Installation de la base de donnée
 
-Si la base de données est sur la même machine, installation du serveur **Postgresql** : 
+Si la base de données est sur la même machine, installation du serveur **Postgresql** :
 
 ```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
@@ -102,7 +102,7 @@ apt-get install postgresql-server-9.5
 
 ### Emplacement
 
-Il est recommandé d'installer oscar dans le dossier **/var** du système : 
+Il est recommandé d'installer oscar dans le dossier **/var** du système :
 
 ```bash
 mkdir -p /var/OscarApp
@@ -125,7 +125,7 @@ git clone https://git.unicaen.fr/open-source/oscar.git
 
 #### Installation de composer
 
-Commencez par installer [Composer](https://getcomposer.org/) : 
+Commencez par installer [Composer](https://getcomposer.org/) :
 
 ```bash
 # Récupération de la dernière version de composer
@@ -135,10 +135,10 @@ wget https://getcomposer.org/composer.phar
 mv composer.phar /bin/composer
 
 #On donne les droit d'accès
-chmod +X /bin/composer
+chmod +x /bin/composer
 ```
 
-Vous pouvez tester le bon déroulement de l'installation de **composer** en saisissant la commande `composer`, vous devriez obtenir l'invite en ligne de commande : 
+Vous pouvez tester le bon déroulement de l'installation de **composer** en saisissant la commande `composer`, vous devriez obtenir l'invite en ligne de commande :
 
 ```bash
    ______
@@ -266,11 +266,13 @@ Vous pouvez tester la configuration avec la commande :
 $ php public/index.php oscar test:config
 ```
 
+Assurez vous que les modules PHP requis sont bien détectés avec la mention "Installed" et que la base de données réponds. A cette étape, Oscar est fonctionnel mais il reste encore quelques paramètres à configurer.
+
 
 ### Configurer les mails
 
 [Documentation du mailer](./mailer.md)
-        
+
 
 ### Configurer le serveur web (Apache)
 
@@ -303,8 +305,7 @@ vi /etc/apache2/sites-available/000-default.conf
 <VirtualHost *:443>
    ServerAdmin stephane.bouvry@unicaen.fr
    ServerName oscar-pp.unicaen.fr
-   ServerAdmin webmaster@localhost
-   DocumentRoot /var/www/oscar
+   DocumentRoot /var/OscarApp/oscar/public
 
    SSLEngine On
    SSLCertificateFile /etc/ssl/certs/oscar-pp_unicaen_fr.crt
@@ -314,7 +315,7 @@ vi /etc/apache2/sites-available/000-default.conf
    # Visible dans l'application
    SetEnv APPLICATION_ENV beta
 
-   <Directory /var/www/oscar>
+   <Directory /var/OscarApp/oscar/public>
       DirectoryIndex index.php
       AllowOverride All
       Order allow,deny
@@ -332,7 +333,7 @@ On peut utiliser un lien symbolique pour simplifier les bascules
 
 ```bash
 cd /var/www
-ln -s ../path/to/oscr/public oscar
+ln -s ../path/to/oscar/public oscar
 ```
 
 
@@ -359,14 +360,14 @@ Des fichiers d'exemple sont disponibles avec l'extension `.dist`.
 
 #### Configurer l'authentification LDAP
 
-Copier le fichier d'exemple : 
+Copier le fichier d'exemple :
 
 ```bash
 cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php
 vi !$
 ```
 
-Puis compléter la configuration : 
+Puis compléter la configuration :
 
 ```php
 <?php
@@ -398,7 +399,7 @@ $settings = array(
 Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
 permet de s'identifier à la place d'un utilisateur.
 
-Exemple de configuration du CAS : 
+Exemple de configuration du CAS :
 
 ```php
 <?php
@@ -460,9 +461,9 @@ php public/index.php oscar auth:promote <USER> Administrateur
 
 Utiliser ensuite le navigateur pour vous rendre sur oscar et utiliser l'identifiant **admin** avec la mot de passe **password** pour vous connecter en tant qu'administrateur.
 
-  
-**UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*. 
-Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames` 
+
+**UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*.
+Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
 permet de s'identifier à la place d'un utilisateur.
 
 ## Oscar Live
@@ -475,13 +476,13 @@ Par défaut, cette fonctionnalité est désactivée.
 
 ### Installation du serveur WebSocket
 
-Pour l'activer, il faut commencer par installer NodeJS et NPM : 
+Pour l'activer, il faut commencer par installer NodeJS et NPM :
 
 ```bash
 apt-get install node npm
 ```
 
-Installer les dépendances du serveur Node : 
+Installer les dépendances du serveur Node :
 
 ```bash
 cd socket
@@ -490,7 +491,7 @@ npm install
 
 ### Configuration
 
-Puis configurer le serveur **NodeJS** en copiant la configuration par défaut : 
+Puis configurer le serveur **NodeJS** en copiant la configuration par défaut :
 
 ```bash
 # dans le dossier socket/
@@ -500,7 +501,7 @@ vim !$
 
 Remplissez les informations de connexion à la base de données et d'accès au serveur.
 
-Vous pouvez lancer le serveur node avec la commande : 
+Vous pouvez lancer le serveur node avec la commande :
 
 ```bash
 # dans le dossier socket/
@@ -509,7 +510,7 @@ nodejs server.js
 
 ### ProxyPass Apache
 
-Il faut enfin déléguer à Apache le soin de relayer les requètes déstinées à NodeJS en utilisant le module **proxy** : 
+Il faut enfin déléguer à Apache le soin de relayer les requètes déstinées à NodeJS en utilisant le module **proxy** :
 
 TODO (feat. Nico)
 
@@ -518,6 +519,3 @@ TODO (feat. Nico)
 Info : Le serveur doit être lancé dans un screen.
 
 Si le fichier *socket/config.json* est présent, **OscarLive** devrait être automatiquement disponible (voir clef sockée dans le fichier *config/autoload/local.php*).
-
-
-
