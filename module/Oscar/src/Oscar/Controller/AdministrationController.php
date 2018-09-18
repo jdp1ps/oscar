@@ -499,6 +499,10 @@ class AdministrationController extends AbstractOscarController
         $authentificationId = $this->params()->fromPost('authentification_id');
         $roleId = $this->params()->fromPost('role_id');
 
+        $this->getLogger()->debug("RoleID : $roleId");
+        $this->getLogger()->debug("AuthentificationID : $authentificationId");
+        $this->getLogger()->debug(print_r($_POST, true));
+
         try {
             /** @var Authentification $authentification */
             $authentification = $this->getEntityManager()->getRepository(Authentification::class)->find($authentificationId);
@@ -509,10 +513,10 @@ class AdministrationController extends AbstractOscarController
                 return $this->getResponseNotFound("Compte introuvable.");
             }
             if( !$role ){
-                return $this->getResponseNotFound("Rôle introuvable.");
+                return $this->getResponseNotFound("Rôle '$roleId' introuvable.");
             }
         } catch ( \Exception $e ){
-            return $this->getResponseInternalError("Rôle/Authentification introuvable.");
+            return $this->getResponseInternalError("Rôle/Authentification introuvable : " . $e->getMessage());
         }
 
         $method = $this->getHttpXMethod();
