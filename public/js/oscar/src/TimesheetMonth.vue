@@ -166,7 +166,7 @@
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
                     <strong>{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
-                    <a class="btn btn-default" :href="urlimport" v-if="urlimport">
+                    <a class="btn btn-default" :href="urlimport+'?period=' + periodCode " v-if="urlimport">
                         <i class="icon-calendar"></i>
                         Importer un calendrier</a>
                 </h3>
@@ -782,6 +782,10 @@
 
             mois(){
                 return moment(this.ts.from).format('MMMM YYYY');
+            },
+
+            periodCode(){
+                return this.ts.from.substr(0, 7);
             },
 
             cssDayMenu(){
