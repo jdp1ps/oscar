@@ -135,7 +135,9 @@ define(['exports', 'vue', 'vue-resource', 'bootbox'], function (exports, _vue, _
                     });;
                 } else {
                     this.$http.post(this.$http.$options.root, this.form).then(function (res) {
-                        _this3.common.roles.push(res.body);
+                        var added = res.body;
+                        added.principal = added.principal == 'true';
+                        _this3.common.roles.push(added);
                         flashMessage('success', "Le rôle a été ajouté");
                         return;
                     }, function (err) {
