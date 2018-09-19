@@ -238,7 +238,9 @@ var Roles = Vue.extend({
             else {
                 this.$http.post(this.$http.$options.root, this.form).then(
                     (res) => {
-                        this.common.roles.push(res.body);
+                        var added = res.body;
+                        added.principal = (added.principal == 'true');
+                        this.common.roles.push(added);
                         flashMessage('success', "Le rôle a été ajouté");
                         return;
                     },

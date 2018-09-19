@@ -4017,6 +4017,14 @@ $oscar-line: dotted thin $colorGreyLight;
     }
   }
 
+  .unsend {
+    color: rgba(0,0,0,.5);
+    background: rgba(lighten($colorGreen, 40%), .5);
+    &:hover {
+      background: $colorGreen;
+    }
+  }
+
   .duration { background: $colorGreyLight }
 }
 

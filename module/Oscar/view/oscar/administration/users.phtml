@@ -240,7 +240,9 @@
 <script>
 
     require(['vue', 'vue-resource', 'mm', 'authentification'], function(Vue, VueResource, moment, Authentification){
+
         Vue.use(VueResource);
+
 
         const regex = /\[\w*:[0-9]*:([^\]]*)\]/g;
 
@@ -252,6 +254,9 @@
             var m = moment(date);
             return "le " + m.format('dddd D MMMM YYYY') + ', ' + m.fromNow();
         });
+
+        Vue.http.options.emulateHTTP = true;
+        Vue.http.options.emulateJSON = true;
 
         new Vue({
             render(h) {

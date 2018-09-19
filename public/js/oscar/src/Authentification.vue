@@ -154,6 +154,7 @@
     </section>
 </template>
 <script>
+    // poi watch --format umd --moduleName  Authentification --filename.css Authentification.css --filename.js Authentification.js --dist public/js/oscar/dist public/js/oscar/src/Authentification.vue
     export default {
         props: {
             'users': {required: true},
@@ -235,10 +236,13 @@
                 this.addRoleError = null;
 
                 if (this.addRoleUser.id && this.addRoleId) {
-                    this.$http.post(this.urlRoles, {
-                        authentification_id: this.addRoleUser.id,
-                        role_id: this.addRoleId
-                    }).then(
+
+                    var form = new FormData();
+                    form.append('authentification_id', this.addRoleUser.id);
+                    form.append('role_id', this.addRoleId);
+
+
+                    this.$http.post(this.urlRoles, form).then(
                         res => {
                             this.addRoleUser.roles = res.data.roles;
                             this.addRoleUser = null;

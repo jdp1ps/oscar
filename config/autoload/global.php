@@ -82,7 +82,7 @@ return array(
             ],
 
             'weekLength'     => [
-                'value' => 35.0,
+                'value' => 37.0,
                 'userChange' => false
             ],
 

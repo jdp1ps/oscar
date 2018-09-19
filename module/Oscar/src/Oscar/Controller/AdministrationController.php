@@ -509,10 +509,10 @@ class AdministrationController extends AbstractOscarController
                 return $this->getResponseNotFound("Compte introuvable.");
             }
             if( !$role ){
-                return $this->getResponseNotFound("Rôle introuvable.");
+                return $this->getResponseNotFound("Rôle '$roleId' introuvable.");
             }
         } catch ( \Exception $e ){
-            return $this->getResponseInternalError("Rôle/Authentification introuvable.");
+            return $this->getResponseInternalError("Rôle/Authentification introuvable : " . $e->getMessage());
         }
 
         $method = $this->getHttpXMethod();
