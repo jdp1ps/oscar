@@ -38,8 +38,8 @@
                 <h3>Critères d'importation</h3>
                 <p>Vous pouvez choisir la limite d'importation entre 2 périodes (inclus)</p>
                 <div>
-                    Période de <periodselector :period="periodStart" :max="periodEnd" @change="periodStart = $event" />
-                    à <periodselector :period="periodEnd" :min="periodStart" @change="periodEnd = $event" />
+                    Période de <periodselector :period="periodStart" :max="null" @change="periodStart = $event" />
+                    <!-- à <periodselector :period="periodEnd" :min="periodStart" @change="periodEnd = $event" /> -->
                 </div>
             </div>
 
@@ -463,8 +463,15 @@
                 let result = [];
 
                 out.forEach(item => {
-                    if( this. periodStart && item.periodCode < this.periodStart ) return;
-                    if( this. periodEnd && item.periodCode > this.periodEnd ) return;
+                    if( this.periodStart ){
+                        console.log(this.periodStart, item.periodCode);
+                        console.log("test1", item.periodCode < this.periodStart);
+                        console.log("test2", item.periodCode > this.periodStart);
+                    } else {
+                        console.log("periodStart n'est pas définit");
+                    }
+                    if( this.periodStart && (item.periodCode < this.periodStart || item.periodCode > this.periodStart) ) return;
+                    //if( this.periodEnd ) return;
                     result.push(item);
                 })
 
