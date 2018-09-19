@@ -38,11 +38,12 @@
             render: function(h){
                 return h(TimesheetMonth.default, {
                     props: {
-                      declarationInHours: <?= $declarationInHours ? 'true' : 'false' ?>,
-                      defaultYear: <?= $year ?>,
-                      defaultMonth: <?= $month ?>,
-                      moment: moment,
-                      bootbox: bootbox
+                        declarationInHours: <?= $declarationInHours ? 'true' : 'false' ?>,
+                        defaultYear: <?= $year ?>,
+                        defaultMonth: <?= $month ?>,
+                        moment: moment,
+                        bootbox: bootbox,
+                        urlimport: '<?= $this->url('timesheet/import_ical') ?>'
                     }
                 });
             }

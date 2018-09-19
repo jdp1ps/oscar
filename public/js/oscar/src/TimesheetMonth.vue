@@ -158,11 +158,17 @@
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
             <div class="month col-lg-8">
 
-                <h2>Déclarations de temps pour <strong>{{ ts.person }}</strong></h2>
+                <h2>
+                    Déclarations de temps pour <strong>{{ ts.person }}</strong>
+
+                </h2>
                 <h3 class="periode">Période :
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
                     <strong>{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
+                    <a class="btn btn-default" :href="urlimport" v-if="urlimport">
+                        <i class="icon-calendar"></i>
+                        Importer un calendrier</a>
                 </h3>
 
                 <!--
@@ -683,7 +689,8 @@
             declarationInHours: { required: true },
             defaultMonth: { default: defaultDate.getMonth()+1},
             defaultYear: { default: defaultDate.getFullYear()},
-            defaultDayLength: { default: 8.0 }
+            defaultDayLength: { default: 8.0 },
+            urlimport: { default: null }
         },
 
         components: {
