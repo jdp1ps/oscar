@@ -979,8 +979,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'wp_code' => $wp->getWorkPackage()->getCode(),
                 'acronym' => $wp->getWorkPackage()->getActivity()->getAcronym(),
                 'code' => null,
-                'label' => sprintf('%s - %s', $wp->getWorkPackage()->getActivity()->getAcronym(), $wp->getWorkPackage()->getCode()),
-                'description' => '',
+                'label' => sprintf('[%s] %s', $wp->getWorkPackage()->getActivity()->getAcronym(), $wp->getWorkPackage()->getCode()),
+                'description' => sprintf('[%s] %s : %s', $wp->getWorkPackage()->getActivity()->getAcronym(), $wp->getWorkPackage()->getCode(), $wp->getWorkPackage()->getLabel()),
                 'icon' => true,
             ];
         }

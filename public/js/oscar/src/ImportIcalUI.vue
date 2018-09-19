@@ -12,12 +12,13 @@
 
         <div class="overlay" v-if="editCorrespondance">
             <div class="overlay-content">
-                <a href="#" @click="editCorrespondance = null">CLOSE</a>
+                <i class="icon-cancel-outline overlay-closer" @click="editCorrespondance = null"></i>
+
                 <h3>
                     <i class="tag"></i> Correspondance pour les créneaux <strong>{{ editCorrespondance }}</strong>
                 </h3>
                 <p>Selectionnez une correspondance pour ce type de créneau : </p>
-                <section>
+                <section class="list">
                     <article v-for="c in correspondances" class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance.toLowerCase()] == c }" @click="handlerChangeCorrespondance(editCorrespondance, c)">
                         <em v-if="c.wp_code"><i class="icon-cube"></i>Lot de travail</em>
                         <em v-else>Hors-lot</em>
@@ -61,6 +62,12 @@
         <div class="row" v-else>
             <div class="col-md-8">
                 <h2 @click="debug = exists">Créneaux trouvés</h2>
+
+                <p class="alert alert-info">
+                    <i class="icon-info-circled"></i>
+                    Voici les créneaux trouvès dans le calendrier que vous avez chargé. Les créneaux <strong>étallés sur plusieurs jours sont ignorés</strong>. Une fois les créneaux validés, vous pourrez toujours les modifier ou les supprimer depuis l'interface de déclaration.
+                </p>
+
                 <table class="table table-condensed">
                     <thead>
                         <tr>
@@ -74,21 +81,22 @@
                     </thead>
 
                     <tbody v-for="p in byPeriod" class="period">
-                        <tr class="month-heading">
+                        <tr class="month-heading" :class="{ 'deja-envoyee': exists[p.code] && exists[p.code].hasValidation }">
                             <th colspan="6">
                                 <i class="icon-calendar"></i>
                                 {{ p.label }}
                                 <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerRemovePeriod(p.code)"><i class="icon-trash"></i>Retirer</a>
-                                <span class="alert alert-danger" colspan="4" v-if="exists[p.code] && exists[p.code].hasValidation">
-                                    Vous avez déjà soumis cette période à validation
+                                <span class="message-erreur" colspan="4" v-if="exists[p.code] && exists[p.code].hasValidation">
+                                    <i class="icon-warning-empty"></i>
+                                    <strong>Impossible d'envoyer ces créneaux</strong> Vous avez déjà soumis cette période à validation
                                 </span>
                             </th>
                         </tr>
 
                         <tr v-for="d in p.days">
                             <th>&nbsp;</th>
-                            <th @click="debug = d">{{ d.label }}</th>
-                            <td>
+                            <th class="jour">{{ d.label }}</th>
+                            <td class="jour-description">
                                 <div v-for="t in d.timesheets" :class="{ 'ignored': !t.importable }">
                                     <i class="icon-calendar"></i>{{ t.label }} ({{ t | itemDuration }} min)
                                     <span v-if="t.destinationLabel" class="cartouche xs">
@@ -99,15 +107,15 @@
                                 </div>
                             </td>
 
-                            <td>
+                            <td class="jour-heures">
                                 <strong>{{ d.totalImport | displayMinutes }}</strong>
                             </td>
 
-                            <td>
+                            <td class="jour-heures">
                                 <em v-if="d.exists > 0.0">{{ d.exists | displayMinutes }}</em>
                                 <em v-else>~</em>
                             </td>
-                            <td>{{ d.total | displayMinutes }}</td>
+                            <td class="jour-heures">{{ d.total | displayMinutes }}</td>
 
                         </tr>
                     </tbody>
@@ -146,11 +154,18 @@
         text-shadow: -1px 1px 0 rgba(0,0,0,.3);
         border-top: 1em rgba(255,255,255,0) solid;
     }
+    .month-heading.deja-envoyee {
+        background: #970000;
+    }
+    .month-heading .message-erreur {
+        font-weight: 400;
+        display: block;
+    }
     .match { border-left: #5c9ccc 4px solid; }
 
     .correspondance-choose {
         border-top: solid #efede4 thin;
-        font-size: 10px;
+        font-size: 1em;
         cursor: pointer;
         padding: 4px 1em;
     }
@@ -167,6 +182,24 @@
         padding: 0;
         font-size: 12px;
         font-weight: 600;
+    }
+    .jour {
+        white-space: nowrap;
+        font-weight: 200;
+        color: black;
+        text-align: right;
+    }
+    .jour-description {
+        font-size: .9em;
+    }
+    .jour-heures {
+        text-align: right;
+    }
+    .list {
+
+        margin: 1em;
+        border: solid thin #d9deda;
+
     }
 </style>
 <script>
