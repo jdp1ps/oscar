@@ -27,6 +27,7 @@ var WorkpackagePerson = {
                     </div>
                     <span v-else>
                         <strong class="wp-hours">
+                            <span title="Heure(s) saisie(s)" class="wp-hour unsend">{{person.unsend}}</span>
                             <span title="Heure(s) validée(s)" class="wp-hour validate">{{person.validate}}</span>
                             <span title="Heure(s) en cours de validation" class="wp-hour validating" v-if="person.validating > 0">{{person.validating}}</span>
                             <span title="Heure(s) en conflit" class="wp-hour conflicts" v-if="person.conflicts > 0">{{person.conflicts}}</span>

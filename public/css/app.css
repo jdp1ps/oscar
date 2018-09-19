@@ -8062,6 +8062,11 @@ time.date-missing {
     background: rgba(136, 223, 93, 0.5); }
     .wp-hours .validating:hover {
       background: #499D1F; }
+  .wp-hours .unsend {
+    color: rgba(0, 0, 0, 0.5);
+    background: rgba(183, 236, 156, 0.5); }
+    .wp-hours .unsend:hover {
+      background: #499D1F; }
   .wp-hours .duration {
     background: #AAA; }
 

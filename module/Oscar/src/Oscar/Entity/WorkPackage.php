@@ -244,6 +244,7 @@ class WorkPackage
                     'validating' => 0,
                     'conflicts' => 0,
                     'validate' => 0,
+                    'unsend' => 0
                 ];
             }
             switch( $timesheet->getStatus() ){
@@ -260,6 +261,9 @@ class WorkPackage
                 case TimeSheet::STATUS_ACTIVE:
                     $timesPersons[$timesheet->getPerson()->getId()]['validate'] += $timesheet->getHours();
                     break;
+
+                default:
+                    $timesPersons[$timesheet->getPerson()->getId()]['unsend'] += $timesheet->getHours();
             }
 //            $timesPersons[$timesheet->getPerson()->getId()] += $timesheet->getHours();
 
@@ -275,6 +279,7 @@ class WorkPackage
                 'validating' => array_key_exists($person->getPerson()->getId(), $timesPersons) ? $timesPersons[$person->getPerson()->getId()]['validating'] : 0,
                 'conflicts' => array_key_exists($person->getPerson()->getId(), $timesPersons) ? $timesPersons[$person->getPerson()->getId()]['conflicts'] : 0,
                 'validate' => array_key_exists($person->getPerson()->getId(), $timesPersons) ? $timesPersons[$person->getPerson()->getId()]['validate'] : 0,
+                'unsend' => array_key_exists($person->getPerson()->getId(), $timesPersons) ? $timesPersons[$person->getPerson()->getId()]['unsend'] : 0,
             ];
         }
         return [
