@@ -740,10 +740,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $close = true;
                 $infos = "Ferié " . $locked[$lockedKey];
             }
-            elseif ($dayIndex > 4) {
+
+            if ($dayIndex > 4) {
                 $duration = 0.0;
                 $close = true;
-                $infos = "Weekend";
+                $infos .= $infos ? " / Weekend" : "Weekend";
             }
 
 //            $daysLabels[$dayKey] =  $daysFull[$dayIndex];

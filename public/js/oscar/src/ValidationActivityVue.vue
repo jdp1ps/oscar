@@ -95,7 +95,7 @@
 
                     <table class="table table-condensed">
                         <thead>
-                            <tr class="header-day" style="background-color: #5c9ccc">
+                            <tr class="header-day">
                                 <th colspan="2">
                                     {{ p | monthyear}}
                                 </th>
@@ -240,6 +240,10 @@
         border-radius: 4px;
     }
 
+    .header-day {
+        background-color: #5c9ccc;
+    }
+
     .header-day th {
         text-align: center;
         text-shadow: -1px 1px 0 rgba(255,255,255,.5);
@@ -259,7 +263,7 @@
         color: rgba(0,0,0,.333);
     }
 
-    .closed {
+    .header-day .day.closed {
         background-color: #8f97a0 !important;
     }
 
