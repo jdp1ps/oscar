@@ -30,7 +30,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 ## Importation des données
  
  - Le convertisseur CSV > JSON pour les activités de recherche autorise maintenant une configuration "avancée" pour extraire des données multiples séparées par un séparateur ([Voir documentation](./doc/activity-import.md#donnèes-multiples-personsorganizations-25x))
- - Le test d'existence des organisations test maintenant UNIQUEMENT le nom complet pour éviter le rejet d'organisation aux noms courts proches.
+ - Le test d'existence des organisations teste maintenant UNIQUEMENT le nom complet pour éviter le rejet d'organisation aux noms courts proches.
 
 
 ## Developpement
