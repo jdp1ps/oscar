@@ -511,6 +511,7 @@ class TimesheetController extends AbstractOscarController
      * @throws OscarException
      */
     public function excelAction(){
+
         $activityId     = $this->params()->fromQuery('activityid');
 
         /** @var Activity $activity */
@@ -545,13 +546,14 @@ class TimesheetController extends AbstractOscarController
 
 
         if( $action == "csv" ){
+
+            die("Cette fonctionnalité est provisoirement indisponible.");
+
             if( !$activity ){
                 $this->getResponseBadRequest("Impossible de trouver l'activité");
             }
             $datas = $timesheetService->getPersonTimesheetsCSV($person, $activity, false);
             $filename = $activity->getAcronym() . '-' . $activity->getOscarNum().'-'.$person->getLadapLogin().'.csv';
-
-
 
             $handler = fopen('/tmp/' . $filename, 'w');
 
@@ -570,7 +572,8 @@ class TimesheetController extends AbstractOscarController
         }
 
         if( $action == "export" ){
-            $datas = $timesheetService->getPersonTimesheetsDatas($person, false, $period, null);
+            $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
+
             $modele = $this->getConfiguration('oscar.paths.timesheet_modele');
             if( !$modele ){
                 throw new OscarException("Impossible de charger le modèle de feuille de temps");
@@ -589,9 +592,93 @@ class TimesheetController extends AbstractOscarController
 
             $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
             $lineWpFormula = '=SUM(C%s:AG%s)';
-            echo "<pre>";
 
 
+            $lineWpStart = 10;
+            $lineWpCurent = $lineWpStart;
+            $lineWpCount = 0;
+            $spreadsheet = \PHPExcel_IOFactory::load($modele);
+
+            $spreadsheet->getActiveSheet()->setCellValue('A1', $activity->getLabel());
+            $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
+            $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
+            $spreadsheet->getActiveSheet()->setCellValue('C5', $activity->getAcronym());
+
+            $spreadsheet->getActiveSheet()->setCellValue('U3', $fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue('U4', $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue('U5', $activity->getOscarNum());
+            $spreadsheet->getActiveSheet()->setCellValue('U6', $activity->getCodeEOTP());
+
+            $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
+            $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
+            $spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
+
+
+
+            $line = $lineWpStart;
+            foreach ($datas['declarations']['activities'] as $groupData) {
+
+                $labelG = $groupData['label'];
+                $this->getLogger()->debug($labelG);
+
+
+
+                $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
+                $spreadsheet->getActiveSheet()->setCellValue('A'.$line, $labelG);
+                $spreadsheet->getActiveSheet()->setCellValue('B'.$line, "");
+
+                /*
+                for( $i=0; $i<count($cellDays); $i++ ){
+                    $day = $i+1;
+                    $cellIndex = $cellDays[$i].$rowNum;
+                    //$totalDay = array_key_exists($day, $timesheetsWorkpackage) ? $timesheetsWorkpackage[$day] : 0.0;
+                    $spreadsheet->getActiveSheet()->setCellValue($cellIndex, 1.1);
+                }
+                */
+
+                $line++;
+
+                foreach ($groupData['subgroup'] as $subGroupData) {
+                    $labelSG = $subGroupData['label'];
+                    $this->getLogger()->debug($labelSG);
+                    $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
+                    $spreadsheet->getActiveSheet()->setCellValue('B'.$line, $labelSG);
+                    for( $i=0; $i<count($cellDays); $i++ ){
+                        $day = $i+1;
+                        if( $day < 10 ) $day = '0'.$day;
+
+                        $cellIndex = $cellDays[$i].$line;
+                        $value = 0.0;
+
+                        if( array_key_exists($day, $subGroupData['days']) ){
+                            $value = $subGroupData['days'][$day];
+                        }
+
+                        $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $value);
+                    }
+                    $spreadsheet->getActiveSheet()->setCellValue('AH'.$line, sprintf($lineWpFormula, $line, $line));
+                    $line++;
+                }
+
+                //$spreadsheet->getActiveSheet()->setCellValue('B'.$rowNum, 2.2);
+               //
+            }
+            $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
+
+            $name = ($person->getLadapLogin())."-" . $period . ".xls";
+            $filepath = '/tmp/'. $name;
+
+            $edited->save($filepath);
+
+                header('Content-Type: application/octet-stream');
+                header("Content-Transfer-Encoding: Binary");
+                header("Content-disposition: attachment; filename=\"" . $name . "\"");
+                die(readfile($filepath));
+
+        }
+
+
+            /*
             foreach( $datas[$activityId]['timesheets'] as $period=>$timesheetsPeriod ){
                 $lineWpStart = 10;
                 $lineWpCurent = $lineWpStart;
@@ -665,7 +752,7 @@ class TimesheetController extends AbstractOscarController
         } else {
             $datas = $timesheetService->getPersonTimesheets($person, false, $period, null);
         }
-
+*/
         return [
             "datas" => $datas,
             "person" => $person,

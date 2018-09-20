@@ -21,6 +21,18 @@ class DateTimeUtils {
         return $datetime ? $datetime->format($format) : '';
     }
 
+    public static function periodBounds( $period ){
+        $dateRef = new \DateTime(sprintf('%s-01', $period));
+        $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
+        return [
+            'totalDays' => $nbr,
+            'year' => $dateRef->format('Y'),
+            'month' => $dateRef->format('m'),
+            'start' => $dateRef->format('Y-m-01 00:00:00'),
+            'end' => $dateRef->format('Y-m-' . $nbr .' 23:59:59'),
+        ];
+    }
+
     public static function toDatetime( $value )
     {
         if( $value == null ){

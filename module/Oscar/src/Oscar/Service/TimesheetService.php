@@ -18,6 +18,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Utils\ConfigurationMergable;
+use Oscar\Utils\DateTimeUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Form\Element\Time;
@@ -990,8 +991,95 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
-    public function getPersonTimesheetsDatas( Person $person, $validatedOnly = false, $periodFilter = null, $activity = null ){
-        die("TODO");
+    public function getPersonTimesheetsDatas( Person $person, $period, $validatedOnly = false){
+        $periodBounds = DateTimeUtils::periodBounds($period);
+
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.person = :person')
+            ->andWhere('t.dateFrom >= :dateFrom AND t.dateTo <= :dateTo')
+            ->setParameters([
+                'person' => $person,
+                'dateFrom' => $periodBounds['start'],
+                'dateTo' => $periodBounds['end'],
+            ]);
+
+        $declarations = [
+            'activities' => [],
+            'others' => []
+        ];
+        $others = $this->getOthersWP();
+
+        /** @var TimeSheet $timesheet */
+        foreach ($query->getQuery()->getResult() as $timesheet) {
+            $group = 'Erreur';
+            $groupId = null;
+            $subGroup = 'invalid label';
+            $subGroupId = 'invalid ID';
+            $subGroupType = 'invalid Type';
+            $day = $timesheet->getDateFrom()->format('d');
+
+            if( $timesheet->getActivity() ){
+                $path = 'activities';
+                $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
+                $groupType = 'activity';
+                $groupId = $timesheet->getActivity()->getId();
+                $subGroup = sprintf('%s - %s', $timesheet->getWorkpackage()->getCode(), $timesheet->getWorkpackage()->getLabel());
+                $subGroupId = $timesheet->getWorkpackage()->getId();
+                $subGroupType = "wp";
+            }
+
+            if( array_key_exists($timesheet->getLabel(), $others) ){
+                $path = 'others';
+                $group = 'Hors-lot';
+                $groupId = -1;
+                $groupType = 'others';
+                $subGroup = $others[$timesheet->getLabel()]['label'];
+                $subGroupId = $timesheet->getLabel();
+                $subGroupType = $timesheet->getLabel();
+            }
+
+            if( !array_key_exists($group, $declarations[$path]) ){
+                $declarations[$path][$group] = [
+                    'label' => $group,
+                    'id' => $groupId,
+                    'type' => $groupType,
+                    'total' => 0.0,
+                    'subgroup' => [],
+                ];
+            }
+
+            if( !array_key_exists($subGroup, $declarations[$path][$group]['subgroup']) ){
+                $declarations[$path][$group]['subgroup'][$subGroup] = [
+                    'label' => $subGroup,
+                    'id' => $subGroupId,
+                    'type' => $subGroupType,
+                    'total' => 0.0,
+                    'days' => [],
+                ];
+            }
+
+            if( !array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days']) ) {
+                $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
+            }
+
+            $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] += $timesheet->getDuration();
+            $declarations[$path][$group]['subgroup'][$subGroup]['days']['total'] += $timesheet->getDuration();
+            $declarations[$path][$group]['total'] += $timesheet->getDuration();
+
+        }
+
+        $output = [
+            'person' => (string)$person,
+            'person_id' => $person->getId(),
+            'period' => $period,
+            'totalDays' => $periodBounds['totalDays'],
+            'daysInfos' => $this->getDaysPeriodInfosPerson($person, $periodBounds['year'], $periodBounds['month']),
+            'declarations' => $declarations,
+        ];
+
+
+        return $output;
     }
     /**
      * Retourne les créneaux de la personne regroupès par activité
