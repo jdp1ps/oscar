@@ -19,7 +19,7 @@ if(
         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_SHOW)): ?>
             <li role="presentation" class="dropdown-header"><i class="icon-building-filled"></i> Organisations</li>
             <li><a href="<?= $this->url('organization') ?>">Liste des organisations</a></li>
-            <?php if($this->grant()->privileges(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
                 <li><a href="<?= $this->url('organization/new') ?>">Nouvelle organisation</a></li>
                 <li><a href="<?= $this->url('organization/fusion') ?>">Fusion d'organisations</a></li>
                 <li><a href="<?= $this->url('organization/scission') ?>">Scission d'organisations</a></li>
