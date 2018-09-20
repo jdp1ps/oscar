@@ -36,6 +36,7 @@
                 <hr>
             </template>
 
+            <!--
             <section v-for="o in others" v-if="day[o.code] && day[o.code].length">
                 <article class="wp-duration card xs" v-for="t in day[o.code]">
                     <strong>
@@ -48,97 +49,26 @@
                     </div>
                 </article>
             </section>
-
-<!--
-
-
-            <article class="wp-duration card xs" v-for="t in day.training">
-                <strong>
-                    <i class="icon-training"></i> Formation<br>
-                    <small>{{ t.description }}</small>
-                </strong>
-                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                </div>
-            </article>
-
-            <article class="wp-duration card xs" v-for="t in day.vacations">
-                <strong>
-                    <i class="icon-vacation"></i> Congès<br>
-                    <small>{{ t.description }}</small>
-                </strong>
-                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                </div>
-            </article>
-
-            <article class="wp-duration card xs" v-for="t in day.sickleave">
-                <strong>
-                    <i class="icon-sickleave"></i> Arrêt maladie<br>
-                    <small>{{ t.description }}</small>
-                </strong>
-                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                </div>
-            </article>
-
-            <article class="wp-duration card xs" v-for="t in day.research">
-                <strong>
-                    <i class="icon-research"></i> Autre projet de recherche<br>
-                    <small>{{ t.description }}</small>
-                </strong>
-                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                </div>
-            </article>
-
-            <article class="wp-duration card xs" v-for="t in day.absent">
-                <strong>
-                    <i class="icon-abs"></i> Absence<br>
-                    <small>{{ t.description }}</small>
-                </strong>
-                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                </div>
-            </article>
-
-            <article class="wp-duration card xs" v-for="t in day.infos">
-                <strong>
-                    <i class="icon-infos"></i> Infos<br>
-                    <small>{{ t.description }}</small>
-                </strong>
-                <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
-                <div class="left">
-                    <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                </div>
-            </article>
-            <hr>
-
-            <article class="wp-duration card xs">
-                <span  class="text-large text-xl">Total journée</span>
-                <div class="total">
-                    <span class="text-large text-xl">{{ day.duration | duration2(day.dayLength) }}</span>
-                    <em>heure(s)</em>
-                </div>
-                <div class="left">
-                    &nbsp;
-                </div>
-            </article>
             -->
 
+            <section class="othersWP">
+                <article class="wp-duration card xs"  v-for="t in day.othersWP">
+                    <strong>
+                        <i :class="'icon-'+t.label"></i> {{ others[t.label] ? others[t.label].label : t.label  }}<br>
+                        <small>{{ t.description }}</small>
+                    </strong>
+                    <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
+                    <div class="left">
+                        <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
+                    </div>
+                </article>
+            </section>
 
             <div class="alert-danger alert" v-if="day.duration > day.maxDay">
                 <i class="icon-attention-circled"></i>
                 Attention, le cumul des heures déclarées exéde la limite légale de <strong>{{ day.maxDay | heures }} heures</strong> fixée par le droit du travail.
             </div>
         </section>
-        <a href="#" @click="debug = !debug"><i class="icon-bug"></i> debug</a>
-        <pre v-show="debug">{{ day }}</pre>
     </div>
 </template>
 

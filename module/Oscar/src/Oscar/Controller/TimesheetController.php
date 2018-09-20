@@ -1683,6 +1683,8 @@ class TimesheetController extends AbstractOscarController
                         default:
                             $output['days'][$dayTimesheet]['infos'][] = $datas;
                     }
+
+                $output['days'][$dayTimesheet]['othersWP'][] = $datas;
                     $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
                     $output['total'] += (float)$t->getDuration();
 
