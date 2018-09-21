@@ -746,13 +746,12 @@ class TimesheetController extends AbstractOscarController
 //                header("Content-Transfer-Encoding: Binary");
 //                header("Content-disposition: attachment; filename=\"" . $name . "\"");
 //                die(readfile($filepath));
-            }
+            }*/
 
-            die("-------");
-        } else {
-            $datas = $timesheetService->getPersonTimesheets($person, false, $period, null);
-        }
-*/
+
+        $datas = $timesheetService->getPersonTimesheets($person, false, $period, null);
+
+
         return [
             "datas" => $datas,
             "person" => $person,
