@@ -23,6 +23,7 @@ return array(
         ////////////////////////////////////////////////////////////////////////
         // ! EXPERIMENTAL !
         'generated-documents' => [
+            /****
             'activity' => [
                 'sample' => [
                     'label' => 'Exemple de document',
@@ -35,6 +36,7 @@ return array(
                     'type' => 'Word'
                 ]
             ]
+            /****/
         ],
 
 
@@ -86,6 +88,7 @@ return array(
         'connectors' => [
             // Connection au tiers d'où seront obtenu les structures
             'organization' => [
+                /****
                'rest' => [
                   'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
                   'params'    => realpath(__DIR__) . '/../connectors/organization_rest.yml',

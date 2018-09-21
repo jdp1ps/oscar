@@ -111,8 +111,8 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         foreach ($o->getProjects() as $p ){
             if( $p->isPrincipal() && !$p->isOutOfDate() ){
                 foreach ($p->getProject()->getActivities() as $activity) {
-                    if( !in_array($activity->getActivity(), $activities) )
-                        $activities[] = $activity->getActivity();
+                    if( !in_array($activity, $activities) )
+                        $activities[] = $activity;
                 }
             }
         }
