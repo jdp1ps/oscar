@@ -1012,9 +1012,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         /** @var TimeSheet $timesheet */
         foreach ($query->getQuery()->getResult() as $timesheet) {
-            $group = 'Erreur';
+            $group = 'Projet inconnue';
             $groupId = null;
-            $subGroup = 'invalid label';
+            $subGroup = $timesheet->getLabel();
             $subGroupId = 'invalid ID';
             $subGroupType = 'invalid Type';
             $day = $timesheet->getDateFrom()->format('d');

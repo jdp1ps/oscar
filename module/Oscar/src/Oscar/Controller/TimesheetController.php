@@ -30,6 +30,7 @@ use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
+use PhpOffice\PhpWord\Style\Fill;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\Http\Request;
 use Zend\Http\Response;
@@ -592,12 +593,16 @@ class TimesheetController extends AbstractOscarController
 
             $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
             $lineWpFormula = '=SUM(C%s:AG%s)';
+            $rowWpFormula = '=SUM(%s10:%s%s)';
 
-
+            // Début des LOTS
             $lineWpStart = 10;
-            $lineWpCurent = $lineWpStart;
-            $lineWpCount = 0;
+
+            /** @var \PHPExcel $spreadsheet */
             $spreadsheet = \PHPExcel_IOFactory::load($modele);
+
+            $dateStart  = new \DateTime($period.'-01');
+            $dateEnd    = new \DateTime($period.'-01');
 
             $spreadsheet->getActiveSheet()->setCellValue('A1', $activity->getLabel());
             $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
@@ -611,58 +616,149 @@ class TimesheetController extends AbstractOscarController
 
             $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
             $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
-            $spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
+            //$spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
 
 
-
+            $this->getLogger()->debug(print_r($datas, true));
             $line = $lineWpStart;
-            foreach ($datas['declarations']['activities'] as $groupData) {
 
+            foreach ($datas['declarations']['activities'] as $groupData) {
                 $labelG = $groupData['label'];
                 $this->getLogger()->debug($labelG);
 
-
-
                 $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
                 $spreadsheet->getActiveSheet()->setCellValue('A'.$line, $labelG);
+                $spreadsheet->getActiveSheet()->mergeCells('A'.$line.':'.'AG'.$line);
+                $spreadsheet->getActiveSheet()->getCell('A'.$line)->getStyle()->applyFromArray([]);
                 $spreadsheet->getActiveSheet()->setCellValue('B'.$line, "");
-
-                /*
-                for( $i=0; $i<count($cellDays); $i++ ){
-                    $day = $i+1;
-                    $cellIndex = $cellDays[$i].$rowNum;
-                    //$totalDay = array_key_exists($day, $timesheetsWorkpackage) ? $timesheetsWorkpackage[$day] : 0.0;
-                    $spreadsheet->getActiveSheet()->setCellValue($cellIndex, 1.1);
-                }
-                */
 
                 $line++;
 
                 foreach ($groupData['subgroup'] as $subGroupData) {
                     $labelSG = $subGroupData['label'];
-                    $this->getLogger()->debug($labelSG);
                     $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
                     $spreadsheet->getActiveSheet()->setCellValue('B'.$line, $labelSG);
                     for( $i=0; $i<count($cellDays); $i++ ){
+
+                        // Mise en forme du jour pour obtenir les clefs
                         $day = $i+1;
                         if( $day < 10 ) $day = '0'.$day;
 
                         $cellIndex = $cellDays[$i].$line;
                         $value = 0.0;
+                        $style = [
+                            'fill' => [
+                                'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                                'color' => ['rgb' => 'ffffff']
+                            ]
+                        ];
 
                         if( array_key_exists($day, $subGroupData['days']) ){
                             $value = $subGroupData['days'][$day];
+                            $style['fill']['color']['rgb'] = 'bbf776';
                         }
 
+                        if( $datas['daysInfos'][$day]['close'] ){
+                            $style['fill']['color']['rgb'] = 'cccccc';
+                        }
+
+                        $spreadsheet->getActiveSheet()->getCell($cellIndex)->getStyle()->applyFromArray($style);
                         $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $value);
                     }
                     $spreadsheet->getActiveSheet()->setCellValue('AH'.$line, sprintf($lineWpFormula, $line, $line));
                     $line++;
                 }
-
-                //$spreadsheet->getActiveSheet()->setCellValue('B'.$rowNum, 2.2);
-               //
             }
+
+            $lineTotalWP = $line;
+
+            for( $i=0; $i<count($cellDays); $i++ ){
+                $cell = $cellDays[$i];
+                $sum = sprintf($rowWpFormula, $cell, $cell, $line);
+                $spreadsheet->getActiveSheet()->setCellValue($cell.($line+1), $sum);
+            }
+
+            $spreadsheet->getActiveSheet()->setCellValue('AH'.($line+1), sprintf($rowWpFormula, 'AH', 'AH', $line));
+
+            $line += 2;
+            $spreadsheet->getActiveSheet()->insertNewRowBefore(($line +1));
+            $line++;
+
+            foreach( $this->getOthersWP() as $other ){
+                $this->getLogger()->debug(print_r($other, true));
+                // foreach ($datas['declarations']['activities'] as $groupData) {
+                $spreadsheet->getActiveSheet()->insertNewRowBefore(($line +1));
+                $spreadsheet->getActiveSheet()->setCellValue('B'.$line, $other['label']);
+                $daysDatas = $datas['declarations']['others']['Hors-lot']['subgroup'][$other['label']]['days'];
+
+                for( $i=0; $i<count($cellDays); $i++ ){
+
+                    // Mise en forme du jour pour obtenir les clefs
+                    $day = $i+1;
+                    if( $day < 10 ) $day = '0'.$day;
+
+                    $cellIndex = $cellDays[$i].$line;
+                    $value = 0.0;
+                    $style = [
+                        'fill' => [
+                            'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                            'color' => ['rgb' => 'ffffff']
+                        ]
+                    ];
+
+                    if( array_key_exists($day, $daysDatas) ){
+                        $value = $daysDatas[$day];
+                        $style['fill']['color']['rgb'] = 'bbf776';
+                    }
+
+                    if( $datas['daysInfos'][$day]['close'] ){
+                        $style['fill']['color']['rgb'] = 'cccccc';
+                    }
+
+                    $spreadsheet->getActiveSheet()->getCell($cellIndex)->getStyle()->applyFromArray($style);
+                    $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $value);
+                }
+                $spreadsheet->getActiveSheet()->setCellValue('AH'.$line, sprintf($lineWpFormula, $line, $line));
+                $line++;
+            }
+
+            $line += 1;
+
+
+
+            $startTotal = $lineTotalWP;
+            $end = $line-1;
+
+            for( $i=0; $i<count($cellDays); $i++ ){
+
+                // Mise en forme du jour pour obtenir les clefs
+                $day = $i+1;
+                if( $day < 10 ) $day = '0'.$day;
+
+                $col = $cellDays[$i];
+                $cellIndex = $cellDays[$i].$line;
+
+                $value = sprintf("=SUM(%s%s:%s%s)", $col, $startTotal, $col, $end); //$lineTotalWP';
+                $style = [
+                    'fill' => [
+                        'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                        'color' => ['rgb' => 'ffffff']
+                    ]
+                ];
+
+                if( $datas['daysInfos'][$day]['close'] ){
+                    $style['fill']['color']['rgb'] = 'cccccc';
+                }
+
+                $spreadsheet->getActiveSheet()->getCell($cellIndex)->getStyle()->applyFromArray($style);
+                $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $value);
+            }
+
+            $spreadsheet->getActiveSheet()->setCellValue('AH'.$line, sprintf($lineWpFormula, $line, $line));
+
+            // TOTAL
+
+
             $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
 
             $name = ($person->getLadapLogin())."-" . $period . ".xls";
