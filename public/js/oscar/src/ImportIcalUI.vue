@@ -20,15 +20,18 @@
                 <p>Selectionnez une correspondance pour ce type de créneau : </p>
                 <section class="list">
                     <article v-for="c in correspondances" class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance.toLowerCase()] == c }" @click="handlerChangeCorrespondance(editCorrespondance, c)">
-                        <em v-if="c.wp_code"><i class="icon-cube"></i>Lot de travail</em>
-                        <em v-else>Hors-lot</em>
-                        <small>{{ c.description }}</small>
-                        <h3>{{ c.label }}</h3>
+                        <h3>
+                            <i class="icon-cube" v-if="c.wp_code"></i>
+                            <i class="icon-tag" v-else></i>
+                            <strong>{{ c.label }}</strong>
+                            <small>{{ c.description }}</small>
+                        </h3>
                     </article>
                     <article class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance.toLowerCase()] == null }" @click="handlerChangeCorrespondance(editCorrespondance, null)">
                         <em><i class="icon-cancel-circled"></i></em>
-                        <small>Ce type de créneau sera ignoré</small>
-                        <h3>Ignorer ces créneaux</h3>
+                        <h3>
+                            <strong>Ignorer ces créneaux</strong>
+                            <small>Ce type de créneau sera ignoré</small></h3>
                     </article>
                 </section>
             </div>
@@ -135,12 +138,12 @@
                     <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
                     <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
                 </div>
-                
+
             </div>
         </div>
     </section>
 </template>
-<style>
+<style scoped>
     .period {
         background: white;
 
@@ -167,6 +170,7 @@
 
     .correspondance-choose {
         border-top: solid #efede4 thin;
+        color: #777;
         font-size: 1em;
         cursor: pointer;
         padding: 4px 1em;
@@ -182,8 +186,14 @@
     .correspondance-choose h3 {
         margin: 0;
         padding: 0;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 1em;
+    }
+    .correspondance-choose h3 strong {
+        font-weight: 700;
+        color: black;
+    }
+    .correspondance-choose h3 small {
+        font-size: .8em;
     }
     .jour {
         white-space: nowrap;
