@@ -97,8 +97,10 @@
                             <th>&nbsp;</th>
                             <th class="jour">{{ d.label }}</th>
                             <td class="jour-description">
-                                <div v-for="t in d.timesheets" :class="{ 'ignored': !t.importable }">
-                                    <i class="icon-calendar"></i>{{ t.label }} ({{ t | itemDuration }} min)
+                                <div v-for="t in d.timesheets" class="creneau" :class="{ 'ignored': !t.importable,  'imported': t.imported }" @click="debug = t">
+                                    <i class="icon-calendar" v-if="t.importable"></i>
+                                    <i class="icon-cancel-alt" v-else></i>
+                                    {{ t.label }} ({{ t | itemDuration }} min)
                                     <span v-if="t.destinationLabel" class="cartouche xs">
                                         <i class="icon-cube" v-if="t.destinationCode == 'wp'"></i>
                                         <i class="icon-link-ext" v-else></i>
@@ -126,14 +128,14 @@
                 <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter">
                 <div v-for="label in labels" class="card xs" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
                     <i class="icon-tag"></i> <strong>{{ label }}</strong>
-                    <span v-if="labelsCorrespondance[label.toLowerCase()]" class="cartouche card-info" @click="debug = labelsCorrespondance[label.toLowerCase()]">
+                    <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info" @click="debug = labelsCorrespondance[label.toLowerCase()]">
                         <i class="icon-link-outline"></i>
                         {{ labelsCorrespondance[label.toLowerCase()].label }}
                     </span>
                     <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
                     <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
-
                 </div>
+                
             </div>
         </div>
     </section>
@@ -195,8 +197,11 @@
     .jour-heures {
         text-align: right;
     }
+    .creneau {
+        opacity: .5;
+    }
+    .creneau.imported { opacity: 1 }
     .list {
-
         margin: 1em;
         border: solid thin #d9deda;
 
@@ -334,8 +339,36 @@
 
 
         methods: {
+            toggleImported(timesheet){
+                let imported = timesheet.imported;
+                if (imported == true) {
+                    timesheet.imported = false;
+                } else {
+                    if( timesheet.importable == true ){
+                        timesheet.imported = true;
+                    }
+                }
+            },
+
             handlerChangeCorrespondance(editCorrespondance, dest){
-                console.log(editCorrespondance, dest);
+                this.timesheets.forEach(t => {
+                    if( t.label == editCorrespondance ){
+                        if ( dest == null ){
+                            t.destinationCode = "";
+                            t.destinationId = -1;
+                            t.destinationLabel = "";
+                            t.imported = false;
+                        } else {
+                            if(  t.importable == true ){
+                                t.destinationCode = dest.code;
+                                t.destinationId = dest.id;
+                                t.destinationLabel = dest.label;
+                                t.imported = true;
+                            }
+                        }
+
+                    }
+                })
                 this.labelsCorrespondance[editCorrespondance.toLowerCase()] = dest;
                 this.editCorrespondance = null;
             },
@@ -548,6 +581,7 @@
                     destinationCode = "",
                     destinationId = -1,
                     destinationLabel = "",
+                    imported = false,
                     correspondance = this.findCorrespondance(item.label);
 
                 if( this.hasValidationPeriod(period) ){
@@ -558,6 +592,7 @@
                     destinationCode = correspondance.code;
                     destinationId = correspondance.id;
                     destinationLabel = correspondance.label;
+                    imported = true;
                 }
 
 
@@ -576,6 +611,7 @@
                     label: item.summary,
                     summary: item.summary,
                     importable: importable,
+                    imported: imported,
                     lastimport: true,
                     start: item.start,
                     end: item.end,
