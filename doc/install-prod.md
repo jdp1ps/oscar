@@ -402,10 +402,6 @@ $settings = array(
 #### Configurer l'authentification CAS
 
 **UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*.
-Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
-permet de s'identifier à la place d'un utilisateur.
-
-Exemple de configuration du CAS :
 
 ```php
 <?php
@@ -438,6 +434,22 @@ return array(
     'unicaen-auth' => $settings,
 );
 ```
+
+### Usurpation
+
+Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
+permet de s'identifier à la place d'un utilisateur.
+
+On utilise l'identifiant `compte=compteusurpation` où `compte` correspond à 
+l'identifiant principale (qui doit figurer dans le tableau `usurpation_allowed_usernames`), 
+et `compteusurpation` correspond au compte usurpé. Le mot de passe est celui de `compte`.
+
+Cette option n'est pas compatible avec l'identification CAS.
+
+BUG CONNU : Cette option est utilisé pour les tests uniquement. Il peut arriver que UnicaenApp 
+ait des difficultés à detecter le rôle à charger lors d'une usurpation. Vérifiez toujours 
+lors d'une usurpation qu'un rôle est bien actif en cliquant sur le nom du compte 
+dans le menu principal.
 
 
 ## Première connexion
