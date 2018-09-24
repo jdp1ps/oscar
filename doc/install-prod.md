@@ -91,14 +91,12 @@ Si la base de données est sur la même machine, installation du serveur **Postg
 
 ```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
-apt-get install postgresql-server-9.5
+apt-get install postgresql-server
 
 ```
 
 
-
 ## Installation de la copie de Oscar
-
 
 ### Emplacement
 
@@ -221,6 +219,14 @@ le dépôt dans le fichier : `install/oscar-install.sql`.
 
 ```bash
 psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
+```
+
+### Mise à jour du modèle
+
+Mettre à jour le modèle de donnée : 
+
+```bash
+php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
 
 ### Configuration de la BDD dans Oscar
