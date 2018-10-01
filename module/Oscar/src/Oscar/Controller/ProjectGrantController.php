@@ -1176,8 +1176,8 @@ class ProjectGrantController extends AbstractOscarController
 
             $sort = $this->params()->fromQuery('sort', 'dateUpdated');
             $sortIgnoreNull = $this->params()->fromQuery('sortIgnoreNull', null);
-            $sortDirection = $this->params()->fromQuery('sortDirection',
-                'desc');
+            $sortDirection = $this->params()->fromQuery('sortDirection','desc');
+            $projectview = $this->params()->fromQuery('projectview', '');
 
             // Récupération des critères GET
             $criteria = $this->params()->fromQuery('criteria', []);
@@ -1261,6 +1261,8 @@ class ProjectGrantController extends AbstractOscarController
             // Paramètres de la requête finale
             $parameters = [];
 
+            $projectIds = [];
+
 
             if (!$search && count($criteria) === 0) {
                 $ids = [];
@@ -1336,6 +1338,11 @@ class ProjectGrantController extends AbstractOscarController
 
                             }
                         }
+                    }
+
+                    if( $projectview == 'on' && count($criteria) == 0 )
+                        $projectIds = $this->getActivityService()->getProjectsIdsSearch($search);
+
                     }
                 }
 
@@ -1478,7 +1485,6 @@ class ProjectGrantController extends AbstractOscarController
                             $parameters['withouttype'] = array_merge($parameters['withouttype'],
                                 $this->getActivityTypeService()->getTypeIdsInside($value1));
                             break;
-
                         // Filtre sur la/les incidences financière
                         case 'af' :
                             if (!isset($parameters['withfinancial'])) {
@@ -1487,7 +1493,6 @@ class ProjectGrantController extends AbstractOscarController
                             }
                             $parameters['withfinancial'][] = Activity::getFinancialImpactValues()[$value1];
                             break;
-
                         case 'sf' :
                             if (!isset($parameters['withoutfinancial'])) {
                                 $parameters['withoutfinancial'] = [];
@@ -1508,7 +1513,6 @@ class ProjectGrantController extends AbstractOscarController
                         case 'aj':
                             $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1']);
                             break;
-
                         case 'add' :
                         case 'adf' :
                         case 'adm' :
@@ -1539,14 +1543,9 @@ class ProjectGrantController extends AbstractOscarController
                             } else {
                                 $crit['error'] = 'Plage de date invalide';
                             }
-
                             break;
-
                     }
-
                     $criterias[] = $crit;
-
-
                     if ($type == 'ap' || $type == 'ao' || $type == 'pm' ) {
 
                         if ($filterIds === null) {
@@ -1555,25 +1554,19 @@ class ProjectGrantController extends AbstractOscarController
                             $filterIds = array_intersect($filterIds, $ids);
                         }
                     }
-
                     if ($type == "sp" || $type == 'so') {
                         $filterNotIds = array_merge($filterNotIds, $ids);
                     }
                 }
-
                 if ($filterNotIds) {
                     $qb->andWhere('c.id NOT IN(:not)');
                     $parameters['not'] = $filterNotIds;
                 }
-
                 if ($filterIds !== null) {
                     $qb->andWhere('c.id IN(:ids)');
                     $parameters['ids'] = $filterIds;
                 }
-
                 $qb->setParameters($parameters);
-
-
                 // FILTRE STATIC SUR LES ORGA
                 if ($this->getOrganizationPerimeter()) {
 
@@ -1585,9 +1578,7 @@ class ProjectGrantController extends AbstractOscarController
                         . $organizationsPerimeterIds
                         . ')');
                 }
-            }
 
-            $projectview = $this->params()->fromQuery('projectview', '');
 
             $activities = null;
             if( $startEmpty === false ) {
@@ -1598,16 +1589,18 @@ class ProjectGrantController extends AbstractOscarController
                 foreach ($qbIds->getQuery()->getResult() as $row) {
                     $ids[] = $row['id'];
                 }
-                if ( $projectview == 'on' )
+                if ( $projectview == 'on' ) {
+                   $parameters['projectIds'] = $projectIds;
                     $qb = $this->getEntityManager()
                         ->getRepository(Project::class)
                         ->createQueryBuilder('pr')
-                        ->innerJoin('pr.grants', 'c')
-                        ->where('c.id IN (:ids)')
-                        ->setParameter('ids', $ids);
+                        ->leftJoin('pr.grants', 'c')
+                        ->where('c.id IN (:ids) OR pr.id IN(:projectIds)')
+                        ->setParameters($parameters);
 
-                else
+                } else {
                     $qb->select('c');
+                }
 
                 $qb->orderBy('c.' . $sort, $sortDirection);
                 if( $sortIgnoreNull ){
@@ -1615,7 +1608,6 @@ class ProjectGrantController extends AbstractOscarController
                 }
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
-
             $view = new ViewModel([
                 'projectview' => $projectview,
                 'exportIds' => implode(',', $ids),
@@ -1637,10 +1629,7 @@ class ProjectGrantController extends AbstractOscarController
                 'sortIgnoreNull' => $sortIgnoreNull,
                 'types' => $this->getActivityTypeService()->getActivityTypes(true),
             ]);
-
-
             $view->setTemplate('oscar/project-grant/advanced-search.phtml');
-
             return $view;
 
         } catch (\Exception $e) {
@@ -1848,7 +1837,6 @@ class ProjectGrantController extends AbstractOscarController
             'contracts' => $paginator,
             'search' => $search,
             'filterStatus' => $filterStatus,
-            'filterJalons' => $jalons,
             'filterType' => $filterType,
             'filterYear' => $filterYears,
             'sorts' => $sortCriteria,

@@ -62,6 +62,16 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         return $query->getQuery()->getSingleScalarResult();
     }
 
+    public function getProjectsIdsSearch($text){
+        $query = $this->getEntityManager()->getRepository(Project::class)
+            ->createQueryBuilder('p')
+            ->select('p.id')
+            ->where('p.label LIKE :search OR p.description LIKE :search')
+            ->setParameter('search', '%'.$text.'%');
+        $projects = $query->getQuery()->getResult();
+        return array_map('current', $projects);
+    }
+
 
     public function getActivityIdsByJalon( $jalonTypeId ){
         $q = $this->getActivityRepository()->createQueryBuilder('c')
