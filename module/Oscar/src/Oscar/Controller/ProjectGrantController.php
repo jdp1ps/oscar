@@ -1110,31 +1110,27 @@ class ProjectGrantController extends AbstractOscarController
                 'ap' => "Impliquant la personne",
                 'sp' => "N'impliquant pas la personne",
                 'pm' => "Impliquant une de ces personnes",
-
                 'ao' => "Impliquant l'organisation",
                 'so' => "N'impliquant pas l'organisation",
-
                 'as' => 'Ayant le statut',
                 'ss' => 'N\'ayant pas le statut',
-
                 'cnt' => "Pays (d'une organisation)",
-
                 'af' => 'Ayant comme incidence financière',
                 'sf' => 'N\'ayant pas comme incidence financière',
-
                 'mp' => 'Montant prévu',
-
                 'at' => 'est de type',
                 'st' => 'n\'est pas de type',
-
                 'add' => 'Date de début',
                 'adf' => 'Date de fin',
                 'adc' => 'Date de création',
                 'adm' => 'Date de dernière mise à jour',
                 'ads' => 'Date de signature',
                 'adp' => 'Date d\'ouverture du PFI dans SIFAC',
-
                 'pp' => 'Activités sans projet',
+
+                // Ajout d'un filtre sur les jalons
+                'aj' => 'Ayant le jalon'
+
             ];
 
             // Correspondance des champs de type date
@@ -1156,6 +1152,21 @@ class ProjectGrantController extends AbstractOscarController
                 'dateSigned' => 'Date de signature',
                 'dateOpened' => "Date d'ouverture du PFI dans SIFAC",
             ];
+
+            $milestonesCriterias = [
+
+            ];
+
+            $jalonsFilters = [];
+            $jalons = $this->getEntityManager()->getRepository(DateType::class)->findAll();
+            /** @var DateType $jalon */
+            foreach ($jalons as $jalon) {
+                $jalonsFilters[] = [
+                  'id' => $jalon->getId(),
+                  'label' => $jalon->getLabel(),
+                  'finishable' => $jalon->isFinishable()
+                ];
+            }
 
             // Trie
             $sortDirections = [
@@ -1256,13 +1267,14 @@ class ProjectGrantController extends AbstractOscarController
                 // Requêtes de base
                 /** @var QueryBuilder $qb */
                 $qb = $this->getEntityManager()->createQueryBuilder()
-                    ->select('c, m1, p1, pr, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis')
+                    ->select('c, m1, p1, pr, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis, ml')
                     ->from(Activity::class, 'c')
                     ->leftJoin('c.persons', 'm1')
                     ->leftJoin('m1.person', 'pers1')
                     ->leftJoin('c.disciplines', 'dis')
                     ->leftJoin('c.activityType', 't1')
                     ->leftJoin('c.organizations', 'p1')
+                    ->leftJoin('c.milestones', 'ml')
                     ->leftJoin('p1.organization', 'orga1')
                     ->leftJoin('c.documents', 'd1')
                     ->leftJoin('c.project', 'pr')
@@ -1493,6 +1505,10 @@ class ProjectGrantController extends AbstractOscarController
                                 $parameters['countries'] = $value1;
                             }
                             break;
+                        case 'aj':
+                            $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1']);
+                            break;
+
                         case 'add' :
                         case 'adf' :
                         case 'adm' :
@@ -1600,7 +1616,6 @@ class ProjectGrantController extends AbstractOscarController
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
 
-
             $view = new ViewModel([
                 'projectview' => $projectview,
                 'exportIds' => implode(',', $ids),
@@ -1610,6 +1625,7 @@ class ProjectGrantController extends AbstractOscarController
                 'countries' => $this->getOrganizationService()->getCountriesList(),
                 'fieldsCSV' => $this->getActivityService()->getFieldsCSV(),
                 'persons' => $persons,
+                'filterJalons' => $jalonsFilters,
                 'activities' => $activities,
                 'search' => $search,
                 'filterPersons' => $filterPersons,
@@ -1832,6 +1848,7 @@ class ProjectGrantController extends AbstractOscarController
             'contracts' => $paginator,
             'search' => $search,
             'filterStatus' => $filterStatus,
+            'filterJalons' => $jalons,
             'filterType' => $filterType,
             'filterYear' => $filterYears,
             'sorts' => $sortCriteria,
