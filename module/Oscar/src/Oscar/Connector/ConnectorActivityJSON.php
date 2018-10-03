@@ -149,7 +149,6 @@ class ConnectorActivityJSON implements ConnectorInterface
                 return $roleObj;
             } catch (\Exception $e ){
                 throw new ConnectorException(sprintf("Impossible de créer le rôle '%s' : %s", $role, $e->getMessage()));
-                throw new ConnectorException(sprintf("Impossible de créer le rôle '%s' : %s", $role, $e->getMessage()));
             }
         } catch (NonUniqueResultException $e){
             throw new ConnectorException(sprintf("ATTENTION ! Le rôle '%s' est présent plusieurs fois dans la base de données", $role));
