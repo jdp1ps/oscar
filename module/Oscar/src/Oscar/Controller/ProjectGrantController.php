@@ -1309,9 +1309,6 @@ class ProjectGrantController extends AbstractOscarController
 
                             }
                             if( $projectview == 'on' ){
-                                if(count($filterIds) == 0)
-                                    $filterIds = null;
-
                                 $projectIds = $this->getActivityService()->getProjectsIdsSearch($search);
 
                             }
@@ -1542,14 +1539,18 @@ class ProjectGrantController extends AbstractOscarController
                 }
 
                 if ($filterIds !== null) {
+                    if  ($projectIds) {
 
-
+                        $qb->andWhere('c.id IN(:ids) OR pr.id IN(:projectIds)');
+                        $parameters['projectIds'] = $projectIds;
+                    } else {
                         $qb->andWhere('c.id IN(:ids)');
+                    }
+
+
 
                     $parameters['ids'] = $filterIds;
-                }
-
-                if ($projectIds) {
+                } elseif  ($projectIds) {
 
                     $qb->andWhere('pr.id IN(:projectIds)');
                     $parameters['projectIds'] = $projectIds;
@@ -1584,7 +1585,6 @@ class ProjectGrantController extends AbstractOscarController
 
 
                 if ( $projectview == 'on' ) {
-                    var_dump($qb->getQuery()->getSQL());
                    $qb->select('pr');
 
                 } else {
