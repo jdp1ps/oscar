@@ -1073,9 +1073,9 @@ class ProjectGrantController extends AbstractOscarController
     }
 
     /**
-     * Nouveau système de recherche des activités.
-     *
-     * @return array
+     * @param \Doctrine\ORM\QueryBuilder $qb
+     * @return ViewModel
+     * @throws \Exception
      */
     public function applyAdvancedSearch($qb)
     {
@@ -1276,6 +1276,7 @@ class ProjectGrantController extends AbstractOscarController
                 }
             } else {
                 if ($search) {
+
                     // La saisie est un PFI
                     if (preg_match($this->getServiceLocator()->get("Config")['oscar']['validation']['pfi'], $search)) {
                         $parameters['search'] = $search;
@@ -1307,14 +1308,19 @@ class ProjectGrantController extends AbstractOscarController
                                 $filterIds = [];
 
                             }
-                            if( $projectview == 'on' )
+                            if( $projectview == 'on' ){
+                                if(count($filterIds) == 0)
+                                    $filterIds = null;
+
                                 $projectIds = $this->getActivityService()->getProjectsIdsSearch($search);
+
+                            }
+
                             }
                         }
                     }
-
-
                 }
+
 
                 // Analyse des critères de recherche
                 foreach ($criteria as $c) {
@@ -1528,17 +1534,24 @@ class ProjectGrantController extends AbstractOscarController
                         $filterNotIds = array_merge($filterNotIds, $ids);
                     }
                 }
+
+
                 if ($filterNotIds) {
                     $qb->andWhere('c.id NOT IN(:not)');
                     $parameters['not'] = $filterNotIds;
                 }
+
                 if ($filterIds !== null) {
-                    $qb->andWhere('c.id IN(:ids)');
+
+
+                        $qb->andWhere('c.id IN(:ids)');
+
                     $parameters['ids'] = $filterIds;
                 }
 
                 if ($projectIds) {
-                    $qb->orWhere('pr.id IN(:projectIds)');
+
+                    $qb->andWhere('pr.id IN(:projectIds)');
                     $parameters['projectIds'] = $projectIds;
                 }
 
@@ -1571,14 +1584,8 @@ class ProjectGrantController extends AbstractOscarController
 
 
                 if ( $projectview == 'on' ) {
-                   $parameters['projectIds'] = $projectIds;
+                    var_dump($qb->getQuery()->getSQL());
                    $qb->select('pr');
-                    /*$qb = $this->getEntityManager()
-                        ->getRepository(Project::class)
-                        ->createQueryBuilder('pr')
-                        ->leftJoin('pr.grants', 'c')
-                        ->where('c.id IN (:ids) OR pr.id IN(:projectIds)')
-                        ->setParameters($parameters);*/
 
                 } else {
                     $qb->select('c, pr, m1, p1, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis');
