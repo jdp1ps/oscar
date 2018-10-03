@@ -180,7 +180,8 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
         } else {
             $values = explode($separator, $value);
             foreach ($values as $v) {
-                $out[] = trim($v);
+                $extracted = trim($v);
+                if( $extracted != "" ) $out[] = trim($v);
             }
         }
         return $out;
