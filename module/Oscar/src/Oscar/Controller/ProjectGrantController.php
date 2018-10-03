@@ -1266,45 +1266,15 @@ class ProjectGrantController extends AbstractOscarController
 
             if (!$search && count($criteria) === 0) {
                 $ids = [];
-                // Requêtes de base
-                /** @var QueryBuilder $qb */
-                $qb = $this->getEntityManager()->createQueryBuilder()
-                    ->select('c, m1, p1, pr, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis, ml')
-                    ->from(Activity::class, 'c')
-                    ->leftJoin('c.persons', 'm1')
-                    ->leftJoin('m1.person', 'pers1')
-                    ->leftJoin('c.disciplines', 'dis')
-                    ->leftJoin('c.activityType', 't1')
-                    ->leftJoin('c.organizations', 'p1')
-                    ->leftJoin('c.milestones', 'ml')
-                    ->leftJoin('p1.organization', 'orga1')
-                    ->leftJoin('c.documents', 'd1')
-                    ->leftJoin('c.project', 'pr')
-                    ->leftJoin('pr.members', 'm2')
-                    ->leftJoin('pr.partners', 'p2')
-                    ->leftJoin('m2.person', 'pers2')
-                    ->leftJoin('p2.organization', 'orga2')
-                ;
-
                 if ($include) {
                     $organizationsPerimeterIds = implode(',', $include);
-
                     $qb->andWhere('p1.organization IN('
                             . $organizationsPerimeterIds
                             . ') OR p2.organization IN('
                             . $organizationsPerimeterIds
                             . ')');
                 }
-                /*
-                else {
-                    $startEmpty = true;
-                }
-                /****/
-
             } else {
-
-                // Traitement : Champ de recherche libre
-
                 if ($search) {
                     // La saisie est un PFI
                     if (preg_match($this->getServiceLocator()->get("Config")['oscar']['validation']['pfi'], $search)) {
@@ -1337,13 +1307,13 @@ class ProjectGrantController extends AbstractOscarController
                                 $filterIds = [];
 
                             }
+                            if( $projectview == 'on' )
+                                $projectIds = $this->getActivityService()->getProjectsIdsSearch($search);
+                            }
                         }
                     }
 
-                    if( $projectview == 'on' && count($criteria) == 0 )
-                        $projectIds = $this->getActivityService()->getProjectsIdsSearch($search);
 
-                    }
                 }
 
                 // Analyse des critères de recherche
@@ -1566,7 +1536,15 @@ class ProjectGrantController extends AbstractOscarController
                     $qb->andWhere('c.id IN(:ids)');
                     $parameters['ids'] = $filterIds;
                 }
+
+                if ($projectIds) {
+                    $qb->orWhere('pr.id IN(:projectIds)');
+                    $parameters['projectIds'] = $projectIds;
+                }
+
                 $qb->setParameters($parameters);
+
+
                 // FILTRE STATIC SUR LES ORGA
                 if ($this->getOrganizationPerimeter()) {
 
@@ -1582,31 +1560,38 @@ class ProjectGrantController extends AbstractOscarController
 
             $activities = null;
             if( $startEmpty === false ) {
-                $qbIds = $qb->select('DISTINCT c.id');
 
-
-                $ids = [];
-                foreach ($qbIds->getQuery()->getResult() as $row) {
-                    $ids[] = $row['id'];
+                if( $projectview == 'on' ){
+                    $qbIds = $qb->select('DISTINCT pr.id');
+                } else {
+                    $qbIds = $qb->select('DISTINCT c.id');
                 }
+
+                $ids = array_map('current', $qbIds->getQuery()->getResult());
+
+
                 if ( $projectview == 'on' ) {
                    $parameters['projectIds'] = $projectIds;
-                    $qb = $this->getEntityManager()
+                   $qb->select('pr');
+                    /*$qb = $this->getEntityManager()
                         ->getRepository(Project::class)
                         ->createQueryBuilder('pr')
                         ->leftJoin('pr.grants', 'c')
                         ->where('c.id IN (:ids) OR pr.id IN(:projectIds)')
-                        ->setParameters($parameters);
+                        ->setParameters($parameters);*/
 
                 } else {
-                    $qb->select('c');
+                    $qb->select('c, pr, m1, p1, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis');
+                    $qb->orderBy('c.' . $sort, $sortDirection);
+                    if( $sortIgnoreNull ){
+                        $qb->andWhere('c.' . $sort . ' IS NOT NULL');
+                    }
                 }
 
-                $qb->orderBy('c.' . $sort, $sortDirection);
-                if( $sortIgnoreNull ){
-                    $qb->andWhere('c.' . $sort . ' IS NOT NULL');
-                }
+
+
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
+
             }
             $view = new ViewModel([
                 'projectview' => $projectview,
@@ -1646,23 +1631,46 @@ class ProjectGrantController extends AbstractOscarController
     {
 
         // Requêtes de base
-        $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('c, m1, p1, pr, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis')
-            ->from(Activity::class, 'c')
-            ->leftJoin('c.persons', 'm1')
-            ->leftJoin('m1.person', 'pers1')
-            ->leftJoin('c.disciplines', 'dis')
-            ->leftJoin('c.activityType', 't1')
-            ->leftJoin('c.organizations', 'p1')
-            ->leftJoin('p1.organization', 'orga1')
-            ->leftJoin('c.documents', 'd1')
-            ->leftJoin('c.project', 'pr')
-            ->leftJoin('pr.members', 'm2')
-            ->leftJoin('pr.partners', 'p2')
-            ->leftJoin('m2.person', 'pers2')
-            ->leftJoin('p2.organization', 'orga2');
 
-        return $this->applyAdvancedSearch($qb);
+        $projectview = $this->params()->fromQuery('projectview', '');
+
+
+        if( $projectview == 'on') {
+
+            $qb = $this->getEntityManager()->createQueryBuilder()
+                ->select('pr')
+                ->from(Project::class, 'pr')
+                ->leftJoin('pr.grants', 'c')
+                ->leftJoin('c.persons', 'm1')
+                ->leftJoin('m1.person', 'pers1')
+                ->leftJoin('c.disciplines', 'dis')
+                ->leftJoin('c.activityType', 't1')
+                ->leftJoin('c.organizations', 'p1')
+                ->leftJoin('p1.organization', 'orga1')
+                ->leftJoin('c.documents', 'd1')
+                ->leftJoin('pr.members', 'm2')
+                ->leftJoin('pr.partners', 'p2')
+                ->leftJoin('m2.person', 'pers2')
+                ->leftJoin('p2.organization', 'orga2');
+        } else {
+            $qb = $this->getEntityManager()->createQueryBuilder()
+                ->select('c')
+                ->from(Activity::class, 'c')
+                ->leftJoin('c.persons', 'm1')
+                ->leftJoin('m1.person', 'pers1')
+                ->leftJoin('c.disciplines', 'dis')
+                ->leftJoin('c.activityType', 't1')
+                ->leftJoin('c.organizations', 'p1')
+                ->leftJoin('p1.organization', 'orga1')
+                ->leftJoin('c.documents', 'd1')
+                ->leftJoin('c.project', 'pr')
+                ->leftJoin('pr.members', 'm2')
+                ->leftJoin('pr.partners', 'p2')
+                ->leftJoin('m2.person', 'pers2')
+                ->leftJoin('p2.organization', 'orga2');
+        }
+
+            return $this->applyAdvancedSearch($qb);
     }
 
     /**
