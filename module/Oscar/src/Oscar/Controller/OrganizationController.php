@@ -70,7 +70,7 @@ class OrganizationController extends AbstractOscarController
         } else {
             $token = $this->getSessionService()->createToken('organization-delete');
         }
-        
+
         return [
             'organization' => $organization,
             'token' => $token

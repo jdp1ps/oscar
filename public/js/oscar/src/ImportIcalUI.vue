@@ -234,9 +234,6 @@
                 daysString: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
                 timesheets: null,
                 labelFilter: "",
-                // @todo à récupérer depuis l'app
-                periodStart: "2018-06",
-
                 // @todo à récupérer depuis le serveur
                 periodEnd: "2018-12",
                 debug: null,
@@ -254,7 +251,8 @@
             moment: { required: true },
             dayLength: { required: true },
             exists: { default: {} },
-            correspondances: { required: true }
+            correspondances: { required: true },
+            periodStart: { required: true }
         },
 
         computed: {

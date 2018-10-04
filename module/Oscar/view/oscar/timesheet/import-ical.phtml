@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="/js/oscar/dist/importicalui.css" />
 <script>
     require(['vue', 'vue-resource', 'mm', 'ical', 'ImportIcalUI'], function(Vue, VueResource, moment, ICAL, ImportIcalUI) {
-        console.log(Vue);
+
         Vue.use(VueResource);
 
         Vue.filter('month', function(v){
@@ -29,13 +29,8 @@
             return hours +":" +minutes;
         });
 
-        // TODO transmettre à la vue les correspondances
-        var associations = {
-
-        };
-
         var corr = <?= json_encode($correspondances) ?>;
-        console.log(corr);
+
         new Vue({
             el: '#app',
             render(h){
@@ -44,6 +39,7 @@
                         ICAL: window.ICAL,
                         moment: moment,
                         dayLength: 7.5,
+                        periodStart: '<?= $period ?>',
                         exists: <?= json_encode($exists) ?>,
                         correspondances: corr
 

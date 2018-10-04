@@ -860,10 +860,14 @@ class TimesheetController extends AbstractOscarController
         // Liste des types de créneau valide
         $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson());
 
+        $now = new \DateTime();
+        $period = $this->params()->fromQuery('period', $now->format('Y-m'));
+
         $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($this->getCurrentPerson());
 
         return [
             'exists' => $resume,
+            'period' => $period,
             'correspondances' => $correspondances
         ];
     }
@@ -1486,7 +1490,6 @@ class TimesheetController extends AbstractOscarController
 
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
-
 
         $dayLength = $this->getTimesheetService()->getDayDuration($currentPerson);
         $declarationInHours = $this->getTimesheetService()->isDeclarationsHoursPerson($currentPerson);
