@@ -4,7 +4,7 @@
         <div class="btn-group">
             <select name="format" class="form-control xs">
                 <option value="xls" selected>XLS (Excel)</option>
-                <option value="csv">CSV (Commat Separated Value)</option>
+                <option value="csv">CSV (Comma Separated Value)</option>
             </select>
             <button type="submit" class="btn btn-xs btn-default"> <i class="icon-download-outline"></i>Télécharger</button>
             <button type="button" class="btn btn-xs btn-default" @click="showConfiguration = !showConfiguration"> <i class="icon-cog"></i>Configurer</button>
