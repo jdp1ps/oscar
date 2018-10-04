@@ -450,10 +450,10 @@
 
                 });
             </script>
-
+            <hr>
             <form action="<?= $this->url('contract/csvpayments') . $perimeter ?>" class=" export-all-area" method="post">
                 <input type="hidden" name="ids" value="<?= $exportIds ?>">
-                <button type="submit" href="#" class="btn btn-default">
+                <button type="submit" href="#" class="btn btn-default btn-xs">
                     <i class="icon-bank"></i>
                     Exporter les versements
                 </button>
@@ -461,7 +461,7 @@
 
             <form action="<?= $this->url('contract/exportjson') ?>" class=" export-selection-area" method="post">
                 <input type="hidden" name="ids" value="<?= $exportIds ?>">
-                <button type="submit" href="#" class="btn btn-primary">
+                <button type="submit" href="#" class="btn btn-primary btn-xs">
                     <i class="icon-cube"></i>
                     Export JSON
                 </button>

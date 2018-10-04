@@ -415,6 +415,9 @@ class ProjectGrantController extends AbstractOscarController
 
         $perimeter = $this->params()->fromQuery('perimeter', '');
         $fields = $this->params()->fromPost('fields', null);
+        $format = $this->params()->fromPost('format', 'csv');
+
+
 
 
         $qb = $this->getEntityManager()->createQueryBuilder()->select('a')
@@ -589,11 +592,36 @@ class ProjectGrantController extends AbstractOscarController
             }
         }
         fclose($handler);
-        header('Content-Disposition: attachment; filename=oscar-export.csv');
-        header('Content-Length: ' . filesize('/tmp/' . $csv));
-        header('Content-type: text/csv');
 
-        die(file_get_contents('/tmp/' . $csv));
+
+        $csvPath = sprintf('/tmp/%s', $csv);
+        $xlsPath = sprintf('/tmp/%s.xls', $csv);
+        $extension = 'csv';
+        $mime = 'text/csv';
+
+        $filePath = $csvPath;
+
+        if( $format == "xls" ){
+            $reader = \PHPExcel_IOFactory::createReader('CSV');
+            $csvDatas = $reader->load($csvPath);
+            $writer = \PHPExcel_IOFactory::createWriter($csvDatas, 'Excel5');
+            $writer->save($xlsPath);
+
+            $filePath = $xlsPath;
+            $extension = 'xls';
+            $mime = 'application/vnd.ms-excel';
+        }
+
+        header('Content-Disposition: attachment; filename=oscar-export.' . $extension);
+        header('Content-Length: ' . filesize($filePath));
+        header('Content-type: '.$mime);
+
+        echo file_get_contents($filePath);
+
+        // Purge des fichiers temporaires
+        @unlink($csvPath);
+        if( $extension == 'xls' ) @unlink($filePath);
+        die();
     }
 
     /**
