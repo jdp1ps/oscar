@@ -91,14 +91,12 @@ Si la base de données est sur la même machine, installation du serveur **Postg
 
 ```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
-apt-get install postgresql-server-9.5
+apt-get install postgresql-server
 
 ```
 
 
-
 ## Installation de la copie de Oscar
-
 
 ### Emplacement
 
@@ -221,6 +219,14 @@ le dépôt dans le fichier : `install/oscar-install.sql`.
 
 ```bash
 psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
+```
+
+### Mise à jour du modèle
+
+Mettre à jour le modèle de donnée : 
+
+```bash
+php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
 
 ### Configuration de la BDD dans Oscar
@@ -396,10 +402,6 @@ $settings = array(
 #### Configurer l'authentification CAS
 
 **UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*.
-Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
-permet de s'identifier à la place d'un utilisateur.
-
-Exemple de configuration du CAS :
 
 ```php
 <?php
@@ -432,6 +434,22 @@ return array(
     'unicaen-auth' => $settings,
 );
 ```
+
+### Usurpation
+
+Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
+permet de s'identifier à la place d'un utilisateur.
+
+On utilise l'identifiant `compte=compteusurpation` où `compte` correspond à 
+l'identifiant principale (qui doit figurer dans le tableau `usurpation_allowed_usernames`), 
+et `compteusurpation` correspond au compte usurpé. Le mot de passe est celui de `compte`.
+
+Cette option n'est pas compatible avec l'identification CAS.
+
+BUG CONNU : Cette option est utilisé pour les tests uniquement. Il peut arriver que UnicaenApp 
+ait des difficultés à detecter le rôle à charger lors d'une usurpation. Vérifiez toujours 
+lors d'une usurpation qu'un rôle est bien actif en cliquant sur le nom du compte 
+dans le menu principal.
 
 
 ## Première connexion

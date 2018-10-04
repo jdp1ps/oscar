@@ -27,7 +27,7 @@ class Currency
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(type="string", length=4)
      */
     private $symbol;
 

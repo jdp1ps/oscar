@@ -2,7 +2,11 @@
     <form :action="urlPost" method="POST">
         <input type="hidden" name="ids" :value="ids" />
         <div class="btn-group">
-            <button type="submit" class="btn btn-xs btn-default"> <i class="icon-download-outline"></i>Télécharger le CSV</button>
+            <select name="format" class="form-control xs">
+                <option value="xls" selected>XLS (Excel)</option>
+                <option value="csv">CSV (Comma Separated Value)</option>
+            </select>
+            <button type="submit" class="btn btn-xs btn-default"> <i class="icon-download-outline"></i>Télécharger</button>
             <button type="button" class="btn btn-xs btn-default" @click="showConfiguration = !showConfiguration"> <i class="icon-cog"></i>Configurer</button>
         </div>
         <section v-show="showConfiguration" class="vue-loader text-small export-config">

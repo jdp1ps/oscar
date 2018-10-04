@@ -173,14 +173,15 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
      * @param $separator
      * @return array
      */
-    private function extractArrayString( $value, $separator ){
+    public function extractArrayString( $value, $separator ){
         $out = [];
         if( $separator === null ){
             $out = [trim($value)];
         } else {
             $values = explode($separator, $value);
             foreach ($values as $v) {
-                $out[] = trim($v);
+                $extracted = trim($v);
+                if( $extracted != "" ) $out[] = trim($v);
             }
         }
         return $out;
