@@ -33,6 +33,7 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
+use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
@@ -386,7 +387,9 @@ class ProjectGrantController extends AbstractOscarController
 
         // Fichier temporaire
         $filename = uniqid('oscar_export_activities_payment_') . '.csv';
-        $handler = fopen('/tmp/' . $filename, 'w');
+        $filePath = '/tmp/'.$filename;
+
+        $handler = fopen($filePath, 'w');
 
         fputcsv($handler, $formatter->csvHeaders());
 
@@ -397,11 +400,9 @@ class ProjectGrantController extends AbstractOscarController
 
         fclose($handler);
 
-        header('Content-Disposition: attachment; filename=oscar-export-versements.csv');
-        header('Content-Length: ' . filesize('/tmp/' . $filename));
-        header('Content-type: plain/text');
-
-        die(file_get_contents('/tmp/' . $filename));
+        $downloader = new CSVDownloader();
+        $downloader->downloadCSVToExcel($filePath);
+        die();
     }
 
 
@@ -593,34 +594,16 @@ class ProjectGrantController extends AbstractOscarController
         }
         fclose($handler);
 
+        $downloader = new CSVDownloader();
+
 
         $csvPath = sprintf('/tmp/%s', $csv);
-        $xlsPath = sprintf('/tmp/%s.xls', $csv);
-        $extension = 'csv';
-        $mime = 'text/csv';
-
-        $filePath = $csvPath;
 
         if( $format == "xls" ){
-            $reader = \PHPExcel_IOFactory::createReader('CSV');
-            $csvDatas = $reader->load($csvPath);
-            $writer = \PHPExcel_IOFactory::createWriter($csvDatas, 'Excel5');
-            $writer->save($xlsPath);
-
-            $filePath = $xlsPath;
-            $extension = 'xls';
-            $mime = 'application/vnd.ms-excel';
+            $downloader->downloadCSVToExcel($csvPath);
+        } else {
+            $downloader->downloadCSV($csvPath);
         }
-
-        header('Content-Disposition: attachment; filename=oscar-export.' . $extension);
-        header('Content-Length: ' . filesize($filePath));
-        header('Content-type: '.$mime);
-
-        echo file_get_contents($filePath);
-
-        // Purge des fichiers temporaires
-        @unlink($csvPath);
-        if( $extension == 'xls' ) @unlink($filePath);
         die();
     }
 
