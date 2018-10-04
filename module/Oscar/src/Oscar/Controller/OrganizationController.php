@@ -8,6 +8,7 @@
  */
 namespace Oscar\Controller;
 
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\Query;
 use Oscar\Connector\IConnector;
 use Oscar\Connector\IConnectorOrganization;
@@ -20,6 +21,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
+use Oscar\Exception\OscarException;
 use Oscar\Form\OrganizationIdentificationForm;
 use Oscar\Service\OrganizationService;
 use Oscar\Utils\EntityHydrator;
@@ -35,12 +37,44 @@ class OrganizationController extends AbstractOscarController
     {
         return $this->getOrganizationService()->syncLdap($this->plugin('url'));
     }
+
+
+
+
     /**
      * @return OrganizationService
      */
     protected function getOrganizationService()
     {
         return $this->getServiceLocator()->get('OrganizationService');
+    }
+
+    public function deleteAction(){
+
+        $id = $this->params()->fromRoute('id');
+        $organization = $this->getOrganizationService()->getOrganization($id);
+
+        if( $this->getRequest()->isPost() ){
+            $tokenName = $this->params()->fromPost('tokenname');
+            $tokenValue = $this->params()->fromPost('tokenvalue');
+
+            if ($this->getSessionService()->checkToken($tokenName, $tokenValue) ){
+                try {
+                    $this->getOrganizationService()->deleteOrganization($id);
+                    $this->redirect()->toRoute("organization");
+                } catch ( ForeignKeyConstraintViolationException $e ){
+                    throw new OscarException("Vous devez supprimer cette organisation des activités et supprimer ces membres avant de la supprimer.", 0, $e);
+                }
+            }
+
+        } else {
+            $token = $this->getSessionService()->createToken('organization-delete');
+        }
+        
+        return [
+            'organization' => $organization,
+            'token' => $token
+        ];
     }
 
     /**

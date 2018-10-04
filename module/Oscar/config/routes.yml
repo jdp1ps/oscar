@@ -557,6 +557,12 @@ organization:
                 route: '/edit/:id'
                 defaults:
                     action: edit
+        delete:
+            type: segment
+            options:
+                route: '/delete/:id'
+                defaults:
+                    action: delete
         close:
             type: segment
             options:

@@ -345,6 +345,15 @@
     "fullcode": "ORGANIZATION-INDEX"
   },
 
+  "ORGANIZATION-DELETE": {
+    "root": "ORGANIZATION-INDEX",
+    "category_id": 4,
+    "spot": 4,
+    "code": "DELETE",
+    "libelle": "Autorise la suppression définitive d'une organisation",
+    "fullcode": "ORGANIZATION-DELETE"
+  },
+
 
   "ORGANIZATION-SHOW": {
     "category_id": 4,

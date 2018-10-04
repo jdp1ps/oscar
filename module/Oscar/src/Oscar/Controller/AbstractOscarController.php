@@ -25,10 +25,12 @@ use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
 use Oscar\Service\SearchService;
+use Oscar\Service\SessionService;
 use UnicaenAuth\Service\UserContext;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Session\Container;
 use Zend\View\Model\JsonModel;
 
 /**
@@ -52,9 +54,13 @@ class AbstractOscarController extends AbstractActionController
         return $config->getConfiguration($key);
     }
 
-    protected function checkToken(){
-
+    /**
+     * @return SessionService
+     */
+    protected function getSessionService(){
+        return $this->getServiceLocator()->get('SessionService');
     }
+
 
     protected function getHttpXMethod(){
         /** @var Request $request */

@@ -1,0 +1,25 @@
+<div class="container">
+    <h1>
+        <small><i class="icon-trash"></i>
+        Suppression définitive de l'organisation</small><br>
+        <strong><?= $organization ?></strong>
+    </h1>
+    <p class="alert alert-danger text-large">
+        <i class="icon-attention-1"></i>
+        Cette suppression est un <strong>opération de maintenance</strong>, elle est <strong>définitive</strong>,
+        <form action="" method="post">
+        <input type="hidden" name="tokenname" value="<?= $token['name'] ?>" />
+        <input type="hidden" name="tokenvalue" value="<?= $token['value'] ?>" />
+        <button type="submit" class="btn btn-danger">
+            <small>Supprimer</small>
+        </button>
+        </form>
+    </p>
+</div>
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 04/10/18
+ * Time: 15:44
+ */

@@ -129,14 +129,20 @@
             <div class="col-md-4">
                 <h2>Intitulés et correspondance</h2>
                 <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter">
-                <div v-for="label in labels" class="card xs" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
-                    <i class="icon-tag"></i> <strong>{{ label }}</strong>
+                <div v-for="label in labels" class="card xs correspondance" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
+                    <div class="in-ical">
+                        <i class="icon-tag"></i> <strong>{{ label }}</strong>
+                    </div>
+
                     <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info" @click="debug = labelsCorrespondance[label.toLowerCase()]">
                         <i class="icon-link-outline"></i>
                         {{ labelsCorrespondance[label.toLowerCase()].label }}
                     </span>
-                    <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
-                    <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
+
+                    <nav>
+                        <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
+                        <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
+                    </nav>
                 </div>
 
             </div>

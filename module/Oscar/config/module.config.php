@@ -266,6 +266,10 @@ return array(
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_SHOW
                 ],
                 [ 'controller' =>   'Organization',
+                    'action' => ['delete'],
+                    'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_DELETE
+                ],
+                [ 'controller' =>   'Organization',
                     'action' => ['edit', 'new', 'syncLdap', 'merge', 'close'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_EDIT
                 ],
@@ -776,17 +780,8 @@ return array(
             'MilestoneService' => \Oscar\Service\MilestoneService::class,
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             'MailingService' => \Oscar\Service\MailingService::class,
-            // Droits
-            //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
-
-            ///////////////////////////////////////////////////////// ASSERTIONS
-            //'ProjectShowAssertion' => \Oscar\Assertion\ProjectShowAssertion::class,
-            //'Tutu' => 'Oscar\Assertion\TutuAssertion',
+            'SessionService' => \Oscar\Service\SessionService::class,
         ],
-
-       /* 'aliases' => [
-            'zfcuser_zend_db_adapter' => 'Zend\Db\Adapter\Adapter',
-        ],*/
 
         'factories' => array(
             'RoleProvider' => function (\Zend\ServiceManager\ServiceManager $sm){
