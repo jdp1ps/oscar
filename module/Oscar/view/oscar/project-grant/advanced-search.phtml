@@ -138,6 +138,8 @@
         </article>
     </script>
 
+
+
     <?php /*
         ---------------------------------------------
         TEMPLATE des critères des types de convention
@@ -175,6 +177,30 @@
                 <option value="<?= $country ?>"><?= $country ?></option>
                 <?php endforeach; ?>
             </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="milestones-criteria-tpl">
+        <article class="criteria criteria-{{type}} card">
+            <div class="icon-calendar"></div>
+            <small>{{typeLabel}}</small>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <select class="select2 form-control val1 changer types" id="filter_jalon">
+                <?php foreach( $filterJalons as $jalon ): ?>
+                    <option value="<?= $jalon['id'] ?>"><?= $jalon['label'] ?></option>
+                <?php endforeach; ?>
+            </select>
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <!--
+            <strong>Annnée</strong>
+            <small>Optionnel</small>
+            <input type="text" value="{{val2}}"class=" changer val2">
+            -->
             <nav>
                 <a href="#" class="delete">
                     <i class="icon-cancel-outline"></i>
@@ -424,10 +450,10 @@
 
                 });
             </script>
-
+            <hr>
             <form action="<?= $this->url('contract/csvpayments') . $perimeter ?>" class=" export-all-area" method="post">
                 <input type="hidden" name="ids" value="<?= $exportIds ?>">
-                <button type="submit" href="#" class="btn btn-default">
+                <button type="submit" href="#" class="btn btn-default btn-xs">
                     <i class="icon-bank"></i>
                     Exporter les versements
                 </button>
@@ -435,7 +461,7 @@
 
             <form action="<?= $this->url('contract/exportjson') ?>" class=" export-selection-area" method="post">
                 <input type="hidden" name="ids" value="<?= $exportIds ?>">
-                <button type="submit" href="#" class="btn btn-primary">
+                <button type="submit" href="#" class="btn btn-primary btn-xs">
                     <i class="icon-cube"></i>
                     Export JSON
                 </button>
@@ -634,6 +660,9 @@
                     else if(datas.type == 'pm' ) {
                         dom = $(tplPersons(datas));
                     }
+                    else if(datas.type == 'aj' ){
+                        dom = $(tplMilestone(datas));
+                    }
                     else {
                         console.error("le type", datas.type, "n'est pas pris en charge", datas);
                         return;
@@ -760,6 +789,7 @@
                     tplStatic = Handlebars.compile($('#static-criteria-tpl').html()),
                     tplNumber = Handlebars.compile($('#number-criteria-tpl').html()),
                     tplPersons = Handlebars.compile($('#persons-criteria-tpl').html()),
+                    tplMilestone = Handlebars.compile($('#milestones-criteria-tpl').html()),
                     id = 1;
 
                 //

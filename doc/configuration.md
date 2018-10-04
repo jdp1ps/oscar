@@ -4,8 +4,7 @@ La configuration métier de Oscar est placée dans le fichier `config/autoload/l
 
 
 ## Rappel
-Techniquement,wrap
- Oscar commence par charger la configuration par défaut présente dans le fichier `config/autoload/global.php`. **Attention**, ce fichier est versionné et permet de renseigner des valeurs par défaut, **il est susceptible d'être écrasé lors d'une mise à jour et ne doit donc pas être modifié**.
+Techniquement, Oscar commence par charger la configuration par défaut présente dans le fichier `config/autoload/global.php`. **Attention**, ce fichier est versionné et permet de renseigner des valeurs par défaut, **il est susceptible d'être écrasé lors d'une mise à jour et ne doit donc pas être modifié**.
 
 Notez que toutes les valeurs présentes dans ce fichier peuvent être surchargées par celles présentes dans le fichier `local.php`, dans ce sens, elles seront largement commentées.
 
@@ -50,7 +49,9 @@ return array(
 
 ## Formalisme du PFI
 
-La règle de contrôle du PFI est précisée dans la clef `oscar > validation > pfi` (Il s'agit d'une expression régulière utilisée par Oscar pour valider les donnnées non-nulles saisies dans Oscar).
+La règle de contrôle du PFI est précisée dans la clef `oscar > validation > pfi` (Il s'agit d'une expression régulière utilisée par Oscar pour valider les donnnées non-nulles saisies dans Oscar et détecter les PFI saisis dans le moteur de recherche pour proposer des résultats ciblés).
+
+**Attention** : Comme indiqué, l'expression régulière étant utilisée pour par le moteur de recherche pour trouver une activité de recherche à partir d'un PFI, les expressions régulières trop permissive posent problème. Ex : Si vous utilisez une expression tel que `/.*/mi`, n'importe quelle recherche sera detecté comme étant un PFI, donc Oscar recherchera uniquement les activités ayant pour PFI la saisie de la recherche. Assurez vous donc que ce champ est correctement renseigné. 
 
 ```php
 <?php

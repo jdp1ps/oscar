@@ -38,11 +38,15 @@ class ConnectorActivityJSON implements ConnectorInterface
     private $entityManager;
     private $options;
 
+    private $createdLog;
+
 
     public function __construct( array $jsonData, EntityManager $entityManager, $options = null )
     {
         $this->jsonDatas = $jsonData;
         $this->entityManager = $entityManager;
+        $this->createdLog = [];
+
         if( $options == null ){
             $this->options = [
                 "create-missing-organization"       => false,
@@ -71,7 +75,7 @@ class ConnectorActivityJSON implements ConnectorInterface
 
     }
 
-    protected function getOrganizationOrCreate( $fullname ){
+    protected function getOrganizationOrCreate( $fullname, ConnectorRepport $repport ){
 
         try {
             return $this->entityManager->getRepository(Organization::class)
@@ -87,6 +91,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                 $this->entityManager->persist($organization);
                 $organization->setFullName($fullname);
                 $this->entityManager->flush($organization);
+                $repport->addadded(sprintf("ORGANIZA '%s'", $organization));
                 return $organization;
             } catch (\Exception $e) {
                 $error = sprintf("Impossible de créer l'organisation '%s'", $fullname);
@@ -94,6 +99,7 @@ class ConnectorActivityJSON implements ConnectorInterface
         } catch (NonUniqueResultException $e ){
             $error = sprintf("ATTENTION, l'organisation '%s' est présente dans la base en plusieurs exemplaire", $fullname);
         }
+        //$this->createdLog[] = sprintf('!ORG %s', $organization);
         throw new ConnectorException($error);
     }
 
@@ -102,7 +108,7 @@ class ConnectorActivityJSON implements ConnectorInterface
      * @return Role
      * @throws ConnectorException
      */
-    protected function getRolePersonOrCreate( $role ){
+    protected function getRolePersonOrCreate( $role, ConnectorRepport $repport ){
         try {
             return $this->entityManager->getRepository(Role::class)
                 ->createQueryBuilder('r')
@@ -117,13 +123,16 @@ class ConnectorActivityJSON implements ConnectorInterface
                 $this->entityManager->persist($roleObj);
                 $roleObj->setRoleId($role);
                 $this->entityManager->flush($roleObj);
+                $repport->addadded(sprintf("ROLEPERS '%s'", $roleObj));
                 return $roleObj;
             } catch (\Exception $e ){
-                throw new ConnectorException(sprintf("Impossible de créer le rôle (Role) '%s' : %s", $role, $e->getMessage()));
+               $error = sprintf("Impossible de créer le rôle (Role) '%s' : %s", $role, $e->getMessage());
             }
         } catch (NonUniqueResultException $e){
-            throw new ConnectorException(sprintf("ATTENTION ! Le rôle (Role) '%s' est présent plusieurs fois dans la base de données", $role));
+            $error = sprintf("ATTENTION ! Le rôle (Role) '%s' est présent plusieurs fois dans la base de données", $role);
         }
+        //$this->createdLog[] = sprintf('!ROLEPERS %s : %s', $roleObj, $error);
+        throw new ConnectorException($error);
     }
 
     /**
@@ -131,7 +140,7 @@ class ConnectorActivityJSON implements ConnectorInterface
      * @return OrganizationRole
      * @throws ConnectorException
      */
-    protected function getRoleOrganizationOrCreate( $role ){
+    protected function getRoleOrganizationOrCreate( $role, ConnectorRepport $repport ){
         try {
             $roleObj =  $project = $this->entityManager->getRepository(OrganizationRole::class)->createQueryBuilder('r')
                 ->where('r.label = :label')
@@ -146,9 +155,9 @@ class ConnectorActivityJSON implements ConnectorInterface
                 $this->entityManager->persist($roleObj);
                 $roleObj->setLabel($role);
                 $this->entityManager->flush($roleObj);
+                $repport->addadded(sprintf("ROLEORGA '%s'", $roleObj));
                 return $roleObj;
             } catch (\Exception $e ){
-                throw new ConnectorException(sprintf("Impossible de créer le rôle '%s' : %s", $role, $e->getMessage()));
                 throw new ConnectorException(sprintf("Impossible de créer le rôle '%s' : %s", $role, $e->getMessage()));
             }
         } catch (NonUniqueResultException $e){
@@ -156,7 +165,7 @@ class ConnectorActivityJSON implements ConnectorInterface
         }
     }
 
-    protected function getPersonOrCreate( $personDatas ){
+    protected function getPersonOrCreate( $personDatas, ConnectorRepport $repport ){
         $fullname = $personDatas['firstname']. ' ' . $personDatas['lastname'] . ($personDatas['email'] ? '<'.$personDatas['email'].'>' : '');
         try {
             return $this->entityManager->getRepository(Person::class)
@@ -175,6 +184,8 @@ class ConnectorActivityJSON implements ConnectorInterface
                     ->setLastname($personDatas['lastname'])
                     ->setEmail($personDatas['email']);
                 $this->entityManager->flush($person);
+
+                $repport->addadded(sprintf("PERSONNE '%s'", $person));
                 return $person;
 
             } catch (\Exception $e ){
@@ -212,10 +223,10 @@ class ConnectorActivityJSON implements ConnectorInterface
                 $project->setAcronym($acronym)
                     ->setLabel($label);
                 $this->entityManager->flush($project);
+
                 $repport->addadded(sprintf("Le projet '%s' a été créé", $project));
                 return $project;
             } catch (\Exception $e ){
-                die("PAS DE PROJET " . $e->getMessage());
                 $repport->adderror(sprintf("Impossible de créé le projet '[%s] %s' : %s", $acronym, $label, $e->getMessage()));
             }
 
@@ -233,7 +244,7 @@ class ConnectorActivityJSON implements ConnectorInterface
      * @return DateType
      * @throws ConnectorException
      */
-    protected function getMilestoneTypeOrCreate( $label ){
+    protected function getMilestoneTypeOrCreate( $label, ConnectorRepport $repport ){
         try {
             // Obtention du projet si il existe
             return $this->entityManager->getRepository(DateType::class)->createQueryBuilder('d')
@@ -250,6 +261,9 @@ class ConnectorActivityJSON implements ConnectorInterface
                 $this->entityManager->persist($milestoneType);
                 $milestoneType->setLabel($label);
                 $this->entityManager->flush($milestoneType);
+
+                $repport->addadded(sprintf("JALOTYPE '%s'", $milestoneType));
+
                 return $milestoneType;
             } catch (\Exception $e ){
                 throw new ConnectorException(sprintf("Impossible de créé le type de jalon '%s' : %s", $label, $e->getMessage()));
@@ -270,7 +284,7 @@ class ConnectorActivityJSON implements ConnectorInterface
      * @throws NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    protected function getType( $typeLabel ){
+    protected function getType( $typeLabel){
         /** @var Query $queryOrganization */
         static $queryType;
         if( $queryType === null ){
@@ -340,11 +354,11 @@ class ConnectorActivityJSON implements ConnectorInterface
             if ($data->type) {
 
                 // On tente de récupérer le type d'activité depuis la BDD
-                $type = $this->getType($data->type);
+                $type = $this->getType($data->type, $repport);
 
                 // Invalid, on ignore
                 if (!$type) {
-                    $repport->addwarning(sprintf("Le type d'activité %s n'existe pas dans osar",
+                    $repport->addwarning(sprintf("Le type d'activité %s n'existe pas dans oscar",
                             $data->type));
                 }
             }
@@ -423,11 +437,11 @@ class ConnectorActivityJSON implements ConnectorInterface
             foreach( $data->organizations as $role=>$organizations ){
                 try {
 
-                    $roleObj = $this->getRoleOrganizationOrCreate( $role );
+                    $roleObj = $this->getRoleOrganizationOrCreate( $role, $repport );
 
                     foreach( $organizations as $fullName ){
                         try {
-                            $organization = $this->getOrganizationOrCreate($fullName);
+                            $organization = $this->getOrganizationOrCreate($fullName, $repport);
 
                             if( !$activity->hasOrganization($organization, $roleObj->getLabel()) ){
                                 $activityOrganization = new ActivityOrganization();
@@ -454,30 +468,32 @@ class ConnectorActivityJSON implements ConnectorInterface
                 try {
 
                     ////////////////////////////////////////////////////////////
-                    $roleObj = $this->getRolePersonOrCreate( $role );
+                    $roleObj = $this->getRolePersonOrCreate( $role, $repport );
 
 
                     foreach( $persons as $fullName ){
-
                         $datasPerson = (new DataExtractorFullname())->extract($fullName);
-                        $person = $this->getPersonOrCreate($datasPerson);
+                        if( $datasPerson ) {
+                            $person = $this->getPersonOrCreate($datasPerson, $repport);
+                            if( !$activity->hasPerson($person, $role) ){
+                                try {
+                                    $personActivity = new ActivityPerson();
+                                    $this->entityManager->persist($personActivity);
+                                    $personActivity->setPerson($person)
+                                        ->setActivity($activity)
+                                        ->setRoleObj($roleObj);
+                                    $this->entityManager->flush($personActivity);
+                                    $repport->addadded(sprintf("%s a été ajoutée dans %s avec le rôle %s.", $fullName, $activity, $role));
 
-
-                        if( !$activity->hasPerson($person, $role) ){
-                            try {
-                                $personActivity = new ActivityPerson();
-                                $this->entityManager->persist($personActivity);
-                                $personActivity->setPerson($person)
-                                    ->setActivity($activity)
-                                    ->setRoleObj($roleObj);
-                                $this->entityManager->flush($personActivity);
-                                $repport->addadded(sprintf("%s a été ajoutée dans %s avec le rôle %s.", $fullName, $activity, $role));
-
-                            } catch( \Exception $e ){
-                                $repport->addadded(sprintf("Impossible d'ajouter %s dans %s avec le rôle %s : %s.", $fullName, $activity, $role, $e->getMessage()));
+                                } catch( \Exception $e ){
+                                    $repport->addadded(sprintf("Impossible d'ajouter %s dans %s avec le rôle %s : %s.", $fullName, $activity, $role, $e->getMessage()));
+                                }
                             }
+                        } else {
+                            $repport->adderror(sprintf("Impossible de traiter la personne '%s'", $fullName));
                         }
                     }
+
                 } catch( \Exception $e ){
                     $repport->addwarning(sprintf("Impossible d'ajouter la personne '%s' avec le rôle '%s' dans l'activité '%s' : %s",
                         $fullName, $role, $activity, $e->getMessage()));
@@ -487,7 +503,7 @@ class ConnectorActivityJSON implements ConnectorInterface
             ///////////////////////////////////////////////////////// MILESTONES
             foreach ( $data->milestones as $milestone ){
                 try {
-                    $type = $this->getMilestoneTypeOrCreate($milestone->type);
+                    $type = $this->getMilestoneTypeOrCreate($milestone->type, $repport);
                     try {
                         $date = new \DateTime($milestone->date);
                     } catch (\Exception $e) {

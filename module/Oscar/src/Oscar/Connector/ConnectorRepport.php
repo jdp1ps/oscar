@@ -107,42 +107,42 @@ class ConnectorRepport
     public function addnotice( $message ){
         $this->notices[] = [
             'time' => time(),
-            'message' => $message
+            'message' => '[.] ' . $message
         ];
     }
 
     public function addwarning( $message ){
         $this->warnings[] = [
             'time' => time(),
-            'message' => $message
+            'message' => '[~] ' . $message
         ];
     }
 
     public function adderror( $message ){
         $this->errors[] = [
             'time' => time(),
-            'message' => $message
+            'message' => '[!] ' . $message
         ];
     }
 
     public function addadded( $message ){
         $this->added[] = [
             'time' => time(),
-            'message' => $message
+            'message' => '[a] ' . $message
         ];
     }
 
     public function addupdated( $message ){
         $this->updated[] = [
             'time' => time(),
-            'message' => $message
+            'message' => '[u] ' . $message
         ];
     }
 
     public function addremoved( $message ){
         $this->removeds[] = [
             'time' => time(),
-            'message' => $message
+            'message' => '[-] ' . $message
         ];
     }
 
