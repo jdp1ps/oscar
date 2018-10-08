@@ -774,77 +774,6 @@ class TimesheetController extends AbstractOscarController
         }
 
 
-            /*
-            foreach( $datas[$activityId]['timesheets'] as $period=>$timesheetsPeriod ){
-                $lineWpStart = 10;
-                $lineWpCurent = $lineWpStart;
-                $lineWpCount = 0;
-                $spreadsheet = \PHPExcel_IOFactory::load($modele);
-
-
-                $spreadsheet->getActiveSheet()->setCellValue('A1', $activity->getLabel());
-                $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
-                $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
-                $spreadsheet->getActiveSheet()->setCellValue('C5', $activity->getAcronym());
-
-                $spreadsheet->getActiveSheet()->setCellValue('U3', $fmt->format($activity->getDateStart()));
-                $spreadsheet->getActiveSheet()->setCellValue('U4', $fmt->format($activity->getDateEnd()));
-                $spreadsheet->getActiveSheet()->setCellValue('U5', $activity->getOscarNum());
-                $spreadsheet->getActiveSheet()->setCellValue('U6', $activity->getCodeEOTP());
-
-                $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
-                $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
-                $spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
-
-                foreach ($timesheetsPeriod as $workpackage=>$timesheetsWorkpackage) {
-
-
-                    echo "$workpackage<br>";
-                    var_dump($timesheetsWorkpackage);
-
-                    if( $workpackage == "unvalidate" || $workpackage == "total" )
-                        continue;
-
-                    $rowNum = $lineWpStart + $lineWpCount;
-                    $spreadsheet->getActiveSheet()->insertNewRowBefore(($rowNum + 1));
-                    for( $i=0; $i<count($cellDays); $i++ ){
-                        $day = $i+1;
-                        $cellIndex = $cellDays[$i].$rowNum;
-                        $totalDay = array_key_exists($day, $timesheetsWorkpackage) ? $timesheetsWorkpackage[$day] : 0.0;
-                        $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $totalDay);
-                    }
-                    $spreadsheet->getActiveSheet()->setCellValue('A'.$rowNum, "");
-                    $spreadsheet->getActiveSheet()->setCellValue('B'.$rowNum, $workpackage);
-                    $spreadsheet->getActiveSheet()->setCellValue('AH'.$rowNum, sprintf($lineWpFormula, $rowNum, $rowNum));
-                    $lineWpCount++;
-                }
-
-                $rowNum = $lineWpStart + $lineWpCount + 1;
-
-                for( $i=0; $i<count($cellDays); $i++ ){
-                    $day = $i+1;
-                    $cellIndex = $cellDays[$i].$rowNum;
-                    $sum = "=SUM(" . $cellDays[$i] .'10:' .$cellDays[$i].($rowNum-1) .')';
-
-                    $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $sum);
-                }
-
-                $spreadsheet->getActiveSheet()->setCellValue('AH'.$rowNum, sprintf('=SUM(AH10:AH%s)', ($rowNum-1)));
-
-                $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
-
-                $name = ($person->getLadapLogin())."-" . $period . ".xls";
-                $filepath = '/tmp/'. $name;
-
-                $edited->save($filepath);
-
-//                header('Content-Type: application/octet-stream');
-//                header("Content-Transfer-Encoding: Binary");
-//                header("Content-disposition: attachment; filename=\"" . $name . "\"");
-//                die(readfile($filepath));
-            }*/
-
-
         $datas = $timesheetService->getPersonTimesheets($person, false, $period, null);
 
 
@@ -860,8 +789,23 @@ class TimesheetController extends AbstractOscarController
         // Liste des types de créneau valide
         $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson());
 
-        $now = new \DateTime();
-        $period = $this->params()->fromQuery('period', $now->format('Y-m'));
+        // -------------------------------------------------------------------------------------------------------------
+        // Période URL
+        $period = $this->params()->fromQuery('period', null);
+
+        // par défaut, mois qui précède
+        if( $period == null ){
+            $now = new \DateTime();
+            $now->sub( new \DateInterval('P1M'));
+            $period = $now->format('Y-m');
+        }
+
+        $firstDay = new \DateTime($period.'-01');
+
+        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getCurrentPerson(), $period);
+        echo "<pre>";
+        var_dump($datas);
+        die($period);
 
         $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($this->getCurrentPerson());
 
@@ -1049,137 +993,7 @@ class TimesheetController extends AbstractOscarController
     public function usurpationAction()
     {
         die("DESACTIVE");
-//        // Méthode réél
-//        $method = $this->getHttpXMethod();
-//
-//        /** @var Activity $activity */
-//        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
-//
-//        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_USURPATION, $activity);
-//
-//        $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
-//
-//        if (!$activity) {
-//            return $this->getResponseNotFound("L'activité n'existe pas");
-//        }
-//
-//        if (!$person) {
-//            return $this->getResponseNotFound("La person %s n'existe pas");
-//        }
-//
-//        /** @var TimesheetService $timeSheetService */
-//        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
-//
-//        $timesheets = [];
-//
-//        if ($method == 'GET') {
-//            $timesheets = $timeSheetService->allByPerson($person, $person);
-//        }
-//
-//        if ($method == 'POST') {
-//
-//            $datas = json_decode($this->getRequest()->getPost()['events'], true);
-//            $action = $this->getRequest()->getPost()['do'];
-//
-//            if ($action == 'send') {
-//                $timesheets = $timeSheetService->send($datas, $person);
-//            } else if ( $action ){
-//                if( !in_array($action, ['validatesci', 'validateadm', 'send', 'rejectsci','rejectadm'])) {
-//                    return $this->getResponseBadRequest('Opération inconnue !');
-//                }
-//
-//                foreach ($datas as $data) {
-//                    if ($data['id'] && $data['id'] != 'null') {
-//                        /** @var TimeSheet $timeSheet */
-//                        $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
-//                        $activity = null ;
-//                        if( $timeSheet->getActivity() ){
-//                            $activity = $timeSheet->getActivity();
-//                        }
-//                        elseif ($timeSheet->getWorkpackage()){
-//                            $activity = $timeSheet->getWorkpackage()->getActivity();
-//                        }
-//                        if( !$activity ){
-//                            // todo Ajouter un warning
-//                            continue;
-//                        }
-//
-//                        $timesheets = array_merge($timesheets, $this->processAction(
-//                            $action, [$data], $timeSheetService, $activity, $person)
-//                        );
-//                    }
-//                }
-//            } else {
-//                $timesheets = $timeSheetService->create($datas, $person);
-//            }
-//        }
-//
-//        if ($method == 'DELETE') {
-//            $timesheetId = $this->params()->fromQuery('timesheet', null);
-//
-//            // UID de l'ICS
-//            $icsUid = $this->params()->fromQuery('icsuid', null);
-//
-//            if ($timesheetId) {
-//                if ($timeSheetService->delete($timesheetId,
-//                    $this->getCurrentPerson())
-//                ) {
-//                    return $this->getResponseOk('Créneaux supprimé');
-//                }
-//            }
-//            elseif ($icsUid) {
-//                $this->getLogger()->info("Suppression d'un ICS");
-//                try {
-//                    $warnings = $timeSheetService->deleteIcsFileUid($icsUid, $person);
-//                    $this->getLogger()->info("Suppression OK warn = " . count($warnings));
-//                    foreach ($warnings as $w){
-//                        $this->getLogger()->info($w);
-//                    }
-//                    return $this->getResponseOk(json_encode($warnings));
-//                }
-//                catch (\Exception $e ){
-//                    $this->getLogger()->err($e->getMessage());
-//                    return $this->getResponseInternalError("Impossible de supprimer ce calendrier : " . $e->getMessage());
-//                }
-//            }
-//
-//            return $this->getResponseBadRequest("Impossible de supprimer le créneau : créneau inconnu");
-//        }
-//
-//        $wpDeclarants = [];
-//        /** @var WorkPackage $workPackage */
-//        foreach($activity->getWorkPackages() as $workPackage ){
-//            if( $workPackage->hasPerson($person) ){
-//                $wpDeclarants[$workPackage->getId()] = $workPackage;
-//            }
-//        }
-//
-//        foreach($timesheets as &$timesheet ){
-//            if( !($timesheet['activity_id'] == null || $timesheet['activity_id'] == $activity->getId()) ){
-//                $timesheet['credentials']['editable'] = false;
-//                $timesheet['credentials']['deletable'] = false;
-//                $timesheet['credentials']['sendable'] = false;
-//            }
-//        }
-//
-//        $datasView = [
-//            'wpDeclarants' => $wpDeclarants,
-//            'timesheets' => $timesheets,
-//            'person' => $person,
-//            'activity' => $activity,
-//        ];
-//
-//        if ($this->getRequest()->isXmlHttpRequest()) {
-//            $response = new JsonModel($datasView);
-//            $response->setTerminal(true);
-//
-//            return $response;
-//        }
-//
-//        return $datasView;
     }
-
-
 
     /**
      * Déclaration des heures.
@@ -1188,7 +1002,6 @@ class TimesheetController extends AbstractOscarController
     {
         return $this->getResponseDeprecated("Cette fonctionnalité n'existe plus");
     }
-
 
     protected function getQueryData()
     {
@@ -1464,7 +1277,6 @@ class TimesheetController extends AbstractOscarController
         return $this->getResponseOk();
 
     }
-
 
     /**
      * RÉCUPÉRATION des DÉCLARATIONS.

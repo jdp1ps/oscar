@@ -38,18 +38,20 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * @return ConfigurationParser
      */
-    protected function getOscarConfig(){
+    protected function getOscarConfig()
+    {
         return $this->getServiceLocator()->get('OscarConfig');
     }
 
     //////////////////////////////////////////////////////////////////////// VALIDATION des PERIODES
-    public function validationProject( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
-        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP1 ){
+    public function validationProject(ValidationPeriod $validationPeriod, Person $validator, $message = '')
+    {
+        if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP1) {
             throw new OscarException("Erreur d'état");
         }
 
         $log = $validationPeriod->getLog();
-        $person = (string) $validator;
+        $person = (string)$validator;
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Validation PROJET par $person\n";
         $log .= $msg;
@@ -67,13 +69,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
-    public function validationSci( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
-        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP2 ){
+    public function validationSci(ValidationPeriod $validationPeriod, Person $validator, $message = '')
+    {
+        if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP2) {
             throw new OscarException("Erreur d'état");
         }
 
         $log = $validationPeriod->getLog();
-        $person = (string) $validator;
+        $person = (string)$validator;
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Validation SCIENTIFIQUE par $person\n";
         $log .= $msg;
@@ -92,18 +95,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
-    public function validationAdm( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
+    public function validationAdm(ValidationPeriod $validationPeriod, Person $validator, $message = '')
+    {
         $this->getLogger()->debug($validationPeriod->getObjectGroup() . " == " . ValidationPeriod::GROUP_OTHER);
-        if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER ){
-            if( !in_array($validationPeriod->getStatus(), [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP3]) ){
-                throw new OscarException("Vous ne pouvez pas valider cette période (erreur de status - ". $validationPeriod->getStatus() .").");
+        if ($validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER) {
+            if (!in_array($validationPeriod->getStatus(), [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP3])) {
+                throw new OscarException("Vous ne pouvez pas valider cette période (erreur de status - " . $validationPeriod->getStatus() . ").");
             }
-        } else if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP3 ){
+        } else if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP3) {
             throw new OscarException("Erreur d'état, la période doit être validée scientifiquement avant.");
         }
 
         $log = $validationPeriod->getLog();
-        $person = (string) $validator;
+        $person = (string)$validator;
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Validation ADMINISTRATIVE par $person\n";
         $log .= $msg;
@@ -121,13 +125,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
-    public function rejectPrj( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
-        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP1 ){
+    public function rejectPrj(ValidationPeriod $validationPeriod, Person $validator, $message = '')
+    {
+        if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP1) {
             throw new OscarException("Erreur d'état");
         }
 
         $log = $validationPeriod->getLog();
-        $person = (string) $validator;
+        $person = (string)$validator;
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet PROJET par $person\n";
         $log .= $msg;
@@ -145,13 +150,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
-    public function rejectSci( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
-        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP2 ){
+    public function rejectSci(ValidationPeriod $validationPeriod, Person $validator, $message = '')
+    {
+        if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP2) {
             throw new OscarException("Erreur d'état");
         }
 
         $log = $validationPeriod->getLog();
-        $person = (string) $validator;
+        $person = (string)$validator;
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet SCIENTIFIQUE par $person\n";
         $log .= $msg;
@@ -169,18 +175,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
-    public function rejectAdm( ValidationPeriod $validationPeriod, Person $validator, $message='' ){
+    public function rejectAdm(ValidationPeriod $validationPeriod, Person $validator, $message = '')
+    {
         $this->getLogger()->debug($validationPeriod->getObjectGroup() . " == " . ValidationPeriod::GROUP_OTHER);
-        if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER ){
-            if( !in_array($validationPeriod->getStatus(), [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP3]) ){
-                throw new OscarException("Vous ne pouvez pas rejeter cette période (erreur de status - ". $validationPeriod->getStatus() .").");
+        if ($validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER) {
+            if (!in_array($validationPeriod->getStatus(), [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP3])) {
+                throw new OscarException("Vous ne pouvez pas rejeter cette période (erreur de status - " . $validationPeriod->getStatus() . ").");
             }
-        } else if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP3 ){
+        } else if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP3) {
             throw new OscarException("Erreur d'état, la période doit être validée scientifiquement avant.");
         }
 
         $log = $validationPeriod->getLog();
-        $person = (string) $validator;
+        $person = (string)$validator;
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet ADMINISTRATIF par $person\n";
         $log .= $msg;
@@ -206,8 +213,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @throws OscarException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function reSendValidation(ValidationPeriod $validationPeriod) {
-        if( $validationPeriod->getStatus() !== ValidationPeriod::STATUS_CONFLICT ){
+    public function reSendValidation(ValidationPeriod $validationPeriod)
+    {
+        if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_CONFLICT) {
             throw new OscarException("Erreur d'état");
         }
 
@@ -217,8 +225,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Reset des champs
         $validationPeriod->setRejectSciBy(null)->setRejectSciMessage('')->setRejectSciAt(null)->setRejectSciById(null)
             ->setRejectAdmBy(null)->setRejectAdmMessage('')->setRejectAdmAt(null)->setRejectAdmById(null)
-            ->setRejectActivityBy(null)->setRejectActivityMessage('')->setRejectActivityAt(null)->setRejectActivityById(null)
-            ;
+            ->setRejectActivityBy(null)->setRejectActivityMessage('')->setRejectActivityAt(null)->setRejectActivityById(null);
 
         $this->getEntityManager()->flush($validationPeriod);
 
@@ -226,12 +233,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public function getValidationPeriodPersonConflict( Person $person ){
-        $out= [];
+    public function getValidationPeriodPersonConflict(Person $person)
+    {
+        $out = [];
         $validationsPeriods = $this->getValidationPeriodRepository()->getValidationPeriodPersonWithConflict($person->getId());
         foreach ($validationsPeriods as $validationsPeriod) {
             $activity = null;
-            if( $validationsPeriod->getObject() == ValidationPeriod::OBJECT_ACTIVITY ){
+            if ($validationsPeriod->getObject() == ValidationPeriod::OBJECT_ACTIVITY) {
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($validationsPeriod->getObjectId());
             }
             $out[] = [
@@ -242,14 +250,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $out;
     }
 
-    public function getValidationPeriodsOutWPToValidate( $person = null ){
+    public function getValidationPeriodsOutWPToValidate($person = null)
+    {
         return $this->getValidationPeriodRepository()->getValidationPeriodsOutWPToValidate($person ? $person->getId() : null);
     }
 
-    public function getValidationPeriodsOutWP( $person = null ){
+    public function getValidationPeriodsOutWP($person = null)
+    {
         return $this->getValidationPeriodRepository()->getValidationPeriodsOutWP($person ? $person->getId() : null);
     }
-
 
 
     /**
@@ -263,11 +272,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * @return ValidationPeriodRepository
      */
-    protected function getValidationPeriodRepository(){
+    protected function getValidationPeriodRepository()
+    {
         return $this->getEntityManager()->getRepository(ValidationPeriod::class);
     }
 
-    public function getTimesheetToValidateByOrganization( Organization $organization ){
+    public function getTimesheetToValidateByOrganization(Organization $organization)
+    {
         // Activities
 
         $query = $this->getEntityManager()->createQueryBuilder()->select('ts')
@@ -278,10 +289,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->leftJoin('o1.roleObj', 'roleo1')
             ->leftJoin('p.partners', 'o2')
             ->leftJoin('o2.roleObj', 'roleo2')
-
             ->where('ts.status = :status')
             ->andWhere('(o1.organization = :organization AND roleo1.principal = true) OR (o2.organization = :organization AND roleo2.principal = true)')
-
             ->setParameters([
                 'status' => TimeSheet::STATUS_TOVALIDATE,
                 'organization' => $organization
@@ -294,7 +303,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * Retourne les créneaux de la personne regroupès par activité
      * @param Person $person
      */
-    public function getPersonTimesheetsCSV( Person $person, Activity $activity, $validatedOnly = false){
+    public function getPersonTimesheetsCSV(Person $person, Activity $activity, $validatedOnly = false)
+    {
         $fmt = new \IntlDateFormatter(
             'fr_FR',
             \IntlDateFormatter::FULL,
@@ -307,20 +317,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->createQueryBuilder('t')
             ->where('t.person = :person')
             ->andWhere('t.activity = :activity')
-            ->orderBy('t.activity, t.dateFrom')
-            ;
+            ->orderBy('t.activity, t.dateFrom');
 
         $datas = [];
 
         $workpackages = [];
 
         /** @var WorkPackage $workPackage */
-        foreach ($activity->getWorkPackages() as $workPackage ){
+        foreach ($activity->getWorkPackages() as $workPackage) {
             $workpackages[] = $workPackage->getCode();
         }
         sort($workpackages);
 
-        $ligneHeader = [ (string)$person ];
+        $ligneHeader = [(string)$person];
         foreach ($workpackages as $wpCode) {
             $ligneHeader[] = $wpCode;
         }
@@ -332,8 +341,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $datas[] = $ligneHeader;
 
         $days = [];
-        $yearStart = (int) $activity->getDateStart()->format('Y');
-        $yearEnd = (int) $activity->getDateEnd()->format('Y');
+        $yearStart = (int)$activity->getDateStart()->format('Y');
+        $yearEnd = (int)$activity->getDateEnd()->format('Y');
 
         // Prétraitement des créneaux
         $creneaux = [];
@@ -343,14 +352,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         ])->getResult();
 
         /** @var TimeSheet $timesheet */
-        foreach( $timesheets as $timesheet ){
+        foreach ($timesheets as $timesheet) {
 
-            $dayStr =   $fmt->format($timesheet->getDateFrom());
-            $code =     $timesheet->getWorkpackage()->getCode();
-            $comment =  trim($timesheet->getComment());
-            $duration = (float) $timesheet->getDuration();
+            $dayStr = $fmt->format($timesheet->getDateFrom());
+            $code = $timesheet->getWorkpackage()->getCode();
+            $comment = trim($timesheet->getComment());
+            $duration = (float)$timesheet->getDuration();
 
-            if( !array_key_exists($dayStr, $creneaux) ){
+            if (!array_key_exists($dayStr, $creneaux)) {
                 $creneaux[$dayStr] = [];
                 foreach ($workpackages as $wpCode) {
                     $creneaux[$dayStr][$wpCode] = 0.0;
@@ -369,7 +378,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $content = [];
 
-        foreach ($creneaux as $dayStr=>$dayData) {
+        foreach ($creneaux as $dayStr => $dayData) {
             $ligne = [$dayStr];
             foreach ($workpackages as $wpCode) {
                 $ligne[] = $creneaux[$dayStr][$wpCode];
@@ -389,12 +398,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param $month
      * @param $year
      */
-    public function periodSubmitable( Person $person, $month, $year){
+    public function periodSubmitable(Person $person, $month, $year)
+    {
         return count($this->getValidationPeriods($year, $month, $person)) == 0;
     }
 
 
-    public function validatePersonPeriod($person, $year, $month){
+    public function validatePersonPeriod($person, $year, $month)
+    {
         throw new \Exception("Non implémenté");
     }
 
@@ -405,7 +416,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param Activity $activity
      * @return array
      */
-    public function getValidationPeriodsActivity( Activity $activity ){
+    public function getValidationPeriodsActivity(Activity $activity)
+    {
         $this->getLogger()->debug(sprintf('Récupération des validation pour %s', $activity));
 
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
@@ -426,22 +438,25 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param Activity $activity
      * @return array
      */
-    public function getValidationPeriodActivityAt( Activity $activity, Person $person,  $year, $month ){
+    public function getValidationPeriodActivityAt(Activity $activity, Person $person, $year, $month)
+    {
         $this->getLogger()->debug(sprintf('Récupération des validation pour %s au %s-%s', $activity, $year, $month));
         return $this->getValidationPeriodRepository()->getValidationPeriodForActivity($year, $month, $activity->getId(), $person->getId());
     }
 
-    public function getOthersWP(){
+    public function getOthersWP()
+    {
         static $others;
-        if( $others == null ){
+        if ($others == null) {
             $others = $this->getOscarConfig()->getConfiguration('horslots');
         }
         return $others;
     }
 
-    public function getOthersWPByCode( $code ){
+    public function getOthersWPByCode($code)
+    {
         $conf = $this->getOthersWP();
-        if( array_key_exists($code, $conf) ){
+        if (array_key_exists($code, $conf)) {
             return $conf[$code];
         }
         return [
@@ -457,8 +472,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     ///
 
 
-
-    public function getDeclarationConfigurationPerson( Person $person ){
+    public function getDeclarationConfigurationPerson(Person $person)
+    {
         $conf = new ConfigurationMergable($this->getOscarConfig()->getConfiguration('declarationsDurations'));
 
     }
@@ -467,11 +482,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param $idPeriod
      * @return null|ValidationPeriod
      */
-    public function getValidationPeriod( $idPeriod ){
+    public function getValidationPeriod($idPeriod)
+    {
         return $this->getValidationPeriodRepository()->find($idPeriod);
     }
 
-    public function getDatasOutOfWorkPackageToValidate( Person $person ){
+    public function getDatasOutOfWorkPackageToValidate(Person $person)
+    {
 
         $timesheetFormatter = new TimesheetsMonthFormatter();
         $hwp = $this->getOthersWP();
@@ -503,11 +520,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param ValidationPeriod $validationPeriod
      * @return array
      */
-    public function getTimesheetsForValidationPeriod( ValidationPeriod $validationPeriod ){
+    public function getTimesheetsForValidationPeriod(ValidationPeriod $validationPeriod)
+    {
         $timesheets = [];
 
         $this->getLogger()->debug("Récupération des créneaux pour la période " . $validationPeriod);
-
 
 
         $year = $validationPeriod->getYear();
@@ -537,10 +554,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $daysLength = [];
         $daysClosed = [];
-        $daysInfos  = [];
-        $daysLabels  = [];
+        $daysInfos = [];
+        $daysLabels = [];
 
-        foreach ($daysDetails as $date=>$data) {
+        foreach ($daysDetails as $date => $data) {
             $daysLength[$date] = $data['duration'];
             $daysClosed[$date] = $data['close'];
             $daysInfos[$date] = $data['infos'];
@@ -549,20 +566,20 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $periodsAtSameMoment = $query->getQuery()->getResult();
         $output = [
-            'main'          => '',
-            'displayHours'  => $this->isDeclarationsHoursPerson($person),
-            'dayLength'     => $this->getDayDuration($person),
-            'monthLength'   => $this->getMonthDuration($person, $year, $month),
-            'projects'      => [],
-            'others'        => [],
-            'total'         => [],
-            'daysLabels'    => $daysLabels,
-            'daysLabels'    => $daysLabels,
-            'daysClosed'    => $daysClosed,
-            'daysLength'    => $daysLength,
-            'daysInfos'     => $daysInfos,
-            'declarant'     => (string)$person,
-            'nbrDays'       => $nbr
+            'main' => '',
+            'displayHours' => $this->isDeclarationsHoursPerson($person),
+            'dayLength' => $this->getDayDuration($person),
+            'monthLength' => $this->getMonthDuration($person, $year, $month),
+            'projects' => [],
+            'others' => [],
+            'total' => [],
+            'daysLabels' => $daysLabels,
+            'daysLabels' => $daysLabels,
+            'daysClosed' => $daysClosed,
+            'daysLength' => $daysLength,
+            'daysInfos' => $daysInfos,
+            'declarant' => (string)$person,
+            'nbrDays' => $nbr
         ];
 
         $total = [];
@@ -573,10 +590,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $timesheetsPeriod = $this->getTimesheetsValidationPeriod($vp);
 
 
-            if($vp->getId() == $validationPeriod->getId() ){
+            if ($vp->getId() == $validationPeriod->getId()) {
                 $output['main'] = $this->getArrayFormatedTimesheetsFull($vp, $timesheetsPeriod, $total);
             } else {
-                if( $vp->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
+                if ($vp->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE) {
                     $output['projects'][] = $this->getArrayFormatedTimesheetsCompact($vp, $timesheetsPeriod, $total);
                 } else {
                     $output['others'][] = $this->getArrayFormatedTimesheetsCompact($vp, $timesheetsPeriod, $total);
@@ -587,7 +604,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $output['total'] = $total;
         $fullTotal = 0.0;
 
-        foreach( $total as $day=>$duration ){
+        foreach ($total as $day => $duration) {
             $fullTotal += $duration;
         }
 
@@ -605,18 +622,20 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @return null|ValidationPeriod
      * @throws OscarException
      */
-    public function getValidationPeriosOutOfWorkpackageAt( Person $person, $year, $month, $code) {
+    public function getValidationPeriosOutOfWorkpackageAt(Person $person, $year, $month, $code)
+    {
         return $this->getValidationPeriodRepository()->getValidationPeriodOutWP($year, $month, $code, $person->getId());
     }
 
     /**
      * @param TimeSheet[] $timesheets
      */
-    public function getArrayFormatedTimesheetsCompact( ValidationPeriod $validationPeriod, $timesheets, &$total ){
+    public function getArrayFormatedTimesheetsCompact(ValidationPeriod $validationPeriod, $timesheets, &$total)
+    {
         $output = [];
         /** @var TimeSheet $timesheet */
-        foreach ($timesheets as $timesheet ){
-            if( $timesheet->getActivity() ) {
+        foreach ($timesheets as $timesheet) {
+            if ($timesheet->getActivity()) {
                 $label = $pack = $timesheet->getActivity()->getLabel();
                 $code = $timesheet->getActivity()->getAcronym();
                 $objId = $timesheet->getId();
@@ -626,22 +645,22 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $label = $this->getOthersWPByCode($code)['label'];
                 $objId = 0;
             }
-            if( !array_key_exists($pack, $output) ){
+            if (!array_key_exists($pack, $output)) {
                 $output[$pack] = [
-                    'oid'   => $objId,
+                    'oid' => $objId,
                     'validationperiod_id' => $validationPeriod->getId(),
                     'validationperiod_state' => $validationPeriod->getState(),
-                    'validation_icon' => 'icon-'.$validationPeriod->getStatus(),
+                    'validation_icon' => 'icon-' . $validationPeriod->getStatus(),
                     'label' => $label,
                     'code' => $code,
-                    'days'  => [],
+                    'days' => [],
                     'total' => 0.0
                 ];
             }
 
             $day = $timesheet->getDateFrom()->format('d');
 
-            if( !array_key_exists($day, $output[$pack]['days']) ){
+            if (!array_key_exists($day, $output[$pack]['days'])) {
                 $output[$pack]['days'][$day] = 0.0;
             }
 
@@ -650,7 +669,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $total[$day] += $timesheet->getDuration();
         }
 
-        if( count($output) == 1 ){
+        if (count($output) == 1) {
             return $output[$pack];
         }
 
@@ -664,27 +683,27 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @return bool
      * @throws OscarException
      */
-    public function isDeclarationsHoursPerson( Person $person ){
+    public function isDeclarationsHoursPerson(Person $person)
+    {
 
         $declarationShours = $default = $this->getOscarConfig()->getConfiguration('declarationsHours');
 
-        if( $this->getOscarConfig()->getConfiguration('declarationsHoursOverwriteByAuth') ){
+        if ($this->getOscarConfig()->getConfiguration('declarationsHoursOverwriteByAuth')) {
             try {
-                if( !$person || !$person->getLadapLogin() ){
+                if (!$person || !$person->getLadapLogin()) {
                     throw new \Exception("Cette personne n'existe pas ou n'a pas de login valide.");
                 }
 
                 /** @var Authentification $auth */
                 $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]);
-                if( !$auth ){
+                if (!$auth) {
                     throw new \Exception("La personne '$person' n'a pas de compte actif sur Oscar.");
                 }
 
                 $declarationShours = $auth->getSetting('declarationsHours', $default);
 
 
-
-            } catch (\Exception $e ){
+            } catch (\Exception $e) {
                 $this->getLogger()->err("ERROR : " . $e->getMessage());
             }
         }
@@ -700,11 +719,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @return mixed
      * @throws OscarException
      */
-    public function getDayDuration( Person $person ){
-        return $this->getOscarConfig()->getConfiguration('declarationsDayDuration');
+    public function getDayDuration(Person $person)
+    {
+        return $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value');
     }
 
-    public function getMonthDuration( Person $person, $year, $month ){
+    public function getDayMaxLengthPerson(Person $person)
+    {
+        return $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.max');
+    }
+
+    public function getMonthDuration(Person $person, $year, $month)
+    {
         $daysInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);
         $total = 0.0;
         foreach ($daysInfos as $dayInfo) {
@@ -713,12 +739,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $total;
     }
 
-    public function getDaysPeriodInfosPerson(Person $person, $year, $month ){
+    public function getDaysPeriodInfosPerson(Person $person, $year, $month)
+    {
 
         $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
         $locked = $this->getLockedDays($year, $month);
-
-
 
         // Nombre de jours dans le mois
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
@@ -726,52 +751,58 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $daysFull = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
         $decaleDay = $dateRef->format('N') - 1;
         $daysLabels = [];
+        $weekendAllowed = $this->getOscarConfig()->getConfiguration('declarationsWeekend') == false;
 
-        for( $i=$decaleDay; $i<$nbr+$decaleDay; $i++ ){
+        for ($i = $decaleDay; $i < $nbr + $decaleDay; $i++) {
             $duration = $this->getDayDuration($person);
-            $day = $i-$decaleDay+1;
-            $dayIndex = ($i%7);
+            $maxlength = $this->getDayMaxLengthPerson($person);
+            $day = $i - $decaleDay + 1;
+            $dayIndex = ($i % 7);
             $close = false;
             $infos = "";
-            $dayKey = $day < 10 ? '0'.$day : $day;
+            $dayKey = $day < 10 ? '0' . $day : $day;
             $lockedKey = "$year-$month-$day";
 
-            if( array_key_exists($lockedKey, $locked) ){
+            if (array_key_exists($lockedKey, $locked)) {
                 $duration = 0.0;
+                $maxlength = 0.0;
                 $close = true;
                 $infos = "Ferié " . $locked[$lockedKey];
             }
 
-            if ($dayIndex > 4) {
+            if ($dayIndex > 4 && $weekendAllowed == true) {
                 $duration = 0.0;
+                $maxlength = 0.0;
                 $close = true;
                 $infos .= $infos ? " / Weekend" : "Weekend";
             }
 
 //            $daysLabels[$dayKey] =  $daysFull[$dayIndex];
             $days[$dayKey] = [
-                'duration' => $duration,
+                'duration' => 0.0,
+                'dayLength' => $duration,
+                'maxLength' => $maxlength,
                 'label' => $daysFull[$dayIndex],
                 'close' => $close,
                 'infos' => $infos,
                 'datefull' => $lockedKey,
-                ];
+            ];
         }
 
         return $days;
     }
 
 
-
     /**
      * @param TimeSheet[] $timesheets
      */
-    public function getArrayFormatedTimesheetsFull(ValidationPeriod $validationPeriod, $timesheets, &$total ){
+    public function getArrayFormatedTimesheetsFull(ValidationPeriod $validationPeriod, $timesheets, &$total)
+    {
         $output = [];
         $totalByDays = [];
         /** @var TimeSheet $timesheet */
-        foreach ($timesheets as $timesheet ){
-            if( $timesheet->getActivity() ) {
+        foreach ($timesheets as $timesheet) {
+            if ($timesheet->getActivity()) {
                 $packId = $timesheet->getActivity()->getId();
                 $pack = $timesheet->getActivity()->getLabel();
                 $num = $timesheet->getActivity()->getOscarNum();
@@ -787,7 +818,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $subpackId = 0;
             }
 
-            if( !array_key_exists($pack, $output) ){
+            if (!array_key_exists($pack, $output)) {
                 $output[$pack] = [
                     'oid' => $packId,
                     'validationperiod_id' => $validationPeriod->getId(),
@@ -804,7 +835,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ];
             }
 
-            if( !array_key_exists($subpack, $output[$pack]['details']) ){
+            if (!array_key_exists($subpack, $output[$pack]['details'])) {
                 $output[$pack]['details'][$subpack] = [
                     'oid' => $subpackId,
                     'label' => $subpack,
@@ -814,11 +845,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             $day = $timesheet->getDateFrom()->format('d');
-            if( !array_key_exists($day, $output[$pack]['details'][$subpack]['days']) ){
+            if (!array_key_exists($day, $output[$pack]['details'][$subpack]['days'])) {
                 $output[$pack]['details'][$subpack]['days'][$day] = 0.0;
             }
 
-            if( !array_key_exists($day,  $output[$pack]['totalDays']) ){
+            if (!array_key_exists($day, $output[$pack]['totalDays'])) {
                 $output[$pack]['totalDays'][$day] = 0.0;
             }
 
@@ -834,7 +865,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $output;
     }
 
-    public function getTimesheetsValidationPeriod( ValidationPeriod $validationPeriod ){
+    public function getTimesheetsValidationPeriod(ValidationPeriod $validationPeriod)
+    {
 
         // Récupération des dates de la périodes
         $year = $validationPeriod->getYear();
@@ -844,7 +876,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Nombre de jours dans le mois
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
         $from = $dateRef->format('Y-m-01 00:00:00');
-        $to = $dateRef->format('Y-m-' . $nbr .' 23:59:59');
+        $to = $dateRef->format('Y-m-' . $nbr . ' 23:59:59');
 
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)
             ->createQueryBuilder('t')
@@ -856,12 +888,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'to' => $to,
         ];
 
-        if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER ){
+        if ($validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER) {
             $query->andWhere('t.label = :label');
             $parameters['label'] = $validationPeriod->getObject();
         }
 
-        if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
+        if ($validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE) {
             $query->andWhere('t.activity = :activity');
             $parameters['activity'] = $validationPeriod->getObjectId();
         }
@@ -880,7 +912,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param $year
      * @return array
      */
-    public function getPeriodValidation( Person $person, $month, $year){
+    public function getPeriodValidation(Person $person, $month, $year)
+    {
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
             ->createQueryBuilder('v')
             ->where('v.month = :month AND v.year = :year AND v.declarer = :personId')
@@ -894,7 +927,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $result = [];
         /** @var ValidationPeriod $validationPeriod */
         foreach ($query->getQuery()->getResult() as $validationPeriod) {
-            if( array_key_exists($validationPeriod->getPeriodKey(), $result) ){
+            if (array_key_exists($validationPeriod->getPeriodKey(), $result)) {
                 $this->getLogger()->err(sprintf("L'objet ValidationPeriod %s a un doublon !", $validationPeriod));
             }
             $result[$validationPeriod->getPeriodKey()] = $validationPeriod;
@@ -902,7 +935,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $result;
     }
 
-    public function getPersonPeriods( Person $person ){
+    public function getPersonPeriods(Person $person)
+    {
         // Périodes
         $periods = $this->getValidationPeriodRepository()->getValidationPeriodsPersonQuery($person->getId())->getQuery()->getResult();
         $out = [];
@@ -910,9 +944,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var ValidationPeriod $period */
         foreach ($periods as $period) {
 
-            $key = $period->getYear().'-'.($period->getMonth()<10 ? '0'.$period->getMonth() : $period->getMonth());
+            $key = $period->getYear() . '-' . ($period->getMonth() < 10 ? '0' . $period->getMonth() : $period->getMonth());
 
-            if( !array_key_exists($key, $out) ){
+            if (!array_key_exists($key, $out)) {
                 $out[$key] = [
                     'periodCode' => $key,
                     'hasValidation' => true,
@@ -934,7 +968,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $key = $timesheet->getDateFrom()->format('Y-m');
             $keyDay = $timesheet->getDateFrom()->format('Y-m-d');
 
-            if( !array_key_exists($key, $out) ){
+            if (!array_key_exists($key, $out)) {
                 $out[$key] = [
                     'periodCode' => $key,
                     'hasValidation' => false,
@@ -942,7 +976,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ];
             }
 
-            if( !array_key_exists($keyDay, $out[$key]['days']) ){
+            if (!array_key_exists($keyDay, $out[$key]['days'])) {
                 $out[$key]['days'][$keyDay] = 0.0;
             }
 
@@ -954,7 +988,356 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $out;
     }
 
-    public function getAllTimesheetTypes( Person $person ){
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// CENTRALISER ICI !
+    ///
+    ///
+    public function getTimesheetDatasPersonPeriod(Person $person, $period)
+    {
+        $output = [];
+
+        $now = new \DateTime();
+
+        // Récupération des données sur la période
+        $periodFirstDay = new \DateTime($period . '-01');
+        $year = (int)$periodFirstDay->format('Y');
+        $month = (int)$periodFirstDay->format('m');
+        $daysInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);
+        $totalDays = count($daysInfos);
+        $periodLastDay = new \DateTime($period . '-' . $totalDays . ' 23:59:59');
+
+        $periodInfos = "";
+        $periodFutur = $periodFirstDay > $now;
+        $periodFinished = $periodLastDay < $now;
+        $periodCurrent = $period == $now->format('Y-m');
+
+        $submitable = false;
+        $submitableInfos = "Vous ne pouvez pas soumettre cette période pour une raison inconnue";
+
+        $editable = false;
+        $editableInfos = "Vous ne pouvez pas modifier les déclarations pour cette période pour une raison inconnue";
+
+        // Récupération des validations pour cette période
+        $periodValidations = $this->getPeriodValidation($person, $month, $year);
+        $isPeriodSend = count($periodValidations);
+        $periodValidationsDt = [];
+
+
+        $from = $periodFirstDay->format('Y-m-d');
+        $to = $periodLastDay->format('Y-m-d');
+
+        $periodLength = 0.0;
+        $periodOpened = 0.0;
+        $periodDeclarations = 0.0;
+
+
+        /** @var ValidationPeriod $periodValidation */
+        foreach ($periodValidations as $periodValidation) {
+            $data = $periodValidation->json();
+
+            if( $periodValidation->getObjectId() > 0 ){
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($periodValidation->getObjectId());
+                $label = (string) $activity;
+                $data['label'] = "Déclaration pour " . $label;
+            }
+            $periodValidationsDt[] = $data;
+        }
+
+        // Période pas encore commencée
+        if( $periodFutur ){
+            $periodInfos = "Ce mois n'a pas encore commencé";
+        }
+
+        if( $periodFinished ){
+            $periodInfos = "Ce mois est terminé";
+
+            // Il y'a des déclarations
+            if( count($periodValidations) ){
+                $submitable = false;
+                $submitableInfos = "Vous avez déja envoyé cette période pour validation";
+                $editable = false;
+                $editableInfos  = "Vous avez déja envoyé cette période pour validation";
+            } else {
+                $submitable = true;
+                $submitableInfos = "Ce mois est terminé, complétez votre déclaration avant de la soumettre";
+                $editable = true;
+                $editableInfos  = "Ce mois est terminé, complétez votre déclaration avant de la soumettre";
+            }
+        }
+
+        if( $periodCurrent ){
+            $periodInfos = "Mois en cours";
+            $submitable = false;
+            $submitableInfos = "mois en cours, vous ne pouvez soumettre vos déclarations qu'à la fin du mois";
+            $editable = true;
+            $editableInfos  = "Mois en cours, vous pouvez commencer à compléter votre déclaration";
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //// Récupération des lots de travail pour cette période
+        $activities = [];
+        $workPackages = [];
+
+        $availableWorkPackages = $this->getServiceLocator()->get('ActivityService')->getWorkPackagePersonPeriod($person, $year, $month);
+        /** @var WorkPackagePerson $workPackagePerson */
+        foreach ($availableWorkPackages as $workPackagePerson){
+            $workPackage = $workPackagePerson->getWorkPackage();
+            $activity = $workPackage->getActivity();
+
+            /** @var ValidationPeriod $period */
+            $periodActivityValidation = $this->getValidationPeriodActivityAt($workPackage->getActivity(), $person, $year, $month);
+
+            if( !array_key_exists($activity->getId()) ){
+                $activities[$activity->getId()] = [
+                    'id' => $activity->getId(),
+                    'acronym' => $activity->getAcronym(),
+                    'project' => (string)$activity->getProject(),
+                    'project_id' => $activity->getProject()->getId(),
+                    'label' => $activity->getLabel(),
+                    'total' => 0.0,
+                    'validation_state' => $periodActivityValidation ? $periodActivityValidation->json() : null
+                ];
+            }
+
+            $validationUp = false;
+
+            if( $isPeriodSend ){
+                $validationUp = $periodActivityValidation && $periodActivityValidation->isOpenForDeclaration();
+            } else {
+                $validationUp = true;
+            }
+
+            $workPackages[$workPackage->getId()] = [
+                'id' => $workPackage->getId(),
+                'from' => $from,
+                'to' => $to,
+                'label' => $workPackage->getLabel(),
+                'code' => $workPackage->getCode(),
+                'acronym' => $activity->getAcronym(),
+                'description' => 'Lot dans ' . (string)$activity,
+                'project' => (string)$activity->getProject(),
+                'project_id' => $activity->getProject()->getId(),
+                'activity' => (string)$activity,
+                'activity_id' => $activity->getId(),
+                'hours' => $workPackagePerson->getDuration(),
+                'total' => 0.0,
+                'validation_up' => $validationUp, //!$period || $period->isOpenForDeclaration(),
+                'validation_state' => $periodActivityValidation ? $periodActivityValidation->json() : null
+            ];
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Récupération des créneaux Hors-Lot
+        $others = $this->getOthersWP();
+        $horsLot = [];
+
+        foreach ($others as $key=>&$datas) {
+            $periodHL = $this->getValidationPeriosOutOfWorkpackageAt($person, $year, $month, $key);
+
+            if( $isPeriodSend ){
+                $validationUp = $periodHL && $periodHL->isOpenForDeclaration();
+            } else {
+                $validationUp = true;
+            }
+
+            $horsLot[$key]['validation_state'] = $periodHL ? $periodHL->json() : null;
+            $horsLot[$key]['validation_up'] = $validationUp;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        $timesheets = $this->getTimesheetsPersonPeriod($person, $from, $to);
+        /** @var TimeSheet $t */
+        foreach ($timesheets as $t) {
+
+            $dayTimesheet = (int)($t->getDateFrom()->format('d'));
+            $period = $t->getDateFrom()->format('Y-m');
+
+
+            if (!$t->getActivity()) {
+                $periodKey = ValidationPeriod::GROUP_OTHER;
+
+
+                $datas = [
+                    'id' => $t->getId(),
+                    'label' => $t->getLabel(),
+                    'description' => $t->getComment(),
+                    'duration' => $t->getDuration(),
+                    'status_id' => $t->getStatus(),
+                    'status' => 'locked',
+                    'validations' => null,
+                ];
+
+                $period = $this->getValidationPeriosOutOfWorkpackageAt( $t->getPerson(), $year, $month, $t->getLabel());
+                if( $period ){
+                    if( $period->getStatus() == ValidationPeriod::STATUS_VALID ){
+                        $datas['status_id'] = TimeSheet::STATUS_ACTIVE;
+                        $datas['status_id'] = TimeSheet::STATUS_ACTIVE;
+                        $datas['validations'] = $period->json();
+                    }
+                    elseif ($period->getStatus() != ValidationPeriod::STATUS_CONFLICT) {
+                        $datas['status_id'] = TimeSheet::STATUS_TOVALIDATE_ADMIN;
+                        $datas['status_id'] = TimeSheet::STATUS_TOVALIDATE_ADMIN;
+                        $datas['validations'] = $period->json();
+                    }
+                    else {
+                        $datas['status_id'] = TimeSheet::STATUS_CONFLICT;
+                        $datas['status_id'] = TimeSheet::STATUS_CONFLICT;
+                        $datas['validations'] = $period->json();
+                    }
+                }
+
+                switch( $t->getLabel() ){
+                    case 'cours' :
+                    case 'enseignement' :
+                    case 'teaching' :
+                        $output['days'][$dayTimesheet]['teaching'][] = $datas;
+                        break;
+
+                    case 'formation' :
+                    case 'learning' :
+                    case 'training' :
+                        $output['days'][$dayTimesheet]['training'][] = $datas;
+                        break;
+
+                    case 'vacation' :
+                    case 'conges' :
+                        $output['days'][$dayTimesheet]['conges'][] = $datas;
+                        break;
+
+                    case 'sickleave' :
+                        $output['days'][$dayTimesheet]['sickleave'][] = $datas;
+                        break;
+
+                    case 'absent' :
+                        $output['days'][$dayTimesheet]['absent'][] = $datas;
+                        break;
+
+                    case 'research' :
+                        $output['days'][$dayTimesheet]['research'][] = $datas;
+                        break;
+
+                    default:
+                        $output['days'][$dayTimesheet]['infos'][] = $datas;
+                }
+
+                $output['days'][$dayTimesheet]['othersWP'][] = $datas;
+                $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
+                $output['total'] += (float)$t->getDuration();
+
+
+                continue;
+            } else {
+                $periodKey = "activity-" . $t->getActivity()->getId();
+            }
+
+            $projectAcronym = $t->getActivity()->getAcronym();
+            $project = $t->getActivity()->getProject();
+            $activity = $t->getActivity();
+            $activityCode = $activity->getOscarNum();
+            $workpackage = $t->getWorkpackage();
+            $wpCode = $workpackage->getCode();
+            $periodDeclarations += (float)$t->getDuration();
+
+            $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
+            $periodLength += (float)$t->getDuration();
+            $activities[$activity->getId()]['total'] += $t->getDuration();
+            $workPackages[$workpackage->getId()]['total'] += $t->getDuration();
+
+
+            if( $t->getStatus() == TimeSheet::STATUS_DRAFT ){
+                $output['hasUnsend'] = true;
+            }
+
+            $output['days'][$dayTimesheet]['declarations'][] = [
+                'id' => $t->getId(),
+                'credentials' => $this->resolveTimeSheetCredentials($t),
+                'validations' => $this->resolveTimeSheetValidation($t),
+                'label' => $t->getLabel(),
+                'comment' => $t->getComment(),
+                'activity' => (string) $activity,
+                'activity_code' => $activityCode,
+                'acronym' => $projectAcronym,
+                'project' => (string)$project,
+                'status_id' => $t->getStatus(),
+                'status' => 'locked',
+                'wpCode' => $wpCode,
+                'duration' => (float)$t->getDuration(),
+                'wp_id' => $t->getWorkpackage()->getId(),
+            ];
+        }
+
+        $output = [
+            'person' => (string)$person,
+            'person_id' => $person->getId(),
+            'period' => $periodFirstDay->format('Y-m'),
+            'periodInfos' => $periodInfos,
+            'periodFutur' => $periodFutur,
+            'periodFinished' => $periodFinished,
+            'periodCurrent' => $periodCurrent,
+            'periodLength' => $periodLength,
+            'periodOpened' => $periodOpened,
+            'periodDeclarations' => $periodDeclarations,
+            'month' => $month,
+            'year' => $year,
+            'from' => $periodFirstDay->format('Y-m-d'),
+            'to' => $periodLastDay->format('Y-m-d'),
+            'submitable' => $submitable,
+            'submitableInfos' => $submitableInfos,
+            'editable' => $editable,
+            'editableInfos' => $editableInfos,
+            'period_total_days' => $totalDays,
+            'dayNbr' => $totalDays,
+            'daylength' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value'),
+            'dayLength' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value'),
+
+            'dayExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.max'),
+            'weekExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max'),
+            'monthExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.max'),
+            'activities' => $activities,
+            'workpackages' => $workPackages,
+            'otherWP' => $others,
+            'days' => []
+        ];
+
+       // $output['periodsValidations'] = $periodValidationsDt;
+
+
+        foreach ($daysInfos as $day => $daydata) {
+           $datetime = new \DateTime($daydata['datefull']);
+           $locked = true;
+
+           $editable = $editable;
+
+            $daydata['date'] = $daydata['datefull'];
+            $daydata['data'] = $daydata['datefull'];
+            $daydata['day'] = $datetime->format('N');
+            $daydata['week'] = $datetime->format('W');
+            $daydata['editable'] = $editable;
+            $daydata['declarations'] = [];
+            $daydata['total'] = 0.0;
+
+            foreach ($others as $otherKey=>$other) {
+                $daydata[$otherKey] = [];
+            }
+
+           $output['days'][$day] = $daydata;
+           //var_dump($daydata); die();
+        }
+
+
+        echo "<pre>";
+        var_dump(json_encode($output, JSON_PRETTY_PRINT));
+        die();
+
+
+        return $output;
+    }
+
+
+    public function getAllTimesheetTypes(Person $person)
+    {
         $all = [];
         foreach ($this->getOthersWP() as $other) {
             $all[] = [
@@ -991,7 +1374,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
-    public function getPersonTimesheetsDatas( Person $person, $period, $validatedOnly = false){
+    public function getPersonTimesheetsDatas(Person $person, $period, $validatedOnly = false)
+    {
         $periodBounds = DateTimeUtils::periodBounds($period);
 
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)
@@ -1019,7 +1403,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $subGroupType = 'invalid Type';
             $day = $timesheet->getDateFrom()->format('d');
 
-            if( $timesheet->getActivity() ){
+            if ($timesheet->getActivity()) {
                 $path = 'activities';
                 $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
                 $groupType = 'activity';
@@ -1029,7 +1413,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $subGroupType = "wp";
             }
 
-            if( array_key_exists($timesheet->getLabel(), $others) ){
+            if (array_key_exists($timesheet->getLabel(), $others)) {
                 $path = 'others';
                 $group = 'Hors-lot';
                 $groupId = -1;
@@ -1039,7 +1423,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $subGroupType = $timesheet->getLabel();
             }
 
-            if( !array_key_exists($group, $declarations[$path]) ){
+            if (!array_key_exists($group, $declarations[$path])) {
                 $declarations[$path][$group] = [
                     'label' => $group,
                     'id' => $groupId,
@@ -1049,7 +1433,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ];
             }
 
-            if( !array_key_exists($subGroup, $declarations[$path][$group]['subgroup']) ){
+            if (!array_key_exists($subGroup, $declarations[$path][$group]['subgroup'])) {
                 $declarations[$path][$group]['subgroup'][$subGroup] = [
                     'label' => $subGroup,
                     'id' => $subGroupId,
@@ -1059,7 +1443,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ];
             }
 
-            if( !array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days']) ) {
+            if (!array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days'])) {
                 $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
             }
 
@@ -1081,11 +1465,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         return $output;
     }
+
     /**
      * Retourne les créneaux de la personne regroupès par activité
      * @param Person $person
      */
-    public function getPersonTimesheets( Person $person, $validatedOnly = false, $periodFilter = null, $activity = null ){
+    public function getPersonTimesheets(Person $person, $validatedOnly = false, $periodFilter = null, $activity = null)
+    {
 
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)
             ->createQueryBuilder('t')
@@ -1093,7 +1479,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->orderBy('t.activity, t.dateFrom')
             ->setParameter('person', $person);
 
-        if( $activity != null ){
+        if ($activity != null) {
             $query->andWhere('t.activity = :activity')
                 ->setParameter('activity', $activity);
         }
@@ -1101,32 +1487,32 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $datas = [];
 
         /** @var TimeSheet $timesheet */
-        foreach( $query->getQuery()->getResult() as $timesheet ){
-            if( !$timesheet->getActivity() ) continue;
+        foreach ($query->getQuery()->getResult() as $timesheet) {
+            if (!$timesheet->getActivity()) continue;
 
             $activityId = $timesheet->getActivity()->getId();
             $period = $timesheet->getDateFrom()->format('Y-m');
 
-            if( $periodFilter!== null && $periodFilter != $period )
+            if ($periodFilter !== null && $periodFilter != $period)
                 continue;
 
-            if( !array_key_exists($activityId, $datas) ){
+            if (!array_key_exists($activityId, $datas)) {
                 $datas[$activityId] = [
-                  'activityObj' => $timesheet->getActivity(),
-                  'activity' => (string) $timesheet->getActivity(),
-                  'project' => (string) $timesheet->getActivity()->getProject(),
-                  'activity_id' => $timesheet->getActivity()->getId()
+                    'activityObj' => $timesheet->getActivity(),
+                    'activity' => (string)$timesheet->getActivity(),
+                    'project' => (string)$timesheet->getActivity()->getProject(),
+                    'activity_id' => $timesheet->getActivity()->getId()
                 ];
             }
 
-            if( !array_key_exists($period, $datas[$activityId]) ){
+            if (!array_key_exists($period, $datas[$activityId])) {
                 $datas[$activityId][$period] = [
                     'unvalidate' => false,
                     'total' => 0.0,
                 ];
                 /** @var WorkPackage $wp */
-                foreach ($timesheet->getActivity()->getWorkPackages() as $wp ){
-                    if( !array_key_exists($wp->getCode(), $datas[$activityId]['timesheets'][$period]) )
+                foreach ($timesheet->getActivity()->getWorkPackages() as $wp) {
+                    if (!array_key_exists($wp->getCode(), $datas[$activityId]['timesheets'][$period]))
                         $datas[$activityId]['timesheets'][$period][$wp->getCode()] = [
                             'total' => 0.0
                         ];
@@ -1134,16 +1520,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
             $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]['total'] += $timesheet->getDuration();
             $datas[$activityId]['timesheets'][$period]['total'] += $timesheet->getDuration();
-            if( $timesheet->getStatus() != TimeSheet::STATUS_ACTIVE ){
+            if ($timesheet->getStatus() != TimeSheet::STATUS_ACTIVE) {
                 $datas[$activityId]['timesheets'][$period]['unvalidate'] = true;
             }
 
-            $day = (string) $timesheet->getDateFrom()->format('j');
-            if (!array_key_exists($day, $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()])){
+            $day = (string)$timesheet->getDateFrom()->format('j');
+            if (!array_key_exists($day, $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()])) {
                 $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()][$day] = 0.0;
-                $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]["crenaux_".$day] = 0;
+                $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]["crenaux_" . $day] = 0;
             }
-            $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]["crenaux_".$day]++;
+            $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]["crenaux_" . $day]++;
             $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()][$day] += $timesheet->getDuration();
 
         }
@@ -1153,7 +1539,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * Retourne la liste des déclarants
      */
-    public function getDeclarersList(){
+    public function getDeclarersList()
+    {
 
         $persons = $this->getEntityManager()->createQueryBuilder()->select('p')
             ->from(Person::class, 'p')
@@ -1166,7 +1553,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $validationsPeriodRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
 
         /** @var Person $person */
-        foreach ($persons->getQuery()->getResult() as $person){
+        foreach ($persons->getQuery()->getResult() as $person) {
             $personData = $person->toJson();
             $personData['workpackages'] = count($person->getWorkPackages());
             $personData['validationsStats'] = $validationsPeriodRepo->getValidationPersonStats($person);
@@ -1181,23 +1568,25 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * Retourne les données sur les déclarations de la personne
      */
-    public function getDeclarerDetails(Person $person){
+    public function getDeclarerDetails(Person $person)
+    {
         throw new OscarException("PAS FAIT");
     }
 
 
-    public function getDeclarers(){
+    public function getDeclarers()
+    {
         // Récupération des IDS des déclarants
         $timesheets = $this->getTimesheetRepository()->getTimesheetsWithWorkPackage();
         $out = [];
         $persons = [];
         $activities = [];
         /** @var TimeSheet $timesheet */
-        foreach( $timesheets as $timesheet ){
+        foreach ($timesheets as $timesheet) {
             /** @var Person $currentPerson */
             $currentPerson = $timesheet->getPerson();
 
-            if( !array_key_exists($currentPerson->getId(), $persons) ){
+            if (!array_key_exists($currentPerson->getId(), $persons)) {
                 $persons[$currentPerson->getId()] = $currentPerson->toJson();
                 $persons[$currentPerson->getId()]['declarations'] = [];
             }
@@ -1205,7 +1594,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             /** @var Activity $currentActivity */
             $currentActivity = $timesheet->getActivity();
 
-            if( !array_key_exists($currentActivity->getId(), $persons[$currentPerson->getId()]['declarations']) ){
+            if (!array_key_exists($currentActivity->getId(), $persons[$currentPerson->getId()]['declarations'])) {
                 $persons[$currentPerson->getId()]['declarations'][$currentActivity->getId()] = $currentActivity->toJson();
                 $persons[$currentPerson->getId()]['declarations'][$currentActivity->getId()]['timesheets'] = [];
             }
@@ -1221,8 +1610,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
-
-    public function getActivitiesWithTimesheetSend(){
+    public function getActivitiesWithTimesheetSend()
+    {
 
         // récupération des périodes
         /** @var ValidationPeriodRepository $repositoryPeriod */
@@ -1239,16 +1628,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $activities->setParameter('ids', $activitiesIdsWithValidationProgress)->getQuery()->getResult();
     }
 
-    public function getTimesheetRejected( Person $person ){
-         $timesheets = $this->getEntityManager()->createQueryBuilder()->select('t')
+    public function getTimesheetRejected(Person $person)
+    {
+        $timesheets = $this->getEntityManager()->createQueryBuilder()->select('t')
             ->from(TimeSheet::class, 't')
             ->where('t.person = :person AND t.status = :status')
-             ->setParameter('person', $person)
-             ->setParameter('status', TimeSheet::STATUS_CONFLICT);
+            ->setParameter('person', $person)
+            ->setParameter('status', TimeSheet::STATUS_CONFLICT);
         return $timesheets->getQuery()->getResult();
     }
 
-    public function getTimesheetsPersonPeriodArrayId($currentPerson, \DateTime $from, \DateTime $to){
+    public function getTimesheetsPersonPeriodArrayId($currentPerson, \DateTime $from, \DateTime $to)
+    {
 
         $query = $this->getEntityManager()->createQueryBuilder('t')
             ->select('t.id')
@@ -1270,7 +1661,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param \DateTime $to
      * @return Query
      */
-    protected function getQueryTimesheetsPersonPeriod($currentPerson, \DateTime $from, \DateTime $to){
+    protected function getQueryTimesheetsPersonPeriod($currentPerson, \DateTime $from, \DateTime $to)
+    {
         $query = $this->getEntityManager()->createQueryBuilder('t')
             ->select('t')
             ->from(TimeSheet::class, 't')
@@ -1287,7 +1679,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $query;
     }
 
-    public function setTimesheetToSend(TimeSheet &$timeSheet) {
+    public function setTimesheetToSend(TimeSheet &$timeSheet)
+    {
         $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE)
             ->setSendBy((string)$this->getOscarUserContext()->getCurrentPerson())
             ->setRejectedSciComment(null)
@@ -1303,8 +1696,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->setValidatedSciById(null)
             ->setValidatedAdminAt(null)
             ->setValidatedAdminBy(null)
-            ->setValidatedAdminById(null)
-        ;
+            ->setValidatedAdminById(null);
     }
 
 
@@ -1318,7 +1710,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function send($datas, $by)
     {
         $timesheets = [];
-        if( !$datas ){
+        if (!$datas) {
             throw new \Exception("Invalid datas");
         }
 
@@ -1345,7 +1737,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         try {
             $notificationService->notifyActivitiesTimesheetSend($activityNotification);
-        } catch ( \Exception $e ){
+        } catch (\Exception $e) {
             //$this->getServiceLocator()->get('Logger')->error($e->getMessage() ." - " . $e->getTraceAsString());
         }
         return $timesheets;
@@ -1369,7 +1761,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $timesheets[] = $json;
         }
 
-        foreach ($this->getExternal( $person ) as $data) {
+        foreach ($this->getExternal($person) as $data) {
             $timesheets[] = $data;
         }
 
@@ -1380,7 +1772,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * Charge les emplois du temps "extérieurs"
      * @param Person $person
      */
-    public function getExternal( Person $person ){
+    public function getExternal(Person $person)
+    {
         // TODO Récupération des créneaux 'externes'
         return [/*
             [
@@ -1407,7 +1800,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * @return Logger
      */
-    protected function getLogger(){
+    protected function getLogger()
+    {
         return $this->getServiceLocator()->get('Logger');
     }
 
@@ -1425,7 +1819,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param Person $person
      * @return array
      */
-    public function getValidationPeriods( $year, $month, Person $person ){
+    public function getValidationPeriods($year, $month, Person $person)
+    {
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('v')
             ->where('v.year = :year AND v.month = :month AND v.declarer = :person')
             ->setParameters([
@@ -1437,14 +1832,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $query->getResult();
     }
 
-    public function sendPeriod( $from, $to, $sender ){
+    public function sendPeriod($from, $to, $sender)
+    {
 
 
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
         $this->getLogger()->debug("Traitement pour $sender ($fromMonth - $toMonth)");
 
-        if( $fromMonth != $toMonth)
+        if ($fromMonth != $toMonth)
             throw new Exception("La période à traiter n'est pas un mois...");
 
         $mois = (integer)$from->format('m');
@@ -1453,7 +1849,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Créneaux de la périodes
         $timesheets = $this->getQueryTimesheetsPersonPeriod($sender, $from, $to)->getResult();
 
-        if( count($timesheets) == 0 ){
+        if (count($timesheets) == 0) {
             throw new OscarException("Aucun créneau à soumettre pour cette période.");
         }
 
@@ -1461,7 +1857,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $declarations = $this->getValidationPeriods($annee, $mois, $sender);
         $this->getLogger()->debug("Déclarations trouvées = " . count($declarations));
 
-        if( count($declarations) > 0 ){
+        if (count($declarations) > 0) {
             throw new OscarException("Vous avez déjà envoyé des déclarations pour cette période");
         }
 
@@ -1476,16 +1872,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $object = $timesheet->getLabel();
             $objectId = -1;
 
-            if( $timesheet->getActivity() ){
+            if ($timesheet->getActivity()) {
                 $object = ValidationPeriod::OBJECT_ACTIVITY;
                 $objectGroup = ValidationPeriod::GROUP_WORKPACKAGE;
                 $objectId = $timesheet->getActivity()->getId();
             }
 
             $key = sprintf("%s_%s", $object, $objectId);
-            if( !array_key_exists($key, $declarations) ){
+            if (!array_key_exists($key, $declarations)) {
                 $declarations[$key] = [
-                    'objectId'      => $objectId,
+                    'objectId' => $objectId,
                     'object' => $object,
                     'objectGroup' => $objectGroup,
                     'log' => "Déclaration envoyée",
@@ -1510,7 +1906,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @return ValidationPeriod
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    protected function createDeclaration($sender, $year, $month,  $object, $objectId, $objectGroup) {
+    protected function createDeclaration($sender, $year, $month, $object, $objectId, $objectGroup)
+    {
 
         $now = new \DateTime();
         $declaration = new ValidationPeriod();
@@ -1530,7 +1927,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     }
 
-    public function allByActivity( Activity $activity ){
+    public function allByActivity(Activity $activity)
+    {
         $timesheets = $this->getEntityManager()->createQueryBuilder()
             ->select('t')
             ->from(TimeSheet::class, 't')
@@ -1552,17 +1950,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $declaration;
     }
 
-    public function resolveTimeSheetValidation( TimeSheet $timeSheet ){
+    public function resolveTimeSheetValidation(TimeSheet $timeSheet)
+    {
         $validation = false;
 
-        if( $timeSheet->getStatus() != TimeSheet::STATUS_INFO ){
+        if ($timeSheet->getStatus() != TimeSheet::STATUS_INFO) {
 
             $conflict = '';
 
-            if( $timeSheet->getRejectedAdminAt() ) {
+            if ($timeSheet->getRejectedAdminAt()) {
                 $conflict .= sprintf("Rejet administratif par %s le %s : %s", $timeSheet->getRejectedAdminBy(), $timeSheet->getRejectedAdminAt()->format('Y-m-d'), $timeSheet->getRejectedAdminComment());
             }
-            if( $timeSheet->getRejectedSciAt() ) {
+            if ($timeSheet->getRejectedSciAt()) {
                 $conflict .= sprintf("Rejet scientifique par %s le %s : %s", $timeSheet->getRejectedSciBy(), $timeSheet->getRejectedSciAt()->format('Y-m-d'), $timeSheet->getRejectedSciComment());
             }
 
@@ -1572,12 +1971,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'by' => null
                 ],
                 'sci' => [
-                    'date' => $timeSheet->getValidatedSciAt() ? $timeSheet->getValidatedSciAt()->format('Y-m-d'): null,
+                    'date' => $timeSheet->getValidatedSciAt() ? $timeSheet->getValidatedSciAt()->format('Y-m-d') : null,
                     'validator' => $timeSheet->getValidatedSciBy() ? $timeSheet->getValidatedSciBy() : null,
                     'validator_id' => $timeSheet->getValidatedSciById() ? $timeSheet->getValidatedSciById() : null,
                 ],
                 'adm' => [
-                    'date' => $timeSheet->getValidatedAdminAt() ? $timeSheet->getValidatedAdminAt()->format('Y-m-d'): null,
+                    'date' => $timeSheet->getValidatedAdminAt() ? $timeSheet->getValidatedAdminAt()->format('Y-m-d') : null,
                     'validator' => $timeSheet->getValidatedAdminBy() ? $timeSheet->getValidatedAdminBy() : null,
                     'validator_id' => $timeSheet->getValidatedAdminById() ? $timeSheet->getValidatedAdminById() : null,
                 ],
@@ -1618,7 +2017,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $validableSci = false;
         $validableAdm = false;
 
-        if( $periodValidation ){
+        if ($periodValidation) {
 
 
             switch ($periodValidation->getStatus()) {
@@ -1641,7 +2040,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $editable = true;
         }
 
-        if ($timeSheet->getStatus() == TimeSheet::STATUS_TOVALIDATE){
+        if ($timeSheet->getStatus() == TimeSheet::STATUS_TOVALIDATE) {
             $validableSci = $timeSheet->getValidatedSciAt() ?
                 false :
                 $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
@@ -1664,7 +2063,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         ];
     }
 
-    public function createOrMerge( $datas ){
+    public function createOrMerge($datas)
+    {
 
     }
 
@@ -1717,7 +2117,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ->setDateFrom(new \DateTime($data['start']))
                 ->setDateTo(new \DateTime($data['end']));
 
-            if( $status == TimeSheet::STATUS_INFO ){
+            if ($status == TimeSheet::STATUS_INFO) {
                 $timeSheet->setActivity(null)
                     ->setWorkpackage(null)
                     ->setSendBy(null);
@@ -1741,7 +2141,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param TimeSheet $timeSheet
      * @return TimeSheet
      */
-    public function resetValidationData( TimeSheet $timeSheet ){
+    public function resetValidationData(TimeSheet $timeSheet)
+    {
         return $timeSheet
             ->setRejectedAdminById(null)
             ->setRejectedAdminBy(null)
@@ -1760,7 +2161,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param $icsUid UID du fichier ICAL source
      * @param $by Person à l'origine de la suppression
      */
-    public function deleteIcsFileUid($icsUid, $by){
+    public function deleteIcsFileUid($icsUid, $by)
+    {
         // Récupération des créneaux correspondant
         $timesheets = $this->getTimesheetRepository()->getTimesheetsByIcsFileUid($icsUid);
 
@@ -1775,12 +2177,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
         /** @var TimeSheet $timesheet */
-        foreach( $timesheets as $timesheet ){
-            if($timesheet->getPerson() != $by ){
+        foreach ($timesheets as $timesheet) {
+            if ($timesheet->getPerson() != $by) {
                 $warnings[] = sprintf("Le créneau '%s' n'a pas été supprimé (owner error).", $timesheet);
                 continue;
             }
-            if( !in_array($timesheet->getStatus(), $status) ){
+            if (!in_array($timesheet->getStatus(), $status)) {
                 $warnings[] = sprintf("Le créneau '%s' n'a pas été supprimé (statut error).", $status);
                 continue;
             }
@@ -1791,11 +2193,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
-    public function getLockedDays( $annee, $mois, $loadInitiale = true, $person=null ){
+    public function getLockedDays($annee, $mois, $loadInitiale = true, $person = null)
+    {
         // Jours vérrouillés dans le mois
         $locked = [];
 
-        if( $loadInitiale == true ){
+        if ($loadInitiale == true) {
             $datas = $this->getServiceLocator()->get('Configuration');
             $lockedEachMonth = $datas['oscar']['closedDays'];
             $lockedEachSpecifics = $datas['oscar']['closedDaysExtras'];
@@ -1809,13 +2212,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * @return TimesheetRepository
      */
-    protected function getTimesheetRepository(){
+    protected function getTimesheetRepository()
+    {
         return $this->getEntityManager()->getRepository(TimeSheet::class);
     }
 
 
-
-    public function getPeriodValidationTimesheet( TimeSheet $t ){
+    public function getPeriodValidationTimesheet(TimeSheet $t)
+    {
 
         $year = $t->getDateFrom()->format('Y');
         $month = $t->getDateFrom()->format('m');
@@ -1823,7 +2227,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var ValidationPeriodRepository $periodRepo */
         $periodRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
 
-        if( $t->getActivity() ){
+        if ($t->getActivity()) {
             $period = $periodRepo->getValidationPeriodForActivity($year, $month, $t->getActivity()->getId(), $t->getPerson()->getId());
         } else {
             $period = $periodRepo->getValidationPeriodOutWP($year, $month, $t->getLabel(), $t->getPerson()->getId());
@@ -1841,7 +2245,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     public function delete($timesheetId, $currentPerson)
     {
-        if( !is_array($timesheetId) ){
+        if (!is_array($timesheetId)) {
             $timesheetId = [$timesheetId];
         }
 
@@ -1860,19 +2264,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $errors = "";
 
             /** @var TimeSheet $t */
-            foreach( $timesheets as $t ){
+            foreach ($timesheets as $t) {
 
                 try {
                     /** @var ValidationPeriod $validationPeriod */
                     $validationPeriod = $this->getPeriodValidationTimesheet($t);
 
-                    if( $validationPeriod != null && $validationPeriod->getStatus() != ValidationPeriod::STATUS_CONFLICT ){
+                    if ($validationPeriod != null && $validationPeriod->getStatus() != ValidationPeriod::STATUS_CONFLICT) {
                         throw new \Exception("Ce créneau a une procédure de validation active. Vous ne pouvez pas le modifier");
                     }
 
                     $this->deleteTimesheet($t, $currentPerson, false);
                 } catch (\Exception $e) {
-                    $errors .= $e->getMessage()."\n";
+                    $errors .= $e->getMessage() . "\n";
                 }
             }
             $this->getEntityManager()->flush();
@@ -1881,7 +2285,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             throw new OscarException("BD Error : " . $e->getMessage());
         }
 
-        if( $errors ){
+        if ($errors) {
             throw new OscarException("Un ou plusieurs créneaux n'ont pas pu être supprimés : \n" . $errors);
         }
 
@@ -1896,32 +2300,31 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @throws OscarException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function deleteTimesheet( TimeSheet $timesheet, $person = null, $flush = true ){
+    public function deleteTimesheet(TimeSheet $timesheet, $person = null, $flush = true)
+    {
         // Récupération des droits
         $credential = $this->resolveTimeSheetCredentials($timesheet, $person);
 
-        if( !$credential['deletable'] == true ){
+        if (!$credential['deletable'] == true) {
             throw new OscarException(sprintf("Impossible de supprimer le créneau %s du %s, seul un créneau non-soumis peut être supprimé.\n", $timesheet->getLabel(), $timesheet->getDateFrom()->format('Y-m-d')));
         } else {
             $this->getEntityManager()->remove($timesheet);
-            if( $flush ){
+            if ($flush) {
                 $this->getEntityManager()->flush($timesheet);
             }
         }
     }
 
 
-
-
     private $notificationsDatas;
 
-    protected function stackNotification( $message, Activity $activity, $action, array $persons )
+    protected function stackNotification($message, Activity $activity, $action, array $persons)
     {
-        if( $this->notificationsDatas === null ){
+        if ($this->notificationsDatas === null) {
             $this->notificationsDatas = [];
         }
         $key = 'Activity:' . $action . ':' . $activity->getId();
-        if( !array_key_exists($key, $this->notificationsDatas) ){
+        if (!array_key_exists($key, $this->notificationsDatas)) {
             $this->notificationsDatas[$key] = [
                 'message' => $message,
                 'action' => $action,
@@ -1941,13 +2344,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /**
      * @return NotificationService
      */
-    protected function getServiceNotification(){
+    protected function getServiceNotification()
+    {
         return $this->getServiceLocator()->get("NotificationService");
     }
 
-    protected function sendStackedNotifications(){
-        if( $this->notificationsDatas ){
-            foreach ($this->notificationsDatas as $activityKey=>$datas) {
+    protected function sendStackedNotifications()
+    {
+        if ($this->notificationsDatas) {
+            foreach ($this->notificationsDatas as $activityKey => $datas) {
                 $this->getServiceNotification()->notification(
                     sprintf($datas['message'], $datas['activity']->log()),
                     $datas['persons'],
@@ -1968,14 +2373,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $currentPersonName = "Oscar Bot";
         $currentPersonId = -1;
 
-        if( $by ){
+        if ($by) {
             $currentPersonName = (string)$by;
             $currentPersonId = $by->getId();
         }
 
         // Traitement
         foreach ($datas as $data) {
-            if ( array_key_exists('id', $data) ) {
+            if (array_key_exists('id', $data)) {
                 /** @var TimeSheet $timeSheet */
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
 
@@ -1985,7 +2390,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     ->setRejectedSciAt(null)
                     ->setRejectedSciBy(null)
                     ->setRejectedSciComment(null)
-
                     ->setValidatedSciAt(new \DateTime())
                     ->setValidatedSciBy($currentPersonName)
                     ->setValidatedSciById($currentPersonId);
@@ -2026,14 +2430,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $currentPersonName = "Oscar Bot";
         $currentPersonId = -1;
-        if( $by ){
+        if ($by) {
             $currentPersonName = (string)$by;
             $currentPersonId = $by->getId();
         }
 
         // Traitement
         foreach ($datas as $data) {
-            if ( array_key_exists('id', $data) ) {
+            if (array_key_exists('id', $data)) {
                 /** @var TimeSheet $timeSheet */
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
 
@@ -2076,9 +2480,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @param $from JOUR de début au format YYYY-MM-DD, ex: 2018-07-01
      * @param $to JOUR de fin au format YYYY-MM-DD, ex: 2018-07-31
      */
-    public function getTimesheetsPersonPeriod(Person $person, $from, $to){
+    public function getTimesheetsPersonPeriod(Person $person, $from, $to)
+    {
         $this->getLogger()->debug(sprintf('Récupération des créneaux entre %s et %s pour %s', $from, $to
-        , $person));
+            , $person));
         // Récupération des créneaux présents dans Oscar
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
         $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')
@@ -2087,8 +2492,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 // PATCH Aout 2018
                 // Ajout des heures pour récupérer les créneaux du dernier jour
                 // Note : DoctrineExtension ne semble pas fonctionner (usage de DATE(Champ))
-                'start' => $from .' 00:00:00',
-                'end' => $to.' 23:59:59',
+                'start' => $from . ' 00:00:00',
+                'end' => $to . ' 23:59:59',
                 'person' => $person,
             ]);
         return $query->getQuery()->getResult();

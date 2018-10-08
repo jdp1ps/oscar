@@ -64,25 +64,41 @@ return array(
         // TRUE => en heure
         'declarationsHours' => false,
 
+        'declarationsWeekend' => false,
+        'declarationsWeekendOverwrite' => false,
+
         // Authorise la personnalisation du mode de déclaration
         'declarationsHoursOverwriteByAuth' => false,
 
         // Durée standard d'une journée pour les déclarants (général)
         'declarationsDayDuration' => 7.4,
+        'declarationsDayDurationMaxlength' => 9.0,
 
         // Durée standards d'une semaine
         'declarationsWeekDuration' => 7.4*5,
+        'declarationsWeekDurationMaxlength' => 39.0,
+
+        'declarationsMonthDuration' => 144.0,
+        'declarationsMonthDurationMaxlength' => 176.0,
 
         // Configuration des cas particuliers (LABS)
         'declarationsDurations' => [
 
             'dayLength'     => [
                 'value' => 8.0,
+                'max' => 10.0,
                 'userChange' => false
             ],
 
             'weekLength'     => [
                 'value' => 37.0,
+                'max' => 44.0,
+                'userChange' => false
+            ],
+
+            'monthLength' => [
+                'value' => 144.0,
+                'max'   => 176.0,
                 'userChange' => false
             ],
 
