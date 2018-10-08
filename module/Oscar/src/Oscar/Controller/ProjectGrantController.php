@@ -106,7 +106,6 @@ class ProjectGrantController extends AbstractOscarController
             $datas[] = $jsonFormatter->format($activity, false);
         }
 
-
         return $this->ajaxResponse([
             'oscar' => OscarVersion::getBuild(),
             'date'  => date('Y-m-d H:i:s'),
@@ -308,7 +307,7 @@ class ProjectGrantController extends AbstractOscarController
         $entity = $this->getActivityFromRoute();
 
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
-        // $this->getM
+
         $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
 
         /** @var NotificationService $serviceNotification */
@@ -415,13 +414,9 @@ class ProjectGrantController extends AbstractOscarController
         /** @var Request $request */
         $request = $this->getRequest();
 
-
         $perimeter = $this->params()->fromQuery('perimeter', '');
         $fields = $this->params()->fromPost('fields', null);
         $format = $this->params()->fromPost('format', 'csv');
-
-
-
 
         $qb = $this->getEntityManager()->createQueryBuilder()->select('a')
             ->from(Activity::class, 'a');
@@ -485,8 +480,6 @@ class ProjectGrantController extends AbstractOscarController
             }
         }
 
-
-
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
             ->select('r.label')
             ->from(OrganizationRole::class, 'r')
@@ -504,7 +497,6 @@ class ProjectGrantController extends AbstractOscarController
             }
             $rolesOrganisations[$header] = [];
         }
-
 
         $rolesOrga = $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray();
         $rolesPersons = [];
@@ -540,9 +532,8 @@ class ProjectGrantController extends AbstractOscarController
             $jalons[$header] = [];
         }
 
-
-
         fputcsv($handler, $headers);
+
         /** @var Activity $entity */
         foreach ($entities as $entity) {
             $datas = [];
@@ -568,13 +559,10 @@ class ProjectGrantController extends AbstractOscarController
                         'nop';
                 }
 
-
-
                 foreach ( $entity->csv() as $col=>$value ){
                     if( $columns[$col] === true )
                         $datas[] = $value;
                 }
-
 
                 foreach( $rolesCurrent as $role=>$organisations ){
                     if( $columns[$role] === true )
@@ -586,7 +574,6 @@ class ProjectGrantController extends AbstractOscarController
                         $datas[] = $persons ? implode('|', array_unique($persons)) : ' ';
                 }
 
-
                 foreach( $jalonsCurrent as $jalon2=>$date ){
                     if( $columns[$jalon2] === true )
                         $datas[] = $date ? implode('|', array_unique($date)) : ' ';
@@ -597,7 +584,6 @@ class ProjectGrantController extends AbstractOscarController
         fclose($handler);
 
         $downloader = new CSVDownloader();
-
 
         $csvPath = sprintf('/tmp/%s', $csv);
 
@@ -706,14 +692,7 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         return new JsonModel($out);
-
     }
-
-    /*
-    protected function getActivityFromRoute( $field = 'id' ){
-
-    }
-    /****/
 
     public function notificationsAction(){
 
@@ -747,7 +726,6 @@ class ProjectGrantController extends AbstractOscarController
 
     public function show2Action(){
         $method = $this->getHttpXMethod();
-
 
         $id = $this->params()->fromRoute('id');
 

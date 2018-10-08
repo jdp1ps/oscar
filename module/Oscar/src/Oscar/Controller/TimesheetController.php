@@ -803,15 +803,13 @@ class TimesheetController extends AbstractOscarController
         $firstDay = new \DateTime($period.'-01');
 
         $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getCurrentPerson(), $period);
-        echo "<pre>";
-        var_dump($datas);
-        die($period);
-
         $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($this->getCurrentPerson());
+
 
         return [
             'exists' => $resume,
             'period' => $period,
+            'datas' => $datas,
             'correspondances' => $correspondances
         ];
     }
@@ -888,7 +886,6 @@ class TimesheetController extends AbstractOscarController
             }
         }
 
-
         $method = $this->getHttpXMethod();
 
         switch( $method ){
@@ -899,8 +896,6 @@ class TimesheetController extends AbstractOscarController
                     $urlActivity = [];
                     $urlProject = [];
 
-
-
                     /** @var OrganizationPerson $organizationPerson */
                     foreach ($organizationsTimesheets as $data ){
 
@@ -909,7 +904,6 @@ class TimesheetController extends AbstractOscarController
                           'role'  => (string)$data['role'],
                           'timesheets' => []
                         ];
-
 
                         /** @var TimeSheet $timesheet */
                         foreach ($timesheetsService->getTimesheetToValidateByOrganization( $data['organization']) as $timesheet ){

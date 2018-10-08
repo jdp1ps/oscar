@@ -1024,7 +1024,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $isPeriodSend = count($periodValidations);
         $periodValidationsDt = [];
 
-
         $from = $periodFirstDay->format('Y-m-d');
         $to = $periodLastDay->format('Y-m-d');
 
@@ -1146,6 +1145,30 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $horsLot[$key]['validation_up'] = $validationUp;
         }
 
+
+
+        foreach ($daysInfos as $day => $daydata) {
+            $datetime = new \DateTime($daydata['datefull']);
+            $locked = true;
+
+            $editable = $editable;
+
+            $daydata['date'] = $daydata['datefull'];
+            $daydata['data'] = $daydata['datefull'];
+            $daydata['day'] = $datetime->format('N');
+            $daydata['week'] = $datetime->format('W');
+            $daydata['editable'] = $editable;
+            $daydata['declarations'] = [];
+            $daydata['total'] = 0.0;
+
+            /*foreach ($others as $otherKey=>$other) {
+                $daydata[$otherKey] = [];
+            }*/
+
+            $output['days'][$day] = $daydata;
+            //var_dump($daydata); die();
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $timesheets = $this->getTimesheetsPersonPeriod($person, $from, $to);
         /** @var TimeSheet $t */
@@ -1169,6 +1192,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'validations' => null,
                 ];
 
+                /*
+
                 $period = $this->getValidationPeriosOutOfWorkpackageAt( $t->getPerson(), $year, $month, $t->getLabel());
                 if( $period ){
                     if( $period->getStatus() == ValidationPeriod::STATUS_VALID ){
@@ -1186,44 +1211,31 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                         $datas['status_id'] = TimeSheet::STATUS_CONFLICT;
                         $datas['validations'] = $period->json();
                     }
+                }/****/
+
+                $labelTimesheet = $t->getLabel();
+
+                $otherRegular = false;
+
+                /*$output['days'][$dayTimesheet]['infos'] = [];
+
+                foreach ($others as $otherKey => $other) {
+
+                    if( !array_key_exists($otherKey, $output['days'][$dayTimesheet]) ){
+                        $output['days'][$dayTimesheet][$otherKey] = [];
+                    }
+                    if( $labelTimesheet == $otherKey ){
+                        $output['days'][$dayTimesheet][$otherKey][] = $datas;
+                        $otherRegular = true;
+                    }
                 }
 
-                switch( $t->getLabel() ){
-                    case 'cours' :
-                    case 'enseignement' :
-                    case 'teaching' :
-                        $output['days'][$dayTimesheet]['teaching'][] = $datas;
-                        break;
+                if( $otherRegular === false ){
+                    $output['days'][$dayTimesheet]['infos'][] = $datas;
+                }*/
 
-                    case 'formation' :
-                    case 'learning' :
-                    case 'training' :
-                        $output['days'][$dayTimesheet]['training'][] = $datas;
-                        break;
-
-                    case 'vacation' :
-                    case 'conges' :
-                        $output['days'][$dayTimesheet]['conges'][] = $datas;
-                        break;
-
-                    case 'sickleave' :
-                        $output['days'][$dayTimesheet]['sickleave'][] = $datas;
-                        break;
-
-                    case 'absent' :
-                        $output['days'][$dayTimesheet]['absent'][] = $datas;
-                        break;
-
-                    case 'research' :
-                        $output['days'][$dayTimesheet]['research'][] = $datas;
-                        break;
-
-                    default:
-                        $output['days'][$dayTimesheet]['infos'][] = $datas;
-                }
-
-                $output['days'][$dayTimesheet]['othersWP'][] = $datas;
-                $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
+               $daysInfos[$dayTimesheet]['othersWP'][] = $datas;
+                $daysInfos[$dayTimesheet]['duration'] += (float)$t->getDuration();
                 $output['total'] += (float)$t->getDuration();
 
 
@@ -1250,10 +1262,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $output['hasUnsend'] = true;
             }
 
-            $output['days'][$dayTimesheet]['declarations'][] = [
+            $daysInfos[$dayTimesheet]['declarations'][] = [
                 'id' => $t->getId(),
-                'credentials' => $this->resolveTimeSheetCredentials($t),
-                'validations' => $this->resolveTimeSheetValidation($t),
+                // 'credentials' => $this->resolveTimeSheetCredentials($t),
+                // 'validations' => $this->resolveTimeSheetValidation($t),
                 'label' => $t->getLabel(),
                 'comment' => $t->getComment(),
                 'activity' => (string) $activity,
@@ -1291,46 +1303,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'dayNbr' => $totalDays,
             'daylength' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value'),
             'dayLength' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value'),
-
             'dayExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.max'),
             'weekExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max'),
             'monthExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.max'),
             'activities' => $activities,
             'workpackages' => $workPackages,
             'otherWP' => $others,
-            'days' => []
+            'days' => $daysInfos
         ];
-
-       // $output['periodsValidations'] = $periodValidationsDt;
-
-
-        foreach ($daysInfos as $day => $daydata) {
-           $datetime = new \DateTime($daydata['datefull']);
-           $locked = true;
-
-           $editable = $editable;
-
-            $daydata['date'] = $daydata['datefull'];
-            $daydata['data'] = $daydata['datefull'];
-            $daydata['day'] = $datetime->format('N');
-            $daydata['week'] = $datetime->format('W');
-            $daydata['editable'] = $editable;
-            $daydata['declarations'] = [];
-            $daydata['total'] = 0.0;
-
-            foreach ($others as $otherKey=>$other) {
-                $daydata[$otherKey] = [];
-            }
-
-           $output['days'][$day] = $daydata;
-           //var_dump($daydata); die();
-        }
-
-
-        echo "<pre>";
-        var_dump(json_encode($output, JSON_PRETTY_PRINT));
-        die();
-
 
         return $output;
     }

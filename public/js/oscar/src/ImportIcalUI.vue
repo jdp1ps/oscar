@@ -42,7 +42,7 @@
                 <h3>Critères d'importation</h3>
                 <p>Vous pouvez choisir la limite d'importation entre 2 périodes (inclus)</p>
                 <div>
-                    Période de <periodselector :period="periodStart" :max="null" @change="periodStart = $event" />
+                    Période de <periodselector :period="periodStart" :max="null" @change="handlerPeriodChange($event)" />
                     <!-- à <periodselector :period="periodEnd" :min="periodStart" @change="periodEnd = $event" /> -->
                 </div>
             </div>
@@ -362,6 +362,10 @@
                         timesheet.imported = true;
                     }
                 }
+            },
+
+            handlerPeriodChange( period ){
+                document.location = '?period=' + period;
             },
 
             handlerChangeCorrespondance(editCorrespondance, dest){

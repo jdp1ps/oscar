@@ -1,52 +1,65 @@
 <section class="container">
+    <?php if( !$datas['editable'] ): ?>
+        <div class="alert alert-danger">
+            <h1>Vous ne pouvez pas modifier cette période</h1>
+            <?= $datas['editableInfos'] ?>
+        </div>
+    <?php elseif (!$datas['submitable']): ?>
+        <div class="alert alert-danger">
+            <h1>Vous ne pouvez pas modifier cette période</h1>
+            <?= $datas['submitableInfos'] ?></div>
+    <?php else: ?>
+
     <div id="app"></div>
+
+    <link rel="stylesheet" href="/js/oscar/dist/importicalui.css" />
+    <script>
+        require(['vue', 'vue-resource', 'mm', 'ical', 'ImportIcalUI'], function(Vue, VueResource, moment, ICAL, ImportIcalUI) {
+
+            Vue.use(VueResource);
+
+            Vue.filter('month', function(v){
+                return moment(v).format('MMMM YYYY');
+            });
+
+            Vue.filter('formatDay', function(v){
+                return moment(v).format('D MMMM YYYY');
+            });
+
+            /** Retourne le durée en minute **/
+            Vue.filter('itemDuration', function(item){
+                let start = moment(item.start);
+                let end = moment(item.end);
+                return Math.floor( (end.unix() - start.unix()) /60);
+            })
+
+            Vue.filter('displayMinutes', function(duration){
+                let hours = Math.floor(duration / 60);
+                let minutes = duration % 60;
+                if( minutes < 10 ) minutes = '0'+minutes;
+                return hours +":" +minutes;
+            });
+
+            var corr = <?= json_encode($correspondances) ?>;
+
+            new Vue({
+                el: '#app',
+                render(h){
+                    return h(ImportIcalUI.default, {
+                        props: {
+                            ICAL: window.ICAL,
+                            moment: moment,
+                            dayLength: 7.5,
+                            periodStart: '<?= $period ?>',
+                            exists: <?= json_encode($exists) ?>,
+                            correspondances: corr
+
+                        }
+                    });
+                }
+            })
+
+        });
+    </script>
+    <?php endif; ?>
 </section>
-<link rel="stylesheet" href="/js/oscar/dist/importicalui.css" />
-<script>
-    require(['vue', 'vue-resource', 'mm', 'ical', 'ImportIcalUI'], function(Vue, VueResource, moment, ICAL, ImportIcalUI) {
-
-        Vue.use(VueResource);
-
-        Vue.filter('month', function(v){
-            return moment(v).format('MMMM YYYY');
-        });
-
-        Vue.filter('formatDay', function(v){
-            return moment(v).format('D MMMM YYYY');
-        });
-
-        /** Retourne le durée en minute **/
-        Vue.filter('itemDuration', function(item){
-            let start = moment(item.start);
-            let end = moment(item.end);
-            return Math.floor( (end.unix() - start.unix()) /60);
-        })
-
-        Vue.filter('displayMinutes', function(duration){
-            let hours = Math.floor(duration / 60);
-            let minutes = duration % 60;
-            if( minutes < 10 ) minutes = '0'+minutes;
-            return hours +":" +minutes;
-        });
-
-        var corr = <?= json_encode($correspondances) ?>;
-
-        new Vue({
-            el: '#app',
-            render(h){
-                return h(ImportIcalUI.default, {
-                    props: {
-                        ICAL: window.ICAL,
-                        moment: moment,
-                        dayLength: 7.5,
-                        periodStart: '<?= $period ?>',
-                        exists: <?= json_encode($exists) ?>,
-                        correspondances: corr
-
-                    }
-                });
-            }
-        })
-
-    });
-</script>
