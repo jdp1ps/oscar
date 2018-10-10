@@ -107,7 +107,7 @@ return array(
 
             'monthLength' => [
                 'value' => 144.0,
-                'max'   => 176.0,
+                'max'   => 160.0,
                 'userChange' => false
             ],
 

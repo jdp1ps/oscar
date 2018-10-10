@@ -814,6 +814,80 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $days;
     }
 
+    public function verificationPeriod( Person $person, $year, $month) {
+
+        $datas = $this->getTimesheetDatasPersonPeriod($person, sprintf('%s-%s', $year, $month));
+
+        $warnings = [];
+        $errors = [];
+
+        $weeksCount = [];
+        $month = 0.0;
+
+        foreach ($datas['days'] as $day=>$dayData) {
+            $week = $dayData['week'];
+            $duration = $dayData['duration'];
+
+            if( $dayData['duration'] > $dayData['maxLength'] ){
+                $errors[] = "Les heures déclarées le jour " . $dayData['i'] . " dépassent la durée autorisée !";
+            }
+
+            $this->getLogger()->debug("Durée de la journée : " . $duration);
+            if( !array_key_exists($week, $weeksCount) ){
+                // @todo Tester la durée de la semaine
+                $weeksCount[$week] = 0.0;
+            }
+            $weeksCount[$week] += $duration;
+            $month += $duration;
+        }
+
+        /*
+         * 'declarationsDurations' => [
+
+            'dayLength'     => [
+                'value' => 8.0,
+                'max' => 10.0,
+                'userChange' => false,
+                'days' => [
+                    '1' => 7.5,
+                    '2' => 7.5,
+                    '3' => 7.5,
+                    '4' => 7.5,
+                    '5' => 7.0,
+                    '6' => 0.0,
+                    '7' => 0.0,
+                ]
+            ],
+
+            'weekLength'     => [
+                'value' => 37.0,
+                'max' => 44.0,
+                'userChange' => false
+            ],
+         */
+
+        $limitWeek = $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max');
+        $limitMonth = $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.max');
+
+        foreach ($weeksCount as $week=>$weekDuration) {
+            if( $weekDuration > $limitWeek ){
+                $errors[] = sprintf("Les heures déclarées en semaine %s dépassent la durée autorisée", $week);
+            }
+        }
+
+        if( $month > $limitMonth ){
+            $errors[] = "Les heures déclarées pour ce mois dépassent la durée autorisée";
+        }
+
+        if( count($errors) >  0 ){
+            throw new OscarException(sprintf("Il y'a %s erreur(s) dans votre déclaration : %s", count($errors), implode(', ', $errors)));
+        }
+
+
+
+
+        return true;
+    }
 
     /**
      * @param TimeSheet[] $timesheets
@@ -1274,6 +1348,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 if( $otherRegular === false ){
                     $output['days'][$dayTimesheet]['infos'][] = $datas;
                 }*/
+
+                $this->getLogger()->debug("Durée : " . $t->getDuration());
 
                $daysInfos[$dayInt]['othersWP'][] = $datas;
                 $daysInfos[$dayInt]['duration'] += (float)$t->getDuration();
