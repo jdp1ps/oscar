@@ -793,14 +793,70 @@ class TimesheetController extends AbstractOscarController
         // Période URL
         $period = $this->params()->fromQuery('period', null);
 
+        if( $this->getHttpXMethod() == "POST" ){
+
+            $request = $this->getRequest();
+            $events = json_decode($request->getPost('timesheets', '[]'), true);
+            if (count($events)) {
+
+                try {
+                    foreach ($events as $event) {
+
+                        //
+                        //$from = new \DateTime(substr($event['start'], 0, 10));
+                        $to = DateTimeUtils::toDatetime($event['end']);
+                        $from = DateTimeUtils::toDatetime($event['start']);
+
+                        if( !$from || !$to ){
+                            throw new OscarException("Prblème de format des dates : " . $event['form'] . " / " . $event['end']);
+                        }
+
+                        /** @var TimeSheet $timesheet */
+                        $timesheet = new TimeSheet();
+                        $this->getEntityManager()->persist($timesheet);
+                        $timesheet->setIcsUid($event['icsuid'])
+                            ->setIcsFileUid($event['icsfileuid'])
+                            ->setIcsFileName($event['icsfilename'])
+                            ->setIcsFileDateAdded(new \DateTime())
+                            ->setDateFrom($from)
+                            ->setPerson($this->getCurrentPerson())
+                            ->setComment($event['summary'])
+                            ->setDateTo($to);
+
+                        if ($event['destinationId']) {
+                            $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($event['destinationId']);
+                            if (!$wp) {
+                                return $this->getResponseInternalError("Lot de travail inconnue");
+                            }
+                            $timesheet->setWorkPackage($wp);
+                        } elseif ($event['destinationCode']) {
+                            $other = $this->getTimesheetService()->getOthersWPByCode($event['destinationCode']);
+                            if ($other) {
+                                $timesheet->setLabel($other['code']);
+                            } else {
+                                $timesheet->setLabel($event['destinationCode']);
+                            }
+                        }
+
+                        $this->getEntityManager()->flush($timesheet);
+                    }
+                    return $this->redirect()->toRoute('timesheet/declarant', [], ['period' => $period]);
+                    die();
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+
+
+            }
+
+        }
+
         // par défaut, mois qui précède
         if( $period == null ){
             $now = new \DateTime();
             $now->sub( new \DateInterval('P1M'));
             $period = $now->format('Y-m');
         }
-
-        $firstDay = new \DateTime($period.'-01');
 
         $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getCurrentPerson(), $period);
         $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($this->getCurrentPerson());

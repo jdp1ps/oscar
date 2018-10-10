@@ -147,6 +147,11 @@
 
             </div>
         </div>
+        <form action="" method="post" v-if="sendData.length">
+            <input type="hidden" v-model="JSON.stringify(sendData)" name="timesheets"/>
+            <button type="submit" class="btn btn-xs btn-primary">Envoyer</button>
+        </form>
+        <pre>{{ sendData }}</pre>
     </section>
 </template>
 <style scoped>
@@ -256,6 +261,15 @@
         },
 
         computed: {
+            sendData(){
+                if( !this.timesheets ) return [];
+                let datas = [];
+                this.timesheets.forEach(item=>{
+                    if( item.imported )
+                        datas.push(item)
+                });
+                return datas;
+            },
             labels(){
                 let labels = [];
                 if( this.timesheets ){
@@ -608,7 +622,7 @@
 
                 if( correspondance ){
                     destinationCode = correspondance.code;
-                    destinationId = correspondance.id;
+                    destinationId = correspondance.wp_id;
                     destinationLabel = correspondance.label;
                     imported = true;
                 }
@@ -662,6 +676,7 @@
 
                         if( wps.acronym && tofind.indexOf(wps.acronym.toLowerCase()) > -1 ){
                             match = wps;
+
                             if( tofind.indexOf(wps.wp_code.toLowerCase()) > -1 ){
                                 this.labelsCorrespondance[tofind] = match;
                                 return this.labelsCorrespondance[tofind];

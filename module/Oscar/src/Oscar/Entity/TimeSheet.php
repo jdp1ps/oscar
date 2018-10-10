@@ -100,19 +100,19 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime
-     * @ORM\Column(type="datetimetz", nullable=false)
+     * @ORM\Column(type="datetime", nullable=false)
      */
     private $dateFrom;
 
     /**
      * @var \DateTime
-     * @ORM\Column(type="datetimetz", nullable=false)
+     * @ORM\Column(type="datetime", nullable=false)
      */
     private $dateTo;
 
     /**
      * @var \DateTime
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $dateSync;
 
@@ -180,7 +180,7 @@ class TimeSheet implements ITrackable
     /**
      * @var \DateTime Date de l'import de l'ics
      *
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $icsFileDateAdded;
 
@@ -201,7 +201,7 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime Date de la validation projet.
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $validatedProjectAt;
 
@@ -219,7 +219,7 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime Date du refuss de la validation projet.
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $rejectedProjectAt;
 
@@ -246,7 +246,7 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime Date de la validation scientifique.
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $validatedSciAt;
 
@@ -264,7 +264,7 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime Date du refuss de la validation scientifique.
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $rejectedSciAt;
 
@@ -291,7 +291,7 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime Date de la validation administrative.
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $validatedAdminAt;
 
@@ -309,7 +309,7 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime Date du refuss de la validation administrative.
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $rejectedAdminAt;
 
