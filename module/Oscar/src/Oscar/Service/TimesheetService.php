@@ -753,6 +753,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $daysLabels = [];
         $weekendAllowed = $this->getOscarConfig()->getConfiguration('declarationsWeekend') == false;
 
+        $daysDetails = $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.days');
+
+
+
         for ($i = $decaleDay; $i < $nbr + $decaleDay; $i++) {
             $duration = $this->getDayDuration($person);
             $maxlength = $this->getDayMaxLengthPerson($person);
@@ -787,6 +791,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $closedReason = $lockedReason = $infos = "Fermé " . $locked[$lockedKey];
             }
 
+            if( array_key_exists($dayIndex+1, $daysDetails) ){
+                $duration = $daysDetails[$dayIndex+1];
+            }
+
 //            $daysLabels[$dayKey] =  $daysFull[$dayIndex];
             $days[$dayKey] = [
                 'duration' => 0.0,
@@ -797,7 +805,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'locked' => $locked,
                 'lockedReason' => $lockedReason,
                 'closed' => $closed,
-                'closedReason' => $lockedReason,
+                'closedReason' => $closedReason,
                 'infos' => $infos,
                 'datefull' => $lockedKey,
             ];

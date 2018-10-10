@@ -853,8 +853,6 @@
                     let firstDay = this.ts.days[1];
                     let currentWeekNum = firstDay.week;
 
-                    console.log(firstDay);
-
                     let currentWWeek = {
                         label: currentWeekNum,
                         days: [],
@@ -865,13 +863,10 @@
                         drafts: 0,
                         weekExcess: this.ts.weekExcess
                     };
-                    console.log(this.ts.days);
 
                     for( let d in this.ts.days ){
 
                         let currentDay = this.ts.days[d];
-
-                        console.log(currentDay.i);
 
                         if (currentWeekNum != currentDay.week) {
                             weeks.push(currentWWeek);
