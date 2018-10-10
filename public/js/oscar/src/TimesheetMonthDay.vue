@@ -3,7 +3,7 @@
 
 
 
-        <span class="label">{{ day.label }}</span>
+        <span class="label">{{ day.i }}</span>
 
         <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label" :class="{ 'conflict': d.status_id == 3 }">
             <i :class="'icon-status-' + d.status_id"></i>
@@ -15,15 +15,15 @@
 
 
 
-        <span v-for="other in others">
-            <span v-if="day[other.code] && day[other.code].length" class="cartouche xs" :class="other.code">
-                <i class="icon-status-2" v-if="day[other.code][0].validations == null"></i>
-                <i class="icon-status-1" v-else-if="day[other.code][0].validations.status == 'valid'"></i>
-                <i class="icon-status-3" v-else-if="day[other.code][0].validations.status == 'conflict'"></i>
+        <span >
+            <span v-for="other in day.othersWP" class="cartouche xs" :class="other.code">
+                <i class="icon-status-2" v-if="other.validations == null"></i>
+                <i class="icon-status-1" v-else-if="other.validations.status == 'valid'"></i>
+                <i class="icon-status-3" v-else-if="other.validations.status == 'conflict'"></i>
                 <i class="icon-status-5" v-else></i>
                 {{ other.label }}
                 <span class="addon">
-                    {{totalOther(other.code) | duration2(day.dayLength)}}
+                    {{other.duration | duration2(day.dayLength)}}
                 </span>
             </span>
 
@@ -129,21 +129,23 @@
             },
            groupProject(){
                let groups = {};
-               this.day.declarations.forEach(d => {
-                   if( !groups.hasOwnProperty(d.acronym) ){
-                       groups[d.acronym] = {
-                           label: d.label,
-                           acronym: d.acronym,
-                           duration: 0.0,
-                           status_id: d.status_id
+               if( this.day.declarations ) {
+                   this.day.declarations.forEach(d => {
+                       if (!groups.hasOwnProperty(d.acronym)) {
+                           groups[d.acronym] = {
+                               label: d.label,
+                               acronym: d.acronym,
+                               duration: 0.0,
+                               status_id: d.status_id
+                           }
                        }
-                   }
-                   if( d.status_id != groups[d.acronym].status_id ){
-                       groups[d.acronym].status_id = 0;
-                   }
-                   //groups[d.acronym].status_id += d.duration;
-                   groups[d.acronym].duration += d.duration;
-               });
+                       if (d.status_id != groups[d.acronym].status_id) {
+                           groups[d.acronym].status_id = 0;
+                       }
+                       //groups[d.acronym].status_id += d.duration;
+                       groups[d.acronym].duration += d.duration;
+                   });
+               }
                return groups;
            }
         },

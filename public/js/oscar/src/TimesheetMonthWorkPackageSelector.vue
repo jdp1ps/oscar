@@ -109,7 +109,7 @@
                 this.$emit('select', this.selection);
             },
             handlerSelectOther(wp){
-                console.log('Selection OTHER');
+                console.log('Selection OTHER', wp);
                 this.selection = wp;
                 this.$emit('select', this.selection);
             }

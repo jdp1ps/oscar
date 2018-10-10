@@ -87,7 +87,16 @@ return array(
             'dayLength'     => [
                 'value' => 8.0,
                 'max' => 10.0,
-                'userChange' => false
+                'userChange' => false,
+                'days' => [
+                    '1' => 7.5,
+                    '2' => 7.5,
+                    '3' => 7.5,
+                    '4' => 7.5,
+                    '5' => 7.0,
+                    '6' => 0.0,
+                    '7' => 0.0,
+                ]
             ],
 
             'weekLength'     => [

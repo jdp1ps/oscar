@@ -175,7 +175,7 @@
                 </h2>
                 <h3 class="periode">Période :
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
-                    <strong>{{ mois }}</strong>
+                    <strong @click="debug = ts">{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
 
                     <a class="btn btn-default" :href="urlimport+'?period=' + periodCode "
@@ -237,7 +237,7 @@
                 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
                 <timesheetmonthdaydetails v-if="selectedDay"
                                           :day="selectedDay"
-                                          :workPackages="ts.workPackages"
+                                          :workPackages="ts.workpackages"
                                           :others="ts.otherWP"
                                           :selection="selectionWP"
                                           :label="dayLabel"
@@ -320,7 +320,7 @@
                             <strong>{{ (selectedWeek.totalOpen - selectedWeek.total) | duration }} heure(s)</strong>
                             avec une des activités ci-dessous :
                         </p>
-                        <wpselector :others="ts.otherWP" :workpackages="ts.workPackages" :selection="fillSelectedWP"
+                        <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillSelectedWP"
                                     @select="fillSelectedWP = $event"></wpselector>
                         <button class="btn btn-default" @click="fillWeek(selectedWeek, fillSelectedWP)"
                                 :class="fillSelectedWP ? 'btn-primary' : 'disabled'">
@@ -853,6 +853,8 @@
                     let firstDay = this.ts.days[1];
                     let currentWeekNum = firstDay.week;
 
+                    console.log(firstDay);
+
                     let currentWWeek = {
                         label: currentWeekNum,
                         days: [],
@@ -863,9 +865,13 @@
                         drafts: 0,
                         weekExcess: this.ts.weekExcess
                     };
+                    console.log(this.ts.days);
 
-                    for (var d in this.ts.days) {
+                    for( let d in this.ts.days ){
+
                         let currentDay = this.ts.days[d];
+
+                        console.log(currentDay.i);
 
                         if (currentWeekNum != currentDay.week) {
                             weeks.push(currentWWeek);
@@ -887,11 +893,13 @@
                             currentWWeek.totalOpen += currentDay.dayLength;
                         }
 
-                        currentDay.declarations.forEach(d => {
-                            if (d.status_id == 2) {
-                                currentWWeek.drafts++;
-                            }
-                        });
+                        if( currentDay.declarations ) {
+                            currentDay.declarations.forEach(d => {
+                                if (d.status_id == 2) {
+                                    currentWWeek.drafts++;
+                                }
+                            });
+                        }
 
                         if (!currentDay.closed)
                             currentWWeek.weekLength += currentDay.dayLength;
@@ -920,7 +928,7 @@
             },
 
             getWorkpackageById(id) {
-                return this.ts.workPackages[id];
+                return this.ts.workpackages[id];
             },
 
             reSendPeriod(periodValidation) {
@@ -1089,6 +1097,7 @@
             },
 
             handlerDayUpdated() {
+                console.log(arguments[0]);
                 let t = arguments[0];
                 this.dayMenuTime = (t.h + t.m);
             },

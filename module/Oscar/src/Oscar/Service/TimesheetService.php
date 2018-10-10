@@ -743,7 +743,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
 
         $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
-        $locked = $this->getLockedDays($year, $month);
+        $lockedDatas = $this->getLockedDays($year, $month);
 
         // Nombre de jours dans le mois
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
@@ -760,21 +760,31 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $dayIndex = ($i % 7);
             $close = false;
             $infos = "";
-            $dayKey = $day < 10 ? '0' . $day : $day;
+            $dayKey = $day < 10 ? '0' . $day : "".$day;
             $lockedKey = "$year-$month-$day";
 
-            if (array_key_exists($lockedKey, $locked)) {
+            // Jour fermé (provisoire)
+            $locked = false;
+            $lockedReason = "";
+
+            // Jour fermé (définitif)
+            $closed = false;
+            $closedReason = "";
+
+            if (array_key_exists($lockedKey, $lockedDatas)) {
                 $duration = 0.0;
                 $maxlength = 0.0;
                 $close = true;
-                $infos = "Ferié " . $locked[$lockedKey];
+                $locked = true;
+                $closedReason = $lockedReason = $infos = "Fermé " . $locked[$lockedKey];
             }
 
             if ($dayIndex > 4 && $weekendAllowed == true) {
                 $duration = 0.0;
                 $maxlength = 0.0;
-                $close = true;
-                $infos .= $infos ? " / Weekend" : "Weekend";
+                $closed = true;
+                $locked = true;
+                $closedReason = $lockedReason = $infos = "Fermé " . $locked[$lockedKey];
             }
 
 //            $daysLabels[$dayKey] =  $daysFull[$dayIndex];
@@ -784,6 +794,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'maxLength' => $maxlength,
                 'label' => $daysFull[$dayIndex],
                 'close' => $close,
+                'locked' => $locked,
+                'lockedReason' => $lockedReason,
+                'closed' => $closed,
+                'closedReason' => $lockedReason,
                 'infos' => $infos,
                 'datefull' => $lockedKey,
             ];
@@ -1004,7 +1018,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $periodFirstDay = new \DateTime($period . '-01');
         $year = (int)$periodFirstDay->format('Y');
         $month = (int)$periodFirstDay->format('m');
-        $daysInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);
+        $declarationInHours = $this->isDeclarationsHoursPerson($person);
+
+
+        $daysInfosPerson = $this->getDaysPeriodInfosPerson($person, $year, $month);
+        $daysInfos = [];
+        foreach( $daysInfosPerson as $dayNum=>$data ){
+            $daysInfos[(int)$dayNum] = $data;
+         }
+
+
         $totalDays = count($daysInfos);
         $periodLastDay = new \DateTime($period . '-' . $totalDays . ' 23:59:59');
 
@@ -1028,6 +1051,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $to = $periodLastDay->format('Y-m-d');
 
         $periodLength = 0.0;
+        $periodTotal = 0.0;
         $periodOpened = 0.0;
         $periodDeclarations = 0.0;
 
@@ -1127,6 +1151,20 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ];
         }
 
+        $periodValidations = $this->getPeriodValidation($person, $month, $year);
+        $periodValidationsDt = [];
+        /** @var ValidationPeriod $periodValidation */
+        foreach ($periodValidations as $periodValidation) {
+            $data = $periodValidation->json();
+
+            if( $periodValidation->getObjectId() > 0 ){
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($periodValidation->getObjectId());
+                $label = (string) $activity;
+                $data['label'] = "Déclaration pour " . $label;
+            }
+            $periodValidationsDt[] = $data;
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Récupération des créneaux Hors-Lot
         $others = $this->getOthersWP();
@@ -1141,32 +1179,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $validationUp = true;
             }
 
-            $horsLot[$key]['validation_state'] = $periodHL ? $periodHL->json() : null;
-            $horsLot[$key]['validation_up'] = $validationUp;
+            $others[$key]['validation_state'] = $periodHL ? $periodHL->json() : null;
+            $others[$key]['validation_up'] = $validationUp;
         }
 
 
 
-        foreach ($daysInfos as $day => $daydata) {
+        foreach ($daysInfos as $day => &$daydata) {
             $datetime = new \DateTime($daydata['datefull']);
-            $locked = true;
-
-            $editable = $editable;
-
             $daydata['date'] = $daydata['datefull'];
             $daydata['data'] = $daydata['datefull'];
+            $daydata['i'] = $day;
             $daydata['day'] = $datetime->format('N');
             $daydata['week'] = $datetime->format('W');
             $daydata['editable'] = $editable;
             $daydata['declarations'] = [];
+            $daydata['validations'] = null;
             $daydata['total'] = 0.0;
-
-            /*foreach ($others as $otherKey=>$other) {
-                $daydata[$otherKey] = [];
-            }*/
-
             $output['days'][$day] = $daydata;
-            //var_dump($daydata); die();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1174,7 +1204,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var TimeSheet $t */
         foreach ($timesheets as $t) {
 
-            $dayTimesheet = (int)($t->getDateFrom()->format('d'));
+            $dayTimesheet = ($t->getDateFrom()->format('d'));
+            $dayInt = (int)$t->getDateFrom()->format('d');
             $period = $t->getDateFrom()->format('Y-m');
 
 
@@ -1184,15 +1215,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
                 $datas = [
                     'id' => $t->getId(),
-                    'label' => $t->getLabel(),
+                    'int' => $dayInt,
+                    'label' => $this->getOthersWPByCode($t->getLabel())['label'],
+                    'code' => $t->getLabel(),
                     'description' => $t->getComment(),
                     'duration' => $t->getDuration(),
                     'status_id' => $t->getStatus(),
                     'status' => 'locked',
-                    'validations' => null,
+                    'validations' => null
                 ];
 
-                /*
+
 
                 $period = $this->getValidationPeriosOutOfWorkpackageAt( $t->getPerson(), $year, $month, $t->getLabel());
                 if( $period ){
@@ -1211,7 +1244,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                         $datas['status_id'] = TimeSheet::STATUS_CONFLICT;
                         $datas['validations'] = $period->json();
                     }
-                }/****/
+                }
 
                 $labelTimesheet = $t->getLabel();
 
@@ -1234,16 +1267,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $output['days'][$dayTimesheet]['infos'][] = $datas;
                 }*/
 
-               $daysInfos[$dayTimesheet]['othersWP'][] = $datas;
-                $daysInfos[$dayTimesheet]['duration'] += (float)$t->getDuration();
+               $daysInfos[$dayInt]['othersWP'][] = $datas;
+                $daysInfos[$dayInt]['duration'] += (float)$t->getDuration();
+                $daysInfos[$dayInt]['total'] += (float)$t->getDuration();
                 $output['total'] += (float)$t->getDuration();
 
 
                 continue;
-            } else {
-                $periodKey = "activity-" . $t->getActivity()->getId();
             }
 
+            $periodKey = "activity-" . $t->getActivity()->getId();
             $projectAcronym = $t->getActivity()->getAcronym();
             $project = $t->getActivity()->getProject();
             $activity = $t->getActivity();
@@ -1252,7 +1285,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $wpCode = $workpackage->getCode();
             $periodDeclarations += (float)$t->getDuration();
 
-            $output['days'][$dayTimesheet]['duration'] += (float)$t->getDuration();
+            $daysInfos[$dayInt]['duration'] += (float)$t->getDuration();
+            $daysInfos[$dayInt]['total'] += (float)$t->getDuration();
             $periodLength += (float)$t->getDuration();
             $activities[$activity->getId()]['total'] += $t->getDuration();
             $workPackages[$workpackage->getId()]['total'] += $t->getDuration();
@@ -1262,10 +1296,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $output['hasUnsend'] = true;
             }
 
-            $daysInfos[$dayTimesheet]['declarations'][] = [
+            $daysInfos[$dayInt]['declarations'][] = [
                 'id' => $t->getId(),
-                // 'credentials' => $this->resolveTimeSheetCredentials($t),
-                // 'validations' => $this->resolveTimeSheetValidation($t),
+                'credentials' => $this->resolveTimeSheetCredentials($t),
+                'validations' => $this->resolveTimeSheetValidation($t),
                 'label' => $t->getLabel(),
                 'comment' => $t->getComment(),
                 'activity' => (string) $activity,
@@ -1289,8 +1323,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'periodFinished' => $periodFinished,
             'periodCurrent' => $periodCurrent,
             'periodLength' => $periodLength,
+            'total' => $periodTotal,
             'periodOpened' => $periodOpened,
             'periodDeclarations' => $periodDeclarations,
+            'periodsValidations' => $periodValidationsDt,
             'month' => $month,
             'year' => $year,
             'from' => $periodFirstDay->format('Y-m-d'),
@@ -1309,6 +1345,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'activities' => $activities,
             'workpackages' => $workPackages,
             'otherWP' => $others,
+            'declarationInHours' => $declarationInHours,
             'days' => $daysInfos
         ];
 
