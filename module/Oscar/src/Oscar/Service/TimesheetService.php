@@ -43,6 +43,51 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get('OscarConfig');
     }
 
+
+    public function getDatasDeclarations(){
+        $output = [];
+        $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->findAll();
+        /** @var ValidationPeriod $declaration */
+        foreach ($declarations as $declaration) {
+            $period = sprintf('%s-%s', $declaration->getYear(), $declaration->getMonth());
+            $personId = $declaration->getDeclarer()->getId();
+            $dataKey = sprintf('%s_%s', $period, $personId);
+
+            if( !array_key_exists($dataKey, $output) ){
+                $output[$dataKey] = [
+                    'key' => $dataKey,
+                    'period' => $period,
+                    'person' => (string) $declaration->getDeclarer(),
+                    'person_id' => $declaration->getDeclarer()->getId(),
+                    'declarations' => []
+                ];
+            }
+
+            $object = $declaration->getObject();
+
+            if( $object == ValidationPeriod::OBJECT_ACTIVITY ){
+                /** @var Activity $activity */
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($declaration->getObjectId());
+                $label = (string) $activity->getFullLabel();
+
+            } else {
+
+                $label = $this->getOthersWPByCode($object)['label'];
+            }
+
+            $output[$dataKey]['declarations'][] = [
+                'id' => $declaration->getId(),
+                'status' => $declaration->getStatus(),
+                'object' => $declaration->getObject(),
+                'objectgroup' => $declaration->getObjectGroup(),
+                'objectid' => $declaration->getObjectId(),
+                'label' => $label,
+                'datesend' => $declaration->getDateSend()->format('Y-m-d'),
+            ];
+        }
+        return $output;
+    }
+
     //////////////////////////////////////////////////////////////////////// VALIDATION des PERIODES
     public function validationProject(ValidationPeriod $validationPeriod, Person $validator, $message = '')
     {

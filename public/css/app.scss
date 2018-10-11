@@ -2339,6 +2339,34 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
   border-top: $colorLight 2px solid;
 }
 
+
+.validations-admin {
+  .declaration {
+    display: flex;
+    flex-wrap: wrap;
+    > * {
+      flex: 1;
+    }
+    .validations {
+      border-top: thin solid $colorGreyLight;
+      display: block;
+      flex: 0 0 100%;
+
+      .validation {
+        display: flex;
+        >span {
+          flex: 1;
+        }
+        em {
+          flex: 0 0 150px;
+          margin: auto;
+        }
+      }
+
+    }
+  }
+}
+
 .buttons-icon {
   i {
     padding: 2px;

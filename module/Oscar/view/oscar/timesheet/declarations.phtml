@@ -1,0 +1,16 @@
+<section class="container">
+    <div id="app"></div>
+</section>
+<script>
+    require(['vue', 'vue-resource', 'TimesheetDeclarationsList', 'bootbox', 'mm'], function (Vue, VueResource, TimesheetDeclarationsList, Bootbox, moment) {
+        Vue.use(VueResource);
+        new Vue({
+            render: function(h){
+                return h(TimesheetDeclarationsList.default, { props: {
+                        bootbox: Bootbox,
+                        moment: moment
+                    }});
+            }
+        }).$mount('#app')
+    });
+</script>

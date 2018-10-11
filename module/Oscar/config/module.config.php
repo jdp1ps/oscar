@@ -210,7 +210,7 @@ return array(
                         "declaration2", "indexActivity", "validateTimesheet",
                         'usurpation', 'excel', 'organizationLeader',
                         'declarant', 'declarantAPI', 'validationActivity', 'validationActivity2',
-                        'validationHWPPerson', 'validatePersonPeriod', 'importIcal'
+                        'validationHWPPerson', 'validatePersonPeriod', 'importIcal', 'declarations'
                     ],
                     'roles' => ['user']
                 ],

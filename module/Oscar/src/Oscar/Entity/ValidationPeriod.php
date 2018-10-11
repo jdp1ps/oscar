@@ -407,7 +407,7 @@ class ValidationPeriod
     }
 
     /**
-     * @return mixed
+     * @return Person
      */
     public function getDeclarer()
     {

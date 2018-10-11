@@ -78,6 +78,14 @@ timesheet:
             controller: Timesheet
     may_terminate: false
     child_routes:
+
+        declarations:
+            type: segment
+            options:
+                route: /declarations
+                defaults:
+                    action: declarations
+
         import_ical:
             type: segment
             options:

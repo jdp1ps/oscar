@@ -6987,6 +6987,23 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 .montant-total {
   border-top: #FEFEEF 2px solid; }
 
+.validations-admin .declaration {
+  display: flex;
+  flex-wrap: wrap; }
+  .validations-admin .declaration > * {
+    flex: 1; }
+  .validations-admin .declaration .validations {
+    border-top: thin solid #AAA;
+    display: block;
+    flex: 0 0 100%; }
+    .validations-admin .declaration .validations .validation {
+      display: flex; }
+      .validations-admin .declaration .validations .validation > span {
+        flex: 1; }
+      .validations-admin .declaration .validations .validation em {
+        flex: 0 0 150px;
+        margin: auto; }
+
 .buttons-icon i {
   padding: 2px;
   text-align: center;

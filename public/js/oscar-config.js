@@ -73,7 +73,8 @@ requirejs.config({
         'ValidationPeriod' : 'oscar/dist/ValidationPeriod',
         'DeclarersList' : 'oscar/dist/DeclarersList',
         'ImportIcalUI' : 'oscar/dist/ImportIcalUI',
-        'PeriodSelector' : 'oscar/dist/PeriodSelector'
+        'PeriodSelector' : 'oscar/dist/PeriodSelector',
+        'TimesheetDeclarationsList' : 'oscar/dist/TimesheetDeclarationsList'
     },
     shim: {
         "bootstrap": {

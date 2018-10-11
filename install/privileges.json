@@ -559,6 +559,14 @@
     "fullcode": "MAINTENANCE-CONNECTOR_ACCESS"
   },
 
+  "MAINTENANCE-VALIDATION_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "VALIDATION_MANAGE",
+    "libelle": "Peut gérer et modifier l'état des déclarations envoyées",
+    "fullcode": "MAINTENANCE-VALIDATION_MANAGE"
+  },
+
   "MAINTENANCE-ACTIVITYTYPE_MANAGE": {
     "spot": 7,
     "category_id": 6,

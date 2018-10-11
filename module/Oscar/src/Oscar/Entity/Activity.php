@@ -859,6 +859,10 @@ class Activity implements ResourceInterface
         return $this->label;
     }
 
+    public function getFullLabel(){
+        return sprintf('[%s] %s', $this->getAcronym(), $this->getLabel());
+    }
+
     /**
      * @param string $label
      */

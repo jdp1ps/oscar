@@ -1454,4 +1454,14 @@ class TimesheetController extends AbstractOscarController
     {
         return $this->getResponseNotImplemented();
     }
+
+    public function declarationsAction()
+    {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
+        if( $this->isAjax() ){
+            $return = $this->getTimesheetService()->getDatasDeclarations();
+            return $this->ajaxResponse($return);
+        }
+        return [];
+    }
 }
