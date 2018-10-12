@@ -140,3 +140,9 @@ return array(
 ## Notifications
 
 [Configurer les notifications](./notifications.md)
+
+## Feuilles de temps
+
+Configuration des options pour la feuille de temps
+
+[Configurer les feuilles de temps](./timesheet.md)
