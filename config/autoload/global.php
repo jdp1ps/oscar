@@ -85,7 +85,7 @@ return array(
         'declarationsDurations' => [
 
             'dayLength'     => [
-                'value' => 8.0,
+                'value' => 7.5,
                 'max' => 10.0,
                 'userChange' => false,
                 'days' => [
@@ -93,7 +93,7 @@ return array(
                     '2' => 7.5,
                     '3' => 7.5,
                     '4' => 7.5,
-                    '5' => 7.0,
+                    '5' => 7.5,
                     '6' => 0.0,
                     '7' => 0.0,
                 ]
