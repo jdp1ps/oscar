@@ -6987,6 +6987,23 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 .montant-total {
   border-top: #FEFEEF 2px solid; }
 
+.validations-admin .declaration {
+  display: flex;
+  flex-wrap: wrap; }
+  .validations-admin .declaration > * {
+    flex: 1; }
+  .validations-admin .declaration .validations {
+    border-top: thin solid #AAA;
+    display: block;
+    flex: 0 0 100%; }
+    .validations-admin .declaration .validations .validation {
+      display: flex; }
+      .validations-admin .declaration .validations .validation > span {
+        flex: 1; }
+      .validations-admin .declaration .validations .validation em {
+        flex: 0 0 150px;
+        margin: auto; }
+
 .buttons-icon i {
   padding: 2px;
   text-align: center;
@@ -7041,6 +7058,61 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
     background: #fbb6cb; }
     .role-line:hover .controls {
       opacity: 1; }
+
+.period {
+  background: white; }
+  .period .ignored {
+    font-style: italic;
+    text-decoration: line-through;
+    color: #777; }
+  .period .month-heading {
+    background: #5c9ccc;
+    color: white;
+    text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.3);
+    border-top: 1em rgba(255, 255, 255, 0) solid; }
+  .period .month-heading.deja-envoyee {
+    background: #970000; }
+  .period .month-heading .message-erreur {
+    font-weight: 400;
+    display: block; }
+  .period .match {
+    border-left: #5c9ccc 4px solid; }
+  .period .correspondance-choose {
+    border-top: solid #efede4 thin;
+    color: #777;
+    font-size: 1em;
+    cursor: pointer;
+    padding: 4px 1em; }
+  .period .correspondance-choose.selected, .period .correspondance-choose:hover {
+    background: #5c9ccc;
+    color: white; }
+  .period .correspondance-choose:hover small, .period .correspondance-choose.selected small {
+    color: white; }
+  .period .correspondance-choose h3 {
+    margin: 0;
+    padding: 0;
+    font-size: 1em; }
+  .period .correspondance-choose h3 strong {
+    font-weight: 700;
+    color: black; }
+  .period .correspondance-choose h3 small {
+    font-size: .8em; }
+  .period .jour {
+    white-space: nowrap;
+    font-weight: 200;
+    color: black;
+    text-align: right; }
+  .period .jour-description {
+    font-size: .9em; }
+  .period .jour-heures {
+    text-align: right; }
+  .period .creneau {
+    opacity: .5; }
+  .period .creneau.imported {
+    opacity: 1; }
+  .period .list {
+    margin: 1em;
+    border: solid thin #d9deda; }
 
 body .tv {
   border: none;

@@ -101,12 +101,15 @@
                                 <div v-for="t in d.timesheets" class="creneau" :class="{ 'ignored': !t.importable,  'imported': t.imported }">
                                     <i class="icon-calendar" v-if="t.importable"></i>
                                     <i class="icon-cancel-alt" v-else></i>
-                                    {{ t.label }} ({{ t | itemDuration }} min)
+                                    <strong>{{ t.label }} ({{ t | itemDuration }} min)</strong>
                                     <span v-if="t.destinationLabel" class="cartouche xs">
                                         <i class="icon-cube" v-if="t.destinationCode == 'wp'"></i>
                                         <i class="icon-link-ext" v-else></i>
                                         {{ t.destinationLabel }}
                                     </span>
+                                    <nav>
+                                        <i class="icon-trash" @click="handlerRemoveTimesheet(t)" title="Supprimer ce créneau"></i>
+                                    </nav>
                                 </div>
                             </td>
 
@@ -138,7 +141,15 @@
 
                     </p>
                 </div>
-                <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter">
+
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="icon-filter"></i></div>
+                    <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter" />
+                </div>
+
+                <hr>
+
+
                 <div v-for="label in labels" class="card xs correspondance" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
                     <div class="in-ical">
                         <i class="icon-tag"></i> <strong>{{ label }}</strong>
@@ -319,6 +330,10 @@
                 document.location = '?period=' + period;
             },
 
+            handlerRemoveTimesheet(timesheet){
+                this.timesheets.splice(this.timesheets.indexOf(timesheet), 1);
+            },
+
             handlerChangeCorrespondance(editCorrespondance, dest){
                 this.timesheets.forEach(t => {
                     if( t.label == editCorrespondance ){
@@ -347,7 +362,8 @@
             },
 
             test(){
-              console.log(arguments);
+
+
             },
 
             /**
@@ -376,7 +392,6 @@
             handlerFileSelected(e) {
                 var fr = new FileReader();
                 fr.onloadend = (result) => {
-                    console.log(result);
                     this.parseICAL(fr.result);
                 };
                 fr.readAsText(e.target.files[0]);
@@ -414,7 +429,6 @@
 
                     // Extraction des données brutes
                     if (d[0] == 'vevent') {
-                        console.log(d);
                         d[1].forEach((dd) => {
 
                             if (dd[0] == 'uid') {
@@ -473,7 +487,6 @@
                             exceptions = exceptions.concat(this.generateItem(item));
                         }
                         else if (item.daily == "allday") {
-                            console.log("Traitement d'un créneau de type ALLDAY", rrule, item);
 
                             let start = this.moment(item.start);
 
@@ -501,15 +514,7 @@
                 let result = [];
 
                 out.forEach(item => {
-                    if( this.periodStart ){
-                        console.log(this.periodStart, item.periodCode);
-                        console.log("test1", item.periodCode < this.periodStart);
-                        console.log("test2", item.periodCode > this.periodStart);
-                    } else {
-                        console.log("periodStart n'est pas définit");
-                    }
                     if( this.periodStart && (item.periodCode < this.periodStart || item.periodCode > this.periodStart) ) return;
-                    //if( this.periodEnd ) return;
                     result.push(item);
                 })
 
@@ -679,7 +684,6 @@
                             while (fromDate < end) {
                                 let currentDay = this.daysString[fromDate.getDay()];
                                 if( item.daily == "allday" && exdate.indexOf(moment(fromDate).format("YYYY-MM-DD")+'T00:00:00.000Z') > -1 ){
-                                    console.log('GROS CENEAU');
                                 } else if (!(byday.indexOf(currentDay) < 0 || exdate.indexOf(fromDate.toISOString()) > -1 )) {
                                     let copy = JSON.parse(JSON.stringify(item));
                                     copy.start = moment(fromDate).format();
