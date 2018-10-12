@@ -175,7 +175,7 @@
                 </h2>
                 <h3 class="periode">Période :
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
-                    <strong @click="debug = ts">{{ mois }}</strong>
+                    <strong @click.shift="debug = ts">{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
 
                     <a class="btn btn-default" :href="urlimport+'?period=' + periodCode "
@@ -255,9 +255,11 @@
                         <i class="icon-calendar"></i>
                         Détails de la
                         <strong>semaine {{ selectedWeek.label }}</strong>
+                        <a href="#" @click="handlerCopyWeek(selectedWeek)"><i class="icon-docs"></i></a>
+                        <a href="#" @click="handlerPasteWeek(selectedWeek)" v-show="clipboardData"><i class="icon-paste"></i></a>
                     </h3>
 
-                    <a class="link" @click="selectedWeek = null">
+                    <a class="btn btn-default" @click="selectedWeek = null">
                         <i class="icon-angle-left"></i> Revenir au mois
                     </a>
 
@@ -307,7 +309,7 @@
 
                     <nav class="buttons-bar">
                         <button class="btn btn-danger btn-xs" @click="deleteWeek(selectedWeek)"
-                                v-if="selectedWeek.drafts > 0">
+                                v-if="ts.editable">
                             <i class="icon-trash"></i>
                             Supprimer les déclarations non-envoyées
                         </button>
@@ -406,7 +408,7 @@
                         Vous n'être identifié comme déclarant sur aucune activité pour cette période. Si cette situation
                         vous semble anormale, prenez contact avec votre responsable scientifique.
                     </p>
-                    <section class="card xs" v-for="a in ts.activities" @click="debug = a" v-else>
+                    <section class="card xs" v-for="a in ts.activities" @click.shift="debug = a" v-else>
                         <div class="week-header interaction-off">
 
                                 <span>
@@ -426,7 +428,7 @@
                                     <em class="text-thin">{{ a.label }}</em>
 
                                 </span>
-                            <small>
+                            <small class="subtotal">
                                 <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>
                             </small>
                         </div>
@@ -672,6 +674,9 @@
             font-weight: 700;
             flex: 1;
         }
+        small.subtotal {
+            flex: 0;
+        }
         small {
             em {
                 color: #5c646c;
@@ -779,6 +784,8 @@
                     wp: null,
                     type: 'infos',
                 },
+
+                copyClipboard: null,
 
                 showHours: true,
 
@@ -1053,12 +1060,61 @@
                     d.declarations.forEach(t => {
                         ids.push(t.id);
                     })
+                    if( d.othersWP ){
+                        d.othersWP.forEach(t => {
+                            ids.push(t.id);
+                        })
+                    }
                 })
+
                 this.performDelete(ids);
             },
 
             deleteTimesheet(timesheet) {
                 this.performDelete([timesheet.id]);
+            },
+
+            handlerPasteWeek( week ){
+                let datasSendable = [];
+                week.days.forEach(day => {
+                    this.clipboardData.forEach(item => {
+                        if( item.day == day.day ){
+                            let data = JSON.parse(JSON.stringify(item));
+                            data.day = day.datefull;
+                            datasSendable.push(data);
+                        }
+                    })
+                });
+                this.performAddDays(datasSendable);
+            },
+
+            handlerCopyWeek(week){
+                let datasCopy = [];
+                week.days.forEach(day => {
+                    if( day.declarations ){
+                        day.declarations.forEach(timesheet => {
+                            datasCopy.push({
+                               code: timesheet.wpCode,
+                               comment: timesheet.comment,
+                               duration: timesheet.duration * 60,
+                               day: day.day,
+                               wpId: timesheet.wp_id,
+                            });
+                        });
+                    }
+                    if( day.othersWP ) {
+                        day.othersWP.forEach(timesheet => {
+                            datasCopy.push({
+                                code: timesheet.code,
+                                comment: "",
+                                duration: timesheet.duration * 60,
+                                day: day.day,
+                                wpId: null,
+                            });
+                        });
+                    }
+                });
+                this.clipboardData = datasCopy;
             },
 
             handlerSaveMenuTime() {
@@ -1083,6 +1139,8 @@
             performAddDays(datas) {
                 let formData = new FormData();
                 formData.append('timesheets', JSON.stringify(datas));
+
+                console.log(datas);
                 this.loading = "Enregistrement des créneaux";
 
                 this.$http.post('/feuille-de-temps/declarant-api', formData).then(
