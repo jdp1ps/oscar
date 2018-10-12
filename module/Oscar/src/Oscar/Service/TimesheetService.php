@@ -1325,6 +1325,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $others[$key]['validation_state'] = $periodHL ? $periodHL->json() : null;
             $others[$key]['validation_up'] = $validationUp;
+            $others[$key]['total'] = 0.0;
         }
 
 
@@ -1390,33 +1391,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     }
                 }
 
-                $labelTimesheet = $t->getLabel();
 
-                $otherRegular = false;
-
-                /*$output['days'][$dayTimesheet]['infos'] = [];
-
-                foreach ($others as $otherKey => $other) {
-
-                    if( !array_key_exists($otherKey, $output['days'][$dayTimesheet]) ){
-                        $output['days'][$dayTimesheet][$otherKey] = [];
-                    }
-                    if( $labelTimesheet == $otherKey ){
-                        $output['days'][$dayTimesheet][$otherKey][] = $datas;
-                        $otherRegular = true;
-                    }
-                }
-
-                if( $otherRegular === false ){
-                    $output['days'][$dayTimesheet]['infos'][] = $datas;
-                }*/
-
-                $this->getLogger()->debug("Durée : " . $t->getDuration());
-
-               $daysInfos[$dayInt]['othersWP'][] = $datas;
+                $daysInfos[$dayInt]['othersWP'][] = $datas;
                 $daysInfos[$dayInt]['duration'] += (float)$t->getDuration();
                 $daysInfos[$dayInt]['total'] += (float)$t->getDuration();
-                $output['total'] += (float)$t->getDuration();
+                $periodTotal += (float)$t->getDuration();
+                $others[$key]['total'] += (float)$t->getDuration();
 
 
                 continue;
@@ -1433,7 +1413,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $daysInfos[$dayInt]['duration'] += (float)$t->getDuration();
             $daysInfos[$dayInt]['total'] += (float)$t->getDuration();
-            $periodLength += (float)$t->getDuration();
+            $periodTotal += (float)$t->getDuration();
+
             $activities[$activity->getId()]['total'] += $t->getDuration();
             $workPackages[$workpackage->getId()]['total'] += $t->getDuration();
 
