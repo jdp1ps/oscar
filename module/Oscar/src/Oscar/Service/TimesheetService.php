@@ -1342,6 +1342,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $daydata['validations'] = null;
             $daydata['total'] = 0.0;
             $output['days'][$day] = $daydata;
+            if( $datetime > $now ){
+                $daydata['locked'] = true;
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
