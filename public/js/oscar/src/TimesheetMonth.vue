@@ -375,6 +375,31 @@
                     </div>
 
                     <hr>
+                    <h4><i class="icon-tags"></i> Hors-lot</h4>
+                    <section class="card xs" v-for="a in ts.otherWP" v-if="a.total > 0">
+                        <div class="week-header interaction-off">
+                                <span>
+                                    <i :class="'icon-'+a.code"></i>
+                                    {{ a.label }}
+                                    <i v-if="a.validation_state == null"></i>
+                                    <i class="icon-cube" v-else-if="a.validation_state.status == 'send-prj'"
+                                       title="Validation projet en attente"></i>
+                                    <i class="icon-beaker" v-else-if="a.validation_state.status == 'send-sci'"
+                                       title="Validation scientifique en attente"></i>
+                                    <i class="icon-hammer" v-else-if="a.validation_state.status == 'send-adm'"
+                                       title="Validation administrative en attente"></i>
+                                    <i class="icon-minus-circled" v-else-if="a.validation_state.status == 'conflict'"
+                                       title="Il y'a un problème dans la déclaration"></i>
+                                    <i class="icon-ok-circled" v-else-if="a.validation_state.status == 'valid'"
+                                       title="Cette déclaration est valide"></i>
+                                    <br>
+                                    <em class="text-thin">{{ a.description }}</em>
+                                </span>
+                            <small>
+                                <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>
+                            </small>
+                        </div>
+                    </section>
 
                     <h4><i class="icon-cubes"></i> Activités pour cette période</h4>
                     <p class="alert alert-info" v-if="ts.activities.length == 0">
