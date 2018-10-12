@@ -1147,6 +1147,23 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $month = (int)$periodFirstDay->format('m');
         $declarationInHours = $this->isDeclarationsHoursPerson($person);
 
+        // periode suivante
+        $todayMonth = (int)$now->format('m');
+        $todayYear = (int)$now->format('Y');
+        $todayDay = (int)$now->format('d');
+
+        $currentMonthLength = cal_days_in_month(CAL_GREGORIAN, $todayMonth, $todayYear);
+
+        if( $todayDay == $currentMonthLength ){
+            if( $todayMonth == 12 ){
+                $todayMonth = 1;
+                $todayYear += 1;
+            }
+        }
+        $periodMax = sprintf('%s-%s', $todayYear, $todayMonth);
+
+        $this->getLogger()->debug("Période suivante " . $periodMax);
+
 
         $daysInfosPerson = $this->getDaysPeriodInfosPerson($person, $year, $month);
         $daysInfos = [];
@@ -1447,6 +1464,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'person' => (string)$person,
             'person_id' => $person->getId(),
             'period' => $periodFirstDay->format('Y-m'),
+            'periodMax' => $periodMax,
             'periodInfos' => $periodInfos,
             'periodFutur' => $periodFutur,
             'periodFinished' => $periodFinished,

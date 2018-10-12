@@ -12,7 +12,6 @@
 
     <div id="app"></div>
 
-    <link rel="stylesheet" href="/js/oscar/dist/importicalui.css" />
     <script>
         require(['vue', 'vue-resource', 'mm', 'ical', 'ImportIcalUI'], function(Vue, VueResource, moment, ICAL, ImportIcalUI) {
 
@@ -51,6 +50,7 @@
                             moment: moment,
                             dayLength: 7.5,
                             periodStart: '<?= $period ?>',
+                            periodMax: '<?= $periodMax ?>',
                             exists: <?= json_encode($exists) ?>,
                             correspondances: corr
 

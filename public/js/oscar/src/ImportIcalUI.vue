@@ -40,10 +40,8 @@
         <div class="row">
             <div class="col-md-6">
                 <h3>Critères d'importation</h3>
-                <p>Vous pouvez choisir la limite d'importation entre 2 périodes (inclus)</p>
                 <div>
-                    Période de <periodselector :period="periodStart" :max="null" @change="handlerPeriodChange($event)" />
-                    <!-- à <periodselector :period="periodEnd" :min="periodStart" @change="periodEnd = $event" /> -->
+                    Période de <periodselector :period="periodStart" :max="periodMax" @change="handlerPeriodChange($event)" />
                 </div>
             </div>
 
@@ -64,7 +62,7 @@
         </div>
         <div class="row" v-else>
             <div class="col-md-8">
-                <h2 @click="debug = exists">Créneaux trouvés</h2>
+                <h2><i class="icon-pin"></i>Créneaux trouvés</h2>
 
                 <p class="alert alert-info">
                     <i class="icon-info-circled"></i>
@@ -100,7 +98,7 @@
                             <th>&nbsp;</th>
                             <th class="jour">{{ d.label }}</th>
                             <td class="jour-description">
-                                <div v-for="t in d.timesheets" class="creneau" :class="{ 'ignored': !t.importable,  'imported': t.imported }" @click="debug = t">
+                                <div v-for="t in d.timesheets" class="creneau" :class="{ 'ignored': !t.importable,  'imported': t.imported }">
                                     <i class="icon-calendar" v-if="t.importable"></i>
                                     <i class="icon-cancel-alt" v-else></i>
                                     {{ t.label }} ({{ t | itemDuration }} min)
@@ -127,14 +125,26 @@
                 </table>
             </div>
             <div class="col-md-4">
-                <h2>Intitulés et correspondance</h2>
+                <h2>
+                    <i class="icon-tags"></i>
+                    Intitulés et correspondance</h2>
+
+                <div class="alert alert-info">
+                    <p>
+                        Vous trouverez ici les <strong>intitulés</strong> chargés depuis le calendrier.
+                    </p>
+
+                    <p>
+
+                    </p>
+                </div>
                 <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter">
                 <div v-for="label in labels" class="card xs correspondance" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
                     <div class="in-ical">
                         <i class="icon-tag"></i> <strong>{{ label }}</strong>
                     </div>
 
-                    <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info" @click="debug = labelsCorrespondance[label.toLowerCase()]">
+                    <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info">
                         <i class="icon-link-outline"></i>
                         {{ labelsCorrespondance[label.toLowerCase()].label }}
                     </span>
@@ -151,83 +161,9 @@
             <input type="hidden" v-model="JSON.stringify(sendData)" name="timesheets"/>
             <button type="submit" class="btn btn-xs btn-primary">Envoyer</button>
         </form>
-        <pre>{{ sendData }}</pre>
+
     </section>
 </template>
-<style scoped>
-    .period {
-        background: white;
-
-    }
-    .ignored {
-        font-style: italic;
-        text-decoration: line-through;
-        color: #777;
-    }
-    .month-heading{
-        background: #5c9ccc;
-        color: white;
-        text-shadow: -1px 1px 0 rgba(0,0,0,.3);
-        border-top: 1em rgba(255,255,255,0) solid;
-    }
-    .month-heading.deja-envoyee {
-        background: #970000;
-    }
-    .month-heading .message-erreur {
-        font-weight: 400;
-        display: block;
-    }
-    .match { border-left: #5c9ccc 4px solid; }
-
-    .correspondance-choose {
-        border-top: solid #efede4 thin;
-        color: #777;
-        font-size: 1em;
-        cursor: pointer;
-        padding: 4px 1em;
-    }
-    .correspondance-choose.selected {
-        background: #5c9ccc;
-        color: white;
-    }
-    .correspondance-choose:hover {
-        background: #5c9ccc;
-        color: white;
-    }
-    .correspondance-choose h3 {
-        margin: 0;
-        padding: 0;
-        font-size: 1em;
-    }
-    .correspondance-choose h3 strong {
-        font-weight: 700;
-        color: black;
-    }
-    .correspondance-choose h3 small {
-        font-size: .8em;
-    }
-    .jour {
-        white-space: nowrap;
-        font-weight: 200;
-        color: black;
-        text-align: right;
-    }
-    .jour-description {
-        font-size: .9em;
-    }
-    .jour-heures {
-        text-align: right;
-    }
-    .creneau {
-        opacity: .5;
-    }
-    .creneau.imported { opacity: 1 }
-    .list {
-        margin: 1em;
-        border: solid thin #d9deda;
-
-    }
-</style>
 <script>
     // poi watch --format umd --moduleName  ImportIcalUI --filename.css ImportIcalUI.css --filename.js ImportIcalUI.js --dist public/js/oscar/dist public/js/oscar/src/ImportIcalUI.vue
 
@@ -257,7 +193,8 @@
             dayLength: { required: true },
             exists: { default: {} },
             correspondances: { required: true },
-            periodStart: { required: true }
+            periodStart: { required: true },
+            periodMax: { required: true }
         },
 
         computed: {

@@ -867,6 +867,7 @@ class TimesheetController extends AbstractOscarController
         return [
             'exists' => $resume,
             'period' => $period,
+            'periodMax' => $datas['periodMax'],
             'datas' => $datas,
             'correspondances' => $correspondances
         ];
