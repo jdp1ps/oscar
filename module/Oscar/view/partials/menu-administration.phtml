@@ -8,7 +8,8 @@ if(
     $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ||
     $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION) ||
     $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE) ||
-    $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)
+    $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE) ||
+    $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE)
 ):
 ?>
 
@@ -49,6 +50,10 @@ if(
 
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX) ):?>
         <li><a href="<?= $this->url('project/empty') ?>">Projets sans activité</a></li>
+        <?php endif; ?>
+
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE) ):?>
+            <li><a href="<?= $this->url('timesheet/declarations') ?>">Feuille de temps</a></li>
         <?php endif; ?>
 
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
