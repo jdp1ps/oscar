@@ -1460,8 +1460,24 @@ class TimesheetController extends AbstractOscarController
     {
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
         if( $this->isAjax() ){
-            $return = $this->getTimesheetService()->getDatasDeclarations();
-            return $this->ajaxResponse($return);
+            $method = $this->getHttpXMethod();
+            switch ($method) {
+                case 'GET' :
+                $return = $this->getTimesheetService()->getDatasDeclarations();
+                return $this->ajaxResponse($return);
+
+                case 'DELETE':
+                    $person_id = $this->params()->fromQuery('person_id');
+                    $period = $this->params()->fromQuery('period');
+                    if( $person_id ){
+                        $person = $this->getPersonService()->getPerson($person_id);
+                    }
+                    $this->getTimesheetService()->deleteValidationPeriodPerson($person, $period);
+                    return $this->getResponseOk();
+
+                default:
+                    return $this->getResponseInternalError("Non pris en charge");
+            }
         }
         return [];
     }

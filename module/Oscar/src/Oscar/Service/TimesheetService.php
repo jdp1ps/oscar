@@ -1045,6 +1045,26 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $query->getQuery()->getResult();
     }
 
+    public function deleteValidationPeriodPerson( Person $person, $period ){
+        $spli = explode('-', $period);
+        $year = (int)$spli[0];
+        $month = (int)$spli[1];
+
+        $query = $this->getEntityManager()->createQueryBuilder('vp')
+            ->delete(ValidationPeriod::class, 'vp')
+            ->where('vp.year = :year AND vp.month = :month AND vp.declarer = :person')
+            ->setParameters([
+                'year' => $year,
+                'month' => $month,
+                'person' => $person,
+            ])
+            ->getQuery();
+
+        $query->execute();
+        return true;
+
+    }
+
     /**
      * Récupération des validations actives pour la période donnée.
      *

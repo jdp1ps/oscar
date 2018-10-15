@@ -35,17 +35,9 @@
                     <em>
                         État : <i :class="'icon-' +validation.status"></i>
                     </em>
-<!--
-                    Validations :
-                    <nav class="btn-group btn-group-xs">
-                        <a href="#" class="btn btn-xs btn-success">Projet</a>
-                        <a href="#" class="btn btn-xs btn-success">Scientifique</a>
-                        <a href="#" class="btn btn-xs btn-success">Administrative</a>
-                    </nav>-->
                 </article>
             </section>
         </section>
-        <pre>{{ $data }}</pre>
     </section>
 </template>
 <script>
@@ -83,7 +75,6 @@
 
 
             fetch(clear = true) {
-                console.log("Chargement...");
                 this.loading = "Chargement de la période";
 
                 this.$http.get('').then(
@@ -99,8 +90,30 @@
                 ).then(foo => {
                     this.loading = false
                 });
-            }
+            },
+
+            handlerCancelDeclaration(declaration){
+                console.log(declaration);
+                this.bootbox.confirm("Supprimer la déclaration (le déclarant devra réenvoyer la déclaration) ?", ok => {
+                    if( ok ){
+                        this.loading = "Suppression de la déclaration";
+
+                        this.$http.delete('?person_id=' + declaration.person_id +"&period=" +declaration.period).then(
+                            ok => {
+                                this.fetch();
+                            },
+                            ko => {
+                                this.error = AjaxResolve.resolve('Impossible de charger les données', ko);
+                            }
+                        ).then(foo => {
+                            this.loading = false
+                        });
+                    }
+                })
+
+            },
         },
+
         mounted() {
             this.fetch(true)
         }
