@@ -1,5 +1,5 @@
 <template>
-    <section @click="handlerClick">
+    <section @click="handlerClick" @keyup="handlerKeyDown">
 
         <transition name="fade">
             <div class="loading-message" v-show="loading">
@@ -186,11 +186,6 @@
                         Importer un calendrier</a>
                 </h3>
 
-                <!--
-                <div class="help cursor-pointer" @click="help=true">
-                    <i class="icon-help-circled"></i> Informations légales sur les déclarations soumises aux feuilles de temps
-                </div>
-                -->
 
                 <div class="month">
                     <header class="month-header">
@@ -243,6 +238,8 @@
                                           :label="dayLabel"
                                           :day-excess="ts.dayExcess"
                                           @debug="debug = $event"
+                                          @copy="handlerCopyDay"
+                                          @paste="handlerPasteDay"
                                           @cancel="selectedDay = null"
                                           @removetimesheet="deleteTimesheet"
                                           @edittimesheet="editTimesheet"
@@ -315,7 +312,7 @@
                         </button>
                     </nav>
 
-                    <section v-if="selectedWeek.total < selectedWeek.totalOpen">
+                    <section v-if="selectedWeek.total < selectedWeek.totalOpen && ts.editable">
                         <p>
                             <i class="icon-help-circled"></i>
                             Vous pouvez compléter automatiquement cette semaine en affectant les
@@ -786,6 +783,7 @@
                 },
 
                 copyClipboard: null,
+                clipboardDataDay: null,
 
                 showHours: true,
 
@@ -941,6 +939,45 @@
         },
 
         methods: {
+
+            handlerPasteDay( day ){
+                let datasSendable = [];
+
+                this.clipboardDataDay.forEach(item => {
+                    let data = JSON.parse(JSON.stringify(item));
+                    data.day = day.datefull;
+                    datasSendable.push(data);
+                });
+
+                this.performAddDays(datasSendable);
+            },
+
+            handlerCopyDay(day){
+                let datasCopy = [];
+
+                if( day.declarations ){
+                    day.declarations.forEach(timesheet => {
+                        datasCopy.push({
+                            code: timesheet.wpCode,
+                            comment: timesheet.comment,
+                            duration: timesheet.duration * 60,
+                            wpId: timesheet.wp_id,
+                        });
+                    });
+                }
+                if( day.othersWP ) {
+                    day.othersWP.forEach(timesheet => {
+                        datasCopy.push({
+                            code: timesheet.code,
+                            comment: "",
+                            duration: timesheet.duration * 60,
+                            wpId: null,
+                        });
+                    });
+                }
+
+                this.clipboardDataDay = datasCopy;
+            },
 
             editTimesheet(timesheet, day) {
 
@@ -1190,6 +1227,10 @@
                 this.selectedWP = null;
                 this.selectedTime = null;
                 this.dayMenu = 'none';
+            },
+
+            handlerKeyDown(event){
+                console.log(event);
             },
 
             handlerClick() {

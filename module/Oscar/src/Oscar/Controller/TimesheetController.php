@@ -118,8 +118,6 @@ class TimesheetController extends AbstractOscarController
 
                         $this->getLogger()->debug("VALIDATION SCIENTIFIQUE");
 
-                        return $this->getResponseDeprecated("En cours de modification SCI");
-
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
 
@@ -138,8 +136,6 @@ class TimesheetController extends AbstractOscarController
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider administrativement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
-
-                        return $this->getResponseDeprecated("En cours de modification ADMIN");
 
                         try {
 

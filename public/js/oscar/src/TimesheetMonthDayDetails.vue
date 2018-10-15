@@ -7,6 +7,14 @@
             <i class="icon-angle-left"></i> Retour
         </a>
 
+        <a href="#" @click.prevent="$emit('copy', day)" class="link">
+            <i class="icon-docs"></i> Copier
+        </a>
+
+        <a href="#" @click.prevent="$emit('paste', day)" class="link">
+            <i class="icon-paste"></i> Coller
+        </a>
+
         <div>
             Compléter avec :
             <wpselector :others="others" :workpackages="workPackages" @select="addToWorkpackage" :selection="selection"></wpselector>
