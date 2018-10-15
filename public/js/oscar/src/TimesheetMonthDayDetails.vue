@@ -1,19 +1,25 @@
 <template>
     <div class="day-details" :class="{'locked': day.locked}">
 
-        <h3 @click.stop.prevent="$emit('debug', day)">Déclarer des heures <strong>{{ label }}</strong></h3>
+        <h3 @click.stop.prevent.shift="$emit('debug', day)">Déclarer des heures <strong>{{ label }}</strong></h3>
 
-        <a href="#" @click.prevent="$emit('cancel')" class="link">
+        <a href="#" @click.prevent="$emit('cancel')" class="btn btn-xs btn-default">
             <i class="icon-angle-left"></i> Retour
         </a>
 
-        <a href="#" @click.prevent="$emit('copy', day)" class="link">
-            <i class="icon-docs"></i> Copier
-        </a>
+        <div class="btn-group btn-group-xs" role="group" aria-label="...">
+            <a href="#" @click.prevent="$emit('copy', day)" v-show="day.othersWP || day.declarations.length" title="Copier les créneaux" class="btn btn-default btn-xs">
+                <i class="icon-docs"></i> Copier
+            </a>
 
-        <a href="#" @click.prevent="$emit('paste', day)" class="link">
-            <i class="icon-paste"></i> Coller
-        </a>
+            <a href="#" @click.prevent="$emit('paste', day)" v-show="copiable" class="btn btn-default btn-xs">
+                <i class="icon-paste"></i> Coller
+            </a>
+        </div>
+
+        <div class="alert alert-danger" v-show="day.total > day.maxLength">
+            <i class="icon-attention"></i> Le temps déclaré excède la durée autorisée. Vous ne pourrez pas soumettre votre feuille de temps.
+        </div>
 
         <div>
             Compléter avec :
@@ -163,6 +169,9 @@
             },
             dayExcess: {
                 require: true
+            },
+            copiable: {
+                default: null
             }
         },
 

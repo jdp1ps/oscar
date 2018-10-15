@@ -237,6 +237,7 @@
                                           :selection="selectionWP"
                                           :label="dayLabel"
                                           :day-excess="ts.dayExcess"
+                                          :copiable="clipboardDataDay"
                                           @debug="debug = $event"
                                           @copy="handlerCopyDay"
                                           @paste="handlerPasteDay"
@@ -304,7 +305,7 @@
                         duration }}</strong> heures.
                     </div>
 
-                    <nav class="buttons-bar">
+                    <nav class="buttons-bar" v-if="selectedWeek.total > 0">
                         <button class="btn btn-danger btn-xs" @click="deleteWeek(selectedWeek)"
                                 v-if="ts.editable">
                             <i class="icon-trash"></i>
@@ -649,6 +650,10 @@
             .day {
                 border-color: $weekHightlightColor;
             }
+        }
+
+        .day.error {
+            background: #dd1144 !important;
         }
     }
 

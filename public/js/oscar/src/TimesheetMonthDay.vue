@@ -1,9 +1,18 @@
 <template>
-    <div class="day" @click="handlerClick" @click.shift.prevent.stop="$emit('debug', day)" :class="{'locked': day.locked}" @contextmenu.prevent="handlerRightClick">
+    <div class="day"
+         @click="handlerClick"
+         @click.shift.prevent.stop="$emit('debug', day)"
+         :class="{'locked': day.locked, 'error': (day.total > day.maxLength)}"
+         >
 
 
 
         <span class="label">{{ day.i }}</span>
+
+        <span v-if="day.total > day.maxLength" class="text-danger">
+            <i class="icon-attention"></i>
+            Erreur
+        </span>
 
         <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label" :class="{ 'conflict': d.status_id == 3 }">
             <i :class="'icon-status-' + d.status_id"></i>
