@@ -7059,60 +7059,174 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
     .role-line:hover .controls {
       opacity: 1; }
 
-.period {
+.import-ical .period {
   background: white; }
-  .period .ignored {
-    font-style: italic;
-    text-decoration: line-through;
-    color: #777; }
-  .period .month-heading {
-    background: #5c9ccc;
-    color: white;
-    text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.3);
-    border-top: 1em rgba(255, 255, 255, 0) solid; }
-  .period .month-heading.deja-envoyee {
-    background: #970000; }
-  .period .month-heading .message-erreur {
-    font-weight: 400;
-    display: block; }
-  .period .match {
-    border-left: #5c9ccc 4px solid; }
-  .period .correspondance-choose {
-    border-top: solid #efede4 thin;
-    color: #777;
-    font-size: 1em;
-    cursor: pointer;
-    padding: 4px 1em; }
-  .period .correspondance-choose.selected, .period .correspondance-choose:hover {
+
+.import-ical .correspondance {
+  display: flex; }
+  .import-ical .correspondance nav {
+    white-space: nowrap;
+    flex: 0 1 auto;
+    margin-left: auto; }
+
+.import-ical .creneau {
+  display: flex; }
+  .import-ical .creneau strong {
+    flex: 1; }
+  .import-ical .creneau nav {
+    flex: 0 1 auto;
+    margin: auto; }
+  .import-ical .creneau:hover {
+    background: #bce5f1; }
+
+.import-ical .cartouche {
+  white-space: nowrap; }
+
+.import-ical .ignored {
+  font-style: italic;
+  text-decoration: line-through;
+  color: #777; }
+
+.import-ical .month-heading {
+  background: #5c9ccc;
+  color: white;
+  text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.3);
+  border-top: 1em rgba(255, 255, 255, 0) solid; }
+
+.import-ical .month-heading.deja-envoyee {
+  background: #970000; }
+
+.import-ical .month-heading .message-erreur {
+  font-weight: 400;
+  display: block; }
+
+.import-ical .match {
+  border-left: #5c9ccc 4px solid; }
+
+.import-ical .correspondance-choose {
+  border-top: solid #efede4 thin;
+  color: #777;
+  font-size: 1em;
+  cursor: pointer;
+  padding: 4px 1em; }
+  .import-ical .correspondance-choose.selected, .import-ical .correspondance-choose:hover {
     background: #5c9ccc;
     color: white; }
-  .period .correspondance-choose:hover small, .period .correspondance-choose.selected small {
-    color: white; }
-  .period .correspondance-choose h3 {
+    .import-ical .correspondance-choose.selected small, .import-ical .correspondance-choose:hover small {
+      color: white; }
+  .import-ical .correspondance-choose h3 {
     margin: 0;
     padding: 0;
     font-size: 1em; }
-  .period .correspondance-choose h3 strong {
-    font-weight: 700;
-    color: black; }
-  .period .correspondance-choose h3 small {
-    font-size: .8em; }
-  .period .jour {
-    white-space: nowrap;
-    font-weight: 200;
-    color: black;
-    text-align: right; }
-  .period .jour-description {
-    font-size: .9em; }
-  .period .jour-heures {
-    text-align: right; }
-  .period .creneau {
-    opacity: .5; }
-  .period .creneau.imported {
-    opacity: 1; }
-  .period .list {
-    margin: 1em;
-    border: solid thin #d9deda; }
+    .import-ical .correspondance-choose h3 strong {
+      font-weight: 700;
+      color: black; }
+    .import-ical .correspondance-choose h3 small {
+      font-size: .8em; }
+
+.import-ical .jour {
+  white-space: nowrap;
+  font-weight: 200;
+  color: black;
+  text-align: right; }
+
+.import-ical .jour-description {
+  font-size: .9em; }
+
+.import-ical .jour-heures {
+  text-align: right; }
+
+.import-ical .creneau {
+  opacity: .5; }
+
+.import-ical .creneau.imported {
+  opacity: 1; }
+
+.import-ical .list {
+  margin: 1em;
+  border: solid thin #d9deda; }
+
+.period-selector {
+  position: relative; }
+  .period-selector .visualizer {
+    border: solid thin #8f97a0;
+    border-radius: 4px;
+    display: inline-flex;
+    background: white;
+    z-index: 1;
+    position: relative; }
+  .period-selector .open .visualizer {
+    border-radius: 4px 4px 0 0;
+    border-bottom: none;
+    line-height: 1.6em;
+    display: inline-flex;
+    flex-align: center;
+    justify-content: center; }
+  .period-selector .visualizer:hover {
+    background: #5c9ccc; }
+  .period-selector .visualizer span {
+    display: inline-block;
+    padding: 4px 8px; }
+  .period-selector .period-selector .visualizer {
+    display: inline-flex; }
+  .period-selector .selector {
+    z-index: 2;
+    min-width: 30em;
+    min-height: 6em;
+    position: absolute;
+    display: flex;
+    background: white;
+    box-shadow: 0 0.5em 0.3em rgba(0, 0, 0, 0.3);
+    border: solid thin #8f97a0;
+    margin-top: -1px;
+    align-items: stretch;
+    justify-content: center; }
+  .period-selector .selector .scroll {
+    display: flex;
+    padding: 0 .5em;
+    cursor: pointer;
+    align-items: center; }
+  .period-selector .scroll-left {
+    border-right: thin solid #8f97a0; }
+  .period-selector .scroll-right {
+    border-left: thin solid #8f97a0; }
+  .period-selector .selector .scroll:hover {
+    background: #5c9ccc; }
+  .period-selector .selector-content {
+    display: flex;
+    flex-direction: row;
+    flex-flow: wrap; }
+  .period-selector .selector-content span {
+    flex: 0 0 25%;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 1em;
+    text-align: center; }
+  .period-selector .selector-content span:hover {
+    background: #5c9ccc;
+    cursor: pointer; }
+  .period-selector .selector-content span.disabled {
+    background: url("/css/bg.gif") #efefef;
+    cursor: not-allowed;
+    pointer-events: none; }
+  .period-selector .selector-content span.selected {
+    background: #5c9ccc;
+    color: white;
+    text-shadow: -1px 1px 1px rgba(255, 255, 255, 0.5); }
+  .period-selector .selector-options {
+    flex: 1 1 auto;
+    display: flex;
+    border-top: thin solid #8f97a0; }
+  .period-selector .selector-option {
+    flex: 1;
+    text-align: center;
+    padding: .5em;
+    cursor: pointer;
+    text-decoration: none; }
+  .period-selector .selector-option:hover {
+    background: #5c9ccc;
+    cursor: pointer; }
+  .period-selector .selector-option:first-child {
+    border-right: solid red thin; }
 
 body .tv {
   border: none;
@@ -8168,6 +8282,12 @@ time.date-missing {
 .week-days-total {
   box-shadow: 0 -8px 8px rgba(0, 0, 0, 0.25);
   font-size: .75em; }
+
+.title-with-menu {
+  display: flex; }
+  .title-with-menu .right-menu {
+    margin: auto;
+    flex: 0; }
 
 @keyframes fresh {
   from {

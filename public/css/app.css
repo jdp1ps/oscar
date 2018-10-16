@@ -8283,6 +8283,20 @@ time.date-missing {
   box-shadow: 0 -8px 8px rgba(0, 0, 0, 0.25);
   font-size: .75em; }
 
+pre.alert-danger {
+  white-space: pre-wrap; }
+
+.title-with-menu {
+  display: flex; }
+  .title-with-menu .text {
+    flex: 1; }
+  .title-with-menu .right-menu {
+    font-size: .6em;
+    margin: auto;
+    flex: 0 0 auto; }
+    .title-with-menu .right-menu a {
+      background: white; }
+
 @keyframes fresh {
   from {
     background: #30b0d5; }

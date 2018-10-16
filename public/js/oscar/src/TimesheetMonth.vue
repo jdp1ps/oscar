@@ -249,19 +249,22 @@
 
                 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS SEMAINE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
                 <div v-else-if="selectedWeek">
-                    <h3 @click.shift="debug = selectedWeek">
-                        <i class="icon-calendar"></i>
-                        Détails de la
-                        <strong>semaine {{ selectedWeek.label }}</strong>
-                        <a href="#" @click="handlerCopyWeek(selectedWeek)"><i class="icon-docs"></i></a>
-                        <a href="#" @click="handlerPasteWeek(selectedWeek)" v-show="clipboardData"><i class="icon-paste"></i></a>
+                    <h3 @click.shift="debug = selectedWeek" class="title-with-menu">
+                        <div class="text">
+                            <i class="icon-calendar"></i>
+                            <strong>Semaine {{ selectedWeek.label }}</strong>
+                        </div>
+                        <nav class="right-menu" v-if="ts.editable">
+                            <a href="#" @click="handlerCopyWeek(selectedWeek)" title="Copier les créneaux de la semaine"><i class="icon-docs"></i></a>
+                            <a href="#" @click="handlerPasteWeek(selectedWeek)"  title="Coller les créneaux" v-show="clipboardData"><i class="icon-paste"></i></a>
+                        </nav>
                     </h3>
 
                     <a class="btn btn-default" @click="selectedWeek = null">
                         <i class="icon-angle-left"></i> Revenir au mois
                     </a>
 
-                    <h4>Détails : </h4>
+                    <h4>Jours : </h4>
                     <article class="card xs total repport-item"
                              :class="{ 'locked': d.locked, 'closed': d.closed, 'excess': d.duration > ts.dayExcess }"
                              v-for="d in selectedWeek.days"
@@ -376,6 +379,7 @@
 
                     <hr>
                     <h4><i class="icon-tags"></i> Hors-lot</h4>
+
                     <section class="card xs" v-for="a in ts.otherWP" v-if="a.total > 0">
                         <div class="week-header interaction-off">
                                 <span>
@@ -397,6 +401,15 @@
                                 </span>
                             <small>
                                 <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>
+                            </small>
+                        </div>
+                    </section>
+
+                    <section class="card xs total interaction-off">
+                        <div class="week-header">
+                            <span class="text-big text-xxl">Total</span>
+                            <small>
+                                <strong class="text-large">{{ totalWP | duration2(ts.periodLength) }}</strong>
                             </small>
                         </div>
                     </section>
@@ -874,6 +887,15 @@
                     top: this.dayMenuTop + 'px',
                     left: this.dayMenuLeft + 'px'
                 }
+            },
+
+            totalWP(){
+              let t = 0.0;
+              for( let other in this.ts.otherWP ) {
+                  if( this.ts.otherWP[other].total )
+                      t += this.ts.otherWP[other].total;
+              }
+              return t;
             },
 
             /**

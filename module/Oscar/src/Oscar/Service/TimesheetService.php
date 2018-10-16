@@ -831,7 +831,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $minlength = 0.0;
                 $close = true;
                 $locked = true;
-                $closedReason = $lockedReason = $infos = "Fermé " . $locked[$lockedKey];
+                $closedReason = $lockedReason = $infos = "Fermé " . $lockedDatas[$lockedKey];
             }
 
             if ($dayIndex > 4 && $weekendAllowed == true) {
@@ -840,7 +840,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $minlength = 0.0;
                 $closed = true;
                 $locked = true;
-                $closedReason = $lockedReason = $infos = "Fermé " . $locked[$lockedKey];
+                $closedReason = $lockedReason = $infos = "Weekend";
             }
 
             if( array_key_exists($dayIndex+1, $daysDetails) ){
@@ -893,7 +893,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             if( $dayData['total'] < $dayData['minLength'] ){
-                $errors[] = "- Les heures déclarées le jour " . $dayData['i'] . " sont en deça la durée minimum !";
+                $errors[] = "- Les heures déclarées le jour " . $dayData['i'] . " sont en deça la durée minimum (" . $dayData['minLength'] . ") !";
             }
 
             $this->getLogger()->debug("Durée de la journée : " . $duration . '(' . $min . ', ' . $max . ')');
@@ -1413,6 +1413,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
                 $period = $this->getValidationPeriosOutOfWorkpackageAt( $t->getPerson(), $year, $month, $t->getLabel());
+                $key = $t->getLabel();
+
                 if( $period ){
                     if( $period->getStatus() == ValidationPeriod::STATUS_VALID ){
                         $datas['status_id'] = TimeSheet::STATUS_ACTIVE;
@@ -1431,12 +1433,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     }
                 }
 
-
+                $duree = (float)$t->getDuration();
                 $daysInfos[$dayInt]['othersWP'][] = $datas;
-                $daysInfos[$dayInt]['duration'] += (float)$t->getDuration();
-                $daysInfos[$dayInt]['total'] += (float)$t->getDuration();
-                $periodTotal += (float)$t->getDuration();
-                $others[$key]['total'] += (float)$t->getDuration();
+                $daysInfos[$dayInt]['duration'] += $duree;
+                $daysInfos[$dayInt]['total'] += $duree;
+                $periodTotal += $duree;
+
+                $this->getLogger()->debug("Ajout $duree pour " . $key);
+                $others[$key]['total'] += $duree;
 
 
                 continue;
@@ -1480,6 +1484,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'wp_id' => $t->getWorkpackage()->getId(),
             ];
         }
+
+        $this->getLogger()->debug("OTHERS " . print_r($others, true));
 
         $output = [
             'person' => (string)$person,

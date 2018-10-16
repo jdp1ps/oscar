@@ -4129,6 +4129,26 @@ $oscar-line: dotted thin $colorGreyLight;
   }
 }
 
+pre.alert-danger {
+  white-space: pre-wrap;
+}
+
+.title-with-menu {
+
+  display: flex;
+  .text {
+    flex: 1;
+  }
+  .right-menu {
+    font-size: .6em;
+    margin: auto;
+    flex: 0 0 auto;
+    a {
+      background: white;
+    }
+  }
+}
+
 @keyframes fresh {
   from {
     background: $colorBlue;
