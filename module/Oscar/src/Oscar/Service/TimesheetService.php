@@ -868,7 +868,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     public function verificationPeriod( Person $person, $year, $month) {
-
+        $this->getLogger()->debug("VERIFICATION PERIODE $year $month");
         $datas = $this->getTimesheetDatasPersonPeriod($person, sprintf('%s-%s', $year, $month));
 
         $warnings = [];
@@ -888,15 +888,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $min = $dayData['minLength'];
             $max = $dayData['maxLength'];
 
-            if( $dayData['total'] > $dayData['maxLength'] ){
+            if( $duration > $max ){
                 $errors[] = "- Les heures déclarées le jour " . $dayData['i'] . " dépassent la durée autorisée !";
             }
 
-            if( $dayData['total'] < $dayData['minLength'] ){
-                $errors[] = "- Les heures déclarées le jour " . $dayData['i'] . " sont en deça la durée minimum (" . $dayData['minLength'] . ") !";
+            if( $duration < $min ){
+                $this->getLogger()->debug("Durée de la journée ". $day." : " . $duration . '(' . $min . ', ' . $max . ')');
+                $this->getLogger()->debug(print_r($dayData, true));
+                $errors[] = "- Les heures déclarées (".$duration.") le jour " . $dayData['i'] . " sont en deça la durée minimum (" . $min . ") !";
             }
 
-            $this->getLogger()->debug("Durée de la journée : " . $duration . '(' . $min . ', ' . $max . ')');
 
             if( !array_key_exists($week, $weeksMaxCount) )
                 $weeksMaxCount[$week] = 0.0;

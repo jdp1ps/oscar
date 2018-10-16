@@ -35,6 +35,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Router\Http\Method;
+use Zend\Validator\Date;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
@@ -1385,7 +1386,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));
-                    $this->getLogger()->debug("Données recues : " . print_r($datas, true));
+
                     if( !$datas ){
                         return $this->getResponseBadRequest('Problème de transmission des données');
                     }
@@ -1397,8 +1398,8 @@ class TimesheetController extends AbstractOscarController
                     $this->getLogger()->debug("##### ENVOI DES DECLARATIONS");
 
                     try {
-
-                        $this->getTimesheetService()->verificationPeriod($currentPerson, $year, $month);
+                        $firstDay = new \DateTime($datas->from);
+                        $this->getTimesheetService()->verificationPeriod($currentPerson, $firstDay->format('Y'), $firstDay->format('m'));
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError("Déclaration invalide : " . $e->getMessage());
                     }
