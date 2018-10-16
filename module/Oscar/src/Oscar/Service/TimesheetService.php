@@ -874,11 +874,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $warnings = [];
         $errors = [];
 
-        $weeksCount = [];
+        $weeksMaxCount = [];
+        $weeksMinCount = [];
+
         $month = 0.0;
+        $limitMinMonth = 0.0;
+
 
         foreach ($datas['days'] as $day=>$dayData) {
             $week = $dayData['week'];
+
             $duration = $dayData['total'];
             $min = $dayData['minLength'];
             $max = $dayData['maxLength'];
@@ -893,28 +898,40 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $this->getLogger()->debug("Durée de la journée : " . $duration . '(' . $min . ', ' . $max . ')');
 
-            if( !array_key_exists($week, $weeksCount) ){
-                // @todo Tester la durée de la semaine
-                $weeksCount[$week] = 0.0;
-            }
-            $weeksCount[$week] += $duration;
+            if( !array_key_exists($week, $weeksMaxCount) )
+                $weeksMaxCount[$week] = 0.0;
+
+            if( !array_key_exists($week, $weeksMinCount) )
+                $weeksMinCount[$week] = 0.0;
+
+
+            $weeksMaxCount[$week] += $duration;
+            $weeksMinCount[$week] += $min;
+            $limitMinMonth += $min;
             $month += $duration;
         }
 
         $limitWeekMax = $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max');
         $limitMonthMax = $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.max');
 
-        $limitWeekMin = $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.min');
+        // @todo Faire comme pour la semaine
         $limitMonthMin = $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.min');
 
-        foreach ($weeksCount as $week=>$weekDuration) {
+        foreach ($weeksMaxCount as $week=>$weekDuration) {
             if( $weekDuration > $limitWeekMax ){
                 $errors[] = sprintf("- Les heures déclarées en semaine %s dépassent la durée autorisée", $week);
             }
-            if( $weekDuration < $limitWeekMin ){
-                $errors[] = sprintf("- Le total des heures déclarées en semaine %s sont en deça de la durée attendue.", $week);
-            }
         }
+
+        $this->getLogger()->debug(print_r($weeksMinCount, true));
+
+        // @todo
+        /*
+        foreach ($weeksMinCount as $week=>$weekDuration) {
+            if( $weekDuration > $limitWeekMax ){
+                $errors[] = sprintf("- Les heures déclarées en semaine %s dépassent la durée autorisée", $week);
+            }
+        }*/
 
         if( $month > $limitMonthMax ){
             $errors[] = "- Les heures déclarées pour ce mois dépassent la durée autorisée";
