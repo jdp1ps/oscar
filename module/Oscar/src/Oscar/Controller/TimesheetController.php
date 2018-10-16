@@ -1368,6 +1368,7 @@ class TimesheetController extends AbstractOscarController
 
                 case 'POST' :
                     $action = $this->params()->fromPost('action', 'send');
+
                     if( $action == 'resend' ){
                         $periodId = $this->params()->fromPost('period_id');
                         $period = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($periodId);

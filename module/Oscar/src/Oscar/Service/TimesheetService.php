@@ -773,6 +773,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
         return $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.max');
     }
+    public function getDayMinLengthPerson(Person $person)
+    {
+        return $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.min');
+    }
 
     public function getMonthDuration(Person $person, $year, $month)
     {
@@ -796,8 +800,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $daysFull = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
         $decaleDay = $dateRef->format('N') - 1;
         $daysLabels = [];
-        $weekendAllowed = $this->getOscarConfig()->getConfiguration('declarationsWeekend') == false;
 
+        $weekendAllowed = $this->getOscarConfig()->getConfiguration('declarationsWeekend') == false;
         $daysDetails = $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.days');
 
 
@@ -805,6 +809,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         for ($i = $decaleDay; $i < $nbr + $decaleDay; $i++) {
             $duration = $this->getDayDuration($person);
             $maxlength = $this->getDayMaxLengthPerson($person);
+            $minlength = $this->getDayMinLengthPerson($person);
             $day = $i - $decaleDay + 1;
             $dayIndex = ($i % 7);
             $close = false;
@@ -823,6 +828,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if (array_key_exists($lockedKey, $lockedDatas)) {
                 $duration = 0.0;
                 $maxlength = 0.0;
+                $minlength = 0.0;
                 $close = true;
                 $locked = true;
                 $closedReason = $lockedReason = $infos = "Fermé " . $locked[$lockedKey];
@@ -831,6 +837,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if ($dayIndex > 4 && $weekendAllowed == true) {
                 $duration = 0.0;
                 $maxlength = 0.0;
+                $minLength = 0.0;
                 $closed = true;
                 $locked = true;
                 $closedReason = $lockedReason = $infos = "Fermé " . $locked[$lockedKey];
@@ -845,6 +852,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'duration' => 0.0,
                 'dayLength' => $duration,
                 'maxLength' => $maxlength,
+                'minLength' => $minlength,
                 'label' => $daysFull[$dayIndex],
                 'close' => $close,
                 'locked' => $locked,
@@ -871,13 +879,20 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         foreach ($datas['days'] as $day=>$dayData) {
             $week = $dayData['week'];
-            $duration = $dayData['duration'];
+            $duration = $dayData['total'];
+            $min = $dayData['minLength'];
+            $max = $dayData['maxLength'];
 
-            if( $dayData['duration'] > $dayData['maxLength'] ){
-                $errors[] = "Les heures déclarées le jour " . $dayData['i'] . " dépassent la durée autorisée !";
+            if( $dayData['total'] > $dayData['maxLength'] ){
+                $errors[] = "- Les heures déclarées le jour " . $dayData['i'] . " dépassent la durée autorisée !";
             }
 
-            $this->getLogger()->debug("Durée de la journée : " . $duration);
+            if( $dayData['total'] < $dayData['minLength'] ){
+                $errors[] = "- Les heures déclarées le jour " . $dayData['i'] . " sont en deça la durée minimum !";
+            }
+
+            $this->getLogger()->debug("Durée de la journée : " . $duration . '(' . $min . ', ' . $max . ')');
+
             if( !array_key_exists($week, $weeksCount) ){
                 // @todo Tester la durée de la semaine
                 $weeksCount[$week] = 0.0;
@@ -886,46 +901,31 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $month += $duration;
         }
 
-        /*
-         * 'declarationsDurations' => [
+        $limitWeekMax = $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max');
+        $limitMonthMax = $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.max');
 
-            'dayLength'     => [
-                'value' => 8.0,
-                'max' => 10.0,
-                'userChange' => false,
-                'days' => [
-                    '1' => 7.5,
-                    '2' => 7.5,
-                    '3' => 7.5,
-                    '4' => 7.5,
-                    '5' => 7.0,
-                    '6' => 0.0,
-                    '7' => 0.0,
-                ]
-            ],
-
-            'weekLength'     => [
-                'value' => 37.0,
-                'max' => 44.0,
-                'userChange' => false
-            ],
-         */
-
-        $limitWeek = $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max');
-        $limitMonth = $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.max');
+        $limitWeekMin = $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.min');
+        $limitMonthMin = $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.min');
 
         foreach ($weeksCount as $week=>$weekDuration) {
-            if( $weekDuration > $limitWeek ){
-                $errors[] = sprintf("Les heures déclarées en semaine %s dépassent la durée autorisée", $week);
+            if( $weekDuration > $limitWeekMax ){
+                $errors[] = sprintf("- Les heures déclarées en semaine %s dépassent la durée autorisée", $week);
+            }
+            if( $weekDuration < $limitWeekMin ){
+                $errors[] = sprintf("- Le total des heures déclarées en semaine %s sont en deça de la durée attendue.", $week);
             }
         }
 
-        if( $month > $limitMonth ){
-            $errors[] = "Les heures déclarées pour ce mois dépassent la durée autorisée";
+        if( $month > $limitMonthMax ){
+            $errors[] = "- Les heures déclarées pour ce mois dépassent la durée autorisée";
+        }
+
+        if( $month < $limitMonthMin ){
+            $errors[] = "- Les heures déclarées pour ce mois sont de deça la durée attendue";
         }
 
         if( count($errors) >  0 ){
-            throw new OscarException(sprintf("Il y'a %s erreur(s) dans votre déclaration : %s", count($errors), implode(', ', $errors)));
+            throw new OscarException(sprintf("Il y'a %s erreur(s) dans votre déclaration : \n %s", count($errors), implode("\n", $errors)));
         }
 
 
