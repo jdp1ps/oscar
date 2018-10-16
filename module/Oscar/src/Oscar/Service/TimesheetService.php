@@ -837,7 +837,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if ($dayIndex > 4 && $weekendAllowed == true) {
                 $duration = 0.0;
                 $maxlength = 0.0;
-                $minLength = 0.0;
+                $minlength = 0.0;
                 $closed = true;
                 $locked = true;
                 $closedReason = $lockedReason = $infos = "Fermé " . $locked[$lockedKey];
