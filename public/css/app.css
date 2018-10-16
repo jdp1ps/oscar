@@ -8283,7 +8283,7 @@ time.date-missing {
   box-shadow: 0 -8px 8px rgba(0, 0, 0, 0.25);
   font-size: .75em; }
 
-pre.alert-danger {
+pre.alert-danger, pre.alert-info {
   white-space: pre-wrap; }
 
 .title-with-menu {
