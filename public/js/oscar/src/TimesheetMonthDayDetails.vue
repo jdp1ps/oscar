@@ -38,45 +38,43 @@
                 ></day>
 
                 <article class="wp-duration card xs">
-                    <span class="text-large text-xl">Total<br>
-                        <small class="text-thin text-small">Sur les activités soumises aux déclarations</small>
+                    <span>
+                        <strong>
+                            <i class="icon-archive"></i> Total<br>
+                            <small>sur les lot de travail</small>
+                        </strong>
                     </span>
                     <div class="total">
                         <span class="text-large text-xl">{{ totalWP | duration2(day.dayLength) }}</span>
-                        <em>heure(s)</em>
                     </div>
                     <div class="left"></div>
                 </article>
                 <hr>
             </template>
 
-            <!--
-            <section v-for="o in others" v-if="day[o.code] && day[o.code].length">
-                <article class="wp-duration card xs" v-for="t in day[o.code]">
-                    <strong>
-                        <i class="icon-teaching"></i> {{ o.label }}<br>
-                        <small>{{ t.description }}</small>
-                    </strong>
-                    <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
-                    <div class="left">
-                        <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                    </div>
-                </article>
-            </section>
-            -->
-
-            <section class="othersWP">
+            <section class="othersWP" v-if="day.othersWP">
+                <h3><i class="icon-tags"></i> Heures Hors-Lots</h3>
                 <article class="wp-duration card xs"  v-for="t in day.othersWP">
                     <strong>
                         <i :class="'icon-'+t.label"></i> {{ others[t.label] ? others[t.label].label : t.label  }}<br>
                         <small>{{ t.description }}</small>
                     </strong>
-                    <div class="total">{{ t.duration | duration2(day.dayLength) }} <em>heure(s)</em></div>
+                    <div class="total">{{ t.duration | duration2(day.dayLength) }}</div>
                     <div class="left">
                         <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
                     </div>
                 </article>
+                <hr>
             </section>
+
+
+
+            <article class="wp-duration card xl">
+                <strong>
+                    Total de la journée<br>
+                </strong>
+                <div class="total">{{ totalJour | duration2(day.dayLength) }}</div>
+            </article>
 
             <div class="alert-danger alert" v-if="day.duration > day.maxDay">
                 <i class="icon-attention-circled"></i>
@@ -204,6 +202,19 @@
                     t += d.duration;
                 })
                 return t;
+            },
+
+            totalHWP(){
+                let t = 0.0;
+                this.day.othersWP.forEach( d => {
+                    t += d.duration;
+                })
+                return t;
+
+            },
+
+            totalJour(){
+              return this.totalWP + this.totalHWP;
 
             },
 
