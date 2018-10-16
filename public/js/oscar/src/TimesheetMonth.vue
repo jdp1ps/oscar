@@ -171,7 +171,6 @@
 
                 <h2>
                     Déclarations de temps pour <strong>{{ ts.person }}</strong>
-
                 </h2>
                 <h3 class="periode">Période :
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
@@ -366,7 +365,7 @@
                         <div class="week-header">
                             <span class="text-big text-xxl">Total</span>
                             <small>
-                                <strong class="text-large">{{ ts.total | duration2(ts.periodLength) }}</strong>
+                                <strong class="text-large">{{ ts.total | duration2(monthLength) }}</strong>
                             </small>
                         </div>
                     </section>
@@ -400,7 +399,7 @@
                                     <em class="text-thin">{{ a.description }}</em>
                                 </span>
                             <small>
-                                <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>
+                                <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
                             </small>
                         </div>
                     </section>
@@ -409,7 +408,7 @@
                         <div class="week-header">
                             <span class="text-big text-xxl">Total</span>
                             <small>
-                                <strong class="text-large">{{ totalWP | duration2(ts.periodLength) }}</strong>
+                                <strong class="text-large">{{ totalWP | duration2(monthLength) }}</strong>
                             </small>
                         </div>
                     </section>
@@ -440,7 +439,7 @@
 
                                 </span>
                             <small class="subtotal">
-                                <strong class="text-large">{{ a.total | duration2(ts.periodLength) }}</strong>
+                                <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
                             </small>
                         </div>
                     </section>
@@ -451,7 +450,7 @@
                                     <small>Pour les activités soumisses aux déclarations</small>
                                 </span>
                             <small>
-                                <strong class="text-large">{{ ts.periodDeclarations | duration2(ts.periodLength)
+                                <strong class="text-large">{{ ts.periodDeclarations | duration2(monthLength)
                                     }}</strong>
                             </small>
                         </div>
@@ -762,7 +761,7 @@
 </style>
 
 <script>
-    // poi watch --format umd --moduleName  TimesheetMonth --filename.css TimesheetMonth.css --filename.js TimesheetMonth.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetMonth.vue
+    // poi watch --format umd --moduleName  TimesheetMonth --filename.css timesheetmonth.css --filename.js TimesheetMonth.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetMonth.vue
     import AjaxResolve from "./AjaxResolve";
 
 
@@ -855,6 +854,14 @@
         },
 
         computed: {
+            monthLength(){
+                let t = 0.0;
+                for( let day in this.ts.days ){
+                    t += this.ts.days[day].dayLength;
+                }
+                return t;
+            },
+
             dayLabel() {
                 if (this.selectedDay)
                     return moment(this.selectedDay.data).format('dddd DD MMMM YYYY');

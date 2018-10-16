@@ -829,7 +829,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $duration = 0.0;
                 $maxlength = 0.0;
                 $minlength = 0.0;
-                $close = true;
+                $closed = true;
                 $locked = true;
                 $closedReason = $lockedReason = $infos = "Fermé " . $lockedDatas[$lockedKey];
             }

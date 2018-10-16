@@ -24,6 +24,10 @@
             <i class="icon-attention"></i> Le temps déclaré <strong>excède la durée autorisée</strong>. Vous ne pourrez pas soumettre votre feuille de temps.
         </div>
 
+        <div class="alert alert-danger" v-show="day.total < day.minLength">
+            <i class="icon-attention"></i> Le temps déclaré <strong>est en deça de la durée minimum</strong>. Vous ne pourrez pas soumettre votre feuille de temps.
+        </div>
+
         <div>
             Compléter avec :
             <wpselector :others="others" :workpackages="workPackages" @select="addToWorkpackage" :selection="selection"></wpselector>
