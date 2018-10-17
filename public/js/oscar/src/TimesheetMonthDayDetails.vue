@@ -63,7 +63,7 @@
                 <h3><i class="icon-tags"></i> Heures Hors-Lots</h3>
                 <article class="wp-duration card xs"  v-for="t in day.othersWP">
                     <strong>
-                        <i :class="'icon-'+t.label"></i> {{ others[t.label] ? others[t.label].label : t.label  }}<br>
+                        <i :class="'icon-'+t.code"></i> {{ others[t.label] ? others[t.label].label : t.label  }}<br>
                         <small>{{ t.description }}</small>
                     </strong>
                     <div class="total">{{ t.duration | duration2(day.dayLength) }}</div>
