@@ -237,7 +237,6 @@
             byPeriod(){
                 let out = {}, output = {};
 
-
                 if( this.timesheets ) {
 
                     this.timesheets.forEach(item => {
@@ -311,8 +310,6 @@
                 return output;
             }
         },
-
-
 
         methods: {
             toggleImported(timesheet){
@@ -480,6 +477,7 @@
                             }
                             else if (dd[0] == 'x-microsoft-cdo-alldayevent') {
                                 item.daily = "allday";
+                                console.log(item.end);
                             }
                         });
 
@@ -488,18 +486,23 @@
                         }
                         else if (item.daily == "allday") {
 
+                            // On commence par detecter
                             let start = this.moment(item.start);
+                            let end = this.moment(item.end);
 
-                            let end = start.add(this.dayLength, 'hours');
-                            item.end = end.format();
+                            let jours = end.diff(start, 'days');
+                            let generatedEnd = start.add(this.dayLength, 'hours');
+                            let generated = null;
 
-                            if (rrule) {
-                                out = out.concat(this.repeat(item, rrule, exdate));
-                            } else {
-                                out = out.concat(this.generateItem(item));
+                            for( let i = 0; i<jours; i++ ){
+                                generatedEnd = this.moment(start).add(this.dayLength*60, 'minutes');
+                                generated = JSON.parse(JSON.stringify(item));
+                                generated.start = this.moment(start);
+                                generated.end = this.moment(generatedEnd);
+
+                                out = out.concat(this.generateItem(generated));
+                                start.add(1, 'days');
                             }
-
-                            // On va forcer les date de l'item
                         } else {
                             if (rrule) {
                                 out = out.concat(this.repeat(item, rrule, exdate));
@@ -531,6 +534,11 @@
                 // Détection des chevauchements
                 // découpe la période en 2 morceaux pour n'avoir que des périodes
                 // journalières.
+
+
+
+                console.log("generate item", mmStart.date(), mmEnd.date());
+
                 if (mmStart.date() != mmEnd.date()) {
 
                     var part1 = JSON.parse(JSON.stringify(item))
