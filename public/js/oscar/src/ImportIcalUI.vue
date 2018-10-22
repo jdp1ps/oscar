@@ -51,10 +51,7 @@
             </div>
         </div>
 
-        <div v-if="timesheets == null">
-            &nbsp;
-        </div>
-
+        <div v-if="timesheets == null"></div>
         <div v-else-if="timesheets.length == 0">
             <div class="alert alert-info">
                 Aucun créneau chargé depuis le fichier ICS
@@ -66,7 +63,8 @@
 
                 <p class="alert alert-info">
                     <i class="icon-info-circled"></i>
-                    Voici les créneaux trouvès dans le calendrier que vous avez chargé. Les créneaux <strong>étallés sur plusieurs jours sont ignorés</strong>. Une fois les créneaux validés, vous pourrez toujours les modifier ou les supprimer depuis l'interface de déclaration.
+                    Voici les créneaux trouvès dans le calendrier que vous avez chargé. Une fois les créneaux validés,
+                    vous pourrez toujours les modifier ou les supprimer depuis l'interface de déclaration.
                 </p>
 
                 <table class="table table-condensed">
@@ -95,10 +93,13 @@
                         </tr>
 
                         <tr v-for="d in p.days">
-                            <th>&nbsp;</th>
-                            <th class="jour">{{ d.label }}</th>
+                            <th>&nbsp;
+
+                            </th>
+                            <th class="jour" @click.shift="debug = d">{{ d.label }}</th>
                             <td class="jour-description">
                                 <div v-for="t in d.timesheets" class="creneau" :class="{ 'ignored': !t.importable,  'imported': t.imported }">
+                                    <i v-if="t.warning" class="icon-attention" :title="t.warning"></i>
                                     <i class="icon-calendar" v-if="t.importable"></i>
                                     <i class="icon-cancel-alt" v-else></i>
                                     <strong>{{ t.label }} ({{ t | itemDuration }} min)</strong>
@@ -247,6 +248,7 @@
                         let period = m.format('YYYY-MM');
                         let periodLabel = m.format('MMMM YYYY');
                         let day = m.format('YYYY-MM-DD');
+                        let daySimple = m.format('DD');
                         let dayLabel = m.format('dddd DD');
 
                         if (!out.hasOwnProperty(period)) {
@@ -275,15 +277,21 @@
                                 declaration: hasDeclaration,
                                 totalImport: 0.0,
                                 total: 0.0,
+                                closed: false,
+                                closedReason: "",
                                 day: day,
+                                max: 0.0,
                                 code: day,
                                 label: dayLabel,
                                 timesheets: []
                             };
 
-                            if( this.exists.hasOwnProperty(period) && this.exists[period].days.hasOwnProperty(day) ){
-                                out[period].days[day].exists += this.exists[period].days[day] * 60;
-                                out[period].days[day].total += this.exists[period].days[day] * 60;
+                            if( this.exists.hasOwnProperty(period) && this.exists[period].days.hasOwnProperty(daySimple) ){
+                                out[period].days[day].exists += this.exists[period].days[daySimple].duration * 60;
+                                out[period].days[day].total += this.exists[period].days[daySimple].duration * 60;
+                                out[period].days[day].closed += this.exists[period].days[daySimple].closed;
+                                out[period].days[day].max = this.exists[period].days[daySimple].maxLength * 60;
+                                out[period].days[day].closedReason += this.exists[period].days[daySimple].closedReason;
                             }
                         }
 
@@ -477,7 +485,6 @@
                             }
                             else if (dd[0] == 'x-microsoft-cdo-alldayevent') {
                                 item.daily = "allday";
-                                console.log(item.end);
                             }
                         });
 
@@ -535,10 +542,6 @@
                 // découpe la période en 2 morceaux pour n'avoir que des périodes
                 // journalières.
 
-
-
-                console.log("generate item", mmStart.date(), mmEnd.date());
-
                 if (mmStart.date() != mmEnd.date()) {
 
                     var part1 = JSON.parse(JSON.stringify(item))
@@ -559,6 +562,7 @@
 
                 let period = mmStart.format('YYYY-MM'),
                     day = mmStart.format('YYYY-MM-DD'),
+                    daySimple = mmStart.format('DD'),
                     importable = true,
                     destinationCode = "",
                     destinationId = -1,
@@ -575,6 +579,14 @@
                     destinationId = correspondance.wp_id;
                     destinationLabel = correspondance.label;
                     imported = true;
+                }
+
+                let warning = "";
+
+                // JOUR FERMÉ
+                if( this.exists[period].days[daySimple].closed ){
+                    warning = this.exists[period].days[daySimple].closedReason;
+                    imported = false;
                 }
 
 
@@ -594,6 +606,7 @@
                     summary: item.summary,
                     importable: importable,
                     imported: imported,
+                    warning: warning,
                     lastimport: true,
                     start: item.start,
                     end: item.end,
