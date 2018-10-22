@@ -7061,6 +7061,9 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 
 .import-ical .period {
   background: white; }
+  .import-ical .period .excess {
+    font-weight: bold;
+    color: #DD423E; }
 
 .import-ical .correspondance {
   display: flex; }
@@ -7070,7 +7073,8 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
     margin-left: auto; }
 
 .import-ical .creneau {
-  display: flex; }
+  display: flex;
+  flex-wrap: wrap; }
   .import-ical .creneau strong {
     flex: 1; }
   .import-ical .creneau nav {
@@ -7078,6 +7082,9 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
     margin: auto; }
   .import-ical .creneau:hover {
     background: #bce5f1; }
+  .import-ical .creneau small {
+    display: block;
+    flex: 0 0 100%; }
 
 .import-ical .cartouche {
   white-space: nowrap; }

@@ -7061,6 +7061,9 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 
 .import-ical .period {
   background: white; }
+  .import-ical .period .excess {
+    font-weight: bold;
+    color: #DD423E; }
 
 .import-ical .correspondance {
   display: flex; }
