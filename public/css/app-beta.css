@@ -7004,6 +7004,9 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
         flex: 0 0 150px;
         margin: auto; }
 
+.form-inline {
+  display: inline; }
+
 .buttons-icon i {
   padding: 2px;
   text-align: center;
@@ -7073,7 +7076,8 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
     margin-left: auto; }
 
 .import-ical .creneau {
-  display: flex; }
+  display: flex;
+  flex-wrap: wrap; }
   .import-ical .creneau strong {
     flex: 1; }
   .import-ical .creneau nav {
@@ -7081,6 +7085,9 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
     margin: auto; }
   .import-ical .creneau:hover {
     background: #bce5f1; }
+  .import-ical .creneau small {
+    display: block;
+    flex: 0 0 100%; }
 
 .import-ical .cartouche {
   white-space: nowrap; }

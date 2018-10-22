@@ -7004,6 +7004,9 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
         flex: 0 0 150px;
         margin: auto; }
 
+.form-inline {
+  display: inline; }
+
 .buttons-icon i {
   padding: 2px;
   text-align: center;

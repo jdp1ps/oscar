@@ -18,6 +18,7 @@ use Oscar\Entity\Privilege;
 use Oscar\Entity\PrivilegeRepository;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
+use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\UnicaenDoctrinePaginator;
@@ -43,6 +44,49 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
      */
     public function getRepository(){
         return $this->getEntityManager()->getRepository(Person::class);
+    }
+
+    public function addReferent( $referent_id, $person_id ){
+        $referent = $this->getPerson($referent_id);
+        $person = $this->getPerson($person_id);
+
+        // @todo Vérifier si le référent n'est pas déjà identifié
+
+        $referentRec = new Referent();
+        $this->getEntityManager()->persist($referentRec);
+        $referentRec->setPerson($person)->setReferent($referent);
+        $this->getEntityManager()->flush($referentRec);
+
+        return true;
+    }
+
+    public function removeReferentById( $referent_id ){
+        $referent = $this->getEntityManager()->getRepository(Referent::class)->find($referent_id);
+        $this->getEntityManager()->remove($referent);
+        $this->getEntityManager()->flush();
+        return true;
+    }
+
+
+
+    public function getReferentsPerson( $personId ){
+        $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->where('r.person = :personId')
+            ->setParameter('personId', $personId);
+        return $query->getQuery()->getResult();
+    }
+
+    public function getSubordinatesPerson( $personId ){
+        $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->where('r.referent = :personId')
+            ->setParameter('personId', $personId);
+        return $query->getQuery()->getResult();
+    }
+
+
+
+    public function getNP1( Person $person, $date = null ){
+        // @todo
     }
 
     /**

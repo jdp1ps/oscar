@@ -18,7 +18,7 @@
             <?php endif; ?>
         </h1>
         <p><i class="icon-mail"></i> <?= $entity->getEmail() ?></p>
-        <div class="col-xs-2">
+        <div class="col-xs-3">
             <h2>&nbsp;</h2>
             <img src="//www.gravatar.com/avatar/<?= md5($entity->getEmail()) ?>?s=250"
                  style="border-radius: 20px; width: 100%"
@@ -35,6 +35,106 @@
             <p>
                 
             </p>
+            <h2><i class="icon-sitemap"></i> Hiérarchie</h2>
+
+            <h3>N+1</h3>
+            <p>Le <strong>N+1</strong> est utilisé par Oscar pour déterminer la personne en charge de valider les feuilles de temps</p>
+
+            <?php if( count($referents) ): ?>
+            <?php foreach ($referents as $referent): ?>
+                <article class="card card-xs">
+                    <i class="icon-user"></i>
+                    <a href="<?= $this->url('person/show', ['id' => $referent->getReferent()->getId() ]); ?>"><?= $referent->getReferent() ?></a>
+                    <form action="" method="post" class="form-inline">
+                        <input type="hidden" name="action" value="removereferent" />
+                        <input type="hidden" name="referent_id" value="<?= $referent->getId() ?>" />
+
+                        <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
+                    </form>
+                </article>
+            <?php endforeach; ?>
+            <?php else: ?>
+
+            <?php endif; ?>
+
+            <button id="editReferent" onclick="$('#referentEditor').show(); $('#editReferent').hide();">
+                <i class="icon-pencil"></i> Ajouter un référent</button>
+
+            <form id="referentEditor" action="" method="POST" style="display: none">
+                Selectionner un référent :
+                <input type="hidden" value="<?= $entity->getId() ?>" name="person_id">
+                <input type="hidden" value="referent" name="action">
+                <select name="referent_id" class="selectPerson"></select>
+                <button type="submit">Enregistrer</button>
+                <button type="cancel" onclick="$('#referentEditor').hide(); $('#editReferent').show();">Annuler</button>
+            </form>
+
+            <script>
+                var formatRepo = function (repo) {
+                    if (repo.loading) return repo.text;
+
+                    var markup = '<div class="clearfix">';
+                    markup += repo.label || repo.text;
+                    markup += '</div>';
+
+                    return markup;
+                };
+
+                var formatRepoSelection = function (repo) {
+                    return repo.label || repo.text;
+                };
+
+                require(['jquery', 'select2'], function($, select2){
+                    $(".selectPerson").select2({
+                            placeholder: 'Rechercher une personne...',
+                            width: '100%',
+                            allowClear: true,
+                            ajax: {
+                                url: '<?= $this->url('person/search') ?>',
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                    return {
+                                        q: params.term, // search term
+                                        page: params.page
+                                    };
+                                },
+                                processResults: function (data, page) {
+                                    return {results: data.datas};
+                                },
+                                cache: true
+                            },
+                            escapeMarkup: function (markup) {
+                                return markup;
+                            },
+                            minimumInputLength: 3,
+                            id: function (dt) {
+                                return dt.uid;
+                            },
+                            templateResult: formatRepo, // omitted for brevity, see the source of this page
+                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                        }
+                    );
+                })
+            </script>
+
+
+            <h3>N-1</h3>
+            <?php if( $subordinates ): ?>
+                <?php foreach ($subordinates as $subordinate) :?>
+                    <article class="card card-xs">
+                        <i class="icon-user"></i>
+                        <a href="<?= $this->url('person/show', ['id' => $subordinate->getPerson()->getId() ]); ?>"><?= $subordinate->getPerson() ?></a>
+                        <form action="" method="post" class="form-inline">
+                            <input type="hidden" name="action" value="removereferent" />
+                            <input type="hidden" name="referent_id" value="<?= $subordinate->getId() ?>" />
+
+                            <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
+                        </form>
+                    </article>
+                <?php endforeach; ?>
+            <?php endif; ?>
+
             <h2><i class="icon-building-filled"></i>Structure</h2>
             <section id="structures">
                 <?php
@@ -50,7 +150,7 @@
                 <?php endforeach; ?>
             </section>
         </div>
-        <div class="col-xs-10">
+        <div class="col-xs-9">
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
             <h2><i class="icon-tag"></i> Informations administratives</h2>
             <div class="card">

@@ -503,6 +503,27 @@ class PersonController extends AbstractOscarController
         $activities = null;
         $traces = null;
 
+        $method = $this->getHttpXMethod();
+
+        if( $method == "POST" ){
+            $action = $this->params()->fromPost('action', null);
+            switch( $action ) {
+                case 'referent' :
+                    $referent_id = $this->params()->fromPost('referent_id', null);
+                    $person_id = $this->params()->fromPost('person_id', null);
+                    $this->getPersonService()->addReferent($referent_id, $person_id);
+                    return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
+
+                case 'removereferent' :
+                    $referent_id = $this->params()->fromPost('referent_id', null);
+                    $this->getPersonService()->removeReferentById($referent_id);
+                    return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
+
+                default:
+                    return $this->getResponseInternalError("Opération inconnue");
+            }
+        }
+
         if ($person && $person->getLadapLogin()) {
             $auth = $this->getEntityManager()
                 ->getRepository('Oscar\Entity\Authentification')
@@ -529,9 +550,16 @@ class PersonController extends AbstractOscarController
             $roles[preg_replace($re, '$1', $role['ldapFilter'])] = $role;
         }
 
+        // Récupération des référents
+        $referents = $this->getPersonService()->getReferentsPerson($person);
+        $subordinates = $this->getPersonService()->getSubordinatesPerson($person);
+
+
         return [
             'entity' => $person,
             'ldapRoles' => $roles,
+            'referents' => $referents,
+            'subordinates' => $subordinates,
             'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
             'auth' => $auth,
             'projects'  => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
