@@ -9,5 +9,8 @@
     <testsuite name="Import">
       <directory>Oscar/Import</directory>
     </testsuite>
+    <testsuite name="Utils">
+      <directory>Oscar/Utils</directory>
+    </testsuite>
   </testsuites>
 </phpunit>
