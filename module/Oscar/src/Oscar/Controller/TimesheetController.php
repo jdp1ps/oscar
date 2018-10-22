@@ -783,12 +783,15 @@ class TimesheetController extends AbstractOscarController
 
     public function importIcalAction(){
 
-        // Liste des types de créneau valide
-        $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson());
-
         // -------------------------------------------------------------------------------------------------------------
         // Période URL
         $period = $this->params()->fromQuery('period', null);
+
+        if( !$period )
+            return $this->getResponseBadRequest("La période est non définit");
+
+        // Liste des types de créneau valide
+        $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson(), $period);
 
         if( $this->getHttpXMethod() == "POST" ){
 
@@ -798,14 +801,12 @@ class TimesheetController extends AbstractOscarController
 
                 try {
                     foreach ($events as $event) {
-
-                        //
-                        //$from = new \DateTime(substr($event['start'], 0, 10));
+                        // Récupération des dates
                         $to = DateTimeUtils::toDatetime($event['end']);
                         $from = DateTimeUtils::toDatetime($event['start']);
 
                         if( !$from || !$to ){
-                            throw new OscarException("Prblème de format des dates : " . $event['form'] . " / " . $event['end']);
+                            throw new OscarException("Problème de format des dates : " . $event['form'] . " / " . $event['end']);
                         }
 
                         /** @var TimeSheet $timesheet */
@@ -844,8 +845,6 @@ class TimesheetController extends AbstractOscarController
                 } catch (\Exception $e) {
                     return $this->getResponseInternalError($e->getMessage());
                 }
-
-
             }
 
         }

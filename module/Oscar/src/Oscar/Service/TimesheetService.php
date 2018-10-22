@@ -1114,18 +1114,34 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $result;
     }
 
-    public function getPersonPeriods(Person $person)
+
+
+    public function getPersonPeriods(Person $person, $period)
     {
+
+        $periodDatas = DateTimeUtils::extractPeriodDatasFromString($period);
+
+
         // Périodes
-        $periods = $this->getValidationPeriodRepository()->getValidationPeriodsPersonQuery($person->getId())->getQuery()->getResult();
+        $periodQuery = $this->getValidationPeriodRepository()->getValidationPeriodsPersonQuery($person->getId());
+        $periodQuery->andWhere('vp.year = :year AND vp.month = :month')
+            ->setParameters([
+                'year' => $periodDatas['year'],
+                'month' => $periodDatas['month'],
+                'personId' => $person->getId()
+            ])
+            ->getQuery()->getResult();
         $out = [];
+        $periods = $periodQuery->getQuery()->getResult();
 
         /** @var ValidationPeriod $period */
         foreach ($periods as $period) {
+            if( $period)
 
             $key = $period->getYear() . '-' . ($period->getMonth() < 10 ? '0' . $period->getMonth() : $period->getMonth());
 
             if (!array_key_exists($key, $out)) {
+
                 $out[$key] = [
                     'periodCode' => $key,
                     'hasValidation' => true,
@@ -1141,17 +1157,25 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->getQuery()
             ->getResult();
 
+        $daysInfos = $this->getDaysPeriodInfosPerson($person, $periodDatas['year'], $periodDatas['month']);
+
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
 
+            $month = (int)$timesheet->getDateFrom()->format('n');
+            $year = (int)$timesheet->getDateFrom()->format('Y');
+
+            if( $month != $periodDatas['month'] || $year != $periodDatas['year'] ) continue;
+
+
             $key = $timesheet->getDateFrom()->format('Y-m');
-            $keyDay = $timesheet->getDateFrom()->format('Y-m-d');
+            $keyDay = $timesheet->getDateFrom()->format('d');
 
             if (!array_key_exists($key, $out)) {
                 $out[$key] = [
                     'periodCode' => $key,
                     'hasValidation' => false,
-                    'days' => []
+                    'days' => $daysInfos
                 ];
             }
 
@@ -1159,9 +1183,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $out[$key]['days'][$keyDay] = 0.0;
             }
 
-            $out[$key]['days'][$keyDay] += $timesheet->getDuration();
-
-
+            $out[$key]['days'][$keyDay]['duration'] += $timesheet->getDuration();
         }
 
         return $out;
