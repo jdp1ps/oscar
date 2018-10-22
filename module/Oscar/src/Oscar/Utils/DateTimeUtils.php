@@ -8,6 +8,8 @@
 namespace Oscar\Utils;
 
 
+use Oscar\Exception\OscarException;
+
 class DateTimeUtils {
     /**
      * Retourne la date au format $format, si la date est NULL, retourne une
@@ -40,5 +42,20 @@ class DateTimeUtils {
         } else {
             return new \DateTime($value);
         }
+    }
+
+    public static function extractPeriodDatasFromString($str){
+        $re = '/([0-9]{4})\-(10|11|12|0?[1-9])$/';
+        preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+        if( $matches ){
+            $month = intval($matches[0][2]);
+            $year = intval($matches[0][1]);
+            return [
+                'period' => sprintf('%s-%s', $year, $month),
+                'month' => $month,
+                'year' => $year,
+            ];
+        }
+        throw new OscarException(sprintf("Format de période '%s' incorrect", $str));
     }
 }
