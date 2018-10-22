@@ -111,6 +111,8 @@
                                     <nav>
                                         <i class="icon-trash" @click="handlerRemoveTimesheet(t)" title="Supprimer ce créneau"></i>
                                     </nav>
+                                    <small v-if="!t.importable"><i class="icon-cancel-circled"></i>Ce créneau ne peut pas être importé.</small>
+                                    <small v-else-if="!t.imported">Ce créneau sera ignoré</small>
                                 </div>
                             </td>
 
@@ -122,7 +124,10 @@
                                 <em v-if="d.exists > 0.0">{{ d.exists | displayMinutes }}</em>
                                 <em v-else>~</em>
                             </td>
-                            <td class="jour-heures">{{ d.total | displayMinutes }}</td>
+                            <td class="jour-heures" :class="{ 'excess': d.total > d.max }">
+                                <i class="icon-attention" title="Dépassement du temps autorisé" v-if="d.total > d.max"></i>
+                                {{ d.total | displayMinutes }}
+                            </td>
 
                         </tr>
                     </tbody>

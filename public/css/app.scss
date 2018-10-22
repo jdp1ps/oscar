@@ -2431,6 +2431,12 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 .import-ical {
   .period {
     background: white;
+
+    .excess {
+      font-weight: bold;
+      color: $colorRed;
+
+    }
   }
 
   .correspondance {
@@ -2446,6 +2452,7 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
   .creneau {
 
     display: flex;
+    flex-wrap: wrap;
     strong {
       flex: 1;
     }
@@ -2456,6 +2463,11 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 
     &:hover {
       background: lighten($colorBlue, 33%);
+    }
+
+    small {
+      display: block;
+      flex: 0 0 100%;
     }
   }
 
