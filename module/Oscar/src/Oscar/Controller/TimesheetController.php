@@ -526,7 +526,7 @@ class TimesheetController extends AbstractOscarController
         }
 
         if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
-            $this->getOscarUserContext()->check(Privileges::PERSON_VIEW_TIMESHEET, $activity);
+            $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
             $personId = $personIdQuery;
         } else {
             $personId = $currentPersonId;

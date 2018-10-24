@@ -1191,7 +1191,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     /**
      * Méthode de contrôle de l'éligibilité d'un créneau pour un lot donné.
-     * 
+     *
      * @param Person $person
      * @param \DateTime $start
      * @param \DateTime $to
