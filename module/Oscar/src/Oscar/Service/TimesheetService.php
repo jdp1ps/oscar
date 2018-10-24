@@ -1189,6 +1189,32 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $out;
     }
 
+    /**
+     * Méthode de contrôle de l'éligibilité d'un créneau pour un lot donné.
+     * 
+     * @param Person $person
+     * @param \DateTime $start
+     * @param \DateTime $to
+     * @param WorkPackage $wp
+     * @throws OscarException
+     */
+    public function checkAllowedAddedTimesheetInWorkPackage(Person $person, \DateTime $start, \DateTime $to, WorkPackage $wp ){
+        $jourCreneau = $start->format('d/m/Y');
+
+        // On test si la personne est bien identifiée comme déclarante sur le lot
+        if( !$wp->hasPerson($person) ){
+            throw new OscarException(sprintf("%s n'est pas identifié comme déclarant sur le lot %s", $person, $wp));
+        }
+
+        if( $wp->getDateStart() && $start < $wp->getDateStart() ){
+            throw new OscarException(sprintf("Le lot %s n'est pas encore commencé au %s", $wp, $jourCreneau));
+        }
+
+        if( $wp->getDateEnd() && $start > $wp->getDateEnd() ){
+            throw new OscarException(sprintf("Le lot %s est terminé au %s", $wp, $jourCreneau));
+        }
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///

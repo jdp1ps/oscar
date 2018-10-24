@@ -1259,6 +1259,14 @@ class TimesheetController extends AbstractOscarController
             else {
                 /** @var WorkPackage $wp */
                 $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
+
+                try {
+                    $this->getTimesheetService()->checkAllowedAddedTimesheetInWorkPackage($person, $start, $end, $wp);
+                } catch ( OscarException $e ){
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+
+
                 if( !$wp ){
                     $msg = sprintf("Le lot de travail 'N°%s' n'existe plus", $wpId);
                     $this->getLogger()->error($msg);

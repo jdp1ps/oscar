@@ -219,6 +219,8 @@
 
             <section class="col">
                 <h2><i class="icon-building-filled"></i> Structures</h2>
+
+                <?php if( count($entity->getOrganizations()) ): ?>
                 <?php
                 /** @var \Oscar\Entity\OrganizationPerson $organizationPerson */
                 foreach( $entity->getOrganizations() as $organizationPerson ): ?>
@@ -233,6 +235,11 @@
                         </p>
                     </article>
                 <?php endforeach; ?>
+                <?php else: ?>
+                <div class="alert alert-info">
+                    Cette personne n'est associée à aucune structure
+                </div>
+                <?php endif; ?>
             </section>
 
             <section class="col">
