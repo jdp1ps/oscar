@@ -111,6 +111,87 @@ $colorGreyDark: #555;
 $colorGreyBlack: #222;
 
 
+.card {
+  h2, h3, h4 {
+    margin: 0 0 .25em;
+    padding: 0;
+  }
+}
+
+
+.options-menu {
+
+  display: flex;
+  font-weight: 100;
+  font-size: .75em;
+
+  a {
+    color: $colorGreyMedium;
+    text-decoration: underline;
+    padding: 2px 4px;
+  }
+
+  &.right {
+    >:first-child {
+      margin-left: auto;
+    }
+
+
+  }
+}
+
+.cols {
+  display: flex;
+  flex-wrap: wrap;
+
+  >.col {
+    flex: 1;
+    margin: .5%;
+  }
+
+  >.col-1 {
+    flex-grow: 1;
+  }
+  >.col-2 {
+    flex-grow: 2;
+  }
+}
+
+
+.data-list {
+  color: $colorGreyMedium;
+  .data-row {
+    display: flex;
+    border-bottom: thin $colorGreyUltraLight solid;
+    .data-label { font-weight: 100; flex: 0 0 30%; white-space: nowrap }
+    .data-value {
+        font-weight: bold;
+        color: $brand-primary;
+        flex: 1 1 auto;
+        ul {
+          margin: 0;
+          padding: 0;
+        }
+
+        .ldap-groups {
+          font-size: .75em;
+          list-style: none;
+          .no-role {
+            display: none;
+          }
+          &.show-off .no-role {
+            display: block;
+          }
+        }
+        .no-role {
+          font-weight: 100;
+          color: $colorGreyMedium;
+        }
+      }
+  }
+}
+
+
 .oscar-link {
   color: lighten(black, 25%);
   text-decoration: underline;

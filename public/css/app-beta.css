@@ -5362,6 +5362,51 @@ button.close {
 .openable.open .icon-openable:before {
   content: '\e860'; }
 
+.card h2, .card h3, .card h4 {
+  margin: 0 0 .25em;
+  padding: 0; }
+
+.options-menu {
+  display: flex;
+  font-weight: 100;
+  font-size: .75em; }
+  .options-menu a {
+    color: #999;
+    text-decoration: underline;
+    padding: 2px 4px; }
+  .options-menu.right > :first-child {
+    margin-left: auto; }
+
+.cards {
+  display: flex; }
+
+.data-list {
+  color: #999; }
+  .data-list .data-row {
+    display: flex;
+    border-bottom: thin #CCC solid; }
+    .data-list .data-row .data-label {
+      font-weight: 100;
+      flex: 0 0 30%;
+      white-space: nowrap; }
+    .data-list .data-row .data-value {
+      font-weight: bold;
+      color: #790629;
+      flex: 1 1 auto; }
+      .data-list .data-row .data-value ul {
+        margin: 0;
+        padding: 0; }
+      .data-list .data-row .data-value .ldap-groups {
+        font-size: .75em;
+        list-style: none; }
+        .data-list .data-row .data-value .ldap-groups .no-role {
+          display: none; }
+        .data-list .data-row .data-value .ldap-groups.show-off .no-role {
+          display: block; }
+      .data-list .data-row .data-value .no-role {
+        font-weight: 100;
+        color: #999; }
+
 .oscar-link {
   color: #404040;
   text-decoration: underline; }

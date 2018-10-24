@@ -18,250 +18,286 @@
             <?php endif; ?>
         </h1>
         <p><i class="icon-mail"></i> <?= $entity->getEmail() ?></p>
-        <div class="col-xs-3">
-            <h2>&nbsp;</h2>
-            <img src="//www.gravatar.com/avatar/<?= md5($entity->getEmail()) ?>?s=250"
-                 style="border-radius: 20px; width: 100%"
-                 alt="" />
-            <p>
-                Impliqué dans <a href="#projects"><?= count($projects) ?> projet(s)</a>
-            </p>
-            <?php if( $this->grant(\Oscar\Provider\Privileges::PERSON_VIEW_TIMESHEET) ): ?>
-                <a href="<?= $this->url('timesheet/excel') ?>?personid=<?= $entity->getId() ?>" class="btn btn-lg btn-primary">
-                    <i class="icon-calendar"></i>
-                    Voir les feuilles de temps
-                </a>
-            <?php endif; ?>
-            <p>
-                
-            </p>
-            <h2><i class="icon-sitemap"></i> Hiérarchie</h2>
-
-            <h3>N+1</h3>
-            <p>Le <strong>N+1</strong> est utilisé par Oscar pour déterminer la personne en charge de valider les feuilles de temps</p>
-
-            <?php if( count($referents) ): ?>
-            <?php foreach ($referents as $referent): ?>
-                <article class="card card-xs">
-                    <i class="icon-user"></i>
-                    <a href="<?= $this->url('person/show', ['id' => $referent->getReferent()->getId() ]); ?>"><?= $referent->getReferent() ?></a>
-                    <form action="" method="post" class="form-inline">
-                        <input type="hidden" name="action" value="removereferent" />
-                        <input type="hidden" name="referent_id" value="<?= $referent->getId() ?>" />
-
-                        <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
-                    </form>
-                </article>
-            <?php endforeach; ?>
-            <?php else: ?>
-
-            <?php endif; ?>
-
-            <button id="editReferent" onclick="$('#referentEditor').show(); $('#editReferent').hide();">
-                <i class="icon-pencil"></i> Ajouter un référent</button>
-
-            <form id="referentEditor" action="" method="POST" style="display: none">
-                Selectionner un référent :
-                <input type="hidden" value="<?= $entity->getId() ?>" name="person_id">
-                <input type="hidden" value="referent" name="action">
-                <select name="referent_id" class="selectPerson"></select>
-                <button type="submit">Enregistrer</button>
-                <button type="cancel" onclick="$('#referentEditor').hide(); $('#editReferent').show();">Annuler</button>
-            </form>
-
-            <script>
-                var formatRepo = function (repo) {
-                    if (repo.loading) return repo.text;
-
-                    var markup = '<div class="clearfix">';
-                    markup += repo.label || repo.text;
-                    markup += '</div>';
-
-                    return markup;
-                };
-
-                var formatRepoSelection = function (repo) {
-                    return repo.label || repo.text;
-                };
-
-                require(['jquery', 'select2'], function($, select2){
-                    $(".selectPerson").select2({
-                            placeholder: 'Rechercher une personne...',
-                            width: '100%',
-                            allowClear: true,
-                            ajax: {
-                                url: '<?= $this->url('person/search') ?>',
-                                dataType: 'json',
-                                delay: 250,
-                                data: function (params) {
-                                    return {
-                                        q: params.term, // search term
-                                        page: params.page
-                                    };
-                                },
-                                processResults: function (data, page) {
-                                    return {results: data.datas};
-                                },
-                                cache: true
-                            },
-                            escapeMarkup: function (markup) {
-                                return markup;
-                            },
-                            minimumInputLength: 3,
-                            id: function (dt) {
-                                return dt.uid;
-                            },
-                            templateResult: formatRepo, // omitted for brevity, see the source of this page
-                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
-                        }
-                    );
-                })
-            </script>
 
 
-            <h3>N-1</h3>
-            <?php if( $subordinates ): ?>
-                <?php foreach ($subordinates as $subordinate) :?>
-                    <article class="card card-xs">
-                        <i class="icon-user"></i>
-                        <a href="<?= $this->url('person/show', ['id' => $subordinate->getPerson()->getId() ]); ?>"><?= $subordinate->getPerson() ?></a>
-                        <form action="" method="post" class="form-inline">
-                            <input type="hidden" name="action" value="removereferent" />
-                            <input type="hidden" name="referent_id" value="<?= $subordinate->getId() ?>" />
+        <div class="cols two">
+            <section class="col">
+                <h2>
+                    <span><i class="icon-help-circled"></i> Informations générales</span>
+                </h2>
+                <div class="cols">
+                    <div class="col col-1">
+                        <img src="//www.gravatar.com/avatar/<?= md5($entity->getEmail()) ?>?s=250"
+                             style="border-radius: 20px; width: 100%"
+                             alt="" />
+                    </div>
+                    <div class="col col-2">
+                        <div class="data-list">
+                            <div class="data-row">
+                                <div class="data-label">Nom affiché</div>
+                                <div class="data-value"><?= $entity->getDisplayName() ?></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Prénom</div>
+                                <div class="data-value"><?= $entity->getFirstname() ?></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Nom</div>
+                                <div class="data-value"><?= $entity->getLastname() ?></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Courriel</div>
+                                <div class="data-value"><i class="icon-mail"></i><?= $entity->getEmail() ?></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Téléphone</div>
+                                <div class="data-value"><i class="icon-phone-outline"></i><?= $entity->getPhone() ?></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">LDAP (Localisation)</div>
+                                <div class="data-value"><?= $entity->getLdapSiteLocation() ?></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">LDAP (Affectation)</div>
+                                <div class="data-value"><?= $entity->getLdapAffectation() ?></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">LDAP (Statut)</div>
+                                <div class="data-value"><?= $entity->getLdapStatus() ?></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Projets</div>
+                                <div class="data-value"><i class="icon-cubes"></i>
+                                    Impliqué dans <a href="#projects"><?= count($projects) ?> projet(s)</a>
+                                </div>
+                            </div>
+                            <?php if( $this->grant(\Oscar\Provider\Privileges::PERSON_VIEW_TIMESHEET) ): ?>
+                                <div class="data-row">
+                                    <div class="data-label">Feuille de temps</div>
+                                    <div class="data-value">
+                                        <?php if( count($entity->getWorkPackages()) ): ?>
+                                            <a href="<?= $this->url('timesheet/excel') ?>?personid=<?= $entity->getId() ?>" >
+                                                <i class="icon-calendar"></i>
+                                                Voir les feuilles de temps
+                                            </a>
+                                        <?php else: ?>
+                                            Cette personne n'a pas été identifiée comme déclarant sur un lot de travail
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <nav class="admin-bar text-center">
+                    <div class="btn-group">
+                        <a class="btn btn-default btn-xs" href="<?= $this->url('person/edit', ['id'=>$entity->getId()]) ?>">
+                            <i class="icon-pencil"></i>
+                            Éditer les informations
+                        </a>
+                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
+                            <a class="btn btn-default btn-xs" href="<?= $this->url('person/notification', ['id'=>$entity->getId()]) ?>">
+                                <i class="icon-bell"></i>
+                                Voir les notifications
+                            </a>
+                        <?php endif; ?>
 
-                            <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
+
+                    </div>
+                </nav>
+            </section>
+
+            <section class="col">
+                <h2><i class="icon-sitemap"></i> Hiérarchie</h2>
+                <p>Les informations hiérarchiques sont utilisées par Oscar pour déterminer les personnes en charge lors de la procédure de <strong>validation des feuilles de temps</strong>.</p>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="icon-group"></i>Est validé par (N+1)</h4>
+                        <?php if( count($referents) ): ?>
+                            <?php foreach ($referents as $referent): ?>
+                                <article class="card card-xs">
+                                    <i class="icon-user"></i>
+                                    <a href="<?= $this->url('person/show', ['id' => $referent->getReferent()->getId() ]); ?>"><?= $referent->getReferent() ?></a>
+                                    <form action="" method="post" class="form-inline">
+                                        <input type="hidden" name="action" value="removereferent" />
+                                        <input type="hidden" name="referent_id" value="<?= $referent->getId() ?>" />
+                                        <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
+                                    </form>
+                                </article>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php if(count($entity->getWorkPackages())): ?>
+                                <p class="alert alert-danger">
+                                    <i class="icon-attention"></i> <strong><?= $entity ?></strong> a été identifié comme déclarant, mais personne n'a été identifié pour assurer la validation administrative.
+                                </p>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                        <button id="editReferent" onclick="$('#referentEditor').show(); $('#editReferent').hide();">
+                            <i class="icon-pencil"></i> Ajouter un référent</button>
+
+                        <form id="referentEditor" action="" method="POST" style="display: none">
+                            Selectionner un référent :
+                            <input type="hidden" value="<?= $entity->getId() ?>" name="person_id">
+                            <input type="hidden" value="referent" name="action">
+                            <select name="referent_id" class="selectPerson"></select>
+                            <button type="submit">Enregistrer</button>
+                            <button type="button" onclick="$('#referentEditor').hide(); $('#editReferent').show();">Annuler</button>
                         </form>
-                    </article>
-                <?php endforeach; ?>
-            <?php endif; ?>
 
-            <h2><i class="icon-building-filled"></i>Structure</h2>
-            <section id="structures">
+                        <script>
+                            var formatRepo = function (repo) {
+                                if (repo.loading) return repo.text;
+
+                                var markup = '<div class="clearfix">';
+                                markup += repo.label || repo.text;
+                                markup += '</div>';
+
+                                return markup;
+                            };
+
+                            var formatRepoSelection = function (repo) {
+                                return repo.label || repo.text;
+                            };
+
+                            require(['jquery', 'select2'], function($, select2){
+                                $(".selectPerson").select2({
+                                        placeholder: 'Rechercher une personne...',
+                                        width: '100%',
+                                        allowClear: true,
+                                        ajax: {
+                                            url: '<?= $this->url('person/search') ?>',
+                                            dataType: 'json',
+                                            delay: 250,
+                                            data: function (params) {
+                                                return {
+                                                    q: params.term, // search term
+                                                    page: params.page
+                                                };
+                                            },
+                                            processResults: function (data, page) {
+                                                return {results: data.datas};
+                                            },
+                                            cache: true
+                                        },
+                                        escapeMarkup: function (markup) {
+                                            return markup;
+                                        },
+                                        minimumInputLength: 3,
+                                        id: function (dt) {
+                                            return dt.uid;
+                                        },
+                                        templateResult: formatRepo, // omitted for brevity, see the source of this page
+                                        templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                                    }
+                                );
+                            })
+                        </script>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="icon-group"></i>Valide les déclarations pour (N-1)</h4>
+                        <?php if( $subordinates ): ?>
+                            <?php foreach ($subordinates as $subordinate) :?>
+                                <article class="card card-xs">
+                                    <i class="icon-user"></i>
+                                    <a href="<?= $this->url('person/show', ['id' => $subordinate->getPerson()->getId() ]); ?>"><?= $subordinate->getPerson() ?></a>
+                                    <form action="" method="post" class="form-inline">
+                                        <input type="hidden" name="action" value="removereferent" />
+                                        <input type="hidden" name="referent_id" value="<?= $subordinate->getId() ?>" />
+                                        <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
+                                    </form>
+                                </article>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            Personne
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="cols two">
+
+            <section class="col">
+                <h2><i class="icon-building-filled"></i> Structures</h2>
                 <?php
                 /** @var \Oscar\Entity\OrganizationPerson $organizationPerson */
                 foreach( $entity->getOrganizations() as $organizationPerson ): ?>
-                    <article class="card xs">
+                    <article class="card">
                         <p class="text-highlight">
                             <strong><?= $organizationPerson->getRole() ? $organizationPerson->getRole() : '<em>impliqué</em>' ?></strong>
-                        dans
-                        <?= $this->link()->organization($organizationPerson->getOrganization()); ?>
+                            dans
+                            <?= $this->link()->organization($organizationPerson->getOrganization()); ?>
+                            <?php if( $organizationPerson->getRoleObj()->isPrincipal() ): ?>
+                                <br><small>Ce rôle accorde des droits à <strong><?= $entity ?></strong> sur <strong><?= $organizationPerson->getOrganization() ?></strong></small>
+                            <?php endif; ?>
                         </p>
                     </article>
                 <?php endforeach; ?>
             </section>
-        </div>
-        <div class="col-xs-9">
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
-            <h2><i class="icon-tag"></i> Informations administratives</h2>
-            <div class="card">
-                    <p class="text-highlight text-small">
-                        Dernière mise à jour :
-                        <?php if($entity->getDateSyncLdap()): ?>
-                            <strong class="text-success">
-                                <i class="icon-ok-circled"></i>
-                                <?= $this->moment($entity->getDateSyncLdap()) ?>
-                                <span class="text-light">(<?= $this->moment($entity->getDateSyncLdap())->since() ?>)</span>
-                            </strong>
-                        <?php else: ?>
-                            <i class="icon-cancel-circled-outline"></i>
-                            <em>Jamais</em>
-                        <?php endif; ?>
-                        <br/>
-                        Créé le <time><?= $this->moment($entity->getDateCreated())->full() ?></time>
-                    </p>
-                    <?php if($auth): ?>
-                        <div class="alert alert-info">
-                            <p><?= $entity ?> est actif sur Oscar (Dernière connexion <strong><?= $this->moment($auth->getDateLogin())->full() ?></strong>).</p>
-                        </div>
-                    <?php endif; ?>
-                    <style>th { text-align: right }</style>
-                    <table class="table table-bordered small">
-                        <tbody>
-                        <tr>
-                            <th>#ID</th>
-                            <td><?= $entity->getId() ?></td>
-                        </tr>
-                        <tr>
-                            <th>displayname</th>
-                            <td><?= $entity->getDisplayName() ?></td>
-                        </tr>
-                        <tr>
-                            <th>Prénom</th>
-                            <td><?= $entity->getFirstName() ?></td>
-                        </tr>
-                        <tr>
-                            <th>Nom</th>
-                            <td><?= $entity->getLastname() ?></td>
-                        </tr>
-                        <tr>
-                            <th>email</th>
-                            <td><?= $entity->getEmail() ?></td>
-                        </tr>
-                        <tr>
-                            <th>Groupes (LDAP)</th>
-                            <td>
 
-                                <?php if( $entity->getLdapMemberOf() ): ?>
-                                <ul style="list-style: none">
-                                <?php foreach( $entity->getLdapMemberOf() as $memberOf ): ?>
-                                    <?php if( array_key_exists($memberOf, $ldapRoles) ):?>
-                                    <li>
-                                        <i class="icon-group"></i><code><?= $memberOf ?></code>
-                                        <span class="cartouche <?= $ldapRoles[$memberOf]['principal'] ? 'primary' : '' ?>"><?= $ldapRoles[$memberOf]['roleId'] ?></span>
-                                    </li>
-                                    <?php else: ?>
-                                    <li style="opacity: .5"><i class="icon-group"></i><code><?= $memberOf ?></code></li>
-                                    <?php endif; ?>
+            <section class="col">
+                <h2><i class="icon-cog"></i> Donnèes techniques</h2>
+                <p class="text-highlight text-small">
+                    Dernière mise à jour :
+                    <?php if($entity->getDateSyncLdap()): ?>
+                        <strong class="text-success">
+                            <i class="icon-ok-circled"></i>
+                            <?= $this->moment($entity->getDateSyncLdap()) ?>
+                            <span class="text-light">(<?= $this->moment($entity->getDateSyncLdap())->since() ?>)</span>
+                        </strong>
+                    <?php else: ?>
+                        <i class="icon-cancel-circled-outline"></i>
+                        <em>Jamais</em>
+                    <?php endif; ?>
+                    <br/>
+                    Créé le <time><?= $this->moment($entity->getDateCreated())->full() ?></time>
+                </p>
+                <?php if($auth): ?>
+                    <div class="alert alert-info">
+                        <p><?= $entity ?> est actif sur Oscar (Dernière connexion <strong><?= $this->moment($auth->getDateLogin())->full() ?></strong>).</p>
+                    </div>
+                <?php endif; ?>
+                <div class="data-list card">
+                    <div class="data-row">
+                        <div class="data-label">#ID (Oscar)</div>
+                        <div class="data-value"><?= $entity->getId() ?></div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">LDAP > Identifiant</div>
+                        <div class="data-value"><?= $entity->getLadapLogin() ?></div>
+                    </div>
+
+                    <div class="data-row">
+                        <div class="data-label">Authentification</div>
+                        <div class="data-value"><?= $entity->getLadapLogin() ?></div>
+                    </div>
+
+                    <div class="data-row">
+                        <div class="data-label">LDAP > Activité</div>
+                        <div class="data-value"><?= $entity->getLdapDisabled() ? "Inactif" : "Actif" ?></div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">LDAP > Fin</div>
+                        <div class="data-value"><?= $entity->getLdapFinInscription() ?></div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Droits spécifiques</div>
+                        <div class="data-value">
+                            <?php if( $authentification == null ): ?>
+                            <em>Pas d'authentification</em>
+                            <?php elseif ($authentification->getRoles() ): ?>
+                                <?php foreach( $authentification->getRoles() as $role) : ?>
+                                    <span class="cartouche <?= $role->isPrincipal() ? 'primary' : '' ?>"><?= $role ?></span>
                                 <?php endforeach; ?>
-                                </ul>
-                                <?php else: ?>
-                                <div class="alert alert-info">
-                                    Aucun groupe LDAP
-                                </div>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Statut</th>
-                            <td><?= $entity->getLdapStatus() ?></td>
-                        </tr>
-                        <?php /*
-                         <tr>
-                            <th>INM</th>
-                            <td><?= $entity->getHarpegeINM() ?></td>
-                        </tr>  */ ?>
-                        <tr>
-                            <th>LDAP (identifiant)</th>
-                            <td><?= $entity->getLadapLogin() ?></td>
-                        </tr>
-                        <tr>
-                            <th>Localisation (LDAP)</th>
-                            <td><?= $entity->getLdapSiteLocation() ?></td>
-                        </tr>
-                        <tr>
-                            <th>Affectation (LDAP)</th>
-                            <td><?= $entity->getLdapAffectation() ?></td>
-                        </tr>
-                        <tr>
-                            <th>ldapDisabled</th>
-                            <td><?= $entity->getLdapDisabled() ?></td>
-                        </tr>
-                        <tr>
-                            <th>ldapDateFinInscription</th>
-                            <td><?= $entity->getLdapFinInscription() ?></td>
-                        </tr>
-                        <tr>
-                            <th>ladapLogin</th>
-                            <td><?= $entity->getLadapLogin() ?></td>
-                        </tr>
-                        <tr>
-                            <th>phone</th>
-                            <td><?= $entity->getPhone() ?></td>
-                        </tr>
-                        <tr>
-                            <th>Connecteur(s)</th>
-                            <td>
-                                <ul>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+
+
+                    <div class="data-row">
+                        <div class="data-label">Connecteur(s)</div>
+                        <div class="data-value"><ul>
                                 <?php foreach( $connectors as $connector ): ?>
                                     <li>
                                         <?= $connector ?> :
@@ -277,90 +313,78 @@
                                         <?php endif; ?>
                                     </li>
                                 <?php endforeach; ?>
-                                </ul>
-                            </td>
-                        </tr>
+                            </ul></div>
+                    </div>
 
-                        </tbody>
-                    </table>
-                    <nav class="admin-bar text-center">
-                        <div class="btn-group">
-                            <a class="btn btn-default btn-xs" href="<?= $this->url('person/edit', ['id'=>$entity->getId()]) ?>">
-                                <i class="icon-pencil"></i>
-                                Éditer les informations
-                            </a>
-                            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
-                            <a class="btn btn-default btn-xs" href="<?= $this->url('person/notification', ['id'=>$entity->getId()]) ?>">
-                                <i class="icon-bell"></i>
-                                Voir les notifications
-                            </a>
+                    <div class="data-row">
+                        <div class="data-label">Groupes LDAP</div>
+                        <div class="data-value">
+                            <?php if( $entity->getLdapMemberOf() ): ?>
+                                <nav class="options-menu right">
+                                    <a href="#" onclick="$('.ldap-groups').toggleClass('show-off')">
+                                        <i class="icon-eye"></i> Groupes sans effets</a>
+                                </nav>
+                                <ul class="ldap-groups">
+                                    <?php foreach( $entity->getLdapMemberOf() as $memberOf ): ?>
+                                        <?php if( array_key_exists($memberOf, $ldapRoles) ):?>
+                                            <li>
+                                                <i class="icon-group"></i><code><?= $memberOf ?></code>
+                                                <span class="cartouche <?= $ldapRoles[$memberOf]['principal'] ? 'primary' : '' ?>"><?= $ldapRoles[$memberOf]['roleId'] ?></span>
+                                            </li>
+                                        <?php else: ?>
+                                            <li class="no-role"><i class="icon-group"></i><code><?= $memberOf ?></code></li>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php else: ?>
+                                <div class="alert alert-info">
+                                    Aucun groupe LDAP
+                                </div>
                             <?php endif; ?>
                         </div>
-                    </nav>
-                    <hr>
+                    </div>
 
-
-            </div>
-            <?php endif; ?>
-            <section id="projects">
-                <h2><i class="icon-cubes"></i> Projets</h2>
-                <?php foreach( $projects as $project ): ?>
-                    <?= $this->partial('/oscar/project/project-item-openable.phtml', ['project'    => $project]); ?>
-                <?php endforeach; ?>
-                <?= $this->pager($projects, preg_replace("/\\??&page=[0-9]*/", '', $_SERVER['REQUEST_URI']) . '?&page=%s') ?>
+                </div>
             </section>
+        </div>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_EDITION) ): ?>
-            <section>
-                <h2><i class="icon-lock-1"></i> Authentification</h2>
-                <?php if( !$entity->getLadapLogin() ): ?>
-                    <p class="alert alert-warning">Cette personne ne peut pas accéder à Oscar.</p>
-                <?php elseif ( $authentification ): ?>
-                    <p class="alert alert-info">
-                        Dernière connection <?= $this->moment($authentification->getDateLogin())->full() ?>
-                    </p>
-                    <?php if( $authentification->getRoles() ): ?>
-                        <p>Cette personne dispose de droit applicatif spécifique :
-                    <?php foreach( $authentification->getRoles() as $role) : ?>
-                        <span class="cartouche <?= $role->isPrincipal() ? 'primary' : '' ?>"><?= $role ?></span>
-                    <?php endforeach; ?>
-                        </p>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <p class="alert alert-info">Cette personne n'a pas d'authentification active</p>
-                <?php endif; ?>
-            </section>
-            <?php endif; ?>
+        <section id="projects">
+            <h2><i class="icon-cubes"></i> Projets</h2>
+            <?php foreach( $projects as $project ): ?>
+                <?= $this->partial('/oscar/project/project-item-openable.phtml', ['project'    => $project]); ?>
+            <?php endforeach; ?>
+            <?= $this->pager($projects, preg_replace("/\\??&page=[0-9]*/", '', $_SERVER['REQUEST_URI']) . '?&page=%s') ?>
+        </section>
+
 
             <?php if( count($activities) ): ?>
-            <section id="activites">
-                <h2>Activités de recherche (Sans projet)</h2>
-                <?php
-                $year = null;
-                $discipline = null;
-                foreach( $activities as $activity ):
-                    if( $activity->getProject() !== null ) continue;
-                    $activityYear = $activity->getDateCreated()->format('Y');
-                    if( $activityYear != $year ){
-                        echo "<div class='list-separator'><h3 class='list-separator-label'>$activityYear</h3></div>";
-                        $year = $activityYear;
-                    }
-                    ?>
-                    <?= $this->partial('/oscar/project-grant/item-list.phtml', [
-                    'activity'    => $activity,
-                ]); ?>
-                <?php endforeach; ?>
-            </section>
+                <section id="activites" class="card">
+                    <h2>Activités de recherche (Sans projet)</h2>
+                    <?php
+                    $year = null;
+                    $discipline = null;
+                    foreach( $activities as $activity ):
+                        if( $activity->getProject() !== null ) continue;
+                        $activityYear = $activity->getDateCreated()->format('Y');
+                        if( $activityYear != $year ){
+                            echo "<div class='list-separator'><h3 class='list-separator-label'>$activityYear</h3></div>";
+                            $year = $activityYear;
+                        }
+                        ?>
+                        <?= $this->partial('/oscar/project-grant/item-list.phtml', [
+                        'activity'    => $activity,
+                    ]); ?>
+                    <?php endforeach; ?>
+                </section>
             <?php endif; ?>
 
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_EDITION)): ?>
-                <section>
+                <section class="card">
                     <h2>Activités récentes</h2>
                     <?= $this->partial('oscar/activity-log/frag-list.phtml',
                         ['entities' => $traces]) ?>
                 </section>
             <?php endif; ?>
-
         </div>
     </div>
 </section>
