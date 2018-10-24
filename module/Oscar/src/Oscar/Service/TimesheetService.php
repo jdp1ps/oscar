@@ -1706,6 +1706,49 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $output;
     }
 
+
+    private $_cacheValidationsPeriodPerson = [];
+
+
+    /**
+     * Retourne l'état général de la période pour la personne.
+     *
+     * @param Person $person
+     * @param $periodKey
+     * @return mixed
+     * @throws OscarException
+     */
+    public function getValidationStatePersonPeriod(Person $person, $periodKey){
+        $periodData = DateTimeUtils::extractPeriodDatasFromString($periodKey);
+        $year = $periodData['year'];
+        $month = $periodData['month'];
+        $key = sprintf('person_%s-period_%s-%s', $person->getId(), $year, $month);
+
+        if( !array_key_exists($key, $this->_cacheValidationsPeriodPerson) ){
+            $validations = $this->getValidationPeriods($year, $month, $person);
+
+            $states = ["unsend", ValidationPeriod::STATUS_VALID, ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2, ValidationPeriod::STATUS_STEP3, ValidationPeriod::STATUS_CONFLICT];
+            $globalState = 0;
+
+            $datas = [
+                'state' => "",
+                'validations' => []
+            ];
+
+            /** @var ValidationPeriod $vp */
+            foreach ($validations as $vp) {
+                $datas['validations'][] = (string)$vp;
+                $globalState = max($globalState, array_search($vp->getStatus(), $states));
+            }
+
+            $datas['state'] = $states[$globalState];
+
+            $this->_cacheValidationsPeriodPerson[$key] = $datas;
+        }
+        return $this->_cacheValidationsPeriodPerson[$key];
+
+    }
+
     /**
      * Retourne les créneaux de la personne regroupès par activité
      * @param Person $person
@@ -1732,37 +1775,44 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $activityId = $timesheet->getActivity()->getId();
             $period = $timesheet->getDateFrom()->format('Y-m');
+            $periodKey = $timesheet->getDateFrom()->format('Y-n');
 
             if ($periodFilter !== null && $periodFilter != $period)
                 continue;
 
+            $validationState = $this->getValidationStatePersonPeriod($person, $periodKey);
+
             if (!array_key_exists($activityId, $datas)) {
+
                 $datas[$activityId] = [
-                    'activityObj' => $timesheet->getActivity(),
+                    'activityObj' => (string)$timesheet->getActivity(),
                     'activity' => (string)$timesheet->getActivity(),
                     'project' => (string)$timesheet->getActivity()->getProject(),
-                    'activity_id' => $timesheet->getActivity()->getId()
+                    'activity_id' => $timesheet->getActivity()->getId(),
                 ];
             }
 
             if (!array_key_exists($period, $datas[$activityId])) {
+
+
+
                 $datas[$activityId][$period] = [
-                    'unvalidate' => false,
+                    'toto' => 'tata',
+                    'unvalidate' => $validationState['state'],
                     'total' => 0.0,
                 ];
                 /** @var WorkPackage $wp */
                 foreach ($timesheet->getActivity()->getWorkPackages() as $wp) {
                     if (!array_key_exists($wp->getCode(), $datas[$activityId]['timesheets'][$period]))
                         $datas[$activityId]['timesheets'][$period][$wp->getCode()] = [
-                            'total' => 0.0
+                            'total' => 0.0,
+                            'unvalidate' => $validationState['state'],
                         ];
                 }
             }
             $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()]['total'] += $timesheet->getDuration();
             $datas[$activityId]['timesheets'][$period]['total'] += $timesheet->getDuration();
-            if ($timesheet->getStatus() != TimeSheet::STATUS_ACTIVE) {
-                $datas[$activityId]['timesheets'][$period]['unvalidate'] = true;
-            }
+
 
             $day = (string)$timesheet->getDateFrom()->format('j');
             if (!array_key_exists($day, $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()])) {
@@ -1773,6 +1823,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $datas[$activityId]['timesheets'][$period][$timesheet->getWorkpackage()->getCode()][$day] += $timesheet->getDuration();
 
         }
+
         return $datas;
     }
 

@@ -119,18 +119,26 @@ function displayTotaux( $array, $label ){
                         <?php endforeach; ?>
                         <td class="text-right"><strong><?= number_format($totaux['total'],2) ?></strong></td>
                         <td class="text-right">
+                            <?php
 
-                            <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
-                               class="link">
-                                <i class="icon-download-outline"></i>
-                                Télécharger la feuille de temps (Excel)
-                            </a>
+                            switch ($activityDatas[$period]['unvalidate']){
+                                case 'unsend' : echo "Pas encore envoyé"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_STEP1 : echo "Validation projet en cours"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_STEP2 : echo "Validation scientifique en cours"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_STEP3 : echo "Validation administrative en cours"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_CONFLICT : echo "Conflit en cours de résolution par le déclarant"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_VALID :
+                                    ?>
+                                    <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
+                                       class="link">
+                                        <i class="icon-download-outline"></i>
+                                        Télécharger la feuille de temps (Excel)
+                                    </a>
+                                    <?php break;
+                                default : echo "État inconnu"; break;
+                            }
+                            ?>
 
-                            <?php if( $totaux['unvalidate'] == true ): ?>
-                            <small class="helper danger">
-                                <i class="icon-warning-empty"></i>
-                                Certains créneaux n'ont pas été validés</small>
-                            <?php endif; ?>
                         </td>
                     </tr>
 

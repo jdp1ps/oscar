@@ -1346,6 +1346,9 @@
                         if (daySelected) {
                             this.selectedDay = this.ts.days[daySelected];
                         }
+                        this.selectedWP = null;
+                        this.selectionWP = null;
+                        this.fillSelectedWP = null;
                     },
                     ko => {
                         this.error = AjaxResolve.resolve('Impossible de charger cette période', ko);
