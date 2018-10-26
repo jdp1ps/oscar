@@ -7,6 +7,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
+use Oscar\Entity\Referent;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\TimesheetRepository;
 use Oscar\Entity\ValidationPeriod;
@@ -1747,6 +1748,30 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
         return $this->_cacheValidationsPeriodPerson[$key];
 
+    }
+
+    public function getValidationHorsLotByReferent( Person $referent ){
+
+        $validations = [];
+
+        if( $referent ){
+
+            $subordinates = $this->getServiceLocator()->get('PersonService')->getSubordinates($referent);
+
+
+
+            if( count($subordinates) )
+                $validations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
+                    ->where('vp.declarer IN(:persons)')
+                    ->setParameter('persons', $subordinates)
+                    ->getQuery()
+                    ->getResult();
+        }
+
+
+
+
+        return $validations;
     }
 
     /**

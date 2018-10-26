@@ -84,6 +84,9 @@ class PublicController extends AbstractOscarController
         $declarationsHoursOverwriteByAuth = $this->getConfiguration('oscar.declarationsHoursOverwriteByAuth');
 
         return [
+            'subordinates' => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
+            'managers' => $this->getPersonService()->getManagers( $this->getCurrentPerson()),
+            'subordonates' => $this->getPersonService()->getSubordinates( $this->getCurrentPerson()),
             'declarationsConfiguration' => $timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
             'person' => $this->getCurrentPerson(),
             'declarationsHours' => $declarationsHours,
@@ -125,6 +128,11 @@ class PublicController extends AbstractOscarController
         $periodsRejected = [];
         $periodHorsLotsUnvalid = [];
 
+        $validationsHorsLot = [];
+        if( $this->getCurrentPerson() ) {
+            $validationsHorsLot = $timeSheetService->getValidationHorsLotByReferent($this->getCurrentPerson(), true);
+        }
+
 
         $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
 
@@ -157,6 +165,7 @@ class PublicController extends AbstractOscarController
             $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
         }
         return [
+            'validationsHorsLot' => $validationsHorsLot,
             'activitiesValidation' => $activitiesValidation,
             'periodsRejected' => $periodsRejected,
             'user' => $person

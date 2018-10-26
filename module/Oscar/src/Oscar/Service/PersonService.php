@@ -46,6 +46,26 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $this->getEntityManager()->getRepository(Person::class);
     }
 
+    public function getManagers( $person ){
+        if( !$person ) return [];
+
+        $qb = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+            ->innerJoin(Referent::class, 'r', 'WITH', 'r.referent = p')
+            ->where('r.person = :person');
+
+        return $qb->setParameter('person', $person)->getQuery()->getResult();
+    }
+
+    public function getSubordinates( $person ){
+        if( !$person ) return [];
+
+        $qb = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+            ->innerJoin(Referent::class, 'r', 'WITH', 'r.person = p')
+            ->where('r.referent = :person');
+
+        return $qb->setParameter('person', $person)->getQuery()->getResult();
+    }
+
     public function addReferent( $referent_id, $person_id ){
         $referent = $this->getPerson($referent_id);
         $person = $this->getPerson($person_id);

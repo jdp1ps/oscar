@@ -454,7 +454,10 @@ class TimesheetController extends AbstractOscarController
     public function validationHWPPersonAction(){
 
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
+        //$this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
+
+
+
         $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
         if( !$person ){
             return $this->getResponseBadRequest("Personne introuvable");
