@@ -3,11 +3,11 @@
     <?php if( $organizationsPerimeter ): ?>
     <h1>
         <i class="icon-cube"></i>
-        Activités de recherche dans vos structures :
+        <?= $this->translate("Activités de recherche dans vos structures") ?> :
     </h1>
 
     <?php else: ?>
-    <h1><i class="icon-cube"></i>Activités de recherche <?= ($projectview ? ' (Projets)' : '') ?></h1>
+    <h1><i class="icon-cube"></i><?= $this->translate("Activités de recherche") ?> <?= ($projectview ? ' (Projets)' : '') ?></h1>
     <?php endif; ?>
     <style>
         .criteria {
@@ -196,11 +196,6 @@
                 <?php endforeach; ?>
             </select>
             <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
-            <!--
-            <strong>Annnée</strong>
-            <small>Optionnel</small>
-            <input type="text" value="{{val2}}"class=" changer val2">
-            -->
             <nav>
                 <a href="#" class="delete">
                     <i class="icon-cancel-outline"></i>

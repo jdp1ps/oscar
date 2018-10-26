@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ZendSkeletonApplication\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-26 10:43+0200\n"
-"PO-Revision-Date: 2018-10-26 10:43+0200\n"
+"POT-Creation-Date: 2018-10-26 16:15+0200\n"
+"PO-Revision-Date: 2018-10-26 16:15+0200\n"
 "Last-Translator: Evan Coury <me@evancoury.com>\n"
 "Language-Team: ZF Contibutors <zf-devteam@zend.com>\n"
 "Language: fr_FR\n"
@@ -40,178 +40,254 @@ msgstr ""
 msgid "Données sauvegardées."
 msgstr ""
 
+#: ../src/Oscar/Form/ProjectGrantForm.php:42
+msgid "Intitulé de l'activité"
+msgstr "Intitulé de l'accord"
+
+#: ../src/Oscar/Form/ProjectGrantForm.php:56
+msgid "Description"
+msgstr "Description"
+
+#: ../src/Oscar/Form/ProjectGrantForm.php:73
+msgid "Discipline(s)"
+msgstr ""
+
+#: ../src/Oscar/Form/ProjectGrantForm.php:100
+msgid "Incidence financière"
+msgstr ""
+
+#: ../src/Oscar/Form/ProjectGrantForm.php:113
+msgid "Type d'activité"
+msgstr "Type d'accord"
+
+#: ../src/Oscar/Form/ProjectGrantForm.php:126
+msgid "Devise"
+msgstr ""
+
 #: ../src/Oscar/Service/PersonService.php:666
 #, php-format
 msgid "Impossible de synchroniser les informations pour '%s'"
 msgstr ""
 
-#: ../view/layout/layout.phtml:110
+#: ../view/layout/layout.phtml:100
 msgid "Accueil"
 msgstr "Accueil"
 
-#: ../view/layout/layout.phtml:114
+#: ../view/layout/layout.phtml:104
 msgid "Mes projets"
 msgstr ""
 
-#: ../view/layout/layout.phtml:116
+#: ../view/layout/layout.phtml:106
 msgid "Mes structures"
 msgstr ""
 
-#: ../view/layout/layout.phtml:119
+#: ../view/layout/layout.phtml:109
 msgid "Documents pratiques"
 msgstr ""
 
-#: ../view/layout/layout.phtml:152
+#: ../view/layout/layout.phtml:142
+#: ../view/partials/menu-project-activity.phtml:47
 msgid "Prochains versements"
 msgstr ""
 
-#: ../view/layout/layout.phtml:153
+#: ../view/layout/layout.phtml:143
+#: ../view/partials/menu-project-activity.phtml:48
 msgid "Versements en retard"
 msgstr ""
 
-#: ../view/layout/layout.phtml:154
+#: ../view/layout/layout.phtml:144
+#: ../view/partials/menu-project-activity.phtml:49
 msgid "Écarts de paiement"
 msgstr ""
 
-#: ../view/layout/layout.phtml:155
+#: ../view/layout/layout.phtml:145
+#: ../view/partials/menu-project-activity.phtml:50
 msgid "Tous les versements"
 msgstr ""
 
-#: ../view/layout/layout.phtml:164
+#: ../view/layout/layout.phtml:154
+#: ../view/partials/menu-project-activity.phtml:55
 msgid "Tous les jalons"
 msgstr ""
 
-#: ../view/layout/layout.phtml:165 ../view/layout/layout.phtml:184
+#: ../view/layout/layout.phtml:155 ../view/layout/layout.phtml:174
 msgid "Gérer les types de jalon"
 msgstr ""
 
-#: ../view/layout/layout.phtml:172
+#: ../view/layout/layout.phtml:162
+#: ../view/partials/menu-project-activity.phtml:18
+#: ../view/partials/menu-project-activity.phtml:31
 msgid "Activités"
 msgstr "Accords"
 
-#: ../view/layout/layout.phtml:174
+#: ../view/layout/layout.phtml:164
+#: ../view/partials/menu-project-activity.phtml:32
 msgid "Liste des activités"
 msgstr "Liste des accords"
 
-#: ../view/layout/layout.phtml:175
+#: ../view/layout/layout.phtml:165
+#: ../view/partials/menu-project-activity.phtml:39
 msgid "Nouvelle activité"
 msgstr "Nouvel accord"
 
-#: ../view/layout/layout.phtml:176
+#: ../view/layout/layout.phtml:166
 msgid "Bientôt terminées"
 msgstr ""
 
-#: ../view/layout/layout.phtml:177
+#: ../view/layout/layout.phtml:167
+#: ../view/partials/menu-project-activity.phtml:42
 msgid "Débutant prochainement"
 msgstr ""
 
-#: ../view/layout/layout.phtml:178
+#: ../view/layout/layout.phtml:168
 msgid "Liste des documents téléversés"
 msgstr ""
 
-#: ../view/layout/layout.phtml:180
+#: ../view/layout/layout.phtml:170
 msgid "Gérer les types d'activité"
 msgstr "Gérer les types d'accord"
 
-#: ../view/layout/layout.phtml:192
+#: ../view/layout/layout.phtml:182
+#: ../view/partials/menu-project-activity.phtml:23
 msgid "Projets"
 msgstr ""
 
-#: ../view/layout/layout.phtml:194
+#: ../view/layout/layout.phtml:184
+#: ../view/partials/menu-project-activity.phtml:24
 msgid "Liste des projets"
 msgstr ""
 
-#: ../view/layout/layout.phtml:196
+#: ../view/layout/layout.phtml:186
+#: ../view/partials/menu-project-activity.phtml:26
 msgid "Créer un projet"
 msgstr ""
 
-#: ../view/layout/layout.phtml:204
+#: ../view/layout/layout.phtml:194
 msgid "Organisations"
 msgstr ""
 
-#: ../view/layout/layout.phtml:206
+#: ../view/layout/layout.phtml:196
 msgid "Liste des organisations"
 msgstr ""
 
-#: ../view/layout/layout.phtml:208
+#: ../view/layout/layout.phtml:198
 msgid "Nouvelle organisation"
 msgstr ""
 
-#: ../view/layout/layout.phtml:209
+#: ../view/layout/layout.phtml:199
 msgid "Fusion d'organisations"
 msgstr ""
 
-#: ../view/layout/layout.phtml:210
+#: ../view/layout/layout.phtml:200
 msgid "Scission d'organisations"
 msgstr ""
 
-#: ../view/layout/layout.phtml:220
+#: ../view/layout/layout.phtml:210
 msgid "Liste des personnes"
 msgstr ""
 
-#: ../view/layout/layout.phtml:221
+#: ../view/layout/layout.phtml:211
 msgid "Liste des responsables"
 msgstr ""
 
-#: ../view/layout/layout.phtml:223
+#: ../view/layout/layout.phtml:213
 msgid "Ajouter une personne"
 msgstr ""
 
-#: ../view/layout/layout.phtml:226
-#, fuzzy
-#| msgid "Liste des activités"
+#: ../view/layout/layout.phtml:216
 msgid "Liste des déclarants"
-msgstr "Liste des accords"
+msgstr "Liste des déclarants"
 
-#: ../view/layout/layout.phtml:236
+#: ../view/layout/layout.phtml:226
 #: ../view/partials/menu-administration.phtml:48
 msgid "Activités sans projet"
 msgstr "Accords sans projet"
 
-#: ../view/layout/layout.phtml:237
-#, fuzzy
-#| msgid "Liste des activités"
+#: ../view/layout/layout.phtml:227
+#: ../view/partials/menu-administration.phtml:52
 msgid "Projets sans activité"
-msgstr "Liste des accords"
+msgstr "Projet vide"
 
-#: ../view/layout/layout.phtml:239
+#: ../view/layout/layout.phtml:229
 #: ../view/partials/menu-administration.phtml:60
 msgid "Synchronisation des donnèes"
 msgstr ""
 
-#: ../view/layout/layout.phtml:243
+#: ../view/layout/layout.phtml:233
 #: ../view/partials/menu-administration.phtml:64
 msgid "Mise à jour de l'index de recherche"
 msgstr ""
 
-#: ../view/layout/layout.phtml:247
-#, fuzzy
-#| msgid "Gérer les types d'activité"
+#: ../view/layout/layout.phtml:237
 msgid "Gérer les types d'organisation"
-msgstr "Gérer les types d'accord"
+msgstr "Gérer les types d'organisation"
+
+#: ../view/layout/layout.phtml:241
+#: ../view/partials/menu-administration.phtml:92
+msgid "Gérer les disciplines"
+msgstr "Gérer les types d'organisation"
 
 #: ../view/layout/layout.phtml:251
-#: ../view/partials/menu-administration.phtml:92
-#, fuzzy
-#| msgid "Gérer les types d'activité"
-msgid "Gérer les disciplines"
-msgstr "Gérer les types d'accord"
-
-#: ../view/layout/layout.phtml:261
 msgid "Gestion des droits"
 msgstr ""
 
-#: ../view/layout/layout.phtml:262
+#: ../view/layout/layout.phtml:252
 #: ../view/partials/menu-administration.phtml:70
 msgid "Authentifications actives"
 msgstr ""
 
-#: ../view/layout/layout.phtml:263
+#: ../view/layout/layout.phtml:253
 msgid "Affectation des structures"
 msgstr ""
 
-#: ../view/layout/layout.phtml:264
+#: ../view/layout/layout.phtml:254
 msgid "Gestion des types de documents"
+msgstr ""
+
+#: ../view/oscar/project-grant/advanced-search.phtml:6
+msgid "Activités de recherche dans vos structures"
+msgstr "Accords dans vos structures"
+
+#: ../view/oscar/project-grant/advanced-search.phtml:10
+#: ../view/oscar/project-grant/orphans.phtml:9
+msgid "Activités de recherche"
+msgstr "Accord"
+
+#: ../view/oscar/project-grant/form.phtml:21
+msgid "Nouvelle activité de recherche"
+msgstr "Nouvel accord"
+
+#: ../view/oscar/project-grant/form.phtml:25
+msgid "Informations"
+msgstr ""
+
+#: ../view/oscar/project-grant/form.phtml:30
+msgid "Données administratives"
+msgstr ""
+
+#: ../view/oscar/project-grant/form.phtml:55
+msgid "Informations financières"
+msgstr ""
+
+#: ../view/oscar/project-grant/form.phtml:110
+msgid "Numérotation"
+msgstr ""
+
+#: ../view/oscar/project-grant/form.phtml:126
+msgid "Enregistrer"
+msgstr ""
+
+#: ../view/oscar/project-grant/orphans.phtml:10
+msgid "sans projet"
+msgstr "sans projet"
+
+#: ../view/oscar/project-grant/orphans.phtml:17
+msgid "Actualiser"
+msgstr ""
+
+#: ../view/oscar/project-grant/orphans.phtml:23
+#, php-format
+msgid "%s résultats(s)"
 msgstr ""
 
 #: ../view/oscar/public/index.phtml:69
@@ -220,17 +296,11 @@ msgstr ""
 
 #: ../view/oscar/public/index.phtml:79
 msgid "Votre compte n'est associé à aucun projet/activité de recherche"
-msgstr ""
+msgstr "Votre compte n'est associé à aucun projet/accord"
 
 #: ../view/oscar/public/index.phtml:87
 msgid "Voir mes projets"
 msgstr ""
-
-#: ../view/partials/menu-administration.phtml:52
-#, fuzzy
-#| msgid "Liste des activités"
-msgid ">Projets sans activité<"
-msgstr "Liste des accords"
 
 #: ../view/partials/menu-administration.phtml:56
 msgid "Feuille de temps"
@@ -245,14 +315,10 @@ msgid "Privilèges et droits"
 msgstr ""
 
 #: ../view/partials/menu-administration.phtml:71
-#, fuzzy
-#| msgid "Gérer les types d'activité"
 msgid "Rôle des organisations"
-msgstr "Gérer les types d'accord"
+msgstr "Gérer les types d'organisation"
 
 #: ../view/partials/menu-administration.phtml:77
-#, fuzzy
-#| msgid "Gérer les types d'activité"
 msgid "Types d'activité"
 msgstr "Gérer les types d'accord"
 
@@ -265,10 +331,27 @@ msgid "Types de documents"
 msgstr ""
 
 #: ../view/partials/menu-administration.phtml:88
-#, fuzzy
-#| msgid "Gérer les types d'activité"
 msgid "Types d'organisation"
-msgstr "Gérer les types d'accord"
+msgstr "Types d'organisation"
+
+#: ../view/partials/menu-project-activity.phtml:35
+msgid "Documents téléversés"
+msgstr ""
+
+#: ../view/partials/menu-project-activity.phtml:41
+msgid "Bientôt terminés"
+msgstr ""
+
+#: ../view/partials/menu-project-activity.phtml:46
+msgid "Versements"
+msgstr ""
+
+#: ../view/partials/menu-project-activity.phtml:54
+msgid "Jalons"
+msgstr ""
+
+#~ msgid ">Projets sans activité<"
+#~ msgstr "Projet sans accord"
 
 #~ msgid "Skeleton Application"
 #~ msgstr "Skeleton Application"
@@ -356,9 +439,6 @@ msgstr "Gérer les types d'accord"
 
 #~ msgid "resolves to %s"
 #~ msgstr "résout en %s"
-
-#~ msgid "Exception"
-#~ msgstr "Exception"
 
 #~ msgid "Oscar"
 #~ msgstr "Oscar"

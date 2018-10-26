@@ -18,17 +18,16 @@
         <?php if( $activity->getId() ): ?>
             <strong><i class="icon-cube"></i> <?= $activity->getLabel() ?></strong> (Modification)
         <?php else: ?>
-        <strong><i class="icon-cube"></i> Nouvelle activité de recherche</strong>
+        <strong><i class="icon-cube"></i> <?= $this->translate("Nouvelle activité de recherche") ?></strong>
         <?php endif; ?>
-
     </h1>
     <div class="form">
-        <h3>Informations</h3>
+        <h3><?= $this->translate("Informations") ?></h3>
         <?= $this->form()->openTag($form->prepare()); ?>
         <?= $this->formControlGroup($form->get('label')); ?>
         <?= $this->formControlGroup($form->get('description')); ?>
 
-        <h3>Données administratives</h3>
+        <h3><?= $this->translate("Données administratives") ?></h3>
 
         <div class="row">
             <div class="col-md-3">
@@ -53,7 +52,7 @@
             </div>
         </div>
 
-        <h3>Informations financières</h3>
+        <h3><?= $this->translate("Informations financières") ?></h3>
         <div class="row">
                 <div class="col-md-4">
                     <?= $this->formControlGroup($form->get('financialImpact')); ?>
@@ -108,15 +107,9 @@
             </div>
         </div>
 
-        <h3>Numérotation</h3>
+        <h3><?= $this->translate("Numérotation") ?></h3>
         <div class="row">
-            <?php /*<div class="col-md-6">
-                <?php echo $this->formLabel($form->get('centaureNumConvention'));?>
-                <?php echo $this->formInput($form->get('centaureNumConvention'));?>
-                <?php echo $this->formElementErrors($form->get('centaureNumConvention')); ?>
-            </div> */ ?>
             <div class="col-md-12">
-                <h4>Autres Numérotations</h4>
                 <?php echo $this->keyvalue($form->get('numbers'));?>
                 <?php echo $this->formElementErrors($form->get('numbers')); ?>
             </div>
@@ -130,7 +123,7 @@
                     <i class="icon-angle-left"></i>
                     Retour
                 </a>
-                <button class="btn btn-primary" type="submit">Enregistrer</button>
+                <button class="btn btn-primary" type="submit"><?= $this->translate("Enregistrer") ?></button>
             </nav>
         </div>
         <datalist id="keyvalue_list">

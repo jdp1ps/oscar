@@ -49,7 +49,7 @@ if(
         <?php endif; ?>
 
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX) ):?>
-        <li><a href="<?= $this->url('project/empty') ?>"<?= $this->translate(">Projets sans activité<") ?>/a></li>
+        <li><a href="<?= $this->url('project/empty') ?>"><?= $this->translate("Projets sans activité") ?></a></li>
         <?php endif; ?>
 
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE) ):?>

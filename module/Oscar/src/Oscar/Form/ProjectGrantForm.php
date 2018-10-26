@@ -39,7 +39,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         ]);
 
         // LABEL
-        $label = "Intitulé de l'activité";
+        $label = _("Intitulé de l'activité");
         $this->add([
             'name'   => 'label',
             'options' => [
@@ -53,7 +53,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         ]);
 
         // DESCRIPTION
-        $label = "Description";
+        $label = _("Description");
         $this->add([
             'name'   => 'description',
             'options' => [
@@ -70,7 +70,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         $this->add([
             'name'   => 'disciplines',
             'options' => [
-                'label' => 'Discipline(s)',
+                'label' => _('Discipline(s)'),
                 'value_options' => $this->getServiceLocator()->get('ProjectGrantService')->getDisciplines()
             ],
             'attributes' => [
@@ -97,7 +97,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         $this->add([
             'name'   => 'financialImpact',
             'options' => [
-                'label' => 'Incidence financière',
+                'label' => _('Incidence financière'),
                 'value_options' => Activity::getFinancialImpactValues()
             ],
             'attributes' => [
@@ -110,7 +110,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         $this->add([
             'name'   => 'activityType',
             'options' => [
-                'label' => "Type d'activité",
+                'label' => _("Type d'activité"),
                 'value_options' => $this->getServiceLocator()->get('ActivityTypeService')->getActivityTypes(true)
             ],
             'attributes' => [
@@ -123,7 +123,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         $this->add([
             'name'   => 'currency',
             'options' => [
-                'label' => "Devise",
+                'label' => _("Devise"),
                 'value_options' => Util::collectionAsOptions($grantService->getCurrencies())
             ],
             'attributes' => [
