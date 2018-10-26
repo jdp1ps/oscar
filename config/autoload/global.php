@@ -12,6 +12,8 @@ return array(
         // Par défaut, pas de socket
         'socket' => false,
 
+        'theme' => 'oscar',
+
         // ./doc/connectors.md
         'connectors' => [
             'organization' => [],
