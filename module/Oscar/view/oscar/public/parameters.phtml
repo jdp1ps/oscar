@@ -88,6 +88,45 @@
 
                     <h3>
                         <i class="icon-building-filled"></i>
+                        Référents
+                    </h3>
+
+                    <section class="data-list">
+                        <small>Les <strong>déclarants</strong> sont les personnes pour lesquelles vous devrez valider les déclarations Hors-Projet.</small>
+                        <div class="data-row card">
+                            <div class="data-label" style="flex: 1; white-space: normal">
+                                <strong>Déclarant(s)</strong><br>
+                            </div>
+                            <div class="data-value"  style="flex: 4">
+                                <?php if( $subordinates ): ?>
+                                <?php foreach($subordinates as $person): ?>
+                                    <article>
+                                        <?= $person ?>
+                                    </article>
+                                <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <small>Les <strong>référents</strong> sont les personnes qui sont habilitées à valider vos déclaration Hors-Projet.</small>
+                        <div class="data-row card">
+                            <div class="data-label" style="flex: 1; white-space: normal">
+                                <strong>Référent(s)</strong><br>
+                            </div>
+                            <div class="data-value"  style="flex: 4">
+                                <?php if( $managers ): ?>
+                                    <?php foreach($managers as $person): ?>
+                                        <article>
+                                            <?= $person ?>
+                                        </article>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </section>
+
+                    <h3>
+                        <i class="icon-building-filled"></i>
                         Organisations
                     </h3>
 

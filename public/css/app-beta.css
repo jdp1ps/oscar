@@ -5377,8 +5377,16 @@ button.close {
   .options-menu.right > :first-child {
     margin-left: auto; }
 
-.cards {
-  display: flex; }
+.cols {
+  display: flex;
+  flex-wrap: wrap; }
+  .cols > .col {
+    flex: 1;
+    margin: .5%; }
+  .cols > .col-1 {
+    flex-grow: 1; }
+  .cols > .col-2 {
+    flex-grow: 2; }
 
 .data-list {
   color: #999; }
@@ -8471,29 +8479,3 @@ pre.alert-danger, pre.alert-info {
       background: #499D1F; }
   .wp-hours .duration {
     background: #AAA; }
-
-/*
-// ######################################################### ACTIVITY FICHE v2.0
-.activity {
-  header {
-    background: $brand-secondary1;
-    color: white;
-    h4 { margin-bottom:  0}
-    h2 {
-      margin-top: 0;
-      font-size: 3em;
-    }
-  }
-
-  .metas {
-    color: rgba(white, .75);
-    font-size: .8em;
-    font-weight: 100;
-    list-style: none;
-    line-height: 1.5em;
-    strong {
-      color: white;
-    }
-  }
-}
-*/

@@ -60,13 +60,13 @@
 
         <div class="col-md-9">
 
-            <h1 style="font-size: 8em">OSCAR</h1>
+            <h1 style="font-size: 8em"><?= $this->appInfos()->nom ?></h1>
 
             <p><?= $this->appInfos()->desc ?><p>
                 <?php if( !$this->hasRole('user') ): ?>
                     <a href="<?= $this->url('zfcuser/login') ?>" class="btn btn-success btn-large">
                         <i class="glyphicon glyphicon-user"></i>
-                        Se connecter
+                        <?= $this->translate('Se connecter') ?>
                     </a>
                 <?php else: ?>
 
@@ -76,7 +76,7 @@
                         <strong><?= $user->getDisplayname() ?></strong>,
                     <?php else: ?>
                     <div class="alert alert-warning">
-                        <p>Votre compte n'est associé à aucun projet/activité de recherche</p>
+                        <p><?= $this->translate('Votre compte n\'est associé à aucun projet/activité de recherche') ?></p>
                     </div>
                     <?php endif; ?>
 
@@ -84,7 +84,7 @@
 
                     <div class="row">
                         <div class="col-md-12">
-                            <a href="<?= $this->url('project/mine') ?>" class="btn btn-primary"><i class="icon-cubes"></i> Voir mes projets</a>
+                            <a href="<?= $this->url('project/mine') ?>" class="btn btn-primary"><i class="icon-cubes"></i> <?= $this->translate('Voir mes projets') ?></a>
 
                             <?php if( $this->grant()->isBoss() ): ?>
                                <a href="<?= $this->url('project/structure') ?>" class="btn btn-primary">
@@ -127,6 +127,7 @@
                                     <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
+
                             <?php if( count($activitiesValidation) ): ?>
                                 <h1>Validation en attente</h1>
                                 <section>
@@ -142,13 +143,14 @@
                                     <?php endforeach; ?>
                                 </section>
                             <?php endif; ?>
-                            <?php if( count($periodHorsLotsUnvalid) ): ?>
-                                <h1>Validation Hors-Lot</h1>
+
+                            <?php if( count($validationsHorsLot) ): ?>
+                                <h1>Validation Hors-Lot (<?= count($validationsHotLot) ?>)</h1>
                                 <section>
-                                    <?php foreach ($periodHorsLotsUnvalid as $period): ?>
+                                    <?php foreach ($validationsHorsLot as $val): ?>
                                         <article class="card card-xs">
-                                            <strong><?= $period->getLabel() ?></strong> pour <strong><?= $period->getDeclarer() ?></strong>
-                                            <a href="<?= $this->url('timesheet/validationhwpperson', ['idperson' => $period->getDeclarer()->getId()]) ?>">
+                                            <strong><?= $val->getLabel() ?></strong> pour <strong><?= $val->getDeclarer() ?></strong>
+                                            <a href="<?= $this->url('timesheet/validationhwpperson', ['idperson' => $val->getDeclarer()->getId()]) ?>">
                                                 <i class="icon-pencil"></i>
                                                 Valider les déclarations
                                             </a>
@@ -163,7 +165,7 @@
                                       method="get" class="form">
                                 <div class="input-group input-group">
                                     <input
-                                        placeholder="Rechercher dans les activités un PFI, un N°Oscar, la vie, l'univers ou le reste&hellip;"
+                                        placeholder="Rechercher dans les activités un PFI, un N°, la vie, l'univers ou le reste&hellip;"
                                         type="search"
                                         class="form-control input"
                                         name="q"

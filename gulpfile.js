@@ -177,7 +177,7 @@ gulp.task('modules-oscar-watch', [], function(){
 });
 
 
-gulp.task('watch-sass', function () {
+gulp.task('watch-sass', ['sass'], function () {
     gulp.watch(directories.css + '**/*.scss', ['sass']);
 });
 

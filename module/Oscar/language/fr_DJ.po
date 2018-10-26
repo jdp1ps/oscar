@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ZendSkeletonApplication\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-26 10:28+0200\n"
-"PO-Revision-Date: 2018-10-26 10:28+0200\n"
+"POT-Creation-Date: 2018-10-26 10:43+0200\n"
+"PO-Revision-Date: 2018-10-26 10:43+0200\n"
 "Last-Translator: Evan Coury <me@evancoury.com>\n"
 "Language-Team: ZF Contibutors <zf-devteam@zend.com>\n"
 "Language: fr_FR\n"
@@ -87,15 +87,15 @@ msgstr ""
 
 #: ../view/layout/layout.phtml:172
 msgid "Activités"
-msgstr ""
+msgstr "Accords"
 
 #: ../view/layout/layout.phtml:174
 msgid "Liste des activités"
-msgstr ""
+msgstr "Liste des accords"
 
 #: ../view/layout/layout.phtml:175
 msgid "Nouvelle activité"
-msgstr ""
+msgstr "Nouvel accord"
 
 #: ../view/layout/layout.phtml:176
 msgid "Bientôt terminées"
@@ -111,7 +111,7 @@ msgstr ""
 
 #: ../view/layout/layout.phtml:180
 msgid "Gérer les types d'activité"
-msgstr ""
+msgstr "Gérer les types d'accord"
 
 #: ../view/layout/layout.phtml:192
 msgid "Projets"
@@ -158,31 +158,60 @@ msgid "Ajouter une personne"
 msgstr ""
 
 #: ../view/layout/layout.phtml:226
+#, fuzzy
+#| msgid "Liste des activités"
 msgid "Liste des déclarants"
-msgstr ""
+msgstr "Liste des accords"
 
 #: ../view/layout/layout.phtml:236
+#: ../view/partials/menu-administration.phtml:48
 msgid "Activités sans projet"
-msgstr ""
+msgstr "Accords sans projet"
 
 #: ../view/layout/layout.phtml:237
+#, fuzzy
+#| msgid "Liste des activités"
 msgid "Projets sans activité"
-msgstr ""
+msgstr "Liste des accords"
 
 #: ../view/layout/layout.phtml:239
+#: ../view/partials/menu-administration.phtml:60
 msgid "Synchronisation des donnèes"
 msgstr ""
 
 #: ../view/layout/layout.phtml:243
+#: ../view/partials/menu-administration.phtml:64
 msgid "Mise à jour de l'index de recherche"
 msgstr ""
 
 #: ../view/layout/layout.phtml:247
+#, fuzzy
+#| msgid "Gérer les types d'activité"
 msgid "Gérer les types d'organisation"
-msgstr ""
+msgstr "Gérer les types d'accord"
 
 #: ../view/layout/layout.phtml:251
+#: ../view/partials/menu-administration.phtml:92
+#, fuzzy
+#| msgid "Gérer les types d'activité"
 msgid "Gérer les disciplines"
+msgstr "Gérer les types d'accord"
+
+#: ../view/layout/layout.phtml:261
+msgid "Gestion des droits"
+msgstr ""
+
+#: ../view/layout/layout.phtml:262
+#: ../view/partials/menu-administration.phtml:70
+msgid "Authentifications actives"
+msgstr ""
+
+#: ../view/layout/layout.phtml:263
+msgid "Affectation des structures"
+msgstr ""
+
+#: ../view/layout/layout.phtml:264
+msgid "Gestion des types de documents"
 msgstr ""
 
 #: ../view/oscar/public/index.phtml:69
@@ -196,6 +225,50 @@ msgstr ""
 #: ../view/oscar/public/index.phtml:87
 msgid "Voir mes projets"
 msgstr ""
+
+#: ../view/partials/menu-administration.phtml:52
+#, fuzzy
+#| msgid "Liste des activités"
+msgid ">Projets sans activité<"
+msgstr "Liste des accords"
+
+#: ../view/partials/menu-administration.phtml:56
+msgid "Feuille de temps"
+msgstr ""
+
+#: ../view/partials/menu-administration.phtml:68
+msgid "Droits et sécurités"
+msgstr ""
+
+#: ../view/partials/menu-administration.phtml:69
+msgid "Privilèges et droits"
+msgstr ""
+
+#: ../view/partials/menu-administration.phtml:71
+#, fuzzy
+#| msgid "Gérer les types d'activité"
+msgid "Rôle des organisations"
+msgstr "Gérer les types d'accord"
+
+#: ../view/partials/menu-administration.phtml:77
+#, fuzzy
+#| msgid "Gérer les types d'activité"
+msgid "Types d'activité"
+msgstr "Gérer les types d'accord"
+
+#: ../view/partials/menu-administration.phtml:80
+msgid "Types de jalon"
+msgstr ""
+
+#: ../view/partials/menu-administration.phtml:84
+msgid "Types de documents"
+msgstr ""
+
+#: ../view/partials/menu-administration.phtml:88
+#, fuzzy
+#| msgid "Gérer les types d'activité"
+msgid "Types d'organisation"
+msgstr "Gérer les types d'accord"
 
 #~ msgid "Skeleton Application"
 #~ msgstr "Skeleton Application"

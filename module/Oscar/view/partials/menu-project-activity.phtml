@@ -15,44 +15,44 @@ if(
 
 <li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-        <i class="icon-cube"></i> Activités <span class="caret"></span>
+        <i class="icon-cube"></i> <?= $this->translate("Activités") ?><span class="caret"></span>
     </a>
     <ul class="dropdown-menu" role="menu">
 
         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX)): ?>
-            <li role="presentation" class="dropdown-header"><i class="icon-cubes"></i> Projets</li>
-            <li><a href="<?= $this->url('contract/advancedsearch') ?>?projectview=on">Liste des projets</a></li>
+            <li role="presentation" class="dropdown-header"><i class="icon-cubes"></i> <?= $this->translate("Projets") ?></li>
+            <li><a href="<?= $this->url('contract/advancedsearch') ?>?projectview=on"><?= $this->translate("Liste des projets") ?></a></li>
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_CREATE)): ?>
-                <li><a href="<?= $this->url('project/new') ?>?projectview=on">Créer un projet</a></li>
+                <li><a href="<?= $this->url('project/new') ?>?projectview=on"><?= $this->translate("Créer un projet") ?></a></li>
             <?php endif; ?>
         <?php endif; ?>
 
         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX)): ?>
-        <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Activités</li>
-        <li><a href="<?= $this->url('contract/advancedsearch') ?>">Liste des activités</a></li>
+        <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> <?= $this->translate("Activités") ?></li>
+        <li><a href="<?= $this->url('contract/advancedsearch') ?>"><?= $this->translate("Liste des activités") ?></a></li>
 
         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW)): ?>
-        <li><a href="<?= $this->url('contractdocument') ?>">Documents téléversés</a></li>
+        <li><a href="<?= $this->url('contractdocument') ?>"><?= $this->translate("Documents téléversés") ?></a></li>
         <?php endif; ?>
 
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT) ):?>
-        <li><a href="<?= $this->url('contract/new') ?>">Nouvelle activité</a></li>
+        <li><a href="<?= $this->url('contract/new') ?>"><?= $this->translate("Nouvelle activité") ?></a></li>
         <?php endif; ?>
-        <li><a href="<?= $this->url('contract/almostdone') ?>">Bientôt terminés</a></li>
-        <li><a href="<?= $this->url('contract/almoststart') ?>">Débutant prochainement</a></li>
+        <li><a href="<?= $this->url('contract/almostdone') ?>"><?= $this->translate("Bientôt terminés") ?></a></li>
+        <li><a href="<?= $this->url('contract/almoststart') ?>"><?= $this->translate("Débutant prochainement") ?></a></li>
         <?php endif; ?>
 
         <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW)): ?>
-            <li role="presentation" class="dropdown-header"><i class="icon-bank"></i> Versements</li>
-            <li><a href="<?= $this->url('payment/income') ?>">Prochains versements</a></li>
-            <li><a href="<?= $this->url('payment/late') ?>">Versements en retard</a></li>
-            <li><a href="<?= $this->url('payment/difference') ?>">Écarts de paiement</a></li>
-            <li><a href="<?= $this->url('payment') ?>">Tous les versements</a></li>
+            <li role="presentation" class="dropdown-header"><i class="icon-bank"></i> <?= $this->translate("Versements") ?></li>
+            <li><a href="<?= $this->url('payment/income') ?>"><?= $this->translate("Prochains versements") ?></a></li>
+            <li><a href="<?= $this->url('payment/late') ?>"><?= $this->translate("Versements en retard") ?></a></li>
+            <li><a href="<?= $this->url('payment/difference') ?>"><?= $this->translate("Écarts de paiement") ?></a></li>
+            <li><a href="<?= $this->url('payment') ?>"><?= $this->translate("Tous les versements") ?></a></li>
         <?php endif; ?>
 
         <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW)): ?>
-            <li role="presentation" class="dropdown-header"><i class="icon-calendar"></i> Jalons</li>
-            <li><a href="<?= $this->url('milestones') ?>">Tous les jalons</a></li>
+            <li role="presentation" class="dropdown-header"><i class="icon-calendar"></i> <?= $this->translate("Jalons") ?></li>
+            <li><a href="<?= $this->url('milestones') ?>"><?= $this->translate("Tous les jalons") ?></a></li>
         <?php endif; ?>
 
     </ul>

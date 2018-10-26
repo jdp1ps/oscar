@@ -853,7 +853,7 @@ return array(
     ),
 
     'translator' => array(
-        'locale' => 'fr_FR', // en_US
+        'locale' => 'fr_DJ', // en_US
         'translation_file_patterns' => array(
             array(
                 'type' => 'gettext',
@@ -924,6 +924,7 @@ return array(
             'hasRole' => \Oscar\View\Helpers\HasRole::class,
             'hasPrivilege' => \Oscar\View\Helpers\HasPrivilege::class,
             'grant' => \Oscar\View\Helpers\Grant::class,
+            'options' => \Oscar\View\Helpers\Options::class,
             'keyvalue' => \Oscar\View\Helpers\KeyValueHelper::class,
             'slugify' => \Oscar\View\Helpers\Slugify::class,
         ],
