@@ -52,6 +52,7 @@ class DateTimeUtils {
             $year = intval($matches[0][1]);
             return [
                 'period' => sprintf('%s-%s', $year, $month),
+                'periodCode' => sprintf('%s-%s', $year,  ($month < 10 ? '0' . $month : $month)),
                 'month' => $month,
                 'year' => $year,
             ];

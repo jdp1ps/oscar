@@ -453,11 +453,6 @@ class TimesheetController extends AbstractOscarController
 
     public function validationHWPPersonAction(){
 
-
-        //$this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
-
-
-
         $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
         if( !$person ){
             return $this->getResponseBadRequest("Personne introuvable");
@@ -795,6 +790,7 @@ class TimesheetController extends AbstractOscarController
 
         // Liste des types de créneau valide
         $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson(), $period);
+
 
         if( $this->getHttpXMethod() == "POST" ){
 

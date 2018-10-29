@@ -1121,7 +1121,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
 
         $periodDatas = DateTimeUtils::extractPeriodDatasFromString($period);
-
+        $periodCode = $periodDatas['periodCode'];
 
         // Périodes
         $periodQuery = $this->getValidationPeriodRepository()->getValidationPeriodsPersonQuery($person->getId());
@@ -1132,7 +1132,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'personId' => $person->getId()
             ])
             ->getQuery()->getResult();
-        $out = [];
+
+        $out = [
+            "$periodCode" => [
+                'periodCode' => $periodCode,
+                'hasValidation' => false,
+                'days' => $this->getDaysPeriodInfosPerson($person, $periodDatas['year'], $periodDatas['month'])
+            ]
+        ];
         $periods = $periodQuery->getQuery()->getResult();
 
         /** @var ValidationPeriod $period */
@@ -1158,7 +1165,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->getQuery()
             ->getResult();
 
-        $daysInfos = $this->getDaysPeriodInfosPerson($person, $periodDatas['year'], $periodDatas['month']);
 
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
@@ -1171,18 +1177,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $key = $timesheet->getDateFrom()->format('Y-m');
             $keyDay = $timesheet->getDateFrom()->format('d');
-
-            if (!array_key_exists($key, $out)) {
-                $out[$key] = [
-                    'periodCode' => $key,
-                    'hasValidation' => false,
-                    'days' => $daysInfos
-                ];
-            }
-
-            if (!array_key_exists($keyDay, $out[$key]['days'])) {
-                $out[$key]['days'][$keyDay] = 0.0;
-            }
 
             $out[$key]['days'][$keyDay]['duration'] += $timesheet->getDuration();
         }
