@@ -2255,6 +2255,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             /** @var Activity $activity */
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($objectId);
 
+            $validateursAdm = $this->getValidatorsAdm($activity);
+            /** @var Person $validateur */
+            foreach ($validateursAdm as $validateur) {
+                $declaration->addValidatorAdm($validateur);
+            }
+
+            $validateursSci = $this->getValidatorsAdm($activity);
+            /** @var Person $validateur */
+            foreach ($validateursSci as $validateur) {
+                $declaration->addValidatorSci($validateur);
+            }
+
         }
 
 
