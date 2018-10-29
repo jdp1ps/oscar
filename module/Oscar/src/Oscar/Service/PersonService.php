@@ -234,6 +234,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         // Résultat
         $persons = [];
 
+        $this->getLoggerService()->debug("Récupération des personnes ayant le privilège $privilegeFullCode sur $activity");
+
         /** @var PrivilegeRepository $privilegeRepository */
         $privilegeRepository = $this->getEntityManager()->getRepository(Privilege::class);
 
@@ -243,6 +245,9 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             // 1. Récupération des rôles associès au privilège
             $privilege = $privilegeRepository->getPrivilegeByCode($privilegeFullCode);
 
+
+
+
             foreach ($privilege->getRole() as $role) {
                 $rolesIds[] = $role->getRoleId();
                 if ($role->getLdapFilter()) {
@@ -250,6 +255,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                         '$1', $role->getLdapFilter());
                 }
             }
+
+            $this->getLoggerService()->debug("Rôles : " . implode(',', $rolesIds));
 
             if( $includeApp ) {
 
@@ -294,28 +301,36 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             }
 
             // Selection des personnes associées via le Projet/Activité
-            foreach ($activity->getPersonPrincipalActive($rolesIds, false) as $p ){
-                $persons[$p->getPerson()->getId()] = $p->getPerson(); ;
+
+            foreach ($activity->getPersonsDeep() as $p ){
+                if( in_array($p->getRole(), $rolesIds) ){
+                    $this->getLoggerService()->debug('Person : ' . $p->getPerson());
+                    $persons[$p->getPerson()->getId()] = $p->getPerson();
+                }
             }
 
             // Selection des personnes via l'oganisation assocociée au Projet/Activité
             /** @var Organization $organization */
             foreach ($activity->getOrganizationsDeep() as $organization ){
+
                 /** @var OrganizationPerson $personOrganization */
                 if( $organization->isPrincipal() ) {
+                    $this->getLoggerService()->debug("Recherche dans " . $organization->getOrganization());
                     foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
                         if (in_array($personOrganization->getRole(), $rolesIds)) {
+                            $this->getLoggerService()->debug('Person : ' . $personOrganization->getPerson());
                             $persons[$personOrganization->getPerson()->getId()] = $personOrganization->getPerson();
                         }
                     }
                 }
             }
 
+            $this->getLoggerService()->debug("PERSONNES : " . count($persons));
+
             return $persons;
 
         } catch ( \Exception $e ){
             throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
-            die($e->getMessage());
         }
     }
 

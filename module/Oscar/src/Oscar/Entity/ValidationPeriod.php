@@ -1084,6 +1084,39 @@ class ValidationPeriod
         return $this;
     }
 
+    /**
+     * @param Person $person
+     * @return $this
+     */
+    public function addValidatorPrj( Person $person ){
+        if( !$this->getValidatorsPrj()->contains($person) ){
+            $this->getValidatorsPrj()->add($person);
+        }
+        return $this;
+    }
+
+    /**
+     * @param Person $person
+     * @return $this
+     */
+    public function addValidatorSci( Person $person ){
+        if( !$this->getValidatorsSci()->contains($person) ){
+            $this->getValidatorsSci()->add($person);
+        }
+        return $this;
+    }
+
+    /**
+     * @param Person $person
+     * @return $this
+     */
+    public function addValidatorAdm( Person $person ){
+        if( !$this->getValidatorsAdm()->contains($person) ){
+            $this->getValidatorsAdm()->add($person);
+        }
+        return $this;
+    }
+
 
     /**
      * Retourne la clef de trie pour le rangement mensuel.

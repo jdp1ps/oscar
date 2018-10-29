@@ -423,6 +423,44 @@
     <hr>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
         <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
+        <h3>Validateurs</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Scientifique</h4>
+                <?php if(count($validatorsSci)):?>
+                    <?php foreach($validatorsSci as $validateur): ?>
+                        <article class="card">
+                            <?= $validateur ?>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="alert alert-danger">
+                        Aucun validateur scientifique identifié pour cette activité
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="col-md-6">
+                <h4>Administratif</h4>
+                <?php if(count($validatorsAdm)):?>
+                    <?php foreach($validatorsAdm as $validateur): ?>
+                        <article class="card">
+                            <?= $validateur ?>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="alert alert-danger">
+                        Aucun validateur administratif identifié pour cette activité
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+
+
+
+
+
+
         <h3>Visualiser les feuilles de temps</h3>
         <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
             <?php if( $entity->hasDeclarant($personActivity->getPerson()) ):

@@ -40,6 +40,7 @@ use Oscar\Formatter\JSONFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\NotificationService;
+use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
@@ -807,11 +808,18 @@ class ProjectGrantController extends AbstractOscarController
             $currencies[] = $currency->asArray();
         }
 
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
         return [
             'generatedDocuments' => $this->getConfiguration('oscar.generated-documents.activity'),
             'entity' => $activity,
 
             'currencies' => $currencies,
+
+            'validatorsSci' => $timesheetService->getValidatorsSci($activity),
+            'validatorsAdm' => $timesheetService->getValidatorsAdm($activity),
+
 
             'declarations' => $declarations,
 

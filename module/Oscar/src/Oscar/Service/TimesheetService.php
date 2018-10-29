@@ -2108,6 +2108,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     /**
+     * @return PersonService
+     */
+    protected function getPersonService(){
+        return $this->getServiceLocator()->get('PersonService');
+    }
+
+    /**
      * @return Logger
      */
     protected function getLogger()
@@ -2144,8 +2151,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function sendPeriod($from, $to, $sender)
     {
-
-
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
         $this->getLogger()->debug("Traitement pour $sender ($fromMonth - $toMonth)");
@@ -2206,6 +2211,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->getLogger()->debug(print_r($declarations, true));
     }
 
+    public function getValidatorsSci( Activity $activity ){
+        return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+    }
+
+    public function getValidatorsAdm( Activity $activity ){
+        return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+    }
+
     /**
      * @param $sender
      * @param $year
@@ -2219,8 +2232,37 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     protected function createDeclaration($sender, $year, $month, $object, $objectId, $objectGroup)
     {
 
-        $now = new \DateTime();
         $declaration = new ValidationPeriod();
+
+
+        // CAS N°1 : Validation Hors-Lot
+        if( $objectGroup == ValidationPeriod::GROUP_OTHER ){
+            $validateurs = $this->getPersonService()->getManagers($sender);
+            $declaration->setValidationActivityById(-1)
+                ->setValidationActivityAt(new \DateTime())
+                ->setValidationActivityMessage("Validation automatique pour les créneaux hors-lot")
+                ->setValidationActivityBy('Oscar Bot');
+            $declaration->setValidationSciById(-1)
+                ->setValidationSciAt(new \DateTime())
+                ->setValidationSciMessage("Validation automatique pour les créneaux hors-lot")
+                ->setValidationSciBy('Oscar Bot');
+
+            /** @var Person $validateur */
+            foreach ($validateurs as $validateur) {
+                $declaration->addValidatorAdm($validateur);
+            }
+        } else {
+            /** @var Activity $activity */
+            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($objectId);
+
+        }
+
+
+
+
+        //throw new OscarException('Refonte de la création de déclaration en cours');
+
+        $now = new \DateTime();
         $declaration->setStatus(ValidationPeriod::STATUS_STEP1)
             ->setDateSend($now)
             ->setDeclarer($sender)
@@ -2231,7 +2273,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->setYear($year)
             ->setMonth($month);
         $this->getEntityManager()->persist($declaration);
-        $this->getEntityManager()->flush($declaration);
         $this->getEntityManager()->flush($declaration);
         return $declaration;
 
