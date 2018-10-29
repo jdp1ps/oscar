@@ -8,6 +8,7 @@
 
 namespace Oscar\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 
@@ -62,6 +63,33 @@ class ValidationPeriod
      * @ORM\ManyToOne(targetEntity="Person")
      */
     private $declarer;
+
+    /**
+     * Personnes
+     *
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable(name="validationperiod_prj")
+     */
+    protected $validatorsPrj;
+
+    /**
+     * Personnes
+     *
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable(name="validationperiod_sci")
+     */
+    protected $validatorsSci;
+
+    /**
+     * Personnes
+     *
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable(name="validationperiod_adm")
+     */
+    protected $validatorsAdm;
 
     /**
      * Mois
@@ -324,6 +352,17 @@ class ValidationPeriod
 
     const STATUS_CONFLICT   = 'conflict';
     const STATUS_VALID      = 'valid';
+
+    /**
+     * ValidationPeriod constructor.
+     * @param $id
+     */
+    public function __construct()
+    {
+        $this->validatorsPrj = new ArrayCollection();
+        $this->validatorsSci = new ArrayCollection();
+        $this->validatorsAdm = new ArrayCollection();
+    }
 
 
     public function isOpenForDeclaration(){
@@ -993,6 +1032,58 @@ class ValidationPeriod
 
         ];
     }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsPrj()
+    {
+        return $this->validatorsPrj;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsPrj
+     */
+    public function setValidatorsPrj($validatorsPrj)
+    {
+        $this->validatorsPrj = $validatorsPrj;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsSci()
+    {
+        return $this->validatorsSci;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsSci
+     */
+    public function setValidatorsSci($validatorsSci)
+    {
+        $this->validatorsSci = $validatorsSci;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsAdm()
+    {
+        return $this->validatorsAdm;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsAdm
+     */
+    public function setValidatorsAdm($validatorsAdm)
+    {
+        $this->validatorsAdm = $validatorsAdm;
+        return $this;
+    }
+
 
     /**
      * Retourne la clef de trie pour le rangement mensuel.
