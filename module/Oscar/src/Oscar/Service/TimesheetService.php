@@ -76,15 +76,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $label = $this->getOthersWPByCode($object)['label'];
             }
 
-            $output[$dataKey]['declarations'][] = [
-                'id' => $declaration->getId(),
-                'status' => $declaration->getStatus(),
-                'object' => $declaration->getObject(),
-                'objectgroup' => $declaration->getObjectGroup(),
-                'objectid' => $declaration->getObjectId(),
-                'label' => $label,
-                'datesend' => $declaration->getDateSend()->format('Y-m-d'),
-            ];
+            $declarationDatas = $declaration->toJson();
+            $declarationDatas['label'] = $label;
+
+            $output[$dataKey]['declarations'][] = $declarationDatas;
         }
         return $output;
     }

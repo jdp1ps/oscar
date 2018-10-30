@@ -1131,6 +1131,46 @@ class ValidationPeriod
         }
     }
 
+    public function toJson(){
+
+        $validateursPrj = [];
+        $validateursSci = [];
+        $validateursAdm = [];
+
+        foreach( $this->getValidatorsPrj() as $validateur ){
+            $validateursPrj[] = [
+                'id' => $validateur->getId(),
+                'person' => (string)$validateur
+            ];
+        }
+
+        foreach( $this->getValidatorsSci() as $validateur ){
+            $validateursSci[] = [
+                'id' => $validateur->getId(),
+                'person' => (string)$validateur
+            ];
+        }
+
+        foreach( $this->getValidatorsAdm() as $validateur ){
+            $validateursAdm[] = [
+                'id' => $validateur->getId(),
+                'person' => (string)$validateur
+            ];
+        }
+
+        return [
+            'id' => $this->getId(),
+            'status' => $this->getStatus(),
+            'object' => $this->getObject(),
+            'objectgroup' => $this->getObjectGroup(),
+            'objectid' => $this->getObjectId(),
+            'datesend' => $this->getDateSend()->format('Y-m-d'),
+            'validateursPrj' => $validateursPrj,
+            'validateursSci' => $validateursSci,
+            'validateursAdm' => $validateursAdm,
+        ];
+    }
+
     public function __toString()
     {
         return sprintf('[ValidationPeriod:%s] %s-%s %s:%s=%s, pid=%s', $this->getId(), $this->getYear(), $this->getMonth(), $this->getObjectGroup(), $this->getObject(), $this->getObjectId(), $this->getDeclarer());
