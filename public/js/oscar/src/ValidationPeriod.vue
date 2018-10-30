@@ -12,10 +12,9 @@
                 </nav>
             </div>
         </div>
-        <section v-if="declarations">
-
-            <a href="#" class="btn btn-xs btn-default" @click="group = 'label'">
-                par type
+        <section v-if="declarations && declarations.length">
+            <a href="#" class="btn btn-xs btn-default" @click="group = 'person'">
+                par personne
             </a>
             <a href="#" class="btn btn-xs btn-default" @click="group = 'monthLabel'">
                 par période
@@ -26,6 +25,7 @@
                     <thead>
                         <tr>
                             <th>{{ label }}</th>
+                            <th>Créneaux</th>
                             <th v-for="i in group.maxDays">
                                 {{i }}
                             </th>
@@ -34,16 +34,16 @@
                                 Actions
                             </th>
                         </tr>
-                        </tr>
                     </thead>
                     <tbody>
                         <tr v-for="d in group.declarations">
                             <th>{{ d.sublabel }}</th>
+                            <th>{{ d.label }}</th>
                             <td v-for="i in group.maxDays">
-                                <strong v-if="d.days[i]">{{ d.days[i].total }}</strong>
+                                <strong v-if="d.days[i]">{{ d.days[i].total | duration }}</strong>
                                 <em v-else>-</em>
                             </td>
-                            <td><{{ d.total }}/td>
+                            <td>{{ d.total | duration}}</td>
                             <td>
                                 <span v-if="d.validation.status == 'valid'">
                                     <i class="icon-ok-circled"></i> Validé
@@ -60,34 +60,10 @@
                         </tr>
                     </tbody>
                 </table>
-
             </section>
-            <!--
-            <article v-for="p in declarations">
-                <h2>{{ p.label }} ({{ p.monthLabel }})</h2>
-                <p v-if="p.totaltimesheets == 0" class="alert alert-info">
-                    Il n'y pas de créneaux à déclarer
-                </p>
-                <section v-else>
-                    <p class="help">Il y'a {{ p.totaltimesheets }} créneaux à valider.</p>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th v-for="i in p.totalDays">{{i}}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td v-for="i in p.totalDays">
-                                <strong v-if="p.days[i]">{{ p.days[i].total }}</strong>
-                                <em v-else>0.0</em>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </section>
-
-            </article>-->
+        </section>
+        <section v-else class="alert alert-info">
+            Aucune déclaration en attente
         </section>
     </div>
 </template>
@@ -109,14 +85,14 @@
 
         computed: {
             subgroup(){
-                return this.group == "monthLabel" ? "label" : "monthLabel"
+                return this.group == "monthLabel" ? "person" : "monthLabel"
             },
             grouped (){
                 let datas = {};
                 if( this.declarations ){
                     this.declarations.forEach(item => {
                         let key = item[this.group];
-                        console.log(key);
+
                         if( !datas.hasOwnProperty(key) ){
                             datas[key] = {
                                 label: item[key],

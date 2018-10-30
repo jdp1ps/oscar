@@ -118,40 +118,42 @@ class PublicController extends AbstractOscarController
         /** @var TimesheetService  $timeSheetService */
         $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
 
-        // est déclarant
+//        // est déclarant
+//
+//        // est validateur (Application)
+//        $isValidateurScientifique = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI);
+//        $isValidateurAdministratif = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
+//
+//        $activitiesValidation = [];
+//        $periodsRejected = [];
+//        $periodHorsLotsUnvalid = [];
+//
+//        $validationsHorsLot = [];
+//        if( $this->getCurrentPerson() ) {
+//            $validationsHorsLot = $timeSheetService->getValidationHorsLotByReferent($this->getCurrentPerson(), true);
+//        }
 
-        // est validateur (Application)
-        $isValidateurScientifique = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI);
-        $isValidateurAdministratif = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
 
-        $activitiesValidation = [];
-        $periodsRejected = [];
-        $periodHorsLotsUnvalid = [];
+//        $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
+//
+//        ///
+//        /** @var Activity $activity */
+//        foreach ($activityWithValidationUp as $activity ){
+//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)){
+//                $activitiesValidation[] = $activity;
+//                continue;
+//            }
+//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity)){
+//                $activitiesValidation[] = $activity;
+//                continue;
+//            }
+//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)){
+//                $activitiesValidation[] = $activity;
+//                continue;
+//            }
+//        }
 
-        $validationsHorsLot = [];
-        if( $this->getCurrentPerson() ) {
-            $validationsHorsLot = $timeSheetService->getValidationHorsLotByReferent($this->getCurrentPerson(), true);
-        }
-
-
-        $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
-
-        ///
-        /** @var Activity $activity */
-        foreach ($activityWithValidationUp as $activity ){
-            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)){
-                $activitiesValidation[] = $activity;
-                continue;
-            }
-            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity)){
-                $activitiesValidation[] = $activity;
-                continue;
-            }
-            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)){
-                $activitiesValidation[] = $activity;
-                continue;
-            }
-        }
+        $validations = [];
 
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
@@ -159,14 +161,16 @@ class PublicController extends AbstractOscarController
             if( $person ){
                 // Déclaration en conflit
                 $periodsRejected = $timeSheetService->getValidationPeriodPersonConflict($person);
+                $validations = $timeSheetService->getValidationToDoPerson($person);
             }
 
         } catch( \Exception $e ){
             $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
         }
         return [
-            'validationsHorsLot' => $validationsHorsLot,
-            'activitiesValidation' => $activitiesValidation,
+//            'validationsHorsLot' => $validationsHorsLot,
+//            'activitiesValidation' => $activitiesValidation,
+            'validations' => $validations,
             'periodsRejected' => $periodsRejected,
             'user' => $person
         ];

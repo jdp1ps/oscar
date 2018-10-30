@@ -128,7 +128,17 @@
                                 </div>
                             <?php endif; ?>
 
-                            <?php if( count($activitiesValidation) ): ?>
+                            <?php if( count($validations) ): ?>
+                                <h1>Validation (<?= count($validations) ?>)</h1>
+                                <section>
+                                    <a href="<?= $this->url('timesheet/validations') ?>">
+                                        <i class="icon-pencil"></i>
+                                        Valider les déclarations
+                                    </a>
+                                </section>
+                            <?php endif; ?>
+
+                            <?php /* if( count($activitiesValidation) ): ?>
                                 <h1>Validation en attente</h1>
                                 <section>
                                     <?php foreach ($activitiesValidation as $activity): ?>
@@ -157,7 +167,7 @@
                                         </article>
                                     <?php endforeach; ?>
                                 </section>
-                            <?php endif; ?>
+                            <?php endif; */?>
                         </div>
                         <div class="col-md-12">
                             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX) ): ?>

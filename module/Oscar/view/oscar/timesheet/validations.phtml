@@ -1,0 +1,26 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 29/08/18
+ * Time: 10:53
+ */
+?>
+<section class="container-fluid">
+    <h1>Validations</h1>
+    <div id="app"></div>
+    <script>
+        require(['vue', 'vue-resource', 'ValidationPeriod', 'bootbox'], function(Vue, VueResource, ValidationPeriod, bootbox){
+            Vue.use(VueResource);
+            Vue.filter('duration', function (v){
+                return v.toFixed(2);
+            })
+            new Vue({
+                el: "#app",
+                render: function(h){
+                    return h(ValidationPeriod.default, { props: {bootbox: bootbox}})
+                }
+            })
+        });
+    </script>
+</section>

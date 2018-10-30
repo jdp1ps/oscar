@@ -528,6 +528,44 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getValidationPeriodRepository()->find($idPeriod);
     }
 
+    public function getValidationsForValidator(Person $person)
+    {
+
+        $timesheetFormatter = new TimesheetsMonthFormatter();
+        $hwp = $this->getOthersWP();
+        $periods = $this->getValidationToDoPerson($person);
+        $out = [
+            'label' => 'Déclaration hors-lot pour ' . (string)$person,
+            'packages' => []
+        ];
+
+        /** @var ValidationPeriod $period */
+        foreach ($periods as $period) {
+            $timesheets = $this->getTimesheetsValidationPeriod($period);
+            $code = array_key_exists($period->getObject(), $hwp) ? $period->getObject() : 'other';
+
+            if( $period->getObject() == 'activity' ){
+                /** @var Activity $activity */
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId());
+                $label = sprintf('[%s] %s', $activity->getAcronym() , $activity->getLabel());
+            } else {
+                $label = array_key_exists($period->getObject(), $hwp) ? $hwp[$period->getObject()]['label'] : 'Non-définit';
+            }
+
+            $periodDatas = $timesheetFormatter->format($timesheets, $period->getMonth(), $period->getYear());
+            $periodDatas['person'] = (string)$period->getDeclarer();
+            $periodDatas['type'] = $period->getObject();
+            $periodDatas['label'] = $label;
+            $periodDatas['description'] = $hwp[$code]['description'];
+            $periodDatas['code'] = $code;
+            $periodDatas['validation'] = $period->json();
+            $periodDatas['period_id'] = $period->getId();
+            $out['packages'][] = $periodDatas;
+        }
+
+        return $out;
+    }
+
     public function getDatasOutOfWorkPackageToValidate(Person $person)
     {
 
@@ -2206,12 +2244,70 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->getLogger()->debug(print_r($declarations, true));
     }
 
+    public function getValidatorsPrj( Activity $activity ){
+        return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
+    }
+
     public function getValidatorsSci( Activity $activity ){
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
     }
 
     public function getValidatorsAdm( Activity $activity ){
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+    }
+
+
+    /**
+     * Retourne toutes les validations où la personne est identifiée comme validateur.
+     *
+     * @param Person $person
+     * @return array
+     */
+    public function getValidationToDoPerson( Person $person ){
+
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
+            ->createQueryBuilder('vp')
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where('vprj = :person OR vsci = :person OR vadm = :person')
+            ->setParameter('person', $person);
+
+        $validations = [];
+
+        /** @var ValidationPeriod $validation */
+        foreach ($query->getQuery()->getResult() as $validation) {
+            if( $validation->isValidator($person) ){
+                $validations[] = $validation;
+            }
+        }
+
+        return $validations;
+    }
+
+    public function validation( ValidationPeriod $period, Person $validateur, $message="" ){
+        if($period->isValidator($validateur)){
+            switch($period->getStatus()){
+                case ValidationPeriod::STATUS_STEP1:
+                    $period->setValidationActivity($validateur, new \DateTime(), $message);
+                    break;
+
+                case ValidationPeriod::STATUS_STEP2:
+                    $period->setValidationSci($validateur, new \DateTime(), $message);
+                    break;
+
+                case ValidationPeriod::STATUS_STEP3:
+                    $period->setValidationAdm($validateur, new \DateTime(), $message);
+                    break;
+
+                default:
+                    throw new OscarException("Cette période n'a pas le bon status pour être validée.");
+            }
+            $this->getEntityManager()->flush($period);
+            return true;
+        } else {
+            throw new OscarException("Vous n'êtes pas autorisé à valider pour cette étape de validation");
+        }
     }
 
     /**
@@ -2233,14 +2329,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // CAS N°1 : Validation Hors-Lot
         if( $objectGroup == ValidationPeriod::GROUP_OTHER ){
             $validateurs = $this->getPersonService()->getManagers($sender);
+
+            // ETAPE 3 Directement
             $declaration->setValidationActivityById(-1)
                 ->setValidationActivityAt(new \DateTime())
                 ->setValidationActivityMessage("Validation automatique pour les créneaux hors-lot")
                 ->setValidationActivityBy('Oscar Bot');
+
             $declaration->setValidationSciById(-1)
                 ->setValidationSciAt(new \DateTime())
                 ->setValidationSciMessage("Validation automatique pour les créneaux hors-lot")
                 ->setValidationSciBy('Oscar Bot');
+
+            $declaration->setStatus(ValidationPeriod::STATUS_STEP3);
 
             /** @var Person $validateur */
             foreach ($validateurs as $validateur) {
@@ -2250,17 +2351,26 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             /** @var Activity $activity */
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($objectId);
 
+
+            $validateursPrj = $this->getValidatorsPrj($activity);
+            /** @var Person $validateur */
+            foreach ($validateursPrj as $validateur) {
+                $declaration->addValidatorPrj($validateur);
+            }
+
             $validateursAdm = $this->getValidatorsAdm($activity);
             /** @var Person $validateur */
             foreach ($validateursAdm as $validateur) {
                 $declaration->addValidatorAdm($validateur);
             }
 
-            $validateursSci = $this->getValidatorsAdm($activity);
+            $validateursSci = $this->getValidatorsSci($activity);
             /** @var Person $validateur */
             foreach ($validateursSci as $validateur) {
                 $declaration->addValidatorSci($validateur);
             }
+
+            $declaration->setStatus(ValidationPeriod::STATUS_STEP1);
 
         }
 
@@ -2270,7 +2380,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         //throw new OscarException('Refonte de la création de déclaration en cours');
 
         $now = new \DateTime();
-        $declaration->setStatus(ValidationPeriod::STATUS_STEP1)
+        $declaration
             ->setDateSend($now)
             ->setDeclarer($sender)
             ->setLog($now->format('Y-m-d H:i:s') . " : $sender vient d'envoyer sa déclaration\n")

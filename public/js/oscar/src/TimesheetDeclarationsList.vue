@@ -19,6 +19,7 @@
         <h1>Liste des déclarations</h1>
         <section v-for="line,k in declarations" class="card declaration" @click="line.open = !line.open">
             <strong>{{ line.person }}</strong> <time>{{ line.period }}</time>
+
             <span class="validations-icon">
                 <i class="icon" :class="'icon-' +d.status" v-for="d in line.declarations" :title="d.label"></i>
             </span>
@@ -32,12 +33,30 @@
                         <i :class="validation.object == 'activity' ? 'icon-cube' : 'icon-tag'"></i>
                         <strong>{{ validation.label }}</strong>
                     </span>
+
+                    <span v-if="validation.object == 'activity'">
+                        <i class="icon-cube"></i>
+                        <span v-for="p in validation.validateursPrj">{{ p.person }}</span>
+                    </span>
+                    <span v-else>~</span>
+
+                    <span v-if="validation.object == 'activity'">
+                        <i class="icon-beaker"></i>
+                        <span v-for="p in validation.validateursSci">{{ p.person }}</span>
+                    </span>
+                    <span v-else>~</span>
+
+                    <span>
+                        <i class="icon-book"></i>
+                        <span v-for="p in validation.validateursAdm">{{ p.person }}</span>
+                    </span>
                     <em>
                         État : <i :class="'icon-' +validation.status"></i>
                     </em>
                 </article>
             </section>
         </section>
+        <pre>TOT :{{ $data }}</pre>
     </section>
 </template>
 <script>

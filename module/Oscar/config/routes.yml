@@ -157,6 +157,12 @@ timesheet:
                 route: /validation-horaire/:idactivity
                 defaults:
                     action: validateTimesheet
+        validations:
+            type: segment
+            options:
+                route: /validations
+                defaults:
+                    action: validations
 
         validationhwpperson:
             type: segment

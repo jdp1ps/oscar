@@ -817,6 +817,7 @@ class ProjectGrantController extends AbstractOscarController
 
             'currencies' => $currencies,
 
+            'validatorsPrj' => $timesheetService->getValidatorsPrj($activity),
             'validatorsSci' => $timesheetService->getValidatorsSci($activity),
             'validatorsAdm' => $timesheetService->getValidatorsAdm($activity),
 

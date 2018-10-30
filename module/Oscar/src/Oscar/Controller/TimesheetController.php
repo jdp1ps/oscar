@@ -1043,6 +1043,46 @@ class TimesheetController extends AbstractOscarController
         die("DESACTIVE");
     }
 
+    public function validationsAction() {
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            $serviceTimesheet = $this->getTimesheetService();
+
+            switch ($method) {
+                case 'GET' :
+                    return $this->ajaxResponse($serviceTimesheet->getValidationsForValidator($this->getCurrentPerson()));
+                    break;
+
+                case 'POST' :
+                    $action = $this->params()->fromPost('action');
+                    if( !in_array($action, ['valid', 'reject']) ){
+                        return $this->getResponseBadRequest("Mauvaise requête !");
+                    }
+                    $periodId = $this->params()->fromPost('period_id');
+                    $message = $this->params()->fromPost('message', '');
+                    try {
+                        $period = $this->getTimesheetService()->getValidationPeriod($periodId);
+                        if( !$period ){
+                            throw new OscarException("Impossible de charger la période.");
+                        }
+                        if( $action == 'valid' )
+                            $this->getTimesheetService()->validation($period, $this->getCurrentPerson(), $message);
+                        else
+                            $this->getTimesheetService()->reject($period, $this->getCurrentPerson(), $message);
+
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+                    return $this->getResponseOk();
+                    break;
+
+                default:
+                    return $this->getResponseNotFound();
+            }
+        }
+        return [];
+    }
+
     /**
      * Déclaration des heures.
      */

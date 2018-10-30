@@ -425,7 +425,21 @@
         <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
         <h3>Validateurs</h3>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <h4>Activité</h4>
+                <?php if(count($validatorsPrj)):?>
+                    <?php foreach($validatorsPrj as $validateur): ?>
+                        <article class="card">
+                            <?= $validateur ?>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="alert alert-danger">
+                        Aucun validateur scientifique identifié pour cette activité
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="col-md-4">
                 <h4>Scientifique</h4>
                 <?php if(count($validatorsSci)):?>
                     <?php foreach($validatorsSci as $validateur): ?>
@@ -439,7 +453,7 @@
                     </div>
                 <?php endif; ?>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <h4>Administratif</h4>
                 <?php if(count($validatorsAdm)):?>
                     <?php foreach($validatorsAdm as $validateur): ?>

@@ -206,7 +206,7 @@ return array(
                 // TIMESHEET
                 ['controller' => 'Timesheet',
                     'action' => [
-                        'indexPersonActivity', 'sauvegarde', 'declaration',
+                        'indexPersonActivity', 'sauvegarde', 'declaration', 'validations',
                         "declaration2", "indexActivity", "validateTimesheet",
                         'usurpation', 'excel', 'organizationLeader',
                         'declarant', 'declarantAPI', 'validationActivity', 'validationActivity2',

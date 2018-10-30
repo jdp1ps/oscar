@@ -173,7 +173,7 @@ gulp.task('modules-oscar', [], function() {
 });
 
 gulp.task('modules-oscar-watch', [], function(){
-    gulp.watch(['public/js/oscar/src/*.vue','public/js/oscar/src/*.js'], ['modules-oscar']);
+    gulp.watch(['public/js/oscar/src/*.vue'], ['modules-oscar']);
 });
 
 

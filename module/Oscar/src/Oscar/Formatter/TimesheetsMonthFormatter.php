@@ -67,6 +67,7 @@ class TimesheetsMonthFormatter
             'month' => $month,
             'year' => $year,
             'monthLabel' => $formatter->format($firstDay),
+            'total' => 0.0,
             'totalDays' => $totalDays
         ];
 
@@ -87,6 +88,7 @@ class TimesheetsMonthFormatter
                     'timesheets' => []
                 ];
                 $days[$day]['total'] += $timesheet->getDuration();
+                $output['total'] += $timesheet->getDuration();
                 $days[$day]['timesheets'][] = $timesheet->toJson2();
             }
         }
