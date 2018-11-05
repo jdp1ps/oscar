@@ -12,6 +12,7 @@ use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
@@ -21,6 +22,7 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
+use Oscar\Provider\Privileges;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -220,6 +222,54 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $mail = $mailer->newMessage("Notifications en attente sur Oscar", ['body' => $content]);
         $mail->setTo([$to => (string) $person]);
         $mailer->send($mail);
+    }
+
+    public function getRolesPrincipaux( $privilege = null){
+        $query = $this->getEntityManager()->getRepository(Role::class)->createQueryBuilder('r');
+die($privilege);
+        if( $privilege != null ){
+            $query->innerJoin('r.privileges', 'p')
+                ->where('p.code = :privilege')
+            ->setParameter('privilege', $privilege);
+
+            echo $query->getDQL();
+
+        }
+
+        return $query->getQuery()->getResult();
+
+    }
+
+
+    /**
+     * Retourne la liste des organizations où la personne a un rôle principale.
+     *
+     * @param Person $person
+     */
+    public function getOrganizationsPersonWithPrincipalRole(Person $person){
+
+        $rolesObj = $this->getRolesPrincipaux( Privileges::ACTIVITY_SHOW);
+
+        foreach ($rolesObj as $role) {
+            echo $role->getRoleId() . "<br>";
+        }
+
+        die();
+
+        $roles = $this->getOscarUserContext()->getRoleIdPrimary();
+
+        $structures = $this->getEntityManager()->getRepository(Organization::class)->createQueryBuilder('o')
+            ->innerJoin('o.persons', 'p')
+            ->innerJoin('p.roleObj', 'r')
+            ->where('p.person = :person AND r.roleId IN(:roles)')
+            ->setParameters([
+               'person'    => $person,
+               'roles'     => $roles,
+            ])
+            ->getQuery()
+            ->getResult();
+
+        return $structures;
     }
 
     /**

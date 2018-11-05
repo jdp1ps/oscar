@@ -532,34 +532,54 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
 
         $timesheetFormatter = new TimesheetsMonthFormatter();
+
+        // Configuration des Hors-Lots
         $hwp = $this->getOthersWP();
+
+        // Récupérations des périodes à valider
         $periods = $this->getValidationToDoPerson($person);
-        $out = [
-            'label' => 'Déclaration hors-lot pour ' . (string)$person,
-            'packages' => []
-        ];
+
+        $out = [];
 
         /** @var ValidationPeriod $period */
         foreach ($periods as $period) {
             $timesheets = $this->getTimesheetsValidationPeriod($period);
+
+
+
+
             $code = array_key_exists($period->getObject(), $hwp) ? $period->getObject() : 'other';
+            $wpDetails = false;
+            $details = null;
+            $wps = null;
 
             if( $period->getObject() == 'activity' ){
                 /** @var Activity $activity */
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId());
                 $label = sprintf('[%s] %s', $activity->getAcronym() , $activity->getLabel());
+                $description = $activity->getDescription();
+                $code = "activity";
+                $wpDetails = true;
+                $wps = [];
+                foreach ($activity->getWorkPackages() as $wp ){
+                    $wps[$wp->getCode()] = 0.0;
+                }
             } else {
-                $label = array_key_exists($period->getObject(), $hwp) ? $hwp[$period->getObject()]['label'] : 'Non-définit';
+                $label  = array_key_exists($period->getObject(), $hwp) ? $hwp[$period->getObject()]['label'] : 'Non-définit';
+                $code   = array_key_exists($period->getObject(), $hwp) ? $hwp[$period->getObject()]['code'] : 'n-d';
+                $description = $hwp[$code]['description'];
             }
 
-            $periodDatas = $timesheetFormatter->format($timesheets, $period->getMonth(), $period->getYear());
+            $periodDatas = $timesheetFormatter->format($timesheets, $period->getMonth(), $period->getYear(), $wps);
+            $periodDatas['period_id'] = $period->getId();
             $periodDatas['person'] = (string)$period->getDeclarer();
             $periodDatas['type'] = $period->getObject();
             $periodDatas['label'] = $label;
-            $periodDatas['description'] = $hwp[$code]['description'];
+            $periodDatas['description'] = $description;
             $periodDatas['code'] = $code;
             $periodDatas['validation'] = $period->json();
-            $periodDatas['period_id'] = $period->getId();
+            $periodDatas['details'] = $details;
+
             $out['packages'][] = $periodDatas;
         }
 

@@ -1043,6 +1043,55 @@ class TimesheetController extends AbstractOscarController
         die("DESACTIVE");
     }
 
+    public function resumeAction(){
+
+        $roles = $this->getOscarUserContext()->getRoleIdPrimary();
+
+        $organizations = $this->getPersonService()->getOrganizationsPersonWithPrincipalRole( $this->getCurrentPerson());
+
+        foreach ($organizations as $organization) {
+
+            echo "<li> O : $organization</li>";
+        }
+
+
+//        $structures = $this->getEntityManager()->getRepository(OrganizationPerson::class)->createQueryBuilder('s')
+//            ->where('s.person = :person AND s.role IN(:roles)')
+//            ->setParameters([
+//                'person'    => $currentPerson,
+//                'roles'     => $roles,
+//            ])
+//            ->getQuery()
+//            ->getResult()
+//        ;
+//
+//
+//        $projects = [];
+//
+//        /** @var OrganizationPerson $organizationPerson */
+//        foreach( $structures as $organizationPerson ){
+//            $orgaId = $organizationPerson->getOrganization()->getId();
+//            if( !isset($projects[$orgaId]) ){
+//                $projects[$orgaId] = [
+//                    'organization' => $organizationPerson->getOrganization(),
+//                    'projects' => []
+//                ];
+//            }
+//            /** @var ProjectPartner $partner */
+//            foreach($organizationPerson->getOrganization()->getProjects() as $partner ){
+//                if( in_array($partner->getRole(), $this->getOscarUserContext()->getRolesOrganisationLeader()))
+//                    $projects[$orgaId]['projects'][] = $partner->getProject();
+//            }
+//            /** @var ActivityOrganization $activityPartner */
+//            foreach($organizationPerson->getOrganization()->getActivities() as $activityPartner ){
+//                // Cas des activités sans projet
+//                if( $activityPartner->getActivity()->getProject() && in_array($activityPartner->getRole(), $this->getOscarUserContext()->getRolesOrganisationLeader()) )
+//                    $projects[$orgaId]['projects'][] = $activityPartner->getActivity()->getProject();
+//            }
+//        }
+        die("RESUME");
+    }
+
     public function validationsAction() {
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();

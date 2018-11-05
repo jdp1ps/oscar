@@ -160,6 +160,17 @@
   }
 }
 
+.validations-table {
+  .lot, .lotsTotal {
+    display: block;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .lot { font-weight: 100;}
+
+  .lotsTotal { font-weight: 600;}
+}
+
 .link {
   color: saturate($brand-primary, 50%);
   text-decoration: underline;

@@ -54,7 +54,7 @@ class TimesheetsMonthFormatter
      * @param $month
      * @param $year
      */
-    public function format( $timesheets, $month, $year ){
+    public function format( $timesheets, $month, $year, $wps = null ){
 
         $totalDays = $this->getMonthDaysLength($month, $year);
         $formatter = $this->getDateFormatter();
@@ -68,29 +68,49 @@ class TimesheetsMonthFormatter
             'year' => $year,
             'monthLabel' => $formatter->format($firstDay),
             'total' => 0.0,
-            'totalDays' => $totalDays
+            'totalDays' => $totalDays,
+            'totalWps' => $wps
         ];
 
 
         $formatter->setPattern('eeee d');
 
         $days = [];
+
+
+
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet){
             $day = (integer)$timesheet->getDateFrom()->format('d');
 
-
-            if( !array_key_exists($day, $days) ){
+            if( !array_key_exists($day, $days) ) {
                 $days[$day] = [
                     "label" => "$day",
+                    "daylabel" => "$day",
                     'dayname' => $formatter->format($timesheet->getDateFrom()),
                     "total" => 0.0,
-                    'timesheets' => []
+                    "details" => [],
+                    //'timesheets' => []
                 ];
-                $days[$day]['total'] += $timesheet->getDuration();
-                $output['total'] += $timesheet->getDuration();
-                $days[$day]['timesheets'][] = $timesheet->toJson2();
             }
+
+            if( $wps != null ){
+
+                $pack = $timesheet->getWorkpackage()->getCode();
+                if( !array_key_exists($pack, $days[$day]['details']) ){
+                    foreach ($wps as $wp=>$total ) {
+                        $days[$day]['details'][$wp] = 0.0;
+                    }
+                }
+                $days[$day]['details'][$pack] += $timesheet->getDuration();
+                $output['totalWps'][$pack] += $timesheet->getDuration();
+
+            }
+
+            $days[$day]['total'] += $timesheet->getDuration();
+            $output['total'] += $timesheet->getDuration();
+           // $days[$day]['timesheets'][] = $timesheet->toJson2();
+
         }
 
         $output['days'] = $days;

@@ -21,11 +21,14 @@
             </a>
             <section v-for="group, label in grouped" class="card card-xs">
                 <h1>{{ label }}</h1>
-                <table class="table table-bordered">
+                <table class="table table-bordered validations-table">
                     <thead>
                         <tr>
                             <th>{{ label }}</th>
-                            <th>Créneaux</th>
+                            <th>Type</th>
+                            <th>
+                               ~
+                            </th>
                             <th v-for="i in group.maxDays">
                                 {{i }}
                             </th>
@@ -39,11 +42,26 @@
                         <tr v-for="d in group.declarations">
                             <th>{{ d.sublabel }}</th>
                             <th>{{ d.label }}</th>
+                            <td>
+                                <small v-for="total,lot in d.totalWps" class="lot"><i class="icon-archive"></i>{{ lot }}</small>
+                                <strong class="lotsTotal">Total</strong>
+                            </td>
                             <td v-for="i in group.maxDays">
-                                <strong v-if="d.days[i]">{{ d.days[i].total | duration }}</strong>
+                                <span v-if="d.days[i]">
+                                    <small v-for="detail, wp in d.days[i].details" :title="'Total pour le lot : ' + wp" class="lot">
+                                        {{ detail | duration }}
+                                    </small>
+                                    <strong class="lotsTotal">
+                                        {{ d.days[i].total | duration }}
+                                    </strong>
+                                </span>
                                 <em v-else>-</em>
                             </td>
-                            <td>{{ d.total | duration}}</td>
+
+                            <td>
+                                <small v-for="total,lot in d.totalWps" class="lot"><i class="icon-archive"></i>{{ total | duration }}</small>
+                                <strong class="lotsTotal">{{ d.total | duration }}</strong>
+                            </td>
                             <td>
                                 <span v-if="d.validation.status == 'valid'">
                                     <i class="icon-ok-circled"></i> Validé
@@ -55,7 +73,6 @@
                                     <button class="btn btn-success btn-xs" @click="validate(d.period_id)">Valider</button>
                                     <button class="btn btn-danger btn-xs" @click="reject(d.period_id)">Rejeter</button>
                                 </span>
-
                             </td>
                         </tr>
                     </tbody>

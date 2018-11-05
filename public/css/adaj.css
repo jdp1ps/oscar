@@ -5422,6 +5422,17 @@ button.close {
     color: black;
     text-decoration: none; }
 
+.validations-table .lot, .validations-table .lotsTotal {
+  display: block;
+  text-align: right;
+  white-space: nowrap; }
+
+.validations-table .lot {
+  font-weight: 100; }
+
+.validations-table .lotsTotal {
+  font-weight: 600; }
+
 .link {
   color: #00609e;
   text-decoration: underline; }

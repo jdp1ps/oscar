@@ -79,6 +79,13 @@ timesheet:
     may_terminate: false
     child_routes:
 
+        resume:
+            type: segment
+            options:
+                route: /resume
+                defaults:
+                    action: resume
+
         declarations:
             type: segment
             options:
