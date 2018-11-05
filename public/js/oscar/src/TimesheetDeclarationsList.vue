@@ -202,6 +202,30 @@
               this.addedPerson = data;
             },
 
+            handlerDelete( type, personId ){
+              console.log("Suppression de ", personId, type, this.selectedValidation.id);
+                this.loading = "Suppression du validateur";
+
+                let datas = new FormData();
+                datas.append('person_id', personId);
+                datas.append('declaration_id', this.selectedValidation.id);
+                datas.append('action', 'delete');
+                datas.append('type', type);
+
+                this.$http.post('', datas).then(
+                    ok => {
+                        this.fetch();
+                    },
+                    ko => {
+                        this.error = AjaxResolve.resolve("Impossible de supprimer ce validateur", ko);
+                    }
+                ).then(foo => {
+                    this.selectedValidation = null;
+                    this.addedPerson = null;
+                    this.loading = false
+                });
+            },
+
             handlerConfirmAdd(type, personId){
 
                 this.loading = "Ajout du validateur";
@@ -219,6 +243,8 @@
                         this.error = AjaxResolve.resolve("Impossible d'ajouter le validateur", ko);
                     }
                 ).then(foo => {
+                    this.selectedValidation = null;
+                    this.addedPerson = null;
                     this.loading = false
                 });
             },

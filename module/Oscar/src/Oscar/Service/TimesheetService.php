@@ -44,6 +44,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get('OscarConfig');
     }
 
+
+    public function removeValidatorToValidation( $type, Person $person, ValidationPeriod $validation ){
+        switch( $type ){
+            case 'prj' :
+                $validation->getValidatorsPrj()->removeElement($person);
+                break;
+            case 'sci' :
+                $validation->getValidatorsSci()->removeElement($person);
+                break;
+            case 'adm' :
+                $validation->getValidatorsAdm()->removeElement($person);
+                break;
+            default:
+                throw new OscarException('Type de validation inconnu');
+        }
+        $this->getEntityManager()->flush($validation);
+    }
+
     public function addValidatorToValidation( $type, Person $person, ValidationPeriod $validation ){
         switch( $type ){
             case 'prj' :
