@@ -1577,10 +1577,15 @@ class TimesheetController extends AbstractOscarController
                         $this->getTimesheetService()->removeValidatorToValidation($type, $person, $validation);
                     } else {
                         $this->getTimesheetService()->addValidatorToValidation($type, $person, $validation);
+                        $return = [
+                            'person' => (string) $person,
+                            'id' => $person->getId()
+                        ];
+                        return $this->ajaxResponse($return);
                     }
 
 
-                    $this->getLogger()->debug(print_r($_POST, true));
+
                     return $this->getResponseOk();
 //                    return $this->getResponseNotImplemented("En cours d'implémentation");
 

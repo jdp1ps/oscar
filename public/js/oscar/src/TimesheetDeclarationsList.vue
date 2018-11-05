@@ -92,7 +92,7 @@
             <section class="col-md-4">
                 <div v-if="selectedValidation">
                     <h3>
-                        Validation pour les créneaux
+                        <small>Validation pour les créneaux</small><br>
                         <strong v-if="selectedValidation.object == 'activity'">
                            <i class="icon-cube"></i> {{ selectedValidation.label }}
                         </strong>
@@ -139,19 +139,15 @@
                         <ul>
                             <li v-for="p in selectedValidation.validateursAdm">
                                 <i class="icon-user"></i>{{ p.person }}
-                                <a class="link" @click.prevent.stop="handlerDelete('adm', p.id)">Supprimer</a>
+                                <a class="link" @click.prevent.stop="handlerDelete('adm', p)">Supprimer</a>
                             </li>
                         </ul>
 
                         <a class="btn btn-xs btn-primary" @click.prevent.stop="handlerAdd('adm')">Ajouter un validateur</a>
                     </div>
-
-
-                    <pre>{{ selectedValidation }}</pre>
                 </div>
             </section>
         </div>
-        <pre>TOT :{{ $data }}</pre>
     </section>
 </template>
 <script>
@@ -202,26 +198,38 @@
               this.addedPerson = data;
             },
 
-            handlerDelete( type, personId ){
-              console.log("Suppression de ", personId, type, this.selectedValidation.id);
+            handlerDelete( type, person ){
+
                 this.loading = "Suppression du validateur";
 
                 let datas = new FormData();
-                datas.append('person_id', personId);
+                datas.append('person_id', person.id);
                 datas.append('declaration_id', this.selectedValidation.id);
                 datas.append('action', 'delete');
                 datas.append('type', type);
 
                 this.$http.post('', datas).then(
                     ok => {
-                        this.fetch();
+
+                        switch( type ){
+                            case "prj":
+                                this.selectedValidation.validateursPrj.splice(this.selectedValidation.validateursPrj.indexOf(person, 1));
+                                break;
+                            case "sci":
+                                this.selectedValidation.validateursSci.splice(this.selectedValidation.validateursSci.indexOf(person, 1));
+                                break;
+                            case "adm":
+                                this.selectedValidation.validateursAdm.splice(this.selectedValidation.validateursAdm.indexOf(person, 1));
+                                break;
+                        }
                     },
                     ko => {
                         this.error = AjaxResolve.resolve("Impossible de supprimer ce validateur", ko);
+
                     }
                 ).then(foo => {
-                    this.selectedValidation = null;
                     this.addedPerson = null;
+                    this.create = null;
                     this.loading = false
                 });
             },
@@ -237,14 +245,24 @@
 
                 this.$http.post('', datas).then(
                     ok => {
-                        this.fetch();
+                        switch( type ){
+                            case "prj":
+                                this.selectedValidation.validateursPrj.push(ok.body);
+                                break;
+                            case "sci":
+                                this.selectedValidation.validateursSci.push(ok.body);
+                                break;
+                            case "adm":
+                                this.selectedValidation.validateursAdm.push(ok.body);
+                                break;
+                        }
                     },
                     ko => {
                         this.error = AjaxResolve.resolve("Impossible d'ajouter le validateur", ko);
                     }
                 ).then(foo => {
-                    this.selectedValidation = null;
                     this.addedPerson = null;
+                    this.create = null;
                     this.loading = false
                 });
             },
