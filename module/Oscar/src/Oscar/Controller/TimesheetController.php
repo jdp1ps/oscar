@@ -1557,7 +1557,25 @@ class TimesheetController extends AbstractOscarController
             switch ($method) {
                 case 'GET' :
                 $return = $this->getTimesheetService()->getDatasDeclarations();
+               // $return['validatorsEdit'] = true;
                 return $this->ajaxResponse($return);
+
+                case 'POST' :
+                    $person_id = $this->params()->fromPost('person_id');
+                    $type = $this->params()->fromPost('type');
+                    $declaration_id = $this->params()->fromPost('declaration_id');
+
+                    $validation = $this->getTimesheetService()->getValidationPeriod($declaration_id);
+                    $person = $this->getPersonService()->getPerson($person_id);
+                    if( !in_array($type, ['adm', 'sci', 'prj']) ){
+                        return $this->getResponseInternalError('Type de validation inconnu');
+                    }
+
+                    $this->getTimesheetService()->addValidatorToValidation($type, $person, $validation);
+
+                    $this->getLogger()->debug(print_r($_POST, true));
+                    return $this->getResponseOk();
+//                    return $this->getResponseNotImplemented("En cours d'implémentation");
 
                 case 'DELETE':
                     $person_id = $this->params()->fromQuery('person_id');

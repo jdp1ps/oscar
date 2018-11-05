@@ -16,6 +16,22 @@
                 </div>
             </div>
         </transition>
+
+        <transition name="fade">
+            <div class="overlay" v-show="create">
+                <div class="overlay-content">
+                    <span class="overlay-closer" @click="create = null">X</span>
+                    Choisissez une personne à ajouter :
+                    <personautocompleter @change="handlerAddPerson"/>
+
+                    <button @click="handlerConfirmAdd(create, addedPerson.id)" :class="{ 'disabled' : addedPerson == null }" class="btn btn-primary">
+                        <span v-if="addedPerson != null">Ajouter <strong>{{ addedPerson.displayname }}</strong> comme validateur</span>
+                        <span v-else>Selectionner une personne</span>
+                    </button>
+                </div>
+            </div>
+        </transition>
+
         <h1>Liste des déclarations</h1>
 
         <div class="row">
@@ -121,8 +137,13 @@
                         <strong>Validation administrative en attente</strong>
                         par l'un des validateurs suivant :
                         <ul>
-                            <li v-for="p in selectedValidation.validateursAdm"><i class="icon-user"></i>{{ p.person }}</li>
+                            <li v-for="p in selectedValidation.validateursAdm">
+                                <i class="icon-user"></i>{{ p.person }}
+                                <a class="link" @click.prevent.stop="handlerDelete('adm', p.id)">Supprimer</a>
+                            </li>
                         </ul>
+
+                        <a class="btn btn-xs btn-primary" @click.prevent.stop="handlerAdd('adm')">Ajouter un validateur</a>
                     </div>
 
 
@@ -136,6 +157,7 @@
 <script>
     // poi watch --format umd --moduleName  TimesheetDeclarationsList --filename.css TimesheetDeclarationsList.css --filename.js TimesheetDeclarationsList.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetDeclarationsList.vue
     import AjaxResolve from "./AjaxResolve";
+    import PersonAutoCompleter from "./PersonAutoCompleter";
 
 
 
@@ -145,11 +167,12 @@
         props: {
             moment: {required: true},
             bootbox: {required: true},
-            urlapi: {default: null}
+            urlapi: {default: null},
+            editable: { default: false }
         },
 
         components: {
-
+            'personautocompleter': PersonAutoCompleter
         },
 
         data() {
@@ -157,7 +180,9 @@
                 loading: null,
                 declarations: [],
                 error: null,
-                selectedValidation: null
+                selectedValidation: null,
+                create: false,
+                addedPerson: null
             }
         },
 
@@ -167,9 +192,40 @@
 
         methods: {
 
+            handlerAdd(type){
+                console.log('Type:', type);
+                this.create = type;
+            },
+
+            handlerAddPerson(data){
+              console.log("ajout", data);
+              this.addedPerson = data;
+            },
+
+            handlerConfirmAdd(type, personId){
+
+                this.loading = "Ajout du validateur";
+
+                let datas = new FormData();
+                datas.append('person_id', personId);
+                datas.append('declaration_id', this.selectedValidation.id);
+                datas.append('type', type);
+
+                this.$http.post('', datas).then(
+                    ok => {
+                        this.fetch();
+                    },
+                    ko => {
+                        this.error = AjaxResolve.resolve("Impossible d'ajouter le validateur", ko);
+                    }
+                ).then(foo => {
+                    this.loading = false
+                });
+            },
+
 
             fetch(clear = true) {
-                this.loading = "Chargement de la période";
+                this.loading = "Chargement des données";
 
                 this.$http.get('').then(
                     ok => {

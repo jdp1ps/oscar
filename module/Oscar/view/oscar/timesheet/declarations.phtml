@@ -11,7 +11,8 @@
             render: function(h){
                 return h(TimesheetDeclarationsList.default, { props: {
                         bootbox: Bootbox,
-                        moment: moment
+                        moment: moment,
+                        editable: true
                     }});
             }
         }).$mount('#app')
