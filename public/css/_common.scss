@@ -2378,8 +2378,8 @@ const STATUS_VALID      = 'valid';
 [class*="icon-status-6"]:before { content: '\e891'; }
 [class*="icon-send-sci"]:before { content: '\e891'; }
 
-[class*="icon-status-7"]:before { content: '\e87b'; }
-[class*="icon-send-adm"]:before { content: '\e87b'; }
+[class*="icon-status-7"]:before { content: '\e87a'; }
+[class*="icon-send-adm"]:before { content: '\e87a'; }
 
 /*
 span[class*="status-102"] .icon:before{ content: '\e85e '}
@@ -2401,6 +2401,13 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
       border-top: thin solid $colorGreyLight;
       display: block;
       flex: 0 0 100%;
+
+      .validators span:after {
+        content: '/';
+      }
+      .validators span:last-child:after {
+        content: '';
+      }
 
       .validation {
         display: flex;

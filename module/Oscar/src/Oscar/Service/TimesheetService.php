@@ -60,7 +60,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'period' => $period,
                     'person' => (string) $declaration->getDeclarer(),
                     'person_id' => $declaration->getDeclarer()->getId(),
-                    'declarations' => []
+                    'declarations' => [],
                 ];
             }
 
@@ -78,6 +78,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $declarationDatas = $declaration->toJson();
             $declarationDatas['label'] = $label;
+            $declarationDatas['validation'] = $declaration->getState();
 
             $output[$dataKey]['declarations'][] = $declarationDatas;
         }

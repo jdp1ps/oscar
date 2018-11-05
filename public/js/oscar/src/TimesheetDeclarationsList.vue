@@ -35,20 +35,35 @@
                     </span>
 
                     <span v-if="validation.object == 'activity'">
-                        <i class="icon-cube"></i>
-                        <span v-for="p in validation.validateursPrj">{{ p.person }}</span>
+                        <span v-if="validation.validation.validationactivity_by" class="cartouche green" title="Validation projet">
+                            <i class="icon-cube"></i>{{ validation.validation.validationactivity_by }}
+                        </span>
+                        <span v-else v-else class="validators">
+                            <i class="icon-cube"></i>
+                            <span v-for="p in validation.validateursPrj">{{ p.person }}</span>
+                        </span>
                     </span>
                     <span v-else>~</span>
 
                     <span v-if="validation.object == 'activity'">
-                        <i class="icon-beaker"></i>
-                        <span v-for="p in validation.validateursSci">{{ p.person }}</span>
+                        <span v-if="validation.validation.validationsci_by" class="cartouche green" title="Validation scientifique">
+                            <i class="icon-beaker"></i>{{ validation.validation.validationsci_by }}
+                        </span>
+                        <span v-else class="validators">
+                            <i class="icon-beaker"></i>
+                            <span v-for="p in validation.validateursSci">{{ p.person }}</span>
+                        </span>
                     </span>
                     <span v-else>~</span>
 
                     <span>
-                        <i class="icon-book"></i>
-                        <span v-for="p in validation.validateursAdm">{{ p.person }}</span>
+                        <span v-if="validation.validation.validationadm_by" class="cartouche green" title="Validation administrative">
+                            <i class="icon-book"></i>{{ validation.validation.validationadm_by }}
+                        </span>
+                        <span v-else class="validators">
+                            <i class="icon-book"></i>
+                            <span v-for="p in validation.validateursAdm">{{ p.person }}</span>
+                        </span>
                     </span>
                     <em>
                         État : <i :class="'icon-' +validation.status"></i>

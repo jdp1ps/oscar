@@ -7039,10 +7039,10 @@ const STATUS_VALID      = 'valid';
   content: '\e891'; }
 
 [class*="icon-status-7"]:before {
-  content: '\e87b'; }
+  content: '\e87a'; }
 
 [class*="icon-send-adm"]:before {
-  content: '\e87b'; }
+  content: '\e87a'; }
 
 /*
 span[class*="status-102"] .icon:before{ content: '\e85e '}
@@ -7060,6 +7060,10 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
     border-top: thin solid #888;
     display: block;
     flex: 0 0 100%; }
+    .validations-admin .declaration .validations .validators span:after {
+      content: '/'; }
+    .validations-admin .declaration .validations .validators span:last-child:after {
+      content: ''; }
     .validations-admin .declaration .validations .validation {
       display: flex; }
       .validations-admin .declaration .validations .validation > span {
