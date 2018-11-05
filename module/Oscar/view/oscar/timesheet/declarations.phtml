@@ -4,6 +4,9 @@
 <script>
     require(['vue', 'vue-resource', 'TimesheetDeclarationsList', 'bootbox', 'mm'], function (Vue, VueResource, TimesheetDeclarationsList, Bootbox, moment) {
         Vue.use(VueResource);
+        Vue.filter('humandate', function(str){
+           return moment(str).format('dddd D MMMM YYYY');
+        });
         new Vue({
             render: function(h){
                 return h(TimesheetDeclarationsList.default, { props: {

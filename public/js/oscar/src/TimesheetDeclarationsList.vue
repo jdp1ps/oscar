@@ -17,17 +17,19 @@
             </div>
         </transition>
         <h1>Liste des déclarations</h1>
-        <section v-for="line,k in declarations" class="card declaration" @click="line.open = !line.open">
+
+        <div class="row">
+            <section v-for="line,k in declarations" class="card declaration col-md-8" @click="line.open = !line.open">
             <strong>{{ line.person }}</strong> <time>{{ line.period }}</time>
 
             <span class="validations-icon">
                 <i class="icon" :class="'icon-' +d.status" v-for="d in line.declarations" :title="d.label"></i>
             </span>
             <nav>
-                <a href="#" class="btn btn-danger btn-xs" @click="handlerCancelDeclaration(line)"> <i class="icon-trash"></i>Annuler cette déclaration</a>
+                <a href="#" class="btn btn-danger btn-xs" @click.prevent.stop="handlerCancelDeclaration(line)"> <i class="icon-trash"></i>Annuler cette déclaration</a>
             </nav>
             <section class="validations text-small" v-show="line.open">
-                <article v-for="validation in line.declarations" class="validation">
+                <article v-for="validation in line.declarations" class="validation" @click.prevent.stop="selectedValidation = validation">
 
                     <span>
                         <i :class="validation.object == 'activity' ? 'icon-cube' : 'icon-tag'"></i>
@@ -71,6 +73,63 @@
                 </article>
             </section>
         </section>
+            <section class="col-md-4">
+                <div v-if="selectedValidation">
+                    <h3>
+                        Validation pour les créneaux
+                        <strong v-if="selectedValidation.object == 'activity'">
+                           <i class="icon-cube"></i> {{ selectedValidation.label }}
+                        </strong>
+                        <strong v-else>
+                            <i :class="'icon-' +selectedValidation.object"></i> {{ selectedValidation.label }}
+                        </strong>
+                    </h3>
+
+                    <div v-if="selectedValidation.object == 'activity'">
+
+                        <div v-if="selectedValidation.validation.validationactivity_by" class="card">
+                            Validation projet par <strong><i class="icon-user"></i>{{ selectedValidation.validation.validationactivity_by }}</strong> le
+                            <time>{{ selectedValidation.validation.validationactivity_at | humandate }}</time>
+                        </div>
+                        <div v-else class="card">
+                            <strong>Validation projet en attente</strong>
+                            par l'un des validateurs suivant :
+                            <ul>
+                                <li v-for="p in selectedValidation.validateursPrj"><i class="icon-user"></i>{{ p.person }}</li>
+                            </ul>
+                        </div>
+
+                        <div v-if="selectedValidation.validation.validationsci_by" class="card">
+                            Validation scientifique par <strong><i class="icon-user"></i>{{ selectedValidation.validation.validationsci_by }}</strong> le
+                            <time>{{ selectedValidation.validation.validationsci_at | humandate }}</time>
+                        </div>
+                        <div v-else class="card">
+                            <strong>Validation scientifique en attente</strong>
+                            par l'un des validateurs suivant :
+                            <ul>
+                                <li v-for="p in selectedValidation.validateursSci"><i class="icon-user"></i>{{ p.person }}</li>
+                            </ul>
+                        </div>
+
+                    </div>
+
+                    <div v-if="selectedValidation.validation.validationadm_by" class="card">
+                        Validation administrative par <strong><i class="icon-user"></i>{{ selectedValidation.validation.validationadm_by }}</strong> le
+                        <time>{{ selectedValidation.validation.validationadm_at | humandate }}</time>
+                    </div>
+                    <div v-else class="card">
+                        <strong>Validation administrative en attente</strong>
+                        par l'un des validateurs suivant :
+                        <ul>
+                            <li v-for="p in selectedValidation.validateursAdm"><i class="icon-user"></i>{{ p.person }}</li>
+                        </ul>
+                    </div>
+
+
+                    <pre>{{ selectedValidation }}</pre>
+                </div>
+            </section>
+        </div>
         <pre>TOT :{{ $data }}</pre>
     </section>
 </template>
@@ -97,7 +156,8 @@
             return {
                 loading: null,
                 declarations: [],
-                error: null
+                error: null,
+                selectedValidation: null
             }
         },
 
