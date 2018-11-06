@@ -94,7 +94,7 @@
                 </section>
             </section>
             <section class="col-md-4">
-                <div v-if="selectedValidation">
+                <div v-if="selectedValidation" class="validation-details">
                     <h3>
                         <small>Validation pour les créneaux</small><br>
                         <strong v-if="selectedValidation.object == 'activity'">
@@ -110,12 +110,19 @@
                     </h3>
 
                     <div v-if="selectedValidation.object == 'activity'">
-
-                        <div v-if="selectedValidation.validation.validationactivity_by" class="card">
+                        <!-- Validation niveau projet -->
+                        <div v-if="selectedValidation.validation.validationactivity_by" class="card valid">
+                            <i class="icon-ok-circled"></i>
                             Validation projet par <strong><i class="icon-user"></i>{{ selectedValidation.validation.validationactivity_by }}</strong> le
                             <time>{{ selectedValidation.validation.validationactivity_at | humandate }}</time>
                         </div>
-                        <div v-else class="card">
+                        <div v-else-if="selectedValidation.validation.rejectactivity_by" class="card reject">
+                            <i class="icon-attention-circled"></i>
+                            Rejet des créneaux par <strong><i class="icon-user"></i>{{ selectedValidation.validation.rejectactivity_by }}</strong> le
+                            <time>{{ selectedValidation.validation.rejectactivity_at | humandate }}</time> :
+                            <pre>{{ selectedValidation.validation.rejectactivity_message }}</pre>
+                        </div>
+                        <div v-else class="card waiting">
                             <strong>Validation projet en attente</strong>
                             par l'un des validateurs suivant :
                             <ul>
@@ -127,11 +134,18 @@
                             <a class="btn btn-xs btn-primary" @click.prevent.stop="handlerAdd('prj')">Ajouter un validateur</a>
                         </div>
 
-                        <div v-if="selectedValidation.validation.validationsci_by" class="card">
+                        <div v-if="selectedValidation.validation.validationsci_by" class="card valid">
                             Validation scientifique par <strong><i class="icon-user"></i>{{ selectedValidation.validation.validationsci_by }}</strong> le
                             <time>{{ selectedValidation.validation.validationsci_at | humandate }}</time>
+
                         </div>
-                        <div v-else class="card">
+                        <div v-else-if="selectedValidation.validation.rejectsci_by" class="card reject">
+                            <i class="icon-attention-circled"></i>
+                            Rejet scientifique des créneaux par <strong><i class="icon-user"></i>{{ selectedValidation.validation.rejectsci_by }}</strong> le
+                            <time>{{ selectedValidation.validation.rejectsci_at | humandate }}</time>
+                            <pre>{{ selectedValidation.validation.rejectsci_message }}</pre>
+                        </div>
+                        <div v-else class="card waiting">
                             <strong>Validation scientifique en attente</strong>
                             par l'un des validateurs suivant :
                             <ul>
@@ -144,11 +158,17 @@
                         </div>
                     </div>
 
-                    <div v-if="selectedValidation.validation.validationadm_by" class="card">
+                    <div v-if="selectedValidation.validation.validationadm_by" class="card valid">
                         Validation administrative par <strong><i class="icon-user"></i>{{ selectedValidation.validation.validationadm_by }}</strong> le
                         <time>{{ selectedValidation.validation.validationadm_at | humandate }}</time>
                     </div>
-                    <div v-else class="card">
+                    <div v-else-if="selectedValidation.validation.rejectadm_by" class="card reject">
+                        <i class="icon-attention-circled"></i>
+                        Rejet administrative des créneaux par <strong><i class="icon-user"></i>{{ selectedValidation.validation.rejectadm_by }}</strong> le
+                        <time>{{ selectedValidation.validation.rejectadm_at | humandate }}</time>
+                        <pre>{{ selectedValidation.validation.validationadm_message }}</pre>
+                    </div>
+                    <div v-else class="card waiting">
                         <strong>Validation administrative en attente</strong>
                         par l'un des validateurs suivant :
                         <ul>
@@ -159,6 +179,7 @@
                         </ul>
                         <a class="btn btn-xs btn-primary" @click.prevent.stop="handlerAdd('adm')">Ajouter un validateur</a>
                     </div>
+
                     <pre>{{ selectedValidation }}</pre>
                 </div>
             </section>

@@ -406,6 +406,44 @@ class ValidationPeriod
             ->setStatus(self::STATUS_VALID);
     }
 
+    // ---
+
+    public function setRejectActivity(Person $validateur, $when, $message = ""){
+        $this->setRejectActivityMessage($message)
+            ->setRejectActivityBy((string)$validateur)
+            ->setRejectActivityById($validateur->getId())
+            ->setRejectActivityAt($when)
+            ->setStatus(self::STATUS_CONFLICT);
+    }
+
+    public function setRejectSci(Person $validateur, $when, $message = ""){
+        $this->setRejectSciMessage($message)
+            ->setRejectSciBy((string)$validateur)
+            ->setRejectSciById($validateur->getId())
+            ->setRejectSciAt($when)
+            ->setStatus(self::STATUS_CONFLICT);
+    }
+
+    public function setRejectAdm(Person $validateur, $when, $message = ""){
+        $this->setRejectAdmMessage($message)
+            ->setRejectAdmBy((string)$validateur)
+            ->setRejectAdmById($validateur->getId())
+            ->setRejectAdmAt($when)
+            ->setStatus(self::STATUS_CONFLICT);
+    }
+
+
+
+//$period->setRejectActivity($validateur, new \DateTime(), $message);
+//break;
+//
+//case ValidationPeriod::STATUS_STEP2:
+//$period->setRejectSci($validateur, new \DateTime(), $message);
+//break;
+//
+//case ValidationPeriod::STATUS_STEP3:
+//$period->setRejectAdm($validateur, new \DateTime(), $message);
+
     /**
      * Peut être validé niveau projet par la personne.
      *

@@ -2427,6 +2427,20 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 }
 
 
+.validation-details {
+  .waiting {
+    border-left: solid $colorGreyMedium 4px;
+  }
+
+  .valid {
+    border-left: solid $colorGreen 4px;
+  }
+
+  .reject {
+    border-left: solid $colorRed 4px;
+  }
+}
+
 
 .validations-admin {
   .declaration {

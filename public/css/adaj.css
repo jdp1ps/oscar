@@ -7084,6 +7084,15 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
   font-size: 8px;
   font-weight: 100; }
 
+.validation-details .waiting {
+  border-left: solid #999 4px; }
+
+.validation-details .valid {
+  border-left: solid #499D1F 4px; }
+
+.validation-details .reject {
+  border-left: solid #DD423E 4px; }
+
 .validations-admin .declaration {
   display: flex;
   flex-wrap: wrap; }

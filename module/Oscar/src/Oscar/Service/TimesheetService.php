@@ -2368,6 +2368,31 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
     }
 
+    public function reject( ValidationPeriod $period, Person $validateur, $message="" ){
+        if($period->isValidator($validateur)){
+            switch($period->getStatus()){
+                case ValidationPeriod::STATUS_STEP1:
+                    $period->setRejectActivity($validateur, new \DateTime(), $message);
+                    break;
+
+                case ValidationPeriod::STATUS_STEP2:
+                    $period->setRejectSci($validateur, new \DateTime(), $message);
+                    break;
+
+                case ValidationPeriod::STATUS_STEP3:
+                    $period->setRejectAdm($validateur, new \DateTime(), $message);
+                    break;
+
+                default:
+                    throw new OscarException("Cette période n'a pas le bon status pour être validée.");
+            }
+            $this->getEntityManager()->flush($period);
+            return true;
+        } else {
+            throw new OscarException("Vous n'êtes pas autorisé à valider pour cette étape de validation");
+        }
+    }
+
     /**
      * @param $sender
      * @param $year
