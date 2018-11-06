@@ -15,7 +15,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 ## Administration
  - Le script de test de configuration a été mis à jour
  - Le script de test des mails a été amélioré
- - Correction de bug dans
+ - Correction de bugs
 
 
 ## Importation
