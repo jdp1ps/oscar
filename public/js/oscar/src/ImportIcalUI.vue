@@ -1,8 +1,6 @@
 <template>
     <section class="oscar-ui import-ical">
         <h1>Imporation de calendrier</h1>
-
-        <pre>{{ exists }}</pre>
         <div class="overlay" v-if="debug">
             <div class="overlay-content">
                 <a href="#" @click="debug = null">CLOSE</a>
