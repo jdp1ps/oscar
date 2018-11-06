@@ -2389,6 +2389,44 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
   border-top: $colorLight 2px solid;
 }
 
+.choose {
+  background: white;
+  border: solid thin #eee;
+  box-shadow: -8px 8px 8px rgba(0,0,0,.3);
+}
+
+.choice {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  cursor: pointer;
+
+  &:hover {
+    background: lighten($colorBlue, 30%);
+  }
+}
+.choice > img {
+  flex: 0 0 30px;
+}
+.choice .infos {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  margin: 0;
+  padding: 0 4px;
+  border-bottom: solid thin #eee;
+}
+.choice .infos small, .choice .infos strong {
+  padding: 0 1em;
+}
+.choice .infos small {
+  font-size: 8px;
+  font-weight: 100;
+}
+
+
 
 .validations-admin {
   .declaration {
@@ -2397,6 +2435,12 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
     > * {
       flex: 1;
     }
+
+    .opener {
+      flex: 0 1 auto;
+      cursor: pointer;
+    }
+
     .validations {
       border-top: thin solid $colorGreyLight;
       display: block;
@@ -2404,6 +2448,7 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 
       .validators span:after {
         content: '/';
+        color: #eee;
       }
       .validators span:last-child:after {
         content: '';
@@ -2411,12 +2456,30 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
 
       .validation {
         display: flex;
+        align-items: center;
+        cursor: pointer;
+
+
+
+        &.selected {
+          background: lighten($colorBlue, 30%);
+        }
+
+        border-bottom: thin solid $colorGreyUltraLight;
+
         >span {
           flex: 1;
+          border-right: thin dotted $colorGreyUltraLight;
+          padding: 2px 4px;
         }
+
         em {
-          flex: 0 0 150px;
+          flex: 0 1 auto;
           margin: auto;
+        }
+
+        &:hover {
+          background: lighten($colorBlue, 40%);
         }
       }
 

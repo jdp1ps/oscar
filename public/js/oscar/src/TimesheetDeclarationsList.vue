@@ -19,7 +19,7 @@
 
         <transition name="fade">
             <div class="overlay" v-show="create">
-                <div class="overlay-content">
+                <div class="overlay-content" style="overflow-y: visible">
                     <span class="overlay-closer" @click="create = null">X</span>
                     Choisissez une personne à ajouter :
                     <personautocompleter @change="handlerAddPerson"/>
@@ -35,60 +35,64 @@
         <h1>Liste des déclarations</h1>
 
         <div class="row">
-            <section v-for="line,k in declarations" class="card declaration col-md-8" @click="line.open = !line.open">
-            <strong>{{ line.person }}</strong> <time>{{ line.period }}</time>
-
-            <span class="validations-icon">
-                <i class="icon" :class="'icon-' +d.status" v-for="d in line.declarations" :title="d.label"></i>
-            </span>
-            <nav>
-                <a href="#" class="btn btn-danger btn-xs" @click.prevent.stop="handlerCancelDeclaration(line)"> <i class="icon-trash"></i>Annuler cette déclaration</a>
-            </nav>
-            <section class="validations text-small" v-show="line.open">
-                <article v-for="validation in line.declarations" class="validation" @click.prevent.stop="selectedValidation = validation">
-
-                    <span>
-                        <i :class="validation.object == 'activity' ? 'icon-cube' : 'icon-tag'"></i>
-                        <strong>{{ validation.label }}</strong>
+            <section class="col-md-8">
+                <section v-for="line,k in declarations" class="card declaration" @click="line.open = !line.open">
+                    <span class="opener">
+                        <i class="icon-angle-down" v-if="line.open"></i>
+                        <i class="icon-angle-right" v-else></i>
                     </span>
-
-                    <span v-if="validation.object == 'activity'">
-                        <span v-if="validation.validation.validationactivity_by" class="cartouche green" title="Validation projet">
-                            <i class="icon-cube"></i>{{ validation.validation.validationactivity_by }}
-                        </span>
-                        <span v-else v-else class="validators">
-                            <i class="icon-cube"></i>
-                            <span v-for="p in validation.validateursPrj">{{ p.person }}</span>
-                        </span>
+                    <strong>{{ line.person }}</strong> <time>{{ line.period | period }}</time>
+                    <span class="validations-icon">
+                        <i class="icon" :class="'icon-' +d.status" v-for="d in line.declarations" :title="d.label"></i>
                     </span>
-                    <span v-else>~</span>
+                    <nav>
+                        <a href="#" class="btn btn-danger btn-xs" @click.prevent.stop="handlerCancelDeclaration(line)"> <i class="icon-trash"></i>Annuler cette déclaration</a>
+                    </nav>
+                    <section class="validations text-small" v-show="line.open">
+                        <article v-for="validation in line.declarations" class="validation" @click.prevent.stop="selectedValidation = validation" :class="{ 'selected': selectedValidation == validation }">
+                            <span>
+                                <i :class="validation.object == 'activity' ? 'icon-cube' : 'icon-tag'"></i>
+                                <strong>{{ validation.label }}</strong>
+                            </span>
 
-                    <span v-if="validation.object == 'activity'">
-                        <span v-if="validation.validation.validationsci_by" class="cartouche green" title="Validation scientifique">
-                            <i class="icon-beaker"></i>{{ validation.validation.validationsci_by }}
-                        </span>
-                        <span v-else class="validators">
-                            <i class="icon-beaker"></i>
-                            <span v-for="p in validation.validateursSci">{{ p.person }}</span>
-                        </span>
-                    </span>
-                    <span v-else>~</span>
+                            <span v-if="validation.object == 'activity'">
+                                <span v-if="validation.validation.validationactivity_by" class="cartouche green" title="Validation projet">
+                                    <i class="icon-cube"></i>{{ validation.validation.validationactivity_by }}
+                                </span>
+                                <span v-else v-else class="validators">
+                                    <i class="icon-cube"></i>
+                                    <span v-for="p in validation.validateursPrj">{{ p.person }}</span>
+                                </span>
+                            </span>
+                            <span v-else>~</span>
 
-                    <span>
-                        <span v-if="validation.validation.validationadm_by" class="cartouche green" title="Validation administrative">
-                            <i class="icon-book"></i>{{ validation.validation.validationadm_by }}
-                        </span>
-                        <span v-else class="validators">
-                            <i class="icon-book"></i>
-                            <span v-for="p in validation.validateursAdm">{{ p.person }}</span>
-                        </span>
-                    </span>
-                    <em>
-                        État : <i :class="'icon-' +validation.status"></i>
-                    </em>
-                </article>
+                            <span v-if="validation.object == 'activity'">
+                                <span v-if="validation.validation.validationsci_by" class="cartouche green" title="Validation scientifique">
+                                    <i class="icon-beaker"></i>{{ validation.validation.validationsci_by }}
+                                </span>
+                                <span v-else class="validators">
+                                    <i class="icon-beaker"></i>
+                                    <span v-for="p in validation.validateursSci">{{ p.person }}</span>
+                                </span>
+                            </span>
+                            <span v-else>~</span>
+
+                            <span>
+                                <span v-if="validation.validation.validationadm_by" class="cartouche green" title="Validation administrative">
+                                    <i class="icon-book"></i>{{ validation.validation.validationadm_by }}
+                                </span>
+                                <span v-else class="validators">
+                                    <i class="icon-book"></i>
+                                    <span v-for="p in validation.validateursAdm">{{ p.person }}</span>
+                                </span>
+                            </span>
+                            <em>
+                                <i :class="'icon-' +validation.status"></i>
+                            </em>
+                        </article>
+                    </section>
+                </section>
             </section>
-        </section>
             <section class="col-md-4">
                 <div v-if="selectedValidation">
                     <h3>
@@ -98,7 +102,11 @@
                         </strong>
                         <strong v-else>
                             <i :class="'icon-' +selectedValidation.object"></i> {{ selectedValidation.label }}
-                        </strong>
+                        </strong><br>
+                        <small>
+                            de <strong>{{ selectedValidation.person }}</strong>
+                            en <strong>{{ selectedValidation.period | period }}</strong>
+                        </small>
                     </h3>
 
                     <div v-if="selectedValidation.object == 'activity'">
@@ -111,8 +119,12 @@
                             <strong>Validation projet en attente</strong>
                             par l'un des validateurs suivant :
                             <ul>
-                                <li v-for="p in selectedValidation.validateursPrj"><i class="icon-user"></i>{{ p.person }}</li>
+                                <li v-for="p in selectedValidation.validateursPrj">
+                                    <i class="icon-user"></i>{{ p.person }}
+                                    <a class="link" @click.prevent.stop="handlerDelete('prj', p)"><i class="icon-trash"></i> Supprimer</a>
+                                </li>
                             </ul>
+                            <a class="btn btn-xs btn-primary" @click.prevent.stop="handlerAdd('prj')">Ajouter un validateur</a>
                         </div>
 
                         <div v-if="selectedValidation.validation.validationsci_by" class="card">
@@ -123,10 +135,13 @@
                             <strong>Validation scientifique en attente</strong>
                             par l'un des validateurs suivant :
                             <ul>
-                                <li v-for="p in selectedValidation.validateursSci"><i class="icon-user"></i>{{ p.person }}</li>
+                                <li v-for="p in selectedValidation.validateursSci">
+                                    <i class="icon-user"></i>{{ p.person }}
+                                    <a class="link" @click.prevent.stop="handlerDelete('sci', p)"><i class="icon-trash"></i> Supprimer</a>
+                                </li>
                             </ul>
+                            <a class="btn btn-xs btn-primary" @click.prevent.stop="handlerAdd('sci')">Ajouter un validateur</a>
                         </div>
-
                     </div>
 
                     <div v-if="selectedValidation.validation.validationadm_by" class="card">
@@ -139,12 +154,12 @@
                         <ul>
                             <li v-for="p in selectedValidation.validateursAdm">
                                 <i class="icon-user"></i>{{ p.person }}
-                                <a class="link" @click.prevent.stop="handlerDelete('adm', p)">Supprimer</a>
+                                <a class="link" @click.prevent.stop="handlerDelete('adm', p)"><i class="icon-trash"></i> Supprimer</a>
                             </li>
                         </ul>
-
                         <a class="btn btn-xs btn-primary" @click.prevent.stop="handlerAdd('adm')">Ajouter un validateur</a>
                     </div>
+                    <pre>{{ selectedValidation }}</pre>
                 </div>
             </section>
         </div>

@@ -57,32 +57,3 @@
         }
     }
 </script>
-<style>
-    .choice {
-        display: flex;
-        flex-direction: row;
-        align-items: stretch;
-        width: 100%;
-        background: white;
-    }
-    .choice > img {
-        flex: 0 0 50px;
-    }
-    .search-item .infos {
-        font-size: 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        padding-left: 1em;
-    }
-    .search-item .infos small, .search-item .infos strong {
-        padding: 0 1em;
-    }
-    .search-item .infos small {
-        font-size: 8px;
-        font-weight: 100;
-    }
-</style>
