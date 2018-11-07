@@ -218,6 +218,33 @@
         <div class="cols two">
 
             <section class="col">
+
+                <?php if($this->grant(\Oscar\Provider\Privileges::PERSON_MANAGE_SCHEDULE)): ?>
+                <h2><i class="icon-clock"></i> Horaires</h2>
+                <div id="manage-schelude"></div>
+                    <script>
+                        require(['vue', 'vue-resource', 'mm', 'PersonSchelude'], function(Vue, VueResource, moment, PersonSchelude){
+                           new Vue({
+                               'el': '#manage-schelude'
+                           })
+                        });
+                    </script>
+                <p>
+                    Durée d'une journée normale : <strong><?= $schedule['value'] ?></strong><br>
+                    Maximum authorisé pour une journée : <strong><?= $schedule['max'] ?></strong><br>
+                    Minimum requis pour une journée : <strong><?= $schedule['min'] ?></strong><br>
+                </p>
+                <?php
+                    $days  = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+                    foreach ($days as $index=>$day): ?>
+                    <article class="card xs">
+                        <strong><?= $day ?></strong>
+                        <em><?= $schedule['days'][$index+1] ?></em>
+                    </article>
+                <?php endforeach; ?>
+                <?php  endif; ?>
+
+
                 <h2><i class="icon-building-filled"></i> Structures</h2>
 
                 <?php if( count($entity->getOrganizations()) ): ?>
@@ -396,6 +423,4 @@
     </div>
 </section>
 
-<script src="<?= $this->basePath() . '/js/vendor/requirejs/require.js' ?>"></script>
-<script src="<?= $this->basePath() . '/js/oscar-config.js' ?>"></script>
 

@@ -29,6 +29,7 @@ use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Person\SyncPersonHarpege;
 use Oscar\Service\PersonnelService;
 use Oscar\Service\PersonService;
+use Oscar\Service\TimesheetService;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
@@ -47,13 +48,6 @@ class PersonController extends AbstractOscarController
     {
         $this->getResponseDeprecated();
     }
-
-    public function personFusionAction()
-    {
-
-    }
-
-
 
     public function viewsAction()
     {
@@ -554,8 +548,11 @@ class PersonController extends AbstractOscarController
         $referents = $this->getPersonService()->getReferentsPerson($person);
         $subordinates = $this->getPersonService()->getSubordinatesPerson($person);
 
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
         return [
+            'schedule'  => $timesheetService->getDayLengthPerson($person),
             'entity' => $person,
             'ldapRoles' => $roles,
             'referents' => $referents,

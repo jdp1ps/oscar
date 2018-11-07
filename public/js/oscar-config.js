@@ -74,7 +74,8 @@ requirejs.config({
         'DeclarersList' : 'oscar/dist/DeclarersList',
         'ImportIcalUI' : 'oscar/dist/ImportIcalUI',
         'PeriodSelector' : 'oscar/dist/PeriodSelector',
-        'TimesheetDeclarationsList' : 'oscar/dist/TimesheetDeclarationsList'
+        'TimesheetDeclarationsList' : 'oscar/dist/TimesheetDeclarationsList',
+        'PersonSchelude' : 'oscar/dist/PersonSchelude',
     },
     shim: {
         "bootstrap": {

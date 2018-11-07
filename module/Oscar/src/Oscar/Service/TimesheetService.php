@@ -37,6 +37,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
     /**
+     * Retourne la configuration OSCAR.
+     *
      * @return ConfigurationParser
      */
     protected function getOscarConfig()
@@ -44,7 +46,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getServiceLocator()->get('OscarConfig');
     }
 
-
+    /**
+     * Supprimer la Person $person de  la validation.
+     *
+     * @param $type prj|sci|adm
+     * @param Person $person
+     * @param ValidationPeriod $validation
+     * @throws OscarException
+     */
     public function removeValidatorToValidation( $type, Person $person, ValidationPeriod $validation ){
         switch( $type ){
             case 'prj' :
@@ -62,6 +71,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->getEntityManager()->flush($validation);
     }
 
+    /**
+     * Ajoute la Person $person à la validation.
+     *
+     * @param $type
+     * @param Person $person
+     * @param ValidationPeriod $validation
+     * @throws OscarException
+     */
     public function addValidatorToValidation( $type, Person $person, ValidationPeriod $validation ){
         switch( $type ){
             case 'prj' :
@@ -148,6 +165,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// SYSTEME DE VALIDATION
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public function validationSci(ValidationPeriod $validationPeriod, Person $validator, $message = '')
     {
         if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP2) {
@@ -155,18 +178,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         $log = $validationPeriod->getLog();
+
         $person = (string)$validator;
-        $date = new \DateTime();
-        $msg = $date->format('Y-m-d H:i:s') . " : Validation SCIENTIFIQUE par $person\n";
-        $log .= $msg;
+        $msg = sprintf('Validation scientifique par %s', $person);
+
         $this->getLogger()->debug($msg);
 
         $validationPeriod->setLog($log);
         $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP3);
-        $validationPeriod->setValidationSciAt($date)
+        $validationPeriod->setValidationSciAt(new \DateTime())
             ->setValidationSciBy((string)$validator)
             ->setValidationSciById($validator->getId())
-            ->setValidationSciMessage($message);
+            ->setValidationSciMessage($message)
+            ->addLog($msg, $person);
 
         $this->getEntityManager()->flush($validationPeriod);
 
@@ -176,7 +200,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function validationAdm(ValidationPeriod $validationPeriod, Person $validator, $message = '')
     {
-        $this->getLogger()->debug($validationPeriod->getObjectGroup() . " == " . ValidationPeriod::GROUP_OTHER);
+
         if ($validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER) {
             if (!in_array($validationPeriod->getStatus(), [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP3])) {
                 throw new OscarException("Vous ne pouvez pas valider cette période (erreur de status - " . $validationPeriod->getStatus() . ").");
@@ -550,13 +574,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     /// ACCÉS aux CONFIGURATION HORAIRES
     ///
 
-
-    public function getDeclarationConfigurationPerson(Person $person)
-    {
-        $conf = new ConfigurationMergable($this->getOscarConfig()->getConfiguration('declarationsDurations'));
-
-    }
-
     /**
      * @param $idPeriod
      * @return null|ValidationPeriod
@@ -856,18 +873,36 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @return mixed
      * @throws OscarException
      */
-    public function getDayDuration(Person $person)
+    public function getDayDuration(Person $person, $day=null)
     {
-        return $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value');
+        $config = $this->getDayLengthPerson($person);
+        $day = (string)$day;
+        if( array_key_exists($day, $config['days']) ){
+            return $config['days'][$day];
+        } else {
+            return $config['value'];
+        }
     }
 
-    public function getDayMaxLengthPerson(Person $person)
+    public function getDayMaxLengthPerson(Person $person, $day=null)
     {
-        return $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.max');
+        $config = $this->getDayLengthPerson($person);
+        return $config['max'];
     }
-    public function getDayMinLengthPerson(Person $person)
+
+    public function getDayMinLengthPerson(Person $person, $day=null)
     {
-        return $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.min');
+        $config = $this->getDayLengthPerson($person);
+        return $config['min'];
+    }
+
+
+    public function getDayLengthPerson( Person $person ){
+        $configApp =  $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength');
+
+        // todo Récupération des horaires spécifiques de la personne
+
+        return $configApp;
     }
 
     public function getMonthDuration(Person $person, $year, $month)
@@ -899,11 +934,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
         for ($i = $decaleDay; $i < $nbr + $decaleDay; $i++) {
-            $duration = $this->getDayDuration($person);
-            $maxlength = $this->getDayMaxLengthPerson($person);
-            $minlength = $this->getDayMinLengthPerson($person);
             $day = $i - $decaleDay + 1;
             $dayIndex = ($i % 7);
+            $duration = $this->getDayDuration($person, $dayIndex+1);
+            $maxlength = $this->getDayMaxLengthPerson($person, $dayIndex+1);
+            $minlength = $this->getDayMinLengthPerson($person, $dayIndex+1);
+
+
             $close = false;
             $infos = "";
             $dayKey = $day < 10 ? '0' . $day : "".$day;

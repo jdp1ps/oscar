@@ -432,18 +432,6 @@ class ValidationPeriod
             ->setStatus(self::STATUS_CONFLICT);
     }
 
-
-
-//$period->setRejectActivity($validateur, new \DateTime(), $message);
-//break;
-//
-//case ValidationPeriod::STATUS_STEP2:
-//$period->setRejectSci($validateur, new \DateTime(), $message);
-//break;
-//
-//case ValidationPeriod::STATUS_STEP3:
-//$period->setRejectAdm($validateur, new \DateTime(), $message);
-
     /**
      * Peut être validé niveau projet par la personne.
      *
@@ -1117,6 +1105,7 @@ class ValidationPeriod
         $msg = $date->format(sprintf('Y-m-d H:i:s %s %s', $by, $message));
         $log .= $msg."\n";
         $this->setLog($log);
+        return $this;
     }
 
     public function getState()
@@ -1149,8 +1138,6 @@ class ValidationPeriod
             'rejectadm_by' => $this->getRejectAdmBy(),
             'rejectadm_at' => $this->getRejectAdmAt() ? $this->getRejectAdmAt()->format('Y-m-d') : null,
             'rejectadm_message' => $this->getRejectAdmMessage(),
-
-
         ];
     }
 
