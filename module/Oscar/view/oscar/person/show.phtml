@@ -219,7 +219,7 @@
 
             <section class="col">
 
-                <?php if($this->grant(\Oscar\Provider\Privileges::PERSON_MANAGE_SCHEDULE)): ?>
+                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_MANAGE_SCHEDULE)): ?>
                 <h2><i class="icon-clock"></i> Horaires</h2>
                 <div id="manage-schelude"></div>
                     <script>
