@@ -167,6 +167,12 @@ class Person implements ResourceInterface
      */
     protected $ldapMemberOf;
 
+    /**
+     * @var
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $customSettings;
+
 
     function __construct()    {
         $this->projectAffectations = new ArrayCollection();
@@ -189,6 +195,42 @@ class Person implements ResourceInterface
         }
         return false;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCustomSettings()
+    {
+        return $this->customSettings;
+    }
+
+    /**
+     * @param mixed $customSettings
+     */
+    public function setCustomSettings($customSettings)
+    {
+        $this->customSettings = $customSettings;
+        return $this;
+    }
+
+    public function getCustomSettingsObj(){
+        return json_decode($this->getCustomSettings(), JSON_OBJECT_AS_ARRAY);
+    }
+
+    public function getCustomSettingsKey( $key ){
+        $custom = $this->getCustomSettingsObj();
+        if( array_key_exists($key, $custom) ){
+            return $custom[$key];
+        }
+        return null;
+    }
+
+    public function setCustomSettingsObj( $datas ){
+        $this->setCustomSettings(json_encode($datas));
+        return $this;
+    }
+
+
 
     public function getRolesFromConnector( $connectorName ){
 //        $roles = [];

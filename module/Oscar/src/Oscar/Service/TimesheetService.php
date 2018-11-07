@@ -899,9 +899,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function getDayLengthPerson( Person $person ){
         $configApp =  $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength');
-
-        // todo Récupération des horaires spécifiques de la personne
-
+        if( $person->getCustomSettingsKey('days') ){
+            $customDays = $person->getCustomSettingsKey('days');
+            foreach ($customDays as $day=>$value) {
+                $configApp['days'][$day] = $value;
+            }
+        }
         return $configApp;
     }
 
@@ -929,7 +932,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $daysLabels = [];
 
         $weekendAllowed = $this->getOscarConfig()->getConfiguration('declarationsWeekend') == false;
-        $daysDetails = $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.days');
+        $daysDetails = $this->getDayLengthPerson($person);
 
 
 

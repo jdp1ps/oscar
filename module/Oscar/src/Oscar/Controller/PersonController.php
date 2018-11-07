@@ -27,6 +27,7 @@ use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Person\SyncPersonHarpege;
+use Oscar\Provider\Privileges;
 use Oscar\Service\PersonnelService;
 use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
@@ -508,7 +509,29 @@ class PersonController extends AbstractOscarController
                     $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
                     if( $method == "POST" ){
-                        return $this->getResponseInternalError("Pas encore implémenté");
+                        $this->getOscarUserContext()->check(Privileges::PERSON_MANAGE_SCHEDULE);
+
+                        try {
+                            $daysLength = json_decode($this->params()->fromPost('days'));
+                            $allowDays = ['1', '2', '3', '4', '5'];
+
+                            // Tester l'authorisation de déclarer le weekend
+                            $datas = ['days' => []];
+                            foreach ($daysLength as $day=>$duration) {
+                                if( in_array($day, $allowDays) ){
+                                    $value = floatval($duration);
+                                    if( is_float($value) ){
+                                        $datas['days'][$day] = $value;
+                                    }
+                                }
+                            }
+
+                            $person->setCustomSettingsObj($datas);
+                            $this->getEntityManager()->flush($person);
+                        } catch (\Exception $e) {
+                            return $this->getResponseInternalError("Impossible d'enregistrer les paramètres : " . $e->getMessage());
+                        }
+                        return $this->getResponseOk();
                     }
 
                     $datas = $timesheetService->getDayLengthPerson($person);

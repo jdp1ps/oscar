@@ -87,7 +87,7 @@ class PublicController extends AbstractOscarController
             'subordinates' => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
             'managers' => $this->getPersonService()->getManagers( $this->getCurrentPerson()),
             'subordonates' => $this->getPersonService()->getSubordinates( $this->getCurrentPerson()),
-            'declarationsConfiguration' => $timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
+            'declarationsConfiguration' => null, //$timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
             'person' => $this->getCurrentPerson(),
             'declarationsHours' => $declarationsHours,
             'declarationsHoursOverwriteByAuth' => $declarationsHoursOverwriteByAuth,

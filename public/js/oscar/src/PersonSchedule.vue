@@ -101,8 +101,7 @@
             handlerSaveDays(){
                 this.loading = "Enregistrement des horaires";
                 let datas = new FormData();
-                datas.append('days', this.days);
-                //datas.append('action', 'savedays');
+                datas.append('days', JSON.stringify(this.days));
 
                 this.$http.post(this.urlapi, datas).then(
                     ok => {
