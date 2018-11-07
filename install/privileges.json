@@ -288,6 +288,8 @@
   },
 
 
+
+
   "PERSON-SHOW": {
     "category_id": 3,
     "spot": 4,
@@ -295,6 +297,7 @@
     "libelle": "Voir la fiche d'une personne",
     "fullcode": "PERSON-SHOW"
   },
+
   "PERSON-PROJECTS": {
     "category_id": 3,
     "root": "PERSON-SHOW",
@@ -303,6 +306,16 @@
     "libelle": "Voir les projets d'une personnes",
     "fullcode": "PERSON-PROJECTS"
   },
+
+  "PERSON-MANAGE_SCHEDULE": {
+    "category_id": 3,
+    "root": "PERSON-SHOW",
+    "spot": 7,
+    "code": "PROJECTS",
+    "libelle": "Peut  modifier et valider la répartition horaire d'une personne",
+    "fullcode": "PERSON-MANAGE_SCHEDULE"
+  },
+
   "PERSON-EDIT": {
     "category_id": 3,
     "spot": 4,
