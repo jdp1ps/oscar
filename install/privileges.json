@@ -311,7 +311,7 @@
     "category_id": 3,
     "root": "PERSON-SHOW",
     "spot": 7,
-    "code": "PROJECTS",
+    "code": "MANAGE_SCHEDULE",
     "libelle": "Peut  modifier et valider la répartition horaire d'une personne",
     "fullcode": "PERSON-MANAGE_SCHEDULE"
   },
