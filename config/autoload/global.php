@@ -72,6 +72,10 @@ return array(
         // Authorise la personnalisation du mode de déclaration
         'declarationsHoursOverwriteByAuth' => false,
 
+        // Modification des horaires de la personne
+        'declarationsScheduleOverwrite' => false,
+        'declarationsScheduleOverwriteValidation' => 'n+1', // OU via le privilège PERSON_MANAGE_SCHEDULE
+
         // Durée standard d'une journée pour les déclarants (général)
         'declarationsDayDuration' => 7.4,
         'declarationsDayDurationMaxlength' => 9.0,
