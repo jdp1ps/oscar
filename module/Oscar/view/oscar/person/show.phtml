@@ -221,28 +221,24 @@
 
                 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_MANAGE_SCHEDULE)): ?>
                 <h2><i class="icon-clock"></i> Horaires</h2>
-                <div id="manage-schelude"></div>
-                    <script>
-                        require(['vue', 'vue-resource', 'mm', 'PersonSchelude'], function(Vue, VueResource, moment, PersonSchelude){
-                           new Vue({
-                               'el': '#manage-schelude'
-                           })
+                <div id="manage-schedule"></div>
+                <script>
+                    require(['vue', 'vue-resource', 'mm', 'PersonSchedule'], function(Vue, VueResource, moment, PersonSchedule){
+                        Vue.use(VueResource);
+                        Vue.filter('heures', function(v){
+                            var heure = Math.floor(v);
+                            var minutes = (v-heure)*60;
+                            return heure +':' +minutes;
                         });
-                    </script>
-                <p>
-                    Durée d'une journée normale : <strong><?= $schedule['value'] ?></strong><br>
-                    Maximum authorisé pour une journée : <strong><?= $schedule['max'] ?></strong><br>
-                    Minimum requis pour une journée : <strong><?= $schedule['min'] ?></strong><br>
-                </p>
-                <?php
-                    $days  = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-                    foreach ($days as $index=>$day): ?>
-                    <article class="card xs">
-                        <strong><?= $day ?></strong>
-                        <em><?= $schedule['days'][$index+1] ?></em>
-                    </article>
-                <?php endforeach; ?>
-                <?php  endif; ?>
+                       new Vue({
+                           'el': '#manage-schedule',
+                           render: function(h){
+                               return h(PersonSchedule.default, { props: {urlapi:'?a=schedule', edit: true}})
+                           }
+                       })
+                    });
+                </script>
+                <?php endif; ?>
 
 
                 <h2><i class="icon-building-filled"></i> Structures</h2>

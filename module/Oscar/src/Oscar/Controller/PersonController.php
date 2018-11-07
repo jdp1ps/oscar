@@ -499,6 +499,29 @@ class PersonController extends AbstractOscarController
 
         $method = $this->getHttpXMethod();
 
+        if( $this->isAjax() ){
+            $action = $this->params()->fromQuery('a');
+
+            switch( $action ){
+                case 'schedule':
+                    /** @var TimesheetService $timesheetService */
+                    $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+                    if( $method == "POST" ){
+                        return $this->getResponseInternalError("Pas encore implémenté");
+                    }
+
+                    $datas = $timesheetService->getDayLengthPerson($person);
+
+                    return $this->ajaxResponse($datas);
+                    break;
+                default:
+                    return $this->getResponseInternalError("Action non-reconnue");
+                    break;
+
+            }
+        }
+
         if( $method == "POST" ){
             $action = $this->params()->fromPost('action', null);
             switch( $action ) {
