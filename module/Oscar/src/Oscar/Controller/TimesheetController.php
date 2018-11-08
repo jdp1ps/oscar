@@ -1451,25 +1451,28 @@ class TimesheetController extends AbstractOscarController
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
 
-        $output = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);
-
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
         if( $this->isAjax() ) {
             switch ($method) {
+
+                // Envois des créneaux
                 case 'GET' :
-                    return $this->ajaxResponse($output);
+                    return $this->ajaxResponse($this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period));
                     break;
 
                 case 'POST' :
                     $action = $this->params()->fromPost('action', 'send');
 
+                    // Réenvoi de la déclaration
                     if( $action == 'resend' ){
                         $periodId = $this->params()->fromPost('period_id');
+                        /** @var ValidationPeriod $period */
                         $period = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($periodId);
                         if( $period->getDeclarer() == $currentPerson ){
                             try {
+                                $timesheetService->verificationPeriod($currentPerson, $period->getYear(), $period->getMonth());
                                 $timesheetService->reSendValidation($period);
                                 return $this->getResponseOk();
                             } catch (\Exception $e ){
@@ -1489,8 +1492,6 @@ class TimesheetController extends AbstractOscarController
                     if( !$datas->from || !$datas->to ){
                         return $this->getResponseInternalError("La période soumise est incomplète");
                     }
-
-                    $this->getLogger()->debug("##### ENVOI DES DECLARATIONS");
 
                     try {
                         $firstDay = new \DateTime($datas->from);
@@ -1524,7 +1525,7 @@ class TimesheetController extends AbstractOscarController
             }
         }
 
-        return $output;
+        return $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);;
     }
 
 
