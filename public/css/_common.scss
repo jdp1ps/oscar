@@ -74,6 +74,15 @@
     margin: 0 0 .25em;
     padding: 0;
   }
+  .card-title {
+    .right {
+      margin-left: auto;
+      flex: 0 1 auto;
+    }
+    .big {
+      font-size: 1.4em;
+    }
+  }
 }
 
 
@@ -2459,6 +2468,7 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
       border-top: thin solid $colorGreyLight;
       display: block;
       flex: 0 0 100%;
+      transform: translateY(0);
 
       .validators span:after {
         content: '/';
@@ -2472,8 +2482,6 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
         display: flex;
         align-items: center;
         cursor: pointer;
-
-
 
         &.selected {
           background: lighten($colorBlue, 30%);
@@ -4068,6 +4076,16 @@ $oscar-line: dotted thin $colorGreyLight;
 .fade-enter, .fade-leave-to, .fade-leave-active {
   opacity: 0
 }
+
+.slide-enter-active, .slide-leave-active {
+  transition: all .3s
+}
+
+.slide-enter, .slide-leave-to, .slide-leave-active {
+  opacity: 0;
+  transform: translateY(-50px);
+}
+
 
 .list-item {
   display: inline-block;

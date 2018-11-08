@@ -24,14 +24,14 @@
             <h3 class="card-title">
                 <strong>{{daysLabels[day]}}</strong>
                 <input type="text" v-model="days[day]" v-if="editDay">
-                <em class="total" @click="handlerEditDays()" v-else>{{ total | heures }}</em>
+                <em class="big right" @click="handlerEditDays()" v-else>{{ total | heures }}</em>
             </h3>
         </article>
 
         <article class="card">
             <h3 class="card-title">
                 <strong>Total / semaine</strong>
-                <em class="total">{{ totalWeek | heures }}</em>
+                <em class="big right">{{ totalWeek | heures }}</em>
             </h3>
         </article>
 
@@ -40,8 +40,6 @@
             <button @click="handlerSaveDays()" class="btn btn-primary" v-if="editDay"><i class="icon-floppy"></i> enregistrer</button>
             <button @click="fetch()" class="btn btn-primary" v-if="editDay"><i class="icon-cancel-circled"></i> annuler</button>
         </nav>
-
-        <pre>{{ days }}</pre>
     </section>
 </template>
 <script>

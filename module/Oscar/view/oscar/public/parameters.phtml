@@ -205,6 +205,7 @@
                     this.declarationsHours = !this.declarationsHours;
                     var formData = new FormData();
                     formData.append('declarationsHours', this.declarationsHours ? 'on' : 'off');
+                    formData.append('action', 'declaration-mode');
 
                     this.$http.post('', formData)
                         .then(
@@ -340,6 +341,7 @@
 
                 save(){
                     this.loading = true;
+                    // todo Utiliser FormData
                     this.$http.post('', { "frequency":  this.frequency.join(',') })
                         .then(
                             success => {

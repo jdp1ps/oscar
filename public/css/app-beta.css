@@ -5366,6 +5366,13 @@ button.close {
   margin: 0 0 .25em;
   padding: 0; }
 
+.card .card-title .right {
+  margin-left: auto;
+  flex: 0 1 auto; }
+
+.card .card-title .big {
+  font-size: 1.4em; }
+
 .options-menu {
   display: flex;
   font-weight: 100;
@@ -7104,7 +7111,8 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
   .validations-admin .declaration .validations {
     border-top: thin solid #AAA;
     display: block;
-    flex: 0 0 100%; }
+    flex: 0 0 100%;
+    transform: translateY(0); }
     .validations-admin .declaration .validations .validators span:after {
       content: '/';
       color: #eee; }
@@ -8271,6 +8279,13 @@ time.date-missing {
 
 .fade-enter, .fade-leave-to, .fade-leave-active {
   opacity: 0; }
+
+.slide-enter-active, .slide-leave-active {
+  transition: all .3s; }
+
+.slide-enter, .slide-leave-to, .slide-leave-active {
+  opacity: 0;
+  transform: translateY(-50px); }
 
 .list-item {
   display: inline-block;

@@ -48,10 +48,11 @@
                     <nav>
                         <a href="#" class="btn btn-danger btn-xs" @click.prevent.stop="handlerCancelDeclaration(line)"> <i class="icon-trash"></i>Annuler cette déclaration</a>
                     </nav>
-                    <section class="validations text-small" v-show="line.open">
+                    <transition name="slide">
+                    <section class="validations text-small" v-if="line.open">
                         <article v-for="validation in line.declarations" class="validation" @click.prevent.stop="selectedValidation = validation" :class="{ 'selected': selectedValidation == validation }">
                             <span>
-                                <i :class="validation.object == 'activity' ? 'icon-cube' : 'icon-tag'"></i>
+                                <i :class="validation.object == 'activity' ? 'icon-cube' : 'icon-' + validation.object"></i>
                                 <strong>{{ validation.label }}</strong>
                             </span>
 
@@ -91,9 +92,11 @@
                             </em>
                         </article>
                     </section>
+                    </transition>
                 </section>
             </section>
             <section class="col-md-4">
+                <transition name="fade">
                 <div v-if="selectedValidation" class="validation-details">
                     <h3>
                         <small>Validation pour les créneaux</small><br>
@@ -179,11 +182,11 @@
                         </ul>
                         <a class="btn btn-xs btn-primary" @click.prevent.stop="handlerAdd('adm')">Ajouter un validateur</a>
                     </div>
-
-                    <pre>{{ selectedValidation }}</pre>
                 </div>
+                </transition>
             </section>
         </div>
+
     </section>
 </template>
 <script>

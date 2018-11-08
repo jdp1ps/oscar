@@ -33,21 +33,18 @@ class PublicController extends AbstractOscarController
 
     public function parametersAction()
     {
-
-
-
         /** @var Authentification $auth */
         $auth = $this->getOscarUserContext()->getAuthentification();
-
 
         // Récupération des envois automatiques
         $forceSend = $this->getConfiguration('oscar.notifications.fixed');
 
-
-        //$saveDeclarationMode = $this->params()->fromPost('')
-
-
         if( $this->getHttpXMethod() == "POST" ){
+            $action = $this->params()->fromPost('action');
+
+            switch ($action) {
+
+            }
             $declarationsHours = $this->params()->fromPost('declarationsHours');
 
             if( $declarationsHours !== null ){
