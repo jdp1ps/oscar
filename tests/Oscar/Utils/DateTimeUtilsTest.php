@@ -17,19 +17,21 @@ class DateTimeUtilsTest extends TestCase
 
 
         $valid = [
-            ['date' => '2018-01', 'month' => 1, 'year' => 2018 ],
-            ['date' => '2018-1', 'month' => 1, 'year' => 2018 ],
-            ['date' => '2018-02', 'month' => 2, 'year' => 2018 ],
-            ['date' => '2018-2', 'month' => 2, 'year' => 2018 ],
-            ['date' => '2018-12', 'month' => 12, 'year' => 2018 ],
+            ['date' => '2018-01', 'month' => 1, 'year' => 2018, 'period' => '2018-1', 'periodCode' => '2018-01' ],
+            ['date' => '2018-1', 'month' => 1, 'year' => 2018, 'period' => '2018-1', 'periodCode' => '2018-01' ],
+            ['date' => '2018-02', 'month' => 2, 'year' => 2018, 'period' => '2018-2', 'periodCode' => '2018-02' ],
+            ['date' => '2018-2', 'month' => 2, 'year' => 2018, 'period' => '2018-2', 'periodCode' => '2018-02' ],
+            ['date' => '2018-12', 'month' => 12, 'year' => 2018, 'period' => '2018-12', 'periodCode' => '2018-12' ],
         ];
 
         foreach ($valid as $dt){
             $result = DateTimeUtils::extractPeriodDatasFromString($dt['date']);
-
-            $this->assertEquals(3, count($result));
+            
+            $this->assertEquals(4, count($result));
             $this->assertEquals($dt['month'], $result['month'], 'Le mois extrait ne correspond pas pour ' . $dt['date']);
             $this->assertEquals($dt['year'], $result['year'], 'Année extrait ne correspond pas pour ' . $dt['date']);
+            $this->assertEquals($dt['period'], $result['period'], 'Année extrait ne correspond pas pour ' . $dt['date']);
+            $this->assertEquals($dt['periodCode'], $result['periodCode'], 'Année extrait ne correspond pas pour ' . $dt['date']);
         }
     }
 
