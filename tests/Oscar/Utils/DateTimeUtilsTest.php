@@ -26,7 +26,7 @@ class DateTimeUtilsTest extends TestCase
 
         foreach ($valid as $dt){
             $result = DateTimeUtils::extractPeriodDatasFromString($dt['date']);
-            
+
             $this->assertEquals(4, count($result));
             $this->assertEquals($dt['month'], $result['month'], 'Le mois extrait ne correspond pas pour ' . $dt['date']);
             $this->assertEquals($dt['year'], $result['year'], 'Année extrait ne correspond pas pour ' . $dt['date']);
