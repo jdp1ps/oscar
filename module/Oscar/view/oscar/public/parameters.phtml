@@ -152,6 +152,29 @@
                 <div id="declarationsHours"></div>
 
 
+
+                <h3><i class="icon-clock"></i>
+                    Répartition Horaire</h3>
+                <div id="schedule"></div>
+                <script>
+                    require(['vue', 'vue-resource', 'mm', 'PersonSchedule'], function(Vue, VueResource, moment, PersonSchedule){
+                        Vue.use(VueResource);
+                        Vue.filter('heures', function(v){
+                            var heure = Math.floor(v);
+                            var minutes = (v-heure)*60;
+                            return heure +':' +minutes;
+                        });
+                        new Vue({
+                            'el': '#schedule',
+                            render: function(h){
+                                return h(PersonSchedule.default, { props: {urlapi:'?a=schedule', editable: <?= $scheduleEditable ? 'true' : 'false' ?>}})
+                            }
+                        })
+                    });
+                </script>
+
+
+
                 <h3><i class="icon-history"></i>
                     Fréquence des envois</h3>
 

@@ -87,6 +87,48 @@ return array(
         'declarationsMonthDuration' => 144.0,
         'declarationsMonthDurationMaxlength' => 176.0,
 
+        'userSubmitSchedule' => false,
+        'userSubmitScheduleValidateByNp1' => true,
+        'userSubmitScheduleValidateByPrivilege' => \Oscar\Provider\Privileges::PERSON_MANAGE_SCHEDULE,
+
+        'scheduleModeles' => [
+            'fulltime' => [
+                'label' => 'Plein temps',
+                'week' => 35.0,
+                'days' => [
+                    1 => 7.0,
+                    2 => 7.0,
+                    3 => 7.0,
+                    4 => 7.0,
+                    5 => 7.0
+                ]
+            ],
+
+            'halftime' => [
+                'label' => 'Mi-temps',
+                'week' => 17.5,
+                'days' => [
+                    1 => 3.5,
+                    2 => 3.5,
+                    3 => 3.5,
+                    4 => 3.5,
+                    5 => 3.5
+                ]
+            ],
+
+            'parttime' => [
+                'label' => 'Mi-temps',
+                'week' => 30.0,
+                'days' => [
+                    1 => 6.0,
+                    2 => 6.0,
+                    3 => 6.0,
+                    4 => 6.0,
+                    5 => 6.0
+                ]
+            ],
+        ],
+
         // Configuration des cas particuliers (LABS)
         'declarationsDurations' => [
 
@@ -94,7 +136,6 @@ return array(
                 'value' => 7.5,
                 'max' => 10.0,
                 'min' => 5.0,
-                'userChange' => false,
                 'days' => [
                     '1' => 7.5,
                     '2' => 7.5,

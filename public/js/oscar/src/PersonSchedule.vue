@@ -35,10 +35,10 @@
             </h3>
         </article>
 
-        <nav>
-            <button @click="handlerEditDays()" class="btn btn-default" v-if="!editDay"><i class="icon-pencil"></i> modifier</button>
-            <button @click="handlerSaveDays()" class="btn btn-primary" v-if="editDay"><i class="icon-floppy"></i> enregistrer</button>
-            <button @click="fetch()" class="btn btn-primary" v-if="editDay"><i class="icon-cancel-circled"></i> annuler</button>
+        <nav v-if="editable">
+            <button @click.prevent="handlerEditDays()" class="btn btn-default" v-if="!editDay"><i class="icon-pencil"></i> modifier</button>
+            <button @click.prevent="handlerSaveDays()" class="btn btn-primary" v-if="editDay"><i class="icon-floppy"></i> enregistrer</button>
+            <button @click.prevent="fetch()" class="btn btn-primary" v-if="editDay"><i class="icon-cancel-circled"></i> annuler</button>
         </nav>
     </section>
 </template>
@@ -51,7 +51,7 @@
 
         props: {
             urlapi: {default: ''},
-            edit: { default: false }
+            editable: { default: false }
         },
 
         data() {

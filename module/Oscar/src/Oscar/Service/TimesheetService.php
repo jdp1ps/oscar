@@ -904,6 +904,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             foreach ($customDays as $day=>$value) {
                 $configApp['days'][$day] = $value;
             }
+            if( $person->getCustomSettingsKey('days_request') ){
+                $configApp['days_request'] = $person->getCustomSettingsKey('days_request');
+            }
         }
         return $configApp;
     }

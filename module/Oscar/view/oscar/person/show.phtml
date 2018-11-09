@@ -233,7 +233,7 @@
                        new Vue({
                            'el': '#manage-schedule',
                            render: function(h){
-                               return h(PersonSchedule.default, { props: {urlapi:'?a=schedule', edit: true}})
+                               return h(PersonSchedule.default, { props: {urlapi:'?a=schedule', editable: <?= $scheduleEditable ? 'true' : 'false' ?>}})
                            }
                        })
                     });

@@ -512,22 +512,9 @@ class PersonController extends AbstractOscarController
                         $this->getOscarUserContext()->check(Privileges::PERSON_MANAGE_SCHEDULE);
 
                         try {
-                            $daysLength = json_decode($this->params()->fromPost('days'));
-                            $allowDays = ['1', '2', '3', '4', '5'];
-
-                            // Tester l'authorisation de déclarer le weekend
-                            $datas = ['days' => []];
-                            foreach ($daysLength as $day=>$duration) {
-                                if( in_array($day, $allowDays) ){
-                                    $value = floatval($duration);
-                                    if( is_float($value) ){
-                                        $datas['days'][$day] = $value;
-                                    }
-                                }
-                            }
-
-                            $person->setCustomSettingsObj($datas);
-                            $this->getEntityManager()->flush($person);
+                            $daysLength = $this->params()->fromPost('days');
+                            $this->getUserParametersService()->performChangeSchedule($daysLength, $person);
+                            return $this->getResponseOk("Heures enregistrées");
                         } catch (\Exception $e) {
                             return $this->getResponseInternalError("Impossible d'enregistrer les paramètres : " . $e->getMessage());
                         }
@@ -535,7 +522,6 @@ class PersonController extends AbstractOscarController
                     }
 
                     $datas = $timesheetService->getDayLengthPerson($person);
-
                     return $this->ajaxResponse($datas);
                     break;
                 default:
@@ -601,6 +587,7 @@ class PersonController extends AbstractOscarController
             'schedule'  => $timesheetService->getDayLengthPerson($person),
             'entity' => $person,
             'ldapRoles' => $roles,
+            'scheduleEditable' => $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_MANAGE_SCHEDULE),
             'referents' => $referents,
             'subordinates' => $subordinates,
             'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),

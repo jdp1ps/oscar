@@ -122,6 +122,7 @@
     "category_id": 2,
     "root": "ACTIVITY-MILESTONE_SHOW",
     "spot": 7,
+    "spot": 7,
     "code": "MILESTONE_PROGRESSION",
     "libelle": "Peut g\u00e9rer l'état d'avancement des jalons",
     "fullcode": "ACTIVITY-MILESTONE_PROGRESSION"
@@ -314,6 +315,15 @@
     "code": "MANAGE_SCHEDULE",
     "libelle": "Peut  modifier et valider la répartition horaire d'une personne",
     "fullcode": "PERSON-MANAGE_SCHEDULE"
+  },
+
+  "PERSON-SHOW_SCHEDULE": {
+    "category_id": 3,
+    "root": "PERSON-SHOW",
+    "spot": 7,
+    "code": "SHOW_SCHEDULE",
+    "libelle": "Peut  voir la répartition horaire d'une personne",
+    "fullcode": "PERSON-SHOW_SCHEDULE"
   },
 
   "PERSON-EDIT": {

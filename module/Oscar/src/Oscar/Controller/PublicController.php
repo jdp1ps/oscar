@@ -40,6 +40,32 @@ class PublicController extends AbstractOscarController
         // Récupération des envois automatiques
         $forceSend = $this->getConfiguration('oscar.notifications.fixed');
 
+        $method = $this->getHttpXMethod();
+
+
+        // Traitment des horaires
+        if( $this->isAjax() && $this->params()->fromQuery('a') == 'schedule' ){
+
+            /** @var TimesheetService $timesheetService */
+            $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+            if( $method == 'GET' ){
+                $datas = $timesheetService->getDayLengthPerson($this->getCurrentPerson());
+                return $this->ajaxResponse($datas);
+            }
+            elseif ($method == 'POST'){
+
+                $schedule = $this->params()->fromPost('days');
+                try {
+                    $this->getUserParametersService()->performChangeSchedule($schedule, $this->getCurrentPerson(), false);
+                    return $this->getResponseOk();
+                } catch ( OscarException $e ){
+                    return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier la répartition horaire'), $e->getMessage()));
+                }
+            }
+
+        }
+
         if( $this->getHttpXMethod() == "POST" ){
             $action = $this->params()->fromPost('action');
 
@@ -83,6 +109,7 @@ class PublicController extends AbstractOscarController
             'subordinates' => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
             'managers' => $this->getPersonService()->getManagers( $this->getCurrentPerson()),
             'subordonates' => $this->getPersonService()->getSubordinates( $this->getCurrentPerson()),
+            'scheduleEditable' => $this->getUserParametersService()->scheduleEditable(),
             'declarationsConfiguration' => null, //$timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
             'person' => $this->getCurrentPerson(),
             'declarationsHours' => $declarationsHours,
