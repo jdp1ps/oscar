@@ -9,6 +9,7 @@ use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
+use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\TimesheetService;
@@ -44,34 +45,32 @@ class PublicController extends AbstractOscarController
 
             switch ($action) {
 
-            }
-            $declarationsHours = $this->params()->fromPost('declarationsHours');
+                // Modification du mode de déclaration
+                case 'declaration-mode' :
+                    try {
+                        $this->getUserParametersService()->performChangeDeclarationMode($this->params()->fromPost('declarationsHours'));
+                        return $this->getResponseOk();
+                    } catch ( OscarException $e ){
+                        return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier le mode de déclaration'), $e->getMessage()));
+                    }
+                    break;
 
-            if( $declarationsHours !== null ){
-                if( !$this->getConfiguration('oscar.declarationsHoursOverwriteByAuth', false) ){
-                    return $this->getResponseInternalError("Cette option ne peut pas être modifiée");
-                }
+                case 'frequency' :
+                    try {
+                        $this->getUserParametersService()->performChangeFrequency($this->params()->fromPost('frequency', null));
+                        return $this->getResponseOk();
+                    } catch ( OscarException $e ){
+                        return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier le mode de déclaration'), $e->getMessage()));
+                    }
+                    break;
 
-                $settings = $auth->getSettings() ?: [];
-                $declarationsHours = $this->params()->fromPost('declarationsHours') == 'on' ? true : false;
-                $settings['declarationsHours'] = $declarationsHours;
-                $auth->setSettings($settings);
-                $this->getEntityManager()->flush($auth);
-                return $this->getResponseOk();
-            }
+                // todo Modification de la fréquence
 
-            $frequency = $this->params()->fromPost('frequency', null);
-            if( $frequency ) {
-                $parameters = explode(',', $this->params()->fromPost('frequency'));
-                $this->getLogger()->debug("Save for = " . $auth->getDisplayName());
-                $settings = $auth->getSettings() ?: [];
-                $settings['frequency'] = $parameters;
-                $auth->setSettings($settings);
-                $this->getEntityManager()->flush($auth);
-                return $this->getResponseOk();
+
+                // todo Modification des horaires (soumission)
             }
 
-            return $this->getResponseBadRequest("");
+            return $this->getResponseBadRequest("Erreur d'usage");
         }
 
         /** @var TimesheetService $timesheetService */

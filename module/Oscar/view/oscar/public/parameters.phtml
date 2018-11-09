@@ -341,8 +341,13 @@
 
                 save(){
                     this.loading = true;
-                    // todo Utiliser FormData
-                    this.$http.post('', { "frequency":  this.frequency.join(',') })
+
+                    var datas = new FormData();
+                    console.log(this.frequency);
+                    datas.append('action', 'frequency');
+                    datas.append('frequency', this.frequency.join(','));
+
+                    this.$http.post('', datas)
                         .then(
                             success => {
                                 console.log('OK');

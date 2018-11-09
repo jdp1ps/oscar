@@ -26,6 +26,7 @@ use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
 use Oscar\Service\SearchService;
 use Oscar\Service\SessionService;
+use Oscar\Service\UserParametersService;
 use UnicaenAuth\Service\UserContext;
 use Zend\Http\Request;
 use Zend\Http\Response;
@@ -52,6 +53,13 @@ class AbstractOscarController extends AbstractActionController
             $config = new ConfigurationParser($this->getServiceLocator()->get('Config'));
         }
         return $config->getConfiguration($key);
+    }
+
+    /**
+     * @return UserParametersService
+     */
+    public function getUserParametersService(){
+        return $this->getServiceLocator()->get('UserParametersService');
     }
 
     /**

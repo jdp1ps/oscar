@@ -21,6 +21,7 @@ use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Entity\ValidationPeriod;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -564,6 +565,10 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     public function notifyActivitiesTimesheetReject($activities)
     {
 
+    }
+
+    public function generateNotificationValidation( ValidationPeriod $validationperiod ){
+        // todo Diffusion des notifications pour les déclarations
     }
 
     /**

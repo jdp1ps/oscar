@@ -781,6 +781,7 @@ return array(
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             'MailingService' => \Oscar\Service\MailingService::class,
             'SessionService' => \Oscar\Service\SessionService::class,
+            'UserParametersService' => \Oscar\Service\UserParametersService::class,
         ],
 
         'factories' => array(

@@ -9,7 +9,10 @@
 namespace Oscar\Service;
 
 
-class ConfigurationAwareInterface
+interface ConfigurationAwareInterface
 {
-
+    /**
+     * @return ConfigurationParser
+     */
+    public function getConfiguration($key);
 }
