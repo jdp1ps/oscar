@@ -2539,8 +2539,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $declaration->setStatus(ValidationPeriod::STATUS_STEP1);
         }
 
+        $settings = json_encode($this->getDayLengthPerson($sender));
+
         $now = new \DateTime();
         $declaration
+            ->setSchedule($settings)
             ->setDateSend($now)
             ->setDeclarer($sender)
             ->setLog($now->format('Y-m-d H:i:s') . " : $sender vient d'envoyer sa déclaration\n")
