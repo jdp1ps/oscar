@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Oscar\Exception\OscarException;
 
 
 /**
@@ -364,123 +365,7 @@ class ValidationPeriod
         $this->validatorsAdm = new ArrayCollection();
     }
 
-    /**
-     * Retourne true si la personne est valide pour valider l'étape courante.
-     *
-     * @param Person $person
-     */
-    public function isValidator( Person $person ){
-        switch( $this->getStatus() ){
-            case self::STATUS_STEP1:
-                return $this->isValidablePrjBy($person);
-            case self::STATUS_STEP2:
-                return $this->isValidableSciBy($person);
-            case self::STATUS_STEP3:
-                return $this->isValidableAdmBy($person);
-            default:
-                return false;
-        }
-    }
 
-    public function setValidationActivity(Person $validateur, $when, $message = ""){
-        $this->setValidationActivityMessage($message)
-            ->setValidationActivityBy((string)$validateur)
-            ->setValidationActivityById($validateur->getId())
-            ->setValidationActivityAt($when)
-            ->setStatus(self::STATUS_STEP2);
-    }
-
-    public function setValidationSci(Person $validateur, $when, $message = ""){
-        $this->setValidationSciMessage($message)
-            ->setValidationSciBy((string)$validateur)
-            ->setValidationSciById($validateur->getId())
-            ->setValidationSciAt($when)
-            ->setStatus(self::STATUS_STEP3);
-    }
-
-    public function setValidationAdm(Person $validateur, $when, $message = ""){
-        $this->setValidationAdmMessage($message)
-            ->setValidationAdmBy((string)$validateur)
-            ->setValidationAdmById($validateur->getId())
-            ->setValidationAdmAt($when)
-            ->setStatus(self::STATUS_VALID);
-    }
-
-    // ---
-
-    public function setRejectActivity(Person $validateur, $when, $message = ""){
-        $this->setRejectActivityMessage($message)
-            ->setRejectActivityBy((string)$validateur)
-            ->setRejectActivityById($validateur->getId())
-            ->setRejectActivityAt($when)
-            ->setStatus(self::STATUS_CONFLICT);
-    }
-
-    public function setRejectSci(Person $validateur, $when, $message = ""){
-        $this->setRejectSciMessage($message)
-            ->setRejectSciBy((string)$validateur)
-            ->setRejectSciById($validateur->getId())
-            ->setRejectSciAt($when)
-            ->setStatus(self::STATUS_CONFLICT);
-    }
-
-    public function setRejectAdm(Person $validateur, $when, $message = ""){
-        $this->setRejectAdmMessage($message)
-            ->setRejectAdmBy((string)$validateur)
-            ->setRejectAdmById($validateur->getId())
-            ->setRejectAdmAt($when)
-            ->setStatus(self::STATUS_CONFLICT);
-    }
-
-    /**
-     * Peut être validé niveau projet par la personne.
-     *
-     * @param Person $person
-     * @return bool
-     */
-    public function isValidablePrjBy( Person $person ){
-        if( $this->getStatus() == self::STATUS_STEP1 && $this->getValidatorsPrj()->contains($person) ){
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Peut être validé niveau scientifique par la personne.
-     *
-     * @param Person $person
-     * @return bool
-     */
-    public function isValidableSciBy( Person $person ){
-        if( $this->getStatus() == self::STATUS_STEP2 && $this->getValidatorsSci()->contains($person) ){
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Peut être validé administrativement par la personne.
-     *
-     * @param Person $person
-     * @return bool
-     */
-    public function isValidableAdmBy( Person $person ){
-        if( $this->getStatus() == self::STATUS_STEP3 && $this->getValidatorsAdm()->contains($person) ){
-            return true;
-        }
-        return false;
-    }
-
-
-
-
-    public function isOpenForDeclaration(){
-        return $this->hasConflict() || !$this->getStatus();
-    }
-
-    public function hasConflict(){
-        return $this->getStatus() == self::STATUS_CONFLICT;
-    }
 
     /**
      * @return mixed
@@ -1066,6 +951,152 @@ class ValidationPeriod
     {
         $this->status = $status;
         return $this;
+    }
+
+    /**
+     * Retourne true si la personne est valide pour valider l'étape courante.
+     *
+     * @param Person $person
+     */
+    public function isValidator( Person $person ){
+        switch( $this->getStatus() ){
+            case self::STATUS_STEP1:
+                return $this->isValidablePrjBy($person);
+            case self::STATUS_STEP2:
+                return $this->isValidableSciBy($person);
+            case self::STATUS_STEP3:
+                return $this->isValidableAdmBy($person);
+            default:
+                return false;
+        }
+    }
+
+    public function setValidationActivity(Person $validateur, $when, $message = ""){
+        $this->setValidationActivityMessage($message)
+            ->setValidationActivityBy((string)$validateur)
+            ->setValidationActivityById($validateur->getId())
+            ->setValidationActivityAt($when)
+            ->setStatus(self::STATUS_STEP2);
+    }
+
+    public function setValidationSci(Person $validateur, $when, $message = ""){
+        $this->setValidationSciMessage($message)
+            ->setValidationSciBy((string)$validateur)
+            ->setValidationSciById($validateur->getId())
+            ->setValidationSciAt($when)
+            ->setStatus(self::STATUS_STEP3);
+    }
+
+    public function setValidationAdm(Person $validateur, $when, $message = ""){
+        $this->setValidationAdmMessage($message)
+            ->setValidationAdmBy((string)$validateur)
+            ->setValidationAdmById($validateur->getId())
+            ->setValidationAdmAt($when)
+            ->setStatus(self::STATUS_VALID);
+    }
+
+    // ---
+
+    public function setRejectActivity(Person $validateur, $when, $message = ""){
+        $this->setRejectActivityMessage($message)
+            ->setRejectActivityBy((string)$validateur)
+            ->setRejectActivityById($validateur->getId())
+            ->setRejectActivityAt($when)
+            ->setStatus(self::STATUS_CONFLICT);
+    }
+
+    public function setRejectSci(Person $validateur, $when, $message = ""){
+        $this->setRejectSciMessage($message)
+            ->setRejectSciBy((string)$validateur)
+            ->setRejectSciById($validateur->getId())
+            ->setRejectSciAt($when)
+            ->setStatus(self::STATUS_CONFLICT);
+    }
+
+    public function setRejectAdm(Person $validateur, $when, $message = ""){
+        $this->setRejectAdmMessage($message)
+            ->setRejectAdmBy((string)$validateur)
+            ->setRejectAdmById($validateur->getId())
+            ->setRejectAdmAt($when)
+            ->setStatus(self::STATUS_CONFLICT);
+    }
+
+    /**
+     * @return bool
+     */
+    public function requireValidation(){
+        return $this->getStatus() == self::STATUS_STEP1 ||
+            $this->getStatus() == self::STATUS_STEP2 ||
+            $this->getStatus() == self::STATUS_STEP3;
+    }
+
+    /**
+     * @return ArrayCollection
+     * @throws OscarException
+     */
+    public function getCurrentValidators(){
+
+        if( $this->getStatus() == self::STATUS_STEP1 ){
+            return $this->getValidatorsPrj();
+        }
+        elseif ($this->getStatus() == self::STATUS_STEP2 ){
+            return $this->getValidatorsSci();
+        }
+        elseif ($this->getStatus() == self::STATUS_STEP3 ){
+            return $this->getValidatorsAdm();
+        }
+
+        throw new OscarException("Non éligible à validation");
+    }
+
+    /**
+     * Peut être validé niveau projet par la personne.
+     *
+     * @param Person $person
+     * @return bool
+     */
+    public function isValidablePrjBy( Person $person ){
+        if( $this->getStatus() == self::STATUS_STEP1 && $this->getValidatorsPrj()->contains($person) ){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Peut être validé niveau scientifique par la personne.
+     *
+     * @param Person $person
+     * @return bool
+     */
+    public function isValidableSciBy( Person $person ){
+        if( $this->getStatus() == self::STATUS_STEP2 && $this->getValidatorsSci()->contains($person) ){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Peut être validé administrativement par la personne.
+     *
+     * @param Person $person
+     * @return bool
+     */
+    public function isValidableAdmBy( Person $person ){
+        if( $this->getStatus() == self::STATUS_STEP3 && $this->getValidatorsAdm()->contains($person) ){
+            return true;
+        }
+        return false;
+    }
+
+
+
+
+    public function isOpenForDeclaration(){
+        return $this->hasConflict() || !$this->getStatus();
+    }
+
+    public function hasConflict(){
+        return $this->getStatus() == self::STATUS_CONFLICT;
     }
 
     public function json(){
