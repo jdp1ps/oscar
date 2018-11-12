@@ -13,10 +13,10 @@
             </div>
         </div>
         <section v-if="declarations && declarations.length">
-            <a href="#" class="btn btn-xs btn-default" @click="group = 'person'">
+            <a href="#" class="btn btn-xs" :class="group == 'person' ? 'btn-primary' : 'btn-default'" @click="group = 'person'">
                 par personne
             </a>
-            <a href="#" class="btn btn-xs btn-default" @click="group = 'monthLabel'">
+            <a href="#" class="btn btn-xs" :class="group == 'monthLabel' ? 'btn-primary' : 'btn-default'" @click="group = 'monthLabel'">
                 par période
             </a>
             <section v-for="group, label in grouped" class="card card-xs">

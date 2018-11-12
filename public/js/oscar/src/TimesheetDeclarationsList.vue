@@ -16,12 +16,12 @@
                 </div>
             </div>
         </transition>
-
         <transition name="fade">
             <div class="overlay" v-show="create">
                 <div class="overlay-content" style="overflow-y: visible">
                     <span class="overlay-closer" @click="create = null">X</span>
                     Choisissez une personne à ajouter :
+
                     <personautocompleter @change="handlerAddPerson"/>
 
                     <button @click="handlerConfirmAdd(create, addedPerson.id)" :class="{ 'disabled' : addedPerson == null }" class="btn btn-primary">
@@ -233,7 +233,6 @@
             },
 
             handlerAddPerson(data){
-              console.log("ajout", data);
               this.addedPerson = data;
             },
 

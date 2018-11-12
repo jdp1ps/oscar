@@ -52,6 +52,7 @@
             handlerSelectPerson(data){
                 this.selectedPerson = data;
                 this.showSelector = false;
+                this.expression = "";
                 this.$emit('change', data);
             }
         }
