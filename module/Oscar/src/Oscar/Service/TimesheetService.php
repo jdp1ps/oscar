@@ -941,13 +941,31 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $weekendAllowed = $this->getOscarConfig()->getConfiguration('declarationsWeekend') == false;
         $daysDetails = $this->getDayLengthPerson($person);
 
+        $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)
+            ->createQueryBuilder('d')
+            ->where('d.year = :year AND d.month = :month AND d.declarer = :person')
+            ->getQuery()
+            ->setParameters([
+                'year' => $year,
+                'month' => $month,
+                'person' => $person,
+            ])
+            ->getResult()
+        ;
+        if( count($declarations) ){
+            $daysDetails = json_decode($declarations[0]->getSchedule(), JSON_OBJECT_AS_ARRAY);
+        }
+
+       // var_dump($daysDetails); die();
 
         for ($i = $decaleDay; $i < $nbr + $decaleDay; $i++) {
             $day = $i - $decaleDay + 1;
             $dayIndex = ($i % 7);
-            $duration = $this->getDayDuration($person, $dayIndex + 1);
-            $maxlength = $this->getDayMaxLengthPerson($person, $dayIndex + 1);
-            $minlength = $this->getDayMinLengthPerson($person, $dayIndex + 1);
+            $dayOfWeek = $dayIndex +1;
+
+            $duration = $daysDetails['days'][$dayOfWeek];
+            $maxlength = $daysDetails['max'];
+            $minlength = $daysDetails['min'];
 
 
             $close = false;
@@ -1379,9 +1397,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
         }
         $periodMax = sprintf('%s-%s', $todayYear, $todayMonth);
-
-        $this->getLogger()->debug("Période suivante " . $periodMax);
-
 
         $daysInfosPerson = $this->getDaysPeriodInfosPerson($person, $year, $month);
         $daysInfos = [];

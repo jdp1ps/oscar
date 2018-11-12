@@ -1440,13 +1440,10 @@ class TimesheetController extends AbstractOscarController
         $method = $this->getHttpXMethod();
 
         // Durée d'un jour "normal"
-
-
         $today = new \DateTime();
         $year = (int)$this->params()->fromQuery('year', $today->format('Y'));
         $month = (int)$this->params()->fromQuery('month', $today->format('m'));
         $period = sprintf('%s-%s', $year, $month);
-
 
         /** @var Person $currentPerson */
         $currentPerson = $this->getCurrentPerson();
@@ -1499,7 +1496,6 @@ class TimesheetController extends AbstractOscarController
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError("Déclaration invalide : " . $e->getMessage());
                     }
-
 
                     try {
                         $from = new \DateTime($datas->from);
