@@ -95,6 +95,7 @@ uid             | String    | Non       | Oui    | Identifiant d'import (évite 
 acronym         | String    | Non       | Non    | Acronyme du projet, Si Oscar ne trouve pas de projet existant avec cet acronyme, il le créera automatiquement
 projectlabel | String    | Oui       | Non    | Utilisé pour créer le projet si il n'existe pas
 label           | String    | NR        | Non    | Intitulé de l'activité
+description           | String    | Oui        | Non    | Description de l'activité
 datestart       | Date ISO  | Oui       | Non    | Date de début de l'activité
 dateend         | Date ISO  | Oui       | Non    | Date de fin de l'activité
 datesigned         | Date ISO  | Oui       | Non    | Date de la signsture de la convention
@@ -118,6 +119,7 @@ Le corps vide d'un objet se présente ainsi :
     "acronym": "",
     "projectlabel": "",
     "label": "",
+    "description": "",
     "datestart": "",
     "dateend": "",
     "datesigned": "",
@@ -310,40 +312,36 @@ Ce script implique de configurer la correspondance entre les colonnes de la sour
 <?php
 //
 return [
-    0 =>    "project.acronym",
-    1 =>    "label",
-    3 =>    "project.label",
-    120 =>  "amount",
-    166 =>  "dateStart",
-    167 =>  "dateEnd",
-    
-    427 =>  "PFI",
-    428 =>  "datePFI",
-    429 =>  "dateSigned",
+    0 => "uid",
 
-    // Organizations
-    3 =>    "organizations.Porteur du projet",
-    9 =>    "organizations.Laboratoire",
-    117 =>  "organizations.Financeur",
-    175 =>  "organizations.Payeur",
+    2   => 'project.acronym',
+    4   => "project.label",
 
-    // Payment
-    11 =>   "payments",
-    13 =>   "payments.1",
-    15 =>   "payments.-1",
+    3   => "label",
+    1   => 'description',
+    5   => "PFI",
+    19  => "datePFI",
+    22  => "dateSigned",
 
-    // Milestones
-    169 =>  "milestones.Début d'éligibilité des dépenses",
-    170 =>  "milestones.Fin d'éligibilité des dépenses",
+    6   => "organizations.Composante Responsable",
+    7   => "organizations.Laboratoire",
+    21   => "organizations.Laboratoire",
 
-    // Persons
-    423 => "persons.Responsable scientifique",
-    424 => "persons.Chargé d'affaires",
-    
-    // Nouveau (2.5.x)
-    // Cas de données multiple séparée par une virgule
-    425 => [
-        'key' => "persons.Ingénieur",
+    8   => "persons.Responsable Scientifique",
+    9   => "persons.Ingénieur",
+    10   => "persons.Ingénieur",
+
+    11  => "amount",
+
+    12  => "payments.1.2",
+    15  => "payments.1.2",
+    24  => "payments.-1",
+
+    18  => "milestones.Rapport financier",
+    20  => "type",
+
+    25  => [
+        'key' => "persons.Participants",
         'separator' => ','
     ]
 ];
