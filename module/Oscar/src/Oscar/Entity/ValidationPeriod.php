@@ -20,51 +20,20 @@ use Oscar\Exception\OscarException;
  */
 class ValidationPeriod
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     */
-    private $object;
-
-    const OBJECT_ACTIVITY       = 'activity';
-    const OBJECT_HOLIDAY        = 'conges';
-    const OBJECT_LEARNING       = 'learning';
-    const OBJECT_TEACHING       = 'teaching';
-    const OBJECT_SICKLEAVE      = 'sickleave';
-    const OBJECT_AWAY           = 'absent';
-    const OBJECT_RESEARCH       = 'research';
-
-    const GROUP_WORKPACKAGE     = 'workpackage';
-    const GROUP_OTHER           = 'other';
-
-
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     */
-    private $objectGroup;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     */
-    private $object_id;
-
-
-    /**
-     * @var
-     * @ORM\ManyToOne(targetEntity="Person")
-     */
-    private $declarer;
-
+    const OBJECT_ACTIVITY = 'activity';
+    const OBJECT_HOLIDAY = 'conges';
+    const OBJECT_LEARNING = 'learning';
+    const OBJECT_TEACHING = 'teaching';
+    const OBJECT_SICKLEAVE = 'sickleave';
+    const OBJECT_AWAY = 'absent';
+    const OBJECT_RESEARCH = 'research';
+    const GROUP_WORKPACKAGE = 'workpackage';
+    const GROUP_OTHER = 'other';
+    const STATUS_STEP1 = 'send-prj';
+    const STATUS_STEP2 = 'send-sci';
+    const STATUS_STEP3 = 'send-adm';
+    const STATUS_CONFLICT = 'conflict';
+    const STATUS_VALID = 'valid';
     /**
      * Personnes
      *
@@ -91,7 +60,36 @@ class ValidationPeriod
      * @ORM\JoinTable(name="validationperiod_adm")
      */
     protected $validatorsAdm;
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $object;
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $objectGroup;
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $object_id;
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Validation niveau activité
+    /**
+     * @var
+     * @ORM\ManyToOne(targetEntity="Person")
+     */
+    private $declarer;
     /**
      * Mois
      *
@@ -99,7 +97,6 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=false)
      */
     private $month;
-
     /**
      * Année
      *
@@ -107,8 +104,6 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=false)
      */
     private $year;
-
-
     /**
      * Date d'envoi.
      *
@@ -117,6 +112,9 @@ class ValidationPeriod
      */
     private $dateSend;
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Validation niveau scientifique (Laboratoire)
     /**
      * Historique
      *
@@ -124,11 +122,6 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $log;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Validation niveau activité
-
     /**
      * Date de la validation projet.
      *
@@ -136,7 +129,6 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $validationActivityAt;
-
     /**
      * Intitulé du valideur.
      *
@@ -144,7 +136,6 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $validationActivityBy;
-
     /**
      * Identifiant du valideur (Person).
      *
@@ -153,6 +144,9 @@ class ValidationPeriod
      */
     private $validationActivityById;
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Validation niveau administratif (Composante)
     /**
      * Message
      *
@@ -160,11 +154,6 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $validationActivityMessage;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Validation niveau scientifique (Laboratoire)
-
     /**
      * Date de la validation.
      *
@@ -172,7 +161,6 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $validationSciAt;
-
     /**
      * Intitulé du valideur.
      *
@@ -180,7 +168,6 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $validationSciBy;
-
     /**
      * Identifiant du valideur (Person).
      *
@@ -189,6 +176,9 @@ class ValidationPeriod
      */
     private $validationSciById;
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Rejet niveau activité
     /**
      * Message
      *
@@ -196,11 +186,6 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $validationSciMessage;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Validation niveau administratif (Composante)
-
     /**
      * Date de la validation.
      *
@@ -208,7 +193,6 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $validationAdmAt;
-
     /**
      * Intitulé du valideur.
      *
@@ -216,7 +200,6 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $validationAdmBy;
-
     /**
      * Identifiant du valideur (Person).
      *
@@ -225,6 +208,8 @@ class ValidationPeriod
      */
     private $validationAdmById;
 
+
+    /// Rejet scientifique hiérarchique
     /**
      * Message
      *
@@ -232,11 +217,6 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $validationAdmMessage;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Rejet niveau activité
-
     /**
      * Date de la validation projet.
      *
@@ -244,7 +224,6 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $rejectActivityAt;
-
     /**
      * Intitulé du valideur.
      *
@@ -252,7 +231,6 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $rejectActivityBy;
-
     /**
      * Identifiant du valideur (Person).
      *
@@ -261,6 +239,8 @@ class ValidationPeriod
      */
     private $rejectActivityById;
 
+
+    // Rejet administratif
     /**
      * Message
      *
@@ -268,10 +248,6 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $rejectActivityMessage;
-
-
-    /// Rejet scientifique hiérarchique
-
     /**
      * Date de la reject.
      *
@@ -279,7 +255,6 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $rejectSciAt;
-
     /**
      * Intitulé du valideur.
      *
@@ -287,7 +262,6 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $rejectSciBy;
-
     /**
      * Identifiant du valideur (Person).
      *
@@ -295,7 +269,6 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=true)
      */
     private $rejectSciById;
-
     /**
      * Message
      *
@@ -303,10 +276,6 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $rejectSciMessage;
-
-
-    // Rejet administratif
-
     /**
      * Date du rejet.
      *
@@ -314,7 +283,6 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $rejectAdmAt;
-
     /**
      * Intitulé du valideur.
      *
@@ -322,7 +290,6 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $rejectAdmBy;
-
     /**
      * Identifiant du valideur (Person).
      *
@@ -330,7 +297,6 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=true)
      */
     private $rejectAdmById;
-
     /**
      * Message
      *
@@ -338,7 +304,13 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $rejectAdmMessage;
-
+    /**
+     * Schedule
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $schedule;
     /**
      * Intitulé du valideur.
      *
@@ -346,13 +318,6 @@ class ValidationPeriod
      * @ORM\Column(type="string")
      */
     private $status;
-
-    const STATUS_STEP1      = 'send-prj';
-    const STATUS_STEP2      = 'send-sci';
-    const STATUS_STEP3      = 'send-adm';
-
-    const STATUS_CONFLICT   = 'conflict';
-    const STATUS_VALID      = 'valid';
 
     /**
      * ValidationPeriod constructor.
@@ -365,40 +330,9 @@ class ValidationPeriod
         $this->validatorsAdm = new ArrayCollection();
     }
 
-
-
-    /**
-     * @return mixed
-     */
-    public function getId()
+    public function isActivityValidation()
     {
-        return $this->id;
-    }
-
-    /**
-     * @param mixed $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getObject()
-    {
-        return $this->object;
-    }
-
-    /**
-     * @param string $object
-     */
-    public function setObject($object)
-    {
-        $this->object = $object;
-        return $this;
+        return $this->getObjectGroup() == self::GROUP_WORKPACKAGE;
     }
 
     /**
@@ -409,152 +343,12 @@ class ValidationPeriod
         return $this->objectGroup;
     }
 
-    public function isActivityValidation(){
-        return $this->getObjectGroup() == self::GROUP_WORKPACKAGE;
-    }
-
     /**
      * @param string $objectGroup
      */
     public function setObjectGroup($objectGroup)
     {
         $this->objectGroup = $objectGroup;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getObjectId()
-    {
-        return $this->object_id;
-    }
-
-    /**
-     * @param string $object_id
-     */
-    public function setObjectId($object_id)
-    {
-        $this->object_id = $object_id;
-        return $this;
-    }
-
-    /**
-     * @return Person
-     */
-    public function getDeclarer()
-    {
-        return $this->declarer;
-    }
-
-    /**
-     * @param mixed $declarer
-     */
-    public function setDeclarer($declarer)
-    {
-        $this->declarer = $declarer;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getMonth()
-    {
-        return $this->month;
-    }
-
-    /**
-     * @param int $month
-     */
-    public function setMonth($month)
-    {
-        $this->month = $month;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getYear()
-    {
-        return $this->year;
-    }
-
-    /**
-     * @param int $year
-     */
-    public function setYear($year)
-    {
-        $this->year = $year;
-        return $this;
-    }
-
-    /**
-     * @return datetime
-     */
-    public function getDateSend()
-    {
-        return $this->dateSend;
-    }
-
-    /**
-     * @param datetime $dateSend
-     */
-    public function setDateSend($dateSend)
-    {
-        $this->dateSend = $dateSend;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLog()
-    {
-        return $this->log;
-    }
-
-    /**
-     * @param string $log
-     */
-    public function setLog($log)
-    {
-        $this->log = $log;
-        return $this;
-    }
-
-    /**
-     * @return datetime
-     */
-    public function getValidationActivityAt()
-    {
-        return $this->validationActivityAt;
-    }
-
-    /**
-     * @param datetime $validationActivityAt
-     */
-    public function setValidationActivityAt($validationActivityAt)
-    {
-        $this->validationActivityAt = $validationActivityAt;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValidationActivityBy()
-    {
-        return $this->validationActivityBy;
-    }
-
-    /**
-     * @param string $validationActivityBy
-     */
-    public function setValidationActivityBy($validationActivityBy)
-    {
-        $this->validationActivityBy = $validationActivityBy;
         return $this;
     }
 
@@ -593,40 +387,6 @@ class ValidationPeriod
     }
 
     /**
-     * @return datetime
-     */
-    public function getValidationSciAt()
-    {
-        return $this->validationSciAt;
-    }
-
-    /**
-     * @param datetime $validationSciAt
-     */
-    public function setValidationSciAt($validationSciAt)
-    {
-        $this->validationSciAt = $validationSciAt;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValidationSciBy()
-    {
-        return $this->validationSciBy;
-    }
-
-    /**
-     * @param string $validationSciBy
-     */
-    public function setValidationSciBy($validationSciBy)
-    {
-        $this->validationSciBy = $validationSciBy;
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getValidationSciById()
@@ -657,40 +417,6 @@ class ValidationPeriod
     public function setValidationSciMessage($validationSciMessage)
     {
         $this->validationSciMessage = $validationSciMessage;
-        return $this;
-    }
-
-    /**
-     * @return datetime
-     */
-    public function getValidationAdmAt()
-    {
-        return $this->validationAdmAt;
-    }
-
-    /**
-     * @param datetime $validationAdmAt
-     */
-    public function setValidationAdmAt($validationAdmAt)
-    {
-        $this->validationAdmAt = $validationAdmAt;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValidationAdmBy()
-    {
-        return $this->validationAdmBy;
-    }
-
-    /**
-     * @param string $validationAdmBy
-     */
-    public function setValidationAdmBy($validationAdmBy)
-    {
-        $this->validationAdmBy = $validationAdmBy;
         return $this;
     }
 
@@ -729,40 +455,6 @@ class ValidationPeriod
     }
 
     /**
-     * @return datetime
-     */
-    public function getRejectActivityAt()
-    {
-        return $this->rejectActivityAt;
-    }
-
-    /**
-     * @param datetime $rejectActivityAt
-     */
-    public function setRejectActivityAt($rejectActivityAt)
-    {
-        $this->rejectActivityAt = $rejectActivityAt;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectActivityBy()
-    {
-        return $this->rejectActivityBy;
-    }
-
-    /**
-     * @param string $rejectActivityBy
-     */
-    public function setRejectActivityBy($rejectActivityBy)
-    {
-        $this->rejectActivityBy = $rejectActivityBy;
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getRejectActivityById()
@@ -780,57 +472,6 @@ class ValidationPeriod
     }
 
     /**
-     * @return string
-     */
-    public function getRejectActivityMessage()
-    {
-        return $this->rejectActivityMessage;
-    }
-
-    /**
-     * @param string $rejectActivityMessage
-     */
-    public function setRejectActivityMessage($rejectActivityMessage)
-    {
-        $this->rejectActivityMessage = $rejectActivityMessage;
-        return $this;
-    }
-
-    /**
-     * @return datetime
-     */
-    public function getRejectSciAt()
-    {
-        return $this->rejectSciAt;
-    }
-
-    /**
-     * @param datetime $rejectSciAt
-     */
-    public function setRejectSciAt($rejectSciAt)
-    {
-        $this->rejectSciAt = $rejectSciAt;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectSciBy()
-    {
-        return $this->rejectSciBy;
-    }
-
-    /**
-     * @param string $rejectSciBy
-     */
-    public function setRejectSciBy($rejectSciBy)
-    {
-        $this->rejectSciBy = $rejectSciBy;
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getRejectSciById()
@@ -844,59 +485,6 @@ class ValidationPeriod
     public function setRejectSciById($rejectSciById)
     {
         $this->rejectSciById = $rejectSciById;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectSciMessage()
-    {
-        return $this->rejectSciMessage;
-    }
-
-    /**
-     * @param string $rejectSciMessage
-     */
-    public function setRejectSciMessage($rejectSciMessage)
-    {
-        $this->rejectSciMessage = $rejectSciMessage;
-        return $this;
-    }
-
-
-
-    /**
-     * @return datetime
-     */
-    public function getRejectAdmAt()
-    {
-        return $this->rejectAdmAt;
-    }
-
-    /**
-     * @param datetime $rejectAdmAt
-     */
-    public function setRejectAdmAt($rejectAdmAt)
-    {
-        $this->rejectAdmAt = $rejectAdmAt;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectAdmBy()
-    {
-        return $this->rejectAdmBy;
-    }
-
-    /**
-     * @param string $rejectAdmBy
-     */
-    public function setRejectAdmBy($rejectAdmBy)
-    {
-        $this->rejectAdmBy = $rejectAdmBy;
         return $this;
     }
 
@@ -920,21 +508,38 @@ class ValidationPeriod
     /**
      * @return string
      */
-    public function getRejectAdmMessage()
+    public function getSchedule()
     {
-        return $this->rejectAdmMessage;
+        return $this->schedule;
     }
 
     /**
-     * @param string $rejectAdmMessage
+     * @param string $schedule
      */
-    public function setRejectAdmMessage($rejectAdmMessage)
+    public function setSchedule($schedule)
     {
-        $this->rejectAdmMessage = $rejectAdmMessage;
+        $this->schedule = $schedule;
         return $this;
     }
 
-
+    /**
+     * Retourne true si la personne est valide pour valider l'étape courante.
+     *
+     * @param Person $person
+     */
+    public function isValidator(Person $person)
+    {
+        switch ($this->getStatus()) {
+            case self::STATUS_STEP1:
+                return $this->isValidablePrjBy($person);
+            case self::STATUS_STEP2:
+                return $this->isValidableSciBy($person);
+            case self::STATUS_STEP3:
+                return $this->isValidableAdmBy($person);
+            default:
+                return false;
+        }
+    }
 
     /**
      * @return string
@@ -954,24 +559,100 @@ class ValidationPeriod
     }
 
     /**
-     * Retourne true si la personne est valide pour valider l'étape courante.
+     * Peut être validé niveau projet par la personne.
      *
      * @param Person $person
+     * @return bool
      */
-    public function isValidator( Person $person ){
-        switch( $this->getStatus() ){
-            case self::STATUS_STEP1:
-                return $this->isValidablePrjBy($person);
-            case self::STATUS_STEP2:
-                return $this->isValidableSciBy($person);
-            case self::STATUS_STEP3:
-                return $this->isValidableAdmBy($person);
-            default:
-                return false;
+    public function isValidablePrjBy(Person $person)
+    {
+        if ($this->getStatus() == self::STATUS_STEP1 && $this->getValidatorsPrj()->contains($person)) {
+            return true;
         }
+        return false;
     }
 
-    public function setValidationActivity(Person $validateur, $when, $message = ""){
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsPrj()
+    {
+        return $this->validatorsPrj;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsPrj
+     */
+    public function setValidatorsPrj($validatorsPrj)
+    {
+        $this->validatorsPrj = $validatorsPrj;
+        return $this;
+    }
+
+    /**
+     * Peut être validé niveau scientifique par la personne.
+     *
+     * @param Person $person
+     * @return bool
+     */
+    public function isValidableSciBy(Person $person)
+    {
+        if ($this->getStatus() == self::STATUS_STEP2 && $this->getValidatorsSci()->contains($person)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsSci()
+    {
+        return $this->validatorsSci;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsSci
+     */
+    public function setValidatorsSci($validatorsSci)
+    {
+        $this->validatorsSci = $validatorsSci;
+        return $this;
+    }
+
+    /**
+     * Peut être validé administrativement par la personne.
+     *
+     * @param Person $person
+     * @return bool
+     */
+    public function isValidableAdmBy(Person $person)
+    {
+        if ($this->getStatus() == self::STATUS_STEP3 && $this->getValidatorsAdm()->contains($person)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsAdm()
+    {
+        return $this->validatorsAdm;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsAdm
+     */
+    public function setValidatorsAdm($validatorsAdm)
+    {
+        $this->validatorsAdm = $validatorsAdm;
+        return $this;
+    }
+
+    public function setValidationActivity(Person $validateur, $when, $message = "")
+    {
         $this->setValidationActivityMessage($message)
             ->setValidationActivityBy((string)$validateur)
             ->setValidationActivityById($validateur->getId())
@@ -979,7 +660,8 @@ class ValidationPeriod
             ->setStatus(self::STATUS_STEP2);
     }
 
-    public function setValidationSci(Person $validateur, $when, $message = ""){
+    public function setValidationSci(Person $validateur, $when, $message = "")
+    {
         $this->setValidationSciMessage($message)
             ->setValidationSciBy((string)$validateur)
             ->setValidationSciById($validateur->getId())
@@ -987,7 +669,8 @@ class ValidationPeriod
             ->setStatus(self::STATUS_STEP3);
     }
 
-    public function setValidationAdm(Person $validateur, $when, $message = ""){
+    public function setValidationAdm(Person $validateur, $when, $message = "")
+    {
         $this->setValidationAdmMessage($message)
             ->setValidationAdmBy((string)$validateur)
             ->setValidationAdmById($validateur->getId())
@@ -995,9 +678,8 @@ class ValidationPeriod
             ->setStatus(self::STATUS_VALID);
     }
 
-    // ---
-
-    public function setRejectActivity(Person $validateur, $when, $message = ""){
+    public function setRejectActivity(Person $validateur, $when, $message = "")
+    {
         $this->setRejectActivityMessage($message)
             ->setRejectActivityBy((string)$validateur)
             ->setRejectActivityById($validateur->getId())
@@ -1005,7 +687,8 @@ class ValidationPeriod
             ->setStatus(self::STATUS_CONFLICT);
     }
 
-    public function setRejectSci(Person $validateur, $when, $message = ""){
+    public function setRejectSci(Person $validateur, $when, $message = "")
+    {
         $this->setRejectSciMessage($message)
             ->setRejectSciBy((string)$validateur)
             ->setRejectSciById($validateur->getId())
@@ -1013,7 +696,8 @@ class ValidationPeriod
             ->setStatus(self::STATUS_CONFLICT);
     }
 
-    public function setRejectAdm(Person $validateur, $when, $message = ""){
+    public function setRejectAdm(Person $validateur, $when, $message = "")
+    {
         $this->setRejectAdmMessage($message)
             ->setRejectAdmBy((string)$validateur)
             ->setRejectAdmById($validateur->getId())
@@ -1024,7 +708,8 @@ class ValidationPeriod
     /**
      * @return bool
      */
-    public function requireValidation(){
+    public function requireValidation()
+    {
         return $this->getStatus() == self::STATUS_STEP1 ||
             $this->getStatus() == self::STATUS_STEP2 ||
             $this->getStatus() == self::STATUS_STEP3;
@@ -1034,109 +719,33 @@ class ValidationPeriod
      * @return ArrayCollection
      * @throws OscarException
      */
-    public function getCurrentValidators(){
+    public function getCurrentValidators()
+    {
 
-        if( $this->getStatus() == self::STATUS_STEP1 ){
+        if ($this->getStatus() == self::STATUS_STEP1) {
             return $this->getValidatorsPrj();
-        }
-        elseif ($this->getStatus() == self::STATUS_STEP2 ){
+        } elseif ($this->getStatus() == self::STATUS_STEP2) {
             return $this->getValidatorsSci();
-        }
-        elseif ($this->getStatus() == self::STATUS_STEP3 ){
+        } elseif ($this->getStatus() == self::STATUS_STEP3) {
             return $this->getValidatorsAdm();
         }
 
         throw new OscarException("Non éligible à validation");
     }
 
-    /**
-     * Peut être validé niveau projet par la personne.
-     *
-     * @param Person $person
-     * @return bool
-     */
-    public function isValidablePrjBy( Person $person ){
-        if( $this->getStatus() == self::STATUS_STEP1 && $this->getValidatorsPrj()->contains($person) ){
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Peut être validé niveau scientifique par la personne.
-     *
-     * @param Person $person
-     * @return bool
-     */
-    public function isValidableSciBy( Person $person ){
-        if( $this->getStatus() == self::STATUS_STEP2 && $this->getValidatorsSci()->contains($person) ){
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Peut être validé administrativement par la personne.
-     *
-     * @param Person $person
-     * @return bool
-     */
-    public function isValidableAdmBy( Person $person ){
-        if( $this->getStatus() == self::STATUS_STEP3 && $this->getValidatorsAdm()->contains($person) ){
-            return true;
-        }
-        return false;
-    }
-
-
-
-
-    public function isOpenForDeclaration(){
+    public function isOpenForDeclaration()
+    {
         return $this->hasConflict() || !$this->getStatus();
     }
 
-    public function hasConflict(){
+    public function hasConflict()
+    {
         return $this->getStatus() == self::STATUS_CONFLICT;
     }
 
-    public function json(){
+    public function json()
+    {
         return $this->getState();
-    }
-
-    public function getLabel(){
-        if( $this->getObjectGroup() == self::GROUP_WORKPACKAGE ){
-            return "Déclaration sur une activité ";
-        }else {
-            return "Déclaration hors-lot " . $this->getObject();
-        }
-    }
-
-    public function getText(){
-        if( $this->getObjectGroup() == self::GROUP_WORKPACKAGE ){
-            return $this->getObject();
-        }
-        else {
-        }
-    }
-
-    public function getFirstDayStr(){
-        $month = $this->getMonth()<10 ? '0'.$this->getMonth() : $this->getMonth();
-        return sprintf('%s-%s-01', $this->getYear(), $month);
-    }
-
-    /**
-     * Actualise les logs.
-     *
-     * @param $message
-     * @param string $by
-     */
-    public function addLog($message, $by='Anonymous'){
-        $log = $this->getLog();
-        $date = new \DateTime();
-        $msg = $date->format(sprintf('Y-m-d H:i:s %s %s', $by, $message));
-        $log .= $msg."\n";
-        $this->setLog($log);
-        return $this;
     }
 
     public function getState()
@@ -1173,53 +782,383 @@ class ValidationPeriod
     }
 
     /**
-     * @return ArrayCollection
+     * @return mixed
      */
-    public function getValidatorsPrj()
+    public function getId()
     {
-        return $this->validatorsPrj;
+        return $this->id;
     }
 
     /**
-     * @param ArrayCollection $validatorsPrj
+     * @param mixed $id
      */
-    public function setValidatorsPrj($validatorsPrj)
+    public function setId($id)
     {
-        $this->validatorsPrj = $validatorsPrj;
+        $this->id = $id;
         return $this;
     }
 
     /**
-     * @return ArrayCollection
+     * @return string
      */
-    public function getValidatorsSci()
+    public function getLog()
     {
-        return $this->validatorsSci;
+        return $this->log;
     }
 
     /**
-     * @param ArrayCollection $validatorsSci
+     * @param string $log
      */
-    public function setValidatorsSci($validatorsSci)
+    public function setLog($log)
     {
-        $this->validatorsSci = $validatorsSci;
+        $this->log = $log;
+        return $this;
+    }
+
+    public function getLabel()
+    {
+        if ($this->getObjectGroup() == self::GROUP_WORKPACKAGE) {
+            return "Déclaration sur une activité ";
+        } else {
+            return "Déclaration hors-lot " . $this->getObject();
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getObject()
+    {
+        return $this->object;
+    }
+
+    /**
+     * @param string $object
+     */
+    public function setObject($object)
+    {
+        $this->object = $object;
         return $this;
     }
 
     /**
-     * @return ArrayCollection
+     * @return datetime
      */
-    public function getValidatorsAdm()
+    public function getValidationActivityAt()
     {
-        return $this->validatorsAdm;
+        return $this->validationActivityAt;
     }
 
     /**
-     * @param ArrayCollection $validatorsAdm
+     * @param datetime $validationActivityAt
      */
-    public function setValidatorsAdm($validatorsAdm)
+    public function setValidationActivityAt($validationActivityAt)
     {
-        $this->validatorsAdm = $validatorsAdm;
+        $this->validationActivityAt = $validationActivityAt;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidationActivityBy()
+    {
+        return $this->validationActivityBy;
+    }
+
+    /**
+     * @param string $validationActivityBy
+     */
+    public function setValidationActivityBy($validationActivityBy)
+    {
+        $this->validationActivityBy = $validationActivityBy;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidationSciBy()
+    {
+        return $this->validationSciBy;
+    }
+
+    /**
+     * @param string $validationSciBy
+     */
+    public function setValidationSciBy($validationSciBy)
+    {
+        $this->validationSciBy = $validationSciBy;
+        return $this;
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getValidationSciAt()
+    {
+        return $this->validationSciAt;
+    }
+
+    /**
+     * @param datetime $validationSciAt
+     */
+    public function setValidationSciAt($validationSciAt)
+    {
+        $this->validationSciAt = $validationSciAt;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidationAdmBy()
+    {
+        return $this->validationAdmBy;
+    }
+
+    /**
+     * @param string $validationAdmBy
+     */
+    public function setValidationAdmBy($validationAdmBy)
+    {
+        $this->validationAdmBy = $validationAdmBy;
+        return $this;
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getValidationAdmAt()
+    {
+        return $this->validationAdmAt;
+    }
+
+    /**
+     * @param datetime $validationAdmAt
+     */
+    public function setValidationAdmAt($validationAdmAt)
+    {
+        $this->validationAdmAt = $validationAdmAt;
+        return $this;
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getRejectActivityAt()
+    {
+        return $this->rejectActivityAt;
+    }
+
+    /**
+     * @param datetime $rejectActivityAt
+     */
+    public function setRejectActivityAt($rejectActivityAt)
+    {
+        $this->rejectActivityAt = $rejectActivityAt;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectActivityBy()
+    {
+        return $this->rejectActivityBy;
+    }
+
+    /**
+     * @param string $rejectActivityBy
+     */
+    public function setRejectActivityBy($rejectActivityBy)
+    {
+        $this->rejectActivityBy = $rejectActivityBy;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectActivityMessage()
+    {
+        return $this->rejectActivityMessage;
+    }
+
+    /**
+     * @param string $rejectActivityMessage
+     */
+    public function setRejectActivityMessage($rejectActivityMessage)
+    {
+        $this->rejectActivityMessage = $rejectActivityMessage;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectSciBy()
+    {
+        return $this->rejectSciBy;
+    }
+
+    /**
+     * @param string $rejectSciBy
+     */
+    public function setRejectSciBy($rejectSciBy)
+    {
+        $this->rejectSciBy = $rejectSciBy;
+        return $this;
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getRejectSciAt()
+    {
+        return $this->rejectSciAt;
+    }
+
+    // ---
+
+    /**
+     * @param datetime $rejectSciAt
+     */
+    public function setRejectSciAt($rejectSciAt)
+    {
+        $this->rejectSciAt = $rejectSciAt;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectSciMessage()
+    {
+        return $this->rejectSciMessage;
+    }
+
+    /**
+     * @param string $rejectSciMessage
+     */
+    public function setRejectSciMessage($rejectSciMessage)
+    {
+        $this->rejectSciMessage = $rejectSciMessage;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectAdmBy()
+    {
+        return $this->rejectAdmBy;
+    }
+
+    /**
+     * @param string $rejectAdmBy
+     */
+    public function setRejectAdmBy($rejectAdmBy)
+    {
+        $this->rejectAdmBy = $rejectAdmBy;
+        return $this;
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getRejectAdmAt()
+    {
+        return $this->rejectAdmAt;
+    }
+
+    /**
+     * @param datetime $rejectAdmAt
+     */
+    public function setRejectAdmAt($rejectAdmAt)
+    {
+        $this->rejectAdmAt = $rejectAdmAt;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectAdmMessage()
+    {
+        return $this->rejectAdmMessage;
+    }
+
+    /**
+     * @param string $rejectAdmMessage
+     */
+    public function setRejectAdmMessage($rejectAdmMessage)
+    {
+        $this->rejectAdmMessage = $rejectAdmMessage;
+        return $this;
+    }
+
+    public function getText()
+    {
+        if ($this->getObjectGroup() == self::GROUP_WORKPACKAGE) {
+            return $this->getObject();
+        } else {
+        }
+    }
+
+    public function getFirstDayStr()
+    {
+        $month = $this->getMonth() < 10 ? '0' . $this->getMonth() : $this->getMonth();
+        return sprintf('%s-%s-01', $this->getYear(), $month);
+    }
+
+    /**
+     * @return int
+     */
+    public function getMonth()
+    {
+        return $this->month;
+    }
+
+    /**
+     * @param int $month
+     */
+    public function setMonth($month)
+    {
+        $this->month = $month;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getYear()
+    {
+        return $this->year;
+    }
+
+    /**
+     * @param int $year
+     */
+    public function setYear($year)
+    {
+        $this->year = $year;
+        return $this;
+    }
+
+    /**
+     * Actualise les logs.
+     *
+     * @param $message
+     * @param string $by
+     */
+    public function addLog($message, $by = 'Anonymous')
+    {
+        $log = $this->getLog();
+        $date = new \DateTime();
+        $msg = $date->format(sprintf('Y-m-d H:i:s %s %s', $by, $message));
+        $log .= $msg . "\n";
+        $this->setLog($log);
         return $this;
     }
 
@@ -1227,8 +1166,9 @@ class ValidationPeriod
      * @param Person $person
      * @return $this
      */
-    public function addValidatorPrj( Person $person ){
-        if( !$this->getValidatorsPrj()->contains($person) ){
+    public function addValidatorPrj(Person $person)
+    {
+        if (!$this->getValidatorsPrj()->contains($person)) {
             $this->getValidatorsPrj()->add($person);
         }
         return $this;
@@ -1238,8 +1178,9 @@ class ValidationPeriod
      * @param Person $person
      * @return $this
      */
-    public function addValidatorSci( Person $person ){
-        if( !$this->getValidatorsSci()->contains($person) ){
+    public function addValidatorSci(Person $person)
+    {
+        if (!$this->getValidatorsSci()->contains($person)) {
             $this->getValidatorsSci()->add($person);
         }
         return $this;
@@ -1249,48 +1190,67 @@ class ValidationPeriod
      * @param Person $person
      * @return $this
      */
-    public function addValidatorAdm( Person $person ){
-        if( !$this->getValidatorsAdm()->contains($person) ){
+    public function addValidatorAdm(Person $person)
+    {
+        if (!$this->getValidatorsAdm()->contains($person)) {
             $this->getValidatorsAdm()->add($person);
         }
         return $this;
     }
-
 
     /**
      * Retourne la clef de trie pour le rangement mensuel.
      *
      * @return string
      */
-    public function getPeriodKey(){
-        if( $this->getObjectGroup() == self::GROUP_WORKPACKAGE ){
-            return $this->getObject().'-'.$this->getObjectId();
+    public function getPeriodKey()
+    {
+        if ($this->getObjectGroup() == self::GROUP_WORKPACKAGE) {
+            return $this->getObject() . '-' . $this->getObjectId();
         } else {
             return $this->getObjectGroup();
         }
     }
 
-    public function toJson(){
+    /**
+     * @return string
+     */
+    public function getObjectId()
+    {
+        return $this->object_id;
+    }
+
+    /**
+     * @param string $object_id
+     */
+    public function setObjectId($object_id)
+    {
+        $this->object_id = $object_id;
+        return $this;
+    }
+
+    public function toJson()
+    {
 
         $validateursPrj = [];
         $validateursSci = [];
         $validateursAdm = [];
 
-        foreach( $this->getValidatorsPrj() as $validateur ){
+        foreach ($this->getValidatorsPrj() as $validateur) {
             $validateursPrj[] = [
                 'id' => $validateur->getId(),
                 'person' => (string)$validateur
             ];
         }
 
-        foreach( $this->getValidatorsSci() as $validateur ){
+        foreach ($this->getValidatorsSci() as $validateur) {
             $validateursSci[] = [
                 'id' => $validateur->getId(),
                 'person' => (string)$validateur
             ];
         }
 
-        foreach( $this->getValidatorsAdm() as $validateur ){
+        foreach ($this->getValidatorsAdm() as $validateur) {
             $validateursAdm[] = [
                 'id' => $validateur->getId(),
                 'person' => (string)$validateur
@@ -1310,9 +1270,43 @@ class ValidationPeriod
         ];
     }
 
+    /**
+     * @return datetime
+     */
+    public function getDateSend()
+    {
+        return $this->dateSend;
+    }
+
+    /**
+     * @param datetime $dateSend
+     */
+    public function setDateSend($dateSend)
+    {
+        $this->dateSend = $dateSend;
+        return $this;
+    }
+
     public function __toString()
     {
         return sprintf('[ValidationPeriod:%s] %s-%s %s:%s=%s, pid=%s', $this->getId(), $this->getYear(), $this->getMonth(), $this->getObjectGroup(), $this->getObject(), $this->getObjectId(), $this->getDeclarer());
+    }
+
+    /**
+     * @return Person
+     */
+    public function getDeclarer()
+    {
+        return $this->declarer;
+    }
+
+    /**
+     * @param mixed $declarer
+     */
+    public function setDeclarer($declarer)
+    {
+        $this->declarer = $declarer;
+        return $this;
     }
 
 
