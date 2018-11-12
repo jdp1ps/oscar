@@ -723,7 +723,7 @@ class AdministrationController extends AbstractOscarController
             ////////////////////////////////////////////////////////////////////
             // GET : Liste des rôles
             if( $this->getHttpXMethod() == 'GET' ){
-                $roles = $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
+                $roles = $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy([], ['label' => 'ASC']);
                 $out = [];
                 /** @var OrganizationRole $role */
                 foreach( $roles as $role ){
