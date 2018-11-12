@@ -13,6 +13,7 @@ return [
     4   => "project.label",
 
     3   => "label",
+    1   => 'description',
     5   => "PFI",
     19  => "datePFI",
     22  => "dateSigned",

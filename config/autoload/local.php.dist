@@ -94,13 +94,16 @@ return array(
                   'params'    => realpath(__DIR__) . '/../connectors/organization_rest.yml',
                   'editable'  => false
                ]
+               /****/
             ],
             'person' => [
+               /****
                'rest' => [
                   'class'     => \Oscar\Connector\ConnectorPersonREST::class,
                   'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
                   'editable'  => false
                ]
+               /****/
             ]
         ],
         /*** Notifications ***/

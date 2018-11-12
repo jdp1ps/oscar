@@ -400,6 +400,7 @@ class ConnectorActivityJSON implements ConnectorInterface
 
             $activity
                 ->setLabel($this->getPropertyObject($data, 'label'))
+                ->setDescription($this->getPropertyObject($data, 'description', false))
                 ->setCurrency($defaultCurrency)
                 ->setCodeEOTP($data->pfi)
                 ->setActivityType($type)
