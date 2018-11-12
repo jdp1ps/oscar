@@ -94,6 +94,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 throw new OscarException('Type de validation inconnu');
         }
         $this->getEntityManager()->flush($validation);
+        $this->notificationsValidationPeriod($validation);
     }
 
 
@@ -331,6 +332,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->setRejectActivityBy(null)->setRejectActivityMessage('')->setRejectActivityAt(null)->setRejectActivityById(null);
 
         $this->getEntityManager()->flush($validationPeriod);
+        $this->notificationsValidationPeriod($validationPeriod);
 
         return true;
     }
@@ -2405,6 +2407,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     throw new OscarException("Cette période n'a pas le bon status pour être validée.");
             }
             $this->getEntityManager()->flush($period);
+            $this->notificationsValidationPeriod($period);
             return true;
         } else {
             throw new OscarException("Vous n'êtes pas autorisé à valider pour cette étape de validation");
@@ -2430,10 +2433,46 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     throw new OscarException("Cette période n'a pas le bon status pour être validée.");
             }
             $this->getEntityManager()->flush($period);
+            $this->notificationsValidationPeriod($period);
             return true;
         } else {
             throw new OscarException("Vous n'êtes pas autorisé à valider pour cette étape de validation");
         }
+    }
+
+
+    public function notificationsValidationPeriod( ValidationPeriod $validationPeriod ){
+        $notificationService = $this->getServiceNotification();
+
+        if( $validationPeriod->hasConflict() ){
+            $notificationService->notification(_("Déclaration rejetée"),
+                [$validationPeriod->getDeclarer()],
+                'ValidationPeriod-reject',
+                $validationPeriod->getId(),
+                'Application',
+                new \DateTime(),
+                new \DateTime());
+        }
+        elseif ( $validationPeriod->getStatus() == ValidationPeriod::STATUS_VALID ){
+            $notificationService->notification(_("Déclaration validée"),
+                [$validationPeriod->getDeclarer()],
+                'ValidationPeriod-valid',
+                $validationPeriod->getId(),
+                'Application',
+                new \DateTime(),
+                new \DateTime());
+        }
+
+        else {
+            $notificationService->notification(_("Validation en attente"),
+                $validationPeriod->getCurrentValidators()->toArray(),
+                'ValidationPeriod-wait',
+                $validationPeriod->getId(),
+                'Application',
+                new \DateTime(),
+                new \DateTime());
+        }
+
     }
 
     /**
@@ -2517,6 +2556,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->setMonth($month);
         $this->getEntityManager()->persist($declaration);
         $this->getEntityManager()->flush($declaration);
+
+        $this->notificationsValidationPeriod($declaration);
+
         return $declaration;
 
     }

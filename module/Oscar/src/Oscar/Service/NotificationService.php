@@ -588,7 +588,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
 
         // Code unique
-        $hash = $serie . ':' . $dateEffective->format('Ymd');
+        $hash = $serie . ':' . $dateEffective->format('YmdH:i');
 
         /** @var Notification $notif */
         $notif = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);
