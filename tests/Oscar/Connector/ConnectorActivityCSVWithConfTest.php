@@ -33,7 +33,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
     {
         $config = $this->getDemoConfig();
         $this->assertTrue(is_array($config));
-        $this->assertEquals(20, count($this->getDemoConfig()), "La configuration de démo contient 20 entrées.");
+        $this->assertEquals(21, count($this->getDemoConfig()), "La configuration de démo contient 20 entrées.");
     }
 
 
@@ -58,6 +58,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals('R1', $datas[0]['uid']);
         $this->assertEquals('RELATIV', $datas[0]['acronym']);
         $this->assertEquals('Théorie de la gravitation', $datas[0]['projectlabel']);
+        $this->assertEquals("Description 1", $datas[0]['description']);
 
         $this->assertEquals('EOTP201400002', $datas[0]['pfi']);
 
@@ -75,6 +76,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
 
         // Deuxième activité
         $this->assertEquals(45000.0, $datas[1]['amount']);
+        $this->assertEquals("Description 2", $datas[1]['description']);
         $this->assertEquals('2017-12-24', $datas[1]['datepfi']);
         $this->assertEquals('2017-12-31', $datas[1]['datesigned']);
 
