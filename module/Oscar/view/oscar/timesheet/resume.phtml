@@ -1,7 +1,15 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: bouvry
- * Date: 13/11/18
- * Time: 10:48
- */
+<div class="container">
+    <div id="app">Chargement</div>
+    <script>
+        require(['vue', 'TimesheetPersonResume'], function(Vue, TimesheetPersonResume){
+            new Vue({
+                el: "#app",
+                render: function(h){
+                    return h(TimesheetPersonResume.default, { props: { datas: <?= json_encode($datas) ?>}});
+                }
+            })
+        });
+    </script>
+
+
+</div>

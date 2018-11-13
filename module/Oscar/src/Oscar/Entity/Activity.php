@@ -1900,6 +1900,20 @@ class Activity implements ResourceInterface
         return self::class;
     }
 
+    public function getDateStartStr(){
+        if( $this->getDateStart() ){
+            return $this->getDateStart()->format('Y-m-d');
+        }
+        return "";
+    }
+
+    public function getDateEndStr(){
+        if( $this->getDateEnd() ){
+            return $this->getDateEnd()->format('Y-m-d');
+        }
+        return "";
+    }
+
     public function toJson()
     {
         return [

@@ -925,6 +925,151 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $total;
     }
 
+    public function getActivitiesWithDeclarant( Person $person ){
+        return $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
+            ->innerJoin('a.workPackages', 'wp')
+            ->innerJoin('wp.persons', 'wpp')
+            ->where('wpp.person = :person')
+            ->getQuery()
+            ->setParameter('person', $person)
+            ->getResult();
+
+    }
+
+    public function getResumePerson( Person $person ){
+        $declarantInActivities = $this->getActivitiesWithDeclarant($person);
+
+        $now = new \DateTime();
+        $periodNow = $now->format('Y-m');
+        $minPeriod = $now->getTimestamp();
+        $maxPeriod = $now->getTimestamp();
+
+        $datas = [
+            'minDate' => "",
+            'maxDate' => "",
+            'periods' => [],
+            'activities' => [],
+            'validations' => [],
+            'horslots' => []
+        ];
+
+        $periodsDetails = [];
+
+        foreach ($this->getOthersWP() as $hl) {
+            $datas['horslots'][$hl['code']] = [
+                'code' => $hl['code'],
+                'label' => $hl['label']
+            ];
+        }
+
+        /** @var Activity $activity */
+        foreach ($declarantInActivities as $activity) {
+
+            $activityDatas = [
+                'id' => $activity->getId(),
+                'acronym' => $activity->getAcronym(),
+                'label' => $activity->getLabel(),
+                'workpackages' => [],
+                'total' => 0.0,
+                'start' => $activity->getDateStartStr(),
+                'dateend' => $activity->getDateEndStr(),
+            ];
+
+            $workPackagesId = [];
+
+            /** @var WorkPackage $workPackage */
+            foreach ($activity->getWorkPackages() as $workPackage) {
+                $workPackagesId[] = $workPackage->getId();
+                $activityDatas['workpackages'][$workPackage->getId()] = [
+                    'id' => $workPackage->getId(),
+                    'code' => $workPackage->getCode(),
+                    'label' => $workPackage->getLabel(),
+                    'available' => $workPackage->hasPerson($person),
+                    'total' => 0.0
+                ];
+            }
+
+            if( $activity->getDateStart() && $activity->getDateEnd() ){
+                $periods = DateTimeUtils::allperiodsBetweenTwo($activity->getDateStart()->format('Y-m'), $activity->getDateEnd()->format('Y-m'));
+                foreach ($periods as $period) {
+                    if( !array_key_exists($period, $periodsDetails) ){
+                        $split = explode('-', $period);
+                        $year = $split[0];
+                        $month = $split[1];
+                        $periodsDetails[$period] = [
+                            'period' => $period,
+                            'month' => $month,
+                            'year' => $year,
+                            'past'              => $period < $periodNow,
+                            'current'           => $period == $periodNow,
+                            'futur'             => $period > $periodNow,
+                            'activities_id'     => [],
+                            'workpackages_id'   => [],
+                            'unexpected'        => false,
+                            'total'             => 0.0,
+                            'total_activities'  => 0.0,
+                            'total_horslots'    => 0.0,
+                            'validations_id'    => []
+                        ];
+                    }
+                    $periodsDetails[$period]['activities_id'][] = $activity->getId();
+                    $periodsDetails[$period]['workpackages_id'] = $workPackagesId;
+                }
+            }
+
+            if( $activity->getDateStart() ) {
+                $minPeriod = min($minPeriod, $activity->getDateStart()->getTimestamp());
+            }
+            if( $activity->getDateEnd() ) {
+                $maxPeriod = max($maxPeriod, $activity->getDateEnd()->getTimestamp());
+            }
+
+            $datas['activities'][$activityDatas['id']] = $activityDatas;
+        }
+
+        $timesheets = $this->getEntityManager()->getRepository(TimeSheet::class)->findBy(['person' => $person]);
+
+        /** @var TimeSheet $timesheet */
+        foreach ($timesheets as $timesheet) {
+            $period = $timesheet->getPeriodCode();
+            if( !array_key_exists($period, $periodsDetails) ){
+                $periodsDetails[$period] = [
+                    'period' => $period,
+                    'activities_id'     => [],
+                    'workpackages_id'   => [],
+                    'unexpected'        => true,
+                    'total'             => 0.0,
+                    'total_activities'  => 0.0,
+                    'total_horslots'    => 0.0,
+                    'validations_id'    => []
+                ];
+            }
+            $total = $timesheet->getDuration();
+
+            $periodsDetails[$period]['total'] += $total;
+            if( $timesheet->getActivity() ){
+                $periodsDetails[$period]['total_activities'] += $total;
+            } else {
+                $periodsDetails[$period]['total_horslots'] += $total;
+
+            }
+        }
+
+        $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->findBy(['declarer' => $person]);
+        /** @var ValidationPeriod $declaration */
+        foreach ($declarations as $declaration) {
+            $period = DateTimeUtils::getCodePeriod($declaration->getYear(), $declaration->getMonth());
+            $periodsDetails[$period]['validations_id'][] = $declaration->getId();
+            $datas['validations'][$declaration->getId()] = $declaration->toJson();
+        }
+
+        $datas['periods'] = $periodsDetails;
+        $datas['minDate'] = \DateTime::createFromFormat('U', $minPeriod)->format('Y-m');
+        $datas['maxDate'] = \DateTime::createFromFormat('U', $maxPeriod)->format('Y-m');
+
+        return $datas;
+    }
+
     public function getDaysPeriodInfosPerson(Person $person, $year, $month)
     {
 

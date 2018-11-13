@@ -399,6 +399,13 @@ class TimeSheet implements ITrackable
         ];
     }
 
+    /**
+     * @return string
+     */
+    public function getPeriodCode(){
+        return $this->getDateFrom()->format('Y-m');
+    }
+
     public function toJson(){
         $activityId = null;
         $activityLabel = null;
