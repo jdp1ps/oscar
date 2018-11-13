@@ -35,6 +35,39 @@ class DateTimeUtils {
         ];
     }
 
+    /**
+     * Retourne la liste des périodes entre 2 périodes.
+     *
+     * @param $from
+     * @param $to
+     * @return array
+     */
+    public static function allperiodsBetweenTwo( $from, $to ){
+        $start = new \DateTime($from.'-01');
+        $end = new \DateTime($to.'-01');
+
+        $startYear = (int) $start->format('Y');
+        $startMonth = (int) $start->format('m');
+
+        $endYear = (int) $end->format('Y');
+        $endMonth = (int) $end->format('m');
+
+        $periods = [];
+
+        while( !($startYear == $endYear && $startMonth == $endMonth) ){
+            $periods[] = self::getCodePeriod($startYear, $startMonth);
+            $startMonth++;
+            if( $startMonth > 12 ){
+                $startYear++;
+                $startMonth = 1;
+            }
+        }
+        $periods[] = self::getCodePeriod($startYear, $startMonth);
+
+        return $periods;
+
+    }
+
     public static function toDatetime( $value )
     {
         if( $value == null ){
@@ -42,6 +75,12 @@ class DateTimeUtils {
         } else {
             return new \DateTime($value);
         }
+    }
+
+    public static function getCodePeriod($year, $month){
+        $year = (int)$year;
+        $month = (int)$month;
+        return sprintf('%s-%s', $year,  ($month < 10 ? '0' . $month : $month));
     }
 
     public static function extractPeriodDatasFromString($str){

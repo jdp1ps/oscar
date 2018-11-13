@@ -14,8 +14,6 @@ use PHPUnit\Framework\TestCase;
 class DateTimeUtilsTest extends TestCase
 {
     public function testSDateOK(){
-
-
         $valid = [
             ['date' => '2018-01', 'month' => 1, 'year' => 2018, 'period' => '2018-1', 'periodCode' => '2018-01' ],
             ['date' => '2018-1', 'month' => 1, 'year' => 2018, 'period' => '2018-1', 'periodCode' => '2018-01' ],
@@ -23,7 +21,6 @@ class DateTimeUtilsTest extends TestCase
             ['date' => '2018-2', 'month' => 2, 'year' => 2018, 'period' => '2018-2', 'periodCode' => '2018-02' ],
             ['date' => '2018-12', 'month' => 12, 'year' => 2018, 'period' => '2018-12', 'periodCode' => '2018-12' ],
         ];
-
         foreach ($valid as $dt){
             $result = DateTimeUtils::extractPeriodDatasFromString($dt['date']);
 
@@ -34,6 +31,25 @@ class DateTimeUtilsTest extends TestCase
             $this->assertEquals($dt['periodCode'], $result['periodCode'], 'Année extrait ne correspond pas pour ' . $dt['date']);
         }
     }
+
+    public function testGetCodePeriod(){
+        $this->assertEquals('2018-01', DateTimeUtils::getCodePeriod('2018', '1'));
+        $this->assertEquals('2017-12', DateTimeUtils::getCodePeriod('2017', '12'));
+    }
+
+    public function testAllperiodsBetweenTwo(){
+        $periods = DateTimeUtils::allperiodsBetweenTwo('2018-01', '2018-12');
+        $this->assertEquals(12, count($periods));
+        $this->assertEquals('2018-01', $periods[0]);
+        $this->assertEquals('2018-12', $periods[11]);
+
+        $periods = DateTimeUtils::allperiodsBetweenTwo('2018-06', '2019-06');
+        $this->assertEquals(13, count($periods));
+        $this->assertEquals('2018-06', $periods[0]);
+        $this->assertEquals('2019-06', $periods[12]);
+    }
+
+
 
     public function testSDateKO(){
 
