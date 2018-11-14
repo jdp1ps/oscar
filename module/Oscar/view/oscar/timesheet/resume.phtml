@@ -1,7 +1,13 @@
 <div class="container">
     <div id="app">Chargement</div>
     <script>
-        require(['vue', 'TimesheetPersonResume'], function(Vue, TimesheetPersonResume){
+        require(['vue', 'TimesheetPersonResume', 'mm'], function(Vue, TimesheetPersonResume, moment){
+
+            // Affichage des périodes
+            Vue.filter('period', function(value){
+                return moment(value+"-01").format("MMMM YYYY");
+            });
+
             new Vue({
                 el: "#app",
                 render: function(h){
@@ -10,6 +16,4 @@
             })
         });
     </script>
-
-
 </div>
