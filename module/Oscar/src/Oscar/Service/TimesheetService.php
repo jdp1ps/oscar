@@ -936,6 +936,27 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     }
 
+    private $_cache_getPeriodDuration = [];
+
+    public function getPeriodDuration( $person, $year, $month){
+        $key = sprintf('%s_%s-%s', $person->getId(), $year, $month);
+        if( !array_key_exists($key, $this->_cache_getPeriodDuration) ){
+            $periodInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);
+            $totalPeriod = 0.0;
+            foreach ($periodInfos as $day) {
+                $totalPeriod += $day['dayLength'];
+            }
+            $this->_cache_getPeriodDuration = $totalPeriod;
+        }
+        return $this->_cache_getPeriodDuration = $totalPeriod;
+    }
+
+    /**
+     * Retourne le résumé complet des déclarations d'une personne.
+     *
+     * @param Person $person
+     * @return array
+     */
     public function getResumePerson( Person $person ){
         $declarantInActivities = $this->getActivitiesWithDeclarant($person);
 
@@ -997,9 +1018,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                         $year = $split[0];
                         $month = $split[1];
                         $periodsDetails[$period] = [
-                            'period' => $period,
-                            'month' => $month,
-                            'year' => $year,
+                            'period'            => $period,
+                            'month'             => $month,
+                            'year'              => $year,
+                            'periodDuration'    => $this->getPeriodDuration($person, $year, $month),
                             'past'              => $period < $periodNow,
                             'current'           => $period == $periodNow,
                             'futur'             => $period > $periodNow,
