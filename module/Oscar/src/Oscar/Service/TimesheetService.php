@@ -943,7 +943,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         if( !array_key_exists($key, $this->_cache_getPeriodDuration) ){
             $periodInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);
             $totalPeriod = 0.0;
-            foreach ($periodInfos as $day) {
+            foreach ($periodInfos as $key=>$day) {
                 $totalPeriod += $day['dayLength'];
             }
             $this->_cache_getPeriodDuration = $totalPeriod;
@@ -1138,7 +1138,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $close = false;
             $infos = "";
             $dayKey = $day < 10 ? '0' . $day : "" . $day;
-            $lockedKey = "$year-$month-$day";
+            $lockedKey = "$year-".intval($month)."-$day";
 
             // Jour fermé (provisoire)
             $locked = false;
@@ -3009,6 +3009,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function getLockedDays($annee, $mois, $loadInitiale = true, $person = null)
     {
+
+        $annee = intval($annee);
+        $mois = intval($mois);
         // Jours vérrouillés dans le mois
         $locked = [];
 
