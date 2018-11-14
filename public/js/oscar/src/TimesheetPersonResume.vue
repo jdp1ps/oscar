@@ -37,7 +37,15 @@
                     <th class="period"><strong @click="debug = p">{{ p.period | period}}</strong></th>
                     <td class="required">
                         <em v-if="p.activities_id.length">
-                            <span v-if="p.validations_id.length">Oui</span>
+                            <span v-if="p.validations_id.length">
+                                <i :class="'icon-' +p.validation_state"></i>
+                                <small>
+                                    Validateur(s) :
+                                    <strong class="cartouche" v-for="v in p.validators">
+                                        <i class="icon-user"></i>
+                                        {{ v }}</strong>
+                                </small>
+                            </span>
                             <span v-else="p.validations_id.length">Non</span>
                         </em>
                         <em v-else>
