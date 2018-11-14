@@ -107,6 +107,66 @@
   }
 }
 
+.declarations-resume {
+  .heading-year {
+    font-size: 2em;
+    text-align: right;
+  }
+  thead th {
+    text-align: center;
+    background: #0b93d5;
+  }
+  .yearrow {
+    background: rgba(255,255,255,.8);
+  }
+
+  .icon-time {
+    display: none;
+  }
+  .valid-95 {
+    .icon-time {
+      display: inline-block; color: #00cc66;
+      &:before {
+        content: '\e840';
+      }
+    }
+  }
+
+  .valid-105 {
+    .icon-time {
+      display: inline-block; color: #3fd53f;
+      &:before {
+        content: '\e843';
+      }
+    }
+  }
+
+  .error-95 {
+    .icon-time {
+      display: inline-block; color: #970000;
+      &:before {
+        content: '\e840';
+      }
+    }
+  }
+
+  .error-105 {
+    .icon-time {
+      display: inline-block; color: #9e0505;
+      &:before {
+        content: '\e843';
+      }
+    }
+
+  }
+
+  .valid-100 {
+    .icon-time {
+      display: inline-block; color: #00AA00;
+    }
+  }
+}
+
 .cols {
   display: flex;
   flex-wrap: wrap;

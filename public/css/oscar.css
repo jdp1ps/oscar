@@ -5384,6 +5384,48 @@ button.close {
   .options-menu.right > :first-child {
     margin-left: auto; }
 
+.declarations-resume .heading-year {
+  font-size: 2em;
+  text-align: right; }
+
+.declarations-resume thead th {
+  text-align: center;
+  background: #0b93d5; }
+
+.declarations-resume .yearrow {
+  background: rgba(255, 255, 255, 0.8); }
+
+.declarations-resume .icon-time {
+  display: none; }
+
+.declarations-resume .valid-95 .icon-time {
+  display: inline-block;
+  color: #00cc66; }
+  .declarations-resume .valid-95 .icon-time:before {
+    content: '\e840'; }
+
+.declarations-resume .valid-105 .icon-time {
+  display: inline-block;
+  color: #3fd53f; }
+  .declarations-resume .valid-105 .icon-time:before {
+    content: '\e843'; }
+
+.declarations-resume .error-95 .icon-time {
+  display: inline-block;
+  color: #970000; }
+  .declarations-resume .error-95 .icon-time:before {
+    content: '\e840'; }
+
+.declarations-resume .error-105 .icon-time {
+  display: inline-block;
+  color: #9e0505; }
+  .declarations-resume .error-105 .icon-time:before {
+    content: '\e843'; }
+
+.declarations-resume .valid-100 .icon-time {
+  display: inline-block;
+  color: #00AA00; }
+
 .cols {
   display: flex;
   flex-wrap: wrap; }

@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <h1>Résumé</h1>
+        <h1>Vos déclarations</h1>
         <div class="overlay" v-if="debug">
             <div class="overlay-content">
                 <button @click="debug = null">close</button>
@@ -9,7 +9,7 @@
             </div>
         </div>
         <pre>{{ debug }}</pre>
-        <table class="table">
+        <table class="table declarations-resume">
             <thead>
             <tr>
                 <th>Période</th>
@@ -27,7 +27,13 @@
                     <th colspan="6">{{ year }}</th>
                 </tr>
             <tbody class="yearrow">
-                <tr v-for="p in yeardatas.periods">
+                <tr v-for="p in yeardatas.periods" :class="{
+                'valid-100' : p.total == p.periodDuration,
+                'valid-95': p.total >= p.periodDuration*.95 && p.total < p.periodDuration,
+                'valid-105': p.total <= p.periodDuration*1.05 && p.total > p.periodDuration,
+                'error-105': p.total > p.periodDuration*1.05,
+                'error-95': p.total < p.periodDuration*.95,
+                }">
                     <th class="period"><strong @click="debug = p">{{ p.period | period}}</strong></th>
                     <td class="required">
                         <em v-if="p.activities_id.length">
@@ -39,10 +45,12 @@
                         </em>
                     </td>
                     <td>{{ p.activities_id.length }}</td>
-                    <td class="soustotal">{{ p.total_activities }}</td>
-                    <td class="soustotal">{{ p.total_horslots }}</td>
-                    <td class="total">{{ p.total }} / {{ p.validations_id.length }}</td>
-                    <td class="total">
+                    <td class="soustotal text-right">{{ p.total_activities | heures }}</td>
+                    <td class="soustotal text-right">{{ p.total_horslots | heures }}</td>
+                    <td class="total text-right">
+                        <i class="icon-time icon-clock"></i>
+                        <strong>{{ p.total | heures }}</strong> <small>/ {{ p.periodDuration | heures }}</small></td>
+                    <td class="total text-right">
                         <em class="text-danger">{{p.error}}</em>
                         <span v-if="p.total > 0">
                             <template v-if="p.validations_id.length > 0">Envoyé</template>
@@ -63,9 +71,9 @@
                     <th>Total {{ year }}</th>
                     <th>&nbsp;</th>
                     <th>&nbsp;</th>
-                    <th>{{ yeardatas.total_activities }}</th>
-                    <th>{{ yeardatas.total_horslots }}</th>
-                    <th>{{ yeardatas.total }}</th>
+                    <th>{{ yeardatas.total_activities | heures }}</th>
+                    <th>{{ yeardatas.total_horslots | heures }}</th>
+                    <th><strong>{{ yeardatas.total | heures }}</strong><small>/ {{ yeardatas.periodDuration | heures }}</small></th>
                     <th>&nbsp;</th>
                 </tr>
             </tbody>
@@ -101,6 +109,7 @@
                             out[year] = {
                                 periods: {},
                                 total: 0.0,
+                                periodDuration: 0.0,
                                 total_activities: 0.0,
                                 total_horslots: 0.0
                             }
@@ -108,6 +117,7 @@
 
                         out[year].periods[periodKey] = this.datas.periods[periodKey];
                         out[year].total += this.datas.periods[periodKey].total;
+                        out[year].periodDuration += this.datas.periods[periodKey].periodDuration;
                         out[year].total_activities += this.datas.periods[periodKey].total_activities;
                         out[year].total_horslots += this.datas.periods[periodKey].total_horslots;
                     }
