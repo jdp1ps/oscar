@@ -24,7 +24,7 @@
 
             <template v-for="yeardatas, year in years">
                 <tr class="heading-year">
-                    <th colspan="6">{{ year }}</th>
+                    <th colspan="7">{{ year }}</th>
                 </tr>
             <tbody class="yearrow">
                 <tr v-for="p in yeardatas.periods" :class="{
@@ -60,13 +60,6 @@
                         <strong>{{ p.total | heures }}</strong> <small>/ {{ p.periodDuration | heures }}</small></td>
                     <td class="total text-right">
                         <em class="text-danger">{{p.error}}</em>
-                        <span v-if="p.total > 0">
-                            <template v-if="p.validations_id.length > 0">Envoyé</template>
-                            <template v-else>Pas encore envoyée</template>
-                        </span>
-                        <em v-else>
-                           Aucune déclaration
-                        </em>
                         <a class="xs btn btn-primary btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year">
                             <i class="icon-calendar"></i>
                             <template v-if="p.validations_id.length > 0">Visualiser</template>
@@ -79,9 +72,9 @@
                     <th>Total {{ year }}</th>
                     <th>&nbsp;</th>
                     <th>&nbsp;</th>
-                    <th>{{ yeardatas.total_activities | heures }}</th>
-                    <th>{{ yeardatas.total_horslots | heures }}</th>
-                    <th><strong>{{ yeardatas.total | heures }}</strong><small>/ {{ yeardatas.periodDuration | heures }}</small></th>
+                    <th class="text-right">{{ yeardatas.total_activities | heures }}</th>
+                    <th class="text-right">{{ yeardatas.total_horslots | heures }}</th>
+                    <th class="text-right"><strong>{{ yeardatas.total | heures }}</strong><small>/ {{ yeardatas.periodDuration | heures }}</small></th>
                     <th>&nbsp;</th>
                 </tr>
             </tbody>

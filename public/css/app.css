@@ -5384,7 +5384,7 @@ button.close {
   .options-menu.right > :first-child {
     margin-left: auto; }
 
-.declarations-resume .heading-year {
+.declarations-resume .heading-year th {
   font-size: 2em;
   text-align: right; }
 

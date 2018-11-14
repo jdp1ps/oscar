@@ -1057,8 +1057,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         foreach ($timesheets as $timesheet) {
             $period = $timesheet->getPeriodCode();
             if( !array_key_exists($period, $periodsDetails) ){
+                $year = $timesheet->getDateFrom()->format('Y');
+                $month = $timesheet->getDateFrom()->format('m');
                 $periodsDetails[$period] = [
                     'period' => $period,
+                    'month'             => $month,
+                    'year'              => $year,
+                    'periodDuration'    => $this->getPeriodDuration($person, $year, $month),
                     'activities_id'     => [],
                     'workpackages_id'   => [],
                     'unexpected'        => true,
@@ -1100,6 +1105,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $periodsDetails[$period]['validators'] = [];
                 foreach ( $declaration->getCurrentValidators() as $validator ){
                     $periodsDetails[$period]['validators'][] = (string)$validator;
+                }
+            }
+            else if( $declarationStatusIndex == $currentStatusIndex ){
+                foreach ( $declaration->getCurrentValidators() as $validator ){
+                    $validatorStr = (string)$validator;
+                    if( !in_array($validatorStr, $periodsDetails[$period]['validators']) ){
+                        $periodsDetails[$period]['validators'][] = (string)$validator;
+                    }
                 }
             }
 
@@ -1144,8 +1157,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         if( count($declarations) ){
             $daysDetails = json_decode($declarations[0]->getSchedule(), JSON_OBJECT_AS_ARRAY);
         }
-
-       // var_dump($daysDetails); die();
 
         for ($i = $decaleDay; $i < $nbr + $decaleDay; $i++) {
             $day = $i - $decaleDay + 1;
