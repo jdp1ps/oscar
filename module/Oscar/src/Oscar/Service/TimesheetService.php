@@ -1103,15 +1103,20 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if( $declarationStatusIndex < $currentStatusIndex ){
                 $periodsDetails[$period]['validation_state'] = $declaration->getStatus();
                 $periodsDetails[$period]['validators'] = [];
-                foreach ( $declaration->getCurrentValidators() as $validator ){
-                    $periodsDetails[$period]['validators'][] = (string)$validator;
+                if( $declaration->requireValidation() ){
+                    foreach ( $declaration->getCurrentValidators() as $validator ){
+                        $periodsDetails[$period]['validators'][] = (string)$validator;
+                    }
                 }
             }
             else if( $declarationStatusIndex == $currentStatusIndex ){
-                foreach ( $declaration->getCurrentValidators() as $validator ){
-                    $validatorStr = (string)$validator;
-                    if( !in_array($validatorStr, $periodsDetails[$period]['validators']) ){
-                        $periodsDetails[$period]['validators'][] = (string)$validator;
+                if( $declaration->requireValidation() ) {
+                    foreach ( $declaration->getCurrentValidators() as $validator ){
+                        $validatorStr = (string)$validator;
+
+                        if (!in_array($validatorStr, $periodsDetails[$period]['validators'])) {
+                            $periodsDetails[$period]['validators'][] = (string)$validator;
+                        }
                     }
                 }
             }
