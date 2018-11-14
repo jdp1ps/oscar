@@ -1019,6 +1019,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                         $month = $split[1];
                         $periodsDetails[$period] = [
                             'period'            => $period,
+                            'person_id'         => $person->getId(),
+                            'person'            => (string)$person,
                             'month'             => $month,
                             'year'              => $year,
                             'periodDuration'    => $this->getPeriodDuration($person, $year, $month),

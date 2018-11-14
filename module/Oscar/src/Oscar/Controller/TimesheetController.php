@@ -583,8 +583,8 @@ class TimesheetController extends AbstractOscarController
                 \IntlDateFormatter::GREGORIAN,
                 'd MMMM Y');
 
-            /** @var Activity $activity */
-            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+//            /** @var Activity $activity */
+//            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
 
             $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
             $lineWpFormula = '=SUM(C%s:AG%s)';
@@ -599,15 +599,15 @@ class TimesheetController extends AbstractOscarController
             $dateStart  = new \DateTime($period.'-01');
             $dateEnd    = new \DateTime($period.'-01');
 
-            $spreadsheet->getActiveSheet()->setCellValue('A1', $activity->getLabel());
+            $spreadsheet->getActiveSheet()->setCellValue('A1', "Déclaration");
             $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
             $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
-            $spreadsheet->getActiveSheet()->setCellValue('C5', $activity->getAcronym());
+            $spreadsheet->getActiveSheet()->setCellValue('C5', "ACRO");
 
-            $spreadsheet->getActiveSheet()->setCellValue('U3', $fmt->format($activity->getDateStart()));
-            $spreadsheet->getActiveSheet()->setCellValue('U4', $fmt->format($activity->getDateEnd()));
-            $spreadsheet->getActiveSheet()->setCellValue('U5', $activity->getOscarNum());
-            $spreadsheet->getActiveSheet()->setCellValue('U6', $activity->getCodeEOTP());
+            $spreadsheet->getActiveSheet()->setCellValue('U3', "U3"); //$fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue('U4', 'U4'); // $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue('U5', 'U5'); //$activity->getOscarNum());
+            $spreadsheet->getActiveSheet()->setCellValue('U6', 'EOTP'); //$activity->getCodeEOTP());
 
             $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
             $spreadsheet->getActiveSheet()->setCellValue('B8', $period);

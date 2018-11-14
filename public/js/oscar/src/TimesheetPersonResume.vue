@@ -34,18 +34,28 @@
                 'error-105': p.total > p.periodDuration*1.05,
                 'error-95': p.total < p.periodDuration*.95,
                 }">
-                    <th class="period"><strong @click="debug = p">{{ p.period | period}}</strong></th>
+                    <th class="period"><strong @click="debug = p">
+                        <i class="icon-ellipsis" v-if="p.activities_id.length == 0" title="Aucune déclaration requise pour cette période"></i>
+                        <i class="icon-attention-1" v-if="p.activities_id.length && !p.validations_id.length && p.past" title="Il faut déclarer pour cette période"></i>
+                        <i class="icon-calendar" v-if="p.activities_id.length && p.validations_id.length" title="Procédure de déclaration en cours"></i>
+
+                        {{ p.period | period}}</strong>
+                    </th>
                     <td class="required">
                         <em v-if="p.activities_id.length">
                             <span v-if="p.validations_id.length">
                                 <i :class="'icon-' +p.validation_state"></i>
-                                <small>
+                                <small v-if="p.validators.length">
                                     Validateur(s) :
                                     <strong class="cartouche" v-for="v in p.validators">
                                         <i class="icon-user"></i>
                                         {{ v }}</strong>
                                 </small>
                             </span>
+                            <a :href="'/feuille-de-temps/excel?action=export&period=' +p.period +'&personid=' + p.person_id" v-if="p.validation_state == 'valid'">
+                                <i class="icon-download-outline"></i>
+                                Télécharger la feuille de temps (Excel)
+                            </a>
                             <span v-else="p.validations_id.length">Non</span>
                         </em>
                         <em v-else>
