@@ -1022,6 +1022,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                             'month'             => $month,
                             'year'              => $year,
                             'periodDuration'    => $this->getPeriodDuration($person, $year, $month),
+                            //'periodValidation'  => $this->getPeriodValidation
                             'past'              => $period < $periodNow,
                             'current'           => $period == $periodNow,
                             'futur'             => $period > $periodNow,
@@ -1031,6 +1032,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                             'total'             => 0.0,
                             'total_activities'  => 0.0,
                             'total_horslots'    => 0.0,
+                            'validation_state'  => 'none',
                             'validations_id'    => []
                         ];
                     }
@@ -1077,10 +1079,30 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
         }
 
+        $validations_states = [
+            ValidationPeriod::STATUS_CONFLICT,
+            ValidationPeriod::STATUS_STEP1,
+            ValidationPeriod::STATUS_STEP2,
+            ValidationPeriod::STATUS_STEP3,
+            ValidationPeriod::STATUS_VALID,
+            'none',
+            ];
+
         $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->findBy(['declarer' => $person]);
         /** @var ValidationPeriod $declaration */
         foreach ($declarations as $declaration) {
             $period = DateTimeUtils::getCodePeriod($declaration->getYear(), $declaration->getMonth());
+            $currentStatusIndex = array_search($periodsDetails[$period]['validation_state'], $validations_states);
+            $declarationStatusIndex = array_search($declaration->getStatus(), $validations_states);
+
+            if( $declarationStatusIndex < $currentStatusIndex ){
+                $periodsDetails[$period]['validation_state'] = $declaration->getStatus();
+                $periodsDetails[$period]['validators'] = [];
+                foreach ( $declaration->getCurrentValidators() as $validator ){
+                    $periodsDetails[$period]['validators'][] = (string)$validator;
+                }
+            }
+
             $periodsDetails[$period]['validations_id'][] = $declaration->getId();
             $datas['validations'][$declaration->getId()] = $declaration->toJson();
         }
