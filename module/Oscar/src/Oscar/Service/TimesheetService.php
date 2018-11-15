@@ -1033,12 +1033,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                             'unexpected'        => false,
                             'total'             => 0.0,
                             'total_activities'  => 0.0,
+                            'total_activities_details' => [],
                             'total_horslots'    => 0.0,
                             'validation_state'  => 'none',
                             'validations_id'    => []
                         ];
                     }
                     $periodsDetails[$period]['activities_id'][] = $activity->getId();
+                    $periodsDetails[$period]['total_activities_details'][$activity->getId()] = 0.0;
                     $periodsDetails[$period]['workpackages_id'] = $workPackagesId;
                 }
             }
@@ -1080,6 +1082,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $periodsDetails[$period]['total'] += $total;
             if( $timesheet->getActivity() ){
                 $periodsDetails[$period]['total_activities'] += $total;
+                $periodsDetails[$period]['total_activities_details'][$timesheet->getActivity()->getId()] += $total;
             } else {
                 $periodsDetails[$period]['total_horslots'] += $total;
 

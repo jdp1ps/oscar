@@ -8,7 +8,7 @@
                 <pre>{{ debug }}</pre>
             </div>
         </div>
-        <pre>{{ debug }}</pre>
+
         <table class="table declarations-resume">
             <thead>
             <tr>
@@ -33,6 +33,10 @@
                 'valid-105': p.total <= p.periodDuration*1.05 && p.total > p.periodDuration,
                 'error-105': p.total > p.periodDuration*1.05,
                 'error-95': p.total < p.periodDuration*.95,
+                'optional': p.activities_id.length == 0,
+                'conflict' : p.validation_state == 'conflict',
+                'validating' : p.validation_state && p.validation_state.indexOf('send-') == 0,
+                'validated' : p.validation_state == 'valid'
                 }">
                     <th class="period"><strong @click="debug = p">
                         <i class="icon-ellipsis" v-if="p.activities_id.length == 0" title="Aucune déclaration requise pour cette période"></i>
@@ -56,13 +60,26 @@
                                 <i class="icon-download-outline"></i>
                                 Télécharger la feuille de temps (Excel)
                             </a>
-                            <span v-else="p.validations_id.length">Non</span>
+                            <em v-if="p.validations_id.length == 0">
+                               Pas de déclaration envoyée
+                            </em>
                         </em>
                         <em v-else>
                             Facultatif
                         </em>
                     </td>
-                    <td>{{ p.activities_id.length }}</td>
+
+                    <td>
+                        <div v-for="activityId in p.activities_id">
+                            <i class="icon-cube"></i>
+                            <strong :title="datas.activities[activityId].acronym +' : ' +datas.activities[activityId].label">{{ datas.activities[activityId].acronym }}</strong>
+                            <span v-if="p.total_activities_details">
+                                {{  p.total_activities_details[activityId] | heures }}
+                            </span>
+                            <em v-else>Rien</em>
+                        </div>
+                    </td>
+
                     <td class="soustotal text-right">{{ p.total_activities | heures }}</td>
                     <td class="soustotal text-right">{{ p.total_horslots | heures }}</td>
                     <td class="total text-right">
@@ -70,11 +87,20 @@
                         <strong>{{ p.total | heures }}</strong> <small>/ {{ p.periodDuration | heures }}</small></td>
                     <td class="total text-right">
                         <em class="text-danger">{{p.error}}</em>
-                        <a class="xs btn btn-primary btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year">
-                            <i class="icon-calendar"></i>
-                            <template v-if="p.validations_id.length > 0">Visualiser</template>
-                            <template v-else>Déclarer</template>
 
+
+
+                        <a class="xs btn btn-primary btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-if="p.validation_state == 'conflict'">
+                            <i class="icon-edit"></i>
+                            Corriger
+                        </a>
+                        <a class="xs btn btn-default btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-else-if="p.validations_id.length > 0">
+                            <i class="icon-zoom-in-outline"></i>
+                            Visualiser
+                        </a>
+                        <a class="xs btn btn-primary btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-else>
+                            <i class="icon-calendar"></i>
+                            Déclarer
                         </a>
                     </td>
                 </tr>

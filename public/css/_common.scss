@@ -132,6 +132,10 @@
     }
   }
 
+  tbody tr {
+    border-left: solid 4px #eee;
+  }
+
   .valid-105 {
     .icon-time {
       display: inline-block; color: #3fd53f;
@@ -164,6 +168,25 @@
     .icon-time {
       display: inline-block; color: #00AA00;
     }
+  }
+
+  tr.optionnal {
+    border-left-color: #5a5a5a;
+  }
+
+  tr.conflict {
+    border-left-color: #CC0000;
+    background: rgba(#990000, .10);
+  }
+
+  tr.validated {
+    border-left-color: #00AA00;
+    background: rgba(#00AA00, .10);
+  }
+
+  tr.validating {
+    border-left-color: #0b93d5;
+    background: rgba(#0b93d5, .10);
   }
 }
 

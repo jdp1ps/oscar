@@ -5404,6 +5404,9 @@ button.close {
   .declarations-resume .valid-95 .icon-time:before {
     content: '\e840'; }
 
+.declarations-resume tbody tr {
+  border-left: solid 4px #eee; }
+
 .declarations-resume .valid-105 .icon-time {
   display: inline-block;
   color: #3fd53f; }
@@ -5425,6 +5428,21 @@ button.close {
 .declarations-resume .valid-100 .icon-time {
   display: inline-block;
   color: #00AA00; }
+
+.declarations-resume tr.optionnal {
+  border-left-color: #5a5a5a; }
+
+.declarations-resume tr.conflict {
+  border-left-color: #CC0000;
+  background: rgba(153, 0, 0, 0.1); }
+
+.declarations-resume tr.validated {
+  border-left-color: #00AA00;
+  background: rgba(0, 170, 0, 0.1); }
+
+.declarations-resume tr.validating {
+  border-left-color: #0b93d5;
+  background: rgba(11, 147, 213, 0.1); }
 
 .cols {
   display: flex;
