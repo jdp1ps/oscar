@@ -102,6 +102,11 @@
                             <i class="icon-calendar"></i>
                             Déclarer
                         </a>
+
+                        <a :href="'/feuille-de-temps/excel?action=export&period=' +p.period +'&personid=' + p.person_id">
+                            <i class="icon-download-outline"></i>
+                            Prévisualiser (Excel)
+                        </a>
                     </td>
                 </tr>
                 <tr>

@@ -6,15 +6,25 @@
  * Time: 10:53
  */
 ?>
+<link rel="stylesheet" href="/js/oscar/dist/ValidationPeriod.css">
 <section class="container-fluid">
     <h1>Validations</h1>
     <div id="app"></div>
     <script>
-        require(['vue', 'vue-resource', 'ValidationPeriod', 'bootbox'], function(Vue, VueResource, ValidationPeriod, bootbox){
+        require(['vue', 'vue-resource', 'ValidationPeriod', 'bootbox', 'mm'], function(Vue, VueResource, ValidationPeriod, bootbox, moment){
             Vue.use(VueResource);
+            Vue.filter('duration2', function(duree, total){
+                let h = Math.floor(duree);
+                let m = Math.round((duree - h)*60);
+                if( m < 10 ) m = '0'+m;
+                return h +':' +m;
+            });
             Vue.filter('duration', function (v){
                 return v.toFixed(2);
-            })
+            });
+            Vue.filter('period', function(str){
+                return moment(str+'-01').format('MMMM YYYY');
+            });
             new Vue({
                 el: "#app",
                 render: function(h){

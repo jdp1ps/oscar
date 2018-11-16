@@ -31,7 +31,9 @@ class DateTimeUtils {
             'year' => $dateRef->format('Y'),
             'month' => $dateRef->format('m'),
             'start' => $dateRef->format('Y-m-01 00:00:00'),
+            'firstDay' => $dateRef->format('Y-m-01'),
             'end' => $dateRef->format('Y-m-' . $nbr .' 23:59:59'),
+            'lastDay' => $dateRef->format('Y-m-'. $nbr),
         ];
     }
 

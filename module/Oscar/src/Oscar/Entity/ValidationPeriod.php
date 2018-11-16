@@ -11,6 +11,7 @@ namespace Oscar\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Oscar\Exception\OscarException;
+use Oscar\Utils\DateTimeUtils;
 
 
 /**
@@ -541,6 +542,14 @@ class ValidationPeriod
         }
     }
 
+    public function isValidable(){
+        return
+            $this->getStatus() == self::STATUS_STEP1 ||
+            $this->getStatus() == self::STATUS_STEP2 ||
+            $this->getStatus() == self::STATUS_STEP3;
+
+    }
+
     /**
      * @return string
      */
@@ -730,7 +739,7 @@ class ValidationPeriod
             return $this->getValidatorsAdm();
         }
 
-        throw new OscarException("Non éligible à validation");
+        return [];
     }
 
     public function isOpenForDeclaration()
@@ -1210,6 +1219,12 @@ class ValidationPeriod
         } else {
             return $this->getObjectGroup();
         }
+    }
+
+
+    public function getPeriod()
+    {
+        return DateTimeUtils::getCodePeriod($this->getYear(), $this->getMonth());
     }
 
     /**

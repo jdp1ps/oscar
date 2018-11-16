@@ -24,7 +24,7 @@
         <?php else: ?>
         Vue.filter('duration2', function(duree, total){
             if( duree == 0 ) return 0.0;
-            return duree + '(' + Math.round( 100 / total * duree) + "%)";
+            return Math.round( 100 / total * duree) + "%";
         });
         <?php endif; ?>
         <?php /*

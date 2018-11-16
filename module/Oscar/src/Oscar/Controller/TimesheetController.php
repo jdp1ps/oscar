@@ -1052,13 +1052,16 @@ class TimesheetController extends AbstractOscarController
     }
 
     public function validationsAction() {
+
+
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();
             $serviceTimesheet = $this->getTimesheetService();
 
             switch ($method) {
                 case 'GET' :
-                    return $this->ajaxResponse($serviceTimesheet->getValidationsForValidator($this->getCurrentPerson()));
+                    $datas = $serviceTimesheet->getValidationsForValidator2($this->getCurrentPerson());
+                    return $this->ajaxResponse($datas);
                     break;
 
                 case 'POST' :

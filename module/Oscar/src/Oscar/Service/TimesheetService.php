@@ -588,6 +588,179 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getValidationPeriodRepository()->find($idPeriod);
     }
 
+
+    public function getStatusMessage( $status ){
+        static $statusMessages;
+        if( $statusMessages === null ){
+            $statusMessages = [
+                ValidationPeriod::STATUS_VALID => "Validée",
+                ValidationPeriod::STATUS_CONFLICT => "Conflict",
+                ValidationPeriod::STATUS_STEP1 => "En attente de validation projet",
+                ValidationPeriod::STATUS_STEP2 => "En attente de validation scientifique",
+                ValidationPeriod::STATUS_STEP3 => "En attente de validation administrative",
+            ];
+        }
+        if( array_key_exists($status, $statusMessages) ){
+            return $statusMessages[$status];
+        } else {
+            return "Unknow Status";
+        }
+    }
+
+    //public function
+
+    public function getValidationsForValidator2(Person $validator, $declarer = null, $period = null)
+    {
+        $timesheetFormatter = new TimesheetsMonthFormatter();
+
+        // Configuration des Hors-Lots
+        $hwp = $this->getOthersWP();
+
+        // Récupération des données à traiter
+        $queryValidationPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class)
+            ->createQueryBuilder('vp')
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where("vprj = :person OR vsci = :person OR vadm = :person")
+            ->setParameter('person', $validator)
+            ->getQuery();
+
+        $periods = $queryValidationPeriod->getResult();
+
+        $group = [];
+        $periodIds = [];
+        $output = [];
+
+
+
+        /** @var ValidationPeriod $period */
+        foreach ($periods as $period) {
+            $periodIds[] = $period->getId();
+            $key = $period->getPeriod().'-'.$period->getDeclarer()->getId();
+            $validateCurrentState = false;
+            $validators = [];
+            foreach ( $period->getCurrentValidators() as $v ){
+                if( $v->getId() == $validator->getId() ){
+                    $validateCurrentState = true;
+                }
+                $validators[] = (string)$v;
+            }
+            $periodBounds = DateTimeUtils::periodBounds($period->getPeriod());
+
+            if( !array_key_exists($key, $group) ){
+                $group[$key] = [
+                    'period' => $period->getPeriod(),
+                    'totalDays' => $periodBounds['totalDays'],
+                    'periodFirstDay' => $periodBounds['firstDay'],
+                    'periodLastDay' => $periodBounds['lastDay'],
+                    'person' => (string)$period->getDeclarer(),
+                    'person_id' => $period->getDeclarer()->getId(),
+                    'declarations_activities' => [],
+                    'declarations_others' => [],
+                    'declarations_off' => [
+                        'timesheets' => [],
+                        'total' => 0.0,
+                    ],
+                    'details' => $this->getDaysPeriodInfosPerson($period->getDeclarer(), $period->getYear(), $period->getMonth()),
+                ];
+            }
+
+            // Modèle commun
+            $periodDatas = [
+                'validationperiod_id' => $period->getId(),
+                'validationperiod_object' => $period->getObject(),
+                'validationperiod_objectid' => $period->getObjectId(),
+                'validableStep' => $validateCurrentState,
+                'validabe' => $period->isValidable(),
+                'validators' => $validators,
+                'total' => 0.0,
+                'label' => "Inconnu",
+                'status' => $period->getStatus(),
+                'statusMessage' => $this->getStatusMessage($period->getStatus()),
+            ];
+
+
+
+            // Déclarations sur des activités
+            if( $period->getObject() == 'activity' ){
+                /** @var Activity $activity */
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId());
+                $activityDatas = [
+                    'label' => $activity->getFullLabel(),
+                    'workpackages' => []
+                ];
+
+                /** @var WorkPackage $workpackage */
+                foreach ($activity->getWorkPackages() as $workpackage) {
+                    $inWorkpackage = $workpackage->hasPerson($period->getDeclarer());
+                    $activityDatas['workpackages'][$workpackage->getCode()] = [
+                        'code' => $workpackage->getCode(),
+                        'enabled' => $inWorkpackage,
+                        'label' => $workpackage->getLabel(),
+                        'total' => 0.0,
+                        'timesheets' => []
+                    ];
+                }
+
+                $periodDatas = array_merge($periodDatas, $activityDatas);
+
+                $group[$key]['declarations_activities'][$activity->getId()] = $periodDatas;
+            }
+            // Déclarations Hors-Lot
+            else {
+                $otherInfos = $this->getOthersWPByCode($period->getObject());
+                $periodDatas['label'] = $otherInfos['label'];
+                $periodDatas['timesheets'] = [];
+                $group[$key]['declarations_others'][$otherInfos['code']] = $periodDatas;
+            }
+        }
+
+        foreach ($group as $periodPerson=>$periodPersonDatas ){
+            $period = $periodPersonDatas['period'];
+            $personId = $periodPersonDatas['person_id'];
+            $declarer = $this->getEntityManager()->getRepository(Person::class)->find($personId);
+
+            $timesheets = $this->getTimesheetsPersonPeriod($declarer, $periodPersonDatas['periodFirstDay'], $periodPersonDatas['periodLastDay']);
+
+            /** @var TimeSheet $timesheet */
+            foreach ($timesheets as $timesheet) {
+                $dayStr = $timesheet->getDateFrom()->format('j');
+                $activity = $timesheet->getActivity();
+                if( $activity ){
+                    $main = $activity->getId();
+                    $sub = $timesheet->getWorkpackage()->getCode();
+
+                    if( array_key_exists($main, $periodPersonDatas['declarations_activities']) ){
+                        $periodPersonDatas['declarations_activities'][$main]['workpackages'][$sub]['timesheets'][$dayStr] += $timesheet->getDuration();
+                        $periodPersonDatas['declarations_activities'][$main]['workpackages'][$sub]['total'] += $timesheet->getDuration();
+                        $periodPersonDatas['declarations_activities'][$main]['total'] += $timesheet->getDuration();
+                    } else {
+                        $periodPersonDatas['declarations_off']['total'] += $timesheet->getDuration();
+                        $periodPersonDatas['declarations_off']['timesheets'][$dayStr] += $timesheet->getDuration();
+                    }
+
+                } else {
+                    $main = 'others';
+                    $sub = $timesheet->getLabel();
+
+                    if( array_key_exists($sub, $periodPersonDatas['declarations_others']) ){
+                        $periodPersonDatas['declarations_others'][$sub]['timesheets'][$dayStr] += $timesheet->getDuration();
+                        $periodPersonDatas['declarations_others'][$sub]['total'] += $timesheet->getDuration();
+                    } else {
+                        $periodPersonDatas['declarations_off']['total'] += $timesheet->getDuration();
+                        $periodPersonDatas['declarations_off']['timesheets'][$dayStr] += $timesheet->getDuration();
+                    }
+                }
+                $periodPersonDatas['total'] += $timesheet->getDuration();
+                $periodPersonDatas['details'][$dayStr]['duration'] += $timesheet->getDuration();
+            }
+                $output[] = $periodPersonDatas;
+        }
+
+        return $output;
+    }
+
     public function getValidationsForValidator(Person $person)
     {
 
@@ -1180,7 +1353,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $close = false;
             $infos = "";
-            $dayKey = $day < 10 ? '0' . $day : "" . $day;
+            $dayKey = $day; // < 10 ? '0' . $day : "" . $day;
             $lockedKey = "$year-".intval($month)."-$day";
 
             // Jour fermé (provisoire)
@@ -1229,7 +1402,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'datefull' => $lockedKey,
             ];
         }
-
+        ksort($days, SORT_NATURAL);
         return $days;
     }
 
