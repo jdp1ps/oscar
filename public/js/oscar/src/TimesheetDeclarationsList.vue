@@ -32,6 +32,16 @@
             </div>
         </transition>
 
+        <transition name="fade">
+            <div class="overlay" v-if="schedule">
+                <div class="overlay-content" style="overflow-y: visible">
+                    <personschedule :schedule="schedule.schedule"
+                                    @cancel="schedule = null"
+                                    @changeschedule="handlerSaveSchedule" :editable="true"/>
+                </div>
+            </div>
+        </transition>
+
         <h1>Liste des déclarations</h1>
 
         <div class="row">
@@ -46,7 +56,10 @@
                         <i class="icon" :class="'icon-' +d.status" v-for="d in line.declarations" :title="d.label"></i>
                     </span>
                     <nav>
-                        <a href="#" class="btn btn-danger btn-xs" @click.prevent.stop="handlerCancelDeclaration(line)"> <i class="icon-trash"></i>Annuler cette déclaration</a>
+                        <a href="#" class="btn btn-default btn-xs" @click.prevent.stop="handlerChangeSchedule(line)">
+                            <i class="icon-clock"></i>Modifier les horaires</a>
+                        <a href="#" class="btn btn-danger btn-xs" @click.prevent.stop="handlerCancelDeclaration(line)">
+                            <i class="icon-trash"></i>Annuler cette déclaration</a>
                     </nav>
                     <transition name="slide">
                     <section class="validations text-small" v-if="line.open">
@@ -193,6 +206,7 @@
     // poi watch --format umd --moduleName  TimesheetDeclarationsList --filename.css TimesheetDeclarationsList.css --filename.js TimesheetDeclarationsList.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetDeclarationsList.vue
     import AjaxResolve from "./AjaxResolve";
     import PersonAutoCompleter from "./PersonAutoCompleter";
+    import PersonSchedule from "./PersonSchedule";
 
 
 
@@ -207,12 +221,14 @@
         },
 
         components: {
-            'personautocompleter': PersonAutoCompleter
+            'personautocompleter': PersonAutoCompleter,
+            'personschedule': PersonSchedule
         },
 
         data() {
             return {
                 loading: null,
+                schedule: null,
                 declarations: [],
                 error: null,
                 selectedValidation: null,
@@ -227,8 +243,40 @@
 
         methods: {
 
+            handlerSaveSchedule(evt){
+
+                let datas = new FormData();
+                datas.append('person_id', this.schedule.person_id);
+                datas.append('period', this.schedule.period);
+                datas.append('action', 'changeschedule');
+                datas.append('days', JSON.stringify(evt));
+
+                this.$http.post('', datas).then(
+                    ok => {
+                        this.fetch();
+                    },
+                    ko => {
+                        this.error = AjaxResolve.resolve("Impossible de modifier les horaires", ko);
+
+                    }
+                ).then(foo => {
+                    this.addedPerson = null;
+                    this.schedule = null;
+                    this.create = null;
+                    this.loading = false
+                });
+            },
+
+            handlerChangeSchedule(line){
+              console.log(line.settings);
+              this.schedule = {
+                schedule : JSON.parse(line.settings),
+                person_id: line.person_id,
+                period: line.period,
+              };
+            },
+
             handlerAdd(type){
-                console.log('Type:', type);
                 this.create = type;
             },
 

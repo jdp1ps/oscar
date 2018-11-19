@@ -38,7 +38,7 @@
         <nav v-if="editable">
             <button @click.prevent="handlerEditDays()" class="btn btn-default" v-if="!editDay"><i class="icon-pencil"></i> modifier</button>
             <button @click.prevent="handlerSaveDays()" class="btn btn-primary" v-if="editDay"><i class="icon-floppy"></i> enregistrer</button>
-            <button @click.prevent="fetch()" class="btn btn-primary" v-if="editDay"><i class="icon-cancel-circled"></i> annuler</button>
+            <button @click.prevent="handlerCancel()" class="btn btn-primary" v-if="editDay"><i class="icon-cancel-circled"></i> annuler</button>
         </nav>
     </section>
 </template>
@@ -51,7 +51,8 @@
 
         props: {
             urlapi: {default: ''},
-            editable: { default: false }
+            editable: { default: false },
+            schedule: null
         },
 
         data() {
@@ -96,40 +97,62 @@
                 this.editDay = true;
             },
 
-            handlerSaveDays(){
-                this.loading = "Enregistrement des horaires";
-                let datas = new FormData();
-                datas.append('days', JSON.stringify(this.days));
+            handlerCancel(){
+                if( !this.urlapi ){
+                    this.$emit('cancel');
+                } else {
+                    this.fetch();
+                }
+            },
 
-                this.$http.post(this.urlapi, datas).then(
-                    ok => {
-                        this.fetch();
-                    },
-                    ko => {
-                        this.error = AjaxResolve.resolve('Impossible de modifier les horaires', ko);
-                    }
-                ).then(foo => {
-                    this.loading = false
-                });
+            handlerSaveDays(){
+                if( !this.urlapi ){
+                    this.$emit('changeschedule', this.days);
+                }
+
+                else {
+                    this.loading = "Enregistrement des horaires";
+                    let datas = new FormData();
+                    datas.append('days', JSON.stringify(this.days));
+
+                    this.$http.post(this.urlapi, datas).then(
+                        ok => {
+                            this.fetch();
+                        },
+                        ko => {
+                            this.error = AjaxResolve.resolve('Impossible de modifier les horaires', ko);
+                        }
+                    ).then(foo => {
+                        this.loading = false
+                    });
+                }
             },
 
 
             fetch(clear = true) {
-                this.loading = "Chargement des données";
+                if( this.schedule == null ){
 
-                this.$http.get(this.urlapi).then(
-                    ok => {
-                        console.log(ok.body);
-                        this.days = ok.body.days;
-                        this.dayLength = ok.body.dayLength;
-                    },
-                    ko => {
-                        this.error = AjaxResolve.resolve('Impossible de charger les données', ko);
-                    }
-                ).then(foo => {
-                    this.loading = false;
-                    this.editDay = null;
-                });
+                    this.loading = "Chargement des données";
+
+                    this.$http.get(this.urlapi).then(
+                        ok => {
+                            console.log(ok.body);
+                            this.days = ok.body.days;
+                            this.dayLength = ok.body.dayLength;
+                        },
+                        ko => {
+                            this.error = AjaxResolve.resolve('Impossible de charger les données', ko);
+                        }
+                    ).then(foo => {
+                        this.loading = false;
+                        this.editDay = null;
+                    });
+                } else {
+                    console.log(this.schedule);
+                    this.days = this.schedule.days;
+                    this.dayLength = this.schedule.dayLength;
+                    this.editDay = true;
+                }
             }
         },
 

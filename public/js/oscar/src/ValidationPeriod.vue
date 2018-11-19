@@ -30,7 +30,7 @@
                                 <strong>{{ day }}</strong>
                             </th>
                             <th>Total</th>
-                            <th style="max-width: 150px"><i class="icon-cog"></i> Validation</th>
+                            <th style="width: 150px"><i class="icon-cog"></i> Validation</th>
                         </thead>
 
                         <tbody>

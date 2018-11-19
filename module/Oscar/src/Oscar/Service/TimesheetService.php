@@ -100,6 +100,38 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
 
+    public function changePersonSchedulePeriod($person, $days, $period){
+        try {
+            $this->getLogger()->debug("Modification des horaires pour $person en $period : " . json_encode(($days)));
+            $periodDatas = DateTimeUtils::extractPeriodDatasFromString($period);
+            $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('d')
+                ->where('d.declarer = :person AND d.year = :year AND d.month = :month')
+                ->setParameters([
+                    'person' => $person,
+                    'year' => $periodDatas['year'],
+                    'month' => $periodDatas['month'],
+                ])
+                ->getQuery()
+                ->getResult();
+
+            /** @var ValidationPeriod $declaration */
+            foreach ($declarations as $declaration) {
+                $schedule = $declaration->getSchedule();
+                $scheduleJson = json_decode($schedule, JSON_OBJECT_AS_ARRAY);
+                if( !$scheduleJson ){
+                    $scheduleJson = [];
+                }
+                $scheduleJson['days'] = $days;
+                $declaration->setSchedule(json_encode($scheduleJson));
+            }
+
+            $this->getEntityManager()->flush($declarations);
+        } catch( \Exception $e ){
+            throw new OscarException($e->getMessage());
+        }
+    }
+
+
     public function getDatasDeclarations()
     {
         $output = [];
@@ -116,6 +148,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'period' => $period,
                     'person' => (string)$declaration->getDeclarer(),
                     'person_id' => $declaration->getDeclarer()->getId(),
+                    'settings' => $declaration->getSchedule(),
                     'declarations' => [],
                 ];
             }
@@ -607,7 +640,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
     }
 
-    //public function
+
 
     public function getValidationsForValidator2(Person $validator, $declarer = null, $period = null)
     {
@@ -631,8 +664,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $group = [];
         $periodIds = [];
         $output = [];
-
-
 
         /** @var ValidationPeriod $period */
         foreach ($periods as $period) {
@@ -674,13 +705,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'validableStep' => $validateCurrentState,
                 'validabe' => $period->isValidable(),
                 'validators' => $validators,
+                'currentStep' => 5,
                 'total' => 0.0,
                 'label' => "Inconnu",
                 'status' => $period->getStatus(),
                 'statusMessage' => $this->getStatusMessage($period->getStatus()),
             ];
-
-
 
             // Déclarations sur des activités
             if( $period->getObject() == 'activity' ){

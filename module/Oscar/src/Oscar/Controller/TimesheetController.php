@@ -1520,33 +1520,50 @@ class TimesheetController extends AbstractOscarController
                 return $this->ajaxResponse($return);
 
                 case 'POST' :
-                    $person_id = $this->params()->fromPost('person_id');
-                    $type = $this->params()->fromPost('type');
-                    $declaration_id = $this->params()->fromPost('declaration_id');
                     $action = $this->params()->fromPost('action', 'add');
+                    $person_id = $this->params()->fromPost('person_id');
 
-                    $validation = $this->getTimesheetService()->getValidationPeriod($declaration_id);
                     $person = $this->getPersonService()->getPerson($person_id);
 
-                    if( !in_array($type, ['adm', 'sci', 'prj']) ){
-                        return $this->getResponseInternalError('Type de validation inconnu');
+                    // Modification des heures pour la périodes
+                    if( $action == 'changeschedule') {
+                        $days = json_decode($this->params()->fromPost('days'));
+                        $period = $this->params()->fromPost('period');
+
+                        try {
+                            $this->getTimesheetService()->changePersonSchedulePeriod($person, $days, $period);
+                            return $this->getResponseOk();
+                        } catch (OscarException $e){
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
                     }
 
-                    if( $action == 'delete' ){
-                        $this->getTimesheetService()->removeValidatorToValidation($type, $person, $validation);
-                    } else {
-                        $this->getTimesheetService()->addValidatorToValidation($type, $person, $validation);
-                        $return = [
-                            'person' => (string) $person,
-                            'id' => $person->getId()
-                        ];
-                        return $this->ajaxResponse($return);
+                    //
+                    else {
+
+                        $type = $this->params()->fromPost('type');
+                        $declaration_id = $this->params()->fromPost('declaration_id');
+                        $validation = $this->getTimesheetService()->getValidationPeriod($declaration_id);
+
+
+                        if( !in_array($type, ['adm', 'sci', 'prj']) ){
+                            return $this->getResponseInternalError('Type de validation inconnu');
+                        }
+
+                        if( $action == 'delete' ){
+                            $this->getTimesheetService()->removeValidatorToValidation($type, $person, $validation);
+                            return $this->getResponseOk();
+                        } else {
+                            $this->getTimesheetService()->addValidatorToValidation($type, $person, $validation);
+                            $return = [
+                                'person' => (string) $person,
+                                'id' => $person->getId()
+                            ];
+                            return $this->ajaxResponse($return);
+                        }
                     }
 
-
-
-                    return $this->getResponseOk();
-//                    return $this->getResponseNotImplemented("En cours d'implémentation");
+                    return $this->getResponseBadRequest("Erreur d'API");
 
                 case 'DELETE':
                     $person_id = $this->params()->fromQuery('person_id');
