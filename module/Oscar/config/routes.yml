@@ -78,7 +78,12 @@ timesheet:
             controller: Timesheet
     may_terminate: false
     child_routes:
-
+        activity:
+            type: segment
+            options:
+                route: /resume-activity/:id
+                defaults:
+                    action: resumeActivity
         resume:
             type: segment
             options:
@@ -428,6 +433,13 @@ person:
                 route: '/show/:id'
                 defaults:
                     action: show
+
+        grant:
+            type: segment
+            options:
+                route: '/grant/:id'
+                defaults:
+                    action: grant
 
         notification:
             type: segment

@@ -1043,12 +1043,34 @@ class TimesheetController extends AbstractOscarController
         die("DESACTIVE");
     }
 
+    public function resumeActivityAction(){
+
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('id'));
+        $method = $this->getHttpXMethod();
+
+        if( $this->isAjax() ){
+            switch ($method) {
+                case 'GET' :
+                    $datas = $this->getTimesheetService()->getResumeActivity($activity);
+                    return $this->ajaxResponse($datas);
+            }
+        }
+        return [];
+    }
+
     public function resumeAction(){
 
-        return [
-            'datas' => $this->getTimesheetService()->getResumePerson($this->getCurrentPerson())
-            ];
+        $personId = $this->params()->fromQuery('person_id', null);
+        if( $personId ){
+            $person = $this->getPersonService()->getPerson($personId);
+        } else {
+            $person = $this->getCurrentPerson();
+        }
 
+        return [
+            'datas' => $this->getTimesheetService()->getResumePerson($person),
+            'person' => $personId ? $person : null
+        ];
     }
 
     public function validationsAction() {

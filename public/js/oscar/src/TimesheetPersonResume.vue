@@ -87,21 +87,20 @@
                         <strong>{{ p.total | heures }}</strong> <small>/ {{ p.periodDuration | heures }}</small></td>
                     <td class="total text-right">
                         <em class="text-danger">{{p.error}}</em>
-
-
-
-                        <a class="xs btn btn-primary btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-if="p.validation_state == 'conflict'">
-                            <i class="icon-edit"></i>
-                            Corriger
-                        </a>
-                        <a class="xs btn btn-default btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-else-if="p.validations_id.length > 0">
-                            <i class="icon-zoom-in-outline"></i>
-                            Visualiser
-                        </a>
-                        <a class="xs btn btn-primary btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-else>
-                            <i class="icon-calendar"></i>
-                            Déclarer
-                        </a>
+                        <span v-if="datas.owner">
+                            <a class="xs btn btn-primary btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-if="p.validation_state == 'conflict'">
+                                <i class="icon-edit"></i>
+                                Corriger
+                            </a>
+                            <a class="xs btn btn-default btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-else-if="p.validations_id.length > 0">
+                                <i class="icon-zoom-in-outline"></i>
+                                Visualiser
+                            </a>
+                            <a class="xs btn btn-primary btn-xs" :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-else>
+                                <i class="icon-calendar"></i>
+                                Déclarer
+                            </a>
+                        </span>
 
                         <a :href="'/feuille-de-temps/excel?action=export&period=' +p.period +'&personid=' + p.person_id">
                             <i class="icon-download-outline"></i>
@@ -126,6 +125,7 @@
     </div>
 </template>
 <script>
+    // poi watch --format umd --moduleName  TimesheetPersonResume --filename.css TimesheetPersonResume.css --filename.js TimesheetPersonResume.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetPersonResume.vue
     export default {
         props: {
             datas: {

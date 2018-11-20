@@ -1,4 +1,10 @@
 <div class="container">
+    <h1>
+        Feuilles de temps
+        <?php if( $person ): ?>
+            pour <strong><?= $person ?></strong>
+        <?php endif; ?>
+    </h1>
     <div id="app">Chargement</div>
     <script>
         require(['vue', 'TimesheetPersonResume', 'mm'], function(Vue, TimesheetPersonResume, moment){

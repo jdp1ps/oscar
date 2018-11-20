@@ -1962,6 +1962,25 @@ class Activity implements ResourceInterface
         return false;
     }
 
+    /**
+     * @return Person[]
+     */
+    public function getDeclarers(){
+        $persons = [];
+
+        /** @var WorkPackage $workPackage */
+        foreach ($this->getWorkPackages() as $workPackage){
+            /** @var WorkPackagePerson $workPackagePerson */
+            foreach ($workPackage->getPersons() as $workPackagePerson) {
+                if( !array_key_exists($workPackagePerson->getPerson()->getId(), $persons) ){
+                    $persons[$workPackagePerson->getPerson()->getId()] = $workPackagePerson->getPerson();
+                }
+            }
+        }
+
+        return $persons;
+    }
+
     public function getTimesheets(){
         $timesheets = [];
         /** @var WorkPackage $workPackage */

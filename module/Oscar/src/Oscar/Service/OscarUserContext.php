@@ -649,10 +649,13 @@ class OscarUserContext extends UserContext
                 }
             }
             $tmpRolesOrganization[$key] = array_unique($tmpRolesOrganization[$key]);
-
         }
-
         return $tmpRolesOrganization[$key];
+    }
+
+    public function getPersonPrivilegesInOrganization( Person $person, Organization $organization ){
+        $roles = $this->getRolesPersonInOrganization($person, $organization);
+        return $this->getPrivilegesRoles($roles);
     }
 
     /**
@@ -771,6 +774,20 @@ class OscarUserContext extends UserContext
             return $this->getPrivilegesRoles($roles);
         }
     }
+
+    public function getPrivilegesPerson( Person $person ){
+
+    }
+
+    public function getPrivilegesOrganization( Organization $organization ){
+        if (!$this->getCurrentPerson()) {
+            return [];
+        } else {
+            return $this->getPersonPrivilegesInOrganization($organization);
+        }
+    }
+
+
 
     /**
      * Retourne un booléen indiquant si l'utilisateur courant dispose du privilége

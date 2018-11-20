@@ -20,6 +20,7 @@ use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Utils\ConfigurationMergable;
 use Oscar\Utils\DateTimeUtils;
+use Oscar\Utils\DateTimeUtilsTest;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Form\Element\Time;
@@ -628,9 +629,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $statusMessages = [
                 ValidationPeriod::STATUS_VALID => "Validée",
                 ValidationPeriod::STATUS_CONFLICT => "Conflict",
-                ValidationPeriod::STATUS_STEP1 => "En attente de validation projet",
-                ValidationPeriod::STATUS_STEP2 => "En attente de validation scientifique",
-                ValidationPeriod::STATUS_STEP3 => "En attente de validation administrative",
+                ValidationPeriod::STATUS_STEP1 => "Validation projet",
+                ValidationPeriod::STATUS_STEP2 => "Validation scientifique",
+                ValidationPeriod::STATUS_STEP3 => "Validation administrative",
             ];
         }
         if( array_key_exists($status, $statusMessages) ){
@@ -1154,6 +1155,103 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->_cache_getPeriodDuration = $totalPeriod;
     }
 
+    public function getResumeActivity( Activity $activity ){
+
+        $workPackages   = [];
+        $periods        = [];
+        $persons        = [];
+        $total          = 0.0;
+
+        /** @var WorkPackage $workPackage */
+        foreach ($activity->getWorkPackages() as $workPackage) {
+            $workPackages[$workPackage->getId()] = [
+                'id'    => $workPackage->getId(),
+                'code'  => $workPackage->getCode(),
+                'label' => $workPackage->getLabel(),
+                'total' => 0.0
+            ];
+        }
+
+        $declarersIds = [];
+
+        /** @var Person $person */
+        foreach ($activity->getDeclarers() as $person) {
+            $declarersIds[] = $person->getId();
+            $persons[$person->getId()] = [
+                'id'            => $person->getId(),
+                'displayname'   => (string)$person,
+                'total'         => 0.0
+            ];
+        }
+
+        // Début / Fin
+        $periodsList = DateTimeUtils::allperiodsBetweenTwo($activity->getDateStart()->format('Y-m'), $activity->getDateEnd()->format('Y-m'));
+        foreach ($periodsList as $period) {
+            $periods[$period] = [
+                'total' => 0.0,
+                'workpackages' => [],
+                'persons' => []
+            ];
+        }
+
+        $timessheets = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t')
+            ->innerJoin('t.person', 'd')
+            ->where('d.id IN (:declarers) AND t.activity = :activity')
+            ->setParameters([
+                'declarers' => $declarersIds,
+                'activity' => $activity
+            ])
+            ->getQuery()
+            ->getResult();
+
+        /** @var TimeSheet $timesheet */
+        foreach ($timessheets as $timesheet) {
+            $personId   = $timesheet->getPerson()->getId();
+            $period     = $timesheet->getDateFrom()->format('Y-m');
+            $wpCode     = $timesheet->getWorkpackage()->getCode();
+            $wpId       = $timesheet->getWorkpackage()->getId();
+            $duration   = $timesheet->getDuration();
+
+            $total += $duration;
+            $workPackages[$wpId]['total'] += $duration;
+            $persons[$personId]['total'] += $duration;
+
+            $periods[$period]['total'] += $duration;
+
+            if( !array_key_exists($personId, $periods[$period]['persons']) ){
+                $periods[$period]['persons'][$personId] = [
+                    'workpackages' => [],
+                    'total' => 0.0
+                ];
+            }
+            if( !array_key_exists($wpId, $periods[$period]['persons'][$personId]) ){
+                $periods[$period]['persons'][$personId]['workpackages'][$wpId] = 0.0;
+            }
+            $periods[$period]['persons'][$personId]['workpackages'][$wpId] += $duration;
+
+            $periods[$period]['persons'][$personId]['total'] += $duration;
+
+            if( !array_key_exists($wpId, $periods[$period]['workpackages']) ){
+                $periods[$period]['workpackages'][$wpId] = 0.0;
+            }
+
+            $periods[$period]['workpackages'][$wpId] += $duration;
+        }
+
+        $datas = [
+            'test'          => count($timessheets),
+            'total'         => $total,
+            'activity_id'   => $activity->getId(),
+            'acronym'       => $activity->getAcronym(),
+            'label'         => $activity->getLabel(),
+            'workspackages' => $workPackages,
+            'persons'       => $persons,
+            'periods'       => $periods,
+        ];
+
+        return $datas;
+    }
+
     /**
      * Retourne le résumé complet des déclarations d'une personne.
      *
@@ -1169,6 +1267,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $maxPeriod = $now->getTimestamp();
 
         $datas = [
+            'owner' => $person == $this->getOscarUserContext()->getCurrentPerson(),
             'minDate' => "",
             'maxDate' => "",
             'periods' => [],

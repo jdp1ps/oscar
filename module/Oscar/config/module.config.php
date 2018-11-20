@@ -36,23 +36,19 @@ return array(
                     'action' => ['documentation', 'parameters'],
                     'roles' => ['user'],
                 ],
-                [ 'controller' =>  'Public',
-                    'action' => ['testCalendar'],
-                    'roles' => ['user'],
-                ],
 
                 [ 'controller' =>  'Notification',
-                    'action' => ['indexPerson', 'index', 'test'],
-                    'roles' => ['user'],
-                ],
-
-                [ 'controller' =>  'Notification',
-                    'action' => ['notifyPerson', 'history'],
+                    'action' => ['indexPerson', 'index', 'test',
+                        'notifyPerson', 'history'],
                     'roles' => ['user'],
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'userRoles', 'organizationRole', 'organizationRoleApi', 'activityIndexBuild', 'organizationType', 'discipline'],
+                    'action' => ['users', 'roles', 'rolesEdit',
+                        "index", "accessAPI", "roleAPI",
+                        "userLogs", 'userRoles', 'organizationRole',
+                        'organizationRoleApi', 'activityIndexBuild', 'organizationType',
+                        'discipline'],
                     'roles' => ['user']
                 ],
 
@@ -209,8 +205,9 @@ return array(
                         'indexPersonActivity', 'sauvegarde', 'declaration', 'validations', 'resume',
                         "declaration2", "indexActivity", "validateTimesheet",
                         'usurpation', 'excel', 'organizationLeader',
-                        'declarant', 'declarantAPI', 'validationActivity', 'validationActivity2',
-                        'validationHWPPerson', 'validatePersonPeriod', 'importIcal', 'declarations'
+                        'declarant', 'declarantAPI', 'validationActivity',
+                        'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
+                        'importIcal', 'declarations', 'resumeActivity'
                     ],
                     'roles' => ['user']
                 ],
@@ -242,6 +239,11 @@ return array(
                     'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
                 ],
+                [ 'controller' =>   'Person',
+                    'action' => ['grant'],
+                    'privileges' => \Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION
+                ],
+
                 // Membre
                 [ 'controller' =>   'Enroll',
                     'action' => ['personProjectNew', 'personProjectDelete', 'personProjectEdit'],

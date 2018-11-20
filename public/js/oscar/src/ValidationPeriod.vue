@@ -47,8 +47,8 @@
                                    <strong v-if="lot.timesheets[d]">{{ lot.timesheets[d] | duration2 }}</strong>
                                     <em v-else>-</em>
                                 </td>
-                                <th>
-                                    {{ lot.total }}
+                                <th class="total">
+                                    {{ lot.total | duration2 }}
                                 </th>
                                 <th>-</th>
                             </tr>
@@ -57,7 +57,7 @@
                                         Total pour <i class="icon-cube"></i>{{ activity.label }}
                                     </th>
                                     <th colspan="2">Actions</th>
-                                    <th>
+                                    <th class="total">
                                         {{ activity.total | duration2 }}
                                     </th>
                                     <th>
@@ -90,8 +90,8 @@
                                         <strong v-if="hl.timesheets[d]">{{ hl.timesheets[d] | duration2 }}</strong>
                                         <em v-else>-</em>
                                     </td>
-                                    <th>
-                                        {{ hl.total }}
+                                    <th class="total">
+                                        {{ hl.total | duration2 }}
                                     </th>
                                     <th>
                                         <small><i :class="'icon-'+hl.status"></i> {{ hl.statusMessage }}</small>
@@ -116,15 +116,15 @@
                                     <th :colspan="period.totalDays+2"><i class="icon-lock"></i>Autres déclarations </th>
                                 </tr>
                                 <tr class="datas">
-                                    <th><small>~</small></th>
+                                    <th><small>Vous ne pouvez pas voir le détails pour ces créneaux</small></th>
                                     <td v-for="d in period.totalDays">
                                         <strong v-if="period.declarations_off.timesheets[d]">{{ period.declarations_off.timesheets[d] | duration2 }}</strong>
                                         <em v-else>-</em>
                                     </td>
-                                    <th>
-                                        {{ period.declarations_off.total }}
+                                    <th class="total">
+                                        {{ period.declarations_off.total | duration2 }}
                                     </th>
-                                    <th><small>Vous ne pouvez pas voir le détails pour ces créneaux</small></th>
+                                    <th>~</th>
                                 </tr>
                             </template>
                         </tbody>
@@ -135,7 +135,7 @@
                             <th v-for="dayInfos, day in period.details" :class="{'locked': dayInfos.locked}">
                                 <strong>{{ dayInfos.duration | duration2 }}<small>/ {{ dayInfos.dayLength | duration2 }}</small></strong>
                             </th>
-                            <th>{{ period.total | duration2 }}</th>
+                            <th class="total">{{ period.total | duration2 }}</th>
                             <th>-</th>
                             </tr>
                         </tfoot>
@@ -189,6 +189,11 @@
         }
         .datas td {
             text-align: right;
+        }
+
+        .total {
+            text-align: right;
+            font-size: 1.2em;
         }
     }
 

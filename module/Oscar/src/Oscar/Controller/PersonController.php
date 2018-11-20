@@ -50,6 +50,30 @@ class PersonController extends AbstractOscarController
         $this->getResponseDeprecated();
     }
 
+    public function grantAction()
+    {
+        $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+        $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
+
+        $organizations = [];
+
+        /** @var OrganizationPerson $personOrganization */
+        foreach( $person->getOrganizations() as $personOrganization ){
+            $organizations[$personOrganization->getOrganization()->getId()] = [
+                'rôles' => $this->getOscarUserContext()->getRolesPersonInOrganization($person, $personOrganization->getOrganization()),
+                'privileges' => $this->getOscarUserContext()->getPersonPrivilegesInOrganization($person, $personOrganization->getOrganization())
+            ];
+
+        }
+
+        var_dump($organizations);
+
+        //$userCOntext = $this->getOscarUserContext()->getPri
+        return [
+            'person' => $person
+        ];
+    }
+
     public function viewsAction()
     {
         $view = $this->params()->fromQuery('view', 'almoststart');
