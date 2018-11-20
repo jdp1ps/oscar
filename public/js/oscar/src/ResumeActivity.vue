@@ -11,26 +11,22 @@
                         </th>
                         <th>Total</th>
                     </tr>
-                    <tbody v-if="p.persons">
-                        <tr v-for="person, personId in p.persons">
-                            <th>{{ datas.persons[personId].displayname }} - {{ person }}</th>
-                            <td v-for="wpCode in datas.workspackages">
-                                <strong v-if="person.workpackages[wpCode]">{{ person.workpackages[wpCode] }}</strong>
-                                <em v-else> ~ </em>
-                                 (WPID: {{ wpCode.id }})
+                    <tbody>
+                        <tr v-for="person in p.persons" v-if="person.total > 0">
+                            <th>{{ person.displayname }}</th>
+                            <td v-for="wp in person.workpackages">
+                                <strong v-if="wp">{{ wp | duration}}</strong>
+                                <small v-else>0.0</small>
                             </td>
-                            <td class="total">- {{ person.total }}</td>
+
+                            <td class="total">
+                                <strong v-if="person.total">{{ person.total | duration }}</strong>
+                                <small v-else>0.0</small>
+
+                            </td>
                         </tr>
                     </tbody>
-                        <tr>
-                            <th>{{ period | period }}</th>
-                            <th v-for="wp in datas.workspackages">
-                                {{ wp.total }}
-                            </th>
-                            <th>Total</th>
-                        </tr>
                 </table>
-                <pre>{{ p }}</pre>
                 <hr>
             </div>
         </template>

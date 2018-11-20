@@ -1192,6 +1192,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'workpackages' => [],
                 'persons' => []
             ];
+            foreach ($persons as $person) {
+                $personId = $person['id'];
+                $periods[$period]['persons'][$personId] = [
+                    'total' => 0.0,
+                    'displayname' => $person['displayname'],
+                    'workpackages' => [],
+                ];
+                foreach ($workPackages as $wp) {
+                    $periods[$period]['persons'][$personId]['workpackages'][$wp['id']] = 0.0;
+                }
+            }
         }
 
         $timessheets = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t')
@@ -1215,27 +1226,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $total += $duration;
             $workPackages[$wpId]['total'] += $duration;
             $persons[$personId]['total'] += $duration;
-
             $periods[$period]['total'] += $duration;
-
-            if( !array_key_exists($personId, $periods[$period]['persons']) ){
-                $periods[$period]['persons'][$personId] = [
-                    'workpackages' => [],
-                    'total' => 0.0
-                ];
-            }
-            if( !array_key_exists($wpId, $periods[$period]['persons'][$personId]) ){
-                $periods[$period]['persons'][$personId]['workpackages'][$wpId] = 0.0;
-            }
-            $periods[$period]['persons'][$personId]['workpackages'][$wpId] += $duration;
-
             $periods[$period]['persons'][$personId]['total'] += $duration;
 
-            if( !array_key_exists($wpId, $periods[$period]['workpackages']) ){
-                $periods[$period]['workpackages'][$wpId] = 0.0;
-            }
-
-            $periods[$period]['workpackages'][$wpId] += $duration;
+            $periods[$period]['persons'][$personId]['workpackages'][$wpId] += $duration;
         }
 
         $datas = [
