@@ -2932,22 +2932,34 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function validation(ValidationPeriod $period, Person $validateur, $message = "")
     {
         if ($period->isValidator($validateur)) {
+
+            if($period->getObject() == ValidationPeriod::OBJECT_ACTIVITY){
+                $obj = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId())->log();
+            } else {
+                $obj = $period->getLabel();
+            }
             switch ($period->getStatus()) {
                 case ValidationPeriod::STATUS_STEP1:
+                    $msg = sprintf("a valider niveau activité la déclartion %s", $obj);
                     $period->setValidationActivity($validateur, new \DateTime(), $message);
                     break;
 
                 case ValidationPeriod::STATUS_STEP2:
+                    $msg = sprintf("a valider scientifiquement la déclartion %s", $obj);
                     $period->setValidationSci($validateur, new \DateTime(), $message);
                     break;
 
                 case ValidationPeriod::STATUS_STEP3:
+                    $msg = sprintf("a valider administrativement la déclartion %s", $obj);
                     $period->setValidationAdm($validateur, new \DateTime(), $message);
                     break;
 
                 default:
                     throw new OscarException("Cette période n'a pas le bon status pour être validée.");
             }
+            /** @var ActivityLogService $als */
+            $als = $this->getServiceLocator()->get('ActivityLogService');
+            $als->addUserInfo($msg, 'Activity', $period->getObjectId());
             $this->getEntityManager()->flush($period);
             $this->notificationsValidationPeriod($period);
             return true;
