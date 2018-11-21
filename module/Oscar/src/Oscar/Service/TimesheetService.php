@@ -1174,6 +1174,23 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $declarersIds = [];
 
+        $validations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
+            ->where('vp.object_id = :activityId AND vp.object = :object')
+            ->setParameters([
+                'activityId' => $activity->getId(),
+                'object' => ValidationPeriod::OBJECT_ACTIVITY
+            ])
+            ->getQuery()
+            ->getResult();
+
+        $validationsState = [];
+        /** @var ValidationPeriod $validation */
+        foreach ($validations as $validation) {
+            $key = $validation->getDeclarer()->getId() . '-' . $validation->getPeriod();
+            $validationsState[$key] = $validation->getStatus();
+        }
+
+
         /** @var Person $person */
         foreach ($activity->getDeclarers() as $person) {
             $declarersIds[] = $person->getId();
@@ -1193,9 +1210,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'persons' => []
             ];
             foreach ($persons as $person) {
+
                 $personId = $person['id'];
+                $validationKey = sprintf('%s-%s', $personId, $period);
                 $periods[$period]['persons'][$personId] = [
                     'total' => 0.0,
+                    'validation_state' => array_key_exists($validationKey, $validationsState) ? $validationsState[$validationKey] : 'none',
                     'displayname' => $person['displayname'],
                     'workpackages' => [],
                 ];

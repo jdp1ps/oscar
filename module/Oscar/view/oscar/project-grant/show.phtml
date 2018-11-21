@@ -469,7 +469,16 @@
             </div>
         </div>
 
-        <h3>Visualiser les feuilles de temps</h3>
+        <h3>Synthèse de déclarations</h3>
+        <a href="<?= $this->url('timesheet/activity', ['id' => $entity->getId()]) ?>"
+           class="btn btn-primary btn-large">
+            <i class="icon-calendar"></i>
+            Synthèse générale
+        </a>
+
+
+
+        <h3>Déclarants</h3>
         <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
             <?php if( $entity->hasDeclarant($personActivity->getPerson()) ):
                 $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($entity);
@@ -485,19 +494,6 @@
                 </a>
             <?php endif; ?>
         <?php endforeach; ?>
-
-        <h3>Gérer les déclarations</h3>
-
-        <a href="#" class="btn btn-primary">Validation</a>
-
-        <?php if( $entity->hasDeclarant($this->grant()->getCurrentPerson())  ): ?>
-            <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
-                <a class="btn btn-primary" href="<?= $this->url('timesheet/declarant') ?>">
-                    <i class="icon-calendar"></i>
-                    Déclarer vos heures
-                </a>
-            <?php endif; ?>
-        <?php endif; ?>
     <?php endif; ?>
 
         <?php /*if( ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ||
@@ -540,22 +536,6 @@
         <?php endif; ?>
 
     <?php endif;  */ ?>
-
-<?php
-    if(     $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $entity) ||
-        $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ||
-        $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity )):?>
-        <section>
-            <h2>
-                <i class="icon-calendar"></i> Déclarations
-            </h2>
-            <p>Il y'a <?= count($declarations) ?> déclaration(s) pour cette activité.</p>
-            <a href="<?= $this->url('timesheet/validationactivity', ['idactivity' => $entity->getId()]) ?>">
-                <i class="icon-pencil"></i>
-                Voir les déclarations
-            </a>
-        </section>
-    <?php endif; ?>
 
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
