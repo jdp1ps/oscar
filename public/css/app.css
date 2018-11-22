@@ -7075,6 +7075,9 @@ const STATUS_STEP3      = 'send-adm';
 const STATUS_CONFLICT   = 'conflict';
 const STATUS_VALID      = 'valid';
 */
+[class*="icon-none"]:before {
+  content: '\e83b'; }
+
 [class*="icon-status-1"]:before {
   content: '\e85b'; }
 

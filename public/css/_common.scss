@@ -2455,6 +2455,8 @@ const STATUS_CONFLICT   = 'conflict';
 const STATUS_VALID      = 'valid';
 */
 
+[class*="icon-none"]:before { content: '\e83b'; }
+
 [class*="icon-status-1"]:before { content: '\e85b'; }
 [class*="icon-valid"]:before { content: '\e85b'; }
 
