@@ -23,10 +23,12 @@ class DateTimeUtils {
         return $datetime ? $datetime->format($format) : '';
     }
 
-    public static function periodBounds( $period ){
+    public static function periodBounds( $period, $daysDetails = false ){
+
         $dateRef = new \DateTime(sprintf('%s-01', $period));
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
-        return [
+
+        $datas = [
             'totalDays' => $nbr,
             'year' => $dateRef->format('Y'),
             'month' => $dateRef->format('m'),
@@ -35,6 +37,21 @@ class DateTimeUtils {
             'end' => $dateRef->format('Y-m-' . $nbr .' 23:59:59'),
             'lastDay' => $dateRef->format('Y-m-'. $nbr),
         ];
+
+
+
+        $daysLabel = ['', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+        $i = 1;
+        $days = [];
+
+        for($i=1; $i<$nbr; $i++){
+            $forDay = new \DateTime($period.'-'.$i);
+            $days[$i] = $daysLabel[$forDay->format('N')];
+        }
+
+        $datas['days'] = $days;
+
+        return $datas;
     }
 
     /**
