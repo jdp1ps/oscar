@@ -112,6 +112,10 @@ class AbstractOscarController extends AbstractActionController
         return $r;
     }
 
+    protected function jsonOutput($datas){
+        return $this->ajaxResponse($datas);
+    }
+
     protected function getHttpResponse($code, $content = null)
     {
         $response = new Response();

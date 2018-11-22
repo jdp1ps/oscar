@@ -1046,12 +1046,21 @@ class TimesheetController extends AbstractOscarController
     public function resumeActivityAction(){
 
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('id'));
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+
+
+        $format = $this->params()->fromQuery('format', null);
         $method = $this->getHttpXMethod();
 
-        if( $this->isAjax() ){
+        if( $this->isAjax() || $format == 'json' ){
             switch ($method) {
                 case 'GET' :
                     $datas = $this->getTimesheetService()->getResumeActivity($activity);
+                    if( $format == 'json' ){
+                        return $this->jsonOutput($datas);
+
+                    }
                     return $this->ajaxResponse($datas);
             }
         }

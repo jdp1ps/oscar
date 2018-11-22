@@ -1204,8 +1204,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Début / Fin
         $periodsList = DateTimeUtils::allperiodsBetweenTwo($activity->getDateStart()->format('Y-m'), $activity->getDateEnd()->format('Y-m'));
         foreach ($periodsList as $period) {
+
+            $periodBounds = DateTimeUtils::periodBounds($period);
+
             $periods[$period] = [
                 'total' => 0.0,
+                'days' => $periodBounds['days'],
                 'workpackages' => [],
                 'persons' => []
             ];
@@ -1218,6 +1222,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'validation_state' => array_key_exists($validationKey, $validationsState) ? $validationsState[$validationKey] : 'none',
                     'displayname' => $person['displayname'],
                     'workpackages' => [],
+                    'details' => [],
                 ];
                 foreach ($workPackages as $wp) {
                     $periods[$period]['persons'][$personId]['workpackages'][$wp['id']] = 0.0;
@@ -1242,14 +1247,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $wpCode     = $timesheet->getWorkpackage()->getCode();
             $wpId       = $timesheet->getWorkpackage()->getId();
             $duration   = $timesheet->getDuration();
+            $day        = $timesheet->getDateFrom()->format('j');
 
             $total += $duration;
             $workPackages[$wpId]['total'] += $duration;
             $persons[$personId]['total'] += $duration;
             $periods[$period]['total'] += $duration;
             $periods[$period]['persons'][$personId]['total'] += $duration;
-
             $periods[$period]['persons'][$personId]['workpackages'][$wpId] += $duration;
+
+            if( !array_key_exists($wpId, $periods[$period]['persons'][$personId]['details']) ){
+                $periods[$period]['persons'][$personId]['details'][$wpId] = [];
+            }
+
+            if( !array_key_exists($day, $periods[$period]['persons'][$personId]['details'][$wpId]) ){
+                $periods[$period]['persons'][$personId]['details'][$wpId][$day] = 0.0;
+            }
+
+            $periods[$period]['persons'][$personId]['details'][$wpId][$day] += $duration;
         }
 
         $datas = [
