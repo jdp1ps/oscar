@@ -128,14 +128,14 @@
                                 </div>
                             <?php endif; ?>
 
-                            <?php if( count($validations) ): ?>
-                                <h1>Validation (<?= count($validations) ?>)</h1>
-                                <section>
-                                    <a href="<?= $this->url('timesheet/validations') ?>" class="btn btn-primary">
+                            <?php if( $isValidator ): ?>
+
+
+                                    <a href="<?= $this->url('timesheet/validations') ?>" class="btn <?= count($validations) > 0 ? 'btn-primary' : 'btn-default' ?>">
                                         <i class="icon-pencil"></i>
-                                        Valider les déclarations
+                                        Validation des feuilles de temps
                                     </a>
-                                </section>
+
                             <?php endif; ?>
 
                             <?php /* if( count($activitiesValidation) ): ?>

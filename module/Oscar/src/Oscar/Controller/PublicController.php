@@ -141,42 +141,9 @@ class PublicController extends AbstractOscarController
         /** @var TimesheetService  $timeSheetService */
         $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
 
-//        // est déclarant
-//
-//        // est validateur (Application)
-//        $isValidateurScientifique = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI);
-//        $isValidateurAdministratif = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
-//
-//        $activitiesValidation = [];
-//        $periodsRejected = [];
-//        $periodHorsLotsUnvalid = [];
-//
-//        $validationsHorsLot = [];
-//        if( $this->getCurrentPerson() ) {
-//            $validationsHorsLot = $timeSheetService->getValidationHorsLotByReferent($this->getCurrentPerson(), true);
-//        }
-
-
-//        $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
-//
-//        ///
-//        /** @var Activity $activity */
-//        foreach ($activityWithValidationUp as $activity ){
-//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)){
-//                $activitiesValidation[] = $activity;
-//                continue;
-//            }
-//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity)){
-//                $activitiesValidation[] = $activity;
-//                continue;
-//            }
-//            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)){
-//                $activitiesValidation[] = $activity;
-//                continue;
-//            }
-//        }
 
         $validations = [];
+        $isValidator = false;
 
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
@@ -184,6 +151,8 @@ class PublicController extends AbstractOscarController
             if( $person ){
                 // Déclaration en conflit
                 $periodsRejected = $timeSheetService->getValidationPeriodPersonConflict($person);
+
+                $isValidator = $timeSheetService->isValidator($person);
                 $validations = $timeSheetService->getValidationToDoPerson($person);
             }
 
@@ -191,9 +160,8 @@ class PublicController extends AbstractOscarController
             $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
         }
         return [
-//            'validationsHorsLot' => $validationsHorsLot,
-//            'activitiesValidation' => $activitiesValidation,
             'validations' => $validations,
+            'isValidator' => $isValidator,
             'periodsRejected' => $periodsRejected,
             'user' => $person
         ];

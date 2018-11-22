@@ -15,12 +15,17 @@
 
         <section v-if="declarations && declarations.length" class="validation">
             <section v-for="period in periodsPerson">
-                <h2>
+                <h3 @click="period.open = !period.open" :class="{ 'has-validation': period.validableStep }">
                     <strong class="person"><i class="icon-user"></i> {{ period.person }}</strong>
                     <strong class="period"><i class="icon-calendar"></i> {{ period.period | period}}</strong>
-                </h2>
+                    <small v-if="period.validableStep">
+                        <i class="icon-clock"></i>
+                        Validation à faire
+                    </small>
+                </h3>
 
-                <section class="activity card">
+                <transition name="slide">
+                <section class="activity card" v-show="period.open">
                     <table class="table table-condensed">
 
                         <thead class="heading-days">
@@ -141,6 +146,7 @@
                         </tfoot>
                     </table>
                 </section>
+                </transition>
 
             </section>
         </section>
@@ -151,6 +157,11 @@
 </template>
 <style lang="scss">
     .validation {
+
+        .has-validation {
+            cursor: pointer;
+            border-left: 4px #0b93d5 solid;
+        }
 
         background: transparent;
 
@@ -224,7 +235,12 @@
             fetch(){
                 this.$http.get().then(
                     ok => {
-                        this.declarations = ok.body;
+                        let datas = [];
+                        Object.keys(ok.body).forEach(key => {
+                           ok.body[key].open = ok.body[key].validableStep;
+                            datas.push(ok.body[key]);
+                        });
+                        this.declarations = datas;
                     },
                     ko => {
                         this.error = "Impossible de charger les données : " + ko.body;

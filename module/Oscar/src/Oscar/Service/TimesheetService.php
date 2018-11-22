@@ -690,6 +690,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'person_id' => $period->getDeclarer()->getId(),
                     'declarations_activities' => [],
                     'declarations_others' => [],
+                    'validableStep' => $validateCurrentState,
                     'declarations_off' => [
                         'timesheets' => [],
                         'total' => 0.0,
@@ -2914,6 +2915,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
     }
 
+
+    public function isValidator( Person $person ){
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
+            ->createQueryBuilder('vp')
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where('vprj = :person OR vsci = :person OR vadm = :person')
+            ->setParameter('person', $person);
+
+        return count($query->getQuery()->getResult()) > 0;
+    }
 
     /**
      * Retourne toutes les validations où la personne est identifiée comme validateur.
