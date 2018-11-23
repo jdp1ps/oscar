@@ -665,6 +665,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $group = [];
         $periodIds = [];
         $output = [];
+        $hasValidableStep = false;
 
         /** @var ValidationPeriod $period */
         foreach ($periods as $period) {
@@ -674,7 +675,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $validators = [];
             foreach ( $period->getCurrentValidators() as $v ){
                 if( $v->getId() == $validator->getId() ){
-                    $validateCurrentState = true;
+                    $hasValidableStep = $validateCurrentState = true;
                 }
                 $validators[] = (string)$v;
             }
@@ -683,14 +684,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if( !array_key_exists($key, $group) ){
                 $group[$key] = [
                     'period' => $period->getPeriod(),
+                    'validators' => $validators,
                     'totalDays' => $periodBounds['totalDays'],
                     'periodFirstDay' => $periodBounds['firstDay'],
                     'periodLastDay' => $periodBounds['lastDay'],
+                    'validableStep' => false,
                     'person' => (string)$period->getDeclarer(),
                     'person_id' => $period->getDeclarer()->getId(),
                     'declarations_activities' => [],
                     'declarations_others' => [],
-                    'validableStep' => $validateCurrentState,
                     'declarations_off' => [
                         'timesheets' => [],
                         'total' => 0.0,
@@ -699,13 +701,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ];
             }
 
+            if( $validateCurrentState == true ){
+                $group[$key]['validableStep'] = true;
+            }
+
             // Modèle commun
             $periodDatas = [
                 'validationperiod_id' => $period->getId(),
                 'validationperiod_object' => $period->getObject(),
                 'validationperiod_objectid' => $period->getObjectId(),
                 'validableStep' => $validateCurrentState,
-                'validabe' => $period->isValidable(),
+                'validable' => $period->isValidable(),
                 'validators' => $validators,
                 'currentStep' => 5,
                 'total' => 0.0,
@@ -713,6 +719,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'status' => $period->getStatus(),
                 'statusMessage' => $this->getStatusMessage($period->getStatus()),
             ];
+
 
             // Déclarations sur des activités
             if( $period->getObject() == 'activity' ){

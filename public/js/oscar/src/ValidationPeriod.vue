@@ -15,6 +15,7 @@
 
         <section v-if="declarations && declarations.length" class="validation">
             <section v-for="period in periodsPerson">
+
                 <h3 @click="period.open = !period.open" :class="{ 'has-validation': period.validableStep }">
                     <strong class="person"><i class="icon-user"></i> {{ period.person }}</strong>
                     <strong class="period"><i class="icon-calendar"></i> {{ period.period | period}}</strong>
@@ -26,6 +27,7 @@
 
                 <transition name="slide">
                 <section class="activity card" v-show="period.open">
+
                     <table class="table table-condensed">
 
                         <thead class="heading-days">
@@ -47,6 +49,13 @@
                                     <span class="state" :class="'state-' + activity.status">
                                         <i :class="'icon-'+activity.status"></i>
                                         {{ activity.status | status }}
+                                    </span>
+
+                                    <span v-if="activity.validators.length">
+                                        Validateurs :
+                                        <span v-for="v in activity.validators" class="cartouche cartouche-xs xs">
+                                            {{ v }}
+                                        </span>
                                     </span>
                                 </th>
 
@@ -250,7 +259,7 @@
         'send-prj': 'Validation projet',
         'send-sci': 'Validation scientifique',
         'send-adm': 'Validation administrative',
-        'reject': 'Refusée'
+        'conflict': 'Refusée'
     };
 
     export default {
