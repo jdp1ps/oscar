@@ -186,22 +186,6 @@
             color: rgba(0,0,0,.25)
         }
 
-        small.state {
-            background: #5c646c;
-            color: #FFFFFF;
-            padding: 0 4px 0 2px;
-            text-shadow: -1px 1px 0 rgba(0,0,0,.3);
-            border-radius: 2px;
-            font-weight: 400;
-
-            &.state-none { background: #8f97a0; }
-            &.state-valid { background: #3a8104; }
-            &.state-conflict { background: #9a1e1b; }
-            &.state-send-prj,
-            &.state-send-sci,
-            &.state-send-adm { background: #0b93d5; }
-        }
-
         .line-label {
             flex: 3 0 0;
         }

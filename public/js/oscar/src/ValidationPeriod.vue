@@ -43,6 +43,11 @@
                             <tr class="heading-activity heading">
                                 <th :colspan="period.totalDays+3">
                                     <i class="icon-cube"></i>{{ activity.label }}
+
+                                    <span class="state" :class="'state-' + activity.status">
+                                        <i :class="'icon-'+activity.status"></i>
+                                        {{ activity.status | status }}
+                                    </span>
                                 </th>
 
                             </tr>
@@ -58,10 +63,10 @@
                                 <th>-</th>
                             </tr>
                                 <tr>
-                                    <th :colspan="period.totalDays-1">
-                                        Total pour <i class="icon-cube"></i>{{ activity.label }}
+                                    <th :colspan="period.totalDays-1" style="padding-left: 1em">
+                                        Total
                                     </th>
-                                    <th colspan="2">Actions</th>
+                                    <th colspan="2">&nbsp;</th>
                                     <th class="total">
                                         {{ activity.total | duration2 }}
                                     </th>
@@ -72,9 +77,9 @@
                                             <button class="btn btn-danger btn-xs" @click="reject(activity.validationperiod_id)" v-if="activity.validableStep">Rejeter</button>
                                         </span>
                                         <span v-else>
-                                            <span v-if="activity.validabe">
+                                            <span v-if="activity.validable">
                                                 <span v-if="activity.validators.length == 0" class="text-danger">
-                                                    <i class="icon-attention-1"></i> Aucun validateur pour cette étape, contacter l'administrateur Oscar pour corriger le problème
+                                                    <i class="icon-attention-1"></i> Aucun validateur
                                                 </span>
                                                 <div v-else>
                                                     <span class="cartouche xs" v-for="v in activity.validators">{{ v }}</span>
@@ -90,7 +95,13 @@
                                     <th :colspan="period.totalDays+3"><i class="icon-tags"></i>Hors-lot</th>
                                 </tr>
                                 <tr v-for="hl, hlcode in period.declarations_others" class="datas">
-                                    <th><i class="hors-lot" :class="'icon-' + hlcode"></i>{{ hl.label }}</th>
+                                    <th>
+                                        <i class="hors-lot" :class="'icon-' + hlcode"></i>{{ hl.label }}
+                                        <span class="state" :class="'state-' + hl.status">
+                                        <i :class="'icon-'+hl.status"></i>
+                                        {{ hl.status | status }}
+                                    </span>
+                                    </th>
                                     <td v-for="d in period.totalDays">
                                         <strong v-if="hl.timesheets[d]">{{ hl.timesheets[d] | duration2 }}</strong>
                                         <em v-else>-</em>
@@ -106,7 +117,7 @@
                                         </span>
                                         <span v-else-if="hl.validabe">
                                             <span v-if="hl.validators.length == 0">
-                                                <i class="icon-attention-1"></i> Aucun validateur pour cette étape, contacter l'administrateur Oscar pour corriger le problème
+                                                <i class="icon-attention-1"></i> Aucun validateur
                                             </span>
                                             <div v-else>
                                                 <span class="cartouche xs" v-for="v in hl.validators">{{ v }}</span>
@@ -116,7 +127,7 @@
                                 </tr>
                             </template>
 
-                            <template v-if="period.declarations_off">
+                            <template v-if="period.declarations_off && period.declarations_off.total > 0">
                                 <tr class="heading-activity heading">
                                     <th :colspan="period.totalDays+2"><i class="icon-lock"></i>Autres déclarations </th>
                                 </tr>
@@ -129,7 +140,7 @@
                                     <th class="total">
                                         {{ period.declarations_off.total | duration2 }}
                                     </th>
-                                    <th>~</th>
+                                    <td>~</td>
                                 </tr>
                             </template>
                         </tbody>
@@ -137,11 +148,12 @@
                         <tfoot>
                         <tr class="total-row">
                             <th>Total période</th>
-                            <th v-for="dayInfos, day in period.details" :class="{'locked': dayInfos.locked}">
-                                <strong>{{ dayInfos.duration | duration2 }}<small>/ {{ dayInfos.dayLength | duration2 }}</small></strong>
-                            </th>
+                            <td v-for="dayInfos, day in period.details" :class="{'locked': dayInfos.locked}">
+                                <strong v-if="dayInfos.duration">{{ dayInfos.duration | duration2 }}</strong>
+                                <small v-else>0.0</small>
+                            </td>
                             <th class="total">{{ period.total | duration2 }}</th>
-                            <th>-</th>
+                            <td>-</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -157,6 +169,25 @@
 </template>
 <style lang="scss">
     .validation {
+
+        table.table {
+            td, th {
+                padding: 2px;
+                font-size: .9em;
+            }
+
+            .datas > th {
+                padding-left: 1em;
+            }
+
+            .heading-activity > th {
+                padding-top: 1em;
+                border-top: solid 1px #ddd;
+                font-weight: 100;
+            }
+        }
+
+
 
         .has-validation {
             cursor: pointer;
@@ -198,7 +229,7 @@
         .datas th {
             padding-left: 1em;
         }
-        .datas td {
+        .datas td, .total-row td {
             text-align: right;
         }
 
@@ -212,7 +243,23 @@
 <script>
     // Compilation :
     // poi watch --format umd --moduleName  ValidationPeriod --filename.css ValidationPeriod.css --filename.js ValidationPeriod.js --dist public/js/oscar/dist public/js/oscar/src/ValidationPeriod.vue
+
+
+    const status = {
+        'valid': 'Validée',
+        'send-prj': 'Validation projet',
+        'send-sci': 'Validation scientifique',
+        'send-adm': 'Validation administrative',
+        'reject': 'Refusée'
+    };
+
     export default {
+        filters: {
+            status(s){
+                return status[s];
+            }
+        },
+
         data() {
             return {
                 error: null,
