@@ -99,7 +99,7 @@
                                 </tr>
                             </template>
 
-                            <template v-if="period.declarations_others">
+                            <template v-if="period.declarations_others && period.declarations_others.length != 0">
                                 <tr class="heading-activity heading">
                                     <th :colspan="period.totalDays+3"><i class="icon-tags"></i>Hors-lot</th>
                                 </tr>
@@ -138,7 +138,9 @@
 
                             <template v-if="period.declarations_off && period.declarations_off.total > 0">
                                 <tr class="heading-activity heading">
-                                    <th :colspan="period.totalDays+2"><i class="icon-lock"></i>Autres déclarations </th>
+                                    <th :colspan="period.totalDays+2"><i class="icon-lock"></i>Autres déclarations
+                                    <pre>{{ period.declarations_off }}</pre>
+                                    </th>
                                 </tr>
                                 <tr class="datas">
                                     <th><small>Vous ne pouvez pas voir le détails pour ces créneaux</small></th>
