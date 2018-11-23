@@ -675,7 +675,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $validators = [];
             foreach ( $period->getCurrentValidators() as $v ){
                 if( $v->getId() == $validator->getId() ){
-                    $hasValidableStep = $validateCurrentState = true;
+                    $validateCurrentState = true;
                 }
                 $validators[] = (string)$v;
             }
@@ -696,6 +696,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'declarations_off' => [
                         'timesheets' => [],
                         'total' => 0.0,
+                        'validators' => []
                     ],
                     'details' => $this->getDaysPeriodInfosPerson($period->getDeclarer(), $period->getYear(), $period->getMonth()),
                 ];
@@ -775,6 +776,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                         $periodPersonDatas['declarations_activities'][$main]['workpackages'][$sub]['total'] += $timesheet->getDuration();
                         $periodPersonDatas['declarations_activities'][$main]['total'] += $timesheet->getDuration();
                     } else {
+                        $periodPersonDatas['declarations_off']['validators'] = $validators;
                         $periodPersonDatas['declarations_off']['total'] += $timesheet->getDuration();
                         $periodPersonDatas['declarations_off']['timesheets'][$dayStr] += $timesheet->getDuration();
                     }
@@ -789,6 +791,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     } else {
                         $periodPersonDatas['declarations_off']['total'] += $timesheet->getDuration();
                         $periodPersonDatas['declarations_off']['timesheets'][$dayStr] += $timesheet->getDuration();
+                        $periodPersonDatas['declarations_off']['validators'] = $validators;
                     }
                 }
                 $periodPersonDatas['total'] += $timesheet->getDuration();

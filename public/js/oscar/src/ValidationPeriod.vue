@@ -139,7 +139,6 @@
                             <template v-if="period.declarations_off && period.declarations_off.total > 0">
                                 <tr class="heading-activity heading">
                                     <th :colspan="period.totalDays+2"><i class="icon-lock"></i>Autres déclarations
-                                    <pre>{{ period.declarations_off }}</pre>
                                     </th>
                                 </tr>
                                 <tr class="datas">
