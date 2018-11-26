@@ -1125,6 +1125,43 @@ class TimesheetController extends AbstractOscarController
         return [];
     }
 
+    public function resolveInvalidLabelsAction(){
+
+        // TODO
+        // $this->getOscarUserContext()->check(Privileges::)
+
+        $invalidLabels = $this->getTimesheetService()->getInvalidLabels();
+        $destinations = $this->getTimesheetService()->getOthersWP();
+        $message = "";
+
+        if( $this->getHttpXMethod() == 'POST' ){
+
+            $correspondances = $this->params()->fromPost('labels');
+            $resolve = [];
+
+            foreach( $correspondances as $correspondance=>$destination ){
+                if( $destination == "" ) continue;
+
+                if( !in_array($correspondance, $invalidLabels) ){
+                    throw new OscarException(sprintf("Opération interrompue : L'intitulé %s n'existe pas", $correspondance));
+                }
+                if( !array_key_exists($destination, $destinations) ){
+                    throw new OscarException(sprintf("Opération interrompue : La destination %s n'existe pas", $correspondance));
+                }
+
+                $resolve[$correspondance] = $destination;
+            }
+            $this->getTimesheetService()->maintenanceConvertHorsLots($resolve);
+            $message = "Opération terminée";
+        }
+
+        return [
+            'message' => $message,
+            'datas' => $invalidLabels,
+            'othersWP'=> $destinations
+        ];
+    }
+
     /**
      * Déclaration des heures.
      */

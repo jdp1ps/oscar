@@ -39,7 +39,8 @@
     "lastname": "Grossmann",
     "mail": "marcel.grossmann@jacksay.com",
     "login": "marcelgrossmann",
-    "uid": "marcelgrossmann"
+    "uid": "marcelgrossmann",
+    "referents": ["maxplank"]
   },
   {
     "firstname": "Max",

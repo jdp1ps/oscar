@@ -81,6 +81,12 @@ timesheet:
         activity:
             type: segment
             options:
+                route: /resolve-invalid-labels
+                defaults:
+                    action: resolveInvalidLabels
+        activity:
+            type: segment
+            options:
                 route: /resume-activity/:id
                 defaults:
                     action: resumeActivity

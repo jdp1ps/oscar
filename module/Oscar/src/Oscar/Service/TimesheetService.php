@@ -2967,6 +2967,52 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $validations;
     }
 
+    public function getInvalidLabels(){
+        $output = [];
+
+        $horsLots = [];
+        foreach ($this->getOthersWP() as $other) {
+            $horsLots[] = $other['code'];
+        }
+
+        //
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t')
+            ->select('DISTINCT t.label')
+            ->where('t.label NOT IN(:othersWP) AND t.activity IS NULL')
+            ->getQuery()
+            ->setParameters([
+                'othersWP' => $horsLots
+            ]);
+
+        foreach( $query->getArrayResult() as $d ){
+            $output[] = $d['label'];
+
+        }
+
+        return $output;
+    }
+
+    public function maintenanceConvertHorsLots( $correspondances ){
+
+        $labels = array_keys($correspondances);
+        $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t')
+            ->where('t.label IN(:othersWP) AND t.activity IS NULL')
+            ->getQuery()
+            ->setParameters([
+                'othersWP' => $labels
+            ]);
+        /** @var TimeSheet $timesheet */
+        foreach ($query->getResult() as $timesheet){
+            $oldLabel = $timesheet->getLabel();
+            $newLabel = $correspondances[$oldLabel];
+
+            $timesheet->setLabel($newLabel)
+                ->setComment($timesheet->getComment() . " " . $oldLabel);
+        }
+
+        $this->getEntityManager()->flush();
+    }
+
     public function validation(ValidationPeriod $period, Person $validateur, $message = "")
     {
         if ($period->isValidator($validateur)) {

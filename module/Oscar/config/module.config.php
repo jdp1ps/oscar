@@ -207,7 +207,8 @@ return array(
                         'usurpation', 'excel', 'organizationLeader',
                         'declarant', 'declarantAPI', 'validationActivity',
                         'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
-                        'importIcal', 'declarations', 'resumeActivity'
+                        'importIcal', 'declarations', 'resumeActivity',
+                        'resolveInvalidLabels'
                     ],
                     'roles' => ['user']
                 ],
