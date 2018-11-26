@@ -77,6 +77,7 @@ timesheet:
         defaults:
             controller: Timesheet
     may_terminate: false
+
     child_routes:
         resolve:
             type: segment

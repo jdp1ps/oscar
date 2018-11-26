@@ -339,6 +339,20 @@
                         Mois de <strong>{{ mois }}</strong>
                     </h3>
 
+                    <section v-if="monthRest > 0 && ts.periodFinished">
+                        <p>
+                            <i class="icon-help-circled"></i>
+                            Vous pouvez compléter automatiquement ce mois avec :
+                        </p>
+                        <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillMonthWP"
+                                    @select="fillMonthWP = $event"></wpselector>
+                        <button class="btn btn-default" @click="handlerFillMonth(fillMonthWP)"
+                                :class="fillMonthWP ? 'btn-primary' : 'disabled'">
+                            <i class="icon-floppy"></i>
+                            Compléter
+                        </button>
+                    </section>
+
                     <section v-for="week in weeks" v-if="ts" class="card xs">
                         <header class="week-header" @click="selectWeek(week)">
                                 <span>
@@ -833,7 +847,8 @@
                 selectedTime: null,
                 dayMenuSelected: null,
                 dayMenuTime: 0.0,
-                editedTimesheet: null
+                editedTimesheet: null,
+                fillMonthWP: null
             }
         },
 
@@ -854,6 +869,10 @@
         },
 
         computed: {
+            monthRest(){
+                return this.monthLength - this.ts.total;
+            },
+
             monthLength(){
                 let t = 0.0;
                 for( let day in this.ts.days ){
@@ -974,6 +993,26 @@
 
         methods: {
 
+            handlerFillMonth(withWP){
+                console.log("Remplir", withWP);
+
+                let data = [];
+
+                Object.keys(this.ts.days).forEach(date => {
+                    let d = this.ts.days[date];
+                    if (!(d.closed || d.locked || d.duration >= d.dayLength)) {
+                        data.push({
+                            'day': d.date,
+                            'wpId': withWP.id,
+                            'code': withWP.code,
+                            'commentaire': '',
+                            'duration': (d.dayLength - d.duration) * 60
+                        });
+                    }
+                });
+                this.performAddDays(data);
+            },
+
             handlerPasteDay( day ){
                 let datasSendable = [];
 
@@ -1093,10 +1132,6 @@
                     }
                 });
 
-            },
-
-            fillMonth() {
-                // TODO Remplissage automatique du mois
             },
 
             fillWeek(week, wp) {
