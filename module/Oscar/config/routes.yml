@@ -78,7 +78,7 @@ timesheet:
             controller: Timesheet
     may_terminate: false
     child_routes:
-        activity:
+        resolve:
             type: segment
             options:
                 route: /resolve-invalid-labels
