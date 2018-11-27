@@ -219,7 +219,11 @@ return array(
 
                 ////////////////////////////////////////////////////////////////
                 // PERSON
-                ////////////////////////////////////////////////////////////////
+                ///////////////////////////////////////////////////////////////
+                [ 'controller' =>   'Person',
+                    'action' => ['personnel'],
+                    'roles' => ['user']
+                ],
                 [ 'controller' =>   'Person',
                     'action' => ['search', 'synchronize'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX

@@ -428,6 +428,12 @@ person:
             action: index
     may_terminate: true
     child_routes:
+        personnel:
+            type: segment
+            options:
+                route: '/personnel'
+                defaults:
+                    action: personnel
         synchronize:
             type: segment
             options:

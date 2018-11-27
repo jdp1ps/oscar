@@ -1,0 +1,12 @@
+<section class="container">
+    <div id="app"></div>
+</section>
+
+<script>
+    requirejs(['vue', 'vue-resource', 'PersonsList'], function(Vue, VueResource, PersonsList){
+        Vue.use(VueResource);
+        new Vue({el: '#app', render: function(h){
+            return h(PersonsList.default, { props: {urlapi: '<?= $this->url('person/personnel') ?>'} })
+            }})
+    })
+</script>

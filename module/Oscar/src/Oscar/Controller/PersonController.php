@@ -50,6 +50,14 @@ class PersonController extends AbstractOscarController
         $this->getResponseDeprecated();
     }
 
+    public function personnelAction(){
+        $datas = [];
+
+
+
+        return $datas;
+    }
+
     public function grantAction()
     {
         $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
