@@ -184,16 +184,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             throw new OscarException("Erreur d'état");
         }
 
-        $log = $validationPeriod->getLog();
         $person = (string)$validator;
-        $date = new \DateTime();
-        $msg = $date->format('Y-m-d H:i:s') . " : Validation PROJET par $person\n";
-        $log .= $msg;
-        $this->getLogger()->debug($msg);
 
-        $validationPeriod->setLog($log);
+        $validationPeriod->addLog("Validation projet", $person);
         $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP2);
-        $validationPeriod->setValidationActivityAt($date)
+        $validationPeriod->setValidationActivityAt(new \DateTime())
             ->setValidationActivityBy((string)$validator)
             ->setValidationActivityById($validator->getId())
             ->setValidationActivityMessage($message);
@@ -215,20 +210,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             throw new OscarException("Erreur d'état");
         }
 
-        $log = $validationPeriod->getLog();
-
         $person = (string)$validator;
-        $msg = sprintf('Validation scientifique par %s', $person);
+        $validationPeriod->addLog("Validation scientifique par", $person);
 
-        $this->getLogger()->debug($msg);
-
-        $validationPeriod->setLog($log);
         $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP3);
         $validationPeriod->setValidationSciAt(new \DateTime())
             ->setValidationSciBy((string)$validator)
             ->setValidationSciById($validator->getId())
-            ->setValidationSciMessage($message)
-            ->addLog($msg, $person);
+            ->setValidationSciMessage($message);
+
 
         $this->getEntityManager()->flush($validationPeriod);
 
@@ -247,14 +237,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             throw new OscarException("Erreur d'état, la période doit être validée scientifiquement avant.");
         }
 
-        $log = $validationPeriod->getLog();
         $person = (string)$validator;
         $date = new \DateTime();
-        $msg = $date->format('Y-m-d H:i:s') . " : Validation ADMINISTRATIVE par $person\n";
-        $log .= $msg;
-        $this->getLogger()->debug($msg);
 
-        $validationPeriod->setLog($log);
+        $validationPeriod->addLog("Validation administrative par", $person);
         $validationPeriod->setStatus(ValidationPeriod::STATUS_VALID);
         $validationPeriod->setValidationAdmAt($date)
             ->setValidationAdmBy((string)$validator)
@@ -3026,21 +3012,25 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 case ValidationPeriod::STATUS_STEP1:
                     $msg = sprintf("a validé niveau activité la déclartion %s", $obj);
                     $period->setValidationActivity($validateur, new \DateTime(), $message);
+                    $period->addLog('vient de valider niveau activité la déclaration.', (string)$validateur);
                     break;
 
                 case ValidationPeriod::STATUS_STEP2:
                     $msg = sprintf("a validé scientifiquement la déclartion %s", $obj);
                     $period->setValidationSci($validateur, new \DateTime(), $message);
+                    $period->addLog('vient de valider scientifiquement la déclaration.', (string)$validateur);
                     break;
 
                 case ValidationPeriod::STATUS_STEP3:
                     $msg = sprintf("a validé administrativement la déclartion %s", $obj);
                     $period->setValidationAdm($validateur, new \DateTime(), $message);
+                    $period->addLog('vient de valider administrativement la déclaration.', (string)$validateur);
                     break;
 
                 default:
                     throw new OscarException("Cette période n'a pas le bon status pour être validée.");
             }
+
             /** @var ActivityLogService $als */
             $als = $this->getServiceLocator()->get('ActivityLogService');
             $als->addUserInfo($msg, 'Activity', $period->getObjectId());
@@ -3066,16 +3056,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 case ValidationPeriod::STATUS_STEP1:
                     $msg = sprintf("a rejeté niveau activité la déclartion %s", $obj);
                     $period->setRejectActivity($validateur, new \DateTime(), $message);
+                    $period->addLog('vient de rejeter niveau activité la déclaration.', (string)$validateur);
                     break;
 
                 case ValidationPeriod::STATUS_STEP2:
                     $msg = sprintf("a rejeté scientifiquement la déclartion %s", $obj);
                     $period->setRejectSci($validateur, new \DateTime(), $message);
+                    $period->addLog('vient de rejeter scientifiquement la déclaration.', (string)$validateur);
                     break;
 
                 case ValidationPeriod::STATUS_STEP3:
                     $msg = sprintf("a rejeté administrativement la déclartion %s", $obj);
                     $period->setRejectAdm($validateur, new \DateTime(), $message);
+                    $period->addLog('vient de rejeter administrativement la déclaration.', (string)$validateur);
                     break;
 
                 default:

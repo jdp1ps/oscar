@@ -1165,7 +1165,7 @@ class ValidationPeriod
     {
         $log = $this->getLog();
         $date = new \DateTime();
-        $msg = $date->format(sprintf('Y-m-d H:i:s %s %s', $by, $message));
+        $msg = sprintf('%s %s %s', $date->format('Y-m-d H:i:s'), $by, $message);
         $log .= $msg . "\n";
         $this->setLog($log);
         return $this;
