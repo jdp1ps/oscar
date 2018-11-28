@@ -19,14 +19,19 @@
         </a>
 
 
+        <div class="alert alert-danger" v-show="day.locked">
+            <i class="icon-attention"></i> Cette journée est verrouillé <strong>{{ day.lockedReason }}</strong>
+        </div>
 
         <div class="alert alert-danger" v-show="day.total > day.maxLength">
             <i class="icon-attention"></i> Le temps déclaré <strong>excède la durée autorisée</strong>. Vous ne pourrez pas soumettre votre feuille de temps.
         </div>
 
+        <!--
         <div class="alert alert-danger" v-show="day.total < day.minLength">
             <i class="icon-attention"></i> Le temps déclaré <strong>est en deça de la durée minimum</strong>. Vous ne pourrez pas soumettre votre feuille de temps.
         </div>
+        -->
 
         <div>
             Compléter avec :
