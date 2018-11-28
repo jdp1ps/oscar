@@ -1603,11 +1603,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $errors[] = "- Les heures déclarées le jour " . $dayData['i'] . " dépassent la durée autorisée !";
             }
 
-//            if ($duration < $min) {
-//                $this->getLogger()->debug("Durée de la journée " . $day . " : " . $duration . '(' . $min . ', ' . $max . ')');
-//                $this->getLogger()->debug(print_r($dayData, true));
-//                $errors[] = "- Les heures déclarées (" . $duration . ") le jour " . $dayData['i'] . " sont en deça la durée minimum (" . $min . ") !";
-//            }
+            if ($min > 0.0 && $duration == 0.0) {
+                $this->getLogger()->debug("Durée de la journée " . $day . " : " . $duration . '(' . $min . ', ' . $max . ')');
+                $this->getLogger()->debug(print_r($dayData, true));
+                $errors[] = "- Il doit y avoir des heures de déclarées le jour " . $dayData['i'] . " (" . $min . ") !";
+            }
 
 
             if (!array_key_exists($week, $weeksMaxCount))
