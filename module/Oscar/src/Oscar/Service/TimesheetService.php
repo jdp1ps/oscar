@@ -668,10 +668,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $periodBounds = DateTimeUtils::periodBounds($period->getPeriod());
 
             if( !array_key_exists($key, $group) ){
+                $daysDetails = $this->getDaysPeriodInfosPerson($period->getDeclarer(), $period->getYear(), $period->getMonth());
+                $periodLength = 0.0;
+
+                foreach ($daysDetails as $d) {
+                    $periodLength += $d['dayLength'];
+                }
                 $group[$key] = [
                     'period' => $period->getPeriod(),
                     'validators' => $validators,
                     'totalDays' => $periodBounds['totalDays'],
+                    'periodLength' => $periodLength,
                     'periodFirstDay' => $periodBounds['firstDay'],
                     'periodLastDay' => $periodBounds['lastDay'],
                     'validableStep' => false,
@@ -684,7 +691,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                         'total' => 0.0,
                         'validators' => []
                     ],
-                    'details' => $this->getDaysPeriodInfosPerson($period->getDeclarer(), $period->getYear(), $period->getMonth()),
+                    'details' => $daysDetails,
                 ];
             }
 
@@ -1479,6 +1486,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $daysLabels = [];
 
         $weekendAllowed = $this->getOscarConfig()->getConfiguration('declarationsWeekend') == false;
+
+        $amplitudeMax = $this->getOscarConfig()->getConfiguration('declarationAmplitudeMax');
+        $amplitudeMin = $this->getOscarConfig()->getConfiguration('declarationAmplitudeMin');
+
         $daysDetails = $this->getDayLengthPerson($person);
 
         $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)
@@ -1490,8 +1501,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'month' => $month,
                 'person' => $person,
             ])
-            ->getResult()
-        ;
+            ->getResult();
+
         if( count($declarations) ){
             $daysDetails = json_decode($declarations[0]->getSchedule(), JSON_OBJECT_AS_ARRAY);
         }
@@ -1504,6 +1515,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $duration = $daysDetails['days'][$dayOfWeek];
             $maxlength = $daysDetails['max'];
             $minlength = $daysDetails['min'];
+
+            $amplitudemax = $duration * $amplitudeMax;
+            $amplidudemin = $duration * $amplitudeMin;
 
 
             $close = false;
@@ -1547,6 +1561,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'dayLength' => $duration,
                 'maxLength' => $maxlength,
                 'minLength' => $minlength,
+                'amplitudemin' => $amplidudemin,
+                'amplitudemax' => $amplitudemax,
                 'label' => $daysFull[$dayIndex],
                 'close' => $close,
                 'locked' => $locked,

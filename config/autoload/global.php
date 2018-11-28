@@ -80,8 +80,17 @@ return array(
         'declarationsDayDuration' => 7.4,
         'declarationsDayDurationMaxlength' => 9.0,
 
+        // Indication visuelle de dépassement problématique
+        // Journée de 8.0 heures => déclaré 8.0*.5 = 4.0
+        'declarationAmplitudeMin' => .75,
+
+        // Journée de 8.0 heures => 8.0*1.125 = 9.0
+        'declarationAmplitudeMax' => 1.25,
+
         // Durée standards d'une semaine
         'declarationsWeekDuration' => 7.4*5,
+
+
         'declarationsWeekDurationMaxlength' => 39.0,
 
         'declarationsMonthDuration' => 144.0,

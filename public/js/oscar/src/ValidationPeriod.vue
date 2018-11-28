@@ -158,12 +158,32 @@
                         <tfoot>
                         <tr class="total-row">
                             <th>Total période</th>
-                            <td v-for="dayInfos, day in period.details" :class="{'locked': dayInfos.locked}">
+                            <td class="day" v-for="dayInfos, day in period.details" :class="{'locked': dayInfos.locked,
+                                'less': dayInfos && dayInfos.duration < dayInfos.dayLength,
+                                'many': dayInfos && dayInfos.duration > dayInfos.dayLength,
+                                'warnmin': dayInfos && dayInfos.duration < dayInfos.amplitudemin,
+                                'littlemin': dayInfos && dayInfos.duration > dayInfos.amplitudemin && dayInfos.duration < dayInfos.dayLength,
+                                'warnmax': dayInfos && dayInfos.duration > dayInfos.amplitudemax,
+                                'littlemax': dayInfos && dayInfos.duration < dayInfos.amplitudemax && dayInfos.duration > dayInfos.dayLength,
+                                'exact': dayInfos && dayInfos.duration == dayInfos.dayLength}">
+
+                                <i class="icon-up-outline icon-many"></i>
+                                <i class="icon-down-outline icon-less"></i>
+                                <i class="icon-clock icon-exact"></i>
+
                                 <strong v-if="dayInfos.duration">{{ dayInfos.duration | duration2 }}</strong>
                                 <small v-else>0.0</small>
                             </td>
                             <th class="total">{{ period.total | duration2 }}</th>
                             <td>-</td>
+                            </tr>
+                            <tr class="total-row">
+                                <th>Temps normal prévu</th>
+                                <td class="day" v-for="dayInfos, day in period.details">
+                                    <small>{{ dayInfos.dayLength | duration2 }}</small>
+                                </td>
+                                <th class="total"><small>{{ period.periodLength | duration2}}</small></th>
+                                <td>-</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -179,6 +199,57 @@
 </template>
 <style lang="scss">
     .validation {
+
+        .day {
+            white-space: nowrap;
+            .icon-less, .icon-exact, .icon-many { display: none }
+
+
+            &.littlemax {
+
+            }
+
+            &.exact {
+                color: darkgreen;
+            }
+
+            &.littlemin {
+
+            }
+
+
+            &.less {
+                color: darkgreen;
+                .icon-less {
+                    display: inline-block;
+                    color: green;
+                }
+
+                &.warnmin {
+                    background: red;
+                    strong { color: white };
+                    .icon-less {
+                        color: white;
+                    }
+                }
+            }
+
+            &.many {
+                color: darkgreen;
+                .icon-many {
+                    display: inline-block;
+                    color: green;
+                }
+                &.warnmax {
+                    background: red;
+                    strong { color: white };
+                    .icon-many {
+                        color: white;
+                    }
+                }
+            }
+
+        }
 
         table.table {
             td, th {
