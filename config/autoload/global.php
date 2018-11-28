@@ -14,6 +14,8 @@ return array(
 
         'theme' => 'oscar',
 
+        'oscar_num_separator' => 'DRI',
+
         // ./doc/connectors.md
         'connectors' => [
             'organization' => [],

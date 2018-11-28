@@ -30,4 +30,8 @@ class Options extends AbstractHtmlElement implements ServiceLocatorAwareInterfac
         return $this->getConfiguration()->getConfiguration('theme');
     }
 
+    public function oscarNumSeparator(){
+        return $this->getConfiguration()->getConfiguration('oscar_num_separator');
+    }
+
 }

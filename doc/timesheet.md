@@ -69,17 +69,11 @@ return array(
             ],
 
             'weekLength'     => [
-                // Durée d'une semaine normale
-                'value' => 37.0,
-                
                 // Durée à NE PAS dépasser (bloquant)
                 'max' => 44.0,
             ],
 
-            'monthLength' => [
-                // Durée d'un mois normal
-                'value' => 144.0,
-                
+            'monthLength' => [               
                 // Durée à NE PAS dépasser (bloquant)
                 'max'   => 160.0,
             ],

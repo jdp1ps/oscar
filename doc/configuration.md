@@ -146,3 +146,10 @@ return array(
 Configuration des options pour la feuille de temps
 
 [Configurer les feuilles de temps](./timesheet.md)
+
+
+## Numérotation automatique des activités de recherche
+
+Pour modifier les numéros qui sont sous la forme **2018DRI00001**.
+
+[Modifier le formalisme de la numérotation Oscar](./numérotation.md)

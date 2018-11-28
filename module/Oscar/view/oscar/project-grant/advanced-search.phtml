@@ -282,7 +282,7 @@
                 <li><strong>Wildcard *</strong> le caractère <em>*</em> en fin de terme permet d'élargir les résultats, ex : Normand* fera remonter les résultats avec Normandie, Normand, etc... (Un terme se terminant par une wildcard doit commencer par au moins 2 caractères standards)</li>
                 <li><strong>ET/OU</strong> Les mots clefs <strong>OR</strong> et <strong>AND</strong> permettent de préciser les termes à rechercher : NORMAND* OR RESEAU, cherchera les activités contenant des termes commençant par "NORMAND..." ou contenant le terme RESEAU</li>
                 <li><strong>PFI</strong> Saisissez directement le PFI.</li>
-                <li><strong>XXXXDRI</strong> Recherche sur le système de numérotation Oscar (2017DRI...).</li>
+                <li><strong>XXXX<?= $this->options()->oscarNumSeparator() ?></strong> Recherche sur le système de numérotation Oscar (2017<?= $this->options()->oscarNumSeparator() ?>...).</li>
                 <li><strong>num=valeur</strong> Permet de chercher sur la numérotation libre proposée dans les activités de recherche.</li>
             </ul>
         </div>
