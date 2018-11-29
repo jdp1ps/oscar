@@ -271,10 +271,7 @@ class WorkPackage
                 default:
                     $timesPersons[$timesheet->getPerson()->getId()]['unsend'] += $timesheet->getHours();
             }
-//            $timesPersons[$timesheet->getPerson()->getId()] += $timesheet->getHours();
-
         }
-
 
         /** @var WorkPackagePerson $person */
         foreach( $this->getPersons() as $person ){

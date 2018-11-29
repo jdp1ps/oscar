@@ -184,9 +184,6 @@ class ActivityPaymentController extends AbstractOscarController
         // Page "Liste"
         else {
 
-
-
-
             $search = $this->params()->fromQuery('q', '');
 
             $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
