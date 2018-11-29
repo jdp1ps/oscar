@@ -553,6 +553,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     public function specificSearch( $what, &$qb, $activityAlias='c' )
     {
+        $oscarNumSeparator = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('oscar_num_separator');
         $fieldName = uniqid('num_');
         if (preg_match(EOTP::REGEX_EOTP, $what)) {
             $qb->andWhere($activityAlias.'.codeEOTP = :' . $fieldName)
@@ -566,7 +567,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         // La saisie est un numéro OSCAR©
-        elseif (preg_match("/^[0-9]{4}DRI.*/mi", $what)) {
+        elseif (preg_match("/^[0-9]{4}$oscarNumSeparator.*/mi", $what)) {
             $qb->andWhere($activityAlias.'.oscarNum LIKE :'.$fieldName)
                 ->setParameter($fieldName, $what.'%');
         }
