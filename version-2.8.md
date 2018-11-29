@@ -12,9 +12,30 @@ Refonte compète de l'interface de saisie pour les déclarants.
 
 L'interface de saisie permet aux déclarants (personnes indentifiées comme déclarant sur un lot de travail dans une activité) de renseigner son activité.
 
+![Synthèse 1](doc/images/declaration-v2.png)
+
+
+### Interface de validation
+
+
+
+### Interface de synthèse Déclarant
+
+Accessible au déclarant et depuis la fiche activité par les personnes autorisées. Elle permet de **visualiser les feuille de temps** validées ainsi de de les prévisualiser (avant validation).
+
+On peut également voir les validateurs impliqués selon l'étape de validation, et les potentiels dépassements de temps via un indicateur visuel.
+
+![Synthèse 1](doc/images/recap-declarant.png)
+
+### Synthèse depuis la fiche activité
+
 Cet écran propose un récapitulatif par mois des déclarations
 
-![Nouvelle inteface de déclaration](doc/images/declaration-v2.png)
+![Synthèse 1](doc/images/synthese-activite.png)
+
+Et le détails de chaque déclaration
+![Synthèse 2](doc/images/synthes-activite-details.png)
+
 
 
 ### Importation des ICAL
@@ -28,6 +49,11 @@ Un interface permet de charger les informations depuis un calendrier (ICAL/ICS)
 Les données saisies permettent de produire un document au format Excel qui syntétise les informations de la déclaration. Pour le moment, l'affichage des informations ne propose que le format heure.
 
 ![Nouvelle inteface de déclaration](doc/images/feuille-de-temps.png)
+
+
+### Gestion des N+1
+
+La validation des créneaux *Hors-Lots* est assurée par les N+1. Ces derniers peuvent être administrés depuis la fiche personne par l'administrateur. (Connecteur à venir)
 
 
 ### Configuration des feuilles de temps
@@ -44,7 +70,9 @@ Les données saisies permettent de produire un document au format Excel qui synt
  
 ### Administration
 
-L'administrateur dispose d'une vue pour supprimer les déclarations. Elle proposera également des procédures pour valider/invalider les déclarations et gérer l'organisme référent si ce dernier est manquant/éronné.
+L'administrateur dispose d'une vue pour gérer les déclarations. 
+
+Elle proposera également des procédures pour valider/invalider les déclarations et gérer l'organisme référent si ce dernier est manquant/éronné.
  
 
 
