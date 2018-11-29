@@ -80,7 +80,10 @@ trait TraitTrackable
      */
     public function getStatus()
     {
-        return $this->status;
+        if( $this->getValidationPeriod() )
+            return $this->getValidationPeriod()->getStatus();
+
+        return self::STATUS_DRAFT;
     }
 
     /**

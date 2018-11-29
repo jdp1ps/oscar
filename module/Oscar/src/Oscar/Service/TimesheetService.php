@@ -2900,16 +2900,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'objectId' => $objectId,
                     'object' => $object,
                     'objectGroup' => $objectGroup,
-                    'log' => "Déclaration envoyée",
+                    'log' => "Déclaration envoyée"
                 ];
-                $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup);
+                $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup);
             }
-
-            //$this->setTimesheetToSend($timesheet);
+            $timesheet->setValidationPeriod($declarations[$key]['declaration']);
         }
 
         $this->getEntityManager()->flush($timesheets);
-        $this->getLogger()->debug(print_r($declarations, true));
     }
 
     public function getValidatorsPrj(Activity $activity)

@@ -321,6 +321,14 @@ class ValidationPeriod
     private $status;
 
     /**
+     * liste des créneaux associés
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="TimeSheet", mappedBy="validationPeriod")
+     */
+    protected $timesheets;
+
+    /**
      * ValidationPeriod constructor.
      * @param $id
      */
@@ -329,6 +337,24 @@ class ValidationPeriod
         $this->validatorsPrj = new ArrayCollection();
         $this->validatorsSci = new ArrayCollection();
         $this->validatorsAdm = new ArrayCollection();
+        $this->timesheets = new ArrayCollection();
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getTimesheets()
+    {
+        return $this->timesheets;
+    }
+
+    /**
+     * @param ArrayCollection $timesheets
+     */
+    public function setTimesheets($timesheets)
+    {
+        $this->timesheets = $timesheets;
+        return $this;
     }
 
     public function isActivityValidation()
