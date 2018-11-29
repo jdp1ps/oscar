@@ -2138,15 +2138,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var TimeSheet $t */
         foreach ($timesheets as $t) {
 
-            $dayTimesheet = ($t->getDateFrom()->format('d'));
             $dayInt = (int)$t->getDateFrom()->format('d');
-            $period = $t->getDateFrom()->format('Y-m');
 
 
             if (!$t->getActivity()) {
-                $periodKey = ValidationPeriod::GROUP_OTHER;
-
-
                 $datas = [
                     'id' => $t->getId(),
                     'int' => $dayInt,
@@ -2154,30 +2149,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'code' => $t->getLabel(),
                     'description' => $t->getComment(),
                     'duration' => $t->getDuration(),
-                    'status_id' => $t->getStatus(),
+                    'foo' => 'bar',
+                    'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : null,
                     'status' => 'locked',
-                    'validations' => null
+                    'validations' => $t->getValidationPeriod() ? $t->getValidationPeriod()->json() : null
                 ];
-
-
-                $period = $this->getValidationPeriosOutOfWorkpackageAt($t->getPerson(), $year, $month, $t->getLabel());
-                $key = $t->getLabel();
-
-                if ($period) {
-                    if ($period->getStatus() == ValidationPeriod::STATUS_VALID) {
-                        $datas['status_id'] = TimeSheet::STATUS_ACTIVE;
-                        $datas['status_id'] = TimeSheet::STATUS_ACTIVE;
-                        $datas['validations'] = $period->json();
-                    } elseif ($period->getStatus() != ValidationPeriod::STATUS_CONFLICT) {
-                        $datas['status_id'] = TimeSheet::STATUS_TOVALIDATE_ADMIN;
-                        $datas['status_id'] = TimeSheet::STATUS_TOVALIDATE_ADMIN;
-                        $datas['validations'] = $period->json();
-                    } else {
-                        $datas['status_id'] = TimeSheet::STATUS_CONFLICT;
-                        $datas['status_id'] = TimeSheet::STATUS_CONFLICT;
-                        $datas['validations'] = $period->json();
-                    }
-                }
 
                 $duree = (float)$t->getDuration();
                 $daysInfos[$dayInt]['othersWP'][] = $datas;
@@ -2192,7 +2168,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 continue;
             }
 
-            $periodKey = "activity-" . $t->getActivity()->getId();
             $projectAcronym = $t->getActivity()->getAcronym();
             $project = $t->getActivity()->getProject();
             $activity = $t->getActivity();
@@ -2209,7 +2184,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $workPackages[$workpackage->getId()]['total'] += $t->getDuration();
 
 
-            if ($t->getStatus() == TimeSheet::STATUS_DRAFT) {
+            if ( !$t->getValidationPeriod() == null ) {
                 $output['hasUnsend'] = true;
             }
 
@@ -2223,7 +2198,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'activity_code' => $activityCode,
                 'acronym' => $projectAcronym,
                 'project' => (string)$project,
-                'status_id' => $t->getStatus(),
+                'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : null,
                 'status' => 'locked',
                 'wpCode' => $wpCode,
                 'duration' => (float)$t->getDuration(),

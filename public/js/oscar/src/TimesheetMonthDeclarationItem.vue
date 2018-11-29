@@ -10,11 +10,7 @@
             <small><i class="icon-cubes"></i> {{ d.label }}</small>
 
             <div class="status">
-                <small v-if="d.status_id == 1"><i class="icon-ok-circled"></i>Validée</small>
-                <small v-else-if="d.status_id == 2"><i class="icon-pencil"></i> Brouillon</small>
-                <small v-else-if="d.status_id == 3"><i class="icon-attention-circled"></i> Rejeté</small>
-                <small v-else-if="d.status_id == 5"><i class="icon-paper-plane"></i>En cours de validation</small>
-                <small v-else><i class="icon-help-circled"></i> Autre status ({{d.status_id}})</small>
+                <i :class="'icon-'+d.status_id"></i> {{ d.status_id | status }}
                 <span v-if="d.validations.conflict" class="text-danger">
                     {{ d.validations.conflict }}
                 </span>

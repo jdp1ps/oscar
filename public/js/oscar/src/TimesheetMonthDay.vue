@@ -14,8 +14,9 @@
             Erreur
         </span>
 
-        <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label" :class="{ 'conflict': d.status_id == 3 }">
-            <i :class="'icon-status-' + d.status_id"></i>
+        <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label">
+            <i v-if="d.status_id == null" class="icon-draft"></i>
+            <i v-else :class="'icon-' + d.status_id"></i>
             {{ d.acronym }}
             <span class="addon">
                 {{d.duration | duration2(day.dayLength)}}
@@ -26,10 +27,8 @@
 
         <span >
             <span v-for="other in day.othersWP" class="cartouche xs" :class="other.code">
-                <i class="icon-status-2" v-if="other.validations == null"></i>
-                <i class="icon-status-1" v-else-if="other.validations.status == 'valid'"></i>
-                <i class="icon-status-3" v-else-if="other.validations.status == 'conflict'"></i>
-                <i class="icon-status-5" v-else></i>
+                <i v-if="other.validations == null" class="icon-draft"></i>
+                <i :class="'icon-' + other.status_id" v-else></i>
                 {{ other.label }}
                 <span class="addon">
                     {{other.duration | duration2(day.dayLength)}}
@@ -141,6 +140,7 @@
                if( this.day.declarations ) {
                    this.day.declarations.forEach(d => {
                        if (!groups.hasOwnProperty(d.acronym)) {
+                        console.log(JSON.stringify(d.status_id));
                            groups[d.acronym] = {
                                label: d.label,
                                acronym: d.acronym,
@@ -148,9 +148,7 @@
                                status_id: d.status_id
                            }
                        }
-                       if (d.status_id != groups[d.acronym].status_id) {
-                           groups[d.acronym].status_id = 0;
-                       }
+
                        //groups[d.acronym].status_id += d.duration;
                        groups[d.acronym].duration += d.duration;
                    });

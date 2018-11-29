@@ -253,18 +253,20 @@ class WorkPackage
                     'unsend' => 0
                 ];
             }
-            switch( $timesheet->getStatus() ){
-                case TimeSheet::STATUS_TOVALIDATE_SCI:
-                case TimeSheet::STATUS_TOVALIDATE_ADMIN:
-                case TimeSheet::STATUS_TOVALIDATE:
+
+            $status = $timesheet->getValidationPeriod() ? $timesheet->getValidationPeriod()->getStatus() : null;
+            switch( $status ){
+                case ValidationPeriod::STATUS_STEP1:
+                case ValidationPeriod::STATUS_STEP2:
+                case ValidationPeriod::STATUS_STEP3:
                     $timesPersons[$timesheet->getPerson()->getId()]['validating'] += $timesheet->getHours();
                     break;
 
-                case TimeSheet::STATUS_CONFLICT:
+                case ValidationPeriod::STATUS_CONFLICT:
                     $timesPersons[$timesheet->getPerson()->getId()]['conflicts'] += $timesheet->getHours();
                     break;
 
-                case TimeSheet::STATUS_ACTIVE:
+                case ValidationPeriod::STATUS_VALID:
                     $timesPersons[$timesheet->getPerson()->getId()]['validate'] += $timesheet->getHours();
                     break;
 

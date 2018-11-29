@@ -33,6 +33,20 @@
             return Math.round( 100 / total * duree) + "%";
         });*/ ?>
 
+        var status = {
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_STEP1 ?>': 'validation projet',
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_STEP2 ?>': 'validation scientifique',
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_STEP3 ?>': 'validation administrative',
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_CONFLICT ?>': 'Rejetée',
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_VALID ?>': 'Validée',
+        };
+        Vue.filter('status', function(s){
+            if( status.hasOwnProperty(s) ){
+                return status[s];
+            }
+            return "Status inconnu : " + s;
+        });
+
         new Vue({
             render: function(h){
                 return h(TimesheetMonth.default, {

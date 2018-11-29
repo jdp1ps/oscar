@@ -30,11 +30,13 @@ class ValidationPeriod
     const OBJECT_RESEARCH = 'research';
     const GROUP_WORKPACKAGE = 'workpackage';
     const GROUP_OTHER = 'other';
+
     const STATUS_STEP1 = 'send-prj';
     const STATUS_STEP2 = 'send-sci';
     const STATUS_STEP3 = 'send-adm';
     const STATUS_CONFLICT = 'conflict';
     const STATUS_VALID = 'valid';
+
     /**
      * Personnes
      *

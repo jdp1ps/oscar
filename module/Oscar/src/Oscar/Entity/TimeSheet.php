@@ -188,6 +188,7 @@ class TimeSheet implements ITrackable
     /**
      * @var ValidationPeriod
      * @ORM\ManyToOne(targetEntity="ValidationPeriod", inversedBy="timesheets")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     private $validationPeriod;
 
@@ -280,7 +281,7 @@ class TimeSheet implements ITrackable
             'description' => $this->getComment(),
             'start' => $this->getDateFrom()->format('c'),
             'end' => $this->getDateTo()->format('c'),
-            'status' => self::getStatusText()[$this->getStatus()],
+            'status' => $this->getStatus(),
             'owner' => $this->getPerson()->getDisplayName(),
             'owner_id' => $this->getPerson()->getId(),
         ];
