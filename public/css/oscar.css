@@ -5942,6 +5942,7 @@ body::-webkit-scrollbar-thumb {
 
 .contracts table, .contracts thead, .contracts tbody, .contracts tfoot {
   font-size: 12px;
+  font-size: 12px;
   width: 100%; }
 
 .contracts h3 {
@@ -8004,11 +8005,17 @@ pre.alert {
     .person-card nav a {
       margin-left: 1em; }
 
+.oscar-text-loading {
+  animation-name: disco;
+  animation-iteration-count: infinite;
+  animation-duration: .5s;
+  animation-direction: alternate; }
+
 @keyframes disco {
   from {
     color: #185a7b; }
   to {
-    color: white; } }
+    color: #1F180D; } }
 
 #flash-messages {
   position: fixed;

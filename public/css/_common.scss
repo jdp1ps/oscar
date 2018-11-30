@@ -3662,6 +3662,13 @@ pre.alert {
   }
 }
 
+.oscar-text-loading {
+  animation-name: disco;
+  animation-iteration-count: infinite;
+  animation-duration: .5s;
+  animation-direction: alternate;
+}
+
 ///////////////////////////////////////////////////////////////////////// JALONS
 
 @keyframes disco {
@@ -3669,7 +3676,7 @@ pre.alert {
     color: saturate($brand-complementary, 20);
   }
   to {
-    color: rgb(255, 255, 255);
+    color: $colorDark;
   }
 }
 

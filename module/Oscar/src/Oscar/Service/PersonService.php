@@ -480,6 +480,91 @@ die($privilege);
         }
     }
 
+    public function getCoWorkerIds( $idPerson ){
+        $ids = [];
+
+        // Liste des organisations ou la personne a un role principal
+        $orga = $this->getEntityManager()->getRepository(Organization::class)->createQueryBuilder('o')
+            ->select('o.id')
+            ->innerJoin('o.persons', 'op')
+            ->innerJoin('op.roleObj', 'r')
+            ->where('op.person = :person AND r.principal = \'true\'')
+            ->setParameter('person', $idPerson)
+            ->getQuery();
+
+        $orgaIds = array_map('current', $orga->getResult());
+
+        $coworkers = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+            ->select('p.id')
+            ->innerJoin('p.organizations', 'op')
+            ->where('op.organization IN(:organisationsIds)')
+            ->setParameter('organisationsIds', $orgaIds)
+            ->getQuery();
+
+        $coWorkersIds = array_map('current', $coworkers->getResult());
+
+        $listPersonIncludeActivityMember = true;
+        if( $listPersonIncludeActivityMember ){
+            $activityMembers = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+                ->select('DISTINCT p.id')
+                ->innerJoin('p.activities', 'ap')
+                ->innerJoin('ap.activity', 'a')
+                ->innerJoin('a.organizations', 'o')
+                ->innerJoin('o.roleObj', 'r')
+                ->where('r.principal = \'true\' AND o.organization IN(:organizationIds)')
+                ->setParameter('organizationIds', $orgaIds)
+                ->getQuery();
+            $coWorkersIds = array_merge($coWorkersIds, array_map('current', $activityMembers->getResult()));
+        }
+
+
+        return $coWorkersIds;
+
+        //                /** @var OrganizationPerson $personOrganisation */
+//                foreach ($this->getCurrentPerson()->getLeadedOrganizations() as $personOrganisation) {
+//                    if( $personOrganisation->getRoleObj()->isPrincipal() ){
+//                        /** @var OrganizationPerson $po */
+//                        foreach ($personOrganisation->getOrganization()->getPersons() as $po){
+//                           if( !in_array($po->getPerson()->getId(), $idsMembers) ){
+//                               $idsMembers[] = $po->getPerson()->getId();
+//                           }
+//                        }
+//
+//                        if( $includePersonsInActivity ){
+//                            /** @var Activity $activity */
+//                            foreach ($personOrganisation->getOrganization()->getActivities() as $activity){
+//                                if( $activity->getRoleObj()->isPrincipal() ){
+//                                    foreach ($activity->getActivity()->getPersonsDeep(true) as $person) {
+//                                        if (!in_array($person->getPerson()->getId(), $idsMembers)) {
+//                                            $idsMembers[] = $person->getPerson()->getId();
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+
+
+        return $ids;
+    }
+
+    public function getSubordinateIds( $idPerson ){
+
+        // Récupération des subordonnés
+        $nm1 = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->innerJoin('r.person', 'p')
+            ->select('p.id')
+            ->where('r.referent = :person')
+            ->setParameters([
+                'person' => $this->getCurrentPerson()
+            ])
+            ->getQuery()
+            ->getResult();
+
+        return array_map('current', $nm1);
+    }
+
     /**
      * @param int $currentPage
      * @param int $resultByPage
@@ -506,15 +591,19 @@ die($privilege);
         $resultByPage = 50
     ) {
 
+        $query = $this->getBaseQuery();
+
+        $query->leftJoin('p.organizations', 'o')
+            ->leftJoin('p.activities', 'a');
+
+
         if( $filters['leader'] ){
             $query = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
                 ->innerJoin('p.organizations', 'o')
                 ->innerJoin('o.roleObj', 'r')
+                ->innerJoin('p.activities', 'a')
                 ->where('r.principal = true')
             ;
-        } else {
-
-            $query = $this->getBaseQuery();
         }
 
         if( array_key_exists('order_by', $filters) ){
@@ -654,6 +743,11 @@ die($privilege);
             // d'ID caluclée
             $query->andWhere('p.id IN (:ids)')
                 ->setParameter(':ids', $ids);
+        }
+
+        if( $filters['ids'] ){
+            $query->andWhere('p.id IN(:filterIds)')
+                ->setParameter('filterIds', $filters['ids']);
         }
 
         return new UnicaenDoctrinePaginator($query, $currentPage,

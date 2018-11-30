@@ -721,13 +721,35 @@ class Person implements ResourceInterface
             'firstName'             => $this->getFirstname(),
             'lastName'              => $this->getLastname(),
             'displayname'           => $this->getDisplayName(),
-            'text'           => $this->getDisplayName(),
+            'text'                  => $this->getDisplayName(),
             'email'                 => $this->getEmail(),
+            'phone'                 => $this->getPhone(),
             'mail'                  => $this->getEmail(),
             'mailMd5'               => md5($this->getEmail()),
             'ucbnSiteLocalisation'  => $this->getLdapSiteLocation() ? $this->getLdapSiteLocation() : "",
             'affectation'           => $this->getLdapAffectation() ? $this->getLdapAffectation() :  ""
         );
+    }
+
+    public function toArrayList(){
+        $datas = $this->toArray();
+        $organisations = [];
+        /** @var OrganizationPerson $o */
+        foreach ($this->getOrganizations() as $o) {
+            $organisation = $o->getOrganization();
+            $role = (string)$o->getRoleObj();
+            if( !array_key_exists($organisation->getId()) ){
+                $organisations[$organisation->getId()] = [
+                    'organisation' => $organisation->displayName(),
+                    'roles' => []
+                ];
+            }
+            if( !in_array($role, $organisations[$organisation->getId()]['roles']) ){
+                $organisations[$organisation->getId()]['roles'][] = $role;
+            }
+        }
+        $datas['organisations'] = $organisations;
+        return $datas;
     }
 
     /**

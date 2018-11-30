@@ -10,6 +10,7 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
+use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
@@ -20,6 +21,7 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectMember;
+use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\WorkPackagePerson;
@@ -51,6 +53,59 @@ class PersonController extends AbstractOscarController
     }
 
     public function personnelAction(){
+
+        if( $this->isAjax() || $this->params()->fromQuery('format') == 'json' ){
+
+            $q = $this->params()->fromQuery('q');
+            $page = $this->params()->fromQuery('p', 1);
+
+            $params = [
+                'filter_roles' => [],
+                'order_by' => 'lastname',
+                'leader' => null
+            ];
+
+            $idCoWorkers = $this->getPersonService()->getCoWorkerIds($this->getCurrentPerson()->getId());
+            $idSubordinates = $this->getPersonService()->getSubordinateIds($this->getCurrentPerson()->getId());
+
+            if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_INDEX) ){
+                $params['ids'] = array_merge($idCoWorkers, $idSubordinates);
+            }
+
+            $datas = $this->getPersonService()->getPersonsSearchPaged($q, $page, $params);
+
+            $output = [
+                'total'=> count($datas),
+                'persons' => [],
+                'page' => $page,
+                'resultbypage' => 50,
+                'coworkers' => [],
+                'subordinates' => [],
+            ];
+
+
+
+            /** @var Person $person */
+            foreach ($datas as $person) {
+                $datasPerson = $person->toArrayList();
+                    $datasPerson['sub'] = false;
+                    $datasPerson['coworker'] = false;
+                    $datasPerson['activities'] = count($person->getActivities());
+
+                    if( in_array($person->getId(), $idSubordinates ) ){
+                        $datasPerson['sub'] = true;
+                    }
+                    if( in_array($person->getId(), $idCoWorkers ) ){
+                        $datasPerson['coworker'] = true;
+                    }
+                    $output['persons'][] = $datasPerson;
+            }
+
+            $output['subordinates'] = $idSubordinates;
+            $output['coworkers'] = $idCoWorkers;
+
+            return $this->ajaxResponse($output);
+        }
         $datas = [];
 
 

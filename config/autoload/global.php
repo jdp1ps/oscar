@@ -14,7 +14,20 @@ return array(
 
         'theme' => 'oscar',
 
+        /////////////////////////////////////////////////////////////////////////////////// oscar_num_separator [string]
+        /// Permet de modifier le formalisme de la numérotation automatique dans Oscar, il faut également modifier
+        ///  la fonction Postgresql associée (doc/numerotation.md)
+        ///
         'oscar_num_separator' => 'DRI',
+
+
+        ////////////////////////////////////////////////////////////////////// listPersonIncludeActivityMember [boolean]
+        /// Lorsque qu'un membre d'une organisation disposant du privilège "Liste des personnes"
+        /// accède à la liste du personnel de son organisation, cette denière ne propose que les personnes
+        /// qualifiées avec un rôle dans l'oganisation. Cette option permet d'ajouter à cette liste
+        /// les personnes impliquées dans des activités où la structure endosse un rôle principal.
+        ///
+        'listPersonIncludeActivityMember' => false,
 
         // ./doc/connectors.md
         'connectors' => [
