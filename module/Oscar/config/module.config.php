@@ -238,7 +238,7 @@ return array(
                 ],
                 [ 'controller' =>   'Person',
                     'action' => ['show'],
-                    'privileges' => \Oscar\Provider\Privileges::PERSON_SHOW
+                    'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',
                     'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],

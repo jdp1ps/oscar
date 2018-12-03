@@ -5,6 +5,8 @@
         <div class="input-group input-group-lg">
             <span class="input-group-addon"><i class="icon-zoom-in-outline"></i></span>
             <input type="text" class="form-control" placeholder="Rechercher" @keyup.enter="handlerSearch" v-model="search" />
+
+
             <span class="input-group-addon" v-show="loading">
                 <span class="oscar-text-loading">
                     <i class="icon-spinner animate-spin"></i>
@@ -30,6 +32,9 @@
                 <span :class="page < totalPage ? '' : 'disabled'" class="btn btn-default"  @click="handlerNext">
                     <i class="icon-right-open-outline"></i>
                 </span>
+            </span>
+            <span class="input-group-btn">
+                <button class="btn btn-primary" @click="handlerSearch">Rechercher</button>
             </span>
         </div>
 

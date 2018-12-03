@@ -105,6 +105,9 @@ $this->headScript();
                                 <?php if( $this->grant()->isBoss() ): ?>
                                 <li><a href="<?= $this->url('project/structure') ?>"><i class="icon-building-filled"></i> <?= $this->translate('Mes structures') ?></a></li>
                                 <?php endif; ?>
+                                <?php if( $this->grant()->hasPersonnelAccess() ): ?>
+                                    <li><a href="<?= $this->url('person/personnel') ?>"><i class="icon-group"></i> <?= $this->translate('Personnel') ?></a></li>
+                                <?php endif; ?>
                                 <li>
                                     <a href="<?= $this->url('administrativedocument') ?>"><i class="icon-book"></i> <?= $this->translate('Documents pratiques') ?></a>
                                 </li>

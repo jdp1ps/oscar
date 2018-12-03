@@ -23,6 +23,74 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     private $_cacheSelectebleRolesOrganisation;
 
     /**
+     * Retourne la liste des IDS des personnes identifiées directement comme membre dans la/les organisations.
+     *
+     * @param $organisationIds
+     * @return array
+     */
+    public function getPersonIdsInOrganizations( $organisationIds ){
+        $result = $this->createQueryBuilder('p')
+            ->select('p.id')
+            ->innerJoin('p.organizations', 'op')
+            ->where('op.organization IN(:organisationsIds)')
+            ->setParameter('organisationsIds', $organisationIds)
+            ->getQuery()
+            ->getResult();
+        return array_map('current', $result);
+    }
+
+    public function getPersonIdsForOrganizationsActivities( $organizationIds ){
+        $activityMembers = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+            ->select('DISTINCT p.id')
+            ->innerJoin('p.activities', 'ap')
+            ->innerJoin('ap.activity', 'a')
+            ->innerJoin('a.organizations', 'o')
+            ->innerJoin('o.roleObj', 'r')
+            ->where('r.principal = \'true\' AND o.organization IN(:organizationIds)')
+            ->setParameter('organizationIds', $organizationIds)
+            ->getQuery();
+
+        $projectMembers = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+            ->select('DISTINCT p.id')
+            ->innerJoin('p.projectAffectations', 'p_p')
+            ->innerJoin('p_p.project', 'prj')
+            ->innerJoin('prj.partners', 'partner')
+            ->innerJoin('partner.organization', 'org')
+            ->innerJoin('partner.roleObj', 'r')
+            ->where('r.principal = \'true\' AND org.id IN(:organizationIds)')
+            ->setParameter('organizationIds', $organizationIds)
+            ->getQuery();
+
+        $idsFromActivities = array_map('current', $activityMembers->getResult());
+        $idsFromProjects = array_map('current', $projectMembers->getResult());
+
+        return array_unique(array_merge($idsFromActivities, $idsFromProjects));
+    }
+
+    public function getSubordinates( $idReferent ){
+        $ids = $this->getSubordinatesIds($idReferent);
+        return $this->createQueryBuilder('p')
+            ->where('p.id IN(:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult()
+        ;
+
+    }
+
+    public function getSubordinatesIds( $referentId ){
+        $result = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->select('p.id')
+            ->innerJoin('r.person', 'p')
+            ->where('r.referent = :idReferent')
+            ->setParameter('idReferent', $referentId)
+            ->getQuery()
+            ->getResult();
+        return array_map('current', $result);
+
+    }
+
+    /**
      * Retourne la liste des personnes qui ont des notifications non-lues et ayant un compte d'authentification.
      *
      * @return mixed

@@ -119,11 +119,13 @@
                                 <article class="card card-xs">
                                     <i class="icon-user"></i>
                                     <a href="<?= $this->url('person/show', ['id' => $referent->getReferent()->getId() ]); ?>"><?= $referent->getReferent() ?></a>
+                                    <?php if( $manageHierarchie ): ?>
                                     <form action="" method="post" class="form-inline">
                                         <input type="hidden" name="action" value="removereferent" />
                                         <input type="hidden" name="referent_id" value="<?= $referent->getId() ?>" />
                                         <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
                                     </form>
+                                    <?php endif; ?>
                                 </article>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -133,6 +135,8 @@
                                 </p>
                             <?php endif; ?>
                         <?php endif; ?>
+
+                        <?php if( $manageHierarchie ): ?>
                         <button id="editReferent" onclick="$('#referentEditor').show(); $('#editReferent').hide();">
                             <i class="icon-pencil"></i> Ajouter un référent</button>
 
@@ -193,6 +197,7 @@
                                 );
                             })
                         </script>
+                        <?php endif; ?>
                     </div>
                     <div class="col-md-6">
                         <h4><i class="icon-group"></i>Valide les déclarations pour (N-1)</h4>
@@ -201,11 +206,13 @@
                                 <article class="card card-xs">
                                     <i class="icon-user"></i>
                                     <a href="<?= $this->url('person/show', ['id' => $subordinate->getPerson()->getId() ]); ?>"><?= $subordinate->getPerson() ?></a>
+                                    <?php if( $manageHierarchie ): ?>
                                     <form action="" method="post" class="form-inline">
                                         <input type="hidden" name="action" value="removereferent" />
                                         <input type="hidden" name="referent_id" value="<?= $subordinate->getId() ?>" />
                                         <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
                                     </form>
+                                    <?php endif; ?>
                                 </article>
                             <?php endforeach; ?>
                         <?php else: ?>

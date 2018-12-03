@@ -35,6 +35,16 @@ class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
         return $this->connected() && $this->getOscarUserContext()->hasRolePrincipalInAnyOrganisations();
     }
 
+    /**
+     * Retourne TRUE si la personne connectée est un référent (N+1)
+     *
+     * @return boolean
+     */
+    public function hasPersonnelAccess(){
+        return $this->connected() && $this->getOscarUserContext()->hasPersonnelAccess();
+    }
+
+
     public function isDeclarer(){
         return $this->connected() && $this->getOscarUserContext()->isDeclarer();
     }

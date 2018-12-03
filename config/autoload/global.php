@@ -115,6 +115,13 @@ return array(
         'userSubmitScheduleValidateByNp1' => true,
         'userSubmitScheduleValidateByPrivilege' => \Oscar\Provider\Privileges::PERSON_MANAGE_SCHEDULE,
 
+        // Niveau d'accès à la liste du personnel
+        //  - 0
+        //  - 1 = N=1
+        //  - 2 = Personnel dans l'oganisation
+        //  - 3 = Person dans l'organisation, et dans les activités
+        'listPersonnel' => 0,
+
         'scheduleModeles' => [
             'fulltime' => [
                 'label' => 'Plein temps',

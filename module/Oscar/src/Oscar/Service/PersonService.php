@@ -481,72 +481,32 @@ die($privilege);
     }
 
     public function getCoWorkerIds( $idPerson ){
-        $ids = [];
+        /** @var OrganizationRepository $organizationRepository */
+        $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
 
-        // Liste des organisations ou la personne a un role principal
-        $orga = $this->getEntityManager()->getRepository(Organization::class)->createQueryBuilder('o')
-            ->select('o.id')
-            ->innerJoin('o.persons', 'op')
-            ->innerJoin('op.roleObj', 'r')
-            ->where('op.person = :person AND r.principal = \'true\'')
-            ->setParameter('person', $idPerson)
-            ->getQuery();
+        /** @var PersonRepository $personRepository */
+        $personRepository = $this->getEntityManager()->getRepository(Person::class);
 
-        $orgaIds = array_map('current', $orga->getResult());
+        // Organisations où la person est "principale"
+        $orgaIds = $organizationRepository->getOrganizationsIdsForPerson($idPerson, true);
 
-        $coworkers = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
-            ->select('p.id')
-            ->innerJoin('p.organizations', 'op')
-            ->where('op.organization IN(:organisationsIds)')
-            ->setParameter('organisationsIds', $orgaIds)
-            ->getQuery();
+        if( count($orgaIds) == 0 ){
+            return [];
+        }
 
-        $coWorkersIds = array_map('current', $coworkers->getResult());
+        // IDS des membres des organisations
+        $coWorkersIds = $personRepository->getPersonIdsInOrganizations($orgaIds);
 
-        $listPersonIncludeActivityMember = true;
-        if( $listPersonIncludeActivityMember ){
-            $activityMembers = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
-                ->select('DISTINCT p.id')
-                ->innerJoin('p.activities', 'ap')
-                ->innerJoin('ap.activity', 'a')
-                ->innerJoin('a.organizations', 'o')
-                ->innerJoin('o.roleObj', 'r')
-                ->where('r.principal = \'true\' AND o.organization IN(:organizationIds)')
-                ->setParameter('organizationIds', $orgaIds)
-                ->getQuery();
-            $coWorkersIds = array_merge($coWorkersIds, array_map('current', $activityMembers->getResult()));
+        // Inclue les personnes impliquées dans des activités ?
+        $listPersonIncludeActivityMember = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('listPersonnel');
+        if( $listPersonIncludeActivityMember == 3 ) {
+            $engaged = $personRepository->getPersonIdsForOrganizationsActivities($orgaIds);
+
+            $coWorkersIds = array_unique(array_merge($coWorkersIds, $engaged));
         }
 
 
         return $coWorkersIds;
-
-        //                /** @var OrganizationPerson $personOrganisation */
-//                foreach ($this->getCurrentPerson()->getLeadedOrganizations() as $personOrganisation) {
-//                    if( $personOrganisation->getRoleObj()->isPrincipal() ){
-//                        /** @var OrganizationPerson $po */
-//                        foreach ($personOrganisation->getOrganization()->getPersons() as $po){
-//                           if( !in_array($po->getPerson()->getId(), $idsMembers) ){
-//                               $idsMembers[] = $po->getPerson()->getId();
-//                           }
-//                        }
-//
-//                        if( $includePersonsInActivity ){
-//                            /** @var Activity $activity */
-//                            foreach ($personOrganisation->getOrganization()->getActivities() as $activity){
-//                                if( $activity->getRoleObj()->isPrincipal() ){
-//                                    foreach ($activity->getActivity()->getPersonsDeep(true) as $person) {
-//                                        if (!in_array($person->getPerson()->getId(), $idsMembers)) {
-//                                            $idsMembers[] = $person->getPerson()->getId();
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-
-
-        return $ids;
     }
 
     public function getSubordinateIds( $idPerson ){
@@ -745,7 +705,7 @@ die($privilege);
                 ->setParameter(':ids', $ids);
         }
 
-        if( $filters['ids'] ){
+        if( array_key_exists('ids', $filters) ){
             $query->andWhere('p.id IN(:filterIds)')
                 ->setParameter('filterIds', $filters['ids']);
         }
