@@ -19,19 +19,19 @@ Note : Cet écran permet de voir les heures en cours de saisie, les heures valid
 
 ### Interface de déclaration
 
-Elle permet au déclarant d'indiquer le temps passé sur les activités où il est identifié comme déclarant et le temps hors-lot. Lorsque un mois est terminé, il peut soumettre sa déclaration.
+Elle permet au déclarant d'indiquer le temps passé sur les activités où il est identifié comme déclarant et le temps hors-lot. Lorsqu'un mois est terminé, il peut soumettre sa déclaration.
 
 ![Synthèse 1](images/declaration-v2.png)
 
 
 ### Importation des ICAL
 
-Un interface permet de charger les informations depuis un calendrier (ICAL/ICS)
+Une interface permet de charger les informations depuis un calendrier (ICAL/ICS)
 
 ![Nouvelle inteface de déclaration](images/import-ical.png)
 
 
-### Suivie des déclarations
+### Suivi des déclarations
 
 Accessible au déclarant et depuis la fiche activité par les personnes autorisées. Elle permet de **visualiser les feuille de temps** validées ainsi de de les prévisualiser (avant validation).
 
@@ -42,7 +42,7 @@ On peut également voir les validateurs impliqués selon l'étape de validation,
 
 ### Export des feuilles de temps
 
-Les données saisies permettent de produire un document au format Excel qui syntétise les informations de la déclaration. Pour le moment, l'affichage des informations ne propose que le format heure.
+Les données saisies permettent de produire un document au format Excel qui synthétise les informations de la déclaration. Pour le moment, l'affichage des informations ne propose que le format heure.
 
 ![Nouvelle inteface de déclaration](images/feuille-de-temps.png)
 
@@ -85,7 +85,7 @@ Le déclarant pourra choisir son mode de saisie depuis ces paramètres personnel
 
 La répartition permet de savoir comment sont distribuées les heures attendues d'une personne dans la semaine. Cela permet également de résoudre les cas particuliers (amménagement de temps de travail, temps partiel, mi-temps, etc...).
 
-Par défaut, la répartition est tel que définie dans la configuration Oscar. La clef `declarationsDurations` permet de configurer la répartition horaire, ces valeurs seront utilisées pour l'affichage en pourcentage, et seront utilisées pour le remplissage des journées avec le choix **remplir**.
+Par défaut, la répartition est telle que définie dans la configuration Oscar. La clef `declarationsDurations` permet de configurer la répartition horaire, ces valeurs seront utilisées pour l'affichage en pourcentage, et seront utilisées pour le remplissage des journées avec le choix **remplir**.
 
 ```php
 <?php
@@ -125,7 +125,7 @@ return array(
 );
 ```
 
-Les personnes ayant le privilèges **Personne > peut modifier la répartition horaire** pourra, depuis la fiche personne, modifier les horaires de la personne.
+Les personnes ayant le privilège **Personne > peut modifier la répartition horaire** pourra, depuis la fiche personne, modifier les horaires de la personne.
 
 ![Horaires](images/fiche-personne-horaire.png)
 
@@ -161,9 +161,9 @@ return array(
 
 **IMPORTANT** : Une fois les catégories Hors-Lots disponibles configurées, il n'est pas recommandé de la modifier.
 
-#### Mécanisme générale
+#### Mécanisme général
 
-Lorsque qu'un déclarant soumet ces heures, Oscar va **COPIER** les données pour la validation au jour de l'envoi : 
+Lorsqu'un déclarant soumet ses heures, Oscar va **COPIER** les données pour la validation au jour de l'envoi : 
 
  - Les validateurs
  - La configuration horaire
@@ -179,7 +179,7 @@ Une fois la déclaration soumise, il est possible que des problèmes surviennent
 
 Cet écran permet : 
 
- - Contrôler l'états de validation des différentes lignes
+ - Contrôler l'état de validation des différentes lignes
  - D'annuler une déclaration
  - Modifier les horaires de la personne sur la période
  - Ajouter / supprimer des validateurs
@@ -201,8 +201,8 @@ La validation des créneaux *Hors-Lots* est assurée par les N+1. Ces derniers p
    
 Une déclaration envoyée est composée de plusieurs "ligne" :
 
-- Une ligne par activité, ligne dites "activité"
-- Une ligne dites "Hors-Lot" qui regroupe les déclarations hots activité
+- Une ligne par activité, ligne dite "activité"
+- Une ligne dite "Hors-Lot" qui regroupe les déclarations hots activité
 
 
 ### Validation des lignes activités
@@ -213,7 +213,7 @@ Les lignes activité ont 3 étapes de validation :
 - Étape 2 : validation **scientifique**
 - Étape 3 : validation **administrative** 
 
-Chaque une des ces étapes est associée à un privilège qui peut être accorder dans la gestion des privilèges.
+Chacune des ces étapes est associée à un privilège qui peut être accordé dans la gestion des privilèges.
 
 Avec le privilège "Voir les feuilles de temps sur une activité", on peut également voir les validateurs des différentes étapes : 
 
@@ -225,7 +225,7 @@ Les validateurs disposeront automatiquement d'une interface de validation depuis
 
 ![Accueil validateur](images/accueil-validateur.png)
 
-L'écran de validation propose le détails des déclarations à valider, sont état de validation et les validateurs impliqués : 
+L'écran de validation propose le détail des déclarations à valider, son état de validation et les validateurs impliqués : 
 
 
 ![Accueil validateur](images/validateur-ui.png)
