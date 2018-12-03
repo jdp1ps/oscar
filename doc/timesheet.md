@@ -213,7 +213,7 @@ Les lignes activité ont 3 étapes de validation :
 - Étape 2 : validation **scientifique**
 - Étape 3 : validation **administrative** 
 
-Chacune des ces étapes est associée à un privilège qui peut être accordé dans la gestion des privilèges.
+Chacune de ces étapes est associée à un privilège qui peut être accordé dans la gestion des privilèges.
 
 Avec le privilège "Voir les feuilles de temps sur une activité", on peut également voir les validateurs des différentes étapes : 
 
