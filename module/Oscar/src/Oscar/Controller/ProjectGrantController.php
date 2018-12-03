@@ -701,7 +701,7 @@ class ProjectGrantController extends AbstractOscarController
         $entity = $this->getActivityFromRoute();
 
         // Check access
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity);
 
         /** @var NotificationService $notificationService */
         $notificationService = $this->getServiceLocator()->get('NotificationService');
