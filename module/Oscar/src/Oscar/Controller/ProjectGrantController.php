@@ -801,8 +801,8 @@ class ProjectGrantController extends AbstractOscarController
                     $involvedPersons[] = $p->toJson();
                 }
                 $involvedPersonsJSON = json_encode($involvedPersons);
-            } catch ( OscarException $e ){
-
+            } catch ( \Exception $e ){
+                $this->log($e->getMessage());
             }
         }
 
