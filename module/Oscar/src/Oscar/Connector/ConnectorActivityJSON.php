@@ -28,6 +28,7 @@ use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Project;
 use Oscar\Entity\Role;
+use Oscar\Entity\TVA;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Data\DataExtractorFullname;
@@ -308,6 +309,44 @@ class ConnectorActivityJSON implements ConnectorInterface
         return $this->entityManager->getRepository(Organization::class);
     }
 
+    /**
+     * @param $symbolOrName
+     * @return Currency
+     * @throws OscarException
+     */
+    protected function getCurrency( $symbolOrName ){
+        static $currencies;
+        if( $currencies === null ){
+            $currencies = $this->entityManager->getRepository(Currency::class)->findAll();
+        }
+        /** @var Currency $currency */
+        foreach ($currencies as $currency ){
+            if( $currency->getLabel() == $symbolOrName || $currency->getSymbol() == $symbolOrName ){
+                return $currency;
+            }
+        }
+        throw new OscarException("Impossible de trouver la devise '$symbolOrName'");
+    }
+
+    /**
+     * @param $tauxTVA
+     * @return TVA
+     * @throws OscarException
+     */
+    protected function getTva( $tauxTVA ){
+        static $tvas;
+        if( $tvas === null ){
+            $tvas = $this->entityManager->getRepository(TVA::class)->findAll();
+        }
+        /** @var TVA $tva */
+        foreach ($tvas as $tva ){
+            if( $tva->getRate() == $tauxTVA ){
+                return $tva;
+            }
+        }
+        throw new OscarException("Impossible de trouver la TVA '$tauxTVA'");
+    }
+
     protected function getPropertyObject( $object, $property, $required = true, $type=null ){
         if( !property_exists($object, $property) ){
             if( $required === true )
@@ -397,11 +436,27 @@ class ConnectorActivityJSON implements ConnectorInterface
             $dateStart = null;
             $dateEnd = null;
 
+            if( $data->currency ){
+                $currency = $this->getCurrency($data->currency);
+            } else {
+                $currency = $defaultCurrency;
+            }
+
+            if( $data->currency ){
+                $tva = $this->getTva($data->tva);
+            } else {
+                $tva = null;
+            }
+
+
 
             $activity
                 ->setLabel($this->getPropertyObject($data, 'label'))
                 ->setDescription($this->getPropertyObject($data, 'description', false))
-                ->setCurrency($defaultCurrency)
+                ->setFinancialImpact($this->getPropertyObject($data, 'financialImpact', false))
+                ->setAssietteSubventionnable($this->getPropertyObject($data, 'assietteSubventionnable', false))
+                ->setCurrency($currency)
+                ->setTva($tva)
                 ->setCodeEOTP($data->pfi)
                 ->setActivityType($type)
                 ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
@@ -534,8 +589,6 @@ class ConnectorActivityJSON implements ConnectorInterface
                             $paymentData->amount));
                     }
 
-
-
                     try {
                         $datePayment = $paymentData->date ?
                             new \DateTime($paymentData->date) :
@@ -558,7 +611,6 @@ class ConnectorActivityJSON implements ConnectorInterface
                     } else {
                         $paymentStatus = ActivityPayment::STATUS_REALISE;
                     }
-
 
                     if( !$activity->hasPaymentAt( $amount, $datePayment, $datePredicted) ){
                         $payment = new ActivityPayment();

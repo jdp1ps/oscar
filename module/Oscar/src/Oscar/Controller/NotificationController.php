@@ -52,7 +52,9 @@ class NotificationController extends AbstractOscarController
 
     public function indexAction()
     {
-
+        if( !$this->getCurrentPerson() ){
+            return [];
+        }
         // $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
         $personId = $this->getCurrentPerson()->getId();
 

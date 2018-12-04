@@ -33,7 +33,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
     {
         $config = $this->getDemoConfig();
         $this->assertTrue(is_array($config));
-        $this->assertEquals(21, count($this->getDemoConfig()), "La configuration de démo contient 20 entrées.");
+        $this->assertEquals(25, count($this->getDemoConfig()), "La configuration de démo contient 25 entrées.");
     }
 
 
@@ -52,8 +52,10 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $converter = new ConnectorActivityCSVWithConf($source, $config, null);
         $datas = $converter->syncAll();
 
+
+
         $this->assertNotNull($datas);
-        $this->assertEquals(2, count($datas));
+        $this->assertEquals(3, count($datas));
 
         $this->assertEquals('R1', $datas[0]['uid']);
         $this->assertEquals('RELATIV', $datas[0]['acronym']);
@@ -72,35 +74,48 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals("Batman", $datas[0]['persons']['Participants'][0]);
         $this->assertEquals("Robin", $datas[0]['persons']['Participants'][1]);
 
-        $this->assertEquals(1, count($datas[0]['persons']['Ingénieur']), 'Valeurs multiples sur plusieurs colonnes, une des colonne vide');
+        $this->assertEquals(2, count($datas[0]['persons']['Ingénieur']), 'Valeurs multiples sur plusieurs colonnes, une des colonne vide');
+
+        $this->assertEquals("Marcel Grossmann", $datas[0]['persons']['Ingénieur'][0], 'Ingé 1');
+        $this->assertEquals("Serge Le Normand", $datas[0]['persons']['Ingénieur'][1], 'Ingé 2');
+
+        $this->assertEquals(null, $datas[0]['tva']);
+        $this->assertEquals(null, $datas[0]['assietteSubventionnable']);
+        $this->assertEquals('Recette', $datas[0]['financialImpact']);
+        $this->assertEquals(null, $datas[0]['currency']);
+
 
         // Deuxième activité
         $this->assertEquals(45000.0, $datas[1]['amount']);
         $this->assertEquals("Description 2", $datas[1]['description']);
         $this->assertEquals('2017-12-24', $datas[1]['datepfi']);
         $this->assertEquals('2017-12-31', $datas[1]['datesigned']);
-
         $this->assertEquals(2, count($datas[1]['persons']['Ingénieur']), 'Valeurs multiples sur plusieurs colonnes');
         $this->assertTrue(in_array("Marcel Grossmann", $datas[1]['persons']['Ingénieur']), "Marcel Grossmann est dans l'activité 2");
-
-        /// PAYMENTS
         $this->assertEquals(3, count($datas[1]['payments']));
-
         $this->assertEquals(20000, $datas[1]['payments'][0]['amount']);
         $this->assertEquals('2018-01-01', $datas[1]['payments'][0]['date']);
         $this->assertEquals('2018-01-01', $datas[1]['payments'][0]['predicted']);
-
         $this->assertEquals(25000, $datas[1]['payments'][1]['amount']);
         $this->assertEquals('', $datas[1]['payments'][1]['date']);
         $this->assertEquals('2018-06-01', $datas[1]['payments'][1]['predicted']);
-
         $this->assertEquals(666.66, $datas[1]['payments'][2]['amount']);
         $this->assertNull($datas[1]['payments'][2]['predicted']);
         $this->assertEquals('2020-12-31', $datas[1]['payments'][2]['date']);
-
-
-        // MILESTONES
         $this->assertEquals('Rapport financier', $datas[1]['milestones'][0]['type']);
         $this->assertEquals('2018-04-15', $datas[1]['milestones'][0]['date']);
+        $this->assertEquals(null, $datas[1]['tva']);
+        $this->assertEquals(15.0, $datas[1]['assietteSubventionnable']);
+        $this->assertEquals('Dépense', $datas[1]['financialImpact']);
+        $this->assertEquals('$', $datas[1]['currency']);
+
+        // Troisième activité
+        $this->assertEquals(15000.0, $datas[2]['amount']);
+        $this->assertEquals("Mécanique quantique", $datas[2]['description']);
+        $this->assertEquals("Niels Bohr", $datas[2]['persons']['Ingénieur'][0]);
+        $this->assertEquals(19.6, $datas[2]['tva']);
+        $this->assertEquals(5.0, $datas[2]['assietteSubventionnable']);
+        $this->assertEquals('Aucune', $datas[2]['financialImpact']);
+        $this->assertEquals('Yens', $datas[2]['currency']);
     }
 }
