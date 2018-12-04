@@ -795,11 +795,15 @@ class ProjectGrantController extends AbstractOscarController
 
         $involvedPersons = null; $involvedPersonsJSON = null;
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_ACCESS, $activity) ){
-            $involved = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_SHOW, $activity, true);
-            foreach ($involved as $p){
-                $involvedPersons[] = $p->toJson();
+            try {
+                $involved = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_SHOW, $activity, true);
+                foreach ($involved as $p){
+                    $involvedPersons[] = $p->toJson();
+                }
+                $involvedPersonsJSON = json_encode($involvedPersons);
+            } catch ( OscarException $e ){
+
             }
-            $involvedPersonsJSON = json_encode($involvedPersons);
         }
 
         $currencies = [];
