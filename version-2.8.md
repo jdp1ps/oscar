@@ -8,6 +8,11 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 Refonte complète de l'interface de saisie et de validation des déclarations
 
 [Détails sur le fonctionnement des Feuille de temps](./doc/timesheet.md)
+
+
+## Autres
+
+ - [Liste du personnel](./doc/liste-personnel.md) 
  
 
 
