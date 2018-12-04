@@ -38,5 +38,10 @@ return [
     25  => [
         'key' => "persons.Participants",
         'separator' => ','
-    ]
+    ],
+
+    26  => "tva",
+    27  => "financialImpact",
+    28  => "currency",
+    29  => "assietteSubventionnable",
 ];

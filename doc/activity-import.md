@@ -34,6 +34,10 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
     "datePFI": "2017-07-04",
     "type": "ANR",
     "amount": "0.0",
+    "tva": null,
+    "currency": null,
+    "assietteSubventionnable": null,
+    "financialImpact": null,
     "organizations": {
       "Laboratoire": ["Cyberdyne", "US Robots"]
     },
@@ -54,6 +58,10 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
     "pfi": "",
     "type": "Colloques",
     "amount": 15000,
+    "tva": 19.6,
+    "currency": "Yens",
+    "assietteSubventionnable": 5,
+    "financialImpact": "Aucune",  
     "milestones": [
 
     ],
@@ -103,13 +111,14 @@ pfi             | String    | Oui       | Non    | EOTP/PFI de l'activité de re
 datePFI         | Date ISO  | Oui       | Non    | Date d'ouverture du PFI
 type            | String    | Oui       | Non    | Type d'activité, si Oscar ne trouve pas de type correspondant, la donnée est ignorée
 amount          | Double    | Oui       | Non    | Montant de la convention
+tva          | Double    | Oui       | Non    | Montant de la TVA (ex: 19.6)
+currency          | Double    | Oui       | Non    | Nom ou symbole de la devise
+assietteSubventionnable          | Double    | Oui       | Non    | Assiette subventionnable
+financialImpact          | String    | Oui       | Non    | Aucune,Recette,Dépense
 organizations   | Object    | Oui       | Non    | Voir détails dans [Gestion des organisations](#organizations)
 persons         | Object    | Oui       | Non    | Voir détails dans [Gestion des personnes](#persons)
 milestones      | Array     | Oui       | Non    | Voir détails dans [Gestion des jalons](#milestones)
 payments        | Array     | Oui       | Non    | Voir détails dans [Gestion des versements](#payments)
-
-
-Le corps vide d'un objet se présente ainsi :
 
 
 ```json
@@ -127,10 +136,14 @@ Le corps vide d'un objet se présente ainsi :
     "pfi": "",
     "type": "",
     "amount": "",
+    "tva": null,
+    "currency": null,
+    "assietteSubventionnable": null,
+    "financialImpact": null,
     "organizations": {},
     "persons": {},
     "milestones": [],
-    "payments": []
+    "payments": []    
   }
 ]
 ```
@@ -298,6 +311,26 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 > Les versements sans valeur dans la clef `date` mais avec une clef `predicted` seront tagués comme prévisionnels.
 
 
+## La clef TVA (float, ex: 19.6)
+
+La valeur doit correspondre à un taux présent dans la base de données (table `tva`)
+
+
+## Currency (string, ex: €)
+
+La valeur doit correspondre à un symbole / un intitulé de devise présent en base de données (table `currency`), Si rien n'est trouvé, Oscar mettra automatiquement l'euro en devise.
+
+
+## assietteSubventionnable ( defaut : null, ex: 5.0 )
+
+Valeur 
+
+
+## financialImpact (ex: Recette)
+
+Valeurs possibles : Aucune, Recette ou Dépense
+
+
 # Importation depuis un fichier Excel
 
 Oscar propose un utilitaire en ligne de commande pour convertir une source de donnée CSV en un fichier JSON.
@@ -343,7 +376,12 @@ return [
     25  => [
         'key' => "persons.Participants",
         'separator' => ','
-    ]
+    ],
+    
+    26  => "tva",
+    27  => "financialImpact",
+    28  => "currency",
+    29  => "assietteSubventionnable",
 ];
 ```
 

@@ -205,6 +205,10 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 "persons" => [],
                 "milestones" => [],
                 "payments" => [],
+                "tva" => null,
+                "currency" => null,
+                "assietteSubventionnable" => null,
+                "financialImpact" => null
             ];
 
             foreach ($datas as $index => $value) {
@@ -281,10 +285,31 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                         "date" => $paymentDatePayment,
                         "predicted" => $paymentDatePredicted,
                     ];
-                } // PFI
+                }
+
+                // PFI
+                else if ($key == "currency") {
+                    $json['currency'] = $value;
+                }
+
+                else if ($key == "tva") {
+                    $json['tva'] = floatval(str_replace(',', '.', $value));
+                }
+
+                else if ($key == "assietteSubventionnable") {
+                    $json['assietteSubventionnable'] = (float)$value;
+                }
+
+                else if ($key == "financialImpact") {
+                    $json['financialImpact'] = $value;
+                }
+
+                // PFI
                 else if ($key == "PFI") {
                     $json['pfi'] = $value;
-                } else if ($key == "datePFI") {
+                }
+
+                else if ($key == "datePFI") {
                     $json['datepfi'] = $value;
                 } else if ($key == "type") {
                     $json['type'] = $value;
