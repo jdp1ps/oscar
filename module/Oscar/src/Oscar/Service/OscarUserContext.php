@@ -50,7 +50,11 @@ class OscarUserContext extends UserContext
         }
         $access = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('listPersonnel');
 
+        // OFF
         if( $access == 0 ) return false;
+
+        // Accès global
+        if( $this->hasPrivileges(Privileges::PERSON_INDEX) ) return true;
 
         /** @var PersonRepository $personRepository */
         $personRepository = $this->getEntityManager()->getRepository(Person::class);
@@ -58,15 +62,16 @@ class OscarUserContext extends UserContext
         /** @var OrganizationRepository $organisationRepository */
         $organisationRepository = $this->getEntityManager()->getRepository(Organization::class);
 
+        // Accès niveau 1 : N+1
         $subodinates = $personRepository->getSubordinatesIds($this->getCurrentPerson()->getId());
-
         if( $access > 0 && count($subodinates) > 0 ) return true;
 
+        // Accès niveau 2 : Membre de l'organisation
         $idsOrga = $organisationRepository->getOrganizationsIdsForPerson($this->getCurrentPerson()->getId());
         $coworkers = $personRepository->getPersonIdsInOrganizations($idsOrga);
-
         if( $access > 1 && count($coworkers) > 0 ) return true;
 
+        // Accès niveau 3 : ... et personnes impliquées dans les activités
         $cocoworkers = $personRepository->getPersonIdsForOrganizationsActivities($idsOrga);
         if( $access > 1 && count($cocoworkers) > 0 ) return true;
 
