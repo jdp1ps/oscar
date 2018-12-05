@@ -163,8 +163,7 @@
                 </nav>
             </div>
         </div>
-
-        <section v-if="ts">
+        <section v-if="ts" class="container-fluid" style="margin-bottom: 5em">
 
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
             <div class="month col-lg-8">
@@ -172,6 +171,7 @@
                 <h2>
                     Déclarations de temps pour <strong>{{ ts.person }}</strong>
                 </h2>
+
                 <h3 class="periode">Période :
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
                     <strong @click.shift="debug = ts">{{ mois }}</strong>
@@ -182,9 +182,9 @@
                        :title="!ts.submitable ? 'Vous ne pouvez pas importer pour cette période' : ''"
                        :class="{ 'disabled': !ts.submitable }">
                         <i class="icon-calendar"></i>
-                        Importer un calendrier</a>
+                        Importer un calendrier
+                    </a>
                 </h3>
-
 
                 <div class="month">
                     <header class="month-header">
@@ -450,7 +450,6 @@
                                        title="Cette déclaration est valide"></i>
                                     <br>
                                     <em class="text-thin">{{ a.label }}</em>
-
                                 </span>
                             <small class="subtotal">
                                 <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
@@ -469,7 +468,6 @@
                             </small>
                         </div>
                     </section>
-
 
                     <div v-if="ts.periodsValidations.length">
                         <h3>Procédures de validation pour cette période</h3>
