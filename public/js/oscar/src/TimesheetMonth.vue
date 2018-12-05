@@ -1259,6 +1259,7 @@
                     this.selectedWeek = null;
                     this.selectionWP = null;
                     this.loading = false;
+                    this.commentaire = "";
                     this.editedTimesheet = null;
                 });
                 ;
