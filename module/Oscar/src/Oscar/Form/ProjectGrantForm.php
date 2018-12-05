@@ -187,13 +187,13 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         // Amount
         $this->add([
             'name'   => 'assietteSubventionnable',
-            'help' => "% de l'assiette subventionnable",
+            'help' => "% de l'assiette éligible",
             'options' => [
-                'label' => 'Assiette subventionnable'
+                'label' => 'Assiette éligible'
             ],
             'attributes' => [
                 'class' => 'form-control',
-                'placeholder' => 'Assiette subventionnable (ex: 5.5)'
+                'placeholder' => 'Assiette éligible (ex: 5.5)'
             ],
             'type'=>'Text'
         ]);
