@@ -723,12 +723,13 @@
         .day {
             .label {
                 position: absolute;
-                top: 0;
+                bottom: 0;
                 right: 0;
                 display: block;
-                font-size: 20px;
+                font-size: 12px;
                 text-align: right;
-                text-shadow: -1px 1px 1px rgba(0, 0, 0, .2);
+                text-shadow: -1px 1px 1px rgba(255, 255, 255, .3);
+                color: #787171;
             }
 
             .cartouche em {
