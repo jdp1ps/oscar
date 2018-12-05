@@ -2150,7 +2150,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'description' => $t->getComment(),
                     'duration' => $t->getDuration(),
                     'foo' => 'bar',
-                    'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : null,
+                    'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : 'draft',
                     'status' => 'locked',
                     'validations' => $t->getValidationPeriod() ? $t->getValidationPeriod()->json() : null
                 ];
@@ -2198,7 +2198,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'activity_code' => $activityCode,
                 'acronym' => $projectAcronym,
                 'project' => (string)$project,
-                'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : null,
+                'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : 'draft',
                 'status' => 'locked',
                 'wpCode' => $wpCode,
                 'duration' => (float)$t->getDuration(),

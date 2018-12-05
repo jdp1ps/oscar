@@ -86,55 +86,6 @@
         },
 
         computed: {
-            totalEnseignement(){
-                let t = 0.0;
-                this.day.teaching.forEach(d => {
-                    t += d.duration;
-                });
-                return t;
-            },
-            totalInfo(){
-                let t = 0.0;
-                this.day.infos.forEach(d => {
-                    t += d.duration;
-                });
-                return t;
-            },
-            totalFormation(){
-                let t = 0.0;
-                this.day.training.forEach(d => {
-                    t += d.duration;
-                });
-                return t;
-            },
-            totalConges(){
-                let t = 0.0;
-                this.day.conges.forEach(d => {
-                    t += d.duration;
-                });
-                return t;
-            },
-            totalSickleave(){
-                let t = 0.0;
-                this.day.sickleave.forEach(d => {
-                    t += d.duration;
-                });
-                return t;
-            },
-            totalAbsent(){
-                let t = 0.0;
-                this.day.absent.forEach(d => {
-                    t += d.duration;
-                });
-                return t;
-            },
-            totalResearch(){
-                let t = 0.0;
-                this.day.research.forEach(d => {
-                    t += d.duration;
-                });
-                return t;
-            },
            groupProject(){
                let groups = {};
                if( this.day.declarations ) {
