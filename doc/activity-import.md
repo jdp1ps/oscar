@@ -505,21 +505,54 @@ On obtiendra en JSON :
 ```
 
 
-### payments.POSITIONMONTANT
+### payments.POSITIONS
 
-La clef `payments` prend pour paramètre la position du montant. Par exemple si le fichier CSV propose la date du versement à la colonne 13 et le montant de ce versement à la colonne 14, le paramètre sera 1 (13 + 1).
+La clef `payments` indique l'emplacement du montant du versement et prends comme premier paramètre la date prévue du versement, et en deuxième paramêtre la date effective souf la forme `payments.PREVU.EFFECTIF`.
 
-Par exemple, le fichier CSV suivant :
+#### Exemple 1
 
-| Activité | Acronym Projet | Premier versement (date) | Premier versement (montant)
-|---|---|---|---|---
-| La relativité restreinte | RELATIV | 2016-01-01 | 2500.50
-
-La date du versement est à la colone 2, et le montant correspondant à la colonne suivante (1), la configuration se présentera ainsi :
+|   Activité                | Acronym Projet    | Premier versement (montant)  | Premier versement (prévu)  | 1er versement (effectif)
+|---------------------------|-------------------|---------------------------|-------------------------------|-------------------------
+| La relativité restreinte  | RELATIV           | 2000.00                | 2017-01-01                       | 2017-01-06
 
 ```php
 return [
-  2 => "payments.1",
+  2 => "payments.1.2",
+]
+```
+
+Le premier chiffre indique l'emplacement de la colonne contenant la date prévue (une colonne après).
+Le deuxième chiffre indique l'emplacement de la colonne content la date effective (deux colonnes après).
+
+On obtiendra : 
+
+```json
+{
+  "payments": [
+     {
+        "amount": 20000,
+        "date": "2017-01-07",
+        "predicted": "2017-01-01"
+      }
+  ]
+}
+```
+
+#### exemple 2
+
+Si les colonnes sont dans des ordres différents, il faut prendre comme référence la colonne contenant le montant, ici la 4ème colonne (index 3), et mettre l'emplacement des autres colonnes par rapport à celle ci : 
+
+Ex: 
+
+|   Activité                | Acronym Projet    | Premier versement (prévu)  | Premier versement (montant)  | 1er versement (effectif)
+|---------------------------|-------------------|---------------------------|-------------------------------|-------------------------
+| La relativité restreinte  | RELATIV           | 2016-01-01                | 2500.50                       | 2016-01-10
+
+Ce qui donne : 
+
+```php
+return [
+  2 => "payments.-1.1",
 ]
 ```
 
@@ -530,8 +563,13 @@ On obtiendra en JSON :
   "payments": [
       {
         "amount": 2500.5,
-        "date": "2016-01-01"
+        "date": "2016-01-10",
+        "predicted": "2016-01-01"
       }
   ]
 }
 ```
+
+#### Status
+
+Au moment de l'injection des données JSON dans Oscar, Oscar regardera si une date effective (`date`) est présente (non null), si c'est le cas, le versement créé sera marqué comme EFFECTUÉ, sinon il sera marqué comme PRÉVU.

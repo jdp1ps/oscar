@@ -801,7 +801,7 @@ class ConsoleController extends AbstractOscarController
                 $this->getEntityManager());
 
             $datas = $sync->syncAll();
-            $json = json_encode($datas);
+            $json = json_encode($datas, JSON_PRETTY_PRINT);
             $error =  json_last_error();
 
             if( $error ){
