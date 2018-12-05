@@ -1,11 +1,14 @@
-<div class="flex-container">
-    <div id="app"></div>
-</div>
+<!--
 <link rel="stylesheet" href="/js/oscar/dist/timesheetmonth.css" type="text/css" />
 <link rel="stylesheet" href="/js/oscar/dist/timesheetmonthday.css" type="text/css" />
 <link rel="stylesheet" href="/js/oscar/dist/timesheetmonthdaydetails.css" type="text/css" />
 <link rel="stylesheet" href="/js/oscar/dist/timesheetmonthworkpackageselector.css" type="text/css" />
 <link rel="stylesheet" href="/js/oscar/dist/uitimechooser.css" type="text/css" />
+-->
+
+<div class="flex-container">
+    <div id="app"></div>
+</div>
 
 <script>
     require(['vue', 'vue-resource', 'TimesheetMonth', 'mm', 'bootbox'], function(Vue, VueResource, TimesheetMonth, moment, bootbox){
@@ -44,7 +47,7 @@
             if( status.hasOwnProperty(s) ){
                 return status[s];
             }
-            return "Status inconnu : " + s;
+            return "Brouillon";
         });
 
         new Vue({
