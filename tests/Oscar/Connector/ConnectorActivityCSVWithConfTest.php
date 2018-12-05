@@ -94,7 +94,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertTrue(in_array("Marcel Grossmann", $datas[1]['persons']['Ingénieur']), "Marcel Grossmann est dans l'activité 2");
         $this->assertEquals(3, count($datas[1]['payments']));
         $this->assertEquals(20000, $datas[1]['payments'][0]['amount']);
-        $this->assertEquals('2018-01-01', $datas[1]['payments'][0]['date']);
+        $this->assertEquals('2018-01-06', $datas[1]['payments'][0]['date']);
         $this->assertEquals('2018-01-01', $datas[1]['payments'][0]['predicted']);
         $this->assertEquals(25000, $datas[1]['payments'][1]['amount']);
         $this->assertEquals('', $datas[1]['payments'][1]['date']);
