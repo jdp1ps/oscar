@@ -6,7 +6,7 @@
     requirejs(['vue', 'vue-resource', 'PersonsList'], function(Vue, VueResource, PersonsList){
         Vue.use(VueResource);
         new Vue({el: '#app', render: function(h){
-            return h(PersonsList.default, { props: {urlapi: '<?= $this->url('person/personnel') ?>'} })
+            return h(PersonsList.default, { props: {urlapi: '<?= $this->url('person/personnel') ?>', result: <?= json_encode($result) ?>} })
         }})
     })
 </script>

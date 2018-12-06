@@ -64,73 +64,72 @@ class PersonController extends AbstractOscarController
             throw new BadRequest400Exception("Cette fonctionnalité n'est pas activé");
         }
 
-        if( $this->isAjax() || $this->params()->fromQuery('format') == 'json' ){
+        $q = $this->params()->fromQuery('q', "");
+        $page = $this->params()->fromQuery('p', 1);
+        $params = [
+            'filter_roles' => [],
+            'order_by' => 'lastname',
+            'leader' => null
+        ];
 
-            $q = $this->params()->fromQuery('q');
-            $page = $this->params()->fromQuery('p', 1);
+        $idCoWorkers = [];
 
-            $params = [
-                'filter_roles' => [],
-                'order_by' => 'lastname',
-                'leader' => null
-            ];
-
-
-            $idCoWorkers = [];
-
-            $idSubordinates = $this->getPersonService()->getSubordinateIds($this->getCurrentPerson()->getId());
+        $idSubordinates = $this->getPersonService()->getSubordinateIds($this->getCurrentPerson()->getId());
 
 
-            if( $access > 1 ){
-                $idCoWorkers = $this->getPersonService()->getCoWorkerIds($this->getCurrentPerson()->getId());
-            }
+        if( $access > 1 ){
+            $idCoWorkers = $this->getPersonService()->getCoWorkerIds($this->getCurrentPerson()->getId());
+        }
 
 
-            if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_INDEX) ){
-                $params['ids'] = array_merge($idCoWorkers, $idSubordinates);
-//                var_dump($params);
-//                die();
-            }
+        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_INDEX) ){
+            $params['ids'] = array_merge($idCoWorkers, $idSubordinates);
+        }
 
+        $extended = $this->params()->fromQuery('extended', 0);
+        if( $extended ){
+            $datas = $this->getPersonService()->searchPersonnel($q, $page, $params);
+        } else {
             $datas = $this->getPersonService()->getPersonsSearchPaged($q, $page, $params);
+        }
 
-            $output = [
-                'total'=> count($datas),
-                'persons' => [],
-                'page' => $page,
-                'resultbypage' => 50,
-                'coworkers' => [],
-                'subordinates' => [],
-            ];
+        $output = [
+            'total'=> count($datas),
+            'search' => $q,
+            'persons' => [],
+            'extended' => $extended,
+            'page' => $page,
+            'resultbypage' => 50,
+            'coworkers' => [],
+            'subordinates' => [],
+        ];
 
 
 
-            /** @var Person $person */
-            foreach ($datas as $person) {
-                $datasPerson = $person->toArrayList();
-                    $datasPerson['sub'] = false;
-                    $datasPerson['coworker'] = false;
-                    $datasPerson['activities'] = count($person->getActivities());
+        /** @var Person $person */
+        foreach ($datas as $person) {
+            $datasPerson = $person->toArrayList();
+            $datasPerson['sub'] = false;
+            $datasPerson['coworker'] = false;
+            $datasPerson['activities'] = count($person->getActivities());
 
-                    if( in_array($person->getId(), $idSubordinates ) ){
-                        $datasPerson['sub'] = true;
-                    }
-                    if( in_array($person->getId(), $idCoWorkers ) ){
-                        $datasPerson['coworker'] = true;
-                    }
-                    $output['persons'][] = $datasPerson;
+            if( in_array($person->getId(), $idSubordinates ) ){
+                $datasPerson['sub'] = true;
             }
+            if( in_array($person->getId(), $idCoWorkers ) ){
+                $datasPerson['coworker'] = true;
+            }
+            $output['persons'][] = $datasPerson;
+        }
 
-            $output['subordinates'] = $idSubordinates;
-            $output['coworkers'] = $idCoWorkers;
+        $output['subordinates'] = $idSubordinates;
+        $output['coworkers'] = $idCoWorkers;
 
+        if( $this->isAjax() || $this->params()->fromQuery('format') == 'json' ){
             return $this->ajaxResponse($output);
         }
-        $datas = [];
 
-
-
-        return $datas;
+        return ['result' => $output ];
     }
 
     public function grantAction()

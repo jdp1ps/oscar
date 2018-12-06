@@ -538,6 +538,45 @@ die($privilege);
     }
 
     /**
+     * @return PersonRepository
+     */
+    protected function getPersonRepository(){
+        return $this->getEntityManager()->getRepository(Person::class);
+    }
+
+    public function searchPersonnel(
+        $search = null,
+        $currentPage = 1,
+        $filters = [],
+        $resultByPage = 50
+    ) {
+        $query = $this->getBaseQuery();
+
+        if( $search ){
+            /** @var ProjectGrantService $activityService */
+            $activityService = $this->getServiceLocator()->get("ActivityService");
+
+            $ids = $activityService->search($search);
+
+            $idsPersons = $this->getPersonRepository()->getPersonsIdsForActivitiesids($ids);
+
+
+            $query->leftJoin('p.organizations', 'o')
+                ->leftJoin('p.activities', 'a')
+                ->where('p.id IN(:ids)')
+                ->setParameter('ids', $idsPersons);
+        }
+
+        if( array_key_exists('ids', $filters) ){
+            $query->andWhere('p.id IN(:filterIds)')
+                ->setParameter('filterIds', $filters['ids']);
+        }
+
+        return new UnicaenDoctrinePaginator($query, $currentPage,
+            $resultByPage);
+    }
+
+    /**
      * @param string|null $search
      * @param int         $currentPage
      * @param int         $resultByPage

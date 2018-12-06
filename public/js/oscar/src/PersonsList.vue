@@ -1,11 +1,17 @@
 <template>
     <section>
 
-        <h1>Liste du personnel</h1>
+        <h1>
+            <i class="icon-group"></i>
+            Liste du personnel</h1>
+
         <div class="input-group input-group-lg">
             <span class="input-group-addon"><i class="icon-zoom-in-outline"></i></span>
             <input type="text" class="form-control" placeholder="Rechercher" @keyup.enter="handlerSearch" v-model="search" />
 
+            <span class="input-group-addon">
+               <input type="checkbox" aria-label="" title="Étendre la recherche" v-model="extended">
+            </span>
 
             <span class="input-group-addon" v-show="loading">
                 <span class="oscar-text-loading">
@@ -34,6 +40,7 @@
                 </span>
             </span>
             <span class="input-group-btn">
+
                 <button class="btn btn-primary" @click="handlerSearch">Rechercher</button>
             </span>
         </div>
@@ -89,6 +96,9 @@
     // poi watch --format umd --moduleName  PersonsList --filename.css PersonsList.css --filename.js PersonsList.js --dist public/js/oscar/dist public/js/oscar/src/PersonsList.vue
     export default {
         props: {
+            result: {
+                default: null
+            },
             urlapi: {
                 default: ""
             }
@@ -98,6 +108,7 @@
             return {
                 search: "",
                 loading: false,
+                extended: false,
                 total: 0,
                 page: 0,
                 error: "",
@@ -111,8 +122,22 @@
             }
         },
 
+        mounted(){
+            if( this.result ){
+                this.displayResult(this.result);
+            }
+        },
+
 
         methods: {
+            displayResult(data){
+                this.persons = data.persons;
+                this.page = data.page;
+                this.total = data.total;
+                this.search = data.search;
+                this.extended = data.extended == 1 ? true : false;
+            },
+
             handlerPrevious(){
                 if( this.page > 1 ){
                     this.page--;
@@ -135,11 +160,13 @@
                     page = 1;
                 }
 
-                this.$http.get(this.urlapi + "?p=" +page +"&q=" + this.search).then(
+                let urlPath = "?p=" +page +"&q=" +this.search +"&extended=" + (this.extended ? 1 : 0);
+                window.history.pushState({},"", urlPath);
+
+
+                this.$http.get(urlPath).then(
                     ok => {
-                        this.persons = ok.body.persons;
-                        this.page = ok.body.page;
-                        this.total = ok.body.total;
+                        this.displayResult(ok.body);
                     },
                     ko => {
                         this.error = ko.body;

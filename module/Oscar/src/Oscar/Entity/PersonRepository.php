@@ -22,6 +22,28 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
 
+    public function getPersonsIdsForActivitiesids( $activitiesIds ){
+        $queryActivity = $this->createQueryBuilder('p')
+            ->select('DISTINCT p.id')
+            ->innerJoin('p.activities', 'ap')
+            ->innerJoin('ap.activity', 'a')
+            ->where('a.id IN (:ids)')
+            ->setParameter('ids', $activitiesIds);
+
+        $queryProject = $this->createQueryBuilder('p')
+            ->select('DISTINCT p.id')
+            ->innerJoin('p.projectAffectations', 'pra')
+            ->innerJoin('pra.project', 'pr')
+            ->innerJoin('pr.grants', 'a')
+            ->where('a.id IN (:ids)')
+            ->setParameter('ids', $activitiesIds);
+
+        $fromActivities = array_map('current', $queryActivity->getQuery()->getResult());
+        $fromProject = array_map('current', $queryProject->getQuery()->getResult());
+
+        return array_unique(array_merge($fromActivities, $fromProject));
+    }
+
     /**
      * Retourne la liste des IDS des personnes identifiées directement comme membre dans la/les organisations.
      *

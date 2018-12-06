@@ -1,0 +1,34 @@
+[
+  {
+    "uid": "alberteinstein",
+    "roles": {
+      "14": ["Responsable scientifique"]
+    }
+  },
+  {
+    "uid": "normanosborn",
+    "roles": {
+      "OSCORP": ["Directeur de laboratoire"]
+    }
+  },
+  {
+    "uid": "mauricesolovine",
+    "roles": {
+      "14": ["Responsable scientifique", "Doctorant"]
+    }
+  },
+  {
+    "uid": "maxplank",
+    "roles": {
+      "14": ["Turlututu"],
+      "ED209": ["Code Absent de oscar => Ignoré"],
+      "UNIV2": "Gestionnaire"
+    }
+  },
+  {
+    "uid": "direction",
+    "roles": {
+      "LABO1": ["Directeur de composante"]
+    }
+  }
+]
