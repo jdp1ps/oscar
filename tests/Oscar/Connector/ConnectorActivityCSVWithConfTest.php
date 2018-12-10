@@ -10,6 +10,7 @@ namespace tests\Oscar\Connector;
 
 
 use Oscar\Connector\ConnectorActivityCSVWithConf;
+use Oscar\Entity\Activity;
 use PHPUnit\Framework\TestCase;
 
 class ConnectorActivityCSVWithConfTest extends TestCase
@@ -33,7 +34,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
     {
         $config = $this->getDemoConfig();
         $this->assertTrue(is_array($config));
-        $this->assertEquals(25, count($this->getDemoConfig()), "La configuration de démo contient 25 entrées.");
+        $this->assertEquals(26, count($this->getDemoConfig()), "La configuration de démo contient 25 entrées.");
     }
 
 
@@ -61,28 +62,21 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals('RELATIV', $datas[0]['acronym']);
         $this->assertEquals('Théorie de la gravitation', $datas[0]['projectlabel']);
         $this->assertEquals("Description 1", $datas[0]['description']);
-
         $this->assertEquals('EOTP201400002', $datas[0]['pfi']);
-
-
         $this->assertEquals(2, count($datas[0]['organizations']['Laboratoire']));
-
         $this->assertEquals("Olympia", $datas[0]['organizations']['Laboratoire'][0]);
         $this->assertEquals("US Robot", $datas[0]['organizations']['Laboratoire'][1]);
-
         $this->assertEquals(2, count($datas[0]['persons']['Participants']), 'Valeurs multiples séparées par une virgule');
         $this->assertEquals("Batman", $datas[0]['persons']['Participants'][0]);
         $this->assertEquals("Robin", $datas[0]['persons']['Participants'][1]);
-
         $this->assertEquals(2, count($datas[0]['persons']['Ingénieur']), 'Valeurs multiples sur plusieurs colonnes, une des colonne vide');
-
         $this->assertEquals("Marcel Grossmann", $datas[0]['persons']['Ingénieur'][0], 'Ingé 1');
         $this->assertEquals("Serge Le Normand", $datas[0]['persons']['Ingénieur'][1], 'Ingé 2');
-
         $this->assertEquals(null, $datas[0]['tva']);
         $this->assertEquals(null, $datas[0]['assietteSubventionnable']);
         $this->assertEquals('Recette', $datas[0]['financialImpact']);
         $this->assertEquals(null, $datas[0]['currency']);
+        $this->assertEquals(Activity::STATUS_ERROR_STATUS, $datas[0]['status']);
 
 
         // Deuxième activité
@@ -108,6 +102,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals(15.0, $datas[1]['assietteSubventionnable']);
         $this->assertEquals('Dépense', $datas[1]['financialImpact']);
         $this->assertEquals('$', $datas[1]['currency']);
+        $this->assertEquals(Activity::STATUS_PROGRESS, $datas[1]['status']);
 
         // Troisième activité
         $this->assertEquals(15000.0, $datas[2]['amount']);
@@ -117,5 +112,6 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals(5.0, $datas[2]['assietteSubventionnable']);
         $this->assertEquals('Aucune', $datas[2]['financialImpact']);
         $this->assertEquals('Yens', $datas[2]['currency']);
+        $this->assertEquals(Activity::STATUS_ACTIVE, $datas[0]['status']);
     }
 }
