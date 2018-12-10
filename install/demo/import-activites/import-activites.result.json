@@ -121,7 +121,13 @@
             ]
         },
         "milestones": [],
-        "payments": [],
+        "payments": [
+            {
+                "amount": 15000,
+                "date": "",
+                "predicted": "2020-01-01"
+            }
+        ],
         "tva": 19.6,
         "currency": "Yens",
         "assietteSubventionnable": 5,
