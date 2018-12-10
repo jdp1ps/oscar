@@ -112,6 +112,6 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals(5.0, $datas[2]['assietteSubventionnable']);
         $this->assertEquals('Aucune', $datas[2]['financialImpact']);
         $this->assertEquals('Yens', $datas[2]['currency']);
-        $this->assertEquals(Activity::STATUS_ACTIVE, $datas[0]['status']);
+        $this->assertEquals(Activity::STATUS_ACTIVE, $datas[2]['status']);
     }
 }
