@@ -448,6 +448,12 @@ class ConnectorActivityJSON implements ConnectorInterface
                 $tva = null;
             }
 
+            if( $data->status ){
+                $status = (int)$data->status;
+            } else {
+                $status = Activity::STATUS_ERROR_STATUS;
+            }
+
 
 
             $activity
@@ -461,6 +467,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                 ->setActivityType($type)
                 ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
                 ->setDateOpened($data->datePFI ? new \DateTime($data->datePFI) : null)
+                ->setStatus($status)
                 ->setAmount(((double)$data->amount));
 
             if( $data->datestart ){
