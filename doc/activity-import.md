@@ -143,6 +143,7 @@ payments        | Array     | Oui       | Non    | Voir détails dans [Gestion d
     "organizations": {},
     "persons": {},
     "milestones": [],
+    "status": 404,
     "payments": []    
   }
 ]
@@ -153,6 +154,21 @@ payments        | Array     | Oui       | Non    | Voir détails dans [Gestion d
 ### La clef `uid`
 
 Cette clef contient une valeur unique permettant à oscar de maintenir le lien logique entre l'activité dans la base de donnée et l'information dans le fichier JSON. Elle permet de mettre à jour l'activité si le script d'importation est éxécuté plusieurs fois.
+
+### La clef `status`
+
+Cette clef permet de rensigner le status de l'activité en utilisant un code standard (un entier) : 
+
+| CODE | Correspondance texte |
+|------|----------------------|
+| 101  | Actif
+| 102  | Brouillon
+| 103  | Déposé
+| 200  | Terminé
+| 201  | Résilié
+| 250  | Dossier abandonné
+| 201  | Refusé
+| 404  | Conflit (pas de status)
 
 
 ### Donnée projet (les clefs `acronym` et `projectlabel`)
@@ -316,6 +332,8 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 La valeur doit correspondre à un taux présent dans la base de données (table `tva`)
 
 
+
+
 ## Currency (string, ex: €)
 
 La valeur doit correspondre à un symbole / un intitulé de devise présent en base de données (table `currency`), Si rien n'est trouvé, Oscar mettra automatiquement l'euro en devise.
@@ -382,6 +400,7 @@ return [
     27  => "financialImpact",
     28  => "currency",
     29  => "assietteSubventionnable",
+    30  => "status"
 ];
 ```
 
