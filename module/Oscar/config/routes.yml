@@ -12,13 +12,14 @@ home:
             controller: Public
             action: index
 
-testcalendar:
+requestactivity:
     type: literal
     options:
-        route: /testcalendar
+        route: /request-activity
         defaults:
-            controller: Public
-            action: testCalendar
+            controller: Activity
+            action: requestFor
+
 
 changelog:
     type: literal

@@ -1,0 +1,39 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 10/12/18
+ * Time: 16:08
+ */
+?>
+<div class="container">
+    <form action="" method="post" class="form">
+        <h1>
+            <i class="icon-cube"></i>
+            <?= _("Demande d'activité") ?>
+        </h1>
+
+
+        <div class="">
+            <label for="label"><?= _('Intitilé') ?></label>
+            <input type="text" name="label" placeholder="<?= _('Intitulé') ?>" id="label" class="form-control input-lg">
+        </div>
+
+        <div class="">
+            <label for="description"><?= _('Description') ?></label>
+            <textarea name="description" id="description" class="form-control" placeholder="<?= _('description') ?>"></textarea>
+        </div>
+
+        <div>
+            <label for="">Demandeur</label>
+            <span class="cartouche">
+                <?= $demandeur ?>
+                <span class="addon">
+                    Demandeur
+                </span>
+            </span>
+        </div>
+
+        <pre>CHAMPS CONFIGURABLES</pre>
+    </form>
+</div>

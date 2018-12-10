@@ -30,7 +30,13 @@
     "fullcode": "droit-privilege-edition"
   },
 
-
+  "ACTIVITY-REQUEST": {
+    "category_id": 2,
+    "spot": 4,
+    "code": "REQUEST",
+    "libelle": "Faire une demande d'activité",
+    "fullcode": "ACTIVITY-REQUEST"
+  },
 
   "ACTIVITY-INDEX": {
     "category_id": 2,
@@ -39,6 +45,7 @@
     "libelle": "Afficher \/ rechercher dans les activit\u00e9s",
     "fullcode": "ACTIVITY-INDEX"
   },
+
   "ACTIVITY-EXPORT": {
     "category_id": 2,
     "spot": 4,

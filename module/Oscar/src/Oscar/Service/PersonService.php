@@ -226,14 +226,10 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
     public function getRolesPrincipaux( $privilege = null){
         $query = $this->getEntityManager()->getRepository(Role::class)->createQueryBuilder('r');
-die($privilege);
         if( $privilege != null ){
             $query->innerJoin('r.privileges', 'p')
                 ->where('p.code = :privilege')
             ->setParameter('privilege', $privilege);
-
-            echo $query->getDQL();
-
         }
 
         return $query->getQuery()->getResult();
@@ -248,13 +244,6 @@ die($privilege);
      */
     public function getOrganizationsPersonWithPrincipalRole(Person $person){
 
-        $rolesObj = $this->getRolesPrincipaux( Privileges::ACTIVITY_SHOW);
-
-        foreach ($rolesObj as $role) {
-            echo $role->getRoleId() . "<br>";
-        }
-
-        die();
 
         $roles = $this->getOscarUserContext()->getRoleIdPrimary();
 

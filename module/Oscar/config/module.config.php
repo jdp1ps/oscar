@@ -103,7 +103,7 @@ return array(
                 [   'controller' =>   'Activity',
                     'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
                         'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
-                        'notifications', 'generateNotifications', 'generatedDocument', 'api', 'apiUi'],
+                        'notifications', 'generateNotifications', 'generatedDocument', 'api', 'apiUi', 'requestFor'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',

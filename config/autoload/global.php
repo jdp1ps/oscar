@@ -29,6 +29,8 @@ return array(
         ///
         'listPersonIncludeActivityMember' => false,
 
+        'allow_activity_request' => 'leader',
+
         // ./doc/connectors.md
         'connectors' => [
             'organization' => [],

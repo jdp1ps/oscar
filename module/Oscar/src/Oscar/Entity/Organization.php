@@ -961,7 +961,8 @@ class Organization implements ResourceInterface, IConnectedObject
         return
             ($this->isClose() && $displayClose ? '!FERME! ' : '').
             ($this->getCode() ? '['.$this->getCode().'] ' : '').
-            ($this->getShortName() ? $this->getShortName() : $this->getFullName()).
+            ($this->getShortName() ? $this->getShortName().' ' : '').
+            ($this->getFullName() ? $this->getFullName().' ' : '').
             ($this->getCity() ? '(' . $this->getCity() . ')' : '');
     }
 

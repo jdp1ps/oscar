@@ -586,6 +586,8 @@ class OscarUserContext extends UserContext
             return $this->getPrivilegesProjet($entity);
         } elseif ($entity instanceof Activity) {
             return $this->getPrivilegesActivity($entity);
+        } elseif( $entity instanceof Organization ){
+            return $this->getPrivilegesOrganization($entity);
         } else {
             throw new \Exception('La ressource fournie doit être un projet ou une activité');
         }
@@ -794,6 +796,17 @@ class OscarUserContext extends UserContext
         return $tmpActivities[$key];
     }
 
+    public function getPrivilegesOrganization( Organization $organization ){
+        if( !$this->getCurrentPerson() ){
+            return [];
+        }
+        else {
+            $roles = $this->getRolesPersonInOrganization($this->getCurrentPerson(), $organization);
+            $privileges = $this->getPrivilegesRoles($roles);
+            return $privileges;
+        }
+    }
+
     public function getPrivilegesActivity(Activity $entity)
     {
         if (!$this->getCurrentPerson()) {
@@ -815,13 +828,15 @@ class OscarUserContext extends UserContext
 
     }
 
-    public function getPrivilegesOrganization( Organization $organization ){
-        if (!$this->getCurrentPerson()) {
-            return [];
-        } else {
-            return $this->getPersonPrivilegesInOrganization($organization);
-        }
-    }
+////    public function getPrivilegesOrganization( Organization $organization ){
+//        if (!$this->getCurrentPerson()) {
+//            return [];
+//        } else {
+//            $roles = $this->getRolesPersonInOrganization($this->getCurrentPerson(), $organization);
+//            var_dump($roles);
+//            die();
+//        }
+//    }
 
 
 
@@ -844,7 +859,8 @@ class OscarUserContext extends UserContext
 
             // Puis si besoin, les rôles hérités de l'application
             if ($ressource) {
-                return in_array($privilege, $this->getPrivileges($ressource));
+                $privileges = $this->getPrivileges($ressource);
+                return in_array($privilege, $privileges);
             }
         } catch (\Exception $e) {
 

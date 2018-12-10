@@ -23,6 +23,7 @@ use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
 use Oscar\Entity\Notification;
+use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
@@ -33,6 +34,7 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Form\ActivityRequestForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\CSVDownloader;
@@ -61,6 +63,31 @@ class ProjectGrantController extends AbstractOscarController
 {
     public function apiUiAction(){
         return [];
+    }
+
+    public function requestForAction()
+    {
+        $demandeur = $this->getOscarUserContext()->getCurrentPerson();
+        $organizationsPerson = $this->getPersonService()->getOrganizationsPersonWithPrincipalRole($demandeur);
+
+        $organizations = [];
+
+        /** @var Organization $o */
+        foreach ($organizationsPerson as $o ){
+            $organizations[$o->getId()] = (string) $o;
+        }
+
+        $usedFileds = [
+            'label' => true,
+            'description' => true,
+            'documents' => true
+        ];
+
+        return [
+            'demandeur' => $demandeur,
+            'form' => $usedFileds,
+            'organizations' => $organizations
+        ];
     }
 
     /**
