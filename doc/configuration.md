@@ -51,7 +51,7 @@ return array(
 
 La règle de contrôle du PFI est précisée dans la clef `oscar > validation > pfi` (Il s'agit d'une expression régulière utilisée par Oscar pour valider les donnnées non-nulles saisies dans Oscar et détecter les PFI saisis dans le moteur de recherche pour proposer des résultats ciblés).
 
-**Attention** : Comme indiqué, l'expression régulière étant utilisée pour par le moteur de recherche pour trouver une activité de recherche à partir d'un PFI, les expressions régulières trop permissive posent problème. Ex : Si vous utilisez une expression tel que `/.*/mi`, n'importe quelle recherche sera detecté comme étant un PFI, donc Oscar recherchera uniquement les activités ayant pour PFI la saisie de la recherche. Assurez vous donc que ce champ est correctement renseigné. 
+**Attention** : Comme indiqué, l'expression régulière étant utilisée par le moteur de recherche pour trouver une activité de recherche à partir d'un PFI, les expressions régulières trop permissives posent problème. Ex : Si vous utilisez une expression telle que `/.*/mi`, n'importe quelle recherche sera detectée comme étant un PFI, donc Oscar recherchera uniquement les activités ayant pour PFI la saisie de la recherche. Assurez vous donc que ce champ est correctement renseigné. 
 
 ```php
 <?php
