@@ -695,6 +695,31 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         return $this->getEntityManager()->getRepository(TVA::class)->findAll();
     }
 
+    public function getTVAsForJson(){
+        try {
+            $query = $this->getEntityManager()->getRepository(TVA::class)->createQueryBuilder('t')
+                ->select('t.id, t.label, t.rate, t.active AS active, count(a) as used')
+                ->groupBy('t.id')
+                ->leftJoin(Activity::class, 'a', 'WITH', 't.id = a.tva');
+
+            $tvas = [];
+            foreach ($query->getQuery()->getResult() as $tva ){
+                $tvas[] = [
+                    'id' => $tva['id'],
+                    'label' => $tva['label'],
+                    'rate' => $tva['rate'],
+                    'active' => $tva['active'],
+                    'used' => $tva['used'],
+                ];
+            }
+
+            return $tvas;
+        } catch (\Exception $e ){
+            throw new OscarException($e->getMessage());
+        }
+
+    }
+
     /**
      * Retourne la liste des types de dates pour alimenter un Select.
      *

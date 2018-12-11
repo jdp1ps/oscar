@@ -1427,6 +1427,13 @@ administration:
                 route: /discipline
                 defaults:
                     action: discipline
+        tva:
+            type: segment
+            may_terminate: true
+            options:
+                route: /tva
+                defaults:
+                    action: tva
 
         privileges:
             type: segment

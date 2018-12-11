@@ -75,16 +75,33 @@
     padding: 0;
   }
   .card-title {
+    align-items: center;
     .right {
       margin-left: auto;
-      flex: 0 1 auto;
+      flex: 0 0 auto;
     }
     .big {
       font-size: 1.4em;
     }
   }
+
+  &.active {
+    border-left: 4px #0b93d5 solid;
+  }
+
+  &.error {
+    border-left: 4px #9e0505 solid;
+  }
+
+  &.disabled {
+    border-left: 4px #5a5a5a solid;
+  }
 }
 
+
+.label i[class *= "icon-"] {
+  color: white !important;
+}
 
 .options-menu {
 

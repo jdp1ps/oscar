@@ -613,6 +613,14 @@
     "fullcode": "MAINTENANCE-MILESTONETYPE_MANAGE"
   },
 
+  "MAINTENANCE-TVA_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "TVA_MANAGE",
+    "libelle": "Configurer les TVAs disponibles",
+    "fullcode": "MAINTENANCE-TVA_MANAGE"
+  },
+
   "MAINTENANCE-DISCIPLINE_MANAGE": {
     "spot": 7,
     "category_id": 6,

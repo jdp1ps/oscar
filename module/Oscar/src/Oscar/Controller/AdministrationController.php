@@ -19,6 +19,7 @@ use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
+use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
@@ -33,6 +34,77 @@ class AdministrationController extends AbstractOscarController
     public function indexAction()
     {
         $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+
+        return [];
+    }
+
+    public function tvaAction()
+    {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_TVA_MANAGE);
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            switch ( $method ){
+                case 'GET':
+                    return $this->jsonOutput(['tvas' => $this->getActivityService()->getTVAsForJson()]);
+                    break;
+
+                case 'DELETE':
+                    try {
+                        $id = $this->params()->fromQuery('id');
+
+                        if( $id ){
+                            $tva = $this->getActivityService()->getTVA($id);
+                            if( !$tva ){
+                                return $this->getResponseInternalError("Impossible de charger la TVA '$id'");
+                            }
+                        } else {
+                            return $this->getResponseBadRequest("");
+                        }
+                        $this->getEntityManager()->remove($tva);
+                        return $this->getResponseOk('TVA supprimée');
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+                    return $this->jsonOutput(['tvas' => $this->getActivityService()->getTVAsForJson()]);
+                    break;
+
+                case 'POST':
+
+                    try {
+                        $id = intval($this->params()->fromPost('id', null));
+                        $active = boolval($this->params()->fromPost('active', false));
+                        if( $active == 'false' ) $active = false;
+                        $label = $this->params()->fromPost('label', "PAS d'INTITULÉ");
+                        $rate = floatval($this->params()->fromPost('rate', 0.0));
+
+                        if( $id ){
+                            $tva = $this->getActivityService()->getTVA($id);
+                            if( !$tva ){
+                                throw new OscarException("Impossible de charger la TVA '$id'");
+                            }
+                        } else {
+                            $tva = new TVA();
+                            $this->getEntityManager()->persist($tva);
+                        }
+
+                        $tva->setLabel($label)
+                            ->setRate($rate)
+                            ->setActive($active);
+
+                        $this->getEntityManager()->flush($tva);
+
+                        return $this->getResponseOk('TVA créée');
+
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+                    break;
+
+                default:
+                    return $this->getResponseBadRequest("Erreur d'API");
+            }
+
+        }
         return [];
     }
 
@@ -49,7 +121,6 @@ class AdministrationController extends AbstractOscarController
             case 'PUT' :
                 $label = $this->params()->fromPost('label');
                 $this->getLogger()->debug($label);
-
                 $discipline = new Discipline();
                 $this->getEntityManager()->persist($discipline);
                 $discipline->setLabel($label);

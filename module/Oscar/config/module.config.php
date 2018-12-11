@@ -48,7 +48,7 @@ return array(
                         "index", "accessAPI", "roleAPI",
                         "userLogs", 'userRoles', 'organizationRole',
                         'organizationRoleApi', 'activityIndexBuild', 'organizationType',
-                        'discipline'],
+                        'discipline', 'tva'],
                     'roles' => ['user']
                 ],
 
