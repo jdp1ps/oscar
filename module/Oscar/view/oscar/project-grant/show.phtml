@@ -93,6 +93,14 @@
                         </small>
                     </div>
                 <?php endif ?>
+                <?php if( $entity->getTva() ): ?>
+                    <div><small>
+                            TVA :
+                            <b><?= $entity->getTva() ?></b>
+                        </small>
+                    </div>
+                <?php endif ?>
+
             </div>
             <?php endif; ?>
         </h1>
