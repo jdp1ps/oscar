@@ -1,6 +1,6 @@
 # Configuration des déclarations
 
-La configuration du système de déclaration peut être modifier en suchargeant les paramètres 
+La configuration du système de déclaration peut être modifié en suchargeant les paramètres 
 par défaut fixés dans le fichier `config/autoload/global.php`. Pour ça, redéclarez les paramètres en 
 modifiant les valeurs dans le fichier `config/autoload/local.php`.
 
@@ -19,7 +19,7 @@ Cette option permet d'autoriser (Valeur `true`) ou pas (Valeur `false`) le choix
 
 ### declarationsDayDuration : Durée d'une journée
 
-Configure la durée normal d'une journée. Pour le moment, ce paramètre ne peut pas être modifié sans effet de bord. 
+Configure la durée normale d'une journée. Pour le moment, ce paramètre ne peut pas être modifié sans effet de bord. 
 (ex: La journée est fixée à 7 heures, une personne déclare 100%, puis la journée est fixée à 8 heures. La déclaration 
 de 100% a été enregistrée sur l'ancienne valeur, et pour le moment, s'affichera à moins de 100%)
 
@@ -87,4 +87,4 @@ Ce qui suit sont des notes/idées pour l'amélioration de la configuration et de
 
 ## Configuration des durées
 
- - Ajouter une valeur de contrôle semaine, il faudra cependant réfléchir à la mise en place de ce control en proposant un calcule effectif (exemple semaine tronquées, ex: Jours feriè à soustraire) Solution actuel, soustraire à la semaine le temps configuré dans la journée standard.
+ - Ajouter une valeur de contrôle semaine, il faudra cependant réfléchir à la mise en place de ce control en proposant un calcule effectif (exemple semaine tronquées, ex: Jours feriè à soustraire) Solution actuelle, soustraire à la semaine le temps configuré dans la journée standard.
