@@ -36,6 +36,10 @@ class AdministrationController extends AbstractOscarController
         return [];
     }
 
+    public function accueilAction(){
+        return [];
+    }
+
     public function disciplineAction()
     {
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
