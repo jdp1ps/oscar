@@ -82,9 +82,14 @@ class PersonController extends AbstractOscarController
         }
 
 
+
+
         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_INDEX) ){
             $params['ids'] = array_merge($idCoWorkers, $idSubordinates);
         }
+
+
+        // TODO Verifier configuration + DROIT sur le Rôle dans l'oganisation
 
         $extended = $this->params()->fromQuery('extended', 0);
         if( $extended ){
