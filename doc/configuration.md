@@ -153,3 +153,30 @@ Configuration des options pour la feuille de temps
 Pour modifier les numéros qui sont sous la forme **2018DRI00001**.
 
 [Modifier le formalisme de la numérotation Oscar](./numérotation.md)
+
+
+## Activité > Formulaire de saisie
+
+Une option permet de masquer certains champs : 
+
+ - Discipline
+ - Frais de gestion
+ 
+Pour cela, modifier le configuration Oscar dans le fichier `config/autoload/local.php` : 
+
+```php
+<?php
+// ./config/autoload/local.php
+return array(
+    // ...
+
+    // Oscar
+    'oscar' => [
+        
+        'activity_hidden_fields' => [
+            'disciplines', 
+            'fraisDeGestion'],
+    // ...
+    ]
+);
+```

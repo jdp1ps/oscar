@@ -35,6 +35,8 @@ return array(
             'person' => []
         ],
 
+        'activity_hidden_fields' => [],
+
         'closedDays' => function(&$joursFeries, $annee, $mois){
             $feries = [
                 '1' => [
