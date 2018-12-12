@@ -993,7 +993,6 @@ class ConsoleController extends AbstractOscarController
 
         if (!$anythingToDo) {
             $this->consoleSuccess("Les privilèges sont à jour.");
-
             return;
         }
 
@@ -1043,6 +1042,8 @@ class ConsoleController extends AbstractOscarController
                 $this->consoleError("Impossible de mettre à jour le privilège " . $privilege->getCode() . " : " . $e->getMessage());
             }
         }
+
+        $this->checkPrivilegesAction();
 
 
     }
