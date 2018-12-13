@@ -1473,6 +1473,7 @@ class TimesheetController extends AbstractOscarController
         $today = new \DateTime();
         $year = (int)$this->params()->fromQuery('year', $today->format('Y'));
         $month = (int)$this->params()->fromQuery('month', $today->format('m'));
+        $format = $this->params()->fromQuery('format', null);
         $period = sprintf('%s-%s', $year, $month);
 
         /** @var Person $currentPerson */
@@ -1481,7 +1482,7 @@ class TimesheetController extends AbstractOscarController
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
-        if( $this->isAjax() ) {
+        if( $this->isAjax() || $format == 'json' ) {
             switch ($method) {
 
                 // Envois des créneaux
