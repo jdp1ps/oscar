@@ -25,6 +25,7 @@ Refonte complète de l'interface de saisie et de validation des déclarations
  - Doc > Import d'activité : La partie consacrée aux paiements est plus claire (ajout d'exemple)
  - Activité > Numéro : La capacité du champ a été augmentée 
  - Le privilèges 'Voir les notifications plannifiées' fonctionne correctement
+ - Déclaration : Les jours feriès Lundi de pâques, ascension et pentecôte ont été ajoutés
 
 
 

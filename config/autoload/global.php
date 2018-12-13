@@ -34,7 +34,7 @@ return array(
             'organization' => [],
             'person' => []
         ],
-        
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Champs masqués dans la fiche activité (Saisie)
         'activity_hidden_fields' => [],
