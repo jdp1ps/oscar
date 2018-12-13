@@ -34,9 +34,13 @@ return array(
             'organization' => [],
             'person' => []
         ],
-
+        
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Champs masqués dans la fiche activité (Saisie)
         'activity_hidden_fields' => [],
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// JOURS FERIÉS
         'closedDays' => function(&$joursFeries, $annee, $mois){
             $feries = [
                 '1' => [
@@ -67,9 +71,22 @@ return array(
                 ]
             ];
 
-            // TODO Lundi de pâque
-            // TODO Jeudi de l'assension
-            // TODO Lundi de pentcôte
+            // Lundi de pâque
+            $easterDate  = easter_date($annee);
+            $easterDay   = (int)date('j', $easterDate) + 1;
+            $easterMonth = date('n', $easterDate);
+            $easterYear   = date('Y', $easterDate);
+            $feries[$easterMonth][sprintf("%s-%s-%s", $easterYear, $easterMonth, $easterDay)] = "Jour ferié (Lundi de Pâques)";
+
+            // Jeudi de l'assension
+            $ascension = new DateTime(date('Y-m-d', $easterDate));
+            $ascension->add(new DateInterval('P40D'));
+            $feries[$ascension->format('n')][$ascension->format('Y-n-j')] = "Jour ferié (Jeudi de l'ascension)";
+
+            // Pentecôte
+            $pentecote = new DateTime(date('Y-m-d', $easterDate));
+            $pentecote->add(new DateInterval('P50D'));
+            $feries[$pentecote->format('n')][$pentecote->format('Y-n-j')] = "Jour ferié (Pentecôte)";
 
             foreach ($feries[$mois] as $jour => $message){
                 $joursFeries[$jour] = $message;
