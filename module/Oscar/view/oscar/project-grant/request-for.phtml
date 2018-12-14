@@ -24,22 +24,181 @@
             <textarea name="description" id="description" class="form-control" placeholder="<?= _('description') ?>"></textarea>
         </div>
 
-        <div>
-            <label for="">Demandeur</label>
-            <span class="cartouche">
+
+        <div class="row">
+            <div class="col-md-4">
+                <label for="">Demandeur</label>
+                <br>
+                <span class="cartouche">
                 <?= $demandeur ?>
-                <span class="addon">
+                    <span class="addon">
                     Demandeur
                 </span>
             </span>
+            </div>
+            <div class="col-md-4">
+                <label for="">Organisme</label>
+                <?php if( count($organizations) == 1): ?>
+                    <?php foreach ($organizations as $id=>$label): ?>
+                        <span class="cartouche">
+                    <?= $label ?>
+                        <span class="addon">
+                        Organisme référent
+                    </span>
+                        <input type="hidden" name="organisation_id" value="<?= $id ?>" />
+                    <?php endforeach; ?>
+                    </span>
+                <?php elseif ( count($organizations) == 0 ): ?>
+                    <p class="alert-info alert">Aucune organisation identifiée</p>
+                <?php else: ?>
+                    <p class="form-help help">
+                        Spécifier l'organisme impliqué
+                    </p>
+                    <select name="organisation_id" class="form-control">
+                        <?php foreach ($organizations as $id=>$label): ?>
+                            <option value="<?= $id ?>"><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php endif; ?>
+            </div>
+            <div class="col-md-4">
+                <label for="">Montant</label>
+                <p class="form-help help">
+                    Spécifier le montant attendu/prévu
+                </p>
+                <input type="text" name="amount" value="" class="form-control" />
+
+            </div>
         </div>
 
-        <di>
-            <label for="">Organisme</label>
+        <div>
+            <label for="">Fichiers</label>
+            <div id="fichiers"></div>
+        </div>
 
 
-        </di>
-
-        <pre>CHAMPS CONFIGURABLES</pre>
     </form>
+    <style>
+        .dropzone {
+            border-radius: 4px;
+            background: white;
+            padding: 8px;
+            text-align: center;
+            min-height: 150px;
+            border: #9da4ab solid 4px;
+            color: #9da4ab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .dropzone .message {
+            font-size: 1em;
+            font-weight: 400;
+            pointer-events: none;
+            position: absolute;
+        }
+        .dropzone .message > [class*="icon-"] {
+            font-size: 4em;
+            display: block;
+        }
+
+        .dropzone.hover {
+            border-color: #0b93d5;
+            color: #0b93d5;
+        }
+
+        .dropzone section {
+            position: relative;
+            z-index: 5;
+        }
+
+        .dropzone section article {
+            text-align: left;
+            border: #9da4ab solid 1px;
+            background: rgba(255,255,255,.5);
+            padding: .3em .5em;
+            margin: .5em;
+        }
+    </style>
+    <script>
+        require(['vue'], function(Vue){
+            new Vue({
+                el: "#fichiers",
+                data: {
+                    fichiers: [
+                        { "name": "Etat previsionnel vierge 2018-2019.pdf", "type": "application/pdf", "size": 60524 },
+                        { "name": "Etat previsionnel vierge 2018-2019.xlsx", "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "size": 21349 }
+                    ],
+                    hover: false
+                },
+                methods: {
+                    handlerDrop(e){
+                        console.log(e);
+                        if (e.dataTransfer.items) {
+                            // Use DataTransferItemList interface to access the file(s)
+                            for (var i = 0; i < e.dataTransfer.items.length; i++) {
+                                // If dropped items aren't files, reject them
+                                if (e.dataTransfer.items[i].kind === 'file') {
+                                    var file = e.dataTransfer.items[i].getAsFile();
+                                    console.log(file);
+                                    this.fichiers.push({
+                                        name: file.name,
+                                        type: file.type,
+                                        size: file.size
+                                    });
+                                }
+                            }
+                        } else {
+                            // Use DataTransfer interface to access the file(s)
+                            for (var i = 0; i < e.dataTransfer.files.length; i++) {
+                                var file = e.dataTransfer.files[i];
+                                console.log(file);
+                                this.fichiers.push(file);
+                            }
+                        }
+                        this.hover = false;
+                        e.preventDefault();
+                    },
+                    handlerDragOver(e){
+                        console.log(e);
+                        this.hover = true;
+                        e.preventDefault();
+                    },
+                    handlerDragLeave(e){
+                        console.log(e);
+                        this.hover = false;
+                        e.preventDefault();
+                    },
+
+                    handlerRemove(file){
+                        console.log(file.name);
+                        this.fichiers.splice(this.fichiers.indexOf(file), 1);
+                    }
+                },
+
+                filters: {
+                    ext(s){
+                        return s.replace(/(.*)\.(.*)/g, '$2')
+                    }
+                },
+
+                template: `<div @drop="handlerDrop" @dragover="handlerDragOver" @dragleave="handlerDragLeave" class="dropzone" :class="{'hover': hover}">
+                <section>
+                    <article v-for="f in fichiers" class="doc" :class="f.name.replace(/(.*)\\.(.*)/g, 'doc-$2')">
+                        <strong> {{ f.name }}</strong>
+                        <em>{{ f.size }}</em> ~
+                        <a href="" @click.prevent="handlerRemove(f)">
+                            <i class="icon-cancel-alt"></i>
+                        </a>
+
+                    </article>
+                </section>
+                <span class="message">
+                    <i class="icon-down-outline"></i>
+                    Fichiers joins</span>
+            </div>`
+            })
+        });
+    </script>
 </div>
