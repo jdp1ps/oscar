@@ -33,9 +33,9 @@ if(
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                 <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
             <?php endif; ?>
-            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION)): ?>
+            <?php /*if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION)): ?>
                 <li><a href="<?= $this->url('timesheet/declarers') ?>">Liste des déclarants</a></li>
-            <?php endif; ?>
+            <?php endif;*/ ?>
         <?php endif; ?>
 
 
@@ -73,6 +73,9 @@ if(
 
 
         <li role="presentation" class="dropdown-header"><i class="icon-cog"></i> Configuration</li>
+
+        <li><a href="<?= $this->url('administration/accueil') ?>"><?= $this->translate("Configuration et maintenance") ?></a></li>
+
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)) : ?>
             <li><a href="<?= $this->url('activitytype') ?>"><?= $this->translate("Types d'activité") ?></a></li>
         <?php endif; ?>

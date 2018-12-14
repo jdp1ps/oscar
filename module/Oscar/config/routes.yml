@@ -448,6 +448,13 @@ person:
                 defaults:
                     action: show
 
+        access:
+            type: segment
+            options:
+                route: '/access/:id'
+                defaults:
+                    action: access
+
         grant:
             type: segment
             options:
@@ -1367,6 +1374,14 @@ administration:
     may_terminate: true
 
     child_routes:
+        accueil:
+            type: segment
+            may_terminate: true
+            options:
+                route: /accueil
+                defaults:
+                    action: accueil
+
         connectors_home:
             type: segment
             may_terminate: true

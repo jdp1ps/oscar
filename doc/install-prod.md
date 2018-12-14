@@ -229,6 +229,15 @@ Mettre à jour le modèle de donnée :
 php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
 
+### Mise à jour des privilèges de l'application
+
+```bash
+php public/index.php oscar patch checkPrivilegesJSON
+```
+
+Executer cette commande jusqu'à obtenir un message "Les privilèges sont à jour" (sera prochainement corrigé).
+
+
 ### Configuration de la BDD dans Oscar
 
 La configuration de la BDD est spécifiée dans le fichier `config/autoload/local.php`.

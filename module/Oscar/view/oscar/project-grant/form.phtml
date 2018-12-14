@@ -46,9 +46,11 @@
                 <?php echo $this->formElementErrors($form->get('activityType')); ?>
             </div>
             <div class="col-md-3">
+                <?php if( !in_array('disciplines', $hidden)): ?>
                 <?php echo $this->formLabel($form->get('disciplines'));?>
                 <?php echo $this->formSelect($form->get('disciplines'));?>
                 <?php echo $this->formElementErrors($form->get('disciplines')); ?>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -70,7 +72,9 @@
                 <?= $this->formControlGroup($form->get('tva')); ?>
             </div>
             <div class="col-md-4">
+                <?php if( !in_array('fraisDeGestion', $hidden)): ?>
                 <?= $this->formControlGroup($form->get('fraisDeGestion')); ?>
+                <?php endif; ?>
             </div>
             <div class="col-md-4">
                 <?= $this->formControlGroup($form->get('assietteSubventionnable')); ?>

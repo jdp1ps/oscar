@@ -57,6 +57,63 @@ class PersonController extends AbstractOscarController
         $this->getResponseDeprecated();
     }
 
+    public function accessAction(){
+
+
+        $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+
+        $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
+
+
+        $privilegesDT = $this->getEntityManager()->getRepository(Privilege::class)->findBy([], ['root' => 'DESC']);
+
+        $privileges = [];
+        /** @var Privilege $privilege */
+        foreach ($privilegesDT as $privilege) {
+            $p = [
+                'id' => $privilege->getId(),
+                'label' => $privilege->getLibelle(),
+                'category' => $privilege->getCategorie()->getLibelle(),
+                'spot' => $privilege->getSpot(),
+                'roleIds' => $privilege->getRoleIds(),
+                'root' => $privilege->getRoot() ? $privilege->getRoot()->getId() : null,
+                'enabled' => false
+            ];
+            $privileges[$privilege->getId()] = $p;
+        }
+        $rolesApplication = [];
+        try {
+            $rolesApplication = $this->getPersonService()->getRolesApplication($person);
+        } catch (\Exception $e ){}
+        $rolesOrganisation = [];
+
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($person->getOrganizations() as $personOrganization) {
+            $organizationId = $personOrganization->getOrganization()->getId();
+            $organization = (string)$personOrganization->getOrganization();
+            $roleId = $personOrganization->getRoleObj()->getId();
+            $role = $personOrganization->getRoleObj()->getRoleId();
+
+            if( !array_key_exists($organizationId, $rolesOrganisation) ){
+                $rolesOrganisation[$organizationId] = [
+                    'id' => $organizationId,
+                    'label' => $organization,
+                    'roles' => [],
+                ];
+                $rolesOrganisation[$organizationId]['roles'][$roleId] = $role;
+            }
+
+        }
+
+
+        return [
+            'person' => $person,
+            'application' => $rolesApplication,
+            'organizations' => $rolesOrganisation,
+            'privileges' => $privileges
+        ];
+    }
+
     public function personnelAction(){
 
         $access = $this->getConfiguration('oscar.listPersonnel');

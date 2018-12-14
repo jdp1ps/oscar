@@ -196,8 +196,13 @@ class ProjectGrantController extends AbstractOscarController
      */
     public function editAction()
     {
+
+
         $id = $this->params()->fromRoute('id');
         $projectGrant = $this->getProjectGrantService()->getGrant($id);
+        $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
+
+
         $form = new ProjectGrantForm();
         $form->setServiceLocator($this->getServiceLocator());
         $form->init();
@@ -218,6 +223,7 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         $view = new ViewModel([
+            'hidden' => $hidden,
             'form' => $form,
             'activity' => $projectGrant,
             'numbers_keys' => $keys = $this->getActivityService()->getDistinctNumbersKey()
@@ -633,6 +639,8 @@ class ProjectGrantController extends AbstractOscarController
         // Récupération du projet (si précisé)
         $projectId = $this->params()->fromRoute('projectid', null);
 
+        $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
+
         // Contrôle des droits
         if ($projectId) {
             $project = $this->getProjectService()->getProject($projectId);
@@ -677,6 +685,7 @@ class ProjectGrantController extends AbstractOscarController
 
         $view = new ViewModel([
             'form' => $form,
+            'hidden' => $hidden,
             'activity' => $projectGrant,
             'project' => $project,
         ]);

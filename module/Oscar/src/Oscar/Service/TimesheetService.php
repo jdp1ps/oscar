@@ -103,7 +103,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function changePersonSchedulePeriod($person, $days, $period){
         try {
-            $this->getLogger()->debug("Modification des horaires pour $person en $period : " . json_encode(($days)));
             $periodDatas = DateTimeUtils::extractPeriodDatasFromString($period);
             $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('d')
                 ->where('d.declarer = :person AND d.year = :year AND d.month = :month')
@@ -263,7 +262,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet PROJET par $person\n";
         $log .= $msg;
-        $this->getLogger()->debug($msg);
 
         $validationPeriod->setLog($log);
         $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
@@ -288,7 +286,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet SCIENTIFIQUE par $person\n";
         $log .= $msg;
-        $this->getLogger()->debug($msg);
 
         $validationPeriod->setLog($log);
         $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
@@ -304,7 +301,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function rejectAdm(ValidationPeriod $validationPeriod, Person $validator, $message = '')
     {
-        $this->getLogger()->debug($validationPeriod->getObjectGroup() . " == " . ValidationPeriod::GROUP_OTHER);
         if ($validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_OTHER) {
             if (!in_array($validationPeriod->getStatus(), [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP3])) {
                 throw new OscarException("Vous ne pouvez pas rejeter cette période (erreur de status - " . $validationPeriod->getStatus() . ").");
@@ -318,7 +314,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet ADMINISTRATIF par $person\n";
         $log .= $msg;
-        $this->getLogger()->debug($msg);
 
         $validationPeriod->setLog($log);
         $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
@@ -546,7 +541,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     public function getValidationPeriodsActivity(Activity $activity)
     {
-        $this->getLogger()->debug(sprintf('Récupération des validation pour %s', $activity));
 
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
             ->createQueryBuilder('v')
@@ -568,7 +562,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     public function getValidationPeriodActivityAt(Activity $activity, Person $person, $year, $month)
     {
-        $this->getLogger()->debug(sprintf('Récupération des validation pour %s au %s-%s', $activity, $year, $month));
         return $this->getValidationPeriodRepository()->getValidationPeriodForActivity($year, $month, $activity->getId(), $person->getId());
     }
 
@@ -887,11 +880,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     public function getTimesheetsForValidationPeriod(ValidationPeriod $validationPeriod)
     {
-        $timesheets = [];
-
-        $this->getLogger()->debug("Récupération des créneaux pour la période " . $validationPeriod);
-
-
         $year = $validationPeriod->getYear();
         $month = $validationPeriod->getMonth();
         $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
@@ -1533,15 +1521,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $closed = false;
             $closedReason = "";
 
-            if (array_key_exists($lockedKey, $lockedDatas)) {
-                $duration = 0.0;
-                $maxlength = 0.0;
-                $minlength = 0.0;
-                $closed = true;
-                $locked = true;
-                $closedReason = $lockedReason = $infos = "Fermé " . $lockedDatas[$lockedKey];
-            }
-
             if ($dayIndex > 4 && $weekendAllowed == true) {
                 $duration = 0.0;
                 $maxlength = 0.0;
@@ -1549,6 +1528,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $closed = true;
                 $locked = true;
                 $closedReason = $lockedReason = $infos = "Weekend";
+            }
+
+            if (array_key_exists($lockedKey, $lockedDatas)) {
+                $duration = 0.0;
+                $maxlength = 0.0;
+                $minlength = 0.0;
+                $closed = true;
+                $locked = true;
+                $closedReason = $lockedReason = $infos = "Fermé " . $lockedDatas[$lockedKey];
             }
 
             if (array_key_exists($dayIndex + 1, $daysDetails)) {
@@ -1579,7 +1567,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function verificationPeriod(Person $person, $year, $month)
     {
-        $this->getLogger()->debug("VERIFICATION PERIODE $year $month");
         $datas = $this->getTimesheetDatasPersonPeriod($person, sprintf('%s-%s', $year, $month));
 
         $warnings = [];
@@ -1604,8 +1591,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             if ($min > 0.0 && $duration == 0.0) {
-                $this->getLogger()->debug("Durée de la journée " . $day . " : " . $duration . '(' . $min . ', ' . $max . ')');
-                $this->getLogger()->debug(print_r($dayData, true));
                 $errors[] = "- Il doit y avoir des heures de déclarées le jour " . $dayData['i'] . " (" . $min . ") !";
             }
 
@@ -1958,6 +1943,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $daysInfos[(int)$dayNum] = $data;
         }
 
+        $this->getLogger()->info("TEST");
+        $this->getLogger()->debug(print_r($daysInfosPerson, true));
+
 
         $totalDays = count($daysInfos);
         $periodLastDay = new \DateTime($period . '-' . $totalDays . ' 23:59:59');
@@ -2206,9 +2194,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ];
         }
 
-        $this->getLogger()->debug("OTHERS " . print_r($others, true));
 
         $output = [
+            'feries' => $this->getLockedDays($year, $month),
             'person' => (string)$person,
             'person_id' => $person->getId(),
             'period' => $periodFirstDay->format('Y-m'),
@@ -2603,8 +2591,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $repositoryPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class);
 
         $activitiesIdsWithValidationProgress = $repositoryPeriod->getValidationPeriodsValidationProgressActivitiesIds();
-        $this->getLogger()->debug('ID:' . print_r($activitiesIdsWithValidationProgress, true));
-
 
         $activities = $this->getEntityManager()->createQueryBuilder()->select('a')
             ->from(Activity::class, 'a')
@@ -2658,8 +2644,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'to' => $to
             ])
             ->getQuery();
-
-        $this->getLogger()->debug($query->getSQL());
 
         return $query;
     }
@@ -2829,7 +2813,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
-        $this->getLogger()->debug("Traitement pour $sender ($fromMonth - $toMonth)");
 
         if ($fromMonth != $toMonth)
             throw new Exception("La période à traiter n'est pas un mois...");
@@ -2846,15 +2829,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         // Déclarations de la période
         $declarations = $this->getValidationPeriods($annee, $mois, $sender);
-        $this->getLogger()->debug("Déclarations trouvées = " . count($declarations));
 
         if (count($declarations) > 0) {
             throw new OscarException("Vous avez déjà envoyé des déclarations pour cette période");
         }
 
         $declarations = [];
-
-        $this->getLogger()->debug("Traitments des " . count($timesheets) . ' créneaux.');
 
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
@@ -3750,8 +3730,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     public function getTimesheetsPersonPeriod(Person $person, $from, $to)
     {
-        $this->getLogger()->debug(sprintf('Récupération des créneaux entre %s et %s pour %s', $from, $to
-            , $person));
         // Récupération des créneaux présents dans Oscar
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t');
         $query->where('t.dateFrom >= :start AND t.dateTo <= :end AND t.person = :person')

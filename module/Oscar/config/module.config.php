@@ -53,7 +53,7 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
+                    'action' => ['accueil', 'connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
                     'roles' => ['Administrateur']
                 ],
 
@@ -221,7 +221,7 @@ return array(
                 // PERSON
                 ///////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Person',
-                    'action' => ['personnel'],
+                    'action' => ['personnel', 'access'],
                     'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',

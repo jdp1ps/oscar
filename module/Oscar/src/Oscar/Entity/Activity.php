@@ -82,9 +82,9 @@ class Activity implements ResourceInterface
         static $statusSelect;
         if ($statusSelect === null) {
             $statusSelect = [
+                self::STATUS_ERROR_STATUS   => 'Conflit : pas de statut',
                 self::STATUS_ACTIVE         => 'Actif',
                 self::STATUS_PROGRESS       => 'Brouillon',
-                self::STATUS_ERROR_STATUS   => 'Conflit : pas de statut',
                 self::STATUS_DEPOSIT        => 'Déposé',
                 self::STATUS_ABORDED        => 'Dossier abandonné',
                 self::STATUS_DISPUTE        => 'Litige',
