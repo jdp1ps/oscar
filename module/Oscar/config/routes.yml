@@ -447,6 +447,13 @@ person:
                 defaults:
                     action: show
 
+        access:
+            type: segment
+            options:
+                route: '/access/:id'
+                defaults:
+                    action: access
+
         grant:
             type: segment
             options:

@@ -346,7 +346,7 @@ class Privilege implements ResourceInterface
     }
 
 
-    public function asArray()
+    public function asArray($flat = false)
     {
         $data = [
             'id' => $this->getId(),
@@ -355,12 +355,14 @@ class Privilege implements ResourceInterface
             'categorie' => $this->getCategorie()->toArray(),
             'roles' => $this->getRoleIds(),
             'root' => $this->getRoot(),
-            'spot' => $this->getSpot(),
-            'children' => []
+            'spot' => $this->getSpot()
         ];
 
-        foreach ($this->getChildren() as $child ){
-            $data['children'][] = $child->asArray();
+        if( $flat != true ){
+            $data['children'] = [];
+            foreach ($this->getChildren() as $child ){
+                $data['children'][] = $child->asArray();
+            }
         }
 
         return $data;

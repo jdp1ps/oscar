@@ -221,7 +221,7 @@ return array(
                 // PERSON
                 ///////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Person',
-                    'action' => ['personnel'],
+                    'action' => ['personnel', 'access'],
                     'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',

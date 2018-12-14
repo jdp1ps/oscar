@@ -2,6 +2,7 @@
 
 namespace Oscar\Service;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Moment\Moment;
 use Oscar\Entity\Activity;
@@ -241,6 +242,47 @@ die($privilege);
     }
 
 
+    public function getRolesApplication( Person $person ){
+
+        /** @var Authentification $auth */
+        $auth = $this->getEntityManager()->getRepository(Authentification::class)->createQueryBuilder('a')
+            ->where('a.username = :login')
+            ->leftJoin('a.roles', 'r')
+            ->setParameter('login', $person->getLadapLogin())
+            ->getQuery()
+            ->getSingleResult();
+
+        $rolesFixes = [];
+
+        /** @var Role $role */
+        foreach ($auth->getRoles() as $role) {
+            $rolesFixes[$role->getId()] = $role->getRoleId();
+        }
+
+        $ldapRoles = $this->getEntityManager()->getRepository(Role::class)
+            ->createQueryBuilder('r', 'r.ldapFilter')
+            ->where('r.ldapFilter IS NOT NULL')
+            ->getQuery()
+            ->getResult(AbstractQuery::HYDRATE_ARRAY);
+
+        $roles = [];
+        $re = '/\(memberOf=(.*)\)/';
+        echo "role :\n";
+
+        foreach ($ldapRoles as $role ){
+            $ldapRoleStr = preg_replace($re, '$1', $role['ldapFilter']);
+            if( in_array($ldapRoleStr, $person->getLdapMemberOf()) ){
+                $roles[$role['id']] = $role['roleId'];
+            }
+        }
+
+        return [
+            'auth' => $auth->getDisplayName(),
+            'roles_fixes' => $rolesFixes,
+            'roles_ldap' => $roles
+        ];
+    }
+
     /**
      * Retourne la liste des organizations où la personne a un rôle principale.
      *
@@ -253,8 +295,6 @@ die($privilege);
         foreach ($rolesObj as $role) {
             echo $role->getRoleId() . "<br>";
         }
-
-        die();
 
         $roles = $this->getOscarUserContext()->getRoleIdPrimary();
 

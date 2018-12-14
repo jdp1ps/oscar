@@ -1,0 +1,123 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 13/12/18
+ * Time: 15:02
+ */
+?>
+
+<div class="container">
+    <h1>Accès pour <strong><?= $person ?></strong></h1>
+    <div id="app"></div>
+
+    <script>
+        require(['vue'], function(Vue){
+           new Vue({
+               el: "#app",
+               data: {
+                   privileges: <?= json_encode($privileges) ?>,
+                   rolesApp: <?= json_encode($application['roles_fixes']) ?>,
+                   roleLdap: <?= json_encode($application['roles_ldap']) ?>,
+                   organizations: <?= json_encode($organizations) ?>,
+
+               },
+               computed: {
+                byCategory(){
+                    var out = {};
+
+                    Object.keys(this.privileges).forEach(key => {
+                        let privilege = this.privileges[key],
+                            category = privilege.category,
+                            id = privilege.id,
+                            root = privilege.root;
+
+                        privilege.sub = {};
+
+                        if( !out.hasOwnProperty(category) ){
+                            out[category] = {
+                                label: category,
+                                privileges: {}
+                            };
+                        }
+
+                        if( root ){
+                            //console.log(out[category].privileges[root]);
+                            // out[category].privileges[root].sub[id] = {
+                            //     label: category,
+                            //     privileges: {}
+                            // }
+                        } else {
+
+                        }
+                        out[category].privileges[id] = privilege;
+
+                    });
+                    return out;
+                }
+               },
+               methods: {
+                   isAppAllow(privilege){
+                       let allow = false;
+                       console.log("id", this.rolesApp);
+                       if( this.rolesApp ){
+                           Object.keys(this.rolesApp).forEach( idRole => {
+                               let id = parseInt(idRole);
+                               console.log("id", idRole, privilege.roleIds);
+                               if( privilege.roleIds.indexOf(id) >= 0 ){
+                                   allow = true;
+                               }
+                           });
+                       }
+                       return allow;
+                   },
+                   isOrgAllow(privilege, organization){
+                       let allow = false;
+
+                       Object.keys(organization.roles).forEach( idRole => {
+                           let id = parseInt(idRole);
+                           if( privilege.roleIds.indexOf(id) >= 0 ){
+                               allow = true;
+                           }
+                       });
+
+                       return allow;
+                   }
+               },
+               template: `<section>
+    <h1>Privilèges</h1>
+    <table class="table table-bordered table-condensed table-hover">
+    <thead>
+        <tr>
+            <th rowspan="2">Privilèges</th>
+            <th rowspan="2">Application</th>
+            <th :colspan="Object.keys(organizations).length">Organisations</th>
+            <th rowspan="2">Activitès</th>
+        </tr>
+        <tr>
+            <th v-for="o in organizations">{{ o.label }}
+                <span v-for="r in o.roles" class="cartouche">{{r}}</span>
+                </th>
+        </tr>
+    </thead>
+    <tbody v-for="category in byCategory">
+        <th><h4>{{ category.label }}</h4></th>
+        <tr v-for="p in category.privileges">
+            <th><small>{{p.category }}/{{ p.label }}</small></th>
+            <td>
+            <i class="icon-ok-circled" v-if="isAppAllow(p)"></i>
+            <i v-else class="icon-cancel-circled-outline"></i>
+            </td>
+            <td v-for="o in organizations">
+            <i class="icon-ok-circled" v-if="isOrgAllow(p, o)"></i>
+            <i v-else class="icon-cancel-circled-outline"></i>
+            </td>
+            <td>~</td>
+        </tr>
+    </tbody>
+    </table>
+</section>`
+           })
+        });
+    </script>
+</div>
