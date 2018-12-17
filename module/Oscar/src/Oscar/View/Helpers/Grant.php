@@ -76,6 +76,10 @@ class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
         return $this->getOscarUserContext()->hasPrivileges($privilege, $resource);
     }
 
+    public function hasPrivilegeInOrganizations($privilege){
+        return $this->getOscarUserContext()->hasPrivilegeInOrganizations($privilege);
+    }
+
     public function getPrivileges( $entity ){
         return $this->getOscarUserContext()->getPrivileges($entity);
     }

@@ -111,6 +111,10 @@ $this->headScript();
                                 <li>
                                     <a href="<?= $this->url('administrativedocument') ?>"><i class="icon-book"></i> <?= $this->translate('Documents pratiques') ?></a>
                                 </li>
+
+                                <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) ): ?>
+                                    <li><a href="<?= $this->url('requestactivity') ?>"><i class="icon-book"></i> <?= $this->translate("Demande d'activité") ?></a></li>
+                                <?php endif; ?>
                             </ul>
                         </li>
                     <?php endif; ?>

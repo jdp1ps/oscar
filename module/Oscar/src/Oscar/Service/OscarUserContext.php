@@ -870,5 +870,23 @@ class OscarUserContext extends UserContext
         return false;
     }
 
+    public function hasPrivilegeInOrganizations($privilege){
+        $person = $this->getCurrentPerson();
+
+        if( !$person ){
+            return false;
+        }
+
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($person->getOrganizations() as $personOrganization) {
+            if( $personOrganization->isPrincipal() && $this->hasPrivileges($privilege, $personOrganization->getOrganization()) ){
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
 
 }
