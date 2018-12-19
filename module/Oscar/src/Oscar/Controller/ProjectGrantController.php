@@ -18,6 +18,7 @@ use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
@@ -41,6 +42,7 @@ use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ActivityRequestService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
@@ -69,12 +71,87 @@ class ProjectGrantController extends AbstractOscarController
     {
         $demandeur = $this->getOscarUserContext()->getCurrentPerson();
         $organizationsPerson = $this->getPersonService()->getOrganizationsPersonWithPrincipalRole($demandeur);
-
+        $dest = $this->getConfiguration('oscar.paths.document_request');
         $organizations = [];
 
         /** @var Organization $o */
         foreach ($organizationsPerson as $o ){
             $organizations[$o->getId()] = (string) $o;
+        }
+
+        $method = $this->getHttpXMethod();
+
+        /** @var ActivityRequestService $activityRequestService */
+        $activityRequestService = $this->getServiceLocator()->get('ActivityRequestService');
+
+        if( $this->isAjax() ){
+            try {
+                switch ($method) {
+                    case "GET" :
+                        $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json');
+                        return $this->jsonOutput([
+                            'activityRequests' => $demandes
+                        ]);
+                }
+            } catch (OscarException $e) {
+                return $this->getResponseInternalError($e->getMessage());
+            }
+        }
+
+        if( $method == "POST" ){
+
+//            $organization = $this->getEntityManager()->getRepository(Organization::class)->find($this->params()->fromPost('organisation_id'));
+
+            $datas = [
+                "label" => strip_tags(trim($this->params()->fromPost('label'))),
+                "description" => strip_tags(trim($this->params()->fromPost('description'))),
+                "amount" => floatval(str_replace(',', '.', $this->params()->fromPost('amount'))),
+            ];
+
+            if( $_FILES ){
+                $datas['files'] = [];
+                $nbr = count($_FILES['files']['tmp_name']);
+                for( $i=0; $i<$nbr; $i++ ){
+                    $size = $_FILES['files']['size'][$i];
+                    $type = $_FILES['files']['type'][$i];
+                    $name = $_FILES['files']['name'][$i];
+                    $filepath = $dest .'/' . date('Y-m-d_H:i:s').'-'.md5(rand(0,10000));
+                    $this->getLogger()->debug($filepath);
+                    if( $size > 0 ){
+                        if( move_uploaded_file($_FILES['files']['tmp_name'][$i], $filepath) ){
+                            $datas['files'][] = [
+                                'name' => $name,
+                                'type' => $type,
+                                'size' => $size,
+                                'file' => $filepath
+                            ];
+                        } else {
+                            throw new OscarException("Impossible de téléverser votre fichier $name." . error_get_last());
+                        }
+                    }
+                }
+
+                try {
+                    $this->getLogger()->debug("Enregistrement de la demande");
+                    $activityRequest = new ActivityRequest();
+                    $this->getEntityManager()->persist($activityRequest);
+                    $activityRequest->setLabel($datas['label'])
+                        ->setCreatedBy($this->getCurrentPerson())
+                        ->setDescription($datas['description'])
+                        ->setAmount($datas['amount'])
+                        ->setFiles($datas['files']);
+
+                    $this->getEntityManager()->flush();
+
+                    return [
+                        'success' => "Votre demande a bien été envoyée"
+                    ];
+
+                } catch (\Exception $e ){
+                    $this->getLogger()->error("Impossible d'enregistrer la demande d'activité : " . $e->getMessage());
+                    throw new OscarException("Impossible d'enregistrer le demande : " . $e->getMessage());
+                }
+            }
         }
 
         $usedFileds = [

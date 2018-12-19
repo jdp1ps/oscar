@@ -79,7 +79,8 @@ requirejs.config({
         'TimesheetPersonResume' : 'oscar/dist/TimesheetPersonResume',
         'ResumeActivity' : 'oscar/dist/ResumeActivity',
         'PersonsList' : 'oscar/dist/PersonsList',
-        'Tva': 'oscar/dist/Tva'
+        'Tva': 'oscar/dist/Tva',
+        'ActivityRequest': 'oscar/dist/ActivityRequest'
     },
     shim: {
         "bootstrap": {

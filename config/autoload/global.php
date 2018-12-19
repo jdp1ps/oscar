@@ -237,6 +237,9 @@ return array(
             // Documents des activités
             'document_oscar' => realpath( __DIR__.'/../../data/documents/activity'),
 
+            // Documents des demandes d'activités
+            'document_request' => realpath( __DIR__.'/../../data/documents/request'),
+
             // Documents 'publiques"
             'document_admin_oscar' => realpath( __DIR__.'/../../data/documents/public'),
 

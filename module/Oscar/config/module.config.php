@@ -789,6 +789,7 @@ return array(
             'MailingService' => \Oscar\Service\MailingService::class,
             'SessionService' => \Oscar\Service\SessionService::class,
             'UserParametersService' => \Oscar\Service\UserParametersService::class,
+            'ActivityRequestService' => \Oscar\Service\ActivityRequestService::class,
         ],
 
         'factories' => array(

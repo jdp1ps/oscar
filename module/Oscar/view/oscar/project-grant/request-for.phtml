@@ -5,9 +5,17 @@
  * Date: 10/12/18
  * Time: 16:08
  */
+
+
+/*
 ?>
 <div class="container">
-    <form action="" method="post" class="form">
+
+    <?php if( $success): ?>
+    <p class="alert alert-success"><?= $success ?></p>
+    <?php else: ?>
+
+    <form action="" method="post" class="form" enctype="multipart/form-data">
         <h1>
             <i class="icon-cube"></i>
             <?= _("Demande d'activité") ?>
@@ -23,6 +31,8 @@
             <label for="description"><?= _('Description') ?></label>
             <textarea name="description" id="description" class="form-control" placeholder="<?= _('description') ?>"></textarea>
         </div>
+
+
 
 
         <div class="row">
@@ -76,6 +86,10 @@
             <div id="fichiers"></div>
         </div>
 
+        <nav>
+            <button type="submit" class="btn btn-primary">Soumettre</button>
+        </nav>
+
 
     </form>
     <style>
@@ -126,10 +140,7 @@
             new Vue({
                 el: "#fichiers",
                 data: {
-                    fichiers: [
-                        { "name": "Etat previsionnel vierge 2018-2019.pdf", "type": "application/pdf", "size": 60524 },
-                        { "name": "Etat previsionnel vierge 2018-2019.xlsx", "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "size": 21349 }
-                    ],
+                    fichiers: [],
                     hover: false
                 },
                 methods: {
@@ -174,6 +185,17 @@
                     handlerRemove(file){
                         console.log(file.name);
                         this.fichiers.splice(this.fichiers.indexOf(file), 1);
+                    },
+
+                    handlerFileChange(e){
+                        console.log(e);
+                        this.fichiers = [];
+
+                        for( let i=0; i<e.target.files.length; i++ ){
+                            console.log(e.target.files[i]);
+                            this.fichiers.push(e.target.files[i]);
+                        }
+//                        this.fichiers.push(e.target.files);
                     }
                 },
 
@@ -183,22 +205,47 @@
                     }
                 },
 
-                template: `<div @drop="handlerDrop" @dragover="handlerDragOver" @dragleave="handlerDragLeave" class="dropzone" :class="{'hover': hover}">
-                <section>
-                    <article v-for="f in fichiers" class="doc" :class="f.name.replace(/(.*)\\.(.*)/g, 'doc-$2')">
-                        <strong> {{ f.name }}</strong>
-                        <em>{{ f.size }}</em> ~
-                        <a href="" @click.prevent="handlerRemove(f)">
-                            <i class="icon-cancel-alt"></i>
-                        </a>
+                template: `<!--<div @drop="handlerDrop" @dragover="handlerDragOver" @dragleave="handlerDragLeave" class="dropzone" :class="{'hover': hover}">-->
+                <div class="dropzone">
+                    <div class="box__input">
+                        <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected" multiple @change="handlerFileChange"/>
+                        <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
+                    </div>
+<!--
+                    <section>
+                        <article v-for="f in fichiers" class="doc" :class="f.name.replace(/(.*)\\.(.*)/g, 'doc-$2')">
+                            <strong> {{ f.name }}</strong>
+                            <em>{{ f.size }}</em> ~
+                            <a href="" @click.prevent="handlerRemove(f)">
+                                <i class="icon-cancel-alt"></i>
+                            </a>
 
-                    </article>
-                </section>
-                <span class="message">
-                    <i class="icon-down-outline"></i>
-                    Fichiers joins</span>
-            </div>`
+                        </article>
+                    </section>-->
+                    <span class="message" style="display: none">
+                        <i class="icon-down-outline"></i>
+                        Fichiers joins</span>
+                </div>`
             })
         });
     </script>
+    <?php endif; ?>
 </div>
+*/ ?>
+<section class="container">
+    <div id="app"></div>
+</section>
+<script>
+    require(['vue', 'vue-resource','mm', 'ActivityRequest'], function( Vue, VueResource, moment, ActivityRequest) {
+        Vue.use(VueResource);
+        Vue.filter('date', function(s){
+           return moment(s).format('dddd D MMMM YYYY')
+        });
+        new Vue({
+            el: '#app',
+            render: function(h){
+                return h(ActivityRequest.default)
+            }
+        })
+    })
+</script>
