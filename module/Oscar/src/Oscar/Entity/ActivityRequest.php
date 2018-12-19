@@ -61,6 +61,12 @@ class ActivityRequest
     private $dateEnd;
 
     /**
+     * @var Organization
+     * @ORM\ManyToOne(targetEntity="Organization")
+     */
+    private $organisation;
+
+    /**
      * Liste des documents.
      *
      * @var String
@@ -161,12 +167,43 @@ class ActivityRequest
         return $this->files;
     }
 
+    public function getFilesArray()
+    {
+        return $this->getFiles();
+    }
+
+    public function getFileInfosByFile( $file ){
+        foreach ($this->getFilesArray() as $f) {
+            if( $f['file'] == $file ){
+                return $f;
+            }
+        }
+        return null;
+    }
+
     /**
      * @param String $files
      */
     public function setFiles($files)
     {
         $this->files = $files;
+        return $this;
+    }
+
+    /**
+     * @return Organization
+     */
+    public function getOrganisation()
+    {
+        return $this->organisation;
+    }
+
+    /**
+     * @param Organization $organisation
+     */
+    public function setOrganisation($organisation)
+    {
+        $this->organisation = $organisation;
         return $this;
     }
 
@@ -183,14 +220,16 @@ class ActivityRequest
             'id' => $this->getId(),
             'label' => $this->getLabel(),
             'statut' => $this->getStatus(),
+            'amount' => $this->getAmount(),
             'description' => $this->getDescription(),
             'files' => $this->getFiles(),
-            'dateStart' => $this->getDateStart(),
-            'dateEnd' => $this->getDateEnd(),
+            'dateStart' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
+            'dateEnd' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
             'dateCreated' => $this->getDateCreated()->format("Y-m-d"),
             'requester_id' => $this->getCreatedBy()->getId(),
             'requester' => (string)$this->getCreatedBy(),
-            'organisation' => "Acme"
+            'organisation_id' => $this->getOrganisation() ? $this->getOrganisation()->getId() : null,
+            'organisation' => $this->getOrganisation() ? (string)$this->getOrganisation() : null,
         ];
     }
 

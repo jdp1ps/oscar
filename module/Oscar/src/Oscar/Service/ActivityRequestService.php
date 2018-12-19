@@ -34,7 +34,7 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
     /**
      * @param $id
      * @param bool $throw
-     * @return null|object
+     * @return null|ActivityRequest
      * @throws OscarException
      */
     public function getActivityRequest($id, $throw = true)
@@ -66,6 +66,8 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
                 foreach ($query->getResult() as $activityRequest) {
                     $json = $activityRequest->toJson();
                     $json['statutText'] = $this->getStatutText($json['statut']);
+                    $json['editable'] = $activityRequest->getStatus() == 1;
+                    $json['sendable'] = $activityRequest->getStatus() == 1;
                     $array[] = $json;
                 }
 
@@ -102,6 +104,25 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
         }
     }
 
+    public function deleteActivityRequest( ActivityRequest $activityRequest ){
+        // Suppression des fichiers
+
+        $this->getServiceLocator()->get('Logger')->debug("Suppression");
+        $dir = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_request');
+
+        // Suppression des fichiers
+        foreach ($activityRequest->getFilesArray() as $fileInfos){
+            $filepath = $dir.'/'.$fileInfos['file'];
+            if( file_exists($filepath) ){
+                @unlink($filepath);
+            }
+        }
+
+        $this->getEntityManager()->remove($activityRequest);
+        $this->getEntityManager()->flush($activityRequest);
+        return true;
+    }
+
     public function sendActivityRequest(ActivityRequest $activityRequest)
     {
         throw new OscarException("L'envoi des demandes d'activité n'est pas encore implanté.");
@@ -109,7 +130,7 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
-    /// ENREGISTREMENT DES DONNÉES
+    /// TRAITEMENT DES DONNÉES
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public function getStatutText( $statut ){

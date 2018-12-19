@@ -4,37 +4,84 @@
 
         <transition name="fade">
             <div class="overlay" v-if="formData">
-                <form action="?" @submit.prevent="handlerSave($event)" enctype="multipart/form-data" method="post" name="save">
+                <form action="?" @submit.prevent="handlerSave($event)" enctype="multipart/form-data" method="post" name="save" style="min-width: 75vw">
                     <!--
                     <h1 v-if="formData.original">Modifier {{ formData.original }}</h1>
                     <h1 v-else="formData.original">Nouvelle discipline</h1>
                     -->
+                    <div class="columns">
+                        <div class="col6">
+                            <strong>Demandeur</strong>
+                            <span class="cartouche">
+                                {{ demandeur }}
+                                <span class="addon">Demandeur</span>
+                            </span>
+                        </div>
+                        <div class="col6">
+                            <strong>Oragnisme référent</strong>
+                            <select name="organisation_id" >
+                                <option :value="id" v-for="org, id in organisations">{{ org }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr class="separator">
+
                     <div>
                         <label for="form_label">Intitulé</label>
-                        <input type="text" class="form-control lg" v-model="formData.label" id="form_label" name="label"/>
+                        <input type="hidden" v-model="formData.id" v-if="formData.id" name="id" />
+                        <input type="text" class="form-control input-lg" v-model="formData.label" id="form_label" name="label"/>
                     </div>
+                    <hr class="separator">
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Début prévu</strong>
+                            <p class="help">Vous pouvez laisser ce champ vide.</p>
+                            <datepicker :moment="moment" :value="formData.dateStart" @change="formData.dateStart = $event"/>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Fin prévue</strong>
+                            <p class="help">Vous pouvez laisser ce champ vide.</p>
+                            <datepicker  :moment="moment"  :value="formData.dateEnd" @change="formData.dateEnd = $event"/>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="form_amount">Montant souhaité</label>
+                            <p class="help">Vous pouvez laisser ce champ vide.</p>
+                            <input type="text" class="form-control" name="amount" id="form_amount" v-model="formData.amount">
+                        </div>
+                    </div>
+                    <hr class="separator">
 
                     <div>
                         <label for="form_description">Description</label>
                         <textarea type="text" class="form-control" v-model="formData.description" id="form_description" name="description"></textarea>
                     </div>
+                    <hr class="separator">
 
                     <div>
-                        <label for="form_files">Fichiers</label>
+                        <label for="form_files">Fichiers à ajouter</label>
+                        <p class="help">Vous pouvez sélectionner plusieurs fichiers en maintenant la touche CTRL enfoncé lors de la sélection d'un fichier</p>
                         <input type="file" name="files[]" id="form_files">
+                    </div>
+
+                    <div class="alert alert-info">
+                        Vous pourrez modifier votre saisie, et finaliser la demande en cliquant sur l'action <strong>Envoyer la demande</strong>
                     </div>
 
                     <hr>
 
-                    <nav>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="icon-floppy"></i>
-                            Enregistrer
-                        </button>
+                    <nav class="text-center">
                         <button type="reset" class="btn btn-default" @click.prevent="handlerCancelForm">
                             <i class="icon-cancel-outline"></i>
                             Annuler
                         </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="icon-floppy"></i>
+                            Enregistrer
+                        </button>
+
                     </nav>
 
                 </form>
@@ -57,7 +104,7 @@
         <transition name="fade">
             <div class="overlay" v-if="deleteData">
                 <div class="alert alert-danger">
-                    <h3>Supprimer la TVA <strong>{{ deleteData.label }}</strong> ?</h3>
+                    <h3>Supprimer la demande <strong>{{ deleteData.label }}</strong> ?</h3>
                     <nav>
                         <button type="reset" class="btn btn-danger" @click.prevent="deleteData = null">
                             <i class="icon-cancel-outline"></i>
@@ -75,7 +122,9 @@
         <section v-if="activityRequests.length">
         <article v-for="a in activityRequests" class="card">
             <h3 class="card-title">
-                <strong>{{ a.label }}</strong> <small>par {{ a.requester }}</small>
+                <strong>
+                    <i class="icon-cube"></i>
+                    {{ a.label }}</strong> <small>par {{ a.requester }}</small>
             </h3>
             <div class="card-metas text-highlight">
                 <strong><i :class="'icon-' + a.statut"></i>{{ a.statutText }}</strong>
@@ -86,6 +135,11 @@
                 <em v-else>
                     Non prise en charge pour le moment
                 </em>
+                ~
+                <strong>
+                    <i class="icon-building-filled"></i>
+                    {{ a.organisation }}
+                </strong>
             </div>
             <hr>
             <div>
@@ -97,20 +151,26 @@
                 <div v-if="a.files.length == 0" class="alert alert-info">
                     Vous n'avez fourni aucun document pour cette demande
                 </div>
-                <article v-else v-for="f in a.files">
-                    {{ f }}
-                </article>
-                <!--
-                <form action="?" @submit.prevent="sendFile(a.id, $event)" enctype="multipart/form-data" v-if="addFile" method="post" name="sendfile">
-                    <input type="hidden" name="activityrequest_id" :value="a.id" />
-                    <input type="hidden" name="action" :value="a.id" />
-                    <input type="file" @change="processFile($event)" name="file" />
-                    <button type="submit" :class="{'disabled': !addableFiles }" class="btn btn-primary">Envoyer</button>
-                </form>
-                <button @click="handlerAddFile()" v-else>Ajouter un fichier</button>
-                -->
+                <ul v-else>
+                <li v-for="f in a.files">
+                    <strong>{{ f.name }}</strong>
+                    <a :href="'?dl=' + f.file + '&id=' + a.id" class="btn btn-default btn-xs">
+                        <i class="icon-download"></i>
+                        Télécharger</a>
+                    <a href="#" @click.prevent.stop="handlerDeleteFile(f, a)" class="btn btn-default btn-xs">
+                        <i class="icon-trash"></i>
+                        Supprimer ce fichier</a>
+                </li>
+                </ul>
             </section>
-            <pre>{{ a }}</pre>
+            <nav>
+                <a href="#" @click.prevent.stop="handlerEdit(a)" class="btn btn-primary" v-if="a.editable">
+                    <i class="icon-edit"></i>
+                    Modifier</a>
+                <a href="#" @click.prevent.stop="handlerDelete(a)" class="btn btn-primary" v-if="a.editable">
+                    <i class="icon-trash"></i>
+                    Supprimer</a>
+            </nav>
         </article>
         </section>
         <div v-else>
@@ -119,11 +179,15 @@
             </p>
         </div>
         <hr>
-        <button type="button" class="btn btn-primary" @click.prevent="handlerNew">
+        <button type="button" class="btn btn-primary" @click.prevent="handlerNew" v-if="allowNew">
             <i class="icon-plus-circled"></i>
             Nouvelle Demande
         </button>
-        <pre>{{ addableFiles }}</pre>
+        <div class="alert alert-danger" v-if="lockMessages.length">
+            <ul>
+                <li v-for="m in lockMessages">{{ m }}</li>
+            </ul>
+        </div>
     </section>
 </template>
 <script>
@@ -139,7 +203,18 @@
                 loading: "",
                 activityRequests: [],
                 error: null,
-                deleteData: null
+                deleteData: null,
+                allowNew : false,
+                demandeur : "",
+                demandeur_id : null,
+                organisations : [],
+                lockMessages : []
+            }
+        },
+
+        props: {
+            moment: {
+                required: true
             }
         },
 
@@ -156,11 +231,19 @@
                 this.addFile = true;
             },
 
+            /**
+             * Récupération des données.
+             */
             fetch(){
                 this.loading = "Chargement des Demandes";
                 this.$http.get('?').then(
                     ok => {
                         this.activityRequests = ok.body.activityRequests;
+                        this.allowNew = ok.body.allowNew;
+                            this.demandeur = ok.body.demandeur;
+                            this.demandeur_id = ok.body.demandeur_id;
+                            this.organisations = ok.body.organisations;
+                            this.lockMessages = ok.body.lockMessages;
                     },
                     ko => {
                         this.error = "Impossible de charger les demandes : " + ko.body;
@@ -207,6 +290,10 @@
                     id: null,
                     label: "",
                     description: "",
+                    dateStart: null,
+                    dateEnd: null,
+                    amount: 0.0,
+                    organization: this.organisations[0],
                     files: []
                 };
             },
@@ -217,20 +304,43 @@
                     id: demande.id,
                     label: demande.label,
                     description: demande.description,
-                    files: demande.files
+                    dateStart: demande.dateStart,
+                    dateEnd: demande.dateEnd,
+                    amount: demande.amount,
+                    organization: demande.organization,
+                    files: demande.files,
                 };
                 /****/
             },
 
+            handlerDeleteFile(f, a){
+                this.loading = "Suppression du fichier " + f.name;
+                this.$http.get('?rdl=' + f.file + '&id=' + a.id).then(
+                    ok => {
+                        this.fetch();
+                    }
+                ).catch( err => {
+                    this.error = err.body;
+                }).finally( foo => {
+                    this.loading = "";
+                })
+            },
+
             handlerSave( evt ){
                 let upload = new FormData(evt.target);
+                upload.append('dateStart', this.formData.dateStart);
+                upload.append('dateEnd', this.formData.dateEnd);
                 this.$http.post('?', upload).then(
                     ok => {
-                        console.log(ok);
+                        this.fetch();
+                        this.formData = null;
                     }).catch(
                     err => {
+                        this.error = err.body;
+                        this.formData = null;
                         console.log(err);
                     })
+
             },
 
             handlerCancelForm(){
@@ -243,11 +353,11 @@
             },
 
             performDelete(){
-                /*
-                let tva = this.deleteData;
-                this.$http.delete('?id=' + tva.id).then(
+                this.loading = "Suppression de la demande " + this.deleteData.label;
+                let request = this.deleteData;
+                this.$http.delete('?id=' + request.id).then(
                     ok => {
-                        //this.tvas = ok.body.tvas;
+                        this.fetch();
                     },
                     ko => {
                         this.error = ko.body;

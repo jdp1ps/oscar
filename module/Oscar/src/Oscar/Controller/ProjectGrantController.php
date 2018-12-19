@@ -73,25 +73,90 @@ class ProjectGrantController extends AbstractOscarController
         $organizationsPerson = $this->getPersonService()->getOrganizationsPersonWithPrincipalRole($demandeur);
         $dest = $this->getConfiguration('oscar.paths.document_request');
         $organizations = [];
+        $lockMessage = [];
+
+        /** @var ActivityRequestService $activityRequestService */
+        $activityRequestService = $this->getServiceLocator()->get('ActivityRequestService');
+
+
+        $dlFile = $this->params()->fromQuery("dl", null);
+        $rdlFile = $this->params()->fromQuery("rdl", null);
+
+        if( $dlFile || $rdlFile ){
+            $idRequest = $this->params()->fromQuery("id");
+            $demande = $activityRequestService->getActivityRequest($idRequest);
+
+            $filepath = $this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
+
+            if( $dlFile ) {
+                $fileInfo = $demande->getFileInfosByFile($dlFile);
+                $filename = $fileInfo['name'];
+                $filetype = $fileInfo['type'];
+                $size = filesize($filepath);
+                $content = file_get_contents($filepath);
+                // todo test d'accès
+                header('Content-Disposition: attachment; filename=' . $filename);
+                header('Content-Length: ' . $size);
+                header('Content-type: '.$filetype);
+                echo $content;
+                die();
+            } else {
+                $files = $demande->getFiles();
+                $newFiles = [];
+                foreach ($files as $file) {
+                    if( $file['file'] == $rdlFile ){
+                        @unlink($filepath.'/'.$file['file']);
+                    } else {
+                        $newFiles[] = $file;
+                    }
+                }
+                $demande->setFiles($newFiles);
+                $this->getEntityManager()->flush($demande);
+                return $this->getResponseOk("Fichier supprimé");
+            }
+        }
 
         /** @var Organization $o */
         foreach ($organizationsPerson as $o ){
             $organizations[$o->getId()] = (string) $o;
         }
 
+        if( count($organizations) == 0 ){
+            $lockMessage[] = "Il faut être associé à une organisation pour pouvoir faire des demandes d'activité.";
+        }
+
         $method = $this->getHttpXMethod();
 
-        /** @var ActivityRequestService $activityRequestService */
-        $activityRequestService = $this->getServiceLocator()->get('ActivityRequestService');
+
+
+
 
         if( $this->isAjax() ){
+            $this->getLogger()->debug("API REQUESTACTIVITY " . $method);
             try {
                 switch ($method) {
                     case "GET" :
+                        $limit = 5;
                         $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json');
+                        if( count($demandes) >= $limit ){
+                            $lockMessage[] = "Vous avez atteint la limite des demandes autorisées.";
+                        }
+
                         return $this->jsonOutput([
-                            'activityRequests' => $demandes
+                            'allowNew' => count($lockMessage) == 0,
+                            'activityRequests' => $demandes,
+                            'total' => count($demandes),
+                            'demandeur' => (string) $this->getCurrentPerson(),
+                            'demandeur_id' => $this->getCurrentPerson()->getId(),
+                            'organisations' => $organizations,
+                            'lockMessages' => $lockMessage
                         ]);
+
+                    case "DELETE":
+                        $idRequestActivity = $this->params()->fromQuery('id');
+                        $requestActivity = $activityRequestService->getActivityRequest($idRequestActivity);
+                        $activityRequestService->deleteActivityRequest($requestActivity);
+                        return $this->getResponseOk("Suppression de la demande terminée");
                 }
             } catch (OscarException $e) {
                 return $this->getResponseInternalError($e->getMessage());
@@ -100,13 +165,35 @@ class ProjectGrantController extends AbstractOscarController
 
         if( $method == "POST" ){
 
+
 //            $organization = $this->getEntityManager()->getRepository(Organization::class)->find($this->params()->fromPost('organisation_id'));
 
             $datas = [
+                "id" => $this->params()->fromPost("id", null),
                 "label" => strip_tags(trim($this->params()->fromPost('label'))),
                 "description" => strip_tags(trim($this->params()->fromPost('description'))),
                 "amount" => floatval(str_replace(',', '.', $this->params()->fromPost('amount'))),
+                "dateStart" => $this->params()->fromPost('dateStart'),
+                "dateEnd" => $this->params()->fromPost('dateEnd'),
+                "organisation_id" => $this->params()->fromPost('organisation_id')
             ];
+
+            $organization = $this->getEntityManager()->getRepository(Organization::class)->find($datas['organisation_id']);
+
+            if( $datas['dateStart'] && $datas['dateStart'] != "null" ){
+                $datas['dateStart'] = new \DateTime($datas['dateStart']);
+            } else {
+                $datas['dateStart'] = null;
+            }
+            if( $datas['dateEnd'] && $datas['dateEnd'] != "null" ){
+                $datas['dateEnd'] = new \DateTime($datas['dateEnd']);
+            } else {
+                $datas['dateEnd'] = null;
+            }
+
+            $this->getLogger()->debug(print_r($datas, true));
+
+            // todo : Tester la validitée des données
 
             if( $_FILES ){
                 $datas['files'] = [];
@@ -115,7 +202,8 @@ class ProjectGrantController extends AbstractOscarController
                     $size = $_FILES['files']['size'][$i];
                     $type = $_FILES['files']['type'][$i];
                     $name = $_FILES['files']['name'][$i];
-                    $filepath = $dest .'/' . date('Y-m-d_H:i:s').'-'.md5(rand(0,10000));
+                    $filepathname = date('Y-m-d_H:i:s').'-'.md5(rand(0,10000));
+                    $filepath = $dest .'/' . $filepathname;
                     $this->getLogger()->debug($filepath);
                     if( $size > 0 ){
                         if( move_uploaded_file($_FILES['files']['tmp_name'][$i], $filepath) ){
@@ -123,7 +211,7 @@ class ProjectGrantController extends AbstractOscarController
                                 'name' => $name,
                                 'type' => $type,
                                 'size' => $size,
-                                'file' => $filepath
+                                'file' => $filepathname
                             ];
                         } else {
                             throw new OscarException("Impossible de téléverser votre fichier $name." . error_get_last());
@@ -133,11 +221,23 @@ class ProjectGrantController extends AbstractOscarController
 
                 try {
                     $this->getLogger()->debug("Enregistrement de la demande");
-                    $activityRequest = new ActivityRequest();
-                    $this->getEntityManager()->persist($activityRequest);
+                    if( $datas['id'] ){
+                        $activityRequest = $activityRequestService->getActivityRequest($datas['id']);
+                        if( $activityRequest->getFiles() ){
+                            $datas['files'] = array_merge($datas['files'], $activityRequest->getFiles());
+                        }
+
+                    } else {
+                        $activityRequest = new ActivityRequest();
+                        $this->getEntityManager()->persist($activityRequest);
+                    }
+
                     $activityRequest->setLabel($datas['label'])
                         ->setCreatedBy($this->getCurrentPerson())
                         ->setDescription($datas['description'])
+                        ->setOrganisation($organization)
+                        ->setDateStart($datas['dateStart'])
+                        ->setDateEnd($datas['dateEnd'])
                         ->setAmount($datas['amount'])
                         ->setFiles($datas['files']);
 
@@ -163,7 +263,8 @@ class ProjectGrantController extends AbstractOscarController
         return [
             'demandeur' => $demandeur,
             'form' => $usedFileds,
-            'organizations' => $organizations
+            'organizations' => $organizations,
+            'lockMessage' => $lockMessage
         ];
     }
 
