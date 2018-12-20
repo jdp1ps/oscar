@@ -105,8 +105,12 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
     }
 
     public function deleteActivityRequest( ActivityRequest $activityRequest ){
-        // Suppression des fichiers
+        if( $activityRequest->getStatus() != ActivityRequest::STATUS_DRAFT ){
+            throw new OscarException("Vous ne pouvez pas supprimer cette demande");
+        }
 
+
+        // Suppression des fichiers
         $this->getServiceLocator()->get('Logger')->debug("Suppression");
         $dir = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_request');
 
@@ -125,7 +129,16 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
 
     public function sendActivityRequest(ActivityRequest $activityRequest)
     {
-        throw new OscarException("L'envoi des demandes d'activité n'est pas encore implanté.");
+        if( $activityRequest->getStatus() != ActivityRequest::STATUS_DRAFT ){
+            throw new OscarException("Cette demande a déjà été envoyée");
+        }
+        try {
+            $activityRequest->setStatus(ActivityRequest::STATUS_SEND);
+            $this->getEntityManager()->flush($activityRequest);
+        } catch (\Exception $err){
+            throw new OscarException("Impossible d'envoyer la demande.");
+        }
+        return true;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

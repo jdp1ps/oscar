@@ -24,6 +24,10 @@ class ActivityRequest
 {
     use TraitTrackable;
 
+
+    const STATUS_DRAFT = 1;
+    const STATUS_SEND = 2;
+
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)

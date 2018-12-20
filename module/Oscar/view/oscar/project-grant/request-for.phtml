@@ -243,6 +243,9 @@
         Vue.filter('date', function(s){
            return moment(s).format('dddd D MMMM YYYY')
         });
+        Vue.filter('montant', function(d){
+            return d.toFixed(2);
+        });
         new Vue({
             el: '#app',
             render: function(h){

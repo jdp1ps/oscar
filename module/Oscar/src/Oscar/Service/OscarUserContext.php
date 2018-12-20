@@ -466,7 +466,6 @@ class OscarUserContext extends UserContext
             foreach ($privileges as $privilege) {
                 $_PRIVILEGES[] = $privilege->getFullCode();
             }
-
         }
 
         return $_PRIVILEGES;

@@ -69,15 +69,23 @@ class ProjectGrantController extends AbstractOscarController
 
     public function requestForAction()
     {
+        /** @var Person $demandeur */
         $demandeur = $this->getOscarUserContext()->getCurrentPerson();
+
+        if( !$demandeur ){
+            throw new OscarException(_('Oscar ne vous connait pas.'));
+        }
+
+        /** @var Organization[] $organizationsPerson */
         $organizationsPerson = $this->getPersonService()->getOrganizationsPersonWithPrincipalRole($demandeur);
-        $dest = $this->getConfiguration('oscar.paths.document_request');
+
+        //// CONFIGURATION
+        $dest = $this->getConfiguration('oscar.paths.document_request');    // Emplacement des documents
         $organizations = [];
         $lockMessage = [];
 
         /** @var ActivityRequestService $activityRequestService */
         $activityRequestService = $this->getServiceLocator()->get('ActivityRequestService');
-
 
         $dlFile = $this->params()->fromQuery("dl", null);
         $rdlFile = $this->params()->fromQuery("rdl", null);
@@ -121,18 +129,17 @@ class ProjectGrantController extends AbstractOscarController
             $organizations[$o->getId()] = (string) $o;
         }
 
-        if( count($organizations) == 0 ){
-            $lockMessage[] = "Il faut être associé à une organisation pour pouvoir faire des demandes d'activité.";
-        }
 
         $method = $this->getHttpXMethod();
 
 
-
-
-
         if( $this->isAjax() ){
-            $this->getLogger()->debug("API REQUESTACTIVITY " . $method);
+
+            $action = $this->params()->fromPost('action', null);
+            $idDemande = $this->params()->fromPost("id", null);
+
+
+
             try {
                 switch ($method) {
                     case "GET" :
@@ -153,106 +160,117 @@ class ProjectGrantController extends AbstractOscarController
                         ]);
 
                     case "DELETE":
-                        $idRequestActivity = $this->params()->fromQuery('id');
-                        $requestActivity = $activityRequestService->getActivityRequest($idRequestActivity);
+                        $idDemande = $this->params()->fromQuery('id');
+                        $requestActivity = $activityRequestService->getActivityRequest($idDemande);
                         $activityRequestService->deleteActivityRequest($requestActivity);
                         return $this->getResponseOk("Suppression de la demande terminée");
+
+                    case "POST":
+                        switch( $action ){
+                            case 'send' :
+                                $demande = $activityRequestService->getActivityRequest($idDemande);
+                                $activityRequestService->sendActivityRequest($demande);
+                                return $this->getResponseOk();
+                        }
+
+
+
+                        $datas = [
+                            "id" => $idDemande,
+                            "label" => strip_tags(trim($this->params()->fromPost('label'))),
+                            "description" => strip_tags(trim($this->params()->fromPost('description'))),
+                            "amount" => floatval(str_replace(',', '.', $this->params()->fromPost('amount'))),
+                            "dateStart" => $this->params()->fromPost('dateStart'),
+                            "dateEnd" => $this->params()->fromPost('dateEnd'),
+                            "organisation_id" => $this->params()->fromPost('organisation_id')
+                        ];
+
+                        if( $datas['id'] ){
+                            $activityRequest = $activityRequestService->getActivityRequest($datas['id']);
+                            if( $activityRequest->getFiles() ){
+
+                            }
+                        } else {
+                            $activityRequest = new ActivityRequest();
+                            $this->getEntityManager()->persist($activityRequest);
+                        }
+
+                        if( $activityRequest->getStatus() != ActivityRequest::STATUS_DRAFT ){
+                            throw new OscarException("Vous ne pouvez pas modifier une demande en cours de traitement");
+                        }
+
+                        if( $datas['organisation_id'] ){
+                            $organization = $this->getEntityManager()->getRepository(Organization::class)->find($datas['organisation_id']);
+                        } else {
+                            $organization = null;
+                        }
+
+                        if( $datas['dateStart'] && $datas['dateStart'] != "null" ){
+                            $datas['dateStart'] = new \DateTime($datas['dateStart']);
+                        } else {
+                            $datas['dateStart'] = null;
+                        }
+                        if( $datas['dateEnd'] && $datas['dateEnd'] != "null" ){
+                            $datas['dateEnd'] = new \DateTime($datas['dateEnd']);
+                        } else {
+                            $datas['dateEnd'] = null;
+                        }
+
+                        if( $_FILES ){
+                            $datas['files'] = [];
+                            $nbr = count($_FILES['files']['tmp_name']);
+                            for( $i=0; $i<$nbr; $i++ ){
+                                $size = $_FILES['files']['size'][$i];
+                                $type = $_FILES['files']['type'][$i];
+                                $name = $_FILES['files']['name'][$i];
+                                $filepathname = date('Y-m-d_H:i:s').'-'.md5(rand(0,10000));
+                                $filepath = $dest .'/' . $filepathname;
+                                if( $size > 0 ){
+                                    if( move_uploaded_file($_FILES['files']['tmp_name'][$i], $filepath) ){
+                                        $datas['files'][] = [
+                                            'name' => $name,
+                                            'type' => $type,
+                                            'size' => $size,
+                                            'file' => $filepathname
+                                        ];
+                                    } else {
+                                        throw new OscarException("Impossible de téléverser votre fichier $name." . error_get_last());
+                                    }
+                                }
+                            }
+
+                            $datas['files'] = array_merge($datas['files'], $activityRequest->getFiles());
+
+                            try {
+
+                                $activityRequest->setLabel($datas['label'])
+                                    ->setCreatedBy($this->getCurrentPerson())
+                                    ->setDescription($datas['description'])
+                                    ->setOrganisation($organization)
+                                    ->setDateStart($datas['dateStart'])
+                                    ->setDateEnd($datas['dateEnd'])
+                                    ->setAmount($datas['amount'])
+                                    ->setFiles($datas['files']);
+
+                                $this->getEntityManager()->flush();
+
+                                return [
+                                    'success' => "Votre demande a bien été envoyée"
+                                ];
+
+                            } catch (\Exception $e ){
+                                $this->getLogger()->error("Impossible d'enregistrer la demande d'activité : " . $e->getMessage());
+                                throw new OscarException("Impossible d'enregistrer le demande : " . $e->getMessage());
+                            }
+                        }
+
+
                 }
             } catch (OscarException $e) {
                 return $this->getResponseInternalError($e->getMessage());
             }
         }
 
-        if( $method == "POST" ){
-
-
-//            $organization = $this->getEntityManager()->getRepository(Organization::class)->find($this->params()->fromPost('organisation_id'));
-
-            $datas = [
-                "id" => $this->params()->fromPost("id", null),
-                "label" => strip_tags(trim($this->params()->fromPost('label'))),
-                "description" => strip_tags(trim($this->params()->fromPost('description'))),
-                "amount" => floatval(str_replace(',', '.', $this->params()->fromPost('amount'))),
-                "dateStart" => $this->params()->fromPost('dateStart'),
-                "dateEnd" => $this->params()->fromPost('dateEnd'),
-                "organisation_id" => $this->params()->fromPost('organisation_id')
-            ];
-
-            $organization = $this->getEntityManager()->getRepository(Organization::class)->find($datas['organisation_id']);
-
-            if( $datas['dateStart'] && $datas['dateStart'] != "null" ){
-                $datas['dateStart'] = new \DateTime($datas['dateStart']);
-            } else {
-                $datas['dateStart'] = null;
-            }
-            if( $datas['dateEnd'] && $datas['dateEnd'] != "null" ){
-                $datas['dateEnd'] = new \DateTime($datas['dateEnd']);
-            } else {
-                $datas['dateEnd'] = null;
-            }
-
-            $this->getLogger()->debug(print_r($datas, true));
-
-            // todo : Tester la validitée des données
-
-            if( $_FILES ){
-                $datas['files'] = [];
-                $nbr = count($_FILES['files']['tmp_name']);
-                for( $i=0; $i<$nbr; $i++ ){
-                    $size = $_FILES['files']['size'][$i];
-                    $type = $_FILES['files']['type'][$i];
-                    $name = $_FILES['files']['name'][$i];
-                    $filepathname = date('Y-m-d_H:i:s').'-'.md5(rand(0,10000));
-                    $filepath = $dest .'/' . $filepathname;
-                    $this->getLogger()->debug($filepath);
-                    if( $size > 0 ){
-                        if( move_uploaded_file($_FILES['files']['tmp_name'][$i], $filepath) ){
-                            $datas['files'][] = [
-                                'name' => $name,
-                                'type' => $type,
-                                'size' => $size,
-                                'file' => $filepathname
-                            ];
-                        } else {
-                            throw new OscarException("Impossible de téléverser votre fichier $name." . error_get_last());
-                        }
-                    }
-                }
-
-                try {
-                    $this->getLogger()->debug("Enregistrement de la demande");
-                    if( $datas['id'] ){
-                        $activityRequest = $activityRequestService->getActivityRequest($datas['id']);
-                        if( $activityRequest->getFiles() ){
-                            $datas['files'] = array_merge($datas['files'], $activityRequest->getFiles());
-                        }
-
-                    } else {
-                        $activityRequest = new ActivityRequest();
-                        $this->getEntityManager()->persist($activityRequest);
-                    }
-
-                    $activityRequest->setLabel($datas['label'])
-                        ->setCreatedBy($this->getCurrentPerson())
-                        ->setDescription($datas['description'])
-                        ->setOrganisation($organization)
-                        ->setDateStart($datas['dateStart'])
-                        ->setDateEnd($datas['dateEnd'])
-                        ->setAmount($datas['amount'])
-                        ->setFiles($datas['files']);
-
-                    $this->getEntityManager()->flush();
-
-                    return [
-                        'success' => "Votre demande a bien été envoyée"
-                    ];
-
-                } catch (\Exception $e ){
-                    $this->getLogger()->error("Impossible d'enregistrer la demande d'activité : " . $e->getMessage());
-                    throw new OscarException("Impossible d'enregistrer le demande : " . $e->getMessage());
-                }
-            }
-        }
 
         $usedFileds = [
             'label' => true,

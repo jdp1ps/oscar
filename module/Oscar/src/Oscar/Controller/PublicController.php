@@ -28,10 +28,6 @@ class PublicController extends AbstractOscarController
         return ['log' => $log];
     }
 
-    public function testCalendarAction(){
-        return [];
-    }
-
     public function parametersAction()
     {
         /** @var Authentification $auth */
@@ -144,6 +140,14 @@ class PublicController extends AbstractOscarController
 
         $validations = [];
         $isValidator = false;
+
+
+//        echo "<pre style='width: 250px; z-index: 20000; position: fixed; bottom: 0; right: 0; background: red'>";
+//
+//        var_dump($this->getOscarUserContext()->getSelectedIdentityRole());
+//        echo "</pre>";
+
+
 
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();

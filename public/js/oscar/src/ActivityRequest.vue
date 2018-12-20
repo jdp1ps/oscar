@@ -11,15 +11,18 @@
                     -->
                     <div class="columns">
                         <div class="col6">
-                            <strong>Demandeur</strong>
+                            <strong>Demandeur : </strong><br>
                             <span class="cartouche">
                                 {{ demandeur }}
                                 <span class="addon">Demandeur</span>
                             </span>
                         </div>
                         <div class="col6">
-                            <strong>Oragnisme référent</strong>
-                            <select name="organisation_id" >
+                            <strong>Oragnisme référent : </strong><br>
+                            <p v-if="organisations.length == 0" class="alert alert-info">
+                                Vous n'êtes associé à aucun organisme.
+                            </p>
+                            <select name="organisation_id" v-else class="form-control">
                                 <option :value="id" v-for="org, id in organisations">{{ org }}</option>
                             </select>
                         </div>
@@ -124,7 +127,12 @@
             <h3 class="card-title">
                 <strong>
                     <i class="icon-cube"></i>
-                    {{ a.label }}</strong> <small>par {{ a.requester }}</small>
+                    {{ a.label }}</strong>
+                <strong>
+                    <i class="icon-bank"></i>
+                    {{ a.amount }}
+                </strong>
+                <small class="right">par <strong>{{ a.requester }}</strong></small>
             </h3>
             <div class="card-metas text-highlight">
                 <strong><i :class="'icon-' + a.statut"></i>{{ a.statutText }}</strong>
@@ -138,38 +146,51 @@
                 ~
                 <strong>
                     <i class="icon-building-filled"></i>
-                    {{ a.organisation }}
+                    <span v-if="a.organisation">{{ a.organisation }}</span>
+                    <em v-else>Aucune organisation</em>
                 </strong>
             </div>
             <hr>
             <div>
-                <h4><i class=" icon-edit"></i> Informations</h4>
+                <h3><i class=" icon-edit"></i> Informations</h3>
+                <ul>
+                    <li><i class="icon-bank"></i> Somme demandée : <strong>{{ a.amount | montant}}</strong></li>
+                    <li><i class="icon-calendar"></i> Début (prévu) : <strong>{{ a.dateStart | date}}</strong></li>
+                    <li><i class="icon-calendar"></i> Fin (prévue) : <strong>{{ a.dateEnd | date}}</strong></li>
+                </ul>
+                <div class="alert alert-help">
+                    <strong>Description</strong> :
                 {{ a.description }}
+                </div>
             </div>
             <section class="fichiers">
-                <h4><i class="icon-attach-outline"></i> Fichiers</h4>
+                <h3><i class="icon-attach-outline"></i> Fichiers</h3>
                 <div v-if="a.files.length == 0" class="alert alert-info">
                     Vous n'avez fourni aucun document pour cette demande
                 </div>
                 <ul v-else>
                 <li v-for="f in a.files">
                     <strong>{{ f.name }}</strong>
+
                     <a :href="'?dl=' + f.file + '&id=' + a.id" class="btn btn-default btn-xs">
                         <i class="icon-download"></i>
                         Télécharger</a>
-                    <a href="#" @click.prevent.stop="handlerDeleteFile(f, a)" class="btn btn-default btn-xs">
+                    <a href="#" @click.prevent.stop="handlerDeleteFile(f, a)" class="btn btn-default btn-xs" v-if="a.sendable">
                         <i class="icon-trash"></i>
                         Supprimer ce fichier</a>
                 </li>
                 </ul>
             </section>
-            <nav>
-                <a href="#" @click.prevent.stop="handlerEdit(a)" class="btn btn-primary" v-if="a.editable">
+            <nav v-if="a.sendable">
+                <a href="#" @click.prevent.stop="handlerEdit(a)" class="btn btn-primary">
                     <i class="icon-edit"></i>
                     Modifier</a>
-                <a href="#" @click.prevent.stop="handlerDelete(a)" class="btn btn-primary" v-if="a.editable">
+                <a href="#" @click.prevent.stop="handlerDelete(a)" class="btn btn-danger">
                     <i class="icon-trash"></i>
                     Supprimer</a>
+                <a href="#" @click.prevent.stop="handlerSend(a)" class="btn btn-default">
+                    <i class="icon-paper-plane"></i>
+                    soumettre</a>
             </nav>
         </article>
         </section>
@@ -264,25 +285,18 @@
                 })
             },
 
-            handlerSubmit(){
-                let data = new FormData();
-                /*
-                data.append('label', this.formData.label);
-                data.append('rate', this.formData.rate.toString().replace(/,/g,'.'));
-                data.append('active', this.formData.active);
-                data.append('id', this.formData.id);
+            handlerSend(demande){
+                let form = new FormData();
+                form.append('action', 'send');
+                form.append('id', demande.id);
 
-                this.$http.post('?', data).then(
-                    ok => {
-                      this.fetch();
-                    },
-                    ko => {
-                        this.error = ko.body;
-                    }
-                ).finally( foo => {
-                    this.formData = null;
-                });
-                /****/
+                this.$http.post('?', form)
+                    .then( ok => {
+                        this.fetch();
+                    })
+                    .catch( err => {
+                        this.error = err.body;
+                    })
             },
 
             handlerNew(){
