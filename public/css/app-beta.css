@@ -6579,6 +6579,24 @@ h2 {
 .selectable.selected {
   background-color: #afe1ef; }
 
+.follow {
+  border: solid 2px #ddd;
+  padding: .5em;
+  display: flex; }
+  .follow .avatar {
+    flex: 0 0 auto; }
+  .follow .content {
+    padding: 0 0 0 1em; }
+  .follow .avatar img {
+    width: 64px;
+    border-radius: 64px;
+    border: solid 2px #30b0d5; }
+
+hr.separator {
+  border-top: dotted #CCC thin;
+  margin-top: .5em;
+  margin-bottom: .3em; }
+
 .separator-date {
   border-top: dashed 1px #999;
   margin: 0;

@@ -1812,6 +1812,31 @@ $colorSelect: lighten($colorBlue, 30%);
 
 $dateBorderSize: 1px;
 
+.follow {
+  border: solid 2px #ddd;
+  padding: .5em;
+  display: flex;
+  .avatar {
+    flex: 0 0 auto;
+  }
+  .content {
+    padding: 0 0 0 1em;
+  }
+  .avatar img {
+    width: 64px;
+    border-radius: 64px;
+    border: solid 2px $colorBlue;
+  }
+}
+
+
+
+hr.separator {
+  border-top: dotted $colorGreyUltraLight thin;
+  margin-top: .5em;
+  margin-bottom: .3em;
+}
+
 .separator-date {
   border-top: dashed $dateBorderSize #999;
   margin: 0;

@@ -27,6 +27,7 @@ use Oscar\Entity\Notification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
+use Oscar\Entity\Privilege;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
@@ -67,10 +68,18 @@ class ProjectGrantController extends AbstractOscarController
         return [];
     }
 
+    public function requestManageAction(){
+        die('TODO');
+    }
+
     public function requestForAction()
     {
         /** @var Person $demandeur */
         $demandeur = $this->getOscarUserContext()->getCurrentPerson();
+
+        if( !($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST) || $this->getOscarUserContext()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_REQUEST)) ){
+            throw new UnAuthorizedException('Droits insuffisants');
+        }
 
         if( !$demandeur ){
             throw new OscarException(_('Oscar ne vous connait pas.'));
@@ -138,13 +147,12 @@ class ProjectGrantController extends AbstractOscarController
             $action = $this->params()->fromPost('action', null);
             $idDemande = $this->params()->fromPost("id", null);
 
-
-
             try {
                 switch ($method) {
                     case "GET" :
                         $limit = 5;
                         $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json');
+
                         if( count($demandes) >= $limit ){
                             $lockMessage[] = "Vous avez atteint la limite des demandes autorisées.";
                         }
@@ -169,11 +177,9 @@ class ProjectGrantController extends AbstractOscarController
                         switch( $action ){
                             case 'send' :
                                 $demande = $activityRequestService->getActivityRequest($idDemande);
-                                $activityRequestService->sendActivityRequest($demande);
+                                $activityRequestService->sendActivityRequest($demande, $this->getCurrentPerson());
                                 return $this->getResponseOk();
                         }
-
-
 
                         $datas = [
                             "id" => $idDemande,
@@ -185,11 +191,9 @@ class ProjectGrantController extends AbstractOscarController
                             "organisation_id" => $this->params()->fromPost('organisation_id')
                         ];
 
+                        // Création ou Mise à jour
                         if( $datas['id'] ){
                             $activityRequest = $activityRequestService->getActivityRequest($datas['id']);
-                            if( $activityRequest->getFiles() ){
-
-                            }
                         } else {
                             $activityRequest = new ActivityRequest();
                             $this->getEntityManager()->persist($activityRequest);
@@ -243,6 +247,7 @@ class ProjectGrantController extends AbstractOscarController
 
                             try {
 
+
                                 $activityRequest->setLabel($datas['label'])
                                     ->setCreatedBy($this->getCurrentPerson())
                                     ->setDescription($datas['description'])
@@ -291,6 +296,8 @@ class ProjectGrantController extends AbstractOscarController
      * @return JsonModel
      */
     public function apiAction(){
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
 
         ////////////////////////////////////////////////////////////////////////
         // Paramètres envoyés à l'API

@@ -151,16 +151,37 @@
                 </strong>
             </div>
             <hr>
-            <div>
-                <h3><i class=" icon-edit"></i> Informations</h3>
-                <ul>
-                    <li><i class="icon-bank"></i> Somme demandée : <strong>{{ a.amount | montant}}</strong></li>
-                    <li><i class="icon-calendar"></i> Début (prévu) : <strong>{{ a.dateStart | date}}</strong></li>
-                    <li><i class="icon-calendar"></i> Fin (prévue) : <strong>{{ a.dateEnd | date}}</strong></li>
-                </ul>
-                <div class="alert alert-help">
-                    <strong>Description</strong> :
-                {{ a.description }}
+            <div class="row">
+                <div class="col-md-6">
+                    <h3><i class=" icon-edit"></i> Informations</h3>
+                    <ul>
+                        <li><i class="icon-bank"></i> Somme demandée : <strong>{{ a.amount | montant}}</strong></li>
+                        <li><i class="icon-calendar"></i> Début (prévu) : <strong v-if="a.dateStart">{{ a.dateStart | date}}</strong><em>pas de date de début prévue</em></li>
+                        <li><i class="icon-calendar"></i> Fin (prévue) : <strong v-if="a.dateEnd">{{ a.dateEnd | date}}</strong><em>pas de date de fin prévue</em></li>
+                    </ul>
+                    <div class="alert alert-help">
+                        <strong>Description</strong> :
+                    {{ a.description }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <section>
+                        <h3><i class="icon-signal"></i> Suivi</h3>
+                        <article v-for="s in a.suivi" class="follow">
+                            <figure class="avatar">
+                                <img :src="'//www.gravatar.com/avatar/' + s.by.gravatar + '?s=64'"
+                                     alt="" />
+                            </figure>
+                            <div class="content">
+                                <small class="infos">
+                                    <i class="icon-clock"></i> {{ s.datecreated | date }}
+                                    par <strong><i class="icon-user"></i> {{ s.by.username }}</strong>
+                                </small>
+                                <br>
+                                <p>{{ s.description }}</p>
+                            </div>
+                        </article>
+                    </section>
                 </div>
             </div>
             <section class="fichiers">

@@ -103,11 +103,11 @@ return array(
                 [   'controller' =>   'Activity',
                     'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
                         'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
-                        'notifications', 'generateNotifications', 'generatedDocument', 'api', 'apiUi', 'requestFor'],
+                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'requestManage'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
-                    'action' => ['advancedSearch', 'exportJSON', 'almostDone', 'almostStart'],
+                    'action' => ['advancedSearch', 'exportJSON', 'almostDone', 'almostStart', 'api'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
                 ],
                 [ 'controller' =>   'Activity',

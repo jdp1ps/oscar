@@ -78,6 +78,13 @@ class ActivityRequest
      */
     private $files = null;
 
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityRequestFollow", mappedBy="activityRequest", cascade={"remove"})
+     */
+    private $follows;
+
     /**
      * @return string
      */
@@ -212,6 +219,24 @@ class ActivityRequest
     }
 
     /**
+     * @return ArrayCollection
+     */
+    public function getFollows()
+    {
+        return $this->follows;
+    }
+
+    /**
+     * @param ArrayCollection $follows
+     */
+    public function setFollows($follows)
+    {
+        $this->follows = $follows;
+        return $this;
+    }
+
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -219,7 +244,20 @@ class ActivityRequest
         return $this->id;
     }
 
+    public function __construct()
+    {
+        $this->files = [];
+        $this->setDateCreated(new \DateTime());
+        $this->follows = new ArrayCollection();
+    }
+
     public function toJson(){
+
+        $follows = [];
+        /** @var ActivityRequestFollow $f */
+        foreach ($this->getFollows() as $f) {
+            $follows[] = $f->toJson();
+        }
         return [
             'id' => $this->getId(),
             'label' => $this->getLabel(),
@@ -234,6 +272,7 @@ class ActivityRequest
             'requester' => (string)$this->getCreatedBy(),
             'organisation_id' => $this->getOrganisation() ? $this->getOrganisation()->getId() : null,
             'organisation' => $this->getOrganisation() ? (string)$this->getOrganisation() : null,
+            'suivi' => $follows
         ];
     }
 

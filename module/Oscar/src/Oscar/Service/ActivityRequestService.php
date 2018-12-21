@@ -11,6 +11,7 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
 use Oscar\Entity\ActivityRequest;
+use Oscar\Entity\ActivityRequestFollow;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -92,6 +93,7 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
 
     public function updateActivityRequest($datas)
     {
+
         throw new OscarException("L'enregistrement des demandes d'activité n'est pas encore implanté.");
     }
 
@@ -127,14 +129,22 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
         return true;
     }
 
-    public function sendActivityRequest(ActivityRequest $activityRequest)
+    public function sendActivityRequest(ActivityRequest $activityRequest, Person $sender)
     {
         if( $activityRequest->getStatus() != ActivityRequest::STATUS_DRAFT ){
             throw new OscarException("Cette demande a déjà été envoyée");
         }
         try {
+            $follow = new ActivityRequestFollow();
+            $this->getEntityManager()->persist($follow);
+
+            $follow->setActivityRequest($activityRequest)
+                ->setDescription("Demande envoyée")
+                ->setDateCreated(new \DateTime())
+                ->setCreatedBy($sender);
+
             $activityRequest->setStatus(ActivityRequest::STATUS_SEND);
-            $this->getEntityManager()->flush($activityRequest);
+            $this->getEntityManager()->flush();
         } catch (\Exception $err){
             throw new OscarException("Impossible d'envoyer la demande.");
         }

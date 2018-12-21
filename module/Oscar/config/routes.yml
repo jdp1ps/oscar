@@ -682,7 +682,6 @@ contract:
             action: index
     may_terminate: true
     child_routes:
-
         api:
             type: segment
             options:
@@ -721,6 +720,13 @@ contract:
                 defaults:
                     action: show
 
+        requestmanage:
+            type: segment
+            options:
+                route: /gerer-demandes-activites
+                default:
+                    action: requestManage
+
         exportjson:
             type: segment
             options:
@@ -734,7 +740,6 @@ contract:
                 route: /generer-document/:id/:doc
                 defaults:
                     action: generatedDocument
-
 
         show2:
             type: segment

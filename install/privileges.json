@@ -38,6 +38,14 @@
     "fullcode": "ACTIVITY-REQUEST"
   },
 
+  "ACTIVITY-REQUEST-MANAGE": {
+    "category_id": 2,
+    "spot": 4,
+    "code": "REQUEST-MANAGE",
+    "libelle": "Traiter les demandes d'activité",
+    "fullcode": "ACTIVITY-REQUEST-MANAGE"
+  },
+
   "ACTIVITY-INDEX": {
     "category_id": 2,
     "spot": 4,
