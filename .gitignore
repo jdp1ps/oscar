@@ -41,12 +41,16 @@ data/**.*
 data/DoctrineORMModule
 data/luceneindex
 data/mails
+data/documents/**
 !data/timesheet_model.xls
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
 !data/documents/activity/.gitkeep
 !data/documents/public/.gitkeep
 !data/mails/.gitkeep
+!data/documents/request/.gitkeep
+
+
 
 # Residus
 public/js/oscar/dist/index.html
