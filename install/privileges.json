@@ -41,7 +41,7 @@
   "ACTIVITY-REQUEST_MANAGE": {
     "category_id": 2,
     "spot": 4,
-    "code": "REQUEST-MANAGE",
+    "code": "REQUEST_MANAGE",
     "libelle": "Traiter les demandes d'activité",
     "fullcode": "ACTIVITY-REQUEST_MANAGE"
   },
