@@ -679,8 +679,8 @@ contract:
         route: /activites-de-recherche
         defaults:
             controller: Activity
-            action: index
-    may_terminate: true
+
+    may_terminate: false
     child_routes:
         api:
             type: segment
@@ -720,12 +720,12 @@ contract:
                 defaults:
                     action: show
 
-        requestmanage:
-            type: segment
+        requestadmin:
+            type: literal
             options:
-                route: /gerer-demandes-activites
-                default:
-                    action: requestManage
+                route: /admin-request
+                defaults:
+                    action: adminDemande
 
         exportjson:
             type: segment
