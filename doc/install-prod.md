@@ -177,7 +177,6 @@ Composer se chargera d'installer les dépendances PHP tel de définies dans le f
 
 
 
-
 ## Configuration d'oscar
 
 ### Base de données
@@ -221,14 +220,6 @@ le dépôt dans le fichier : `install/oscar-install.sql`.
 psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 ```
 
-### Mise à jour du modèle
-
-Mettre à jour le modèle de donnée : 
-
-```bash
-php vendor/bin/doctrine-module orm:schema-tool:update --force
-```
-
 ### Configuration de la BDD dans Oscar
 
 La configuration de la BDD est spécifiée dans le fichier `config/autoload/local.php`.
@@ -265,6 +256,17 @@ return array(
 ```
 
 Ce fichier contient également des configurations spécifiques métier approfondies dans le fichier [Configuration métier](./configuration.md)
+
+
+### Mise à jour du modèle
+
+Mettre à jour le modèle de donnée :
+
+```bash
+php vendor/bin/doctrine-module orm:schema-tool:update --force
+```
+
+### Tester la configuration
 
 Vous pouvez tester la configuration avec la commande :
 
@@ -440,15 +442,15 @@ return array(
 Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
 permet de s'identifier à la place d'un utilisateur.
 
-On utilise l'identifiant `compte=compteusurpation` où `compte` correspond à 
-l'identifiant principale (qui doit figurer dans le tableau `usurpation_allowed_usernames`), 
+On utilise l'identifiant `compte=compteusurpation` où `compte` correspond à
+l'identifiant principale (qui doit figurer dans le tableau `usurpation_allowed_usernames`),
 et `compteusurpation` correspond au compte usurpé. Le mot de passe est celui de `compte`.
 
 Cette option n'est pas compatible avec l'identification CAS.
 
-BUG CONNU : Cette option est utilisé pour les tests uniquement. Il peut arriver que UnicaenApp 
-ait des difficultés à detecter le rôle à charger lors d'une usurpation. Vérifiez toujours 
-lors d'une usurpation qu'un rôle est bien actif en cliquant sur le nom du compte 
+BUG CONNU : Cette option est utilisé pour les tests uniquement. Il peut arriver que UnicaenApp
+ait des difficultés à detecter le rôle à charger lors d'une usurpation. Vérifiez toujours
+lors d'une usurpation qu'un rôle est bien actif en cliquant sur le nom du compte
 dans le menu principal.
 
 
@@ -483,4 +485,3 @@ Utiliser ensuite le navigateur pour vous rendre sur oscar et utiliser l'identifi
 **UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*.
 Pour les copies de développement/préprod, l'option `usurpation_allowed_usernames`
 permet de s'identifier à la place d'un utilisateur.
-
