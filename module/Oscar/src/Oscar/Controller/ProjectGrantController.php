@@ -68,8 +68,39 @@ class ProjectGrantController extends AbstractOscarController
         return [];
     }
 
-    public function requestManageAction(){
-        die('TODO');
+    public function adminDemandeAction()
+    {
+        /** @var Person $demandeur */
+        $demandeur = $this->getOscarUserContext()->getCurrentPerson();
+
+        if( !$demandeur ){
+            throw new OscarException(_('Oscar ne vous connait pas.'));
+        }
+
+        $organizations = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE);
+
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
+            // todo toutes les demandes affichées
+        }
+        elseif (count($organizations)) {
+            foreach($organizations as $o){
+                echo "$o<br>\n";
+            }
+            die();
+        } else {
+            throw new UnAuthorizedException("Vous n'avez pas l'autorisation d'accéder à ces informations");
+        }
+
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            switch ($method) {
+                case "get":
+                    break;
+            }
+            return $this->getResponseBadRequest("MAUVAISE UTILISATION");
+        }
+
+        return [];
     }
 
     public function requestForAction()
@@ -77,13 +108,15 @@ class ProjectGrantController extends AbstractOscarController
         /** @var Person $demandeur */
         $demandeur = $this->getOscarUserContext()->getCurrentPerson();
 
+        if( !$demandeur ){
+            throw new OscarException(_('Oscar ne vous connait pas.'));
+        }
+
         if( !($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST) || $this->getOscarUserContext()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_REQUEST)) ){
             throw new UnAuthorizedException('Droits insuffisants');
         }
 
-        if( !$demandeur ){
-            throw new OscarException(_('Oscar ne vous connait pas.'));
-        }
+
 
         /** @var Organization[] $organizationsPerson */
         $organizationsPerson = $this->getPersonService()->getOrganizationsPersonWithPrincipalRole($demandeur);
@@ -103,10 +136,11 @@ class ProjectGrantController extends AbstractOscarController
             $idRequest = $this->params()->fromQuery("id");
             $demande = $activityRequestService->getActivityRequest($idRequest);
 
-            $filepath = $this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
+            // todo REVOIR CETTE PARTIE
 
             if( $dlFile ) {
                 $fileInfo = $demande->getFileInfosByFile($dlFile);
+                $filepath = $this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
                 $filename = $fileInfo['name'];
                 $filetype = $fileInfo['type'];
                 $size = filesize($filepath);
@@ -122,7 +156,7 @@ class ProjectGrantController extends AbstractOscarController
                 $newFiles = [];
                 foreach ($files as $file) {
                     if( $file['file'] == $rdlFile ){
-                        @unlink($filepath.'/'.$file['file']);
+                        @unlink($this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'. $file['file']);
                     } else {
                         $newFiles[] = $file;
                     }

@@ -80,7 +80,8 @@ requirejs.config({
         'ResumeActivity' : 'oscar/dist/ResumeActivity',
         'PersonsList' : 'oscar/dist/PersonsList',
         'Tva': 'oscar/dist/Tva',
-        'ActivityRequest': 'oscar/dist/ActivityRequest'
+        'ActivityRequest': 'oscar/dist/ActivityRequest',
+        'ActivityRequestAdmin': 'oscar/dist/ActivityRequestAdmin'
     },
     shim: {
         "bootstrap": {

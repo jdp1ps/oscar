@@ -103,7 +103,7 @@ return array(
                 [   'controller' =>   'Activity',
                     'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
                         'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
-                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'requestManage'],
+                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
@@ -113,10 +113,6 @@ return array(
                 [ 'controller' =>   'Activity',
                     'action' => ['makeProject', 'changeProject', 'orphans'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
-                ],
-                [ 'controller' =>   'Activity',
-                    'action' => [],
-                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
                 ],
 
                 // DEPENSES
@@ -204,7 +200,7 @@ return array(
                     'action' => [
                         'indexPersonActivity', 'sauvegarde', 'declaration', 'validations', 'resume',
                         "declaration2", "indexActivity", "validateTimesheet",
-                        'usurpation', 'excel', 'organizationLeader',
+                        'excel', 'organizationLeader',
                         'declarant', 'declarantAPI', 'validationActivity',
                         'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
                         'importIcal', 'declarations', 'resumeActivity',
@@ -882,7 +878,7 @@ return array(
             'Organization' => \Oscar\Controller\OrganizationController::class,
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
             'CentaureSync' => \Oscar\Controller\CentaureSyncController::class,
-            'Contract' => \Oscar\Controller\ContractController::class,
+            //'Contract' => \Oscar\Controller\ContractController::class,
             'Activity' => \Oscar\Controller\ProjectGrantController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
