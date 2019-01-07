@@ -1296,7 +1296,7 @@
             },
 
             handlerKeyDown(event){
-                
+
             },
 
             handlerClick() {
