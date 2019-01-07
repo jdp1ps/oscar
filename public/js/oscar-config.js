@@ -32,7 +32,7 @@ requirejs.config({
         'timewalker': 'vendor/timewalker/src/js/TimeViewer',
         'oscar-auto': 'oscar-auto',
         'OscarUI': 'oscar-ui',
-        'vue': 'vendor/vue/dist/vue',
+        'vue': 'vendor/vue/dist/vue.min',
         'vue-resource': 'vendor/vue-resource/dist/vue-resource',
         'vue-router': 'vendor/vue-router/dist/vue-router',
         'LocalDB': 'LocalDB/LocalDB',
