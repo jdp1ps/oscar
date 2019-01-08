@@ -151,9 +151,6 @@
 
                 <div id="declarationsHours"></div>
 
-                <pre>TEST:
-                <?php var_dump($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SHOW_SCHEDULE)) ?>
-                </pre>
                 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SHOW_SCHEDULE)): ?>
                 <h3><i class="icon-clock"></i>
                     Répartition Horaire</h3>
