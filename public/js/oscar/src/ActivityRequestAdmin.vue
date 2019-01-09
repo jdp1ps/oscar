@@ -45,6 +45,12 @@
                 </strong>
                 <small class="right">par <strong>{{ a.requester }}</strong></small>
             </h3>
+            <div class="content">
+                Demandeur : <strong><i class="icon-user"></i> {{ a.requester }}</strong><br>
+                Organisme : <strong v-if="a.organisation"><i class="icon-building-filled"></i> {{ a.organisation }}</strong>
+                <em v-else>Aucun organisme identifié</em>
+            </div>
+            <pre>{{ a }}</pre>
         </article>
         </section>
         <div v-else>

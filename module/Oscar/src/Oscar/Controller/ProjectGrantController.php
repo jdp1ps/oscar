@@ -19,6 +19,7 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRequest;
+use Oscar\Entity\ActivityRequestRepository;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
@@ -79,15 +80,13 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         $organizations = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE);
+        $spot = null;
 
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
-            // todo toutes les demandes affichées
+            $spot = "global";
         }
         elseif (count($organizations)) {
-            foreach($organizations as $o){
-                echo "$o<br>\n";
-            }
-            die();
+            $spot = "organizations";
         } else {
             throw new UnAuthorizedException("Vous n'avez pas l'autorisation d'accéder à ces informations");
         }
@@ -95,10 +94,32 @@ class ProjectGrantController extends AbstractOscarController
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();
             switch ($method) {
-                case "get":
+                case "GET":
+                    /** @var ActivityRequestRepository $demandeActiviteRepository */
+                    $demandeActiviteRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
+                    if( $spot == 'global'){
+                        $activityRequests = $demandeActiviteRepository->getAll();
+                    }
+                    elseif ($spot == 'organizations') {
+                        $activityRequests = $demandeActiviteRepository->getAllForOrganizations($organizations);
+                    }
+                    else {
+                        return $this->getResponseBadRequest('Mauvais contexte !');
+                    }
+
+                    $datas = [
+                        'activityRequests' => []
+                    ];
+                    /** @var ActivityRequest $activityRequest */
+                    foreach ($activityRequests as $activityRequest) {
+                        $datas['activityRequests'][] = $activityRequest->toJson();
+                    }
+
+                    return $this->jsonOutput($datas);
+
                     break;
             }
-            return $this->getResponseBadRequest("MAUVAISE UTILISATION");
+            return $this->getResponseBadRequest("MAUVAISE UTILISATION ($method)");
         }
 
         return [];

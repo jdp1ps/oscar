@@ -160,7 +160,8 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
         static $statutText;
         if( !$statutText ){
             $statutText = [
-                1 => "Brouillon"
+                1 => "Brouillon",
+                2 => "Envoyée",
             ];
         }
         if( array_key_exists($statut, $statutText) ){
