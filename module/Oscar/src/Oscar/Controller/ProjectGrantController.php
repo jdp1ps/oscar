@@ -60,6 +60,7 @@ use Zend\View\Model\ViewModel;
 class ProjectGrantController extends AbstractOscarController
 {
     public function apiUiAction(){
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
         return [];
     }
 
@@ -68,7 +69,7 @@ class ProjectGrantController extends AbstractOscarController
      * @return JsonModel
      */
     public function apiAction(){
-
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
         ////////////////////////////////////////////////////////////////////////
         // Paramètres envoyés à l'API
         $q = $this->params()->fromQuery('q', '');
