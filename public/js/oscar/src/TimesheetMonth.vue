@@ -993,7 +993,6 @@
         methods: {
 
             handlerFillMonth(withWP){
-                console.log("Remplir", withWP);
 
                 let data = [];
 
@@ -1068,7 +1067,7 @@
             },
 
             reSendPeriod(periodValidation) {
-                console.log(periodValidation.status);
+
                 if (periodValidation.status != 'conflict') {
                     this.error = 'Vous ne pouvez pas soumettre cette déclaration, status incorrect';
                     return;
@@ -1245,7 +1244,6 @@
                 let formData = new FormData();
                 formData.append('timesheets', JSON.stringify(datas));
 
-                console.log(datas);
                 this.loading = "Enregistrement des créneaux";
 
                 this.$http.post('/feuille-de-temps/declarant-api', formData).then(
@@ -1281,7 +1279,6 @@
             },
 
             handlerDayUpdated() {
-                console.log(arguments[0]);
                 let t = arguments[0];
                 this.dayMenuTime = (t.h + t.m);
             },
@@ -1299,7 +1296,7 @@
             },
 
             handlerKeyDown(event){
-                console.log(event);
+
             },
 
             handlerClick() {

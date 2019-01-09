@@ -1943,17 +1943,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $daysInfos[(int)$dayNum] = $data;
         }
 
-        $this->getLogger()->info("TEST");
-        $this->getLogger()->debug(print_r($daysInfosPerson, true));
-
-
         $totalDays = count($daysInfos);
         $periodLastDay = new \DateTime($period . '-' . $totalDays . ' 23:59:59');
 
         $periodInfos = "";
         $periodFutur = $periodFirstDay > $now;
         $periodFinished = $periodLastDay < $now;
-        $periodCurrent = $period == $now->format('Y-m');
+        $periodCurrent = $period == $now->format('Y-n');
 
         $submitable = false;
         $submitableInfos = "Vous ne pouvez pas soumettre cette période pour une raison inconnue";
@@ -1978,7 +1974,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var ValidationPeriod $periodValidation */
         foreach ($periodValidations as $periodValidation) {
             $data = $periodValidation->json();
-
             if ($periodValidation->getObjectId() > 0) {
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($periodValidation->getObjectId());
                 $label = (string)$activity;
@@ -2089,7 +2084,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $others = $this->getOthersWP();
         $horsLot = [];
 
-        foreach ($others as $key => &$datas) {
+        foreach ($others as $key => $datas) {
             $periodHL = $this->getValidationPeriosOutOfWorkpackageAt($person, $year, $month, $key);
 
             if ($isPeriodSend) {
@@ -2137,9 +2132,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'code' => $t->getLabel(),
                     'description' => $t->getComment(),
                     'duration' => $t->getDuration(),
-                    'foo' => 'bar',
                     'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : 'draft',
-                    'status' => 'locked',
                     'validations' => $t->getValidationPeriod() ? $t->getValidationPeriod()->json() : null
                 ];
 
@@ -2148,11 +2141,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $daysInfos[$dayInt]['duration'] += $duree;
                 $daysInfos[$dayInt]['total'] += $duree;
                 $periodTotal += $duree;
-
-                $this->getLogger()->debug("Ajout $duree pour " . $key);
                 $others[$key]['total'] += $duree;
-
-
                 continue;
             }
 

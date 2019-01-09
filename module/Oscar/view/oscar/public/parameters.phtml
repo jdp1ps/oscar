@@ -151,8 +151,7 @@
 
                 <div id="declarationsHours"></div>
 
-
-
+                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SHOW_SCHEDULE)): ?>
                 <h3><i class="icon-clock"></i>
                     Répartition Horaire</h3>
                 <div id="schedule"></div>
@@ -172,6 +171,7 @@
                         })
                     });
                 </script>
+                <?php endif; ?>
 
 
 
