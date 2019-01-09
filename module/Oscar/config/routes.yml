@@ -219,13 +219,13 @@ timesheet:
                 defaults:
                     action: indexPersonActivity
 
-        # Déclarations d'une activité (plusieurs personnes)
-        activity:
-            type: segment
-            options:
-                route: /activite/:idactivity
-                defaults:
-                    action: indexActivity
+#        # Déclarations d'une activité (plusieurs personnes)
+#        activity:
+#            type: segment
+#            options:
+#                route: /activite/:idactivity
+#                defaults:
+#                    action: indexActivity
 
         # Déclarations d'une personne
         person:
