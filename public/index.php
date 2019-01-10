@@ -127,13 +127,13 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
     }
 
     $msg = sprintf("[%s] %s (%s, ligne %s)", $codeStr, $errstr, $errfile, $errline);
-    error_log($msg);
 
     if (!(error_reporting() & $errno)) {
         // Ce code d'erreur n'est pas inclus dans error_reporting(), donc il continue
         // jusqu'au gestionaire d'erreur standard de PHP
         return;
     }
+    error_log($msg);
 
     if($codeStr == 'ERROR'){
         throw new Exception("ERROR $errstr");
