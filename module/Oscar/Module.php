@@ -12,6 +12,7 @@ namespace Oscar;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Monolog\Logger;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\Authentification;
@@ -63,6 +64,14 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
     protected function getServiceActivity()
     {
         return $this->getServiceManager()->get('ActivityLogService');
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLogger()
+    {
+        return $this->getServiceManager()->get('Logger');
     }
 
     /**
@@ -125,6 +134,8 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
         $dbUser = null;
 
+        $this->getLogger()->addInfo(sprintf('Chargement du bdUser avec identity = %s', (string)$e->getIdentity()));
+
 		if( is_string($e->getIdentity()) ){
 			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $e->getIdentity()]);
 		} else {
@@ -137,7 +148,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
                 $this->getEntityManager()->flush($dbUser);
             } catch (\Exception $e) {
-
+                error_log("Mise à jour du dbUser impossible : " . $e->getMessage());
             }
 
             /** @var PersonService $personService */
@@ -153,6 +164,8 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
             $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
                 $str), $dbUser);
+        } else {
+            error_log("dbUser manquant !");
         }
 
     }

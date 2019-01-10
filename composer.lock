@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "98778fca36c35a94cad5a141633a286c",
+    "content-hash": "f54f98522460ce5d86fcff675fcd6d06",
     "packages": [
         {
             "name": "bjyoungblood/bjy-authorize",
@@ -1209,16 +1209,16 @@
         },
         {
             "name": "elasticsearch/elasticsearch",
-            "version": "v6.0.1",
+            "version": "v6.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/elastic/elasticsearch-php.git",
-                "reference": "b8e3bc9d1fc54d6a18692df0b74956efe7fe241a"
+                "reference": "b237a37b2cdf23a5a17fd3576cdea771394ad00d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/b8e3bc9d1fc54d6a18692df0b74956efe7fe241a",
-                "reference": "b8e3bc9d1fc54d6a18692df0b74956efe7fe241a",
+                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/b237a37b2cdf23a5a17fd3576cdea771394ad00d",
+                "reference": "b237a37b2cdf23a5a17fd3576cdea771394ad00d",
                 "shasum": ""
             },
             "require": {
@@ -1262,7 +1262,7 @@
                 "elasticsearch",
                 "search"
             ],
-            "time": "2017-12-05T14:15:58+00:00"
+            "time": "2019-01-08T18:53:46+00:00"
         },
         {
             "name": "erusev/parsedown",
@@ -2168,16 +2168,16 @@
         },
         {
             "name": "react/promise",
-            "version": "v2.7.0",
+            "version": "v2.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "f4edc2581617431aea50430749db55cc3fc031b3"
+                "reference": "31ffa96f8d2ed0341a57848cbb84d88b89dd664d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/f4edc2581617431aea50430749db55cc3fc031b3",
-                "reference": "f4edc2581617431aea50430749db55cc3fc031b3",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/31ffa96f8d2ed0341a57848cbb84d88b89dd664d",
+                "reference": "31ffa96f8d2ed0341a57848cbb84d88b89dd664d",
                 "shasum": ""
             },
             "require": {
@@ -2210,7 +2210,7 @@
                 "promise",
                 "promises"
             ],
-            "time": "2018-06-13T15:59:06+00:00"
+            "time": "2019-01-07T21:25:54+00:00"
         },
         {
             "name": "rwoverdijk/assetmanager",
@@ -2721,11 +2721,11 @@
         },
         {
             "name": "unicaen/auth",
-            "version": "1.2.18",
+            "version": "1.2.19",
             "source": {
                 "type": "git",
                 "url": "https://git.unicaen.fr/lib/unicaen/auth",
-                "reference": "cb8ef2800879bf8b3c70258e7775efaec6455a78"
+                "reference": "ca921e67ba535bd364f131e337d73c55589f9cec"
             },
             "require": {
                 "bjyoungblood/bjy-authorize": ">=1.4",
@@ -2747,7 +2747,7 @@
                 ]
             },
             "description": "Module d'authentification pour les applications Unicaen",
-            "time": "2018-11-19T16:04:53+00:00"
+            "time": "2019-01-08T14:44:26+00:00"
         },
         {
             "name": "zendframework/zend-authentication",
@@ -6760,12 +6760,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "735f266d72f253d59269f4cab38094070f3db22f"
+                "reference": "69633fc19189699d20114f005efc8851c3fe9288"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/735f266d72f253d59269f4cab38094070f3db22f",
-                "reference": "735f266d72f253d59269f4cab38094070f3db22f",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/69633fc19189699d20114f005efc8851c3fe9288",
+                "reference": "69633fc19189699d20114f005efc8851c3fe9288",
                 "shasum": ""
             },
             "require": {
@@ -6819,7 +6819,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2019-01-06T16:39:37+00:00"
+            "time": "2019-01-08T16:48:01+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -6871,123 +6871,6 @@
                 "validate"
             ],
             "time": "2018-12-25T11:19:39+00:00"
-        },
-        {
-            "name": "zendframework/zend-debug",
-            "version": "2.6.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/zendframework/zend-debug.git",
-                "reference": "cb423facd6f2e875a3cb44cf992b6bd1f5fd1a96"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-debug/zipball/cb423facd6f2e875a3cb44cf992b6bd1f5fd1a96",
-                "reference": "cb423facd6f2e875a3cb44cf992b6bd1f5fd1a96",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^5.6 || ^7.0",
-                "zendframework/zend-escaper": "^2.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^5.7.27 || ^6.5.8 || ^7.1.5",
-                "zendframework/zend-coding-standard": "~1.0.0"
-            },
-            "suggest": {
-                "ext-xdebug": "XDebug, for better backtrace output"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.6.x-dev",
-                    "dev-develop": "2.7.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Zend\\Debug\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "description": "Safely dump debug information to HTML",
-            "keywords": [
-                "ZendFramework",
-                "debug",
-                "zf"
-            ],
-            "time": "2018-04-30T20:10:31+00:00"
-        },
-        {
-            "name": "zendframework/zend-developer-tools",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/zendframework/ZendDeveloperTools.git",
-                "reference": "b2509f8e62b018fc9d70ad126431d01ba0de6eed"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/ZendDeveloperTools/zipball/b2509f8e62b018fc9d70ad126431d01ba0de6eed",
-                "reference": "b2509f8e62b018fc9d70ad126431d01ba0de6eed",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.3",
-                "zendframework/zend-debug": "2.*",
-                "zendframework/zend-eventmanager": "2.*",
-                "zendframework/zend-modulemanager": "2.*",
-                "zendframework/zend-mvc": "2.*",
-                "zendframework/zend-servicemanager": "2.*",
-                "zendframework/zend-stdlib": "2.*",
-                "zendframework/zend-version": "2.*",
-                "zendframework/zend-view": "2.*"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~4"
-            },
-            "suggest": {
-                "aist/aist-git-tools": "Show you informations about current GIT repository",
-                "bjyoungblood/bjy-profiler": "Version: dev-master, allows the usage of the (Zend) Db collector.",
-                "doctrine/doctrine-orm-module": "Profile DoctrineORM queries",
-                "jhuet/zdt-logger-module": "Show you log data from Zend\\Log",
-                "ocramius/ocra-service-manager": "OcraServiceManager can help you track dependencies within your application.",
-                "san/san-session-toolbar": "SanSessionToolbar can help you see current Zend\\Session data you're using within your application.",
-                "snapshotpl/zf-snap-event-debugger": "ZfSnapEventDebugger can help you debug events from Zend\\EventManager"
-            },
-            "type": "zf-module",
-            "autoload": {
-                "psr-0": {
-                    "ZendDeveloperTools": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Evan Coury",
-                    "email": "me@evancoury.com",
-                    "homepage": "http://blog.evan.pro/"
-                },
-                {
-                    "name": "Eric Boh",
-                    "email": "cossish@gmail.com"
-                }
-            ],
-            "description": "Module for developer and debug tools for working with the ZF2 MVC layer.",
-            "homepage": "https://github.com/zendframework/ZendDeveloperTools",
-            "keywords": [
-                "debug",
-                "developer",
-                "module",
-                "zf2"
-            ],
-            "time": "2015-11-24T11:08:25+00:00"
         }
     ],
     "aliases": [],

@@ -29,7 +29,12 @@ $settings = array(
      * Identifiants de connexion LDAP autorisés à faire de l'usurpation d'identité.
      * NB: à réserver exclusivement aux tests.
      */
+
+
     // 'usurpation_allowed_usernames' => array('sbouvry', 'bouvry', 'turbout'),
+
+    // Champ utilisé pour l'autentification (côté LDAP)
+    // 'ldap_username' => 'supannaliaslogin',
 );
 
 /**
