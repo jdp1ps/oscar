@@ -34,7 +34,10 @@
   "minimum-stability": "stable",
   "config": {
     "github-protocols": ["https", "ssh"],
-    "secure-http": false
+    "secure-http": false,
+    "platform": {
+      "php": "7.0"
+    }
   },
   "autoload": {
     "psr-0": {
