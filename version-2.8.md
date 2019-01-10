@@ -1,6 +1,10 @@
-# version 2.8 "Callahan" (Novembre 2018)
+# version 2.8 "Callahan" (Janvier 2019)
 
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
+
+## ATTENTION
+
+Pour les instances d'oscar utilisant LDAP, cette version profite d'évolutions de la librairie tiers **UnicaenApp** qui permet maintenant de configurer le champ LDAP utilisé pour l'autentification. Voir la documentation ([Configurer l'identifiant de connexion LDAP](./doc/install-prod.md), partie **Authentification LDAP : Non-Supann**).
 
 
 ## Feuille de temps
@@ -26,6 +30,7 @@ Refonte complète de l'interface de saisie et de validation des déclarations
  - Activité > Numéro : La capacité du champ a été augmentée 
  - Le privilèges 'Voir les notifications plannifiées' fonctionne correctement
  - Déclaration : Les jours feriès Lundi de pâques, ascension et pentecôte ont été ajoutés
+ - Ajout de LOG d'erreur
 
 
 
