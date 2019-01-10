@@ -46,11 +46,34 @@
                 <small class="right">par <strong>{{ a.requester }}</strong></small>
             </h3>
             <div class="content">
-                Demandeur : <strong><i class="icon-user"></i> {{ a.requester }}</strong><br>
-                Organisme : <strong v-if="a.organisation"><i class="icon-building-filled"></i> {{ a.organisation }}</strong>
-                <em v-else>Aucun organisme identifié</em>
+                <i class="icon-user"></i> Demandeur : <strong>{{ a.requester }}</strong><br>
+                <i class="icon-building-filled"></i>Organisme : <strong v-if="a.organisation"> {{ a.organisation }}</strong>
+                <em v-else>Aucun organisme identifié</em><br>
+                <i class="icon-bank"></i> Budget : <strong>{{ a.amount | montant}}</strong><br>
+                <i class="icon-calendar"></i> du <strong v-if="a.dateStart">{{ a.dateStart | date}}</strong><em v-else>non précisé</em> au
+                    <strong v-if="a.dateEnd">{{ a.dateEnd | date}}</strong><em v-else>non précisé</em>
             </div>
-            <pre>{{ a }}</pre>
+            <p class="">Description : <br>
+                {{ a.description }}
+            </p>
+            <section class="liste-fichiers" v-if="a.files.length">
+                <h4><i class="icon-file-excel"></i> Fichiers</h4>
+                <ul>
+                    <li v-for="f in a.files"><strong>{{ f.name }}</strong>{{ f }}</li>
+                </ul>
+            </section>
+                <!-- <pre>{{ a }}</pre> -->
+            <nav>
+                <button class="btn btn-success">
+                    <i class="icon-valid"></i> Valider la demande
+                </button>
+                <button class="btn btn-default">
+                    <i class="icon-edit"></i> Marquée comme pise en charge
+                </button>
+                <button class="btn btn-danger">
+                    <i class="icon-cancel-alt"></i> Rejeter la demande
+                </button>
+            </nav>
         </article>
         </section>
         <div v-else>

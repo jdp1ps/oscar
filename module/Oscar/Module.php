@@ -215,18 +215,12 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
                 $action = $match->getParam('action');
                 $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
-
-
                 $userInfos = $this->getCurrentUserInfo();
                 $base = $userInfos['base'];
-
                 $method = $request->getMethod();
-
-
-                $userid = $userContext->getDbUser() ? $userContext->getDbUser()->getid() : -1;
                 $contextId = $match->getParam('id', '?');
                 $message = sprintf('%s [%s] %s:%s %s', $base, $method, $controller, $action, $uri);
-                // $this->getLogger()->debug($message);
+                $this->getLogger()->debug($message);
 
             } catch (\Exception $e) {
                 error_log($e->getMessage());
