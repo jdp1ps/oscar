@@ -9,18 +9,13 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
-use Doctrine\DBAL\Query\QueryBuilder;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
-use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityRequestRepository;
-use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
@@ -28,7 +23,6 @@ use Oscar\Entity\Notification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
-use Oscar\Entity\Privilege;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
@@ -37,7 +31,6 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
-use Oscar\Form\ActivityRequestForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\CSVDownloader;
@@ -49,10 +42,7 @@ use Oscar\Service\NotificationService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Oscar\Validator\EOTP;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\Http\PhpEnvironment\Request;
-use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
@@ -95,27 +85,32 @@ class ProjectGrantController extends AbstractOscarController
             $method = $this->getHttpXMethod();
             switch ($method) {
                 case "GET":
-                    /** @var ActivityRequestRepository $demandeActiviteRepository */
-                    $demandeActiviteRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
-                    if( $spot == 'global'){
-                        $activityRequests = $demandeActiviteRepository->getAll();
-                    }
-                    elseif ($spot == 'organizations') {
-                        $activityRequests = $demandeActiviteRepository->getAllForOrganizations($organizations);
-                    }
-                    else {
-                        return $this->getResponseBadRequest('Mauvais contexte !');
+                    try {
+                        /** @var ActivityRequestRepository $demandeActiviteRepository */
+                        $demandeActiviteRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
+                        if( $spot == 'global'){
+                            $activityRequests = $demandeActiviteRepository->getAll();
+                        }
+                        elseif ($spot == 'organizations') {
+                            $activityRequests = $demandeActiviteRepository->getAllForOrganizations($organizations);
+                        }
+                        else {
+                            return $this->getResponseBadRequest('Mauvais contexte !');
+                        }
+
+                        $datas = [
+                            'activityRequests' => []
+                        ];
+                        /** @var ActivityRequest $activityRequest */
+                        foreach ($activityRequests as $activityRequest) {
+                            $datas['activityRequests'][] = $activityRequest->toJson();
+                        }
+
+                        return $this->jsonOutput($datas);
+                    } catch (\Exception $e){
+                        return $this->getResponseInternalError($e->getMessage());
                     }
 
-                    $datas = [
-                        'activityRequests' => []
-                    ];
-                    /** @var ActivityRequest $activityRequest */
-                    foreach ($activityRequests as $activityRequest) {
-                        $datas['activityRequests'][] = $activityRequest->toJson();
-                    }
-
-                    return $this->jsonOutput($datas);
 
                     break;
             }

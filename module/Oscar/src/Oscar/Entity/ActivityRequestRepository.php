@@ -13,10 +13,29 @@ use Doctrine\ORM\EntityRepository;
 
 class ActivityRequestRepository extends EntityRepository
 {
-    public function getAll(){
-        return $this->findAll();
+
+    /**
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    protected function getBaseQueryAdministration(){
+        $qb = $this->createQueryBuilder('ar')
+            ->where('ar.status != :status')
+            ->setParameter('status', ActivityRequest::STATUS_DRAFT);
+
+        return$qb;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getAll(){
+        return $this->getBaseQueryAdministration()->getQuery()->getResult();
+    }
+
+    /**
+     * @param $organizations
+     * @return mixed
+     */
     public function getAllForOrganizations( $organizations ){
         $qb = $this->createQueryBuilder('ar')
             ->where('ar.organization IN(:organizations)')
