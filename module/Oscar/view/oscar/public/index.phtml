@@ -111,14 +111,14 @@
                                     <i class="icon-warning-empty"></i> Problème pour la/les déclaration(s) :
                                     <?php foreach ($periodsRejected as $validationPeriod): ?>
                                     <article>
-
                                         <?php if( $validationPeriod['activity'] ): ?>
                                         L'activité <strong><?= $validationPeriod['activity'] ?></strong>
                                         <?php else: ?>
                                         Les créneaux <strong><?= $validationPeriod['validation']->getLabel() ?> </strong>
                                         <?php endif; ?>
                                         pour la période <strong><?= $this->moment($validationPeriod['validation']->getFirstDayStr(), 'M Y') ?></strong>
-                                        <a class="btn btn-default btn-xs" href="<?= $this->url('timesheet/declarant') ?>?month=<?= $validationPeriod['validation']->getMonth() ?>&year=<?= $validationPeriod['validation']->getYear() ?>" >
+                                        <a class="btn btn-default btn-xs"
+                                           href="<?= $this->url('timesheet/declarant') ?>?month=<?= $validationPeriod['validation']->getMonth() ?>&year=<?= $validationPeriod['validation']->getYear() ?>" >
                                             <i class="icon-pencil"></i>
                                             Modifier
                                         </a>
@@ -129,46 +129,23 @@
                             <?php endif; ?>
 
                             <?php if( $isValidator ): ?>
-
-
                                     <a href="<?= $this->url('timesheet/validations') ?>" class="btn <?= count($validations) > 0 ? 'btn-primary' : 'btn-default' ?>">
                                         <i class="icon-pencil"></i>
                                         Validation des feuilles de temps
                                     </a>
-
                             <?php endif; ?>
 
-                            <?php /* if( count($activitiesValidation) ): ?>
-                                <h1>Validation en attente</h1>
-                                <section>
-                                    <?php foreach ($activitiesValidation as $activity): ?>
-                                        <article class="card card-xs">
-                                            <strong><?= $activity->getProject() ?></strong> /
-                                            <?= $activity ?> :
-                                            <a href="<?= $this->url('timesheet/validationactivity', ['idactivity' => $activity->getId()]) ?>">
-                                                <i class="icon-pencil"></i>
-                                                Valider les déclarations
-                                            </a>
-                                        </article>
-                                    <?php endforeach; ?>
-                                </section>
+                            <?php if( $isRequestValidator ): ?>
+                                <a href="<?= $this->url('contract/requestadmin') ?>" class="btn <?= $requestValidations > 0 ? 'btn-primary' : 'btn-default' ?>">
+                                    <i class="icon-cube"></i>
+                                    Demande d'activité
+                                    <?php if( $requestValidations > 0 ): ?>
+                                    <sub class="bubble bubble-danger"><?= $requestValidations ?></sub>
+                                    <?php endif; ?>
+                                </a>
                             <?php endif; ?>
-
-                            <?php if( count($validationsHorsLot) ): ?>
-                                <h1>Validation Hors-Lot (<?= count($validationsHotLot) ?>)</h1>
-                                <section>
-                                    <?php foreach ($validationsHorsLot as $val): ?>
-                                        <article class="card card-xs">
-                                            <strong><?= $val->getLabel() ?></strong> pour <strong><?= $val->getDeclarer() ?></strong>
-                                            <a href="<?= $this->url('timesheet/validationhwpperson', ['idperson' => $val->getDeclarer()->getId()]) ?>">
-                                                <i class="icon-pencil"></i>
-                                                Valider les déclarations
-                                            </a>
-                                        </article>
-                                    <?php endforeach; ?>
-                                </section>
-                            <?php endif; */?>
                         </div>
+
                         <div class="col-md-12">
                             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX) ): ?>
                                 <form action="<?= $this->url('contract/advancedsearch') ?>"

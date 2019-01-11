@@ -8682,5 +8682,21 @@ pre.alert-danger, pre.alert-info {
   .wp-hours .duration {
     background: #888; }
 
+.bubble {
+  background: #999;
+  color: white;
+  display: inline-block;
+  padding: .25em .5em;
+  text-align: center;
+  line-height: 1em;
+  font-size: .8em;
+  border-radius: 1em;
+  position: relative;
+  top: -.4em;
+  font-weight: bold;
+  text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.2); }
+  .bubble.bubble-danger {
+    background: #DD423E; }
+
 body {
   background: #f2f3eb; }

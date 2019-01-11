@@ -110,14 +110,52 @@ class ProjectGrantController extends AbstractOscarController
                     } catch (\Exception $e){
                         return $this->getResponseInternalError($e->getMessage());
                     }
-
-
                     break;
+
+                case "POST":
+                    try {
+                        $action = $this->params()->fromPost('action');
+
+                        /** @var ActivityRequestService $requestActivityService */
+                        $activityRequestService = $this->getServiceLocator()->get("ActivityRequestService");
+
+                        /** @var ActivityRequest $request */
+                        $request = $activityRequestService->getActivityRequest($this->params()->fromPost('id'));
+
+                        if( $spot == 'organizations'){
+                            if( !in_array($organizations, $request->getOrganisation()) ){
+                                throw new UnAuthorizedException("Vous n'avez pas les droits suffisants pour valider cette demande.");
+                            }
+                        }
+
+                        if( $action == "valid" ){
+                            $activityRequestService->valid($request, $this->getCurrentPerson());
+                        }
+                        elseif ($action == "reject") {
+                            $activityRequestService->reject($request, $this->getCurrentPerson());
+                        }
+                        else {
+                            return $this->getResponseBadRequest("Impossible de résoudre l'action '$action'.");
+                        }
+
+                        return $this->getResponseOk();
+
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
             }
             return $this->getResponseBadRequest("MAUVAISE UTILISATION ($method)");
         }
 
-        return [];
+
+
+        $jsonFormatter = new JSONFormatter($this->getOscarUserContext());
+
+
+        return [
+            'rolesPerson' => $jsonFormatter->objectsCollectionToJson($this->getPersonService()->getAvailableRolesPersonActivity()),
+            'rolesOrganisation' => $jsonFormatter->objectsCollectionToJson($this->getOrganizationService()->getAvailableRolesOrganisationActivity()),
+        ];
     }
 
     public function requestForAction()

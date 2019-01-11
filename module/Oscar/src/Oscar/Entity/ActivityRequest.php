@@ -28,6 +28,7 @@ class ActivityRequest
 
     const STATUS_DRAFT = 1;
     const STATUS_SEND = 2;
+    const STATUS_VALID = 5;
 
     /**
      * @var string

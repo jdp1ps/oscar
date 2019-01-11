@@ -10,8 +10,11 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
+use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityRequestFollow;
+use Oscar\Entity\ActivityRequestRepository;
+use Oscar\Entity\Notification;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -26,6 +29,7 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 class ActivityRequestService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
@@ -81,6 +85,17 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
         }
     }
 
+    public function getAllRequestActivityUnDraft( $organizationsFilter = false ){
+        /** @var ActivityRequestRepository $requestActivityRepository */
+        $requestActivityRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
+
+        if( $organizationsFilter === false )
+            return $requestActivityRepository->getAll();
+        else {
+            return $requestActivityRepository->getAllForOrganizations($organizationsFilter);
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// ENREGISTREMENT DES DONNÉES
@@ -93,8 +108,70 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
 
     public function updateActivityRequest($datas)
     {
-
         throw new OscarException("L'enregistrement des demandes d'activité n'est pas encore implanté.");
+    }
+
+    public function valid( ActivityRequest $activityRequest, Person $validator ){
+        if( $activityRequest->getStatus() != ActivityRequest::STATUS_SEND ){
+            throw new OscarException("Conflit de status");
+        }
+
+        /** @var NotificationService $notificationService */
+        $notificationService = $this->getServiceLocator()->get("NotificationService");
+
+        /** @var ProjectGrantService $notificationService */
+        $activityService = $this->getServiceLocator()->get("ActivityService");
+
+        $activity = new Activity();
+        $this->getEntityManager()->persist($activity);
+        $activity->setLabel($activityRequest->getLabel())
+            ->setDescription($activityRequest->getDescription())
+            ->setAmount($activityRequest->getAmount());
+
+        // todo : Ajout de la personne
+
+        // todo : Ajout de l'oganisme
+
+        $this->getEntityManager()->flush();
+
+        // Mise à jour de l'index de recherche
+        $activityService->searchUpdate($activity);
+
+
+        // Ajout du Follow
+        $follow = new ActivityRequestFollow();
+        $this->getEntityManager()->persist($follow);
+
+        $follow->setActivityRequest($activityRequest)
+            ->setDescription("Demande validée")
+            ->setDateCreated(new \DateTime())
+            ->setCreatedBy($validator);
+
+        $activityRequest->setStatus(ActivityRequest::STATUS_VALID);
+        $this->getEntityManager()->flush();
+
+        // todo Notification du demandeur
+        $demandeur = $activityRequest->getCreatedBy();
+        $notificationService->notification(
+            sprintf("La demande %s a été validée par %s", $activityRequest->getLabel(), $validator),
+            [$demandeur],
+            Notification::OBJECT_ACTIVITY,
+            $activity->getId(),
+            Notification::OBJECT_ACTIVITY,
+            new \DateTime(),
+            new \DateTime()
+        );
+
+        return true;
+
+
+
+
+        throw new OscarException("Cette fonctionnalité n'est pas encore implantée");
+    }
+
+    public function reject( ActivityRequest $activityRequest ){
+        throw new OscarException("Cette fonctionnalité n'est pas encore implantée");
     }
 
     public function createOrUpdateActivityRequest($datas)

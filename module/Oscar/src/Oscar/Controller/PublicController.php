@@ -11,6 +11,7 @@ use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ActivityRequestService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\TimesheetService;
 use Zend\EventManager\Event;
@@ -134,36 +135,53 @@ class PublicController extends AbstractOscarController
     {
 
         $person = null;
-        /** @var TimesheetService  $timeSheetService */
+        /** @var TimesheetService $timeSheetService */
         $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
-
 
         $validations = [];
         $isValidator = false;
+        $person = $this->getOscarUserContext()->getCurrentPerson();
+        $isRequestValidator = false;
+        $hasRequestValidator = false;
 
-
-//        echo "<pre style='width: 250px; z-index: 20000; position: fixed; bottom: 0; right: 0; background: red'>";
-//
-//        var_dump($this->getOscarUserContext()->getSelectedIdentityRole());
-//        echo "</pre>";
-
-
-
-        try {
-            $person = $this->getOscarUserContext()->getCurrentPerson();
-
-            if( $person ){
+        if ($person) {
+            try {
                 // Déclaration en conflit
                 $periodsRejected = $timeSheetService->getValidationPeriodPersonConflict($person);
-
                 $isValidator = $timeSheetService->isValidator($person);
                 $validations = $timeSheetService->getValidationToDoPerson($person);
+            } catch (\Exception $e) {
+                $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
             }
 
-        } catch( \Exception $e ){
-            $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
+
+            try {
+                /** @var ActivityRequestService $serviceDemandeActivite */
+                $serviceDemandeActivite = $this->getServiceLocator()->get('ActivityRequestService');
+                $requests = null;
+
+                // Accès globale
+                if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
+                    $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft();
+                }
+                elseif ( count($organizations = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE)) ){
+                    $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft($organizations);
+                }
+
+                if( $requests !== null ){
+                    $isRequestValidator = true;
+                    $requestValidations = count($requests);
+                }
+
+            } catch (\Exception $e) {
+                $this->getLogger()->error("Impossible de charger les demandes d'activité pour $person : " . $e->getMessage());
+            }
         }
+
+
         return [
+            'isRequestValidator' => $isRequestValidator,
+            'requestValidations' => $requestValidations,
             'validations' => $validations,
             'isValidator' => $isValidator,
             'periodsRejected' => $periodsRejected,

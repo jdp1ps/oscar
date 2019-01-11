@@ -7,9 +7,11 @@
  */
 ?>
 <link rel="stylesheet" href="<?= $this->basePath().'/js/oscar/dist/datepicker.css' ?>">
+
 <section class="container">
     <div id="app"></div>
 </section>
+
 <script>
     require(['vue', 'vue-resource', 'Datepicker2', 'mm', 'ActivityRequestAdmin'], function( Vue, VueResource, Datepicker2, moment, ActivityRequestAdmin) {
         Vue.use(VueResource);
@@ -23,7 +25,11 @@
         new Vue({
             el: '#app',
             render: function(h){
-                return h(ActivityRequestAdmin.default, { props: { moment: moment }})
+                return h(ActivityRequestAdmin.default, { props: {
+                    moment: moment,
+                    rolesPerson: <?= json_encode($rolesPerson) ?>,
+                    rolesOrganisation: <?= json_encode($rolesOrganisation) ?>
+                }})
             }
         })
     })

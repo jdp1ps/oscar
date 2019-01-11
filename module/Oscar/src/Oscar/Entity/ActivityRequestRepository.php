@@ -38,8 +38,10 @@ class ActivityRequestRepository extends EntityRepository
      */
     public function getAllForOrganizations( $organizations ){
         $qb = $this->createQueryBuilder('ar')
-            ->where('ar.organization IN(:organizations)')
-            ->setParameter('organizations', $organizations);
+            ->where('ar.organisation IN(:organizations)')
+            ->andWhere('ar.status != :status')
+            ->setParameter('organizations', $organizations)
+        ->setParameter('status', ActivityRequest::STATUS_DRAFT);
         return $qb->getQuery()->getResult();
     }
 }

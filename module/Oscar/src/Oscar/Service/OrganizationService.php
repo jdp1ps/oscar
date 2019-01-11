@@ -12,6 +12,7 @@ use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationType;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
@@ -39,6 +40,12 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     private $cacheCountries = null;
     private $cacheConnectors = null;
 
+    /**
+     * Retourne la liste des Roles disponible pour une organisation dans une activité.
+     */
+    public function getAvailableRolesOrganisationActivity(){
+        return $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
+    }
 
     public function deleteOrganization( $id ){
         $o = $this->getOrganization($id);

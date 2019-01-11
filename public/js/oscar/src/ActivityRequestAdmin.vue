@@ -4,27 +4,43 @@
 
         <transition name="fade">
             <div class="overlay" v-if="error">
-                <div class="alert alert-danger">
+                <div class="alert alert-danger overlay-content">
                     <h3>Erreur
                         <a href="#" @click.prevent="error =null" class="float-right">
                             <i class="icon-cancel-outline"></i>
                         </a>
                     </h3>
-                    <p>{{ error }}</p>
+                    <pre>{{ error }}</pre>
                 </div>
             </div>
         </transition>
 
         <transition name="fade">
-            <div class="overlay" v-if="deleteData">
-                <div class="alert alert-danger">
-                    <h3>Supprimer la demande <strong>{{ deleteData.label }}</strong> ?</h3>
+            <div class="overlay" v-if="confirmProccess">
+                <div class="alert alert-danger overlay-content">
+                    <h3>{{ confirmProccess.message }}</h3>
+                    <section v-if="confirmProccess.person" class="row">
+                        <label for="roleDelarer" class="col-md-4">Rôle de {{ confirmProccess.person }}</label>
+                        <div class="col-md-8">
+                            <select v-model="confirmProccess.personRole" class="form-control" id="roleDeclarer">
+                                <option value="0">Ne pas affecter à l'activité</option>
+                                <option v-for="r in rolesPerson" :value="r.id">{{ r.roleId }}</option>
+                            </select>
+                        </div>
+                    </section>
+                    <section v-if="confirmProccess.organisation">
+                        <label for="roleOrg">Rôle de {{ confirmProccess.organisation }}</label>
+                        <select v-model="confirmProccess.organisationRole" class="form-control" id="roleOrg">
+                            <option v-for="r in rolesOrganisation" :value="r.id">{{ r.roleId }}</option>
+                        </select>
+                    </section>
+                    <hr class="separator">
                     <nav>
-                        <button type="reset" class="btn btn-danger" @click.prevent="deleteData = null">
+                        <button type="reset" class="btn btn-danger" @click.prevent="confirmProccess = null">
                             <i class="icon-cancel-outline"></i>
                             Annuler
                         </button>
-                        <button type="submit" class="btn btn-success" @click.prevent="performDelete">
+                        <button type="submit" class="btn btn-success" @click.prevent="confirmProccess.process()">
                             <i class="icon-ok-circled"></i>
                             Confirmer
                         </button>
@@ -32,7 +48,9 @@
                 </div>
             </div>
         </transition>
-        <h1>Demandes d'activité en attente</h1>
+
+        <h1>Traitement des demandes d'activité en attente</h1>
+
         <section v-if="activityRequests.length">
         <article v-for="a in activityRequests" class="card">
             <h3 class="card-title">
@@ -46,6 +64,7 @@
                 <small class="right">par <strong>{{ a.requester }}</strong></small>
             </h3>
             <div class="content">
+                <i class="icon-user"></i> Statut : <strong>{{ a.statut }}</strong><br>
                 <i class="icon-user"></i> Demandeur : <strong>{{ a.requester }}</strong><br>
                 <i class="icon-building-filled"></i>Organisme : <strong v-if="a.organisation"> {{ a.organisation }}</strong>
                 <em v-else>Aucun organisme identifié</em><br>
@@ -63,14 +82,14 @@
                 </ul>
             </section>
                 <!-- <pre>{{ a }}</pre> -->
-            <nav>
-                <button class="btn btn-success">
+            <nav v-if="a.statut == 2">
+                <button class="btn btn-success" @click="handlerValid(a)">
                     <i class="icon-valid"></i> Valider la demande
                 </button>
-                <button class="btn btn-default">
-                    <i class="icon-edit"></i> Marquée comme pise en charge
+                <button class="btn btn-default" @click="handlerTaken(a)">
+                    <i class="icon-edit"></i> Marquée comme prise en charge
                 </button>
-                <button class="btn btn-danger">
+                <button class="btn btn-danger" @click="handlerReject(a)">
                     <i class="icon-cancel-alt"></i> Rejeter la demande
                 </button>
             </nav>
@@ -101,14 +120,25 @@
                 demandeur : "",
                 demandeur_id : null,
                 organisations : [],
-                lockMessages : []
+                lockMessages : [],
+                confirmProccess: null,
+                roles: {
+                    person: null,
+                    organisation: null
+                }
             }
         },
 
         props: {
             moment: {
                 required: true
-            }
+            },
+            rolesPerson: {
+                required: true
+            },
+            rolesOrganisation: {
+                required: true
+            },
         },
 
         computed:{
@@ -116,13 +146,77 @@
         },
 
         methods:{
-            processFile(evt){
-                this.addableFiles = evt.target.files[0].name;
+            handlerValid(request){
+                this.confirmProccess = {
+                    message: "Confirmer la transformation de la demande en activité : "+ request.label + " par " + request.requester +" ?",
+                    person: request.requester,
+                    personRole: 0,
+                    organization: request.organisation,
+                    organizationRole: 0,
+                    process: () => this.performValid(request)
+                }
             },
 
-            handlerAddFile(){
-                this.addFile = true;
+            handlerReject(request){
+                this.confirmProccess = {
+                    message: "Confirmer le rejet de la demande : " + request.label + " par " + request.requester +" ?",
+                    process: () => this.performReject(request)
+                }
             },
+
+            performValid(request){
+              this.loading = "Transformation de la demande en activité...";
+              let datas = new FormData();
+              datas.append('id', request.id);
+              datas.append('action', 'valid');
+              if( this.confirmProccess.person ) {
+                  datas.append('personRoleId', this.confirmProccess.personRole);
+              }
+              if( this.confirmProccess.organisation ) {
+                  datas.append('organisationRoleId', this.confirmProccess.organisationRole);
+              }
+
+              this.$http.post('?', datas).then(
+                  ok => {
+                      this.fetch();
+                  },
+                  ko => {
+                      this.error = "Impossible de valider la demande : " +ko.body;
+                  }
+              ).then( foo => {
+                  this.loading = "";
+                  this.confirmProccess = null;
+              })
+            },
+
+            performReject(request){
+                this.loading = "Rejet de la demande en activité...";
+                let datas = new FormData();
+                datas.append('id', request.id);
+                datas.append('action', 'reject');
+                this.$http.post('?', datas).then(
+                    ok => {
+                        this.fetch();
+                    },
+                    ko => {
+                        this.error = "Impossible de rejeter la demande : " +ko.body;
+                    }
+                ).then( foo => {
+                    this.loading = "";
+                    this.confirmProccess = null;
+                })
+            },
+
+            /*
+            (a)">
+                    <i class="icon-valid"></i> Valider la demande
+                </button>
+                <button class="btn btn-default" @click="handlerTaken(a)">
+                    <i class="icon-edit"></i> Marquée comme prise en charge
+                </button>
+                <button class="btn btn-danger" @click="handlerRefuse(a)">
+                    <i class="icon-cancel-alt"></i> Rejeter la demande
+            */
 
             /**
              * Récupération des données.

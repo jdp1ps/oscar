@@ -47,6 +47,11 @@ class Role implements HierarchicalRoleInterface
         ];
     }
 
+    public function toJson()
+    {
+        return $this->asArray();
+    }
+
     /**
      * @param $level
      * @return string

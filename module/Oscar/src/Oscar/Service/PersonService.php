@@ -21,6 +21,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
+use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Utils\UnicaenDoctrinePaginator;
@@ -1008,17 +1009,14 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return preg_replace("/p0*([0-9]*)/", "$1", $codeLdap);
     }
 
-    public function getRolesLdap(){
-        $roles = [];
-        $ldapPersons =  $this->getServiceLdap()->searchSimplifiedEntries(
-            self::LDAP_PERSONS,
-            self::STAFF_ACTIVE_OR_DISABLED,
-            [],
-            'cn'
-        );
-        die('ROLES LDAP');
 
+    public function getAvailableRolesPersonActivity(){
+        /** @var RoleRepository $roleRepository */
+        $roleRepository = $this->getEntityManager()->getRepository(Role::class);
+        $roles = $roleRepository->getRolesAtActivity()->getQuery()->getResult();
+        return $roles;
     }
+
 
     public function getPersonsPrincipalInActivityIncludeOrganization( Activity $activity ){
         $persons = [];
@@ -1174,6 +1172,38 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
         $this->getEntityManager()->remove($organizationPerson);
         $this->getEntityManager()->flush();
+    }
+
+
+    /**
+     * Retourne la liste des organisations de la personne.
+     *
+     * @param Person $person
+     * @param bool $date Si $date est non-false, on test la date donnée
+     * @param bool $pincipal TRUE : Tiens compte uniquement des rôles 'principaux'
+     * @return array
+     */
+    public function getPersonOrganizations( Person $person, $date = false, $pincipal = false ){
+
+        $qb = $this->getEntityManager()->getRepository(Organization::class)
+            ->createQueryBuilder('o')
+            ->innerJoin('o.persons', 'op')
+            ->where('op.person = :person')
+            ->setParameter('person', $person);
+
+        if( $date !== false ){
+            $date = $date === true ? new \DateTime() : $date;
+            $qb->andWhere('op.dateStart IS NULL OR op.dateStart <= :date');
+            $qb->andWhere('op.dateEnd >= :date OR op.dateEnd IS NULL');
+            $qb->setParameter('date', $date);
+        }
+
+        if( $pincipal === true ){
+            $qb->innerJoin('op.roleObj', 'r')
+                ->andWhere('r.principal = true');
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
 

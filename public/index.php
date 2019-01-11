@@ -87,7 +87,7 @@ if( php_sapi_name() !== 'cli' && file_exists(__DIR__.'/../MAINTENANCE') ){
 
 if( getenv('APPLICATION_ENV') == 'development' ){
     define('DEBUG_OSCAR', true);
-    error_reporting(E_ERROR);
+    error_reporting(E_ALL);
 } else {
     define('DEBUG_OSCAR', false);
     error_reporting(E_ERROR);
@@ -133,11 +133,35 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
         // jusqu'au gestionaire d'erreur standard de PHP
         return;
     }
-    error_log($msg);
+
+    error_log('LOGLOG ' . $msg);
 
     if($codeStr == 'ERROR'){
-        throw new Exception("ERROR $errstr");
+        if( array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) ){
+            echo $msg;
+        } else {
+            ?>
+            <div class="container">
+                <section class="alert alert-danger">
+                    <h1>
+                        Erreur d'execution PHP
+                    </h1>
+                    <pre><?= $msg ?></pre>
+                    <p>
+                        <small>Vous pouvez transmettre ce message à l'administateur Oscar pour l'aider à résoudre le
+                            problème.
+                        </small>
+                    </p>
+                </section>
+            </div>
+
+
+            <?php
+        }
+        exit(1);
     }
+
+    return false;
 
     /*switch ($errno) {
         case E_USER_ERROR:
@@ -178,7 +202,7 @@ function fatal_handler() {
         $errline = $error["line"];
         $errstr  = "Fatal error : " . $error["message"];
 
-        oscar_exception( $errno, $errstr, $errfile, $errline);
+        return oscar_exception( $errno, $errstr, $errfile, $errline);
     }
 }
 

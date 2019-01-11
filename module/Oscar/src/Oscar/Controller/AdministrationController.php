@@ -435,20 +435,6 @@ class AdministrationController extends AbstractOscarController
         return ['configs'=>$configs];
     }
 
-    public function connectorTestAction()
-    {
-        $connectorId = $this->params()->fromRoute('connector');
-        $connectors = $this->getServiceLocator()->get('OscarConfig')
-            ->getConfiguration('connectors.' . $connectorId);
-
-
-        $connectorPersonOrganization = $this->getServiceLocator()->get('ConnectorService')->getConnector('person_organization.ldap');
-
-        var_dump($connectorPersonOrganization->getRemoteRolesAvailables());
-
-        die("Test $connectorId");
-    }
-
     ////////////////////////////////////////////////////////////////////////////
     //
     // API
@@ -751,8 +737,6 @@ class AdministrationController extends AbstractOscarController
     {
         $authenticated = $this->getEntityManager()->getRepository(Role::class)->findAll();
         $out = [];
-
-
         return ["roles" => json_encode($out)];
     }
 
