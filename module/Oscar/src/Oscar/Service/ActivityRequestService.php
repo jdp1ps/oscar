@@ -16,6 +16,7 @@ use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityRequestFollow;
 use Oscar\Entity\ActivityRequestRepository;
+use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
 use Oscar\Entity\Notification;
 use Oscar\Entity\OrganizationRole;
@@ -153,18 +154,10 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
             $activityPerson->setPerson($person)
                 ->setActivity($activity)
                 ->setRoleObj($rolePerson);
-
-            $activity->addActivityPerson($activityPerson);
-
-
         }
 
-
-
         if( $organisationDatas && $activityRequest->getOrganisation() ){
-
             $roleOrganization = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($organisationDatas['roleid']);
-
             $activityOrganization = new ActivityOrganization();
             $this->getEntityManager()->persist($activityOrganization);
             $activityOrganization->setOrganization($activityRequest->getOrganisation())
@@ -172,7 +165,36 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
                 ->setRoleObj($roleOrganization);
         }
 
-        // todo DOCUMENTS
+        $dirSource = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_request');
+        $dirDest = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_oscar');
+
+        foreach ($activityRequest->getFilesArray() as $file) {
+            $contractDocument = new ContractDocument();
+            $this->getEntityManager()->persist($contractDocument);
+            $contractDocument->setFileName($file['name'])
+                ->setVersion(1)
+                ->setGrant($activity)
+                ->setFileSize($file['size'])
+                ->setPath($file['name'])
+                ->setDateDeposit($activityRequest->getDateCreated())
+                ->setDateUpdoad($activityRequest->getDateCreated())
+                ->setDateSend($activityRequest->getDateCreated())
+                ->setFileTypeMime($file['type']);
+            $this->getEntityManager()->flush($contractDocument);
+
+            $realName = $contractDocument->generatePath();
+            $contractDocument->setPath($realName);
+
+            $from = $dirSource.'/'.$file['file'];
+            $to = $dirDest.'/'.$realName;
+
+
+            // déplacement du fichier
+            if( !rename($from, $to) ){
+                $this->getServiceLocator()->get('Logger')->error("Impossibe de déplacer le fichier $from vers $to");
+            }
+            $contractDocument->setPath($realName);
+        }
 
         $this->getEntityManager()->flush();
 

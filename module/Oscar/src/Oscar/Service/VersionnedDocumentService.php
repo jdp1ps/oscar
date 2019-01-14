@@ -252,7 +252,7 @@ class VersionnedDocumentService {
         $doc->setPath($realName);
         $directoryLocation = $this->documentHome;
 
-        if( @move_uploaded_file($source, $directoryLocation.$realName) ){
+        if( @move_uploaded_file($source, $directoryLocation.'/'.$realName) ){
             $this->getEntityManager()->persist($doc);
             $this->getEntityManager()->flush($doc);
             return true;
