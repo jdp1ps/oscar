@@ -269,6 +269,12 @@
             }
         },
 
+        watch: {
+            history(){
+                this.fetch();
+            }
+        },
+
         computed:{
 
         },
@@ -287,7 +293,7 @@
              */
             fetch(){
                 this.loading = "Chargement des Demandes";
-                this.$http.get('?').then(
+                this.$http.get('?'+(this.history ? '&history=1' : '')).then(
                     ok => {
                         this.activityRequests = ok.body.activityRequests;
                         this.allowNew = ok.body.allowNew;

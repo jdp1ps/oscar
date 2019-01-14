@@ -243,7 +243,8 @@ class ProjectGrantController extends AbstractOscarController
                 switch ($method) {
                     case "GET" :
                         $limit = 5;
-                        $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json');
+                        $history = $this->params()->fromQuery('history', false);
+                        $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json', $history);
 
                         if( count($demandes) >= $limit ){
                             $lockMessage[] = "Vous avez atteint la limite des demandes autorisées.";

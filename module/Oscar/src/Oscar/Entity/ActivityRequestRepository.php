@@ -59,4 +59,19 @@ class ActivityRequestRepository extends EntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function getAllForPerson( Person $person, $history = false ){
+
+        $mode = 'active';
+        if( $history !== false ){
+            $mode = 'history';
+        }
+        $qb = $this->getBaseQueryAdministration($mode);
+
+        $qb->andWhere('ar.createdBy = :person')
+            ->setParameter('person', $person);
+
+        return $qb->getQuery()->getResult();
+
+    }
 }

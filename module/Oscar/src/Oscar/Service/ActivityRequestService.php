@@ -57,18 +57,18 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
      * @param Person $person
      * @return array
      */
-    public function getActivityRequestPerson(Person $person, $format = 'object')
+    public function getActivityRequestPerson(Person $person, $format = 'object', $history = false)
     {
         try {
-            $query = $this->getEntityManager()->getRepository(ActivityRequest::class)->createQueryBuilder('r')
-                ->where('r.createdBy = :person')
-                ->setParameter('person', $person)
-                ->getQuery();
+            /** @var ActivityRequestRepository $activityRequestRepository */
+            $activityRequestRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
+
+            $activityRequests = $activityRequestRepository->getAllForPerson($person, $history);
 
             if ($format == 'json') {
                 $array = [];
                 /** @var ActivityRequest $activityRequest */
-                foreach ($query->getResult() as $activityRequest) {
+                foreach ($activityRequests as $activityRequest) {
                     $json = $activityRequest->toJson();
                     $json['statutText'] = $this->getStatutText($json['statut']);
                     $json['editable'] = $activityRequest->getStatus() == 1;
@@ -79,7 +79,7 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
                 return $array;
             }
 
-            return $query->getResult();
+            return $activityRequests;
         } catch (\Exception $e) {
             throw new OscarException("Impossible de charger les demande pour $person : " . $e->getMessage());
         }
