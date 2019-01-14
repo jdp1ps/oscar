@@ -19,10 +19,14 @@ class ActivityRequestRepository extends EntityRepository
      */
     protected function getBaseQueryAdministration( $mode = "active" ){
 
-        $status = [ActivityRequest::STATUS_DRAFT];
-
-        if( $mode == 'history' ){
+        if( $mode == "active" ){
+            $status = [ActivityRequest::STATUS_DRAFT];
+        }
+        else if( $mode == 'history' ){
             $status = [ActivityRequest::STATUS_VALID, ActivityRequest::STATUS_REJECT];
+        }
+        else if (is_array($mode)) {
+            $status = $mode;
         }
 
         $qb = $this->createQueryBuilder('ar')
@@ -62,7 +66,7 @@ class ActivityRequestRepository extends EntityRepository
 
     public function getAllForPerson( Person $person, $history = false ){
 
-        $mode = 'active';
+        $mode = [ActivityRequest::STATUS_DRAFT, ActivityRequest::STATUS_SEND];
         if( $history !== false ){
             $mode = 'history';
         }
