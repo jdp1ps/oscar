@@ -16,6 +16,15 @@
     require(['vue', 'vue-resource', 'Datepicker2', 'mm', 'ActivityRequestAdmin'], function( Vue, VueResource, Datepicker2, moment, ActivityRequestAdmin) {
         Vue.use(VueResource);
         Vue.component('datepicker', Datepicker2.default);
+        Vue.filter('renderStatus', function(s){
+           switch(s){
+               case 1 : return "Brouillon";
+               case 2 : return "Envoyé";
+               case 5 : return "Validée";
+               case 7 : return "Refusé";
+               default: return 'Statut ' + s + ' inconnue';
+           }
+        });
         Vue.filter('date', function(s){
             return moment(s).format('dddd D MMMM YYYY')
         });

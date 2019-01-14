@@ -70,7 +70,7 @@
             </h3>
             <div class="content row">
                 <div class="col-md-6">
-                    <i class="icon-user"></i> Statut : <strong>{{ a.statut }}</strong><br>
+                    <i class="icon-user"></i> Statut : <strong>{{ a.statut | renderStatus }}</strong><br>
                     <i class="icon-user"></i> Demandeur : <strong>{{ a.requester }}</strong><br>
                     <i class="icon-building-filled"></i>Organisme : <strong v-if="a.organisation"> {{ a.organisation }}</strong>
                     <em v-else>Aucun organisme identifié</em><br>
