@@ -14,6 +14,10 @@ return array(
 
         'theme' => 'oscar',
 
+        // Pour les opérations automatique, permet d'obtenir depuis la base de donnée la devise à utiliser
+        // dans les activités de recherche si rien n'est spécifié. (valeur de la colonne 'label').
+        'defaultCurrency' => 'Euro',
+
         /////////////////////////////////////////////////////////////////////////////////// oscar_num_separator [string]
         /// Permet de modifier le formalisme de la numérotation automatique dans Oscar, il faut également modifier
         ///  la fonction Postgresql associée (doc/numerotation.md)

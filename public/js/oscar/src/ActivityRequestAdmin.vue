@@ -24,15 +24,17 @@
                         <div class="col-md-8">
                             <select v-model="confirmProccess.personRole" class="form-control" id="roleDeclarer">
                                 <option value="0">Ne pas affecter à l'activité</option>
-                                <option v-for="r in rolesPerson" :value="r.id">{{ r.roleId }}</option>
+                                <option v-for="r, id in rolesPerson" :value="id">{{ r }}</option>
                             </select>
                         </div>
                     </section>
-                    <section v-if="confirmProccess.organisation">
-                        <label for="roleOrg">Rôle de {{ confirmProccess.organisation }}</label>
-                        <select v-model="confirmProccess.organisationRole" class="form-control" id="roleOrg">
-                            <option v-for="r in rolesOrganisation" :value="r.id">{{ r.roleId }}</option>
-                        </select>
+                    <section v-if="confirmProccess.organization" class="row">
+                        <label for="roleOrg" class="col-md-6">Rôle de {{ confirmProccess.organization }}</label>
+                        <div class="col-md-6">
+                            <select v-model="confirmProccess.organisationRole" class="form-control" id="roleOrg">
+                                <option v-for="r in rolesOrganisation" :value="r.id">{{ r.label }}</option>
+                            </select>
+                        </div>
                     </section>
                     <hr class="separator">
                     <nav>
@@ -202,10 +204,11 @@
               let datas = new FormData();
               datas.append('id', request.id);
               datas.append('action', 'valid');
+
               if( this.confirmProccess.person ) {
                   datas.append('personRoleId', this.confirmProccess.personRole);
               }
-              if( this.confirmProccess.organisation ) {
+              if( this.confirmProccess.organization ) {
                   datas.append('organisationRoleId', this.confirmProccess.organisationRole);
               }
 

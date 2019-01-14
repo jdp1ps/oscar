@@ -1022,6 +1022,34 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $roles;
     }
 
+    /**
+     * @param $id
+     * @param bool $throw
+     * @return null|Person
+     * @throws OscarException
+     */
+    public function getPersonById($id, $throw = false){
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($id);
+        if( $throw === true && $person == null ){
+            throw new OscarException(sprintf(_("La personne avec l'identifiant %s n'est pas présente dans la base de données."), $id));
+        }
+        return $person;
+    }
+
+    /**
+     * @param $id
+     * @param bool $throw
+     * @return null|Role
+     * @throws OscarException
+     */
+    public function getRolePersonById($id, $throw = false){
+        $role = $this->getEntityManager()->getRepository(Role::class)->find($id);
+        if( $throw === true && $role == null ){
+            throw new OscarException(sprintf(_("Le rôle avec l'identifiant %s n'est pas présente dans la base de données."), $id));
+        }
+        return $role;
+    }
+
 
     public function getPersonsPrincipalInActivityIncludeOrganization( Activity $activity ){
         $persons = [];

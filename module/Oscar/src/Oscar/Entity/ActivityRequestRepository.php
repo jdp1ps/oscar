@@ -40,7 +40,7 @@ class ActivityRequestRepository extends EntityRepository
      * @return mixed
      */
     public function getAll( $history = false ){
-        $mode = 'active';
+        $mode = [ActivityRequest::STATUS_SEND];
         if( $history !== false ){
             $mode = 'history';
         }

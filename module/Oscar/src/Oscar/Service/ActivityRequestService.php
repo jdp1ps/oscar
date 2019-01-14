@@ -11,10 +11,14 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityRequestFollow;
 use Oscar\Entity\ActivityRequestRepository;
+use Oscar\Entity\Currency;
 use Oscar\Entity\Notification;
+use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -111,7 +115,9 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
         throw new OscarException("L'enregistrement des demandes d'activité n'est pas encore implanté.");
     }
 
-    public function valid( ActivityRequest $activityRequest, Person $validator ){
+    public function valid( ActivityRequest $activityRequest, Person $validator, $personsDatas = null, $organisationDatas = null ){
+
+        // Test du status
         if( $activityRequest->getStatus() != ActivityRequest::STATUS_SEND ){
             throw new OscarException("Conflit de status");
         }
@@ -122,21 +128,56 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
         /** @var ProjectGrantService $notificationService */
         $activityService = $this->getServiceLocator()->get("ActivityService");
 
+        $currency = $this->getEntityManager()->getRepository(Currency::class)->findOneBy([
+            'label' => $this->getServiceLocator()->get('OscarConfig')->getConfiguration('defaultCurrency')
+        ]);
+
         $activity = new Activity();
         $this->getEntityManager()->persist($activity);
         $activity->setLabel($activityRequest->getLabel())
             ->setDescription($activityRequest->getDescription())
-            ->setAmount($activityRequest->getAmount());
+            ->setAmount($activityRequest->getAmount())
+            ->setDateStart($activityRequest->getDateStart())
+            ->setDateEnd($activityRequest->getDateEnd())
+            ->setCurrency($currency);
 
-        // todo : Ajout de la personne
+        $person = $this->getServiceLocator()->get('PersonService')->getPersonById($activityRequest->getCreatedBy()->getId(), true);
 
-        // todo : Ajout de l'oganisme
+
+
+        if( $personsDatas ){
+
+            $rolePerson = $this->getServiceLocator()->get('PersonService')->getRolePersonById($personsDatas['roleid'], false);
+            $activityPerson = new ActivityPerson();
+            $this->getEntityManager()->persist($activityPerson);
+            $activityPerson->setPerson($person)
+                ->setActivity($activity)
+                ->setRoleObj($rolePerson);
+
+            $activity->addActivityPerson($activityPerson);
+
+
+        }
+
+
+
+        if( $organisationDatas && $activityRequest->getOrganisation() ){
+
+            $roleOrganization = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($organisationDatas['roleid']);
+
+            $activityOrganization = new ActivityOrganization();
+            $this->getEntityManager()->persist($activityOrganization);
+            $activityOrganization->setOrganization($activityRequest->getOrganisation())
+                ->setActivity($activity)
+                ->setRoleObj($roleOrganization);
+        }
+
+        // todo DOCUMENTS
 
         $this->getEntityManager()->flush();
 
         // Mise à jour de l'index de recherche
         $activityService->searchUpdate($activity);
-
 
         // Ajout du Follow
         $follow = new ActivityRequestFollow();
@@ -148,6 +189,7 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
             ->setCreatedBy($validator);
 
         $activityRequest->setStatus(ActivityRequest::STATUS_VALID);
+
         $this->getEntityManager()->flush();
 
         // todo Notification du demandeur

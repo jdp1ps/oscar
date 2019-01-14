@@ -118,6 +118,8 @@ class ProjectGrantController extends AbstractOscarController
                 case "POST":
                     try {
                         $action = $this->params()->fromPost('action');
+                        $rolePerson = $this->params()->fromPost('personRoleId');
+                        $roleOrganisation = $this->params()->fromPost('organisationRoleId');
 
                         /** @var ActivityRequestService $requestActivityService */
                         $activityRequestService = $this->getServiceLocator()->get("ActivityRequestService");
@@ -132,7 +134,15 @@ class ProjectGrantController extends AbstractOscarController
                         }
 
                         if( $action == "valid" ){
-                            $activityRequestService->valid($request, $this->getCurrentPerson());
+                            $personData = [
+                                'roleid' => $rolePerson,
+                            ];
+
+                            $organisationData = [
+                                'roleid' => $roleOrganisation,
+                            ];
+
+                            $activityRequestService->valid($request, $this->getCurrentPerson(), $personData, $organisationData);
                         }
                         elseif ($action == "reject") {
                             $activityRequestService->reject($request, $this->getCurrentPerson());
@@ -170,7 +180,8 @@ class ProjectGrantController extends AbstractOscarController
             throw new OscarException(_('Oscar ne vous connait pas.'));
         }
 
-        if( !($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST) || $this->getOscarUserContext()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_REQUEST)) ){
+        if( !($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST) ||
+            $this->getOscarUserContext()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_REQUEST)) ){
             throw new UnAuthorizedException('Droits insuffisants');
         }
 
@@ -230,9 +241,7 @@ class ProjectGrantController extends AbstractOscarController
             $organizations[$o->getId()] = (string) $o;
         }
 
-
         $method = $this->getHttpXMethod();
-
 
         if( $this->isAjax() ){
 
