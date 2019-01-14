@@ -60,7 +60,7 @@
         <article v-for="a in activityRequests" class="card">
             <h3 class="card-title">
                 <strong>
-                    <i class="icon-cube"></i>
+                    <i :class="'icon-' + a.statutText"></i>
                     {{ a.label }}</strong>
                 <strong>
                     <i class="icon-bank"></i>
@@ -68,18 +68,39 @@
                 </strong>
                 <small class="right">par <strong>{{ a.requester }}</strong></small>
             </h3>
-            <div class="content">
-                <i class="icon-user"></i> Statut : <strong>{{ a.statut }}</strong><br>
-                <i class="icon-user"></i> Demandeur : <strong>{{ a.requester }}</strong><br>
-                <i class="icon-building-filled"></i>Organisme : <strong v-if="a.organisation"> {{ a.organisation }}</strong>
-                <em v-else>Aucun organisme identifié</em><br>
-                <i class="icon-bank"></i> Budget : <strong>{{ a.amount | montant}}</strong><br>
-                <i class="icon-calendar"></i> du <strong v-if="a.dateStart">{{ a.dateStart | date}}</strong><em v-else>non précisé</em> au
-                    <strong v-if="a.dateEnd">{{ a.dateEnd | date}}</strong><em v-else>non précisé</em>
+            <div class="content row">
+                <div class="col-md-6">
+                    <i class="icon-user"></i> Statut : <strong>{{ a.statut }}</strong><br>
+                    <i class="icon-user"></i> Demandeur : <strong>{{ a.requester }}</strong><br>
+                    <i class="icon-building-filled"></i>Organisme : <strong v-if="a.organisation"> {{ a.organisation }}</strong>
+                    <em v-else>Aucun organisme identifié</em><br>
+                    <i class="icon-bank"></i> Budget : <strong>{{ a.amount | montant}}</strong><br>
+                    <i class="icon-calendar"></i> du <strong v-if="a.dateStart">{{ a.dateStart | date}}</strong><em v-else>non précisé</em> au
+                    <strong v-if="a.dateEnd">{{ a.dateEnd | date}}</strong><em v-else>non précisé</em><br>
+
+                    <strong><i class="icon-comment"></i>Description : </strong>
+                    {{ a.description }}
+
+                </div>
+                <div class="col-md-6">
+                    <h3>Suivi</h3>
+                    <article v-for="s in a.suivi" class="follow">
+                        <figure class="avatar">
+                            <img :src="'//www.gravatar.com/avatar/' + s.by.gravatar + '?s=64'"
+                                 alt="" />
+                        </figure>
+                        <div class="content">
+                            <small class="infos">
+                                <i class="icon-clock"></i> {{ s.datecreated | date }}
+                                par <strong><i class="icon-user"></i> {{ s.by.username }}</strong>
+                            </small>
+                            <br>
+                            <p>{{ s.description }}</p>
+                        </div>
+                    </article>
+                </div>
+
             </div>
-            <p class="">Description : <br>
-                {{ a }}
-            </p>
             <section class="liste-fichiers" v-if="a.files.length">
                 <h4><i class="icon-file-excel"></i> Fichiers</h4>
                 <ul>

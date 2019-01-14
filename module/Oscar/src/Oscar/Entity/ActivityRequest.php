@@ -254,6 +254,19 @@ class ActivityRequest
         $this->follows = new ArrayCollection();
     }
 
+    public function getStatutText(){
+        static $statusText;
+        if( $statusText === null ){
+            $statusText = [
+                self::STATUS_DRAFT => "draft",
+                self::STATUS_SEND => "send",
+                self::STATUS_VALID => "valid",
+                self::STATUS_REJECT => "reject",
+            ];
+        }
+        return $statusText[$this->getStatus()];
+    }
+
     public function toJson(){
 
         $follows = [];
@@ -265,6 +278,7 @@ class ActivityRequest
             'id' => $this->getId(),
             'label' => $this->getLabel(),
             'statut' => $this->getStatus(),
+            'statutText' => $this->getStatutText(),
             'amount' => $this->getAmount(),
             'description' => $this->getDescription(),
             'files' => $this->getFiles(),

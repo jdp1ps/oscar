@@ -134,13 +134,13 @@
         <article v-for="a in activityRequests" class="card">
             <h3 class="card-title">
                 <strong>
-                    <i class="icon-cube"></i>
-                    {{ a.label }}</strong>
+                    <i :class="'icon-' + a.statutText"></i>
+                    {{ a.label }}
+                </strong>
                 <strong>
                     <i class="icon-bank"></i>
                     {{ a.amount }}
                 </strong>
-                <small class="right">par <strong>{{ a.requester }}</strong></small>
             </h3>
             <div class="card-metas text-highlight">
                 <strong><i :class="'icon-' + a.statut"></i>{{ a.statutText }}</strong>
