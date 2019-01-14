@@ -88,11 +88,14 @@ class ProjectGrantController extends AbstractOscarController
                     try {
                         /** @var ActivityRequestRepository $demandeActiviteRepository */
                         $demandeActiviteRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
+
+                        $history = $this->params()->fromQuery('history', false);
+
                         if( $spot == 'global'){
-                            $activityRequests = $demandeActiviteRepository->getAll();
+                            $activityRequests = $demandeActiviteRepository->getAll($history);
                         }
                         elseif ($spot == 'organizations') {
-                            $activityRequests = $demandeActiviteRepository->getAllForOrganizations($organizations);
+                            $activityRequests = $demandeActiviteRepository->getAllForOrganizations($organizations, $history);
                         }
                         else {
                             return $this->getResponseBadRequest('Mauvais contexte !');
@@ -153,7 +156,7 @@ class ProjectGrantController extends AbstractOscarController
 
 
         return [
-            'rolesPerson' => $jsonFormatter->objectsCollectionToJson($this->getPersonService()->getAvailableRolesPersonActivity()),
+            'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(),
             'rolesOrganisation' => $jsonFormatter->objectsCollectionToJson($this->getOrganizationService()->getAvailableRolesOrganisationActivity()),
         ];
     }

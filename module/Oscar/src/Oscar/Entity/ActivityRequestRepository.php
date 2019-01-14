@@ -17,10 +17,17 @@ class ActivityRequestRepository extends EntityRepository
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
-    protected function getBaseQueryAdministration(){
+    protected function getBaseQueryAdministration( $mode = "active" ){
+
+        $status = [ActivityRequest::STATUS_DRAFT];
+
+        if( $mode == 'history' ){
+            $status = [ActivityRequest::STATUS_VALID, ActivityRequest::STATUS_REJECT];
+        }
+
         $qb = $this->createQueryBuilder('ar')
-            ->where('ar.status != :status')
-            ->setParameter('status', ActivityRequest::STATUS_DRAFT);
+            ->where('ar.status IN (:status)')
+            ->setParameter('status', $status);
 
         return$qb;
     }
@@ -28,20 +35,28 @@ class ActivityRequestRepository extends EntityRepository
     /**
      * @return mixed
      */
-    public function getAll(){
-        return $this->getBaseQueryAdministration()->getQuery()->getResult();
+    public function getAll( $history = false ){
+        $mode = 'active';
+        if( $history !== false ){
+            $mode = 'history';
+        }
+        return $this->getBaseQueryAdministration($mode)->getQuery()->getResult();
     }
 
     /**
      * @param $organizations
      * @return mixed
      */
-    public function getAllForOrganizations( $organizations ){
-        $qb = $this->createQueryBuilder('ar')
-            ->where('ar.organisation IN(:organizations)')
-            ->andWhere('ar.status != :status')
-            ->setParameter('organizations', $organizations)
-        ->setParameter('status', ActivityRequest::STATUS_DRAFT);
+    public function getAllForOrganizations( $organizations, $history = false ){
+        $mode = 'active';
+        if( $history !== false ){
+            $mode = 'history';
+        }
+        $qb = $this->getBaseQueryAdministration($mode);
+
+        $qb->andWhere('ar.organisation IN(:organizations)')
+            ->setParameter('organizations', $organizations);
+
         return $qb->getQuery()->getResult();
     }
 }

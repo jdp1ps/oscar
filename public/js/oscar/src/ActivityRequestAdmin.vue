@@ -50,7 +50,12 @@
         </transition>
 
         <h1>Traitement des demandes d'activité en attente</h1>
-
+        <nav>
+            <label for="history">
+                Afficher l'historique
+                <input type="checkbox" v-model="history" id="history" />
+            </label>
+        </nav>
         <section v-if="activityRequests.length">
         <article v-for="a in activityRequests" class="card">
             <h3 class="card-title">
@@ -73,7 +78,7 @@
                     <strong v-if="a.dateEnd">{{ a.dateEnd | date}}</strong><em v-else>non précisé</em>
             </div>
             <p class="">Description : <br>
-                {{ a.description }}
+                {{ a }}
             </p>
             <section class="liste-fichiers" v-if="a.files.length">
                 <h4><i class="icon-file-excel"></i> Fichiers</h4>
@@ -122,6 +127,7 @@
                 organisations : [],
                 lockMessages : [],
                 confirmProccess: null,
+                history: false,
                 roles: {
                     person: null,
                     organisation: null
@@ -143,6 +149,12 @@
 
         computed:{
 
+        },
+
+        watch: {
+            'history' : function(){
+                this.fetch();
+            }
         },
 
         methods:{
@@ -223,7 +235,7 @@
              */
             fetch(){
                 this.loading = "Chargement des Demandes";
-                this.$http.get('?').then(
+                this.$http.get('?' + (this.history ? '&history=1': '')).then(
                     ok => {
                         this.activityRequests = ok.body.activityRequests;
                         this.allowNew = ok.body.allowNew;

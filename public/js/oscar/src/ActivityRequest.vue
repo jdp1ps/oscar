@@ -122,6 +122,14 @@
             </div>
         </transition>
         <h1>Demandes d'activité</h1>
+
+        <nav>
+            <label for="history">
+                Afficher l'historique
+                <input type="checkbox" v-model="history" id="history" />
+            </label>
+        </nav>
+
         <section v-if="activityRequests.length">
         <article v-for="a in activityRequests" class="card">
             <h3 class="card-title">
@@ -250,7 +258,8 @@
                 demandeur : "",
                 demandeur_id : null,
                 organisations : [],
-                lockMessages : []
+                lockMessages : [],
+                history: false
             }
         },
 

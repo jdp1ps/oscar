@@ -181,6 +181,7 @@ class JSONFormatter
 
     public function format($object, $compact = true){
         $class = get_class($object);
+
         switch ($class) {
             case Activity::class:
                 return $this->formatActivity($object, $compact);
@@ -201,7 +202,7 @@ class JSONFormatter
                 return $object->toJson();
 
             default:
-                throw new OscarException("Impossible de convertir $class ".OrganizationRole::class." au format JSON");
+                throw new OscarException("Impossible de convertir $class au format JSON");
         }
 
     }
