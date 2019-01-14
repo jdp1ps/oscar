@@ -143,7 +143,7 @@
                 </strong>
             </h3>
             <div class="card-metas text-highlight">
-                <strong><i :class="'icon-' + a.statut"></i>{{ a.statutText }}</strong>
+                <strong><i :class="'icon-' + a.statut"></i>{{ a.statut | renderStatus }}</strong>
                 Créé le : <time><i class="icon-calendar"></i>{{ a.dateCreated | date }}</time> ~
                 <span v-if="a.worker">
                     Demande géré par  <strong>{{ a.worker }}</strong>
