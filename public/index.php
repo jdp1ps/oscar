@@ -134,7 +134,7 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
         return;
     }
 
-    error_log('LOGLOG ' . $msg);
+    error_log($msg);
 
     if($codeStr == 'ERROR'){
         if( array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) ){
@@ -161,7 +161,7 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
         exit(1);
     }
 
-    return false;
+    return true;
 
     /*switch ($errno) {
         case E_USER_ERROR:
