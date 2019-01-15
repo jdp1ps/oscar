@@ -17,17 +17,28 @@
 <style scoped lang="scss">
     $colorSelected: #0088cc;
 
-    .jck-selector{
+    .jck-selector {
         border: solid #aaa thin;
         background: white;
         line-height: 1.5em;
+        position: relative;
     }
-     .jck-selector .item {
-         transition: all .25s;
-         cursor: pointer;
-         color: #999999;
-         border-bottom: solid thin #CCC;
-     }
+    .jck-selector:hover .list{
+        display: block;
+    }
+    .jck-selector .list {
+        display: none;
+        position: absolute;
+        background: white;
+        z-index: 2;
+        box-shadow: 0 .5em .3em rgba(0,0,0,.3em);
+    }
+    .jck-selector .item {
+        transition: all .25s;
+        cursor: pointer;
+        color: #999999;
+        border-bottom: solid thin #CCC;
+    }
     .jck-selector .item:last-child {
         border-bottom: none;
     }

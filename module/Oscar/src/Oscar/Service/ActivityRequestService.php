@@ -62,13 +62,14 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
      * @param Person $person
      * @return array
      */
-    public function getActivityRequestPerson(Person $person, $format = 'object', $history = false)
+    public function getActivityRequestPerson(Person $person, $format = 'object', $status = [])
     {
+        if( count($status) == 0 ) return [];
         try {
             /** @var ActivityRequestRepository $activityRequestRepository */
             $activityRequestRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
 
-            $activityRequests = $activityRequestRepository->getAllForPerson($person, $history);
+            $activityRequests = $activityRequestRepository->getAllForPerson($person, $status);
 
             if ($format == 'json') {
                 $array = [];
@@ -95,9 +96,9 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
         $requestActivityRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
 
         if( $organizationsFilter === false )
-            return $requestActivityRepository->getAll();
+            return $requestActivityRepository->getAll([ActivityRequest::STATUS_SEND]);
         else {
-            return $requestActivityRepository->getAllForOrganizations($organizationsFilter);
+            return $requestActivityRepository->getAllForOrganizations($organizationsFilter, [ActivityRequest::STATUS_SEND]);
         }
     }
 

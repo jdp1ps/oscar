@@ -121,17 +121,17 @@
                 </div>
             </div>
         </transition>
-        <h1>Demandes d'activité</h1>
 
-        <nav>
-            <label for="history">
-                Afficher l'historique
-                <input type="checkbox" v-model="history" id="history" />
-            </label>
-        </nav>
+        <header class="row">
+            <h1 class="col-md-9">Demandes d'activité</h1>
+            <nav class="col-md-3">
+                &nbsp;
+                <jckselector :choose="listStatus" :selected="selectedStatus" @change="selectedStatus = $event"/>
+            </nav>
+        </header>
 
         <section v-if="activityRequests.length">
-        <article v-for="a in activityRequests" class="card">
+        <article v-for="a in activityRequests" class="demande card" v-bind:class="'status-' +a.statut">
             <h3 class="card-title">
                 <strong>
                     <i :class="'icon-' + a.statutText"></i>
@@ -200,7 +200,6 @@
                 <ul v-else>
                 <li v-for="f in a.files">
                     <strong>{{ f.name }}</strong>
-
                     <a :href="'?dl=' + f.file + '&id=' + a.id" class="btn btn-default btn-xs">
                         <i class="icon-download"></i>
                         Télécharger</a>
@@ -259,7 +258,7 @@
                 demandeur_id : null,
                 organisations : [],
                 lockMessages : [],
-                history: false
+                selectedStatus: [1, 2]
             }
         },
 
@@ -270,13 +269,25 @@
         },
 
         watch: {
-            history(){
+            selectedStatus(){
                 this.fetch();
             }
         },
 
         computed:{
+            listStatus(){
+                let status = [
+                    {id: 1, label: "Brouillon", description: "Demandes en cours de rédaction (non envoyées)" },
+                    {id: 2, label: "Envoyée", description: "Demandes envoyées mais pas encore traitées" },
+                    {id: 5, label: "Validée", description: "Demandes validées" },
+                    {id: 7, label: "Refusée", description: "Demandes refusées" }
+                ];
+                return status;
+            }
+        },
 
+        components: {
+            'jckselector': require('./JCKSelector.vue').default,
         },
 
         methods:{
@@ -293,7 +304,7 @@
              */
             fetch(){
                 this.loading = "Chargement des Demandes";
-                this.$http.get('?'+(this.history ? '&history=1' : '')).then(
+                this.$http.get('?&status=' + this.selectedStatus.join(',')).then(
                     ok => {
                         this.activityRequests = ok.body.activityRequests;
                         this.allowNew = ok.body.allowNew;

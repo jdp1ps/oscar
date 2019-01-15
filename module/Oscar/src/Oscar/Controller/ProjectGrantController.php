@@ -89,16 +89,25 @@ class ProjectGrantController extends AbstractOscarController
                         /** @var ActivityRequestRepository $demandeActiviteRepository */
                         $demandeActiviteRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
 
-                        $history = $this->params()->fromQuery('history', false);
+                        $statusTxt = $this->params()->fromQuery('status', '');
+                        if( trim($statusTxt) == '' ){
+                            $status = [];
+                        } else {
+                            $status = explode(',', $statusTxt);
+                        }
 
-                        if( $spot == 'global'){
-                            $activityRequests = $demandeActiviteRepository->getAll($history);
-                        }
-                        elseif ($spot == 'organizations') {
-                            $activityRequests = $demandeActiviteRepository->getAllForOrganizations($organizations, $history);
-                        }
-                        else {
-                            return $this->getResponseBadRequest('Mauvais contexte !');
+                        if( count($status) == 0 ){
+                            $activityRequest = [];
+                        } else {
+                            if( $spot == 'global'){
+                                $activityRequests = $demandeActiviteRepository->getAll($status);
+                            }
+                            elseif ($spot == 'organizations') {
+                                $activityRequests = $demandeActiviteRepository->getAllForOrganizations($organizations, $status);
+                            }
+                            else {
+                                return $this->getResponseBadRequest('Mauvais contexte !');
+                            }
                         }
 
                         $datas = [
@@ -128,7 +137,7 @@ class ProjectGrantController extends AbstractOscarController
                         $request = $activityRequestService->getActivityRequest($this->params()->fromPost('id'));
 
                         if( $spot == 'organizations'){
-                            if( !in_array($organizations, $request->getOrganisation()) ){
+                            if( !in_array($request->getOrganisation(), $organizations) ){
                                 throw new UnAuthorizedException("Vous n'avez pas les droits suffisants pour valider cette demande.");
                             }
                         }
@@ -188,7 +197,7 @@ class ProjectGrantController extends AbstractOscarController
 
 
         /** @var Organization[] $organizationsPerson */
-        $organizationsPerson = $this->getPersonService()->getOrganizationsPersonWithPrincipalRole($demandeur);
+        $organizationsPerson = $this->getPersonService()->getPersonOrganizations($demandeur);
 
         //// CONFIGURATION
         $dest = $this->getConfiguration('oscar.paths.document_request');    // Emplacement des documents
@@ -252,8 +261,15 @@ class ProjectGrantController extends AbstractOscarController
                 switch ($method) {
                     case "GET" :
                         $limit = 5;
-                        $history = $this->params()->fromQuery('history', false);
-                        $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json', $history);
+
+                        $statusTxt = $this->params()->fromQuery('status', '');
+                        if( trim($statusTxt) == '' ){
+                            $status = [];
+                        } else {
+                            $status = explode(',', $statusTxt);
+                        }
+
+                        $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json', $status);
 
                         if( count($demandes) >= $limit ){
                             $lockMessage[] = "Vous avez atteint la limite des demandes autorisées.";
@@ -377,7 +393,6 @@ class ProjectGrantController extends AbstractOscarController
                 return $this->getResponseInternalError($e->getMessage());
             }
         }
-
 
         $usedFileds = [
             'label' => true,

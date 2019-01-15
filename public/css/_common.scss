@@ -2518,6 +2518,13 @@ const STATUS_VALID      = 'valid';
 [class*="icon-status-7"]:before { content: '\e87a'; }
 [class*="icon-send-adm"]:before { content: '\e87a'; }
 
+.demande {
+  border-left: 4px solid #5a5a5a;
+  &.status-1 { border-left-color: #5a5a5a; }
+  &.status-2 { border-left-color: $colorBlue; }
+  &.status-5 { border-left-color: $colorGreen; }
+  &.status-7 { border-left-color: $colorRed; }
+}
 
 .state {
   background: #5c646c;

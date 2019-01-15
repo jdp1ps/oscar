@@ -1,7 +1,5 @@
 <template>
     <section>
-        <div class="alert alert-info" v-show="loading">{{ loading }}</div>
-
         <transition name="fade">
             <div class="overlay" v-if="error">
                 <div class="alert alert-danger overlay-content">
@@ -19,45 +17,61 @@
             <div class="overlay" v-if="confirmProccess">
                 <div class="alert alert-danger overlay-content">
                     <h3>{{ confirmProccess.message }}</h3>
-                    <section v-if="confirmProccess.person" class="row">
-                        <label for="roleDelarer" class="col-md-4">Rôle de {{ confirmProccess.person }}</label>
-                        <div class="col-md-8">
-                            <select v-model="confirmProccess.personRole" class="form-control" id="roleDeclarer">
-                                <option value="0">Ne pas affecter à l'activité</option>
-                                <option v-for="r, id in rolesPerson" :value="id">{{ r }}</option>
-                            </select>
+
+                    <transition name="slide">
+                        <div v-if="confirmProccess.step == 2">
+                            <button type="reset" class="btn btn-danger" @click.prevent="confirmProccess = null">
+                                <i class="icon-cancel-outline"></i>
+                                Annuler
+                            </button>
+                            <button type="submit" class="btn btn-success" @click.prevent="confirmProccess.process()">
+                                <i class="icon-ok-circled"></i>
+                                Confirmer
+                            </button>
                         </div>
-                    </section>
-                    <section v-if="confirmProccess.organization" class="row">
-                        <label for="roleOrg" class="col-md-6">Rôle de {{ confirmProccess.organization }}</label>
-                        <div class="col-md-6">
-                            <select v-model="confirmProccess.organisationRole" class="form-control" id="roleOrg">
-                                <option v-for="r in rolesOrganisation" :value="r.id">{{ r.label }}</option>
-                            </select>
+                        <div v-else>
+                            <section v-if="confirmProccess.person" class="row">
+                                <label for="roleDelarer" class="col-md-8">
+                                    Rôle de {{ confirmProccess.person }}<br>
+                                    <small>Selectionnez un rôle pour <strong>{{ confirmProccess.person }}</strong> dans l'activité de recherche. Vous pourrez modfifier cette information en éditant directement l'activité par le suite
+                                    </small>
+                                </label>
+                                <div class="col-md-4">
+                                    <select v-model="confirmProccess.personRole" class="form-control" id="roleDeclarer">
+                                        <option value="0">Ne pas affecter à l'activité</option>
+                                        <option v-for="r, id in rolesPerson" :value="id">{{ r }}</option>
+                                    </select>
+                                </div>
+                            </section>
+                            <section v-if="confirmProccess.organization" class="row">
+                                <label for="roleOrg" class="col-md-8">Rôle de {{ confirmProccess.organization }}</label>
+                                <div class="col-md-4">
+                                    <select v-model="confirmProccess.organisationRole" class="form-control" id="roleOrg">
+                                        <option v-for="r in rolesOrganisation" :value="r.id">{{ r.label }}</option>
+                                    </select>
+                                </div>
+                            </section>
+                            <hr class="separator">
+                            <button type="button" class="btn btn-default" @click="confirmProccess.step = 2">
+                                Suivant
+                                <i class="icon-right-outline"></i>
+                            </button>
                         </div>
-                    </section>
-                    <hr class="separator">
-                    <nav>
-                        <button type="reset" class="btn btn-danger" @click.prevent="confirmProccess = null">
-                            <i class="icon-cancel-outline"></i>
-                            Annuler
-                        </button>
-                        <button type="submit" class="btn btn-success" @click.prevent="confirmProccess.process()">
-                            <i class="icon-ok-circled"></i>
-                            Confirmer
-                        </button>
-                    </nav>
+                    </transition>
                 </div>
             </div>
         </transition>
 
-        <h1>Traitement des demandes d'activité en attente</h1>
-        <nav>
-            <label for="history">
-                Afficher l'historique
-                <input type="checkbox" v-model="history" id="history" />
-            </label>
-        </nav>
+        <header class="row">
+            <h1 class="col-md-9">Traitement des demandes d'activité en attente</h1>
+            <nav class="col-md-3">
+                &nbsp;
+                <jckselector :choose="listStatus" :selected="selectedStatus" @change="selectedStatus = $event"/>
+            </nav>
+        </header>
+
+
+        <div class="alert alert-info" v-show="loading">{{ loading }}</div>
         <section v-if="activityRequests.length">
         <article v-for="a in activityRequests" class="card">
             <h3 class="card-title">
@@ -79,10 +93,8 @@
                     <i class="icon-bank"></i> Budget : <strong>{{ a.amount | montant}}</strong><br>
                     <i class="icon-calendar"></i> du <strong v-if="a.dateStart">{{ a.dateStart | date}}</strong><em v-else>non précisé</em> au
                     <strong v-if="a.dateEnd">{{ a.dateEnd | date}}</strong><em v-else>non précisé</em><br>
-
                     <strong><i class="icon-comment"></i>Description : </strong>
                     {{ a.description }}
-
                 </div>
                 <div class="col-md-6">
                     <h3>Suivi</h3>
@@ -106,16 +118,17 @@
             <section class="liste-fichiers" v-if="a.files.length">
                 <h4><i class="icon-file-excel"></i> Fichiers</h4>
                 <ul>
-                    <li v-for="f in a.files"><strong>{{ f.name }}</strong>{{ f }}</li>
+                    <li v-for="f in a.files">
+                        <strong>{{ f.name }}</strong>
+                        <a :href="'?dl=' + f.file + '&id=' + a.id" class="btn btn-default btn-xs">
+                            <i class="icon-download"></i>
+                            Télécharger</a>
+                    </li>
                 </ul>
             </section>
-                <!-- <pre>{{ a }}</pre> -->
             <nav v-if="a.statut == 2">
                 <button class="btn btn-success" @click="handlerValid(a)">
                     <i class="icon-valid"></i> Valider la demande
-                </button>
-                <button class="btn btn-default" @click="handlerTaken(a)">
-                    <i class="icon-edit"></i> Marquée comme prise en charge
                 </button>
                 <button class="btn btn-danger" @click="handlerReject(a)">
                     <i class="icon-cancel-alt"></i> Rejeter la demande
@@ -151,11 +164,16 @@
                 lockMessages : [],
                 confirmProccess: null,
                 history: false,
+                selectedStatus: [2],
                 roles: {
                     person: null,
                     organisation: null
                 }
             }
+        },
+
+        components: {
+            'jckselector': require('./JCKSelector.vue').default,
         },
 
         props: {
@@ -168,14 +186,32 @@
             rolesOrganisation: {
                 required: true
             },
+            asAdmin: {
+                default: false
+            }
         },
 
         computed:{
-
+            listStatus(){
+                let status = [
+                    {id: 2, label: "Envoyée", description: "Demandes envoyées mais pas encore traitées" },
+                    {id: 5, label: "Validée", description: "Demandes validées" },
+                    {id: 7, label: "Refusée", description: "Demandes refusées" }
+                ];
+                if( this.asAdmin ){
+                    status.push(
+                    {id: 1, label: "Brouillon", description: "Demandes en cours de rédaction (non envoyées)" }
+                    )
+                }
+                return status;
+            }
         },
 
         watch: {
             'history' : function(){
+                this.fetch();
+            },
+            'selectedStatus' : function(){
                 this.fetch();
             }
         },
@@ -183,6 +219,7 @@
         methods:{
             handlerValid(request){
                 this.confirmProccess = {
+                    step: 1,
                     message: "Confirmer la transformation de la demande en activité : "+ request.label + " par " + request.requester +" ?",
                     person: request.requester,
                     personRole: 0,
@@ -243,23 +280,12 @@
                 })
             },
 
-            /*
-            (a)">
-                    <i class="icon-valid"></i> Valider la demande
-                </button>
-                <button class="btn btn-default" @click="handlerTaken(a)">
-                    <i class="icon-edit"></i> Marquée comme prise en charge
-                </button>
-                <button class="btn btn-danger" @click="handlerRefuse(a)">
-                    <i class="icon-cancel-alt"></i> Rejeter la demande
-            */
-
             /**
              * Récupération des données.
              */
             fetch(){
                 this.loading = "Chargement des Demandes";
-                this.$http.get('?' + (this.history ? '&history=1': '')).then(
+                this.$http.get('?' + (this.history ? '&history=1': '') +'&status=' +this.selectedStatus.join(',')).then(
                     ok => {
                         this.activityRequests = ok.body.activityRequests;
                         this.allowNew = ok.body.allowNew;
@@ -275,6 +301,7 @@
                     this.loading = null;
                 });
             },
+
 
             sendFile(id, evt){
                 let upload = new FormData(evt.target);

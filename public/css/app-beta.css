@@ -7146,6 +7146,17 @@ const STATUS_VALID      = 'valid';
 [class*="icon-send-adm"]:before {
   content: '\e87a'; }
 
+.demande {
+  border-left: 4px solid #5a5a5a; }
+  .demande.status-1 {
+    border-left-color: #5a5a5a; }
+  .demande.status-2 {
+    border-left-color: #30b0d5; }
+  .demande.status-5 {
+    border-left-color: #499D1F; }
+  .demande.status-7 {
+    border-left-color: #DD423E; }
+
 .state {
   background: #5c646c;
   color: #FFFFFF;

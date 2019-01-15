@@ -17,17 +17,7 @@ class ActivityRequestRepository extends EntityRepository
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
-    protected function getBaseQueryAdministration( $mode = "active" ){
-
-        if( $mode == "active" ){
-            $status = [ActivityRequest::STATUS_DRAFT];
-        }
-        else if( $mode == 'history' ){
-            $status = [ActivityRequest::STATUS_VALID, ActivityRequest::STATUS_REJECT];
-        }
-        else if (is_array($mode)) {
-            $status = $mode;
-        }
+    protected function getBaseQueryAdministration( $status ){
 
         $qb = $this->createQueryBuilder('ar')
             ->where('ar.status IN (:status)')
@@ -39,24 +29,20 @@ class ActivityRequestRepository extends EntityRepository
     /**
      * @return mixed
      */
-    public function getAll( $history = false ){
-        $mode = [ActivityRequest::STATUS_SEND];
-        if( $history !== false ){
-            $mode = 'history';
-        }
-        return $this->getBaseQueryAdministration($mode)->getQuery()->getResult();
+    public function getAll( $status ){
+        if( count($status) == 0 ) return [];
+        return $this->getBaseQueryAdministration($status)->getQuery()->getResult();
     }
 
     /**
      * @param $organizations
      * @return mixed
      */
-    public function getAllForOrganizations( $organizations, $history = false ){
-        $mode = 'active';
-        if( $history !== false ){
-            $mode = 'history';
-        }
-        $qb = $this->getBaseQueryAdministration($mode);
+    public function getAllForOrganizations( $organizations, $status ){
+
+        if( count($status) == 0 ) return [];
+
+        $qb = $this->getBaseQueryAdministration($status);
 
         $qb->andWhere('ar.organisation IN(:organizations)')
             ->setParameter('organizations', $organizations);
@@ -64,11 +50,11 @@ class ActivityRequestRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getAllForPerson( Person $person, $history = false ){
+    public function getAllForPerson( Person $person, $status = null ){
 
         $mode = [ActivityRequest::STATUS_DRAFT, ActivityRequest::STATUS_SEND];
-        if( $history !== false ){
-            $mode = 'history';
+        if( $status != null ){
+            $mode = $status;
         }
         $qb = $this->getBaseQueryAdministration($mode);
 
