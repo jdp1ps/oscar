@@ -50,9 +50,12 @@ data/mails
 !data/mails/.gitkeep
 
 # Emplacement des documents par défaut
-data/documents/**
+data/documents/**.*
+data/documents/activity/**
 !data/documents/activity/.gitkeep
+data/documents/public/**
 !data/documents/public/.gitkeep
+data/documents/request/**
 !data/documents/request/.gitkeep
 
 # Fichiers d'exemple
