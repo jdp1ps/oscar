@@ -859,13 +859,13 @@ class ConsoleController extends AbstractOscarController
     protected function updatePrivilegeWitDatas(Privilege $privilege, $stdObject)
     {
 
-        // On teste si le configuration est propre
-        foreach ($this->requireProperties as $requireProperty) {
-            if (!property_exists($stdObject, $requireProperty)) {
-                throw new \Exception("La clef '$requireProperty' est manquant dans la configuration : " . print_r($stdObject,
-                        true));
-            }
-        }
+//        // On teste si le configuration est propre
+//        foreach ($this->requireProperties as $requireProperty) {
+//            if (!property_exists($stdObject, $requireProperty)) {
+//                throw new \Exception("La clef '$requireProperty' est manquant dans la configuration : " . print_r($stdObject,
+//                        true));
+//            }
+//        }
 
         $flush = false;
 
@@ -880,7 +880,7 @@ class ConsoleController extends AbstractOscarController
 
         $privilegeRoot = $privilege->getRoot() ? $privilege->getRoot()->getFullCode() : null;
 
-        if ($stdObject->root && $privilegeRoot != $stdObject->root ) {
+        if (property_exists($stdObject, 'root') && $privilegeRoot != $stdObject->root ) {
             $privilege->setRoot($this->getRootByFullCode($stdObject->root));
             $flush = true;
         }
