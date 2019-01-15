@@ -38,18 +38,27 @@ socket/config.json
 
 # Data & Cache
 data/**.*
+
+# Cache Doctrine
 data/DoctrineORMModule
+
+# Index de recherche Lucene
 data/luceneindex
+
+# Dossiers des mails pour les tests
 data/mails
+!data/mails/.gitkeep
+
+# Emplacement des documents par défaut
 data/documents/**
+!data/documents/activity/.gitkeep
+!data/documents/public/.gitkeep
+!data/documents/request/.gitkeep
+
+# Fichiers d'exemple
 !data/timesheet_model.xls
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
-!data/documents/activity/.gitkeep
-!data/documents/public/.gitkeep
-!data/mails/.gitkeep
-!data/documents/request/.gitkeep
-
 
 
 # Residus
