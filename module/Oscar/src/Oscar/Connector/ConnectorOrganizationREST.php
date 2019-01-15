@@ -124,8 +124,9 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
             throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
         }
 
-        if( count($return) > 0 ){
-            foreach( json_decode($return) as $data ){
+        $decode = json_decode($return);
+        if( count($decode) > 0 ){
+            foreach( $decode as $data ){
 
                 try {
                     /** @var Person $personOscar */
@@ -135,11 +136,16 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
                     $organization = $repository->newPersistantObject();
                     $action = "add";
                 }
-
-                if($organization->getDateUpdated() < new \DateTime($data->dateupdated) || $force == true ){
+                if( !property_exists($data, 'dateupdated') ){
+                    $dateupdated = date('Y-m-d H:i:s');
+                } else {
+                    $dateupdated = $data->dateupdated;
+                }
+                if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
 
                     $organization = $this->hydrateWithDatas($organization, $data);
-                    $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
+                    if( property_exists($data, 'type') )
+                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
 
                     $repository->flush($organization);
                     if( $action == 'add' ){

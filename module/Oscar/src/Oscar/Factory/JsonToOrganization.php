@@ -46,7 +46,7 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
                 $this->getFieldValue($jsonData, 'uid'));
         }
 
-        return $object
+        $object
             ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData,'dateupdate', null)))
             ->setShortName($this->getFieldValue($jsonData, 'shortname'))
             ->setCode($this->getFieldValue($jsonData, 'code'))
@@ -56,20 +56,22 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
             ->setEmail($this->getFieldValue($jsonData, 'email'))
             ->setUrl($this->getFieldValue($jsonData, 'url'))
             ->setSiret($this->getFieldValue($jsonData, 'siret'))
-            ->setType($this->getFieldValue($jsonData, 'type'))
+            ->setType($this->getFieldValue($jsonData, 'type'));
 
-            // La partie qui suit devrait être mieux sécurisée
-            ->setStreet1(property_exists($jsonData,
-                'address') ? $jsonData->address->address1 : null)
-            ->setStreet2(property_exists($jsonData,
-                'address') ? $jsonData->address->address2 : null)
-            ->setZipCode(property_exists($jsonData,
-                'address') ? $jsonData->address->zipcode : null)
-            ->setCity(property_exists($jsonData,
-                'address') ? $jsonData->address->city : null)
-            ->setCountry(property_exists($jsonData,
-                'address') ? $jsonData->address->country : null)
-            ->setBp(property_exists($jsonData,
-                'address') ? $jsonData->address->address3 : null);
+        if( property_exists($jsonData, 'address') ){
+            $address = $jsonData->address;
+            $object
+                ->setStreet1(property_exists($address,'address1') ? $address->address1 : null)
+                ->setStreet2(property_exists($address,'address2') ? $address->address2 : null)
+                ->setZipCode(property_exists($address,'zipcode') ? $address->zipcode : null)
+                ->setCity(property_exists($address,'city') ? $address->city : null)
+                ->setCountry(property_exists($address,'country') ? $address->country : null)
+                ->setBp(property_exists($address,'address3') ? $address->address3 : null);
+        }
+
+
+
+
+        return $object;
     }
 }
