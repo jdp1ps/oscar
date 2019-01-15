@@ -12,6 +12,7 @@
     "root": "droit-role-visualisation",
     "code": "role-edition",
     "libelle": "\u00c9dition des r\u00f4les",
+    "libelle": "\u00c9dition des r\u00f4les",
     "fullcode": "droit-role-edition"
   },
   "droit-privilege-visualisation": {
@@ -44,6 +45,14 @@
     "code": "REQUEST_MANAGE",
     "libelle": "Traiter les demandes d'activité",
     "fullcode": "ACTIVITY-REQUEST_MANAGE"
+  },
+
+  "ACTIVITY-REQUEST_ADMIN": {
+    "category_id": 2,
+    "spot": 4,
+    "code": "REQUEST_ADMIN",
+    "libelle": "Administrer toutes les demandes d'activité",
+    "fullcode": "ACTIVITY-REQUEST_ADMIN"
   },
 
   "ACTIVITY-INDEX": {
