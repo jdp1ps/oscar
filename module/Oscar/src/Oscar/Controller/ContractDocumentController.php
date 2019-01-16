@@ -206,7 +206,7 @@ class ContractDocumentController extends AbstractOscarController
 
         header('Content-Disposition: attachment; filename="'.$doc->getFileName().'"');
         header('Content-type: '. $doc->getFileTypeMime());
-        readfile($fileDir.$doc->getPath());
+        readfile($fileDir.'/'.$doc->getPath());
         die();
     }
 

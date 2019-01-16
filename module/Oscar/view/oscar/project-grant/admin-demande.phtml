@@ -37,7 +37,8 @@
                 return h(ActivityRequestAdmin.default, { props: {
                     moment: moment,
                     rolesPerson: <?= json_encode($rolesPerson) ?>,
-                    rolesOrganisation: <?= json_encode($rolesOrganisation) ?>
+                    rolesOrganisation: <?= json_encode($rolesOrganisation) ?>,
+                    asAdmin: <?= $asAdmin ?>
                 }})
             }
         })

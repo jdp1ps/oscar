@@ -145,10 +145,7 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
 
         $person = $this->getServiceLocator()->get('PersonService')->getPersonById($activityRequest->getCreatedBy()->getId(), true);
 
-
-
         if( $personsDatas ){
-
             $rolePerson = $this->getServiceLocator()->get('PersonService')->getRolePersonById($personsDatas['roleid'], false);
             $activityPerson = new ActivityPerson();
             $this->getEntityManager()->persist($activityPerson);
@@ -181,6 +178,7 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
                 ->setDateUpdoad($activityRequest->getDateCreated())
                 ->setDateSend($activityRequest->getDateCreated())
                 ->setFileTypeMime($file['type']);
+
             $this->getEntityManager()->flush($contractDocument);
 
             $realName = $contractDocument->generatePath();

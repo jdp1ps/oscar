@@ -69,7 +69,8 @@ class ProjectGrantController extends AbstractOscarController
             throw new OscarException(_('Oscar ne vous connait pas.'));
         }
 
-        $organizations = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE);
+        $organizations  = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE);
+        $asAdmin        = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_ADMIN);
         $spot = null;
 
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
@@ -175,6 +176,7 @@ class ProjectGrantController extends AbstractOscarController
 
 
         return [
+            'asAdmin' => $asAdmin,
             'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(),
             'rolesOrganisation' => $jsonFormatter->objectsCollectionToJson($this->getOrganizationService()->getAvailableRolesOrganisationActivity()),
         ];
@@ -2054,8 +2056,7 @@ class ProjectGrantController extends AbstractOscarController
                 ->leftJoin('m2.person', 'pers2')
                 ->leftJoin('p2.organization', 'orga2');
         }
-
-            return $this->applyAdvancedSearch($qb);
+        return $this->applyAdvancedSearch($qb);
     }
 
     /**
@@ -2066,8 +2067,6 @@ class ProjectGrantController extends AbstractOscarController
         die("DEPRECATED");
         return $this->getResponseDeprecated();
     }
-
-
 
     public function almostStartAction()
     {
@@ -2085,12 +2084,9 @@ class ProjectGrantController extends AbstractOscarController
 
         ]);
 
-
         $view->setTemplate('oscar/activity/list-view.phtml');
-
         return $view;
     }
-
 
     public function almostDoneAction()
     {
@@ -2114,8 +2110,5 @@ class ProjectGrantController extends AbstractOscarController
     {
         return $this->getResponseNotImplemented();
     }
-
     ////////////////////////////////////////////////////////////////////////////
-
-
 }

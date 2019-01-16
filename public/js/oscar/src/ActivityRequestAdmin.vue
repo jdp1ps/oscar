@@ -194,13 +194,13 @@
         computed:{
             listStatus(){
                 let status = [
-                    {id: 2, label: "Envoyée", description: "Demandes envoyées mais pas encore traitées" },
+                    {id: 2, label: "Envoyée", description: "Demandes envoyées" },
                     {id: 5, label: "Validée", description: "Demandes validées" },
                     {id: 7, label: "Refusée", description: "Demandes refusées" }
                 ];
                 if( this.asAdmin ){
                     status.push(
-                    {id: 1, label: "Brouillon", description: "Demandes en cours de rédaction (non envoyées)" }
+                    {id: 1, label: "Brouillon", description: "Demandes en cours de rédaction" }
                     )
                 }
                 return status;
