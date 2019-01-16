@@ -231,6 +231,7 @@
 
             handlerReject(request){
                 this.confirmProccess = {
+                    step: 2,
                     message: "Confirmer le rejet de la demande : " + request.label + " par " + request.requester +" ?",
                     process: () => this.performReject(request)
                 }

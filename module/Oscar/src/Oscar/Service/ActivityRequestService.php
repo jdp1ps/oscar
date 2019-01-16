@@ -226,15 +226,76 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
         );
 
         return true;
-
-
-
-
-        throw new OscarException("Cette fonctionnalité n'est pas encore implantée");
     }
 
-    public function reject( ActivityRequest $activityRequest ){
-        throw new OscarException("Cette fonctionnalité n'est pas encore implantée");
+    public function reject( ActivityRequest $activityRequest, Person $validator ){
+        // Test du status
+        if( $activityRequest->getStatus() != ActivityRequest::STATUS_SEND ){
+            throw new OscarException("Conflit de status");
+        }
+
+        /** @var NotificationService $notificationService */
+        $notificationService = $this->getServiceLocator()->get("NotificationService");
+
+        // TODO Suppression des fichiers envoyés
+//        $dirSource = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_request');
+//
+//        foreach ($activityRequest->getFilesArray() as $file) {
+//            $contractDocument = new ContractDocument();
+//            $this->getEntityManager()->persist($contractDocument);
+//            $contractDocument->setFileName($file['name'])
+//                ->setVersion(1)
+//                ->setGrant($activity)
+//                ->setFileSize($file['size'])
+//                ->setPath($file['name'])
+//                ->setDateDeposit($activityRequest->getDateCreated())
+//                ->setDateUpdoad($activityRequest->getDateCreated())
+//                ->setDateSend($activityRequest->getDateCreated())
+//                ->setFileTypeMime($file['type']);
+//
+//            $this->getEntityManager()->flush($contractDocument);
+//
+//            $realName = $contractDocument->generatePath();
+//            $contractDocument->setPath($realName);
+//
+//            $from = $dirSource.'/'.$file['file'];
+//            $to = $dirDest.'/'.$realName;
+//
+//
+//            // déplacement du fichier
+//            if( !rename($from, $to) ){
+//                $this->getServiceLocator()->get('Logger')->error("Impossibe de déplacer le fichier $from vers $to");
+//            }
+//            $contractDocument->setPath($realName);
+//        }
+
+
+        // Ajout du Follow
+        $follow = new ActivityRequestFollow();
+        $this->getEntityManager()->persist($follow);
+
+        $follow->setActivityRequest($activityRequest)
+            ->setDescription("Demande rejetée")
+            ->setDateCreated(new \DateTime())
+            ->setCreatedBy($validator);
+
+        $activityRequest->setStatus(ActivityRequest::STATUS_REJECT);
+
+        $this->getEntityManager()->flush();
+
+        // todo Notification du demandeur
+        $demandeur = $activityRequest->getCreatedBy();
+        $notificationService->notification(
+            sprintf("La demande %s a été refusée par %s", $activityRequest->getLabel(), $validator),
+            [$demandeur],
+            Notification::OBJECT_ACTIVITY,
+            -1,
+            Notification::OBJECT_ACTIVITY,
+            new \DateTime(),
+            new \DateTime()
+        );
+
+        return true;
     }
 
     public function createOrUpdateActivityRequest($datas)
