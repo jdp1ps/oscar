@@ -6592,6 +6592,43 @@ h2 {
     border-radius: 48px;
     border: solid 2px #30b0d5; }
 
+.jck-selector {
+  border: solid #aaa thin;
+  background: white;
+  line-height: 1.5em;
+  position: relative; }
+  .jck-selector:hover .list {
+    display: block; }
+  .jck-selector .list {
+    display: none;
+    position: absolute;
+    background: white;
+    z-index: 2;
+    box-shadow: 0 0.5em 0.3em rgba(0, 0, 0, 0.3); }
+  .jck-selector .item {
+    transition: all .25s;
+    cursor: pointer;
+    color: #999999;
+    border-bottom: solid thin #CCC; }
+  .jck-selector .item:last-child {
+    border-bottom: none; }
+  .jck-selector .item small {
+    color: rgba(0, 0, 0, 0.5);
+    font-weight: 100; }
+  .jck-selector .item.selected {
+    background: #99ddff;
+    color: black;
+    font-weight: bold; }
+  .jck-selector .item:hover {
+    background: #0088cc;
+    color: white; }
+  .jck-selector .item .icon-check {
+    display: none; }
+  .jck-selector .item.selected .icon-check {
+    display: inline-block; }
+  .jck-selector .item.selected .icon-check-empty {
+    display: none; }
+
 hr.separator {
   border-top: dotted #AAA thin;
   margin-top: .5em;

@@ -1829,6 +1829,55 @@ $dateBorderSize: 1px;
   }
 }
 
+$colorSelected: #0088cc;
+
+.jck-selector {
+  border: solid #aaa thin;
+  background: white;
+  line-height: 1.5em;
+  position: relative;
+
+  &:hover .list{
+    display: block;
+  }
+   .list {
+    display: none;
+    position: absolute;
+    background: white;
+    z-index: 2;
+    box-shadow: 0 .5em .3em rgba(0,0,0,.3em);
+  }
+   .item {
+    transition: all .25s;
+    cursor: pointer;
+    color: #999999;
+    border-bottom: solid thin #CCC;
+  }
+   .item:last-child {
+    border-bottom: none;
+  }
+   .item small {
+    color: rgba(0,0,0,.5);
+    font-weight: 100;
+  }
+   .item.selected {
+    background: lighten($colorSelected, 40%);
+    color: black;
+    font-weight: bold;
+  }
+   .item:hover {
+    background: $colorSelected;
+    color: white;
+  }
+
+   .item .icon-check {
+    display: none;
+  }
+   .item.selected .icon-check { display: inline-block }
+   .item.selected .icon-check-empty { display: none }
+}
+
+
 
 
 hr.separator {
