@@ -1,8 +1,39 @@
 <div class="container">
+    <link rel="stylesheet" href="/js/oscar/dist/personautocompleter.css" />
+    <div class="container">
+        <div id="app"></div>
+    </div>
+    <script>
+        requirejs(['vue', 'vue-resource', 'ActivitySearchUi', 'VueFilters', 'mm'], function(Vue, VueResource, ActivitySearchUi, VueFilters, moment){
+
+            Vue.use(VueResource);
+
+            Vue.filter('slugify', VueFilters.default.slugify);
+            Vue.filter('money', function(dbl){
+                return dbl.toFixed(2);
+            });
+
+            Vue.filter('fullDate', function(text){
+                var d = moment(text);
+                return d.format("dddd, D MMMM YYYY") + " (" + d.fromNow() + ")";
+            });
+
+            new Vue({
+                render: function (h) {
+                    return h(ActivitySearchUi.default, {
+                        props: {
+                            url: '<?= $this->url('contract/api') ?>',
+                            first: true
+                        }
+                    })
+                }
+            }).$mount('#app');
+        });
+    </script>
+    <?php /*
     <h1><i class="icon-cubes"></i> Mes projets</h1>
     <?php if (count($projects)): ?>
     <?php
-        /** @var \Oscar\Entity\Project $project */
     $byRole = [];
         $contentProject = [];
     foreach( $projects as $project){
@@ -18,7 +49,6 @@
             }
         }
 
-        /** @var \Oscar\Entity\Activity $a */
         foreach ($project->getActivities() as $a) {
             foreach ($a->getPersons() as $member) {
                if( !$member->getPerson() ){

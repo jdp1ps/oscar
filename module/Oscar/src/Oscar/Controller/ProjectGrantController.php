@@ -60,6 +60,77 @@ class ProjectGrantController extends AbstractOscarController
         return [];
     }
 
+    /**
+     * @url /activites-de-recherche/api
+     * @return JsonModel
+     */
+    public function apiAction(){
+
+        // On test les droits de la personne
+        $person = $this->getCurrentPerson();
+
+        ////////////////////////////////////////////////////////////////////////
+        // Paramètres envoyés à l'API
+        $q = $this->params()->fromQuery('q', '');
+        $page = (int) $this->params()->fromQuery('p', 1);
+        $rbp = (int) $this->params()->fromQuery('rbp', 10);
+
+
+        // IDS des activités de la personne
+        $idsPerson = array_unique($this->getActivityService()->getActivitiesIdsPerson($person));
+
+
+        if( !$q ){
+            $activityIds = $idsPerson;
+            $totalQuery = count($activityIds);
+        }
+        else {
+            $activityIds = array_intersect($this->getActivityService()->search($q), $idsPerson);
+            $totalQuery = count($activityIds);
+        }
+
+
+
+        $totalPages = ceil($totalQuery / $rbp);
+        $error = null;
+        ////////////////////////////////////////////////////////////////////////
+
+        if( $page > $totalPages ){
+            $error = "La page demandé dépasse des résultats possibles";
+        }
+
+        // Formatteur > JSON
+        $jsonFormatter = new JSONFormatter($this->getOscarUserContext());
+
+        // Récupération des activités effective
+        $activities = $this->getActivityService()->getActivitiesByIds($activityIds, $page, $rbp);
+        $totalQueryPage = count($activities);
+
+        // Réponse
+        $datas = [];
+
+        // Mise en forme
+        foreach ($activities as $activity) {
+            $datas[] = $jsonFormatter->format($activity, false);
+        }
+
+        return $this->ajaxResponse([
+            'oscar' => OscarVersion::getBuild(),
+            'date'  => date('Y-m-d H:i:s'),
+            'code'  => 200,
+            'totalResultQuery' => $totalQuery,
+            'totalResultPage' => $totalQueryPage,
+            'totalPages' => $totalPages,
+            'page' => $page,
+            'error' => $error,
+            'resultByPage' => $rbp,
+            'datas' => [
+                'ids' => $activityIds,
+                'content' => $datas
+            ]
+        ]);
+    }
+
     public function adminDemandeAction()
     {
         /** @var Person $demandeur */
@@ -410,66 +481,7 @@ class ProjectGrantController extends AbstractOscarController
         ];
     }
 
-    /**
-     * @url /activites-de-recherche/api
-     * @return JsonModel
-     */
-    public function apiAction(){
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
-        ////////////////////////////////////////////////////////////////////////
-        // Paramètres envoyés à l'API
-        $q = $this->params()->fromQuery('q', '');
-        $page = (int) $this->params()->fromQuery('p', 1);
-        $rbp = (int) $this->params()->fromQuery('rbp', 10);
 
-        // Récupération des IDS via l'indexeur
-        if( !$q ){
-            $activityIds = null;
-            $totalQuery = $this->getActivityService()->getTotalActivitiesInDb();
-        }
-        else {
-            $activityIds = $this->getActivityService()->search($q);
-            $totalQuery = count($activityIds);
-        }
-        $totalPages = ceil($totalQuery / $rbp);
-        $error = null;
-        ////////////////////////////////////////////////////////////////////////
-
-        if( $page > $totalPages ){
-            $error = "La page demandé dépasse des résultats possibles";
-        }
-
-        // Formatteur > JSON
-        $jsonFormatter = new JSONFormatter($this->getOscarUserContext());
-
-        // Récupération des activités effective
-        $activities = $this->getActivityService()->getActivitiesByIds($activityIds, $page, $rbp);
-        $totalQueryPage = count($activities);
-
-        // Réponse
-        $datas = [];
-
-        // Mise en forme
-        foreach ($activities as $activity) {
-            $datas[] = $jsonFormatter->format($activity, false);
-        }
-
-        return $this->ajaxResponse([
-            'oscar' => OscarVersion::getBuild(),
-            'date'  => date('Y-m-d H:i:s'),
-            'code'  => 200,
-            'totalResultQuery' => $totalQuery,
-            'totalResultPage' => $totalQueryPage,
-            'totalPages' => $totalPages,
-            'page' => $page,
-            'error' => $error,
-            'resultByPage' => $rbp,
-            'datas' => [
-                'ids' => $activityIds,
-                'content' => $datas
-            ]
-        ]);
-    }
 
     /**
      * Génération automatique de documents.

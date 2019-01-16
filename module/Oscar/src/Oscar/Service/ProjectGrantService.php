@@ -80,9 +80,24 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
      */
     public function getTotalActivitiesInDb()
     {
-        $query = $activities = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
+        $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
         $query->select('COUNT(a.id)');
         return $query->getQuery()->getSingleScalarResult();
+    }
+
+    public function getActivitiesIdsPerson( Person $person ){
+        $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
+        $query->select('a.id')
+            ->leftJoin('a.persons', 'apers')
+            ->leftJoin('apers.person', 'pers1')
+            ->leftJoin('a.project','aprj')
+            ->leftJoin('aprj.members', 'pprs')
+            ->leftJoin('pprs.person', 'pers2')
+            ->where('pers1 = :person OR pers2 = :person')
+            ->setParameter('person', $person)
+        ;
+        $activities = $query->getQuery()->getResult();
+        return array_map('current', $activities);
     }
 
     public function getProjectsIdsSearch($text){

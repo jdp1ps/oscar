@@ -38,17 +38,19 @@
     import ActivitySearchItem from './ActivitySearchItem.vue';
     import OscarGrowl from './OscarGrowl.vue';
     import OscarBus from './OscarBus.js';
-    // import PersonAutoCompleter from './PersonAutoCompleter.vue';
+
+    //poi watch --format umd --moduleName  ActivitySearchUi --filename.css ActivitySearchUi.css --filename.js ActivitySearchUi.js --dist public/js/oscar/dist public/js/oscar/src/ActivitySearchUi.vue
+
 
     export default {
         props: {
-            url: { required: true }
+            url: { required: true },
+            first: { required: true, typ: Boolean }
         },
 
         components: {
             activity: ActivitySearchItem,
             oscargrowl: OscarGrowl,
-            // personautocompleter: PersonAutoCompleter,
         },
 
         data() {
@@ -103,6 +105,8 @@
         },
 
         mounted(){
+
+            this.handlerSubmit();
 
             window.onscroll = () => {
                 let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;

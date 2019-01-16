@@ -263,36 +263,10 @@ class ProjectController extends AbstractOscarController
      */
     public function currentUserProjectsAction()
     {
-        /** @var UserInterface $currentUser */
-        $currentUser = $this->getOscarUserContext()->getDbUser();
-        //var_dump($this->getOscarUserContext()->getDbUser());
-        if( !$currentUser ){
-            $currentUser = $this->getOscarUserContext()->getLdapUser();
-        }
-        
-	/** @var Person|null $currentPerson */
-        $currentPerson = $this->getOscarUserContext()->getCurrentPerson();
 
-
-        if ($currentUser === null) {
-           // die("Bad move, checkmate !");
-        }
-
-        $email = $currentPerson ? $currentPerson->getEmail() : $currentUser->getEmail();
-
-        /** @var $projectRepo ProjectRepository */
-        $projectRepo = $this->getEntityManager()->getRepository('Oscar\Entity\Project');
-	
-	try {
-		$projects = $projectRepo->getByUserEmail($email);
-	} catch( \Exception $e ) {
-		$this->getLogger()->error($e->getMessage() . "\n" . $e->getTraceAsString());
-		$projects = [];
-	}
 
         return [
-            'email' => $email,
-            'projects' => $projects,
+
         ];
     }
 
