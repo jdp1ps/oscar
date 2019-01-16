@@ -123,7 +123,7 @@
         </transition>
 
         <header class="row">
-            <h1 class="col-md-9">Demandes d'activité</h1>
+            <h1 class="col-md-9">{{ title }}</h1>
             <nav class="col-md-3">
                 &nbsp;
                 <jckselector :choose="listStatus" :selected="selectedStatus" @change="selectedStatus = $event"/>
@@ -164,13 +164,37 @@
                     <h3><i class=" icon-edit"></i> Informations</h3>
                     <ul>
                         <li><i class="icon-bank"></i> Somme demandée : <strong>{{ a.amount | montant}}</strong></li>
-                        <li><i class="icon-calendar"></i> Début (prévu) : <strong v-if="a.dateStart">{{ a.dateStart | date}}</strong><em>pas de date de début prévue</em></li>
-                        <li><i class="icon-calendar"></i> Fin (prévue) : <strong v-if="a.dateEnd">{{ a.dateEnd | date}}</strong><em>pas de date de fin prévue</em></li>
+                        <li><i class="icon-calendar"></i> Début (prévu) :
+                            <strong v-if="a.dateStart">{{ a.dateStart | date}}</strong>
+                            <em v-else>pas de date de début prévue</em>
+                        </li>
+                        <li><i class="icon-calendar"></i> Fin (prévue) :
+                            <strong v-if="a.dateEnd">{{ a.dateEnd | date}}</strong>
+                            <em v-else>pas de date de fin prévue</em>
+                        </li>
                     </ul>
                     <div class="alert alert-help">
                         <strong>Description</strong> :
                     {{ a.description }}
                     </div>
+                    <section class="fichiers">
+                        <h3><i class="icon-attach-outline"></i> Fichiers</h3>
+                        <div v-if="a.files.length == 0" class="alert alert-info">
+                            Vous n'avez fourni aucun document pour cette demande
+                        </div>
+                        <ul v-else>
+                            <li v-for="f in a.files">
+                                <strong>{{ f.name }}</strong>
+                                <a :href="'?dl=' + f.file + '&id=' + a.id" class="btn btn-default btn-xs">
+                                    <i class="icon-download"></i>
+                                    Télécharger</a>
+                                <a href="#" @click.prevent.stop="handlerDeleteFile(f, a)" class="btn btn-default btn-xs" v-if="a.sendable">
+                                    <i class="icon-trash"></i>
+                                    Supprimer ce fichier</a>
+                            </li>
+                        </ul>
+                    </section>
+
                 </div>
                 <div class="col-md-6">
                     <section>
@@ -192,23 +216,6 @@
                     </section>
                 </div>
             </div>
-            <section class="fichiers">
-                <h3><i class="icon-attach-outline"></i> Fichiers</h3>
-                <div v-if="a.files.length == 0" class="alert alert-info">
-                    Vous n'avez fourni aucun document pour cette demande
-                </div>
-                <ul v-else>
-                <li v-for="f in a.files">
-                    <strong>{{ f.name }}</strong>
-                    <a :href="'?dl=' + f.file + '&id=' + a.id" class="btn btn-default btn-xs">
-                        <i class="icon-download"></i>
-                        Télécharger</a>
-                    <a href="#" @click.prevent.stop="handlerDeleteFile(f, a)" class="btn btn-default btn-xs" v-if="a.sendable">
-                        <i class="icon-trash"></i>
-                        Supprimer ce fichier</a>
-                </li>
-                </ul>
-            </section>
             <nav v-if="a.sendable">
                 <a href="#" @click.prevent.stop="handlerEdit(a)" class="btn btn-primary">
                     <i class="icon-edit"></i>
@@ -264,6 +271,9 @@
 
         props: {
             moment: {
+                required: true
+            },
+            title: {
                 required: true
             }
         },

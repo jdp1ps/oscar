@@ -171,7 +171,7 @@ $this->headScript();
                             <li><a href="<?= $this->url('contract/advancedsearch') ?>"><?= $this->translate('Liste des activités') ?><i class="icon-asterisk"></i></a></li>
                             <li><a href="<?= $this->url('contract/new') ?>"><?= $this->translate('Nouvelle activité') ?></a></li>
                             <li><a href="<?= $this->url('contract/almostdone') ?>"><?= $this->translate('Bientôt terminées') ?></a></li>
-                            <li><a href="<?= $this->url('contract/requestadmin') ?>"><?= $this->translate("Demandes d'activités") ?></a></li>
+                            <li><a href="<?= $this->url('contract/requestadmin') ?>"><?= $this->translate("Gérer les demandes d'activité") ?></a></li>
                             <li><a href="<?= $this->url('contract/almoststart') ?>"><?= $this->translate('Débutant prochainement') ?></a></li>
                             <li><a href="<?= $this->url('contractdocument') ?>"><?= $this->translate('Liste des documents téléversés') ?></a></li>
                             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)) : ?>

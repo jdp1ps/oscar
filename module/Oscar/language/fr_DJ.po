@@ -350,6 +350,12 @@ msgstr ""
 msgid "Jalons"
 msgstr ""
 
+msgid "Demande d'activité"
+msgstr "Demande d'accord"
+
+msgid "Gérer les demandes d'activité"
+msgstr "Gérer les demandes d'accord"
+
 #~ msgid ">Projets sans activité<"
 #~ msgstr "Projet sans accord"
 

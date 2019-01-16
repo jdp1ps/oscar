@@ -138,7 +138,7 @@
                             <?php if( $isRequestValidator ): ?>
                                 <a href="<?= $this->url('contract/requestadmin') ?>" class="btn <?= $requestValidations > 0 ? 'btn-primary' : 'btn-default' ?>">
                                     <i class="icon-cube"></i>
-                                    Demande d'activité
+                                    <?= $this->translate("Demande d'activité") ?>
                                     <?php if( $requestValidations > 0 ): ?>
                                     <sub class="bubble bubble-danger"><?= $requestValidations ?></sub>
                                     <?php endif; ?>

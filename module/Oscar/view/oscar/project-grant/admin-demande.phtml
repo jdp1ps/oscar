@@ -38,7 +38,8 @@
                     moment: moment,
                     rolesPerson: <?= json_encode($rolesPerson) ?>,
                     rolesOrganisation: <?= json_encode($rolesOrganisation) ?>,
-                    asAdmin: <?= $asAdmin ?>
+                    asAdmin: <?= $asAdmin ?>,
+                    title: "<?= $this->translate("Gérer les demandes d'activité") ?>"
                 }})
             }
         })

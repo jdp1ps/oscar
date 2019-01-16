@@ -32,7 +32,7 @@
         new Vue({
             el: '#app',
             render: function(h){
-                return h(ActivityRequest.default, { props: { moment: moment }})
+                return h(ActivityRequest.default, { props: { moment: moment, title: "<?= $this->translate("Demande d'activité") ?>" }})
             }
         })
     })

@@ -63,7 +63,7 @@
         </transition>
 
         <header class="row">
-            <h1 class="col-md-9">Traitement des demandes d'activité en attente</h1>
+            <h1 class="col-md-9">{{ title }}</h1>
             <nav class="col-md-3">
                 &nbsp;
                 <jckselector :choose="listStatus" :selected="selectedStatus" @change="selectedStatus = $event"/>
@@ -188,6 +188,9 @@
             },
             asAdmin: {
                 default: false
+            },
+            title: {
+                required: true
             }
         },
 
