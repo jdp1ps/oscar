@@ -1018,7 +1018,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     public function getAvailableRolesPersonActivity(){
         /** @var RoleRepository $roleRepository */
         $roleRepository = $this->getEntityManager()->getRepository(Role::class);
-        $roles = $roleRepository->getRolesAtOrganizationArray();
+        $roles = $roleRepository->getRolesAtActivityArray();
         return $roles;
     }
 
