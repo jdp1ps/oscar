@@ -37,13 +37,7 @@ Si des conflits de fichiers surviennent, vous pouvez utiliser la commande
 
 ```bash
 git reset --hard origin/master
-``` 
-
-ou si vous êtes sur la branche **develop** : 
-
-```bash
-git reset --hard origin/develop
-``` 
+```
 
 
 ## Mise à jour des vendors (Librairies tiers)
@@ -53,21 +47,6 @@ En utilisant **composer** :
 ```bash
 composer install
 ```
-
-Ou en utilisant l'archive fournis dans l'installation : 
-
-```bash
-# On supprime les anciennes
-rm -Rf vendor
-
-# On extrait les dernières
-tar xvfz install/vendor.tar.gz
-
-# On accorde les droits d'accès si besoin
-chown -R <user>:<group> ./vendor/
-```
-
-> ATTENTION : Depuis la version 2.5.x, la gestion des dépendances devra être réaliser avec [Composer](https://getcomposer.org).
 
 
 ## Mise à jour de la BDD
@@ -81,6 +60,7 @@ php vendor/bin/doctrine-module orm:schema-tool:update --dump-sql
 # Pour appliquer
 php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
+
 
 ## Vérifier la configuration
 
@@ -108,6 +88,15 @@ php public/index.php oscar patch checkPrivilegesJSON
 Pour des raisons techniques, cette commande doit être exécutée plusieurs fois jusqu'à obtenir un message : 
 
 **Les privilèges sont à jour**
+
+
+## Remise en service
+
+```bash
+# Remettre en production
+rm MAINTENANCE
+```
+
 
 > Cette commande executera automatiquement la requète de mise à jour de la séquence d'index des privilèges : `select setval('privilege_id_seq',(select max(id)+1 from privilege), false)`.
 
