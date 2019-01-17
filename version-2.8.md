@@ -1,10 +1,22 @@
 # version 2.8 "Callahan" (Janvier 2019)
 
-Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
-## ATTENTION
+## Code des LOTS de TRAVAIL obligatoire
+
+Renseigner un code pour un lot de travail est maintenant obligatoire. La commande : 
+
+```bash
+$ php public/index.php oscar patch workpackageCode
+```
+
+Permet de lister les activités identifiées avec des lots de travail dont le code est vide pour permettre de corriger manuellement depuis la fiche activité le code manquant sur le lot.
+
+## Authentification LDAP !
 
 Pour les instances d'oscar utilisant LDAP, cette version profite d'évolutions de la librairie tiers **UnicaenApp** qui permet maintenant de configurer le champ LDAP utilisé pour l'autentification. Voir la documentation ([Configurer l'identifiant de connexion LDAP](./doc/install-prod.md), partie **Authentification LDAP : Non-Supann**).
+
+
+Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
 
 ## Feuille de temps

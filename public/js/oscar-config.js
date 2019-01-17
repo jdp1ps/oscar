@@ -22,7 +22,7 @@ requirejs.config({
         'jquery-serialize': 'vendor/jquery-serialize-object/dist/jquery.serialize-object.min',
         'moment': 'vendor/momentjs/min/moment-with-locales.min',
         'moment-tz': 'vendor/moment-timezone/builds/moment-timezone-with-data.min',
-        'moment-timezone': 'vendor/moment-timezone/builds/moment-timezone-with-data',
+        'moment-timezone': 'vendorworkpackageperson/moment-timezone/builds/moment-timezone-with-data',
         'underscore': 'vendor/underscore/underscore-min',
         'bt-datepicker': 'vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min',
         'timepicker': 'vendor/bootstrap-timepicker/js/bootstrap-timepicker',

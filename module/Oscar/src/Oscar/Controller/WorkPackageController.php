@@ -13,6 +13,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\Person;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
+use Oscar\Exception\OscarException;
 use Oscar\Form\WorkPackageForm;
 use Oscar\Hydrator\WorkPackageHydrator;
 use Oscar\Provider\Privileges;
@@ -68,12 +69,20 @@ class WorkPackageController extends AbstractOscarController
         $workpackageperson = null;
 
         // Mise à jour d'un déclarant
+
         if( $method == 'POST' ) {
             if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
                 return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
             }
 
             $datas = $this->getRequest()->getPost();
+
+            $code = trim($datas['code']);
+
+            // On contrôle les code vide
+            if( $code == '' ){
+                return $this->getResponseBadRequest("Vous devez renseigner un code");
+            }
 
             if( array_key_exists('workpackageid', $datas) ){
                 // Enregistrement du lot de travail
@@ -117,15 +126,19 @@ class WorkPackageController extends AbstractOscarController
         if( $method == 'PUT' ){
             $data = $this->getRequest()->getPost();
 
-
             if( $data['workpackageid'] == -1) {
+                $code = trim($data['code']);
                 try {
+                    // On contrôle les code vide
+                    if( $code == '' ){
+                        throw new OscarException("Vous devez renseigner un code");
+                    }
                     $workpackage = new WorkPackage();
                     $this->getEntityManager()->persist($workpackage);
                     $workpackage->setLabel($data['label'])
                         ->setDescription($data['description'])
                         ->setActivity($activity)
-                        ->setCode($data['code']);
+                        ->setCode($code);
                     $this->getEntityManager()->flush();
                     return $this->getResponseOk();
                 } catch( \Exception $e ){
