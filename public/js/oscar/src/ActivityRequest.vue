@@ -3,21 +3,20 @@
         <div class="alert alert-info" v-show="loading">{{ loading }}</div>
 
         <transition name="fade">
-            <div class="overlay" v-if="formData">
-                <form action="?" @submit.prevent="handlerSave($event)" enctype="multipart/form-data" method="post" name="save" style="min-width: 75vw">
-                    <!--
-                    <h1 v-if="formData.original">Modifier {{ formData.original }}</h1>
-                    <h1 v-else="formData.original">Nouvelle discipline</h1>
-                    -->
-                    <div class="columns">
-                        <div class="col6">
+            <div class="overlay" v-if="formData" style="overflow-y: scroll; padding: 1em">
+                <form action="?" @submit.prevent="handlerSave($event)" enctype="multipart/form-data" method="post" name="save" style="min-width: 75vw; max-width: 80%; padding-top: 2em">
+                    <h1 v-if="formData.id">Modification de la demande</h1>
+                    <h1 v-else>Nouvelle demande</h1>
+
+                    <div class="row">
+                        <div class="col-md-6">
                             <strong>Demandeur : </strong><br>
                             <span class="cartouche">
                                 {{ demandeur }}
                                 <span class="addon">Demandeur</span>
                             </span>
                         </div>
-                        <div class="col6">
+                        <div class="col-md-6">
                             <strong>Oragnisme référent : </strong><br>
                             <p v-if="organisations.length == 0" class="alert alert-info">
                                 Vous n'êtes associé à aucun organisme.

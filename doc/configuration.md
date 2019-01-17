@@ -180,3 +180,7 @@ return array(
     ]
 );
 ```
+
+## Demande d'activité
+
+Présentation et configuration des [Demande d'éctivité](./activity-request.md)
