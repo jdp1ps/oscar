@@ -550,7 +550,34 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
 
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <script>
-        require(['workpackageperson'], function(Workpackageperson){
+        require(['vue', 'vue-resource', 'bootbox', 'Workpackage'], function(Vue, VueResource, Bootbox, Workpackage){
+            Vue.use(VueResource);
+
+            Vue.http.options.emulateJSON = true;
+            Vue.http.options.emulateHTTP = true;
+
+            // Transmission du jeton
+            Vue.http.interceptors.push((request, next) => {
+                request.headers.set('X-CSRF-TOKEN', '<?= $tokenValue ?>');
+                request.headers.set('Authorization', 'OSCAR TOKEN');
+                next();
+            });
+
+            new Vue({
+                render: function(h){
+                    return h(Workpackage.default,{ props: {
+                        url: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>',
+                        token: '<?= $tokenValue ?>',
+                        isValidateur: true,
+                        editable: true,
+                        Bootbox: Bootbox,
+                    }})
+                },
+                el: '#workpackages'
+            })
+        });
+        /*
+        require(['workpackageperson', 'mm'], function(Workpackageperson, moment){
             var wp = new Workpackageperson.default({
                 http: {
                     root: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>'
@@ -571,7 +598,7 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
             wp.$on('declarer', function(){
                 window.location = '<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>';
             });
-        })
+        })*/
     </script>
     <?php endif; ?>
     <?php endif; ?>

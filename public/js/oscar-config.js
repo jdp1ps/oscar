@@ -22,7 +22,7 @@ requirejs.config({
         'jquery-serialize': 'vendor/jquery-serialize-object/dist/jquery.serialize-object.min',
         'moment': 'vendor/momentjs/min/moment-with-locales.min',
         'moment-tz': 'vendor/moment-timezone/builds/moment-timezone-with-data.min',
-        'moment-timezone': 'vendorworkpackageperson/moment-timezone/builds/moment-timezone-with-data',
+        'moment-timezone': 'vendor/moment-timezone/builds/moment-timezone-with-data',
         'underscore': 'vendor/underscore/underscore-min',
         'bt-datepicker': 'vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min',
         'timepicker': 'vendor/bootstrap-timepicker/js/bootstrap-timepicker',
@@ -78,7 +78,8 @@ requirejs.config({
         'PersonSchedule' : 'oscar/dist/PersonSchedule',
         'TimesheetPersonResume' : 'oscar/dist/TimesheetPersonResume',
         'ResumeActivity' : 'oscar/dist/ResumeActivity',
-        'PersonsList' : 'oscar/dist/PersonsList'
+        'PersonsList' : 'oscar/dist/PersonsList',
+        'Workpackage': 'oscar/dist/WorkpackageUI'
     },
     shim: {
         "bootstrap": {

@@ -8,6 +8,7 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\Person;
@@ -77,15 +78,16 @@ class WorkPackageController extends AbstractOscarController
 
             $datas = $this->getRequest()->getPost();
 
-            $code = trim($datas['code']);
-
-            // On contrôle les code vide
-            if( $code == '' ){
-                return $this->getResponseBadRequest("Vous devez renseigner un code");
-            }
 
             if( array_key_exists('workpackageid', $datas) ){
                 // Enregistrement du lot de travail
+                $code = trim($datas['code']);
+
+                // On contrôle les code vide
+                if( $code == '' ){
+                    return $this->getResponseBadRequest("Vous devez renseigner un code");
+                }
+
                 /** @var WorkPackage $workpackage */
                 $workpackage = $this->getEntityManager()->getRepository(WorkPackage::class)->find($datas['workpackageid']);
                 if( !$workpackage ){
@@ -126,6 +128,10 @@ class WorkPackageController extends AbstractOscarController
         if( $method == 'PUT' ){
             $data = $this->getRequest()->getPost();
 
+//            parse_str(file_get_contents('php://input'), $_PUT);
+//
+//            $this->getLogger()->info(print_r($_PUT, true));
+
             if( $data['workpackageid'] == -1) {
                 $code = trim($data['code']);
                 try {
@@ -144,6 +150,9 @@ class WorkPackageController extends AbstractOscarController
                 } catch( \Exception $e ){
                     return $this->getResponseInternalError('Impossible de créer le lot de travail.');
                 }
+            } else {
+                $this->getLogger()->info(print_r($data['workpackageid'], true));
+
             }
 
             try {
@@ -217,7 +226,12 @@ class WorkPackageController extends AbstractOscarController
                     $this->getEntityManager()->remove($workpackage);
                     $this->getEntityManager()->flush();
                     return $this->getResponseOk();
-                } catch( \Exception $e ){
+                }
+                catch (ForeignKeyConstraintViolationException $ex) {
+                    return $this->getResponseInternalError('Ce lot de travail est déjà utilisé pour des déclarations');
+                }
+                catch( \Exception $e ){
+                    $this->getLogger()->error(get_class($e));
                     return $this->getResponseInternalError('Impossible de supprimer le lot de travail. ' . $e->getMessage());
                 }
             }
