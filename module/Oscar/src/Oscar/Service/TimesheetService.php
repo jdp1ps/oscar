@@ -1620,9 +1620,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
         }
 
-        $this->getLogger()->debug(print_r($weeksMinCount, true));
-
-        // @todo
         /*
         foreach ($weeksMinCount as $week=>$weekDuration) {
             if( $weekDuration > $limitWeekMax ){
@@ -2209,7 +2206,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'editableInfos' => $editableInfos,
             'period_total_days' => $totalDays,
             'dayNbr' => $totalDays,
-            'daylength' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value'),
             'dayLength' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value'),
             'dayExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.max'),
             'weekExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max'),
