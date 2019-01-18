@@ -40,7 +40,6 @@ requirejs.config({
         'privileges': 'components/build/privileges',
         'organizationrole': 'components/build/organizationrole',
         'roles': 'components/build/roles',
-        'workpackageperson': 'components/build/workpackageperson',
         'ical': 'vendor/ical.js/build/ical.min',
         'timesheet': 'components/build/timesheet',
         'in-the-box' : 'vendor/in-the-box/build/InTheBox',
@@ -81,7 +80,8 @@ requirejs.config({
         'PersonsList' : 'oscar/dist/PersonsList',
         'Tva': 'oscar/dist/Tva',
         'ActivityRequest': 'oscar/dist/ActivityRequest',
-        'ActivityRequestAdmin': 'oscar/dist/ActivityRequestAdmin'
+        'ActivityRequestAdmin': 'oscar/dist/ActivityRequestAdmin',
+        'Workpackage': 'oscar/dist/WorkpackageUI'
     },
     shim: {
         "bootstrap": {

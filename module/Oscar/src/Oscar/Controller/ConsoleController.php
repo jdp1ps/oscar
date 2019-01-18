@@ -39,6 +39,7 @@ use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleOrganization;
 use Oscar\Entity\RoleRepository;
+use Oscar\Entity\WorkPackage;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\OscarVersion;
@@ -140,6 +141,16 @@ class ConsoleController extends AbstractOscarController
             }
         }
         $this->getEntityManager()->flush();
+    }
+
+    public function patch_workpackageCode(){
+        $this->consoleHeader("Rapport sur les lots de travail invalides : ");
+        $workpackages = $this->getEntityManager()->getRepository(WorkPackage::class)->findAll();
+        foreach ($workpackages as $wp) {
+            if( !$wp->getCode() ){
+                $this->consoleError("Un lot dans l'activité " . $wp->getActivity() . " n'a pas de CODE !");
+            }
+        }
     }
 
 

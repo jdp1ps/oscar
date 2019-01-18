@@ -8,11 +8,13 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\Person;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
+use Oscar\Exception\OscarException;
 use Oscar\Form\WorkPackageForm;
 use Oscar\Hydrator\WorkPackageHydrator;
 use Oscar\Provider\Privileges;
@@ -68,6 +70,7 @@ class WorkPackageController extends AbstractOscarController
         $workpackageperson = null;
 
         // Mise à jour d'un déclarant
+
         if( $method == 'POST' ) {
             if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
                 return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
@@ -75,8 +78,16 @@ class WorkPackageController extends AbstractOscarController
 
             $datas = $this->getRequest()->getPost();
 
+
             if( array_key_exists('workpackageid', $datas) ){
                 // Enregistrement du lot de travail
+                $code = trim($datas['code']);
+
+                // On contrôle les code vide
+                if( $code == '' ){
+                    return $this->getResponseBadRequest("Vous devez renseigner un code");
+                }
+
                 /** @var WorkPackage $workpackage */
                 $workpackage = $this->getEntityManager()->getRepository(WorkPackage::class)->find($datas['workpackageid']);
                 if( !$workpackage ){
@@ -117,20 +128,31 @@ class WorkPackageController extends AbstractOscarController
         if( $method == 'PUT' ){
             $data = $this->getRequest()->getPost();
 
+//            parse_str(file_get_contents('php://input'), $_PUT);
+//
+//            $this->getLogger()->info(print_r($_PUT, true));
 
             if( $data['workpackageid'] == -1) {
+                $code = trim($data['code']);
                 try {
+                    // On contrôle les code vide
+                    if( $code == '' ){
+                        throw new OscarException("Vous devez renseigner un code");
+                    }
                     $workpackage = new WorkPackage();
                     $this->getEntityManager()->persist($workpackage);
                     $workpackage->setLabel($data['label'])
                         ->setDescription($data['description'])
                         ->setActivity($activity)
-                        ->setCode($data['code']);
+                        ->setCode($code);
                     $this->getEntityManager()->flush();
                     return $this->getResponseOk();
                 } catch( \Exception $e ){
                     return $this->getResponseInternalError('Impossible de créer le lot de travail.');
                 }
+            } else {
+                $this->getLogger()->info(print_r($data['workpackageid'], true));
+
             }
 
             try {
@@ -204,7 +226,12 @@ class WorkPackageController extends AbstractOscarController
                     $this->getEntityManager()->remove($workpackage);
                     $this->getEntityManager()->flush();
                     return $this->getResponseOk();
-                } catch( \Exception $e ){
+                }
+                catch (ForeignKeyConstraintViolationException $ex) {
+                    return $this->getResponseInternalError('Ce lot de travail est déjà utilisé pour des déclarations');
+                }
+                catch( \Exception $e ){
+                    $this->getLogger()->error(get_class($e));
                     return $this->getResponseInternalError('Impossible de supprimer le lot de travail. ' . $e->getMessage());
                 }
             }
