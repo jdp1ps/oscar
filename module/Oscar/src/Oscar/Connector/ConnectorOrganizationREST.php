@@ -131,7 +131,7 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
             $json = json_decode($return);
             $jsonDatas = null;
             if( property_exists($json, 'organizations') ){
-                $jsonDatas = $json->persons;
+                $jsonDatas = $json->organizations;
             } else {
                 $jsonDatas = $json;
             }
