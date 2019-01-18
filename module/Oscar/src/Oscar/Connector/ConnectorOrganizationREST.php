@@ -125,7 +125,19 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
         }
 
         if( count($return) > 0 ){
-            foreach( json_decode($return) as $data ){
+
+            /////////////////////////////////////
+            ////// Patch 2.7 "Lewis" GIT#286 ////
+            $json = json_decode($return);
+            $jsonDatas = null;
+            if( property_exists($json, 'organizations') ){
+                $jsonDatas = $json->organizations;
+            } else {
+                $jsonDatas = $json;
+            }
+            ////////////////////////////////////
+
+            foreach( $jsonDatas as $data ){
 
                 try {
                     /** @var Person $personOscar */
