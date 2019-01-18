@@ -193,6 +193,10 @@
     import Payment from './PaymentItem.vue';
     import Datepicker from './Datepicker.vue';
 
+
+    // poi watch --format umd --moduleName  Payments --filename.css Payments.css --filename.js Payments.js --dist public/js/oscar/dist public/js/oscar/src/Payments.vue
+
+
     export default {
         props: ['model', 'moment', 'url', 'amount', 'currency', 'currencies', 'manage'],
 
@@ -228,7 +232,7 @@
                     }
                     total += payment.amount / rate;
                 })
-                return total;
+                return Math.round(total*100)/100;
             },
 
             /**
