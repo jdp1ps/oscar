@@ -121,7 +121,18 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         }
         curl_close($curl);
 
-        foreach( json_decode($return) as $personData ){
+        /////////////////////////////////////
+        ////// Patch 2.7 "Lewis" GIT#286 ////
+        $json = json_decode($return);
+        $personsDatas = null;
+        if( property_exists($json, 'persons') ){
+            $personsDatas = $json->persons;
+        } else {
+            $personsDatas = $json;
+        }
+        ////////////////////////////////////
+
+        foreach( $personsDatas as $personData ){
 
             if( ! property_exists($personData, 'uid') ){
                 $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData->uid, true)));
