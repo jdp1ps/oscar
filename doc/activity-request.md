@@ -1,6 +1,6 @@
 # Demande d'activités
 
-Les **Demande d'activité** permettent à un utilisateur de rédiger une demande d'activité. Une fois la demande envoyé, un gestionnaire pourra accepter cette demande ou la refuser. Lorsque une demande est acceptée, Oscar va créer une nouvelle activité dans la base de donnée.
+Les **Demande d'activité** permettent à un utilisateur de rédiger une demande d'activité. Une fois la demande envoyée, un gestionnaire pourra accepter cette demande ou la refuser. Lorsqu'une demande est acceptée, Oscar va créer une nouvelle activité dans la base de données.
 
 Cette fonctionnalité repose sur 2 privilèges : 
 
@@ -19,7 +19,7 @@ Lorsque un utilisateur dispose du droit **demande d'activité**, il aura accès 
 
 ![Privilèges pour les demandes d'activité](./images/activity-request-03.png)
 
-L'interface permet à l'utilisateur de faire le suivi des ces demandes. Par défaut, le demandes affichées sont les demandes en cours (Brouillon et Envoyée), mais il peut configurer l'interface pour voir l'historique de ces demandes (Validées, refusées).
+L'interface permet à l'utilisateur de faire le suivi des ces demandes. Par défaut, les demandes affichées sont les demandes en cours (Brouillon et Envoyée), mais il peut configurer l'interface pour voir l'historique de ces demandes (Validées, refusées).
 
 ![Privilèges pour les demandes d'activité](./images/activity-request-01.png)
 
@@ -47,6 +47,6 @@ L'étape de validation permet de choisir le rôle du demandeur dans l'activité 
 
 ![Privilèges pour les demandes d'activité](./images/activity-request-08.png)
 
-> Les demandeur associés à un organisme ajoute à cette étape le choix du rôle de l'organisme référent.
+> Les demandeurs associés à un organisme ajoutent à cette étape le choix du rôle de l'organisme référent.
 
-Une fois le demande validée, une activité est créée dans l'application et pourra être gérée comme une activité normale.
+Une fois la demande validée, une activité est créée dans l'application et pourra être gérée comme une activité normale.
