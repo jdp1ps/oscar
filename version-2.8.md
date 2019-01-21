@@ -13,7 +13,7 @@ Permet de lister les activités identifiées avec des lots de travail dont le co
 
 ## Authentification LDAP !
 
-Pour les instances d'oscar utilisant LDAP, cette version profite d'évolutions de la librairie tiers **UnicaenApp** qui permet maintenant de configurer le champ LDAP utilisé pour l'autentification. Voir la documentation ([Configurer l'identifiant de connexion LDAP](./doc/install-prod.md), partie **Authentification LDAP : Non-Supann**).
+Pour les instances d'oscar utilisant LDAP, cette version profite d'évolutions de la librairie tiers **UnicaenApp** qui permet maintenant de configurer le champ LDAP utilisé pour l'authentification. Voir la documentation ([Configurer l'identifiant de connexion LDAP](./doc/install-prod.md), partie **Authentification LDAP : Non-Supann**).
 
 
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
