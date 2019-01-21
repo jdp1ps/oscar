@@ -125,7 +125,8 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         ////// Patch 2.7 "Lewis" GIT#286 ////
         $json = json_decode($return);
         $personsDatas = null;
-        if( property_exists($json, 'persons') ){
+
+        if( is_object($json) && property_exists($json, 'persons') ){
             $personsDatas = $json->persons;
         } else {
             $personsDatas = $json;
@@ -153,9 +154,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 continue;
             }
 
-
-
-            if($personData->dateupdated == null
+            if( $personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null
                     || $personOscar->getDateSyncLdap() < $personData->dateupdated
                     || $force == true )

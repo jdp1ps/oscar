@@ -108,10 +108,14 @@
                 </div>
                 <nav class="admin-bar text-center">
                     <div class="btn-group">
+
+                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
                         <a class="btn btn-default btn-xs" href="<?= $this->url('person/edit', ['id'=>$entity->getId()]) ?>">
                             <i class="icon-pencil"></i>
                             Éditer les informations
                         </a>
+                        <?php endif; ?>
+
                         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
                             <a class="btn btn-default btn-xs" href="<?= $this->url('person/notification', ['id'=>$entity->getId()]) ?>">
                                 <i class="icon-bell"></i>
@@ -326,6 +330,11 @@
                     <div class="data-row">
                         <div class="data-label">Authentification</div>
                         <div class="data-value"><?= $entity->getLadapLogin() ?></div>
+                    </div>
+
+                    <div class="data-row">
+                        <div class="data-label">Modèle horaire</div>
+                        <div class="data-value"><?= $entity->getScheduleKey() ?></div>
                     </div>
 
                     <div class="data-row">

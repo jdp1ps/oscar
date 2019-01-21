@@ -148,8 +148,8 @@ return array(
         'listPersonnel' => 0,
 
         'scheduleModeles' => [
-            'fulltime' => [
-                'label' => 'Plein temps',
+            'full35' => [
+                'label' => 'Plein temps (35 heures)',
                 'week' => 35.0,
                 'days' => [
                     1 => 7.0,
@@ -159,8 +159,19 @@ return array(
                     5 => 7.0
                 ]
             ],
+            'full37' => [
+                'label' => 'Plein temps (37 heures)',
+                'week' => 37.0,
+                'days' => [
+                    1 => 7.5,
+                    2 => 7.5,
+                    3 => 7.5,
+                    4 => 7.5,
+                    5 => 7.0
+                ]
+            ],
 
-            'halftime' => [
+            'half35' => [
                 'label' => 'Mi-temps',
                 'week' => 17.5,
                 'days' => [

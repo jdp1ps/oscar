@@ -80,7 +80,7 @@ class PersonController extends AbstractOscarController
                 $this->redirect()->toRoute('person/index');
             }
             $this->redirect()->toRoute('home');
-            
+
         }
         catch (ForeignKeyConstraintViolationException $e) {
             $this->getLogger()->error($e->getMessage());
