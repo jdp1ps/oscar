@@ -25,6 +25,15 @@
                     Voir les privilèges
                 </a>
             <?php endif; ?>
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
+            <form action="<?= $this->url('person/delete', ['id' => $entity->getId()]) ?>" method="post">
+                <button type="submit" class="btn btn-default btn-xs">
+                    <i class="icon-lock"></i>
+                    Supprimer
+                </button>
+            </form>
+
+            <?php endif; ?>
         </p>
 
 

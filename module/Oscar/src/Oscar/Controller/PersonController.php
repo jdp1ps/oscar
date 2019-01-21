@@ -8,6 +8,7 @@
  */
 namespace Oscar\Controller;
 
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
@@ -30,6 +31,7 @@ use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\WorkPackagePerson;
+use Oscar\Exception\OscarException;
 use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
@@ -55,6 +57,38 @@ class PersonController extends AbstractOscarController
     public function apiLdapAction()
     {
         $this->getResponseDeprecated();
+    }
+
+    public function deleteAction(){
+        $method = $this->getHttpXMethod();
+        $this->getOscarUserContext()->check(Privileges::PERSON_EDIT);
+        try {
+            if( $method != 'POST' ){
+                return $this->getResponseBadRequest("Opération non-authorisée");
+            }
+            $person = $this->getPersonService()->getPersonById($this->params()->fromRoute('id'), true);
+
+            $deleteNotifications = $this->getEntityManager()->createQueryBuilder()->delete(NotificationPerson::class, 'n')
+                ->where('n.person = :person')
+                ->setParameter('person', $person);
+
+            $deleteNotifications->getQuery()->execute();
+
+            $this->getEntityManager()->remove($person);
+            $this->getEntityManager()->flush();
+            if( $this->getOscarUserContext()->check(Privileges::PERSON_INDEX) ){
+                $this->redirect()->toRoute('person/index');
+            }
+            $this->redirect()->toRoute('home');
+            
+        }
+        catch (ForeignKeyConstraintViolationException $e) {
+            $this->getLogger()->error($e->getMessage());
+            throw new OscarException("Impossible de supprimer $person, elle est utilisée.");
+        }
+        catch (\Exception $e) {
+            throw new OscarException("PAS POSSIBLE : " . $e->getMessage());
+        }
     }
 
     public function accessAction(){

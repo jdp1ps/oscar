@@ -106,7 +106,6 @@ class Person implements ResourceInterface
      */
     protected $ladapLogin;
 
-
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
@@ -166,6 +165,12 @@ class Person implements ResourceInterface
      * @ORM\Column(type="array", nullable=true)
      */
     protected $ldapMemberOf;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $scheduleKey;
 
     /**
      * @var
@@ -230,17 +235,7 @@ class Person implements ResourceInterface
         return $this;
     }
 
-
-
     public function getRolesFromConnector( $connectorName ){
-//        $roles = [];
-//        /** @var OrganizationPerson $organizationPerson */
-//        foreach ($this->getOrganizations() as $organizationPerson ){
-//            if( $organizationPerson->getFrom() == $connectorName ){
-//                $roles[$organizationPerson->getRole()] = $organizationPerson;
-//            }
-//        }
-//        return $roles;
         return [];
     }
 
@@ -258,11 +253,25 @@ class Person implements ResourceInterface
     public function setLdapMemberOf($ldapMemberOf)
     {
         $this->ldapMemberOf = $ldapMemberOf;
-
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getScheduleKey()
+    {
+        return $this->scheduleKey;
+    }
 
+    /**
+     * @param string $scheduleKey
+     */
+    public function setScheduleKey($scheduleKey)
+    {
+        $this->scheduleKey = $scheduleKey;
+        return $this;
+    }
 
     /**
      * @return ArrayCollection

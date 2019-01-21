@@ -105,11 +105,8 @@ class ConnectorPersonHydrator
     }
 
 
-    public function     hydratePerson(
-        Person $personOscar,
-        $personData,
-        $connectorName
-    ) {
+    public function hydratePerson(Person $personOscar, $personData, $connectorName) {
+
         $rolesOscar = $this->getRolesOscarByRoleId();
         $this->repport = new ConnectorRepport();
 
