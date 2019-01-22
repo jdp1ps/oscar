@@ -184,7 +184,7 @@ return array(
             ],
 
             'parttime' => [
-                'label' => 'Mi-temps',
+                'label' => 'Temps patiel',
                 'week' => 30.0,
                 'days' => [
                     1 => 6.0,

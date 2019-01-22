@@ -1100,10 +1100,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
         $configApp = $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength');
         $configApp['from'] = 'application';
+        $scheduleConfig = $this->getOscarConfig()->getConfiguration('scheduleModeles');
+        $personModele = $person->getCustomSettingsKey('scheduleModele');
 
 
         if ($person->getCustomSettingsKey('days')) {
-            $configApp['from'] = 'custom';
+            $configApp['from'] = 'free';
             $customDays = $person->getCustomSettingsKey('days');
             foreach ($customDays as $day => $value) {
                 $configApp['days'][$day] = $value;
@@ -1112,9 +1114,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $configApp['days_request'] = $person->getCustomSettingsKey('days_request');
             }
         }
+        elseif ($personModele && array_key_exists($personModele, $scheduleConfig) ){
+            $configApp['from'] = 'presets';
+            $configApp['days'] = $scheduleConfig[$personModele]['days'];
+            $configApp['model'] = $personModele;
+        }
 
         elseif ($person->getScheduleKey()) {
-            $scheduleConfig = $this->getOscarConfig()->getConfiguration('scheduleModeles');
+            $this->getLogger()->info(print_r($person->getCustomSettingsObj(), true));
+
             if( array_key_exists($person->getScheduleKey(), $scheduleConfig) ){
                 $configApp['from'] = 'sync';
                 $configApp['days'] = $scheduleConfig[$person->getScheduleKey()]['days'];

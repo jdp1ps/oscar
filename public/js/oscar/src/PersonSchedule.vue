@@ -19,10 +19,12 @@
             </div>
         </transition>
 
-        <p>La répartition horaire est issue de
+        <p>La répartition horaire est issue de {{ from }}
+
         <strong v-if="from == 'application'">la configuration Oscar par défaut</strong>
         <strong v-if="from == 'sync'">la synchronisation (Connector)</strong>
-        <strong v-if="from == 'custom'">la configuration manuelle</strong>
+        <strong v-if="from == 'custom'">la configuration prédéfinie</strong>
+        <strong v-if="from == 'free'">la configuration manuelle</strong>
         </p>
 
 
@@ -44,8 +46,12 @@
         <nav v-if="editable">
             <button @click.prevent="handlerEditDays()" class="btn btn-default" v-if="!editDay"><i class="icon-pencil"></i> modifier</button>
             <button @click.prevent="handlerSaveDays()" class="btn btn-primary" v-if="editDay"><i class="icon-floppy"></i> enregistrer</button>
+            <select v-model="model" class="form-inline" v-if="models && editDay" @change="handlerSaveDays(model)">
+                <option value="default">Aucun</option>
+                <option v-for="m, key in models" :value="key" :selected="model == key">{{ m.label }}</option>
+            </select>
 
-            <button @click.prevent="handlerSaveDays('default')" class="btn btn-primary" v-if="editDay && from == 'custom'"><i class="icon-floppy"></i> Horaires par défaut</button>
+            <button @click.prevent="handlerSaveDays('default')" class="btn btn-primary" v-if="editDay && from != 'default'"><i class="icon-floppy"></i> Horaires par défaut</button>
             <button @click.prevent="handlerCancel()" class="btn btn-primary" v-if="editDay"><i class="icon-cancel-circled"></i> annuler</button>
         </nav>
     </section>
@@ -80,7 +86,9 @@
                 from: null,
                 days: {},
                 editDay: null,
-                newValue: 0
+                newValue: 0,
+                models: [],
+                model: null
             }
         },
 
@@ -154,6 +162,8 @@
                             this.days = ok.body.days;
                             this.dayLength = ok.body.dayLength;
                             this.from = ok.body.from;
+                            this.models = ok.body.models;
+                            this.model = ok.body.model;
                         },
                         ko => {
                             this.error = AjaxResolve.resolve('Impossible de charger les données', ko);

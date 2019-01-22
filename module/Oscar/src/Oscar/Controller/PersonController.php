@@ -754,18 +754,22 @@ class PersonController extends AbstractOscarController
                     /** @var TimesheetService $timesheetService */
                     $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
+                    $models = $this->getConfiguration('oscar.scheduleModeles');
+
                     if( $method == "POST" ){
                         $this->getOscarUserContext()->check(Privileges::PERSON_MANAGE_SCHEDULE);
 
                         try {
                             $daysLength = $this->params()->fromPost('days');
                             $model = $this->params()->fromPost('model');
+
                             if( $model == 'default' ){
                                 $this->getLogger()->info("Remise par défaut des horaires de $person");
 
                                 $custom = $person->getCustomSettingsObj();
                                 $this->getLogger()->info(print_r($custom, true));
                                 unset($custom['days']);
+                                unset($custom['scheduleModele']);
                                 $person->setCustomSettingsObj($custom);
                                 $this->getEntityManager()->flush($person);
                                 $this->getLogger()->info(print_r($custom, true));
@@ -774,8 +778,18 @@ class PersonController extends AbstractOscarController
                                 $this->getUserParametersService()->performChangeSchedule($daysLength, $person);
                                 return $this->getResponseOk("Heures enregistrées");
                             }
+                            else {
+                                if( !array_key_exists($model, $models) ){
+                                    return $this->getResponseBadRequest("Modèle inconnu");
+                                }
+                                $custom = $person->getCustomSettingsObj();
+                                unset($custom['days']);
+                                $custom['scheduleModele'] = $model;
+                                $person->setCustomSettingsObj($custom);
+                                $this->getEntityManager()->flush($person);
+                                $this->getLogger()->info(print_r($custom, true));
 
-
+                            }
 
                         } catch (\Exception $e) {
                             return $this->getResponseInternalError("Impossible d'enregistrer les paramètres : " . $e->getMessage());
@@ -784,6 +798,8 @@ class PersonController extends AbstractOscarController
                     }
 
                     $datas = $timesheetService->getDayLengthPerson($person);
+                    $datas['models'] = $models;
+
                     return $this->ajaxResponse($datas);
                     break;
                 default:
