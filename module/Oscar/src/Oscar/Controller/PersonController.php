@@ -759,8 +759,24 @@ class PersonController extends AbstractOscarController
 
                         try {
                             $daysLength = $this->params()->fromPost('days');
-                            $this->getUserParametersService()->performChangeSchedule($daysLength, $person);
-                            return $this->getResponseOk("Heures enregistrées");
+                            $model = $this->params()->fromPost('model');
+                            if( $model == 'default' ){
+                                $this->getLogger()->info("Remise par défaut des horaires de $person");
+
+                                $custom = $person->getCustomSettingsObj();
+                                $this->getLogger()->info(print_r($custom, true));
+                                unset($custom['days']);
+                                $person->setCustomSettingsObj($custom);
+                                $this->getEntityManager()->flush($person);
+                                $this->getLogger()->info(print_r($custom, true));
+                            }
+                            elseif ($daysLength != null) {
+                                $this->getUserParametersService()->performChangeSchedule($daysLength, $person);
+                                return $this->getResponseOk("Heures enregistrées");
+                            }
+
+
+
                         } catch (\Exception $e) {
                             return $this->getResponseInternalError("Impossible d'enregistrer les paramètres : " . $e->getMessage());
                         }

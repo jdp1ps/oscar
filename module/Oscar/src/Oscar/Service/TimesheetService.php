@@ -1099,7 +1099,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function getDayLengthPerson(Person $person)
     {
         $configApp = $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength');
+        $configApp['from'] = 'application';
+
+
         if ($person->getCustomSettingsKey('days')) {
+            $configApp['from'] = 'custom';
             $customDays = $person->getCustomSettingsKey('days');
             foreach ($customDays as $day => $value) {
                 $configApp['days'][$day] = $value;
@@ -1112,6 +1116,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         elseif ($person->getScheduleKey()) {
             $scheduleConfig = $this->getOscarConfig()->getConfiguration('scheduleModeles');
             if( array_key_exists($person->getScheduleKey(), $scheduleConfig) ){
+                $configApp['from'] = 'sync';
                 $configApp['days'] = $scheduleConfig[$person->getScheduleKey()]['days'];
             }
         }
