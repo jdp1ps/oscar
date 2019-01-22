@@ -135,9 +135,10 @@
 
                         <div class="col-md-6">
                             <h4>Temps</h4>
+                            <pre>{{ selection }}</pre>
                             <timechooser @timeupdate="handlerDayUpdated"
                                          :declarationInHours="declarationInHours"
-                                         :baseTime="ts.daylength"
+                                         :baseTime="selectedDay.dayLength"
                                          :fill="fillDayValue"
                                          :duration="editedTimesheet ? editedTimesheet.duration : 0"></timechooser>
                         </div>
