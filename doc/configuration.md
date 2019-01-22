@@ -183,4 +183,4 @@ return array(
 
 ## Demande d'activité
 
-Présentation et configuration des [Demande d'éctivité](./activity-request.md)
+Présentation et configuration des [Demande d'activité](./activity-request.md)
