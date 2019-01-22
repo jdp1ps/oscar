@@ -1108,6 +1108,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $configApp['days_request'] = $person->getCustomSettingsKey('days_request');
             }
         }
+
+        elseif ($person->getScheduleKey()) {
+            $scheduleConfig = $this->getOscarConfig()->getConfiguration('scheduleModeles');
+            if( array_key_exists($person->getScheduleKey(), $scheduleConfig) ){
+                $configApp['days'] = $scheduleConfig[$person->getScheduleKey()]['days'];
+            }
+        }
+
         return $configApp;
     }
 

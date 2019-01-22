@@ -68,11 +68,29 @@ class PersonController extends AbstractOscarController
             }
             $person = $this->getPersonService()->getPersonById($this->params()->fromRoute('id'), true);
 
-            $deleteNotifications = $this->getEntityManager()->createQueryBuilder()->delete(NotificationPerson::class, 'n')
+            $del = $this->getEntityManager()->createQueryBuilder()->delete(NotificationPerson::class, 'n')
                 ->where('n.person = :person')
                 ->setParameter('person', $person);
 
-            $deleteNotifications->getQuery()->execute();
+            $del->getQuery()->execute();
+
+            $del = $this->getEntityManager()->createQueryBuilder()->delete(ProjectMember::class, 'n')
+                ->where('n.person = :person')
+                ->setParameter('person', $person);
+
+            $del->getQuery()->execute();
+
+            $del = $this->getEntityManager()->createQueryBuilder()->delete(ActivityPerson::class, 'n')
+                ->where('n.person = :person')
+                ->setParameter('person', $person);
+
+            $del->getQuery()->execute();
+
+            $del = $this->getEntityManager()->createQueryBuilder()->delete(OrganizationPerson::class, 'n')
+                ->where('n.person = :person')
+                ->setParameter('person', $person);
+
+            $del->getQuery()->execute();
 
             $this->getEntityManager()->remove($person);
             $this->getEntityManager()->flush();
@@ -721,9 +739,6 @@ class PersonController extends AbstractOscarController
                 }
             }
         }
-
-
-
 
         $auth = null;
         $activities = null;
