@@ -15,17 +15,17 @@ Cette fonctionnalité repose sur 2 privilèges :
 
 ### Interface de suivi
 
-Lorsque un utilisateur dispose du droit **demande d'activité**, il aura accès à l'interface de demande d'activité depuis le menu principal :
+Lorsqu'un utilisateur dispose du droit **demande d'activité**, il aura accès à l'interface de demande d'activité depuis le menu principal :
 
 ![Privilèges pour les demandes d'activité](./images/activity-request-03.png)
 
-L'interface permet à l'utilisateur de faire le suivi des ces demandes. Par défaut, les demandes affichées sont les demandes en cours (Brouillon et Envoyée), mais il peut configurer l'interface pour voir l'historique de ces demandes (Validées, refusées).
+L'interface permet à l'utilisateur de faire le suivi de ses demandes. Par défaut, les demandes affichées sont les demandes en cours (Brouillon et Envoyée), mais il peut configurer l'interface pour voir l'historique de ses demandes (Validées, refusées).
 
 ![Privilèges pour les demandes d'activité](./images/activity-request-01.png)
 
 ### Nouvelle demande et modification
 
-L'interface permet également de créer une nouvelle demande ou modifier les demande non-envoyées (Brouillon).
+L'interface permet également de créer une nouvelle demande ou modifier les demandes non-envoyées (Brouillon).
 
 ![Privilèges pour les demandes d'activité](./images/activity-request-04.png)
 
