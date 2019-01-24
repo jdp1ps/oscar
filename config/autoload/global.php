@@ -181,17 +181,17 @@ return array(
 
         // Configuration des cas particuliers (LABS)
         'declarationsDurations' => [
-
+            
             'dayLength'     => [
                 'value' => 7.5,
                 'max' => 10.0,
                 'min' => 5.0,
                 'days' => [
-                    '1' => 7,
-                    '2' => 7.5,
-                    '3' => 7.5,
-                    '4' => 7.5,
-                    '5' => 7.5,
+                    '1' => 8.0,
+                    '2' => 8.0,
+                    '3' => 8.0,
+                    '4' => 8.0,
+                    '5' => 8.0,
                     '6' => 0.0,
                     '7' => 0.0,
                 ]
