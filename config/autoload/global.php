@@ -196,43 +196,6 @@ return array(
             ],
         ],
 
-        // Configuration des cas particuliers (LABS)
-        'declarationsDurations' => [
-
-            'dayLength'     => [
-                'value' => 7.5,
-                'max' => 10.0,
-                'min' => 5.0,
-                'days' => [
-                    '1' => 7,
-                    '2' => 7.5,
-                    '3' => 7.5,
-                    '4' => 7.5,
-                    '5' => 7.5,
-                    '6' => 0.0,
-                    '7' => 0.0,
-                ]
-            ],
-
-            'weekLength'     => [
-                'value' => 37.0,
-                'max' => 44.0,
-                'min' => 20.0,
-                'userChange' => false
-            ],
-
-            'monthLength' => [
-                'value' => 144.0,
-                'max'   => 184.0,
-                'min' => 80.0,
-                'userChange' => false
-            ],
-
-            'weekExceptions' => [
-                '3'         => 3.0,
-            ],
-        ],
-
 
 
         'horslots' => [
