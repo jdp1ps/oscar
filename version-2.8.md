@@ -1,5 +1,56 @@
 # version 2.8 "Callahan" (Janvier 2019)
 
+## Configuration du temps
+
+La configuration de la répartition horaire par défaut **A ÉTÉ SUPPRIMÉE**. Il faut obligatoirement la déclarer dans la configuration locale : 
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // ...
+    'oscar' => [
+        // Répartition horaire
+        'declarationsDurations' => [
+
+            'dayLength'     => [
+                'value' => 7.5,
+                'max' => 10.0,
+                'min' => 5.0,
+                'days' => [
+                    '1' => 8.0,
+                    '2' => 8.0,
+                    '3' => 8.0,
+                    '4' => 8.0,
+                    '5' => 8.0,
+                    '6' => 0.0,
+                    '7' => 0.0,
+                ]
+            ],
+
+            'weekLength'     => [
+                'value' => 37.0,
+                'max' => 44.0,
+                'min' => 20.0,
+                'userChange' => false
+            ],
+
+            'monthLength' => [
+                'value' => 144.0,
+                'max'   => 184.0,
+                'min' => 80.0,
+                'userChange' => false
+            ],
+
+            'weekExceptions' => [
+                '3'         => 3.0,
+            ],
+        ],
+    ]
+);
+```
+
+
 
 ## Code des LOTS de TRAVAIL obligatoire
 
