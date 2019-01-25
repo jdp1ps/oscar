@@ -173,7 +173,7 @@
                     Déclarations de temps pour <strong>{{ ts.person }}</strong>
                 </h2>
 
-                <h3 class="periode">Période :
+                <h3 class="periode">Période <code>{{ url }}</code>
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
                     <strong @click.shift="debug = ts">{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
@@ -793,7 +793,10 @@
             defaultMonth: {default: defaultDate.getMonth() + 1},
             defaultYear: {default: defaultDate.getFullYear()},
             defaultDayLength: {default: 8.0},
-            urlimport: {default: null}
+            urlimport: {default: null},
+            url:{
+                required: true
+            }
         },
 
         components: {
@@ -1244,10 +1247,12 @@
             performAddDays(datas) {
                 let formData = new FormData();
                 formData.append('timesheets', JSON.stringify(datas));
+                formData.append('action', "add");
 
                 this.loading = "Enregistrement des créneaux";
 
-                this.$http.post('/feuille-de-temps/declarant-api', formData).then(
+                //this.$http.post('/feuille-de-temps/declarant-api', formData).then(
+                this.$http.post(this.url, formData).then(
                     ok => {
                         this.fetch(false);
                     },
@@ -1266,7 +1271,7 @@
 
             performDelete(ids) {
                 this.loading = "Suppression des créneaux";
-                this.$http.delete('?id=' + ids.join(',')).then(
+                this.$http.delete(this.url + '&id=' + ids.join(',')).then(
                     ok => {
                         this.fetch(false);
                     },
@@ -1372,7 +1377,7 @@
                     daySelected = this.selectedDay.i;
 
 
-                this.$http.get('?month=' + this.month + '&year=' + this.year).then(
+                this.$http.get(this.url + '&month=' + this.month + '&year=' + this.year).then(
                     ok => {
                         this.dayLength = ok.body.dayLength;
                         this.ts = ok.body

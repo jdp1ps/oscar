@@ -96,7 +96,8 @@
     </section>
 
     <section>
-        <h2>Maintenance</h2>
+        <h2><i class="icon-stethoscope"></i>
+            Maintenance</h2>
 
         <article class="card xs">
             <h3 class="card-title">
@@ -164,6 +165,23 @@
                 <?php endif; ?>
             </h3>
             <p>Cette interface permet de visualiser les déclarations et leur état. Elle permet également de <strong>gérer les validateurs</strong> et de <strong>modifier la répartition horaire du déclarant</strong> en cas de problème. Enfin, elle permet d'annuler un procédure de validation.</p>
+        </article>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-docs"></i>
+                    Gestion des documents téléversés</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE) ):?>
+                    <a href="<?= $this->url('contractdocument') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Liste des documents téléversés dans les activités de recherche.</p>
         </article>
 
         <article class="card xs">

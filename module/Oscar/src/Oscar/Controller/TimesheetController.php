@@ -1454,6 +1454,164 @@ class TimesheetController extends AbstractOscarController
     }
 
     /**
+     * API REST pour déclarer des heures.
+     *
+     */
+    public function sendTimesheet(Person $person)
+    {
+
+        // JOUR
+        $datas = json_decode($this->params()->fromPost('timesheets'));
+        $action = $this->params()->fromPost('action');
+
+        // Réenvois d'une déclaration
+        if( $action == "fix-reject" ){
+            return $this->getResponseNotImplemented("Le FIX des rejets n'est pas encore implanté.");
+        }
+
+        $timesheets = [];
+
+        //
+        if( count($datas) == 0 ){
+            return $this->getResponseBadRequest("Aucun créneau à traiter");
+        }
+
+        $now = new \DateTime();
+
+        foreach ($datas as $data){
+            $day = new \DateTime($data->day);
+            $dayBase = $day->format('Y-m-d'). ' %s:%s:00';
+            $wpId = $data->wpId;
+            $code = $data->code;
+            $duration = (int)$data->duration;
+            $heures = floor($duration/60);
+            $minutes = $duration - ($heures*60);
+            $status = TimeSheet::STATUS_DRAFT;
+            $comment = $data->comment;
+            $timesheetId = $data->id;
+            $start = new \DateTime(sprintf($dayBase, 8, 0));
+            $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
+            $month = (integer)$start->format('m');
+            $year = (integer)$start->format('Y');
+            $dayKey = $start->format('Y-n-j');
+
+            // Récupération des jours bloqués
+            $locked = $this->getTimesheetService()->getLockedDays($year, $month);
+
+            if( array_key_exists($dayKey, $locked) ){
+                return $this->getResponseBadRequest("Vous ne pouvez pas déclarer ce jour : " . $locked[$dayKey]);
+            }
+
+            if( $start > $now ){
+                return $this->getResponseBadRequest('Vous ne pouvez pas anticiper votre déclaration');
+            }
+
+            $wp = null;
+            $label = "error";
+            $validationPeriod = null;
+
+            // Récupération des validations en cours pour la période
+            $validationPeriods = $this->getTimesheetService()->getValidationPeriods($year, $month, $person);
+
+            // Créneau "Hors-lot"
+            if( !$data->wpId ){
+
+                $other = $this->getOthersWP()[$data->code];
+
+                // Récupération de la procédure de validation en cours
+                $validationPeriod = $this->getTimesheetService()->getValidationPeriosOutOfWorkpackageAt($person, $year, $month, $label);
+
+                $status = TimeSheet::STATUS_INFO;
+                $label = $code;
+
+                // On contrôle le code
+                if( !$other ){
+                    $msg = sprintf("Ce type de créneau '%s' n'est pas pris en charge dans cette version", $code);
+                    $this->getLogger()->error($msg);
+                    return $this->getResponseBadRequest($msg);
+                }
+            }
+            // Créneau sur un lot
+            else {
+                /** @var WorkPackage $wp */
+                $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
+
+                try {
+                    $this->getTimesheetService()->checkAllowedAddedTimesheetInWorkPackage($person, $start, $end, $wp);
+                } catch ( OscarException $e ){
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+
+
+                if( !$wp ){
+                    $msg = sprintf("Le lot de travail 'N°%s' n'existe plus", $wpId);
+                    $this->getLogger()->error($msg);
+                    return $this->getResponseInternalError($msg);
+                }
+
+                $validationPeriod = $this->getTimesheetService()->getValidationPeriodActivityAt($wp->getActivity(), $person, $year, $month);
+                $label = (string)$wp;
+            }
+
+            // Il y'a une/plusieurs procédures de validation sur cette période ?
+            if( count($validationPeriods) > 0 ){
+
+                $hasConflict = false;
+                $unauthorizedError = "Vous ne pouvez pas modifier une déclaration en cours de validation.";
+
+
+                /** @var ValidationPeriod $vp */
+                foreach ($validationPeriods as $vp) {
+                    if( $vp->getStatus() == ValidationPeriod::STATUS_CONFLICT ){
+                        $unauthorizedError = "Vous ne pouvez pas modifier une déclaration en cours de validation. Seul les créneaux marqués en erreur peuvent être modifiés";
+                        $hasConflict = true;
+                    }
+                }
+
+                // Aucune procédure de validation spécifique pour ce type de créneau
+                if( !$validationPeriod || !$validationPeriod->hasConflict() ){
+                    return $this->getResponseBadRequest($unauthorizedError);
+                }
+            }
+
+            if( $timesheetId ){
+                $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
+                $credentials = $this->getTimesheetService()->resolveTimeSheetCredentials($timesheet, $person);
+
+                if( !$credentials['editable'] ){
+                    return $this->getResponseInternalError("Vous n'avez pas le droit de modififier le créneau");
+                }
+
+                if( !$timesheet ){
+                    return $this->getResponseInternalError("Ce créneau n'existe plus.");
+                }
+
+            } else {
+                $timesheet = new TimeSheet();
+                $this->getEntityManager()->persist($timesheet);
+            }
+
+
+            $timesheet->setWorkpackage($wp)
+                ->setComment($comment)
+                ->setDateFrom($start)
+                ->setDateTo($end)
+                ->setLabel($label)
+                ->setStatus($status)
+                ->setPerson($person);
+
+            $this->getLogger()->debug("Traitement du créneau " . $timesheet . ' créneaux');
+            $timesheets[] = $timesheet;
+
+        }
+
+        $this->getEntityManager()->flush($timesheets);
+
+        return $this->getResponseOk();
+
+    }
+
+    /**
      * RÉCUPÉRATION des DÉCLARATIONS.
      *
      * @return array|Response
@@ -1464,6 +1622,8 @@ class TimesheetController extends AbstractOscarController
         if( !$this->getOscarUserContext()->getCurrentPerson() ){
             return $this->getResponseInternalError("Vous avez été déconnecté de Oscar");
         }
+
+
 
         $output = [];
 
@@ -1476,8 +1636,18 @@ class TimesheetController extends AbstractOscarController
         $format = $this->params()->fromQuery('format', null);
         $period = sprintf('%s-%s', $year, $month);
 
+        $declarerId = $this->params()->fromQuery('person', null);
+        $usurpation = false;
+
+        if( $declarerId ){
+            $this->getOscarUserContext()->check(Privileges::PERSON_FEED_TIMESHEET);
+            $usurpation = $declarerId;
+        } else {
+            $declarerId = $this->getCurrentPerson()->getId();
+        }
+
         /** @var Person $currentPerson */
-        $currentPerson = $this->getCurrentPerson();
+        $currentPerson = $this->getPersonService()->getPersonById($declarerId); //$this->getCurrentPerson();
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
@@ -1487,11 +1657,19 @@ class TimesheetController extends AbstractOscarController
 
                 // Envois des créneaux
                 case 'GET' :
-                    return $this->ajaxResponse($this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period));
+                    $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);
+                    if( $usurpation )
+                        $datas['usurpation'] = $usurpation;
+
+                    return $this->ajaxResponse($datas);
                     break;
 
                 case 'POST' :
                     $action = $this->params()->fromPost('action', 'send');
+
+                    if( $action == 'add' ){
+                        return $this->sendTimesheet($currentPerson);
+                    }
 
                     // Réenvoi de la déclaration
                     if( $action == 'resend' ){
@@ -1551,8 +1729,10 @@ class TimesheetController extends AbstractOscarController
                     break;
             }
         }
-
-        return $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);;
+        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);
+        if( $usurpation )
+            $datas['usurpation'] = $usurpation;
+        return $datas;
     }
 
 
