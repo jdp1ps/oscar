@@ -1226,23 +1226,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
     }
 
     /**
-     * @return GrantSource[]
-     */
-    public function getSources()
-    {
-        $array = [];
-        foreach ($this->getEntityManager()
-            ->createQueryBuilder()
-            ->select('s')
-            ->from(GrantSource::class, 's')
-            ->getQuery()
-            ->getResult() as $grantSource) {
-            $array[$grantSource->getId()] = strval($grantSource);
-        }
-        return $array;
-    }
-
-    /**
      * @param integer[] $ids
      */
     public function getDisciplinesById( $ids )
@@ -1361,14 +1344,13 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $roleClaude = '';
         }
         $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('c, p, m, per, org, src, t, d, pr', 'at', 'org', 'dt')
+            ->select('c, p, m, per, org, t, d, pr', 'at', 'org', 'dt')
             ->from(Activity::class, 'c')
             ->leftJoin('c.organizations', 'p', Query\Expr\Join::WITH, 'p.status = 1' . $roleClaude)
             ->leftJoin('c.persons', 'm', Query\Expr\Join::WITH, 'm.status = 1' . $roleClaude)
             ->leftJoin('m.person', 'per')
             ->leftJoin('c.project', 'pr')
             ->leftJoin('c.activityType', 'at')
-            ->leftJoin('c.source', 'src')
             ->leftJoin('c.type', 't')
             ->leftJoin('c.documents', 'd')
             ->leftJoin('d.typeDocument', 'dt')

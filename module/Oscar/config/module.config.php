@@ -877,8 +877,6 @@ return array(
             'Person' => \Oscar\Controller\PersonController::class,
             'Organization' => \Oscar\Controller\OrganizationController::class,
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
-            'CentaureSync' => \Oscar\Controller\CentaureSyncController::class,
-            //'Contract' => \Oscar\Controller\ContractController::class,
             'Activity' => \Oscar\Controller\ProjectGrantController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
