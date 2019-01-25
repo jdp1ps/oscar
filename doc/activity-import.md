@@ -37,7 +37,7 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
     "tva": null,
     "currency": null,
     "assietteSubventionnable": null,
-    "financialImpact": null,
+    "financialImpact": "Aucune",
     "organizations": {
       "Laboratoire": ["Cyberdyne", "US Robots"]
     },
@@ -139,7 +139,7 @@ payments        | Array     | Oui       | Non    | Voir détails dans [Gestion d
     "tva": null,
     "currency": null,
     "assietteSubventionnable": null,
-    "financialImpact": null,
+    "financialImpact": "Aucune",
     "organizations": {},
     "persons": {},
     "milestones": [],
