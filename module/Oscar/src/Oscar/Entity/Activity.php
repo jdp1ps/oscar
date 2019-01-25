@@ -1715,6 +1715,7 @@ class Activity implements ResourceInterface
         //
         $datas = [
             'id' => $this->getId(),
+            'acronym' => $this->getAcronym(),
             'amount' => $this->getAmount(),
             'pfi' => $this->getCodeEOTP(),
             'oscar' => $this->getOscarNum(),
@@ -1733,6 +1734,7 @@ class Activity implements ResourceInterface
 
 
         $persons = [];
+
         foreach ($this->getPersonsDeep() as $personActivity){
             $roleStr = (string)$personActivity->getRoleObj();
             if( !array_key_exists($roleStr, $persons) ){
@@ -1741,10 +1743,13 @@ class Activity implements ResourceInterface
             $persons[$roleStr][] = (string) $personActivity->getPerson();
         }
         foreach ($persons as $role=>$ps) {
-            $datas[$sluger->slugify($role)] = implode(', ', $ps);
+            $slug = $sluger->slugify($role);
+            $datas[$slug] = implode(', ', $ps);
+            $datas["$slug-list"] = $ps;
         }
 
         $organizations = [];
+
         foreach ($this->getOrganizationsDeep() as $organisationActivity){
             $roleStr = (string)$organisationActivity->getRoleObj();
             if( !array_key_exists($roleStr, $organizations) ){
@@ -1752,8 +1757,28 @@ class Activity implements ResourceInterface
             }
             $organizations[$roleStr][] = (string) $organisationActivity->getOrganization();
         }
+
         foreach ($organizations as $role=>$ps) {
-            $datas[$sluger->slugify($role)] = implode(', ', $ps);
+            $slug = $sluger->slugify($role);
+            $datas[$slug] = implode(', ', $ps);
+            $datas["$slug-list"] = $ps;
+        }
+
+        $versements = [];
+
+        /** @var ActivityPayment $payment */
+        foreach ($this->getPayments() as $payment){
+            $versements[] = $payment->getAmount();
+            if( !array_key_exists($roleStr, $organizations) ){
+                $organizations[$roleStr] = [];
+            }
+            $organizations[$roleStr][] = (string) $organisationActivity->getOrganization();
+        }
+
+        foreach ($organizations as $role=>$ps) {
+            $slug = $sluger->slugify($role);
+            $datas[$slug] = implode(', ', $ps);
+            $datas["$slug-list"] = $ps;
         }
 
         return $datas;

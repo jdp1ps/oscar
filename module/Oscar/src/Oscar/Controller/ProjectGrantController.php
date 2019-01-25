@@ -492,6 +492,21 @@ class ProjectGrantController extends AbstractOscarController
         $id = $this->params()->fromRoute('id');
         $doc = $this->params()->fromRoute('doc');
 
+        if( $doc == "dump" ){
+            echo "<table>";
+            $activity = $this->getProjectGrantService()->getGrant($id);
+            foreach ($activity->documentDatas() as $key=>$value) {
+                echo "<tr>";
+                if( is_array($value) ){
+                    echo "<th>$key</th><td><small>[LIST]</small></td><td>" . implode(", ", $value) . "</td>";
+                } else {
+                    echo "<th>$key</th><td><small>STRING</small></td><td><code>" . $value . "</code></td>";
+                }
+                echo "</tr>";
+            }
+            die("</table>");
+        }
+
         $configDocuments = $this->getConfiguration('oscar.generated-documents.activity');
         if( !array_key_exists($doc, $configDocuments) ){
              throw new OscarException("Modèle de document non disponible (problème de configuration");
