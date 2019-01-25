@@ -1,6 +1,13 @@
 # version 2.9 "Matrix"
 
-La version 2.9 de Oscar introduit une nouvelle fonctionnalité : Les demandes d'activités. Elle permet via les privilèges de permettre aux rôles en disposant de rédiger des demandes d'activité. Ces demandes peuvent ensuite être validées ou refusées pour créer des activités de recherche.
+
+## Demandes d'activités
+
+La version 2.9 de Oscar introduit une nouvelle fonctionnalité : Les demandes d'activités. Elle propose d'activier via les privilèges d'autoriser des demandes d'activité. Ces demandes peuvent ensuite être validées ou refusées pour créer des activités de recherche.
+
+## Configuration par défaut
+
+Afin de résoudre un bug de surcharge des valeurs pour les déclarations de temps par défaut, les critères de répartition horaire ont été supprimés, obligeant à la définir dans la configuration locale (`./config/autoload.php`).
 
 ## Appliquer cette mise à jour depuis Oscar 2.8
 

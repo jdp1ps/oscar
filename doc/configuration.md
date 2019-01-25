@@ -152,7 +152,7 @@ Configuration des options pour la feuille de temps
 
 Pour modifier les numéros qui sont sous la forme **2018DRI00001**.
 
-[Modifier le formalisme de la numérotation Oscar](./numérotation.md)
+[Modifier le formalisme de la numérotation Oscar](./numerotation.md)
 
 
 ## Activité > Formulaire de saisie
@@ -183,4 +183,4 @@ return array(
 
 ## Demande d'activité
 
-Présentation et configuration des [Demande d'éctivité](./activity-request.md)
+Présentation et configuration des [Demande d'activité](./activity-request.md)

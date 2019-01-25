@@ -39,6 +39,43 @@ return array(
             /****/
         ],
 
+        // Répartition horaire
+        'declarationsDurations' => [
+
+            'dayLength'     => [
+                'value' => 7.5,
+                'max' => 10.0,
+                'min' => 5.0,
+                'days' => [
+                    '1' => 8.0,
+                    '2' => 8.0,
+                    '3' => 8.0,
+                    '4' => 8.0,
+                    '5' => 8.0,
+                    '6' => 0.0,
+                    '7' => 0.0,
+                ]
+            ],
+
+            'weekLength'     => [
+                'value' => 37.0,
+                'max' => 44.0,
+                'min' => 20.0,
+                'userChange' => false
+            ],
+
+            'monthLength' => [
+                'value' => 144.0,
+                'max'   => 184.0,
+                'min' => 80.0,
+                'userChange' => false
+            ],
+
+            'weekExceptions' => [
+                '3'         => 3.0,
+            ],
+        ],
+
 
         ////////////////////////////////////////////////////////////////////////
         //
