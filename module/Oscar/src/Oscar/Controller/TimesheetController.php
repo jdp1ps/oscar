@@ -1484,9 +1484,12 @@ class TimesheetController extends AbstractOscarController
         /** @var Person $currentPerson */
         $currentPerson = $this->getPersonService()->getPersonById($declarerId); //$this->getCurrentPerson();
 
-        if( !($declarerId && $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $currentPerson->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
-            throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $currentPerson");
+        if( $declarerId != $this->getCurrentPerson()->getId() ){
+            if( !($this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $currentPerson->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
+                throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $currentPerson");
+            }
         }
+
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
