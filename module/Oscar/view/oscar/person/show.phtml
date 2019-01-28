@@ -25,6 +25,13 @@
                     Voir les privilèges
                 </a>
             <?php endif; ?>
+
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_FEED_TIMESHEET)): ?>
+                <a href="<?= $this->url('timesheet/declarant') ?>?person=<?= $entity->getId() ?>" class="btn btn-default btn-xs">
+                    <i class="icon-calendar"></i>
+                    Compléter la feuille de temps
+                </a>
+            <?php endif; ?>
         </p>
 
 
