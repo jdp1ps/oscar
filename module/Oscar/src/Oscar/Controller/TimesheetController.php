@@ -788,8 +788,19 @@ class TimesheetController extends AbstractOscarController
         if( !$period )
             return $this->getResponseBadRequest("La période est non définit");
 
+        $personId = $this->params()->fromQuery('person', null);
+        if( $personId && $personId != $this->getCurrentPerson()->getId() ) {
+            $person = $this->getPersonService()->getPersonById($personId, true);
+            if( !($this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
+                throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $person");
+            }
+        } else {
+            $person = $this->getCurrentPerson();
+        }
+
+
         // Liste des types de créneau valide
-        $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson(), $period);
+        $resume = $this->getTimesheetService()->getPersonPeriods($person, $period);
 
 
         if( $this->getHttpXMethod() == "POST" ){
@@ -816,7 +827,7 @@ class TimesheetController extends AbstractOscarController
                             ->setIcsFileName($event['icsfilename'])
                             ->setIcsFileDateAdded(new \DateTime())
                             ->setDateFrom($from)
-                            ->setPerson($this->getCurrentPerson())
+                            ->setPerson($person)
                             ->setComment($event['summary'])
                             ->setDateTo($to);
 
@@ -864,6 +875,7 @@ class TimesheetController extends AbstractOscarController
             'period' => $period,
             'periodMax' => $datas['periodMax'],
             'datas' => $datas,
+            'person' => $person,
             'correspondances' => $correspondances
         ];
     }

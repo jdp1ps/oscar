@@ -1,6 +1,6 @@
 <template>
     <section class="oscar-ui import-ical">
-        <h1>Imporation de calendrier</h1>
+        <h1>Imporation de calendrier pour <strong>{{ person }}</strong></h1>
         <div class="overlay" v-if="debug">
             <div class="overlay-content">
                 <a href="#" @click="debug = null">CLOSE</a>
@@ -209,7 +209,9 @@
             exists: { default: {} },
             correspondances: { required: true },
             periodStart: { required: true },
-            periodMax: { required: true }
+            periodMax: { required: true },
+            person: { required: true },
+            personId: { required: true }
         },
 
         computed: {
@@ -335,7 +337,7 @@
             },
 
             handlerPeriodChange( period ){
-                document.location = '?period=' + period;
+                document.location = '?period=' + period+"&person=" + this.personId;
             },
 
             handlerRemoveTimesheet(timesheet){
