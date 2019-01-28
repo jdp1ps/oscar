@@ -667,6 +667,11 @@ class PersonController extends AbstractOscarController
 
         $manageHierarchie = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
         $manageUsurpation = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
+        $allowTimesheet = false;
+
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson()) ){
+            $allowTimesheet = true;
+        }
 
 
         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW) ){
@@ -856,6 +861,7 @@ class PersonController extends AbstractOscarController
             'subordinates' => $subordinates,
             'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
             'auth' => $auth,
+            'allowTimesheet' => $allowTimesheet,
             'projects'  => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
             'activities' => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),
             'traces' => $traces,

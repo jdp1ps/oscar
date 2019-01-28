@@ -173,7 +173,7 @@
                     Déclarations de temps pour <strong>{{ ts.person }}</strong>
                 </h2>
 
-                <h3 class="periode">Période <code>{{ url }}</code>
+                <h3 class="periode">Période
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
                     <strong @click.shift="debug = ts">{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
