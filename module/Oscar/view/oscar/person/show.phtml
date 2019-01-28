@@ -127,7 +127,7 @@
                 <p>Les informations hiérarchiques sont utilisées par Oscar pour déterminer les personnes en charge lors de la procédure de <strong>validation des feuilles de temps</strong>.</p>
                 <hr>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <h4><i class="icon-group"></i>Est validé par (N+1)</h4>
                         <?php if( count($referents) ): ?>
                             <?php foreach ($referents as $referent): ?>
@@ -214,7 +214,7 @@
                         </script>
                         <?php endif; ?>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <h4><i class="icon-group"></i>Valide les déclarations pour (N-1)</h4>
                         <?php if( $subordinates ): ?>
                             <?php foreach ($subordinates as $subordinate) :?>
@@ -232,6 +232,90 @@
                             <?php endforeach; ?>
                         <?php else: ?>
                             Personne
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="col-md-4">
+                        <h4><i class="icon-calendar"></i>Délégation</h4>
+                        <p class="oscar-help"><small>
+                                <i class="icon-help-circled"></i>
+                                Les personnes listées ici sont authorisées à remplir les feuilles de temps de <strong><?= $entity ?></strong>
+                            </small></p>
+
+                            <?php foreach ($entity->getTimesheetsBy() as $p) :?>
+                                <article class="card card-xs">
+                                    <i class="icon-user"></i>
+                                    <a href="<?= $this->url('person/show', ['id' => $p->getId() ]); ?>"><?= $p ?></a>
+                                    <?php if( $manageUsurpation ): ?>
+                                        <form action="" method="post" class="form-inline">
+                                            <input type="hidden" name="action" value="removeusurpation" />
+                                            <input type="hidden" name="person_id" value="<?= $p->getId() ?>" />
+                                            <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
+                                        </form>
+                                    <?php endif; ?>
+                                </article>
+                            <?php endforeach; ?>
+
+                        <?php if($manageUsurpation): ?>
+                            <button id="editUsurpation" class="btn btn-xs btn-primary" onclick="$('#usurpationEditor').show(); $('#editUsurpation').hide();">
+                                <i class="icon-plus-circled"></i> Ajouter</button>
+
+                            <form id="usurpationEditor" action="" method="POST" style="display: none">
+                                Ajouter un délégué pour les feuilles de temps :
+                                <input type="hidden" value="addusurpation" name="action">
+                                <select name="person_id" class="selectPerson"></select>
+                                <button type="submit" class="btn btn-xs btn-primary">Enregistrer</button>
+                                <button type="button" class="btn btn-xs btn-default" onclick="$('#usurpationEditor').hide(); $('#editUsurpation').show();">Annuler</button>
+                            </form>
+
+                            <script>
+                                var formatRepo = function (repo) {
+                                    if (repo.loading) return repo.text;
+
+                                    var markup = '<div class="clearfix">';
+                                    markup += repo.label || repo.text;
+                                    markup += '</div>';
+
+                                    return markup;
+                                };
+
+                                var formatRepoSelection = function (repo) {
+                                    return repo.label || repo.text;
+                                };
+
+                                require(['jquery', 'select2'], function($, select2){
+                                    $(".selectPerson").select2({
+                                            placeholder: 'Rechercher une personne...',
+                                            width: '100%',
+                                            allowClear: true,
+                                            ajax: {
+                                                url: '<?= $this->url('person/search') ?>',
+                                                dataType: 'json',
+                                                delay: 250,
+                                                data: function (params) {
+                                                    return {
+                                                        q: params.term, // search term
+                                                        page: params.page
+                                                    };
+                                                },
+                                                processResults: function (data, page) {
+                                                    return {results: data.datas};
+                                                },
+                                                cache: true
+                                            },
+                                            escapeMarkup: function (markup) {
+                                                return markup;
+                                            },
+                                            minimumInputLength: 3,
+                                            id: function (dt) {
+                                                return dt.uid;
+                                            },
+                                            templateResult: formatRepo, // omitted for brevity, see the source of this page
+                                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                                        }
+                                    );
+                                })
+                            </script>
                         <?php endif; ?>
                     </div>
                 </div>

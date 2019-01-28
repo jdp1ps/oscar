@@ -1088,6 +1088,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('p')
+            // ->leftJoin('p.timesheetsBy', 'tb')
             ->from(Person::class, 'p');
 
         return $queryBuilder;

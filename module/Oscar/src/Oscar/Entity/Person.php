@@ -114,6 +114,12 @@ class Person implements ResourceInterface
     protected $phone;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $foo;
+
+    /**
      * @var \DateTime
      * @ORM\Column(type="datetime", nullable=true)
      */
@@ -156,6 +162,20 @@ class Person implements ResourceInterface
     protected $timesheets;
 
     /**
+     * @ORM\ManyToMany(targetEntity="Person", inversedBy="timesheetsFor")
+     * @ORM\JoinTable(name="timesheetsBy",
+     *      joinColumns={@ORM\JoinColumn(name="person_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="usurpation_person_id", referencedColumnName="id")}
+     *      )
+     */
+    private $timesheetsBy;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Person", mappedBy="timesheetsBy")
+     */
+    private $timesheetsFor;
+
+    /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="WorkPackagePerson", mappedBy="person")
      */
@@ -180,6 +200,8 @@ class Person implements ResourceInterface
         $this->organizations = new ArrayCollection();
         $this->workPackages = new ArrayCollection();
         $this->timesheets = new ArrayCollection();
+        $this->timesheetsBy = new ArrayCollection();
+        $this->timesheetsFor = new ArrayCollection();
         $this->centaureId = [];
         $this->setDateCreated(new \DateTime());
     }
@@ -229,6 +251,64 @@ class Person implements ResourceInterface
         $this->setCustomSettings(json_encode($datas));
         return $this;
     }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getTimesheetsBy()
+    {
+        return $this->timesheetsBy;
+    }
+
+    /**
+     * @param mixed $timesheetsBy
+     */
+    public function setTimesheetsBy($timesheetsBy)
+    {
+        $this->timesheetsBy = $timesheetsBy;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getTimesheetsFor()
+    {
+        return $this->timesheetsFor;
+    }
+
+    /**
+     * @param mixed $timesheetsFor
+     */
+    public function setTimesheetsFor($timesheetsFor)
+    {
+        $this->timesheetsFor = $timesheetsFor;
+        return $this;
+    }
+
+    /**
+     * @param Person $person
+     * @return $this
+     */
+    public function addTimesheetUsurpation(Person $person)
+    {
+        $this->getTimesheetsBy()->add($person);
+//        $person->getTimesheetsFor()->add($this);
+        return $this;
+    }
+
+    /**
+     * @param Person $person
+     * @return $this
+     */
+    public function removeTimesheetUsurpation(Person $person)
+    {
+        $this->getTimesheetsBy()->removeElement($person);
+//        $person->getTimesheetsFor()->remove($this);
+        return $this;
+    }
+
+
 
 
 

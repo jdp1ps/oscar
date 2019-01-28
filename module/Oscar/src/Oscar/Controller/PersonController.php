@@ -30,6 +30,7 @@ use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\WorkPackagePerson;
+use Oscar\Exception\OscarException;
 use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
@@ -665,6 +666,7 @@ class PersonController extends AbstractOscarController
 
 
         $manageHierarchie = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
+        $manageUsurpation = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
 
 
         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW) ){
@@ -729,15 +731,75 @@ class PersonController extends AbstractOscarController
         }
 
         if( $method == "POST" ){
+
+            $action = $this->params()->fromPost('action', null);
+
+            if( in_array($action, ['addusurpation', 'removeusurpation'] ) ){
+                $person_id = $this->params()->fromPost('person_id', null);
+                if( !$person_id ){
+                    throw new OscarException("Impossible de gérer la délagation des feuilles de temps, l'identifiant de la personne manquant");
+                }
+                $other = $this->getPersonService()->getPersonById($person_id);
+
+                if( !$other ) {
+                    throw new OscarException("Impossible de gérer la délagation des feuilles de temps, la personne n'a pas été trouvée.");
+                }
+
+                if( $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) ){
+
+                    switch( $action ) {
+                        case 'addusurpation' :
+                            try {
+                                $person->addTimesheetUsurpation($other);
+                                $this->getEntityManager()->flush($person);
+                                $this->flashMessenger()->addSuccessMessage("$other est maintenant autorisé à remplir les feuilles de temps de $person");
+                                return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
+                            } catch (\Exception $exception) {
+                                return $this->getResponseInternalError($exception->getMessage());
+                            }
+
+                        case 'removeusurpation' :
+                            try {
+                                $person->removeTimesheetUsurpation($other);
+                                $this->getEntityManager()->flush([$person, $other]);
+                                $this->flashMessenger()->addSuccessMessage(sprintf(_('%s ne peut plus remplir les feuilles de temps de %s.'), $other, $person));
+                                return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
+                            } catch (\Exception $exception) {
+                                return $this->getResponseInternalError($exception->getMessage());
+                            }
+
+                        default:
+                            throw new OscarException("Opération inconnue");
+                    }
+                } else {
+                    return $this->getResponseUnauthorized("Vous n'avez pas le droit de déléguer la déclaration d'une personne à une autre.");
+                }
+
+            }
             if( !$manageHierarchie ){
                 return $this->getResponseUnauthorized();
             }
-            $action = $this->params()->fromPost('action', null);
             switch( $action ) {
                 case 'referent' :
                     $referent_id = $this->params()->fromPost('referent_id', null);
                     $person_id = $this->params()->fromPost('person_id', null);
                     $this->getPersonService()->addReferent($referent_id, $person_id);
+                    return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
+
+                case 'addusurpation' :
+                    $person_id = $this->params()->fromPost('person_id', null);
+                    $other = $this->getPersonService()->getPersonById($person_id);
+                    $person->addTimesheetUsurpation($this->getPersonService()->getPersonById($person_id));
+                    $this->getEntityManager()->flush([$person, $other]);
+                    $this->flashMessenger()->addSuccessMessage("$other est autorisé à replir les feuilles de temps de $person");
+                    return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
+
+                case 'removeusurpation' :
+                    $person_id = $this->params()->fromPost('person_id', null);
+                    $other = $this->getPersonService()->getPersonById($person_id);
+                    $person->removeTimesheetUsurpation($other);
+                    $this->getEntityManager()->flush([$person, $other]);
+                    $this->flashMessenger()->addSuccessMessage(sprintf(_('%s ne peut plus remplir les feuilles de temps de %s.'), $other, $person));
                     return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
 
                 case 'removereferent' :
@@ -790,6 +852,7 @@ class PersonController extends AbstractOscarController
             'scheduleEditable' => $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_MANAGE_SCHEDULE),
             'referents' => $referents,
             'manageHierarchie' => $manageHierarchie,
+            'manageUsurpation' => $manageUsurpation,
             'subordinates' => $subordinates,
             'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
             'auth' => $auth,

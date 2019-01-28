@@ -7,7 +7,6 @@ $config = array(
         'ZfcUser',
         'ZfcUserDoctrineORM',
         'BjyAuthorize',
-        //'ZendDeveloperTools',
         'UnicaenApp',
         'UnicaenAuth',
         'Oscar',
