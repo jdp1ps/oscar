@@ -710,11 +710,21 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         return $this->getEntityManager()->getRepository(TVA::class)->findAll();
     }
 
+    public function getTVAsValuesOptions()
+    {
+        $out = [];
+        foreach ($this->getTVAsForJson() as $tva) {
+            $out[$tva['id']] = $tva['label'] . ($tva['active'] ? '' : ' (Obsolète)');
+        }
+        return $out;
+    }
+
     public function getTVAsForJson(){
         try {
             $query = $this->getEntityManager()->getRepository(TVA::class)->createQueryBuilder('t')
                 ->select('t.id, t.label, t.rate, t.active AS active, count(a) as used')
                 ->groupBy('t.id')
+                ->orderBy('t.rate')
                 ->leftJoin(Activity::class, 'a', 'WITH', 't.id = a.tva');
 
             $tvas = [];
