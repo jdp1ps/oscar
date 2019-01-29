@@ -52,6 +52,21 @@
         <article class="card">
             <h3 class="card-title">
                 <strong>
+                    <i class="icon-euro"></i>
+                    TVA
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_TVA_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/tva') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de configurer les TVAs disponibles.</p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
                     <i class="icon-docs"></i>
                     Type de document
                 </strong>

@@ -275,5 +275,6 @@ L'interface de saisie est accessible depuis la fiche de la personne.
 
 ### Globale
 
-Cette fonctionnalité peut être accordée de façon générale via les privilèges
+Cette fonctionnalité peut être accordée de façon générale via les privilèges, ou individurellement à partir de la fiche personne : 
+
 
