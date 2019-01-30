@@ -37,6 +37,10 @@ class PublicController extends AbstractOscarController
         /** @var Authentification $auth */
         $auth = $this->getOscarUserContext()->getAuthentification();
 
+        if( !$this->getCurrentPerson() ){
+            throw new OscarException("Votre compte n'est associé à aucune fiche Personne dans Oscar");
+        }
+
         // Récupération des envois automatiques
         $forceSend = $this->getConfiguration('oscar.notifications.fixed');
 
