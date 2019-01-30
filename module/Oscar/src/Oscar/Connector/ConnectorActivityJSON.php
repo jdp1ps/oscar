@@ -167,16 +167,15 @@ class ConnectorActivityJSON implements ConnectorInterface
     }
 
     protected function getPersonOrCreate( $personDatas, ConnectorRepport $repport ){
+
         $fullname = $personDatas['firstname']. ' ' . $personDatas['lastname'] . ($personDatas['email'] ? '<'.$personDatas['email'].'>' : '');
         try {
-            return $this->entityManager->getRepository(Person::class)
-                ->createQueryBuilder('p')
-                ->where('p.firstname = :firstname AND p.lastname = :lastname')
-                ->getQuery()
-                ->setParameters([
-                    'firstname' => $personDatas['firstname'],
-                    'lastname' => $personDatas['lastname'],
-                ])->getSingleResult();
+            $query = $this->entityManager->getRepository(Person::class)->createQueryBuilder('p')
+                ->where('CONCAT(p.firstname, \' \', p.lastname) = :fullname')
+                ->setParameter('fullname', $personDatas['fullname']);
+
+            $person = $query->getQuery()->getSingleResult();
+            return $person;
         } catch ( NoResultException $e ) {
             try {
                 $person = new Person();
