@@ -23,6 +23,7 @@ use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\OrganizationIdentificationForm;
+use Oscar\Provider\Privileges;
 use Oscar\Service\OrganizationService;
 use Oscar\Utils\EntityHydrator;
 use Oscar\Utils\UnicaenDoctrinePaginator;
@@ -50,6 +51,8 @@ class OrganizationController extends AbstractOscarController
     }
 
     public function deleteAction(){
+
+        $this->getOscarUserContext()->check(Privileges::ORGANIZATION_DELETE);
 
         $id = $this->params()->fromRoute('id');
         $organization = $this->getOrganizationService()->getOrganization($id);
