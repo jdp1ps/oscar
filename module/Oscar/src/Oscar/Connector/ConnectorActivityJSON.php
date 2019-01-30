@@ -185,7 +185,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                     ->setEmail($personDatas['email']);
                 $this->entityManager->flush($person);
 
-                $repport->addadded(sprintf("PERSONNE '%s'", $person));
+                $repport->addadded(sprintf("PERSONNE '%s' (depuis : %s)", $person, $personDatas['fullname']));
                 return $person;
 
             } catch (\Exception $e ){
