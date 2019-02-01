@@ -71,6 +71,8 @@ class ActivityDateController extends AbstractOscarController
 
                 $types = $this->getEntityManager()->createQueryBuilder()
                     ->select('t')
+                    ->orderBy('t.facet')
+                    ->addOrderBy('t.label')
                     ->from(DateType::class, 't')
                     ->getQuery()
                     ->getResult(Query::HYDRATE_ARRAY);
