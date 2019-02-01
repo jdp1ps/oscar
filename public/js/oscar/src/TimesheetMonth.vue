@@ -178,7 +178,7 @@
                     <strong @click.shift="debug = ts">{{ mois }}</strong>
                     <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
 
-                    <a class="btn btn-default" :href="urlimport+'?period=' + periodCode "
+                    <a class="btn btn-default" :href="urlimport+'&period=' + periodCode "
                        v-if="urlimport"
                        :title="!ts.submitable ? 'Vous ne pouvez pas importer pour cette période' : ''"
                        :class="{ 'disabled': !ts.submitable }">
