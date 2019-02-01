@@ -24,7 +24,7 @@ class DataExtractorFullname extends AbstractDataExtractor
 
             $firstname = $matches[1];
             $lastname = trim($matches[3]);
-            $fullname = sprintf('%s %s', $firstname, $lastname);
+            $fullname = $data;
             $email = count($matches) == 6 ? $matches[5] : "";
 
             return [

@@ -16,7 +16,7 @@
                 "Albert Einstein"
             ],
             "Ing\u00e9nieur": [
-                "Marcel Grossmann",
+                "NATHALIE HEUZE VOURC'H",
                 "Serge Le Normand"
             ],
             "Participants": [
@@ -54,7 +54,7 @@
                 "Albert Einstein"
             ],
             "Ing\u00e9nieur": [
-                "Marcel Grossmann",
+                "JO JO LA PIN",
                 "Maurice Solovine"
             ],
             "Participants": [
@@ -137,6 +137,7 @@
         "label": "Th\u00e9orie des cordes",
         "projectlabel": "M\u00e9canique quantique",
         "pfi": "EOTP201600004",
-        "amount": 15000
+        "amount": 15000,
+        "type": "ERASMUS+"
     }
 ]
