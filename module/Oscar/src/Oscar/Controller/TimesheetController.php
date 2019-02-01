@@ -789,6 +789,7 @@ class TimesheetController extends AbstractOscarController
             return $this->getResponseBadRequest("La période est non définit");
 
         $personId = $this->params()->fromQuery('person', null);
+
         if( $personId && $personId != $this->getCurrentPerson()->getId() ) {
             $person = $this->getPersonService()->getPersonById($personId, true);
             if( !($this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
@@ -798,17 +799,14 @@ class TimesheetController extends AbstractOscarController
             $person = $this->getCurrentPerson();
         }
 
-
         // Liste des types de créneau valide
         $resume = $this->getTimesheetService()->getPersonPeriods($person, $period);
-
 
         if( $this->getHttpXMethod() == "POST" ){
 
             $request = $this->getRequest();
             $events = json_decode($request->getPost('timesheets', '[]'), true);
             if (count($events)) {
-
                 try {
                     foreach ($events as $event) {
                         // Récupération des dates
@@ -866,9 +864,10 @@ class TimesheetController extends AbstractOscarController
             $period = $now->format('Y-m');
         }
 
-        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getCurrentPerson(), $period);
-        $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($this->getCurrentPerson());
+        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
+        $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($person);
 
+//        var_dump($correspondances); die();
 
         return [
             'exists' => $resume,
