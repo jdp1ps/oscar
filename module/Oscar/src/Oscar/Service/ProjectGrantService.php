@@ -43,6 +43,29 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
+    public function getWorkPackagePersonPeriod( Person $person, $year, $month ){
+
+        // extraction de la période
+        $from = sprintf("%s-%s-01", $year, $month);
+        $to = sprintf("%s-%s-%s", $year, $month, cal_days_in_month(CAL_GREGORIAN, $month, $year));
+
+
+        $query = $this->getEntityManager()->createQueryBuilder()
+            ->select('wpp')
+            ->from(WorkPackagePerson::class, 'wpp')
+            ->innerJoin('wpp.workPackage', 'wp')
+            ->innerJoin('wp.activity', 'a')
+            ->where('wpp.person = :person AND NOT(a.dateEnd < :from OR a.dateStart > :to)')
+            ->setParameters([
+                    'person' => $person,
+                    'from' => $from,
+                    'to' => $to
+            ])
+            ->getQuery();
+
+        return $query->getResult();
+    }
+
     /**
      * @return ProjectGrantRepository
      */
@@ -530,6 +553,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
     public function specificSearch( $what, &$qb, $activityAlias='c' )
     {
+        $oscarNumSeparator = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('oscar_num_separator');
         $fieldName = uniqid('num_');
         if (preg_match(EOTP::REGEX_EOTP, $what)) {
             $qb->andWhere($activityAlias.'.codeEOTP = :' . $fieldName)
@@ -543,7 +567,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         // La saisie est un numéro OSCAR©
-        elseif (preg_match("/^[0-9]{4}DRI.*/mi", $what)) {
+        elseif (preg_match("/^[0-9]{4}$oscarNumSeparator.*/mi", $what)) {
             $qb->andWhere($activityAlias.'.oscarNum LIKE :'.$fieldName)
                 ->setParameter($fieldName, $what.'%');
         }

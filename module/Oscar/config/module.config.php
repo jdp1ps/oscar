@@ -36,28 +36,24 @@ return array(
                     'action' => ['documentation', 'parameters'],
                     'roles' => ['user'],
                 ],
-                [ 'controller' =>  'Public',
-                    'action' => ['testCalendar'],
-                    'roles' => ['user'],
-                ],
 
                 [ 'controller' =>  'Notification',
-                    'action' => ['indexPerson', 'index', 'test'],
-                    'roles' => ['user'],
-                ],
-
-                [ 'controller' =>  'Notification',
-                    'action' => ['notifyPerson', 'history'],
+                    'action' => ['indexPerson', 'index', 'test',
+                        'notifyPerson', 'history'],
                     'roles' => ['user'],
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['users', 'roles', 'rolesEdit', "index", "accessAPI", "roleAPI", "userLogs", 'userRoles', 'organizationRole', 'organizationRoleApi', 'activityIndexBuild', 'organizationType', 'discipline'],
+                    'action' => ['users', 'roles', 'rolesEdit',
+                        "index", "accessAPI", "roleAPI",
+                        "userLogs", 'userRoles', 'organizationRole',
+                        'organizationRoleApi', 'activityIndexBuild', 'organizationType',
+                        'discipline'],
                     'roles' => ['user']
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
+                    'action' => ['accueil', 'connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
                     'roles' => ['Administrateur']
                 ],
 
@@ -205,7 +201,15 @@ return array(
 
                 // TIMESHEET
                 ['controller' => 'Timesheet',
-                    'action' => ['indexPersonActivity', 'sauvegarde', 'declaration', "declaration2", "indexActivity", "validateTimesheet", 'usurpation', 'excel', 'organizationLeader'],
+                    'action' => [
+                        'indexPersonActivity', 'sauvegarde', 'declaration', 'validations', 'resume',
+                        "declaration2", "indexActivity", "validateTimesheet",
+                        'usurpation', 'excel', 'organizationLeader',
+                        'declarant', 'declarantAPI', 'validationActivity',
+                        'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
+                        'importIcal', 'declarations', 'resumeActivity',
+                        'resolveInvalidLabels'
+                    ],
                     'roles' => ['user']
                 ],
                 ['controller' => 'Timesheet',
@@ -215,7 +219,11 @@ return array(
 
                 ////////////////////////////////////////////////////////////////
                 // PERSON
-                ////////////////////////////////////////////////////////////////
+                ///////////////////////////////////////////////////////////////
+                [ 'controller' =>   'Person',
+                    'action' => ['personnel', 'access'],
+                    'roles' => ['user']
+                ],
                 [ 'controller' =>   'Person',
                     'action' => ['search', 'synchronize'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
@@ -230,12 +238,17 @@ return array(
                 ],
                 [ 'controller' =>   'Person',
                     'action' => ['show'],
-                    'privileges' => \Oscar\Provider\Privileges::PERSON_SHOW
+                    'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',
                     'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
                 ],
+                [ 'controller' =>   'Person',
+                    'action' => ['grant'],
+                    'privileges' => \Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION
+                ],
+
                 // Membre
                 [ 'controller' =>   'Enroll',
                     'action' => ['personProjectNew', 'personProjectDelete', 'personProjectEdit'],
@@ -252,9 +265,15 @@ return array(
                 // ORGANIZATION
                 ////////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Organization',
+                    'action' => ['delete'],
+                    'roles' => ['user']
+
+                ],
+                [ 'controller' =>   'Organization',
                     'action' => ['index', 'search'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_INDEX
                 ],
+
                 [ 'controller' =>   'Organization',
                     'action' => ['show'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_SHOW
@@ -770,17 +789,9 @@ return array(
             'MilestoneService' => \Oscar\Service\MilestoneService::class,
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             'MailingService' => \Oscar\Service\MailingService::class,
-            // Droits
-            //'RoleProvider' => \Oscar\Provider\RoleProvider::class,
-
-            ///////////////////////////////////////////////////////// ASSERTIONS
-            //'ProjectShowAssertion' => \Oscar\Assertion\ProjectShowAssertion::class,
-            //'Tutu' => 'Oscar\Assertion\TutuAssertion',
+            'SessionService' => \Oscar\Service\SessionService::class,
+            'UserParametersService' => \Oscar\Service\UserParametersService::class,
         ],
-
-       /* 'aliases' => [
-            'zfcuser_zend_db_adapter' => 'Zend\Db\Adapter\Adapter',
-        ],*/
 
         'factories' => array(
             'RoleProvider' => function (\Zend\ServiceManager\ServiceManager $sm){
@@ -852,7 +863,7 @@ return array(
     ),
 
     'translator' => array(
-        'locale' => 'fr_FR', // en_US
+        'locale' => 'fr_DJ', // en_US
         'translation_file_patterns' => array(
             array(
                 'type' => 'gettext',
@@ -923,6 +934,7 @@ return array(
             'hasRole' => \Oscar\View\Helpers\HasRole::class,
             'hasPrivilege' => \Oscar\View\Helpers\HasPrivilege::class,
             'grant' => \Oscar\View\Helpers\Grant::class,
+            'options' => \Oscar\View\Helpers\Options::class,
             'keyvalue' => \Oscar\View\Helpers\KeyValueHelper::class,
             'slugify' => \Oscar\View\Helpers\Slugify::class,
         ],

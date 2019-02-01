@@ -19,6 +19,7 @@ use Zend\Permissions\Acl\Resource\ResourceInterface;
  *
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\ActivityRepository")
  */
 class Activity implements ResourceInterface
 {
@@ -81,15 +82,15 @@ class Activity implements ResourceInterface
         static $statusSelect;
         if ($statusSelect === null) {
             $statusSelect = [
-                self::STATUS_ACTIVE => 'Actif',
-                self::STATUS_PROGRESS => 'Brouillon',
-                self::STATUS_ERROR_STATUS => 'Conflit : pas de statut',
-                self::STATUS_DEPOSIT => 'Déposé',
-                self::STATUS_ABORDED => 'Dossier abandonné',
-                self::STATUS_DISPUTE => 'Litige',
-                self::STATUS_REFUSED => 'Refusé',
-                self::STATUS_TERMINATED => 'Résilié',
-                self::STATUS_CLOSED => 'Terminé',
+                self::STATUS_ERROR_STATUS   => 'Conflit : pas de statut',
+                self::STATUS_ACTIVE         => 'Actif',
+                self::STATUS_PROGRESS       => 'Brouillon',
+                self::STATUS_DEPOSIT        => 'Déposé',
+                self::STATUS_ABORDED        => 'Dossier abandonné',
+                self::STATUS_DISPUTE        => 'Litige',
+                self::STATUS_REFUSED        => 'Refusé',
+                self::STATUS_TERMINATED     => 'Résilié',
+                self::STATUS_CLOSED         => 'Terminé',
             ];
         }
 
@@ -139,7 +140,7 @@ class Activity implements ResourceInterface
 
     /**
      * => CONV_CLEUNIK
-     * @ORM\Column(type="string", length=12, nullable=true)
+     * @ORM\Column(type="string", length=20, nullable=true)
      */
     private $oscarNum;
 
@@ -858,6 +859,10 @@ class Activity implements ResourceInterface
         return $this->label;
     }
 
+    public function getFullLabel(){
+        return sprintf('[%s] %s', $this->getAcronym(), $this->getLabel());
+    }
+
     /**
      * @param string $label
      */
@@ -976,6 +981,33 @@ class Activity implements ResourceInterface
         $this->payments = new ArrayCollection();
         $this->disciplines = new ArrayCollection();
         $this->timesheetFormat = TimeSheet::TIMESHEET_FORMAT_NONE;
+    }
+
+    /**
+     * Retourne la liste des périodes sous la forme Y-m prévues pour l'activité.
+     *
+     * @return array
+     */
+    public function getPredictedPeriods(){
+        $out = [
+            'warnings' => null,
+            'periods' => [],
+        ];
+        if( !$this->getDateStart() || !$this->getDateEnd()){
+            $out['warnings'] = "Les dates de début et de fin de l'activité doivent être renseignée";
+        }
+
+        $date1 = $this->getDateStart()->format('Y-m-d');
+        $date2 = $this->getDateEnd()->format('Y-m-d');
+
+        $d1 = strtotime($date1);
+        $d2 = strtotime($date2);
+
+        while ($d1 <= $d2) {
+            $out['periods'][] = date('Y-m', $d1);
+            $d1 = strtotime("+1 month", $d1);
+        }
+        return $out;
     }
 
     /**
@@ -1868,6 +1900,20 @@ class Activity implements ResourceInterface
         return self::class;
     }
 
+    public function getDateStartStr(){
+        if( $this->getDateStart() ){
+            return $this->getDateStart()->format('Y-m-d');
+        }
+        return "";
+    }
+
+    public function getDateEndStr(){
+        if( $this->getDateEnd() ){
+            return $this->getDateEnd()->format('Y-m-d');
+        }
+        return "";
+    }
+
     public function toJson()
     {
         return [
@@ -1914,6 +1960,25 @@ class Activity implements ResourceInterface
             }
         }
         return false;
+    }
+
+    /**
+     * @return Person[]
+     */
+    public function getDeclarers(){
+        $persons = [];
+
+        /** @var WorkPackage $workPackage */
+        foreach ($this->getWorkPackages() as $workPackage){
+            /** @var WorkPackagePerson $workPackagePerson */
+            foreach ($workPackage->getPersons() as $workPackagePerson) {
+                if( !array_key_exists($workPackagePerson->getPerson()->getId(), $persons) ){
+                    $persons[$workPackagePerson->getPerson()->getId()] = $workPackagePerson->getPerson();
+                }
+            }
+        }
+
+        return $persons;
     }
 
     public function getTimesheets(){

@@ -51,7 +51,7 @@ return array(
 
 La règle de contrôle du PFI est précisée dans la clef `oscar > validation > pfi` (Il s'agit d'une expression régulière utilisée par Oscar pour valider les donnnées non-nulles saisies dans Oscar et détecter les PFI saisis dans le moteur de recherche pour proposer des résultats ciblés).
 
-**Attention** : Comme indiqué, l'expression régulière étant utilisée pour par le moteur de recherche pour trouver une activité de recherche à partir d'un PFI, les expressions régulières trop permissive posent problème. Ex : Si vous utilisez une expression tel que `/.*/mi`, n'importe quelle recherche sera detecté comme étant un PFI, donc Oscar recherchera uniquement les activités ayant pour PFI la saisie de la recherche. Assurez vous donc que ce champ est correctement renseigné. 
+**Attention** : Comme indiqué, l'expression régulière étant utilisée par le moteur de recherche pour trouver une activité de recherche à partir d'un PFI, les expressions régulières trop permissives posent problème. Ex : Si vous utilisez une expression telle que `/.*/mi`, n'importe quelle recherche sera detectée comme étant un PFI, donc Oscar recherchera uniquement les activités ayant pour PFI la saisie de la recherche. Assurez vous donc que ce champ est correctement renseigné. 
 
 ```php
 <?php
@@ -140,3 +140,43 @@ return array(
 ## Notifications
 
 [Configurer les notifications](./notifications.md)
+
+## Feuilles de temps
+
+Configuration des options pour la feuille de temps
+
+[Configurer les feuilles de temps](./timesheet.md)
+
+
+## Numérotation automatique des activités de recherche
+
+Pour modifier les numéros qui sont sous la forme **2018DRI00001**.
+
+[Modifier le formalisme de la numérotation Oscar](./numerotation.md)
+
+
+## Activité > Formulaire de saisie
+
+Une option permet de masquer certains champs : 
+
+ - Discipline
+ - Frais de gestion
+ 
+Pour cela, modifier le configuration Oscar dans le fichier `config/autoload/local.php` : 
+
+```php
+<?php
+// ./config/autoload/local.php
+return array(
+    // ...
+
+    // Oscar
+    'oscar' => [
+        
+        'activity_hidden_fields' => [
+            'disciplines', 
+            'fraisDeGestion'],
+    // ...
+    ]
+);
+```

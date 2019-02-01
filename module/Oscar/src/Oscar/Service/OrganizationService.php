@@ -39,6 +39,13 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     private $cacheCountries = null;
     private $cacheConnectors = null;
 
+
+    public function deleteOrganization( $id ){
+        $o = $this->getOrganization($id);
+        $this->getEntityManager()->remove($o);
+        $this->getEntityManager()->flush();
+    }
+
     public function getConnectorsList()
     {
         if( $this->cacheConnectors == null ){

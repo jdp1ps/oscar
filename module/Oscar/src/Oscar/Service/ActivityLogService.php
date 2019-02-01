@@ -87,6 +87,7 @@ class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManager
 
     public function addUserInfo($message, $context = 'Application', $contextId = -1, $level = LogActivity::LEVEL_ADMIN)
     {
+        $this->getServiceLocator()->get('Logger')->info($message);
         $person = $this->getCurrentPerson();
         $personText = "Anonymous";
         if( is_string($person) ){

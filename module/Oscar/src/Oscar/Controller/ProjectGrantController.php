@@ -30,6 +30,8 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\TypeDocument;
+use Oscar\Entity\ValidationPeriod;
+use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
@@ -38,6 +40,7 @@ use Oscar\Formatter\JSONFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\NotificationService;
+use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
@@ -57,6 +60,7 @@ use Zend\View\Model\ViewModel;
 class ProjectGrantController extends AbstractOscarController
 {
     public function apiUiAction(){
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
         return [];
     }
 
@@ -65,7 +69,7 @@ class ProjectGrantController extends AbstractOscarController
      * @return JsonModel
      */
     public function apiAction(){
-
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
         ////////////////////////////////////////////////////////////////////////
         // Paramètres envoyés à l'API
         $q = $this->params()->fromQuery('q', '');
@@ -103,7 +107,6 @@ class ProjectGrantController extends AbstractOscarController
         foreach ($activities as $activity) {
             $datas[] = $jsonFormatter->format($activity, false);
         }
-
 
         return $this->ajaxResponse([
             'oscar' => OscarVersion::getBuild(),
@@ -167,8 +170,13 @@ class ProjectGrantController extends AbstractOscarController
      */
     public function editAction()
     {
+
+
         $id = $this->params()->fromRoute('id');
         $projectGrant = $this->getProjectGrantService()->getGrant($id);
+        $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
+
+
         $form = new ProjectGrantForm();
         $form->setServiceLocator($this->getServiceLocator());
         $form->init();
@@ -189,6 +197,7 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         $view = new ViewModel([
+            'hidden' => $hidden,
             'form' => $form,
             'activity' => $projectGrant,
             'numbers_keys' => $keys = $this->getActivityService()->getDistinctNumbersKey()
@@ -306,7 +315,7 @@ class ProjectGrantController extends AbstractOscarController
         $entity = $this->getActivityFromRoute();
 
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
-        // $this->getM
+
         $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
 
         /** @var NotificationService $serviceNotification */
@@ -413,13 +422,9 @@ class ProjectGrantController extends AbstractOscarController
         /** @var Request $request */
         $request = $this->getRequest();
 
-
         $perimeter = $this->params()->fromQuery('perimeter', '');
         $fields = $this->params()->fromPost('fields', null);
         $format = $this->params()->fromPost('format', 'csv');
-
-
-
 
         $qb = $this->getEntityManager()->createQueryBuilder()->select('a')
             ->from(Activity::class, 'a');
@@ -483,8 +488,6 @@ class ProjectGrantController extends AbstractOscarController
             }
         }
 
-
-
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
             ->select('r.label')
             ->from(OrganizationRole::class, 'r')
@@ -502,7 +505,6 @@ class ProjectGrantController extends AbstractOscarController
             }
             $rolesOrganisations[$header] = [];
         }
-
 
         $rolesOrga = $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray();
         $rolesPersons = [];
@@ -538,9 +540,8 @@ class ProjectGrantController extends AbstractOscarController
             $jalons[$header] = [];
         }
 
-
-
         fputcsv($handler, $headers);
+
         /** @var Activity $entity */
         foreach ($entities as $entity) {
             $datas = [];
@@ -566,13 +567,10 @@ class ProjectGrantController extends AbstractOscarController
                         'nop';
                 }
 
-
-
                 foreach ( $entity->csv() as $col=>$value ){
                     if( $columns[$col] === true )
                         $datas[] = $value;
                 }
-
 
                 foreach( $rolesCurrent as $role=>$organisations ){
                     if( $columns[$role] === true )
@@ -584,7 +582,6 @@ class ProjectGrantController extends AbstractOscarController
                         $datas[] = $persons ? implode('|', array_unique($persons)) : ' ';
                 }
 
-
                 foreach( $jalonsCurrent as $jalon2=>$date ){
                     if( $columns[$jalon2] === true )
                         $datas[] = $date ? implode('|', array_unique($date)) : ' ';
@@ -595,7 +592,6 @@ class ProjectGrantController extends AbstractOscarController
         fclose($handler);
 
         $downloader = new CSVDownloader();
-
 
         $csvPath = sprintf('/tmp/%s', $csv);
 
@@ -616,6 +612,8 @@ class ProjectGrantController extends AbstractOscarController
     {
         // Récupération du projet (si précisé)
         $projectId = $this->params()->fromRoute('projectid', null);
+
+        $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
 
         // Contrôle des droits
         if ($projectId) {
@@ -661,6 +659,7 @@ class ProjectGrantController extends AbstractOscarController
 
         $view = new ViewModel([
             'form' => $form,
+            'hidden' => $hidden,
             'activity' => $projectGrant,
             'project' => $project,
         ]);
@@ -704,14 +703,7 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         return new JsonModel($out);
-
     }
-
-    /*
-    protected function getActivityFromRoute( $field = 'id' ){
-
-    }
-    /****/
 
     public function notificationsAction(){
 
@@ -745,7 +737,6 @@ class ProjectGrantController extends AbstractOscarController
 
     public function show2Action(){
         $method = $this->getHttpXMethod();
-
 
         $id = $this->params()->fromRoute('id');
 
@@ -793,6 +784,12 @@ class ProjectGrantController extends AbstractOscarController
             // $orgas[] = $o->getOrganization()->displayName();
         }
         ////////////////////////////////////////////////////////////////////////
+        ///
+        ///
+        /// DECLARATIONS
+        /** @var ValidationPeriodRepository $pvRepo */
+        $pvRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
+        $declarations = $pvRepo->getValidationPeriodsByActivity($entity);
 
 
         $activityTypeChain = $this->getActivityTypeService()->getActivityTypeChain($entity->getActivityType());
@@ -808,11 +805,15 @@ class ProjectGrantController extends AbstractOscarController
 
         $involvedPersons = null; $involvedPersonsJSON = null;
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_ACCESS, $activity) ){
-            $involved = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_SHOW, $activity, true);
-            foreach ($involved as $p){
-                $involvedPersons[] = $p->toJson();
+            try {
+                $involved = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_SHOW, $activity, true);
+                foreach ($involved as $p){
+                    $involvedPersons[] = $p->toJson();
+                }
+                $involvedPersonsJSON = json_encode($involvedPersons);
+            } catch ( \Exception $e ){
+                $this->log($e->getMessage());
             }
-            $involvedPersonsJSON = json_encode($involvedPersons);
         }
 
         $currencies = [];
@@ -821,11 +822,21 @@ class ProjectGrantController extends AbstractOscarController
             $currencies[] = $currency->asArray();
         }
 
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
         return [
             'generatedDocuments' => $this->getConfiguration('oscar.generated-documents.activity'),
             'entity' => $activity,
 
             'currencies' => $currencies,
+
+            'validatorsPrj' => $timesheetService->getValidatorsPrj($activity),
+            'validatorsSci' => $timesheetService->getValidatorsSci($activity),
+            'validatorsAdm' => $timesheetService->getValidatorsAdm($activity),
+
+
+            'declarations' => $declarations,
 
             // Jeton de sécurité
             'tokenValue' => $this->getOscarUserContext()->getTokenValue(true),
@@ -1288,6 +1299,8 @@ class ProjectGrantController extends AbstractOscarController
             } else {
                 if ($search) {
 
+                    $oscarNumSeparator = $this->getConfiguration("oscar.oscar_num_separator");
+
                     // La saisie est un PFI
                     if (preg_match($this->getServiceLocator()->get("Config")['oscar']['validation']['pfi'], $search)) {
                         $parameters['search'] = $search;
@@ -1302,8 +1315,9 @@ class ProjectGrantController extends AbstractOscarController
                         if (preg_match("/^[0-9]{4}SAIC.*/mi", $search)) {
                             $parameters['search'] = $search . '%';
                             $qb->andWhere('c.centaureNumConvention LIKE :search');
-                        } // La saisie est un numéro OSCAR©
-                        elseif (preg_match("/^[0-9]{4}DRI.*/mi", $search)) {
+                        }
+                        // La saisie est un numéro OSCAR©
+                        elseif (preg_match("/^[0-9]{4}".$oscarNumSeparator.".*/mi", $search)) {
                             $parameters['search'] = $search . '%';
                             $qb->andWhere('c.oscarNum LIKE :search');
                         } // Saisie 'libre'
@@ -1605,12 +1619,21 @@ class ProjectGrantController extends AbstractOscarController
                         $qb->andWhere('c.' . $sort . ' IS NOT NULL');
                     }
                 }
-
-
-
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
-
             }
+
+            if ($this->getRequest()->isXmlHttpRequest()) {
+                $json = [
+                    'datas' => []
+                ];
+                /** @var Activity $activity */
+                foreach ($activities as $activity) {
+                    $json['datas'][] = $activity->toJson();
+                }
+
+                return $this->ajaxResponse($json);
+            }
+
             $view = new ViewModel([
                 'projectview' => $projectview,
                 'exportIds' => implode(',', $ids),
@@ -1696,186 +1719,8 @@ class ProjectGrantController extends AbstractOscarController
      */
     public function indexAction()
     {
-        $page = $this->params()->fromQuery('page', 1);
-        $search = $this->params()->fromQuery('q', '');
-        $filterStatus = $this->params()->fromQuery('filter_status', []);
-        $filterType = $this->params()->fromQuery('filter_type', []);
-        $filterYears = $this->params()->fromQuery('filter_year', []);
-        $filterPersons = $this->params()->fromQuery('persons', []);
-
-        $datefilter_type = $this->params()->fromQuery('datefilter_type', '');
-        $datefilter_from = $this->params()->fromQuery('datefilter_from', '');
-        $datefilter_to = $this->params()->fromQuery('datefilter_to', '');
-
-
-        $sortCriteria = [
-            'dateCreated' => 'Date de création',
-            'dateStart' => 'Date début',
-            'dateEnd' => 'Date fin',
-            'dateUpdated' => 'Date de mise à jour',
-            'dateSigned' => 'Date de signature',
-            'dateOpened' => "Date d'ouverture",
-        ];
-
-        $sortDirections = [
-            'desc' => 'Décroissant',
-            'asc' => 'Croissant'
-        ];
-
-        $sort = $this->params()->fromQuery('sort', 'dateUpdated');
-        $sortDirection = $this->params()->fromQuery('sortDirection', 'desc');
-
-        if (!key_exists($sort, $sortCriteria)) {
-            $sort = 'dateCreated';
-        }
-        if (!key_exists($datefilter_type, $sortCriteria)) {
-            $datefilter_type = '';
-        }
-
-        if (!key_exists($sortDirection, $sortDirections)) {
-            $sortDirection = 'desc';
-        }
-
-        $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('c')
-            ->from(Activity::class, 'c')
-            ->orderBy('c.' . $sort, $sortDirection);
-
-        $displayFilters = false;
-
-        if ($search) {
-            $displayFilters = true;
-            if (preg_match(EOTP::REGEX_EOTP, $search)) {
-                $qb->where('c.codeEOTP = :search')
-                    ->setParameter('search', $search);
-            } else {
-                if (preg_match("/^[0-9]{4}SAIC.*/mi", $search)) {
-                    $qb->where('c.centaureNumConvention LIKE :search')
-                        ->setParameter('search', $search . '%');
-                } elseif (preg_match("/^[0-9]{4}DRI.*/mi", $search)) {
-                    $qb->where('c.oscarNum LIKE :search')
-                        ->setParameter('search', $search . '%');
-                } else {
-
-                    $qb->where('c.id IN(:ids)')
-                        ->setParameter('ids',
-                            $this->getActivityService()->search($search));
-                }
-            }
-        }
-
-        // Filtre sur le status de l'activités
-        if (count($filterStatus)) {
-            $displayFilters = true;
-            $qb->andWhere('c.status IN(:status)')
-                ->setParameter('status', $filterStatus);
-        }
-
-        // Filtre sur les types d'activités
-        if (count($filterType)) {
-            $displayFilters = true;
-            $selectedTypes = $this->getActivityTypeService()->getActivityTypesById($filterType);
-            $qb->innerJoin('c.activityType', 't');
-            /** @var ActivityType $selectedType */
-            foreach ($selectedTypes as $selectedType) {
-                $qb->andWhere('t.lft >= :lft AND t.rgt <= :rgt')
-                    ->setParameter('lft', $selectedType->getLft())
-                    ->setParameter('rgt', $selectedType->getRgt());
-
-            }
-        }
-
-        // Filtre sur les types d'activités
-        if (count($filterYears)) {
-            $displayFilters = true;
-            $clause = [];
-            $values = [];
-
-            foreach ($filterYears as $year) {
-                $values['start_' . $year] = $year . '-01-01';
-                $values['end_' . $year] = $year . '-12-31';
-                $clause[] = "(c.dateStart <= '$year-12-31' AND c.dateEnd >= '$year-01-01')";
-            }
-
-            $qb->andWhere(implode(' OR ', $clause));
-        }
-
-        // Persons
-        $persons = [];
-        if (count($filterPersons)) {
-            $displayFilters = true;
-            foreach ($this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')->where('p.id IN (:persons)')->setParameter('persons',
-                $filterPersons)->getQuery()->getResult() as $p) {
-                $persons[] = $p;
-            }
-            $qb->innerJoin('c.persons', 'm')
-                ->leftJoin('m.person', 'p')
-                ->leftJoin('c.project', 'pr')
-                ->leftJoin('pr.members', 'pm')
-                ->leftJoin('pm.person', 'p2')
-                ->andWhere('p.id in (:personIds) OR p2.id IN (:personIds)')
-                ->setParameter('personIds', $filterPersons);
-        }
-
-        if ($datefilter_type != '' && ($datefilter_from != '' || $datefilter_to != '')) {
-            $displayFilters = true;
-            if ($datefilter_from != '') {
-                $qb->andWhere('c.' . $datefilter_type . ' >= :from')
-                    ->setParameter('from', $datefilter_from);
-            }
-            if ($datefilter_to != '') {
-                $qb->andWhere('c.' . $datefilter_type . ' <= :to')
-                    ->setParameter('to', $datefilter_to);
-            }
-        }
-        try {
-            // IDS
-            $qbIds = $qb->select('c.id');
-            $ids = [];
-            foreach ($qbIds->getQuery()->getResult() as $row) {
-                $ids[] = $row['id'];
-            }
-            $qb->select('c');
-
-            $paginator = new UnicaenDoctrinePaginator($qb, $page, 20);
-
-        } catch (\Exception $e) {
-            die(sprintf("<h1>%s</h1><pre>%s</pre>", $e->getMessage(),
-                $e->getTraceAsString()));
-        }
-
-        if ($this->getRequest()->isXmlHttpRequest()) {
-            $json = [
-                'datas' => []
-            ];
-            /** @var Activity $activity */
-            foreach ($paginator as $activity) {
-                $json['datas'][] = $activity->toJson();
-            }
-
-            return $this->ajaxResponse($json);
-            // die('Recherche');
-        }
-
-
-        return [
-            'exportIds' => implode(',', $ids),
-            'contracts' => $paginator,
-            'search' => $search,
-            'filterStatus' => $filterStatus,
-            'filterType' => $filterType,
-            'filterYear' => $filterYears,
-            'sorts' => $sortCriteria,
-            'directions' => $sortDirections,
-            'sort' => $sort,
-            'sortDirection' => $sortDirection,
-            'filterPersons' => $persons,
-            'displayFilters' => $displayFilters,
-            'datefilter_type' => $datefilter_type,
-            'datefilter_from' => $datefilter_from,
-            'datefilter_to' => $datefilter_to,
-            'types' => $this->getActivityTypeService()->getActivityTypes(true),
-        ];
+        die("DEPRECATED");
+        return $this->getResponseDeprecated();
     }
 
 

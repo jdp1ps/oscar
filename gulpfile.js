@@ -173,11 +173,11 @@ gulp.task('modules-oscar', [], function() {
 });
 
 gulp.task('modules-oscar-watch', [], function(){
-    gulp.watch(['./public/js/oscar/src/*.vue','./public/js/oscar/src/*.js'], ['modules-oscar']);
+    gulp.watch(['public/js/oscar/src/*.vue'], ['modules-oscar']);
 });
 
 
-gulp.task('watch-sass', function () {
+gulp.task('watch-sass', ['sass'], function () {
     gulp.watch(directories.css + '**/*.scss', ['sass']);
 });
 

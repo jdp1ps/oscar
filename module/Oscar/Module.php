@@ -12,6 +12,7 @@ namespace Oscar;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Monolog\Logger;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\Authentification;
@@ -66,6 +67,14 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
     }
 
     /**
+     * @return Logger
+     */
+    protected function getLogger()
+    {
+        return $this->getServiceManager()->get('Logger');
+    }
+
+    /**
      * @return ActivityLogRepository
      */
     protected function getActivityRepository()
@@ -102,10 +111,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
         // Envoi des erreurs dans les LOGS
         $e->getApplication()->getEventManager()->getSharedManager()->attach(
-            '*', 'dispatch.error', function( $e ){
-            if( $e->getParam('exception') instanceof \Exception )
-                $e->getApplication()->getServiceManager()->get('Logger')->error($e->getParam('exception')->getMessage());
-        });
+            '*',
+            'dispatch.error',
+            array($this, 'onDispatchError'));
 
         // Log des accès
         $e->getApplication()->getEventManager()->attach('*', function ($e) {
@@ -121,9 +129,26 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
         $this->getServiceManager()->get('Logger')->error($msg);
     }
 
+    public function onDispatchError( $e ){
+
+        $userInfos = $this->getCurrentUserInfo();
+        $base = $userInfos['base'];
+
+        if( $e->getParam('exception') instanceof \Exception ){
+            $msg = 'exception: ' . $e->getParam('exception')->getMessage();
+        } elseif ( is_string($e->getParam('exception'))) {
+            $msg = 'error: ' . $e->getParam('exception');
+        } else {
+            $msg = "Erreur non identifiée";
+        }
+
+        $this->getLogger()->error("$base $msg");
+    }
     public function onUserLogin( $e ){
 
         $dbUser = null;
+
+        $this->getLogger()->addInfo(sprintf('Chargement du bdUser avec identity = %s', (string)$e->getIdentity()));
 
 		if( is_string($e->getIdentity()) ){
 			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $e->getIdentity()]);
@@ -137,7 +162,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
                 $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
                 $this->getEntityManager()->flush($dbUser);
             } catch (\Exception $e) {
-
+                error_log("Mise à jour du dbUser impossible : " . $e->getMessage());
             }
 
             /** @var PersonService $personService */
@@ -153,6 +178,8 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
             $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
                 $str), $dbUser);
+        } else {
+            error_log("dbUser manquant !");
         }
 
     }
@@ -188,27 +215,57 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
                 $action = $match->getParam('action');
                 $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
-                $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+
+
+                $userInfos = $this->getCurrentUserInfo();
+                $base = $userInfos['base'];
 
                 $method = $request->getMethod();
 
-                if( $userContext->getLdapUser() ){
-                    $user = $userContext->getLdapUser()->getDisplayName();
-                }
-                elseif ( $userContext->getDbUser() ){
-                    $user = $userContext->getDbUser()->getDisplayName();
-                } else {
-                    $user = 'Anonymous';
-                }
 
                 $userid = $userContext->getDbUser() ? $userContext->getDbUser()->getid() : -1;
                 $contextId = $match->getParam('id', '?');
-                $message = sprintf('%s@%s:(%s) [%s] %s:%s %s', $ip, $userid, $user, $method, $controller, $action, $uri);
+                $message = sprintf('%s [%s] %s:%s %s', $base, $method, $controller, $action, $uri);
+                // $this->getLogger()->debug($message);
 
             } catch (\Exception $e) {
                 error_log($e->getMessage());
             }
         }
+    }
+
+    protected function getCurrentUserInfo(){
+
+        static $userInfos;
+        if( $userInfos === null ){
+            $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+
+            $userContext = $this->getUserContext();
+
+            if( $this->getUserContext()->getLdapUser() ){
+                $auth           = 'ldap';
+                $login          = $userContext->getLdapUser()->getUsername();
+                $displayName    = $userContext->getLdapUser()->getDisplayName();
+            }
+            elseif ( $userContext->getDbUser() ){
+                $auth           = 'bdd';
+                $login          = $userContext->getDbUser()->getUsername();
+                $displayName    = $userContext->getDbUser()->getDisplayName();
+            } else {
+                $auth = "no";
+                $displayName = 'Anonymous';
+                $login = 'visitor';
+            }
+
+            $userInfos = [
+                'ip' => $ip,
+                'auth' => $auth,
+                'username' => $login,
+                'display' => $displayName,
+                'base' => sprintf('%s@%s (%s:%s)', $login, $ip, $auth, $displayName)
+            ];
+        }
+        return $userInfos;
     }
 
     public function getConfig()

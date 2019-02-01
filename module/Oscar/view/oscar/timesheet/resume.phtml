@@ -1,0 +1,38 @@
+<div class="container">
+    <h1>
+        Feuilles de temps
+        <?php if( $person ): ?>
+            pour <strong><?= $person ?></strong>
+        <?php endif; ?>
+    </h1>
+    <div id="app">Chargement</div>
+    <script>
+        require(['vue', 'TimesheetPersonResume', 'mm'], function(Vue, TimesheetPersonResume, moment){
+
+            // Affichage des périodes
+            Vue.filter('period', function(value){
+                return moment(value+"-01").format("MMMM YYYY");
+            });
+
+            // Affichage des périodes
+            Vue.filter('heures', function(value){
+                let heures = Math.floor(value);
+                let minutes = Math.round((value - heures)*60);
+                if( minutes == 0 ){
+                    minutes = "";
+                }
+                else if(minutes < 10){
+                    minutes = '0'+minutes;
+                }
+                return heures+'h'+minutes;
+            });
+
+            new Vue({
+                el: "#app",
+                render: function(h){
+                    return h(TimesheetPersonResume.default, { props: { datas: <?= json_encode($datas) ?>}});
+                }
+            })
+        });
+    </script>
+</div>

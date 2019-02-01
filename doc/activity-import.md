@@ -37,7 +37,7 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
     "tva": null,
     "currency": null,
     "assietteSubventionnable": null,
-    "financialImpact": null,
+    "financialImpact": "Aucune",
     "organizations": {
       "Laboratoire": ["Cyberdyne", "US Robots"]
     },
@@ -99,14 +99,14 @@ Voici la liste des clefs attendues :
 
 Clef          | Type      | PÊ Vide   | Unique | Description
 ------|------|------|------|------------------------------------------
-uid             | String    | Non       | Oui    | Identifiant d'import (évite les doublons et permet de mettre à jour les données importées
+uid             | String    | Non       | Oui    | Identifiant d'import (évite les doublons et permet de mettre à jour les données importées)
 acronym         | String    | Non       | Non    | Acronyme du projet, Si Oscar ne trouve pas de projet existant avec cet acronyme, il le créera automatiquement
 projectlabel | String    | Oui       | Non    | Utilisé pour créer le projet si il n'existe pas
 label           | String    | NR        | Non    | Intitulé de l'activité
 description           | String    | Oui        | Non    | Description de l'activité
 datestart       | Date ISO  | Oui       | Non    | Date de début de l'activité
 dateend         | Date ISO  | Oui       | Non    | Date de fin de l'activité
-datesigned         | Date ISO  | Oui       | Non    | Date de la signsture de la convention
+datesigned         | Date ISO  | Oui       | Non    | Date de la signature de la convention
 pfi             | String    | Oui       | Non    | EOTP/PFI de l'activité de recherche
 datePFI         | Date ISO  | Oui       | Non    | Date d'ouverture du PFI
 type            | String    | Oui       | Non    | Type d'activité, si Oscar ne trouve pas de type correspondant, la donnée est ignorée
@@ -139,10 +139,11 @@ payments        | Array     | Oui       | Non    | Voir détails dans [Gestion d
     "tva": null,
     "currency": null,
     "assietteSubventionnable": null,
-    "financialImpact": null,
+    "financialImpact": "Aucune",
     "organizations": {},
     "persons": {},
     "milestones": [],
+    "status": 404,
     "payments": []    
   }
 ]
@@ -152,7 +153,24 @@ payments        | Array     | Oui       | Non    | Voir détails dans [Gestion d
 
 ### La clef `uid`
 
-Cette clef contient une valeur unique permettant à oscar de maintenir le lien logique entre l'activité dans la base de donnée et l'information dans le fichier JSON. Elle permet de mettre à jour l'activité si le script d'importation est éxécuté plusieurs fois.
+Cette clef contient une valeur unique permettant à Oscar de maintenir le lien logique entre l'activité dans la base de données et l'information dans le fichier JSON. Elle permet de mettre à jour l'activité si le script d'importation est éxécuté plusieurs fois.
+
+### La clef `status`
+
+Cette clef permet de rensigner le statut de l'activité en utilisant un code standard (un entier) : 
+
+| CODE | Correspondance texte |
+|------|----------------------|
+| 101  | Actif
+| 102  | Brouillon
+| 103  | Déposé
+| 200  | Terminé
+| 201  | Résilié
+| 250  | Dossier abandonné
+| 201  | Refusé
+| 404  | Conflit (pas de statut)
+
+> Si aucun statut n'est fourni, la valeur par défaut sera 404 (Conflit, pas de statut)
 
 
 ### Donnée projet (les clefs `acronym` et `projectlabel`)
@@ -161,7 +179,7 @@ La clef `acronym` correspond à l'acronyme du projet. Elle est utilisée par Osc
 
 Si plusieurs activités ont la même valeur `acronym`, elles sont agrégées dans le même projet.
 
-Si oscar ne trouve pas le projet dans la base de données, il tentera de le créer. Il utilisera alors la clef `projectlabel` pour renseigner l'intitulé du projet.
+Si Oscar ne trouve pas le projet dans la base de données, il tentera de le créer. Il utilisera alors la clef `projectlabel` pour renseigner l'intitulé du projet.
 
 
 ### la clef `type`
@@ -239,7 +257,7 @@ Elle se compose de clefs correspondants aux rôles des personnes dans l'activit�
 }
 ```
 
-Comme pour les organisations, Oscar se chargera d'ajouter les rôles et les personnes si elles sont absentes de la base de donnée.
+Comme pour les organisations, Oscar se chargera d'ajouter les rôles et les personnes si elles sont absentes de la base de données.
 
 > Si les données des personnes sont synchronisées avec le SI, il faut synchroniser les personnes AVANT d'importer les activités pour éviter la création de doublon.
 
@@ -316,6 +334,8 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 La valeur doit correspondre à un taux présent dans la base de données (table `tva`)
 
 
+
+
 ## Currency (string, ex: €)
 
 La valeur doit correspondre à un symbole / un intitulé de devise présent en base de données (table `currency`), Si rien n'est trouvé, Oscar mettra automatiquement l'euro en devise.
@@ -382,6 +402,7 @@ return [
     27  => "financialImpact",
     28  => "currency",
     29  => "assietteSubventionnable",
+    30  => "status"
 ];
 ```
 
@@ -406,7 +427,7 @@ Les objets plus complexes comme les organisations, les personnes, les versements
 
 ### organizations.Role
 
-La clef `organizations` prend pour paramètre le role de l'organisation trouvé dans la cellule, Si par exemple la colonne 3 contient un laboratoire, la configuration se présentera ainsi :
+La clef `organizations` prend pour paramètre le rôle de l'organisation trouvé dans la cellule, Si par exemple la colonne 3 contient un laboratoire, la configuration se présentera ainsi :
 
 Valeur dans la cellule : Chaîne ou vide
 
@@ -428,7 +449,7 @@ On obtiendra en JSON :
 
 ### persons.Role
 
-La clef `persons` prend pour paramètre le role de la personne trouvé dans la cellule, Si par exemple la colonne 7 contient le responsable scientifique, la configuration se présentera ainsi :
+La clef `persons` prend pour paramètre le rôle de la personne trouvé dans la cellule. Si par exemple la colonne 7 contient le responsable scientifique, la configuration se présentera ainsi :
 
 ```php
 return [
@@ -449,7 +470,7 @@ On obtiendra en JSON :
 <a id="data-composite-1"></a>   
 ### Donnèes multiples persons/organizations (2.5.x)
 
-Les `persons` et les `organizations` autorisent un paramètrage avancès pour permettre d'extraire des données multiples depuis une même colonne : 
+Les `persons` et les `organizations` autorisent un paramètrage avancé pour permettre d'extraire des données multiples depuis une même colonne : 
 
 ```php
 <?php
@@ -467,7 +488,7 @@ Le tableau associatif de configuration permet de spécifier le mode de traitemen
 
 Dans l'exemple, la colonne va contenir des ingénieurs séparés par des virgules.
 
-La données de colonne `Max Plank, Albert Einstein` produirait : 
+La donnée de colonne `Max Plank, Albert Einstein` produirait : 
 
 ```json
 {
@@ -483,7 +504,7 @@ La données de colonne `Max Plank, Albert Einstein` produirait :
 
 ### milestones.Type
 
-La clef `milestones` prend pour paramètre le type de jalon trouvé dans la cellule, Si par exemple la colonne 13 contient la date du rapport scientifique, la configuration se présentera ainsi :
+La clef `milestones` prend pour paramètre le type de jalon trouvé dans la cellule. Si par exemple la colonne 13 contient la date du rapport scientifique, la configuration se présentera ainsi :
 
 ```php
 return [
@@ -505,21 +526,54 @@ On obtiendra en JSON :
 ```
 
 
-### payments.POSITIONMONTANT
+### payments.POSITIONS
 
-La clef `payments` prend pour paramètre la position du montant. Par exemple si le fichier CSV propose la date du versement à la colonne 13 et le montant de ce versement à la colonne 14, le paramètre sera 1 (13 + 1).
+La clef `payments` indique l'emplacement du montant du versement et prends comme premier paramètre la date prévue du versement, et en deuxième paramêtre la date effective souf la forme `payments.PREVU.EFFECTIF`.
 
-Par exemple, le fichier CSV suivant :
+#### Exemple 1
 
-| Activité | Acronym Projet | Premier versement (date) | Premier versement (montant)
-|---|---|---|---|---
-| La relativité restreinte | RELATIV | 2016-01-01 | 2500.50
-
-La date du versement est à la colone 2, et le montant correspondant à la colonne suivante (1), la configuration se présentera ainsi :
+|   Activité                | Acronym Projet    | Premier versement (montant)  | Premier versement (prévu)  | 1er versement (effectif)
+|---------------------------|-------------------|---------------------------|-------------------------------|-------------------------
+| La relativité restreinte  | RELATIV           | 2000.00                | 2017-01-01                       | 2017-01-06
 
 ```php
 return [
-  2 => "payments.1",
+  2 => "payments.1.2",
+]
+```
+
+Le premier chiffre indique l'emplacement de la colonne contenant la date prévue (une colonne après).
+Le deuxième chiffre indique l'emplacement de la colonne content la date effective (deux colonnes après).
+
+On obtiendra : 
+
+```json
+{
+  "payments": [
+     {
+        "amount": 20000,
+        "date": "2017-01-07",
+        "predicted": "2017-01-01"
+      }
+  ]
+}
+```
+
+#### exemple 2
+
+Si les colonnes sont dans des ordres différents, il faut prendre comme référence la colonne contenant le montant, ici la 4ème colonne (index 3), et mettre l'emplacement des autres colonnes par rapport à celle ci : 
+
+Ex: 
+
+|   Activité                | Acronym Projet    | Premier versement (prévu)  | Premier versement (montant)  | 1er versement (effectif)
+|---------------------------|-------------------|---------------------------|-------------------------------|-------------------------
+| La relativité restreinte  | RELATIV           | 2016-01-01                | 2500.50                       | 2016-01-10
+
+Ce qui donne : 
+
+```php
+return [
+  2 => "payments.-1.1",
 ]
 ```
 
@@ -530,8 +584,13 @@ On obtiendra en JSON :
   "payments": [
       {
         "amount": 2500.5,
-        "date": "2016-01-01"
+        "date": "2016-01-10",
+        "predicted": "2016-01-01"
       }
   ]
 }
 ```
+
+#### Statut
+
+Au moment de l'injection des données JSON dans Oscar, Oscar regardera si une date effective (`date`) est présente (non null), si c'est le cas, le versement créé sera marqué comme EFFECTUÉ, sinon il sera marqué comme PRÉVU.

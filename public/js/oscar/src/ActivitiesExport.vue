@@ -52,7 +52,6 @@
                     <button class="btn btn-primary" type="submit" @click="showConfiguration = false">Exporter</button>
                 </nav>
             </div>
-
         </section>
     </form>
 </template>

@@ -32,7 +32,7 @@ requirejs.config({
         'timewalker': 'vendor/timewalker/src/js/TimeViewer',
         'oscar-auto': 'oscar-auto',
         'OscarUI': 'oscar-ui',
-        'vue': 'vendor/vue/dist/vue',
+        'vue': 'vendor/vue/dist/vue.min',
         'vue-resource': 'vendor/vue-resource/dist/vue-resource',
         'vue-router': 'vendor/vue-router/dist/vue-router',
         'LocalDB': 'LocalDB/LocalDB',
@@ -67,7 +67,19 @@ requirejs.config({
         'ActivitySearchUi' : 'oscar/dist/ActivitySearchUi',
         'VueFilters' : 'oscar/dist/VueFilters',
         'OrganizationType' : 'oscar/dist/OrganizationType',
-        'DisciplineUI' : 'oscar/dist/DisciplineUI'
+        'DisciplineUI' : 'oscar/dist/DisciplineUI',
+        'TimesheetMonth' : 'oscar/dist/TimesheetMonth',
+        'ValidationActivityVue' : 'oscar/dist/ValidationActivityVue',
+        'ValidationPeriod' : 'oscar/dist/ValidationPeriod',
+        'DeclarersList' : 'oscar/dist/DeclarersList',
+        'ImportIcalUI' : 'oscar/dist/ImportIcalUI',
+        'PeriodSelector' : 'oscar/dist/PeriodSelector',
+        'TimesheetDeclarationsList' : 'oscar/dist/TimesheetDeclarationsList',
+        'PersonSchedule' : 'oscar/dist/PersonSchedule',
+        'TimesheetPersonResume' : 'oscar/dist/TimesheetPersonResume',
+        'ResumeActivity' : 'oscar/dist/ResumeActivity',
+        'PersonsList' : 'oscar/dist/PersonsList',
+        'Workpackage': 'oscar/dist/WorkpackageUI'
     },
     shim: {
         "bootstrap": {

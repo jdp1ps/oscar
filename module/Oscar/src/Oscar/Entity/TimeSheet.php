@@ -100,15 +100,27 @@ class TimeSheet implements ITrackable
 
     /**
      * @var \DateTime
-     * @ORM\Column(type="datetimetz", nullable=false)
+     * @ORM\Column(type="datetime", nullable=false)
      */
     private $dateFrom;
 
     /**
      * @var \DateTime
-     * @ORM\Column(type="datetimetz", nullable=false)
+     * @ORM\Column(type="datetime", nullable=false)
      */
     private $dateTo;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $dateSync;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $syncId;
 
     /**
      * @var \DateTime
@@ -168,98 +180,17 @@ class TimeSheet implements ITrackable
     /**
      * @var \DateTime Date de l'import de l'ics
      *
-     * @ORM\Column(type="datetimetz", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $icsFileDateAdded;
 
-    //////////////////////////////////////////////////// VALIDATION SCIENTIFIQUE
-
-    ////// VALIDATION
-    /**
-     * @var string Personne ayant fait la validation scientifique.
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $validatedSciBy;
 
     /**
-     * @var int ID de la personne ayant fait la validation scientifique.
-     * @ORM\Column(type="integer", nullable=true)
+     * @var ValidationPeriod
+     * @ORM\ManyToOne(targetEntity="ValidationPeriod", inversedBy="timesheets")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
-    private $validatedSciById;
-
-    /**
-     * @var \DateTime Date de la validation scientifique.
-     * @ORM\Column(type="datetimetz", nullable=true)
-     */
-    private $validatedSciAt;
-
-    /**
-     * @var string Personne ayant fait la validation administrative.
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $validatedAdminBy;
-
-    /**
-     * @var int ID de la personne ayant fait la validation administrative.
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $validatedAdminById;
-
-    /**
-     * @var \DateTime Date de la validation administrative.
-     * @ORM\Column(type="datetimetz", nullable=true)
-     */
-    private $validatedAdminAt;
-
-    ////// REFUS
-    /**
-     * @var string Personne ayant refusé la validation scientifique.
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $rejectedSciBy;
-
-    /**
-     * @var int ID de la personne ayant refusé la validation scientifique.
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $rejectedSciById;
-
-    /**
-     * @var \DateTime Date du refuss de la validation scientifique.
-     * @ORM\Column(type="datetimetz", nullable=true)
-     */
-    private $rejectedSciAt;
-
-    /**
-     * @var string Commentaire laisé par la personne ayant refusé la validation scientifique.
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private $rejectedSciComment;
-
-    ////// REFUS
-    /**
-     * @var string Personne ayant refusé la validation administrative.
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $rejectedAdminBy;
-
-    /**
-     * @var int ID de la personne ayant refusé la validation administrative.
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $rejectedAdminById;
-
-    /**
-     * @var \DateTime Date du refuss de la validation administrative.
-     * @ORM\Column(type="datetimetz", nullable=true)
-     */
-    private $rejectedAdminAt;
-
-    /**
-     * @var string Commentaire laisé par la personne ayant refusé la validation administrative.
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private $rejectedAdminComment;
+    private $validationPeriod;
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -278,11 +209,89 @@ class TimeSheet implements ITrackable
             ->setStatus(self::STATUS_DRAFT);
     }
 
+    /**
+     * @return ValidationPeriod
+     */
+    public function getValidationPeriod()
+    {
+        return $this->validationPeriod;
+    }
+
+    /**
+     * @param ValidationPeriod $validationPeriod
+     */
+    public function setValidationPeriod($validationPeriod)
+    {
+        $this->validationPeriod = $validationPeriod;
+        return $this;
+    }
+
     const UNIT_MINUTE = 60;
     const UNIT_HOUR = 3600;
 
     public function getDuration( $unit = self::UNIT_HOUR){
         return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp()) / $unit;
+    }
+
+    public function toJson2(){
+        $activityId = null;
+        $activityLabel = null;
+        $workpackageId = null;
+        $workpackageLabel = null;
+        $workpackageCode = null;
+
+        $projectAcronym = null;
+        $projectLabel = null;
+        $projectId = null;
+
+
+        if( $this->getWorkpackage() ){
+            $workpackageId = $this->getWorkpackage()->getId();
+            $workpackageLabel = (string)$this->getWorkpackage();
+            $workpackageCode = $this->getWorkpackage()->getCode();
+            $activityId = $this->getWorkpackage()->getActivity()->getId();
+            $activityLabel = (string)$this->getWorkpackage()->getActivity();
+
+            $projectId = $this->getWorkpackage()->getActivity()->getProject()->getId();
+            $projectAcronym = $this->getWorkpackage()->getActivity()->getProject()->getAcronym();
+            $projectLabel = $this->getWorkpackage()->getActivity()->getProject()->getLabel();
+
+        }
+        // Pas de lot, mais une activité ?
+        else if ( $this->getActivity() ){
+            $activityId = $this->getActivity()->getId();
+            $activityLabel = (string)$this->getActivity();
+        }
+
+
+        return [
+            'id' => $this->getId(),
+            'activity_id' => $activityId,
+            'activity_label' => $activityLabel,
+
+            'workpackage_id' => $workpackageId,
+            'workpackage_code' => $workpackageCode,
+            'workpackage_label' => $workpackageLabel,
+
+            'project_id' => $projectId,
+            'project_acronym' => $projectAcronym,
+            'project_label' => $projectLabel,
+
+            'label' => $this->getLabel(),
+            'description' => $this->getComment(),
+            'start' => $this->getDateFrom()->format('c'),
+            'end' => $this->getDateTo()->format('c'),
+            'status' => $this->getStatus(),
+            'owner' => $this->getPerson()->getDisplayName(),
+            'owner_id' => $this->getPerson()->getId(),
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getPeriodCode(){
+        return $this->getDateFrom()->format('Y-m');
     }
 
     public function toJson(){
@@ -355,6 +364,283 @@ class TimeSheet implements ITrackable
     }
 
     /**
+     * @return \DateTime
+     */
+    public function getDateSync()
+    {
+        return $this->dateSync;
+    }
+
+    /**
+     * @param \DateTime $dateSync
+     */
+    public function setDateSync($dateSync)
+    {
+        $this->dateSync = $dateSync;
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getSyncId()
+    {
+        return $this->syncId;
+    }
+
+    /**
+     * @param \DateTime $syncId
+     */
+    public function setSyncId($syncId)
+    {
+        $this->syncId = $syncId;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidatedProjectBy()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidatedProjectBy();
+        }
+        return null;
+    }
+
+    /**
+     * @return int
+     */
+    public function getValidatedProjectById()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidationActivityById();
+        }
+        return null;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getValidatedProjectAt()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidationActivityAt();
+        }
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedProjectBy()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectActivityBy();
+        }
+        return null;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRejectedProjectById()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectActivityById();
+        }
+        return null;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getRejectedProjectAt()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectActivityBy();
+        }
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedProjectComment()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectActivityMessage();
+        }
+        return null;
+    }
+
+     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    /**
+     * @return string
+     */
+    public function getValidatedSciBy()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidationSciBy();
+        }
+        return null;
+    }
+
+    /**
+     * @return int
+     */
+    public function getValidatedSciById()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidationSciById();
+        }
+        return null;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getValidatedSciAt()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidationSciAt();
+        }
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidatedAdminBy()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidationAdmBy();
+        }
+        return null;
+    }
+
+    /**
+     * @return int
+     */
+    public function getValidatedAdminById()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidationAdmById();
+        }
+        return null;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getValidatedAdminAt()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getValidationAdmAt();
+        }
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedSciBy()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectSciBy();
+        }
+        return null;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRejectedSciById()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectSciById();
+        }
+        return null;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getRejectedSciAt()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectSciAt();
+        }
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedSciComment()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectSciMessage();
+        }
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedAdminBy()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectAdmBy();
+        }
+        return null;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRejectedAdminById()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectAdmById();
+        }
+        return null;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getRejectedAdminAt()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectAdmAt();
+        }
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejectedAdminComment()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getRejectAdmMessage();
+        }
+        return null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSendBy()
+    {
+        if( $this->getValidationPeriod() ){
+            return $this->getValidationPeriod()->getDeclarer();
+        }
+        return null;
+    }
+
+    /**
      * @return string
      */
     public function getIcsUid()
@@ -422,278 +708,6 @@ class TimeSheet implements ITrackable
     public function setIcsFileDateAdded($icsFileDateAdded)
     {
         $this->icsFileDateAdded = $icsFileDateAdded;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValidatedSciBy()
-    {
-        return $this->validatedSciBy;
-    }
-
-    /**
-     * @param string $validatedSciBy
-     */
-    public function setValidatedSciBy($validatedSciBy)
-    {
-        $this->validatedSciBy = $validatedSciBy;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getValidatedSciById()
-    {
-        return $this->validatedSciById;
-    }
-
-    /**
-     * @param int $validatedSciById
-     */
-    public function setValidatedSciById($validatedSciById)
-    {
-        $this->validatedSciById = $validatedSciById;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getValidatedSciAt()
-    {
-        return $this->validatedSciAt;
-    }
-
-    /**
-     * @param \DateTime $validatedSciAt
-     */
-    public function setValidatedSciAt($validatedSciAt)
-    {
-        $this->validatedSciAt = $validatedSciAt;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValidatedAdminBy()
-    {
-        return $this->validatedAdminBy;
-    }
-
-    /**
-     * @param string $validatedAdminBy
-     */
-    public function setValidatedAdminBy($validatedAdminBy)
-    {
-        $this->validatedAdminBy = $validatedAdminBy;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getValidatedAdminById()
-    {
-        return $this->validatedAdminById;
-    }
-
-    /**
-     * @param int $validatedAdminById
-     */
-    public function setValidatedAdminById($validatedAdminById)
-    {
-        $this->validatedAdminById = $validatedAdminById;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getValidatedAdminAt()
-    {
-        return $this->validatedAdminAt;
-    }
-
-    /**
-     * @param \DateTime $validatedAdminAt
-     */
-    public function setValidatedAdminAt($validatedAdminAt)
-    {
-        $this->validatedAdminAt = $validatedAdminAt;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectedSciBy()
-    {
-        return $this->rejectedSciBy;
-    }
-
-    /**
-     * @param string $rejectedSciBy
-     */
-    public function setRejectedSciBy($rejectedSciBy)
-    {
-        $this->rejectedSciBy = $rejectedSciBy;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getRejectedSciById()
-    {
-        return $this->rejectedSciById;
-    }
-
-    /**
-     * @param int $rejectedSciById
-     */
-    public function setRejectedSciById($rejectedSciById)
-    {
-        $this->rejectedSciById = $rejectedSciById;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getRejectedSciAt()
-    {
-        return $this->rejectedSciAt;
-    }
-
-    /**
-     * @param \DateTime $rejectedSciAt
-     * @return TimeSheet
-     */
-    public function setRejectedSciAt($rejectedSciAt)
-    {
-        $this->rejectedSciAt = $rejectedSciAt;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectedSciComment()
-    {
-        return $this->rejectedSciComment;
-    }
-
-    /**
-     * @param string $rejectedSciComment
-     */
-    public function setRejectedSciComment($rejectedSciComment)
-    {
-        $this->rejectedSciComment = $rejectedSciComment;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectedAdminBy()
-    {
-        return $this->rejectedAdminBy;
-    }
-
-    /**
-     * @param string $rejectedAdminBy
-     */
-    public function setRejectedAdminBy($rejectedAdminBy)
-    {
-        $this->rejectedAdminBy = $rejectedAdminBy;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getRejectedAdminById()
-    {
-        return $this->rejectedAdminById;
-    }
-
-    /**
-     * @param int $rejectedAdminById
-     */
-    public function setRejectedAdminById($rejectedAdminById)
-    {
-        $this->rejectedAdminById = $rejectedAdminById;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getRejectedAdminAt()
-    {
-        return $this->rejectedAdminAt;
-    }
-
-    /**
-     * @param \DateTime $rejectedAdminAt
-     */
-    public function setRejectedAdminAt($rejectedAdminAt)
-    {
-        $this->rejectedAdminAt = $rejectedAdminAt;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRejectedAdminComment()
-    {
-        return $this->rejectedAdminComment;
-    }
-
-    /**
-     * @param string $rejectedAdminComment
-     */
-    public function setRejectedAdminComment($rejectedAdminComment)
-    {
-        $this->rejectedAdminComment = $rejectedAdminComment;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSendBy()
-    {
-        return $this->sendBy;
-    }
-
-    /**
-     * @param $sendBy
-     * @return $this
-     */
-    public function setSendBy($sendBy)
-    {
-        $this->sendBy = $sendBy;
 
         return $this;
     }
@@ -799,23 +813,6 @@ class TimeSheet implements ITrackable
     /**
      * @return \DateTime
      */
-    public function getValidatedAt()
-    {
-        return $this->validatedAt;
-    }
-
-    /**
-     * @param \DateTime $validatedAt
-     */
-    public function setValidatedAt($validatedAt)
-    {
-        $this->validatedAt = $validatedAt;
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
     public function getDateTo()
     {
         return $this->dateTo;
@@ -893,14 +890,25 @@ class TimeSheet implements ITrackable
 
     public function __toString()
     {
-        return sprintf("[%s] %s %s %s (%s, %s) %s",
+        $acronym = "*";
+        $activity = "Hors-Lot";
+        $wpCode = $this->getLabel();
+
+        if($this->getActivity()){
+            $activity = $this->getActivity();
+            $acronym = $this->getActivity()->getAcronym();
+            $wpCode = $this->getWorkpackage() ? $this->getWorkpackage()->getCode() : 'no WP';
+        }
+
+        return sprintf("[timesheet:%s] %s = %s '%s':'%s':'%s' (%s)",
             $this->getId(),
-            $this->getActivity()->getProject()->getAcronym(),
-            $this->getActivity(),
-            $this->getWorkpackage()->getCode(),
             $this->getDateFrom()->format('Y-m-d'),
             $this->getDuration(),
-            $this->getPerson());
+            $acronym,
+            $activity,
+            $wpCode,
+            $this->getPerson()
+        );
     }
 
 

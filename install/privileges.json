@@ -122,6 +122,7 @@
     "category_id": 2,
     "root": "ACTIVITY-MILESTONE_SHOW",
     "spot": 7,
+    "spot": 7,
     "code": "MILESTONE_PROGRESSION",
     "libelle": "Peut g\u00e9rer l'état d'avancement des jalons",
     "fullcode": "ACTIVITY-MILESTONE_PROGRESSION"
@@ -288,6 +289,8 @@
   },
 
 
+
+
   "PERSON-SHOW": {
     "category_id": 3,
     "spot": 4,
@@ -295,6 +298,7 @@
     "libelle": "Voir la fiche d'une personne",
     "fullcode": "PERSON-SHOW"
   },
+
   "PERSON-PROJECTS": {
     "category_id": 3,
     "root": "PERSON-SHOW",
@@ -303,6 +307,25 @@
     "libelle": "Voir les projets d'une personnes",
     "fullcode": "PERSON-PROJECTS"
   },
+
+  "PERSON-MANAGE_SCHEDULE": {
+    "category_id": 3,
+    "root": "PERSON-SHOW",
+    "spot": 7,
+    "code": "MANAGE_SCHEDULE",
+    "libelle": "Peut  modifier et valider la répartition horaire d'une personne",
+    "fullcode": "PERSON-MANAGE_SCHEDULE"
+  },
+
+  "PERSON-SHOW_SCHEDULE": {
+    "category_id": 3,
+    "root": "PERSON-SHOW",
+    "spot": 7,
+    "code": "SHOW_SCHEDULE",
+    "libelle": "Peut  voir la répartition horaire d'une personne",
+    "fullcode": "PERSON-SHOW_SCHEDULE"
+  },
+
   "PERSON-EDIT": {
     "category_id": 3,
     "spot": 4,
@@ -343,6 +366,15 @@
     "code": "INDEX",
     "libelle": "Voir la liste des organisations",
     "fullcode": "ORGANIZATION-INDEX"
+  },
+
+  "ORGANIZATION-DELETE": {
+    "root": "ORGANIZATION-INDEX",
+    "category_id": 4,
+    "spot": 4,
+    "code": "DELETE",
+    "libelle": "Autorise la suppression définitive d'une organisation",
+    "fullcode": "ORGANIZATION-DELETE"
   },
 
 
@@ -414,7 +446,14 @@
     "libelle": "Voir les feuilles de temps",
     "fullcode": "ACTIVITY-TIMESHEET_VIEW"
   },
-
+  "ACTIVITY-TIMESHEET_VALIDATE_ACTIVITY": {
+    "spot": 7,
+    "category_id": 2,
+    "root": "ACTIVITY-TIMESHEET_VIEW",
+    "code": "TIMESHEET_VALIDATE_ACTIVITY",
+    "libelle": "Validation niveau activité des feuilles de temps",
+    "fullcode": "ACTIVITY-TIMESHEET_VALIDATE_ACTIVITY"
+  },
   "ACTIVITY-TIMESHEET_VALIDATE_SCI": {
     "spot": 7,
     "category_id": 2,
@@ -541,6 +580,14 @@
     "code": "CONNECTOR_ACCESS",
     "libelle": "Peut ex\u00e9cuter la synchronisation des donn\u00e9es",
     "fullcode": "MAINTENANCE-CONNECTOR_ACCESS"
+  },
+
+  "MAINTENANCE-VALIDATION_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "VALIDATION_MANAGE",
+    "libelle": "Peut gérer et modifier l'état des déclarations envoyées",
+    "fullcode": "MAINTENANCE-VALIDATION_MANAGE"
   },
 
   "MAINTENANCE-ACTIVITYTYPE_MANAGE": {

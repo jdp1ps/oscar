@@ -4,8 +4,12 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
+use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\TimesheetService;
@@ -30,32 +34,90 @@ class PublicController extends AbstractOscarController
 
     public function parametersAction()
     {
-        $this->getLogger()->debug("PARAMETERS");
         /** @var Authentification $auth */
-        $auth = $this->getEntityManager()->getRepository(Authentification::class)->find($this->getOscarUserContext()->getDbUser()->getId());
+        $auth = $this->getOscarUserContext()->getAuthentification();
+
+        if( !$this->getCurrentPerson() ){
+            throw new OscarException("Votre compte n'est associé à aucune fiche Personne dans Oscar");
+        }
 
         // Récupération des envois automatiques
         $forceSend = $this->getConfiguration('oscar.notifications.fixed');
 
-        if( $this->getHttpXMethod() == "POST" ){
-
-            $this->getLogger()->debug("Reçu = " . $this->params()->fromPost('frequency'));
-            $parameters = explode(',', $this->params()->fromPost('frequency'));
-
-            $this->getLogger()->debug("Save for = " . $auth->getDisplayName());
-            $settings = $auth->getSettings() ?: [];
-            $settings['frequency'] = $parameters;
+        $method = $this->getHttpXMethod();
 
 
-            $auth->setSettings($settings);
-            $this->getEntityManager()->flush($auth);
-            return $this->getResponseOk();
+        // Traitment des horaires
+        if( $this->isAjax() && $this->params()->fromQuery('a') == 'schedule' ){
+
+            /** @var TimesheetService $timesheetService */
+            $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+            if( $method == 'GET' ){
+                $datas = $timesheetService->getDayLengthPerson($this->getCurrentPerson());
+                return $this->ajaxResponse($datas);
+            }
+            elseif ($method == 'POST'){
+
+                $schedule = $this->params()->fromPost('days');
+                try {
+                    $this->getUserParametersService()->performChangeSchedule($schedule, $this->getCurrentPerson(), false);
+                    return $this->getResponseOk();
+                } catch ( OscarException $e ){
+                    return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier la répartition horaire'), $e->getMessage()));
+                }
+            }
+
         }
 
-        $this->getLogger()->debug("FREQUENCY = " . print_r($auth->getSettings(), true));
+        if( $this->getHttpXMethod() == "POST" ){
+            $action = $this->params()->fromPost('action');
+
+            switch ($action) {
+
+                // Modification du mode de déclaration
+                case 'declaration-mode' :
+                    try {
+                        $this->getUserParametersService()->performChangeDeclarationMode($this->params()->fromPost('declarationsHours'));
+                        return $this->getResponseOk();
+                    } catch ( OscarException $e ){
+                        return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier le mode de déclaration'), $e->getMessage()));
+                    }
+                    break;
+
+                case 'frequency' :
+                    try {
+                        $this->getUserParametersService()->performChangeFrequency($this->params()->fromPost('frequency', null));
+                        return $this->getResponseOk();
+                    } catch ( OscarException $e ){
+                        return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier le mode de déclaration'), $e->getMessage()));
+                    }
+                    break;
+
+                // todo Modification de la fréquence
+
+
+                // todo Modification des horaires (soumission)
+            }
+
+            return $this->getResponseBadRequest("Erreur d'usage");
+        }
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        $declarationsHours = $timesheetService->isDeclarationsHoursPerson($this->getCurrentPerson());
+        $declarationsHoursOverwriteByAuth = $this->getConfiguration('oscar.declarationsHoursOverwriteByAuth');
 
         return [
+            'subordinates' => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
+            'managers' => $this->getPersonService()->getManagers( $this->getCurrentPerson()),
+            'subordonates' => $this->getPersonService()->getSubordinates( $this->getCurrentPerson()),
+            'scheduleEditable' => $this->getUserParametersService()->scheduleEditable(),
+            'declarationsConfiguration' => null, //$timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
             'person' => $this->getCurrentPerson(),
+            'declarationsHours' => $declarationsHours,
+            'declarationsHoursOverwriteByAuth' => $declarationsHoursOverwriteByAuth,
             'parameters' => $auth->getSettings(),
             'forceSend' => $forceSend
         ];
@@ -83,40 +145,28 @@ class PublicController extends AbstractOscarController
         /** @var TimesheetService  $timeSheetService */
         $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
 
-        // est déclarant
 
-        // est validateur (Application)
-        $isValidateurScientifique = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI);
-        $isValidateurAdministratif = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM);
-
-        $activitiesValidation = [];
-        $timesheetRejected = [];
-        $activityWithValidationUp = $timeSheetService->getActivitiesWithTimesheetSend();
-
-        /** @var Activity $activity */
-        foreach ($activityWithValidationUp as $activity ){
-            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) && $activity->hasTimesheetsUpForValidationSci() ){
-                $activitiesValidation[] = $activity;
-                continue;
-            }
-            if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) && $activity->hasTimesheetsUpForValidationAdmin() ){
-                $activitiesValidation[] = $activity;
-                continue;
-            }
-        }
-
+        $validations = [];
+        $isValidator = false;
 
         try {
             $person = $this->getOscarUserContext()->getCurrentPerson();
-            if( $person )
-                $timesheetRejected = $timeSheetService->getTimesheetRejected($person);
 
+            if( $person ){
+                // Déclaration en conflit
+                $periodsRejected = $timeSheetService->getValidationPeriodPersonConflict($person);
+
+                $isValidator = $timeSheetService->isValidator($person);
+                $validations = $timeSheetService->getValidationToDoPerson($person);
+            }
 
         } catch( \Exception $e ){
+            $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
         }
         return [
-            'activitiesValidation' => $activitiesValidation,
-            'timesheetRejected' => $timesheetRejected,
+            'validations' => $validations,
+            'isValidator' => $isValidator,
+            'periodsRejected' => $periodsRejected,
             'user' => $person
         ];
     }

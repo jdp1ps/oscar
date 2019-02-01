@@ -36,6 +36,10 @@ class AdministrationController extends AbstractOscarController
         return [];
     }
 
+    public function accueilAction(){
+        return [];
+    }
+
     public function disciplineAction()
     {
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
@@ -723,7 +727,7 @@ class AdministrationController extends AbstractOscarController
             ////////////////////////////////////////////////////////////////////
             // GET : Liste des rôles
             if( $this->getHttpXMethod() == 'GET' ){
-                $roles = $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
+                $roles = $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy([], ['label' => 'ASC']);
                 $out = [];
                 /** @var OrganizationRole $role */
                 foreach( $roles as $role ){

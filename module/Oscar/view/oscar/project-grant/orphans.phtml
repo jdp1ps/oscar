@@ -6,21 +6,21 @@
  */
 ?>
 <section class="container">
-    <h1><i class="icon-cube"></i> Activités de recherche <strong>sans
-            projet</strong></h1>
+    <h1><i class="icon-cube"></i> <?= $this->translate("Activités de recherche") ?> <strong>
+            <?= $this->translate("sans projet") ?></strong></h1>
 
     <form action="?" method="get">
         <span class="input-group">
             <?= $this->partial('partials/filter-persons.phtml', ['selectedPersons' => $persons]) ?>
             <span class="input-group-btn">
                 <button type="submit" class="btn btn-primary">
-                    <i class="icon-cw-outline"></i> Actualiser
+                    <i class="icon-cw-outline"></i> <?= $this->translate("Actualiser") ?>
                 </button>
             </span>
         </span>
     </form>
 
-    <h3 class="text-center"><?= count($contracts) ?> résultat(s)</h3>
+    <h3 class="text-center"><?= sprintf($this->translate("%s résultats(s)"), count($contracts)) ?> résultat(s)</h3>
 
     <?php /** @var \Oscar\Entity\Activity $contract */
     foreach( $contracts as $contract):

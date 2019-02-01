@@ -93,6 +93,95 @@ if( getenv('APPLICATION_ENV') == 'development' ){
     error_reporting(E_ERROR);
 }
 
+set_error_handler('oscar_exception');
+
+// ON LOG LES PROBEMES
+function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $errcontext=[]){
+    static $codeLabels;
+
+    if( $codeLabels === null ){
+        $codeLabels = [
+            E_WARNING => 'WARNING',
+            E_PARSE => 'PARSE',
+            E_NOTICE => 'NOTICE',
+            E_ERROR => 'ERROR',
+
+            E_CORE_ERROR => 'ERROR',
+            E_CORE_WARNING => 'WARNING',
+            E_CORE_ERROR => 'ERROR',
+
+            E_USER_NOTICE => 'NOTICE',
+            E_USER_DEPRECATED => 'DEPRECATED',
+            E_USER_ERROR => 'ERROR',
+
+            E_DEPRECATED => 'DEPRECATED',
+            E_STRICT => 'STRICT',
+        ];
+    }
+
+    if( $codeLabels[$errno] ){
+        $codeStr = $codeLabels[$errno];
+    } else {
+
+        $codeStr = 'UNKNOW:'.$errno;
+    }
+
+    $msg = sprintf("[%s] %s (%s, ligne %s)", $codeStr, $errstr, $errfile, $errline);
+
+    if (!(error_reporting() & $errno)) {
+        // Ce code d'erreur n'est pas inclus dans error_reporting(), donc il continue
+        // jusqu'au gestionaire d'erreur standard de PHP
+        return;
+    }
+    error_log($msg);
+
+    if($codeStr == 'ERROR'){
+        throw new Exception("ERROR $errstr");
+    }
+
+    /*switch ($errno) {
+        case E_USER_ERROR:
+            echo "<b>Mon ERREUR</b> [$errno] $errstr<br />\n";
+            echo "  Erreur fatale sur la ligne $errline dans le fichier $errfile";
+            echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+            echo "Arrêt...<br />\n";
+            exit(1);
+            break;
+
+        case E_USER_WARNING:
+            //error_log()
+            echo "<b>Mon ALERTE</b> [$errno] $errstr<br />\n";
+            break;
+
+        case E_USER_NOTICE:
+            echo "<b>Mon AVERTISSEMENT</b> [$errno] $errstr<br />\n";
+            break;
+
+        default:
+            echo "Type d'erreur inconnu : [$errno] $errstr<br />\n";
+            break;
+    }*/
+
+    /* Ne pas exécuter le gestionnaire interne de PHP */
+    // return true;
+}
+
+
+register_shutdown_function( "fatal_handler" );
+
+function fatal_handler() {
+    $error = error_get_last();
+
+    if( $error !== NULL) {
+        $errno   = $error["type"];
+        $errfile = $error["file"];
+        $errline = $error["line"];
+        $errstr  = "Fatal error : " . $error["message"];
+
+        oscar_exception( $errno, $errstr, $errfile, $errline);
+    }
+}
+
 
 /**
  * This makes our life easier when dealing with paths. Everything is relative

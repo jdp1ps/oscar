@@ -118,6 +118,13 @@ $markText = function( $text, $search ){
                                   <i class="icon-pencil"></i> Modifier les informations
                               </a>
                           </li>
+                          <li class="separator">
+                          </li>
+                          <li>
+                              <a href="<?= $this->url('organization/delete', ['id' => $entity->getId()]); ?>">
+                                  <i class="icon-trash"></i> Supprimer définitivement
+                              </a>
+                          </li>
                           <?php if( !$entity->isClose() ): ?>
                               <li>
                                   <a href="<?= $this->url('organization/close', ['id' => $entity->getId()]); ?>">
@@ -155,7 +162,7 @@ $markText = function( $text, $search ){
     ?>
     <?= $this->pager($entities, $this->url().'?q='.urlencode($search).'&'.(implode('&', $types)).'&page=%s') ?>
 </section>
-<?php if($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
+<?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_DELETE)): ?>
 <div style="position: fixed; bottom: 3em; right: 1em">
     <button id="fuzzion">FUSIONNER les organisations selectionnées</button>
 </div>

@@ -5,7 +5,7 @@
 <!-- /////////////////////////////////////////////////////////////////////// -->
 <section class="informations">
     <div class="metas row">
-        <div class="col-md-6">
+        <div class="col-md-9">
             <i class="icon-flow-split"></i>
             <?= $project->getComposantePrincipal() ?> /
             <?= count($project->getComposantesResponsables()) ?
@@ -15,10 +15,6 @@
                 . '</a>'
                 : '' ?>
         </div>
-        <div class="text-center col-md-3">
-
-        </div>
-
         <div class="text-right code-saic col-md-3">
             <?= $project->getCode() ?>
         </div>

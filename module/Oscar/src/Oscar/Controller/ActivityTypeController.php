@@ -149,20 +149,18 @@ class ActivityTypeController extends AbstractOscarController
         $form->bind($activityType);
 
         if( $this->getRequest()->isPost() ){
-            echo "POSTED !";
             $form->setData($this->getRequest()->getPost());
             if( $form->isValid() ) {
-                echo "save !";
                 $this->getEntityManager()->flush($form->getObject());
-            } else {
-                var_dump($form);
             }
         }
+
         $view = new ViewModel([
             'entity' => $activityType,
             'form' => $form,
             'parent' => null,
         ]);
+
         $view->setTemplate('oscar/activity-type/form.phtml');
         return $view;
     }

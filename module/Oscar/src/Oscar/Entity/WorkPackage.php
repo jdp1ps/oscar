@@ -31,7 +31,7 @@ class WorkPackage
 
     /**
      * @var
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="string", nullable=false)
      */
     protected $code;
 
@@ -162,6 +162,9 @@ class WorkPackage
      */
     public function getDateStart()
     {
+        if( $this->dateStart == null ) {
+            return $this->getActivity()->getDateStart();
+        }
         return $this->dateStart;
     }
 
@@ -179,6 +182,9 @@ class WorkPackage
      */
     public function getDateEnd()
     {
+        if( $this->dateEnd == null ) {
+            return $this->getActivity()->getDateEnd();
+        }
         return $this->dateEnd;
     }
 
@@ -247,28 +253,27 @@ class WorkPackage
                     'unsend' => 0
                 ];
             }
-            switch( $timesheet->getStatus() ){
-                case TimeSheet::STATUS_TOVALIDATE_SCI:
-                case TimeSheet::STATUS_TOVALIDATE_ADMIN:
-                case TimeSheet::STATUS_TOVALIDATE:
+
+            $status = $timesheet->getValidationPeriod() ? $timesheet->getValidationPeriod()->getStatus() : null;
+            switch( $status ){
+                case ValidationPeriod::STATUS_STEP1:
+                case ValidationPeriod::STATUS_STEP2:
+                case ValidationPeriod::STATUS_STEP3:
                     $timesPersons[$timesheet->getPerson()->getId()]['validating'] += $timesheet->getHours();
                     break;
 
-                case TimeSheet::STATUS_CONFLICT:
+                case ValidationPeriod::STATUS_CONFLICT:
                     $timesPersons[$timesheet->getPerson()->getId()]['conflicts'] += $timesheet->getHours();
                     break;
 
-                case TimeSheet::STATUS_ACTIVE:
+                case ValidationPeriod::STATUS_VALID:
                     $timesPersons[$timesheet->getPerson()->getId()]['validate'] += $timesheet->getHours();
                     break;
 
                 default:
                     $timesPersons[$timesheet->getPerson()->getId()]['unsend'] += $timesheet->getHours();
             }
-//            $timesPersons[$timesheet->getPerson()->getId()] += $timesheet->getHours();
-
         }
-
 
         /** @var WorkPackagePerson $person */
         foreach( $this->getPersons() as $person ){

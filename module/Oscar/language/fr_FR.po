@@ -2,179 +2,309 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ZendSkeletonApplication\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-05 22:32-0700\n"
-"PO-Revision-Date: 2012-07-05 23:36-0700\n"
+"POT-Creation-Date: 2018-10-26 10:28+0200\n"
+"PO-Revision-Date: 2018-10-26 10:28+0200\n"
 "Last-Translator: Evan Coury <me@evancoury.com>\n"
 "Language-Team: ZF Contibutors <zf-devteam@zend.com>\n"
-"Language: \n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: translate\n"
-"X-Poedit-Language: French\n"
-"X-Poedit-Country: FRANCE\n"
 "X-Poedit-Basepath: .\n"
+"X-Generator: Poedit 2.1.1\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: ../view/layout/layout.phtml:6
-#: ../view/layout/layout.phtml:33
-msgid "Skeleton Application"
-msgstr "Skeleton Application"
+#: ../src/Oscar/Controller/MemberController.php:81
+msgid "Mauvaise utilisation de l'API"
+msgstr ""
 
-#: ../view/layout/layout.phtml:36
-msgid "Home"
+#: ../src/Oscar/Controller/MemberController.php:88
+#, php-format
+msgid "Personne '%s' inconnue."
+msgstr ""
+
+#: ../src/Oscar/Controller/MemberController.php:96
+#, php-format
+msgid "Projet '%s' inconnu."
+msgstr ""
+
+#: ../src/Oscar/Controller/MemberController.php:103
+#, php-format
+msgid "Rôle '%s' inconnu."
+msgstr ""
+
+#: ../src/Oscar/Controller/OrganizationController.php:770
+#: ../src/Oscar/Controller/PersonController.php:718
+#: ../src/Oscar/Controller/PersonController.php:759
+msgid "Données sauvegardées."
+msgstr ""
+
+#: ../src/Oscar/Service/PersonService.php:666
+#, php-format
+msgid "Impossible de synchroniser les informations pour '%s'"
+msgstr ""
+
+#: ../view/layout/layout.phtml:110
+msgid "Accueil"
 msgstr "Accueil"
 
-#: ../view/layout/layout.phtml:50
-msgid "All rights reserved."
-msgstr "Tous droits réservés."
+#: ../view/layout/layout.phtml:114
+msgid "Mes projets"
+msgstr ""
 
-#: ../view/application/index/index.phtml:2
-#, php-format
-msgid "Welcome to %sZend Framework 2%s"
-msgstr "Bienvenue dans le %sZend Framework 2%s"
+#: ../view/layout/layout.phtml:116
+msgid "Mes structures"
+msgstr ""
 
-#: ../view/application/index/index.phtml:3
-#, php-format
-msgid "Congratulations! You have successfully installed the %sZF2 Skeleton Application%s. You are currently running Zend Framework version %s. This skeleton can serve as a simple starting point for you to begin building your application on ZF2."
-msgstr "Félicitations ! Vous avez installé avec succès le %sZF2 Skeleton Application%s. Vous utilisez actuellement Zend Framework version %s. Cette structure peut vous servir comme un point de départ simple pour démarrer la construction de votre application avec ZF2."
+#: ../view/layout/layout.phtml:119
+msgid "Documents pratiques"
+msgstr ""
 
-#: ../view/application/index/index.phtml:4
-msgid "Fork Zend Framework 2 on GitHub"
-msgstr "Faites un Fork de Zend Framework 2 sur GitHub"
+#: ../view/layout/layout.phtml:152
+msgid "Prochains versements"
+msgstr ""
 
-#: ../view/application/index/index.phtml:10
-msgid "Follow Development"
-msgstr "Suivre le développement"
+#: ../view/layout/layout.phtml:153
+msgid "Versements en retard"
+msgstr ""
 
-#: ../view/application/index/index.phtml:11
-#, php-format
-msgid "Zend Framework 2 is under active development. If you are interested in following the development of ZF2, there is a special ZF2 portal on the official Zend Framework website which provides links to the ZF2 %swiki%s, %sdev blog%s, %sissue tracker%s, and much more. This is a great resource for staying up to date with the latest developments!"
-msgstr "Zend Framework 2 est en cours de développement. Si vous êtes intéressé pour suivre l'évolution de ZF2, il existe un portail dédié à ZF2 sur le site officiel Zend Framework qui propose des liens vers le %swiki%s ZF2, %sdev blog%s, %ssuivi des problèmes%s, et bien plus encore. Il s'agit d'une excellente ressource pour rester à jour sur les dernières évolutions !"
+#: ../view/layout/layout.phtml:154
+msgid "Écarts de paiement"
+msgstr ""
 
-#: ../view/application/index/index.phtml:12
-msgid "ZF2 Development Portal"
-msgstr "Portail sur le développement de ZF2"
+#: ../view/layout/layout.phtml:155
+msgid "Tous les versements"
+msgstr ""
 
-#: ../view/application/index/index.phtml:16
-msgid "Discover Modules"
-msgstr "Découvrez les modules"
+#: ../view/layout/layout.phtml:164
+msgid "Tous les jalons"
+msgstr ""
 
-#: ../view/application/index/index.phtml:17
-#, php-format
-msgid "The community is working on developing a community site to serve as a repository and gallery for ZF2 modules. The project is available %son GitHub%s. The site is currently live and currently contains a list of some of the modules already available for ZF2."
-msgstr "La communauté travaille sur le développement d'un site communautaire avec l'objectif de servir de dépôt et de galerie  pour les modules ZF2. Le projet est disponible %ssur GitHub%s. Le site est déjà en ligne, et contient une liste non exhaustive des modules déjà disponibles pour ZF2."
+#: ../view/layout/layout.phtml:165 ../view/layout/layout.phtml:184
+msgid "Gérer les types de jalon"
+msgstr ""
 
-#: ../view/application/index/index.phtml:18
-msgid "Explore ZF2 Modules"
-msgstr "Explorer les modules ZF2"
+#: ../view/layout/layout.phtml:172
+msgid "Activités"
+msgstr ""
 
-#: ../view/application/index/index.phtml:22
-msgid "Help &amp; Support"
-msgstr "Aide &amp; support"
+#: ../view/layout/layout.phtml:174
+msgid "Liste des activités"
+msgstr ""
 
-#: ../view/application/index/index.phtml:23
-#, php-format
-msgid "If you need any help or support while developing with ZF2, you may reach us via IRC: %s#zftalk on Freenode%s. We'd love to hear any questions or feedback you may have regarding the beta releases. Alternatively, you may subscribe and post questions to the %smailing lists%s."
-msgstr "Si vous avez besoin d'aide ou de support en développant avec ZF2, vous pouvez nous joindre sur IRC : %s#zftalk sur Freenode%s. Nous aimerions avoir vos questions ou vos commentaires que vous pourriez avoir au sujet des versions bêta. Sinon, vous pouvez vous abonner, et poser des questions sur la %sliste de diffusion%s."
+#: ../view/layout/layout.phtml:175
+msgid "Nouvelle activité"
+msgstr ""
 
-#: ../view/application/index/index.phtml:24
-msgid "Ping us on IRC"
-msgstr "Rejoignez-nous sur IRC"
+#: ../view/layout/layout.phtml:176
+msgid "Bientôt terminées"
+msgstr ""
 
-#: ../view/error/index.phtml:1
-msgid "An error occurred"
-msgstr "Une erreur est survenue"
+#: ../view/layout/layout.phtml:177
+msgid "Débutant prochainement"
+msgstr ""
 
-#: ../view/error/index.phtml:8
-msgid "Additional information"
-msgstr "Informations complémentaires"
+#: ../view/layout/layout.phtml:178
+msgid "Liste des documents téléversés"
+msgstr ""
 
-#: ../view/error/index.phtml:11
-#: ../view/error/index.phtml:35
-msgid "File"
-msgstr "Fichier"
+#: ../view/layout/layout.phtml:180
+msgid "Gérer les types d'activité"
+msgstr ""
 
-#: ../view/error/index.phtml:15
-#: ../view/error/index.phtml:39
-msgid "Message"
-msgstr "Message"
+#: ../view/layout/layout.phtml:192
+msgid "Projets"
+msgstr ""
 
-#: ../view/error/index.phtml:19
-#: ../view/error/index.phtml:43
-#: ../view/error/404.phtml:55
-msgid "Stack trace"
-msgstr "Pile d'exécution"
+#: ../view/layout/layout.phtml:194
+msgid "Liste des projets"
+msgstr ""
 
-#: ../view/error/index.phtml:29
-msgid "Previous exceptions"
-msgstr "Exceptions précédentes"
+#: ../view/layout/layout.phtml:196
+msgid "Créer un projet"
+msgstr ""
 
-#: ../view/error/index.phtml:58
-msgid "No Exception available"
-msgstr "Aucune exception disponible"
+#: ../view/layout/layout.phtml:204
+msgid "Organisations"
+msgstr ""
 
-#: ../view/error/404.phtml:1
-msgid "A 404 error occurred"
-msgstr "Une erreur 404 est survenue"
+#: ../view/layout/layout.phtml:206
+msgid "Liste des organisations"
+msgstr ""
 
-#: ../view/error/404.phtml:10
-msgid "The requested controller was unable to dispatch the request."
-msgstr "Le contrôleur demandé n'a pas pu dispatcher la requête."
+#: ../view/layout/layout.phtml:208
+msgid "Nouvelle organisation"
+msgstr ""
 
-#: ../view/error/404.phtml:13
-msgid "The requested controller could not be mapped to an existing controller class."
-msgstr "Le contrôleur demandé ne correspond pas à une classe existante de contrôleur."
+#: ../view/layout/layout.phtml:209
+msgid "Fusion d'organisations"
+msgstr ""
 
-#: ../view/error/404.phtml:16
-msgid "The requested controller was not dispatchable."
-msgstr "Le contrôleur demandé n'est pas dispatchable."
+#: ../view/layout/layout.phtml:210
+msgid "Scission d'organisations"
+msgstr ""
 
-#: ../view/error/404.phtml:19
-msgid "The requested URL could not be matched by routing."
-msgstr "L'URL demandée n'a pas pu trouver de route correspondante."
+#: ../view/layout/layout.phtml:220
+msgid "Liste des personnes"
+msgstr ""
 
-#: ../view/error/404.phtml:22
-msgid "We cannot determine at this time why a 404 was generated."
-msgstr "Nous ne pouvons pas déterminer pour le moment pourquoi une 404 a été générée."
+#: ../view/layout/layout.phtml:221
+msgid "Liste des responsables"
+msgstr ""
 
-#: ../view/error/404.phtml:34
-msgid "Controller"
-msgstr "Contrôleur"
+#: ../view/layout/layout.phtml:223
+msgid "Ajouter une personne"
+msgstr ""
 
-#: ../view/error/404.phtml:41
-#, php-format
-msgid "resolves to %s"
-msgstr "résout en %s"
+#: ../view/layout/layout.phtml:226
+msgid "Liste des déclarants"
+msgstr ""
 
-#: ../view/error/404.phtml:51
-msgid "Exception"
-msgstr "Exception"
+#: ../view/layout/layout.phtml:236
+msgid "Activités sans projet"
+msgstr ""
 
+#: ../view/layout/layout.phtml:237
+msgid "Projets sans activité"
+msgstr ""
 
-msgid "Oscar"
-msgstr "Oscar"
+#: ../view/layout/layout.phtml:239
+msgid "Synchronisation des donnèes"
+msgstr ""
 
-msgid "OSCAR"
-msgstr "OSCAR"
+#: ../view/layout/layout.phtml:243
+msgid "Mise à jour de l'index de recherche"
+msgstr ""
 
-msgid "Organisation et Suivi des Contrats et des Activités de Recherche"
-msgstr "Organisation et Suivi des Contrats et des Activités de Recherche"
+#: ../view/layout/layout.phtml:247
+msgid "Gérer les types d'organisation"
+msgstr ""
+
+#: ../view/layout/layout.phtml:251
+msgid "Gérer les disciplines"
+msgstr ""
+
+#: ../view/oscar/public/index.phtml:69
+msgid "Se connecter"
+msgstr ""
+
+#: ../view/oscar/public/index.phtml:79
+msgid "Votre compte n'est associé à aucun projet/activité de recherche"
+msgstr ""
+
+#: ../view/oscar/public/index.phtml:87
+msgid "Voir mes projets"
+msgstr ""
+
+#~ msgid "Skeleton Application"
+#~ msgstr "Skeleton Application"
+
+#~ msgid "All rights reserved."
+#~ msgstr "Tous droits réservés."
+
+#~ msgid "Welcome to %sZend Framework 2%s"
+#~ msgstr "Bienvenue dans le %sZend Framework 2%s"
+
+#~ msgid "Congratulations! You have successfully installed the %sZF2 Skeleton Application%s. You are currently running Zend Framework version %s. This skeleton can serve as a simple starting point for you to begin building your application on ZF2."
+#~ msgstr "Félicitations ! Vous avez installé avec succès le %sZF2 Skeleton Application%s. Vous utilisez actuellement Zend Framework version %s. Cette structure peut vous servir comme un point de départ simple pour démarrer la construction de votre application avec ZF2."
+
+#~ msgid "Fork Zend Framework 2 on GitHub"
+#~ msgstr "Faites un Fork de Zend Framework 2 sur GitHub"
+
+#~ msgid "Follow Development"
+#~ msgstr "Suivre le développement"
+
+#~ msgid "Zend Framework 2 is under active development. If you are interested in following the development of ZF2, there is a special ZF2 portal on the official Zend Framework website which provides links to the ZF2 %swiki%s, %sdev blog%s, %sissue tracker%s, and much more. This is a great resource for staying up to date with the latest developments!"
+#~ msgstr "Zend Framework 2 est en cours de développement. Si vous êtes intéressé pour suivre l'évolution de ZF2, il existe un portail dédié à ZF2 sur le site officiel Zend Framework qui propose des liens vers le %swiki%s ZF2, %sdev blog%s, %ssuivi des problèmes%s, et bien plus encore. Il s'agit d'une excellente ressource pour rester à jour sur les dernières évolutions !"
+
+#~ msgid "ZF2 Development Portal"
+#~ msgstr "Portail sur le développement de ZF2"
+
+#~ msgid "Discover Modules"
+#~ msgstr "Découvrez les modules"
+
+#~ msgid "The community is working on developing a community site to serve as a repository and gallery for ZF2 modules. The project is available %son GitHub%s. The site is currently live and currently contains a list of some of the modules already available for ZF2."
+#~ msgstr "La communauté travaille sur le développement d'un site communautaire avec l'objectif de servir de dépôt et de galerie  pour les modules ZF2. Le projet est disponible %ssur GitHub%s. Le site est déjà en ligne, et contient une liste non exhaustive des modules déjà disponibles pour ZF2."
+
+#~ msgid "Explore ZF2 Modules"
+#~ msgstr "Explorer les modules ZF2"
+
+#~ msgid "Help &amp; Support"
+#~ msgstr "Aide &amp; support"
+
+#~ msgid "If you need any help or support while developing with ZF2, you may reach us via IRC: %s#zftalk on Freenode%s. We'd love to hear any questions or feedback you may have regarding the beta releases. Alternatively, you may subscribe and post questions to the %smailing lists%s."
+#~ msgstr "Si vous avez besoin d'aide ou de support en développant avec ZF2, vous pouvez nous joindre sur IRC : %s#zftalk sur Freenode%s. Nous aimerions avoir vos questions ou vos commentaires que vous pourriez avoir au sujet des versions bêta. Sinon, vous pouvez vous abonner, et poser des questions sur la %sliste de diffusion%s."
+
+#~ msgid "Ping us on IRC"
+#~ msgstr "Rejoignez-nous sur IRC"
+
+#~ msgid "An error occurred"
+#~ msgstr "Une erreur est survenue"
+
+#~ msgid "Additional information"
+#~ msgstr "Informations complémentaires"
+
+#~ msgid "File"
+#~ msgstr "Fichier"
+
+#~ msgid "Message"
+#~ msgstr "Message"
+
+#~ msgid "Stack trace"
+#~ msgstr "Pile d'exécution"
+
+#~ msgid "Previous exceptions"
+#~ msgstr "Exceptions précédentes"
+
+#~ msgid "No Exception available"
+#~ msgstr "Aucune exception disponible"
+
+#~ msgid "A 404 error occurred"
+#~ msgstr "Une erreur 404 est survenue"
+
+#~ msgid "The requested controller was unable to dispatch the request."
+#~ msgstr "Le contrôleur demandé n'a pas pu dispatcher la requête."
+
+#~ msgid "The requested controller could not be mapped to an existing controller class."
+#~ msgstr "Le contrôleur demandé ne correspond pas à une classe existante de contrôleur."
+
+#~ msgid "The requested controller was not dispatchable."
+#~ msgstr "Le contrôleur demandé n'est pas dispatchable."
+
+#~ msgid "The requested URL could not be matched by routing."
+#~ msgstr "L'URL demandée n'a pas pu trouver de route correspondante."
+
+#~ msgid "We cannot determine at this time why a 404 was generated."
+#~ msgstr "Nous ne pouvons pas déterminer pour le moment pourquoi une 404 a été générée."
+
+#~ msgid "Controller"
+#~ msgstr "Contrôleur"
+
+#~ msgid "resolves to %s"
+#~ msgstr "résout en %s"
+
+#~ msgid "Exception"
+#~ msgstr "Exception"
+
+#~ msgid "Oscar"
+#~ msgstr "Oscar"
+
+#~ msgid "OSCAR"
+#~ msgstr "OSCAR"
+
+#~ msgid "Organisation et Suivi des Contrats et des Activités de Recherche"
+#~ msgstr "Organisation et Suivi des Contrats et des Activités de Recherche"
 
 # Authentification
+#~ msgid "Votre identifiant"
+#~ msgstr "Votre identifiant"
 
-msgid "Votre identifiant"
-msgstr "Votre identifiant"
+#~ msgid "Votre mot de passe"
+#~ msgstr "Votre mot de passe"
 
-msgid "Votre mot de passe"
-msgstr "Votre mot de passe"
+#~ msgid "Vous n'êtes pas connecté(e)"
+#~ msgstr "Vous n'êtes pas connecté(e)"
 
-msgid "Vous n'êtes pas connecté(e)"
-msgstr "Vous n'êtes pas connecté(e)"
-
-msgid "Connexion"
-msgstr "Connexion"
-
-
-
-
+#~ msgid "Connexion"
+#~ msgstr "Connexion"

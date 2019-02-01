@@ -66,39 +66,6 @@ function displayTotaux( $array, $label ){
                     Revenir sur la fiche activité</a>
             </h2>
 
-            <p>
-                <a href="<?= $downloadBaseUrl ?>?action=csv&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
-                   class="btn btn-default btn-lg">
-                    <i class="icon-download-outline"></i>
-                    Télécharger les données (CSV)
-                </a>
-
-                <?php
-                /** @var \Oscar\Entity\Activity $activityObj */
-                $activityObj = $activityDatas['activityObj'];
-                if($activityObj && $activityObj->hasDeclarant($this->grant()->getCurrentPerson())): ?>
-                    <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>?activity_id=<?= $activityObj->getId() ?>">
-                        <i class="icon-calendar"></i>
-                        Déclarer des heures
-                    </a>
-                <?php endif; ?>
-
-                <?php if( $activityObj->hasTimesheetsUpForValidationAdmin() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activityObj) ): ?>
-                    <a href="<?= $this->url('timesheet/validation', ['idactivity' => $activityObj->getId()]) ?>" class="btn btn-primary">
-                        <i class="icon-archive"></i>
-                        Validation administrative en attente
-                    </a>
-                <?php endif; ?>
-                <?php if( $activityObj->hasTimesheetsUpForValidationSci() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activityObj) ): ?>
-                    <a href="<?= $this->url('timesheet/validation', ['idactivity' => $activityObj->getId()]) ?>" class="btn btn-primary">
-                        <i class="icon-beaker"></i>
-                        Validation scientifique en attente
-                    </a>
-                <?php endif; ?>
-
-
-            </p>
-
             <table class="oscar-table">
 
                 <?php $first = true; $year = null; $totauxYear = []; $totauxFull = []; $wpCodes = [];?>
@@ -152,18 +119,26 @@ function displayTotaux( $array, $label ){
                         <?php endforeach; ?>
                         <td class="text-right"><strong><?= number_format($totaux['total'],2) ?></strong></td>
                         <td class="text-right">
+                            <?php
 
-                            <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
-                               class="link">
-                                <i class="icon-download-outline"></i>
-                                Télécharger la feuille de temps (Excel)
-                            </a>
+                            switch ($activityDatas[$period]['unvalidate']){
+                                case 'unsend' : echo "Pas encore envoyé"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_STEP1 : echo "Validation projet en cours"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_STEP2 : echo "Validation scientifique en cours"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_STEP3 : echo "Validation administrative en cours"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_CONFLICT : echo "Conflit en cours de résolution par le déclarant"; break;
+                                case \Oscar\Entity\ValidationPeriod::STATUS_VALID :
+                                    ?>
+                                    <a href="<?= $downloadBaseUrl ?>?action=export&period=<?= $period ?>&activityid=<?= $activityDatas['activity_id'] ?>&personid=<?= $person->getId() ?>"
+                                       class="link">
+                                        <i class="icon-download-outline"></i>
+                                        Télécharger la feuille de temps (Excel)
+                                    </a>
+                                    <?php break;
+                                default : echo "État inconnu"; break;
+                            }
+                            ?>
 
-                            <?php if( $totaux['unvalidate'] == true ): ?>
-                            <small class="helper danger">
-                                <i class="icon-warning-empty"></i>
-                                Certains créneaux n'ont pas été validés</small>
-                            <?php endif; ?>
                         </td>
                     </tr>
 

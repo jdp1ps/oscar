@@ -338,6 +338,23 @@ class Authentification implements UserInterface, ProviderInterface
         return $this;
     }
 
+    public function getSetting($key, $defaultValue){
+        $settings = $this->getSettings();
+        if( $settings && array_key_exists($key, $settings) ){
+            return $settings[$key];
+        }
+        return $defaultValue;
+    }
+
+    public function updateSetting( $key, $value ){
+        $settings = $this->getSettings();
+        if( !is_array($settings) ){
+            $settings = [];
+        }
+        $settings[$key] = $value;
+        $this->setSettings($settings);
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     public function hasRolesIds( array $rolesIds ){
         foreach ($this->getRoles() as $role ){

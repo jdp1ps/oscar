@@ -1,0 +1,274 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 12/12/18
+ * Time: 11:02
+ */
+?>
+<div class="container">
+    <header>
+        <h1>
+            <i class="icon-cog"></i>
+            Administration et configuration Oscar
+        </h1>
+    </header>
+
+    <section>
+        <h2>
+            <i class="icon-tags"></i>
+            Nomenclatures
+        </h2>
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-cube"></i>
+                    Type d'activité
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE) ): ?>
+                    <a href="<?= $this->url('activitytype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Correpond (généralement) au <strong>type de contrat/convention</strong></p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-calendar"></i>
+                    Type de jalon
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE) ): ?>
+                    <a href="<?= $this->url('datetype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de gérer les jalons disponibles dans les activités de recherche ainsi que leur comportement : système de validation, fréquence des rappels</p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-docs"></i>
+                    Type de document
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de gérer les types de document disponibles dans les activités de recherche lors du dépôt d'un document.</p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-building-filled"></i>
+                    Type d'organisation
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de gérer les types d'organisation proposés pour qualifier une organisation.</p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-tags"></i>
+                    Disciplines
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DISCIPLINE_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/discipline') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de gérer les disciplines disponibles.</p>
+        </article>
+    </section>
+
+    <section>
+        <h2>Maintenance</h2>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-building-filled"></i>
+                    Fusion des organisations</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT) ):?>
+                    <a href="<?= $this->url('organization/fusion') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <small><i class="icon-lock"></i> Privilège insuffisant</small>
+                <?php endif; ?>
+            </h3>
+            <p>Procédure de fusion des organisations</p>
+        </article>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-building-filled"></i>
+                    Scission des organisations</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT) ):?>
+                    <a href="<?= $this->url('organization/scission') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <small><i class="icon-lock"></i> Privilège insuffisant</small>
+                <?php endif; ?>
+            </h3>
+            <p>Procédure de scission des organisations</p>
+        </article>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-cubes"></i>
+                    Afficher les projets vides</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX) ):?>
+                    <a href="<?= $this->url('project/empty') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <small><i class="icon-lock"></i> Privilège insuffisant</small>
+                <?php endif; ?>
+            </h3>
+            <p>Permet des gérer les projets vides pour éventuellement les supprimer</p>
+        </article>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-calendar"></i>
+                    Gestion des déclarations</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE) ):?>
+                    <a href="<?= $this->url('timesheet/declarations') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Cette interface permet de visualiser les déclarations et leur état. Elle permet également de <strong>gérer les validateurs</strong> et de <strong>modifier la répartition horaire du déclarant</strong> en cas de problème. Enfin, elle permet d'annuler un procédure de validation.</p>
+        </article>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-plug"></i>
+                    Synchronisation des données (connectors)</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
+                    <a href="<?= $this->url('administration/connectors_home') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>
+                Affiche la liste des connecteurs configurés dans <?= _('OScar') ?> pour vérifier s'ils sont bien configurés. Permet également de les éxécuter manuellement depuis l'interface.
+            </p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-cw-outline"></i>
+                    Reconstruire l'index de recherche des activités</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD) ):?>
+                    <a href="<?= $this->url('administration/connectors_home') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Exécuter") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>
+                Lance le reconstruction de l'index de recherche depuis l'interface
+            </p>
+            <p class="alert-warning alert">
+                Cette opération est coûteuse en ressource et peut dépasser la durée d'execution autorisée. Il est préférable de réaliser cette opération de amintenance depuis l'utilitaire en ligne de commande :
+                <br>$ <code>php public/index oscar activity:search:build</code>
+            </p>
+        </article>
+
+
+        <h2>
+            <i class="icon-lock"></i>
+            Privilèges et droits d'accès
+        </h2>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-group"></i>
+                    Privilèges et rôles</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ):?>
+                    <a href="<?= $this->url('administration') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>
+                Gestion des <strong>rôles</strong> des personnes et des <strong>privilèges</strong> accordés à ces rôles
+            </p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-plug"></i>
+                    Authentifications</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ):?>
+                    <a href="<?= $this->url('administration/users') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>
+                Visualisation des authentifications actives. Permet également d'accorder des <strong>rôles applicatifs particulier</strong>
+            </p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-building-filled"></i>
+                    Rôles des organisations</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ):?>
+                    <a href="<?= $this->url('administration/organizationrole') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>
+                Gestion des rôles disponibles lors de l'association d'un organisation à une activité de recherche.
+            </p>
+        </article>
+    </section>
+</div>

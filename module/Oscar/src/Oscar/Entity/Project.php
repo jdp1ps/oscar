@@ -63,7 +63,7 @@ class Project implements ResourceInterface
 
     /**
      * @Annotation\Options({"label": "Description"})
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
     protected $description;
 

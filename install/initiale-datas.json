@@ -1,0 +1,17 @@
+{
+  "categoriesprivileges": [
+    { "code": "ACTIVITY", "label": "Activité" },
+    { "code": "ADMINISTRATIVE", "label": "Informations administratives" },
+    { "code": "DEPENSE", "label": "Accès aux dépenses" },
+    { "code": "DOCUMENT", "label": "Documents (générale)" },
+    { "code": "droit", "label": "Gestion des droits" },
+    { "code": "MAINTENANCE", "label": "Maintenance" },
+    { "code": "ORGANIZATION", "label": "Organisations" },
+    { "code": "PERSON", "label": "Personnes" },
+    { "code": "PROJECT", "label": "Projets" }
+  ],
+  "roles": [
+    { "roleId": "Administrateur", "privileges": "ALL" },
+    { "roleId": "user", "privileges": [] }
+  ]
+}

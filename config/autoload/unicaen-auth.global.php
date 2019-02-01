@@ -6,6 +6,12 @@
  * drop this config file in it and change the values as you wish.
  */
 $settings = array(
+    'local' => [
+        /**
+         * Affichage ou non du formulaire d'authentification avec un compte local.
+         */
+        'enabled' => false,
+    ],
     /**
      * Flag indiquant si l'utilisateur authenitifié avec succès via l'annuaire LDAP doit
      * être enregistré/mis à jour dans la table des utilisateurs de l'appli.

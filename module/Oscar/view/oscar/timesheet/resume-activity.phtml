@@ -1,0 +1,27 @@
+<div class="container">
+    <div id="app"></div>
+    <link rel="stylesheet" href="<?= $this->basePath().'/js/oscar/dist/ResumeActivity.css' ?>">
+    <script>
+        require(['vue', 'vue-resource', 'ResumeActivity', 'bootbox', 'mm'], function(Vue, VueResource, ResumeActivity, bootbox, moment){
+            Vue.use(VueResource);
+            Vue.filter('duration2', function(duree, total){
+                let h = Math.floor(duree);
+                let m = Math.round((duree - h)*60);
+                if( m < 10 ) m = '0'+m;
+                return h +':' +m;
+            });
+            Vue.filter('duration', function (v){
+                return v.toFixed(2);
+            });
+            Vue.filter('period', function(str){
+                return moment(str+'-01').format('MMMM YYYY');
+            });
+            new Vue({
+                el: "#app",
+                render: function(h){
+                    return h(ResumeActivity.default, { props: {bootbox: bootbox}})
+                }
+            })
+        });
+    </script>
+</div>

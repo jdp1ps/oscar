@@ -85,6 +85,59 @@
                             </table>
                         </div>
                     </div>
+
+                    <h3>
+                        <i class="icon-building-filled"></i>
+                        Référents
+                    </h3>
+
+                    <section class="data-list">
+                        <small>Les <strong>déclarants</strong> sont les personnes pour lesquelles vous devrez valider les déclarations Hors-Projet.</small>
+                        <div class="data-row card">
+                            <div class="data-label" style="flex: 1; white-space: normal">
+                                <strong>Déclarant(s)</strong><br>
+                            </div>
+                            <div class="data-value"  style="flex: 4">
+                                <?php if( $subordinates ): ?>
+                                <?php foreach($subordinates as $person): ?>
+                                    <article>
+                                        <?= $person ?>
+                                    </article>
+                                <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <small>Les <strong>référents</strong> sont les personnes qui sont habilitées à valider vos déclaration Hors-Projet.</small>
+                        <div class="data-row card">
+                            <div class="data-label" style="flex: 1; white-space: normal">
+                                <strong>Référent(s)</strong><br>
+                            </div>
+                            <div class="data-value"  style="flex: 4">
+                                <?php if( $managers ): ?>
+                                    <?php foreach($managers as $person): ?>
+                                        <article>
+                                            <?= $person ?>
+                                        </article>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </section>
+
+                    <h3>
+                        <i class="icon-building-filled"></i>
+                        Organisations
+                    </h3>
+
+                    <?php foreach ($person->getOrganizations() as $organizationPerson): ?>
+                    <article class="card xs">
+                        <h4 class="card-title">
+                            <i><?= $organizationPerson->getOrganization() ?></i>
+                            <strong><?= $organizationPerson->getRole() ?></strong>
+                        </h4>
+                    </article>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <p class="alert alert-warning">
                         Votre compte n'est pas associé à une personne dans les activités
@@ -93,6 +146,35 @@
 
             </div>
             <div class="col-md-6">
+                <h3><i class="icon-calendar"></i>
+                    Mode de déclaration</h3>
+
+                <div id="declarationsHours"></div>
+
+                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SHOW_SCHEDULE)): ?>
+                <h3><i class="icon-clock"></i>
+                    Répartition Horaire</h3>
+                <div id="schedule"></div>
+                <script>
+                    require(['vue', 'vue-resource', 'mm', 'PersonSchedule'], function(Vue, VueResource, moment, PersonSchedule){
+                        Vue.use(VueResource);
+                        Vue.filter('heures', function(v){
+                            var heure = Math.floor(v);
+                            var minutes = (v-heure)*60;
+                            return heure +':' +minutes;
+                        });
+                        new Vue({
+                            'el': '#schedule',
+                            render: function(h){
+                                return h(PersonSchedule.default, { props: {urlapi:'?a=schedule', editable: <?= $scheduleEditable ? 'true' : 'false' ?>}})
+                            }
+                        })
+                    });
+                </script>
+                <?php endif; ?>
+
+
+
                 <h3><i class="icon-history"></i>
                     Fréquence des envois</h3>
 
@@ -116,9 +198,52 @@
 </div>
 <script>
     require(['vue', 'vue-resource'], function(Vue, VueResource){
+
+
+
         Vue.use(VueResource);
         Vue.http.options.emulateJSON = true;
         Vue.http.options.emulateHTTP = true;
+        new Vue({
+            data: {
+                declarationsHours: <?= $declarationsHours ? 'true':'false' ?>,
+                declarationsHoursOverwrite: <?= $declarationsHoursOverwriteByAuth ? 'true' : 'false'?>
+            },
+            el: '#declarationsHours',
+            template: `<div>
+                <section>
+                    <p v-if="declarationsHoursOverwrite">
+                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en poucentage jour' }}</strong><br>
+                        <a @click="switchDeclarationMode()" href="#" class="btn btn-primary">
+                            {{ declarationsHours ? 'utiliser la déclaration en pourcentage jour' : 'utiliser la déclaration en heure' }}
+                        </a>
+                    </p>
+                    <p v-else class="alert alert-info">
+                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en poucentage jour' }}</strong>
+                    </p>
+                </section>
+                </div>`,
+            methods: {
+                switchDeclarationMode: function(){
+                    this.declarationsHours = !this.declarationsHours;
+                    var formData = new FormData();
+                    formData.append('declarationsHours', this.declarationsHours ? 'on' : 'off');
+                    formData.append('action', 'declaration-mode');
+
+                    this.$http.post('', formData)
+                        .then(
+                            success => {
+                                console.log('OK');
+                            },
+                            fail => {
+                                console.log(fail);
+                            }
+                        ).then( (foo) => {
+                    });
+                }
+            }
+        });
+
         new Vue({
             data: {
                 'loading': false,
@@ -239,7 +364,13 @@
 
                 save(){
                     this.loading = true;
-                    this.$http.post('', { "frequency":  this.frequency.join(',') })
+
+                    var datas = new FormData();
+                    console.log(this.frequency);
+                    datas.append('action', 'frequency');
+                    datas.append('frequency', this.frequency.join(','));
+
+                    this.$http.post('', datas)
                         .then(
                             success => {
                                 console.log('OK');

@@ -1,0 +1,66 @@
+<link rel="stylesheet" href="/js/oscar/dist/timesheetmonth.css" type="text/css" />
+<link rel="stylesheet" href="/js/oscar/dist/timesheetmonthday.css" type="text/css" />
+<link rel="stylesheet" href="/js/oscar/dist/timesheetmonthdaydetails.css" type="text/css" />
+<link rel="stylesheet" href="/js/oscar/dist/timesheetmonthworkpackageselector.css" type="text/css" />
+<link rel="stylesheet" href="/js/oscar/dist/uitimechooser.css" type="text/css" />
+
+<div class="flex-container">
+    <div id="app"></div>
+</div>
+
+<script>
+    require(['vue', 'vue-resource', 'TimesheetMonth', 'mm', 'bootbox'], function(Vue, VueResource, TimesheetMonth, moment, bootbox){
+        Vue.use(VueResource);
+
+
+        let mode = "POURCENT";
+
+        <?php if( $declarationInHours == true ): ?>
+        Vue.filter('duration2', function(duree, total){
+            let h = Math.floor(duree);
+            let m = Math.round((duree - h)*60);
+            if( m < 10 ) m = '0'+m;
+            return h +':' +m;
+        });
+        <?php else: ?>
+        Vue.filter('duration2', function(duree, total){
+            if( duree == 0 ) return 0.0;
+            return Math.round( 100 / total * duree) + "%";
+        });
+        <?php endif; ?>
+        <?php /*
+        Vue.filter('duration', function(duree, total){
+            if( duree == 0 ) return 0.0;
+            return Math.round( 100 / total * duree) + "%";
+        });*/ ?>
+
+        var status = {
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_STEP1 ?>': 'validation projet',
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_STEP2 ?>': 'validation scientifique',
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_STEP3 ?>': 'validation administrative',
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_CONFLICT ?>': 'Rejetée',
+          '<?= \Oscar\Entity\ValidationPeriod::STATUS_VALID ?>': 'Validée',
+        };
+        Vue.filter('status', function(s){
+            if( status.hasOwnProperty(s) ){
+                return status[s];
+            }
+            return "Brouillon";
+        });
+
+        new Vue({
+            render: function(h){
+                return h(TimesheetMonth.default, {
+                    props: {
+                        declarationInHours: <?= $declarationInHours ? 'true' : 'false' ?>,
+                        defaultYear: <?= $year ?>,
+                        defaultMonth: <?= $month ?>,
+                        moment: moment,
+                        bootbox: bootbox,
+                        urlimport: '<?= $this->url('timesheet/import_ical') ?>'
+                    }
+                });
+            }
+        }).$mount('#app');
+    })
+</script>

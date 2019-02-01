@@ -10,6 +10,9 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
+use Elasticsearch\Common\Exceptions\BadRequest400Exception;
+use Elasticsearch\Common\Exceptions\Unauthorized401Exception;
+use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
@@ -18,8 +21,12 @@ use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
+use Oscar\Entity\PersonRepository;
+use Oscar\Entity\Privilege;
 use Oscar\Entity\ProjectMember;
+use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\WorkPackagePerson;
@@ -27,8 +34,10 @@ use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Person\SyncPersonHarpege;
+use Oscar\Provider\Privileges;
 use Oscar\Service\PersonnelService;
 use Oscar\Service\PersonService;
+use Oscar\Service\TimesheetService;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
@@ -48,12 +57,166 @@ class PersonController extends AbstractOscarController
         $this->getResponseDeprecated();
     }
 
-    public function personFusionAction()
-    {
+    public function accessAction(){
 
+
+        $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+
+        $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
+
+
+        $privilegesDT = $this->getEntityManager()->getRepository(Privilege::class)->findBy([], ['root' => 'DESC']);
+
+        $privileges = [];
+        /** @var Privilege $privilege */
+        foreach ($privilegesDT as $privilege) {
+            $p = [
+                'id' => $privilege->getId(),
+                'label' => $privilege->getLibelle(),
+                'category' => $privilege->getCategorie()->getLibelle(),
+                'spot' => $privilege->getSpot(),
+                'roleIds' => $privilege->getRoleIds(),
+                'root' => $privilege->getRoot() ? $privilege->getRoot()->getId() : null,
+                'enabled' => false
+            ];
+            $privileges[$privilege->getId()] = $p;
+        }
+        $rolesApplication = [];
+        try {
+            $rolesApplication = $this->getPersonService()->getRolesApplication($person);
+        } catch (\Exception $e ){}
+        $rolesOrganisation = [];
+
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($person->getOrganizations() as $personOrganization) {
+            $organizationId = $personOrganization->getOrganization()->getId();
+            $organization = (string)$personOrganization->getOrganization();
+            $roleId = $personOrganization->getRoleObj()->getId();
+            $role = $personOrganization->getRoleObj()->getRoleId();
+
+            if( !array_key_exists($organizationId, $rolesOrganisation) ){
+                $rolesOrganisation[$organizationId] = [
+                    'id' => $organizationId,
+                    'label' => $organization,
+                    'roles' => [],
+                ];
+                $rolesOrganisation[$organizationId]['roles'][$roleId] = $role;
+            }
+
+        }
+
+
+        return [
+            'person' => $person,
+            'application' => $rolesApplication,
+            'organizations' => $rolesOrganisation,
+            'privileges' => $privileges
+        ];
     }
 
+    public function personnelAction(){
 
+        $access = $this->getConfiguration('oscar.listPersonnel');
+        if( $access == 0 ){
+            throw new BadRequest400Exception("Cette fonctionnalité n'est pas activé");
+        }
+
+        $q = $this->params()->fromQuery('q', "");
+        $page = $this->params()->fromQuery('p', 1);
+        $params = [
+            'filter_roles' => [],
+            'order_by' => 'lastname',
+            'leader' => null
+        ];
+
+        $idCoWorkers = [];
+
+        $idSubordinates = $this->getPersonService()->getSubordinateIds($this->getCurrentPerson()->getId());
+
+
+        if( $access > 1 ){
+            $idCoWorkers = $this->getPersonService()->getCoWorkerIds($this->getCurrentPerson()->getId());
+        }
+
+
+
+
+        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_INDEX) ){
+            $params['ids'] = array_merge($idCoWorkers, $idSubordinates);
+        }
+
+
+        // TODO Verifier configuration + DROIT sur le Rôle dans l'oganisation
+
+        $extended = $this->params()->fromQuery('extended', 0);
+        if( $extended ){
+            $datas = $this->getPersonService()->searchPersonnel($q, $page, $params);
+        } else {
+            $datas = $this->getPersonService()->getPersonsSearchPaged($q, $page, $params);
+        }
+
+        $output = [
+            'total'=> count($datas),
+            'search' => $q,
+            'persons' => [],
+            'extended' => $extended,
+            'page' => $page,
+            'resultbypage' => 50,
+            'coworkers' => [],
+            'subordinates' => [],
+        ];
+
+
+
+        /** @var Person $person */
+        foreach ($datas as $person) {
+            $datasPerson = $person->toArrayList();
+            $datasPerson['sub'] = false;
+            $datasPerson['coworker'] = false;
+            $datasPerson['activities'] = count($person->getActivities());
+
+            if( in_array($person->getId(), $idSubordinates ) ){
+                $datasPerson['sub'] = true;
+            }
+            if( in_array($person->getId(), $idCoWorkers ) ){
+                $datasPerson['coworker'] = true;
+            }
+            $output['persons'][] = $datasPerson;
+        }
+
+        $output['subordinates'] = $idSubordinates;
+        $output['coworkers'] = $idCoWorkers;
+
+        if( $this->isAjax() || $this->params()->fromQuery('format') == 'json' ){
+            return $this->ajaxResponse($output);
+        }
+
+        return ['result' => $output ];
+    }
+
+    public function grantAction()
+    {
+        $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+        $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
+
+        $organizations = [];
+
+        /** @var OrganizationPerson $personOrganization */
+        foreach( $person->getOrganizations() as $personOrganization ){
+            $organizations[$personOrganization->getOrganization()->getId()] = [
+                'rôles' => $this->getOscarUserContext()->getRolesPersonInOrganization($person, $personOrganization->getOrganization()),
+                'privileges' => $this->getOscarUserContext()->getPersonPrivilegesInOrganization($person, $personOrganization->getOrganization())
+            ];
+
+        }
+
+        var_dump($organizations);
+
+        //$userCOntext = $this->getOscarUserContext()->getPri
+        return [
+            'person' => $person
+        ];
+    }
 
     public function viewsAction()
     {
@@ -499,9 +662,93 @@ class PersonController extends AbstractOscarController
         $id = $this->params()->fromRoute('id');
         $page = $this->params()->fromQuery('page', 1);
         $person = $this->getPersonService()->getPerson($id);
+
+
+        $manageHierarchie = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
+
+
+        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW) ){
+
+            // N+1 ?
+            /** @var PersonRepository $personRepository */
+            $personRepository = $this->getEntityManager()->getRepository(Person::class);
+
+            // Subordonnées de la personne connectée
+            $subordinatesIds = $personRepository->getSubordinatesIds($this->getCurrentPerson()->getId());
+
+            if( !in_array($person->getId(), $subordinatesIds) ){
+                /** @var OrganizationRepository $organizationRepository */
+                $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
+                $organizationIds = $organizationRepository->getOrganizationsIdsForPerson($this->getCurrentPerson()->getId(), true);
+
+                $coworkerIds = $this->getPersonService()->getCoWorkerIds($this->getCurrentPerson()->getId());
+                if( ! in_array($id, $coworkerIds) ){
+                    throw new Unauthorized401Exception("Vous n'avez pas accès à la fiche de cette personne");
+                }
+            }
+        }
+
+
+
+
         $auth = null;
         $activities = null;
         $traces = null;
+
+        $method = $this->getHttpXMethod();
+
+        if( $this->isAjax() ){
+            $action = $this->params()->fromQuery('a');
+
+            switch( $action ){
+                case 'schedule':
+                    /** @var TimesheetService $timesheetService */
+                    $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+                    if( $method == "POST" ){
+                        $this->getOscarUserContext()->check(Privileges::PERSON_MANAGE_SCHEDULE);
+
+                        try {
+                            $daysLength = $this->params()->fromPost('days');
+                            $this->getUserParametersService()->performChangeSchedule($daysLength, $person);
+                            return $this->getResponseOk("Heures enregistrées");
+                        } catch (\Exception $e) {
+                            return $this->getResponseInternalError("Impossible d'enregistrer les paramètres : " . $e->getMessage());
+                        }
+                        return $this->getResponseOk();
+                    }
+
+                    $datas = $timesheetService->getDayLengthPerson($person);
+                    return $this->ajaxResponse($datas);
+                    break;
+                default:
+                    return $this->getResponseInternalError("Action non-reconnue");
+                    break;
+
+            }
+        }
+
+        if( $method == "POST" ){
+            if( !$manageHierarchie ){
+                return $this->getResponseUnauthorized();
+            }
+            $action = $this->params()->fromPost('action', null);
+            switch( $action ) {
+                case 'referent' :
+                    $referent_id = $this->params()->fromPost('referent_id', null);
+                    $person_id = $this->params()->fromPost('person_id', null);
+                    $this->getPersonService()->addReferent($referent_id, $person_id);
+                    return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
+
+                case 'removereferent' :
+                    $referent_id = $this->params()->fromPost('referent_id', null);
+                    $this->getPersonService()->removeReferentById($referent_id);
+                    return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
+
+                default:
+                    return $this->getResponseInternalError("Opération inconnue");
+            }
+        }
 
         if ($person && $person->getLadapLogin()) {
             $auth = $this->getEntityManager()
@@ -529,9 +776,21 @@ class PersonController extends AbstractOscarController
             $roles[preg_replace($re, '$1', $role['ldapFilter'])] = $role;
         }
 
+        // Récupération des référents
+        $referents = $this->getPersonService()->getReferentsPerson($person);
+        $subordinates = $this->getPersonService()->getSubordinatesPerson($person);
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
         return [
+            'schedule'  => $timesheetService->getDayLengthPerson($person),
             'entity' => $person,
             'ldapRoles' => $roles,
+            'scheduleEditable' => $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_MANAGE_SCHEDULE),
+            'referents' => $referents,
+            'manageHierarchie' => $manageHierarchie,
+            'subordinates' => $subordinates,
             'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
             'auth' => $auth,
             'projects'  => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),

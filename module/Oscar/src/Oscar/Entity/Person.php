@@ -167,6 +167,12 @@ class Person implements ResourceInterface
      */
     protected $ldapMemberOf;
 
+    /**
+     * @var
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $customSettings;
+
 
     function __construct()    {
         $this->projectAffectations = new ArrayCollection();
@@ -189,6 +195,42 @@ class Person implements ResourceInterface
         }
         return false;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCustomSettings()
+    {
+        return $this->customSettings;
+    }
+
+    /**
+     * @param mixed $customSettings
+     */
+    public function setCustomSettings($customSettings)
+    {
+        $this->customSettings = $customSettings;
+        return $this;
+    }
+
+    public function getCustomSettingsObj(){
+        return json_decode($this->getCustomSettings(), JSON_OBJECT_AS_ARRAY);
+    }
+
+    public function getCustomSettingsKey( $key ){
+        $custom = $this->getCustomSettingsObj();
+        if( array_key_exists($key, $custom) ){
+            return $custom[$key];
+        }
+        return null;
+    }
+
+    public function setCustomSettingsObj( $datas ){
+        $this->setCustomSettings(json_encode($datas));
+        return $this;
+    }
+
+
 
     public function getRolesFromConnector( $connectorName ){
 //        $roles = [];
@@ -679,13 +721,35 @@ class Person implements ResourceInterface
             'firstName'             => $this->getFirstname(),
             'lastName'              => $this->getLastname(),
             'displayname'           => $this->getDisplayName(),
-            'text'           => $this->getDisplayName(),
+            'text'                  => $this->getDisplayName(),
             'email'                 => $this->getEmail(),
+            'phone'                 => $this->getPhone(),
             'mail'                  => $this->getEmail(),
             'mailMd5'               => md5($this->getEmail()),
             'ucbnSiteLocalisation'  => $this->getLdapSiteLocation() ? $this->getLdapSiteLocation() : "",
             'affectation'           => $this->getLdapAffectation() ? $this->getLdapAffectation() :  ""
         );
+    }
+
+    public function toArrayList(){
+        $datas = $this->toArray();
+        $organisations = [];
+        /** @var OrganizationPerson $o */
+        foreach ($this->getOrganizations() as $o) {
+            $organisation = $o->getOrganization();
+            $role = (string)$o->getRoleObj();
+            if( !array_key_exists($organisation->getId()) ){
+                $organisations[$organisation->getId()] = [
+                    'organisation' => $organisation->displayName(),
+                    'roles' => []
+                ];
+            }
+            if( !in_array($role, $organisations[$organisation->getId()]['roles']) ){
+                $organisations[$organisation->getId()]['roles'][] = $role;
+            }
+        }
+        $datas['organisations'] = $organisations;
+        return $datas;
     }
 
     /**

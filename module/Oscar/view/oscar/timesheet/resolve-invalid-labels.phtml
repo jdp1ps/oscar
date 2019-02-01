@@ -1,0 +1,36 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 26/11/18
+ * Time: 08:58
+ */
+?>
+<div class="container">
+    <h1>Résolution des conflits</h1>
+
+    <?php if( count($datas) == 0 ):?>
+    <div class="alert alert-danger">
+        Aucun créneau invalide
+    </div>
+    <?php else: ?>
+    <form method="post">
+    <?php foreach( $datas as $label): ?>
+    <div>
+        <strong><?= $label ?></strong> :
+        <select name="labels[<?= $label ?>]">
+            <option value="">Ignorer</option>
+            <?php foreach( $othersWP as $other): ?>
+            <option value="<?= $other['code'] ?>"><?= $other['label'] ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <?php endforeach; ?>
+        <nav>
+            <button type="submit" >
+                <i class="icon-arrows-cw-outline"></i>
+                Appliquer</button>
+        </nav>
+    </form>
+    <?php endif; ?>
+</div>

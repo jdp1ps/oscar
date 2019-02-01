@@ -220,6 +220,26 @@ le dépôt dans le fichier : `install/oscar-install.sql`.
 psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 ```
 
+<<<<<<< HEAD
+=======
+### Mise à jour du modèle
+
+Mettre à jour le modèle de donnée : 
+
+```bash
+php vendor/bin/doctrine-module orm:schema-tool:update --force
+```
+
+### Mise à jour des privilèges de l'application
+
+```bash
+php public/index.php oscar patch checkPrivilegesJSON
+```
+
+Executer cette commande jusqu'à obtenir un message "Les privilèges sont à jour" (sera prochainement corrigé).
+
+
+>>>>>>> callahan
 ### Configuration de la BDD dans Oscar
 
 La configuration de la BDD est spécifiée dans le fichier `config/autoload/local.php`.
@@ -401,6 +421,84 @@ $settings = array(
 );
 ```
 
+NOTE : Concernant le filtre `accountFilterFormat`, si votre LDAP est non supann, penser à consulter la partie suivante.
+
+#### Authentification LDAP : Non-Supann
+
+Pour les LDAP **non-spann**, il est possible que le champ utilisé pour l'autentification soit différent de **supannaliaslogin**, généralement le champ **uid**. Si c'est la cas, vous pouvez éditer le fichier **config/autoload/unicaen-auth.local.php** en renseignant la clef `ldap_username` : 
+
+```php
+<?php
+//config/autoload/unicaen-auth.local.php
+$settings = array(
+    // ...
+    // Champ utilisé pour l'autentification (côté LDAP)
+    // exemple avec UID au lieu de supannaliaslogin
+    'ldap_username' => 'uid',
+);
+
+return array(
+    'unicaen-auth' => $settings,
+);
+```
+
+Vous devrez également adapter les filtres LDAP en conséquence dans le fichier **config/autoload/unicaen-app.local.php** : 
+
+```php
+<?php
+//config/autoload/unicaen-app.local.php
+$settings = array(
+    //
+    'ldap' => array(
+        'connection' => array(
+            // ...
+        ),
+        'dn' => [
+            'UTILISATEURS_BASE_DN'                  => 'ou=people,dc=domain,dc=fr',
+            'UTILISATEURS_DESACTIVES_BASE_DN'       => 'ou=deactivated,dc=domain,dc=fr',
+            'GROUPS_BASE_DN'                        => 'ou=groups,dc=domain,dc=fr',
+        ],
+        
+        'filters' => [
+            'LOGIN_FILTER'                          => '(uid=%s)',
+            'UTILISATEUR_STD_FILTER'                => '(|(uid=p*)(&(uid=e*)(eduPersonAffiliation=student)))',
+            'CN_FILTER'                             => '(cn=%s)',
+            'NAME_FILTER'                           => '(cn=%s*)',
+            'UID_FILTER'                            => '(uid=%s)',
+            // Les autres filtres sont optionnels
+        ],
+        /****/
+    ),
+    // ...
+);
+
+return array(
+    'unicaen-app' => $settings,
+);
+```
+
+Pensez également à corriger la clef `accountFilterFormat` dans la connexion LDAP renseignée dans le fichier `config/autoload/unicaen-app.local.php` : 
+
+```php
+<?php
+//config/autoload/unicaen-app.local.php
+$settings = array(
+  // LDAP    
+  'ldap' => array(
+    'connection' => array(
+      'default' => array(
+        'params' => array(
+          // ...
+          'accountFilterFormat' => '(&(objectClass=posixAccount)(uid=%s))', // << ICI
+        )
+      )
+    )
+  ),
+  // etc ...
+);
+```
+
+
 #### Configurer l'authentification CAS
 
 **UnicaenAuth** va permettre de configurer l'accès à Oscar en utilisant le *Cas*.
@@ -436,6 +534,8 @@ return array(
     'unicaen-auth' => $settings,
 );
 ```
+
+
 
 ### Usurpation
 

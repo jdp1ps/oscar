@@ -202,6 +202,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
             $json = [
                 "uid" => 'LN-' . ($i++),
                 "organizations" => [],
+                "status" => Activity::STATUS_ERROR_STATUS,
                 "persons" => [],
                 "milestones" => [],
                 "payments" => [],
@@ -307,6 +308,10 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 // PFI
                 else if ($key == "PFI") {
                     $json['pfi'] = $value;
+                }
+
+                else if( $key == "status" ){
+                    $json['status'] = $value;
                 }
 
                 else if ($key == "datePFI") {

@@ -2,6 +2,7 @@
 
 namespace Oscar\Service;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Moment\Moment;
 use Oscar\Entity\Activity;
@@ -12,14 +13,17 @@ use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\PrivilegeRepository;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
+use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
+use Oscar\Provider\Privileges;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -43,6 +47,69 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
      */
     public function getRepository(){
         return $this->getEntityManager()->getRepository(Person::class);
+    }
+
+    public function getManagers( $person ){
+        if( !$person ) return [];
+
+        $qb = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+            ->innerJoin(Referent::class, 'r', 'WITH', 'r.referent = p')
+            ->where('r.person = :person');
+
+        return $qb->setParameter('person', $person)->getQuery()->getResult();
+    }
+
+    public function getSubordinates( $person ){
+        if( !$person ) return [];
+
+        $qb = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
+            ->innerJoin(Referent::class, 'r', 'WITH', 'r.person = p')
+            ->where('r.referent = :person');
+
+        return $qb->setParameter('person', $person)->getQuery()->getResult();
+    }
+
+    public function addReferent( $referent_id, $person_id ){
+        $referent = $this->getPerson($referent_id);
+        $person = $this->getPerson($person_id);
+
+        // @todo Vérifier si le référent n'est pas déjà identifié
+
+        $referentRec = new Referent();
+        $this->getEntityManager()->persist($referentRec);
+        $referentRec->setPerson($person)->setReferent($referent);
+        $this->getEntityManager()->flush($referentRec);
+
+        return true;
+    }
+
+    public function removeReferentById( $referent_id ){
+        $referent = $this->getEntityManager()->getRepository(Referent::class)->find($referent_id);
+        $this->getEntityManager()->remove($referent);
+        $this->getEntityManager()->flush();
+        return true;
+    }
+
+
+
+    public function getReferentsPerson( $personId ){
+        $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->where('r.person = :personId')
+            ->setParameter('personId', $personId);
+        return $query->getQuery()->getResult();
+    }
+
+    public function getSubordinatesPerson( $personId ){
+        $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->where('r.referent = :personId')
+            ->setParameter('personId', $personId);
+        return $query->getQuery()->getResult();
+    }
+
+
+
+    public function getNP1( Person $person, $date = null ){
+        // @todo
     }
 
     /**
@@ -158,6 +225,93 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $mailer->send($mail);
     }
 
+    public function getRolesPrincipaux( $privilege = null){
+        $query = $this->getEntityManager()->getRepository(Role::class)->createQueryBuilder('r');
+die($privilege);
+        if( $privilege != null ){
+            $query->innerJoin('r.privileges', 'p')
+                ->where('p.code = :privilege')
+            ->setParameter('privilege', $privilege);
+
+            echo $query->getDQL();
+
+        }
+
+        return $query->getQuery()->getResult();
+
+    }
+
+
+    public function getRolesApplication( Person $person ){
+
+        /** @var Authentification $auth */
+        $auth = $this->getEntityManager()->getRepository(Authentification::class)->createQueryBuilder('a')
+            ->where('a.username = :login')
+            ->leftJoin('a.roles', 'r')
+            ->setParameter('login', $person->getLadapLogin())
+            ->getQuery()
+            ->getSingleResult();
+
+        $rolesFixes = [];
+
+        /** @var Role $role */
+        foreach ($auth->getRoles() as $role) {
+            $rolesFixes[$role->getId()] = $role->getRoleId();
+        }
+
+        $ldapRoles = $this->getEntityManager()->getRepository(Role::class)
+            ->createQueryBuilder('r', 'r.ldapFilter')
+            ->where('r.ldapFilter IS NOT NULL')
+            ->getQuery()
+            ->getResult(AbstractQuery::HYDRATE_ARRAY);
+
+        $roles = [];
+        $re = '/\(memberOf=(.*)\)/';
+        echo "role :\n";
+
+        foreach ($ldapRoles as $role ){
+            $ldapRoleStr = preg_replace($re, '$1', $role['ldapFilter']);
+            if( in_array($ldapRoleStr, $person->getLdapMemberOf()) ){
+                $roles[$role['id']] = $role['roleId'];
+            }
+        }
+
+        return [
+            'auth' => $auth->getDisplayName(),
+            'roles_fixes' => $rolesFixes,
+            'roles_ldap' => $roles
+        ];
+    }
+
+    /**
+     * Retourne la liste des organizations où la personne a un rôle principale.
+     *
+     * @param Person $person
+     */
+    public function getOrganizationsPersonWithPrincipalRole(Person $person){
+
+        $rolesObj = $this->getRolesPrincipaux( Privileges::ACTIVITY_SHOW);
+
+        foreach ($rolesObj as $role) {
+            echo $role->getRoleId() . "<br>";
+        }
+
+        $roles = $this->getOscarUserContext()->getRoleIdPrimary();
+
+        $structures = $this->getEntityManager()->getRepository(Organization::class)->createQueryBuilder('o')
+            ->innerJoin('o.persons', 'p')
+            ->innerJoin('p.roleObj', 'r')
+            ->where('p.person = :person AND r.roleId IN(:roles)')
+            ->setParameters([
+               'person'    => $person,
+               'roles'     => $roles,
+            ])
+            ->getQuery()
+            ->getResult();
+
+        return $structures;
+    }
+
     /**
      * Charge en profondeur la liste des personnes disposant du privilége sur une
      * activité. (Beaucoup de requêtes, attention ux perfs)
@@ -170,6 +324,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         // Résultat
         $persons = [];
 
+        $this->getLoggerService()->debug("Récupération des personnes ayant le privilège $privilegeFullCode sur $activity");
+
         /** @var PrivilegeRepository $privilegeRepository */
         $privilegeRepository = $this->getEntityManager()->getRepository(Privilege::class);
 
@@ -179,6 +335,9 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             // 1. Récupération des rôles associès au privilège
             $privilege = $privilegeRepository->getPrivilegeByCode($privilegeFullCode);
 
+
+
+
             foreach ($privilege->getRole() as $role) {
                 $rolesIds[] = $role->getRoleId();
                 if ($role->getLdapFilter()) {
@@ -186,6 +345,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                         '$1', $role->getLdapFilter());
                 }
             }
+
+            $this->getLoggerService()->debug("Rôles : " . implode(',', $rolesIds));
 
             if( $includeApp ) {
 
@@ -230,28 +391,36 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             }
 
             // Selection des personnes associées via le Projet/Activité
-            foreach ($activity->getPersonPrincipalActive($rolesIds, false) as $p ){
-                $persons[$p->getPerson()->getId()] = $p->getPerson(); ;
+
+            foreach ($activity->getPersonsDeep() as $p ){
+                if( in_array($p->getRole(), $rolesIds) ){
+                    $this->getLoggerService()->debug('Person : ' . $p->getPerson());
+                    $persons[$p->getPerson()->getId()] = $p->getPerson();
+                }
             }
 
             // Selection des personnes via l'oganisation assocociée au Projet/Activité
             /** @var Organization $organization */
             foreach ($activity->getOrganizationsDeep() as $organization ){
+
                 /** @var OrganizationPerson $personOrganization */
                 if( $organization->isPrincipal() ) {
+                    $this->getLoggerService()->debug("Recherche dans " . $organization->getOrganization());
                     foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
                         if (in_array($personOrganization->getRole(), $rolesIds)) {
+                            $this->getLoggerService()->debug('Person : ' . $personOrganization->getPerson());
                             $persons[$personOrganization->getPerson()->getId()] = $personOrganization->getPerson();
                         }
                     }
                 }
             }
 
+            $this->getLoggerService()->debug("PERSONNES : " . count($persons));
+
             return $persons;
 
         } catch ( \Exception $e ){
             throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
-            die($e->getMessage());
         }
     }
 
@@ -292,8 +461,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
 
         if( !isset($this->_cachePersonLdapLogin[$login]) ){
-
-            $this->getServiceLocator()->get('Logger')->info('Récupération de PERSON via ' . $login);
+            // $this->getServiceLocator()->get('Logger')->info('Request BDD with ' . $login);
             $this->_cachePersonLdapLogin[$login] = $this->getBaseQuery()
                 ->where('p.ladapLogin = :login')
                 ->setParameter('login', $login)
@@ -351,6 +519,51 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
     }
 
+    public function getCoWorkerIds( $idPerson ){
+        /** @var OrganizationRepository $organizationRepository */
+        $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
+
+        /** @var PersonRepository $personRepository */
+        $personRepository = $this->getEntityManager()->getRepository(Person::class);
+
+        // Organisations où la person est "principale"
+        $orgaIds = $organizationRepository->getOrganizationsIdsForPerson($idPerson, true);
+
+        if( count($orgaIds) == 0 ){
+            return [];
+        }
+
+        // IDS des membres des organisations
+        $coWorkersIds = $personRepository->getPersonIdsInOrganizations($orgaIds);
+
+        // Inclue les personnes impliquées dans des activités ?
+        $listPersonIncludeActivityMember = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('listPersonnel');
+        if( $listPersonIncludeActivityMember == 3 ) {
+            $engaged = $personRepository->getPersonIdsForOrganizationsActivities($orgaIds);
+
+            $coWorkersIds = array_unique(array_merge($coWorkersIds, $engaged));
+        }
+
+
+        return $coWorkersIds;
+    }
+
+    public function getSubordinateIds( $idPerson ){
+
+        // Récupération des subordonnés
+        $nm1 = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->innerJoin('r.person', 'p')
+            ->select('p.id')
+            ->where('r.referent = :person')
+            ->setParameters([
+                'person' => $this->getCurrentPerson()
+            ])
+            ->getQuery()
+            ->getResult();
+
+        return array_map('current', $nm1);
+    }
+
     /**
      * @param int $currentPage
      * @param int $resultByPage
@@ -360,6 +573,45 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     public function getPersonsPaged($currentPage = 1, $resultByPage = 50)
     {
         return new UnicaenDoctrinePaginator($this->getBaseQuery(), $currentPage,
+            $resultByPage);
+    }
+
+    /**
+     * @return PersonRepository
+     */
+    protected function getPersonRepository(){
+        return $this->getEntityManager()->getRepository(Person::class);
+    }
+
+    public function searchPersonnel(
+        $search = null,
+        $currentPage = 1,
+        $filters = [],
+        $resultByPage = 50
+    ) {
+        $query = $this->getBaseQuery();
+
+        if( $search ){
+            /** @var ProjectGrantService $activityService */
+            $activityService = $this->getServiceLocator()->get("ActivityService");
+
+            $ids = $activityService->search($search);
+
+            $idsPersons = $this->getPersonRepository()->getPersonsIdsForActivitiesids($ids);
+
+
+            $query->leftJoin('p.organizations', 'o')
+                ->leftJoin('p.activities', 'a')
+                ->where('p.id IN(:ids)')
+                ->setParameter('ids', $idsPersons);
+        }
+
+        if( array_key_exists('ids', $filters) ){
+            $query->andWhere('p.id IN(:filterIds)')
+                ->setParameter('filterIds', $filters['ids']);
+        }
+
+        return new UnicaenDoctrinePaginator($query, $currentPage,
             $resultByPage);
     }
 
@@ -377,15 +629,19 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $resultByPage = 50
     ) {
 
+        $query = $this->getBaseQuery();
+
+        $query->leftJoin('p.organizations', 'o')
+            ->leftJoin('p.activities', 'a');
+
+
         if( $filters['leader'] ){
             $query = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
                 ->innerJoin('p.organizations', 'o')
                 ->innerJoin('o.roleObj', 'r')
+                ->innerJoin('p.activities', 'a')
                 ->where('r.principal = true')
             ;
-        } else {
-
-            $query = $this->getBaseQuery();
         }
 
         if( array_key_exists('order_by', $filters) ){
@@ -525,6 +781,11 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             // d'ID caluclée
             $query->andWhere('p.id IN (:ids)')
                 ->setParameter(':ids', $ids);
+        }
+
+        if( array_key_exists('ids', $filters) ){
+            $query->andWhere('p.id IN(:filterIds)')
+                ->setParameter('filterIds', $filters['ids']);
         }
 
         return new UnicaenDoctrinePaginator($query, $currentPage,

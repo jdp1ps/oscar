@@ -72,6 +72,9 @@ url_person: 'https://rest.service.tld/api/person/%s'
 
 Les URL correspondent à l'API REST qui devra retourner un JSON standard, pour la liste un tableau d'objet, pour l'accès unitaire un objet simple sous la forme :
 
+**Remarque** : Depuis la version *2.7 "Lewis"*, Oscar accepte un objet contenant une clef `persons` contenant le tableau d'objet afin de simplifier sa synchronisation avec les outils tel que **Talend ESB**.
+
+
 ```JSON
 {
    "uid": "p00000237*",
@@ -161,6 +164,27 @@ Pour l'URL "liste", le service REST doit retourner un tableau composé d'objets 
 ]
 ```
 
+ou
+
+```JSON
+{ 
+  "persons" : [
+      {  
+        "uid": "person1",
+        "login": "etc..." 
+      },
+      {
+        "uid": "person2",
+       "login": "etc..." 
+      },
+      { 
+        "uid": "person3",
+        "login": "etc..." 
+      }
+  ]
+}
+```
+
 ### Clef ROLES
 
 Cette clef permet d'affecter automatiquement une personne (**Person**) à une organisation (**Organization**) avec un ou plusieurs rôles.
@@ -238,6 +262,54 @@ Données minimales attendues :
 ```
 
 > Conernant le CODE. Le champs CODE permet dans la version actuelle d'établir la liaison entre une personne et une organisation. Dans les prochaines versions, cette liaison sera probablement découplée du reste (un nouveau connecteur sera dédié à gérer cette relation) et utilisera l'UID plutôt que le code.
+
+Forme attendue : 
+
+```JSON
+[
+    {  
+        "uid" : "ED209",
+        "code" : "ED209",
+        "shortname" : "OCP",
+        "longname" : "Omni Consumer Product",
+        "dateupdated" : "etc..."
+    },
+    {
+        "uid": "ORG2",
+        "code": "ORG2 etc ..." 
+    },
+    { 
+        "uid": "ORG3",
+        "code": "ORG3 etc ..." 
+    }
+]
+``` 
+
+**Remarque** : Depuis la version *2.7 "Lewis"*, Oscar accepte un objet contenant une clef `organizations` contenant le tableau d'objet afin de simplifier sa synchronisation avec les outils tel que **Talend ESB**.
+
+```JSON
+{ 
+  "organization" : [
+      {  
+        "uid" : "ED209",
+        "code" : "ED209",
+        "shortname" : "OCP",
+        "longname" : "Omni Consumer Product",
+        "dateupdated" : "etc..."
+      },
+      {
+        "uid": "ORG2",
+        "code": "ORG2 etc ..." 
+      },
+      { 
+        "uid": "ORG3",
+        "code": "ORG3 etc ..." 
+      }
+  ]
+}
+``` 
+
+
 
 ## Importer des activités (Installation initiale)
 

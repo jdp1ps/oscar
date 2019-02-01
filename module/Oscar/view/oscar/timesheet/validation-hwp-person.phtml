@@ -1,0 +1,23 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 29/08/18
+ * Time: 10:53
+ */
+?>
+<section class="container">
+    <h1>Validation hors-lot pour <strong><?= $person ?></strong></h1>
+    <div id="app"></div>
+    <script>
+        require(['vue', 'vue-resource', 'ValidationPeriod', 'bootbox'], function(Vue, VueResource, ValidationPeriod, bootbox){
+            Vue.use(VueResource);
+            new Vue({
+                el: "#app",
+                render: function(h){
+                    return h(ValidationPeriod.default, { props: {bootbox: bootbox}})
+                }
+            })
+        });
+    </script>
+</section>

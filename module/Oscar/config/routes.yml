@@ -77,7 +77,52 @@ timesheet:
         defaults:
             controller: Timesheet
     may_terminate: false
+
     child_routes:
+        resolve:
+            type: segment
+            options:
+                route: /resolve-invalid-labels
+                defaults:
+                    action: resolveInvalidLabels
+        activity:
+            type: segment
+            options:
+                route: /resume-activity/:id
+                defaults:
+                    action: resumeActivity
+        resume:
+            type: segment
+            options:
+                route: /resume
+                defaults:
+                    action: resume
+
+        declarations:
+            type: segment
+            options:
+                route: /declarations
+                defaults:
+                    action: declarations
+
+        import_ical:
+            type: segment
+            options:
+                route: /import-ical
+                defaults:
+                    action: importIcal
+        declarant:
+            type: segment
+            options:
+                route: /declarant
+                defaults:
+                    action: declarant
+        declarantapi:
+            type: segment
+            options:
+                route: /declarant-api
+                defaults:
+                    action: declarantAPI
         excel:
             type: segment
             options:
@@ -131,6 +176,40 @@ timesheet:
                 route: /validation-horaire/:idactivity
                 defaults:
                     action: validateTimesheet
+        validations:
+            type: segment
+            options:
+                route: /validations
+                defaults:
+                    action: validations
+
+        validationhwpperson:
+            type: segment
+            options:
+                route: /validation/hwp/:idperson
+                defaults:
+                    action: validationHWPPerson
+
+        validatepersonperiod:
+            type: segment
+            options:
+                route: /validation/person/:idperson
+                defaults:
+                    action: validatePersonPeriod
+
+        validationactivity:
+            type: segment
+            options:
+                route: /validation/activity/:idactivity
+                defaults:
+                    action: validationActivity
+
+        validationactivity2:
+            type: segment
+            options:
+                route: /validation/activity2/:idactivity
+                defaults:
+                    action: validationActivity2
 
         # Déclarations d'une personne pour une activité
         activityperson:
@@ -140,13 +219,13 @@ timesheet:
                 defaults:
                     action: indexPersonActivity
 
-        # Déclarations d'une activité (plusieurs personnes)
-        activity:
-            type: segment
-            options:
-                route: /activite/:idactivity
-                defaults:
-                    action: indexActivity
+#        # Déclarations d'une activité (plusieurs personnes)
+#        activity:
+#            type: segment
+#            options:
+#                route: /activite/:idactivity
+#                defaults:
+#                    action: indexActivity
 
         # Déclarations d'une personne
         person:
@@ -349,6 +428,12 @@ person:
             action: index
     may_terminate: true
     child_routes:
+        personnel:
+            type: segment
+            options:
+                route: '/personnel'
+                defaults:
+                    action: personnel
         synchronize:
             type: segment
             options:
@@ -361,6 +446,20 @@ person:
                 route: '/show/:id'
                 defaults:
                     action: show
+
+        access:
+            type: segment
+            options:
+                route: '/access/:id'
+                defaults:
+                    action: access
+
+        grant:
+            type: segment
+            options:
+                route: '/grant/:id'
+                defaults:
+                    action: grant
 
         notification:
             type: segment
@@ -511,6 +610,12 @@ organization:
                 route: '/edit/:id'
                 defaults:
                     action: edit
+        delete:
+            type: segment
+            options:
+                route: '/delete/:id'
+                defaults:
+                    action: delete
         close:
             type: segment
             options:
@@ -1268,6 +1373,14 @@ administration:
     may_terminate: true
 
     child_routes:
+        accueil:
+            type: segment
+            may_terminate: true
+            options:
+                route: /accueil
+                defaults:
+                    action: accueil
+
         connectors_home:
             type: segment
             may_terminate: true

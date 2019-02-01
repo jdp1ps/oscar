@@ -21,6 +21,7 @@ use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Entity\ValidationPeriod;
 use Oscar\Provider\Privileges;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -566,6 +567,10 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     }
 
+    public function generateNotificationValidation( ValidationPeriod $validationperiod ){
+        // todo Diffusion des notifications pour les déclarations
+    }
+
     /**
      * @param $message
      * @param $personsId
@@ -583,7 +588,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
 
         // Code unique
-        $hash = $serie . ':' . $dateEffective->format('Ymd');
+        $hash = $serie . ':' . $dateEffective->format('YmdH:i');
 
         /** @var Notification $notif */
         $notif = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);

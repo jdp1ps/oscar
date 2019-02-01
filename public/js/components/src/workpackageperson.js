@@ -12,6 +12,12 @@ Vue.use(VueResource);
 Vue.http.options.emulateJSON = true;
 Vue.http.options.emulateHTTP = true;
 
+Vue.filter('heures', function(h){
+    let heure = Math.floor(h);
+    let minutes = Math.round((h - heure)*60);
+    return heure +':' +minutes;
+})
+
 var WorkpackagePerson = {
   template: `<article class="workpackage-person">
                 <div class="displayname">
@@ -27,10 +33,10 @@ var WorkpackagePerson = {
                     </div>
                     <span v-else>
                         <strong class="wp-hours">
-                            <span title="Heure(s) saisie(s)" class="wp-hour unsend">{{person.unsend}}</span>
-                            <span title="Heure(s) validée(s)" class="wp-hour validate">{{person.validate}}</span>
-                            <span title="Heure(s) en cours de validation" class="wp-hour validating" v-if="person.validating > 0">{{person.validating}}</span>
-                            <span title="Heure(s) en conflit" class="wp-hour conflicts" v-if="person.conflicts > 0">{{person.conflicts}}</span>
+                            <span title="Heure(s) saisie(s)" class="wp-hour unsend">{{ person.unsend | heures }}</span>
+                            <span title="Heure(s) validée(s)" class="wp-hour validate">{{person.validate | heures}}</span>
+                            <span title="Heure(s) en cours de validation" class="wp-hour validating" v-if="person.validating > 0">{{person.validating | heures}}</span>
+                            <span title="Heure(s) en conflit" class="wp-hour conflicts" v-if="person.conflicts > 0">{{person.conflicts | heures}}</span>
                             <span title="Heure(s) à valider" class="wp-hour duration"> 
                                 / {{person.duration}}
                                 <a href="#" @click.prevent="handlerEdit" v-if="editable && mode == 'read'" title="Modifier les heures prévues"><i class="icon-pencil"></i></a>

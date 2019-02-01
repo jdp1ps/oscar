@@ -33,7 +33,6 @@ class FieldImportSetterStrategy implements IFieldImportStrategy
     public function run(&$activity, $datas, $index)
     {
         $setter = 'set'.ucfirst($this->key);
-        echo "$setter\n";
         $activity->$setter($datas[$index]);
         return $activity;
     }

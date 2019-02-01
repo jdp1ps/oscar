@@ -223,6 +223,7 @@ class EnrollController extends AbstractOscarController
 
     private function saveEnroll($class)
     {
+
         $labelTpl = "Ajout d'un <em>%s</em> dans <strong>%s</strong>";
 
         $enrollerId = $this->params()->fromRoute('idenroller', null);
@@ -371,19 +372,19 @@ class EnrollController extends AbstractOscarController
 
                 switch ($class) {
                     case ProjectMember::class :
-                        $this->getPersonService()->personProjectAdd($enroller, $enrolled, $roleObj);
+                        $this->getPersonService()->personProjectAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
                         $this->redirect()->toRoute('project/show', ['id' => $enroller->getId()]);
                         return;
                         break;
 
                     case ActivityPerson::class :
-                        $this->getPersonService()->personActivityAdd($enroller, $enrolled, $roleObj);
+                        $this->getPersonService()->personActivityAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
                         $this->redirect()->toRoute('contract/show', ['id' => $enroller->getId()]);
                         return;
                         break;
 
                     case OrganizationPerson::class :
-                        $this->getPersonService()->personOrganizationAdd($enroller, $enrolled, $roleObj);
+                        $this->getPersonService()->personOrganizationAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
                         $this->redirect()->toRoute('organization/show', ['id' => $enroller->getId()]);
                         return;
                         break;

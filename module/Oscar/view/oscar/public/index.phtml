@@ -60,13 +60,13 @@
 
         <div class="col-md-9">
 
-            <h1 style="font-size: 8em">OSCAR</h1>
+            <h1 style="font-size: 8em"><?= $this->appInfos()->nom ?></h1>
 
             <p><?= $this->appInfos()->desc ?><p>
-                <?php if( !$this->hasRole('user') ): ?>
+                <?php if( !$user ): ?>
                     <a href="<?= $this->url('zfcuser/login') ?>" class="btn btn-success btn-large">
                         <i class="glyphicon glyphicon-user"></i>
-                        Se connecter
+                        <?= $this->translate('Se connecter') ?>
                     </a>
                 <?php else: ?>
 
@@ -76,7 +76,7 @@
                         <strong><?= $user->getDisplayname() ?></strong>,
                     <?php else: ?>
                     <div class="alert alert-warning">
-                        <p>Votre compte n'est associé à aucun projet/activité de recherche</p>
+                        <p><?= $this->translate('Votre compte n\'est associé à aucun projet/activité de recherche') ?></p>
                     </div>
                     <?php endif; ?>
 
@@ -84,50 +84,68 @@
 
                     <div class="row">
                         <div class="col-md-12">
-                            <a href="<?= $this->url('project/mine') ?>" class="btn btn-primary"><i class="icon-cubes"></i> Voir mes projets</a>
+                            <a href="<?= $this->url('project/mine') ?>" class="btn btn-primary"><i class="icon-cubes"></i> <?= $this->translate('Voir mes projets') ?></a>
 
                             <?php if( $this->grant()->isBoss() ): ?>
                                <a href="<?= $this->url('project/structure') ?>" class="btn btn-primary">
                                    <i class="icon-building-filled"></i>
                                    Activités de ma-mes structure-s
                                </a>
-                                <a href="<?= $this->url('timesheet/organization') ?>" class="btn btn-primary">
-                                   <i class="icon-calendar"></i>
-                                   Déclarations dans ma-mes structure-s
-                               </a>
                             <?php endif; ?>
 
                             <?php if( $this->grant()->getCurrentPerson()
                                 && $this->grant()->isDeclarer()): ?>
-                                <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>">
+                                <a class="btn btn-primary" href="<?= $this->url('timesheet/declarant') ?>">
                                     <i class="icon-pencil"></i>
-                                    Déclarer mes heures
+                                    Déclarer des heures
                                 </a>
-                                <a class="btn btn-primary" href="<?= $this->url('timesheet/excel') ?>">
+                                <a class="btn btn-primary" href="<?= $this->url('timesheet/resume') ?>">
                                     <i class="icon-calendar"></i>
                                     Voir mes feuilles de temps
                                 </a>
-
                             <?php endif; ?>
 
-                            <?php if( count($timesheetRejected) ): ?>
+                            <?php if( count($periodsRejected) ): ?>
                                 <hr>
                                 <div class="alert alert-danger">
-                                    <i class="icon-warning-empty"></i>Vous avez des déclarations rejetées
-                                    <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>">
-                                        <i class="icon-pencil"></i>
-                                        Accéder à mes déclarations
-                                    </a>
+                                    <i class="icon-warning-empty"></i> Problème pour la/les déclaration(s) :
+                                    <?php foreach ($periodsRejected as $validationPeriod): ?>
+                                    <article>
+
+                                        <?php if( $validationPeriod['activity'] ): ?>
+                                        L'activité <strong><?= $validationPeriod['activity'] ?></strong>
+                                        <?php else: ?>
+                                        Les créneaux <strong><?= $validationPeriod['validation']->getLabel() ?> </strong>
+                                        <?php endif; ?>
+                                        pour la période <strong><?= $this->moment($validationPeriod['validation']->getFirstDayStr(), 'M Y') ?></strong>
+                                        <a class="btn btn-default btn-xs" href="<?= $this->url('timesheet/declarant') ?>?month=<?= $validationPeriod['validation']->getMonth() ?>&year=<?= $validationPeriod['validation']->getYear() ?>" >
+                                            <i class="icon-pencil"></i>
+                                            Modifier
+                                        </a>
+
+                                    </article>
+                                    <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
-                            <?php if( count($activitiesValidation) ): ?>
+
+                            <?php if( $isValidator ): ?>
+
+
+                                    <a href="<?= $this->url('timesheet/validations') ?>" class="btn <?= count($validations) > 0 ? 'btn-primary' : 'btn-default' ?>">
+                                        <i class="icon-pencil"></i>
+                                        Validation des feuilles de temps
+                                    </a>
+
+                            <?php endif; ?>
+
+                            <?php /* if( count($activitiesValidation) ): ?>
                                 <h1>Validation en attente</h1>
                                 <section>
                                     <?php foreach ($activitiesValidation as $activity): ?>
                                         <article class="card card-xs">
                                             <strong><?= $activity->getProject() ?></strong> /
                                             <?= $activity ?> :
-                                            <a href="<?= $this->url('timesheet/validation', ['idactivity' => $activity->getId()]) ?>">
+                                            <a href="<?= $this->url('timesheet/validationactivity', ['idactivity' => $activity->getId()]) ?>">
                                                 <i class="icon-pencil"></i>
                                                 Valider les déclarations
                                             </a>
@@ -135,6 +153,21 @@
                                     <?php endforeach; ?>
                                 </section>
                             <?php endif; ?>
+
+                            <?php if( count($validationsHorsLot) ): ?>
+                                <h1>Validation Hors-Lot (<?= count($validationsHotLot) ?>)</h1>
+                                <section>
+                                    <?php foreach ($validationsHorsLot as $val): ?>
+                                        <article class="card card-xs">
+                                            <strong><?= $val->getLabel() ?></strong> pour <strong><?= $val->getDeclarer() ?></strong>
+                                            <a href="<?= $this->url('timesheet/validationhwpperson', ['idperson' => $val->getDeclarer()->getId()]) ?>">
+                                                <i class="icon-pencil"></i>
+                                                Valider les déclarations
+                                            </a>
+                                        </article>
+                                    <?php endforeach; ?>
+                                </section>
+                            <?php endif; */?>
                         </div>
                         <div class="col-md-12">
                             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX) ): ?>
@@ -142,7 +175,7 @@
                                       method="get" class="form">
                                 <div class="input-group input-group">
                                     <input
-                                        placeholder="Rechercher dans les activités un PFI, un N°Oscar, la vie, l'univers ou le reste&hellip;"
+                                        placeholder="Rechercher dans les activités un PFI, un N°, la vie, l'univers ou le reste&hellip;"
                                         type="search"
                                         class="form-control input"
                                         name="q"

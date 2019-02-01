@@ -17,8 +17,10 @@ use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
+use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
@@ -41,6 +43,50 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  */
 class OscarUserContext extends UserContext
 {
+
+    public function hasPersonnelAccess(){
+        if( !$this->getCurrentPerson() ){
+            return false;
+        }
+        $access = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('listPersonnel');
+
+        // OFF
+        if( $access == 0 ) return false;
+
+        // Accès global
+        if( $this->hasPrivileges(Privileges::PERSON_INDEX) ) return true;
+
+        /** @var PersonRepository $personRepository */
+        $personRepository = $this->getEntityManager()->getRepository(Person::class);
+
+        /** @var OrganizationRepository $organisationRepository */
+        $organisationRepository = $this->getEntityManager()->getRepository(Organization::class);
+
+        // Accès niveau 1 : N+1
+        $subodinates = $personRepository->getSubordinatesIds($this->getCurrentPerson()->getId());
+        if( $access > 0 && count($subodinates) > 0 ) return true;
+
+        // Accès niveau 2 : Membre de l'organisation
+        $idsOrga = $organisationRepository->getOrganizationsIdsForPerson($this->getCurrentPerson()->getId());
+        $coworkers = $personRepository->getPersonIdsInOrganizations($idsOrga);
+        if( $access > 1 && count($coworkers) > 0 ) return true;
+
+        // Accès niveau 3 : ... et personnes impliquées dans les activités
+        $cocoworkers = $personRepository->getPersonIdsForOrganizationsActivities($idsOrga);
+        if( $access > 1 && count($cocoworkers) > 0 ) return true;
+
+        return false;
+    }
+
+    /**
+     * @return null|Authentification
+     */
+    public function getAuthentification(){
+        if( $this->getDbUser() ){
+            return $this->getEntityManager()->getRepository(Authentification::class)->find($this->getDbUser()->getId());
+        }
+        return null;
+    }
 
     /**
      * Retourne la liste des rôles disponibles.
@@ -639,10 +685,13 @@ class OscarUserContext extends UserContext
                 }
             }
             $tmpRolesOrganization[$key] = array_unique($tmpRolesOrganization[$key]);
-
         }
-
         return $tmpRolesOrganization[$key];
+    }
+
+    public function getPersonPrivilegesInOrganization( Person $person, Organization $organization ){
+        $roles = $this->getRolesPersonInOrganization($person, $organization);
+        return $this->getPrivilegesRoles($roles);
     }
 
     /**
@@ -761,6 +810,20 @@ class OscarUserContext extends UserContext
             return $this->getPrivilegesRoles($roles);
         }
     }
+
+    public function getPrivilegesPerson( Person $person ){
+
+    }
+
+    public function getPrivilegesOrganization( Organization $organization ){
+        if (!$this->getCurrentPerson()) {
+            return [];
+        } else {
+            return $this->getPersonPrivilegesInOrganization($organization);
+        }
+    }
+
+
 
     /**
      * Retourne un booléen indiquant si l'utilisateur courant dispose du privilége

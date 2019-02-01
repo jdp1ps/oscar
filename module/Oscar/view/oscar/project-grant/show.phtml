@@ -423,13 +423,68 @@
     <hr>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
         <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
-        <h3>Visualiser les feuilles de temps</h3>
+        <h3>Validateurs</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <h4>Activité</h4>
+                <?php if(count($validatorsPrj)):?>
+                    <?php foreach($validatorsPrj as $validateur): ?>
+                        <article class="card">
+                            <?= $validateur ?>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="alert alert-danger">
+                        Aucun validateur scientifique identifié pour cette activité
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="col-md-4">
+                <h4>Scientifique</h4>
+                <?php if(count($validatorsSci)):?>
+                    <?php foreach($validatorsSci as $validateur): ?>
+                        <article class="card">
+                            <?= $validateur ?>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="alert alert-danger">
+                        Aucun validateur scientifique identifié pour cette activité
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="col-md-4">
+                <h4>Administratif</h4>
+                <?php if(count($validatorsAdm)):?>
+                    <?php foreach($validatorsAdm as $validateur): ?>
+                        <article class="card">
+                            <?= $validateur ?>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="alert alert-danger">
+                        Aucun validateur administratif identifié pour cette activité
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <h3>Synthèse de déclarations</h3>
+        <a href="<?= $this->url('timesheet/activity', ['id' => $entity->getId()]) ?>"
+           class="btn btn-primary btn-large">
+            <i class="icon-calendar"></i>
+            Synthèse générale
+        </a>
+
+
+
+        <h3>Déclarants</h3>
         <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
             <?php if( $entity->hasDeclarant($personActivity->getPerson()) ):
                 $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($entity);
                 ?>
 
-                <a href="<?= $this->url('timesheet/excel') ?>?activityid=<?= $entity->getId() ?>&personid=<?= $personActivity->getPerson()->getId() ?>"
+                <a href="<?= $this->url('timesheet/resume') ?>?person_id=<?= $personActivity->getPerson()->getId() ?>"
                    class="btn <?=  $hasDeclaration ? 'btn-primary' : 'btn-default disabled' ?>">
                     <i class="icon-calendar"></i>
                     <?= $personActivity->getPerson() ?>
@@ -439,28 +494,7 @@
                 </a>
             <?php endif; ?>
         <?php endforeach; ?>
-
-        <h3>Gérer les déclarations</h3>
-        <?php if( $entity->hasTimesheetsUpForValidationAdmin() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ): ?>
-            <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
-                <i class="icon-archive"></i>
-                Validation administrative en attente
-            </a>
-        <?php endif; ?>
-        <?php if( $entity->hasTimesheetsUpForValidationSci() && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ): ?>
-            <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>" class="btn btn-primary">
-                <i class="icon-beaker"></i>
-                Validation scientifique en attente
-            </a>
-        <?php endif; ?>
-        <?php if( $entity->hasDeclarant($this->grant()->getCurrentPerson())  ): ?>
-            <?php if( $this->grant()->isDeclarer() && $this->grant()->getCurrentPerson() ): ?>
-                <a class="btn btn-primary" href="<?= $this->url('timesheet/declaration') ?>?activity_id=<?= $entity->getId() ?>">
-                    <i class="icon-calendar"></i>
-                    Déclarer vos heures
-                </a>
-            <?php endif; ?>
-        <?php endif; ?>
+    <?php endif; ?>
 
         <?php /*if( ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ||
                 $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ) &&
@@ -471,7 +505,7 @@
                 Validation des déclarations
             </a>
         <?php endif;*/ ?>
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION, $entity) ): ?>
+        <?php /*if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION, $entity) ): ?>
 
             <?php if( count($entity->getWorkPackages()) == 0 ): ?>
                 <p class="alert-infos">
@@ -501,18 +535,49 @@
             <?php endif; ?>
         <?php endif; ?>
 
-    <?php endif; ?>
+    <?php endif;  */ ?>
+
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
-
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <section>
         <h2><i class="icon-archive"></i> Lot de travail</h2>
         <div id="workpackages"></div>
     </section>
+
+
+
+
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <script>
-        require(['workpackageperson'], function(Workpackageperson){
+        require(['vue', 'vue-resource', 'bootbox', 'Workpackage'], function(Vue, VueResource, Bootbox, Workpackage){
+            Vue.use(VueResource);
+
+            Vue.http.options.emulateJSON = true;
+            Vue.http.options.emulateHTTP = true;
+
+            // Transmission du jeton
+            Vue.http.interceptors.push((request, next) => {
+                request.headers.set('X-CSRF-TOKEN', '<?= $tokenValue ?>');
+                request.headers.set('Authorization', 'OSCAR TOKEN');
+                next();
+            });
+
+            new Vue({
+                render: function(h){
+                    return h(Workpackage.default,{ props: {
+                        url: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>',
+                        token: '<?= $tokenValue ?>',
+                        isValidateur: true,
+                        editable: true,
+                        Bootbox: Bootbox,
+                    }})
+                },
+                el: '#workpackages'
+            })
+        });
+        /*
+        require(['workpackageperson', 'mm'], function(Workpackageperson, moment){
             var wp = new Workpackageperson.default({
                 http: {
                     root: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>'
@@ -533,7 +598,7 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
             wp.$on('declarer', function(){
                 window.location = '<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>';
             });
-        })
+        })*/
     </script>
     <?php endif; ?>
     <?php endif; ?>

@@ -12,11 +12,185 @@ return array(
         // Par défaut, pas de socket
         'socket' => false,
 
+        'theme' => 'oscar',
+
+        /////////////////////////////////////////////////////////////////////////////////// oscar_num_separator [string]
+        /// Permet de modifier le formalisme de la numérotation automatique dans Oscar, il faut également modifier
+        ///  la fonction Postgresql associée (doc/numerotation.md)
+        ///
+        'oscar_num_separator' => 'DRI',
+
+
+        ////////////////////////////////////////////////////////////////////// listPersonIncludeActivityMember [boolean]
+        /// Lorsque qu'un membre d'une organisation disposant du privilège "Liste des personnes"
+        /// accède à la liste du personnel de son organisation, cette denière ne propose que les personnes
+        /// qualifiées avec un rôle dans l'oganisation. Cette option permet d'ajouter à cette liste
+        /// les personnes impliquées dans des activités où la structure endosse un rôle principal.
+        ///
+        'listPersonIncludeActivityMember' => false,
+
         // ./doc/connectors.md
         'connectors' => [
             'organization' => [],
             'person' => []
         ],
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Champs masqués dans la fiche activité (Saisie)
+        'activity_hidden_fields' => [],
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// JOURS FERIÉS
+        'closedDays' => function(&$joursFeries, $annee, $mois){
+            $feries = [
+                '1' => [
+                    "$annee-1-1"    => 'Jour férié  (Nouvel an)',
+                ],
+                '2' => [],
+                '3' => [],
+                '4' => [],
+                '5' => [
+                    "$annee-5-1"     => 'Jour férié (Fête du travail)',
+                    "$annee-5-8"    => 'Jour ferié (Armistice 39-45)',
+                ],
+                '6' => [],
+                '7' => [
+                    "$annee-7-14"    => 'Jour ferié (Fête nationnale)',
+                ],
+                '8' => [
+                    "$annee-8-15"    => 'Jour ferié (Assomption)',
+                ],
+                '9' => [],
+                '10' => [],
+                '11' => [
+                    "$annee-11-1"  => 'Jour ferié (La Toussaint)',
+                    "$annee-11-11"  => 'Jour ferié (Armistice 14-18)',
+                ],
+                '12' => [
+                    "$annee-12-25"   => 'Jour ferié (Noël)',
+                ]
+            ];
+
+            // Lundi de pâque
+            $easterDate  = easter_date($annee);
+            $easterDay   = (int)date('j', $easterDate) + 1;
+            $easterMonth = date('n', $easterDate);
+            $easterYear   = date('Y', $easterDate);
+            $feries[$easterMonth][sprintf("%s-%s-%s", $easterYear, $easterMonth, $easterDay)] = "Jour ferié (Lundi de Pâques)";
+
+            // Jeudi de l'assension
+            $ascension = new DateTime(date('Y-m-d', $easterDate));
+            $ascension->add(new DateInterval('P40D'));
+            $feries[$ascension->format('n')][$ascension->format('Y-n-j')] = "Jour ferié (Jeudi de l'ascension)";
+
+            // Pentecôte
+            $pentecote = new DateTime(date('Y-m-d', $easterDate));
+            $pentecote->add(new DateInterval('P50D'));
+            $feries[$pentecote->format('n')][$pentecote->format('Y-n-j')] = "Jour ferié (Pentecôte)";
+
+            foreach ($feries[$mois] as $jour => $message){
+                $joursFeries[$jour] = $message;
+            }
+        },
+
+        'closedDaysExtras' => function($locked, $year, $month){},
+
+        // Mode de déclaration
+        // FALSE => en pourcentage
+        // TRUE => en heure
+        'declarationsHours' => false,
+
+        'declarationsWeekend' => false,
+        'declarationsWeekendOverwrite' => false,
+
+        // Authorise la personnalisation du mode de déclaration
+        'declarationsHoursOverwriteByAuth' => false,
+
+        // Modification des horaires de la personne
+        'declarationsScheduleOverwrite' => false,
+        'declarationsScheduleOverwriteValidation' => 'n+1', // OU via le privilège PERSON_MANAGE_SCHEDULE
+
+        // Durée standard d'une journée pour les déclarants (général)
+        'declarationsDayDuration' => 7.4,
+        'declarationsDayDurationMaxlength' => 9.0,
+
+        // Indication visuelle de dépassement problématique
+        // Journée de 8.0 heures => déclaré 8.0*.5 = 4.0
+        'declarationAmplitudeMin' => .75,
+
+        // Journée de 8.0 heures => 8.0*1.125 = 9.0
+        'declarationAmplitudeMax' => 1.25,
+
+        // Durée standards d'une semaine
+        'declarationsWeekDuration' => 7.4*5,
+
+
+        'declarationsWeekDurationMaxlength' => 39.0,
+
+        'declarationsMonthDuration' => 144.0,
+        'declarationsMonthDurationMaxlength' => 176.0,
+
+        'userSubmitSchedule' => false,
+        'userSubmitScheduleValidateByNp1' => true,
+        'userSubmitScheduleValidateByPrivilege' => \Oscar\Provider\Privileges::PERSON_MANAGE_SCHEDULE,
+
+        // Niveau d'accès à la liste du personnel
+        //  - 0
+        //  - 1 = N=1
+        //  - 2 = Personnel dans l'oganisation
+        //  - 3 = Person dans l'organisation, et dans les activités
+        'listPersonnel' => 0,
+
+        'scheduleModeles' => [
+            'fulltime' => [
+                'label' => 'Plein temps',
+                'week' => 35.0,
+                'days' => [
+                    1 => 7.0,
+                    2 => 7.0,
+                    3 => 7.0,
+                    4 => 7.0,
+                    5 => 7.0
+                ]
+            ],
+
+            'halftime' => [
+                'label' => 'Mi-temps',
+                'week' => 17.5,
+                'days' => [
+                    1 => 3.5,
+                    2 => 3.5,
+                    3 => 3.5,
+                    4 => 3.5,
+                    5 => 3.5
+                ]
+            ],
+
+            'parttime' => [
+                'label' => 'Mi-temps',
+                'week' => 30.0,
+                'days' => [
+                    1 => 6.0,
+                    2 => 6.0,
+                    3 => 6.0,
+                    4 => 6.0,
+                    5 => 6.0
+                ]
+            ],
+        ],
+
+
+
+        'horslots' => [
+            'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
+            'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
+            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
+            //  'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
+            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+            'other' => [ 'code' => 'other', 'label' => 'Divers',  'description' => 'Autre activité', 'icon' => true ],
+        ],
+
 
         ////////////////////////////////////////////////////////////// DOCUMENTS
         // Emplacement des dossiers pour les documents
