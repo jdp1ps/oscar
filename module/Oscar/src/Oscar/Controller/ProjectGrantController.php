@@ -493,7 +493,7 @@ class ProjectGrantController extends AbstractOscarController
         $doc = $this->params()->fromRoute('doc');
 
         if( $doc == "dump" ){
-            echo "<table>";
+            echo "<table border='1'>";
             $activity = $this->getProjectGrantService()->getGrant($id);
             foreach ($activity->documentDatas() as $key=>$value) {
                 echo "<tr>";

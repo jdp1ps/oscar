@@ -1738,22 +1738,59 @@ class Activity implements ResourceInterface
             $datas["$slug-list"] = $ps;
         }
 
-        $versements = [];
+        $jalons = [];
+        /** @var ActivityDate $milestone */
+        foreach ($this->getMilestones() as $milestone) {
+            $milestoneStr = $milestone->getType()->getLabel();
+            if( !array_key_exists($milestoneStr, $jalons) ){
+                $jalons[$milestoneStr] = [];
+            }
+            $jalons[$milestoneStr][] = $milestone->getDateStart()->format('d/m/Y');
+        }
+
+        foreach ($jalons as $type=>$date) {
+            $slug = $sluger->slugify($type);
+            $datas['jalon-'.$slug] = implode(', ', $date);
+            $datas["jalon-$slug-list"] = $date;
+        }
+
+        // $slug = $sluger->slugify($milestone->getType()->getLabel());
+
+        $versementsPrevus = [];
+        $versementsPrevusStr = [];
+        $versementsPrevusDate = [];
+        $versementsEffectues = [];
+        $versementsEffectuesStr = [];
+        $versementsEffectuesDate = [];
 
         /** @var ActivityPayment $payment */
         foreach ($this->getPayments() as $payment){
-            $versements[] = $payment->getAmount();
-            if( !array_key_exists($roleStr, $organizations) ){
-                $organizations[$roleStr] = [];
-            }
-            $organizations[$roleStr][] = (string) $organisationActivity->getOrganization();
-        }
 
-        foreach ($organizations as $role=>$ps) {
-            $slug = $sluger->slugify($role);
-            $datas[$slug] = implode(', ', $ps);
-            $datas["$slug-list"] = $ps;
+            $amount = number_format($payment->getAmount(), 2) . ' ' . $this->getCurrency()->getSymbol();
+
+            if($payment->getDatePayment()){
+                $date = $payment->getDatePayment()->format('d/m/Y');
+                $versementsEffectues[] = $amount;
+                $versementsEffectuesStr[] = $amount . ' le ' . $date;
+                $versementsEffectuesDate[] = $date;
+            } else {
+                $date = $payment->getDatePredicted()->format('d/m/Y');
+
+                $versementsPrevus[] = $amount;
+                $versementsPrevusStr[] = $amount . ' le ' . $date;
+                $versementsPrevusDate[] = $payment->getDatePredicted()->format('d/m/Y');
+            }
         }
+        $datas['versements-prevus'] = implode(', ', $versementsPrevusStr);
+        $datas['versements-effectues'] = implode(', ', $versementsEffectuesStr);
+        // TODO
+//        for( $i=0; $i<count($versementsPrevus); $i++ ){
+//
+//        }
+//
+//        for( $i=0; $i<count($versementsEffectues); $i++ ){
+//
+//        }
 
         return $datas;
 
