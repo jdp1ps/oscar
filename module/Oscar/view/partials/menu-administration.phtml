@@ -22,8 +22,6 @@ if(
             <li><a href="<?= $this->url('organization') ?>">Liste des organisations</a></li>
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
                 <li><a href="<?= $this->url('organization/new') ?>">Nouvelle organisation</a></li>
-                <li><a href="<?= $this->url('organization/fusion') ?>">Fusion d'organisations</a></li>
-                <li><a href="<?= $this->url('organization/scission') ?>">Scission d'organisations</a></li>
             <?php endif; ?>
         <?php endif; ?>
 
@@ -33,9 +31,7 @@ if(
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                 <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
             <?php endif; ?>
-            <?php /*if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION)): ?>
-                <li><a href="<?= $this->url('timesheet/declarers') ?>">Liste des déclarants</a></li>
-            <?php endif;*/ ?>
+
         <?php endif; ?>
 
 
@@ -52,48 +48,9 @@ if(
         <li><a href="<?= $this->url('project/empty') ?>"><?= $this->translate("Projets sans activité") ?></a></li>
         <?php endif; ?>
 
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE) ):?>
-            <li><a href="<?= $this->url('timesheet/declarations') ?>"><?= $this->translate("Feuille de temps") ?></a></li>
-        <?php endif; ?>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
-            <li><a href="<?= $this->url('administration/connectors_home') ?>"><?= $this->translate("Synchronisation des donnèes") ?></a></li>
-        <?php endif; ?>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD) ):?>
-            <li><a href="<?= $this->url('administration/activity_index') ?>"><?= $this->translate("Mise à jour de l'index de recherche") ?></a></li>
-        <?php endif; ?>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ): ?>
-            <li role="presentation" class="dropdown-header"><i class="icon-lock"></i><?= $this->translate("Droits et sécurités") ?></li>
-            <li><a href="<?php echo $this->url('administration') ?>"><?= $this->translate("Privilèges et droits") ?></a></li>
-            <li><a href="<?php echo $this->url('administration/users') ?>"><?= $this->translate("Authentifications actives") ?></a></li>
-            <li><a href="<?php echo $this->url('administration/organizationrole') ?>"><?= $this->translate("Rôle des organisations") ?></a></li>
-        <?php endif; ?>
-
-
         <li role="presentation" class="dropdown-header"><i class="icon-cog"></i> Configuration</li>
 
         <li><a href="<?= $this->url('administration/accueil') ?>"><?= $this->translate("Configuration et maintenance") ?></a></li>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)) : ?>
-            <li><a href="<?= $this->url('activitytype') ?>"><?= $this->translate("Types d'activité") ?></a></li>
-        <?php endif; ?>
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE) ): ?>
-            <li><a href="<?= $this->url('datetype') ?>"><?= $this->translate("Types de jalon") ?></a></li>
-        <?php endif; ?>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE) ): ?>
-        <li><a href="<?php echo $this->url('administration/typedocument') ?>"><?= $this->translate("Types de documents") ?></a></li>
-        <?php endif; ?>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ): ?>
-        <li><a href="<?= $this->url('administration/organizationtype') ?>"><?= $this->translate("Types d'organisation") ?></a></li>
-        <?php endif; ?>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DISCIPLINE_MANAGE) ):?>
-            <li><a href="<?= $this->url('administration/discipline') ?>"><?= $this->translate("Gérer les disciplines") ?></a></li>
-        <?php endif; ?>
     </ul>
 </li>
 <?php endif; ?>

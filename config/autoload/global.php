@@ -25,6 +25,15 @@ return array(
         'oscar_num_separator' => 'DRI',
 
 
+        'export' => [
+            'payments' => [
+                'separator' => '$$',
+                'persons' => '',
+                'organizations' => 'Composante responsable,Laboratoire,Financeur'
+            ]
+        ],
+
+
         ////////////////////////////////////////////////////////////////////// listPersonIncludeActivityMember [boolean]
         /// Lorsque qu'un membre d'une organisation disposant du privilège "Liste des personnes"
         /// accède à la liste du personnel de son organisation, cette denière ne propose que les personnes

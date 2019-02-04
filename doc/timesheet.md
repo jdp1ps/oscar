@@ -266,3 +266,15 @@ Cet écran propose un récapitulatif par mois des déclarations
 Et le détails de chaque déclaration
 ![Synthèse 2](images/synthes-activite-details.png)
 
+
+## Usurpation
+
+Oscar intègre un mécanisme d'*usurpation* pour autoriser un tiers de compléter la feuille de temps d'une autre personne.
+
+L'interface de saisie est accessible depuis la fiche de la personne.
+
+### Globale
+
+Cette fonctionnalité peut être accordée de façon générale via les privilèges, ou individurellement à partir de la fiche personne : 
+
+

@@ -20,11 +20,10 @@ class ProjectGrantRepository extends EntityRepository{
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
 
-        $qb->select('pg, p, m, s, t')
+        $qb->select('pg, p, m, t')
             ->from('Oscar\Entity\ProjectGrant', 'pg')
             ->leftJoin('pg.project', 'p')
             ->leftJoin('pg.type', 't')
-            ->leftJoin('pg.source', 's')
             ->leftJoin('p.members', 'm');
 
         return $qb;

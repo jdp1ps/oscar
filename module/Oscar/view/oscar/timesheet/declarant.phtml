@@ -57,7 +57,8 @@
                         defaultMonth: <?= $month ?>,
                         moment: moment,
                         bootbox: bootbox,
-                        urlimport: '<?= $this->url('timesheet/import_ical') ?>'
+                        url: '<?= $this->url('timesheet/declarant').($usurpation?"?person=$usurpation":"?") ?>',
+                        urlimport: '<?= $this->url('timesheet/import_ical'). ($usurpation?"?person=$usurpation":"?")?>'
                     }
                 });
             }

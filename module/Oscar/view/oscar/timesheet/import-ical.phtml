@@ -48,6 +48,8 @@
                         props: {
                             ICAL: window.ICAL,
                             moment: moment,
+                            personId: <?= $person->getId() ?>,
+                            person: "<?= $person ?>",
                             dayLength: 7.5,
                             periodStart: '<?= $period ?>',
                             periodMax: '<?= $periodMax ?>',

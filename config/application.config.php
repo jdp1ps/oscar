@@ -7,7 +7,6 @@ $config = array(
         'ZfcUser',
         'ZfcUserDoctrineORM',
         'BjyAuthorize',
-        //'ZendDeveloperTools',
         'UnicaenApp',
         'UnicaenAuth',
         'Oscar',
@@ -23,6 +22,10 @@ $config = array(
         ),
     ),
 );
+
+if (\Zend\Console\Console::isConsole()) {
+    unset($config['modules'][array_search('BjyAuthorize', $config['modules'])]);
+}
 
 if( getenv('APPLICATION_ENV') == 'development' ){
     //$config['modules'][] = 'ZendDeveloperTools';

@@ -23,7 +23,8 @@
                     return h(ActivitySearchUi.default, {
                         props: {
                             url: '<?= $this->url('contract/api') ?>',
-                            first: true
+                            first: true,
+                            title: '<?= $this->translate("Mes activités de recherche") ?>'
                         }
                     })
                 }

@@ -764,7 +764,12 @@ class ProjectGrantController extends AbstractOscarController
 
         $payments = $this->getProjectGrantService()->getPaymentsByActivityId($ids,
             $organizations);
+
         $formatter = new ActivityPaymentFormatter();
+        $formatter->setRolesOrganizations($this->getConfiguration('oscar.export.payments.organizations'));
+        $formatter->setRolesPerson($this->getConfiguration('oscar.export.payments.persons'));
+        $formatter->setSeparator($this->getConfiguration('oscar.export.payments.separator'));
+
         $csv = [];
 
         // Fichier temporaire

@@ -261,16 +261,18 @@ return array(
                 // ORGANIZATION
                 ////////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Organization',
+                    'action' => ['delete'],
+                    'roles' => ['user']
+
+                ],
+                [ 'controller' =>   'Organization',
                     'action' => ['index', 'search'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_INDEX
                 ],
+
                 [ 'controller' =>   'Organization',
                     'action' => ['show'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_SHOW
-                ],
-                [ 'controller' =>   'Organization',
-                    'action' => ['delete'],
-                    'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_DELETE
                 ],
                 [ 'controller' =>   'Organization',
                     'action' => ['edit', 'new', 'syncLdap', 'merge', 'close'],
@@ -877,8 +879,6 @@ return array(
             'Person' => \Oscar\Controller\PersonController::class,
             'Organization' => \Oscar\Controller\OrganizationController::class,
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
-            'CentaureSync' => \Oscar\Controller\CentaureSyncController::class,
-            //'Contract' => \Oscar\Controller\ContractController::class,
             'Activity' => \Oscar\Controller\ProjectGrantController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,

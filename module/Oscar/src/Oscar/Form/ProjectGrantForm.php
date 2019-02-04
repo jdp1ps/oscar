@@ -138,7 +138,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'name'   => 'tva',
             'options' => [
                 'label' => "TVA",
-                'value_options' => Util::collectionAsOptions($grantService->getTVAs())
+                'value_options' => $this->getServiceLocator()->get('ProjectGrantService')->getTVAsValuesOptions()
             ],
             'attributes' => [
                 'class' => 'form-control'

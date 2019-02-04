@@ -8,19 +8,15 @@
 namespace Oscar\Controller;
 
 
-use Doctrine\DBAL\Driver\PDOException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\ORM\Tools\SchemaValidator;
-use Moment\Moment;
 use Oscar\Connector\ConnectorActivityCSVWithConf;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Connector\ConnectorOrganizationJSON;
 use Oscar\Connector\ConnectorPersonHarpege;
-use Oscar\Connector\ConnectorPersonHydrator;
 use Oscar\Connector\ConnectorPersonJSON;
 use Oscar\Connector\ConnectorRepport;
 use Oscar\Connector\GetJsonDataFromFileStrategy;
@@ -48,39 +44,21 @@ use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\MailingService;
 use Oscar\Service\NotificationService;
-use Oscar\Service\ShuffleDataService;
 use Oscar\Strategy\Search\ActivityElasticSearch;
 use Oscar\Strategy\Search\ActivityZendLucene;
 use Oscar\Utils\ActivityCSVToObject;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
-use UnicaenAuth\Authentication\Adapter\Ldap;
 use Zend\Console\Adapter\AdapterInterface;
 use Zend\Console\ColorInterface;
-use Zend\Console\Console;
 use Zend\Console\Prompt\Confirm;
 use Zend\Console\Prompt\Line;
 use Zend\Console\Prompt\Password;
-use Zend\Console\Prompt\PromptInterface;
 use Zend\Console\Prompt\Select;
 use Zend\Crypt\Password\Bcrypt;
-use Zend\Diactoros\Exception\DeprecatedMethodException;
 
 class ConsoleController extends AbstractOscarController
 {
-
-    public function updateAction()
-    {
-        $validator = new SchemaValidator($this->getEntityManager());
-        $errors = $validator->validateMapping();
-
-        if (count($errors) > 0) {
-            var_dump($errors);
-            // Lots of errors!
-            echo implode("\n\n", $errors);
-        }
-        die('UPDATE');
-    }
 
     ////////////////////////////////////////////////////////////////////////////
     ///
@@ -153,6 +131,81 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    public function patch_initialData(){
+        $this->consoleHeader("Chargement des données initiale : ");
+        $em = $this->getEntityManager();
+
+        // Fichier source
+        $fichier = realpath(__DIR__.'/../../../../../install/initiale-datas.json');
+        if( !file_exists($fichier) ){
+            $this->consoleError("Le fichier contenant les données initiales n'existe pas ou n'est pas accessible.");
+            return;
+        }
+        $this->consoleKeyValue("Accès au fichier", "OK");
+
+
+        // conversion JSON
+        $datas = file_get_contents($fichier);
+        $json = json_decode($datas, JSON_OBJECT_AS_ARRAY);
+        if( !$json ){
+            $this->consoleError("Mauvais format JSON : " . json_last_error_msg() . "\n" . $datas);
+            exit(1);
+        }
+        $this->consoleKeyValue("Conversion JSON", "OK");
+
+
+        // Traitement des catégories de privilège
+        if( !array_key_exists('categoriesprivileges', $json) ){
+            $this->consoleError("la clef 'categoriesprivileges' est manquante");
+            return;
+        }
+        $this->consoleHeader("Traitment des catégories de privilège");
+        $cpRepo = $em->getRepository(CategoriePrivilege::class);
+        foreach ($json['categoriesprivileges'] as $dt) {
+            $code = $dt['code'];
+            $exist = $cpRepo->findBy(['code' => $code]);
+            if( !$exist ){
+                try {
+                    $label = $dt['label'];
+                    $cat = new CategoriePrivilege();
+                    $em->persist($cat);
+                    $cat->setCode($code)->setLibelle($label);
+                    $em->flush($cat);
+                    $this->consoleKeyValue("Création de la catégorie '$code:$label'", "OK");
+                } catch (\Exception $e) {
+                    $this->consoleError("Impossible de créer la catégorie $code:$label : " . $e->getMessage());
+                    exit(1);
+                }
+            }
+        }
+
+        // Traitement des rôles
+        if( !array_key_exists('roles', $json) ){
+            $this->consoleError("la clef 'roles' est manquante");
+            return;
+        }
+        $this->consoleHeader("Traitment des rôles");
+        $roleRepository = $em->getRepository(Role::class);
+        foreach ($json['roles'] as $roleDT) {
+            $roleId = $roleDT['roleId'];
+            $exist = $roleRepository->findBy(['roleId' => $roleId]);
+            if( !$exist ){
+                try {
+                    $roleCreate = new Role();
+                    $em->persist($roleCreate);
+                    $roleCreate->setRoleId($roleId);
+                    $em->flush($roleCreate);
+                    $this->consoleKeyValue("Création du rôle '$roleId'", "OK");
+                } catch (\Exception $e) {
+                    $this->consoleError("Impossible de créer le rôle $roleId : " . $e->getMessage());
+                    exit(1);
+                }
+            }
+        }
+
+        echo $datas;
+
+    }
 
     /**
      * Maintenance : Recalcule les indices de séquence pour les IDs.

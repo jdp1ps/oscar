@@ -33,6 +33,38 @@ class DataExtractorFullnameTest extends TestCase
     }
 
     /**
+     * Test (TOURS)
+     */
+    public function test2()
+    {
+        $input = "NATHALIE HEUZE VOURC'H";
+        $extractor = new DataExtractorFullname();
+
+        $datas = $extractor->extract($input);
+
+        $this->assertEquals('NATHALIE', $datas['firstname']);
+        $this->assertEquals('HEUZE VOURC\'H', $datas['lastname']);
+        $this->assertEquals('NATHALIE HEUZE VOURC\'H', $datas['fullname']);
+        $this->assertEquals('', $datas['email']);
+    }
+
+    /**
+     * Test (TOURS)
+     */
+    public function test3()
+    {
+        $input = "JORGE ERNESTO MENDOZA GIMENEZ";
+        $extractor = new DataExtractorFullname();
+
+        $datas = $extractor->extract($input);
+
+        $this->assertEquals('JORGE', $datas['firstname']);
+        $this->assertEquals('ERNESTO MENDOZA GIMENEZ', $datas['lastname']);
+        $this->assertEquals('JORGE ERNESTO MENDOZA GIMENEZ', $datas['fullname']);
+        $this->assertEquals('', $datas['email']);
+    }
+
+    /**
      * Simple avec Email
      */
     public function testSimpleAvecEmail()

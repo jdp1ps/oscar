@@ -138,10 +138,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             $msg = 'exception: ' . $e->getParam('exception')->getMessage();
         } elseif ( is_string($e->getParam('exception'))) {
             $msg = 'error: ' . $e->getParam('exception');
-        } else {
-            $msg = "Erreur non identifiée";
-        }
-
+	} else {
+		return;
+	}	
         $this->getLogger()->error("$base $msg");
     }
     public function onUserLogin( $e ){

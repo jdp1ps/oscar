@@ -374,6 +374,7 @@
     "libelle": "Voir les donn\u00e9es administratives",
     "fullcode": "PERSON-INFOS_RH"
   },
+
   "PERSON-VIEW_TIMESHEET": {
     "category_id": 3,
     "spot": 7,
@@ -382,7 +383,13 @@
     "fullcode": "PERSON-VIEW_TIMESHEET"
   },
 
-
+  "PERSON-FEED_TIMESHEET": {
+    "category_id": 3,
+    "spot": 7,
+    "code": "FEED_TIMESHEET",
+    "libelle": "Peut compléter les feuilles de temps de n'importe quel déclarant",
+    "fullcode": "PERSON-FEED_TIMESHEET"
+  },
 
   "ORGANIZATION-INDEX": {
     "category_id": 4,

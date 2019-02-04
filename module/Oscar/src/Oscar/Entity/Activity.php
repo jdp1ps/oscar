@@ -151,14 +151,6 @@ class Activity implements ResourceInterface
     private $centaureNumConvention;
 
     /**
-     * Nature de la subvension.
-     *
-     * @var GrantSource
-     * @ORM\ManyToOne(targetEntity="GrantSource")
-     */
-    private $source;
-
-    /**
      * Type d'activité
      *
      * @var ActivityType
@@ -706,24 +698,6 @@ class Activity implements ResourceInterface
             $this->workPackages->removeElement($workPackage);
             $workPackage->setActivity(null);
         }
-    }
-
-    /**
-     * @return GrantSource
-     */
-    public function getSource()
-    {
-        return $this->source;
-    }
-
-    /**
-     * @param GrantSource $source
-     */
-    public function setSource($source)
-    {
-        $this->source = $source;
-
-        return $this;
     }
 
     /**
@@ -1803,7 +1777,6 @@ class Activity implements ResourceInterface
             'Début' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
             'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
             'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
-            'source' => $this->getSource() ? (string)$this->getSource() : "",
             'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, ',', ' '),
             'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ' '),
             'Frais de gestion' => number_format($this->getFraisDeGestion(), 2, ',', ''),
@@ -1827,7 +1800,6 @@ class Activity implements ResourceInterface
             'Début',
             'Fin',
             'Date de signature',
-            'source',
             'versement effectué',
             'versement prévu',
             'Frais de gestion',
@@ -1896,7 +1868,6 @@ class Activity implements ResourceInterface
             'dateStart' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
             'dateEnd' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
             'dateSigned' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
-            'source' => $this->getSource() ? (string)$this->getSource() : "",
             'paymentReceived' => $this->getTotalPaymentReceived(),
             'paymentProvided' => $this->getTotalPaymentProvided(),
         );

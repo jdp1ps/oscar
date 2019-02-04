@@ -37,7 +37,7 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
     "tva": null,
     "currency": null,
     "assietteSubventionnable": null,
-    "financialImpact": null,
+    "financialImpact": "Aucune",
     "organizations": {
       "Laboratoire": ["Cyberdyne", "US Robots"]
     },
@@ -139,7 +139,7 @@ payments        | Array     | Oui       | Non    | Voir détails dans [Gestion d
     "tva": null,
     "currency": null,
     "assietteSubventionnable": null,
-    "financialImpact": null,
+    "financialImpact": "Aucune",
     "organizations": {},
     "persons": {},
     "milestones": [],
@@ -155,7 +155,7 @@ payments        | Array     | Oui       | Non    | Voir détails dans [Gestion d
 
 Cette clef contient une valeur unique permettant à Oscar de maintenir le lien logique entre l'activité dans la base de données et l'information dans le fichier JSON. Elle permet de mettre à jour l'activité si le script d'importation est éxécuté plusieurs fois.
 
-### La clef `statut`
+### La clef `status`
 
 Cette clef permet de rensigner le statut de l'activité en utilisant un code standard (un entier) : 
 
@@ -169,6 +169,8 @@ Cette clef permet de rensigner le statut de l'activité en utilisant un code sta
 | 250  | Dossier abandonné
 | 201  | Refusé
 | 404  | Conflit (pas de statut)
+
+> Si aucun statut n'est fourni, la valeur par défaut sera 404 (Conflit, pas de statut)
 
 
 ### Donnée projet (les clefs `acronym` et `projectlabel`)
