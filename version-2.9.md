@@ -15,14 +15,11 @@ Détails sur cette fonctionnalité : [Demande d'activités](doc/activity-request
 
 Le code a été purgé des références à un ancien système de classification des activités (Source). A priori, toutes les références ont été supprimées, la table **grantsource** est donc maintenant inutile. Vous pourrez la supprimer après avoir appliqué la mise à jour.
 
+## Export des versements (config)
+
+La version initiale de l'export des versements proposée les rôles de organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurable dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
 
 ## UP / FIX
 
  - Fix : Bug d'affichage des arrondis dans les versements
  - Fix : La table/entités/références Grantsource ont été supprimées
- 
-
-
-
-
-

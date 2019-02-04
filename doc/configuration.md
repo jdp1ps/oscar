@@ -161,7 +161,7 @@ Une option permet de masquer certains champs :
 
  - Discipline
  - Frais de gestion
- 
+
 Pour cela, modifier le configuration Oscar dans le fichier `config/autoload/local.php` : 
 
 ```php
@@ -184,3 +184,38 @@ return array(
 ## Demande d'activité
 
 Présentation et configuration des [Demande d'activité](./activity-request.md)
+
+## Export des versements
+
+Oscar propose différentes options pour régler la sortie CSV pour l'export des versements. Voici les options par défaut : 
+
+```php
+// config/autoload/local.php
+return array(
+    // ...
+    'oscar' => [
+    	// Exports
+        'export' => [
+        
+        	// Export des versements
+            'payments' => [
+            
+            	// Chaîne de séparation
+                'separator' => '$$',
+                
+                // Rôles des personnes
+                // intitulés des rôles des personnes séparés par une virgule
+                'persons' => '',
+                
+                // Rôles des organisation
+                // intitulés des rôles des organisations séparés par une virgule
+                'organizations' => 'Composante responsable,Laboratoire,Financeur'
+            ]
+        ],
+     // ..
+     ]
+);
+```
+
+Vous pouvez surcharger ces paramètres dans la configuration locale
+
