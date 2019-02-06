@@ -4535,6 +4535,12 @@ pre.alert-danger, pre.alert-info {
   }
 }
 
+@media print {
+  .overlay {
+    background: white;
+  }
+}
+
 .overlay {
   position: fixed;
   top: 0;

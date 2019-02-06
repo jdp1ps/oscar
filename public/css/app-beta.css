@@ -8616,6 +8616,10 @@ pre.alert-danger, pre.alert-info {
   to {
     background: #ffffff; } }
 
+@media print {
+  .overlay {
+    background: white; } }
+
 .overlay {
   position: fixed;
   top: 0;
