@@ -1,4 +1,6 @@
 ﻿-- Suppression des données
+DELETE FROM validationperiod;
+DELETE FROM activityrequest;
 DELETE FROM activityperson;
 DELETE FROM activityorganization;
 DELETE FROM contractdocument;
@@ -8,6 +10,7 @@ DELETE FROM activitydate;
 DELETE FROM projectmember;
 DELETE FROM projectpartner;
 DELETE FROM timesheet;
+--DELETE FROM timesheetby;
 DELETE FROM workpackageperson;
 DELETE FROM workpackage;
 DELETE FROM notificationperson;
