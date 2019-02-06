@@ -23,6 +23,64 @@ Par exemple si vous souhaitez remplacer la chaîne "DRI" par "LAB", la ligne dev
 separator text := 'LAB';
 ```
 
+La fonction finale doit ressembler à ça : 
+
+```sql
+
+DECLARE
+	activity_record activity;
+	year int;
+	last_num text;
+	num text;
+	separator text := 'DRI';
+	counter_val int;
+BEGIN
+    ------------------------------------------------------------------------------------
+    -- On récupère l'activité qui va bien
+    SELECT * INTO activity_record FROM activity WHERE id = activity_id;
+
+    -- Err : Pas d'activité
+    IF activity_record IS NULL THEN
+        RAISE EXCEPTION 'Activité % non trouve', activity_id;
+    END IF;
+
+    -- Err : Activité déjà numérotée
+    IF activity_record.oscarnum IS NOT NULL THEN
+        RAISE EXCEPTION 'Cette activité (%) est déjà numérotée', activity_id;
+    END IF;
+    -------------------------------------------------------------------------------------
+
+    -------------------------------------------------------------------------------------
+    -- Récupération du plus grand numéro précédent :
+
+    -- On récupère l'année de l'activité (Si elle est null, on utilise l'année courante)
+    year := EXTRACT(YEAR FROM activity_record.dateSigned);
+    IF year IS NULL THEN
+        year = EXTRACT(YEAR FROM activity_record.dateCreated);
+    END IF;
+    IF year IS NULL THEN
+        year = EXTRACT(YEAR FROM CURRENT_TIMESTAMP);
+    END IF;
+
+    -- On récupère le dernier numéro pour cette année
+    SELECT MAX(oscarNum) INTO last_num FROM activity WHERE oscarnum LIKE year || (separator ||'%');
+    
+    IF last_num IS NULL THEN
+        counter_val := 0;
+    ELSE
+        counter_val := substring(last_num FROM (5 + char_length(separator)) FOR 5)::int;
+    END IF;
+
+    counter_val := counter_val + 1;
+
+    num := CONCAT(year, separator, to_char(counter_val, 'fm00000'));
+
+    UPDATE activity SET oscarNum = num WHERE id = activity_id;
+
+    RETURN num;
+END;
+```
+
 Ensuite, il faut mettre à jour la configuration Oscar : 
 
 
