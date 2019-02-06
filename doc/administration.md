@@ -25,6 +25,11 @@ Dupliquer la base de données :
 CREATE DATABASE <copy> WITH TEMPLATE <original> OWNER <user>;
 ```
 
+### DUMPER la base
+
+```bash
+pg_dump --clean --no-owner -h localhost -U oscar oscar_prod > /tmp/oscar-backup.sql
+```
 
 ### Vider la base
 
@@ -35,6 +40,10 @@ psql -U <USENAME> -h <HOST> -W -d <DATABASE> -a -f databases_maintenance/delete-
 ```
 
 > Le script `databases_maintenance/delete-database.sql` est utilisé pour générer la structure minimale utilisée lors de l'installation initiale. 
+
+### Supprimer la base
+
+
 
 
 ### Dump de la base dans un fichier

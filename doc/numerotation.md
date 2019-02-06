@@ -14,16 +14,14 @@ La numérotion automatique repose sur une fonction *Postgresql* : `activity_num_
 Vous pouvez modifier la fonction en cherchant la ligne 
 
 ```sql
-num := CONCAT(year, 'DRI', to_char(counter_val, 'fm00000'));
+separator text := 'DRI';
 ```
 
 Par exemple si vous souhaitez remplacer la chaîne "DRI" par "LAB", la ligne deviendra : 
 
 ```sql
-num := CONCAT(year, 'LAB', to_char(counter_val, 'fm00000'));
+separator text := 'LAB';
 ```
-
-> La chaîne de séparation est prévue pour avoir 3 caractères, cette taille pourra étre étendue dans la version 2.9 "Matrix"
 
 Ensuite, il faut mettre à jour la configuration Oscar : 
 
@@ -46,4 +44,9 @@ return array(
 ```
 
 Cette ne configuration, une fois choisie ne doit pas être modifiée. Dans le cas contraire, il faudra penser à mettre à jour les numérotations des activités déjà enregistrées en base de données pour qu'elles respectent toutes le même formalisme.
+
+```sql
+-- Mettre à jour la numérotation sous la forme yyyyLABxxxxx
+UPDATE activity SET oscarnum = regexp_replace(oscarnum, '(\d{4})(.*)(\d{5})', '\1LAB\3');
+```
 
