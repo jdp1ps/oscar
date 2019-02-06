@@ -70,7 +70,7 @@
                     <i class="icon-docs"></i>
                     Type de document
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE) ): ?>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE) ): ?>
                     <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
                 <?php else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>

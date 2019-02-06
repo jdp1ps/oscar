@@ -23,6 +23,7 @@ use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
+use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Http\Request;
@@ -833,85 +834,68 @@ class AdministrationController extends AbstractOscarController
      * Gestion des types de documents.
      */
     public function typeDocumentAction() {
-        $this->getLogger()->debug("DEBUG : typeDocumentAction()>");
-        $types=array();
-        $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class);
-        if ($entityRepos != null) {
-            $this->getLogger()->debug("DEBUG : typeDocumentAction() entity TypeDocument found()");
-            $results = $entityRepos->findAll();
-            foreach ($results as $row) {
-                array_push($types,$row->getLabel());
-            }
-            $this->getLogger()->info("INFO : Nombre de types de document recuperes en base :".count($types));
-        } else {
-            $this->getLogger()->error("ERROR : Aucune entite de type 'TypeDocument' retourne");
-        }
-
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
         return new ViewModel(array(
-            'types' => $types,
+
         ));
 
     }
 
     public function typeDocumentApiAction() {
-        $this->getLogger()->debug('DEBUG : typeDocumentActionApi()>');
-        $out = [];
-        $typeDocumentId = $this->params('typedocumentid');
-        $request = $this->getRequest();
-        if ($typeDocumentId == null) {
-            // Liste des types de documents
-            if ( $this->getHttpXMethod() == "GET" ) {
-                $this->getLogger()->debug("DEBUG : typeDocumentActionApi() GET");
-                $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class);
-                if ($entityRepos != null) {
-                    $this->getLogger()->debug("DEBUG : typeDocumentActionApi() entity TypeDocument found()");
-                    $results = $entityRepos->findAll();
-                    $out = [];
-                    /** @var OrganizationRole $role */
-                    foreach ($results as $row) {
-                        $out[] = $row->toArray();
-                    }
 
-                    return $this->ajaxResponse($out);
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
+        $method = $this->getHttpXMethod();
+
+        switch ($method) {
+            case 'GET' :
+                $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class)->createQueryBuilder('d')->orderBy('d.label');
+                $this->getLogger()->debug("DEBUG : typeDocumentActionApi() entity TypeDocument found()");
+                $results = $entityRepos->getQuery()->getResult();
+                $out = [];
+                /** @var OrganizationRole $role */
+                foreach ($results as $row) {
+                    $out[] = $row->toArray();
                 }
-            } ////////////////////////////////////////////////////////////////////
-            // POST : Nouveau type
-            elseif( $this->getHttpXMethod() == 'POST' ){
-                $this->getLogger()->info("INFO : typeDocumentActionApi() POST ajout d'un nouveau type de document");
-                //$this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_EDITION);
+                return $this->ajaxResponse($out);
+
+            case 'POST' :
+                $label = $this->params()->fromPost('label');
+                $description = $this->params()->fromPost('description');
                 $type = new TypeDocument();
-                $type->setLabel($request->getPost('label'));
-                $type->setDescription($request->getPost('description'));
+                $type->setLabel($label)
+                    ->setDescription($description);
                 $this->getEntityManager()->persist($type);
                 $this->getEntityManager()->flush();
-                return $this->ajaxResponse($type->toArray());
-            }
-        } else {
-            // $this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_EDITION);
-            $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class);
-            if ($entityRepos != null) {
-                $this->getLogger()->debug("DEBUG : typeDocumentActionApi() entity TypeDocument found()");
-                $type = $entityRepos->find($typeDocumentId);
-                if( !$type ){
-                    return $this->getResponseInternalError("Ce type de document est introuvable dans la base de données.");
-                }
-                if( $this->getHttpXMethod() == 'PUT' ){
-                    $this->getLogger()->info("INFO : typeDocumentActionApi() PUT mise à jour du type de document");
-                    $type->setLabel($request->getPost('label'));
-                    $type->setDescription($request->getPost('description'));
-                    $this->getEntityManager()->persist($type);
+                return $this->getResponseOk();
+                break;
+
+            case 'PUT' :
+                try {
+                    $_PUT = $_POST;
+                    $typeDocumentId = $_PUT['typedocumentid'];
+                    $this->getLogger()->info("INFO : typeDocumentActionApi() PUT mise à jour du type de document $typeDocumentId");
+                    $this->getLogger()->info(print_r($_POST, true));
+                    $typeDocument = $this->getActivityService()->getTypeDocument($typeDocumentId, true);
+                    $typeDocument->setLabel($_PUT['label'])
+                        ->setDescription($_PUT['description']);
+                    $this->getEntityManager()->persist($typeDocument);
                     $this->getEntityManager()->flush();
-                    return $this->ajaxResponse($type->toArray());
+                    return $this->getResponseOk();
+                } catch (\Exception $e ){
+                    $msg = sprintf(_("Impossible de mettre à jour le type de document %s : %s"), $typeDocument, $e->getMessage());
+                    $this->getLogger()->error($msg);
+                    return $this->getResponseInternalError($msg);
                 }
-                elseif( $this->getHttpXMethod() == 'DELETE' ){
-                    $this->getLogger()->info("INFO : typeDocumentActionApi() DELETE document".$type->getLabel());
-                    $this->getEntityManager()->remove($type);
-                    $this->getEntityManager()->flush();
-                    return $this->getResponseOk('le type de document a été supprimé.');
-                }
-            }
+
+            case 'DELETE' :
+                $typeDocumentId = $this->params()->fromQuery('typedocumentid');
+                $typeDocument = $this->getActivityService()->getTypeDocument($typeDocumentId, true);
+                $this->getEntityManager()->remove($typeDocument);
+                $this->getEntityManager()->flush();
+                return $this->getResponseOk('le type de document a été supprimé.');
+
         }
-        $this->getLogger()->error("ERROR : typeDocumentActionApi() On ne devrait pas se trouver ici !");
+
         return $this->getResponseBadRequest("Accès à l'API improbable...");
     }
 

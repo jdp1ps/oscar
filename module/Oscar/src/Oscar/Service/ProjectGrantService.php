@@ -27,6 +27,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
+use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
@@ -42,6 +43,13 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+    public function getTypeDocument( $typeDocumentId, $throw=false ){
+        $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($typeDocumentId);
+        if( $type == null && $throw === true )
+            throw new OscarException(sprintf(_("Le type de document %s n'existe pas"), $typeDocumentId));
+        return $type;
+    }
 
     public function getWorkPackagePersonPeriod( Person $person, $year, $month ){
 

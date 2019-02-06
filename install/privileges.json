@@ -629,6 +629,14 @@
     "fullcode": "MAINTENANCE-ACTIVITYTYPE_MANAGE"
   },
 
+  "MAINTENANCE-DOCUMENTTYPE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "DOCUMENTTYPE_MANAGE",
+    "libelle": "Configurer les types de document disponibles",
+    "fullcode": "MAINTENANCE-DOCUMENTTYPE_MANAGE"
+  },
+
   "MAINTENANCE-MILESTONETYPE_MANAGE": {
     "spot": 7,
     "category_id": 6,
