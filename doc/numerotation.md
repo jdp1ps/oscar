@@ -2,7 +2,7 @@
 
 Par défaut, **Oscar©** utilise un système de numérotation automatique basé sur l'année en cours, puis une chaîne de sépration ("DRI") et enfin un numéro à 5 chiffres incrémenté automatiquement.
 
-Par exemple, la première activité de 2018 sera numérotée **2018DRI00001**, la deuxième **2018DRI00001**, etc...
+Par exemple, la première activité de 2018 sera numérotée **2018DRI00001**, la deuxième **2018DRI00002**, etc...
 
 Il est possible de modifier le formalise de ce numéro en personnalisant la chaîne de séparation. Pour cela, il faut appliquer **2 modifications techniques** : l'une en base de données, l'autre dans la configuration Oscar.
 
@@ -22,6 +22,8 @@ Par exemple si vous souhaitez remplacer la chaîne "DRI" par "LAB", la ligne dev
 ```sql
 num := CONCAT(year, 'LAB', to_char(counter_val, 'fm00000'));
 ```
+
+> La chaîne de séparation est prévue pour avoir 3 caractères, cette taille pourra étre étendue dans la version 2.9 "Matrix"
 
 Ensuite, il faut mettre à jour la configuration Oscar : 
 
