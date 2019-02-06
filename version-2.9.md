@@ -23,3 +23,5 @@ La version initiale de l'export des versements proposée les rôles de organisat
 
  - Fix : Bug d'affichage des arrondis dans les versements
  - Fix : La table/entités/références Grantsource ont été supprimées
+ - UP : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](doc/numerotation.md)) @JulienDary
+ - DOC : Une requète Postgresql a été ajoutée dans la documentation pour automatiser les changements de formalisme des numérotations
