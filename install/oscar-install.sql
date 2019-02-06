@@ -2,32 +2,46 @@
 -- PostgreSQL database dump
 --
 
+-- Dumped from database version 9.5.13
+-- Dumped by pg_dump version 10.6 (Ubuntu 10.6-0ubuntu0.18.10.1)
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-
-SET search_path = public, pg_catalog;
+SET row_security = off;
 
 ALTER TABLE ONLY public.workpackageperson DROP CONSTRAINT fk_e9b876779485a167;
 ALTER TABLE ONLY public.workpackageperson DROP CONSTRAINT fk_e9b8767765ff1aec;
 ALTER TABLE ONLY public.workpackageperson DROP CONSTRAINT fk_e9b8767763d8c20e;
 ALTER TABLE ONLY public.workpackageperson DROP CONSTRAINT fk_e9b876773174800f;
 ALTER TABLE ONLY public.workpackageperson DROP CONSTRAINT fk_e9b87677217bbb47;
-ALTER TABLE ONLY public.project DROP CONSTRAINT fk_e00ee972a5522701;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT fk_dd65739b65ff1aec;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT fk_dd65739b63d8c20e;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT fk_dd65739b32c8a3de;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT fk_dd65739b3174800f;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT fk_dd65739b1c4132c1;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT fk_dd65739b166d1f9c;
+ALTER TABLE ONLY public.organization DROP CONSTRAINT fk_d9dfb884e5915d19;
 ALTER TABLE ONLY public.organization DROP CONSTRAINT fk_d9dfb88465ff1aec;
 ALTER TABLE ONLY public.organization DROP CONSTRAINT fk_d9dfb88463d8c20e;
 ALTER TABLE ONLY public.organization DROP CONSTRAINT fk_d9dfb8843174800f;
+ALTER TABLE ONLY public.activityrequest DROP CONSTRAINT fk_d7aa8f1e9e6b1585;
+ALTER TABLE ONLY public.activityrequest DROP CONSTRAINT fk_d7aa8f1e65ff1aec;
+ALTER TABLE ONLY public.activityrequest DROP CONSTRAINT fk_d7aa8f1e63d8c20e;
+ALTER TABLE ONLY public.activityrequest DROP CONSTRAINT fk_d7aa8f1e3174800f;
+ALTER TABLE ONLY public.validationperiod_prj DROP CONSTRAINT fk_d7488e1525e297e4;
+ALTER TABLE ONLY public.validationperiod_prj DROP CONSTRAINT fk_d7488e15217bbb47;
 ALTER TABLE ONLY public.role_privilege DROP CONSTRAINT fk_d6d4495bd60322ac;
 ALTER TABLE ONLY public.role_privilege DROP CONSTRAINT fk_d6d4495b32fb8aea;
+ALTER TABLE ONLY public.activityrequestfollow DROP CONSTRAINT fk_cfe2df3ae8fa3e0f;
+ALTER TABLE ONLY public.activityrequestfollow DROP CONSTRAINT fk_cfe2df3a65ff1aec;
+ALTER TABLE ONLY public.activityrequestfollow DROP CONSTRAINT fk_cfe2df3a63d8c20e;
+ALTER TABLE ONLY public.activityrequestfollow DROP CONSTRAINT fk_cfe2df3a3174800f;
 ALTER TABLE ONLY public.workpackage DROP CONSTRAINT fk_c583f07f81c06096;
 ALTER TABLE ONLY public.workpackage DROP CONSTRAINT fk_c583f07f65ff1aec;
 ALTER TABLE ONLY public.workpackage DROP CONSTRAINT fk_c583f07f63d8c20e;
@@ -36,6 +50,7 @@ ALTER TABLE ONLY public.administrativedocument DROP CONSTRAINT fk_c311ba72217bbb
 ALTER TABLE ONLY public.activitytype DROP CONSTRAINT fk_b8fa49765ff1aec;
 ALTER TABLE ONLY public.activitytype DROP CONSTRAINT fk_b8fa49763d8c20e;
 ALTER TABLE ONLY public.activitytype DROP CONSTRAINT fk_b8fa4973174800f;
+ALTER TABLE ONLY public.validationperiod DROP CONSTRAINT fk_b700890a3c21f464;
 ALTER TABLE ONLY public.organizationrole DROP CONSTRAINT fk_a782183065ff1aec;
 ALTER TABLE ONLY public.organizationrole DROP CONSTRAINT fk_a782183063d8c20e;
 ALTER TABLE ONLY public.organizationrole DROP CONSTRAINT fk_a78218303174800f;
@@ -48,12 +63,21 @@ ALTER TABLE ONLY public.activityorganization DROP CONSTRAINT fk_9310307d1c4132c1
 ALTER TABLE ONLY public.currency DROP CONSTRAINT fk_9020ea6965ff1aec;
 ALTER TABLE ONLY public.currency DROP CONSTRAINT fk_9020ea6963d8c20e;
 ALTER TABLE ONLY public.currency DROP CONSTRAINT fk_9020ea693174800f;
+ALTER TABLE ONLY public.timesheetsby DROP CONSTRAINT fk_8ffc688a241061bf;
+ALTER TABLE ONLY public.timesheetsby DROP CONSTRAINT fk_8ffc688a217bbb47;
 ALTER TABLE ONLY public.privilege DROP CONSTRAINT fk_87209a87bcf5e72d;
+ALTER TABLE ONLY public.privilege DROP CONSTRAINT fk_87209a8779066886;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT fk_8115848c81c06096;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT fk_8115848c65ff1aec;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT fk_8115848c63d8c20e;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT fk_8115848c38248176;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT fk_8115848c3174800f;
+ALTER TABLE ONLY public.referent DROP CONSTRAINT fk_7ecce3a35e47e35;
+ALTER TABLE ONLY public.referent DROP CONSTRAINT fk_7ecce3a217bbb47;
+ALTER TABLE ONLY public.organizationtype DROP CONSTRAINT fk_7c35c57379066886;
+ALTER TABLE ONLY public.organizationtype DROP CONSTRAINT fk_7c35c57365ff1aec;
+ALTER TABLE ONLY public.organizationtype DROP CONSTRAINT fk_7c35c57363d8c20e;
+ALTER TABLE ONLY public.organizationtype DROP CONSTRAINT fk_7c35c5733174800f;
 ALTER TABLE ONLY public.tva DROP CONSTRAINT fk_79ced4aa65ff1aec;
 ALTER TABLE ONLY public.tva DROP CONSTRAINT fk_79ced4aa63d8c20e;
 ALTER TABLE ONLY public.tva DROP CONSTRAINT fk_79ced4aa3174800f;
@@ -84,7 +108,6 @@ ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b91c4132c1;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT fk_5d5b51b9166d1f9c;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0cc54c8c93;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0ca1b4b28c;
-ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0c953c1c61;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0c65ff1aec;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0c63d8c20e;
 ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0c4d79775f;
@@ -94,7 +117,10 @@ ALTER TABLE ONLY public.activity DROP CONSTRAINT fk_55026b0c166d1f9c;
 ALTER TABLE ONLY public.contractdocument DROP CONSTRAINT fk_4a390fe85c0c89f3;
 ALTER TABLE ONLY public.contractdocument DROP CONSTRAINT fk_4a390fe83bebd1bd;
 ALTER TABLE ONLY public.contractdocument DROP CONSTRAINT fk_4a390fe8217bbb47;
+ALTER TABLE ONLY public.validationperiod_adm DROP CONSTRAINT fk_4850672625e297e4;
+ALTER TABLE ONLY public.validationperiod_adm DROP CONSTRAINT fk_48506726217bbb47;
 ALTER TABLE ONLY public.timesheet DROP CONSTRAINT fk_34944573dbd8a2b7;
+ALTER TABLE ONLY public.timesheet DROP CONSTRAINT fk_34944573a7131547;
 ALTER TABLE ONLY public.timesheet DROP CONSTRAINT fk_3494457381c06096;
 ALTER TABLE ONLY public.timesheet DROP CONSTRAINT fk_3494457365ff1aec;
 ALTER TABLE ONLY public.timesheet DROP CONSTRAINT fk_3494457363d8c20e;
@@ -112,8 +138,12 @@ ALTER TABLE ONLY public.activitydate DROP CONSTRAINT fk_2dcfc4c43174800f;
 ALTER TABLE ONLY public.datetype DROP CONSTRAINT fk_29fdc4ce65ff1aec;
 ALTER TABLE ONLY public.datetype DROP CONSTRAINT fk_29fdc4ce63d8c20e;
 ALTER TABLE ONLY public.datetype DROP CONSTRAINT fk_29fdc4ce3174800f;
+ALTER TABLE ONLY public.notificationperson DROP CONSTRAINT fk_22ba6515ef1a9d84;
+ALTER TABLE ONLY public.notificationperson DROP CONSTRAINT fk_22ba6515217bbb47;
 ALTER TABLE ONLY public.activity_discipline DROP CONSTRAINT fk_205cd037a5522701;
 ALTER TABLE ONLY public.activity_discipline DROP CONSTRAINT fk_205cd03781c06096;
+ALTER TABLE ONLY public.validationperiod_sci DROP CONSTRAINT fk_1fde42e625e297e4;
+ALTER TABLE ONLY public.validationperiod_sci DROP CONSTRAINT fk_1fde42e6217bbb47;
 DROP TRIGGER activity_numauto ON public.activity;
 DROP INDEX public.uniq_a7821830ea750e8;
 DROP INDEX public.uniq_9de7cd62f85e0677;
@@ -127,18 +157,28 @@ DROP INDEX public.idx_e9b8767765ff1aec;
 DROP INDEX public.idx_e9b8767763d8c20e;
 DROP INDEX public.idx_e9b876773174800f;
 DROP INDEX public.idx_e9b87677217bbb47;
-DROP INDEX public.idx_e00ee972a5522701;
 DROP INDEX public.idx_dd65739b65ff1aec;
 DROP INDEX public.idx_dd65739b63d8c20e;
 DROP INDEX public.idx_dd65739b32c8a3de;
 DROP INDEX public.idx_dd65739b3174800f;
 DROP INDEX public.idx_dd65739b1c4132c1;
 DROP INDEX public.idx_dd65739b166d1f9c;
+DROP INDEX public.idx_d9dfb884e5915d19;
 DROP INDEX public.idx_d9dfb88465ff1aec;
 DROP INDEX public.idx_d9dfb88463d8c20e;
 DROP INDEX public.idx_d9dfb8843174800f;
+DROP INDEX public.idx_d7aa8f1e9e6b1585;
+DROP INDEX public.idx_d7aa8f1e65ff1aec;
+DROP INDEX public.idx_d7aa8f1e63d8c20e;
+DROP INDEX public.idx_d7aa8f1e3174800f;
+DROP INDEX public.idx_d7488e1525e297e4;
+DROP INDEX public.idx_d7488e15217bbb47;
 DROP INDEX public.idx_d6d4495bd60322ac;
 DROP INDEX public.idx_d6d4495b32fb8aea;
+DROP INDEX public.idx_cfe2df3ae8fa3e0f;
+DROP INDEX public.idx_cfe2df3a65ff1aec;
+DROP INDEX public.idx_cfe2df3a63d8c20e;
+DROP INDEX public.idx_cfe2df3a3174800f;
 DROP INDEX public.idx_c583f07f81c06096;
 DROP INDEX public.idx_c583f07f65ff1aec;
 DROP INDEX public.idx_c583f07f63d8c20e;
@@ -147,6 +187,7 @@ DROP INDEX public.idx_c311ba72217bbb47;
 DROP INDEX public.idx_b8fa49765ff1aec;
 DROP INDEX public.idx_b8fa49763d8c20e;
 DROP INDEX public.idx_b8fa4973174800f;
+DROP INDEX public.idx_b700890a3c21f464;
 DROP INDEX public.idx_a782183065ff1aec;
 DROP INDEX public.idx_a782183063d8c20e;
 DROP INDEX public.idx_a78218303174800f;
@@ -159,12 +200,21 @@ DROP INDEX public.idx_9310307d1c4132c1;
 DROP INDEX public.idx_9020ea6965ff1aec;
 DROP INDEX public.idx_9020ea6963d8c20e;
 DROP INDEX public.idx_9020ea693174800f;
+DROP INDEX public.idx_8ffc688a241061bf;
+DROP INDEX public.idx_8ffc688a217bbb47;
 DROP INDEX public.idx_87209a87bcf5e72d;
+DROP INDEX public.idx_87209a8779066886;
 DROP INDEX public.idx_8115848c81c06096;
 DROP INDEX public.idx_8115848c65ff1aec;
 DROP INDEX public.idx_8115848c63d8c20e;
 DROP INDEX public.idx_8115848c38248176;
 DROP INDEX public.idx_8115848c3174800f;
+DROP INDEX public.idx_7ecce3a35e47e35;
+DROP INDEX public.idx_7ecce3a217bbb47;
+DROP INDEX public.idx_7c35c57379066886;
+DROP INDEX public.idx_7c35c57365ff1aec;
+DROP INDEX public.idx_7c35c57363d8c20e;
+DROP INDEX public.idx_7c35c5733174800f;
 DROP INDEX public.idx_79ced4aa65ff1aec;
 DROP INDEX public.idx_79ced4aa63d8c20e;
 DROP INDEX public.idx_79ced4aa3174800f;
@@ -195,7 +245,6 @@ DROP INDEX public.idx_5d5b51b91c4132c1;
 DROP INDEX public.idx_5d5b51b9166d1f9c;
 DROP INDEX public.idx_55026b0cc54c8c93;
 DROP INDEX public.idx_55026b0ca1b4b28c;
-DROP INDEX public.idx_55026b0c953c1c61;
 DROP INDEX public.idx_55026b0c65ff1aec;
 DROP INDEX public.idx_55026b0c63d8c20e;
 DROP INDEX public.idx_55026b0c4d79775f;
@@ -205,7 +254,10 @@ DROP INDEX public.idx_55026b0c166d1f9c;
 DROP INDEX public.idx_4a390fe85c0c89f3;
 DROP INDEX public.idx_4a390fe83bebd1bd;
 DROP INDEX public.idx_4a390fe8217bbb47;
+DROP INDEX public.idx_4850672625e297e4;
+DROP INDEX public.idx_48506726217bbb47;
 DROP INDEX public.idx_34944573dbd8a2b7;
+DROP INDEX public.idx_34944573a7131547;
 DROP INDEX public.idx_3494457381c06096;
 DROP INDEX public.idx_3494457365ff1aec;
 DROP INDEX public.idx_3494457363d8c20e;
@@ -223,28 +275,40 @@ DROP INDEX public.idx_2dcfc4c43174800f;
 DROP INDEX public.idx_29fdc4ce65ff1aec;
 DROP INDEX public.idx_29fdc4ce63d8c20e;
 DROP INDEX public.idx_29fdc4ce3174800f;
+DROP INDEX public.idx_22ba6515ef1a9d84;
+DROP INDEX public.idx_22ba6515217bbb47;
 DROP INDEX public.idx_205cd037a5522701;
 DROP INDEX public.idx_205cd03781c06096;
+DROP INDEX public.idx_1fde42e625e297e4;
+DROP INDEX public.idx_1fde42e6217bbb47;
 ALTER TABLE ONLY public.workpackageperson DROP CONSTRAINT workpackageperson_pkey;
 ALTER TABLE ONLY public.workpackage DROP CONSTRAINT workpackage_pkey;
+ALTER TABLE ONLY public.validationperiod_sci DROP CONSTRAINT validationperiod_sci_pkey;
+ALTER TABLE ONLY public.validationperiod_prj DROP CONSTRAINT validationperiod_prj_pkey;
+ALTER TABLE ONLY public.validationperiod DROP CONSTRAINT validationperiod_pkey;
+ALTER TABLE ONLY public.validationperiod_adm DROP CONSTRAINT validationperiod_adm_pkey;
 ALTER TABLE ONLY public.useraccessdefinition DROP CONSTRAINT useraccessdefinition_pkey;
 ALTER TABLE ONLY public.user_role DROP CONSTRAINT user_role_pkey;
 ALTER TABLE ONLY public.typedocument DROP CONSTRAINT typedocument_pkey;
 ALTER TABLE ONLY public.tva DROP CONSTRAINT tva_pkey;
+ALTER TABLE ONLY public.timesheetsby DROP CONSTRAINT timesheetsby_pkey;
 ALTER TABLE ONLY public.timesheet DROP CONSTRAINT timesheet_pkey;
 ALTER TABLE ONLY public.role_privilege DROP CONSTRAINT role_privilege_pkey;
+ALTER TABLE ONLY public.referent DROP CONSTRAINT referent_pkey;
 ALTER TABLE ONLY public.projectpartner DROP CONSTRAINT projectpartner_pkey;
 ALTER TABLE ONLY public.projectmember DROP CONSTRAINT projectmember_pkey;
 ALTER TABLE ONLY public.project DROP CONSTRAINT project_pkey;
 ALTER TABLE ONLY public.project_discipline DROP CONSTRAINT project_discipline_pkey;
 ALTER TABLE ONLY public.privilege DROP CONSTRAINT privilege_pkey;
 ALTER TABLE ONLY public.person DROP CONSTRAINT person_pkey;
+ALTER TABLE ONLY public.organizationtype DROP CONSTRAINT organizationtype_pkey;
 ALTER TABLE ONLY public.organizationrole DROP CONSTRAINT organizationrole_pkey;
 ALTER TABLE ONLY public.organizationperson DROP CONSTRAINT organizationperson_pkey;
 ALTER TABLE ONLY public.organization_role DROP CONSTRAINT organization_role_pkey;
 ALTER TABLE ONLY public.organization DROP CONSTRAINT organization_pkey;
+ALTER TABLE ONLY public.notificationperson DROP CONSTRAINT notificationperson_pkey;
+ALTER TABLE ONLY public.notification DROP CONSTRAINT notification_pkey;
 ALTER TABLE ONLY public.logactivity DROP CONSTRAINT logactivity_pkey;
-ALTER TABLE ONLY public.grantsource DROP CONSTRAINT grantsource_pkey;
 ALTER TABLE ONLY public.discipline DROP CONSTRAINT discipline_pkey;
 ALTER TABLE ONLY public.datetype DROP CONSTRAINT datetype_pkey;
 ALTER TABLE ONLY public.currency DROP CONSTRAINT currency_pkey;
@@ -255,6 +319,8 @@ ALTER TABLE ONLY public.authentification_role DROP CONSTRAINT authentification_r
 ALTER TABLE ONLY public.authentification DROP CONSTRAINT authentification_pkey;
 ALTER TABLE ONLY public.administrativedocument DROP CONSTRAINT administrativedocument_pkey;
 ALTER TABLE ONLY public.activitytype DROP CONSTRAINT activitytype_pkey;
+ALTER TABLE ONLY public.activityrequestfollow DROP CONSTRAINT activityrequestfollow_pkey;
+ALTER TABLE ONLY public.activityrequest DROP CONSTRAINT activityrequest_pkey;
 ALTER TABLE ONLY public.activityperson DROP CONSTRAINT activityperson_pkey;
 ALTER TABLE ONLY public.activitypayment DROP CONSTRAINT activitypayment_pkey;
 ALTER TABLE ONLY public.activityorganization DROP CONSTRAINT activityorganization_pkey;
@@ -265,6 +331,11 @@ DROP SEQUENCE public.workpackageperson_id_seq;
 DROP TABLE public.workpackageperson;
 DROP SEQUENCE public.workpackage_id_seq;
 DROP TABLE public.workpackage;
+DROP TABLE public.validationperiod_sci;
+DROP TABLE public.validationperiod_prj;
+DROP SEQUENCE public.validationperiod_id_seq;
+DROP TABLE public.validationperiod_adm;
+DROP TABLE public.validationperiod;
 DROP SEQUENCE public.useraccessdefinition_id_seq;
 DROP TABLE public.useraccessdefinition;
 DROP SEQUENCE public.user_role_id_seq;
@@ -273,10 +344,13 @@ DROP SEQUENCE public.typedocument_id_seq;
 DROP TABLE public.typedocument;
 DROP SEQUENCE public.tva_id_seq;
 DROP TABLE public.tva;
+DROP TABLE public.timesheetsby;
 DROP SEQUENCE public.timesheet_id_seq;
 DROP TABLE public.timesheet;
 DROP TABLE public.role_privilege;
 DROP SEQUENCE public.role_id_seq;
+DROP SEQUENCE public.referent_id_seq;
+DROP TABLE public.referent;
 DROP SEQUENCE public.projectpartner_id_seq;
 DROP TABLE public.projectpartner;
 DROP SEQUENCE public.projectmember_id_seq;
@@ -289,6 +363,8 @@ DROP SEQUENCE public.privilege_id_seq;
 DROP TABLE public.privilege;
 DROP SEQUENCE public.person_id_seq;
 DROP TABLE public.person;
+DROP SEQUENCE public.organizationtype_id_seq;
+DROP TABLE public.organizationtype;
 DROP SEQUENCE public.organizationrole_id_seq;
 DROP TABLE public.organizationrole;
 DROP SEQUENCE public.organizationperson_id_seq;
@@ -297,10 +373,13 @@ DROP SEQUENCE public.organization_role_id_seq;
 DROP TABLE public.organization_role;
 DROP SEQUENCE public.organization_id_seq;
 DROP TABLE public.organization;
+DROP SEQUENCE public.notificationperson_id_seq;
+DROP TABLE public.notificationperson;
+DROP SEQUENCE public.notification_id_seq;
+DROP TABLE public.notification;
 DROP SEQUENCE public.logactivity_id_seq;
 DROP TABLE public.logactivity;
 DROP SEQUENCE public.grantsource_id_seq;
-DROP TABLE public.grantsource;
 DROP SEQUENCE public.discipline_id_seq;
 DROP TABLE public.discipline;
 DROP SEQUENCE public.datetype_id_seq;
@@ -320,6 +399,10 @@ DROP SEQUENCE public.administrativedocument_id_seq;
 DROP TABLE public.administrativedocument;
 DROP SEQUENCE public.activitytype_id_seq;
 DROP TABLE public.activitytype;
+DROP SEQUENCE public.activityrequestfollow_id_seq;
+DROP TABLE public.activityrequestfollow;
+DROP SEQUENCE public.activityrequest_id_seq;
+DROP TABLE public.activityrequest;
 DROP SEQUENCE public.activityperson_id_seq;
 DROP TABLE public.activityperson;
 DROP SEQUENCE public.activitypayment_id_seq;
@@ -365,13 +448,11 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
-SET search_path = public, pg_catalog;
-
 --
 -- Name: ProjectRemoveClone(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION "ProjectRemoveClone"() RETURNS void
+CREATE FUNCTION public."ProjectRemoveClone"() RETURNS void
     LANGUAGE plpgsql
     AS $$DECLARE
   -- TOTO
@@ -379,9 +460,9 @@ BEGIN
 	RAISE NOTICE 'Appel de ProjectRemoveClone()';
 
 	-- On récupère les projet en double
-	SELECT eotp
-	FROM project
-	GROUP BY eotp
+	SELECT eotp 
+	FROM project 
+	GROUP BY eotp 
 	HAVING count(*) > 1;
 
 	RETURN;
@@ -393,7 +474,7 @@ $$;
 -- Name: activity_num_auto(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION activity_num_auto(activity_id integer) RETURNS text
+CREATE FUNCTION public.activity_num_auto(activity_id integer) RETURNS text
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -404,49 +485,49 @@ DECLARE
 	separator text := 'DRI';
 	counter_val int;
 BEGIN
-	------------------------------------------------------------------------------------
-	-- On récupère l'activité qui va bien
-	SELECT * INTO activity_record FROM activity WHERE id = activity_id;
+    ------------------------------------------------------------------------------------
+    -- On récupère l'activité qui va bien
+    SELECT * INTO activity_record FROM activity WHERE id = activity_id;
 
-	-- Err : Pas d'activité
-	IF activity_record IS NULL THEN
-		RAISE EXCEPTION 'Activité % non trouve', activity_id;
-	END IF;
+    -- Err : Pas d'activité
+    IF activity_record IS NULL THEN
+        RAISE EXCEPTION 'Activité % non trouve', activity_id;
+    END IF;
 
-	-- Err : Activité déjà numérotée
-	IF activity_record.oscarnum IS NOT NULL THEN
-		RAISE EXCEPTION 'Cette activité (%) est déjà numérotée', activity_id;
-	END IF;
-	-------------------------------------------------------------------------------------
+    -- Err : Activité déjà numérotée
+    IF activity_record.oscarnum IS NOT NULL THEN
+        RAISE EXCEPTION 'Cette activité (%) est déjà numérotée', activity_id;
+    END IF;
+    -------------------------------------------------------------------------------------
 
-	-------------------------------------------------------------------------------------
-	-- Récupération du plus grand numéro précédent :
+    -------------------------------------------------------------------------------------
+    -- Récupération du plus grand numéro précédent :
 
-	-- On récupère l'année de l'activité (Si elle est null, on utilise l'année courante)
-	year := EXTRACT(YEAR FROM activity_record.dateSigned);
-	IF year IS NULL THEN
-		year = EXTRACT(YEAR FROM activity_record.dateCreated);
-	END IF;
-	IF year IS NULL THEN
-		year = EXTRACT(YEAR FROM CURRENT_TIMESTAMP);
-	END IF;
+    -- On récupère l'année de l'activité (Si elle est null, on utilise l'année courante)
+    year := EXTRACT(YEAR FROM activity_record.dateSigned);
+    IF year IS NULL THEN
+        year = EXTRACT(YEAR FROM activity_record.dateCreated);
+    END IF;
+    IF year IS NULL THEN
+        year = EXTRACT(YEAR FROM CURRENT_TIMESTAMP);
+    END IF;
 
-	-- On récupère le dernier numéro pour cette année
-	SELECT MAX(oscarNum) INTO last_num FROM activity WHERE oscarnum LIKE year || 'DRI%';
-	IF last_num IS NULL THEN
-		counter_val := 0;
-	ELSE
-		counter_val := substring(last_num FROM 8 FOR 5)::int;
-	END IF;
+    -- On récupère le dernier numéro pour cette année
+    SELECT MAX(oscarNum) INTO last_num FROM activity WHERE oscarnum LIKE year || (separator ||'%');
+    
+    IF last_num IS NULL THEN
+        counter_val := 0;
+    ELSE
+        counter_val := substring(last_num FROM (5 + char_length(separator)) FOR 5)::int;
+    END IF;
 
-	counter_val := counter_val + 1;
+    counter_val := counter_val + 1;
 
+    num := CONCAT(year, separator, to_char(counter_val, 'fm00000'));
 
-	num := CONCAT(year, 'DRI', to_char(counter_val, 'fm00000'));
+    UPDATE activity SET oscarNum = num WHERE id = activity_id;
 
-	UPDATE activity SET oscarNum = num WHERE id = activity_id;
-
-	RETURN num;
+    RETURN num;
 END;
 $$;
 
@@ -455,7 +536,7 @@ $$;
 -- Name: oscar_activity_numauto(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION oscar_activity_numauto() RETURNS trigger
+CREATE FUNCTION public.oscar_activity_numauto() RETURNS trigger
     LANGUAGE plpgsql
     AS $$DECLARE
 	-- Résultat de la numérotation
@@ -474,7 +555,7 @@ END$$;
 -- Name: test(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION test() RETURNS integer
+CREATE FUNCTION public.test() RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -483,7 +564,7 @@ DECLARE
 	r project%rowtype;
 BEGIN
 	-- Liste des EOTP des projets en double
-
+	
 	RAISE NOTICE 'Execution de test()';
 	SELECT eotp INTO eotps FROM PROJECT GROUP BY eotp HAVING COUNT(eotp) > 1;
 
@@ -491,7 +572,7 @@ BEGIN
 	LOOP
 		RAISE NOTICE 'r.id';
 	END LOOP;
-
+	
 	RETURN 1;
 END;
 $$;
@@ -502,15 +583,14 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: activity; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: activity; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE activity (
+CREATE TABLE public.activity (
     id integer NOT NULL,
-    source_id integer,
     project_id integer,
     type_id integer,
-    centaureid character varying(10) DEFAULT NULL::character varying,
+    centaureid character varying(128) DEFAULT NULL::character varying,
     centaurenumconvention character varying(64) DEFAULT NULL::character varying,
     codeeotp character varying(64) DEFAULT NULL::character varying,
     label character varying(255) DEFAULT NULL::character varying,
@@ -535,10 +615,13 @@ CREATE TABLE activity (
     currency_id integer,
     tva_id integer,
     oscarid character varying(255) DEFAULT NULL::character varying,
-    oscarnum character varying(12) DEFAULT NULL::character varying,
+    oscarnum character varying(20) DEFAULT NULL::character varying,
     timesheetformat character varying(255) DEFAULT 'none'::character varying NOT NULL,
     numbers text,
-    financialimpact character varying(32) DEFAULT 'Recette'::character varying NOT NULL
+    financialimpact character varying(32) DEFAULT 'Recette'::character varying NOT NULL,
+    fraisdegestion double precision,
+    notefinanciere text,
+    assiettesubventionnable double precision
 );
 
 
@@ -546,14 +629,14 @@ CREATE TABLE activity (
 -- Name: COLUMN activity.numbers; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN activity.numbers IS '(DC2Type:object)';
+COMMENT ON COLUMN public.activity.numbers IS '(DC2Type:object)';
 
 
 --
--- Name: activity_discipline; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: activity_discipline; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE activity_discipline (
+CREATE TABLE public.activity_discipline (
     activity_id integer NOT NULL,
     discipline_id integer NOT NULL
 );
@@ -563,7 +646,7 @@ CREATE TABLE activity_discipline (
 -- Name: activity_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE activity_id_seq
+CREATE SEQUENCE public.activity_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -572,10 +655,10 @@ CREATE SEQUENCE activity_id_seq
 
 
 --
--- Name: activitydate; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: activitydate; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE activitydate (
+CREATE TABLE public.activitydate (
     id integer NOT NULL,
     type_id integer,
     activity_id integer,
@@ -587,7 +670,10 @@ CREATE TABLE activitydate (
     datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
     createdby_id integer,
     updatedby_id integer,
-    deletedby_id integer
+    deletedby_id integer,
+    finished integer,
+    datefinish date,
+    finishedby character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -595,7 +681,7 @@ CREATE TABLE activitydate (
 -- Name: activitydate_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE activitydate_id_seq
+CREATE SEQUENCE public.activitydate_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -604,10 +690,10 @@ CREATE SEQUENCE activitydate_id_seq
 
 
 --
--- Name: activityorganization; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: activityorganization; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE activityorganization (
+CREATE TABLE public.activityorganization (
     id integer NOT NULL,
     organization_id integer,
     activity_id integer,
@@ -630,7 +716,7 @@ CREATE TABLE activityorganization (
 -- Name: activityorganization_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE activityorganization_id_seq
+CREATE SEQUENCE public.activityorganization_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -639,10 +725,10 @@ CREATE SEQUENCE activityorganization_id_seq
 
 
 --
--- Name: activitypayment; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: activitypayment; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE activitypayment (
+CREATE TABLE public.activitypayment (
     id integer NOT NULL,
     activity_id integer,
     currency_id integer,
@@ -666,7 +752,7 @@ CREATE TABLE activitypayment (
 -- Name: activitypayment_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE activitypayment_id_seq
+CREATE SEQUENCE public.activitypayment_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -675,10 +761,10 @@ CREATE SEQUENCE activitypayment_id_seq
 
 
 --
--- Name: activityperson; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: activityperson; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE activityperson (
+CREATE TABLE public.activityperson (
     id integer NOT NULL,
     person_id integer,
     activity_id integer,
@@ -701,7 +787,7 @@ CREATE TABLE activityperson (
 -- Name: activityperson_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE activityperson_id_seq
+CREATE SEQUENCE public.activityperson_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -710,10 +796,82 @@ CREATE SEQUENCE activityperson_id_seq
 
 
 --
--- Name: activitytype; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: activityrequest; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE activitytype (
+CREATE TABLE public.activityrequest (
+    id integer NOT NULL,
+    label character varying(255) DEFAULT NULL::character varying,
+    description text,
+    amount double precision,
+    datestart date,
+    dateend date,
+    files text,
+    status integer,
+    datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    createdby_id integer,
+    updatedby_id integer,
+    deletedby_id integer,
+    organisation_id integer
+);
+
+
+--
+-- Name: COLUMN activityrequest.files; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.activityrequest.files IS '(DC2Type:array)';
+
+
+--
+-- Name: activityrequest_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.activityrequest_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activityrequestfollow; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.activityrequestfollow (
+    id integer NOT NULL,
+    description text,
+    status integer,
+    datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    activityrequest_id integer,
+    createdby_id integer,
+    updatedby_id integer,
+    deletedby_id integer
+);
+
+
+--
+-- Name: activityrequestfollow_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.activityrequestfollow_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activitytype; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.activitytype (
     id integer NOT NULL,
     lft integer NOT NULL,
     rgt integer NOT NULL,
@@ -735,7 +893,7 @@ CREATE TABLE activitytype (
 -- Name: activitytype_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE activitytype_id_seq
+CREATE SEQUENCE public.activitytype_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -744,10 +902,10 @@ CREATE SEQUENCE activitytype_id_seq
 
 
 --
--- Name: administrativedocument; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: administrativedocument; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE administrativedocument (
+CREATE TABLE public.administrativedocument (
     id integer NOT NULL,
     person_id integer,
     dateupdoad date,
@@ -765,7 +923,7 @@ CREATE TABLE administrativedocument (
 -- Name: administrativedocument_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE administrativedocument_id_seq
+CREATE SEQUENCE public.administrativedocument_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -774,10 +932,10 @@ CREATE SEQUENCE administrativedocument_id_seq
 
 
 --
--- Name: authentification; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: authentification; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE authentification (
+CREATE TABLE public.authentification (
     id integer NOT NULL,
     username character varying(255) DEFAULT NULL::character varying,
     email character varying(255) NOT NULL,
@@ -794,14 +952,14 @@ CREATE TABLE authentification (
 -- Name: COLUMN authentification.settings; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN authentification.settings IS '(DC2Type:array)';
+COMMENT ON COLUMN public.authentification.settings IS '(DC2Type:array)';
 
 
 --
 -- Name: authentification_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE authentification_id_seq
+CREATE SEQUENCE public.authentification_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -810,20 +968,20 @@ CREATE SEQUENCE authentification_id_seq
 
 
 --
--- Name: authentification_role; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: authentification_role; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE authentification_role (
+CREATE TABLE public.authentification_role (
     authentification_id integer NOT NULL,
     role_id integer NOT NULL
 );
 
 
 --
--- Name: categorie_privilege; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: categorie_privilege; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE categorie_privilege (
+CREATE TABLE public.categorie_privilege (
     id integer NOT NULL,
     code character varying(150) NOT NULL,
     libelle character varying(200) NOT NULL,
@@ -835,7 +993,7 @@ CREATE TABLE categorie_privilege (
 -- Name: categorie_privilege_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE categorie_privilege_id_seq
+CREATE SEQUENCE public.categorie_privilege_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -844,10 +1002,10 @@ CREATE SEQUENCE categorie_privilege_id_seq
 
 
 --
--- Name: contractdocument; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: contractdocument; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE contractdocument (
+CREATE TABLE public.contractdocument (
     id integer NOT NULL,
     grant_id integer,
     person_id integer,
@@ -870,7 +1028,7 @@ CREATE TABLE contractdocument (
 -- Name: contractdocument_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE contractdocument_id_seq
+CREATE SEQUENCE public.contractdocument_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -879,10 +1037,10 @@ CREATE SEQUENCE contractdocument_id_seq
 
 
 --
--- Name: contracttype; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: contracttype; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE contracttype (
+CREATE TABLE public.contracttype (
     id integer NOT NULL,
     code character varying(255) NOT NULL,
     label character varying(255) NOT NULL,
@@ -896,7 +1054,7 @@ CREATE TABLE contracttype (
 -- Name: contracttype_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE contracttype_id_seq
+CREATE SEQUENCE public.contracttype_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -905,10 +1063,10 @@ CREATE SEQUENCE contracttype_id_seq
 
 
 --
--- Name: currency; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: currency; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE currency (
+CREATE TABLE public.currency (
     id integer NOT NULL,
     status integer,
     datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
@@ -918,7 +1076,7 @@ CREATE TABLE currency (
     updatedby_id integer,
     deletedby_id integer,
     label character varying(20) DEFAULT NULL::character varying NOT NULL,
-    symbol character varying(1) DEFAULT NULL::character varying NOT NULL,
+    symbol character varying(4) DEFAULT NULL::character varying NOT NULL,
     rate double precision NOT NULL
 );
 
@@ -927,7 +1085,7 @@ CREATE TABLE currency (
 -- Name: currency_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE currency_id_seq
+CREATE SEQUENCE public.currency_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -936,10 +1094,10 @@ CREATE SEQUENCE currency_id_seq
 
 
 --
--- Name: datetype; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: datetype; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE datetype (
+CREATE TABLE public.datetype (
     id integer NOT NULL,
     label character varying(255) DEFAULT NULL::character varying,
     description character varying(255) DEFAULT NULL::character varying,
@@ -950,7 +1108,9 @@ CREATE TABLE datetype (
     createdby_id integer,
     updatedby_id integer,
     deletedby_id integer,
-    facet character varying(255) DEFAULT NULL::character varying
+    facet character varying(255) DEFAULT NULL::character varying,
+    recursivity character varying(255) DEFAULT NULL::character varying,
+    finishable boolean DEFAULT false NOT NULL
 );
 
 
@@ -958,7 +1118,7 @@ CREATE TABLE datetype (
 -- Name: datetype_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE datetype_id_seq
+CREATE SEQUENCE public.datetype_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -967,10 +1127,10 @@ CREATE SEQUENCE datetype_id_seq
 
 
 --
--- Name: discipline; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: discipline; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE discipline (
+CREATE TABLE public.discipline (
     id integer NOT NULL,
     label character varying(128) NOT NULL,
     centaureid character varying(10) DEFAULT NULL::character varying
@@ -981,33 +1141,19 @@ CREATE TABLE discipline (
 -- Name: discipline_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE discipline_id_seq
+CREATE SEQUENCE public.discipline_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
---
--- Name: grantsource; Type: TABLE; Schema: public; Owner: -; Tablespace:
---
-
-CREATE TABLE grantsource (
-    id integer NOT NULL,
-    description character varying(255) DEFAULT NULL::character varying,
-    logo character varying(255) DEFAULT NULL::character varying,
-    informations character varying(255) DEFAULT NULL::character varying,
-    centaureid character varying(10) DEFAULT NULL::character varying,
-    label character varying(255) DEFAULT NULL::character varying
-);
 
 
 --
 -- Name: grantsource_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE grantsource_id_seq
+CREATE SEQUENCE public.grantsource_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1016,10 +1162,10 @@ CREATE SEQUENCE grantsource_id_seq
 
 
 --
--- Name: logactivity; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: logactivity; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE logactivity (
+CREATE TABLE public.logactivity (
     id integer NOT NULL,
     datecreated timestamp(0) without time zone NOT NULL,
     message text NOT NULL,
@@ -1037,14 +1183,14 @@ CREATE TABLE logactivity (
 -- Name: COLUMN logactivity.datas; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN logactivity.datas IS '(DC2Type:object)';
+COMMENT ON COLUMN public.logactivity.datas IS '(DC2Type:object)';
 
 
 --
 -- Name: logactivity_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE logactivity_id_seq
+CREATE SEQUENCE public.logactivity_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1053,10 +1199,73 @@ CREATE SEQUENCE logactivity_id_seq
 
 
 --
--- Name: organization; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: notification; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE organization (
+CREATE TABLE public.notification (
+    id integer NOT NULL,
+    dateeffective date NOT NULL,
+    datereal date NOT NULL,
+    datecreated timestamp(0) with time zone NOT NULL,
+    message text NOT NULL,
+    object character varying(255) DEFAULT NULL::character varying,
+    objectid integer,
+    hash character varying(255) NOT NULL,
+    context character varying(255) NOT NULL,
+    serie character varying(255) DEFAULT NULL::character varying,
+    level integer NOT NULL,
+    datas text
+);
+
+
+--
+-- Name: COLUMN notification.datas; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.notification.datas IS '(DC2Type:object)';
+
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.notification_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: notificationperson; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.notificationperson (
+    id integer NOT NULL,
+    notification_id integer,
+    person_id integer,
+    read timestamp(0) without time zone DEFAULT NULL::timestamp without time zone
+);
+
+
+--
+-- Name: notificationperson_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.notificationperson_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: organization; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.organization (
     id integer NOT NULL,
     centaureid character varying(10) DEFAULT NULL::character varying,
     shortname character varying(128) DEFAULT NULL::character varying,
@@ -1090,7 +1299,8 @@ CREATE TABLE organization (
     sifacgroup character varying(255) DEFAULT NULL::character varying,
     sifacgroupid character varying(255) DEFAULT NULL::character varying,
     numtvaca character varying(255) DEFAULT NULL::character varying,
-    connectors text
+    connectors text,
+    typeobj_id integer
 );
 
 
@@ -1098,14 +1308,14 @@ CREATE TABLE organization (
 -- Name: COLUMN organization.connectors; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN organization.connectors IS '(DC2Type:object)';
+COMMENT ON COLUMN public.organization.connectors IS '(DC2Type:object)';
 
 
 --
 -- Name: organization_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE organization_id_seq
+CREATE SEQUENCE public.organization_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1114,10 +1324,10 @@ CREATE SEQUENCE organization_id_seq
 
 
 --
--- Name: organization_role; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: organization_role; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE organization_role (
+CREATE TABLE public.organization_role (
     id integer NOT NULL,
     role_id character varying(255) NOT NULL,
     description character varying(255) DEFAULT NULL::character varying,
@@ -1129,7 +1339,7 @@ CREATE TABLE organization_role (
 -- Name: organization_role_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE organization_role_id_seq
+CREATE SEQUENCE public.organization_role_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1138,10 +1348,10 @@ CREATE SEQUENCE organization_role_id_seq
 
 
 --
--- Name: organizationperson; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: organizationperson; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE organizationperson (
+CREATE TABLE public.organizationperson (
     id integer NOT NULL,
     person_id integer,
     organization_id integer,
@@ -1156,7 +1366,8 @@ CREATE TABLE organizationperson (
     createdby_id integer,
     updatedby_id integer,
     deletedby_id integer,
-    roleobj_id integer
+    roleobj_id integer,
+    origin character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1164,7 +1375,7 @@ CREATE TABLE organizationperson (
 -- Name: organizationperson_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE organizationperson_id_seq
+CREATE SEQUENCE public.organizationperson_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1173,10 +1384,10 @@ CREATE SEQUENCE organizationperson_id_seq
 
 
 --
--- Name: organizationrole; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: organizationrole; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE organizationrole (
+CREATE TABLE public.organizationrole (
     id integer NOT NULL,
     label character varying(255) NOT NULL,
     description character varying(255) DEFAULT NULL::character varying,
@@ -1195,7 +1406,7 @@ CREATE TABLE organizationrole (
 -- Name: organizationrole_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE organizationrole_id_seq
+CREATE SEQUENCE public.organizationrole_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1204,10 +1415,41 @@ CREATE SEQUENCE organizationrole_id_seq
 
 
 --
--- Name: person; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: organizationtype; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE person (
+CREATE TABLE public.organizationtype (
+    id integer NOT NULL,
+    root_id integer,
+    label character varying(255) DEFAULT NULL::character varying,
+    description character varying(255) DEFAULT NULL::character varying,
+    status integer,
+    datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    createdby_id integer,
+    updatedby_id integer,
+    deletedby_id integer
+);
+
+
+--
+-- Name: organizationtype_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.organizationtype_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: person; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.person (
     id integer NOT NULL,
     firstname character varying(255) DEFAULT NULL::character varying,
     lastname character varying(255) DEFAULT NULL::character varying,
@@ -1233,7 +1475,10 @@ CREATE TABLE person (
     emailprive character varying(255) DEFAULT NULL::character varying,
     harpegeinm character varying(255) DEFAULT NULL::character varying,
     connectors text,
-    ldapmemberof text
+    ldapmemberof text,
+    customsettings text,
+    foo character varying(255) DEFAULT NULL::character varying,
+    schedulekey character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1241,28 +1486,28 @@ CREATE TABLE person (
 -- Name: COLUMN person.centaureid; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN person.centaureid IS '(DC2Type:simple_array)';
+COMMENT ON COLUMN public.person.centaureid IS '(DC2Type:simple_array)';
 
 
 --
 -- Name: COLUMN person.connectors; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN person.connectors IS '(DC2Type:object)';
+COMMENT ON COLUMN public.person.connectors IS '(DC2Type:object)';
 
 
 --
 -- Name: COLUMN person.ldapmemberof; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN person.ldapmemberof IS '(DC2Type:array)';
+COMMENT ON COLUMN public.person.ldapmemberof IS '(DC2Type:array)';
 
 
 --
 -- Name: person_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE person_id_seq
+CREATE SEQUENCE public.person_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1271,15 +1516,17 @@ CREATE SEQUENCE person_id_seq
 
 
 --
--- Name: privilege; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: privilege; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE privilege (
+CREATE TABLE public.privilege (
     id integer NOT NULL,
     categorie_id integer,
     code character varying(150) NOT NULL,
     libelle character varying(200) NOT NULL,
-    ordre integer
+    ordre integer,
+    root_id integer,
+    spot integer DEFAULT 7
 );
 
 
@@ -1287,7 +1534,7 @@ CREATE TABLE privilege (
 -- Name: privilege_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE privilege_id_seq
+CREATE SEQUENCE public.privilege_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1296,19 +1543,18 @@ CREATE SEQUENCE privilege_id_seq
 
 
 --
--- Name: project; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: project; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE project (
+CREATE TABLE public.project (
     id integer NOT NULL,
-    discipline_id integer,
     centaureid character varying(10) DEFAULT NULL::character varying,
     code character varying(48) DEFAULT NULL::character varying,
     eotp character varying(64) DEFAULT NULL::character varying,
     composanteprincipal character varying(32) DEFAULT NULL::character varying,
     acronym character varying(255),
     label character varying(255) NOT NULL,
-    description character varying(255) DEFAULT NULL::character varying,
+    description text,
     datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
     dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
     datevalidated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone
@@ -1316,10 +1562,10 @@ CREATE TABLE project (
 
 
 --
--- Name: project_discipline; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: project_discipline; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE project_discipline (
+CREATE TABLE public.project_discipline (
     project_id integer NOT NULL,
     discipline_id integer NOT NULL
 );
@@ -1329,7 +1575,7 @@ CREATE TABLE project_discipline (
 -- Name: project_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE project_id_seq
+CREATE SEQUENCE public.project_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1341,7 +1587,7 @@ CREATE SEQUENCE project_id_seq
 -- Name: projectgrant_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE projectgrant_id_seq
+CREATE SEQUENCE public.projectgrant_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1350,10 +1596,10 @@ CREATE SEQUENCE projectgrant_id_seq
 
 
 --
--- Name: projectmember; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: projectmember; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE projectmember (
+CREATE TABLE public.projectmember (
     id integer NOT NULL,
     project_id integer,
     person_id integer,
@@ -1376,7 +1622,7 @@ CREATE TABLE projectmember (
 -- Name: projectmember_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE projectmember_id_seq
+CREATE SEQUENCE public.projectmember_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1385,10 +1631,10 @@ CREATE SEQUENCE projectmember_id_seq
 
 
 --
--- Name: projectpartner; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: projectpartner; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE projectpartner (
+CREATE TABLE public.projectpartner (
     id integer NOT NULL,
     project_id integer,
     organization_id integer,
@@ -1411,7 +1657,32 @@ CREATE TABLE projectpartner (
 -- Name: projectpartner_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE projectpartner_id_seq
+CREATE SEQUENCE public.projectpartner_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: referent; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.referent (
+    id integer NOT NULL,
+    referent_id integer,
+    person_id integer,
+    datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone
+);
+
+
+--
+-- Name: referent_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.referent_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1423,7 +1694,7 @@ CREATE SEQUENCE projectpartner_id_seq
 -- Name: role_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE role_id_seq
+CREATE SEQUENCE public.role_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1432,25 +1703,25 @@ CREATE SEQUENCE role_id_seq
 
 
 --
--- Name: role_privilege; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: role_privilege; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE role_privilege (
+CREATE TABLE public.role_privilege (
     privilege_id integer NOT NULL,
     role_id integer NOT NULL
 );
 
 
 --
--- Name: timesheet; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: timesheet; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE timesheet (
+CREATE TABLE public.timesheet (
     id integer NOT NULL,
     workpackage_id integer,
     person_id integer,
-    datefrom timestamp(0) with time zone NOT NULL,
-    dateto timestamp(0) with time zone NOT NULL,
+    datefrom timestamp(0) without time zone NOT NULL,
+    dateto timestamp(0) without time zone NOT NULL,
     comment text,
     status integer,
     datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
@@ -1460,8 +1731,15 @@ CREATE TABLE timesheet (
     updatedby_id integer,
     deletedby_id integer,
     activity_id integer,
-    validatedat timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-    label text
+    label text,
+    sendby character varying(255) DEFAULT NULL::character varying,
+    icsuid text,
+    icsfileuid text,
+    icsfilename text,
+    icsfiledateadded timestamp(0) without time zone,
+    datesync timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+    syncid character varying(255) DEFAULT NULL::character varying,
+    validationperiod_id integer
 );
 
 
@@ -1469,7 +1747,7 @@ CREATE TABLE timesheet (
 -- Name: timesheet_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE timesheet_id_seq
+CREATE SEQUENCE public.timesheet_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1478,10 +1756,20 @@ CREATE SEQUENCE timesheet_id_seq
 
 
 --
--- Name: tva; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: timesheetsby; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE tva (
+CREATE TABLE public.timesheetsby (
+    person_id integer NOT NULL,
+    usurpation_person_id integer NOT NULL
+);
+
+
+--
+-- Name: tva; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tva (
     id integer NOT NULL,
     label character varying(20) NOT NULL,
     rate double precision NOT NULL,
@@ -1500,7 +1788,7 @@ CREATE TABLE tva (
 -- Name: tva_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE tva_id_seq
+CREATE SEQUENCE public.tva_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1509,10 +1797,10 @@ CREATE SEQUENCE tva_id_seq
 
 
 --
--- Name: typedocument; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: typedocument; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE typedocument (
+CREATE TABLE public.typedocument (
     id integer NOT NULL,
     label character varying(255) NOT NULL,
     description character varying(255) DEFAULT NULL::character varying,
@@ -1531,7 +1819,7 @@ CREATE TABLE typedocument (
 -- Name: typedocument_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE typedocument_id_seq
+CREATE SEQUENCE public.typedocument_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1540,10 +1828,10 @@ CREATE SEQUENCE typedocument_id_seq
 
 
 --
--- Name: user_role; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: user_role; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE user_role (
+CREATE TABLE public.user_role (
     id integer NOT NULL,
     parent_id integer,
     role_id character varying(255) NOT NULL,
@@ -1559,7 +1847,7 @@ CREATE TABLE user_role (
 -- Name: user_role_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE user_role_id_seq
+CREATE SEQUENCE public.user_role_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1568,10 +1856,10 @@ CREATE SEQUENCE user_role_id_seq
 
 
 --
--- Name: useraccessdefinition; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: useraccessdefinition; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE useraccessdefinition (
+CREATE TABLE public.useraccessdefinition (
     id integer NOT NULL,
     context character varying(200) NOT NULL,
     label character varying(200) NOT NULL,
@@ -1584,7 +1872,7 @@ CREATE TABLE useraccessdefinition (
 -- Name: useraccessdefinition_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE useraccessdefinition_id_seq
+CREATE SEQUENCE public.useraccessdefinition_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1593,10 +1881,95 @@ CREATE SEQUENCE useraccessdefinition_id_seq
 
 
 --
--- Name: workpackage; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: validationperiod; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE workpackage (
+CREATE TABLE public.validationperiod (
+    id integer NOT NULL,
+    declarer_id integer,
+    object character varying(255) NOT NULL,
+    objectgroup character varying(255) NOT NULL,
+    object_id character varying(255) NOT NULL,
+    month integer NOT NULL,
+    year integer NOT NULL,
+    datesend date,
+    log text,
+    validationactivityat date,
+    validationactivityby character varying(255) DEFAULT NULL::character varying,
+    validationactivitybyid integer,
+    validationactivitymessage text,
+    validationsciat date,
+    validationsciby character varying(255) DEFAULT NULL::character varying,
+    validationscibyid integer,
+    validationscimessage text,
+    validationadmat date,
+    validationadmby character varying(255) DEFAULT NULL::character varying,
+    validationadmbyid integer,
+    validationadmmessage text,
+    rejectactivityat date,
+    rejectactivityby character varying(255) DEFAULT NULL::character varying,
+    rejectactivitybyid integer,
+    rejectactivitymessage text,
+    rejectsciat date,
+    rejectsciby character varying(255) DEFAULT NULL::character varying,
+    rejectscibyid integer,
+    rejectscimessage text,
+    rejectadmat date,
+    rejectadmby character varying(255) DEFAULT NULL::character varying,
+    rejectadmbyid integer,
+    rejectadmmessage text,
+    schedule text,
+    status character varying(255) NOT NULL
+);
+
+
+--
+-- Name: validationperiod_adm; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.validationperiod_adm (
+    validationperiod_id integer NOT NULL,
+    person_id integer NOT NULL
+);
+
+
+--
+-- Name: validationperiod_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.validationperiod_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: validationperiod_prj; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.validationperiod_prj (
+    validationperiod_id integer NOT NULL,
+    person_id integer NOT NULL
+);
+
+
+--
+-- Name: validationperiod_sci; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.validationperiod_sci (
+    validationperiod_id integer NOT NULL,
+    person_id integer NOT NULL
+);
+
+
+--
+-- Name: workpackage; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workpackage (
     id integer NOT NULL,
     activity_id integer,
     status integer,
@@ -1606,7 +1979,7 @@ CREATE TABLE workpackage (
     createdby_id integer,
     updatedby_id integer,
     deletedby_id integer,
-    code character varying(255) DEFAULT NULL::character varying,
+    code character varying(255) DEFAULT NULL::character varying NOT NULL,
     label character varying(255) NOT NULL,
     description text,
     datestart date,
@@ -1618,7 +1991,7 @@ CREATE TABLE workpackage (
 -- Name: workpackage_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE workpackage_id_seq
+CREATE SEQUENCE public.workpackage_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1627,10 +2000,10 @@ CREATE SEQUENCE workpackage_id_seq
 
 
 --
--- Name: workpackageperson; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: workpackageperson; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE workpackageperson (
+CREATE TABLE public.workpackageperson (
     id integer NOT NULL,
     person_id integer,
     duration integer NOT NULL,
@@ -1649,7 +2022,7 @@ CREATE TABLE workpackageperson (
 -- Name: workpackageperson_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE workpackageperson_id_seq
+CREATE SEQUENCE public.workpackageperson_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1661,7 +2034,7 @@ CREATE SEQUENCE workpackageperson_id_seq
 -- Data for Name: activity; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY activity (id, source_id, project_id, type_id, centaureid, centaurenumconvention, codeeotp, label, description, hassheet, duration, justifyworkingtime, justifycost, amount, datestart, dateend, datesigned, dateopened, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activitytype_id, currency_id, tva_id, oscarid, oscarnum, timesheetformat, numbers, financialimpact) FROM stdin;
+COPY public.activity (id, project_id, type_id, centaureid, centaurenumconvention, codeeotp, label, description, hassheet, duration, justifyworkingtime, justifycost, amount, datestart, dateend, datesigned, dateopened, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activitytype_id, currency_id, tva_id, oscarid, oscarnum, timesheetformat, numbers, financialimpact, fraisdegestion, notefinanciere, assiettesubventionnable) FROM stdin;
 \.
 
 
@@ -1669,134 +2042,151 @@ COPY activity (id, source_id, project_id, type_id, centaureid, centaurenumconven
 -- Data for Name: activity_discipline; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY activity_discipline (activity_id, discipline_id) FROM stdin;
+COPY public.activity_discipline (activity_id, discipline_id) FROM stdin;
 \.
-
-
---
--- Name: activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('activity_id_seq', 9839, true);
 
 
 --
 -- Data for Name: activitydate; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY activitydate (id, type_id, activity_id, datestart, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+COPY public.activitydate (id, type_id, activity_id, datestart, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, finished, datefinish, finishedby) FROM stdin;
 \.
-
-
---
--- Name: activitydate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('activitydate_id_seq', 1114, true);
 
 
 --
 -- Data for Name: activityorganization; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY activityorganization (id, organization_id, activity_id, main, role, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, datestart, dateend, roleobj_id) FROM stdin;
+COPY public.activityorganization (id, organization_id, activity_id, main, role, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, datestart, dateend, roleobj_id) FROM stdin;
 \.
-
-
---
--- Name: activityorganization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('activityorganization_id_seq', 83929, true);
 
 
 --
 -- Data for Name: activitypayment; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY activitypayment (id, activity_id, currency_id, datepayment, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, amount, rate, codetransaction, datepredicted) FROM stdin;
+COPY public.activitypayment (id, activity_id, currency_id, datepayment, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, amount, rate, codetransaction, datepredicted) FROM stdin;
 \.
-
-
---
--- Name: activitypayment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('activitypayment_id_seq', 2466, true);
 
 
 --
 -- Data for Name: activityperson; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY activityperson (id, person_id, activity_id, main, role, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, datestart, dateend, roleobj_id) FROM stdin;
+COPY public.activityperson (id, person_id, activity_id, main, role, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, datestart, dateend, roleobj_id) FROM stdin;
 \.
 
 
 --
--- Name: activityperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Data for Name: activityrequest; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('activityperson_id_seq', 20984, true);
+COPY public.activityrequest (id, label, description, amount, datestart, dateend, files, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, organisation_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: activityrequestfollow; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.activityrequestfollow (id, description, status, datecreated, dateupdated, datedeleted, activityrequest_id, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+\.
 
 
 --
 -- Data for Name: activitytype; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY activitytype (id, lft, rgt, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, label, description, nature, centaureid) FROM stdin;
-1	1	4	\N	\N	\N	\N	\N	\N	\N	ROOT	\N	\N	\N
-411	2	3	1	2017-04-24 12:31:55	\N	\N	\N	\N	\N	Type non-définit		0	\N
+COPY public.activitytype (id, lft, rgt, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, label, description, nature, centaureid) FROM stdin;
+411	2	3	1	2016-03-14 12:21:16	\N	\N	\N	\N	\N	Accords cadre		0	\N
+441	11	12	1	2016-03-14 13:07:09	\N	\N	\N	\N	\N	Cession de droit d'auteur		0	\N
+439	9	10	1	2016-03-14 13:06:25	\N	\N	\N	\N	\N	Accord de copropriété avec exploitation		0	\N
+450	13	14	1	2016-03-14 13:13:08	\N	\N	\N	\N	\N	Cession de brevet		0	\N
+437	5	6	1	2016-03-14 13:05:25	\N	\N	\N	\N	\N	Accord de confidentialité		0	\N
+482	95	96	1	2018-02-05 15:48:01	\N	\N	\N	\N	\N	ERANET - JPI		0	\N
+451	15	16	1	2016-03-14 13:13:33	\N	\N	\N	\N	\N	Cession de logiciel		0	\N
+438	7	8	1	2016-03-14 13:05:59	\N	\N	\N	\N	\N	Accord de copropriété		0	\N
+474	17	18	1	2016-03-14 13:24:11	\N	\N	\N	\N	\N	Contrat de licence (brevet)		0	\N
+452	19	20	1	2016-03-14 13:14:02	\N	\N	\N	\N	\N	Cession de quotes parts de brevet		0	\N
+453	21	22	1	2016-03-14 13:14:17	\N	\N	\N	\N	\N	Contrat de transfert de Savoir-Faire		0	\N
+455	23	24	1	2016-03-14 13:15:36	\N	\N	\N	\N	\N	Contrat d'édition		0	\N
+458	25	26	1	2016-03-14 13:17:50	\N	\N	\N	\N	\N	Concours scientifique		0	\N
+459	27	28	1	2016-03-14 13:18:13	\N	\N	\N	\N	\N	Convention de mise en délégation		0	\N
+473	29	30	1	2016-03-14 13:23:55	\N	\N	\N	\N	\N	Contrat de licence (logiciel)		0	\N
+476	91	92	1	2016-03-14 13:25:18	\N	\N	\N	\N	\N	LIFE+		0	\N
+462	69	70	1	2016-03-14 13:19:32	\N	\N	\N	\N	\N	FEAMP		0	\N
+466	77	78	1	2016-03-14 13:21:19	\N	\N	\N	\N	\N	FP7 - Marie curie		0	\N
+470	85	86	1	2016-03-14 13:22:23	\N	\N	\N	\N	\N	H2020		0	\N
+418	60	61	1	2016-03-14 12:28:29	\N	\N	\N	\N	\N	BQR		0	\N
+417	56	59	1	2016-03-14 12:27:57	\N	\N	\N	\N	\N	ANR                                                                                                                                                                                                                                                            		0	\N
+446	57	58	1	2016-03-14 13:10:20	\N	\N	\N	\N	\N	Convention de subvention (ANR)		0	\N
+412	4	33	1	2016-03-14 12:21:48	\N	\N	\N	\N	\N	Valorisation		0	\N
+414	42	43	1	2016-03-14 12:24:20	\N	\N	\N	\N	\N	Achat en commun                                                                                                                                                                                                                                                		0	\N
+465	75	76	1	2016-03-14 13:20:37	\N	\N	\N	\N	\N	FP6 - tous programmes		0	\N
+477	93	94	1	2016-03-14 13:28:10	\N	\N	\N	\N	\N	Interreg III		0	\N
+463	71	72	1	2016-03-14 13:19:43	\N	\N	\N	\N	\N	FEDER - 2014 / 2020		0	\N
+467	79	80	1	2016-03-14 13:21:30	\N	\N	\N	\N	\N	FP7 - Capacité		0	\N
+471	87	88	1	2016-03-14 13:23:06	\N	\N	\N	\N	\N	Interreg IVA		0	\N
+447	63	64	1	2016-03-14 13:11:02	\N	\N	\N	\N	\N	Autres financements UE		0	\N
+444	47	48	1	2016-03-14 13:09:12	\N	\N	\N	\N	\N	Post-doc subvention autre que Région		0	\N
+415	44	51	1	2016-03-14 12:26:44	\N	\N	\N	\N	\N	Allocations de recherche		0	\N
+416	52	55	1	2016-03-14 12:26:59	\N	\N	\N	\N	\N	Aides OSEO		0	\N
+445	49	50	1	2016-03-14 13:09:51	\N	\N	\N	\N	\N	Post-doc subvention Région		0	\N
+442	53	54	1	2016-03-14 13:07:49	\N	\N	\N	\N	\N	Aides BPI		0	\N
+468	81	82	1	2016-03-14 13:21:42	\N	\N	\N	\N	\N	FP7 - Coopération		0	\N
+472	89	90	1	2016-03-14 13:23:17	\N	\N	\N	\N	\N	Interreg V		0	\N
+475	31	32	1	2016-03-14 13:24:30	\N	\N	\N	\N	\N	Contrat de licence		0	\N
+443	45	46	1	2016-03-14 13:08:30	\N	\N	\N	\N	\N	Thèse subvention autre que Région		0	\N
+413	34	41	1	2016-03-14 12:24:04	\N	\N	\N	\N	\N	Recherche partenariale		0	\N
+457	39	40	1	2016-03-14 13:17:09	\N	\N	\N	\N	\N	Contrats de transfert de matériel		0	\N
+456	37	38	1	2016-03-14 13:16:30	\N	\N	\N	\N	\N	Contrats de mise à disposition		0	\N
+440	35	36	1	2016-03-14 13:06:49	\N	\N	\N	\N	\N	Accord de consortium		0	\N
+461	67	68	1	2016-03-14 13:19:03	\N	\N	\N	\N	\N	EUREKA		0	\N
+464	73	74	1	2016-03-14 13:19:55	\N	\N	\N	\N	\N	FEDER - 2007 / 2013		0	\N
+469	83	84	1	2016-03-14 13:21:55	\N	\N	\N	\N	\N	FP7 - Idées		0	\N
+483	97	98	1	2018-02-05 15:48:53	\N	\N	\N	\N	\N	FEADER		0	\N
+460	65	66	1	2016-03-14 13:18:43	\N	\N	\N	\N	\N	COST		0	\N
+484	99	100	1	2018-02-05 15:50:18	\N	\N	\N	\N	\N	Direction Générale Europe		0	\N
+419	62	103	1	2016-03-14 12:33:48	\N	\N	\N	\N	\N	Union Européenne		0	\N
+1	1	162	\N	\N	\N	\N	\N	\N	\N	ROOT	\N	\N	\N
+454	113	114	1	2016-03-14 13:15:14	\N	\N	\N	\N	\N	Contrat Accompagnement Cifre		0	\N
+485	123	124	1	2018-04-06 10:05:37	\N	\N	\N	\N	\N	Accord de consortium EUROPE		0	\N
+481	160	161	1	2018-01-24 10:53:22	\N	\N	\N	\N	\N	PIA		0	\N
+425	122	127	1	2016-03-14 12:42:22	\N	\N	\N	\N	\N	Contrats européens		0	\N
+449	111	112	1	2016-03-14 13:12:36	\N	\N	\N	\N	\N	Thèse subvention Région		0	\N
+420	104	107	1	2016-03-14 12:36:17	\N	\N	\N	\N	\N	 Appels à projets pôles (FUI)		0	\N
+448	105	106	1	2016-03-14 13:11:38	\N	\N	\N	\N	\N	Convention de subvention (FUI)		0	\N
+421	108	109	1	2016-03-14 12:36:46	\N	\N	\N	\N	\N	International hors UE		0	\N
+422	110	115	1	2016-03-14 12:38:18	\N	\N	\N	\N	\N	Thèse		0	\N
+423	116	117	1	2016-03-14 12:39:54	\N	\N	\N	\N	\N	Collaboration recherche		0	\N
+424	118	121	1	2016-03-14 12:41:35	\N	\N	\N	\N	\N	Relations internationales		0	\N
+410	150	151	1	2017-10-10 15:35:16	\N	\N	\N	\N	\N	Mandat		0	\N
+478	154	155	1	2017-10-24 09:58:46	\N	\N	\N	\N	\N	GIP/GIS		0	\N
+479	156	157	1	2017-11-30 11:10:19	\N	\N	\N	\N	\N	 CPER		0	\N
+480	158	159	1	2017-11-30 11:10:41	\N	\N	\N	\N	\N	CPIER		0	\N
+427	130	131	1	2016-03-14 12:49:38	\N	\N	\N	\N	\N	Location		0	\N
+428	132	133	1	2016-03-14 12:50:13	\N	\N	\N	\N	\N	Maintenance		0	\N
+429	134	135	1	2016-03-14 12:51:24	\N	\N	\N	\N	\N	Mise à disposition de matériel		0	\N
+431	138	139	1	2016-03-14 12:56:10	\N	\N	\N	\N	\N	Transfert de financement		0	\N
+409	119	120	1	2016-10-20 10:56:40	\N	\N	\N	\N	\N	LIA (Laboratoire International Associé)		0	\N
+436	148	149	1	2016-03-14 13:04:13	\N	\N	\N	\N	\N	Vente de matériel		0	\N
+433	142	143	1	2016-03-14 12:59:33	\N	\N	\N	\N	\N	Conseils régionaux		0	\N
+432	140	141	1	2016-03-14 12:57:56	\N	\N	\N	\N	\N	Autres collectivités territoriales		0	\N
+434	144	145	1	2016-03-14 13:00:17	\N	\N	\N	\N	\N	Subventions		0	\N
+435	146	147	1	2016-03-14 13:03:05	\N	\N	\N	\N	\N	Colloques		0	\N
+430	136	137	1	2016-03-14 12:53:44	\N	\N	\N	\N	\N	Prestations		0	\N
+426	128	129	1	2016-03-14 12:43:24	\N	\N	\N	\N	\N	Formation		0	\N
+486	125	126	1	2018-04-06 10:06:01	\N	\N	\N	\N	\N	Avenant Contrat EUROPE		0	\N
+487	101	102	1	2019-01-30 10:21:19	\N	\N	\N	\N	\N	ERASMUS+		0	\N
 \.
-
-
---
--- Name: activitytype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('activitytype_id_seq', 411, true);
 
 
 --
 -- Data for Name: administrativedocument; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY administrativedocument (id, person_id, dateupdoad, path, information, filetypemime, filesize, filename, version, status) FROM stdin;
-6	\N	2016-09-22	oscar-1-demo-docx	Test	application/vnd.openxmlformats-officedocument.wordprocessingml.document; charset=binary	1908	demo.docx	1	5
-10	\N	2016-11-10	oscar-1-document-fictif-pdf	TEST	application/pdf; charset=binary	9035	document-fictif.pdf	1	5
-\.
-
-
---
--- Name: administrativedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('administrativedocument_id_seq', 14, true);
-
-
---
--- Data for Name: authentification; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY authentification (id, username, email, display_name, password, state, datelogin, settings, secret) FROM stdin;
-119	Administrateur	stephaneb@unicaen.fr	Administrateur	$2y$14$vOzuulzsUXsNX2lnUpUjrOxL2/387miSWWfuVEJiidMRnvxPQjwOC	0	\N	N;	\N
-118	bouvry	stephane.bouvry@unicaen.fr	Stephane Bouvry	ldap	1	2017-04-25 13:59:09	N;	050376951aaa6a80c87b9fe17b3c0eb6
-\.
-
-
---
--- Name: authentification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('authentification_id_seq', 119, true);
-
-
---
--- Data for Name: authentification_role; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY authentification_role (authentification_id, role_id) FROM stdin;
-119	1
+COPY public.administrativedocument (id, person_id, dateupdoad, path, information, filetypemime, filesize, filename, version, status) FROM stdin;
 \.
 
 
@@ -1804,7 +2194,7 @@ COPY authentification_role (authentification_id, role_id) FROM stdin;
 -- Data for Name: categorie_privilege; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY categorie_privilege (id, code, libelle, ordre) FROM stdin;
+COPY public.categorie_privilege (id, code, libelle, ordre) FROM stdin;
 2	ACTIVITY	Activité de recherche	\N
 3	PERSON	Personne	\N
 4	ORGANIZATION	Organisation	\N
@@ -1818,32 +2208,18 @@ COPY categorie_privilege (id, code, libelle, ordre) FROM stdin;
 
 
 --
--- Name: categorie_privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('categorie_privilege_id_seq', 1, false);
-
-
---
 -- Data for Name: contractdocument; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY contractdocument (id, grant_id, person_id, dateupdoad, path, information, centaureid, filetypemime, filesize, filename, version, typedocument_id, status, datedeposit, datesend) FROM stdin;
+COPY public.contractdocument (id, grant_id, person_id, dateupdoad, path, information, centaureid, filetypemime, filesize, filename, version, typedocument_id, status, datedeposit, datesend) FROM stdin;
 \.
-
-
---
--- Name: contractdocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('contractdocument_id_seq', 55696, true);
 
 
 --
 -- Data for Name: contracttype; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY contracttype (id, code, label, description, lft, rgt) FROM stdin;
+COPY public.contracttype (id, code, label, description, lft, rgt) FROM stdin;
 1	ROOT			1	462
 2	ADMINISTR.	Label ADMINISTR.	Description pour la catégorie ADMINISTR.	2	23
 3	HEBERGEM.	Label HEBERGEM.	Description pour la sous-catégorie HEBERGEM.	3	8
@@ -2079,17 +2455,10 @@ COPY contracttype (id, code, label, description, lft, rgt) FROM stdin;
 
 
 --
--- Name: contracttype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('contracttype_id_seq', 231, true);
-
-
---
 -- Data for Name: currency; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY currency (id, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, label, symbol, rate) FROM stdin;
+COPY public.currency (id, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, label, symbol, rate) FROM stdin;
 1	1	2015-11-03 14:48:10	\N	\N	\N	\N	\N	Euro	€	1
 4	1	2015-11-03 14:58:31	\N	\N	\N	\N	\N	Yens	¥	132.65100000000001
 3	1	2015-11-03 14:57:20	\N	\N	\N	\N	\N	Livre	£	0.713300000000000045
@@ -2098,53 +2467,40 @@ COPY currency (id, status, datecreated, dateupdated, datedeleted, createdby_id, 
 
 
 --
--- Name: currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('currency_id_seq', 1, false);
-
-
---
 -- Data for Name: datetype; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY datetype (id, label, description, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, facet) FROM stdin;
-1	Début du contrat		1	2016-01-27 14:20:48	\N	\N	\N	\N	\N	\N
-3	Début d'éligibilité des dépenses		1	2016-01-27 14:26:21	\N	\N	\N	\N	\N	\N
-4	Fin d'éligibilité des dépenses		1	2016-01-27 14:31:13	\N	\N	\N	\N	\N	\N
-5	Début d'éligibilité des dépenses de fonctionnement		1	2016-01-27 14:48:23	\N	\N	\N	\N	\N	\N
-6	Fin d'éligibilité des dépenses de fonctionnement		1	2016-01-27 14:48:46	\N	\N	\N	\N	\N	\N
-7	Dépôt de dossier		1	2016-01-27 14:49:01	\N	\N	\N	\N	\N	\N
-8	Signature		1	2016-01-27 14:49:14	\N	\N	\N	\N	\N	\N
-9	Première dépense	Déclenche la demande de l'avance (certificat de commencement du projet)	1	2016-01-27 14:49:42	\N	\N	\N	\N	\N	\N
-10	Démo		1	2016-02-03 18:11:45	\N	\N	\N	\N	\N	\N
-12	Rapport de thèse		1	2016-02-08 12:54:00	\N	\N	\N	\N	\N	Scientifique
-11	Publication d'article		1	2016-02-04 09:34:18	\N	\N	\N	\N	\N	Scientifique
-15	Rapport d'étude		1	2016-02-08 13:23:55	\N	\N	\N	\N	\N	Scientifique
-16	Prototype		1	2016-02-08 13:26:10	\N	\N	\N	\N	\N	Scientifique
-17	Logiciel		1	2016-02-08 13:29:37	\N	\N	\N	\N	\N	Scientifique
-18	Rapport de recherche		1	2016-02-08 13:30:10	\N	\N	\N	\N	\N	Scientifique
-19	Rapport final		1	2016-02-08 13:30:42	\N	\N	\N	\N	\N	Scientifique
-20	Rapport scientifique intermédiaire		1	2016-02-08 13:31:20	\N	\N	\N	\N	\N	Scientifique
-21	Soutenance de thèse		1	2016-02-08 13:31:40	\N	\N	\N	\N	\N	Scientifique
-52	Date de fin d'éligibilité des dépenses d'investissement		1	2016-04-07 12:58:56	\N	\N	\N	\N	\N	Financier
-53	Rapport financier		1	2016-08-26 13:53:40	\N	\N	\N	\N	\N	Financier
-54	Fin de période de rapport/reporting		1	2016-08-26 13:54:00	\N	\N	\N	\N	\N	Général
+COPY public.datetype (id, label, description, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, facet, recursivity, finishable) FROM stdin;
+1	Début du contrat		1	2016-01-27 14:20:48	\N	\N	\N	\N	\N	\N	\N	f
+3	Début d'éligibilité des dépenses		1	2016-01-27 14:26:21	\N	\N	\N	\N	\N	\N	\N	f
+4	Fin d'éligibilité des dépenses		1	2016-01-27 14:31:13	\N	\N	\N	\N	\N	\N	\N	f
+5	Début d'éligibilité des dépenses de fonctionnement		1	2016-01-27 14:48:23	\N	\N	\N	\N	\N	\N	\N	f
+6	Fin d'éligibilité des dépenses de fonctionnement		1	2016-01-27 14:48:46	\N	\N	\N	\N	\N	\N	\N	f
+7	Dépôt de dossier		1	2016-01-27 14:49:01	\N	\N	\N	\N	\N	\N	\N	f
+8	Signature		1	2016-01-27 14:49:14	\N	\N	\N	\N	\N	\N	\N	f
+9	Première dépense	Déclenche la demande de l'avance (certificat de commencement du projet)	1	2016-01-27 14:49:42	\N	\N	\N	\N	\N	\N	\N	f
+10	Démo		1	2016-02-03 18:11:45	\N	\N	\N	\N	\N	\N	\N	f
+12	Rapport de thèse		1	2016-02-08 12:54:00	\N	\N	\N	\N	\N	Scientifique	\N	f
+11	Publication d'article		1	2016-02-04 09:34:18	\N	\N	\N	\N	\N	Scientifique	\N	f
+15	Rapport d'étude		1	2016-02-08 13:23:55	\N	\N	\N	\N	\N	Scientifique	\N	f
+16	Prototype		1	2016-02-08 13:26:10	\N	\N	\N	\N	\N	Scientifique	\N	f
+17	Logiciel		1	2016-02-08 13:29:37	\N	\N	\N	\N	\N	Scientifique	\N	f
+18	Rapport de recherche		1	2016-02-08 13:30:10	\N	\N	\N	\N	\N	Scientifique	\N	f
+19	Rapport final		1	2016-02-08 13:30:42	\N	\N	\N	\N	\N	Scientifique	\N	f
+20	Rapport scientifique intermédiaire		1	2016-02-08 13:31:20	\N	\N	\N	\N	\N	Scientifique	\N	f
+21	Soutenance de thèse		1	2016-02-08 13:31:40	\N	\N	\N	\N	\N	Scientifique	\N	f
+52	Date de fin d'éligibilité des dépenses d'investissement		1	2016-04-07 12:58:56	\N	\N	\N	\N	\N	Financier	\N	f
+54	Fin de période de rapport/reporting		1	2016-08-26 13:54:00	\N	\N	\N	\N	\N	Général	\N	f
+55	Soumission du projet		1	2018-02-08 18:09:50	\N	\N	\N	\N	\N	Administratif		f
+53	Rapport financier		1	2016-08-26 13:53:40	\N	\N	\N	\N	\N	Financier		t
 \.
-
-
---
--- Name: datetype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('datetype_id_seq', 54, true);
 
 
 --
 -- Data for Name: discipline; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY discipline (id, label, centaureid) FROM stdin;
+COPY public.discipline (id, label, centaureid) FROM stdin;
 91	CONSTITUANTS ELEMENTAIRES, PHYSIQUE THEORIQUE	GMC2
 92	PHYSIQUE ATOMIQUE ET MOLECULAIRE, OPTIQUE, LASERS, ELECTROMAGNETISME	GMC3
 93	MATIERE CONDENSEE, MATERIAUX, COMPOSANTS	GMC4
@@ -2176,120 +2532,51 @@ COPY discipline (id, label, centaureid) FROM stdin;
 119	MATHEMATIQUE	GMC1
 \.
 
-
 --
--- Name: discipline_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('discipline_id_seq', 122, true);
-
-
---
--- Data for Name: grantsource; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: notification; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY grantsource (id, description, logo, informations, centaureid, label) FROM stdin;
-1		\N	\N
-2	ANR	\N	\N	ANR_SP	ANR_SP
-3	UCBN PCRD (Plan de Calcul)	\N	\N	UCBN PCRD	UCBN PCRD
-4	coût complet (Plan de calcul)	\N	\N	UCBN_1	UCBN_1
-5	Coût marginal (Plan de Calcul)	\N	\N	UCBN_2	UCBN_2
-6	NON RENSEIGNE	\N	\N	0000000000	0000000000
-7	Accords Cadre	\N	\N	ACADRE	ACADRE
-8	BQR	\N	\N	BQR	BQR
-9	Pôles de compétitivités (FUI)	\N	\N	COMPET	COMPET
-10	CPER	\N	\N	CPER	CPER
-11	Subvention Conseil Régional	\N	\N	CR	CR
-12	International hors Europe	\N	\N	INTER	INTER
-13	NON APPLICABLE	\N	\N	NA	NA
-14	Non défini	\N	\N	ND	ND
-15	Aide à l'innovation OSEO	\N	\N	OSEO	OSEO
-16	Contrat de prestations	\N	\N	PREST	PREST
-17	contrat de collaboration de recherche lucratif	\N	\N	RALNT	RALNT
-18	contrat de collaboration de recherche non lucratif	\N	\N	RANLNT	RANLNT
-19	Convention de Subvention	\N	\N	RANLT	RANLT
-20	Union Européenne	\N	\N	UE	UE
-21	Accord de confidentialité	\N	\N	CONFIDENC	CONFIDENC
-22	Contrat de mise à disposition	\N	\N	MAD	MAD
-23	Accord de copropriété	\N	\N	COPRO	COPRO
-24	Contrat de mandat	\N	\N	mandat	mandat
-25	Contrat de licence	\N	\N	LICENC	LICENC
-26	Contrat de cession	\N	\N	CESSION	CESSION
+COPY public.notification (id, dateeffective, datereal, datecreated, message, object, objectid, hash, context, serie, level, datas) FROM stdin;
 \.
 
 
 --
--- Name: grantsource_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Data for Name: notificationperson; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('grantsource_id_seq', 33, true);
-
-
---
--- Data for Name: logactivity; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY logactivity (id, datecreated, message, context, contextid, userid, level, type, ip, datas) FROM stdin;
+COPY public.notificationperson (id, notification_id, person_id, read) FROM stdin;
 \.
-
-
---
--- Name: logactivity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('logactivity_id_seq', 29163, true);
 
 
 --
 -- Data for Name: organization; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY organization (id, centaureid, shortname, fullname, code, email, url, description, street1, street2, street3, city, zipcode, phone, dateupdated, datecreated, dateend, datestart, status, datedeleted, createdby_id, updatedby_id, deletedby_id, ldapsupanncodeentite, country, sifacid, codepays, siret, bp, type, sifacgroup, sifacgroupid, numtvaca, connectors) FROM stdin;
+COPY public.organization (id, centaureid, shortname, fullname, code, email, url, description, street1, street2, street3, city, zipcode, phone, dateupdated, datecreated, dateend, datestart, status, datedeleted, createdby_id, updatedby_id, deletedby_id, ldapsupanncodeentite, country, sifacid, codepays, siret, bp, type, sifacgroup, sifacgroupid, numtvaca, connectors, typeobj_id) FROM stdin;
 \.
-
-
---
--- Name: organization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('organization_id_seq', 12932, true);
 
 
 --
 -- Data for Name: organization_role; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY organization_role (id, role_id, description, principal) FROM stdin;
+COPY public.organization_role (id, role_id, description, principal) FROM stdin;
 \.
-
-
---
--- Name: organization_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('organization_role_id_seq', 1, false);
 
 
 --
 -- Data for Name: organizationperson; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY organizationperson (id, person_id, organization_id, main, role, datestart, dateend, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, roleobj_id) FROM stdin;
+COPY public.organizationperson (id, person_id, organization_id, main, role, datestart, dateend, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, roleobj_id, origin) FROM stdin;
 \.
-
-
---
--- Name: organizationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('organizationperson_id_seq', 181, true);
 
 
 --
 -- Data for Name: organizationrole; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY organizationrole (id, label, description, principal, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+COPY public.organizationrole (id, label, description, principal, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
 5	Co-financeur	\N	f	\N	\N	\N	\N	\N	\N	\N
 6	Coordinateur	\N	f	\N	\N	\N	\N	\N	\N	\N
 8	Client	\N	f	\N	\N	\N	\N	\N	\N	\N
@@ -2302,111 +2589,133 @@ COPY organizationrole (id, label, description, principal, status, datecreated, d
 12	Conseiller	\N	f	\N	\N	\N	\N	\N	\N	\N
 13	Partenaire	\N	f	\N	\N	\N	\N	\N	\N	\N
 7	Scientifique		f	\N	\N	\N	\N	\N	\N	\N
+14	Tiers		f	1	2018-02-08 18:08:03	\N	\N	\N	\N	\N
+15	Composante Responsable		f	1	2019-01-30 08:32:53	\N	\N	\N	\N	\N
 \.
 
 
 --
--- Name: organizationrole_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Data for Name: organizationtype; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('organizationrole_id_seq', 1, false);
+COPY public.organizationtype (id, root_id, label, description, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+1	\N	Association	\N	1	\N	\N	\N	\N	\N	\N
+2	\N	Collectivité territoriale	\N	1	\N	\N	\N	\N	\N	\N
+3	\N	Composante	\N	1	\N	\N	\N	\N	\N	\N
+4	\N	Groupement d'intérêt économique	\N	1	\N	\N	\N	\N	\N	\N
+5	\N	Inconnue	\N	1	\N	\N	\N	\N	\N	\N
+6	\N	Institution	\N	1	\N	\N	\N	\N	\N	\N
+7	\N	Laboratoire	\N	1	\N	\N	\N	\N	\N	\N
+8	\N	Plateau technique	\N	1	\N	\N	\N	\N	\N	\N
+9	\N	Société	\N	1	\N	\N	\N	\N	\N	\N
+10	\N	Établissement publique	\N	1	\N	\N	\N	\N	\N	\N
+\.
 
 
 --
 -- Data for Name: person; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, ldapstatus, ldapsitelocation, ldapaffectation, ldapdisabled, ldapfininscription, ladaplogin, phone, datesyncldap, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, emailprive, harpegeinm, connectors, ldapmemberof) FROM stdin;
+COPY public.person (id, firstname, lastname, codeharpege, centaureid, codeldap, email, ldapstatus, ldapsitelocation, ldapaffectation, ldapdisabled, ldapfininscription, ladaplogin, phone, datesyncldap, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, emailprive, harpegeinm, connectors, ldapmemberof, customsettings, foo, schedulekey) FROM stdin;
 \.
-
-
---
--- Name: person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('person_id_seq', 11691, true);
 
 
 --
 -- Data for Name: privilege; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY privilege (id, categorie_id, code, libelle, ordre) FROM stdin;
-4	7	role-visualisation	Visualisation des rôles	\N
-5	7	role-edition	Édition des rôles	\N
-6	7	privilege-visualisation	Privilèges - Visualisation	\N
-7	7	privilege-edition	Privilèges - Édition	\N
-8	1	CREATE	Création d'un nouveau projet	\N
-9	1	EDIT	Modifier la description d'un projet	\N
-10	1	ACTIVITY-ADD	Ajouter une activité dans le projet	\N
-11	1	PERSON_MANAGE	Gérer les membres d'un projet	\N
-12	1	ORGANIZATION_MANAGE	Gérer les partenaires d'un projet	\N
-1	1	DASHBOARD	Tableau de bord	\N
-2	1	INDEX	Lister et recherche dans les projets	\N
-13	2	EXPORT	Exporter les données des activités	\N
-16	2	PAYMENT_MANAGE	Gestion des versements d'une activités	\N
-15	2	ORGANIZATION_MANAGE	Gestion des partenaires d'une activité	\N
-19	2	EDIT	Modifier les informations générales d'une activité	\N
-17	2	INDEX	Afficher / recherche dans les activités	\N
-18	2	SHOW	Afficher la fiche d'une activité	\N
-21	2	NUMBER	Peut numéroter l'activité	\N
-20	2	PAYMENT_SHOW	Voir les versements et le budget	\N
-22	2	MILESTONE_SHOW	Peut voir les jalons	\N
-23	2	MILESTONE_MANAGE	Peut gérer les jalons	\N
-24	2	DOCUMENT_SHOW	Peut voir les documents	\N
-25	2	DOCUMENT_MANAGE	Peut gérer les documents (Ajouter)	\N
-26	2	DUPLICATE	Peut dupliquer l'activité	\N
-27	2	CHANGE_PROJECT	Peut modifier le projet d'une activité	\N
-28	2	DELETE	Peut supprimer définitivement une activité	\N
-29	2	STATUS_OFF	Peut modifier le status vers "Désactivé"	\N
-30	2	PERSON_SHOW	Peut voir les membres d'une activité	\N
-31	2	ORGANIZATION_SHOW	Peut voir les partenaires d'un projet	\N
-3	1	SHOW	Voir les détails d'un projet	\N
-32	1	PERSON_SHOW	Voir les membres d'un projet	\N
-33	1	ORGANIZATION_SHOW	Voir les partenaires d'un projet	\N
-34	1	DOCUMENT_SHOW	Voir les documents d'un projet	\N
-35	1	ACTIVITY_SHOW	Voir les activités d'un projet	\N
-36	3	SHOW	Voir la fiche d'une personne	\N
-37	3	EDIT	Modifier la fiche d'une personne	\N
-38	3	SYNC_LDAP	Synchroniser les données avec LDAP	\N
-41	4	SHOW	Voir la fiche d'une organisation	\N
-42	4	EDIT	Modifier la fiche d'une organisation	\N
-43	4	SYNC_LDAP	Synchroniser les données avec LDAP	\N
-14	2	PERSON_MANAGE	Gestion des membres d'une activité	\N
-51	6	MENU_ADMIN	Accès aux menu d'administration	\N
-40	4	INDEX	Voir la liste des organisations	\N
-39	3	INDEX	Voir la liste des personnes	\N
-50	4	TEST	Test de requète	\N
-53	3	PROJECTS	Voir les projets d'une personnes	\N
-52	3	INFOS_RH	Voir les données administratives	\N
-54	2	WORKPACKAGE_SHOW	Voir les lots de travail d'une activité	\N
-55	2	WORKPACKAGE_MANAGE	Gérer les lots de travail d'une activité	\N
-56	2	WORKPACKAGE_COMMIT	Déclarer des heures pour un lot de travail	\N
-57	2	WORKPACKAGE_VALIDATE	Valider une déclaration d'heure pour un lot de travail	\N
-58	8	DOCUMENT_INDEX	Voir les documents adminstratifs	\N
-60	8	DOCUMENT_DELETE	Supprimer un document	\N
-61	8	DOCUMENT_DOWNLOAD	Télécharger un document	\N
-59	8	DOCUMENT_NEW	Téléverser un nouveau document	\N
-62	9	SHOW	Voir les dépenses	\N
-63	7	USER_VISUALISATION	Voir les authentifications utilisateur	\N
-64	7	USER_EDITION	Gérer les authentifications des utilisateurs	\N
-65	7	ROLEORGA_VISUALISATION	Voir les rôles des organisations	\N
-66	7	ROLEORGA_EDITION	Gérer les rôles des organisations	\N
+COPY public.privilege (id, categorie_id, code, libelle, ordre, root_id, spot) FROM stdin;
+6	7	privilege-visualisation	Privilèges - Visualisation	\N	\N	7
+18	2	SHOW	Afficher la fiche d'une activité	\N	\N	7
+20	2	PAYMENT_SHOW	Voir les versements et le budget	\N	\N	7
+22	2	MILESTONE_SHOW	Peut voir les jalons	\N	\N	7
+24	2	DOCUMENT_SHOW	Peut voir les documents	\N	\N	7
+30	2	PERSON_SHOW	Peut voir les membres d'une activité	\N	\N	7
+31	2	ORGANIZATION_SHOW	Peut voir les partenaires d'un projet	\N	\N	7
+3	1	SHOW	Voir les détails d'un projet	\N	\N	7
+32	1	PERSON_SHOW	Voir les membres d'un projet	\N	\N	7
+33	1	ORGANIZATION_SHOW	Voir les partenaires d'un projet	\N	\N	7
+34	1	DOCUMENT_SHOW	Voir les documents d'un projet	\N	\N	7
+35	1	ACTIVITY_SHOW	Voir les activités d'un projet	\N	\N	7
+54	2	WORKPACKAGE_SHOW	Voir les lots de travail d'une activité	\N	\N	7
+56	2	WORKPACKAGE_COMMIT	Déclarer des heures pour un lot de travail	\N	\N	7
+62	9	SHOW	Voir les dépenses	\N	\N	7
+70	6	CONNECTOR_ACCESS	Peut exécuter la synchronisation des données	\N	\N	7
+69	2	TIMESHEET_USURPATION	Peut remplir les feuilles de temps des déclarants d'une activité	\N	\N	7
+72	2	NOTIFICATIONS_SHOW	Peut voir les notifications planifiées dans la fiche activité	\N	\N	7
+74	6	NOTIFICATION_PERSON	Peut notifier manuellement un personne	\N	\N	7
+75	2	PERSON_ACCESS	Voir les personnes qui ont la vision sur l'activité	\N	\N	7
+76	3	VIEW_TIMESHEET	Peut voir les feuilles de temps de n'importe quelle personne	\N	\N	7
+78	2	TIMESHEET_VIEW	Voir les feuilles de temps	\N	\N	7
+79	6	ACTIVITYTYPE_MANAGE	Configurer les types d'activités disponibles	\N	\N	7
+80	6	MILESTONETYPE_MANAGE	Configurer les types de jalons disponibles	\N	\N	7
+81	6	ORGANIZATIONTYPE_MANAGE	Configurer les types d'organisation disponibles	\N	\N	7
+82	6	SEARCH_BUILD	Peut lancer la reconstruction de l'index de recherche des activités	\N	\N	7
+4	7	role-visualisation	Visualisation des rôles	\N	\N	4
+5	7	role-edition	Édition des rôles	\N	4	4
+7	7	privilege-edition	Privilèges - Édition	\N	6	4
+8	1	CREATE	Création d'un nouveau projet	\N	\N	4
+9	1	EDIT	Modifier un projet	\N	3	4
+10	1	ACTIVITY-ADD	Ajouter une activité dans le projet	\N	\N	4
+11	1	PERSON_MANAGE	Gérer les membres d'un projet	\N	32	7
+12	1	ORGANIZATION_MANAGE	Gérer les partenaires d'un projet	\N	33	7
+1	1	DASHBOARD	Tableau de bord	\N	\N	4
+2	1	INDEX	Lister et recherche dans les projets	\N	\N	6
+13	2	EXPORT	Exporter les données des activités	\N	17	4
+16	2	PAYMENT_MANAGE	Gestion des versements d'une activités	\N	20	7
+15	2	ORGANIZATION_MANAGE	Gestion des partenaires d'une activité	\N	31	7
+19	2	EDIT	Modifier les informations générales d'une activité	\N	18	7
+17	2	INDEX	Afficher / rechercher dans les activités	\N	\N	4
+23	2	MILESTONE_MANAGE	Peut gérer les jalons	\N	22	7
+25	2	DOCUMENT_MANAGE	Peut gérer les documents (Ajouter)	\N	24	7
+26	2	DUPLICATE	Peut dupliquer l'activité	\N	\N	3
+27	2	CHANGE_PROJECT	Peut modifier le projet d'une activité	\N	\N	4
+28	2	DELETE	Peut supprimer définitivement une activité	\N	\N	4
+29	2	STATUS_OFF	Peut modifier le statut vers "Désactivé"	\N	\N	4
+36	3	SHOW	Voir la fiche d'une personne	\N	\N	4
+37	3	EDIT	Modifier la fiche d'une personne	\N	36	4
+41	4	SHOW	Voir la fiche d'une organisation	\N	\N	4
+42	4	EDIT	Modifier la fiche d'une organisation	\N	41	4
+14	2	PERSON_MANAGE	Gestion des membres d'une activité	\N	30	7
+51	6	MENU_ADMIN	Accès au menu d'administration	\N	\N	4
+40	4	INDEX	Voir la liste des organisations	\N	\N	4
+39	3	INDEX	Voir la liste des personnes	\N	\N	4
+53	3	PROJECTS	Voir les projets d'une personnes	\N	36	7
+52	3	INFOS_RH	Voir les données administratives	\N	36	4
+55	2	WORKPACKAGE_MANAGE	Gérer les lots de travail d'une activité	\N	54	7
+58	8	DOCUMENT_INDEX	Voir les documents adminstratifs	\N	\N	4
+60	8	DOCUMENT_DELETE	Supprimer un document	\N	58	4
+61	8	DOCUMENT_DOWNLOAD	Télécharger un document	\N	58	4
+59	8	DOCUMENT_NEW	Téléverser un nouveau document	\N	58	4
+63	7	USER_VISUALISATION	Voir les authentifications utilisateur	\N	\N	4
+64	7	USER_EDITION	Gérer les authentifications des utilisateurs	\N	\N	4
+65	7	ROLEORGA_VISUALISATION	Voir les rôles des organisations	\N	\N	4
+66	7	ROLEORGA_EDITION	Configurer les rôles des organisations	\N	65	4
+73	2	NOTIFICATIONS_GENERATE	Peut regénérer manuellement les notifications d'une activité	\N	72	7
+67	2	TIMESHEET_VALIDATE_SCI	Validation scientifique des feuilles de temps	\N	78	7
+68	2	TIMESHEET_VALIDATE_ADM	Validation administrative des feuilles de temps	\N	78	7
+77	2	MILESTONE_PROGRESSION	Peut gérer l'état d'avancement des jalons	\N	22	7
+83	6	DISCIPLINE_MANAGE	Configurer les disciplines disponibles pour les activités	\N	\N	7
+38	3	SYNC_LDAP	Synchroniser les données depuis les connecteurs	\N	36	4
+43	4	SYNC_LDAP	Synchroniser les données avec les connecteurs	\N	41	4
+88	6	VALIDATION_MANAGE	Peut gérer et modifier l'état des déclarations envoyées	\N	\N	7
+84	3	MANAGE_SCHEDULE	Peut  modifier et valider la répartition horaire d'une personne	\N	36	7
+85	3	SHOW_SCHEDULE	Peut  voir la répartition horaire d'une personne	\N	36	7
+86	4	DELETE	Autorise la suppression définitive d'une organisation	\N	40	4
+87	2	TIMESHEET_VALIDATE_ACTIVITY	Validation niveau activité des feuilles de temps	\N	78	7
+89	2	REQUEST	Faire une demande d'activité	\N	\N	4
+90	6	TVA_MANAGE	Configurer les TVAs disponibles	\N	\N	7
+96	2	REQUEST_MANAGE	Traiter les demandes d'activité	\N	\N	4
+97	2	REQUEST_ADMIN	Administrer toutes les demandes d'activité	\N	\N	4
+101	3	FEED_TIMESHEET	Peut compléter les feuilles de temps de n'importe quel déclarant	\N	\N	7
 \.
-
-
---
--- Name: privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('privilege_id_seq', 1, false);
 
 
 --
 -- Data for Name: project; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY project (id, discipline_id, centaureid, code, eotp, composanteprincipal, acronym, label, description, datecreated, dateupdated, datevalidated) FROM stdin;
+COPY public.project (id, centaureid, code, eotp, composanteprincipal, acronym, label, description, datecreated, dateupdated, datevalidated) FROM stdin;
 \.
 
 
@@ -2414,66 +2723,39 @@ COPY project (id, discipline_id, centaureid, code, eotp, composanteprincipal, ac
 -- Data for Name: project_discipline; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY project_discipline (project_id, discipline_id) FROM stdin;
+COPY public.project_discipline (project_id, discipline_id) FROM stdin;
 \.
-
-
---
--- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('project_id_seq', 8634, true);
-
-
---
--- Name: projectgrant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('projectgrant_id_seq', 8654, true);
 
 
 --
 -- Data for Name: projectmember; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY projectmember (id, project_id, person_id, role, datestart, dateend, main, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, roleobj_id) FROM stdin;
+COPY public.projectmember (id, project_id, person_id, role, datestart, dateend, main, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, roleobj_id) FROM stdin;
 \.
-
-
---
--- Name: projectmember_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('projectmember_id_seq', 10714, true);
 
 
 --
 -- Data for Name: projectpartner; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY projectpartner (id, project_id, organization_id, datestart, dateend, main, role, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, roleobj_id) FROM stdin;
+COPY public.projectpartner (id, project_id, organization_id, datestart, dateend, main, role, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, roleobj_id) FROM stdin;
 \.
 
 
 --
--- Name: projectpartner_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Data for Name: referent; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('projectpartner_id_seq', 59703, true);
-
-
---
--- Name: role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('role_id_seq', 1, false);
+COPY public.referent (id, referent_id, person_id, datestart, dateend) FROM stdin;
+\.
 
 
 --
 -- Data for Name: role_privilege; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY role_privilege (privilege_id, role_id) FROM stdin;
+COPY public.role_privilege (privilege_id, role_id) FROM stdin;
 3	6
 33	6
 3	10
@@ -2484,9 +2766,7 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 31	10
 25	10
 54	1
-57	1
 53	9
-57	10
 2	9
 32	9
 34	9
@@ -2508,57 +2788,20 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 41	15
 51	15
 55	7
-57	7
-6	16
-2	16
-32	16
-34	16
-13	16
-18	16
-22	16
-30	16
-54	16
-36	16
-41	16
-51	16
 1	11
 32	11
-3	13
-3	12
-32	13
 35	11
 18	11
-18	12
 30	11
-54	12
-54	13
-56	12
-56	13
 56	8
 59	1
-58	16
 51	9
 59	9
 58	10
 58	15
-58	13
 61	7
-1	17
-32	17
-18	17
-54	17
-58	17
-3	18
-34	18
-18	18
-22	18
-30	18
-54	18
-57	18
-61	18
 61	10
 61	15
-61	13
 58	6
 16	9
 54	9
@@ -2623,43 +2866,33 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 1	1
 1	7
 1	6
-1	14
 2	1
 2	7
 35	22
 13	7
 13	1
 16	1
-16	14
 16	7
 15	1
 15	7
-15	14
 19	1
 19	7
-19	14
 17	1
 17	7
 33	22
 18	1
 18	7
-18	14
-21	1
 20	1
 20	7
-20	14
 22	1
 22	7
-22	14
 23	1
 23	7
 3	22
 24	1
 24	7
-24	14
 25	1
 25	7
-25	14
 26	1
 26	7
 36	22
@@ -2669,26 +2902,26 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 53	22
 41	22
 58	22
+70	1
+69	1
+68	22
+75	1
+72	1
+76	7
+76	9
 29	1
 30	1
 30	7
-30	14
 31	1
 31	7
-31	14
 3	1
 3	7
-3	14
-32	14
 32	7
 32	1
-33	14
 33	7
 33	1
-34	14
 34	7
 34	1
-35	14
 35	7
 35	1
 36	7
@@ -2698,7 +2931,6 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 38	1
 41	7
 41	1
-42	7
 42	1
 43	7
 43	1
@@ -2745,31 +2977,9 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 40	15
 54	7
 56	7
-4	16
-1	16
-3	16
-33	16
-35	16
-17	16
-20	16
-24	16
-31	16
-56	16
-39	16
-40	16
 3	11
-1	13
-1	12
-32	12
-35	12
-35	13
-18	13
-30	13
-30	12
 54	11
-54	14
 56	11
-56	14
 56	15
 58	1
 60	1
@@ -2777,27 +2987,10 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 61	1
 58	7
 58	8
-58	14
 58	11
-58	12
 59	7
-3	17
-35	17
-30	17
-56	17
-1	18
-32	18
-35	18
-20	18
-24	18
-31	18
-56	18
-58	18
-61	16
 61	8
-61	14
 61	11
-61	17
 23	9
 64	1
 66	1
@@ -2845,6 +3038,48 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 52	22
 40	22
 61	22
+68	21
+73	1
+76	1
+76	8
+76	15
+74	1
+79	1
+80	1
+81	1
+82	1
+78	1
+67	23
+67	24
+78	22
+78	10
+78	21
+78	24
+78	23
+78	7
+78	20
+78	8
+78	9
+78	15
+87	10
+89	22
+89	21
+83	1
+62	1
+89	1
+96	1
+89	6
+96	20
+96	7
+97	1
+85	1
+84	1
+88	1
+101	1
+77	1
+90	1
+42	7
+86	1
 \.
 
 
@@ -2852,44 +3087,38 @@ COPY role_privilege (privilege_id, role_id) FROM stdin;
 -- Data for Name: timesheet; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activity_id, validatedat, label) FROM stdin;
+COPY public.timesheet (id, workpackage_id, person_id, datefrom, dateto, comment, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, activity_id, label, sendby, icsuid, icsfileuid, icsfilename, icsfiledateadded, datesync, syncid, validationperiod_id) FROM stdin;
 \.
 
 
 --
--- Name: timesheet_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Data for Name: timesheetsby; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('timesheet_id_seq', 11, true);
+COPY public.timesheetsby (person_id, usurpation_person_id) FROM stdin;
+\.
 
 
 --
 -- Data for Name: tva; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY tva (id, label, rate, active, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+COPY public.tva (id, label, rate, active, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
 1	Exonéré	0	t	1	\N	\N	\N	\N	\N	\N
 2	Taux réduit (5,5%)	5.5	t	1	\N	\N	\N	\N	\N	\N
 3	Taux normal (19,6%)	19.6000000000000014	t	1	\N	\N	\N	\N	\N	\N
 4	Taux DOM-TOM	8.5	t	1	\N	\N	\N	\N	\N	\N
 5	Taux réduit 7%	7	t	1	\N	\N	\N	\N	\N	\N
 6	Taux normal 20%	20	t	1	\N	\N	\N	\N	\N	\N
-7	Taux réduit 10%	10	t	1	\N	\N	\N	\N	\N	\N
+7	Taux réduit 10%	10	f	1	\N	\N	\N	\N	\N	\N
 \.
-
-
---
--- Name: tva_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('tva_id_seq', 1, false);
 
 
 --
 -- Data for Name: typedocument; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY typedocument (id, label, description, codecentaure, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+COPY public.typedocument (id, label, description, codecentaure, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
 1	Bordereau d'envoi	Importé depuis centaure	BORD	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N
 2	Fiche d'analyse	Importé depuis centaure	ANA	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N
 3	Document de travail	Importé depuis centaure	DOC	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N
@@ -2905,32 +3134,15 @@ COPY typedocument (id, label, description, codecentaure, status, datecreated, da
 
 
 --
--- Name: typedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('typedocument_id_seq', 41, true);
-
-
---
 -- Data for Name: user_role; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY user_role (id, parent_id, role_id, is_default, ldap_filter, spot, description, principal) FROM stdin;
-16	\N	Superviseur	f	\N	4	\N	f
-5	\N	valo	f	\N	0	\N	f
-6	\N	Utilisateur	t	(memberOf=cn=harpege,ou=groups,dc=unicaen,dc=fr)	4	\N	f
+COPY public.user_role (id, parent_id, role_id, is_default, ldap_filter, spot, description, principal) FROM stdin;
 1	\N	Administrateur	f	\N	4	\N	f
 8	\N	Responsable RH	f	\N	6	\N	f
 9	\N	Responsable financier	f	(memberOf=cn=projet_oscar_agence_comptable,ou=groups,dc=unicaen,dc=fr)	6	\N	f
 11	\N	Ingénieur	f	\N	1	\N	f
-12	\N	Doctorant	f	\N	3	\N	f
-13	\N	Post-doc	f	\N	3	\N	f
-14	\N	Responsable	f	\N	3	\N	f
 15	\N	Responsable juridique	f	\N	6	\N	f
-17	\N	Chercheur	f	\N	3	\N	f
-18	\N	Co-responsable	f	\N	3	\N	f
-19	\N	Gestionnaire	f	\N	2	\N	f
-2	\N	beta_testeur	f	\N	0	\N	f
 20	\N	Chargé de mission Europe	f	\N	3		t
 10	\N	Responsable scientifique	f	\N	3		t
 22	\N	Directeur de composante	f	\N	2	Contient les directeurs de composantes, directeurs de composantes adjoint, les administrateurs provisoires 	t
@@ -2938,1952 +3150,2714 @@ COPY user_role (id, parent_id, role_id, is_default, ldap_filter, spot, descripti
 24	\N	Gestionnaire recherche de laboratoire	f	\N	2		t
 23	\N	Responsable administratif et gestionnaire de composante	f	\N	3	Les responsables administratifs et gestionnaires de composantes 	t
 7	\N	Chargé de valorisation	f	(memberOf=cn=structure_dir-recherche-innov,ou=groups,dc=unicaen,dc=fr)	7		t
+6	\N	user	t	\N	4	Rôle par défaut	f
 \.
-
-
---
--- Name: user_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('user_role_id_seq', 24, true);
 
 
 --
 -- Data for Name: useraccessdefinition; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY useraccessdefinition (id, context, label, description, key) FROM stdin;
+COPY public.useraccessdefinition (id, context, label, description, key) FROM stdin;
 \.
 
 
 --
--- Name: useraccessdefinition_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Data for Name: validationperiod; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('useraccessdefinition_id_seq', 1, false);
+COPY public.validationperiod (id, declarer_id, object, objectgroup, object_id, month, year, datesend, log, validationactivityat, validationactivityby, validationactivitybyid, validationactivitymessage, validationsciat, validationsciby, validationscibyid, validationscimessage, validationadmat, validationadmby, validationadmbyid, validationadmmessage, rejectactivityat, rejectactivityby, rejectactivitybyid, rejectactivitymessage, rejectsciat, rejectsciby, rejectscibyid, rejectscimessage, rejectadmat, rejectadmby, rejectadmbyid, rejectadmmessage, schedule, status) FROM stdin;
+\.
+
+
+--
+-- Data for Name: validationperiod_adm; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.validationperiod_adm (validationperiod_id, person_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: validationperiod_prj; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.validationperiod_prj (validationperiod_id, person_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: validationperiod_sci; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.validationperiod_sci (validationperiod_id, person_id) FROM stdin;
+\.
 
 
 --
 -- Data for Name: workpackage; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, code, label, description, datestart, dateend) FROM stdin;
+COPY public.workpackage (id, activity_id, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, code, label, description, datestart, dateend) FROM stdin;
 \.
-
-
---
--- Name: workpackage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('workpackage_id_seq', 22, true);
 
 
 --
 -- Data for Name: workpackageperson; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY workpackageperson (id, person_id, duration, status, datecreated, dateupdated, datedeleted, workpackage_id, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+COPY public.workpackageperson (id, person_id, duration, status, datecreated, dateupdated, datedeleted, workpackage_id, createdby_id, updatedby_id, deletedby_id) FROM stdin;
 \.
+
+
+--
+-- Name: activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activity_id_seq', 1, false);
+
+
+--
+-- Name: activitydate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activitydate_id_seq', 1, false);
+
+
+--
+-- Name: activityorganization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activityorganization_id_seq', 1, false);
+
+
+--
+-- Name: activitypayment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activitypayment_id_seq', 1, false);
+
+
+--
+-- Name: activityperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activityperson_id_seq', 1, false);
+
+
+--
+-- Name: activityrequest_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activityrequest_id_seq', 79, true);
+
+
+--
+-- Name: activityrequestfollow_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activityrequestfollow_id_seq', 54, true);
+
+
+--
+-- Name: activitytype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activitytype_id_seq', 488, false);
+
+
+--
+-- Name: administrativedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.administrativedocument_id_seq', 1, false);
+
+
+--
+-- Name: authentification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.authentification_id_seq', 1, true);
+
+
+--
+-- Name: categorie_privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.categorie_privilege_id_seq', 1, false);
+
+
+--
+-- Name: contractdocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.contractdocument_id_seq', 1, false);
+
+
+--
+-- Name: contracttype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.contracttype_id_seq', 231, true);
+
+
+--
+-- Name: currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.currency_id_seq', 5, false);
+
+
+--
+-- Name: datetype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.datetype_id_seq', 57, false);
+
+
+--
+-- Name: discipline_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.discipline_id_seq', 120, false);
+
+
+--
+-- Name: grantsource_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.grantsource_id_seq', 33, true);
+
+
+--
+-- Name: logactivity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.logactivity_id_seq', 13, true);
+
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.notification_id_seq', 1, false);
+
+
+--
+-- Name: notificationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.notificationperson_id_seq', 1, false);
+
+
+--
+-- Name: organization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.organization_id_seq', 1, false);
+
+
+--
+-- Name: organization_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.organization_role_id_seq', 1, false);
+
+
+--
+-- Name: organizationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.organizationperson_id_seq', 1, false);
+
+
+--
+-- Name: organizationrole_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.organizationrole_id_seq', 16, false);
+
+
+--
+-- Name: organizationtype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.organizationtype_id_seq', 10, true);
+
+
+--
+-- Name: person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.person_id_seq', 1, false);
+
+
+--
+-- Name: privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.privilege_id_seq', 102, false);
+
+
+--
+-- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.project_id_seq', 1, false);
+
+
+--
+-- Name: projectgrant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.projectgrant_id_seq', 8654, true);
+
+
+--
+-- Name: projectmember_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.projectmember_id_seq', 10723, true);
+
+
+--
+-- Name: projectpartner_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.projectpartner_id_seq', 60614, true);
+
+
+--
+-- Name: referent_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.referent_id_seq', 1, true);
+
+
+--
+-- Name: role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.role_id_seq', 1, false);
+
+
+--
+-- Name: timesheet_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.timesheet_id_seq', 7490, true);
+
+
+--
+-- Name: tva_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.tva_id_seq', 1, false);
+
+
+--
+-- Name: typedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.typedocument_id_seq', 41, true);
+
+
+--
+-- Name: user_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.user_role_id_seq', 28, true);
+
+
+--
+-- Name: useraccessdefinition_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.useraccessdefinition_id_seq', 1, false);
+
+
+--
+-- Name: validationperiod_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.validationperiod_id_seq', 7, true);
+
+
+--
+-- Name: workpackage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.workpackage_id_seq', 53, true);
 
 
 --
 -- Name: workpackageperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('workpackageperson_id_seq', 1, true);
+SELECT pg_catalog.setval('public.workpackageperson_id_seq', 83, true);
 
 
 --
--- Name: activity_discipline_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: activity_discipline activity_discipline_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity_discipline
+ALTER TABLE ONLY public.activity_discipline
     ADD CONSTRAINT activity_discipline_pkey PRIMARY KEY (activity_id, discipline_id);
 
 
 --
--- Name: activity_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: activity activity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
+ALTER TABLE ONLY public.activity
     ADD CONSTRAINT activity_pkey PRIMARY KEY (id);
 
 
 --
--- Name: activitydate_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: activitydate activitydate_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitydate
+ALTER TABLE ONLY public.activitydate
     ADD CONSTRAINT activitydate_pkey PRIMARY KEY (id);
 
 
 --
--- Name: activityorganization_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: activityorganization activityorganization_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityorganization
+ALTER TABLE ONLY public.activityorganization
     ADD CONSTRAINT activityorganization_pkey PRIMARY KEY (id);
 
 
 --
--- Name: activitypayment_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: activitypayment activitypayment_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitypayment
+ALTER TABLE ONLY public.activitypayment
     ADD CONSTRAINT activitypayment_pkey PRIMARY KEY (id);
 
 
 --
--- Name: activityperson_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: activityperson activityperson_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityperson
+ALTER TABLE ONLY public.activityperson
     ADD CONSTRAINT activityperson_pkey PRIMARY KEY (id);
 
 
 --
--- Name: activitytype_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: activityrequest activityrequest_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitytype
+ALTER TABLE ONLY public.activityrequest
+    ADD CONSTRAINT activityrequest_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activityrequestfollow activityrequestfollow_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequestfollow
+    ADD CONSTRAINT activityrequestfollow_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activitytype activitytype_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitytype
     ADD CONSTRAINT activitytype_pkey PRIMARY KEY (id);
 
 
 --
--- Name: administrativedocument_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: administrativedocument administrativedocument_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY administrativedocument
+ALTER TABLE ONLY public.administrativedocument
     ADD CONSTRAINT administrativedocument_pkey PRIMARY KEY (id);
 
 
 --
--- Name: authentification_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: authentification authentification_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY authentification
+ALTER TABLE ONLY public.authentification
     ADD CONSTRAINT authentification_pkey PRIMARY KEY (id);
 
 
 --
--- Name: authentification_role_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: authentification_role authentification_role_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY authentification_role
+ALTER TABLE ONLY public.authentification_role
     ADD CONSTRAINT authentification_role_pkey PRIMARY KEY (authentification_id, role_id);
 
 
 --
--- Name: categorie_privilege_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: categorie_privilege categorie_privilege_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY categorie_privilege
+ALTER TABLE ONLY public.categorie_privilege
     ADD CONSTRAINT categorie_privilege_pkey PRIMARY KEY (id);
 
 
 --
--- Name: contractdocument_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: contractdocument contractdocument_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY contractdocument
+ALTER TABLE ONLY public.contractdocument
     ADD CONSTRAINT contractdocument_pkey PRIMARY KEY (id);
 
 
 --
--- Name: contracttype_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: contracttype contracttype_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY contracttype
+ALTER TABLE ONLY public.contracttype
     ADD CONSTRAINT contracttype_pkey PRIMARY KEY (id);
 
 
 --
--- Name: currency_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: currency currency_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currency
+ALTER TABLE ONLY public.currency
     ADD CONSTRAINT currency_pkey PRIMARY KEY (id);
 
 
 --
--- Name: datetype_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: datetype datetype_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY datetype
+ALTER TABLE ONLY public.datetype
     ADD CONSTRAINT datetype_pkey PRIMARY KEY (id);
 
 
 --
--- Name: discipline_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: discipline discipline_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY discipline
+ALTER TABLE ONLY public.discipline
     ADD CONSTRAINT discipline_pkey PRIMARY KEY (id);
 
 
 --
--- Name: grantsource_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: logactivity logactivity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grantsource
-    ADD CONSTRAINT grantsource_pkey PRIMARY KEY (id);
-
-
---
--- Name: logactivity_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
---
-
-ALTER TABLE ONLY logactivity
+ALTER TABLE ONLY public.logactivity
     ADD CONSTRAINT logactivity_pkey PRIMARY KEY (id);
 
 
 --
--- Name: organization_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: notification notification_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organization
+ALTER TABLE ONLY public.notification
+    ADD CONSTRAINT notification_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: notificationperson notificationperson_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notificationperson
+    ADD CONSTRAINT notificationperson_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: organization organization_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organization
     ADD CONSTRAINT organization_pkey PRIMARY KEY (id);
 
 
 --
--- Name: organization_role_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: organization_role organization_role_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organization_role
+ALTER TABLE ONLY public.organization_role
     ADD CONSTRAINT organization_role_pkey PRIMARY KEY (id);
 
 
 --
--- Name: organizationperson_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: organizationperson organizationperson_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationperson
+ALTER TABLE ONLY public.organizationperson
     ADD CONSTRAINT organizationperson_pkey PRIMARY KEY (id);
 
 
 --
--- Name: organizationrole_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: organizationrole organizationrole_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationrole
+ALTER TABLE ONLY public.organizationrole
     ADD CONSTRAINT organizationrole_pkey PRIMARY KEY (id);
 
 
 --
--- Name: person_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: organizationtype organizationtype_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY person
+ALTER TABLE ONLY public.organizationtype
+    ADD CONSTRAINT organizationtype_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: person person_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.person
     ADD CONSTRAINT person_pkey PRIMARY KEY (id);
 
 
 --
--- Name: privilege_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: privilege privilege_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY privilege
+ALTER TABLE ONLY public.privilege
     ADD CONSTRAINT privilege_pkey PRIMARY KEY (id);
 
 
 --
--- Name: project_discipline_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: project_discipline project_discipline_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY project_discipline
+ALTER TABLE ONLY public.project_discipline
     ADD CONSTRAINT project_discipline_pkey PRIMARY KEY (project_id, discipline_id);
 
 
 --
--- Name: project_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: project project_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY project
+ALTER TABLE ONLY public.project
     ADD CONSTRAINT project_pkey PRIMARY KEY (id);
 
 
 --
--- Name: projectmember_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: projectmember projectmember_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectmember
+ALTER TABLE ONLY public.projectmember
     ADD CONSTRAINT projectmember_pkey PRIMARY KEY (id);
 
 
 --
--- Name: projectpartner_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: projectpartner projectpartner_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectpartner
+ALTER TABLE ONLY public.projectpartner
     ADD CONSTRAINT projectpartner_pkey PRIMARY KEY (id);
 
 
 --
--- Name: role_privilege_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: referent referent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY role_privilege
+ALTER TABLE ONLY public.referent
+    ADD CONSTRAINT referent_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: role_privilege role_privilege_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.role_privilege
     ADD CONSTRAINT role_privilege_pkey PRIMARY KEY (privilege_id, role_id);
 
 
 --
--- Name: timesheet_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: timesheet timesheet_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY timesheet
+ALTER TABLE ONLY public.timesheet
     ADD CONSTRAINT timesheet_pkey PRIMARY KEY (id);
 
 
 --
--- Name: tva_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: timesheetsby timesheetsby_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY tva
+ALTER TABLE ONLY public.timesheetsby
+    ADD CONSTRAINT timesheetsby_pkey PRIMARY KEY (person_id, usurpation_person_id);
+
+
+--
+-- Name: tva tva_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tva
     ADD CONSTRAINT tva_pkey PRIMARY KEY (id);
 
 
 --
--- Name: typedocument_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: typedocument typedocument_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY typedocument
+ALTER TABLE ONLY public.typedocument
     ADD CONSTRAINT typedocument_pkey PRIMARY KEY (id);
 
 
 --
--- Name: user_role_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: user_role user_role_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY user_role
+ALTER TABLE ONLY public.user_role
     ADD CONSTRAINT user_role_pkey PRIMARY KEY (id);
 
 
 --
--- Name: useraccessdefinition_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: useraccessdefinition useraccessdefinition_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY useraccessdefinition
+ALTER TABLE ONLY public.useraccessdefinition
     ADD CONSTRAINT useraccessdefinition_pkey PRIMARY KEY (id);
 
 
 --
--- Name: workpackage_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: validationperiod_adm validationperiod_adm_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackage
+ALTER TABLE ONLY public.validationperiod_adm
+    ADD CONSTRAINT validationperiod_adm_pkey PRIMARY KEY (validationperiod_id, person_id);
+
+
+--
+-- Name: validationperiod validationperiod_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.validationperiod
+    ADD CONSTRAINT validationperiod_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: validationperiod_prj validationperiod_prj_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.validationperiod_prj
+    ADD CONSTRAINT validationperiod_prj_pkey PRIMARY KEY (validationperiod_id, person_id);
+
+
+--
+-- Name: validationperiod_sci validationperiod_sci_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.validationperiod_sci
+    ADD CONSTRAINT validationperiod_sci_pkey PRIMARY KEY (validationperiod_id, person_id);
+
+
+--
+-- Name: workpackage workpackage_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackage
     ADD CONSTRAINT workpackage_pkey PRIMARY KEY (id);
 
 
 --
--- Name: workpackageperson_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: workpackageperson workpackageperson_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackageperson
+ALTER TABLE ONLY public.workpackageperson
     ADD CONSTRAINT workpackageperson_pkey PRIMARY KEY (id);
 
 
 --
--- Name: idx_205cd03781c06096; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_1fde42e6217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_205cd03781c06096 ON activity_discipline USING btree (activity_id);
+CREATE INDEX idx_1fde42e6217bbb47 ON public.validationperiod_sci USING btree (person_id);
 
 
 --
--- Name: idx_205cd037a5522701; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_1fde42e625e297e4; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_205cd037a5522701 ON activity_discipline USING btree (discipline_id);
+CREATE INDEX idx_1fde42e625e297e4 ON public.validationperiod_sci USING btree (validationperiod_id);
 
 
 --
--- Name: idx_29fdc4ce3174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_205cd03781c06096; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_29fdc4ce3174800f ON datetype USING btree (createdby_id);
+CREATE INDEX idx_205cd03781c06096 ON public.activity_discipline USING btree (activity_id);
 
 
 --
--- Name: idx_29fdc4ce63d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_205cd037a5522701; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_29fdc4ce63d8c20e ON datetype USING btree (deletedby_id);
+CREATE INDEX idx_205cd037a5522701 ON public.activity_discipline USING btree (discipline_id);
 
 
 --
--- Name: idx_29fdc4ce65ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_22ba6515217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_29fdc4ce65ff1aec ON datetype USING btree (updatedby_id);
+CREATE INDEX idx_22ba6515217bbb47 ON public.notificationperson USING btree (person_id);
 
 
 --
--- Name: idx_2dcfc4c43174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_22ba6515ef1a9d84; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_2dcfc4c43174800f ON activitydate USING btree (createdby_id);
+CREATE INDEX idx_22ba6515ef1a9d84 ON public.notificationperson USING btree (notification_id);
 
 
 --
--- Name: idx_2dcfc4c463d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_29fdc4ce3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_2dcfc4c463d8c20e ON activitydate USING btree (deletedby_id);
+CREATE INDEX idx_29fdc4ce3174800f ON public.datetype USING btree (createdby_id);
 
 
 --
--- Name: idx_2dcfc4c465ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_29fdc4ce63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_2dcfc4c465ff1aec ON activitydate USING btree (updatedby_id);
+CREATE INDEX idx_29fdc4ce63d8c20e ON public.datetype USING btree (deletedby_id);
 
 
 --
--- Name: idx_2dcfc4c481c06096; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_29fdc4ce65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_2dcfc4c481c06096 ON activitydate USING btree (activity_id);
+CREATE INDEX idx_29fdc4ce65ff1aec ON public.datetype USING btree (updatedby_id);
 
 
 --
--- Name: idx_2dcfc4c4c54c8c93; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_2dcfc4c43174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_2dcfc4c4c54c8c93 ON activitydate USING btree (type_id);
+CREATE INDEX idx_2dcfc4c43174800f ON public.activitydate USING btree (createdby_id);
 
 
 --
--- Name: idx_2de8c6a3727aca70; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_2dcfc4c463d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_2de8c6a3727aca70 ON user_role USING btree (parent_id);
+CREATE INDEX idx_2dcfc4c463d8c20e ON public.activitydate USING btree (deletedby_id);
 
 
 --
--- Name: idx_3370d4403174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_2dcfc4c465ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_3370d4403174800f ON person USING btree (createdby_id);
+CREATE INDEX idx_2dcfc4c465ff1aec ON public.activitydate USING btree (updatedby_id);
 
 
 --
--- Name: idx_3370d44063d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_2dcfc4c481c06096; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_3370d44063d8c20e ON person USING btree (deletedby_id);
+CREATE INDEX idx_2dcfc4c481c06096 ON public.activitydate USING btree (activity_id);
 
 
 --
--- Name: idx_3370d44065ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_2dcfc4c4c54c8c93; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_3370d44065ff1aec ON person USING btree (updatedby_id);
+CREATE INDEX idx_2dcfc4c4c54c8c93 ON public.activitydate USING btree (type_id);
 
 
 --
--- Name: idx_34944573217bbb47; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_2de8c6a3727aca70; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_34944573217bbb47 ON timesheet USING btree (person_id);
+CREATE INDEX idx_2de8c6a3727aca70 ON public.user_role USING btree (parent_id);
 
 
 --
--- Name: idx_349445733174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_3370d4403174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_349445733174800f ON timesheet USING btree (createdby_id);
+CREATE INDEX idx_3370d4403174800f ON public.person USING btree (createdby_id);
 
 
 --
--- Name: idx_3494457363d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_3370d44063d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_3494457363d8c20e ON timesheet USING btree (deletedby_id);
+CREATE INDEX idx_3370d44063d8c20e ON public.person USING btree (deletedby_id);
 
 
 --
--- Name: idx_3494457365ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_3370d44065ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_3494457365ff1aec ON timesheet USING btree (updatedby_id);
+CREATE INDEX idx_3370d44065ff1aec ON public.person USING btree (updatedby_id);
 
 
 --
--- Name: idx_3494457381c06096; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_34944573217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_3494457381c06096 ON timesheet USING btree (activity_id);
+CREATE INDEX idx_34944573217bbb47 ON public.timesheet USING btree (person_id);
 
 
 --
--- Name: idx_34944573dbd8a2b7; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_349445733174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_34944573dbd8a2b7 ON timesheet USING btree (workpackage_id);
+CREATE INDEX idx_349445733174800f ON public.timesheet USING btree (createdby_id);
 
 
 --
--- Name: idx_4a390fe8217bbb47; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_3494457363d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_4a390fe8217bbb47 ON contractdocument USING btree (person_id);
+CREATE INDEX idx_3494457363d8c20e ON public.timesheet USING btree (deletedby_id);
 
 
 --
--- Name: idx_4a390fe83bebd1bd; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_3494457365ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_4a390fe83bebd1bd ON contractdocument USING btree (typedocument_id);
+CREATE INDEX idx_3494457365ff1aec ON public.timesheet USING btree (updatedby_id);
 
 
 --
--- Name: idx_4a390fe85c0c89f3; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_3494457381c06096; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_4a390fe85c0c89f3 ON contractdocument USING btree (grant_id);
+CREATE INDEX idx_3494457381c06096 ON public.timesheet USING btree (activity_id);
 
 
 --
--- Name: idx_55026b0c166d1f9c; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_34944573a7131547; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0c166d1f9c ON activity USING btree (project_id);
+CREATE INDEX idx_34944573a7131547 ON public.timesheet USING btree (validationperiod_id);
 
 
 --
--- Name: idx_55026b0c3174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_34944573dbd8a2b7; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0c3174800f ON activity USING btree (createdby_id);
+CREATE INDEX idx_34944573dbd8a2b7 ON public.timesheet USING btree (workpackage_id);
 
 
 --
--- Name: idx_55026b0c38248176; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_48506726217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0c38248176 ON activity USING btree (currency_id);
+CREATE INDEX idx_48506726217bbb47 ON public.validationperiod_adm USING btree (person_id);
 
 
 --
--- Name: idx_55026b0c4d79775f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_4850672625e297e4; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0c4d79775f ON activity USING btree (tva_id);
+CREATE INDEX idx_4850672625e297e4 ON public.validationperiod_adm USING btree (validationperiod_id);
 
 
 --
--- Name: idx_55026b0c63d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_4a390fe8217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0c63d8c20e ON activity USING btree (deletedby_id);
+CREATE INDEX idx_4a390fe8217bbb47 ON public.contractdocument USING btree (person_id);
 
 
 --
--- Name: idx_55026b0c65ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_4a390fe83bebd1bd; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0c65ff1aec ON activity USING btree (updatedby_id);
+CREATE INDEX idx_4a390fe83bebd1bd ON public.contractdocument USING btree (typedocument_id);
 
 
 --
--- Name: idx_55026b0c953c1c61; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_4a390fe85c0c89f3; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0c953c1c61 ON activity USING btree (source_id);
+CREATE INDEX idx_4a390fe85c0c89f3 ON public.contractdocument USING btree (grant_id);
 
 
 --
--- Name: idx_55026b0ca1b4b28c; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_55026b0c166d1f9c; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0ca1b4b28c ON activity USING btree (activitytype_id);
+CREATE INDEX idx_55026b0c166d1f9c ON public.activity USING btree (project_id);
 
 
 --
--- Name: idx_55026b0cc54c8c93; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_55026b0c3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_55026b0cc54c8c93 ON activity USING btree (type_id);
+CREATE INDEX idx_55026b0c3174800f ON public.activity USING btree (createdby_id);
 
 
 --
--- Name: idx_5d5b51b9166d1f9c; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_55026b0c38248176; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_5d5b51b9166d1f9c ON projectmember USING btree (project_id);
+CREATE INDEX idx_55026b0c38248176 ON public.activity USING btree (currency_id);
 
 
 --
--- Name: idx_5d5b51b91c4132c1; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_55026b0c4d79775f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_5d5b51b91c4132c1 ON projectmember USING btree (roleobj_id);
+CREATE INDEX idx_55026b0c4d79775f ON public.activity USING btree (tva_id);
 
 
 --
--- Name: idx_5d5b51b9217bbb47; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_55026b0c63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_5d5b51b9217bbb47 ON projectmember USING btree (person_id);
+CREATE INDEX idx_55026b0c63d8c20e ON public.activity USING btree (deletedby_id);
 
 
 --
--- Name: idx_5d5b51b93174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_55026b0c65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_5d5b51b93174800f ON projectmember USING btree (createdby_id);
+CREATE INDEX idx_55026b0c65ff1aec ON public.activity USING btree (updatedby_id);
 
 
 --
--- Name: idx_5d5b51b963d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_55026b0ca1b4b28c; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_5d5b51b963d8c20e ON projectmember USING btree (deletedby_id);
+CREATE INDEX idx_55026b0ca1b4b28c ON public.activity USING btree (activitytype_id);
 
 
 --
--- Name: idx_5d5b51b965ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_55026b0cc54c8c93; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_5d5b51b965ff1aec ON projectmember USING btree (updatedby_id);
+CREATE INDEX idx_55026b0cc54c8c93 ON public.activity USING btree (type_id);
 
 
 --
--- Name: idx_5dbdaf56d28043b; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_5d5b51b9166d1f9c; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_5dbdaf56d28043b ON authentification_role USING btree (authentification_id);
+CREATE INDEX idx_5d5b51b9166d1f9c ON public.projectmember USING btree (project_id);
 
 
 --
--- Name: idx_5dbdaf5d60322ac; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_5d5b51b91c4132c1; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_5dbdaf5d60322ac ON authentification_role USING btree (role_id);
+CREATE INDEX idx_5d5b51b91c4132c1 ON public.projectmember USING btree (roleobj_id);
 
 
 --
--- Name: idx_6547bd503174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_5d5b51b9217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6547bd503174800f ON typedocument USING btree (createdby_id);
+CREATE INDEX idx_5d5b51b9217bbb47 ON public.projectmember USING btree (person_id);
 
 
 --
--- Name: idx_6547bd5063d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_5d5b51b93174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6547bd5063d8c20e ON typedocument USING btree (deletedby_id);
+CREATE INDEX idx_5d5b51b93174800f ON public.projectmember USING btree (createdby_id);
 
 
 --
--- Name: idx_6547bd5065ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_5d5b51b963d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6547bd5065ff1aec ON typedocument USING btree (updatedby_id);
+CREATE INDEX idx_5d5b51b963d8c20e ON public.projectmember USING btree (deletedby_id);
 
 
 --
--- Name: idx_6a2e76b71c4132c1; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_5d5b51b965ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a2e76b71c4132c1 ON activityperson USING btree (roleobj_id);
+CREATE INDEX idx_5d5b51b965ff1aec ON public.projectmember USING btree (updatedby_id);
 
 
 --
--- Name: idx_6a2e76b7217bbb47; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_5dbdaf56d28043b; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a2e76b7217bbb47 ON activityperson USING btree (person_id);
+CREATE INDEX idx_5dbdaf56d28043b ON public.authentification_role USING btree (authentification_id);
 
 
 --
--- Name: idx_6a2e76b73174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_5dbdaf5d60322ac; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a2e76b73174800f ON activityperson USING btree (createdby_id);
+CREATE INDEX idx_5dbdaf5d60322ac ON public.authentification_role USING btree (role_id);
 
 
 --
--- Name: idx_6a2e76b763d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6547bd503174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a2e76b763d8c20e ON activityperson USING btree (deletedby_id);
+CREATE INDEX idx_6547bd503174800f ON public.typedocument USING btree (createdby_id);
 
 
 --
--- Name: idx_6a2e76b765ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6547bd5063d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a2e76b765ff1aec ON activityperson USING btree (updatedby_id);
+CREATE INDEX idx_6547bd5063d8c20e ON public.typedocument USING btree (deletedby_id);
 
 
 --
--- Name: idx_6a2e76b781c06096; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6547bd5065ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a2e76b781c06096 ON activityperson USING btree (activity_id);
+CREATE INDEX idx_6547bd5065ff1aec ON public.typedocument USING btree (updatedby_id);
 
 
 --
--- Name: idx_6a89662b1c4132c1; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a2e76b71c4132c1; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a89662b1c4132c1 ON organizationperson USING btree (roleobj_id);
+CREATE INDEX idx_6a2e76b71c4132c1 ON public.activityperson USING btree (roleobj_id);
 
 
 --
--- Name: idx_6a89662b217bbb47; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a2e76b7217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a89662b217bbb47 ON organizationperson USING btree (person_id);
+CREATE INDEX idx_6a2e76b7217bbb47 ON public.activityperson USING btree (person_id);
 
 
 --
--- Name: idx_6a89662b3174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a2e76b73174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a89662b3174800f ON organizationperson USING btree (createdby_id);
+CREATE INDEX idx_6a2e76b73174800f ON public.activityperson USING btree (createdby_id);
 
 
 --
--- Name: idx_6a89662b32c8a3de; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a2e76b763d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a89662b32c8a3de ON organizationperson USING btree (organization_id);
+CREATE INDEX idx_6a2e76b763d8c20e ON public.activityperson USING btree (deletedby_id);
 
 
 --
--- Name: idx_6a89662b63d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a2e76b765ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a89662b63d8c20e ON organizationperson USING btree (deletedby_id);
+CREATE INDEX idx_6a2e76b765ff1aec ON public.activityperson USING btree (updatedby_id);
 
 
 --
--- Name: idx_6a89662b65ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a2e76b781c06096; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6a89662b65ff1aec ON organizationperson USING btree (updatedby_id);
+CREATE INDEX idx_6a2e76b781c06096 ON public.activityperson USING btree (activity_id);
 
 
 --
--- Name: idx_6d18950d166d1f9c; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a89662b1c4132c1; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6d18950d166d1f9c ON project_discipline USING btree (project_id);
+CREATE INDEX idx_6a89662b1c4132c1 ON public.organizationperson USING btree (roleobj_id);
 
 
 --
--- Name: idx_6d18950da5522701; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a89662b217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_6d18950da5522701 ON project_discipline USING btree (discipline_id);
+CREATE INDEX idx_6a89662b217bbb47 ON public.organizationperson USING btree (person_id);
 
 
 --
--- Name: idx_79ced4aa3174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a89662b3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_79ced4aa3174800f ON tva USING btree (createdby_id);
+CREATE INDEX idx_6a89662b3174800f ON public.organizationperson USING btree (createdby_id);
 
 
 --
--- Name: idx_79ced4aa63d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a89662b32c8a3de; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_79ced4aa63d8c20e ON tva USING btree (deletedby_id);
+CREATE INDEX idx_6a89662b32c8a3de ON public.organizationperson USING btree (organization_id);
 
 
 --
--- Name: idx_79ced4aa65ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a89662b63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_79ced4aa65ff1aec ON tva USING btree (updatedby_id);
+CREATE INDEX idx_6a89662b63d8c20e ON public.organizationperson USING btree (deletedby_id);
 
 
 --
--- Name: idx_8115848c3174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6a89662b65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_8115848c3174800f ON activitypayment USING btree (createdby_id);
+CREATE INDEX idx_6a89662b65ff1aec ON public.organizationperson USING btree (updatedby_id);
 
 
 --
--- Name: idx_8115848c38248176; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6d18950d166d1f9c; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_8115848c38248176 ON activitypayment USING btree (currency_id);
+CREATE INDEX idx_6d18950d166d1f9c ON public.project_discipline USING btree (project_id);
 
 
 --
--- Name: idx_8115848c63d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_6d18950da5522701; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_8115848c63d8c20e ON activitypayment USING btree (deletedby_id);
+CREATE INDEX idx_6d18950da5522701 ON public.project_discipline USING btree (discipline_id);
 
 
 --
--- Name: idx_8115848c65ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_79ced4aa3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_8115848c65ff1aec ON activitypayment USING btree (updatedby_id);
+CREATE INDEX idx_79ced4aa3174800f ON public.tva USING btree (createdby_id);
 
 
 --
--- Name: idx_8115848c81c06096; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_79ced4aa63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_8115848c81c06096 ON activitypayment USING btree (activity_id);
+CREATE INDEX idx_79ced4aa63d8c20e ON public.tva USING btree (deletedby_id);
 
 
 --
--- Name: idx_87209a87bcf5e72d; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_79ced4aa65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_87209a87bcf5e72d ON privilege USING btree (categorie_id);
+CREATE INDEX idx_79ced4aa65ff1aec ON public.tva USING btree (updatedby_id);
 
 
 --
--- Name: idx_9020ea693174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_7c35c5733174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9020ea693174800f ON currency USING btree (createdby_id);
+CREATE INDEX idx_7c35c5733174800f ON public.organizationtype USING btree (createdby_id);
 
 
 --
--- Name: idx_9020ea6963d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_7c35c57363d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9020ea6963d8c20e ON currency USING btree (deletedby_id);
+CREATE INDEX idx_7c35c57363d8c20e ON public.organizationtype USING btree (deletedby_id);
 
 
 --
--- Name: idx_9020ea6965ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_7c35c57365ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9020ea6965ff1aec ON currency USING btree (updatedby_id);
+CREATE INDEX idx_7c35c57365ff1aec ON public.organizationtype USING btree (updatedby_id);
 
 
 --
--- Name: idx_9310307d1c4132c1; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_7c35c57379066886; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9310307d1c4132c1 ON activityorganization USING btree (roleobj_id);
+CREATE INDEX idx_7c35c57379066886 ON public.organizationtype USING btree (root_id);
 
 
 --
--- Name: idx_9310307d3174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_7ecce3a217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9310307d3174800f ON activityorganization USING btree (createdby_id);
+CREATE INDEX idx_7ecce3a217bbb47 ON public.referent USING btree (person_id);
 
 
 --
--- Name: idx_9310307d32c8a3de; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_7ecce3a35e47e35; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9310307d32c8a3de ON activityorganization USING btree (organization_id);
+CREATE INDEX idx_7ecce3a35e47e35 ON public.referent USING btree (referent_id);
 
 
 --
--- Name: idx_9310307d63d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_8115848c3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9310307d63d8c20e ON activityorganization USING btree (deletedby_id);
+CREATE INDEX idx_8115848c3174800f ON public.activitypayment USING btree (createdby_id);
 
 
 --
--- Name: idx_9310307d65ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_8115848c38248176; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9310307d65ff1aec ON activityorganization USING btree (updatedby_id);
+CREATE INDEX idx_8115848c38248176 ON public.activitypayment USING btree (currency_id);
 
 
 --
--- Name: idx_9310307d81c06096; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_8115848c63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_9310307d81c06096 ON activityorganization USING btree (activity_id);
+CREATE INDEX idx_8115848c63d8c20e ON public.activitypayment USING btree (deletedby_id);
 
 
 --
--- Name: idx_a78218303174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_8115848c65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_a78218303174800f ON organizationrole USING btree (createdby_id);
+CREATE INDEX idx_8115848c65ff1aec ON public.activitypayment USING btree (updatedby_id);
 
 
 --
--- Name: idx_a782183063d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_8115848c81c06096; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_a782183063d8c20e ON organizationrole USING btree (deletedby_id);
+CREATE INDEX idx_8115848c81c06096 ON public.activitypayment USING btree (activity_id);
 
 
 --
--- Name: idx_a782183065ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_87209a8779066886; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_a782183065ff1aec ON organizationrole USING btree (updatedby_id);
+CREATE INDEX idx_87209a8779066886 ON public.privilege USING btree (root_id);
 
 
 --
--- Name: idx_b8fa4973174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_87209a87bcf5e72d; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_b8fa4973174800f ON activitytype USING btree (createdby_id);
+CREATE INDEX idx_87209a87bcf5e72d ON public.privilege USING btree (categorie_id);
 
 
 --
--- Name: idx_b8fa49763d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_8ffc688a217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_b8fa49763d8c20e ON activitytype USING btree (deletedby_id);
+CREATE INDEX idx_8ffc688a217bbb47 ON public.timesheetsby USING btree (person_id);
 
 
 --
--- Name: idx_b8fa49765ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_8ffc688a241061bf; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_b8fa49765ff1aec ON activitytype USING btree (updatedby_id);
+CREATE INDEX idx_8ffc688a241061bf ON public.timesheetsby USING btree (usurpation_person_id);
 
 
 --
--- Name: idx_c311ba72217bbb47; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9020ea693174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_c311ba72217bbb47 ON administrativedocument USING btree (person_id);
+CREATE INDEX idx_9020ea693174800f ON public.currency USING btree (createdby_id);
 
 
 --
--- Name: idx_c583f07f3174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9020ea6963d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_c583f07f3174800f ON workpackage USING btree (createdby_id);
+CREATE INDEX idx_9020ea6963d8c20e ON public.currency USING btree (deletedby_id);
 
 
 --
--- Name: idx_c583f07f63d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9020ea6965ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_c583f07f63d8c20e ON workpackage USING btree (deletedby_id);
+CREATE INDEX idx_9020ea6965ff1aec ON public.currency USING btree (updatedby_id);
 
 
 --
--- Name: idx_c583f07f65ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9310307d1c4132c1; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_c583f07f65ff1aec ON workpackage USING btree (updatedby_id);
+CREATE INDEX idx_9310307d1c4132c1 ON public.activityorganization USING btree (roleobj_id);
 
 
 --
--- Name: idx_c583f07f81c06096; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9310307d3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_c583f07f81c06096 ON workpackage USING btree (activity_id);
+CREATE INDEX idx_9310307d3174800f ON public.activityorganization USING btree (createdby_id);
 
 
 --
--- Name: idx_d6d4495b32fb8aea; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9310307d32c8a3de; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_d6d4495b32fb8aea ON role_privilege USING btree (privilege_id);
+CREATE INDEX idx_9310307d32c8a3de ON public.activityorganization USING btree (organization_id);
 
 
 --
--- Name: idx_d6d4495bd60322ac; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9310307d63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_d6d4495bd60322ac ON role_privilege USING btree (role_id);
+CREATE INDEX idx_9310307d63d8c20e ON public.activityorganization USING btree (deletedby_id);
 
 
 --
--- Name: idx_d9dfb8843174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9310307d65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_d9dfb8843174800f ON organization USING btree (createdby_id);
+CREATE INDEX idx_9310307d65ff1aec ON public.activityorganization USING btree (updatedby_id);
 
 
 --
--- Name: idx_d9dfb88463d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_9310307d81c06096; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_d9dfb88463d8c20e ON organization USING btree (deletedby_id);
+CREATE INDEX idx_9310307d81c06096 ON public.activityorganization USING btree (activity_id);
 
 
 --
--- Name: idx_d9dfb88465ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_a78218303174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_d9dfb88465ff1aec ON organization USING btree (updatedby_id);
+CREATE INDEX idx_a78218303174800f ON public.organizationrole USING btree (createdby_id);
 
 
 --
--- Name: idx_dd65739b166d1f9c; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_a782183063d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_dd65739b166d1f9c ON projectpartner USING btree (project_id);
+CREATE INDEX idx_a782183063d8c20e ON public.organizationrole USING btree (deletedby_id);
 
 
 --
--- Name: idx_dd65739b1c4132c1; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_a782183065ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_dd65739b1c4132c1 ON projectpartner USING btree (roleobj_id);
+CREATE INDEX idx_a782183065ff1aec ON public.organizationrole USING btree (updatedby_id);
 
 
 --
--- Name: idx_dd65739b3174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_b700890a3c21f464; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_dd65739b3174800f ON projectpartner USING btree (createdby_id);
+CREATE INDEX idx_b700890a3c21f464 ON public.validationperiod USING btree (declarer_id);
 
 
 --
--- Name: idx_dd65739b32c8a3de; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_b8fa4973174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_dd65739b32c8a3de ON projectpartner USING btree (organization_id);
+CREATE INDEX idx_b8fa4973174800f ON public.activitytype USING btree (createdby_id);
 
 
 --
--- Name: idx_dd65739b63d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_b8fa49763d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_dd65739b63d8c20e ON projectpartner USING btree (deletedby_id);
+CREATE INDEX idx_b8fa49763d8c20e ON public.activitytype USING btree (deletedby_id);
 
 
 --
--- Name: idx_dd65739b65ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_b8fa49765ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_dd65739b65ff1aec ON projectpartner USING btree (updatedby_id);
+CREATE INDEX idx_b8fa49765ff1aec ON public.activitytype USING btree (updatedby_id);
 
 
 --
--- Name: idx_e00ee972a5522701; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_c311ba72217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_e00ee972a5522701 ON project USING btree (discipline_id);
+CREATE INDEX idx_c311ba72217bbb47 ON public.administrativedocument USING btree (person_id);
 
 
 --
--- Name: idx_e9b87677217bbb47; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_c583f07f3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_e9b87677217bbb47 ON workpackageperson USING btree (person_id);
+CREATE INDEX idx_c583f07f3174800f ON public.workpackage USING btree (createdby_id);
 
 
 --
--- Name: idx_e9b876773174800f; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_c583f07f63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_e9b876773174800f ON workpackageperson USING btree (createdby_id);
+CREATE INDEX idx_c583f07f63d8c20e ON public.workpackage USING btree (deletedby_id);
 
 
 --
--- Name: idx_e9b8767763d8c20e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_c583f07f65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_e9b8767763d8c20e ON workpackageperson USING btree (deletedby_id);
+CREATE INDEX idx_c583f07f65ff1aec ON public.workpackage USING btree (updatedby_id);
 
 
 --
--- Name: idx_e9b8767765ff1aec; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_c583f07f81c06096; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_e9b8767765ff1aec ON workpackageperson USING btree (updatedby_id);
+CREATE INDEX idx_c583f07f81c06096 ON public.workpackage USING btree (activity_id);
 
 
 --
--- Name: idx_e9b876779485a167; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_cfe2df3a3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_e9b876779485a167 ON workpackageperson USING btree (workpackage_id);
+CREATE INDEX idx_cfe2df3a3174800f ON public.activityrequestfollow USING btree (createdby_id);
 
 
 --
--- Name: uniq_2de8c6a31596728e; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_cfe2df3a63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uniq_2de8c6a31596728e ON user_role USING btree (ldap_filter);
+CREATE INDEX idx_cfe2df3a63d8c20e ON public.activityrequestfollow USING btree (deletedby_id);
 
 
 --
--- Name: uniq_2de8c6a3d60322ac; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_cfe2df3a65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uniq_2de8c6a3d60322ac ON user_role USING btree (role_id);
+CREATE INDEX idx_cfe2df3a65ff1aec ON public.activityrequestfollow USING btree (updatedby_id);
 
 
 --
--- Name: uniq_598638fb8a90aba9; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_cfe2df3ae8fa3e0f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uniq_598638fb8a90aba9 ON useraccessdefinition USING btree (key);
+CREATE INDEX idx_cfe2df3ae8fa3e0f ON public.activityrequestfollow USING btree (activityrequest_id);
 
 
 --
--- Name: uniq_6e60b4f7d60322ac; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_d6d4495b32fb8aea; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uniq_6e60b4f7d60322ac ON organization_role USING btree (role_id);
+CREATE INDEX idx_d6d4495b32fb8aea ON public.role_privilege USING btree (privilege_id);
 
 
 --
--- Name: uniq_9de7cd62e7927c74; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_d6d4495bd60322ac; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uniq_9de7cd62e7927c74 ON authentification USING btree (email);
+CREATE INDEX idx_d6d4495bd60322ac ON public.role_privilege USING btree (role_id);
 
 
 --
--- Name: uniq_9de7cd62f85e0677; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_d7488e15217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uniq_9de7cd62f85e0677 ON authentification USING btree (username);
+CREATE INDEX idx_d7488e15217bbb47 ON public.validationperiod_prj USING btree (person_id);
 
 
 --
--- Name: uniq_a7821830ea750e8; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: idx_d7488e1525e297e4; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uniq_a7821830ea750e8 ON organizationrole USING btree (label);
+CREATE INDEX idx_d7488e1525e297e4 ON public.validationperiod_prj USING btree (validationperiod_id);
 
 
 --
--- Name: activity_numauto; Type: TRIGGER; Schema: public; Owner: -
+-- Name: idx_d7aa8f1e3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE TRIGGER activity_numauto AFTER INSERT ON activity FOR EACH ROW EXECUTE PROCEDURE oscar_activity_numauto();
+CREATE INDEX idx_d7aa8f1e3174800f ON public.activityrequest USING btree (createdby_id);
 
 
 --
--- Name: fk_205cd03781c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_d7aa8f1e63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity_discipline
-    ADD CONSTRAINT fk_205cd03781c06096 FOREIGN KEY (activity_id) REFERENCES activity(id) ON DELETE CASCADE;
+CREATE INDEX idx_d7aa8f1e63d8c20e ON public.activityrequest USING btree (deletedby_id);
 
 
 --
--- Name: fk_205cd037a5522701; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_d7aa8f1e65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity_discipline
-    ADD CONSTRAINT fk_205cd037a5522701 FOREIGN KEY (discipline_id) REFERENCES discipline(id) ON DELETE CASCADE;
+CREATE INDEX idx_d7aa8f1e65ff1aec ON public.activityrequest USING btree (updatedby_id);
 
 
 --
--- Name: fk_29fdc4ce3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_d7aa8f1e9e6b1585; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY datetype
-    ADD CONSTRAINT fk_29fdc4ce3174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+CREATE INDEX idx_d7aa8f1e9e6b1585 ON public.activityrequest USING btree (organisation_id);
 
 
 --
--- Name: fk_29fdc4ce63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_d9dfb8843174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY datetype
-    ADD CONSTRAINT fk_29fdc4ce63d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+CREATE INDEX idx_d9dfb8843174800f ON public.organization USING btree (createdby_id);
 
 
 --
--- Name: fk_29fdc4ce65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_d9dfb88463d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY datetype
-    ADD CONSTRAINT fk_29fdc4ce65ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+CREATE INDEX idx_d9dfb88463d8c20e ON public.organization USING btree (deletedby_id);
 
 
 --
--- Name: fk_2dcfc4c43174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_d9dfb88465ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitydate
-    ADD CONSTRAINT fk_2dcfc4c43174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+CREATE INDEX idx_d9dfb88465ff1aec ON public.organization USING btree (updatedby_id);
 
 
 --
--- Name: fk_2dcfc4c463d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_d9dfb884e5915d19; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitydate
-    ADD CONSTRAINT fk_2dcfc4c463d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+CREATE INDEX idx_d9dfb884e5915d19 ON public.organization USING btree (typeobj_id);
 
 
 --
--- Name: fk_2dcfc4c465ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_dd65739b166d1f9c; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitydate
-    ADD CONSTRAINT fk_2dcfc4c465ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+CREATE INDEX idx_dd65739b166d1f9c ON public.projectpartner USING btree (project_id);
 
 
 --
--- Name: fk_2dcfc4c481c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_dd65739b1c4132c1; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitydate
-    ADD CONSTRAINT fk_2dcfc4c481c06096 FOREIGN KEY (activity_id) REFERENCES activity(id);
+CREATE INDEX idx_dd65739b1c4132c1 ON public.projectpartner USING btree (roleobj_id);
 
 
 --
--- Name: fk_2dcfc4c4c54c8c93; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_dd65739b3174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitydate
-    ADD CONSTRAINT fk_2dcfc4c4c54c8c93 FOREIGN KEY (type_id) REFERENCES datetype(id);
+CREATE INDEX idx_dd65739b3174800f ON public.projectpartner USING btree (createdby_id);
 
 
 --
--- Name: fk_2de8c6a3727aca70; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_dd65739b32c8a3de; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY user_role
-    ADD CONSTRAINT fk_2de8c6a3727aca70 FOREIGN KEY (parent_id) REFERENCES user_role(id);
+CREATE INDEX idx_dd65739b32c8a3de ON public.projectpartner USING btree (organization_id);
 
 
 --
--- Name: fk_3370d4403174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_dd65739b63d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY person
-    ADD CONSTRAINT fk_3370d4403174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+CREATE INDEX idx_dd65739b63d8c20e ON public.projectpartner USING btree (deletedby_id);
 
 
 --
--- Name: fk_3370d44063d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_dd65739b65ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY person
-    ADD CONSTRAINT fk_3370d44063d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+CREATE INDEX idx_dd65739b65ff1aec ON public.projectpartner USING btree (updatedby_id);
 
 
 --
--- Name: fk_3370d44065ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_e9b87677217bbb47; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY person
-    ADD CONSTRAINT fk_3370d44065ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+CREATE INDEX idx_e9b87677217bbb47 ON public.workpackageperson USING btree (person_id);
 
 
 --
--- Name: fk_34944573217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_e9b876773174800f; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY timesheet
-    ADD CONSTRAINT fk_34944573217bbb47 FOREIGN KEY (person_id) REFERENCES person(id);
+CREATE INDEX idx_e9b876773174800f ON public.workpackageperson USING btree (createdby_id);
 
 
 --
--- Name: fk_349445733174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_e9b8767763d8c20e; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY timesheet
-    ADD CONSTRAINT fk_349445733174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+CREATE INDEX idx_e9b8767763d8c20e ON public.workpackageperson USING btree (deletedby_id);
 
 
 --
--- Name: fk_3494457363d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_e9b8767765ff1aec; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY timesheet
-    ADD CONSTRAINT fk_3494457363d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+CREATE INDEX idx_e9b8767765ff1aec ON public.workpackageperson USING btree (updatedby_id);
 
 
 --
--- Name: fk_3494457365ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: idx_e9b876779485a167; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY timesheet
-    ADD CONSTRAINT fk_3494457365ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+CREATE INDEX idx_e9b876779485a167 ON public.workpackageperson USING btree (workpackage_id);
 
 
 --
--- Name: fk_3494457381c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: uniq_2de8c6a31596728e; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY timesheet
-    ADD CONSTRAINT fk_3494457381c06096 FOREIGN KEY (activity_id) REFERENCES activity(id);
+CREATE UNIQUE INDEX uniq_2de8c6a31596728e ON public.user_role USING btree (ldap_filter);
 
 
 --
--- Name: fk_34944573dbd8a2b7; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: uniq_2de8c6a3d60322ac; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY timesheet
-    ADD CONSTRAINT fk_34944573dbd8a2b7 FOREIGN KEY (workpackage_id) REFERENCES workpackage(id);
+CREATE UNIQUE INDEX uniq_2de8c6a3d60322ac ON public.user_role USING btree (role_id);
 
 
 --
--- Name: fk_4a390fe8217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: uniq_598638fb8a90aba9; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY contractdocument
-    ADD CONSTRAINT fk_4a390fe8217bbb47 FOREIGN KEY (person_id) REFERENCES person(id);
+CREATE UNIQUE INDEX uniq_598638fb8a90aba9 ON public.useraccessdefinition USING btree (key);
 
 
 --
--- Name: fk_4a390fe83bebd1bd; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: uniq_6e60b4f7d60322ac; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY contractdocument
-    ADD CONSTRAINT fk_4a390fe83bebd1bd FOREIGN KEY (typedocument_id) REFERENCES typedocument(id);
+CREATE UNIQUE INDEX uniq_6e60b4f7d60322ac ON public.organization_role USING btree (role_id);
 
 
 --
--- Name: fk_4a390fe85c0c89f3; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: uniq_9de7cd62e7927c74; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY contractdocument
-    ADD CONSTRAINT fk_4a390fe85c0c89f3 FOREIGN KEY (grant_id) REFERENCES activity(id);
+CREATE UNIQUE INDEX uniq_9de7cd62e7927c74 ON public.authentification USING btree (email);
 
 
 --
--- Name: fk_55026b0c166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: uniq_9de7cd62f85e0677; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0c166d1f9c FOREIGN KEY (project_id) REFERENCES project(id);
+CREATE UNIQUE INDEX uniq_9de7cd62f85e0677 ON public.authentification USING btree (username);
 
 
 --
--- Name: fk_55026b0c3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: uniq_a7821830ea750e8; Type: INDEX; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0c3174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+CREATE UNIQUE INDEX uniq_a7821830ea750e8 ON public.organizationrole USING btree (label);
 
 
 --
--- Name: fk_55026b0c38248176; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity activity_numauto; Type: TRIGGER; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0c38248176 FOREIGN KEY (currency_id) REFERENCES currency(id);
+CREATE TRIGGER activity_numauto AFTER INSERT ON public.activity FOR EACH ROW EXECUTE PROCEDURE public.oscar_activity_numauto();
 
 
 --
--- Name: fk_55026b0c4d79775f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: validationperiod_sci fk_1fde42e6217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0c4d79775f FOREIGN KEY (tva_id) REFERENCES tva(id);
+ALTER TABLE ONLY public.validationperiod_sci
+    ADD CONSTRAINT fk_1fde42e6217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_55026b0c63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: validationperiod_sci fk_1fde42e625e297e4; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0c63d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.validationperiod_sci
+    ADD CONSTRAINT fk_1fde42e625e297e4 FOREIGN KEY (validationperiod_id) REFERENCES public.validationperiod(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_55026b0c65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity_discipline fk_205cd03781c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0c65ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activity_discipline
+    ADD CONSTRAINT fk_205cd03781c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_55026b0c953c1c61; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity_discipline fk_205cd037a5522701; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0c953c1c61 FOREIGN KEY (source_id) REFERENCES grantsource(id);
+ALTER TABLE ONLY public.activity_discipline
+    ADD CONSTRAINT fk_205cd037a5522701 FOREIGN KEY (discipline_id) REFERENCES public.discipline(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_55026b0ca1b4b28c; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: notificationperson fk_22ba6515217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0ca1b4b28c FOREIGN KEY (activitytype_id) REFERENCES activitytype(id);
+ALTER TABLE ONLY public.notificationperson
+    ADD CONSTRAINT fk_22ba6515217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_55026b0cc54c8c93; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: notificationperson fk_22ba6515ef1a9d84; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activity
-    ADD CONSTRAINT fk_55026b0cc54c8c93 FOREIGN KEY (type_id) REFERENCES contracttype(id);
+ALTER TABLE ONLY public.notificationperson
+    ADD CONSTRAINT fk_22ba6515ef1a9d84 FOREIGN KEY (notification_id) REFERENCES public.notification(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_5d5b51b9166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: datetype fk_29fdc4ce3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectmember
-    ADD CONSTRAINT fk_5d5b51b9166d1f9c FOREIGN KEY (project_id) REFERENCES project(id);
+ALTER TABLE ONLY public.datetype
+    ADD CONSTRAINT fk_29fdc4ce3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_5d5b51b91c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: datetype fk_29fdc4ce63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectmember
-    ADD CONSTRAINT fk_5d5b51b91c4132c1 FOREIGN KEY (roleobj_id) REFERENCES user_role(id);
+ALTER TABLE ONLY public.datetype
+    ADD CONSTRAINT fk_29fdc4ce63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_5d5b51b9217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: datetype fk_29fdc4ce65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectmember
-    ADD CONSTRAINT fk_5d5b51b9217bbb47 FOREIGN KEY (person_id) REFERENCES person(id);
+ALTER TABLE ONLY public.datetype
+    ADD CONSTRAINT fk_29fdc4ce65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_5d5b51b93174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitydate fk_2dcfc4c43174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectmember
-    ADD CONSTRAINT fk_5d5b51b93174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activitydate
+    ADD CONSTRAINT fk_2dcfc4c43174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_5d5b51b963d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitydate fk_2dcfc4c463d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectmember
-    ADD CONSTRAINT fk_5d5b51b963d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activitydate
+    ADD CONSTRAINT fk_2dcfc4c463d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_5d5b51b965ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitydate fk_2dcfc4c465ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectmember
-    ADD CONSTRAINT fk_5d5b51b965ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activitydate
+    ADD CONSTRAINT fk_2dcfc4c465ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_5dbdaf56d28043b; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitydate fk_2dcfc4c481c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY authentification_role
-    ADD CONSTRAINT fk_5dbdaf56d28043b FOREIGN KEY (authentification_id) REFERENCES authentification(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.activitydate
+    ADD CONSTRAINT fk_2dcfc4c481c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id);
 
 
 --
--- Name: fk_5dbdaf5d60322ac; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitydate fk_2dcfc4c4c54c8c93; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY authentification_role
-    ADD CONSTRAINT fk_5dbdaf5d60322ac FOREIGN KEY (role_id) REFERENCES user_role(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.activitydate
+    ADD CONSTRAINT fk_2dcfc4c4c54c8c93 FOREIGN KEY (type_id) REFERENCES public.datetype(id);
 
 
 --
--- Name: fk_6547bd503174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: user_role fk_2de8c6a3727aca70; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY typedocument
-    ADD CONSTRAINT fk_6547bd503174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.user_role
+    ADD CONSTRAINT fk_2de8c6a3727aca70 FOREIGN KEY (parent_id) REFERENCES public.user_role(id);
 
 
 --
--- Name: fk_6547bd5063d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: person fk_3370d4403174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY typedocument
-    ADD CONSTRAINT fk_6547bd5063d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.person
+    ADD CONSTRAINT fk_3370d4403174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_6547bd5065ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: person fk_3370d44063d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY typedocument
-    ADD CONSTRAINT fk_6547bd5065ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.person
+    ADD CONSTRAINT fk_3370d44063d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_6a2e76b71c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: person fk_3370d44065ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityperson
-    ADD CONSTRAINT fk_6a2e76b71c4132c1 FOREIGN KEY (roleobj_id) REFERENCES user_role(id);
+ALTER TABLE ONLY public.person
+    ADD CONSTRAINT fk_3370d44065ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_6a2e76b7217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: timesheet fk_34944573217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityperson
-    ADD CONSTRAINT fk_6a2e76b7217bbb47 FOREIGN KEY (person_id) REFERENCES person(id);
+ALTER TABLE ONLY public.timesheet
+    ADD CONSTRAINT fk_34944573217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_6a2e76b73174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: timesheet fk_349445733174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityperson
-    ADD CONSTRAINT fk_6a2e76b73174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.timesheet
+    ADD CONSTRAINT fk_349445733174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_6a2e76b763d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: timesheet fk_3494457363d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityperson
-    ADD CONSTRAINT fk_6a2e76b763d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.timesheet
+    ADD CONSTRAINT fk_3494457363d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_6a2e76b765ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: timesheet fk_3494457365ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityperson
-    ADD CONSTRAINT fk_6a2e76b765ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.timesheet
+    ADD CONSTRAINT fk_3494457365ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_6a2e76b781c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: timesheet fk_3494457381c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityperson
-    ADD CONSTRAINT fk_6a2e76b781c06096 FOREIGN KEY (activity_id) REFERENCES activity(id);
+ALTER TABLE ONLY public.timesheet
+    ADD CONSTRAINT fk_3494457381c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id);
 
 
 --
--- Name: fk_6a89662b1c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: timesheet fk_34944573a7131547; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationperson
-    ADD CONSTRAINT fk_6a89662b1c4132c1 FOREIGN KEY (roleobj_id) REFERENCES user_role(id);
+ALTER TABLE ONLY public.timesheet
+    ADD CONSTRAINT fk_34944573a7131547 FOREIGN KEY (validationperiod_id) REFERENCES public.validationperiod(id) ON DELETE SET NULL;
 
 
 --
--- Name: fk_6a89662b217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: timesheet fk_34944573dbd8a2b7; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationperson
-    ADD CONSTRAINT fk_6a89662b217bbb47 FOREIGN KEY (person_id) REFERENCES person(id);
+ALTER TABLE ONLY public.timesheet
+    ADD CONSTRAINT fk_34944573dbd8a2b7 FOREIGN KEY (workpackage_id) REFERENCES public.workpackage(id);
 
 
 --
--- Name: fk_6a89662b3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: validationperiod_adm fk_48506726217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationperson
-    ADD CONSTRAINT fk_6a89662b3174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.validationperiod_adm
+    ADD CONSTRAINT fk_48506726217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_6a89662b32c8a3de; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: validationperiod_adm fk_4850672625e297e4; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationperson
-    ADD CONSTRAINT fk_6a89662b32c8a3de FOREIGN KEY (organization_id) REFERENCES organization(id);
+ALTER TABLE ONLY public.validationperiod_adm
+    ADD CONSTRAINT fk_4850672625e297e4 FOREIGN KEY (validationperiod_id) REFERENCES public.validationperiod(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_6a89662b63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: contractdocument fk_4a390fe8217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationperson
-    ADD CONSTRAINT fk_6a89662b63d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.contractdocument
+    ADD CONSTRAINT fk_4a390fe8217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_6a89662b65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: contractdocument fk_4a390fe83bebd1bd; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationperson
-    ADD CONSTRAINT fk_6a89662b65ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.contractdocument
+    ADD CONSTRAINT fk_4a390fe83bebd1bd FOREIGN KEY (typedocument_id) REFERENCES public.typedocument(id);
 
 
 --
--- Name: fk_6d18950d166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: contractdocument fk_4a390fe85c0c89f3; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY project_discipline
-    ADD CONSTRAINT fk_6d18950d166d1f9c FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.contractdocument
+    ADD CONSTRAINT fk_4a390fe85c0c89f3 FOREIGN KEY (grant_id) REFERENCES public.activity(id);
 
 
 --
--- Name: fk_6d18950da5522701; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity fk_55026b0c166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY project_discipline
-    ADD CONSTRAINT fk_6d18950da5522701 FOREIGN KEY (discipline_id) REFERENCES discipline(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.activity
+    ADD CONSTRAINT fk_55026b0c166d1f9c FOREIGN KEY (project_id) REFERENCES public.project(id);
 
 
 --
--- Name: fk_79ced4aa3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity fk_55026b0c3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY tva
-    ADD CONSTRAINT fk_79ced4aa3174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activity
+    ADD CONSTRAINT fk_55026b0c3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_79ced4aa63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity fk_55026b0c38248176; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY tva
-    ADD CONSTRAINT fk_79ced4aa63d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activity
+    ADD CONSTRAINT fk_55026b0c38248176 FOREIGN KEY (currency_id) REFERENCES public.currency(id);
 
 
 --
--- Name: fk_79ced4aa65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity fk_55026b0c4d79775f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY tva
-    ADD CONSTRAINT fk_79ced4aa65ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activity
+    ADD CONSTRAINT fk_55026b0c4d79775f FOREIGN KEY (tva_id) REFERENCES public.tva(id);
 
 
 --
--- Name: fk_8115848c3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity fk_55026b0c63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitypayment
-    ADD CONSTRAINT fk_8115848c3174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activity
+    ADD CONSTRAINT fk_55026b0c63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_8115848c38248176; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity fk_55026b0c65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitypayment
-    ADD CONSTRAINT fk_8115848c38248176 FOREIGN KEY (currency_id) REFERENCES currency(id);
+ALTER TABLE ONLY public.activity
+    ADD CONSTRAINT fk_55026b0c65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_8115848c63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity fk_55026b0ca1b4b28c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitypayment
-    ADD CONSTRAINT fk_8115848c63d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activity
+    ADD CONSTRAINT fk_55026b0ca1b4b28c FOREIGN KEY (activitytype_id) REFERENCES public.activitytype(id);
 
 
 --
--- Name: fk_8115848c65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activity fk_55026b0cc54c8c93; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitypayment
-    ADD CONSTRAINT fk_8115848c65ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activity
+    ADD CONSTRAINT fk_55026b0cc54c8c93 FOREIGN KEY (type_id) REFERENCES public.contracttype(id);
 
 
 --
--- Name: fk_8115848c81c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: projectmember fk_5d5b51b9166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitypayment
-    ADD CONSTRAINT fk_8115848c81c06096 FOREIGN KEY (activity_id) REFERENCES activity(id);
+ALTER TABLE ONLY public.projectmember
+    ADD CONSTRAINT fk_5d5b51b9166d1f9c FOREIGN KEY (project_id) REFERENCES public.project(id);
 
 
 --
--- Name: fk_87209a87bcf5e72d; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: projectmember fk_5d5b51b91c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY privilege
-    ADD CONSTRAINT fk_87209a87bcf5e72d FOREIGN KEY (categorie_id) REFERENCES categorie_privilege(id);
+ALTER TABLE ONLY public.projectmember
+    ADD CONSTRAINT fk_5d5b51b91c4132c1 FOREIGN KEY (roleobj_id) REFERENCES public.user_role(id);
 
 
 --
--- Name: fk_9020ea693174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: projectmember fk_5d5b51b9217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currency
-    ADD CONSTRAINT fk_9020ea693174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.projectmember
+    ADD CONSTRAINT fk_5d5b51b9217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_9020ea6963d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: projectmember fk_5d5b51b93174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currency
-    ADD CONSTRAINT fk_9020ea6963d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.projectmember
+    ADD CONSTRAINT fk_5d5b51b93174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_9020ea6965ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: projectmember fk_5d5b51b963d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY currency
-    ADD CONSTRAINT fk_9020ea6965ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.projectmember
+    ADD CONSTRAINT fk_5d5b51b963d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_9310307d1c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: projectmember fk_5d5b51b965ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityorganization
-    ADD CONSTRAINT fk_9310307d1c4132c1 FOREIGN KEY (roleobj_id) REFERENCES organizationrole(id);
+ALTER TABLE ONLY public.projectmember
+    ADD CONSTRAINT fk_5d5b51b965ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_9310307d3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: authentification_role fk_5dbdaf56d28043b; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityorganization
-    ADD CONSTRAINT fk_9310307d3174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.authentification_role
+    ADD CONSTRAINT fk_5dbdaf56d28043b FOREIGN KEY (authentification_id) REFERENCES public.authentification(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_9310307d32c8a3de; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: authentification_role fk_5dbdaf5d60322ac; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityorganization
-    ADD CONSTRAINT fk_9310307d32c8a3de FOREIGN KEY (organization_id) REFERENCES organization(id);
+ALTER TABLE ONLY public.authentification_role
+    ADD CONSTRAINT fk_5dbdaf5d60322ac FOREIGN KEY (role_id) REFERENCES public.user_role(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_9310307d63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: typedocument fk_6547bd503174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityorganization
-    ADD CONSTRAINT fk_9310307d63d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.typedocument
+    ADD CONSTRAINT fk_6547bd503174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_9310307d65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: typedocument fk_6547bd5063d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityorganization
-    ADD CONSTRAINT fk_9310307d65ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.typedocument
+    ADD CONSTRAINT fk_6547bd5063d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_9310307d81c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: typedocument fk_6547bd5065ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activityorganization
-    ADD CONSTRAINT fk_9310307d81c06096 FOREIGN KEY (activity_id) REFERENCES activity(id);
+ALTER TABLE ONLY public.typedocument
+    ADD CONSTRAINT fk_6547bd5065ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_a78218303174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activityperson fk_6a2e76b71c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationrole
-    ADD CONSTRAINT fk_a78218303174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activityperson
+    ADD CONSTRAINT fk_6a2e76b71c4132c1 FOREIGN KEY (roleobj_id) REFERENCES public.user_role(id);
 
 
 --
--- Name: fk_a782183063d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activityperson fk_6a2e76b7217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationrole
-    ADD CONSTRAINT fk_a782183063d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activityperson
+    ADD CONSTRAINT fk_6a2e76b7217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_a782183065ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activityperson fk_6a2e76b73174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organizationrole
-    ADD CONSTRAINT fk_a782183065ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activityperson
+    ADD CONSTRAINT fk_6a2e76b73174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_b8fa4973174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activityperson fk_6a2e76b763d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitytype
-    ADD CONSTRAINT fk_b8fa4973174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activityperson
+    ADD CONSTRAINT fk_6a2e76b763d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_b8fa49763d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activityperson fk_6a2e76b765ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitytype
-    ADD CONSTRAINT fk_b8fa49763d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activityperson
+    ADD CONSTRAINT fk_6a2e76b765ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_b8fa49765ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activityperson fk_6a2e76b781c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY activitytype
-    ADD CONSTRAINT fk_b8fa49765ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activityperson
+    ADD CONSTRAINT fk_6a2e76b781c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id);
 
 
 --
--- Name: fk_c311ba72217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationperson fk_6a89662b1c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY administrativedocument
-    ADD CONSTRAINT fk_c311ba72217bbb47 FOREIGN KEY (person_id) REFERENCES person(id);
+ALTER TABLE ONLY public.organizationperson
+    ADD CONSTRAINT fk_6a89662b1c4132c1 FOREIGN KEY (roleobj_id) REFERENCES public.user_role(id);
 
 
 --
--- Name: fk_c583f07f3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationperson fk_6a89662b217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackage
-    ADD CONSTRAINT fk_c583f07f3174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.organizationperson
+    ADD CONSTRAINT fk_6a89662b217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_c583f07f63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationperson fk_6a89662b3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackage
-    ADD CONSTRAINT fk_c583f07f63d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.organizationperson
+    ADD CONSTRAINT fk_6a89662b3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_c583f07f65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationperson fk_6a89662b32c8a3de; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackage
-    ADD CONSTRAINT fk_c583f07f65ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.organizationperson
+    ADD CONSTRAINT fk_6a89662b32c8a3de FOREIGN KEY (organization_id) REFERENCES public.organization(id);
 
 
 --
--- Name: fk_c583f07f81c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationperson fk_6a89662b63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackage
-    ADD CONSTRAINT fk_c583f07f81c06096 FOREIGN KEY (activity_id) REFERENCES activity(id);
+ALTER TABLE ONLY public.organizationperson
+    ADD CONSTRAINT fk_6a89662b63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_d6d4495b32fb8aea; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationperson fk_6a89662b65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY role_privilege
-    ADD CONSTRAINT fk_d6d4495b32fb8aea FOREIGN KEY (privilege_id) REFERENCES privilege(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.organizationperson
+    ADD CONSTRAINT fk_6a89662b65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_d6d4495bd60322ac; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: project_discipline fk_6d18950d166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY role_privilege
-    ADD CONSTRAINT fk_d6d4495bd60322ac FOREIGN KEY (role_id) REFERENCES user_role(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.project_discipline
+    ADD CONSTRAINT fk_6d18950d166d1f9c FOREIGN KEY (project_id) REFERENCES public.project(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_d9dfb8843174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: project_discipline fk_6d18950da5522701; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organization
-    ADD CONSTRAINT fk_d9dfb8843174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.project_discipline
+    ADD CONSTRAINT fk_6d18950da5522701 FOREIGN KEY (discipline_id) REFERENCES public.discipline(id) ON DELETE CASCADE;
 
 
 --
--- Name: fk_d9dfb88463d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tva fk_79ced4aa3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organization
-    ADD CONSTRAINT fk_d9dfb88463d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.tva
+    ADD CONSTRAINT fk_79ced4aa3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_d9dfb88465ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tva fk_79ced4aa63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY organization
-    ADD CONSTRAINT fk_d9dfb88465ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.tva
+    ADD CONSTRAINT fk_79ced4aa63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_dd65739b166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tva fk_79ced4aa65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectpartner
-    ADD CONSTRAINT fk_dd65739b166d1f9c FOREIGN KEY (project_id) REFERENCES project(id);
+ALTER TABLE ONLY public.tva
+    ADD CONSTRAINT fk_79ced4aa65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_dd65739b1c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationtype fk_7c35c5733174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectpartner
-    ADD CONSTRAINT fk_dd65739b1c4132c1 FOREIGN KEY (roleobj_id) REFERENCES organizationrole(id);
+ALTER TABLE ONLY public.organizationtype
+    ADD CONSTRAINT fk_7c35c5733174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_dd65739b3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationtype fk_7c35c57363d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectpartner
-    ADD CONSTRAINT fk_dd65739b3174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.organizationtype
+    ADD CONSTRAINT fk_7c35c57363d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_dd65739b32c8a3de; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationtype fk_7c35c57365ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectpartner
-    ADD CONSTRAINT fk_dd65739b32c8a3de FOREIGN KEY (organization_id) REFERENCES organization(id);
+ALTER TABLE ONLY public.organizationtype
+    ADD CONSTRAINT fk_7c35c57365ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_dd65739b63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizationtype fk_7c35c57379066886; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectpartner
-    ADD CONSTRAINT fk_dd65739b63d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.organizationtype
+    ADD CONSTRAINT fk_7c35c57379066886 FOREIGN KEY (root_id) REFERENCES public.organizationtype(id);
 
 
 --
--- Name: fk_dd65739b65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: referent fk_7ecce3a217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY projectpartner
-    ADD CONSTRAINT fk_dd65739b65ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.referent
+    ADD CONSTRAINT fk_7ecce3a217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_e00ee972a5522701; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: referent fk_7ecce3a35e47e35; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY project
-    ADD CONSTRAINT fk_e00ee972a5522701 FOREIGN KEY (discipline_id) REFERENCES discipline(id);
+ALTER TABLE ONLY public.referent
+    ADD CONSTRAINT fk_7ecce3a35e47e35 FOREIGN KEY (referent_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_e9b87677217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitypayment fk_8115848c3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackageperson
-    ADD CONSTRAINT fk_e9b87677217bbb47 FOREIGN KEY (person_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activitypayment
+    ADD CONSTRAINT fk_8115848c3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_e9b876773174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitypayment fk_8115848c38248176; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackageperson
-    ADD CONSTRAINT fk_e9b876773174800f FOREIGN KEY (createdby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activitypayment
+    ADD CONSTRAINT fk_8115848c38248176 FOREIGN KEY (currency_id) REFERENCES public.currency(id);
 
 
 --
--- Name: fk_e9b8767763d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitypayment fk_8115848c63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackageperson
-    ADD CONSTRAINT fk_e9b8767763d8c20e FOREIGN KEY (deletedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activitypayment
+    ADD CONSTRAINT fk_8115848c63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_e9b8767765ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitypayment fk_8115848c65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackageperson
-    ADD CONSTRAINT fk_e9b8767765ff1aec FOREIGN KEY (updatedby_id) REFERENCES person(id);
+ALTER TABLE ONLY public.activitypayment
+    ADD CONSTRAINT fk_8115848c65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
 
 
 --
--- Name: fk_e9b876779485a167; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: activitypayment fk_8115848c81c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY workpackageperson
-    ADD CONSTRAINT fk_e9b876779485a167 FOREIGN KEY (workpackage_id) REFERENCES workpackage(id);
+ALTER TABLE ONLY public.activitypayment
+    ADD CONSTRAINT fk_8115848c81c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id);
 
 
 --
--- Name: public; Type: ACL; Schema: -; Owner: -
+-- Name: privilege fk_87209a8779066886; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.privilege
+    ADD CONSTRAINT fk_87209a8779066886 FOREIGN KEY (root_id) REFERENCES public.privilege(id);
+
+
+--
+-- Name: privilege fk_87209a87bcf5e72d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.privilege
+    ADD CONSTRAINT fk_87209a87bcf5e72d FOREIGN KEY (categorie_id) REFERENCES public.categorie_privilege(id);
+
+
+--
+-- Name: timesheetsby fk_8ffc688a217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.timesheetsby
+    ADD CONSTRAINT fk_8ffc688a217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
+
+
+--
+-- Name: timesheetsby fk_8ffc688a241061bf; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.timesheetsby
+    ADD CONSTRAINT fk_8ffc688a241061bf FOREIGN KEY (usurpation_person_id) REFERENCES public.person(id);
+
+
+--
+-- Name: currency fk_9020ea693174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.currency
+    ADD CONSTRAINT fk_9020ea693174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: currency fk_9020ea6963d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.currency
+    ADD CONSTRAINT fk_9020ea6963d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: currency fk_9020ea6965ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.currency
+    ADD CONSTRAINT fk_9020ea6965ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityorganization fk_9310307d1c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityorganization
+    ADD CONSTRAINT fk_9310307d1c4132c1 FOREIGN KEY (roleobj_id) REFERENCES public.organizationrole(id);
+
+
+--
+-- Name: activityorganization fk_9310307d3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityorganization
+    ADD CONSTRAINT fk_9310307d3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityorganization fk_9310307d32c8a3de; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityorganization
+    ADD CONSTRAINT fk_9310307d32c8a3de FOREIGN KEY (organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: activityorganization fk_9310307d63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityorganization
+    ADD CONSTRAINT fk_9310307d63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityorganization fk_9310307d65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityorganization
+    ADD CONSTRAINT fk_9310307d65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityorganization fk_9310307d81c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityorganization
+    ADD CONSTRAINT fk_9310307d81c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id);
+
+
+--
+-- Name: organizationrole fk_a78218303174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organizationrole
+    ADD CONSTRAINT fk_a78218303174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: organizationrole fk_a782183063d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organizationrole
+    ADD CONSTRAINT fk_a782183063d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: organizationrole fk_a782183065ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organizationrole
+    ADD CONSTRAINT fk_a782183065ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: validationperiod fk_b700890a3c21f464; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.validationperiod
+    ADD CONSTRAINT fk_b700890a3c21f464 FOREIGN KEY (declarer_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activitytype fk_b8fa4973174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitytype
+    ADD CONSTRAINT fk_b8fa4973174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activitytype fk_b8fa49763d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitytype
+    ADD CONSTRAINT fk_b8fa49763d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activitytype fk_b8fa49765ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitytype
+    ADD CONSTRAINT fk_b8fa49765ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: administrativedocument fk_c311ba72217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.administrativedocument
+    ADD CONSTRAINT fk_c311ba72217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackage fk_c583f07f3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackage
+    ADD CONSTRAINT fk_c583f07f3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackage fk_c583f07f63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackage
+    ADD CONSTRAINT fk_c583f07f63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackage fk_c583f07f65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackage
+    ADD CONSTRAINT fk_c583f07f65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackage fk_c583f07f81c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackage
+    ADD CONSTRAINT fk_c583f07f81c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id);
+
+
+--
+-- Name: activityrequestfollow fk_cfe2df3a3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequestfollow
+    ADD CONSTRAINT fk_cfe2df3a3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityrequestfollow fk_cfe2df3a63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequestfollow
+    ADD CONSTRAINT fk_cfe2df3a63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityrequestfollow fk_cfe2df3a65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequestfollow
+    ADD CONSTRAINT fk_cfe2df3a65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityrequestfollow fk_cfe2df3ae8fa3e0f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequestfollow
+    ADD CONSTRAINT fk_cfe2df3ae8fa3e0f FOREIGN KEY (activityrequest_id) REFERENCES public.activityrequest(id) ON DELETE CASCADE;
+
+
+--
+-- Name: role_privilege fk_d6d4495b32fb8aea; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.role_privilege
+    ADD CONSTRAINT fk_d6d4495b32fb8aea FOREIGN KEY (privilege_id) REFERENCES public.privilege(id);
+
+
+--
+-- Name: role_privilege fk_d6d4495bd60322ac; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.role_privilege
+    ADD CONSTRAINT fk_d6d4495bd60322ac FOREIGN KEY (role_id) REFERENCES public.user_role(id);
+
+
+--
+-- Name: validationperiod_prj fk_d7488e15217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.validationperiod_prj
+    ADD CONSTRAINT fk_d7488e15217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id) ON DELETE CASCADE;
+
+
+--
+-- Name: validationperiod_prj fk_d7488e1525e297e4; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.validationperiod_prj
+    ADD CONSTRAINT fk_d7488e1525e297e4 FOREIGN KEY (validationperiod_id) REFERENCES public.validationperiod(id) ON DELETE CASCADE;
+
+
+--
+-- Name: activityrequest fk_d7aa8f1e3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequest
+    ADD CONSTRAINT fk_d7aa8f1e3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityrequest fk_d7aa8f1e63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequest
+    ADD CONSTRAINT fk_d7aa8f1e63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityrequest fk_d7aa8f1e65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequest
+    ADD CONSTRAINT fk_d7aa8f1e65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activityrequest fk_d7aa8f1e9e6b1585; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityrequest
+    ADD CONSTRAINT fk_d7aa8f1e9e6b1585 FOREIGN KEY (organisation_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: organization fk_d9dfb8843174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT fk_d9dfb8843174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: organization fk_d9dfb88463d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT fk_d9dfb88463d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: organization fk_d9dfb88465ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT fk_d9dfb88465ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: organization fk_d9dfb884e5915d19; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT fk_d9dfb884e5915d19 FOREIGN KEY (typeobj_id) REFERENCES public.organizationtype(id);
+
+
+--
+-- Name: projectpartner fk_dd65739b166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projectpartner
+    ADD CONSTRAINT fk_dd65739b166d1f9c FOREIGN KEY (project_id) REFERENCES public.project(id);
+
+
+--
+-- Name: projectpartner fk_dd65739b1c4132c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projectpartner
+    ADD CONSTRAINT fk_dd65739b1c4132c1 FOREIGN KEY (roleobj_id) REFERENCES public.organizationrole(id);
+
+
+--
+-- Name: projectpartner fk_dd65739b3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projectpartner
+    ADD CONSTRAINT fk_dd65739b3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: projectpartner fk_dd65739b32c8a3de; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projectpartner
+    ADD CONSTRAINT fk_dd65739b32c8a3de FOREIGN KEY (organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: projectpartner fk_dd65739b63d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projectpartner
+    ADD CONSTRAINT fk_dd65739b63d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: projectpartner fk_dd65739b65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projectpartner
+    ADD CONSTRAINT fk_dd65739b65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackageperson fk_e9b87677217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackageperson
+    ADD CONSTRAINT fk_e9b87677217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackageperson fk_e9b876773174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackageperson
+    ADD CONSTRAINT fk_e9b876773174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackageperson fk_e9b8767763d8c20e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackageperson
+    ADD CONSTRAINT fk_e9b8767763d8c20e FOREIGN KEY (deletedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackageperson fk_e9b8767765ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackageperson
+    ADD CONSTRAINT fk_e9b8767765ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: workpackageperson fk_e9b876779485a167; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workpackageperson
+    ADD CONSTRAINT fk_e9b876779485a167 FOREIGN KEY (workpackage_id) REFERENCES public.workpackage(id);
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
 --
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
