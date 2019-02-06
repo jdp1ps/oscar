@@ -25,3 +25,8 @@ La version initiale de l'export des versements proposée les rôles de organisat
  - Fix : La table/entités/références Grantsource ont été supprimées
  - UP : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](doc/numerotation.md)) @JulienDary
  - DOC : Une requète Postgresql a été ajoutée dans la documentation pour automatiser les changements de formalisme des numérotations
+ 
+## Fix mineurs
+
+ - Synchro Organisation JSON : Suppression d'une notice sur le type si il est absent de la source
+ - LOG : L'ajout, la suppression et la modification des jalons ont été ajoutés au tracelog
