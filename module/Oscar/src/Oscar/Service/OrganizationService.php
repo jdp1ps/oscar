@@ -204,7 +204,7 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
             }
             else {
 
-                $qb->orderBy('o.code', 'ASC')
+                $qb
                     ->orWhere('LOWER(o.shortName) LIKE :search')
                     ->orWhere('LOWER(o.fullName) LIKE :search')
                     ->orWhere('LOWER(o.city) LIKE :search')
@@ -222,8 +222,6 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
                 );
             }
 
-        } else {
-            $qb->orderBy('o.id', 'DESC');
         }
 
         if (isset($filter['type']) && $filter['type']){
@@ -294,7 +292,9 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('o')
-            ->from(Organization::class, 'o');
+            ->from(Organization::class, 'o')
+            ->orderBy('o.shortName')
+            ->addOrderBy('o.fullName');
         return $queryBuilder;
     }
 
