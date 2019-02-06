@@ -32,3 +32,4 @@ La version initiale de l'export des versements proposée les rôles de organisat
 
  - Synchro Organisation JSON : Suppression d'une notice sur le type si il est absent de la source
  - LOG : L'ajout, la suppression et la modification des jalons ont été ajoutés au tracelog
+ - TYPO : Dans les descriptions des privilèges
