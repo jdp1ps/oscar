@@ -1107,8 +1107,7 @@ class ConsoleController extends AbstractOscarController
             }
         }
 
-        $this->checkPrivilegesAction();
-
+        $this->consoleWarn("Relancez la commande jusqu'à obtenir le message 'Les privilèges sont à jour'.");
 
     }
 
