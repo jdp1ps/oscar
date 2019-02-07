@@ -63,7 +63,7 @@
             <h1 style="font-size: 8em"><?= $this->appInfos()->nom ?></h1>
 
             <p><?= $this->appInfos()->desc ?><p>
-                <?php if( !$user ): ?>
+                <?php if( !$this->hasRole('user') ): ?>
                     <a href="<?= $this->url('zfcuser/login') ?>" class="btn btn-success btn-large">
                         <i class="glyphicon glyphicon-user"></i>
                         <?= $this->translate('Se connecter') ?>
