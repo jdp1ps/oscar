@@ -324,12 +324,9 @@
                             avec une des activités ci-dessous :
                         </p>
                         <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillSelectedWP"
-                                    @select="fillSelectedWP = $event"></wpselector>
-                        <button class="btn btn-default" @click="fillWeek(selectedWeek, fillSelectedWP)"
-                                :class="fillSelectedWP ? 'btn-primary' : 'disabled'">
-                            <i class="icon-floppy"></i>
-                            Valider
-                        </button>
+                                    @select="fillSelectedWP = $event; fillWeek(selectedWeek, fillSelectedWP);"
+                                    :usevalidation="true"></wpselector>
+
                     </section>
                 </div>
 
@@ -345,13 +342,8 @@
                             <i class="icon-help-circled"></i>
                             Vous pouvez compléter automatiquement ce mois avec :
                         </p>
-                        <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillMonthWP"
-                                    @select="fillMonthWP = $event"></wpselector>
-                        <button class="btn btn-default" @click="handlerFillMonth(fillMonthWP)"
-                                :class="fillMonthWP ? 'btn-primary' : 'disabled'">
-                            <i class="icon-floppy"></i>
-                            Compléter
-                        </button>
+                        <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillMonthWP" :usevalidation="true"
+                                    @select="fillMonthWP = $event; handlerFillMonth(fillMonthWP)"></wpselector>
                     </section>
 
                     <section v-for="week in weeks" v-if="ts" class="card xs">
