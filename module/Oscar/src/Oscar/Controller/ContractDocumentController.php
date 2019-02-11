@@ -37,7 +37,14 @@ class ContractDocumentController extends AbstractOscarController
      * @return mixed
      */
     protected function getDropLocation(){
-        return $this->getServiceLocator()->get('Config')['oscar']['paths']['document_oscar'];
+        return $this->getContractDocumentService()->getDropLocation();
+    }
+
+    /**
+     * @return ContractDocumentService
+     */
+    protected function getContractDocumentService(){
+        return $this->getServiceLocator()->get('ContractDocumentService');
     }
 
     /**
@@ -201,7 +208,7 @@ class ContractDocumentController extends AbstractOscarController
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_SHOW, $activity);
 
 
-        $fileDir = $this->getServiceLocator()->get('Config')['oscar']['paths']['document_oscar'];
+        $fileDir = $this->getDropLocation();
         $this->getActivityLogService()->addUserInfo(sprintf("a téléchargé le document '%s'", $doc), $this->getDefaultContext(), $idDoc);
 
         header('Content-Disposition: attachment; filename="'.$doc->getFileName().'"');
