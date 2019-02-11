@@ -194,8 +194,6 @@ return array(
             ],
         ],
 
-
-
         'horslots' => [
             'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
             'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
@@ -211,13 +209,13 @@ return array(
         // Emplacement des dossiers pour les documents
         'paths' => [
             // Documents des activités
-            'document_oscar' => realpath( __DIR__.'/../../data/documents/activity'),
+            'document_oscar' => realpath( __DIR__.'/../../data/documents/activity/'),
 
             // Documents des demandes d'activités
             'document_request' => realpath( __DIR__.'/../../data/documents/request'),
 
             // Documents 'publiques"
-            'document_admin_oscar' => realpath( __DIR__.'/../../data/documents/public'),
+            'document_admin_oscar' => realpath( __DIR__.'/../../data/documents/public/'),
 
             // Modèle de feuille de temps
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
