@@ -155,9 +155,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ->getQuery()
             ->getResult();
 
-
-        $this->debug(sprintf("Il y'a %s activité(s) à traiter", count($activities)));
-
         /** @var Activity $activity */
         foreach ($activities as $activity) {
             $this->generateNotificationsForActivity($activity);
@@ -348,7 +345,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             }
         }
 
-        if ($payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_PREVISIONNEL) {
+        if ($payment->getDatePredicted() && $payment->getStatus() == ActivityPayment::STATUS_PREVISIONNEL) {
             $message = "$payment dans l'activité " . $activity->log();
             $context = "payment:" . $payment->getId();
             $dateEffective = $payment->getDatePredicted();
