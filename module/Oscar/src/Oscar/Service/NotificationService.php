@@ -466,8 +466,22 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ->execute();
     }
 
+    public function deleteNotificationsPerson(Person $person){
+        return $this->getEntityManager()->getRepository(NotificationPerson::class, 'np')
+            ->createQueryBuilder('np')
+            ->delete(NotificationPerson::class, 'np')
+            ->where('np.person = :person')
+            ->setParameters([
+                'person' => $person,
+            ])
+            ->getQuery()
+            ->execute();
+    }
+
     public function generateNotificationsPerson(Person $person)
     {
+        $this->deleteNotificationsPerson($person);
+        
         // Récupération des activités dans lesquelles la personne est impliquée
         $activities = [];
 
