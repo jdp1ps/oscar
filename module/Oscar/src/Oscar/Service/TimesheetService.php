@@ -2852,8 +2852,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $timesheet->setValidationPeriod($declarations[$key]['declaration']);
         }
 
-        throw new OscarException("TEST D'AGGRÉGAT");
-
         $this->getEntityManager()->flush($timesheets);
     }
 

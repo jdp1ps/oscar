@@ -115,7 +115,7 @@
                     </table>
 
                     <nav class="buttons">
-                        <button class="btn btn-primary">Envoyer la déclaration</button>
+                        <button class="btn btn-primary" @click="sendMonthProceed">Envoyer la déclaration</button>
                         <button class="btn btn-default" @click="screensend = null">Annuler</button>
                     </nav>
                 </div>
@@ -1402,6 +1402,7 @@
                     }
                 ).then(foo => {
                     this.selectedWeek = null;
+                    this.screensend = null;
                     this.loading = false;
                 });
             },
