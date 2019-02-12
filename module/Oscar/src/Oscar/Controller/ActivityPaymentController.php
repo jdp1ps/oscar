@@ -116,9 +116,13 @@ class ActivityPaymentController extends AbstractOscarController
 
                     if( $datePayment )
                         $payment->setDatePayment(new \DateTime($datePayment));
+                    else
+                        $payment->setDatePayment(null);
 
                     if( $datePredicted )
                         $payment->setDatePredicted(new \DateTime($datePredicted));
+                    else
+                        $payment->setDatePredicted(null);
 
                     $payment->setRate($rate)
                         ->setStatus($status);
