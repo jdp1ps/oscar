@@ -21,12 +21,14 @@ La version initiale de l'export des versements proposée les rôles de organisat
 
 ## UP / FIX
 
+ - UP : L'envoi d'un déclaration propose maintenant une vue récapitulative avec l'envoi
  - Fix : Bug d'affichage des arrondis dans les versements
  - Fix : La table/entités/références Grantsource ont été supprimées
  - UP : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](doc/numerotation.md)) @JulienDary
  - DOC : Une requète Postgresql a été ajoutée dans la documentation pour automatiser les changements de formalisme des numérotations
  - ADMIN : Refonte de l'interface de gestion des types de documents et **ajout d'un privilège** pour les gérer
  - Certaines listes dans les écrans de configuration des nomenclatures sont maintenant affichés dans l'ordre alphabéthique
+ - Déclaration : L'interface pour sélectionner les types de créneaux a été adaptée pour mieux gérer l'affichage d'un grand nombre de lot.
  
 ## Fix mineurs
 

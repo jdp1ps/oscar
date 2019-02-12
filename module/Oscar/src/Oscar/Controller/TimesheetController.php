@@ -1470,10 +1470,7 @@ class TimesheetController extends AbstractOscarController
             return $this->getResponseInternalError("Vous avez été déconnecté de Oscar");
         }
 
-
-
-        $output = [];
-
+        // Méthode d'accès
         $method = $this->getHttpXMethod();
 
         // Durée d'un jour "normal"
@@ -1482,7 +1479,6 @@ class TimesheetController extends AbstractOscarController
         $month = (int)$this->params()->fromQuery('month', $today->format('m'));
         $format = $this->params()->fromQuery('format', null);
         $period = sprintf('%s-%s', $year, $month);
-
         $declarerId = $this->params()->fromQuery('person', null);
         $usurpation = false;
 
@@ -1495,20 +1491,22 @@ class TimesheetController extends AbstractOscarController
         /** @var Person $currentPerson */
         $currentPerson = $this->getPersonService()->getPersonById($declarerId); //$this->getCurrentPerson();
 
+        // On test l'authorisation à l'usurpation si besoin
         if( $declarerId != $this->getCurrentPerson()->getId() ){
             if( !($this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $currentPerson->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
                 throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $currentPerson");
             }
         }
 
-
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
 
         if( $this->isAjax() || $format == 'json' ) {
             switch ($method) {
 
-                // Envois des créneaux
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Récupération des créneaux de la période
                 case 'GET' :
                     $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);
                     if( $usurpation )
@@ -1517,9 +1515,12 @@ class TimesheetController extends AbstractOscarController
                     return $this->ajaxResponse($datas);
                     break;
 
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Envoi de données
                 case 'POST' :
                     $action = $this->params()->fromPost('action', 'send');
 
+                    // Ajout des créneaux
                     if( $action == 'add' ){
                         return $this->sendTimesheet($currentPerson);
                     }
@@ -1570,6 +1571,8 @@ class TimesheetController extends AbstractOscarController
                     return $this->getResponseNotImplemented("Erreur inconnue");
                     break;
 
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Suppression
                 case 'DELETE' :
                     try {
                         $idsCreneaux = explode(',', $this->params()->fromQuery('id'));
@@ -1578,7 +1581,6 @@ class TimesheetController extends AbstractOscarController
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError($e->getMessage());
                     }
-
                     break;
             }
         }

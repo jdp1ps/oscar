@@ -2144,7 +2144,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $projectAcronym = $t->getActivity()->getAcronym();
             $project = $t->getActivity()->getProject();
+            $project_id = $t->getActivity()->getProject()->getId();
             $activity = $t->getActivity();
+            $activity_id = $t->getActivity()->getId();
             $activityCode = $activity->getOscarNum();
             $workpackage = $t->getWorkpackage();
             $wpCode = $workpackage->getCode();
@@ -2168,10 +2170,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'validations' => $this->resolveTimeSheetValidation($t),
                 'label' => $t->getLabel(),
                 'comment' => $t->getComment(),
+                'activity_id' => $activity_id,
                 'activity' => (string)$activity,
                 'activity_code' => $activityCode,
                 'acronym' => $projectAcronym,
                 'project' => (string)$project,
+                'project_id' => $project_id,
                 'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : 'draft',
                 'status' => 'locked',
                 'wpCode' => $wpCode,
@@ -2796,6 +2800,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function sendPeriod($from, $to, $sender)
     {
+
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
 
@@ -2846,6 +2851,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
             $timesheet->setValidationPeriod($declarations[$key]['declaration']);
         }
+
+        throw new OscarException("TEST D'AGGRÉGAT");
 
         $this->getEntityManager()->flush($timesheets);
     }
