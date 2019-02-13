@@ -1,5 +1,10 @@
 # OSCAR (Documentation technique)
 
+ - **VERSION 2.8 "Callahan"** ([Note de version](./version-2.8.md))
+ - VERSION 2.7 "Lewis" ([Note de version](./version-2.7.md))
+ 
+> La version Oscar installée est indiquée en pied de page de l'application 
+
 
 ## Mise en place
 
@@ -17,6 +22,4 @@
  - [Personnaliser l'apparence](./doc/custom-ui.md)
  - [Installer les drivers Oracle OCI](./doc/install-oracle-pp.md)
 
-
-## Développeur
 
