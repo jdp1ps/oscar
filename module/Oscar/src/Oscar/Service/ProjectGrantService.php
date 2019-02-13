@@ -814,7 +814,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         $qb = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
             ->leftJoin('a.type', 't')
-            ->leftJoin('a.source', 's')
             ->leftJoin('a.tva', 'tv')
             ->leftJoin('a.currency', 'c')
             ->leftJoin('a.project', 'p')
@@ -833,7 +832,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
         $newActivity->setProject($source->getProject())
             ->setType($source->getType())
-            ->setSource($source->getSource())
             ->setTva($source->getTva())
             ->setCurrency($source->getCurrency())
             ->setLabel('Copie de ' . $source->getLabel())
