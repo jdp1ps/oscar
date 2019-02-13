@@ -1,5 +1,7 @@
 # Procédure de mise à jour Oscar
 
+Avant de déclencher une mise à jour, pensez là lire les patchnotes des versions situées entre votre version actuelle et la version qui sera installée.
+
 ## Sauvegarde
 
 Faites une sauvegarde de l'application en copiant le dossier oscar : 
