@@ -302,8 +302,12 @@
                        :title="!ts.submitable ? 'Vous ne pouvez pas importer pour cette période' : ''"
                        :class="{ 'disabled': !ts.submitable }">
                         <i class="icon-calendar"></i>
-                        Importer un calendrier
+                        Importer un calendrier<br>
+                        <small v-if="!ts.submitable">
+                            Vous ne pouvez pas importer pour une période en cours/déjà envoyée
+                        </small>
                     </a>
+
                 </h3>
 
                 <div class="month">
