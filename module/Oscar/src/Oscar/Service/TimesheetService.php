@@ -2844,8 +2844,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $key = sprintf("%s_%s", $object, $objectId);
             if (!array_key_exists($key, $declarations)) {
                 $comment = "";
-                if( $comments && array_key_exists($objectId, $comments) ){
-                    $comment = $comments[$objectId];
+                $objectCommentKey = $objectId;
+                if( $objectCommentKey == -1 ) $objectCommentKey = $object;
+
+
+                if( $comments && array_key_exists($objectCommentKey, $comments) ){
+                    $comment = array_key_exists($objectCommentKey, $comments) ? $comments[$objectCommentKey] : '';
                 }
                 $declarations[$key] = [
                     'objectId' => $objectId,
@@ -2854,6 +2858,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'log' => "Déclaration envoyée",
                     'comment' => $comment
                 ];
+
+                $this->getLogger()->debug(print_r($declarations[$key], true));
                 $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup, $comment);
             }
             $timesheet->setValidationPeriod($declarations[$key]['declaration']);

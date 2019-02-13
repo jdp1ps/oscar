@@ -77,11 +77,16 @@
                                     </h3>
                                 </th>
                             </tr>
+
                             <tr v-for="hl in recapsend.hl" class="workpackage-line">
-                                <th colspan="2">
+                                <th>
                                     <i :class="'icon-' + hl.code"></i>
                                     {{ hl.label }}
                                 </th>
+                                <td>
+                                    <strong>Commentaire : </strong><br>
+                                    <textarea v-model="screensend[hl.code]"></textarea>
+                                </td>
                                 <td v-for="d in ts.days">
                                     <strong v-if="hl.days[d.i]">{{ hl.days[d.i] | duration2 }}</strong>
                                     <small v-else>-</small>
@@ -1362,24 +1367,37 @@
                 Object.keys(this.ts.days).forEach(d => {
 
                     let day = this.ts.days[d];
-                    if( day.declarations.length == 0 ) return;
+
+                    if( day.othersWP && day.othersWP.length ){
+                        day.othersWP.forEach(timesheet => {
+                           let key = timesheet.code;
+
+                            if( !aggregatProjet.hasOwnProperty(key) ){
+                                aggregatProjet[key] = [];
+                            }
+                            if( timesheet.description && aggregatProjet[key].indexOf(timesheet.description) < 0 ){
+                                aggregatProjet[key].push(timesheet.description);
+                            }
+                        });
+                    }
 
                     day.declarations.forEach(timesheet => {
-                        let activity_id = timesheet.activity_id;
-                        if( !aggregatProjet.hasOwnProperty(activity_id) ){
-                            aggregatProjet[activity_id] = [];
+                        let key = timesheet.activity_id;
+
+                        if( !aggregatProjet.hasOwnProperty(key) ){
+                            aggregatProjet[key] = [];
                         }
-                        if( timesheet.comment && aggregatProjet[activity_id].indexOf(timesheet.comment) < 0 ){
-                            aggregatProjet[activity_id].push(timesheet.comment);
+                        if( timesheet.comment && aggregatProjet[key].indexOf(timesheet.comment) < 0 ){
+                            aggregatProjet[key].push(timesheet.comment);
                         }
                     });
+
+
                 });
 
                 Object.keys(aggregatProjet).forEach(id => {
                     aggregatProjet[id] = " - " +aggregatProjet[id].join("\n - ")
                 });
-
-
 
                 this.screensend = aggregatProjet;
             },
