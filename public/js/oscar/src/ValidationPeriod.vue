@@ -114,9 +114,11 @@
                                     <th>
                                         <i class="hors-lot" :class="'icon-' + hlcode"></i>{{ hl.label }}
                                         <span class="state" :class="'state-' + hl.status">
-                                        <i :class="'icon-'+hl.status"></i>
-                                        {{ hl.status | status }}
-                                    </span>
+                                            <i :class="'icon-'+hl.status"></i>
+                                            {{ hl.status | status }}
+                                        </span>
+                                        <pre class="commentaire-hl"><strong>Commentaire : </strong>{{ hl.comment }}</pre>
+
                                     </th>
                                     <td v-for="d in period.totalDays">
                                         <strong v-if="hl.timesheets[d]">{{ hl.timesheets[d] | duration2 }}</strong>
