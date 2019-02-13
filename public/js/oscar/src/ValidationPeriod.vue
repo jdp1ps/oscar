@@ -60,6 +60,13 @@
                                 </th>
 
                             </tr>
+                                <tr class="heading-activity heading">
+                                    <th :colspan="period.totalDays+3">
+                                        <strong>Commentaire</strong>
+                                        <pre style="white-space: pre-wrap; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif">{{ activity.comment }}</pre>
+                                    </th>
+
+                                </tr>
                             <tr v-for="lot in activity.workpackages"  class="datas">
                                 <th :title="lot.label"><i class="icon-archive"></i>{{ lot.code }}</th>
                                 <td v-for="d in period.totalDays">

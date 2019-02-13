@@ -314,6 +314,7 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $schedule;
+
     /**
      * Intitulé du valideur.
      *
@@ -331,6 +332,14 @@ class ValidationPeriod
     protected $timesheets;
 
     /**
+     * Commentaire du déclarant.
+     *
+     * @var string
+     * @ORM\Column(type="text")
+     */
+    private $comment;
+
+    /**
      * ValidationPeriod constructor.
      * @param $id
      */
@@ -340,6 +349,23 @@ class ValidationPeriod
         $this->validatorsSci = new ArrayCollection();
         $this->validatorsAdm = new ArrayCollection();
         $this->timesheets = new ArrayCollection();
+    }
+
+    /**
+     * @return string
+     */
+    public function getComment()
+    {
+        return $this->comment;
+    }
+
+    /**
+     * @param string $comment
+     */
+    public function setComment($comment)
+    {
+        $this->comment = $comment;
+        return $this;
     }
 
     /**

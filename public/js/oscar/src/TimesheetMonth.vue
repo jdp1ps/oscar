@@ -39,7 +39,7 @@
                                     <th colspan="2">&nbsp;</th>
                                     <td :colspan="ts.dayNbr">
                                     <strong>Commentaires : </strong><br>
-                                    <textarea class="form-control" v-model="activity.comment" style="max-width: 100%"></textarea>
+                                    <textarea class="form-control" v-model="screensend[activity.id]" style="max-width: 100%"></textarea>
                                     </td>
                                     <td>&nbsp;</td>
                                 </tr>
@@ -1021,6 +1021,7 @@
                     let hlDef = this.ts.otherWP[code];
 
                     hl[hlDef.code] = {
+                        id: hlDef.code,
                         code: hlDef.code,
                         label: hlDef.label,
                         days: {},
@@ -1042,12 +1043,14 @@
 
                         recap[project_id] = {
                             label: project,
+                            id: project_id,
                             activities: {}
                         }
                     }
 
                     if (!recap[project_id].activities.hasOwnProperty(activity.id)) {
                         recap[project_id].activities[activity.id] = {
+                            id: activity.id,
                             label: activity.label,
                             acronym: activity.acronym,
                             total: activity.total,
@@ -1386,6 +1389,7 @@
                 // Données à envoyer
                 var datas = new FormData();
                 datas.append('action', 'sendmonth');
+                datas.append('comments', JSON.stringify(this.screensend));
                 datas.append('datas', JSON.stringify({
                     from: this.ts.from,
                     to: this.ts.to

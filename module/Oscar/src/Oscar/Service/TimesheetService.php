@@ -335,14 +335,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @throws OscarException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function reSendValidation(ValidationPeriod $validationPeriod)
+    public function reSendValidation(ValidationPeriod $validationPeriod, $comment="")
     {
         if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_CONFLICT) {
             throw new OscarException("Erreur d'état");
         }
 
         $validationPeriod->addLog('Réenvoi de la déclaration pour validation', (string)$validationPeriod->getDeclarer());
-        $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP1);
+        $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP1)->setComment($comment);
 
         // Reset des champs
         $validationPeriod->setRejectSciBy(null)->setRejectSciMessage('')->setRejectSciAt(null)->setRejectSciById(null)
@@ -714,7 +714,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId());
                 $activityDatas = [
                     'label' => $activity->getFullLabel(),
-                    'workpackages' => []
+                    'workpackages' => [],
+                    'comment' => $period->getComment()
                 ];
 
                 /** @var WorkPackage $workpackage */
@@ -737,6 +738,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             else {
                 $otherInfos = $this->getOthersWPByCode($period->getObject());
                 $periodDatas['label'] = $otherInfos['label'];
+                $periodDatas['comment'] = $period->getComment();
                 $periodDatas['timesheets'] = [];
                 $group[$key]['declarations_others'][$otherInfos['code']] = $periodDatas;
             }
@@ -2798,7 +2800,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $query->getResult();
     }
 
-    public function sendPeriod($from, $to, $sender)
+    public function sendPeriod($from, $to, $sender, $comments=null)
     {
 
         $fromMonth = $from->format('Y-m');
@@ -2841,13 +2843,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $key = sprintf("%s_%s", $object, $objectId);
             if (!array_key_exists($key, $declarations)) {
+                $comment = "";
+                if( $comments && array_key_exists($objectId, $comments) ){
+                    $comment = $comments[$objectId];
+                }
                 $declarations[$key] = [
                     'objectId' => $objectId,
                     'object' => $object,
                     'objectGroup' => $objectGroup,
-                    'log' => "Déclaration envoyée"
+                    'log' => "Déclaration envoyée",
+                    'comment' => $comment
                 ];
-                $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup);
+                $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup, $comment);
             }
             $timesheet->setValidationPeriod($declarations[$key]['declaration']);
         }
@@ -3090,7 +3097,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @return ValidationPeriod
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    protected function createDeclaration($sender, $year, $month, $object, $objectId, $objectGroup)
+    protected function createDeclaration($sender, $year, $month, $object, $objectId, $objectGroup, $comment="")
     {
 
         $declaration = new ValidationPeriod();
@@ -3147,6 +3154,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $now = new \DateTime();
         $declaration
             ->setSchedule($settings)
+            ->setComment($comment)
             ->setDateSend($now)
             ->setDeclarer($sender)
             ->setLog($now->format('Y-m-d H:i:s') . " : $sender vient d'envoyer sa déclaration\n")

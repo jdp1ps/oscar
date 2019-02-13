@@ -1519,6 +1519,11 @@ class TimesheetController extends AbstractOscarController
                 // Envoi de données
                 case 'POST' :
                     $action = $this->params()->fromPost('action', 'send');
+                    $comments = $this->params()->fromPost('comments', null);
+
+                    if( $comments ){
+                        $comments = json_decode($comments, JSON_OBJECT_AS_ARRAY);
+                    }
 
                     // Ajout des créneaux
                     if( $action == 'add' ){
@@ -1533,7 +1538,7 @@ class TimesheetController extends AbstractOscarController
                         if( $period->getDeclarer() == $currentPerson ){
                             try {
                                 $timesheetService->verificationPeriod($currentPerson, $period->getYear(), $period->getMonth());
-                                $timesheetService->reSendValidation($period);
+                                $timesheetService->reSendValidation($period, $comments);
                                 return $this->getResponseOk();
                             } catch (\Exception $e ){
                                 return $this->getResponseInternalError(sprintf('Impossible de réenvoyer la déclaration : %s', $e->getMessage()));
@@ -1563,7 +1568,7 @@ class TimesheetController extends AbstractOscarController
                     try {
                         $from = new \DateTime($datas->from);
                         $to = new \DateTime($datas->to);
-                        $timesheetService->sendPeriod($from, $to, $currentPerson);
+                        $timesheetService->sendPeriod($from, $to, $currentPerson, $comments);
                         return $this->getResponseOk();
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError('Erreur de soumission de la période : ' . $e->getMessage());
