@@ -2625,6 +2625,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     protected function getQueryTimesheetsPersonPeriod($currentPerson, \DateTime $from, \DateTime $to)
     {
+        $from->setTime(0,0,0);
+        $to->setTime(23,59,59);
         $query = $this->getEntityManager()->createQueryBuilder('t')
             ->select('t')
             ->from(TimeSheet::class, 't')
@@ -2830,6 +2832,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
+
+            $this->getLogger()->debug("$timesheet");
 
             $objectGroup = ValidationPeriod::GROUP_OTHER;
             $object = $timesheet->getLabel();
