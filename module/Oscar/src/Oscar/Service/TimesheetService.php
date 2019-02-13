@@ -2279,14 +2279,37 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'dateTo' => $periodBounds['end'],
             ]);
 
+        $commentaires = "";
+        $acronyms = [];
+        $debut = "";
+        $num = [];
+        $pfi = [];
+
+        $validationsDone = [];
+
         $declarations = [
             'activities' => [],
             'others' => []
         ];
+
         $others = $this->getOthersWP();
 
         /** @var TimeSheet $timesheet */
         foreach ($query->getQuery()->getResult() as $timesheet) {
+
+            // Récupération des commentaires
+            $validationId = $timesheet->getValidationPeriod()->getId();
+            if( !in_array($validationId, $validationsDone) ){
+                $validationsDone[] = $validationId;
+                $commentaires .= $timesheet->getValidationPeriod()->getComment() ."\n";
+            }
+
+            if( $timesheet->getActivity() ){
+                if( !in_array($timesheet->getActivity()->getCodeEOTP(), $pfi) ) $pfi[] = $timesheet->getActivity()->getCodeEOTP();
+                if( !in_array($timesheet->getActivity()->getAcronym(), $acronyms) ) $acronyms[] = $timesheet->getActivity()->getAcronym();
+                if( !in_array($timesheet->getActivity()->getOscarNum(), $num) ) $num[] = $timesheet->getActivity()->getOscarNum();
+            }
+
             $group = 'Projet inconnue';
             $groupId = null;
             $subGroup = $timesheet->getLabel();
@@ -2343,9 +2366,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $declarations[$path][$group]['total'] += $timesheet->getDuration();
 
         }
+        /*
+                     $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
+            $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
+
+            $spreadsheet->getActiveSheet()->setCellValue('U3', $datas['debut']); //$fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue('U4', $datas['fin']); // $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
+            $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
+
+
+         */
 
         $output = [
             'person' => (string)$person,
+            'commentaires' => $commentaires,
+            'num' => implode(', ', $num),
+            'pfi' => implode(', ', $pfi),
+            'acronyms' => implode(', ', $acronyms),
             'person_id' => $person->getId(),
             'period' => $period,
             'totalDays' => $periodBounds['totalDays'],

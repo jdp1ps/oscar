@@ -549,6 +549,7 @@ class TimesheetController extends AbstractOscarController
                 $this->getResponseBadRequest("Impossible de trouver l'activité");
             }
             $datas = $timesheetService->getPersonTimesheetsCSV($person, $activity, false);
+
             $filename = $activity->getAcronym() . '-' . $activity->getOscarNum().'-'.$person->getLadapLogin().'.csv';
 
             $handler = fopen('/tmp/' . $filename, 'w');
@@ -602,12 +603,13 @@ class TimesheetController extends AbstractOscarController
             $spreadsheet->getActiveSheet()->setCellValue('A1', "Déclaration");
             $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
             $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
-            $spreadsheet->getActiveSheet()->setCellValue('C5', "ACRO");
+            $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
+            $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
 
-            $spreadsheet->getActiveSheet()->setCellValue('U3', "U3"); //$fmt->format($activity->getDateStart()));
-            $spreadsheet->getActiveSheet()->setCellValue('U4', 'U4'); // $fmt->format($activity->getDateEnd()));
-            $spreadsheet->getActiveSheet()->setCellValue('U5', 'U5'); //$activity->getOscarNum());
-            $spreadsheet->getActiveSheet()->setCellValue('U6', 'EOTP'); //$activity->getCodeEOTP());
+            $spreadsheet->getActiveSheet()->setCellValue('U3', $datas['debut']); //$fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue('U4', $datas['fin']); // $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
+            $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
 
             $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
             $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
