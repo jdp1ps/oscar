@@ -566,6 +566,7 @@
                 let period = mmStart.format('YYYY-MM'),
                     day = mmStart.format('YYYY-MM-DD'),
                     daySimple = mmStart.format('DD'),
+                    dayInt = mmStart.format('D'),
                     importable = true,
                     destinationCode = "",
                     destinationId = -1,
@@ -587,10 +588,11 @@
                 let warning = "";
 
                 // JOUR FERMÉ
-                if( this.exists[period] && this.exists[period].days[daySimple].closed ){
-                    warning = this.exists[period].days[daySimple].closedReason;
+                if( this.exists[period] && this.exists[period].days[dayInt].closed ){
+                    warning = this.exists[period].days[dayInt].closedReason;
                     imported = false;
                 }
+
 
 
                 // Détection du lot
