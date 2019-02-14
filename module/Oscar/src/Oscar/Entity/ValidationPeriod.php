@@ -335,7 +335,7 @@ class ValidationPeriod
      * Commentaire du déclarant.
      *
      * @var string
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $comment;
 
