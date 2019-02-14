@@ -86,7 +86,7 @@
                     Type d'organisation
                 </strong>
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <a href="<?= $this->url('administration/organizationtype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
                 <?php else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
                 <?php endif; ?>
