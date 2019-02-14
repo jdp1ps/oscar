@@ -7,7 +7,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 ## Demandes d'activités
 
-La version 2.9 de Oscar introduit une nouvelle fonctionnalité : Les demandes d'activités. Elle propose d'activier via les privilèges d'autoriser des demandes d'activité. Ces demandes peuvent ensuite être validées ou refusées pour créer des activités de recherche.
+La version 2.9 de Oscar introduit une nouvelle fonctionnalité : Les demandes d'activités. Elle propose d'activer via les privilèges d'autoriser des demandes d'activité. Ces demandes peuvent ensuite être validées ou refusées pour créer des activités de recherche.
 
 Détails sur cette fonctionnalité : [Demande d'activités](doc/activity-request.md)
 
@@ -17,7 +17,7 @@ Le code a été purgé des références à un ancien système de classification 
 
 ## Export des versements (config)
 
-La version initiale de l'export des versements proposée les rôles de organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurable dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
+La version initiale de l'export des versements proposait les rôles de organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurable dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
 
 ## UP / FIX
 
@@ -27,7 +27,7 @@ La version initiale de l'export des versements proposée les rôles de organisat
  - UP : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](doc/numerotation.md)) @JulienDary
  - DOC : Une requète Postgresql a été ajoutée dans la documentation pour automatiser les changements de formalisme des numérotations
  - ADMIN : Refonte de l'interface de gestion des types de documents et **ajout d'un privilège** pour les gérer
- - Certaines listes dans les écrans de configuration des nomenclatures sont maintenant affichés dans l'ordre alphabéthique
+ - Certaines listes dans les écrans de configuration des nomenclatures sont maintenant affichées dans l'ordre alphabétique
  - Déclaration : L'interface pour sélectionner les types de créneaux a été adaptée pour mieux gérer l'affichage d'un grand nombre de lot.
  
 ## Fix mineurs
@@ -35,4 +35,4 @@ La version initiale de l'export des versements proposée les rôles de organisat
  - Synchro Organisation JSON : Suppression d'une notice sur le type si il est absent de la source
  - LOG : L'ajout, la suppression et la modification des jalons ont été ajoutés au tracelog
  - TYPO : Dans les descriptions des privilèges
- - La liste des organisations est affichée dans l'ordre alphabéthique
+ - La liste des organisations est affichée dans l'ordre alphabétique
