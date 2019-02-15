@@ -20,7 +20,7 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
 ?>
 
 <article
-    class="card card-openable <?= $size ?> activity <?= $show ? '' : 'lock' ?> <?= strtolower($activity->getFinancialImpact()) ?>"
+    class="card card-openable <?= $size ?> activity status-<?= $activity->getStatus() ?> <?= $show ? '' : 'lock' ?> <?= strtolower($activity->getFinancialImpact()) ?>"
     data-selectable data-id="<?= $activity->getId() ?>">
     <h3 class="card-title">
         <?php if ($show): ?>
@@ -56,6 +56,13 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
 
             <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DELETE, $activity)): ?>
             <a data-confirm="Supprimer définitivement cette activité ?" data-href="<?= $this->url('contract/delete', ['id'=>$activity->getId()]) ?>" class="del">Supprimer</a>
+            <?php endif; ?>
+
+            <?php if( count($activity->getWorkPackages()) ): ?>
+            <span class="cartouche blue xs">
+                    <i class="icon-calendar"></i>
+                    Soumis aux feuille de temps
+                </span>
             <?php endif; ?>
         </span>
         <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $activity)): ?>

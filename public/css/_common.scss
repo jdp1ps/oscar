@@ -1321,6 +1321,14 @@ $text-small: 12px;
   font-size: $text-small;
 }
 
+.activity { // Refusé
+  &.status-201 { border-left:solid 4px $colorRed; } // Résilié
+  &.status-210 { border-left:solid 4px $colorRed; } // Refusé
+  &.status-250 { border-left:solid 4px $colorRed; } // Litige
+
+  &.status-404 { border-left:solid 4px $colorOrange; } // Pas de status
+}
+
 .card {
   &.selected {
 

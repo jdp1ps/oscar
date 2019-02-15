@@ -80,9 +80,11 @@ class JSONFormatter
 
         $datas['project'] = $activity->getProject() ? $this->formatProject($activity->getProject(), false) : null;
         $datas['project_id'] = $activity->getProject()?$activity->getProject()->getId():null;
+        $datas['statutId'] = $activity->getStatus();
 
         $datas['persons'] = null;
         $datas['persons_primary'] = null;
+        $datas['has_workpackages'] = count($activity->getWorkPackages()) > 0;
 
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity) ) {
 
