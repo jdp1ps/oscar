@@ -59,6 +59,9 @@
     </article>
 </template>
 <script>
+
+    // poi watch --format umd --moduleName  Workpackage --filename.js Workpackage.js --dist public/js/oscar/dist public/js/oscar/src/Workpackage.vue
+
     export default {
         components: {
             'workpackageperson' : require('./WorkpackagePerson.vue').default
@@ -72,9 +75,7 @@
                     id: -1,
                     code: "",
                     label : "",
-                    description: "",
-                    // start: moment().format(),
-                    // end: moment().format()
+                    description: ""
                 }
             }
         },

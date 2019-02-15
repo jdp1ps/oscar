@@ -540,6 +540,15 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
                     Vue.http.options.emulateJSON = true;
                     Vue.http.options.emulateHTTP = true;
 
+                    Vue.filter('heures', function(v){
+                        var heures = parseInt(v);
+                        var minutes = Math.round((parseFloat(v) - heures)*60);
+                        if( minutes == 0 ) minutes = '';
+                        else if (minutes < 10) minutes = ':0' +minutes;
+                        else minutes = ':'+minutes
+                       return heures+minutes;
+                    });
+
                     // Transmission du jeton
                     Vue.http.interceptors.push((request, next) => {
                         request.headers.set('X-CSRF-TOKEN', '<?= $tokenValue ?>');
