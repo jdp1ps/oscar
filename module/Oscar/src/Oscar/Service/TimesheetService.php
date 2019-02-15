@@ -2298,10 +2298,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         foreach ($query->getQuery()->getResult() as $timesheet) {
 
             // Récupération des commentaires
-            $validationId = $timesheet->getValidationPeriod()->getId();
-            if( !in_array($validationId, $validationsDone) ){
-                $validationsDone[] = $validationId;
-                $commentaires .= $timesheet->getValidationPeriod()->getComment() ."\n";
+            if( $timesheet->getValidationPeriod() ) {
+                $validationId = $timesheet->getValidationPeriod()->getId();
+                if (!in_array($validationId, $validationsDone)) {
+                    $validationsDone[] = $validationId;
+                    $commentaires .= $timesheet->getValidationPeriod()->getComment() . "\n";
+                }
             }
 
             if( $timesheet->getActivity() ){
