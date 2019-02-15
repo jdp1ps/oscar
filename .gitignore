@@ -3,6 +3,11 @@ config/autoload/local.php
 config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
 
+# Développement
+databases_maintenance/backup/*
+databases_maintenance/copy-prod-to-local.sh
+!databases_maintenance/backup/.gitkeep
+
 tmp
 sandbox
 debug
