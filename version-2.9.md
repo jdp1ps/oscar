@@ -4,6 +4,9 @@
 
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
+## Déclaration des feuilles de temps
+
+Un écran récapitulatif a été ajouté lors de l'envoi des feuilles de temps. Cet écran, en plus d'afficher une synthèse des créneaux déclarés propose de préciser pour chaques lignes de la déclarations un espace commentaire qui par défaut aggrège les commentaires renseigné sur les créneaux du même type.
 
 ## Demandes d'activités
 
@@ -19,20 +22,24 @@ Le code a été purgé des références à un ancien système de classification 
 
 La version initiale de l'export des versements proposait les rôles de organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurable dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
 
-## UP / FIX
-
- - UP : L'envoi d'un déclaration propose maintenant une vue récapitulative avec l'envoi
- - Fix : Bug d'affichage des arrondis dans les versements
- - Fix : La table/entités/références Grantsource ont été supprimées
- - UP : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](doc/numerotation.md)) @JulienDary
- - DOC : Une requète Postgresql a été ajoutée dans la documentation pour automatiser les changements de formalisme des numérotations
- - ADMIN : Refonte de l'interface de gestion des types de documents et **ajout d'un privilège** pour les gérer
- - Certaines listes dans les écrans de configuration des nomenclatures sont maintenant affichées dans l'ordre alphabétique
- - Déclaration : L'interface pour sélectionner les types de créneaux a été adaptée pour mieux gérer l'affichage d'un grand nombre de lot.
+## Améliorations
  
-## Fix mineurs
+ - Export des activités : L'UI permet maintenant de délectionner/déselectionner les champs à exporter par groupe.
+ - Database : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](doc/numerotation.md)) @JulienDary
+ - Admin : Refonte de l'interface de gestion des types de documents et **ajout d'un privilège** pour les gérer
+ - Feuille de temps > déclaration : L'interface pour sélectionner les types de créneaux a été adaptée pour mieux gérer l'affichage d'un grand nombre de lot.
+ - Admin : Certaines listes dans les écrans de configuration des nomenclatures sont maintenant affichées dans l'ordre alphabétique
+ - Gestion des lots : le bouton enregistrer n'est réctif que si le code est renseigné
+ - DOC : Une requète Postgresql a été ajoutée dans la documentation pour automatiser les changements de formalisme des numérotations
+ - Recherche dans les activités : La mise en page des résultats de la recherche a été améliorée pour mieux distinguer l'état des activités.
+ 
+## Fix
 
  - Synchro Organisation JSON : Suppression d'une notice sur le type si il est absent de la source
  - LOG : L'ajout, la suppression et la modification des jalons ont été ajoutés au tracelog
  - TYPO : Dans les descriptions des privilèges
  - La liste des organisations est affichée dans l'ordre alphabétique
+ - Bug d'affichage des arrondis dans les versements
+ - La table/entités/références Grantsource ont été supprimées
+ - Fiche activité > Lot de travail : Les minutes ne s'affichent plus en décimale d'heure
+ - Feuille de temps Excel > Reprends les commentaires envoyés lors de l'envoi de la déclaration
