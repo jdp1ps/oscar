@@ -65,19 +65,18 @@
                                         <strong>Commentaire</strong>
                                         <pre style="white-space: pre-wrap; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif">{{ activity.comment }}</pre>
                                     </th>
-
                                 </tr>
-                            <tr v-for="lot in activity.workpackages"  class="datas">
-                                <th :title="lot.label"><i class="icon-archive"></i>{{ lot.code }}</th>
-                                <td v-for="d in period.totalDays">
-                                   <strong v-if="lot.timesheets[d]">{{ lot.timesheets[d] | duration2 }}</strong>
-                                    <em v-else>-</em>
-                                </td>
-                                <th class="total">
-                                    {{ lot.total | duration2 }}
-                                </th>
-                                <th>-</th>
-                            </tr>
+                                <tr v-for="lot in activity.workpackages"  class="datas">
+                                    <th :title="lot.label"><i class="icon-archive"></i>{{ lot.code }}</th>
+                                    <td v-for="d in period.totalDays">
+                                       <strong v-if="lot.timesheets[d]">{{ lot.timesheets[d] | duration2 }}</strong>
+                                        <em v-else>-</em>
+                                    </td>
+                                    <th class="total">
+                                        {{ lot.total | duration2 }}
+                                    </th>
+                                    <th>-</th>
+                                </tr>
                                 <tr>
                                     <th :colspan="period.totalDays-1" style="padding-left: 1em">
                                         Total
@@ -118,7 +117,6 @@
                                             {{ hl.status | status }}
                                         </span>
                                         <pre class="commentaire-hl"><strong>Commentaire : </strong>{{ hl.comment }}</pre>
-
                                     </th>
                                     <td v-for="d in period.totalDays">
                                         <strong v-if="hl.timesheets[d]">{{ hl.timesheets[d] | duration2 }}</strong>

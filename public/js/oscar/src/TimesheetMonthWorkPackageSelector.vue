@@ -9,7 +9,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h3><i class="icon-cube"></i> Activités</h3>
-                        <article class="timesheet-item" v-for="w in workpackages" @click.prevent="handlerSelectWP(w)" :class="{ 'selected' : selection && selection.code == w.code, 'disabled': !w.validation_up }">
+                        <article class="timesheet-item" v-for="w in workpackages" @click.prevent="handlerSelectWP(w)" :class="{ 'selected' : selection && selection.id == w.id, 'disabled': !w.validation_up }">
                             <abbr :title="project" class="project-acronym"><i class="icon-cube"></i> {{ w.acronym }}</abbr>
                             <span class="activity-label">{{ w.activity }}</span>
                             <strong class="workpackage-infos">
@@ -43,26 +43,6 @@
                 <em v-else class="info">Lot de travail/Activité...</em>
                 <span class="caret"></span>
             </button>
-            <!--<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                <li v-for="wp in workpackages"
-                    :class="{ 'selected' : selection == wp, 'disabled': !wp.validation_up }"
-                    :title="wp.validation_up ? '': 'Vous ne pouvez pas ajouter de créneau pour ce lot'">
-
-                    <a href="#" @click.prevent="handlerSelectWP(wp)">
-                        <i class="icon-archive"></i>
-                        <abbr :title="wp.project">[{{wp.acronym}}]</abbr>
-                        <strong>{{wp.code}}</strong> <em>{{ wp.label }}</em><br/>
-                        <small class="text-light">{{ wp.description }}</small>
-                    </a>
-                </li>
-                <li role="separator" class="divider"></li>
-                <li v-for="o in others" :class="{ 'selected' : selection == o, 'disabled': !o.validation_up }">
-                    <a href="#" @click.prevent="handlerSelectOther(o)">
-                        <i :class="'icon-' +o.code"></i>
-                        {{ o.label }}
-                    </a>
-                </li>
-            </ul>-->
         </div>
     </div>
 </template>
