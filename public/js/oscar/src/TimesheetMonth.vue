@@ -595,7 +595,8 @@
 
                             <a href="#" @click="popup = periodValidation.log">Historique</a>
                             <a href="#" @click="rejectPeriod = periodValidation"
-                               v-if="periodValidation.status == 'conflict'">Détails sur le rejet</a>
+                               v-if="periodValidation.status == 'conflict'
+                               && (periodValidation.rejectadmin_message || periodValidation.rejectsci_message || periodValidation.rejectactivity_message )">Détails sur le rejet</a>
                             <!--<a href="#" @click="reSendPeriod(periodValidation)"
                                v-if="periodValidation.status == 'conflict'">Réenvoyer</a>-->
                         </section>
