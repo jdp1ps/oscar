@@ -3105,7 +3105,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             /** @var ValidationPeriod $validationPeriod */
             foreach($validationPeriods as $validationPeriod){
-                $this->getLogger()->debug("Rejet $validationPeriod");
                 $validationPeriod->reject($validateur, $message);
             }
 
@@ -3118,33 +3117,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $this->getEntityManager()->flush($validationPeriods);
             $this->notificationsValidationPeriod($period);
             return true;
-
-
-            throw new OscarException("Fonctionnalité en maintenance");
-
-//            switch ($period->getStatus()) {
-//                case ValidationPeriod::STATUS_STEP1:
-//                    $msg = sprintf("a rejeté niveau activité la déclartion %s", $obj);
-//                    $period->setRejectActivity($validateur, new \DateTime(), $message);
-//                    $period->addLog('vient de rejeter niveau activité la déclaration.', (string)$validateur);
-//                    break;
-//
-//                case ValidationPeriod::STATUS_STEP2:
-//                    $msg = sprintf("a rejeté scientifiquement la déclartion %s", $obj);
-//                    $period->setRejectSci($validateur, new \DateTime(), $message);
-//                    $period->addLog('vient de rejeter scientifiquement la déclaration.', (string)$validateur);
-//                    break;
-//
-//                case ValidationPeriod::STATUS_STEP3:
-//                    $msg = sprintf("a rejeté administrativement la déclartion %s", $obj);
-//                    $period->setRejectAdm($validateur, new \DateTime(), $message);
-//                    $period->addLog('vient de rejeter administrativement la déclaration.', (string)$validateur);
-//                    break;
-//
-//                default:
-//                    throw new OscarException("Cette période n'a pas le bon status pour être validée.");
-//            }
-//
         } else {
             throw new OscarException("Vous n'êtes pas autorisé à valider pour cette étape de validation");
         }

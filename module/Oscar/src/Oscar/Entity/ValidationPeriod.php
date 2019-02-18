@@ -739,6 +739,7 @@ class ValidationPeriod
     public function setValidationActivity(Person $validateur, $when, $message = "")
     {
         $this->setValidationActivityMessage($message)
+            ->addLog("Validation niveau projet par $validateur")
             ->setValidationActivityBy((string)$validateur)
             ->setValidationActivityById($validateur->getId())
             ->setValidationActivityAt($when)
@@ -748,6 +749,7 @@ class ValidationPeriod
     public function setValidationSci(Person $validateur, $when, $message = "")
     {
         $this->setValidationSciMessage($message)
+            ->addLog("Validation niveau scientifique par $validateur")
             ->setValidationSciBy((string)$validateur)
             ->setValidationSciById($validateur->getId())
             ->setValidationSciAt($when)
@@ -757,6 +759,7 @@ class ValidationPeriod
     public function setValidationAdm(Person $validateur, $when, $message = "")
     {
         $this->setValidationAdmMessage($message)
+            ->addLog("Validation niveau administratif par $validateur")
             ->setValidationAdmBy((string)$validateur)
             ->setValidationAdmById($validateur->getId())
             ->setValidationAdmAt($when)
@@ -766,6 +769,7 @@ class ValidationPeriod
     public function setRejectActivity(Person $validateur, $when, $message = "")
     {
         $this->setRejectActivityMessage($message)
+            ->addLog("Rejet niveau projet par $validateur")
             ->setRejectActivityBy((string)$validateur)
             ->setRejectActivityById($validateur->getId())
             ->setRejectActivityAt($when)
@@ -775,6 +779,7 @@ class ValidationPeriod
     public function setRejectSci(Person $validateur, $when, $message = "")
     {
         $this->setRejectSciMessage($message)
+            ->addLog("Rejet niveau scientifique par $validateur")
             ->setRejectSciBy((string)$validateur)
             ->setRejectSciById($validateur->getId())
             ->setRejectSciAt($when)
@@ -784,6 +789,7 @@ class ValidationPeriod
     public function setRejectAdm(Person $validateur, $when, $message = "")
     {
         $this->setRejectAdmMessage($message)
+            ->addLog("Rejet niveau administratif", $validateur)
             ->setRejectAdmBy((string)$validateur)
             ->setRejectAdmById($validateur->getId())
             ->setRejectAdmAt($when)
