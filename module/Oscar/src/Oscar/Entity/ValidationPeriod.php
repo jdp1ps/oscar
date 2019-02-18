@@ -714,6 +714,28 @@ class ValidationPeriod
         return $this;
     }
 
+    public function reject(Person $validateur, $message, $date=null) {
+
+        if( $date == null ) $date = new \DateTime();
+
+        switch ($this->getStatus()) {
+            case ValidationPeriod::STATUS_STEP1:
+                $this->setRejectActivity($validateur, $date, $message);
+                break;
+
+            case ValidationPeriod::STATUS_STEP2:
+                $this->setRejectSci($validateur, $date, $message);
+                break;
+
+            case ValidationPeriod::STATUS_STEP3:
+                $this->setRejectAdm($validateur, $date, $message);
+                break;
+
+            default:
+                throw new OscarException("Cette période n'a pas le bon status pour être validée.");
+        }
+    }
+
     public function setValidationActivity(Person $validateur, $when, $message = "")
     {
         $this->setValidationActivityMessage($message)
@@ -1269,9 +1291,9 @@ class ValidationPeriod
     public function getPeriodKey()
     {
         if ($this->getObjectGroup() == self::GROUP_WORKPACKAGE) {
-            return $this->getObject() . '-' . $this->getObjectId();
-        } else {
             return $this->getObjectGroup();
+        } else {
+            return $this->getObject() . '-' . $this->getObjectId();
         }
     }
 

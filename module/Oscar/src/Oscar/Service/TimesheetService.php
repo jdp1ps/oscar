@@ -256,19 +256,32 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP1) {
             throw new OscarException("Erreur d'état");
         }
+        return $this->rejectPeriodPrj($validationPeriod, $validationPeriod->getDeclarer(), $validator, $message);
+    }
 
-        $log = $validationPeriod->getLog();
+    public function rejectPeriodPrj( ValidationPeriod $period, Person $declarant, Person $validator, $message = "" ){
+        $year = $period->getYear();
+        $month = $period->getMonth();
+
+        // Format du message : La déclaration pour Mois Année a été refusée par $validator
+        $validationPeriods = $this->getValidationPeriods($year, $month, $declarant);
+
         $person = (string)$validator;
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet PROJET par $person\n";
-        $log .= $msg;
 
-        $validationPeriod->setLog($log);
-        $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
-        $validationPeriod->setRejectActivityAt($date)
-            ->setRejectActivityBy((string)$validator)
-            ->setRejectActivityById($validator->getId())
-            ->setRejectActivityMessage($message);
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod){
+            $this->getLogger()->debug("Invalidation " . $validationPeriod);
+            $log = $validationPeriod->getLog();
+            $log .= $msg;
+            $validationPeriod->setLog($log);
+            $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
+            $validationPeriod->setRejectActivityAt($date)
+                ->setRejectActivityBy((string)$validator)
+                ->setRejectActivityById($validator->getId())
+                ->setRejectActivityMessage($message);
+        }
 
         $this->getEntityManager()->flush($validationPeriod);
 
@@ -353,6 +366,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->notificationsValidationPeriod($validationPeriod);
 
         return true;
+    }
+    public function reSendPeriod( $year, $month, Person $declarer ){
+        $this->getLogger()->debug("Réenvoi de la période $month $year par $declarer");
+        $validationsPeriods = $this->getValidationPeriods((int)$year, (int)$month, $declarer);
+
+        $this->getLogger()->debug("Il y'a " . count($validationsPeriods) . " a réenvoyer");
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationsPeriods as $validationPeriod) {
+            $this->reSendValidation($validationPeriod);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1953,6 +1976,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $submitable = false;
         $submitableInfos = "Vous ne pouvez pas soumettre cette période pour une raison inconnue";
 
+        $hasConflict = false;
+
         $editable = false;
         $editableInfos = "Vous ne pouvez pas modifier les déclarations pour cette période pour une raison inconnue";
 
@@ -1972,6 +1997,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         /** @var ValidationPeriod $periodValidation */
         foreach ($periodValidations as $periodValidation) {
+            if( $periodValidation->hasConflict() ){
+                $hasConflict = true;
+            }
             $data = $periodValidation->json();
             if ($periodValidation->getObjectId() > 0) {
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($periodValidation->getObjectId());
@@ -2065,6 +2093,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         $periodValidations = $this->getPeriodValidation($person, $month, $year);
+
+        $this->getLogger()->debug("Nombre de validation pour cette période : " . count($periodValidations));
+
         $periodValidationsDt = [];
         /** @var ValidationPeriod $periodValidation */
         foreach ($periodValidations as $periodValidation) {
@@ -2193,6 +2224,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'person_id' => $person->getId(),
             'period' => $periodFirstDay->format('Y-m'),
             'periodMax' => $periodMax,
+            'hasConflict' => $hasConflict,
             'periodInfos' => $periodInfos,
             'periodFutur' => $periodFutur,
             'periodFinished' => $periodFinished,
@@ -3068,35 +3100,51 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         if ($period->isValidator($validateur)) {
-            switch ($period->getStatus()) {
-                case ValidationPeriod::STATUS_STEP1:
-                    $msg = sprintf("a rejeté niveau activité la déclartion %s", $obj);
-                    $period->setRejectActivity($validateur, new \DateTime(), $message);
-                    $period->addLog('vient de rejeter niveau activité la déclaration.', (string)$validateur);
-                    break;
 
-                case ValidationPeriod::STATUS_STEP2:
-                    $msg = sprintf("a rejeté scientifiquement la déclartion %s", $obj);
-                    $period->setRejectSci($validateur, new \DateTime(), $message);
-                    $period->addLog('vient de rejeter scientifiquement la déclaration.', (string)$validateur);
-                    break;
+            $validationPeriods = $this->getValidationPeriods($period->getYear(), $period->getMonth(), $period->getDeclarer());
 
-                case ValidationPeriod::STATUS_STEP3:
-                    $msg = sprintf("a rejeté administrativement la déclartion %s", $obj);
-                    $period->setRejectAdm($validateur, new \DateTime(), $message);
-                    $period->addLog('vient de rejeter administrativement la déclaration.', (string)$validateur);
-                    break;
-
-                default:
-                    throw new OscarException("Cette période n'a pas le bon status pour être validée.");
+            /** @var ValidationPeriod $validationPeriod */
+            foreach($validationPeriods as $validationPeriod){
+                $this->getLogger()->debug("Rejet $validationPeriod");
+                $validationPeriod->reject($validateur, $message);
             }
+
+            $msg = sprintf("a rejeté de la déclaration %s", $period);
+
             /** @var ActivityLogService $als */
             $als = $this->getServiceLocator()->get('ActivityLogService');
             $als->addUserInfo($msg, 'Activity', $period->getObjectId());
 
-            $this->getEntityManager()->flush($period);
+            $this->getEntityManager()->flush($validationPeriods);
             $this->notificationsValidationPeriod($period);
             return true;
+
+
+            throw new OscarException("Fonctionnalité en maintenance");
+
+//            switch ($period->getStatus()) {
+//                case ValidationPeriod::STATUS_STEP1:
+//                    $msg = sprintf("a rejeté niveau activité la déclartion %s", $obj);
+//                    $period->setRejectActivity($validateur, new \DateTime(), $message);
+//                    $period->addLog('vient de rejeter niveau activité la déclaration.', (string)$validateur);
+//                    break;
+//
+//                case ValidationPeriod::STATUS_STEP2:
+//                    $msg = sprintf("a rejeté scientifiquement la déclartion %s", $obj);
+//                    $period->setRejectSci($validateur, new \DateTime(), $message);
+//                    $period->addLog('vient de rejeter scientifiquement la déclaration.', (string)$validateur);
+//                    break;
+//
+//                case ValidationPeriod::STATUS_STEP3:
+//                    $msg = sprintf("a rejeté administrativement la déclartion %s", $obj);
+//                    $period->setRejectAdm($validateur, new \DateTime(), $message);
+//                    $period->addLog('vient de rejeter administrativement la déclaration.', (string)$validateur);
+//                    break;
+//
+//                default:
+//                    throw new OscarException("Cette période n'a pas le bon status pour être validée.");
+//            }
+//
         } else {
             throw new OscarException("Vous n'êtes pas autorisé à valider pour cette étape de validation");
         }

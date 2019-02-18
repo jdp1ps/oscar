@@ -596,8 +596,8 @@
                             <a href="#" @click="popup = periodValidation.log">Historique</a>
                             <a href="#" @click="rejectPeriod = periodValidation"
                                v-if="periodValidation.status == 'conflict'">Détails sur le rejet</a>
-                            <a href="#" @click="reSendPeriod(periodValidation)"
-                               v-if="periodValidation.status == 'conflict'">Réenvoyer</a>
+                            <!--<a href="#" @click="reSendPeriod(periodValidation)"
+                               v-if="periodValidation.status == 'conflict'">Réenvoyer</a>-->
                         </section>
                     </div>
 
@@ -610,6 +610,9 @@
                             <span>
                                     Soumettre mes déclarations
                                 </span>
+                        </button>
+                        <button class="btn btn-primary" v-else-if="ts.hasConflict" @click="reSendPeriod()">
+                            Réenvoyer
                         </button>
                         <span v-else>
                             Vous ne pouvez pas soumettre cette période<br>
@@ -976,6 +979,7 @@
                 help: false,
                 popup: "",
                 screensend: null,
+                sendaction: null,
 
                 //
                 error: '',
@@ -1329,39 +1333,42 @@
             },
 
             reSendPeriod(periodValidation) {
+                this.sendMonth("resend");
 
-                if (periodValidation.status != 'conflict') {
-                    this.error = 'Vous ne pouvez pas soumettre cette déclaration, status incorrect';
-                    return;
-                }
-
-                this.bootbox.confirm('Réenvoyer la déclaration ?', ok => {
-                    if (ok) {
-                        // Données à envoyer
-                        var datas = new FormData();
-                        datas.append('action', 'resend');
-                        datas.append('period_id', periodValidation.id);
-
-                        this.loading = true;
-
-                        this.$http.post('', datas).then(
-                            ok => {
-                                this.fetch();
-                            },
-                            ko => {
-                                this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
-                            }
-                        ).then(foo => {
-                            this.selectedWeek = null;
-                            this.loading = false;
-                        });
-                    }
-                })
+                // if (periodValidation.status != 'conflict') {
+                //     this.error = 'Vous ne pouvez pas soumettre cette déclaration, status incorrect';
+                //     return;
+                // }
+                //
+                // this.bootbox.confirm('Réenvoyer la déclaration ?', ok => {
+                //     if (ok) {
+                //         // Données à envoyer
+                //         var datas = new FormData();
+                //         datas.append('action', 'resend');
+                //         datas.append('period_id', periodValidation.id);
+                //
+                //         this.loading = true;
+                //
+                //         this.$http.post('', datas).then(
+                //             ok => {
+                //                 this.fetch();
+                //             },
+                //             ko => {
+                //                 this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
+                //             }
+                //         ).then(foo => {
+                //             this.selectedWeek = null;
+                //             this.loading = false;
+                //         });
+                //     }
+                // })
             },
 
-            sendMonth() {
+            sendMonth(action="sendmonth") {
 
-                if (this.ts.submitable == undefined || this.ts.submitable != true) {
+                this.sendaction = action;
+
+                if ( !(this.ts.submitable == true || this.ts.hasConflict == true) ) {
                     this.error = 'Vous ne pouvez pas soumettre vos déclarations pour cette période : ' + this.ts.submitableInfos;
                     return;
                 }
@@ -1410,7 +1417,7 @@
 
                 // Données à envoyer
                 var datas = new FormData();
-                datas.append('action', 'sendmonth');
+                datas.append('action', this.sendaction);
                 datas.append('comments', JSON.stringify(this.screensend));
                 datas.append('datas', JSON.stringify({
                     from: this.ts.from,
