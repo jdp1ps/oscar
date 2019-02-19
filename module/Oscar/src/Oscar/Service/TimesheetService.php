@@ -396,6 +396,25 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $out;
     }
 
+    /** Retourne la liste des périodes en conflits */
+    public function getPeriodsConflictPerson( Person $person ){
+        $periods = $this->getValidationPeriodRepository()->getValidationPeriodPersonWithConflict($person->getId());
+        $out = [];
+        /** @var ValidationPeriod $validationPeriod */
+        foreach( $periods as $validationPeriod ){
+            $key = $validationPeriod->getYear().'-'.$validationPeriod->getMonth();
+            if( !array_key_exists($key, $out) ){
+                $out[$key] = [
+                    'firstDay' => new \DateTime(sprintf('%s-%s-01', $validationPeriod->getYear(), $validationPeriod->getMonth())),
+                    'year' => $validationPeriod->getYear(),
+                    'month' => $validationPeriod->getMonth(),
+                ];
+            }
+        }
+        return $out;
+    }
+
+
     public function getValidationPeriodsOutWPToValidate($person = null)
     {
         return $this->getValidationPeriodRepository()->getValidationPeriodsOutWPToValidate($person ? $person->getId() : null);

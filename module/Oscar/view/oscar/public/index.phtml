@@ -111,14 +111,10 @@
                                     <i class="icon-warning-empty"></i> Problème pour la/les déclaration(s) :
                                     <?php foreach ($periodsRejected as $validationPeriod): ?>
                                     <article>
-                                        <?php if( $validationPeriod['activity'] ): ?>
-                                        L'activité <strong><?= $validationPeriod['activity'] ?></strong>
-                                        <?php else: ?>
-                                        Les créneaux <strong><?= $validationPeriod['validation']->getLabel() ?> </strong>
-                                        <?php endif; ?>
-                                        pour la période <strong><?= $this->moment($validationPeriod['validation']->getFirstDayStr(), 'M Y') ?></strong>
+                                        Il y'a un conflit dans la déclaration de <strong><?= $this->moment($validationPeriod['firstDay'], 'M Y') ?></strong>
+
                                         <a class="btn btn-default btn-xs"
-                                           href="<?= $this->url('timesheet/declarant') ?>?month=<?= $validationPeriod['validation']->getMonth() ?>&year=<?= $validationPeriod['validation']->getYear() ?>" >
+                                           href="<?= $this->url('timesheet/declarant') ?>?month=<?= $validationPeriod['month'] ?>&year=<?= $validationPeriod['year'] ?>" >
                                             <i class="icon-pencil"></i>
                                             Modifier
                                         </a>
