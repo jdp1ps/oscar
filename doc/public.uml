@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>84be564d-0665-467b-a2e8-2b2c42aad8f5.SCHEMA:oscar_dev.public</OriginalElement>
+  <nodes>
+    <node x="555.0" y="608.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity</node>
+    <node x="1955.0" y="2583.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_sci</node>
+    <node x="3173.0" y="1018.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.role_privilege</node>
+    <node x="827.0" y="3212.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.useraccessdefinition</node>
+    <node x="1403.0" y="2106.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitypayment</node>
+    <node x="3092.0" y="0.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.authentification</node>
+    <node x="1885.0" y="2458.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_prj</node>
+    <node x="346.0" y="2200.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organization</node>
+    <node x="278.0" y="1111.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.tva</node>
+    <node x="2820.0" y="1404.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod</node>
+    <node x="1353.0" y="413.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.project_discipline</node>
+    <node x="1308.0" y="1357.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person</node>
+    <node x="1222.0" y="2689.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityorganization</node>
+    <node x="544.0" y="1801.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.datetype</node>
+    <node x="2415.0" y="2475.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.workpackageperson</node>
+    <node x="1695.0" y="2009.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectpartner</node>
+    <node x="4237.0" y="876.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.categorie_privilege</node>
+    <node x="942.0" y="468.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitytype</node>
+    <node x="2543.0" y="2049.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityrequestfollow</node>
+    <node x="2991.0" y="654.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.authentification_role</node>
+    <node x="2113.0" y="597.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityperson</node>
+    <node x="1733.0" y="265.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.timesheet</node>
+    <node x="0.0" y="3212.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.logactivity</node>
+    <node x="1439.0" y="991.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.project</node>
+    <node x="2072.0" y="1350.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.workpackage</node>
+    <node x="3685.0" y="862.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.privilege</node>
+    <node x="267.0" y="1710.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationtype</node>
+    <node x="2088.0" y="2759.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityrequest</node>
+    <node x="1757.0" y="1250.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationperson</node>
+    <node x="1811.0" y="2805.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.typedocument</node>
+    <node x="728.0" y="2670.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.administrativedocument</node>
+    <node x="548.0" y="3233.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.role</node>
+    <node x="0.0" y="590.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.contracttype</node>
+    <node x="2397.0" y="1718.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_adm</node>
+    <node x="2670.0" y="1130.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.user_role</node>
+    <node x="567.0" y="194.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity_discipline</node>
+    <node x="1029.0" y="11.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.discipline</node>
+    <node x="1034.0" y="2340.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.currency</node>
+    <node x="2349.0" y="1344.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.notificationperson</node>
+    <node x="981.0" y="1775.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitydate</node>
+    <node x="3178.0" y="1474.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.notification</node>
+    <node x="2271.0" y="1841.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.contractdocument</node>
+    <node x="2587.0" y="681.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectmember</node>
+    <node x="275.0" y="3212.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.grantsource</node>
+    <node x="932.0" y="1059.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.referent</node>
+    <node x="1092.0" y="3212.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organization_role</node>
+    <node x="1972.0" y="2066.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.timesheetsby</node>
+    <node x="682.0" y="2321.0">84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationrole</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityrequest" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="-19.14291913453826" />
+      <point x="0.0" y="-19.142919134538346" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.typedocument" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_prj" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.authentification_role" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.user_role">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.notificationperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.notification">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.administrativedocument" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationtype" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="-10.104809746888435" />
+      <point x="0.0" y="-10.104809746888492" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.tva">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitypayment" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="10.10654075971047" y="0.0" />
+      <point x="10.10654075971047" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitydate" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.referent" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="4.094816228957143" y="-2.8692298707264854" />
+      <point x="4.094816228957143" y="-2.869229870726514" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.privilege" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.categorie_privilege">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.role_privilege" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.user_role">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.contractdocument" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.typedocument">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.timesheet" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.workpackage">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.workpackage" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="-10.251536807987293" />
+      <point x="0.0" y="-10.251536807987435" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.role" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.role">
+      <point x="53.25" y="-79.0" />
+      <point x="707.75" y="3218.0" />
+      <point x="713.75" y="3212.0" />
+      <point x="776.0" y="3212.0" />
+      <point x="782.0" y="3218.0" />
+      <point x="782.0" y="3266.5" />
+      <point x="776.0" y="3272.5" />
+      <point x="106.5" y="-39.5" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityorganization" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.role_privilege" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.privilege">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_prj" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organization">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.contracttype">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.timesheet" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="-5.333497196965823" y="0.0" />
+      <point x="0.0" y="-14.365221223903063" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectmember" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="2.7321460319039943" y="4.187526484734235" />
+      <point x="2.7321460319039943" y="4.187526484734292" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectmember" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.project">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.tva" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationtype" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationtype">
+      <point x="-59.0" y="-154.0" />
+      <point x="326.0" y="1695.0" />
+      <point x="320.0" y="1689.0" />
+      <point x="252.0" y="1689.0" />
+      <point x="246.0" y="1695.0" />
+      <point x="246.0" y="1781.0" />
+      <point x="252.0" y="1787.0" />
+      <point x="-118.0" y="-77.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.project_discipline" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.project">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitypayment" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.currency">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.user_role">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitypayment" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.notificationperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityorganization" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organization">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.authentification_role" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.authentification">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.user_role">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectpartner" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organization">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectmember" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.user_role">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectpartner" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="-16.738053339038117" />
+      <point x="0.0" y="-16.738053339038174" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.currency">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="-5.732525627088876" />
+      <point x="0.0" y="-5.732525627088847" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity_discipline" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.discipline">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity_discipline" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityorganization" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityrequest" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organization">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.workpackage" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitytype" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.workpackageperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.workpackage">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.timesheet" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityrequestfollow" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.user_role" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.user_role">
+      <point x="54.5" y="116.5" />
+      <point x="2833.5" y="1378.0" />
+      <point x="2839.5" y="1384.0" />
+      <point x="2903.0" y="1384.0" />
+      <point x="2909.0" y="1378.0" />
+      <point x="2909.0" y="1310.75" />
+      <point x="2903.0" y="1304.75" />
+      <point x="109.0" y="58.25" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.privilege" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.privilege">
+      <point x="-47.75" y="-104.0" />
+      <point x="3732.75" y="847.0" />
+      <point x="3726.75" y="841.0" />
+      <point x="3670.0" y="841.0" />
+      <point x="3664.0" y="847.0" />
+      <point x="3664.0" y="908.0" />
+      <point x="3670.0" y="914.0" />
+      <point x="-95.5" y="-52.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitydate" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.datetype">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.contractdocument" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.currency" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="10.650590612168116" y="0.0" />
+      <point x="0.0" y="29.057186234590915" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectpartner" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.project">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityorganization" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationrole">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_sci" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="-22.848194727279633" />
+      <point x="1.1368683772161603E-13" y="-22.84819472727952" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.projectpartner" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationrole">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.timesheet" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organization" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_adm" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="-60.5" y="-354.0" />
+      <point x="1378.5" y="1337.0" />
+      <point x="1367.5" y="1326.0" />
+      <point x="1288.0" y="1326.0" />
+      <point x="1277.0" y="1337.0" />
+      <point x="1277.0" y="1528.0" />
+      <point x="1288.0" y="1539.0" />
+      <point x="-131.0" y="-172.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_adm" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.timesheetsby" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="-2.566757332192921" y="4.29089230785786" />
+      <point x="-2.5667573321928785" y="4.29089230785786" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.contractdocument" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.project_discipline" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.discipline">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationrole" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitytype">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.datetype" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.workpackageperson" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="-3.2139894182378157" y="3.8301791106233622" />
+      <point x="-3.2139894182378157" y="3.8301791106233054" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityrequestfollow" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activityrequest">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activitydate" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.person">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.activity" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.project">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod_sci" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.validationperiod">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organization" target="84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.organizationtype">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0999999999999996" x="736.9090909090911" y="1179.5454545454547" />
+  <SelectedNodes>
+    <node>84be564d-0665-467b-a2e8-2b2c42aad8f5.TABLE:oscar_dev.public.discipline</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Key columns</Category>
+    <Category>Columns</Category>
+  </Categories>
+</Diagram>
+
