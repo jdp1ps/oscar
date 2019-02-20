@@ -41,54 +41,12 @@ class AdministrationController extends AbstractOscarController
         return [];
     }
 
-
-
-    protected function getYamlConfigPath(){
-        $dir = realpath(__DIR__.'/../../../../../config/autoload/');
-        $file = $dir.'/oscar-editable.yml';
-
-        if( !file_exists($file) ){
-            if( !is_writeable($dir) ){
-                throw new OscarException("Impossible d'écrire la configuration dans le dossier $dir");
-            }
-        }
-        else if (!is_writeable($file)) {
-            throw new OscarException("Impossible d'écrire le fichier $file");
-        }
-        return $file;
-    }
-
-    protected function getEditableConfRoot(){
-        $path = $this->getYamlConfigPath();
-        if( file_exists($path) ){
-            $parser = new Parser();
-            return $parser->parse(file_get_contents($path));
-        } else {
-            return [];
-        }
-    }
-
-    protected function getEditableConfKey($key, $default = null){
-        $conf = $this->getEditableConfRoot();
-        if( array_key_exists($key, $conf) ){
-            return $conf[$key];
-        } else {
-            return $default;
-        }
-    }
-
     protected function saveEditableConfKey($key, $value){
         $conf = $this->getEditableConfRoot();
-
-       $conf[$key] = $value;
-
+        $conf[$key] = $value;
         $writer = new Dumper();
-
-
         file_put_contents($this->getYamlConfigPath(), $writer->dump($conf));
     }
-
-
 
     public function numerotationAction()
     {

@@ -12,5 +12,16 @@ use Zend\Form\Element;
 
 class KeyValue extends Element
 {
+    public $keys;
+
+    /**
+     * KeyValue constructor.
+     * @param $keys
+     */
+    public function __construct($name = null, $options = array())
+    {
+        parent::__construct($name, $options);
+        $this->keys = $options['keys'];
+    }
 
 }
