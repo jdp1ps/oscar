@@ -60,6 +60,13 @@ class ProjectGrantController extends AbstractOscarController
         return [];
     }
 
+    public function debugAction(){
+        var_dump($this->getConfiguration('oscar.editable'));
+        /*$customNum = $this->getActivityService()->getCustomNum();
+        var_dump($customNum);*/
+        die("DEBUG END");
+    }
+
     /**
      * @url /activites-de-recherche/api
      * @return JsonModel

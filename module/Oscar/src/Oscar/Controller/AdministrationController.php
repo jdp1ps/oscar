@@ -25,6 +25,9 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Yaml\Dumper;
+use Symfony\Component\Yaml\Parser;
+use Zend\Config\Writer\Yaml;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
@@ -35,7 +38,109 @@ class AdministrationController extends AbstractOscarController
     public function indexAction()
     {
         $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+        return [];
+    }
 
+
+
+    protected function getYamlConfigPath(){
+        $dir = realpath(__DIR__.'/../../../../../config/autoload/');
+        $file = $dir.'/oscar-editable.yml';
+
+        if( !file_exists($file) ){
+            if( !is_writeable($dir) ){
+                throw new OscarException("Impossible d'écrire la configuration dans le dossier $dir");
+            }
+        }
+        else if (!is_writeable($file)) {
+            throw new OscarException("Impossible d'écrire le fichier $file");
+        }
+        return $file;
+    }
+
+    protected function getEditableConfRoot(){
+        $path = $this->getYamlConfigPath();
+        if( file_exists($path) ){
+            $parser = new Parser();
+            return $parser->parse(file_get_contents($path));
+        } else {
+            return [];
+        }
+    }
+
+    protected function getEditableConfKey($key, $default = null){
+        $conf = $this->getEditableConfRoot();
+        if( array_key_exists($key, $conf) ){
+            return $conf[$key];
+        } else {
+            return $default;
+        }
+    }
+
+    protected function saveEditableConfKey($key, $value){
+        $conf = $this->getEditableConfRoot();
+
+       $conf[$key] = $value;
+
+        $writer = new Dumper();
+
+
+        file_put_contents($this->getYamlConfigPath(), $writer->dump($conf));
+    }
+
+
+
+    public function numerotationAction()
+    {
+
+        if( $this->isAjax() ) {
+            $method = $this->getHttpXMethod();
+            switch ($method) {
+                case 'GET':
+                    $numerotation = $this->getEditableConfKey('numerotation', []);
+                    return $this->jsonOutput($numerotation);
+                    break;
+
+                case 'DELETE':
+                    $numerotation = $this->getEditableConfKey('numerotation', []);
+                    $deleted = $this->params()->fromQuery('str');
+                    if( !in_array($deleted, $numerotation) ){
+                        return $this->getResponseBadRequest("Impossible de supprimer '$deleted'.'");
+                    }
+
+                    $index = array_search($deleted, $numerotation);
+
+                    array_splice($numerotation, $index, 1);
+
+                    try {
+                        $this->saveEditableConfKey('numerotation', $numerotation);
+                        $this->getResponseOk();
+                    } catch ( \Exception $e ){
+                        return $this->getResponseInternalError("Impossible de supprimer le type '$deleted' : " . $e->getMessage());
+                    }
+
+                    break;
+
+                case 'POST':
+                    $numerotation = $this->getEditableConfKey('numerotation', []);
+                    $added = $this->params()->fromPost('str');
+                    if( in_array($added, $numerotation) ){
+                        return $this->getResponseInternalError("Le type '$added' existe déjà.");
+                    }
+                    $numerotation[] = $added;
+
+                    try {
+                        $this->saveEditableConfKey('numerotation', $numerotation);
+                        $this->getResponseOk();
+                    } catch ( \Exception $e ){
+                        return $this->getResponseInternalError("Impossible d'ajouter le type '$added' : " . $e->getMessage());
+                    }
+                    break;
+
+                default:
+                    return $this->getResponseInternalError();
+            }
+        }
         return [];
     }
 

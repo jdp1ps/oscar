@@ -81,7 +81,8 @@ requirejs.config({
         'Tva': 'oscar/dist/Tva',
         'ActivityRequest': 'oscar/dist/ActivityRequest',
         'ActivityRequestAdmin': 'oscar/dist/ActivityRequestAdmin',
-        'Workpackage': 'oscar/dist/WorkpackageUI'
+        'Workpackage': 'oscar/dist/WorkpackageUI',
+        'ConfigStringList': 'oscar/dist/ConfigStringList',
     },
     shim: {
         "bootstrap": {

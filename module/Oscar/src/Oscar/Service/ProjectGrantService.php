@@ -214,6 +214,34 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         return $datas;
     }
 
+    public function getCustomNum() {
+        static $customNum;
+        if( $customNum === null ){
+            // Récupération des différentes numérotations
+            $customNum = [];
+
+            $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
+                ->select('a.numbers')
+                ->distinct();
+            echo "<pre>";
+            foreach ($query->getQuery()->getResult(Query::HYDRATE_ARRAY) as $r) {
+                if( $r['numbers'] ){
+                    foreach ($r['numbers'] as $key=>$value){
+                        if( !$value ){
+                            echo "$key\n";
+                        }
+                        if( !in_array($key, $customNum) ){
+                            $customNum[] = $key;
+                        }
+                    }
+                }
+            }
+
+        }
+        return $customNum;
+
+    }
+
     public function exportJson( $object ){
         switch( get_class($object) ){
             case Activity::class:

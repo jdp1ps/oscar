@@ -682,6 +682,13 @@ contract:
 
     may_terminate: false
     child_routes:
+        debug:
+            type: segment
+            options:
+                route: /debug
+                defaults:
+                    action: debug
+
         api:
             type: segment
             options:
@@ -1378,6 +1385,7 @@ administration:
             action: index
     may_terminate: true
 
+
     child_routes:
         accueil:
             type: segment
@@ -1386,6 +1394,14 @@ administration:
                 route: /accueil
                 defaults:
                     action: accueil
+
+        numerotation:
+            type: segment
+            may_terminate: true
+            options:
+                route: /numerotation
+                defaults:
+                    action: numerotation
 
         connectors_home:
             type: segment
