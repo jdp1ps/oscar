@@ -661,6 +661,15 @@
     "fullcode": "MAINTENANCE-DISCIPLINE_MANAGE"
   },
 
+  "MAINTENANCE-NUMEROTATION_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "NUMEROTATION_MANAGE",
+    "libelle": "Configurer les numérotations disponibles pour les activités",
+    "fullcode": "MAINTENANCE-NUMEROTATION_MANAGE"
+  },
+
+
   "MAINTENANCE-ORGANIZATIONTYPE_MANAGE": {
     "spot": 7,
     "category_id": 6,
