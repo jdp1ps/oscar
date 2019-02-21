@@ -1,9 +1,7 @@
 <template>
     <article class="workpackage">
         <form action="" @submit.prevent="handlerUpdateWorkPackage" v-if="mode == 'edit'">
-
             <h4><span v-if="workpackage.id > 0">Modification du lot</span><span v-else>Nouveau lot</span> {{ formData.label }}</h4>
-
             <div class="form-group">
                 <label for="">Code</label>
                 <p class="text-danger">Le code est <strong>utilisé pour l'affichage des créneaux</strong> simplifiés, utilisez un code de préférence entre 3 et 5 caractères.</p>
@@ -20,7 +18,7 @@
                 <textarea type="text" placeholder="Description" v-model="formData.description" class="form-control"></textarea>
             </div>
             <div class="buttons">
-                <button type="submit" class="btn btn-default" :class="{'disabled': !formData.code }">Enregistrer</button>
+                <button type="submit" class="btn btn-default btn-save" :class="{'disabled': !formData.code }">Enregistrer</button>
                 <button type="button" class="btn btn-default" @click="handlerCancelEdit">Annuler</button>
             </div>
 
@@ -59,6 +57,9 @@
     </article>
 </template>
 <script>
+
+    // poi watch --format umd --moduleName  Workpackage --filename.js Workpackage.js --dist public/js/oscar/dist public/js/oscar/src/Workpackage.vue
+
     export default {
         components: {
             'workpackageperson' : require('./WorkpackagePerson.vue').default
@@ -72,9 +73,7 @@
                     id: -1,
                     code: "",
                     label : "",
-                    description: "",
-                    // start: moment().format(),
-                    // end: moment().format()
+                    description: ""
                 }
             }
         },
@@ -115,9 +114,15 @@
                 this.$emit('workpackagedelete', this.workpackage);
             },
 
-            handlerUpdateWorkPackage(){
-                this.$emit('workpackageupdate', this.formData);
-                this.mode = 'read';
+            handlerUpdateWorkPackage(e){
+                if( this.formData.code ){
+                    this.$emit('workpackageupdate', this.formData);
+                    this.mode = 'read';
+                } else {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation()
+                    return false;
+                }
             },
 
             handlerUpdate(person, duration){

@@ -8,6 +8,125 @@
             </div>
         </transition>
 
+        <transition name="fade">
+            <div class="overlay" v-if="screensend">
+                <div class="overlay-content">
+
+                    <h2>
+                        <i class="icon-paper-plane"></i> Soumettre la déclaration pour
+                        <strong>{{ mois }}</strong>
+                    </h2>
+
+                    <table class="table table-bordered table-recap">
+                        <thead>
+                            <th colspan="2">&nbsp;</th>
+                            <th v-for="d in ts.days">
+                                <small>{{ d.label }}</small><br>
+                                <strong>{{ d.i }}</strong>
+                            </th>
+                            <th>
+                                Total
+                            </th>
+                        </thead>
+                        <tbody v-for="project in recapsend.lot">
+                            <template v-for="activity in project.activities">
+                                <tr class="activity-line">
+                                    <th :colspan="ts.dayNbr + 3">
+                                        <h3><strong><i class="icon-cube"></i> [{{activity.acronym }}] {{ activity.label }}</strong></h3>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">&nbsp;</th>
+                                    <td :colspan="ts.dayNbr">
+                                    <strong>Commentaires : </strong><br>
+                                    <textarea class="form-control" v-model="screensend[activity.id]" style="max-width: 100%"></textarea>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr v-for="wp in activity.workpackages" class="workpackage-line">
+                                    <th colspan="2">
+                                        <i class="icon-archive"></i> {{ wp.label }}
+                                    </th>
+                                    <td v-for="d in ts.days">
+                                        <strong v-if="wp.days[d.i]">{{ wp.days[d.i] | duration2 }}</strong>
+                                        <small v-else>-</small>
+                                    </td>
+                                    <th class="total">
+                                        {{ wp.total | duration2  }}
+                                    </th>
+                                </tr>
+
+                                <tr class="activity-line-total">
+                                    <th colspan="2">Total</th>
+                                    <td v-for="d in ts.days">
+                                        <strong v-if="activity.days[d.i]">{{ activity.days[d.i] | duration2 }}</strong>
+                                        <small v-else>-</small>
+                                    </td>
+                                    <th class="total">{{ activity.total | duration2 }}</th>
+                                </tr>
+
+                            </template>
+                        </tbody>
+
+                        <tbody>
+                            <tr>
+                                <th :colspan="ts.dayNbr + 3">
+                                    <h3>
+                                        <i class="icon-tags"></i>
+                                        <strong>Hors-Lot</strong>
+                                    </h3>
+                                </th>
+                            </tr>
+
+                            <tr v-for="hl in recapsend.hl" class="workpackage-line">
+                                <th>
+                                    <i :class="'icon-' + hl.code"></i>
+                                    {{ hl.label }}
+                                </th>
+                                <td>
+                                    <strong>Commentaire : </strong><br>
+                                    <textarea v-model="screensend[hl.code]"></textarea>
+                                </td>
+                                <td v-for="d in ts.days">
+                                    <strong v-if="hl.days[d.i]">{{ hl.days[d.i] | duration2 }}</strong>
+                                    <small v-else>-</small>
+                                </td>
+                                <th class="total">
+                                    {{ hl.total | duration2  }}
+                                </th>
+                            </tr>
+                        </tbody>
+
+                        <tbody>
+                            <tr>
+                                <th :colspan="ts.dayNbr + 3">
+                                    <h3><strong>Total</strong></h3>
+                                </th>
+                            </tr>
+
+                            <tr class="total-line">
+                                <th colspan="2">
+                                     =
+                                </th>
+                                <td v-for="d in ts.days">
+                                    <strong v-if="d.total">{{ d.total | duration2 }}</strong>
+                                    <small v-else>-</small>
+                                </td>
+                                <th class="total">
+                                    {{ ts.total | duration2  }}
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <nav class="buttons">
+                        <button class="btn btn-primary" @click="sendMonthProceed">Envoyer la déclaration</button>
+                        <button class="btn btn-default" @click="screensend = null">Annuler</button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
         <div class="overlay" v-if="error" style="z-index: 2002">
             <div class="content container overlay-content">
                 <h2><i class="icon-attention-1"></i> Oups !</h2>
@@ -183,8 +302,12 @@
                        :title="!ts.submitable ? 'Vous ne pouvez pas importer pour cette période' : ''"
                        :class="{ 'disabled': !ts.submitable }">
                         <i class="icon-calendar"></i>
-                        Importer un calendrier
+                        Importer un calendrier<br>
+                        <small v-if="!ts.submitable">
+                            Vous ne pouvez pas importer pour une période en cours/déjà envoyée
+                        </small>
                     </a>
+
                 </h3>
 
                 <div class="month">
@@ -324,12 +447,9 @@
                             avec une des activités ci-dessous :
                         </p>
                         <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillSelectedWP"
-                                    @select="fillSelectedWP = $event"></wpselector>
-                        <button class="btn btn-default" @click="fillWeek(selectedWeek, fillSelectedWP)"
-                                :class="fillSelectedWP ? 'btn-primary' : 'disabled'">
-                            <i class="icon-floppy"></i>
-                            Valider
-                        </button>
+                                    @select="fillSelectedWP = $event; fillWeek(selectedWeek, fillSelectedWP);"
+                                    :usevalidation="true"></wpselector>
+
                     </section>
                 </div>
 
@@ -345,13 +465,8 @@
                             <i class="icon-help-circled"></i>
                             Vous pouvez compléter automatiquement ce mois avec :
                         </p>
-                        <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillMonthWP"
-                                    @select="fillMonthWP = $event"></wpselector>
-                        <button class="btn btn-default" @click="handlerFillMonth(fillMonthWP)"
-                                :class="fillMonthWP ? 'btn-primary' : 'disabled'">
-                            <i class="icon-floppy"></i>
-                            Compléter
-                        </button>
+                        <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillMonthWP" :usevalidation="true"
+                                    @select="fillMonthWP = $event; handlerFillMonth(fillMonthWP)"></wpselector>
                     </section>
 
                     <section v-for="week in weeks" v-if="ts" class="card xs">
@@ -480,9 +595,10 @@
 
                             <a href="#" @click="popup = periodValidation.log">Historique</a>
                             <a href="#" @click="rejectPeriod = periodValidation"
-                               v-if="periodValidation.status == 'conflict'">Détails sur le rejet</a>
-                            <a href="#" @click="reSendPeriod(periodValidation)"
-                               v-if="periodValidation.status == 'conflict'">Réenvoyer</a>
+                               v-if="periodValidation.status == 'conflict'
+                               && (periodValidation.rejectadmin_message || periodValidation.rejectsci_message || periodValidation.rejectactivity_message )">Détails sur le rejet</a>
+                            <!--<a href="#" @click="reSendPeriod(periodValidation)"
+                               v-if="periodValidation.status == 'conflict'">Réenvoyer</a>-->
                         </section>
                     </div>
 
@@ -495,6 +611,9 @@
                             <span>
                                     Soumettre mes déclarations
                                 </span>
+                        </button>
+                        <button class="btn btn-primary" v-else-if="ts.hasConflict" @click="reSendPeriod()">
+                            Réenvoyer
                         </button>
                         <span v-else>
                             Vous ne pouvez pas soumettre cette période<br>
@@ -717,6 +836,41 @@
 
     ///////////////////////////////////////////////////
 
+    .table-recap.table-bordered {
+        font-size: .7em;
+        h2, h3 {
+            font-size: 1.25em;
+            margin: 0;
+        }
+        th {
+            font-weight: 400;
+            &.total {
+                text-align: right;
+                font-weight: 700;
+                font-size: 1.1em;
+            }
+        }
+
+        thead th:nth-child(odd){
+            background-color: #efefef;
+        }
+
+        td:nth-child(odd){
+            background-color: #efefef;
+        }
+
+        thead th { text-align: center }
+
+        tr {
+            td {
+                text-align: right;
+            }
+            th, td {
+                padding: 2px;
+            }
+        }
+    }
+
     .days {
         display: flex;
         //        height: 100px;
@@ -825,6 +979,8 @@
                 debug: null,
                 help: false,
                 popup: "",
+                screensend: null,
+                sendaction: null,
 
                 //
                 error: '',
@@ -872,6 +1028,113 @@
         },
 
         computed: {
+            recapsend() {
+                let recap = {}, hl = {};
+
+                Object.keys(this.ts.otherWP).forEach( code => {
+                    let hlDef = this.ts.otherWP[code];
+
+                    hl[hlDef.code] = {
+                        id: hlDef.code,
+                        code: hlDef.code,
+                        label: hlDef.label,
+                        days: {},
+                        total: hlDef.total
+                    }
+                });
+
+                Object.keys(this.ts.activities).forEach(a => {
+
+                    let activity = this.ts.activities[a];
+                    let project_id = activity.project_id;
+                    let project = activity.project;
+                    let com = "";
+
+                    if (this.screensend && this.screensend.hasOwnProperty(a))
+                        com = this.screensend[a];
+
+                    if (!recap.hasOwnProperty(project_id)) {
+
+                        recap[project_id] = {
+                            label: project,
+                            id: project_id,
+                            activities: {}
+                        }
+                    }
+
+                    if (!recap[project_id].activities.hasOwnProperty(activity.id)) {
+                        recap[project_id].activities[activity.id] = {
+                            id: activity.id,
+                            label: activity.label,
+                            acronym: activity.acronym,
+                            total: activity.total,
+                            days: {},
+                            workpackages: {},
+                            comment: com
+                        }
+                    }
+                });
+
+                Object.keys(this.ts.workpackages).forEach(wp => {
+                    let workpackage = this.ts.workpackages[wp];
+                    let project_id = workpackage.project_id;
+                    let activity_id = workpackage.activity_id;
+                    if (recap[project_id]) {
+                        if (recap[project_id].activities[activity_id]) {
+                            recap[project_id].activities[activity_id].workpackages[workpackage.id] = {
+                                label: workpackage.code,
+                                description: workpackage.label,
+                                total: workpackage.total,
+                                days: {}
+                            }
+                        }
+                    }
+                });
+
+                Object.keys(this.ts.days).forEach(d => {
+                    let day = this.ts.days[d];
+                    day.declarations.forEach(dec => {
+                        let activity_id = dec.activity_id,
+                            project_id = dec.project_id,
+                            wp_id = dec.wp_id;
+
+                        if( !recap[project_id].activities[activity_id].days.hasOwnProperty(d) )
+                            recap[project_id].activities[activity_id].days[d] = 0.0;
+
+                        if( !recap[project_id].activities[activity_id].workpackages[wp_id].days.hasOwnProperty(d) )
+                            recap[project_id].activities[activity_id].workpackages[wp_id].days[d] = 0.0;
+
+                        recap[project_id].activities[activity_id].days[d] += dec.duration;
+                        recap[project_id].activities[activity_id].workpackages[wp_id].days[d] += dec.duration;
+                    });
+
+                    if( !day.othersWP ) return;
+
+                    day.othersWP.forEach(dec => {
+                        let code = dec.code;
+
+                        if( !hl.hasOwnProperty(code) ) {
+                            hl[code] = {
+                                days: {},
+                                total: 0.0
+                           };
+                        }
+
+                        if( !hl[code].days.hasOwnProperty(d) )
+                            hl[code].days[d] = 0.0;
+
+                        hl[code].days[d] += dec.duration;
+                        hl[code].total += dec.duration;
+                    });
+                });
+
+
+                return {
+                    lot: recap,
+                    hl: hl
+                };
+            },
+
             monthRest(){
                 return this.monthLength - this.ts.total;
             },
@@ -1071,69 +1334,111 @@
             },
 
             reSendPeriod(periodValidation) {
+                this.sendMonth("resend");
 
-                if (periodValidation.status != 'conflict') {
-                    this.error = 'Vous ne pouvez pas soumettre cette déclaration, status incorrect';
-                    return;
-                }
-
-                this.bootbox.confirm('Réenvoyer la déclaration ?', ok => {
-                    if (ok) {
-                        // Données à envoyer
-                        var datas = new FormData();
-                        datas.append('action', 'resend');
-                        datas.append('period_id', periodValidation.id);
-
-                        this.loading = true;
-
-                        this.$http.post('', datas).then(
-                            ok => {
-                                this.fetch();
-                            },
-                            ko => {
-                                this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
-                            }
-                        ).then(foo => {
-                            this.selectedWeek = null;
-                            this.loading = false;
-                        });
-                    }
-                })
+                // if (periodValidation.status != 'conflict') {
+                //     this.error = 'Vous ne pouvez pas soumettre cette déclaration, status incorrect';
+                //     return;
+                // }
+                //
+                // this.bootbox.confirm('Réenvoyer la déclaration ?', ok => {
+                //     if (ok) {
+                //         // Données à envoyer
+                //         var datas = new FormData();
+                //         datas.append('action', 'resend');
+                //         datas.append('period_id', periodValidation.id);
+                //
+                //         this.loading = true;
+                //
+                //         this.$http.post('', datas).then(
+                //             ok => {
+                //                 this.fetch();
+                //             },
+                //             ko => {
+                //                 this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
+                //             }
+                //         ).then(foo => {
+                //             this.selectedWeek = null;
+                //             this.loading = false;
+                //         });
+                //     }
+                // })
             },
 
-            sendMonth() {
+            sendMonth(action="sendmonth") {
 
-                if (this.ts.submitable == undefined || this.ts.submitable != true) {
+                this.sendaction = action;
+
+                if ( !(this.ts.submitable == true || this.ts.hasConflict == true) ) {
                     this.error = 'Vous ne pouvez pas soumettre vos déclarations pour cette période : ' + this.ts.submitableInfos;
                     return;
                 }
 
-                this.bootbox.confirm('Soumettre vos déclarations pour cette période ?', ok => {
-                    if (ok) {
-                        // Données à envoyer
-                        var datas = new FormData();
-                        datas.append('action', 'sendmonth');
-                        datas.append('datas', JSON.stringify({
-                            from: this.ts.from,
-                            to: this.ts.to
-                        }));
+                let aggregatProjet = {};
 
-                        this.loading = true;
+                Object.keys(this.ts.days).forEach(d => {
 
-                        this.$http.post('', datas).then(
-                            ok => {
-                                this.fetch();
-                            },
-                            ko => {
-                                this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
+                    let day = this.ts.days[d];
+
+                    if( day.othersWP && day.othersWP.length ){
+                        day.othersWP.forEach(timesheet => {
+                           let key = timesheet.code;
+
+                            if( !aggregatProjet.hasOwnProperty(key) ){
+                                aggregatProjet[key] = [];
                             }
-                        ).then(foo => {
-                            this.selectedWeek = null;
-                            this.loading = false;
+                            if( timesheet.description && aggregatProjet[key].indexOf(timesheet.description) < 0 ){
+                                aggregatProjet[key].push(timesheet.description);
+                            }
                         });
                     }
+
+                    day.declarations.forEach(timesheet => {
+                        let key = timesheet.activity_id;
+
+                        if( !aggregatProjet.hasOwnProperty(key) ){
+                            aggregatProjet[key] = [];
+                        }
+                        if( timesheet.comment && aggregatProjet[key].indexOf(timesheet.comment) < 0 ){
+                            aggregatProjet[key].push(timesheet.comment);
+                        }
+                    });
+
+
                 });
 
+                Object.keys(aggregatProjet).forEach(id => {
+                    aggregatProjet[id] = " - " +aggregatProjet[id].join("\n - ")
+                });
+
+                this.screensend = aggregatProjet;
+            },
+
+            sendMonthProceed(){
+
+                // Données à envoyer
+                var datas = new FormData();
+                datas.append('action', this.sendaction);
+                datas.append('comments', JSON.stringify(this.screensend));
+                datas.append('datas', JSON.stringify({
+                    from: this.ts.from,
+                    to: this.ts.to
+                }));
+
+                this.loading = true;
+
+                this.$http.post('', datas).then(
+                    ok => {
+                        this.fetch();
+                    },
+                    ko => {
+                        this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
+                    }
+                ).then(foo => {
+                    this.selectedWeek = null;
+                    this.screensend = null;
+                    this.loading = false;
+                });
             },
 
             fillWeek(week, wp) {
@@ -1245,6 +1550,9 @@
              * Déclenchement de l'envoi des créneaux à l'API.
              */
             performAddDays(datas) {
+
+
+
                 let formData = new FormData();
                 formData.append('timesheets', JSON.stringify(datas));
                 formData.append('action', "add");

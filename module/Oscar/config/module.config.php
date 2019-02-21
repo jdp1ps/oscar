@@ -53,6 +53,13 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
+                    'action' => ['numerotation'],
+                    'roles' => ['Administrateur']
+                ],
+
+
+
+                [ 'controller' =>  'Administration',
                     'action' => ['accueil', 'connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
                     'roles' => ['Administrateur']
                 ],
@@ -113,6 +120,10 @@ return array(
                 [ 'controller' =>   'Activity',
                     'action' => ['makeProject', 'changeProject', 'orphans'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
+                ],
+                [ 'controller' =>   'Activity',
+                    'action' => ['debug'],
+                    'roles' => ['Administrateur']
                 ],
 
                 // DEPENSES

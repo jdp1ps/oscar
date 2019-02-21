@@ -155,9 +155,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ->getQuery()
             ->getResult();
 
-
-        $this->debug(sprintf("Il y'a %s activité(s) à traiter", count($activities)));
-
         /** @var Activity $activity */
         foreach ($activities as $activity) {
             $this->generateNotificationsForActivity($activity);
@@ -348,7 +345,7 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             }
         }
 
-        if ($payment->getDatePredicted() && $payment->getStatus() != ActivityPayment::STATUS_PREVISIONNEL) {
+        if ($payment->getDatePredicted() && $payment->getStatus() == ActivityPayment::STATUS_PREVISIONNEL) {
             $message = "$payment dans l'activité " . $activity->log();
             $context = "payment:" . $payment->getId();
             $dateEffective = $payment->getDatePredicted();
@@ -469,8 +466,22 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
             ->execute();
     }
 
+    public function deleteNotificationsPerson(Person $person){
+        return $this->getEntityManager()->getRepository(NotificationPerson::class, 'np')
+            ->createQueryBuilder('np')
+            ->delete(NotificationPerson::class, 'np')
+            ->where('np.person = :person')
+            ->setParameters([
+                'person' => $person,
+            ])
+            ->getQuery()
+            ->execute();
+    }
+
     public function generateNotificationsPerson(Person $person)
     {
+        $this->deleteNotificationsPerson($person);
+        
         // Récupération des activités dans lesquelles la personne est impliquée
         $activities = [];
 

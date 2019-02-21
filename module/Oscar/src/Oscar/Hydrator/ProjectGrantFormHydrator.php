@@ -20,6 +20,12 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
 
     use ServiceLocatorAwareTrait;
 
+    private $numbers;
+
+    public function setNumbers($numbers){
+        $this->numbers = $numbers;
+    }
+
     /**
      * Traitement des montants saisis.
      *
@@ -38,6 +44,16 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
      */
     public function hydrate(array $data, $object)
     {
+
+        // On retire les nombres vides
+        $numbers = [];
+        foreach ($data['numbers'] as $key=>$value) {
+            if( trim($value) != '' ){
+                $numbers[$key] = $value;
+            }
+        }
+        $data['numbers'] = $numbers;
+
         $object
             ->setLabel($data['label'])
             ->setDescription($data['description'])
@@ -57,7 +73,6 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             ->setDateSigned(DateTimeUtils::toDatetime($data['dateSigned']))
             ->setDateOpened(DateTimeUtils::toDatetime($data['dateOpened']))
             ->setNumbers(array_key_exists('numbers', $data) ? $data['numbers'] : [])
-
         ;
         if (isset($data['disciplines'])) {
             $object->setDisciplines($this->getDisciplines($data['disciplines']));

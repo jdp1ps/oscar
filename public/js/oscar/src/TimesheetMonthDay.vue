@@ -91,7 +91,6 @@
                if( this.day.declarations ) {
                    this.day.declarations.forEach(d => {
                        if (!groups.hasOwnProperty(d.acronym)) {
-                        console.log(JSON.stringify(d.status_id));
                            groups[d.acronym] = {
                                label: d.label,
                                acronym: d.acronym,

@@ -1,0 +1,26 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 20/02/19
+ * Time: 12:52
+ */
+?>
+<div class="container">
+    <h1>Numérotation personnalisé</h1>
+    <p class="alert alert-info">Vous pouvez gérer ici la liste des types de numérotation proposés dans l'écran de modification des activités</p>
+    <div id="app">
+
+    </div>
+    <script>
+        require(['vue', 'vue-resource', 'ConfigStringList'], function(Vue, VueResource, ConfigStringList){
+            Vue.use(VueResource);
+            new Vue({
+                el: "#app",
+                render(h){
+                    return h(ConfigStringList.default)
+                }
+            })
+        })
+    </script>
+</div>

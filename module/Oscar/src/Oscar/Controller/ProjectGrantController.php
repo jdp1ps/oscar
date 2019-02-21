@@ -60,6 +60,13 @@ class ProjectGrantController extends AbstractOscarController
         return [];
     }
 
+    public function debugAction(){
+        var_dump($this->getConfiguration('oscar.editable'));
+        /*$customNum = $this->getActivityService()->getCustomNum();
+        var_dump($customNum);*/
+        die("DEBUG END");
+    }
+
     /**
      * @url /activites-de-recherche/api
      * @return JsonModel
@@ -546,11 +553,13 @@ class ProjectGrantController extends AbstractOscarController
 
 
         $id = $this->params()->fromRoute('id');
+        $numerotationKeys = $this->getEditableConfKey('numerotation', []);
         $projectGrant = $this->getProjectGrantService()->getGrant($id);
         $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
 
 
         $form = new ProjectGrantForm();
+        $form->setNumbers($numerotationKeys);
         $form->setServiceLocator($this->getServiceLocator());
         $form->init();
         $form->bind($projectGrant);
@@ -570,6 +579,7 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         $view = new ViewModel([
+            'numerotationKeys' => $numerotationKeys,
             'hidden' => $hidden,
             'form' => $form,
             'activity' => $projectGrant,

@@ -70,7 +70,7 @@
                     <i class="icon-docs"></i>
                     Type de document
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE) ): ?>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE) ): ?>
                     <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
                 <?php else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
@@ -86,7 +86,7 @@
                     Type d'organisation
                 </strong>
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <a href="<?= $this->url('administration/organizationtype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
                 <?php else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
                 <?php endif; ?>
@@ -107,6 +107,21 @@
                 <?php endif; ?>
             </h3>
             <p>Permet de gérer les disciplines disponibles.</p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-tags"></i>
+                    Numérotation
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NUMEROTATION_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/numerotation') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de gérer les numérotations disponibles dans l'écran d'édition des activités.</p>
         </article>
     </section>
 

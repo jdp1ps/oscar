@@ -49,7 +49,7 @@
                     <h3 v-if="formData.id">Modification du versement</h3>
                     <h3 v-else>Nouveau versement</h3>
 
-                    <form class="container">
+                    <div class="container">
                         <div class="row">
                             <div class="col-xs-6">
                                 <div class="form-group  ">
@@ -64,7 +64,7 @@
                             </div>
                             <div class="col-xs-3">
                                 <div class="form-group  ">
-                                    <label class=" control-label" for="currency">Devise pour le versement</label>
+                                    <label class=" control-label">Devise pour le versement</label>
                                     <select name="currency" class="form-control form-control"
                                             v-model="formData.currencyId"
                                             @change="handlerFormUpdateRate">
@@ -74,7 +74,7 @@
                             </div>
                             <div class="col-xs-3">
                                 <div class="form-group  ">
-                                    <label class=" control-label" for="rate">Taux</label>
+                                    <label class=" control-label">Taux</label>
                                     <input name="rate" class="form-control form-control"
                                            v-model="formData.rate"
                                            type="text">
@@ -85,7 +85,7 @@
                         <div class="row">
                             <div class="col-xs-6">
                                 <div class="form-group  ">
-                                    <label class=" control-label" for="datePredicted">Date prévue</label>
+                                    <label class=" control-label" >Date prévue</label>
                                     <datepicker :moment="moment"
                                                 :value="formData.datePredicted"
                                                 @input="value => {formData.datePredicted = value}"/>
@@ -97,7 +97,7 @@
                             </div>
                             <div class="col-xs-6">
                                 <div class="form-group  ">
-                                    <label class=" control-label" for="status">Statut</label>
+                                    <label class=" control-label" >Statut</label>
 
                                     <select name="status" class="form-control form-control" v-model="formData.status">
                                         <option value="1" selected="selected">Prévisionnel</option>
@@ -113,7 +113,7 @@
                             <div class="row">
                                 <div class="col-xs-6">
                                     <div class="form-group  ">
-                                        <label class=" control-label" for="datePayment">Date effective</label>
+                                        <label class=" control-label">Date effective</label>
                                         <datepicker :moment="moment"
                                                     :value="formData.datePayment"
                                                     @input="value => {formData.datePayment = value}"/>
@@ -125,7 +125,7 @@
                                 </div>
                                 <div class="col-xs-6">
                                     <div class="form-group  ">
-                                        <label class=" control-label" for="codeTransaction">N° de pièce</label>
+                                        <label class=" control-label">N° de pièce</label>
                                         <input name="codeTransaction"
                                                class="form-control form-control"
                                                v-model="formData.codeTransaction" type="text">
@@ -136,7 +136,7 @@
                         </div>
 
                         <div class="form-group  ">
-                            <label class=" control-label" for="comment">Commentaire</label>
+                            <label class=" control-label">Commentaire</label>
                             <textarea name="comment" class="form-control form-control"
                                       placeholder="Commentaire"
                                       v-model="formData.comment"></textarea>
@@ -153,7 +153,7 @@
                                 </button>
                             </nav>
                         </nav>
-                    </form>
+                    </div>
                 </div>
             </div>
         </transition>
@@ -190,6 +190,11 @@
     </section>
 </template>
 <script>
+
+    // ---- COMPILATION
+    // poi watch --format umd --moduleName  Payments --filename.css Payments.css --filename.js Payments.js --dist public/js/oscar/dist public/js/oscar/src/Payments.vue
+
+
     import Payment from './PaymentItem.vue';
     import Datepicker from './Datepicker.vue';
 
@@ -308,6 +313,10 @@
              * Enregistrement du formulaire
              */
             performSave(){
+
+                if( this.formHasError ){
+                    return;
+                }
 
                 var datas = new FormData();
                 datas.append('id', this.formData.id);

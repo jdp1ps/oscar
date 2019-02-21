@@ -180,6 +180,8 @@
 
 </template>
 <script>
+    // poi watch --format umd --moduleName  Milestones --filename.css milestones.css --filename.js Milestones.js --dist public/js/oscar/dist public/js/oscar/src/Milestones.vue
+
     //////////////////////////////////////////////////////////////
     import MilestoneItem from './MilestoneItem.vue'
     import Datepicker from './Datepicker.vue'
@@ -203,17 +205,6 @@
                 validMilestone: null,
                 unvalidMilestone: null,
                 inProgressMilestone: null
-
-            }
-        },
-
-
-        watcher: {
-            payments: {
-                deep: true,
-                handler(){
-
-                }
             }
         },
 
@@ -256,8 +247,6 @@
                     if( !datePayment )
                         datePayment = new Date();
 
-
-
                     milestones.push({
                         dateStart: datePayment,
                         comment: 'VERSEMENT ' + comment,
@@ -278,16 +267,11 @@
                     milestones.push(milestone);
                 });
 
-
                 milestones.sort( (a, b) => {
                     let vA = this.moment(a.dateStart.date).unix();
                     let vB = this.moment(b.dateStart.date).unix();
-
-
                     return vA - vB;
-
                 });
-
 
                return milestones;
             },
@@ -299,7 +283,6 @@
             formTypeFinishable(){
                 if( !this.formData )
                     return false;
-
                 return this.types.find( type => type.id == this.formData.type.id && type.finishable );
             },
 

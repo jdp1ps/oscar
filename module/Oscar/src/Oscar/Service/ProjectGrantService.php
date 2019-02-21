@@ -27,6 +27,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
+use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
@@ -42,6 +43,13 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+    public function getTypeDocument( $typeDocumentId, $throw=false ){
+        $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($typeDocumentId);
+        if( $type == null && $throw === true )
+            throw new OscarException(sprintf(_("Le type de document %s n'existe pas"), $typeDocumentId));
+        return $type;
+    }
 
     public function getWorkPackagePersonPeriod( Person $person, $year, $month ){
 
@@ -204,6 +212,34 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
 
         return $datas;
+    }
+
+    public function getCustomNum() {
+        static $customNum;
+        if( $customNum === null ){
+            // Récupération des différentes numérotations
+            $customNum = [];
+
+            $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
+                ->select('a.numbers')
+                ->distinct();
+            echo "<pre>";
+            foreach ($query->getQuery()->getResult(Query::HYDRATE_ARRAY) as $r) {
+                if( $r['numbers'] ){
+                    foreach ($r['numbers'] as $key=>$value){
+                        if( !$value ){
+                            echo "$key\n";
+                        }
+                        if( !in_array($key, $customNum) ){
+                            $customNum[] = $key;
+                        }
+                    }
+                }
+            }
+
+        }
+        return $customNum;
+
     }
 
     public function exportJson( $object ){
@@ -806,7 +842,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         $qb = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
             ->leftJoin('a.type', 't')
-            ->leftJoin('a.source', 's')
             ->leftJoin('a.tva', 'tv')
             ->leftJoin('a.currency', 'c')
             ->leftJoin('a.project', 'p')
@@ -825,7 +860,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
         $newActivity->setProject($source->getProject())
             ->setType($source->getType())
-            ->setSource($source->getSource())
             ->setTva($source->getTva())
             ->setCurrency($source->getCurrency())
             ->setLabel('Copie de ' . $source->getLabel())

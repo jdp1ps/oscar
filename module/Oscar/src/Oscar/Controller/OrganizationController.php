@@ -39,9 +39,6 @@ class OrganizationController extends AbstractOscarController
         return $this->getOrganizationService()->syncLdap($this->plugin('url'));
     }
 
-
-
-
     /**
      * @return OrganizationService
      */

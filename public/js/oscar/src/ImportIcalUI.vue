@@ -596,6 +596,7 @@
                 }
 
 
+
                 // Détection du lot
 
 

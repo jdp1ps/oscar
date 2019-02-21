@@ -150,8 +150,7 @@ class PublicController extends AbstractOscarController
 
         if ($person) {
             try {
-                // Déclaration en conflit
-                $periodsRejected = $timeSheetService->getValidationPeriodPersonConflict($person);
+                $periodsRejected = $timeSheetService->getPeriodsConflictPerson($person);
                 $isValidator = $timeSheetService->isValidator($person);
                 $validations = $timeSheetService->getValidationToDoPerson($person);
             } catch (\Exception $e) {

@@ -56,7 +56,7 @@ requirejs.config({
         'io' : 'http://127.0.0.1:3000/socket.io/socket.io.js',
         'notifications' : 'oscar/dist/Notification',
         'activity' : 'components/build/activity',
-        'Typedocument' : 'components/build/Typedocument',
+        'TypeDocument' : 'oscar/dist/TypeDocument',
         'milestones' : 'oscar/dist/Milestones',
         'authentification' : 'oscar/dist/Authentification',
         'payments' : 'oscar/dist/Payments',
@@ -81,7 +81,8 @@ requirejs.config({
         'Tva': 'oscar/dist/Tva',
         'ActivityRequest': 'oscar/dist/ActivityRequest',
         'ActivityRequestAdmin': 'oscar/dist/ActivityRequestAdmin',
-        'Workpackage': 'oscar/dist/WorkpackageUI'
+        'Workpackage': 'oscar/dist/WorkpackageUI',
+        'ConfigStringList': 'oscar/dist/ConfigStringList',
     },
     shim: {
         "bootstrap": {

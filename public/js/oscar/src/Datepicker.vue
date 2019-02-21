@@ -2,7 +2,7 @@
     <div @mouseenter="handlerShow" @mouseleave="handlerHide">
 
         <div class="input-group">
-            <input type="text" class="form-control" v-model="renderValue" />
+            <input type="text" class="form-control" v-model="renderValue"/>
             <div class="input-group-addon">
                 <i class="icon-calendar"></i>
             </div>
@@ -109,6 +109,11 @@
                 default: 'YYYY-MM-DD'
             },
 
+            // Format d'affichage
+            displayFormat: {
+                default: 'D MMMM YYYY'
+            },
+
             // Format utilisé pour l'affichage
             format: {
                 default: 'dddd D MMMM YYYY'
@@ -122,7 +127,8 @@
                 pickerDayRef: this.moment().format(),
                 pickerYearRef: this.moment().format('YYYY'),
                 pickerMonthRef: this.moment().month(),
-                realValue: this.value
+                realValue: this.value,
+                manualChange: ""
             }
         },
 
@@ -220,11 +226,16 @@
              */
             renderValue: {
                 get() {
-                    return !this.realValue ? '' : this.mmValue.format(this.valueFormat);
+                    return !this.realValue ? '' : this.mmValue.format(this.displayFormat);
                 },
                 set( text ){
-                    if( text == '' ){
-                        this.changeDate(null);
+                    console.log('convert ', text);
+                    try {
+                        let v = this.moment(text, this.displayFormat);
+                        if( v.isValid() )
+                            this.changeDate(v.format(this.valueFormat));
+                    }catch (e) {
+                        return;
                     }
                 }
             }
@@ -239,7 +250,14 @@
             },
 
             handlerInputChange(e){
-                console.log(e, this.value);
+
+                try {
+                    var v = this.moment(e.target.value);
+                    this.changeDate(v.format(this.valueFormat));
+                } catch (e) {
+                    console.error("WTF DATE", e);
+                }
+
             },
 
             /**

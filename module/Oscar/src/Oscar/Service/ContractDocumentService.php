@@ -93,6 +93,24 @@ class ContractDocumentService implements ServiceLocatorAwareInterface, EntityMan
         }
     }
 
+    /**
+     * Retourne l'emplacement où sont stoqués les documents depuis le fichier
+     * de configuration local.php
+     *
+     * @return mixed
+     */
+    public function getDropLocation(){
+        static $doclocation;
+        if( $doclocation == null ){
+            $conf = realpath($this->getServiceLocator()->get('Config')['oscar']['paths']['document_oscar']);
+            if( !file_exists($conf) || !is_writable($conf) ){
+                throw new OscarException("L'emplacement des documents n'est pas un dossier accessible en écriture");
+            }
+            $doclocation = $conf.'/';
+        }
+        return $doclocation;
+    }
+
     public function createDocument( $source, ContractDocument $doc )
     {
         // Récupération de la version
@@ -103,7 +121,7 @@ class ContractDocumentService implements ServiceLocatorAwareInterface, EntityMan
         $doc->setVersion(count($exists)+1);
         $realName = $doc->generatePath();
         $doc->setPath($realName);
-        $directoryLocation = $this->getServiceLocator()->get('Config')['oscar']['paths']['document_oscar'];
+        $directoryLocation = $this->getDropLocation();
 
         if( @move_uploaded_file($source, $directoryLocation.$realName) ){
             $this->getEntityManager()->persist($doc);

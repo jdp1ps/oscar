@@ -220,7 +220,6 @@ le dépôt dans le fichier : `install/oscar-install.sql`.
 psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 ```
 
-<<<<<<< HEAD
 =======
 ### Mise à jour du modèle
 
@@ -238,8 +237,6 @@ php public/index.php oscar patch checkPrivilegesJSON
 
 Executer cette commande jusqu'à obtenir un message "Les privilèges sont à jour" (sera prochainement corrigé).
 
-
->>>>>>> callahan
 ### Configuration de la BDD dans Oscar
 
 La configuration de la BDD est spécifiée dans le fichier `config/autoload/local.php`.

@@ -7,19 +7,16 @@
         <section>
             <div id="types"></div>
             <script>
-                require(['vue', 'vue-resource', 'Typedocument'],function(Vue, VueRessource, TypeDocument){
+                require(['vue', 'vue-resource', 'bootbox', 'TypeDocument'],function(Vue, VueRessource, Bootbox, TypeDocument){
                     Vue.use(VueRessource);
-
-                    var typedocument = new TypeDocument.default({
-                        http: {
-                            root : '<?= $this->url('administration/typedocument/api') ?>'
-                        },
-                        data : {
-                            types : [],
-                            manage : true
-                        },
-                        el: '#types'
-                    });
+                    Vue.http.options.emulateJSON = true;
+                    Vue.http.options.emulateHTTP = true;
+                    new Vue({
+                        el: '#types',
+                        render(h){
+                            return h(TypeDocument.default, { props: {url: '<?= $this->url('administration/typedocument/api') ?>', manage: true, bootbox: Bootbox}})
+                        }
+                    })
                 })
             </script>
 </section>

@@ -314,6 +314,7 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $schedule;
+
     /**
      * Intitulé du valideur.
      *
@@ -331,6 +332,14 @@ class ValidationPeriod
     protected $timesheets;
 
     /**
+     * Commentaire du déclarant.
+     *
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $comment;
+
+    /**
      * ValidationPeriod constructor.
      * @param $id
      */
@@ -340,6 +349,23 @@ class ValidationPeriod
         $this->validatorsSci = new ArrayCollection();
         $this->validatorsAdm = new ArrayCollection();
         $this->timesheets = new ArrayCollection();
+    }
+
+    /**
+     * @return string
+     */
+    public function getComment()
+    {
+        return $this->comment;
+    }
+
+    /**
+     * @param string $comment
+     */
+    public function setComment($comment)
+    {
+        $this->comment = $comment;
+        return $this;
     }
 
     /**
@@ -688,9 +714,32 @@ class ValidationPeriod
         return $this;
     }
 
+    public function reject(Person $validateur, $message, $date=null) {
+
+        if( $date == null ) $date = new \DateTime();
+
+        switch ($this->getStatus()) {
+            case ValidationPeriod::STATUS_STEP1:
+                $this->setRejectActivity($validateur, $date, $message);
+                break;
+
+            case ValidationPeriod::STATUS_STEP2:
+                $this->setRejectSci($validateur, $date, $message);
+                break;
+
+            case ValidationPeriod::STATUS_STEP3:
+                $this->setRejectAdm($validateur, $date, $message);
+                break;
+
+            default:
+                throw new OscarException("Cette période n'a pas le bon status pour être validée.");
+        }
+    }
+
     public function setValidationActivity(Person $validateur, $when, $message = "")
     {
         $this->setValidationActivityMessage($message)
+            ->addLog("Validation niveau projet par $validateur")
             ->setValidationActivityBy((string)$validateur)
             ->setValidationActivityById($validateur->getId())
             ->setValidationActivityAt($when)
@@ -700,6 +749,7 @@ class ValidationPeriod
     public function setValidationSci(Person $validateur, $when, $message = "")
     {
         $this->setValidationSciMessage($message)
+            ->addLog("Validation niveau scientifique par $validateur")
             ->setValidationSciBy((string)$validateur)
             ->setValidationSciById($validateur->getId())
             ->setValidationSciAt($when)
@@ -709,6 +759,7 @@ class ValidationPeriod
     public function setValidationAdm(Person $validateur, $when, $message = "")
     {
         $this->setValidationAdmMessage($message)
+            ->addLog("Validation niveau administratif par $validateur")
             ->setValidationAdmBy((string)$validateur)
             ->setValidationAdmById($validateur->getId())
             ->setValidationAdmAt($when)
@@ -718,6 +769,7 @@ class ValidationPeriod
     public function setRejectActivity(Person $validateur, $when, $message = "")
     {
         $this->setRejectActivityMessage($message)
+            ->addLog("Rejet niveau projet par $validateur")
             ->setRejectActivityBy((string)$validateur)
             ->setRejectActivityById($validateur->getId())
             ->setRejectActivityAt($when)
@@ -727,6 +779,7 @@ class ValidationPeriod
     public function setRejectSci(Person $validateur, $when, $message = "")
     {
         $this->setRejectSciMessage($message)
+            ->addLog("Rejet niveau scientifique par $validateur")
             ->setRejectSciBy((string)$validateur)
             ->setRejectSciById($validateur->getId())
             ->setRejectSciAt($when)
@@ -736,6 +789,7 @@ class ValidationPeriod
     public function setRejectAdm(Person $validateur, $when, $message = "")
     {
         $this->setRejectAdmMessage($message)
+            ->addLog("Rejet niveau administratif", $validateur)
             ->setRejectAdmBy((string)$validateur)
             ->setRejectAdmById($validateur->getId())
             ->setRejectAdmAt($when)
@@ -1243,9 +1297,9 @@ class ValidationPeriod
     public function getPeriodKey()
     {
         if ($this->getObjectGroup() == self::GROUP_WORKPACKAGE) {
-            return $this->getObject() . '-' . $this->getObjectId();
-        } else {
             return $this->getObjectGroup();
+        } else {
+            return $this->getObject() . '-' . $this->getObjectId();
         }
     }
 

@@ -6227,6 +6227,15 @@ body::-webkit-scrollbar-thumb {
 .text-small {
   font-size: 12px; }
 
+.activity.status-210 {
+  border-left: solid 4px #DD423E; }
+
+.activity.status-250 {
+  border-left: solid 4px #DD423E; }
+
+.activity.status-404 {
+  border-left: solid 4px #C69951; }
+
 .card.selected {
   box-shadow: 0 0 1em rgba(48, 176, 213, 0.5);
   background-color: #eff9fc; }

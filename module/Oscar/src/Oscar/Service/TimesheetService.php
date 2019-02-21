@@ -256,19 +256,32 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_STEP1) {
             throw new OscarException("Erreur d'état");
         }
+        return $this->rejectPeriodPrj($validationPeriod, $validationPeriod->getDeclarer(), $validator, $message);
+    }
 
-        $log = $validationPeriod->getLog();
+    public function rejectPeriodPrj( ValidationPeriod $period, Person $declarant, Person $validator, $message = "" ){
+        $year = $period->getYear();
+        $month = $period->getMonth();
+
+        // Format du message : La déclaration pour Mois Année a été refusée par $validator
+        $validationPeriods = $this->getValidationPeriods($year, $month, $declarant);
+
         $person = (string)$validator;
         $date = new \DateTime();
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet PROJET par $person\n";
-        $log .= $msg;
 
-        $validationPeriod->setLog($log);
-        $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
-        $validationPeriod->setRejectActivityAt($date)
-            ->setRejectActivityBy((string)$validator)
-            ->setRejectActivityById($validator->getId())
-            ->setRejectActivityMessage($message);
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod){
+            $this->getLogger()->debug("Invalidation " . $validationPeriod);
+            $log = $validationPeriod->getLog();
+            $log .= $msg;
+            $validationPeriod->setLog($log);
+            $validationPeriod->setStatus(ValidationPeriod::STATUS_CONFLICT);
+            $validationPeriod->setRejectActivityAt($date)
+                ->setRejectActivityBy((string)$validator)
+                ->setRejectActivityById($validator->getId())
+                ->setRejectActivityMessage($message);
+        }
 
         $this->getEntityManager()->flush($validationPeriod);
 
@@ -335,14 +348,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @throws OscarException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function reSendValidation(ValidationPeriod $validationPeriod)
+    public function reSendValidation(ValidationPeriod $validationPeriod, $comment="")
     {
         if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_CONFLICT) {
             throw new OscarException("Erreur d'état");
         }
 
         $validationPeriod->addLog('Réenvoi de la déclaration pour validation', (string)$validationPeriod->getDeclarer());
-        $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP1);
+        $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP1)->setComment($comment);
 
         // Reset des champs
         $validationPeriod->setRejectSciBy(null)->setRejectSciMessage('')->setRejectSciAt(null)->setRejectSciById(null)
@@ -353,6 +366,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $this->notificationsValidationPeriod($validationPeriod);
 
         return true;
+    }
+    public function reSendPeriod( $year, $month, Person $declarer ){
+        $this->getLogger()->debug("Réenvoi de la période $month $year par $declarer");
+        $validationsPeriods = $this->getValidationPeriods((int)$year, (int)$month, $declarer);
+
+        $this->getLogger()->debug("Il y'a " . count($validationsPeriods) . " a réenvoyer");
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationsPeriods as $validationPeriod) {
+            $this->reSendValidation($validationPeriod);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,6 +395,25 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
         return $out;
     }
+
+    /** Retourne la liste des périodes en conflits */
+    public function getPeriodsConflictPerson( Person $person ){
+        $periods = $this->getValidationPeriodRepository()->getValidationPeriodPersonWithConflict($person->getId());
+        $out = [];
+        /** @var ValidationPeriod $validationPeriod */
+        foreach( $periods as $validationPeriod ){
+            $key = $validationPeriod->getYear().'-'.$validationPeriod->getMonth();
+            if( !array_key_exists($key, $out) ){
+                $out[$key] = [
+                    'firstDay' => new \DateTime(sprintf('%s-%s-01', $validationPeriod->getYear(), $validationPeriod->getMonth())),
+                    'year' => $validationPeriod->getYear(),
+                    'month' => $validationPeriod->getMonth(),
+                ];
+            }
+        }
+        return $out;
+    }
+
 
     public function getValidationPeriodsOutWPToValidate($person = null)
     {
@@ -714,7 +756,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId());
                 $activityDatas = [
                     'label' => $activity->getFullLabel(),
-                    'workpackages' => []
+                    'workpackages' => [],
+                    'comment' => $period->getComment()
                 ];
 
                 /** @var WorkPackage $workpackage */
@@ -737,6 +780,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             else {
                 $otherInfos = $this->getOthersWPByCode($period->getObject());
                 $periodDatas['label'] = $otherInfos['label'];
+                $periodDatas['comment'] = $period->getComment();
                 $periodDatas['timesheets'] = [];
                 $group[$key]['declarations_others'][$otherInfos['code']] = $periodDatas;
             }
@@ -1972,6 +2016,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $submitable = false;
         $submitableInfos = "Vous ne pouvez pas soumettre cette période pour une raison inconnue";
 
+        $hasConflict = false;
+
         $editable = false;
         $editableInfos = "Vous ne pouvez pas modifier les déclarations pour cette période pour une raison inconnue";
 
@@ -1991,6 +2037,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         /** @var ValidationPeriod $periodValidation */
         foreach ($periodValidations as $periodValidation) {
+            if( $periodValidation->hasConflict() ){
+                $hasConflict = true;
+            }
             $data = $periodValidation->json();
             if ($periodValidation->getObjectId() > 0) {
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($periodValidation->getObjectId());
@@ -2084,6 +2133,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         $periodValidations = $this->getPeriodValidation($person, $month, $year);
+
+        $this->getLogger()->debug("Nombre de validation pour cette période : " . count($periodValidations));
+
         $periodValidationsDt = [];
         /** @var ValidationPeriod $periodValidation */
         foreach ($periodValidations as $periodValidation) {
@@ -2165,7 +2217,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $projectAcronym = $t->getActivity()->getAcronym();
             $project = $t->getActivity()->getProject();
+            $project_id = $t->getActivity()->getProject()->getId();
             $activity = $t->getActivity();
+            $activity_id = $t->getActivity()->getId();
             $activityCode = $activity->getOscarNum();
             $workpackage = $t->getWorkpackage();
             $wpCode = $workpackage->getCode();
@@ -2189,10 +2243,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'validations' => $this->resolveTimeSheetValidation($t),
                 'label' => $t->getLabel(),
                 'comment' => $t->getComment(),
+                'activity_id' => $activity_id,
                 'activity' => (string)$activity,
                 'activity_code' => $activityCode,
                 'acronym' => $projectAcronym,
                 'project' => (string)$project,
+                'project_id' => $project_id,
                 'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : 'draft',
                 'status' => 'locked',
                 'wpCode' => $wpCode,
@@ -2208,6 +2264,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'person_id' => $person->getId(),
             'period' => $periodFirstDay->format('Y-m'),
             'periodMax' => $periodMax,
+            'hasConflict' => $hasConflict,
             'periodInfos' => $periodInfos,
             'periodFutur' => $periodFutur,
             'periodFinished' => $periodFinished,
@@ -2294,14 +2351,39 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'dateTo' => $periodBounds['end'],
             ]);
 
+        $commentaires = "";
+        $acronyms = [];
+        $debut = "";
+        $num = [];
+        $pfi = [];
+
+        $validationsDone = [];
+
         $declarations = [
             'activities' => [],
             'others' => []
         ];
+
         $others = $this->getOthersWP();
 
         /** @var TimeSheet $timesheet */
         foreach ($query->getQuery()->getResult() as $timesheet) {
+
+            // Récupération des commentaires
+            if( $timesheet->getValidationPeriod() ) {
+                $validationId = $timesheet->getValidationPeriod()->getId();
+                if (!in_array($validationId, $validationsDone)) {
+                    $validationsDone[] = $validationId;
+                    $commentaires .= $timesheet->getValidationPeriod()->getComment() . "\n";
+                }
+            }
+
+            if( $timesheet->getActivity() ){
+                if( !in_array($timesheet->getActivity()->getCodeEOTP(), $pfi) ) $pfi[] = $timesheet->getActivity()->getCodeEOTP();
+                if( !in_array($timesheet->getActivity()->getAcronym(), $acronyms) ) $acronyms[] = $timesheet->getActivity()->getAcronym();
+                if( !in_array($timesheet->getActivity()->getOscarNum(), $num) ) $num[] = $timesheet->getActivity()->getOscarNum();
+            }
+
             $group = 'Projet inconnue';
             $groupId = null;
             $subGroup = $timesheet->getLabel();
@@ -2358,9 +2440,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $declarations[$path][$group]['total'] += $timesheet->getDuration();
 
         }
+        /*
+                     $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
+            $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
+
+            $spreadsheet->getActiveSheet()->setCellValue('U3', $datas['debut']); //$fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue('U4', $datas['fin']); // $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
+            $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
+
+
+         */
 
         $output = [
             'person' => (string)$person,
+            'commentaires' => $commentaires,
+            'num' => implode(', ', $num),
+            'pfi' => implode(', ', $pfi),
+            'acronyms' => implode(', ', $acronyms),
             'person_id' => $person->getId(),
             'period' => $period,
             'totalDays' => $periodBounds['totalDays'],
@@ -2640,6 +2737,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     protected function getQueryTimesheetsPersonPeriod($currentPerson, \DateTime $from, \DateTime $to)
     {
+        $from->setTime(0,0,0);
+        $to->setTime(23,59,59);
         $query = $this->getEntityManager()->createQueryBuilder('t')
             ->select('t')
             ->from(TimeSheet::class, 't')
@@ -2815,8 +2914,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $query->getResult();
     }
 
-    public function sendPeriod($from, $to, $sender)
+    public function sendPeriod($from, $to, $sender, $comments=null)
     {
+
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
 
@@ -2845,6 +2945,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
 
+            $this->getLogger()->debug("$timesheet");
+
             $objectGroup = ValidationPeriod::GROUP_OTHER;
             $object = $timesheet->getLabel();
             $objectId = -1;
@@ -2857,13 +2959,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             $key = sprintf("%s_%s", $object, $objectId);
             if (!array_key_exists($key, $declarations)) {
+                $comment = "";
+                $objectCommentKey = $objectId;
+                if( $objectCommentKey == -1 ) $objectCommentKey = $object;
+
+
+                if( $comments && array_key_exists($objectCommentKey, $comments) ){
+                    $comment = array_key_exists($objectCommentKey, $comments) ? $comments[$objectCommentKey] : '';
+                }
                 $declarations[$key] = [
                     'objectId' => $objectId,
                     'object' => $object,
                     'objectGroup' => $objectGroup,
-                    'log' => "Déclaration envoyée"
+                    'log' => "Déclaration envoyée",
+                    'comment' => $comment
                 ];
-                $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup);
+
+                $this->getLogger()->debug(print_r($declarations[$key], true));
+                $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup, $comment);
             }
             $timesheet->setValidationPeriod($declarations[$key]['declaration']);
         }
@@ -3027,33 +3140,21 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         if ($period->isValidator($validateur)) {
-            switch ($period->getStatus()) {
-                case ValidationPeriod::STATUS_STEP1:
-                    $msg = sprintf("a rejeté niveau activité la déclartion %s", $obj);
-                    $period->setRejectActivity($validateur, new \DateTime(), $message);
-                    $period->addLog('vient de rejeter niveau activité la déclaration.', (string)$validateur);
-                    break;
 
-                case ValidationPeriod::STATUS_STEP2:
-                    $msg = sprintf("a rejeté scientifiquement la déclartion %s", $obj);
-                    $period->setRejectSci($validateur, new \DateTime(), $message);
-                    $period->addLog('vient de rejeter scientifiquement la déclaration.', (string)$validateur);
-                    break;
+            $validationPeriods = $this->getValidationPeriods($period->getYear(), $period->getMonth(), $period->getDeclarer());
 
-                case ValidationPeriod::STATUS_STEP3:
-                    $msg = sprintf("a rejeté administrativement la déclartion %s", $obj);
-                    $period->setRejectAdm($validateur, new \DateTime(), $message);
-                    $period->addLog('vient de rejeter administrativement la déclaration.', (string)$validateur);
-                    break;
-
-                default:
-                    throw new OscarException("Cette période n'a pas le bon status pour être validée.");
+            /** @var ValidationPeriod $validationPeriod */
+            foreach($validationPeriods as $validationPeriod){
+                $validationPeriod->reject($validateur, $message);
             }
+
+            $msg = sprintf("a rejeté de la déclaration %s", $period);
+
             /** @var ActivityLogService $als */
             $als = $this->getServiceLocator()->get('ActivityLogService');
             $als->addUserInfo($msg, 'Activity', $period->getObjectId());
 
-            $this->getEntityManager()->flush($period);
+            $this->getEntityManager()->flush($validationPeriods);
             $this->notificationsValidationPeriod($period);
             return true;
         } else {
@@ -3106,7 +3207,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      * @return ValidationPeriod
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    protected function createDeclaration($sender, $year, $month, $object, $objectId, $objectGroup)
+    protected function createDeclaration($sender, $year, $month, $object, $objectId, $objectGroup, $comment="")
     {
 
         $declaration = new ValidationPeriod();
@@ -3163,6 +3264,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $now = new \DateTime();
         $declaration
             ->setSchedule($settings)
+            ->setComment($comment)
             ->setDateSend($now)
             ->setDeclarer($sender)
             ->setLog($now->format('Y-m-d H:i:s') . " : $sender vient d'envoyer sa déclaration\n")

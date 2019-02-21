@@ -18,7 +18,7 @@
                             <span title="Heure(s) en cours de validation" class="wp-hour validating" v-if="person.validating > 0">{{person.validating | heures}}</span>
                             <span title="Heure(s) en conflit" class="wp-hour conflicts" v-if="person.conflicts > 0">{{person.conflicts | heures}}</span>
                             <span title="Heure(s) à valider" class="wp-hour duration">
-                                / {{person.duration}}
+                                / {{person.duration | heures}}
                                 <a href="#" @click.prevent="handlerEdit" v-if="editable && mode == 'read'" title="Modifier les heures prévues"><i class="icon-pencil"></i></a>
                             </span>
                         </strong>

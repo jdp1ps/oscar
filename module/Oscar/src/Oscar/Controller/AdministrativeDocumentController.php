@@ -24,7 +24,15 @@ class AdministrativeDocumentController extends AbstractOscarController
      * @return mixed
      */
     protected function getDropLocation(){
-        return $this->getServiceLocator()->get('Config')['oscar']['paths']['document_admin_oscar'];
+        static $publicdoclocation;
+        if( $publicdoclocation == null ){
+            $conf = realpath($this->getServiceLocator()->get('Config')['oscar']['paths']['document_admin_oscar']);
+            if( !file_exists($conf) || !is_writable($conf) ){
+                throw new OscarException("L'emplacement des documents n'est pas un dossier accessible en écriture");
+            }
+            $publicdoclocation = $conf.'/';
+        }
+        return $publicdoclocation;
     }
 
     /**

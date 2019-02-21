@@ -113,12 +113,6 @@ class Person implements ResourceInterface
     protected $phone;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", nullable=true)
-     */
-    protected $foo;
-
-    /**
      * @var \DateTime
      * @ORM\Column(type="datetime", nullable=true)
      */

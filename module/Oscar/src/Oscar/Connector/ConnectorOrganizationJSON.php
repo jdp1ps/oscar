@@ -93,7 +93,7 @@ class ConnectorOrganizationJSON implements ConnectorInterface
 
             try {
                 $this->organizationJsonFactory->hydrateWithDatas($organization, $data, $this->connectorName);
-                if( $data->type ){
+                if( property_exists($data, 'type') && $data->type ){
                     $type = $this->getOrganizationType($data->type);
                     if( $type ){
                         $organization->setTypeObj($type);

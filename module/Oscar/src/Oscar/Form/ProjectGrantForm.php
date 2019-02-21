@@ -24,9 +24,16 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
 
     use ServiceLocatorAwareTrait;
 
+    private $numbers;
+
+    public function setNumbers($numbers){
+        $this->numbers = $numbers;
+    }
+
     public function init()
     {
         $hydrator = new ProjectGrantFormHydrator();
+        $hydrator->setNumbers($this->numbers);
         $hydrator->setServiceLocator($this->getServiceLocator());
         $this->setHydrator($hydrator);
 
@@ -260,11 +267,11 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'type'=>'Text'
         ]);
 
+
         // DateOpened
-        $this->add([
-            'name'   => 'numbers',
-            'type'=>KeyValue::class
-        ]);
+        $this->add(new KeyValue('numbers', ['keys' => $this->numbers]));
+
+
 
         // Type
         $this->add([
