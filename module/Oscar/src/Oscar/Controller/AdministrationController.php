@@ -51,6 +51,11 @@ class AdministrationController extends AbstractOscarController
     public function numerotationAction()
     {
 
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);
+
+
+        $invalidActivityNumbers = $this->getActivityService()->getActivitiesWithUnreferencedNumbers();
+
         if( $this->isAjax() ) {
             $method = $this->getHttpXMethod();
             switch ($method) {
@@ -99,7 +104,9 @@ class AdministrationController extends AbstractOscarController
                     return $this->getResponseInternalError();
             }
         }
-        return [];
+        return [
+            "invalidActivityNumbers" => $invalidActivityNumbers
+        ];
     }
 
     public function tvaAction()

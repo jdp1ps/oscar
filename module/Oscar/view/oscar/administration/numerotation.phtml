@@ -5,22 +5,53 @@
  * Date: 20/02/19
  * Time: 12:52
  */
+$hasOthers = count($invalidActivityNumbers) > 0;
 ?>
 <div class="container">
-    <h1>Numérotation personnalisé</h1>
-    <p class="alert alert-info">Vous pouvez gérer ici la liste des types de numérotation proposés dans l'écran de modification des activités</p>
-    <div id="app">
 
+    <div class="row">
+
+        <div class="<?= $hasOthers ? 'col-md-8' : 'col-md-12' ?>">
+            <h1>Numérotation personnalisé</h1>
+            <p class="alert alert-info">
+                Vous pouvez gérer ici la liste des types de numérotation proposés dans l'écran de modification des activités
+            </p>
+            <div id="app">
+            </div>
+            <script>
+                require(['vue', 'vue-resource', 'ConfigStringList'], function(Vue, VueResource, ConfigStringList){
+                    Vue.use(VueResource);
+                    new Vue({
+                        el: "#app",
+                        render(h){
+                            return h(ConfigStringList.default)
+                        }
+                    })
+                })
+            </script>
+        </div>
+        <?php if( $hasOthers ): ?>
+        <div class="col-md-4">
+            <h3>Autres numérotation détéctées</h3>
+            <p class="alert alert-warning">
+                Les activités ci-dessous utilisent encore la numérotation libre avec des intitulés non référencés :
+                <?php foreach ($invalidActivityNumbers as $invalid): ?>
+                <article class="activity card xs">
+                    <h3 class="card-title">
+                        <i class="icon-cube"></i><?= $invalid->getLabel() ?>
+                        <?php if($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $invalid)): ?>
+                            <a href="<?= $this->url('contract/edit', ['id'=>$invalid->getId()]) ?>"><i class='icon-edit'></i> Modifier</a>
+                        <?php endif; ?>
+                    </h3>
+
+                    <?php foreach ($invalid->getNumbers() as $key=>$value) :?>
+                    <li class="cartouche"><?= $key ?> <span class="addon"><?= $value ?></span></li><br>
+                    <?php endforeach; ?>
+                
+                </article>
+                <?php endforeach; ?>
+            </p>
+        </div>
+        <?php endif; ?>
     </div>
-    <script>
-        require(['vue', 'vue-resource', 'ConfigStringList'], function(Vue, VueResource, ConfigStringList){
-            Vue.use(VueResource);
-            new Vue({
-                el: "#app",
-                render(h){
-                    return h(ConfigStringList.default)
-                }
-            })
-        })
-    </script>
 </div>

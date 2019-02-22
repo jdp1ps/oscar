@@ -44,6 +44,13 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
+    /**
+     * @return OscarConfigurationService
+     */
+    public function getOscarConfigurationService(){
+        return $this->getServiceLocator()->get('OscarConfig');
+    }
+
     public function getTypeDocument( $typeDocumentId, $throw=false ){
         $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($typeDocumentId);
         if( $type == null && $throw === true )
@@ -409,6 +416,49 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $numbersKey = array_unique($key);
         }
         return $numbersKey;
+    }
+
+    public function getDistinctNumberKeyUnreferenced(){
+        $exists = $this->getDistinctNumbersKey();
+        $referenced = $this->getServiceLocator()->get('OscarConfig')->getOptionalConfiguration('editable.numerotation', []);
+        $unique = [];
+        foreach ($exists as $key){
+            if( !in_array($key, $referenced) ){
+                $unique[] = $key;
+            }
+        }
+        return $unique;
+    }
+
+    /**
+     * @return array
+     */
+    public function getActivitiesWithUnreferencedNumbers(){
+
+        // Clefs connues
+        $authorisedKeys = $this->getOscarConfigurationService()->getNumerotationKeys();
+
+        // Récupération des activités ayant des numérotations
+        $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
+            ->where('a.numbers IS NOT NULL AND a.numbers != \'N;\' AND a.numbers != \'a:0:{}\'');
+
+        // On isole les activités ayant des clefs de numérotation "Hors configuration"
+        $activities = [];
+
+        /** @var Activity $activity */
+        foreach ($query->getQuery()->getResult() as $activity) {
+            $hasUnknow = false;
+            foreach(array_keys($activity->getNumbers()) as $key){
+                if( !in_array($key, $authorisedKeys) ){
+                    $hasUnknow = true;
+                }
+            }
+            if( $hasUnknow === true ){
+                $activities[] = $activity;
+            }
+        }
+
+        return $activities;
     }
 
     public function getPaymentsByActivityId( array $idsActivity, $organizations = null )

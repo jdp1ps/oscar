@@ -15,7 +15,6 @@ use Oscar\View\Helpers\UnicaenDoctrinePaginatorHelper;
 $conf = new Symfony\Component\Yaml\Parser();
 
 return array(
-    'oscar-access' => $conf->parse(file_get_contents(__DIR__ . '/oscar-access.yml')),
 
     'bjyauthorize' => [
 
@@ -861,7 +860,9 @@ return array(
 //            },
 
             'OscarConfig' => function( $sm ){
-                return new \Oscar\Service\ConfigurationParser($sm->get('Config')['oscar']);
+                $config = new \Oscar\Service\OscarConfigurationService();
+                $config->setServiceLocator($sm);
+                return $config;
             },
 
             'PersonOrganizationConnectors' => function( $sm ){
