@@ -908,6 +908,19 @@ class ProjectGrantController extends AbstractOscarController
             $rolesPersons[$role] = [];
         }
 
+        $numbers = [];
+        // Numérotation
+        foreach( $this->getOscarConfigurationService()->getNumerotationKeys() as $key ){
+            $header = $key;
+            if( $keep === true || in_array($header, $keep) ){
+                $columns[$header] = true;
+                $headers[] = $header;
+            } else {
+                $columns[$header] = false;
+            }
+            $numbers[$header] = [];
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // --- JALONS
         // Récupération des différents types de jalons
@@ -940,6 +953,8 @@ class ProjectGrantController extends AbstractOscarController
             if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
                 $entity)
             ) {
+
+
                 foreach( $entity->getOrganizationsDeep() as $org ){
                      $rolesCurrent[$org->getRole()][] = (string)$org->getOrganization();
                 }
@@ -947,6 +962,7 @@ class ProjectGrantController extends AbstractOscarController
                 foreach( $entity->getPersonsDeep() as $per ){
                      $rolesPersonsCurrent[$per->getRole()][] = (string)$per->getPerson();
                 }
+
                 /** @var ActivityDate $mil */
                 foreach( $entity->getMilestones() as $mil ){
 
@@ -954,6 +970,7 @@ class ProjectGrantController extends AbstractOscarController
                         $mil->getDateStart()->format('Y-m-d') :
                         'nop';
                 }
+
 
                 foreach ( $entity->csv() as $col=>$value ){
                     if( $columns[$col] === true )
@@ -970,6 +987,10 @@ class ProjectGrantController extends AbstractOscarController
                         $datas[] = $persons ? implode('|', array_unique($persons)) : ' ';
                 }
 
+                foreach ( $numbers as $key=>$value ){
+                    $datas[] = $entity->getNumber($key);
+                }
+                
                 foreach( $jalonsCurrent as $jalon2=>$date ){
                     if( $columns[$jalon2] === true )
                         $datas[] = $date ? implode('|', array_unique($date)) : ' ';

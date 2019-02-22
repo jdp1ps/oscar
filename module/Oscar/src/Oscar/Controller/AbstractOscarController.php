@@ -21,6 +21,7 @@ use Oscar\Service\ActivityTypeService;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
+use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
@@ -44,6 +45,13 @@ use Zend\View\Model\JsonModel;
  */
 class AbstractOscarController extends AbstractActionController
 {
+    /**
+     * @return OscarConfigurationService
+     */
+    public function getOscarConfigurationService(){
+        return $this->getServiceLocator()->get('OscarConfig');
+    }
+
     protected function getYamlConfigPath(){
         $dir = realpath(__DIR__.'/../../../../../config/autoload/');
         $file = $dir.'/oscar-editable.yml';

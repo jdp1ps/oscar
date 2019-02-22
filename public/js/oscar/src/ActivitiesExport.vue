@@ -47,6 +47,14 @@
                     </label>
                 </div>
                 <hr>
+                <h3 @click="selectSection(fieldsUI.numerotation)"><i class="icon-calendar"></i>Numérotations</h3>
+                <div class="cols">
+                    <label v-for="field, i in fieldsUI.numerotation" class="col3">
+                        <input type="checkbox" :checked="field.selected"  @click="toggleField(field.label)"/>
+                        {{ field.label }}
+                    </label>
+                </div>
+                <hr>
                 <nav>
                     <a class="btn btn-default" @click="selectAll()">
                         <small v-if="switchSelect">Sélectionner tous les champs</small>

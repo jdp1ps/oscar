@@ -368,7 +368,8 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             'core' => Activity::csvHeaders(),
             'organizations' => [],
             'persons' => [],
-            'milestones' => []
+            'milestones' => [],
+            'numerotation' => $this->getOscarConfigurationService()->getNumerotationKeys()
         ];
 
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
