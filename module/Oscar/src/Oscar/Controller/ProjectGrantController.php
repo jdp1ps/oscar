@@ -1697,7 +1697,7 @@ class ProjectGrantController extends AbstractOscarController
                         $key = $result[1];
                         $value = $result[2];
                         $qb->andWhere('c.numbers LIKE :numbersearch');
-                        $parameters['numbersearch'] = '%"' . $key . '";s:%:"' . $value . '";%';
+                        $parameters['numbersearch'] = '%"' . $key . '";s:%:"%' . $value . '%";%';
                     } else {
                         // La saisie est un numéro SAIC
                         if (preg_match("/^[0-9]{4}SAIC.*/mi", $search)) {
