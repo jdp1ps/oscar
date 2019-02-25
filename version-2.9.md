@@ -22,6 +22,14 @@ Le code a été purgé des références à un ancien système de classification 
 
 La version initiale de l'export des versements proposait les rôles de organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurable dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
 
+## Numérotation libre
+
+Dans l'écran d'édition des activités, les numérotations proposées doivent maintenant être configurées via l'interface d'administration. Ce système s'appuis sur la mécanisme de "paramètres éditable"
+
+Le système étant rétrocompatible, une UI dans la gestion des numérotations propose la liste des activités ayant des numérotations non référencer pour pouvoir modifier les activités ou ajouter des numérotation manquantes.
+
+L'e
+
 ## Améliorations
  
  - Export des activités : L'UI permet maintenant de délectionner/déselectionner les champs à exporter par groupe.
@@ -34,7 +42,6 @@ La version initiale de l'export des versements proposait les rôles de organisat
  - Recherche dans les activités : La mise en page des résultats de la recherche a été améliorée pour mieux distinguer l'état des activités.
  - UP : Le système d'invalidation des feuilles de temps s'applique maintenant à la période entière plutôt qu'à un type de créneau. Les messages d'erreur en page d'accueil sont donc maintenant regroupés par période.
  - Le schéma de la base a été ajouté dans la documentation technique [Schéma de la BDD](./doc/schema_bdd.png)
- - Dans l'écran d'édition des activités, les numérotations proposées doivent maintenant être configurées via l'interface d'administration. Ce système s'appuis sur un mécanisme ajouté de "paramètres éditable"
  - Les "paramètres éditables" sont un mécanisme qui permettra de gérer certains paramètres de configuration directement depuis l'interface. Ce dispositif sera dédié à la gestion des options "optionnelles" et va créer une fichier **config/autoload/oscar-editable.yml** non versionné et absent par défaut.
  
 ## Fix
