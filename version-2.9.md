@@ -28,7 +28,9 @@ Dans l'écran d'édition des activités, les numérotations proposées doivent m
 
 Le système étant rétrocompatible, une UI dans la gestion des numérotations propose la liste des activités ayant des numérotations non référencer pour pouvoir modifier les activités ou ajouter des numérotation manquantes.
 
-L'e
+La recherche par numérotation a été étendue pour augmenter les chances de trouver des résultats (ex : ANR= retourne les activités ayant un numéro ANR)
+ 
+Les numérotations qualifiées sont disponibles dans l'export des activités
 
 ## Améliorations
  
