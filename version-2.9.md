@@ -32,6 +32,19 @@ La recherche par numérotation a été étendue pour augmenter les chances de tr
  
 Les numérotations qualifiées sont disponibles dans l'export des activités
 
+** En cas d'erreur d'accès au fichier oscar-editable.yml**, vous pouvez créer manuellement le fichier : 
+
+```bash
+touch config/autoload/oscar-editable.yml
+```
+
+Puis donner les droits d'accès en écriture : 
+
+```bash
+chmod 777 config/autoload/oscar-editable.yml
+```
+
+
 ## Améliorations
  
  - Export des activités : L'UI permet maintenant de délectionner/déselectionner les champs à exporter par groupe.
