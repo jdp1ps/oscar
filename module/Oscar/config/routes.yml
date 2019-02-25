@@ -828,13 +828,6 @@ contract:
                 route: /generer-notifications/:id
                 defaults:
                     action: generateNotifications
-
-        number:
-            type: segment
-            options:
-                route: /numeroter/:id
-                defaults:
-                    action: number
         csv:
             type: segment
             options:
