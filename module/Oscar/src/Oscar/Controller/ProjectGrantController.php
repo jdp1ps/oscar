@@ -990,7 +990,7 @@ class ProjectGrantController extends AbstractOscarController
                 foreach ( $numbers as $key=>$value ){
                     $datas[] = $entity->getNumber($key);
                 }
-                
+
                 foreach( $jalonsCurrent as $jalon2=>$date ){
                     if( $columns[$jalon2] === true )
                         $datas[] = $date ? implode('|', array_unique($date)) : ' ';
