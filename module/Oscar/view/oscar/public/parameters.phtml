@@ -160,7 +160,7 @@
                         Vue.use(VueResource);
                         Vue.filter('heures', function(v){
                             var heure = Math.floor(v);
-                            var minutes = (v-heure)*60;
+                            var minutes = Math.round((v-heure)*60);
                             return heure +':' +minutes;
                         });
                         new Vue({
