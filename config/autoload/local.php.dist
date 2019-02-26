@@ -137,10 +137,10 @@ return array(
         ////////////////////////////////////////////////////////////////////////
         'paths' => [
             // Emplacement où sont stoqués les documents Oscar
-            'document_oscar' => realpath(__DIR__) . '/../../data/documents/oscar/',
+            'document_oscar' => realpath(__DIR__) . '/../../data/documents/activity/',
 
             // Emplacement où sont stoqués les documents administratifs Oscar
-            'document_admin_oscar' => realpath(__DIR__) . '/../../data/documents/administratifs/',
+            'document_admin_oscar' => realpath(__DIR__) . '/../../data/documents/public/',
 
             // Modèle de feuille de temps
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),

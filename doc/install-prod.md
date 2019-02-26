@@ -176,6 +176,40 @@ composer install --prefer-dist
 Composer se chargera d'installer les dépendances PHP tel de définies dans le fichier `composer.json`.
 
 
+## Installation de la base de données
+
+### Création de la base de données vide
+
+Création de l'utilisateur/bdd locale si besoin :
+
+```bash
+su - postgres
+psql
+```
+
+### Création de l'utilisateur
+
+Puis création de l'utilisateur/bdd :
+
+```sql
+CREATE USER oscar WITH PASSWORD 'azerty';
+CREATE DATABASE oscar_dev;
+GRANT ALL PRIVILEGES ON DATABASE oscar_dev to oscar;
+\q
+```
+
+### Structure de données initiales
+
+Les données "de base" sont à disposition dans
+le dépôt dans le fichier : `install/oscar-install.sql`.
+
+```bash
+psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
+```
+
+> La structure initiale n'est pas forcement à jour, vous devez donc procéder à la **Mise à jour du modèle** présenté dans le point suivant.
+
+
 
 ## Configuration d'oscar
 
@@ -193,71 +227,18 @@ cp config/autoload/local.php.dist config/autoload/local.php
 vi !$
 ```
 
-### Installation de la base de données vide
-
-Création de l'utilisateur/bdd locale si besoin :
-
-```bash
-su - postgres
-psql
-```
-
-Puis création de l'utilisateur/bdd :
-
-```sql
-CREATE USER oscar WITH PASSWORD 'azerty';
-CREATE DATABASE oscar_dev;
-GRANT ALL PRIVILEGES ON DATABASE oscar_dev to oscar;
-\q
-```
-
-### Données initiales
-
-Les données "de base" sont à disposition dans
-le dépôt dans le fichier : `install/oscar-install.sql`.
-
-```bash
-psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
-```
-
-=======
-### Mise à jour du modèle
-
-Mettre à jour le modèle de donnée : 
-
-```bash
-php vendor/bin/doctrine-module orm:schema-tool:update --force
-```
-
-### Mise à jour des privilèges de l'application
-
-```bash
-php public/index.php oscar patch checkPrivilegesJSON
-```
-
-Executer cette commande jusqu'à obtenir un message "Les privilèges sont à jour" (sera prochainement corrigé).
-
-### Configuration de la BDD dans Oscar
-
-La configuration de la BDD est spécifiée dans le fichier `config/autoload/local.php`.
-
-Si le fichier n'existe pas, un modèle est présent dans `config/autoload/local.php.dist` :
-
-```bash
-cp config/autoload/local.php.dist config/autoload/local.php
-vi !$
-```
-Exemple de configuration :
+Dans un premier temps, configurez simplement l'accès à la base de donnée : 
 
 ```php
 <?php
-//config/autoload/local.php
+// config/autoload.local.php
+// ...
 return array(
     // ...
-    // Accès BDD
     'doctrine' => array(
         'connection' => array(
             'orm_default' => array(
+                // ...
                 'params' => array(
                     'host'     => 'localhost',
                     'port'     => '5432',
@@ -272,16 +253,39 @@ return array(
 );
 ```
 
-Ce fichier contient également des configurations spécifiques métier approfondies dans le fichier [Configuration métier](./configuration.md)
+Une fois oscar configuré pour accéder à la base de données, il **faut mettre à jour le modèle** (même si vous venez d'installer la structure initiale).
 
 
-### Mise à jour du modèle
+#### Mise à jour du modèle
 
-Mettre à jour le modèle de donnée :
+Oscar est basé sur l'ORM **Doctrine**, la mise à jour du modèle s'effectue en ligne de commande avec la commande : 
 
 ```bash
 php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
+
+
+### Mise à jour des privilèges de l'application
+
+Les droits d'accès au fonctionnalités sont gérés en base de données via des **privilèges**. Au cour du développement, des fonctionnalités sont ajoutées régulièrement, donnant lieu à la création à de nouveaux privilèges pour réguler l'accès à ces fonctionnalités.
+
+Il faut donc à chaque mise à jour mettre à jour ces privilèges en base de données.
+
+Pour **mettre à jour les privilèges**, executez la commande : 
+
+```bash
+php public/index.php oscar patch checkPrivilegesJSON
+```
+
+> Executer cette commande jusqu'à obtenir un message "Les privilèges sont à jour" (sera prochainement corrigé).
+
+
+### Configuration métier
+
+Lors de l'étape de configuration de la base de donnée, vous avez créé un fichier `config/autoload/local.php`.
+
+Ce fichier contient les paramètres métier de l'application. Ces paramètres sont détaillés dans le fichier [Configuration métier](./configuration.md)
+
 
 ### Tester la configuration
 

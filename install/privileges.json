@@ -178,7 +178,7 @@
 
   "ACTIVITY-DUPLICATE": {
     "category_id": 2,
-    "spot": 3,
+    "spot": 4,
     "code": "DUPLICATE",
     "libelle": "Peut dupliquer l'activit\u00e9",
     "fullcode": "ACTIVITY-DUPLICATE"
