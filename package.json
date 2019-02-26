@@ -8,8 +8,7 @@
     "test": "tests"
   },
   "scripts": {
-    "sass": "node node_modules/.bin/gulp sass",
-    "oscar": "node node_modules/.bin/poi build public/js/oscar/src/*.vue"
+    "sass": "node node_modules/.bin/gulp sass"
   },
   "repository": {
     "type": "git",
