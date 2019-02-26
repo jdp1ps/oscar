@@ -111,20 +111,15 @@ class ApiController extends AbstractOscarController
     {
         $sl = $this->getServiceLocator();
         $search = $this->getRequest()->getQuery()->get('q');
-        $this->getLogger()->debug($search);
 
         if (strlen($search) >= 4) {
             $t = $sl->get('PersonnelService');
             /* @var \Application\Service\PersonnelService */
             $result = $t->searchStaff($search);
-            $this->getLogger()->debug(print_r($result));
-
             return new JsonModel($result);
         } else {
-            $sl->get('logger')->addError(get_class().'::searchStaffAction (too short search)');
             $response = new Response();
             $response->setStatusCode(400);
-
             return $response;
         }
     }

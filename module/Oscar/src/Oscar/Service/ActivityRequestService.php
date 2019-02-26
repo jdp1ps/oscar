@@ -314,7 +314,6 @@ class ActivityRequestService implements ServiceLocatorAwareInterface, EntityMana
 
 
         // Suppression des fichiers
-        $this->getServiceLocator()->get('Logger')->debug("Suppression");
         $dir = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_request');
 
         // Suppression des fichiers

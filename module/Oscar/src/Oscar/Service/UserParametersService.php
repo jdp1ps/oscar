@@ -63,8 +63,6 @@ class UserParametersService implements ServiceLocatorAwareInterface, EntityManag
         try {
             $settings = $this->getCurrentAuth()->getSettings() ?: [];
             $frequency = ValidationInput::frequency($userInput);
-            $this->getServiceLocator()->get('Logger')->debug($userInput);
-            $this->getServiceLocator()->get('Logger')->debug(print_r($frequency, true));
             $settings['frequency'] = $frequency;
             $this->getCurrentAuth()->setSettings($settings);
             $this->getEntityManager()->flush($this->getCurrentAuth());

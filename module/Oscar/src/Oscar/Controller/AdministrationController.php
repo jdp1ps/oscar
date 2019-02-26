@@ -190,12 +190,9 @@ class AdministrationController extends AbstractOscarController
         $disciplines = $this->getEntityManager()->getRepository(Discipline::class)->getDisciplinesCounted();
         $method = $this->getHttpXMethod();
 
-        $this->getLogger()->debug($method);
-
         switch ($method) {
             case 'PUT' :
                 $label = $this->params()->fromPost('label');
-                $this->getLogger()->debug($label);
                 $discipline = new Discipline();
                 $this->getEntityManager()->persist($discipline);
                 $discipline->setLabel($label);
@@ -275,7 +272,6 @@ class AdministrationController extends AbstractOscarController
 
                 case 'DELETE' :
                     $id = $this->params()->fromRoute('id');
-                    $this->getLogger()->debug("Suppression du type " + $id);
                     if( $id ){
                         $type = $this->getEntityManager()
                             ->getRepository(OrganizationType::class)
@@ -289,6 +285,7 @@ class AdministrationController extends AbstractOscarController
                                 $this->getEntityManager()->remove($type);
                                 $this->getEntityManager()->flush();
                             } catch (ForeignKeyConstraintViolationException $e ){
+                                $this->getLogger()->error("Impossible de supprimer le type d'organisation: " . $e->getMessage());
                                 return $this->getResponseInternalError("Erreur : ce type d'organisation est encore utilisé.");
                             }
                             return $this->getResponseOk("Type supprimé");
@@ -300,9 +297,7 @@ class AdministrationController extends AbstractOscarController
                     return $this->getResponseNotImplemented("En cours de développement");
 
                 case 'POST' :
-                    $this->getLogger()->debug(print_r($_POST, true));
                     $id = $this->params()->fromPost('id', null);
-
                     $type = null;
                     if( $id ){
                         $type = $this->getEntityManager()
@@ -315,14 +310,10 @@ class AdministrationController extends AbstractOscarController
                         $this->getEntityManager()->persist($type);
                     }
 
-
                     $type->setLabel($this->params()->fromPost('label'));
                     $type->setDescription($this->params()->fromPost('description'));
                     $root = null;
                     $root_id = intval($this->params()->fromPost('root_id'));
-
-                    $this->getLogger()->debug(print_r($type->toJson(), true));
-                    $this->getLogger()->debug($root_id);
 
                     if( $root_id && $root_id != $type->getId() )
                             $root = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $root_id]);
@@ -919,7 +910,6 @@ class AdministrationController extends AbstractOscarController
         switch ($method) {
             case 'GET' :
                 $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class)->createQueryBuilder('d')->orderBy('d.label');
-                $this->getLogger()->debug("DEBUG : typeDocumentActionApi() entity TypeDocument found()");
                 $results = $entityRepos->getQuery()->getResult();
                 $out = [];
                 /** @var OrganizationRole $role */

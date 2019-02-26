@@ -272,7 +272,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         /** @var ValidationPeriod $validationPeriod */
         foreach ($validationPeriods as $validationPeriod){
-            $this->getLogger()->debug("Invalidation " . $validationPeriod);
             $log = $validationPeriod->getLog();
             $log .= $msg;
             $validationPeriod->setLog($log);
@@ -368,10 +367,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return true;
     }
     public function reSendPeriod( $year, $month, Person $declarer ){
-        $this->getLogger()->debug("Réenvoi de la période $month $year par $declarer");
         $validationsPeriods = $this->getValidationPeriods((int)$year, (int)$month, $declarer);
 
-        $this->getLogger()->debug("Il y'a " . count($validationsPeriods) . " a réenvoyer");
         /** @var ValidationPeriod $validationPeriod */
         foreach ($validationsPeriods as $validationPeriod) {
             $this->reSendValidation($validationPeriod);
@@ -2134,8 +2131,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $periodValidations = $this->getPeriodValidation($person, $month, $year);
 
-        $this->getLogger()->debug("Nombre de validation pour cette période : " . count($periodValidations));
-
         $periodValidationsDt = [];
         /** @var ValidationPeriod $periodValidation */
         foreach ($periodValidations as $periodValidation) {
@@ -2945,8 +2940,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
 
-            $this->getLogger()->debug("$timesheet");
-
             $objectGroup = ValidationPeriod::GROUP_OTHER;
             $object = $timesheet->getLabel();
             $objectId = -1;
@@ -2975,7 +2968,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'comment' => $comment
                 ];
 
-                $this->getLogger()->debug(print_r($declarations[$key], true));
                 $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup, $comment);
             }
             $timesheet->setValidationPeriod($declarations[$key]['declaration']);

@@ -84,8 +84,6 @@ class TimesheetController extends AbstractOscarController
         if( $this->isAjax() ){
             switch ($method) {
                 case 'POST':
-                    $this->getLogger()->debug(print_r($_POST, true));
-
                     $validationPeriodId = (int) $this->params()->fromPost('validationperiod_id');
                     $action             = $this->params()->fromPost('action');
 
@@ -116,8 +114,6 @@ class TimesheetController extends AbstractOscarController
                         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
                         }
-
-                        $this->getLogger()->debug("VALIDATION SCIENTIFIQUE");
 
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
@@ -274,8 +270,6 @@ class TimesheetController extends AbstractOscarController
         if( $this->isAjax() ){
             switch ($method) {
                 case 'POST':
-                    $this->getLogger()->debug(print_r($_POST, true));
-
                     $validationPeriodId = (int) $this->params()->fromPost('validationperiod_id');
                     $action             = $this->params()->fromPost('action');
 
@@ -306,8 +300,6 @@ class TimesheetController extends AbstractOscarController
                         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
                         }
-
-                        $this->getLogger()->debug("VALIDATION SCIENTIFIQUE");
 
                         return $this->getResponseDeprecated("En cours de modification SCI");
 
@@ -613,15 +605,11 @@ class TimesheetController extends AbstractOscarController
 
             $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
             $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
-            //$spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
 
-
-            $this->getLogger()->debug(print_r($datas, true));
             $line = $lineWpStart;
 
             foreach ($datas['declarations']['activities'] as $groupData) {
                 $labelG = $groupData['label'];
-                $this->getLogger()->debug($labelG);
 
                 $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
                 $spreadsheet->getActiveSheet()->setCellValue('A'.$line, $labelG);
@@ -682,8 +670,6 @@ class TimesheetController extends AbstractOscarController
             $line++;
 
             foreach( $this->getOthersWP() as $other ){
-                $this->getLogger()->debug(print_r($other, true));
-                // foreach ($datas['declarations']['activities'] as $groupData) {
                 $spreadsheet->getActiveSheet()->insertNewRowBefore(($line +1));
                 $spreadsheet->getActiveSheet()->setCellValue('B'.$line, $other['label']);
                 $daysDatas = $datas['declarations']['others']['Hors-lot']['subgroup'][$other['label']]['days'];
@@ -1449,7 +1435,6 @@ class TimesheetController extends AbstractOscarController
                 ->setStatus($status)
                 ->setPerson($person);
 
-            $this->getLogger()->debug("Traitement du créneau " . $timesheet . ' créneaux');
             $timesheets[] = $timesheet;
 
         }

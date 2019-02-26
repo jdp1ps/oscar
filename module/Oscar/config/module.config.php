@@ -839,7 +839,6 @@ return array(
             /** Système de distribution des mails */
             'MailTransport' => function( $sm ){
                 $conf = $sm->get('Config')['oscar']['mailer']['transport'];
-                $sm->get('Logger')->debug(print_r($conf, true));
                 $transport = new Swift_SmtpTransport($conf['host'], $conf['port'], $conf['security'] );
                 $transport->setUsername($conf['username'])
                     ->setPassword($conf['password']);

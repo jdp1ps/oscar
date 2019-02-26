@@ -2073,7 +2073,6 @@ class ConsoleController extends AbstractOscarController
                         if ($activity->getStatus() != Activity::STATUS_PROGRESS) {
                             $activity->setStatus(Activity::STATUS_PROGRESS);
                             $this->getEntityManager()->flush($activity);
-                            $this->getLogger()->debug($text);
                         }
                     }
                 }

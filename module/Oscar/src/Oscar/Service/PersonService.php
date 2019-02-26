@@ -274,8 +274,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         // Résultat
         $persons = [];
 
-        $this->getLoggerService()->debug("Récupération des personnes ayant le privilège $privilegeFullCode sur $activity");
-
         /** @var PrivilegeRepository $privilegeRepository */
         $privilegeRepository = $this->getEntityManager()->getRepository(Privilege::class);
 
@@ -296,10 +294,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                 }
             }
 
-            $this->getLoggerService()->debug("Rôles : " . implode(',', $rolesIds));
-
             if( $includeApp ) {
-
 
                 // Selection des personnes qui ont le filtre LDAP (Niveau applicatif)
                 if ($ldapFilters) {
@@ -344,7 +339,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
             foreach ($activity->getPersonsDeep() as $p ){
                 if( in_array($p->getRole(), $rolesIds) ){
-                    $this->getLoggerService()->debug('Person : ' . $p->getPerson());
                     $persons[$p->getPerson()->getId()] = $p->getPerson();
                 }
             }
@@ -355,17 +349,13 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
                 /** @var OrganizationPerson $personOrganization */
                 if( $organization->isPrincipal() ) {
-                    $this->getLoggerService()->debug("Recherche dans " . $organization->getOrganization());
                     foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
                         if (in_array($personOrganization->getRole(), $rolesIds)) {
-                            $this->getLoggerService()->debug('Person : ' . $personOrganization->getPerson());
                             $persons[$personOrganization->getPerson()->getId()] = $personOrganization->getPerson();
                         }
                     }
                 }
             }
-
-            $this->getLoggerService()->debug("PERSONNES : " . count($persons));
 
             return $persons;
 

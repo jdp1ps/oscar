@@ -146,8 +146,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
 
     public function generateNotificationsActivities($silent = false)
     {
-        $this->debug("=====================\nGénération des notifications\n=====================");
-
         $activities = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
             ->where('a.dateEnd IS NULL OR a.dateEnd >= :now')
@@ -231,8 +229,6 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
     {
         $context = "milestone-" . $milestone->getId();
         $activity = $milestone->getActivity();
-
-        $this->debug('## Génération pour le jalon ' . $context . ' ' . $milestone->getType());
 
         $persons = $this->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $milestone->getActivity());
 

@@ -153,7 +153,6 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
                 }
             } else {
                 $this->getServiceLocator()->get('Logger')->info(sprintf(' ~ Email pour %s non distribué (Pas d\'exception)', StringUtils::formatMail($msg->getTo())));
-                // $this->getServiceLocator()->get('Logger')->debug($msg->toString());
             }
         } else {
             $this->getMailer()->send($msg);
