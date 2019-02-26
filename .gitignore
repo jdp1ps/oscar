@@ -4,6 +4,8 @@ config/autoload/oscar-editable.yml
 config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
 
+trash
+
 # Développement
 databases_maintenance/backup/*
 databases_maintenance/copy-prod-to-local.sh
