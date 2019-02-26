@@ -87,8 +87,8 @@ Refonte complète de l'interface de saisie et de validation des déclarations
  
  
 ## FIX
- - Feuille de temps > Déclaration : Le commentaire n'est plus concervé d'une saisie à l'autre
- - Doc > Installation : Commande des privilèges manquante dans le documentation d'installation
+ - Feuille de temps > Déclaration : Le commentaire n'est plus conservé d'une saisie à l'autre
+ - Doc > Installation : Commande des privilèges manquante dans la documentation d'installation
  - Doc > Import d'activité : La partie consacrée aux paiements est plus claire (ajout d'exemple)
  - Activité > Numéro : La capacité du champ a été augmentée 
  - Le privilèges 'Voir les notifications plannifiées' fonctionne correctement
