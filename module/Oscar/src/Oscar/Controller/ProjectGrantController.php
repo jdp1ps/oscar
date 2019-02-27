@@ -523,9 +523,30 @@ class ProjectGrantController extends AbstractOscarController
         $activity = $this->getProjectGrantService()->getGrant($id);
 
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
+        $documentDatas = $activity->documentDatas();
 
-        foreach ($activity->documentDatas() as $key=>$value) {
-            $templateProcessor->setValue($key, $value);
+        foreach ($documentDatas as $key=>$value) {
+            if( is_array($value) ){
+
+            } else {
+                $templateProcessor->setValue($key, $value);
+            }
+        }
+
+        // versements
+        try {
+            $versementsPrevus = $documentDatas['versementPrevuMontant'];
+            $versementsPrevusDate = $documentDatas['versementPrevuDate'];
+            if( count($versementsPrevus) ){
+                $templateProcessor->cloneRow('versementPrevuMontant', count($versementsPrevus));
+                for( $i=0; $i<count($versementsPrevus); $i++){
+                    $templateProcessor->setValue('versementPrevuMontant#'.($i+1), $versementsPrevus[$i]);
+                    $templateProcessor->setValue('versementPrevuDate#'.($i+1), $versementsPrevusDate[$i]);
+                }
+            }
+
+        } catch (\Exception $e ){
+            $this->getLogger()->warning("Le template $doc ne contient pas de variable $key");
         }
 
         $filename = 'oscar-' . $activity->getOscarNum().'-' . $doc. '.docx';

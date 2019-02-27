@@ -308,6 +308,7 @@ class Activity implements ResourceInterface
      *
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="ActivityPayment", mappedBy="activity", cascade={"remove"})
+     * @ORM\OrderBy({"datePayment" = "ASC", "datePredicted" = "ASC"})
      */
     protected $payments;
 
@@ -1811,14 +1812,13 @@ class Activity implements ResourceInterface
         }
         $datas['versements-prevus'] = implode(', ', $versementsPrevusStr);
         $datas['versements-effectues'] = implode(', ', $versementsEffectuesStr);
-        // TODO
-//        for( $i=0; $i<count($versementsPrevus); $i++ ){
-//
-//        }
-//
-//        for( $i=0; $i<count($versementsEffectues); $i++ ){
-//
-//        }
+
+        $datas['versementPrevuMontant'] = $versementsPrevus;
+        $datas['versementPrevuDate'] = $versementsPrevusDate;
+
+        $datas['versement-effectue-montant'] = $versementsPrevus;
+        $datas['versement-effectue-date'] = $versementsPrevusDate;
+
 
         return $datas;
 
