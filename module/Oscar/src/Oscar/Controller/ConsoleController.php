@@ -493,7 +493,11 @@ class ConsoleController extends AbstractOscarController
      */
     public function testConfigAction()
     {
-        $configPath = realpath(__DIR__ . '/../../../../../config/autoload/local.php');
+        $rootPath = __DIR__ . '/../../../../../';
+        $configPath = 'config/autoload/local.php';
+        $configPathReal = realpath($rootPath.$configPath);
+        $configEditablePath = 'config/autoload/oscar-editable.yml';
+        $configEditablePathReal = realpath($rootPath.$configEditablePath);
 
         $this->getConsole()->clear();
         $this->getConsole()->writeLine("##################################################################", ColorInterface::LIGHT_WHITE);
@@ -550,12 +554,28 @@ class ConsoleController extends AbstractOscarController
         $this->getConsole()->write($configPath, ColorInterface::LIGHT_WHITE);
         $this->getConsole()->write(" ... ", ColorInterface::WHITE);
 
-        if( !file_exists($configPath) ){
+        if( $configPathReal && !file_exists($configPathReal) ){
             $this->getConsole()->writeLine("ERROR", ColorInterface::WHITE, ColorInterface::RED);
-            $this->consoleError("Le fichier de configuration 'config/config/autoload/local.php' n'existe pas/n'est pas accessible");
+            $this->consoleError("Le fichier de configuration '$configPath' n'existe pas/n'est pas accessible");
             return;
         }
-        $this->getConsole()->writeLine("OK", ColorInterface::BLACK, ColorInterface::GREEN);
+        $this->getConsole()->writeLine("$configPathReal OK", ColorInterface::BLACK, ColorInterface::GREEN);
+
+        $this->getConsole()->write(" * Fichier de configuration éditable ", ColorInterface::WHITE);
+        $this->getConsole()->write($configEditablePath, ColorInterface::LIGHT_WHITE);
+        $this->getConsole()->write(" ... ", ColorInterface::WHITE);
+
+        if( $configEditablePathReal && !file_exists($configEditablePathReal) ){
+            $this->getConsole()->writeLine("ERROR", ColorInterface::WHITE, ColorInterface::RED);
+            $this->consoleError("Le fichier de configuration '$configEditablePath' n'existe pas/n'est pas accessible");
+            return;
+        }
+        if( !is_writable($configEditablePath) ){
+            $this->getConsole()->writeLine("ERROR", ColorInterface::WHITE, ColorInterface::RED);
+            $this->consoleError("Le fichier de configuration '$configEditablePath' n'est pas éditable");
+            return;
+        }
+        $this->getConsole()->writeLine("$configEditablePathReal OK", ColorInterface::BLACK, ColorInterface::GREEN);
 
         // Chargement de la configuration
         $example = require($configPath);
