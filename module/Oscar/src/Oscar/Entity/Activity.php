@@ -1682,6 +1682,34 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * Retourne la date de début sous la forme d'une chaîne de caractère.
+     *
+     * @param string $format
+     * @return string
+     */
+    public function getDateStartStr( $format = 'Y-m-d' ){
+        if( $this->getDateStart() ){
+            return $this->getDateStart()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Retourne la date de fin sous la forme d'une chaîne de caractère.
+     *
+     * @param string $format
+     * @return string
+     */
+    public function getDateEndStr( $format = 'Y-m-d' ){
+        if( $this->getDateEnd() ){
+            return $this->getDateEnd()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * Retourne les données préparées pour le génération des documents
      */
     public function documentDatas(){
@@ -1694,10 +1722,10 @@ class Activity implements ResourceInterface
             'pfi' => $this->getCodeEOTP(),
             'oscar' => $this->getOscarNum(),
             'montant' => number_format((double)$this->getAmount(), 2, ',', ' ') . $this->getCurrency()->getSymbol(),
-            'annee-debut' => $this->getDateStart()->format('Y'),
-            'annee-fin' => $this->getDateEnd()->format('Y'),
-            'debut' => $this->getDateStart()->format('d/m/Y'),
-            'fin' => $this->getDateEnd()->format('d/m/Y'),
+            'annee-debut' => $this->getDateStartStr('Y'),
+            'annee-fin' => $this->getDateEndStr('Y'),
+            'debut' => $this->getDateStartStr('d/m/Y'),
+            'fin' => $this->getDateEndStr('d/m/Y'),
             'intitule' => $this->getLabel(),
             'label' => $this->getLabel(),
             'acronym' => $this->getAcronym(),
@@ -1931,20 +1959,6 @@ class Activity implements ResourceInterface
     public function getResourceId()
     {
         return self::class;
-    }
-
-    public function getDateStartStr(){
-        if( $this->getDateStart() ){
-            return $this->getDateStart()->format('Y-m-d');
-        }
-        return "";
-    }
-
-    public function getDateEndStr(){
-        if( $this->getDateEnd() ){
-            return $this->getDateEnd()->format('Y-m-d');
-        }
-        return "";
     }
 
     public function toJson()
