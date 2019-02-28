@@ -2,7 +2,7 @@
     <div>
         <div class="overlay" v-if="showSelector">
 
-            <transition name="fade">
+
             <div class="overlay-content">
                 <p>Choississez un type de créneau : </p>
 
@@ -31,7 +31,7 @@
                     <button class="btn btn-primary" v-if="usevalidation" :class="selection ? '' : 'disabled'" @click="handlerValidSelection()">Valider</button>
                 </nav>
             </div>
-            </transition>
+
         </div>
         <div class="dropdown">
             <button class="btn-lg btn btn-default dropdown-toggle" type="button" @click.prevent="showSelector = true">

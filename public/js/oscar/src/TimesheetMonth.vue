@@ -290,6 +290,7 @@
 
                 <h2>
                     Déclarations de temps pour <strong>{{ ts.person }}</strong>
+                    <button @click="fetch">Refresh</button>
                 </h2>
 
                 <h3 class="periode">Période

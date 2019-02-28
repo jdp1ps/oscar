@@ -224,6 +224,10 @@
 </div>
 </template>
 <script>
+
+    // node node_modules/.bin/poi watch --format umd --moduleName Calendar --filename.css Calendar.css --filename.js Calendar.js --dist public/js/oscar/dist public/js/oscar/src/Calendar.vue
+
+
     import WeekView from './WeekView.vue';
     import ListView from './ListView.vue';
     import EventItemImport from './EventItemImport.vue';
@@ -448,7 +452,7 @@
             this.eventEditData = {};
             this.eventEditDataVisible = false;
             this.currentDay = moment();
-            this.loading = true;
+            this.loading = false;
             this.remoteError = "";
             this.workPackageIndex = [];
             this.wps = null;
@@ -1373,6 +1377,7 @@
 
             /////////////////////////////////////////////////////////////////// REST
             fetch(){
+                /*
                 this.ics = [];
                 this.transmission = "Chargement des créneaux...";
                 this.loading = true;
@@ -1389,7 +1394,7 @@
                 ).then(() => {
                     this.transmission = "";
                     this.store.loading = false;
-                });
+                });*/
             }
         },
 
@@ -1397,7 +1402,8 @@
 
             console.log(CalendarModel.getInstance());
 
-            var allowState = ['week', 'list', 'timesheet'];
+            var allowState = ['week'];
+
             this.state = 'week';
             if( allowState.indexOf(window.location.hash.substring(1)) >= 0 ){
                 this.state = window.location.hash.substring(1);
