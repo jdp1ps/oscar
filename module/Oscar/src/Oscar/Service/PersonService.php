@@ -8,6 +8,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\AuthentificationRepository;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
@@ -457,6 +458,72 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         } catch(\Exception $e ){
             throw $e;
         }
+    }
+
+    public function getPersonAuthentification( Person $person ){
+        /** @var AuthentificationRepository $repo */
+        $repo = $this->getEntityManager()->getRepository(Authentification::class);
+
+        return $repo->getAuthentificationPerson($person);
+    }
+
+    /**
+     * Retourne la liste des roles de la person définit manuellement sur l'authentification ou obtenu via les
+     * groupes LDAP
+     * @return Role[]
+     */
+    public function getRolesApplication(Person $person){
+
+        /** @var Role[] $inRoles */
+        $inRoles = [];
+
+        // Récupération des rôles via l'authentification
+        $authentification = $this->getPersonAuthentification($person);
+
+        /** @var Role $role */
+        foreach ($authentification->getRoles() as $role) {
+            $inRoles[$role->getRoleId()] = $role;
+        }
+
+        if( $person->getLdapMemberOf() ){
+
+            // Récupération des rôles avec des filtres LDAP
+            $roles = $this->getEntityManager()->getRepository(Role::class)->getRolesLdapFilter();
+            /** @var Role $role */
+            foreach ($roles as $role) {
+
+                // Le rôle est déjà présent "en dur"
+                if( array_key_exists($role->getRoleId(), $inRoles) ) continue;
+
+                // Test des rôles via le filtreLDAP
+                $roleLdapFilter = $role->getLdapFilter();
+
+                foreach ($person->getLdapMemberOf() as $memberOf) {
+                    if( strpos($roleLdapFilter, $memberOf) >= 0 ){
+                        $inRoles[$role->getRoleId()] = $role;
+                        continue 2;
+                    }
+                }
+            }
+        }
+
+        return $inRoles;
+    }
+
+    /**
+     * @param Person $person
+     * @return string[]
+     */
+    public function getRolesApplicationArray(Person $person){
+        return array_keys($this->getRolesApplication($person));
+    }
+
+
+
+
+
+    public function getRolesAuthentification(Authentification $authentification){
+        return $authentification->getRoles();
     }
 
     public function getCoWorkerIds( $idPerson ){

@@ -116,7 +116,6 @@ class PersonController extends AbstractOscarController
 
         $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
 
-
         $privilegesDT = $this->getEntityManager()->getRepository(Privilege::class)->findBy([], ['root' => 'DESC']);
 
         $privileges = [];
@@ -135,8 +134,13 @@ class PersonController extends AbstractOscarController
         }
         $rolesApplication = [];
         try {
-            $rolesApplication = $this->getPersonService()->getRolesApplication($person);
+            $roles = $this->getPersonService()->getRolesApplication($person);
+            foreach ($roles as $role) {
+                $rolesApplication[] = $role->getId();
+            }
+
         } catch (\Exception $e ){}
+
         $rolesOrganisation = [];
 
         /** @var OrganizationPerson $personOrganization */
@@ -156,7 +160,6 @@ class PersonController extends AbstractOscarController
             }
 
         }
-
 
         return [
             'person' => $person,
