@@ -518,10 +518,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return array_keys($this->getRolesApplication($person));
     }
 
-
-
-
-
     public function getRolesAuthentification(Authentification $authentification){
         return $authentification->getRoles();
     }

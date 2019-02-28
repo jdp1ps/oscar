@@ -474,10 +474,11 @@
 
                     <div class="data-row">
                         <div class="data-label">Groupes LDAP</div>
+
                         <div class="data-value">
                             <?php if( $entity->getLdapMemberOf() ): ?>
                                 <nav class="options-menu right">
-                                    <a href="#" onclick="$('.ldap-groups').toggleClass('show-off')">
+                                    <a href="#" id="toogleButton">
                                         <i class="icon-eye"></i> Groupes sans effets</a>
                                 </nav>
                                 <ul class="ldap-groups">
@@ -492,6 +493,14 @@
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 </ul>
+                                <script>
+                                    (function(){
+                                        document.querySelector('#toogleButton').addEventListener('click', function(evt){
+                                            evt.preventDefault();
+                                            document.querySelector('.ldap-groups').classList.toggle('show-off');
+                                        })
+                                    })();
+                                </script>
                             <?php else: ?>
                                 <div class="alert alert-info">
                                     Aucun groupe LDAP
