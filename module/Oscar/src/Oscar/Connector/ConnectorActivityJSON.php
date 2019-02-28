@@ -628,7 +628,12 @@ class ConnectorActivityJSON implements ConnectorInterface
                             ->setActivity($activity)
                             ->setAmount($amount);
                         $this->entityManager->flush($payment);
-                        $repport->addadded(sprintf("Ajout d'un versement de '%s' € le '%s' dans '%s'", $amount, $date->format('D M Y'), $activity));
+
+                        $repport->addadded(sprintf("Ajout d'un versement de '%s' €, effectué le '%s' (Prévu le '%s) dans '%s'",
+                            $amount,
+                            $datePayment ? $datePayment->format('D M Y') : 'N.D',
+                            $datePredicted ? $datePredicted->format('D M Y') : 'N.D',
+                            $activity));
                     }
 
                 } catch ( \Exception $e ){
