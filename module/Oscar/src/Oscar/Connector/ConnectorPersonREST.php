@@ -11,6 +11,7 @@ namespace Oscar\Connector;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Monolog\Logger;
+use mysql_xdevapi\Exception;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
@@ -103,6 +104,8 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
         $url = $this->getParameter('url_persons');
 
+        $repport->addnotice("REQUEST : " . $url);
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -133,6 +136,11 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             } else {
                 $personsDatas = $json;
             }
+
+            if( !is_array($personsDatas) ){
+                throw new \Exception("L'API n'a pas retourné un tableau de donnée");
+            }
+            $repport->addnotice(count($personsDatas). " a traiter.");
             ////////////////////////////////////
 
             foreach( $personsDatas as $personData ){

@@ -47,6 +47,7 @@ use Oscar\Service\NotificationService;
 use Oscar\Strategy\Search\ActivityElasticSearch;
 use Oscar\Strategy\Search\ActivityZendLucene;
 use Oscar\Utils\ActivityCSVToObject;
+use Oscar\Utils\PhpPolyfill;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Yaml;
 use Zend\Console\Adapter\AdapterInterface;
@@ -885,7 +886,7 @@ class ConsoleController extends AbstractOscarController
                 $this->getEntityManager());
 
             $datas = $sync->syncAll();
-            $json = json_encode($datas, JSON_PRETTY_PRINT);
+            $json = PhpPolyfill::jsonEncode($datas, JSON_PRETTY_PRINT);
             $error =  json_last_error();
 
             if( $error ){

@@ -137,6 +137,10 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
                 } else {
                     $jsonDatas = $json;
                 }
+
+                if( !is_array($jsonDatas) ){
+                    throw new \Exception("L'API n'a pas retourné un tableau de donnée");
+                }
                 ////////////////////////////////////
 
                 foreach( $jsonDatas as $data ){
