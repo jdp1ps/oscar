@@ -127,6 +127,26 @@
             </div>
         </transition>
 
+        <transition name="fade">
+            <div class="overlay" v-if="configureColor">
+                <div class="overlay-content">
+
+                    <h2>
+                        <i class="icon-tags"></i> Couleurs des activités
+                    </h2>
+
+                    <article v-for="a in ts.activities">
+                        <strong :style="{ 'background-color': _colorsProjects[a.acronym] }">{{ a.acronym }}</strong>
+                        <em>{{ a.label }}</em>
+                        <input type="color" @change="handlerChangeColor(a.acronym, $event)" :value="_colorsProjects[a.acronym]">
+                    </article>
+                    <nav class="buttons">
+                        <button class="btn btn-primary" @click="configureColor = false">Terminé</button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
         <div class="overlay" v-if="error" style="z-index: 2002">
             <div class="content container overlay-content">
                 <h2><i class="icon-attention-1"></i> Oups !</h2>
@@ -287,11 +307,14 @@
 
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
             <div class="month col-lg-8">
-
                 <h2>
                     Déclarations de temps pour <strong>{{ ts.person }}</strong>
-                    <button @click="fetch">Refresh</button>
+                    <small style="position: absolute; right: 0; font-size: 14px; cursor: pointer" @click="configureColor = true">
+                        Options
+                        <i class="icon-cog"></i>
+                    </small>
                 </h2>
+
 
                 <h3 class="periode">Période
                     <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
@@ -310,7 +333,6 @@
                     </a>
 
                 </h3>
-
                 <div class="month">
                     <header class="month-header">
                         <strong>Lundi</strong>
@@ -341,6 +363,7 @@
                                 <timesheetmonthday v-for="day in week.days"
                                                    :class="selectedDay == day ? 'selected':''"
                                                    :others="ts.otherWP"
+                                                   :projectscolors="_colorsProjects"
                                                    @selectDay="handlerSelectData(day)"
                                                    @daymenu="handlerDayMenu"
                                                    @debug="debug = $event"
@@ -549,11 +572,12 @@
                         Vous n'être identifié comme déclarant sur aucune activité pour cette période. Si cette situation
                         vous semble anormale, prenez contact avec votre responsable scientifique.
                     </p>
-                    <section class="card xs" v-for="a in ts.activities" @click.shift="debug = a" v-else>
+                    <section class="card xs" v-for="a in ts.activities" @click="configureColor = true" v-else>
                         <div class="week-header interaction-off">
 
-                                <span>
+                                <span >
                                     <strong>{{ a.acronym }}</strong>
+                                    <span class="icon-tag" :style="{'color': _colorsProjects[a.acronym] }">&nbsp;</span>
                                     <i v-if="a.validation_state == null"></i>
                                     <i class="icon-cube" v-else-if="a.validation_state.status == 'send-prj'"
                                        title="Validation projet en attente"></i>
@@ -567,6 +591,7 @@
                                        title="Cette déclaration est valide"></i>
                                     <br>
                                     <em class="text-thin">{{ a.label }}</em>
+
                                 </span>
                             <small class="subtotal">
                                 <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
@@ -971,6 +996,22 @@
                     type: 'infos',
                 },
 
+                configureColor: false,
+
+                _colorsProjects: null,
+                colors: [
+                    "#0b098c",
+                    "#09518c",
+                    "#09858c",
+                    "#098c66",
+                    "#098c27",
+                    "#818c09",
+                    "#8c6d09",
+                    "#8c4e09",
+                    "#8c1109",
+                    "#8c0971",
+                    "#8c6f09"],
+
                 copyClipboard: null,
                 clipboardDataDay: null,
 
@@ -1029,6 +1070,11 @@
         },
 
         computed: {
+
+            projectsColors(){
+                return this._colorsProjects;
+            },
+
             recapsend() {
                 let recap = {}, hl = {};
 
@@ -1259,6 +1305,15 @@
         },
 
         methods: {
+            handlerChangeColor(acronym, event){
+                let old = JSON.parse(JSON.stringify(this._colorsProjects));
+                old[acronym] = event.target.value;
+                this._colorsProjects = old;
+                if( window.localStorage ){
+                    window.localStorage.setItem('colorsprojects', JSON.stringify(this._colorsProjects));
+                }
+                //this.$vm.$forceUpdate();
+            },
 
             handlerFillMonth(withWP){
 
@@ -1710,6 +1765,18 @@
             this.month = this.defaultMonth;
             this.year = this.defaultYear;
             this.dayLength = this.defaultDayLength;
+
+
+            if( window.localStorage ){
+                if( window.localStorage.getItem("colorsprojects") ){
+                    this._colorsProjects = JSON.parse(window.localStorage.getItem("colorsprojects"));
+                } else {
+                    this._colorsProjects = {};
+                }
+            }
+
+
+
 
             this.fetch(true)
         }

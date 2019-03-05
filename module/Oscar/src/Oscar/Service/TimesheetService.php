@@ -2090,7 +2090,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             /** @var ValidationPeriod $period */
             $periodActivityValidation = $this->getValidationPeriodActivityAt($workPackage->getActivity(), $person, $year, $month);
 
-            if (!array_key_exists($activity->getId())) {
+            if (!array_key_exists($activity->getId(), $activities)) {
                 $activities[$activity->getId()] = [
                     'id' => $activity->getId(),
                     'acronym' => $activity->getAcronym(),

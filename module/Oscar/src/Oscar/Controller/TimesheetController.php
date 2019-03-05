@@ -1166,7 +1166,7 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarationAction()
     {
-        return $this->getResponseDeprecated("Cette fonctionnalité n'existe plus");
+        return [];
     }
 
     protected function getQueryData()
