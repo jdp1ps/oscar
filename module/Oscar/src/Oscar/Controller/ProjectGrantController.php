@@ -1297,10 +1297,10 @@ class ProjectGrantController extends AbstractOscarController
             /** @var \Zend\Http\Request $request */
             $request = $this->getRequest();
             if ($request->isPost()) {
-                $project = $this->getProjectService()->getProject($request->getPost('project_id'));
-                if (!$project) {
-                    throw new \Exception('Aucun projet ne correspond');
-                }
+                try{
+                    $project = $this->getProjectService()->getProject($request->getPost('project_id'));
+                } catch (\Exception $e) {}
+
                 if ($entity->getProject()) {
                     $entity->getProject()->touch();
                 }
