@@ -8,7 +8,23 @@
             </div>
         </div>
 
-        <div class="overlay" v-if="editCorrespondance">
+        <div class="overlay" v-if="debug">
+            <div class="overlay-content">
+                <a href="#" @click="debug = null">CLOSE</a>
+                <pre>{{ debug }}</pre>
+            </div>
+        </div>
+
+        <div class="overlay" v-if="tutostep > 0">
+            <div class="overlay-content">
+                <div v-if="tutostep == 1">
+
+                </div>
+                <a href="#" @click="debug = null">CLOSE</a>
+            </div>
+        </div>
+
+        <div class="overlay" v-if="editCorrespondance" :class="(tutostep > 0 && tutostep != 4) ? 'blur' : ''">
             <div class="overlay-content">
                 <i class="icon-cancel-outline overlay-closer" @click="editCorrespondance = null"></i>
 
@@ -36,37 +52,75 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6">
-                <h3>Critères d'importation</h3>
+            <div class="col-md-6 card" :class="(tutostep > 0 && tutostep != 1) ? 'blur' : ''">
+                <h3>Etape 1 : <strong>Mois à importer</strong></h3>
+                <p class="basline">Choississez le mois à importer (Vous ne pouvez importer que un mois terminé)</p>
+                <div class="help">Vous ne pouvez selectionner que un mois terminé</div>
                 <div>
                     Période de <periodselector :period="periodStart" :max="periodMax" @change="handlerPeriodChange($event)" />
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <h3>Fichier ICS (Format ICAL)</h3>
+            <div class="col-md-6 card" :class="(tutostep > 0 && tutostep != 2) ? 'blur' : ''">
+                <h3>Etape 2 : <strong>Fichier ICS (Format ICAL)</strong></h3>
+                <p class="basline">Selectionnez le fichier ICAL (format ICS) à charger depuis votre ordinateur</p>
                 <input type="file" @change="handlerFileSelected">
             </div>
         </div>
 
-        <div v-if="timesheets == null"></div>
-        <div v-else-if="timesheets.length == 0">
+        <div v-if="timesheets != null && timesheets.length == 0">
             <div class="alert alert-info">
                 Aucun créneau chargé depuis le fichier ICS
             </div>
         </div>
+
         <div class="row" v-else>
-            <div class="col-md-8">
-                <h2><i class="icon-pin"></i>Créneaux trouvés</h2>
+            <div class="col-md-4 card">
+                <h3>Étape 3 : <strong>Ajuster les correspondances</strong></h3>
 
-                <p class="alert alert-info">
-                    <i class="icon-info-circled"></i>
-                    Voici les créneaux trouvès dans le calendrier que vous avez chargé. Une fois les créneaux validés,
-                    vous pourrez toujours les modifier ou les supprimer depuis l'interface de déclaration.
-                </p>
+                <div class="alert alert-info">
+                    <p>
+                        Vous trouverez ici les <strong>intitulés</strong> chargés depuis le calendrier.
+                    </p>
+                </div>
 
-                <table class="table table-condensed">
-                    <thead>
+                <div v-if="timesheets != null && timesheets.length > 0">
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="icon-filter"></i></div>
+                        <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter" />
+                    </div>
+                    <hr>
+                    <div v-for="label in labels" class="card xs correspondance" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
+                        <div class="in-ical">
+                            <i class="icon-tag"></i> <strong>{{ label }}</strong>
+                        </div>
+
+                        <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info">
+                        <i class="icon-link-outline"></i>
+                        {{ labelsCorrespondance[label.toLowerCase()].label }}
+                    </span>
+
+                        <nav>
+                            <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
+                            <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
+                        </nav>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-8 card">
+                <h2>Étape 4 : <strong>Vérifiez et finaliser</strong></h2>
+
+                <div v-if="timesheets != null && timesheets.length > 0">
+
+                    <p class="alert alert-info">
+                        <i class="icon-info-circled"></i>
+                        Voici les créneaux trouvès dans le calendrier que vous avez chargé. Une fois les créneaux importés,
+                        vous pourrez toujours les modifier ou les supprimer depuis l'interface de déclaration.
+                    </p>
+
+                    <table class="table table-condensed">
+                        <thead>
                         <tr>
                             <th>&nbsp;</th>
                             <th>Jours</th>
@@ -75,9 +129,9 @@
                             <th>Existant</th>
                             <th>TOTAL</th>
                         </tr>
-                    </thead>
+                        </thead>
 
-                    <tbody v-for="p in byPeriod" class="period">
+                        <tbody v-for="p in byPeriod" class="period">
                         <tr class="month-heading" :class="{ 'deja-envoyee': exists[p.code] && exists[p.code].hasValidation }">
                             <th colspan="6">
                                 <i class="icon-calendar"></i>
@@ -128,48 +182,10 @@
                             </td>
 
                         </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="col-md-4">
-                <h2>
-                    <i class="icon-tags"></i>
-                    Intitulés et correspondance</h2>
+                        </tbody>
+                    </table>
 
-                <div class="alert alert-info">
-                    <p>
-                        Vous trouverez ici les <strong>intitulés</strong> chargés depuis le calendrier.
-                    </p>
-
-                    <p>
-
-                    </p>
                 </div>
-
-                <div class="input-group">
-                    <div class="input-group-addon"><i class="icon-filter"></i></div>
-                    <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter" />
-                </div>
-
-                <hr>
-
-
-                <div v-for="label in labels" class="card xs correspondance" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
-                    <div class="in-ical">
-                        <i class="icon-tag"></i> <strong>{{ label }}</strong>
-                    </div>
-
-                    <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info">
-                        <i class="icon-link-outline"></i>
-                        {{ labelsCorrespondance[label.toLowerCase()].label }}
-                    </span>
-
-                    <nav>
-                        <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
-                        <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
-                    </nav>
-                </div>
-
             </div>
         </div>
         <form action="" method="post" v-if="sendData.length">
@@ -194,7 +210,8 @@
                 periodEnd: "2018-12",
                 debug: null,
                 labelsCorrespondance: {},
-                editCorrespondance: null
+                editCorrespondance: null,
+                tutostep: 0
             }
         },
 
@@ -352,7 +369,7 @@
                             t.destinationId = -1;
                             t.destinationLabel = "";
                             t.imported = false;
-                        } else {
+                        } else {editCorrespondance
                             if(  t.importable == true ){
                                 t.destinationCode = dest.code;
                                 t.destinationId = dest.id;
@@ -364,6 +381,9 @@
                     }
                 })
                 this.labelsCorrespondance[editCorrespondance.toLowerCase()] = dest;
+                if( window.localStorage ){
+                    window.localStorage.setItem('labelsCorrespondance', JSON.stringify(this.labelsCorrespondance));
+                }
                 this.editCorrespondance = null;
             },
 
@@ -735,6 +755,11 @@
                     }
                     return items;
                 }
+        },
+        mounted(){
+            if( window.localStorage && window.localStorage.getItem('labelsCorrespondance') ){
+                this.labelsCorrespondance = JSON.parse(window.localStorage.getItem('labelsCorrespondance'));
+            }
         }
     }
 </script>
