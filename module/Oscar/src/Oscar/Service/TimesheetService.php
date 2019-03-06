@@ -2031,6 +2031,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $periodOpened = 0.0;
         $periodDeclarations = 0.0;
 
+        $icsUidList = [];
+
 
         /** @var ValidationPeriod $periodValidation */
         foreach ($periodValidations as $periodValidation) {
@@ -2187,7 +2189,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         foreach ($timesheets as $t) {
 
             $dayInt = (int)$t->getDateFrom()->format('d');
+            $icsUid = $t->getIcsFileUid();
 
+            if( $icsUid != null && !array_key_exists($icsUid, $icsUidList) ){
+                $icsUidList[$icsUid] = $t->getIcsFileName();
+            }
 
             if (!$t->getActivity()) {
                 $datas = [
@@ -2254,6 +2260,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
         $output = [
+            'icsUidList' => $icsUidList,
             'feries' => $this->getLockedDays($year, $month),
             'person' => (string)$person,
             'person_id' => $person->getId(),

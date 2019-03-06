@@ -790,10 +790,42 @@ class TimesheetController extends AbstractOscarController
         // Liste des types de créneau valide
         $resume = $this->getTimesheetService()->getPersonPeriods($person, $period);
 
+        // par défaut, mois qui précède
+        if( $period == null ){
+            $now = new \DateTime();
+            $now->sub( new \DateInterval('P1M'));
+            $period = $now->format('Y-m');
+        }
+
         if( $this->getHttpXMethod() == "POST" ){
 
             $request = $this->getRequest();
             $events = json_decode($request->getPost('timesheets', '[]'), true);
+            $removePrevious = $request->getPost('previousicsuidremove', null) == 'remove';
+
+            if( $removePrevious === true ){
+                $uid = $request->getPost('previousicsuid', null);
+                if( $uid ){
+                    $periodInfos = DateTimeUtils::periodBounds($period);
+
+                    $qb = $this->getEntityManager()->createQueryBuilder();
+                    $qb->delete(TimeSheet::class, 't');
+                    $qb->where('t.icsFileUid = :icsuid');
+                    $qb->andWhere('t.person = :person');
+                    $qb->andWhere('t.dateFrom >= :dateFrom');
+                    $qb->andWhere('t.dateTo <= :dateTo');
+
+                    $qb->setParameters([
+                        'icsuid' => $uid,
+                        'person' => $person,
+                        'dateFrom' => $periodInfos['start'],
+                        'dateTo' => $periodInfos['end'],
+                    ]);
+
+                    $qb->getQuery()->execute();
+                }
+            }
+
             if (count($events)) {
                 try {
                     foreach ($events as $event) {
@@ -843,13 +875,6 @@ class TimesheetController extends AbstractOscarController
                 }
             }
 
-        }
-
-        // par défaut, mois qui précède
-        if( $period == null ){
-            $now = new \DateTime();
-            $now->sub( new \DateInterval('P1M'));
-            $period = $now->format('Y-m');
         }
 
         $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
@@ -1166,6 +1191,7 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarationAction()
     {
+        die("test");
         return [];
     }
 

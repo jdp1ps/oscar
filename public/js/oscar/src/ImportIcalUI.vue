@@ -1,11 +1,12 @@
 <template>
     <section class="oscar-ui import-ical">
         <h1>Imporation de calendrier pour <strong>{{ person }}</strong></h1>
-        <div class="overlay" v-if="debug">
-            <div class="overlay-content">
-                <a href="#" @click="debug = null">CLOSE</a>
-                <pre>{{ debug }}</pre>
-            </div>
+
+        <div class="alert alert-danger" v-if="icsUidList && icsUidList.length > 0">
+            Vous avez déjà importé des fichiers ICS pour cette période, pensez à vérifier si ce nouvel import ne provoque pas l'apparition de doublons :
+            <ul>
+                <li v-for="name, id in icsUidList"><strong>{{ name }}</strong> <small>( UID: {{ id }})</small></li>
+            </ul>
         </div>
 
         <div class="overlay" v-if="debug">
@@ -15,12 +16,17 @@
             </div>
         </div>
 
-        <div class="overlay" v-if="tutostep > 0">
+        <div class="overlay" v-if="alertImport">
             <div class="overlay-content">
-                <div v-if="tutostep == 1">
+                <h3>
+                    <i class="icon-attention-1"></i>
+                    ICAL réimporté
+                </h3>
 
-                </div>
-                <a href="#" @click="debug = null">CLOSE</a>
+                <p>Vous avez déjà importé ce fichier par le passé, les anciens créneaux seront remplacés</p>
+
+
+                <a href="#" @click="alertImport = ''">CLOSE</a>
             </div>
         </div>
 
@@ -52,19 +58,22 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6 card" :class="(tutostep > 0 && tutostep != 1) ? 'blur' : ''">
-                <h3>Etape 1 : <strong>Mois à importer</strong></h3>
-                <p class="basline">Choississez le mois à importer (Vous ne pouvez importer que un mois terminé)</p>
-                <div class="help">Vous ne pouvez selectionner que un mois terminé</div>
-                <div>
-                    Période de <periodselector :period="periodStart" :max="periodMax" @change="handlerPeriodChange($event)" />
+            <div class="col-md-4" :class="(tutostep > 0 && tutostep != 1) ? 'blur' : ''">
+                <div class="card">
+                    <h3>Etape 1 : <strong>Mois à importer</strong></h3>
+                    <p class="basline">Choississez le mois à importer (Vous ne pouvez importer que un mois terminé)</p>
+                    <div>
+                        Période de <periodselector :period="periodStart" :max="periodMax" @change="handlerPeriodChange($event)" />
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-6 card" :class="(tutostep > 0 && tutostep != 2) ? 'blur' : ''">
-                <h3>Etape 2 : <strong>Fichier ICS (Format ICAL)</strong></h3>
-                <p class="basline">Selectionnez le fichier ICAL (format ICS) à charger depuis votre ordinateur</p>
-                <input type="file" @change="handlerFileSelected">
+            <div class="col-md-8" :class="(tutostep > 0 && tutostep != 2) ? 'blur' : ''">
+                <div class="card">
+                    <h3>Etape 2 : <strong>Fichier ICS (Format ICAL)</strong></h3>
+                    <p class="basline">Selectionnez le fichier ICAL (format ICS) à charger depuis votre ordinateur</p>
+                    <input type="file" @change="handlerFileSelected">
+                </div>
             </div>
         </div>
 
@@ -75,8 +84,16 @@
         </div>
 
         <div class="row" v-else>
-            <div class="col-md-4 card">
-                <h3>Étape 3 : <strong>Ajuster les correspondances</strong></h3>
+            <div class="col-md-4">
+                <div class="card">
+
+                <h3>
+                    Étape 3 : <strong>Ajuster les correspondances</strong>
+                    <small>
+                        <i class="icon-help-circled"></i> Aide
+                    </small>
+
+                </h3>
 
                 <div class="alert alert-info">
                     <p>
@@ -106,10 +123,12 @@
                         </nav>
                     </div>
                 </div>
+                </div>
 
             </div>
-            <div class="col-md-8 card">
-                <h2>Étape 4 : <strong>Vérifiez et finaliser</strong></h2>
+            <div class="col-md-8">
+                <div class="card">
+                <h3>Étape 4 : <strong>Vérifiez et finaliser</strong></h3>
 
                 <div v-if="timesheets != null && timesheets.length > 0">
 
@@ -128,6 +147,7 @@
                             <th>Importables</th>
                             <th>Existant</th>
                             <th>TOTAL</th>
+
                         </tr>
                         </thead>
 
@@ -186,11 +206,21 @@
                     </table>
 
                 </div>
+                </div>
             </div>
         </div>
-        <form action="" method="post" v-if="sendData.length">
-            <input type="hidden" v-model="JSON.stringify(sendData)" name="timesheets"/>
-            <button type="submit" class="btn btn-xs btn-primary">Envoyer</button>
+
+        <form action="" method="post" v-if="sendData.length" style="margin-bottom: 3em">
+            <input type="hidden" v-model="JSON.stringify(sendData)" name="timesheets" />
+            <div class="alert alert-warning" v-if="alreadyImported">
+                Quelle action appliquer aux anciens créneaux importés pour ce calendrier ICAL ?
+                <input type="hidden" name="previousicsuid" :value="importedIcsFileUid" >
+                <label for="action">
+                    Supprimer
+                    <input type="checkbox" name="previousicsuidremove" value="remove" id="action" checked>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Importer les créneaux</button>
         </form>
 
     </section>
@@ -211,7 +241,9 @@
                 debug: null,
                 labelsCorrespondance: {},
                 editCorrespondance: null,
-                tutostep: 0
+                tutostep: 0,
+                importedIcsFileUid: null,
+                alertImport: ""
             }
         },
 
@@ -220,6 +252,7 @@
         },
 
         props: {
+            icsUidList: { required: true },
             ICAL: { required: true },
             moment: { required: true },
             dayLength: { required: true },
@@ -232,6 +265,16 @@
         },
 
         computed: {
+
+            alreadyImported(){
+                let imported = false;
+                Object.keys(this.icsUidList).forEach(uid => {
+                    if( uid == this.importedIcsFileUid )
+                        imported = true;
+                });
+                return imported;
+            },
+
             sendData(){
                 if( !this.timesheets ) return [];
                 let datas = [];
@@ -444,6 +487,11 @@
                 var icsfilename = icsData[1][0][3];
                 var icsfileuid = icsData[1][1][3];
                 var icsfiledateaddedd = moment().format('YYYY-MM-DD');
+
+                this.importedIcsFileUid = icsfileuid;
+                if( this.alreadyImported ){
+                    this.alertImport = "Vous avez déjà importez ce calendrier, les créneaux de l'importation précédente seront supprimés";
+                }
 
                 // Events
                 icsData[2].forEach((d) => {
