@@ -568,6 +568,20 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     }
 
     /**
+     * Retourne la liste des IDS des personnes qui ont autorisé la délégation du remplissage des feuilles de temps.
+     * @param $idPerson
+     */
+    public function getTimesheetDelegationIds( $idPerson ){
+        /** @var Person $person */
+        $person = $this->getPersonRepository()->find($idPerson);
+        $ids = [];
+        foreach ($person->getTimesheetsFor() as $p) {
+            $ids[] = $p->getId();
+        }
+        return $ids;
+    }
+
+    /**
      * @param int $currentPage
      * @param int $resultByPage
      *

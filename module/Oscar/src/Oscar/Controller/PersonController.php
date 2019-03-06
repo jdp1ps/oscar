@@ -172,6 +172,7 @@ class PersonController extends AbstractOscarController
     public function personnelAction(){
 
         $access = $this->getConfiguration('oscar.listPersonnel');
+
         if( $access == 0 ){
             throw new BadRequest400Exception("Cette fonctionnalité n'est pas activé");
         }
@@ -187,6 +188,7 @@ class PersonController extends AbstractOscarController
         $idCoWorkers = [];
 
         $idSubordinates = $this->getPersonService()->getSubordinateIds($this->getCurrentPerson()->getId());
+        $idTimesheet = $this->getPersonService()->getTimesheetDelegationIds($this->getCurrentPerson()->getId());
 
 
         if( $access > 1 ){
@@ -197,7 +199,7 @@ class PersonController extends AbstractOscarController
 
 
         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_INDEX) ){
-            $params['ids'] = array_merge($idCoWorkers, $idSubordinates);
+            $params['ids'] = array_merge($idCoWorkers, $idSubordinates, $idTimesheet);
         }
 
 
@@ -741,9 +743,9 @@ class PersonController extends AbstractOscarController
                 /** @var OrganizationRepository $organizationRepository */
                 $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
                 $organizationIds = $organizationRepository->getOrganizationsIdsForPerson($this->getCurrentPerson()->getId(), true);
-
                 $coworkerIds = $this->getPersonService()->getCoWorkerIds($this->getCurrentPerson()->getId());
-                if( ! in_array($id, $coworkerIds) ){
+
+                if( ! (in_array($id, $coworkerIds) || $this->getCurrentPerson()->getTimesheetsFor()->contains($person)) ){
                     throw new Unauthorized401Exception("Vous n'avez pas accès à la fiche de cette personne");
                 }
             }

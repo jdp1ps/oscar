@@ -64,7 +64,8 @@ class OscarUserContext extends UserContext
 
         // Accès niveau 1 : N+1
         $subodinates = $personRepository->getSubordinatesIds($this->getCurrentPerson()->getId());
-        if( $access > 0 && count($subodinates) > 0 ) return true;
+
+        if( $access > 0 && (count($subodinates) > 0 || count($this->getCurrentPerson()->getTimesheetsFor()) > 0)) return true;
 
         // Accès niveau 2 : Membre de l'organisation
         $idsOrga = $organisationRepository->getOrganizationsIdsForPerson($this->getCurrentPerson()->getId());
