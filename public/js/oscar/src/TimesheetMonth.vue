@@ -130,18 +130,23 @@
         <transition name="fade">
             <div class="overlay" v-if="configureColor">
                 <div class="overlay-content">
-
                     <h2>
                         <i class="icon-tags"></i> Couleurs des activités
                     </h2>
 
+                    <p>Les options ajustables ici pemettent uniquement</p>
+
                     <article v-for="a in ts.activities">
-                        <strong :style="{ 'background-color': _colorsProjects[a.acronym] }">{{ a.acronym }}</strong>
-                        <em>{{ a.label }}</em>
-                        <input type="color" @change="handlerChangeColor(a.acronym, $event)" :value="_colorsProjects[a.acronym]">
+                        <strong class="cartouche " :style="{ 'background-color': getAcronymColor(a.acronym) }">{{ a.acronym }}
+                            <em class="addon">{{ a.label }}</em>
+                        </strong>
+                        <input type="color" @change="handlerChangeColor(a.acronym, $event)" v-model="_colorsProjects[a.acronym]">
                     </article>
+                    <hr>
                     <nav class="buttons">
-                        <button class="btn btn-primary" @click="configureColor = false">Terminé</button>
+                        <button class="btn btn-primary" @click="configureColor = false">
+                            <i class="icon-cancel-alt"></i>
+                            Terminé</button>
                     </nav>
                 </div>
             </div>
@@ -955,7 +960,7 @@
 </style>
 
 <script>
-    // poi watch --format umd --moduleName  TimesheetMonth --filename.css timesheetmonth.css --filename.js TimesheetMonth.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetMonth.vue
+    // nodejs ./node_modules/.bin/poi watch --format umd --moduleName  TimesheetMonth --filename.css timesheetmonth.css --filename.js TimesheetMonth.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetMonth.vue
     import AjaxResolve from "./AjaxResolve";
 
 
@@ -1305,14 +1310,24 @@
         },
 
         methods: {
+            getAcronymColor(acronym){
+                if( this._colorsProjects.hasOwnProperty(acronym) ){
+                    return this._colorsProjects[acronym];
+                }
+                return "#333333";
+            },
+
+            /**
+             * Applique la configuration de la couleur pour l'acronyme donné.
+             */
             handlerChangeColor(acronym, event){
-                let old = JSON.parse(JSON.stringify(this._colorsProjects));
+                 let old = JSON.parse(JSON.stringify(this._colorsProjects));
                 old[acronym] = event.target.value;
                 this._colorsProjects = old;
                 if( window.localStorage ){
                     window.localStorage.setItem('colorsprojects', JSON.stringify(this._colorsProjects));
                 }
-                //this.$vm.$forceUpdate();
+                this.$forceUpdate();
             },
 
             handlerFillMonth(withWP){
