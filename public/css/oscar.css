@@ -6360,6 +6360,22 @@ body::-webkit-scrollbar-thumb {
   .cartouche.complementary .addon span nav {
     background: #65a6c7; }
 
+label.radio-selection {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.5);
+  display: block;
+  padding: .3em 1em;
+  font-weight: normal;
+  color: rgba(0, 0, 0, 0.7);
+  display: flex; }
+  label.radio-selection:hover {
+    background: white; }
+  label.radio-selection .icon {
+    font-size: 2em; }
+  label.radio-selection.selected {
+    color: black;
+    background: rgba(48, 176, 213, 0.5); }
+
 /** Extends Bootstrap **/
 .no-gutter > [class*='col-'] {
   padding-right: 0;

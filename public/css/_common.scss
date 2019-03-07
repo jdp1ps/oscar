@@ -1427,6 +1427,26 @@ $text-small: 12px;
 
 }
 
+label.radio-selection {
+  cursor: pointer;
+  background: rgba(white, .5);
+  display: block;
+  padding: .3em 1em;
+  font-weight: normal;
+  color: rgba(0,0,0,.7);
+  display: flex;
+  &:hover {
+    background: white;
+  }
+  .icon {
+    font-size: 2em;
+  }
+  &.selected {
+    color: rgba(0,0,0,1);
+    background: rgba($colorBlue, .5);
+  }
+}
+
 /** Extends Bootstrap **/
 .no-gutter > [class*='col-'] {
   padding-right: 0;

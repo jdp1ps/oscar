@@ -20,13 +20,14 @@
             <div class="overlay-content">
                 <h3>
                     <i class="icon-attention-1"></i>
-                    ICAL réimporté
+                    Vous avez déjà importer cet ICAL
                 </h3>
 
-                <p>Vous avez déjà importé ce fichier par le passé, les anciens créneaux seront remplacés</p>
+                <p>Sans autre action de votre part, les données déjà importer depuis cet ICAL seront mise à jours</p>
+                <hr>
 
-
-                <a href="#" @click="alertImport = ''">CLOSE</a>
+                <a href="#" @click="alertImport = ''" class="btn btn-primary">
+                    <i class="icon-cancel-outline"></i> Fermer</a>
             </div>
         </div>
 
@@ -144,10 +145,9 @@
                             <th>&nbsp;</th>
                             <th>Jours</th>
                             <th>Créneaux</th>
-                            <th>Importables</th>
-                            <th>Existant</th>
-                            <th>TOTAL</th>
-
+                            <th>Heures trouvées</th>
+                            <!--<th>Existant</th>-->
+                            <!--<th>TOTAL</th>-->
                         </tr>
                         </thead>
 
@@ -184,7 +184,11 @@
                                         <i class="icon-trash" @click="handlerRemoveTimesheet(t)" title="Supprimer ce créneau"></i>
                                     </nav>
                                     <small v-if="!t.importable"><i class="icon-cancel-circled"></i>Ce créneau ne peut pas être importé.</small>
-                                    <small v-else-if="!t.imported">Ce créneau sera ignoré</small>
+                                    <small v-else-if="!t.imported">
+                                        Ce créneau sera ignoré :
+                                        <span v-if="t.warning">{{ t.warning }}</span>
+                                        <span v-else>Pas de correspondance pour ce type de créneau</span>
+                                    </small>
                                 </div>
                             </td>
 
@@ -192,14 +196,14 @@
                                 <strong>{{ d.totalImport | displayMinutes }}</strong>
                             </td>
 
-                            <td class="jour-heures">
-                                <em v-if="d.exists > 0.0">{{ d.exists | displayMinutes }}</em>
-                                <em v-else>~</em>
-                            </td>
-                            <td class="jour-heures" :class="{ 'excess': d.total > d.max }">
-                                <i class="icon-attention" title="Dépassement du temps autorisé" v-if="d.total > d.max"></i>
-                                {{ d.total | displayMinutes }}
-                            </td>
+                            <!--<td class="jour-heures">-->
+                                <!--<em v-if="d.exists > 0.0">{{ d.exists | displayMinutes }}</em>-->
+                                <!--<em v-else>~</em>-->
+                            <!--</td>-->
+                            <!--<td class="jour-heures" :class="{ 'excess': d.total > d.max }">-->
+                                <!--<i class="icon-attention" title="Dépassement du temps autorisé" v-if="d.total > d.max"></i>-->
+                                <!--{{ d.total | displayMinutes }}-->
+                            <!--</td>-->
 
                         </tr>
                         </tbody>
@@ -209,19 +213,42 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-4">&nbsp;</div>
+            <div class="col-md-8">
+                <form action="" method="post" v-if="sendData.length" style="margin-bottom: 3em">
+                    <input type="hidden" v-model="JSON.stringify(sendData)" name="timesheets" />
+                    <div class="alert alert-warning" v-if="alreadyImported">
+                        <h3>Importation précédente ?</h3>
 
-        <form action="" method="post" v-if="sendData.length" style="margin-bottom: 3em">
-            <input type="hidden" v-model="JSON.stringify(sendData)" name="timesheets" />
-            <div class="alert alert-warning" v-if="alreadyImported">
-                Quelle action appliquer aux anciens créneaux importés pour ce calendrier ICAL ?
-                <input type="hidden" name="previousicsuid" :value="importedIcsFileUid" >
-                <label for="action">
-                    Supprimer
-                    <input type="checkbox" name="previousicsuidremove" value="remove" id="action" checked>
-                </label>
+                        <input type="hidden" name="previousicsuid" :value="importedIcsFileUid" >
+
+
+                        <label for="action1" class="radio-selection" :class="previousicsuidaction == 'remove' ? 'selected' : ''">
+                            <i class="icon icon-cw-outline"></i>
+                            <span>Mettre à jour les anciens créneaux (Supprimer ceux qui n'existent plus, ajouter les nouveau et modifier ceux qui ont été modifiés)</span>
+                            <input type="radio" name="previousicsuidremove" v-model="previousicsuidaction" value="remove" id="action1" checked>
+                        </label>
+
+                        <label for="action2" class="radio-selection" :class="previousicsuidaction == 'keep' ? 'selected' : ''">
+                            <i class="icon icon-attention"></i>
+                            <span>
+                                Concerver les anciens créneaux importés et <strong>ajouter les nouveaux</strong>.<br>
+                                <small>Cette action risque d'ajouter des créneaux en double dans votre déclaration, pensez à bien vérifier les informations avant de soumettre votre déclaration</small>
+                            </span>
+
+                            <input type="radio" name="previousicsuidremove" v-model="previousicsuidaction" value="keep" id="action2">
+                        </label>
+
+
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">Importer les créneaux</button>
+                </form>
+
             </div>
-            <button type="submit" class="btn btn-primary btn-lg">Importer les créneaux</button>
-        </form>
+        </div>
+
+
 
     </section>
 </template>
@@ -232,6 +259,7 @@
     export default {
         data(){
             return {
+                previousicsuidaction: 'remove',
                 selectedFile: null,
                 daysString: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
                 timesheets: null,
