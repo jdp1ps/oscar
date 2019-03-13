@@ -817,7 +817,8 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @param datetime $dateSigned
+     * @param $dateSigned
+     * @return Activity
      */
     public function setDateSigned($dateSigned)
     {

@@ -35,6 +35,7 @@ use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Utils\StringUtils;
 use Oscar\Validator\EOTP;
+use PHPUnit\Runner\Exception;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -917,6 +918,24 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             ->setDescription('')
             ->setAmount(0.0);
 
+        if( $options['admdata'] ){
+            $newActivity->setAmount($source->getAmount())
+                ->setAssietteSubventionnable($source->getAssietteSubventionnable())
+                ->setFinancialImpact($source->getFinancialImpact())
+                ->setDescription($source->getDescription())
+                ->setStatus($source->getStatus())
+                ->setDateOpened($source->getDateOpened())
+                ->setDateSigned($source->getDateSigned())
+                ->setNoteFinanciere($source->getNoteFinanciere())
+                ->setDateStart($source->getDateStart())
+                ->setDateEnd($source->getDateEnd())
+                ->setCodeEOTP($source->getCodeEOTP())
+            ;
+            $newActivity->setFraisDeGestion($source->getFraisDeGestion());
+            $newActivity->getAssietteSubventionnable($source->getAssietteSubventionnable());
+
+        }
+
         $this->getEntityManager()->flush($newActivity);
 
         if ($options['organizations']) {
@@ -987,8 +1006,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
                     $this->getEntityManager()->flush($wpPerson);
                 }
-
-
             }
         }
 

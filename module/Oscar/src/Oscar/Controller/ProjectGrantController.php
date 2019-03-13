@@ -624,6 +624,8 @@ class ProjectGrantController extends AbstractOscarController
             'admdata' => $this->params()->fromQuery('keepadmdata', false),
         ];
 
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_DUPLICATE);
+
         try {
             $id = $this->params()->fromRoute('id');
             $projectGrant = $this->getProjectGrantService()->getGrant($id);
@@ -632,7 +634,8 @@ class ProjectGrantController extends AbstractOscarController
                 ['id' => $duplicated->getId()]);
 
         } catch (\Exception $e) {
-            die("<pre>ERROR\n : " . $e->getTraceAsString());
+            $this->getLogger()->error($e->getMessage());
+            throw new OscarException($e->getMessage());
         }
     }
 

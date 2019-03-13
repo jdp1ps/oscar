@@ -83,6 +83,8 @@
 </template>
 <script>
 
+    // nodejs node_modules/.bin/poi watch --format umd --moduleName  Activityclone --filename.js Activityclone.js --dist public/js/oscar/dist public/js/oscar/src/Activityclone.vue
+
     export default {
         props: {
             activity: { required: true },
