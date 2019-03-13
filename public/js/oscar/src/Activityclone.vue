@@ -55,6 +55,19 @@
                                     <label for="keepworkpackages" class="label-primary"></label>
                                 </div>
                             </div>
+
+                            <div class="list-group-item separator-bottom">
+                                <strong>
+                                    <i class="icon-archive"></i>
+                                    Reprendre les données administrative
+                                </strong>
+
+                                <div class="material-switch pull-right">
+                                    <input id="keepadmdata" name="keepadmdata" type="checkbox" v-model="keepAdmData"/>
+                                    <label for="keepadmdata" class="label-primary"></label>
+                                </div>
+                            </div>
+
                             <nav class="text-center">
                                 <a href="#" class="btn btn-primary" @click="displayed = false">Annuler</a>
                                 <a href="#" class="btn btn-default" @click="performSend()">Dupliquer l'activité</a>
@@ -69,6 +82,7 @@
     </div>
 </template>
 <script>
+
     export default {
         props: {
             activity: { required: true },
@@ -81,7 +95,8 @@
                 keepPersons: true,
                 keepOrganizations: true,
                 keepMilestones: true,
-                keepWorkpackages: false
+                keepWorkpackages: false,
+                keepAdmData: false
             }
         },
 
@@ -91,7 +106,8 @@
                         + (this.keepPersons ? '&keeppersons=on': '')
                         + (this.keepOrganizations ? '&keeporganizations=on': '')
                         + (this.keepMilestones ? '&keepmilestones=on': '')
-                        + (this.keepWorkpackages ? '&keepworkpackage=on': '');
+                        + (this.keepWorkpackages ? '&keepworkpackage=on': '')
+                        + (this.keepAdmData ? '&keepadmdata=on': '');
 
             }
         }

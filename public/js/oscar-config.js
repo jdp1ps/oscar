@@ -83,6 +83,7 @@ requirejs.config({
         'ActivityRequestAdmin': 'oscar/dist/ActivityRequestAdmin',
         'Workpackage': 'oscar/dist/WorkpackageUI',
         'ConfigStringList': 'oscar/dist/ConfigStringList',
+        'ActivityPersons': 'oscar/dist/ActivityPersons',
     },
     shim: {
         "bootstrap": {

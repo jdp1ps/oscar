@@ -621,6 +621,7 @@ class ProjectGrantController extends AbstractOscarController
             'persons' => $this->params()->fromQuery('keeppersons', false),
             'milestones' => $this->params()->fromQuery('keepmilestones', false),
             'workpackages' => $this->params()->fromQuery('keepworkpackage', false),
+            'admdata' => $this->params()->fromQuery('keepadmdata', false),
         ];
 
         try {
@@ -1335,15 +1336,16 @@ class ProjectGrantController extends AbstractOscarController
     public function personsAction()
     {
 
+        // Récupération de l'activités
         $activity = $this->getProjectGrantService()->getGrant($this->params()->fromRoute('id'));
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PERSON_SHOW,
-            $activity);
+
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PERSON_SHOW, $activity);
+
         $out = [];
 
-        $editableA = $deletableA = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE,
-            $activity);
-        $editableP = $deletableP = $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_PERSON_MANAGE,
-            $activity->getProject());
+        $editableA = $deletableA = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
+        $editableP = $deletableP = $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_PERSON_MANAGE, $activity->getProject());
 
         /**
          * @var ActivityPerson $activityPerson
@@ -1388,8 +1390,7 @@ class ProjectGrantController extends AbstractOscarController
             ];
         }
 
-        echo json_encode($out);
-        die();
+        return $this->ajaxResponse($out);
     }
 
     public function organizationsAction()

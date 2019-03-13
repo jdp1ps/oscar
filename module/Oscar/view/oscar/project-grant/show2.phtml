@@ -1,19 +1,18 @@
-<?php /** @var $entity Oscar\Entity\Activity */ ?>
-<link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css" />
-
-<article class="activity" id="activity"></article>
+<div class="container">
+    <h1>membres</h1>
+    <article class="activity" id="activityPersons"></article>
+</div>
 
 <script>
-    console.log("toto");
-    require(['activity'], function(m){
-        console.log(m.default);
-        var activity = new m.default({
-            el: '#activity',
-            data: <?= json_encode($json) ?>,
-            http: {
-                root: '<?= $this->url('contract/show2', ['id' => $activity->getId()]) ?>'
+    require(['vue', 'vue-resource', 'ActivityPersons'], function(Vue, VueResource, ActivityPersons){
+        Vue.use(VueResource);
+        new Vue({
+            el: "#activityPersons",
+            render(h){
+                return h(ActivityPersons.default, {props: { url: '/activites-de-recherche/persons/2' }})
             }
         })
+
     })
 </script>
 
