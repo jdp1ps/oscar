@@ -8,7 +8,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 ## Déclaration des feuilles de temps
 
-Un écran récapitulatif a été ajouté lors de l'envoi des feuilles de temps. Cet écran, en plus d'afficher une synthèse des créneaux déclarés propose de préciser pour chaques lignes de la déclarations un espace commentaire qui par défaut aggrège les commentaires renseignés sur les créneaux du même type.
+Un écran récapitulatif a été ajouté lors de l'envoi des feuilles de temps. Cet écran, en plus d'afficher une synthèse des créneaux déclarés propose de préciser pour chaque ligne de la déclaration un espace commentaire qui par défaut aggrège les commentaires renseignés sur les créneaux du même type.
 
 
 
@@ -28,7 +28,7 @@ Le code a été purgé des références à un ancien système de classification 
 
 ## Export des versements (config)
 
-La version initiale de l'export des versements proposait les rôles de organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurable dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
+La version initiale de l'export des versements proposait les rôles des organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurables dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
 
 
 
@@ -38,11 +38,11 @@ Dans l'écran d'édition des activités, la zone de numérotation "libre" permet
 
 La création de l'intitulé était laissée à la discretion de l'utilisateur au moment de la saisie du numéro.
 
-A l'usage, les utilisateurs ne respectaient pas forcement un formalisme strict (Majuscule, minuscule), et le nombre des intitulés c'est amplifié sans raison (ANR, anr, N° ANR, numéro ANR, numero ANR, etc...). 
+A l'usage, les utilisateurs ne respectaient pas forcement un formalisme strict (Majuscule, minuscule), et le nombre des intitulés s'est amplifié sans raison (ANR, anr, N° ANR, numéro ANR, numero ANR, etc...). 
 
-les intitulés des numérotations doivent maintenant être configurées via l'interface d'administration. Ce système s'appuis sur la mécanisme de "paramètres éditable" ajouté récemment dans Oscar.
+Les intitulés des numérotations doivent maintenant être configurés via l'interface d'administration. Ce système s'appuie sur le mécanisme de "paramètres éditables" ajouté récemment dans Oscar.
 
-Le système étant rétrocompatible, une UI dans la gestion des numérotations propose la liste des activités ayant des numérotations non référencées pour pouvoir modifier les activités ou ajouter des numérotation manquantes.
+Le système étant rétrocompatible, une UI dans la gestion des numérotations propose la liste des activités ayant des numérotations non référencées pour pouvoir modifier les activités ou ajouter des numérotations manquantes.
 
 La recherche par numérotation a été étendue pour augmenter les chances de trouver des résultats (ex : ANR= retourne les activités ayant un numéro ANR)
  
@@ -65,13 +65,13 @@ Les numérotations qualifiées sont disponibles dans l'export des activités
 
 L'interface pour sélectionner les types de créneaux a été adaptée pour mieux gérer l'affichage d'un grand nombre de lot.
 
-Des options d'affichage ont été ajoutées à l'interface de saisie. Pour le moment elle permettent de modifier les couleurs d'affichage des projets pour aider à les distinguer quand une personne est associée à plusieurs projets de recherche.
+Des options d'affichage ont été ajoutées à l'interface de saisie. Pour le moment elles permettent de modifier les couleurs d'affichage des projets pour aider à les distinguer quand une personne est associée à plusieurs projets de recherche.
 
 ### Importation
 
-L'interface d'importation a été modifier pour facilité son utilisation par les déclarants. Des aides ont été ajoutée pour assister l'utilisateur dans les réglages de l'importation.
+L'interface d'importation a été modifiée pour faciliter son utilisation par les déclarants. Des aides ont été ajoutées pour assister l'utilisateur dans les réglages de l'importation.
 
-Un système de détéction des fichiers ICS est en place. Il permet au déclarants de réimporter un même fichier pour une période donnée en proposant (par défaut) une option pour actualiser les données déjà importées (ou les conserver si besoin), cela évite la création de doublon lors d'importation successives d'un même fichier.
+Un système de détéction des fichiers ICS est en place. Il permet aux déclarants de réimporter un même fichier pour une période donnée en proposant (par défaut) une option pour actualiser les données déjà importées (ou les conserver si besoin), cela évite la création de doublon lors d'importations successives d'un même fichier.
 
 L'interface d'importation mémorise maintenant localement (dans le navigateur) les préférences d'association des créneaux issus du calendrier.
 
@@ -101,6 +101,6 @@ Voir [Documents générés](doc/generated-documents.md)
  - TYPO : Dans les descriptions des privilèges
  - La liste des organisations est affichée dans l'ordre alphabétique
  - Bug d'affichage des arrondis dans les versements
- - La table/entités/références Grantsource ont été supprimées
+ - Les tables/entités/références Grantsource ont été supprimées
  - Fiche activité > Lot de travail : Les minutes ne s'affichent plus en décimale d'heure
- - Feuille de temps Excel > Reprends les commentaires envoyés lors de l'envoi de la déclaration
+ - Feuille de temps Excel > Reprend les commentaires envoyés lors de l'envoi de la déclaration
