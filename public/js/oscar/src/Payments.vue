@@ -190,17 +190,10 @@
     </section>
 </template>
 <script>
-
-    // ---- COMPILATION
-    // poi watch --format umd --moduleName  Payments --filename.css Payments.css --filename.js Payments.js --dist public/js/oscar/dist public/js/oscar/src/Payments.vue
-
-
     import Payment from './PaymentItem.vue';
     import Datepicker from './Datepicker.vue';
 
-
-    // poi watch --format umd --moduleName  Payments --filename.css Payments.css --filename.js Payments.js --dist public/js/oscar/dist public/js/oscar/src/Payments.vue
-
+    // nodejs node_modules/.bin/poi watch --format umd --moduleName  Payments --filename.css Payments.css --filename.js Payments.js --dist public/js/oscar/dist public/js/oscar/src/Payments.vue
 
     export default {
         props: ['model', 'moment', 'url', 'amount', 'currency', 'currencies', 'manage'],
@@ -330,9 +323,10 @@
                 datas.append('comment', this.formData.comment);
 
                 this.pendingMsg = "Enregistrement du versement";
+                datas.append('action', this.formData.id ? 'update' : 'create');
 
-                var method = this.formData.id ?'post' : 'put';
-                this.$http[method](this.url, datas).then(
+
+                this.$http.post(this.url, datas).then(
                     success => {
                         this.fetch();
                     },
