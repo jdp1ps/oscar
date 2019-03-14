@@ -105,24 +105,25 @@ class ActivityDateController extends AbstractOscarController
                             // Default
                             break;
 
-                        case 'PUT':
-                            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
-                            $milestone = $this->getMilestoneService()->createFromArray([
-                               'type_id' => $_POST['type'],
-                               'comment' => $_POST['comment'],
-                               'dateStart' => $_POST['dateStart'],
-                               'activity_id' => $activity->getId(),
-                            ]);
-                            $this->getActivityLogService()->addUserInfo(
-                                sprintf("a ajouté le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
-                                'Activity',
-                                $milestone->getActivity()->getId()
-                            );
-                            return $this->ajaxResponse($milestone->toArray());
-                            break;
-
                         case 'POST':
                             $action = $this->params()->fromPost('action', 'update');
+
+                            if( $action == 'create' ){
+                                $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+                                $milestone = $this->getMilestoneService()->createFromArray([
+                                    'type_id' => $_POST['type'],
+                                    'comment' => $_POST['comment'],
+                                    'dateStart' => $_POST['dateStart'],
+                                    'activity_id' => $activity->getId(),
+                                ]);
+                                $this->getActivityLogService()->addUserInfo(
+                                    sprintf("a ajouté le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
+                                    'Activity',
+                                    $milestone->getActivity()->getId()
+                                );
+                                return $this->ajaxResponse($milestone->toArray());
+                            }
+
                             $milestone = $this->getMilestoneService()->getMilestone($this->params()->fromPost('id'));
 
                             ////////////////////////////////////////////////////////////

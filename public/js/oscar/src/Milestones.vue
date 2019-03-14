@@ -180,7 +180,7 @@
 
 </template>
 <script>
-    // poi watch --format umd --moduleName  Milestones --filename.css milestones.css --filename.js Milestones.js --dist public/js/oscar/dist public/js/oscar/src/Milestones.vue
+    // nodejs node_modules/.bin/poi watch --format umd --moduleName  Milestones --filename.css milestones.css --filename.js Milestones.js --dist public/js/oscar/dist public/js/oscar/src/Milestones.vue
 
     //////////////////////////////////////////////////////////////
     import MilestoneItem from './MilestoneItem.vue'
@@ -441,10 +441,11 @@
                 datas.append('comment', this.formData.comment)
                 datas.append('dateStart', this.formData.dateStart)
 
-                var method = this.formData.id ?'post' : 'put';
+                datas.append('action', this.formData.id ?'update' : 'create')
+
                 this.pendingMsg = this.formData.id ? "Enregistrement des modifications" : "Création du nouveau jalon";
 
-                this.$http[method](this.url, datas).then(
+                this.$http.post(this.url, datas).then(
                     success => {
                         this.getMilestones();
                     },
