@@ -41,11 +41,36 @@ class AdministrationController extends AbstractOscarController
         return [];
     }
 
+    public function parametersAction()
+    {
+
+
+
+        if( $this->getHttpXMethod() == "POST" ){
+            $option = $this->params()->fromPost('parameter_name');
+            switch ($option) {
+                case 'allow_numerotation_custom':
+                    $value = $this->params()->fromPost('parameter_value') == "on";
+                    $this->getOscarConfigurationService()->saveEditableConfKey('allow_numerotation_custom', $value);
+                    return $this->redirect()->toRoute('administration/parameters');
+                    die();
+                break;
+
+                default:
+                    return $this->getResponseBadRequest("Paramètres non-reconnue");
+            }
+
+            echo $option;
+            die();
+        }
+
+        return [
+            'allow_numerotation_custom' => $this->getOscarConfigurationService()->getEditableConfKey('allow_numerotation_custom', false)
+        ];
+    }
+
     protected function saveEditableConfKey($key, $value){
-        $conf = $this->getEditableConfRoot();
-        $conf[$key] = $value;
-        $writer = new Dumper();
-        file_put_contents($this->getYamlConfigPath(), $writer->dump($conf));
+        $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
     }
 
     public function numerotationAction()
@@ -60,12 +85,12 @@ class AdministrationController extends AbstractOscarController
             $method = $this->getHttpXMethod();
             switch ($method) {
                 case 'GET':
-                    $numerotation = $this->getEditableConfKey('numerotation', []);
+                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
                     return $this->jsonOutput($numerotation);
                     break;
 
                 case 'DELETE':
-                    $numerotation = $this->getEditableConfKey('numerotation', []);
+                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
                     $deleted = $this->params()->fromQuery('str');
                     if( !in_array($deleted, $numerotation) ){
                         return $this->getResponseBadRequest("Impossible de supprimer '$deleted'.'");
@@ -76,7 +101,7 @@ class AdministrationController extends AbstractOscarController
                     array_splice($numerotation, $index, 1);
 
                     try {
-                        $this->saveEditableConfKey('numerotation', $numerotation);
+                        $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
                         $this->getResponseOk();
                     } catch ( \Exception $e ){
                         return $this->getResponseInternalError("Impossible de supprimer le type '$deleted' : " . $e->getMessage());
@@ -85,7 +110,7 @@ class AdministrationController extends AbstractOscarController
                     break;
 
                 case 'POST':
-                    $numerotation = $this->getEditableConfKey('numerotation', []);
+                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
                     $added = $this->params()->fromPost('str');
                     if( in_array($added, $numerotation) ){
                         return $this->getResponseInternalError("Le type '$added' existe déjà.");
@@ -93,7 +118,7 @@ class AdministrationController extends AbstractOscarController
                     $numerotation[] = $added;
 
                     try {
-                        $this->saveEditableConfKey('numerotation', $numerotation);
+                        $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
                         $this->getResponseOk();
                     } catch ( \Exception $e ){
                         return $this->getResponseInternalError("Impossible d'ajouter le type '$added' : " . $e->getMessage());

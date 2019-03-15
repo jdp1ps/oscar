@@ -1394,6 +1394,13 @@ administration:
                 route: /accueil
                 defaults:
                     action: accueil
+        parameters:
+            type: segment
+            may_terminate: true
+            options:
+                route: /parameters
+                defaults:
+                    action: parameters
 
         numerotation:
             type: segment

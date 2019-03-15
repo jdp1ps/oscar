@@ -1,0 +1,48 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 12/12/18
+ * Time: 11:02
+ */
+?>
+<div class="container">
+    <header>
+        <h1>
+            <i class="icon-cog"></i>
+            Options et paramètres Oscar
+        </h1>
+    </header>
+
+    <section class="row">
+        <div class="col-md-6">
+            <article class="card <?= $allow_numerotation_custom == true ? 'activated' : 'disabled' ?>">
+                <h3><i class="icon-tags"></i>Numérotation des activités</h3>
+                <p class="help-message">
+                    <i class="icon-help-circled"></i>
+                    En <strong>activant</strong> cette option, vous autorisez les personnes en charge de l'ajout/modification des activités d'ajouter des types de numérotation non-référencées dans la liste des numérotations disponibles.
+                </p>
+                <form action="" method="post" class="form">
+                    <div class="row">
+                        <div class="col-md-7 col-md-push-1">
+                            <strong>type de numérotation personnalisable</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="material-switch">
+                                <input name="parameter_name" type="hidden" value="allow_numerotation_custom" />
+                                <input id="allow_numerotation_custom" name="parameter_value" type="checkbox" <?= $allow_numerotation_custom ? "checked" : "" ?> />
+                                <label for="allow_numerotation_custom" class="label-primary"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
+        </div>
+
+        <div class="col-md-6">
+
+        </div>
+    </section>
+</div>

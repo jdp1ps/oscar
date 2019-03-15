@@ -44,7 +44,8 @@ return array(
 
         'allow_activity_request' => 'leader',
 
-        // ./doc/connectors.md
+        ////////////////////////////////////////////////////////////////////// connectors [array]
+        // Voir documentation ./doc/connectors.md
         'connectors' => [
             'organization' => [],
             'person' => []

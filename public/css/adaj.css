@@ -8700,6 +8700,21 @@ pre.alert-danger, pre.alert-info {
   .overlay {
     background: white; } }
 
+.card.activated {
+  border-left: #499D1F 4px solid; }
+
+.card.disbabled {
+  border-left: #888 4px solid; }
+
+.help-message {
+  background: #efefef;
+  color: #666666;
+  padding: .5em 1em;
+  margin: .3em .5em;
+  font-size: .9em;
+  border-radius: .5em;
+  font-weight: 100; }
+
 .relative-overlay {
   position: absolute;
   top: 0;

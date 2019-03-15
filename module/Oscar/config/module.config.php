@@ -52,6 +52,11 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
+                    'action' => ['parameters'],
+                    'roles' => ['Administrateur']
+                ],
+
+                [ 'controller' =>  'Administration',
                     'action' => ['numerotation'],
                     'roles' => ['Administrateur']
                 ],

@@ -4572,6 +4572,25 @@ pre.alert-danger, pre.alert-info {
   }
 }
 
+
+.card.activated {
+  border-left: $colorGreen 4px solid;
+}
+
+.card.disbabled {
+  border-left: $colorGreyLight 4px solid;
+}
+
+.help-message {
+  background: #efefef;
+  color: darken($colorGreyMedium, 20%);
+  padding: .5em 1em;
+  margin: .3em .5em;
+  font-size: .9em;
+  border-radius: .5em;
+  font-weight: 100;
+}
+
 .relative-overlay {
   position: absolute;
   top: 0;
