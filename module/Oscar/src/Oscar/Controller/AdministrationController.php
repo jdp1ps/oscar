@@ -54,8 +54,11 @@ class AdministrationController extends AbstractOscarController
                     $value = $this->params()->fromPost('parameter_value') == "on";
                     $this->getOscarConfigurationService()->setNumerotationEditable($value);
                     return $this->redirect()->toRoute('administration/parameters');
-                    die();
-                break;
+
+                case OscarConfigurationService::theme:
+                    $value = $this->params()->fromPost('parameter_value', '');
+                    $this->getOscarConfigurationService()->setTheme($value);
+                    return $this->redirect()->toRoute('administration/parameters');
 
                 default:
                     return $this->getResponseBadRequest("Paramètres non-reconnue");
@@ -66,7 +69,9 @@ class AdministrationController extends AbstractOscarController
         }
 
         return [
-            'allow_numerotation_custom' => $this->getOscarConfigurationService()->getNumerotationEditable()
+            'allow_numerotation_custom' => $this->getOscarConfigurationService()->getNumerotationEditable(),
+            'themes' => $this->getOscarConfigurationService()->getConfiguration('themes'),
+            'theme' => $this->getOscarConfigurationService()->getTheme()
         ];
     }
 

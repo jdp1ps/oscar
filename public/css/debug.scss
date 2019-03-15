@@ -1,0 +1,44 @@
+/* ! Oscar © 2015, Université de Caen, Basse-Normandie
+ * Stéphane Bouvry <stephane.bouvry@unicaen.fr>
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Configuration
+////////////////////////////////////////////////////////////////////////////////
+
+$brand-primary: #6e2458 !default;
+$brand-complementary: #834f1c !default;
+$bg-image: 'adaj.jpg' !default;
+
+//rgb(255 - red($brand-primary), 255 - green($brand-primary), 255 - blue($brand-primary));
+$brand-secondary1: #290671;
+$brand-secondary2: #369100;
+$brand-success: #5cb85c !default;
+$brand-info: #5bc0de !default;
+$brand-warning: #f0ad4e !default;
+$brand-danger: #d9534f !default;
+
+$colorGreyUltraLight: #AAA;
+$colorGreyLight: #888;
+
+$font-size-smallest: 9px;
+$font-size-smaller: 10px;
+$font-size-small: 12px;
+$font-size-base: 14px;
+$font-size-big: 16px;
+$font-size-bigger: 18px;
+$font-size-biggest: 20px;
+
+$grey-ultra-light: #CCC;
+
+$grid-float-breakpoint: 1024px;
+$colorGreyMedium: #999;
+$colorGreyDark: #555;
+$colorGreyBlack: #222;
+
+@import "_common.scss";
+
+body {
+  background: #eedcf3;
+  background-image: url("bg-debug.jpg") !important;
+}

@@ -42,7 +42,28 @@
         </div>
 
         <div class="col-md-6">
+            <article class="card">
+                <h3><i class="icon-pencil-1"></i>Thème</h3>
+                <form action="" method="post" class="form">
+                    <div class="row">
+                        <div class="col-md-7 col-md-push-1">
+                            <strong>Thème</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="material-switch">
+                                <input name="parameter_name" type="hidden" value="theme" />
+                                <select name="parameter_value" id="">
+                                    <?php foreach ($themes as $t): ?>
+                                    <option value="<?= $t ?>" <?= $t == $theme ? 'selected' : '' ?>><?= $t ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
         </div>
     </section>
 </div>

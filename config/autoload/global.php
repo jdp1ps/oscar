@@ -13,6 +13,7 @@ return array(
         'socket' => false,
 
         'theme' => 'oscar',
+        'themes' => ['oscar', 'adaj', 'debug'],
 
         // Pour les opérations automatique, permet d'obtenir depuis la base de donnée la devise à utiliser
         // dans les activités de recherche si rien n'est spécifié. (valeur de la colonne 'label').

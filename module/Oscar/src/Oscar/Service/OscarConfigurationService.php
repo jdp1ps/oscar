@@ -21,6 +21,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     use ServiceLocatorAwareTrait;
 
     const allow_numerotation_custom = 'allow_numerotation_custom';
+    const theme = 'theme';
 
     protected function getConfig(){
         return $this->getServiceLocator()->get('Config')['oscar'];
@@ -121,5 +122,18 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function setNumerotationEditable( $boolean ){
         $this->saveEditableConfKey(self::allow_numerotation_custom, $boolean);
+    }
+
+    public function getTheme(){
+        $global = $this->getConfiguration('theme');
+        return $this->getEditableConfKey('theme', $global);
+    }
+
+    public function setTheme( $theme ){
+        if( in_array($theme, $this->getConfiguration('themes')) ){
+            $this->saveEditableConfKey('theme', $theme);
+        } else {
+            throw new OscarException("Le thème '$theme' n'existe pas");
+        }
     }
 }
