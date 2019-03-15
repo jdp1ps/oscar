@@ -86,49 +86,42 @@
             </div>
         </div>
 
-        <h3>Dates clefs</h3>
+
+
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-6">
+                <h3>Dates clefs</h3>
                 <div><?php echo $this->formLabel($form->get('dateStart'));?></div>
                 <?php echo $this->formInput($form->get('dateStart'));?>
                 <?php echo $this->formElementErrors($form->get('dateStart')); ?>
 
-            </div>
-            <div class="col-md-3">
                 <div><?php echo $this->formLabel($form->get('dateEnd'));?></div>
                 <?php echo $this->formInput($form->get('dateEnd')); ?>
                 <?php echo $this->formElementErrors($form->get('dateEnd')); ?>
-            </div>
-            <div class="col-md-3">
                 <div><?php echo $this->formLabel($form->get('dateSigned'));?></div>
                 <?php echo $this->formInput($form->get('dateSigned')); ?>
                 <?php echo $this->formElementErrors($form->get('dateSigned')); ?>
-            </div>
-            <div class="col-md-3">
                 <div><?php echo $this->formLabel($form->get('dateOpened'));?></div>
                 <?php echo $this->formInput($form->get('dateOpened'));?>
                 <?php echo $this->formElementErrors($form->get('dateOpened')); ?>
             </div>
-        </div>
-
-        <h3><?= $this->translate("Numérotation") ?></h3>
-        <div class="row">
-
-            <div class="col-md-12">
+            <div class="col-md-6">
+                <h3><?= $this->translate("Numérotation") ?></h3>
                 <?php echo $this->keyvalue($form->get('numbers'));?>
                 <?php echo $this->formElementErrors($form->get('numbers')); ?>
             </div>
         </div>
 
         <?= $this->formHidden($form->get('id')); ?>
-        <hr>
         <div class="text-center">
             <nav class="btn-group">
                 <a class="btn btn-default" href="javascript:history.back()">
                     <i class="icon-angle-left"></i>
                     Retour
                 </a>
-                <button class="btn btn-primary" type="submit"><?= $this->translate("Enregistrer") ?></button>
+                <button class="btn btn-primary" type="submit">
+                    <i class="icon-floppy"></i>
+                    <?= $this->translate("Enregistrer") ?></button>
             </nav>
         </div>
         <datalist id="keyvalue_list">
@@ -137,8 +130,8 @@
             <?php endforeach; ?>
         </datalist>
         <?= $this->form()->closeTag() ?>
-
     </div>
+    <hr>
 </div>
 <script>
     Initer.ready(function(){

@@ -62,8 +62,17 @@ class KeyValueHelper extends FormElement
                 }
                 $out .= self::getTemplateLine($name, $key, $val, $deletable);
             }
-
-            $out .= '</div>';
+            $uniqid = uniqid('keys_');
+            $out = "<div id=\"$uniqid\"></div>
+<script>
+require(['vue', 'Keyvalue'], function(Vue, Keyvalue){
+    new Vue({
+        el: '#$uniqid',
+        render(h) { return h(Keyvalue.default, { props: { value: " . json_encode($value) . ", keys: ". json_encode($keys).", name: '".$name."'}}) }
+    })    
+});
+</script>
+";
 
             return $out;
         }
