@@ -1,17 +1,21 @@
 <template>
-    <div>
+    <div style="position: relative">
 
-        <div class="dropdown">
-            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        <div class="dropdown " style="position: absolute; right: 0">
+            <button class="btn-xs btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <i class="icon-plus-circled"></i>
                 Ajouter un numéro
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                 <li v-for="k in keys" :class="{ 'disabled': value.hasOwnProperty(k)  }"><a href="#" @click.prevent="handlerAddNum(k)">{{ k }}</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#" @click.prevent="handleNewNum">Nouveau type de numéro</a></li>
+                <template v-if="editable">
+                    <li role="separator" class="divider"></li>
+                    <li><a href="#" @click.prevent="handleNewNum">Nouveau type de numéro</a></li>
+                </template>
             </ul>
         </div>
+        <hr style="margin-bottom: 2em">
         <div class="card" v-for="v,k in value">
             <strong>{{ k }}</strong>
             <input type="text" :name="name+'[' + k +']'" :value="v" />
@@ -27,13 +31,16 @@
         props: {
             name: { required: true },
             keys: { required: true },
-            value: { required: true }
+            value: { required: true },
+            editable: { default: false }
         },
+
         data(){
             return {
 
             }
         },
+
         computed: {
 
         },

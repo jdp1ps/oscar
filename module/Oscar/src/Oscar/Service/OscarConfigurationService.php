@@ -20,6 +20,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     use ServiceLocatorAwareTrait;
 
+    const allow_numerotation_custom = 'allow_numerotation_custom';
+
     protected function getConfig(){
         return $this->getServiceLocator()->get('Config')['oscar'];
     }
@@ -111,5 +113,13 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         } else {
             return $default;
         }
+    }
+
+    public function getNumerotationEditable(){
+        return $this->getEditableConfKey(self::allow_numerotation_custom, false);
+    }
+
+    public function setNumerotationEditable( $boolean ){
+        $this->saveEditableConfKey(self::allow_numerotation_custom, $boolean);
     }
 }

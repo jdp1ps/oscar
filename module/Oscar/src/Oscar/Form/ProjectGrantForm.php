@@ -25,9 +25,11 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
     use ServiceLocatorAwareTrait;
 
     private $numbers;
+    private $editable;
 
-    public function setNumbers($numbers){
+    public function setNumbers($numbers, $editable){
         $this->numbers = $numbers;
+        $this->editable = $editable;
     }
 
     public function init()
@@ -269,7 +271,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
 
 
         // DateOpened
-        $this->add(new KeyValue('numbers', ['keys' => $this->numbers]));
+        $this->add(new KeyValue('numbers', ['keys' => $this->numbers, 'editable' => $this->editable]));
 
 
         // Type

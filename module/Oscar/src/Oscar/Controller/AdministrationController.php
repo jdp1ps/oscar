@@ -23,6 +23,7 @@ use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
+use Oscar\Service\OscarConfigurationService;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Dumper;
@@ -49,9 +50,9 @@ class AdministrationController extends AbstractOscarController
         if( $this->getHttpXMethod() == "POST" ){
             $option = $this->params()->fromPost('parameter_name');
             switch ($option) {
-                case 'allow_numerotation_custom':
+                case OscarConfigurationService::allow_numerotation_custom:
                     $value = $this->params()->fromPost('parameter_value') == "on";
-                    $this->getOscarConfigurationService()->saveEditableConfKey('allow_numerotation_custom', $value);
+                    $this->getOscarConfigurationService()->setNumerotationEditable($value);
                     return $this->redirect()->toRoute('administration/parameters');
                     die();
                 break;
@@ -65,7 +66,7 @@ class AdministrationController extends AbstractOscarController
         }
 
         return [
-            'allow_numerotation_custom' => $this->getOscarConfigurationService()->getEditableConfKey('allow_numerotation_custom', false)
+            'allow_numerotation_custom' => $this->getOscarConfigurationService()->getNumerotationEditable()
         ];
     }
 

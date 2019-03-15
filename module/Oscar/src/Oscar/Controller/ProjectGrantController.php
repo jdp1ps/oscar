@@ -571,16 +571,14 @@ class ProjectGrantController extends AbstractOscarController
      */
     public function editAction()
     {
-
-
         $id = $this->params()->fromRoute('id');
         $numerotationKeys = $this->getEditableConfKey('numerotation', []);
+        $numerotationEditable = $this->getOscarConfigurationService()->getNumerotationEditable();
         $projectGrant = $this->getProjectGrantService()->getGrant($id);
         $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
 
-
         $form = new ProjectGrantForm();
-        $form->setNumbers($numerotationKeys);
+        $form->setNumbers($numerotationKeys, $numerotationEditable);
         $form->setServiceLocator($this->getServiceLocator());
         $form->init();
         $form->bind($projectGrant);

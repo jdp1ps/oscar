@@ -68,7 +68,7 @@ class KeyValueHelper extends FormElement
 require(['vue', 'Keyvalue'], function(Vue, Keyvalue){
     new Vue({
         el: '#$uniqid',
-        render(h) { return h(Keyvalue.default, { props: { value: " . json_encode($value) . ", keys: ". json_encode($keys).", name: '".$name."'}}) }
+        render(h) { return h(Keyvalue.default, { props: { value: " . json_encode($value) . ", keys: ". json_encode($keys).", name: '".$name."', editable: ". ($element->editable ? 'true' : 'false') ."}}) }
     })    
 });
 </script>

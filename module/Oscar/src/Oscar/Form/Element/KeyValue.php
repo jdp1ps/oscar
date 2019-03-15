@@ -13,6 +13,7 @@ use Zend\Form\Element;
 class KeyValue extends Element
 {
     public $keys;
+    public $editable;
 
     /**
      * KeyValue constructor.
@@ -22,6 +23,7 @@ class KeyValue extends Element
     {
         parent::__construct($name, $options);
         $this->keys = $options['keys'];
+        $this->editable = $options['editable'];
     }
 
 }
