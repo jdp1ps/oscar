@@ -8,7 +8,7 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                <li v-for="k in keys" :class="{ 'disabled': value.hasOwnProperty(k)  }"><a href="#" @click.prevent="handlerAddNum(k)">{{ k }}</a></li>
+                <li v-for="k in keys" :class="{ 'disabled': values.hasOwnProperty(k)  }"><a href="#" @click.prevent="handlerAddNum(k)">{{ k }}</a></li>
                 <template v-if="editable">
                     <li role="separator" class="divider"></li>
                     <li><a href="#" @click.prevent="handleNewNum">Nouveau type de numéro</a></li>
@@ -16,15 +16,15 @@
             </ul>
         </div>
         <hr style="margin-bottom: 2em">
-        <div class="card" v-for="v,k in value">
+        <div class="card" v-for="v,k in values">
             <strong>{{ k }}</strong>
-            <input type="text" :name="name+'[' + k +']'" :value="v" />
+            <input type="text" :name="name+'[' + k +']'" v-model="values[k]" />
             <i class="icon-trash" @click="remove(k)"></i>
         </div>
+        <pre>{{ values }}</pre>
     </div>
 </template>
 <script>
-
     // nodejs node_modules/.bin/poi watch --format umd --moduleName  Keyvalue --filename.js Keyvalue.js --dist public/js/oscar/dist public/js/oscar/src/Keyvalue.vue
 
     export default {
@@ -37,7 +37,7 @@
 
         data(){
             return {
-
+                values: {}
             }
         },
 
@@ -47,10 +47,11 @@
 
         methods:{
             handlerAddNum(key){
-                if( !this.value.hasOwnProperty(key) ){
-                    let keys = JSON.parse(JSON.stringify(this.value));
+                console.log("Ajout de ", key);
+                if( !this.values.hasOwnProperty(key) ){
+                    let keys = JSON.parse(JSON.stringify(this.values));
                     keys[key] = "";
-                    this.value = keys;
+                    this.values = keys;
                 }
             },
             handleNewNum(){
@@ -61,13 +62,19 @@
             },
             remove(key){
                 let newOne = {};
-                Object.keys(this.value).forEach( k => {
+                Object.keys(this.values).forEach( k => {
                     if( k != key )
-                        newOne[k] = this.value[k];
+                        newOne[k] = this.values[k];
                 })
-                this.value = newOne;
+                this.values = newOne;
             }
         },
+
+        mounted(){
+            console.log("Mounted", this.value);
+            if( this.value && this.value.length != 0 )
+               this.values = JSON.parse(JSON.stringify(this.value));
+        }
 
     }
 </script>

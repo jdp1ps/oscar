@@ -72,7 +72,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @return string[]
      */
     public function getNumerotationKeys(){
-        return $this->getOptionalConfiguration('editable.numerotation', []);
+        return $this->getEditableConfKey('numerotation', []);
     }
 
     protected function getYamlConfigPath(){

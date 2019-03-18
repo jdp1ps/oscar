@@ -63,7 +63,7 @@ class KeyValueHelper extends FormElement
                 $out .= self::getTemplateLine($name, $key, $val, $deletable);
             }
             $uniqid = uniqid('keys_');
-            $out = "<div id=\"$uniqid\"></div>
+            $out = "<div id=\"$uniqid\">&nbsp;</div>
 <script>
 require(['vue', 'Keyvalue'], function(Vue, Keyvalue){
     new Vue({

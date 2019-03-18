@@ -8,7 +8,7 @@
 
 $brand-primary: #6e2458 !default;
 $brand-complementary: #834f1c !default;
-$bg-image: 'adaj.jpg' !default;
+$bg-image: 'bg-debug.jpg' !default;
 
 //rgb(255 - red($brand-primary), 255 - green($brand-primary), 255 - blue($brand-primary));
 $brand-secondary1: #290671;
@@ -39,6 +39,8 @@ $colorGreyBlack: #222;
 @import "_common.scss";
 
 body {
-  background: #eedcf3;
-  background-image: url("bg-debug.jpg") !important;
+  background-color: #fff9e5;
+  background-size: cover !important;
+  background-position: center center !important;
+
 }

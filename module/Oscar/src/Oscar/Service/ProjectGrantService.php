@@ -439,6 +439,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
         // Clefs connues
         $authorisedKeys = $this->getOscarConfigurationService()->getNumerotationKeys();
+        $this->getServiceLocator()->get('Logger')->debug("Clefs connues : " . print_r($authorisedKeys, true));
 
         // Récupération des activités ayant des numérotations
         $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
@@ -452,6 +453,7 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $hasUnknow = false;
             foreach(array_keys($activity->getNumbers()) as $key){
                 if( !in_array($key, $authorisedKeys) ){
+                    $this->getServiceLocator()->get('Logger')->debug("$key n'est pas référencé");
                     $hasUnknow = true;
                 }
             }
