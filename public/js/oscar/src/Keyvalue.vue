@@ -21,7 +21,6 @@
             <input type="text" :name="name+'[' + k +']'" v-model="values[k]" />
             <i class="icon-trash" @click="remove(k)"></i>
         </div>
-        <pre>{{ values }}</pre>
     </div>
 </template>
 <script>

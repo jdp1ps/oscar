@@ -602,7 +602,7 @@ class ProjectGrantController extends AbstractOscarController
             'hidden' => $hidden,
             'form' => $form,
             'activity' => $projectGrant,
-            'numbers_keys' => $keys = $this->getActivityService()->getDistinctNumbersKey()
+            'numbers_keys' => $numerotationKeys
         ]);
         $view->setTemplate('oscar/project-grant/form');
 
@@ -678,7 +678,6 @@ class ProjectGrantController extends AbstractOscarController
         return $activity;
     }
 
-
     public function exportJSONAction(){
 
         $id = $this->params()->fromRoute('id', null);
@@ -714,7 +713,6 @@ class ProjectGrantController extends AbstractOscarController
         header('Content-type: application/json');
         die(json_encode($json));
     }
-
 
     public function generateNotificationsAction(){
 
@@ -824,7 +822,6 @@ class ProjectGrantController extends AbstractOscarController
         $downloader->downloadCSVToExcel($filePath);
         die();
     }
-
 
     /** Export les données en CSV. */
     public function csvAction()
@@ -1059,7 +1056,12 @@ class ProjectGrantController extends AbstractOscarController
 
         $projectGrant = new Activity();
         $projectGrant->setProject($project);
+
+        $numerotationKeys = $this->getEditableConfKey('numerotation', []);
+        $numerotationEditable = $this->getOscarConfigurationService()->getNumerotationEditable();
+
         $form = new ProjectGrantForm();
+        $form->setNumbers($numerotationKeys, $numerotationEditable);
         $form->setServiceLocator($this->getServiceLocator());
         $form->init();
         $form->setObject($projectGrant);
@@ -1094,6 +1096,8 @@ class ProjectGrantController extends AbstractOscarController
             'hidden' => $hidden,
             'activity' => $projectGrant,
             'project' => $project,
+            'numerotationKeys' => $numerotationKeys,
+            'numbers_keys' => $numerotationKeys
         ]);
 
         $view->setTemplate('oscar/project-grant/form');

@@ -51,7 +51,10 @@ class KeyValueHelper extends FormElement
             $out .= '<div class="keyvalue-lines">';
             $value = $element->getValue();
 
-            $keys = array_merge(array_keys($element->getValue()), $element->keys);
+
+            $specificKeys = $element->getValue() ? array_keys($element->getValue()) : [];
+
+            $keys = array_merge($specificKeys, $element->keys);
             $keys = array_unique($keys);
 
             foreach ($keys as $key) {
