@@ -72,7 +72,7 @@ Des options d'affichage ont été ajoutées à l'interface de saisie. Pour le mo
 
 L'interface d'importation a été modifiée pour faciliter son utilisation par les déclarants. Des aides ont été ajoutées pour assister l'utilisateur dans les réglages de l'importation.
 
-Un système de détéction des fichiers ICS est en place. Il permet aux déclarants de réimporter un même fichier pour une période donnée en proposant (par défaut) une option pour actualiser les données déjà importées (ou les conserver si besoin), cela évite la création de doublon lors d'importations successives d'un même fichier.
+Un système de détection des fichiers ICS est en place. Il permet aux déclarants de réimporter un même fichier pour une période donnée en proposant (par défaut) une option pour actualiser les données déjà importées (ou les conserver si besoin), cela évite la création de doublon lors d'importations successives d'un même fichier.
 
 L'interface d'importation mémorise maintenant localement (dans le navigateur) les préférences d'association des créneaux issus du calendrier.
 
