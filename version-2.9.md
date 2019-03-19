@@ -28,7 +28,7 @@ Le code a été purgé des références à un ancien système de classification 
 
 ## Export des versements (config)
 
-La version initiale de l'export des versements proposait les rôles des organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurables dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
+La version initiale de l'export des versements proposait les rôles des organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurables dans le fichier **local.php**. Un mécanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
 
 
 
