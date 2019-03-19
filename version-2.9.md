@@ -8,7 +8,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 ## Déclaration des feuilles de temps
 
-Un écran récapitulatif a été ajouté lors de l'envoi des feuilles de temps. Cet écran, en plus d'afficher une synthèse des créneaux déclarés propose de préciser pour chaque ligne de la déclaration un espace commentaire qui par défaut aggrège les commentaires renseignés sur les créneaux du même type.
+Un écran récapitulatif a été ajouté lors de l'envoi des feuilles de temps. Cet écran, en plus d'afficher une synthèse des créneaux déclarés propose de préciser pour chaque ligne de la déclaration un espace commentaire qui par défaut agrège les commentaires renseignés sur les créneaux du même type.
 
 
 
@@ -28,7 +28,7 @@ Le code a été purgé des références à un ancien système de classification 
 
 ## Export des versements (config)
 
-La version initiale de l'export des versements proposait les rôles des organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurables dans le fichier **local.php**. Un méchanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
+La version initiale de l'export des versements proposait les rôles des organisations "en dur" ainsi qu'un séparateur de données multiples '$$' imposé. Dans cette version, les rôles des organisations, et le séparateur de chaîne sont configurables dans le fichier **local.php**. Un mécanisme similaire aux organisations a également été ajouté pour exporter les personnes. 
 
 
 
@@ -72,7 +72,7 @@ Des options d'affichage ont été ajoutées à l'interface de saisie. Pour le mo
 
 L'interface d'importation a été modifiée pour faciliter son utilisation par les déclarants. Des aides ont été ajoutées pour assister l'utilisateur dans les réglages de l'importation.
 
-Un système de détéction des fichiers ICS est en place. Il permet aux déclarants de réimporter un même fichier pour une période donnée en proposant (par défaut) une option pour actualiser les données déjà importées (ou les conserver si besoin), cela évite la création de doublon lors d'importations successives d'un même fichier.
+Un système de détection des fichiers ICS est en place. Il permet aux déclarants de réimporter un même fichier pour une période donnée en proposant (par défaut) une option pour actualiser les données déjà importées (ou les conserver si besoin), cela évite la création de doublon lors d'importations successives d'un même fichier.
 
 L'interface d'importation mémorise maintenant localement (dans le navigateur) les préférences d'association des créneaux issus du calendrier.
 
