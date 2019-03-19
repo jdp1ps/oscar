@@ -8,7 +8,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 ## Déclaration des feuilles de temps
 
-Un écran récapitulatif a été ajouté lors de l'envoi des feuilles de temps. Cet écran, en plus d'afficher une synthèse des créneaux déclarés propose de préciser pour chaque ligne de la déclaration un espace commentaire qui par défaut aggrège les commentaires renseignés sur les créneaux du même type.
+Un écran récapitulatif a été ajouté lors de l'envoi des feuilles de temps. Cet écran, en plus d'afficher une synthèse des créneaux déclarés propose de préciser pour chaque ligne de la déclaration un espace commentaire qui par défaut agrège les commentaires renseignés sur les créneaux du même type.
 
 
 
