@@ -839,6 +839,8 @@ class ProjectGrantController extends AbstractOscarController
 
         $parameters = [];
 
+        $separator = '|';
+
         if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
 
         } else {
@@ -896,11 +898,13 @@ class ProjectGrantController extends AbstractOscarController
             }
         }
 
+
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
             ->select('r.label')
             ->from(OrganizationRole::class, 'r')
             ->getQuery()
             ->getResult();
+
         $rolesOrganisations = [];
 
         foreach( $rolesOrganizationsQuery as $role ){
@@ -946,19 +950,24 @@ class ProjectGrantController extends AbstractOscarController
         // Récupération des différents types de jalons
         $jalonsQuery = $this->getEntityManager()->getRepository(DateType::class)->findAll();
         $jalons = [];
+        $jalonsFait = [];
 
         /** @var DateType $jalon */
         foreach ($jalonsQuery as $jalon) {
-            $jalons[$jalon->getLabel()] = [];
-
             $header = $jalon->getLabel();
+            $jalons[$header] = [];
             if( $keep === true || in_array($header, $keep) ){
                 $columns[$header] = true;
                 $headers[] = $header;
+
+                if( $jalon->isFinishable() ){
+                    $headers[] = "Fait";
+                    $columns[$header."_fait"] = true;
+                    $jalonsFait[$header] = [];
+                }
             } else {
                 $columns[$header] = false;
             }
-            $jalons[$header] = [];
         }
 
         fputcsv($handler, $headers);
@@ -969,12 +978,13 @@ class ProjectGrantController extends AbstractOscarController
             $rolesCurrent = $rolesOrganisations;
             $rolesPersonsCurrent = $rolesPersons;
             $jalonsCurrent = $jalons;
+            $jalonsFaitCurrent = $jalonsFait;
+
+
 
             if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
                 $entity)
             ) {
-
-
                 foreach( $entity->getOrganizationsDeep() as $org ){
                      $rolesCurrent[$org->getRole()][] = (string)$org->getOrganization();
                 }
@@ -986,9 +996,26 @@ class ProjectGrantController extends AbstractOscarController
                 /** @var ActivityDate $mil */
                 foreach( $entity->getMilestones() as $mil ){
 
-                    $jalonsCurrent[$mil->getType()->getLabel()][] = $mil->getDateStart() ?
+                    $jalonKey = $mil->getType()->getLabel();
+
+                    $jalonsCurrent[$jalonKey][] = $mil->getDateStart() ?
                         $mil->getDateStart()->format('Y-m-d') :
-                        'nop';
+                        '';
+
+                    if( array_key_exists($jalonKey, $jalonsFaitCurrent) ){
+                        // Calcule de l'état du jalon
+                        $dn = "";
+                        if( $mil->isFinishable() ){
+                            $dn = "non";
+                            if( $mil->getFinished() > 0 ){
+                                $dn = "en cours";
+                            }
+                            if( $mil->isFinished() ){
+                                $dn = $mil->getDateFinish() ? $mil->getDateFinish()->format('Y-m-d') : 'oui';
+                            }
+                        }
+                        $jalonsFaitCurrent[$jalonKey][] = $dn;
+                    }
                 }
 
 
@@ -999,21 +1026,27 @@ class ProjectGrantController extends AbstractOscarController
 
                 foreach( $rolesCurrent as $role=>$organisations ){
                     if( $columns[$role] === true )
-                        $datas[] = $organisations ? implode('|', array_unique($organisations)) : ' ';
+                        $datas[] = ($organisations ? implode($separator, array_unique($organisations)) : '');
                 }
 
                 foreach( $rolesPersonsCurrent as $role=>$persons ){
                     if( $columns[$role] === true )
-                        $datas[] = $persons ? implode('|', array_unique($persons)) : ' ';
+                        $datas[] =  $persons ? implode($separator, array_unique($persons)) : '';
                 }
 
                 foreach ( $numbers as $key=>$value ){
-                    $datas[] = $entity->getNumber($key);
+                    if( $columns[$key] === true )
+                        $datas[] = $entity->getNumber($key);
                 }
 
                 foreach( $jalonsCurrent as $jalon2=>$date ){
-                    if( $columns[$jalon2] === true )
-                        $datas[] = $date ? implode('|', array_unique($date)) : ' ';
+                    if( $columns[$jalon2] === true ) {
+                        $datas[] =  implode($separator, $date);
+                        if( array_key_exists($jalon2, $jalonsFaitCurrent) ){
+                            $done = $jalonsFaitCurrent[$jalon2];
+                            $datas[] =  implode($separator, $done);
+                        }
+                    }
                 }
                 fputcsv($handler, $datas);
             }
