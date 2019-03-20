@@ -146,7 +146,7 @@ class PublicController extends AbstractOscarController
         $isValidator = false;
         $person = $this->getOscarUserContext()->getCurrentPerson();
         $isRequestValidator = false;
-        $hasRequestValidator = false;
+        $requestValidations = false;
 
         if ($person) {
             try {

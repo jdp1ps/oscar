@@ -1826,7 +1826,7 @@ class Activity implements ResourceInterface
 
     }
 
-    public function csv()
+    public function csv($dateFormat='Y-m-d')
     {
         return array(
             'id' => $this->getId(),
@@ -1834,15 +1834,15 @@ class Activity implements ResourceInterface
             'Projet' => $this->getProject() ? $this->getProject()->getLabel() : '',
             'Intitulé' => $this->getLabel(),
             'PFI' => $this->getCodeEOTP(),
-            'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format('Y-m-d') : '',
+            'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format($dateFormat) : '',
             'Montant' => number_format($this->getAmount(), 2, ',', ' '),
             'numéro SAIC' => $this->getCentaureNumConvention(),
             'numéro oscar' => $this->getOscarNum(),
             'Type' => $this->getActivityType() ? (string)$this->getActivityType() : '',
             'Statut' => Activity::getStatusLabel(),
-            'Début' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
-            'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
-            'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
+            'Début' => $this->getDateStart() ? $this->getDateStart()->format($dateFormat) : '',
+            'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format($dateFormat) : '',
+            'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format($dateFormat) : '',
             'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, ',', ' '),
             'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ' '),
             'Frais de gestion' => number_format($this->getFraisDeGestion(), 2, ',', ''),

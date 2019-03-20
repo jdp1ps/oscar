@@ -60,6 +60,17 @@ class AdministrationController extends AbstractOscarController
                     $this->getOscarConfigurationService()->setTheme($value);
                     return $this->redirect()->toRoute('administration/parameters');
 
+                case "export_options":
+                    $separator = $this->params()->fromPost('separator');
+                    $dateFormat = $this->params()->fromPost('dateformat');
+                    $this->getOscarConfigurationService()->setExportSeparator($separator);
+                    $this->getOscarConfigurationService()->setExportDateFormat($dateFormat);
+
+
+
+
+                    return $this->redirect()->toRoute('administration/parameters');
+
                 default:
                     return $this->getResponseBadRequest("Paramètres non-reconnue");
             }
@@ -71,7 +82,11 @@ class AdministrationController extends AbstractOscarController
         return [
             'allow_numerotation_custom' => $this->getOscarConfigurationService()->getNumerotationEditable(),
             'themes' => $this->getOscarConfigurationService()->getConfiguration('themes'),
-            'theme' => $this->getOscarConfigurationService()->getTheme()
+            'theme' => $this->getOscarConfigurationService()->getTheme(),
+            'export' => [
+                'separator' => $this->getOscarConfigurationService()->getExportSeparator(),
+                'dateformat' => $this->getOscarConfigurationService()->getExportDateFormat()
+            ]
         ];
     }
 

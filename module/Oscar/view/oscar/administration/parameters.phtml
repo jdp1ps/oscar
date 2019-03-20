@@ -66,4 +66,30 @@
             </article>
         </div>
     </section>
+
+    <section class="row">
+        <div class="col-md-6">
+            <article class="card">
+                <h3><i class="icon-upload"></i> Format d'exportation</h3>
+                <p class="help-message">
+                    <i class="icon-help-circled"></i>
+                    Permet de configurer le format des données lors de l'exporation des activités de recherche.
+                </p>
+                <form action="" method="post" class="form">
+                    <input name="parameter_name" type="hidden" value="export_options" />
+                    <label for="separator">Séparateur de chaîne</label>
+                    <input type="text" name="separator" id="separator" value="<?= $export['separator'] ?>" class="form-control input-lg" />
+
+                    <label for="dateformat">Format des dates</label>
+                    <input type="text" name="dateformat" id="dateformat" value="<?= $export['dateformat'] ?>" class="form-control input-lg" />
+                    <hr>
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
+        </div>
+
+        <div class="col-md-6">
+            &nbsp;
+        </div>
+    </section>
 </div>

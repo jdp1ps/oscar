@@ -954,6 +954,14 @@ class Organization implements ResourceInterface, IConnectedObject
         return $this;
     }
 
+    public function fullOrShortName( $displayClose = false )
+    {
+        if( $this->getFullName() ){
+            return $this->getFullName();
+        } else {
+            return $this->getShortName();
+        }
+    }
 
 
     public function displayName( $displayClose = false )

@@ -136,4 +136,21 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             throw new OscarException("Le thème '$theme' n'existe pas");
         }
     }
+
+
+    public function getExportSeparator(){
+        return $this->getEditableConfKey('export_format', '|');
+    }
+
+    public function setExportSeparator( $string ){
+        $this->saveEditableConfKey('export_format', $string);
+    }
+
+    public function getExportDateFormat(){
+        return $this->getEditableConfKey('export_dateformat', 'd m Y');
+    }
+
+    public function setExportDateFormat( $string ){
+        $this->saveEditableConfKey('export_dateformat', $string);
+    }
 }

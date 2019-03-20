@@ -839,7 +839,8 @@ class ProjectGrantController extends AbstractOscarController
 
         $parameters = [];
 
-        $separator = '|';
+        $separator = $this->getOscarConfigurationService()->getExportSeparator();
+        $dateFormat = $this->getOscarConfigurationService()->getExportDateFormat();
 
         if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
 
@@ -985,8 +986,9 @@ class ProjectGrantController extends AbstractOscarController
             if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
                 $entity)
             ) {
+                /** @var ActivityOrganization $org */
                 foreach( $entity->getOrganizationsDeep() as $org ){
-                     $rolesCurrent[$org->getRole()][] = (string)$org->getOrganization();
+                     $rolesCurrent[$org->getRole()][] = (string)$org->getOrganization()->fullOrShortName();
                 }
 
                 foreach( $entity->getPersonsDeep() as $per ){
@@ -999,7 +1001,7 @@ class ProjectGrantController extends AbstractOscarController
                     $jalonKey = $mil->getType()->getLabel();
 
                     $jalonsCurrent[$jalonKey][] = $mil->getDateStart() ?
-                        $mil->getDateStart()->format('Y-m-d') :
+                        $mil->getDateStart()->format($dateFormat) :
                         '';
 
                     if( array_key_exists($jalonKey, $jalonsFaitCurrent) ){
@@ -1011,7 +1013,7 @@ class ProjectGrantController extends AbstractOscarController
                                 $dn = "en cours";
                             }
                             if( $mil->isFinished() ){
-                                $dn = $mil->getDateFinish() ? $mil->getDateFinish()->format('Y-m-d') : 'oui';
+                                $dn = $mil->getDateFinish() ? $mil->getDateFinish()->format($dateFormat) : 'oui';
                             }
                         }
                         $jalonsFaitCurrent[$jalonKey][] = $dn;
@@ -1019,7 +1021,7 @@ class ProjectGrantController extends AbstractOscarController
                 }
 
 
-                foreach ( $entity->csv() as $col=>$value ){
+                foreach ( $entity->csv($dateFormat) as $col=>$value ){
                     if( $columns[$col] === true )
                         $datas[] = $value;
                 }
