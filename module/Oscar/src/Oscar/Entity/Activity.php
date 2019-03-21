@@ -167,10 +167,17 @@ class Activity implements ResourceInterface
     private $codeEOTP;
 
     /**
-     * @var double
-     * @ORM\Column(type="float", nullable=true)
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
      */
     private $fraisDeGestion;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $fraisDeGestionPartHebergeur;
+
 
     /**
      * @var string
@@ -375,21 +382,64 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return float
+     * @return string
      */
     public function getFraisDeGestion()
     {
         return $this->fraisDeGestion;
     }
 
+    public function getFraisDeGestionDisplay()
+    {
+        if( ($partH = $this->getFraisDeGestion()) ){
+            if( strpos($partH, '%') ){
+                return $this->getAmount() / 100 * floatval($partH) . $this->getCurrency()->getSymbol() . " ($partH)";
+            } else {
+                return $partH . $this->getCurrency()->getSymbol();
+            }
+        }
+        return $this->fraisDeGestionPartHebergeur;
+    }
+
     /**
-     * @param float $fraisDeGestion
+     * @param string $fraisDeGestion
      */
     public function setFraisDeGestion($fraisDeGestion)
     {
         $this->fraisDeGestion = $fraisDeGestion;
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function getFraisDeGestionPartHebergeur()
+    {
+        return $this->fraisDeGestionPartHebergeur;
+    }
+
+    public function getFraisDeGestionPartHebergeurDisplay()
+    {
+        if( ($partH = $this->getFraisDeGestionPartHebergeur()) ){
+            if( strpos($partH, '%') ){
+                return $this->getAmount() / 100 * floatval($partH) . $this->getCurrency()->getSymbol();
+            } else {
+                return $partH . $this->getCurrency()->getSymbol();
+            }
+        }
+        return $this->fraisDeGestionPartHebergeur;
+    }
+
+    /**
+     * @param string $fraisDeGestionPartHebergeur
+     */
+    public function setFraisDeGestionPartHebergeur($fraisDeGestionPartHebergeur)
+    {
+        $this->fraisDeGestionPartHebergeur = $fraisDeGestionPartHebergeur;
+        return $this;
+    }
+
+
 
     /**
      * Retourne l'acronyme du projet si disponible.
@@ -1835,7 +1885,7 @@ class Activity implements ResourceInterface
             'Intitulé' => $this->getLabel(),
             'PFI' => $this->getCodeEOTP(),
             'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format($dateFormat) : '',
-            'Montant' => number_format($this->getAmount(), 2, ',', ' '),
+            'Montant' => number_format($this->getAmount(), 2, '.', ''),
             'numéro SAIC' => $this->getCentaureNumConvention(),
             'numéro oscar' => $this->getOscarNum(),
             'Type' => $this->getActivityType() ? (string)$this->getActivityType() : '',
@@ -1843,9 +1893,10 @@ class Activity implements ResourceInterface
             'Début' => $this->getDateStart() ? $this->getDateStart()->format($dateFormat) : '',
             'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format($dateFormat) : '',
             'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format($dateFormat) : '',
-            'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, ',', ' '),
-            'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ' '),
-            'Frais de gestion' => number_format($this->getFraisDeGestion(), 2, ',', ''),
+            'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, '.', ' '),
+            'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, '.', ' '),
+            'Frais de gestion' => $this->getFraisDeGestion(),
+            'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur()
         );
     }
 
@@ -1869,6 +1920,7 @@ class Activity implements ResourceInterface
             'versement effectué',
             'versement prévu',
             'Frais de gestion',
+            'Frais de gestion (part hébergeur)'
         );
     }
 

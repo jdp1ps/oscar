@@ -73,7 +73,16 @@
             </div>
             <div class="col-md-4">
                 <?php if( !in_array('fraisDeGestion', $hidden)): ?>
-                <?= $this->formControlGroup($form->get('fraisDeGestion')); ?>
+
+                    <div><?php echo $this->formLabel($form->get('fraisDeGestion'));?></div>
+                    <div class="help-message">
+                        <i class="icon-help-circled"></i>
+                        Vous pouvez saisir un montant (ex 237.25) ou un pourcentage en ajoutant le symbole <strong>%</strong> (ex: 3.75%)
+                    </div>
+                    <?php echo $this->formInput($form->get('fraisDeGestion'));?>
+                    <?php echo $this->formElementErrors($form->get('fraisDeGestion')); ?>
+
+                    <?= $this->formControlGroup($form->get('fraisDeGestionPartHebergeur')); ?>
                 <?php endif; ?>
             </div>
             <div class="col-md-4">

@@ -39,6 +39,18 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
     }
 
     /**
+     * @param $in
+     */
+    protected function decimalOrPercent($in){
+        $out = $this->decimalPointComma($in);
+        if( strpos($in, '%') ){
+            return $out.'%';
+        } else {
+            return $out;
+        }
+    }
+
+    /**
      * @param array $data
      * @param Activity $object
      */
@@ -62,7 +74,8 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             ->setCodeEOTP($data['codeEOTP'])
             ->setStatus($data['status'])
             ->setAmount($this->decimalPointComma($data['amount']))
-            ->setFraisDeGestion($this->decimalPointComma($data['fraisDeGestion']))
+            ->setFraisDeGestion($this->decimalOrPercent($data['fraisDeGestion']))
+            ->setFraisDeGestionPartHebergeur($this->decimalOrPercent($data['fraisDeGestionPartHebergeur']))
             ->setTva($this->getTVA($data['tva']))
             ->setFinancialImpact($this->getFinancialImpact($data['financialImpact']))
             ->setNoteFinanciere($data['noteFinanciere'])
@@ -135,6 +148,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
             'disciplines' => $object->getDisciplinesIds(),
             'amount' => $object->getAmount(),
             'fraisDeGestion' => $object->getFraisDeGestion(),
+            'fraisDeGestionPartHebergeur' => $object->getFraisDeGestionPartHebergeur(),
             'financialImpact' => array_search($object->getFinancialImpact(), Activity::getFinancialImpactValues()),
             'noteFinanciere' => $object->getNoteFinanciere(),
             'assietteSubventionnable' => $object->getAssietteSubventionnable(),

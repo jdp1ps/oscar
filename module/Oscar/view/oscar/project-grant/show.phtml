@@ -86,11 +86,17 @@
                 <em>Budget</em>
                 <strong><?= $this->currency($entity) ?></strong>
                 <?php if( $entity->getFraisDegestion() ): ?>
-                    <div><small>
+                    <div>
+                        <small>
                             Frais de gestion :
-                            <b><?= $entity->getFraisDeGestion() ?></b>
-                            %
+                            <b><?= $entity->getFraisDeGestionDisplay() ?></b>
                         </small>
+                        <?php if( $entity->getFraisDeGestionPartHebergeur() ):?>
+                        <br><small>
+                            Part hébergeur :
+                            <b><?= $entity->getFraisDeGestionPartHebergeurDisplay() ?></b>
+                        </small>
+                        <?php endif; ?>
                     </div>
                 <?php endif ?>
                 <?php if( $entity->getTva() ): ?>
