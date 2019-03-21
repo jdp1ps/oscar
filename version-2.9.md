@@ -84,7 +84,7 @@ Voir [Documents générés](doc/generated-documents.md)
 
 ## Autres améliorations
  
- - Export des activités : L'UI permet maintenant de délectionner/déselectionner les champs à exporter par groupe.
+ - Export des activités : L'UI permet maintenant de sélectionner/déselectionner les champs à exporter par groupe.
  - Database : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](doc/numerotation.md)) @JulienDary
  - Admin : Refonte de l'interface de gestion des types de documents et **ajout d'un privilège** pour les gérer
  - Admin : Certaines listes dans les écrans de configuration des nomenclatures sont maintenant affichées dans l'ordre alphabétique
