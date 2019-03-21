@@ -147,7 +147,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     }
 
     public function getExportDateFormat(){
-        return $this->getEditableConfKey('export_dateformat', 'd m Y');
+        return $this->getEditableConfKey('export_dateformat', 'y-m-d');
     }
 
     public function setExportDateFormat( $string ){
