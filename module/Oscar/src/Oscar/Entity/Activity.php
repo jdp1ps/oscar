@@ -1885,7 +1885,7 @@ class Activity implements ResourceInterface
             'Intitulé' => $this->getLabel(),
             'PFI' => $this->getCodeEOTP(),
             'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format($dateFormat) : '',
-            'Montant' => number_format($this->getAmount(), 2, '.', ''),
+            'Montant' => number_format($this->getAmount(), 2, '.', '').$this->getCurrency()->getSymbol(),
             'numéro SAIC' => $this->getCentaureNumConvention(),
             'numéro oscar' => $this->getOscarNum(),
             'Type' => $this->getActivityType() ? (string)$this->getActivityType() : '',
