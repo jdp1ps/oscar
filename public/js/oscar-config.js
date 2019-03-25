@@ -84,6 +84,7 @@ requirejs.config({
         'Workpackage': 'oscar/dist/WorkpackageUI',
         'ConfigStringList': 'oscar/dist/ConfigStringList',
         'ActivityPersons': 'oscar/dist/ActivityPersons',
+        'ActivityGant': 'oscar/dist/ActivityGant',
         'Keyvalue': 'oscar/dist/Keyvalue',
     },
     shim: {

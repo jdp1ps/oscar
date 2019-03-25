@@ -702,6 +702,13 @@ contract:
                 route: /api
                 defaults:
                     action: api
+        gant:
+            type: segment
+            options:
+                route: /gant
+                defaults:
+                    action: gant
+
         apiui:
             type: segment
             options:

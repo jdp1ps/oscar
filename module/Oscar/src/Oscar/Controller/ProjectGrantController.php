@@ -1067,6 +1067,22 @@ class ProjectGrantController extends AbstractOscarController
         die();
     }
 
+    public function gantAction()
+    {
+        $format = $this->params()->fromQuery('format', 'html');
+
+        if( $this->isAjax() || $format == 'json' ){
+            switch( $this->getHttpXMethod() ){
+                case 'GET' :
+                    die("DONNÉES");
+
+                default:
+                    return $this->getResponseBadRequest("Méthode inconnue");
+            }
+        }
+        return [];
+    }
+
     /**
      * Nouvelle activité de recherche.
      *

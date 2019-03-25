@@ -1,0 +1,31 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 25/03/19
+ * Time: 11:43
+ */
+?>
+
+<div class="container">
+    <div id="app"></div>
+    <script>
+        require(["vue", "vue-resource", "ActivityGant"], function(Vue, VueResource, ActivityGant){
+
+            Vue.use(VueResource);
+
+            new Vue({
+                el: "#app",
+                render(h){
+                    return h(ActivityGant.default, {
+                        props: {
+                            url: 'http://localhost:8080/activites-de-recherche/api'/*,
+                            activities: []
+                            /****/
+                        }
+                    });
+                }
+            })
+        })
+    </script>
+</div>

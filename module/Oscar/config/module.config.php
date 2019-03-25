@@ -114,7 +114,7 @@ return array(
                 [   'controller' =>   'Activity',
                     'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
                         'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
-                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande', 'api'],
+                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande', 'api', 'gant'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
