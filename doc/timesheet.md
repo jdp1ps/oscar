@@ -203,7 +203,7 @@ Ces modèles seront disponibles pour remplir automatiquement la répartition de 
 
 #### Choix "Hors-Lot" disponibles
 
-Oscar permet de configurer les créneaux disponibles hors activité. La clef `horslots` permet de choisir et personnaliser les options proposées. 
+Pour configurer les créneaux disponibles hors activité. La clef `horslots` **doit être défini** dans le fichier `config/autoload/local.php`.
 
 ```php
 <?php
@@ -224,7 +224,7 @@ return array(
 );
 ``` 
 
-**IMPORTANT** : Une fois les catégories Hors-Lots disponibles configurées, il n'est pas recommandé de la modifier.
+**IMPORTANT** : Une fois les catégories Hors-Lots disponibles configurées, il ne faut pas la modifier, en effet, des créneaux pourraient avoir été 
 
 #### Mécanisme général
 
