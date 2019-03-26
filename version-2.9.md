@@ -5,11 +5,35 @@
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
 
+## Hotfix 
+
+ - 26 Mars 2019 : Le Fix de l'anomalie #20765 impose de relancer manuellement l'indexation, cela règle le problème de recherche avec *wildcard* sur les numéros Oscar
+
 
 ## Déclaration des feuilles de temps
 
 Un écran récapitulatif a été ajouté lors de l'envoi des feuilles de temps. Cet écran, en plus d'afficher une synthèse des créneaux déclarés propose de préciser pour chaque ligne de la déclaration un espace commentaire qui par défaut agrège les commentaires renseignés sur les créneaux du même type.
 
+**Attention** : Pour des raisons techniques, la configuration par défaut des créneaux hors-lot n'est plus présente dans le fichier de configuration par défaut, vous devez l'ajouter manuellement dans votre fichier `config/autoload/local.php` : 
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // ...
+    'oscar' => [
+        // ...
+        'horslots' => [
+            'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
+            'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
+            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
+            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+            'other' => [ 'code' => 'other', 'label' => 'Divers',  'description' => 'Autre activité', 'icon' => true ],
+        ]
+     ]
+);
+```
 
 
 ## Demandes d'activités
