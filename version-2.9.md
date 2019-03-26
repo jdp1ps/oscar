@@ -5,6 +5,10 @@
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
 
+## Hotfix 
+
+ - 26 Mars 2019 : Le Fix de l'anomalie #20765 impose de relancer manuellement l'indexation, cela règle le problème de recherche avec *wildcard* sur les numéros Oscar
+
 
 ## Déclaration des feuilles de temps
 
