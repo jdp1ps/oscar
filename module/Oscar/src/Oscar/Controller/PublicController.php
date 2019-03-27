@@ -168,7 +168,6 @@ class PublicController extends AbstractOscarController
                     $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft();
                 }
                 elseif ( count($organizations = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE)) > 0 ){
-                    //die('ICI');
                     $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft($organizations);
                 }
 
