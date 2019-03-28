@@ -174,6 +174,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             'saic' => $activity->getCentaureId(),
             'oscar' => $activity->getOscarNum(),
             'activitytype' => $activity->getActivityType() ? (string)$activity->getActivityType() : '',
+            'numbers' => $activity->getNumbers(),
             'eotp' => $activity->getCodeEOTP(),
             'acronym' => $activity->getAcronym(),
             'activity_id' => $activity->getId(),
