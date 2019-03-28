@@ -80,7 +80,7 @@ class ProjectGrantController extends AbstractOscarController
         // Paramètres envoyés à l'API
         $q = $this->params()->fromQuery('q', '');
         $page = (int) $this->params()->fromQuery('p', 1);
-        $rbp = (int) $this->params()->fromQuery('rbp', 10);
+        $rbp = (int) $this->params()->fromQuery('rbp', 20);
 
 
         // IDS des activités de la personne

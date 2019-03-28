@@ -3,7 +3,9 @@
         <h1>Vue gant</h1>
         <div id="vue" style="position: relative; padding: 1em; padding-top: 5em">
 
-            <div v-for="a in activitiesDisplay" class="activity" style="" :style="{ 'left': a.left +'px', 'width': a.width+'px'}">
+            <activity v-for="a in activitiesDisplay" :activity="a" />
+            <!--
+            <div  class="activity" style="" :style="{ 'left': a.left +'px', 'width': a.width+'px'}">
                 <abbr title="">{{ a.acronym }}</abbr>
                 <strong><i class="icon-cube"></i> {{ a.label }}</strong>
                 <small>
@@ -11,6 +13,7 @@
                     ( {{ a.duration }} mois)
                 </small>
             </div>
+            -->
             <div class="years">
                 <article v-for="year in years" class="year" :style="{ 'width': (unit * 12)+'px'}">
                     <h2>{{ year }}</h2>
@@ -58,12 +61,17 @@
     }
 
     .activity {
-        background: rgba(255,255,255,.5);
+        background: rgba(white,.5);
         padding: .25em;
         margin: .25em;
         z-index: 5;
         position: relative;
         display: block;
+        box-shadow: 0 0 .3em rgba(0,0,0,.2);
+        transition: all .3s;
+        &:hover {
+            background: rgba(white, .8);
+        }
     }
 </style>
 <script>
@@ -76,11 +84,15 @@
             }
         },
 
+        components: {
+            'activity': require('./ActivityGantActivity.vue').default,
+        },
+
 
         data(){
             return {
                 activities: [],
-                unit: 50,
+                unit: 10,
                 months: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec']
             };
         },
@@ -106,6 +118,23 @@
                         //let monthDuration = (end.getFullYear() - start.getFullYear() -1) * 12
                         let width = (end.getTime() - start.getTime())
 
+                        console.log(activity)
+
+                        let persons = {};
+
+                        Object.keys(activity.persons).forEach( role => {
+                            activity.persons[role].forEach( person => {
+                                let personid = person.id;
+                                if( !persons.hasOwnProperty(personid) ){
+                                    persons[personid] = person;
+                                    persons[personid].roles = [];
+                                }
+                                persons[personid].roles.push(role);
+                            });
+
+
+                        });
+
 
 
                         activities.push({
@@ -117,7 +146,8 @@
                             duration: monthStart + monthEnd,
                             width: (monthStart + monthEnd) * this.unit,
                             dateStart: activity.dateStart,
-                            dateEnd: activity.dateEnd
+                            dateEnd: activity.dateEnd,
+                            persons: persons
                         })
 
                     }
