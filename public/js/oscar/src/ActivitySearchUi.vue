@@ -12,7 +12,7 @@
         <oscargrowl />
         <h1>
             <i class="icon-cube"></i>
-            Activités de recherche
+            {{ title }}
         </h1>
 
         <form action="" @submit.prevent="handlerSubmit">
@@ -20,7 +20,6 @@
                 <input placeholder="Rechercher dans l'intitulé, code PFI...…" class="form-control input-lg" name="q" v-model="search" type="search">
 
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" title="Tous savoir sur les expressions de recherche ?"><i class="icon-lifebuoy-1"></i></button>
                     <button type="submit" class="btn btn-primary">Rechercher</button>
                 </span>
             </div>
@@ -38,17 +37,20 @@
     import ActivitySearchItem from './ActivitySearchItem.vue';
     import OscarGrowl from './OscarGrowl.vue';
     import OscarBus from './OscarBus.js';
-    // import PersonAutoCompleter from './PersonAutoCompleter.vue';
+
+    //poi watch --format umd --moduleName  ActivitySearchUi --filename.css ActivitySearchUi.css --filename.js ActivitySearchUi.js --dist public/js/oscar/dist public/js/oscar/src/ActivitySearchUi.vue
+
 
     export default {
         props: {
-            url: { required: true }
+            url: { required: true },
+            first: { required: true, typ: Boolean },
+            title: { default: "Activités de recherche" }
         },
 
         components: {
             activity: ActivitySearchItem,
             oscargrowl: OscarGrowl,
-            // personautocompleter: PersonAutoCompleter,
         },
 
         data() {
@@ -103,6 +105,8 @@
         },
 
         mounted(){
+
+            this.handlerSubmit();
 
             window.onscroll = () => {
                 let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;

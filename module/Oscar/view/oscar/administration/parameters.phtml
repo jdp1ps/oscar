@@ -1,0 +1,95 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 12/12/18
+ * Time: 11:02
+ */
+?>
+<div class="container">
+    <header>
+        <h1>
+            <i class="icon-cog"></i>
+            Options et paramètres Oscar
+        </h1>
+    </header>
+
+    <section class="row">
+        <div class="col-md-6">
+            <article class="card <?= $allow_numerotation_custom == true ? 'activated' : 'disabled' ?>">
+                <h3><i class="icon-tags"></i>Numérotation des activités</h3>
+                <p class="help-message">
+                    <i class="icon-help-circled"></i>
+                    En <strong>activant</strong> cette option, vous autorisez les personnes en charge de l'ajout/modification des activités d'ajouter des types de numérotation non-référencées dans la liste des numérotations disponibles.
+                </p>
+                <form action="" method="post" class="form">
+                    <div class="row">
+                        <div class="col-md-7 col-md-push-1">
+                            <strong>type de numérotation personnalisable</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="material-switch">
+                                <input name="parameter_name" type="hidden" value="allow_numerotation_custom" />
+                                <input id="allow_numerotation_custom" name="parameter_value" type="checkbox" <?= $allow_numerotation_custom ? "checked" : "" ?> />
+                                <label for="allow_numerotation_custom" class="label-primary"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
+        </div>
+
+        <div class="col-md-6">
+            <article class="card">
+                <h3><i class="icon-pencil-1"></i>Thème</h3>
+                <form action="" method="post" class="form">
+                    <div class="row">
+                        <div class="col-md-7 col-md-push-1">
+                            <strong>Thème</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="material-switch">
+                                <input name="parameter_name" type="hidden" value="theme" />
+                                <select name="parameter_value" id="">
+                                    <?php foreach ($themes as $t): ?>
+                                    <option value="<?= $t ?>" <?= $t == $theme ? 'selected' : '' ?>><?= $t ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
+        </div>
+    </section>
+
+    <section class="row">
+        <div class="col-md-6">
+            <article class="card">
+                <h3><i class="icon-upload"></i> Format d'exportation</h3>
+                <p class="help-message">
+                    <i class="icon-help-circled"></i>
+                    Permet de configurer le format des données lors de l'exporation des activités de recherche.
+                </p>
+                <form action="" method="post" class="form">
+                    <input name="parameter_name" type="hidden" value="export_options" />
+                    <label for="separator">Séparateur de chaîne</label>
+                    <input type="text" name="separator" id="separator" value="<?= $export['separator'] ?>" class="form-control input-lg" />
+
+                    <label for="dateformat">Format des dates</label>
+                    <input type="text" name="dateformat" id="dateformat" value="<?= $export['dateformat'] ?>" class="form-control input-lg" />
+                    <hr>
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
+        </div>
+
+        <div class="col-md-6">
+            &nbsp;
+        </div>
+    </section>
+</div>

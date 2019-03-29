@@ -116,6 +116,11 @@ class OrganizationRole
         );
     }
 
+    function toJson()
+    {
+        return $this->toArray();
+    }
+
     function __toString()
     {
         return $this->getLabel();

@@ -16,6 +16,22 @@
 
     <section>
         <h2>
+            <i class="icon-sliders"></i>
+            Paramètres
+        </h2>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-cog"></i>
+                    Options
+                </strong>
+                <a href="<?= $this->url('administration/parameters') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+            </h3>
+            <p>Options générales de l'application</p>
+        </article>
+
+        <h2>
             <i class="icon-tags"></i>
             Nomenclatures
         </h2>
@@ -52,10 +68,25 @@
         <article class="card">
             <h3 class="card-title">
                 <strong>
+                    <i class="icon-euro"></i>
+                    TVA
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_TVA_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/tva') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de configurer les TVAs disponibles.</p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
                     <i class="icon-docs"></i>
                     Type de document
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE) ): ?>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE) ): ?>
                     <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
                 <?php else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
@@ -71,7 +102,7 @@
                     Type d'organisation
                 </strong>
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <a href="<?= $this->url('administration/organizationtype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
                 <?php else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
                 <?php endif; ?>
@@ -93,10 +124,26 @@
             </h3>
             <p>Permet de gérer les disciplines disponibles.</p>
         </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-tags"></i>
+                    Numérotation
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NUMEROTATION_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/numerotation') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de gérer les numérotations disponibles dans l'écran d'édition des activités.</p>
+        </article>
     </section>
 
     <section>
-        <h2>Maintenance</h2>
+        <h2><i class="icon-stethoscope"></i>
+            Maintenance</h2>
 
         <article class="card xs">
             <h3 class="card-title">
@@ -164,6 +211,23 @@
                 <?php endif; ?>
             </h3>
             <p>Cette interface permet de visualiser les déclarations et leur état. Elle permet également de <strong>gérer les validateurs</strong> et de <strong>modifier la répartition horaire du déclarant</strong> en cas de problème. Enfin, elle permet d'annuler un procédure de validation.</p>
+        </article>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-docs"></i>
+                    Gestion des documents téléversés</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE) ):?>
+                    <a href="<?= $this->url('contractdocument') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Liste des documents téléversés dans les activités de recherche.</p>
         </article>
 
         <article class="card xs">

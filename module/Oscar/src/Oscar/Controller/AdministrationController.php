@@ -19,10 +19,16 @@ use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
+use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
+use Oscar\Service\OscarConfigurationService;
+use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Yaml\Dumper;
+use Symfony\Component\Yaml\Parser;
+use Zend\Config\Writer\Yaml;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
@@ -33,6 +39,189 @@ class AdministrationController extends AbstractOscarController
     public function indexAction()
     {
         $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+        return [];
+    }
+
+    public function parametersAction()
+    {
+
+
+
+        if( $this->getHttpXMethod() == "POST" ){
+            $option = $this->params()->fromPost('parameter_name');
+            switch ($option) {
+                case OscarConfigurationService::allow_numerotation_custom:
+                    $value = $this->params()->fromPost('parameter_value') == "on";
+                    $this->getOscarConfigurationService()->setNumerotationEditable($value);
+                    return $this->redirect()->toRoute('administration/parameters');
+
+                case OscarConfigurationService::theme:
+                    $value = $this->params()->fromPost('parameter_value', '');
+                    $this->getOscarConfigurationService()->setTheme($value);
+                    return $this->redirect()->toRoute('administration/parameters');
+
+                case "export_options":
+                    $separator = $this->params()->fromPost('separator');
+                    $dateFormat = $this->params()->fromPost('dateformat');
+                    $this->getOscarConfigurationService()->setExportSeparator($separator);
+                    $this->getOscarConfigurationService()->setExportDateFormat($dateFormat);
+
+
+
+
+                    return $this->redirect()->toRoute('administration/parameters');
+
+                default:
+                    return $this->getResponseBadRequest("Paramètres non-reconnue");
+            }
+
+            echo $option;
+            die();
+        }
+
+        return [
+            'allow_numerotation_custom' => $this->getOscarConfigurationService()->getNumerotationEditable(),
+            'themes' => $this->getOscarConfigurationService()->getConfiguration('themes'),
+            'theme' => $this->getOscarConfigurationService()->getTheme(),
+            'export' => [
+                'separator' => $this->getOscarConfigurationService()->getExportSeparator(),
+                'dateformat' => $this->getOscarConfigurationService()->getExportDateFormat()
+            ]
+        ];
+    }
+
+    protected function saveEditableConfKey($key, $value){
+        $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
+    }
+
+    public function numerotationAction()
+    {
+
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);
+
+
+        $invalidActivityNumbers = $this->getActivityService()->getActivitiesWithUnreferencedNumbers();
+
+        if( $this->isAjax() ) {
+            $method = $this->getHttpXMethod();
+            switch ($method) {
+                case 'GET':
+                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
+                    return $this->jsonOutput($numerotation);
+                    break;
+
+                case 'DELETE':
+                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
+                    $deleted = $this->params()->fromQuery('str');
+                    if( !in_array($deleted, $numerotation) ){
+                        return $this->getResponseBadRequest("Impossible de supprimer '$deleted'.'");
+                    }
+
+                    $index = array_search($deleted, $numerotation);
+
+                    array_splice($numerotation, $index, 1);
+
+                    try {
+                        $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
+                        $this->getResponseOk();
+                    } catch ( \Exception $e ){
+                        return $this->getResponseInternalError("Impossible de supprimer le type '$deleted' : " . $e->getMessage());
+                    }
+
+                    break;
+
+                case 'POST':
+                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
+                    $added = $this->params()->fromPost('str');
+                    if( in_array($added, $numerotation) ){
+                        return $this->getResponseInternalError("Le type '$added' existe déjà.");
+                    }
+                    $numerotation[] = $added;
+
+                    try {
+                        $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
+                        $this->getResponseOk();
+                    } catch ( \Exception $e ){
+                        return $this->getResponseInternalError("Impossible d'ajouter le type '$added' : " . $e->getMessage());
+                    }
+                    break;
+
+                default:
+                    return $this->getResponseInternalError();
+            }
+        }
+        return [
+            "invalidActivityNumbers" => $invalidActivityNumbers
+        ];
+    }
+
+    public function tvaAction()
+    {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_TVA_MANAGE);
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            switch ( $method ){
+                case 'GET':
+                    return $this->jsonOutput(['tvas' => $this->getActivityService()->getTVAsForJson()]);
+                    break;
+
+                case 'DELETE':
+                    try {
+                        $id = $this->params()->fromQuery('id');
+
+                        if( $id ){
+                            $tva = $this->getActivityService()->getTVA($id);
+                            if( !$tva ){
+                                return $this->getResponseInternalError("Impossible de charger la TVA '$id'");
+                            }
+                        } else {
+                            return $this->getResponseBadRequest("");
+                        }
+                        $this->getEntityManager()->remove($tva);
+                        return $this->getResponseOk('TVA supprimée');
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+                    return $this->jsonOutput(['tvas' => $this->getActivityService()->getTVAsForJson()]);
+                    break;
+
+                case 'POST':
+
+                    try {
+                        $id = intval($this->params()->fromPost('id', null));
+                        $active = boolval($this->params()->fromPost('active', false));
+                        if( $active == 'false' ) $active = false;
+                        $label = $this->params()->fromPost('label', "PAS d'INTITULÉ");
+                        $rate = floatval($this->params()->fromPost('rate', 0.0));
+
+                        if( $id ){
+                            $tva = $this->getActivityService()->getTVA($id);
+                            if( !$tva ){
+                                throw new OscarException("Impossible de charger la TVA '$id'");
+                            }
+                        } else {
+                            $tva = new TVA();
+                            $this->getEntityManager()->persist($tva);
+                        }
+
+                        $tva->setLabel($label)
+                            ->setRate($rate)
+                            ->setActive($active);
+
+                        $this->getEntityManager()->flush($tva);
+
+                        return $this->getResponseOk('TVA créée');
+
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+                    break;
+
+                default:
+                    return $this->getResponseBadRequest("Erreur d'API");
+            }
+
+        }
         return [];
     }
 
@@ -47,13 +236,9 @@ class AdministrationController extends AbstractOscarController
         $disciplines = $this->getEntityManager()->getRepository(Discipline::class)->getDisciplinesCounted();
         $method = $this->getHttpXMethod();
 
-        $this->getLogger()->debug($method);
-
         switch ($method) {
             case 'PUT' :
                 $label = $this->params()->fromPost('label');
-                $this->getLogger()->debug($label);
-
                 $discipline = new Discipline();
                 $this->getEntityManager()->persist($discipline);
                 $discipline->setLabel($label);
@@ -133,7 +318,6 @@ class AdministrationController extends AbstractOscarController
 
                 case 'DELETE' :
                     $id = $this->params()->fromRoute('id');
-                    $this->getLogger()->debug("Suppression du type " + $id);
                     if( $id ){
                         $type = $this->getEntityManager()
                             ->getRepository(OrganizationType::class)
@@ -147,6 +331,7 @@ class AdministrationController extends AbstractOscarController
                                 $this->getEntityManager()->remove($type);
                                 $this->getEntityManager()->flush();
                             } catch (ForeignKeyConstraintViolationException $e ){
+                                $this->getLogger()->error("Impossible de supprimer le type d'organisation: " . $e->getMessage());
                                 return $this->getResponseInternalError("Erreur : ce type d'organisation est encore utilisé.");
                             }
                             return $this->getResponseOk("Type supprimé");
@@ -158,9 +343,7 @@ class AdministrationController extends AbstractOscarController
                     return $this->getResponseNotImplemented("En cours de développement");
 
                 case 'POST' :
-                    $this->getLogger()->debug(print_r($_POST, true));
                     $id = $this->params()->fromPost('id', null);
-
                     $type = null;
                     if( $id ){
                         $type = $this->getEntityManager()
@@ -173,14 +356,10 @@ class AdministrationController extends AbstractOscarController
                         $this->getEntityManager()->persist($type);
                     }
 
-
                     $type->setLabel($this->params()->fromPost('label'));
                     $type->setDescription($this->params()->fromPost('description'));
                     $root = null;
                     $root_id = intval($this->params()->fromPost('root_id'));
-
-                    $this->getLogger()->debug(print_r($type->toJson(), true));
-                    $this->getLogger()->debug($root_id);
 
                     if( $root_id && $root_id != $type->getId() )
                             $root = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $root_id]);
@@ -362,20 +541,6 @@ class AdministrationController extends AbstractOscarController
         }
 
         return ['configs'=>$configs];
-    }
-
-    public function connectorTestAction()
-    {
-        $connectorId = $this->params()->fromRoute('connector');
-        $connectors = $this->getServiceLocator()->get('OscarConfig')
-            ->getConfiguration('connectors.' . $connectorId);
-
-
-        $connectorPersonOrganization = $this->getServiceLocator()->get('ConnectorService')->getConnector('person_organization.ldap');
-
-        var_dump($connectorPersonOrganization->getRemoteRolesAvailables());
-
-        die("Test $connectorId");
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -680,8 +845,6 @@ class AdministrationController extends AbstractOscarController
     {
         $authenticated = $this->getEntityManager()->getRepository(Role::class)->findAll();
         $out = [];
-
-
         return ["roles" => json_encode($out)];
     }
 
@@ -778,85 +941,67 @@ class AdministrationController extends AbstractOscarController
      * Gestion des types de documents.
      */
     public function typeDocumentAction() {
-        $this->getLogger()->debug("DEBUG : typeDocumentAction()>");
-        $types=array();
-        $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class);
-        if ($entityRepos != null) {
-            $this->getLogger()->debug("DEBUG : typeDocumentAction() entity TypeDocument found()");
-            $results = $entityRepos->findAll();
-            foreach ($results as $row) {
-                array_push($types,$row->getLabel());
-            }
-            $this->getLogger()->info("INFO : Nombre de types de document recuperes en base :".count($types));
-        } else {
-            $this->getLogger()->error("ERROR : Aucune entite de type 'TypeDocument' retourne");
-        }
-
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
         return new ViewModel(array(
-            'types' => $types,
+
         ));
 
     }
 
     public function typeDocumentApiAction() {
-        $this->getLogger()->debug('DEBUG : typeDocumentActionApi()>');
-        $out = [];
-        $typeDocumentId = $this->params('typedocumentid');
-        $request = $this->getRequest();
-        if ($typeDocumentId == null) {
-            // Liste des types de documents
-            if ( $this->getHttpXMethod() == "GET" ) {
-                $this->getLogger()->debug("DEBUG : typeDocumentActionApi() GET");
-                $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class);
-                if ($entityRepos != null) {
-                    $this->getLogger()->debug("DEBUG : typeDocumentActionApi() entity TypeDocument found()");
-                    $results = $entityRepos->findAll();
-                    $out = [];
-                    /** @var OrganizationRole $role */
-                    foreach ($results as $row) {
-                        $out[] = $row->toArray();
-                    }
 
-                    return $this->ajaxResponse($out);
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
+        $method = $this->getHttpXMethod();
+
+        switch ($method) {
+            case 'GET' :
+                $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class)->createQueryBuilder('d')->orderBy('d.label');
+                $results = $entityRepos->getQuery()->getResult();
+                $out = [];
+                /** @var OrganizationRole $role */
+                foreach ($results as $row) {
+                    $out[] = $row->toArray();
                 }
-            } ////////////////////////////////////////////////////////////////////
-            // POST : Nouveau type
-            elseif( $this->getHttpXMethod() == 'POST' ){
-                $this->getLogger()->info("INFO : typeDocumentActionApi() POST ajout d'un nouveau type de document");
-                //$this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_EDITION);
+                return $this->ajaxResponse($out);
+
+            case 'POST' :
+                $label = $this->params()->fromPost('label');
+                $description = $this->params()->fromPost('description');
                 $type = new TypeDocument();
-                $type->setLabel($request->getPost('label'));
-                $type->setDescription($request->getPost('description'));
+                $type->setLabel($label)
+                    ->setDescription($description);
                 $this->getEntityManager()->persist($type);
                 $this->getEntityManager()->flush();
-                return $this->ajaxResponse($type->toArray());
-            }
-        } else {
-            // $this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_EDITION);
-            $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class);
-            if ($entityRepos != null) {
-                $this->getLogger()->debug("DEBUG : typeDocumentActionApi() entity TypeDocument found()");
-                $type = $entityRepos->find($typeDocumentId);
-                if( !$type ){
-                    return $this->getResponseInternalError("Ce type de document est introuvable dans la base de données.");
-                }
-                if( $this->getHttpXMethod() == 'PUT' ){
-                    $this->getLogger()->info("INFO : typeDocumentActionApi() PUT mise à jour du type de document");
-                    $type->setLabel($request->getPost('label'));
-                    $type->setDescription($request->getPost('description'));
-                    $this->getEntityManager()->persist($type);
+                return $this->getResponseOk();
+                break;
+
+            case 'PUT' :
+                try {
+                    $_PUT = $_POST;
+                    $typeDocumentId = $_PUT['typedocumentid'];
+                    $this->getLogger()->info("INFO : typeDocumentActionApi() PUT mise à jour du type de document $typeDocumentId");
+                    $this->getLogger()->info(print_r($_POST, true));
+                    $typeDocument = $this->getActivityService()->getTypeDocument($typeDocumentId, true);
+                    $typeDocument->setLabel($_PUT['label'])
+                        ->setDescription($_PUT['description']);
+                    $this->getEntityManager()->persist($typeDocument);
                     $this->getEntityManager()->flush();
-                    return $this->ajaxResponse($type->toArray());
+                    return $this->getResponseOk();
+                } catch (\Exception $e ){
+                    $msg = sprintf(_("Impossible de mettre à jour le type de document %s : %s"), $typeDocument, $e->getMessage());
+                    $this->getLogger()->error($msg);
+                    return $this->getResponseInternalError($msg);
                 }
-                elseif( $this->getHttpXMethod() == 'DELETE' ){
-                    $this->getLogger()->info("INFO : typeDocumentActionApi() DELETE document".$type->getLabel());
-                    $this->getEntityManager()->remove($type);
-                    $this->getEntityManager()->flush();
-                    return $this->getResponseOk('le type de document a été supprimé.');
-                }
-            }
+
+            case 'DELETE' :
+                $typeDocumentId = $this->params()->fromQuery('typedocumentid');
+                $typeDocument = $this->getActivityService()->getTypeDocument($typeDocumentId, true);
+                $this->getEntityManager()->remove($typeDocument);
+                $this->getEntityManager()->flush();
+                return $this->getResponseOk('le type de document a été supprimé.');
+
         }
-        $this->getLogger()->error("ERROR : typeDocumentActionApi() On ne devrait pas se trouver ici !");
+
         return $this->getResponseBadRequest("Accès à l'API improbable...");
     }
 

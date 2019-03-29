@@ -96,80 +96,94 @@ class ActivityPaymentController extends AbstractOscarController
                     return $this->getResponseOk("Le versement a bien été supprimé");
 
                 case 'PUT':
-                    /** @var ActivityPayment $payment */
-                    $payment = new ActivityPayment();
-                    $this->getEntityManager()->persist($payment);
+                    return $this->getResponseDeprecated();
 
-                    $payment->setAmount($this->params()->fromPost('amount'))
-                        ->setComment($this->params()->fromPost('comment'))
-                        ->setActivity($activity)
-                        ->setCodeTransaction($this->params()->fromPost('codeTransaction'))
-                        ->setCurrency($this->getEntityManager()
-                            ->getRepository(Currency::class)
-                            ->find($this->params()->fromPost('currencyId')));
-
-
-                    $status = $this->params()->fromPost('status');
-                    $rate = $this->params()->fromPost('rate');
-                    $datePredicted = $this->params()->fromPost('datePredicted');
-                    $datePayment = $this->params()->fromPost('datePayment');
-
-                    if( $datePayment )
-                        $payment->setDatePayment(new \DateTime($datePayment));
-                    else
-                        $payment->setDatePayment(null);
-
-                    if( $datePredicted )
-                        $payment->setDatePredicted(new \DateTime($datePredicted));
-                    else
-                        $payment->setDatePredicted(null);
-
-                    $payment->setRate($rate)
-                        ->setStatus($status);
-
-
-                    $this->getEntityManager()->flush($payment);
-                    $this->getNotificationService()->generatePaymentsNotifications($payment);
-                    return $this->getResponseOk("Le versement a bien été ajouté");
 
                 case 'POST':
-                    /** @var ActivityPayment $payment */
-                    $payment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($this->params()->fromPost('id'));
 
-                    $payment->setAmount($this->params()->fromPost('amount'))
-                        ->setComment($this->params()->fromPost('comment'))
-                        ->setActivity($activity)
-                        ->setCodeTransaction($this->params()->fromPost('codeTransaction'))
-                        ->setCurrency($this->getEntityManager()
-                            ->getRepository(Currency::class)
-                            ->find($this->params()->fromPost('currencyId')));
+                    $action = $this->params()->fromPost('action');
 
+                    if( $action == 'create' ){
+                        /** @var ActivityPayment $payment */
+                        $payment = new ActivityPayment();
+                        $this->getEntityManager()->persist($payment);
 
-                    $status = $this->params()->fromPost('status');
-                    $rate = $this->params()->fromPost('rate');
-                    $datePredicted = $this->params()->fromPost('datePredicted');
-                    $datePayment = $this->params()->fromPost('datePayment');
-
-                    if( $datePayment )
-                        $payment->setDatePayment(new \DateTime($datePayment));
-                    else
-                        $payment->setDatePayment(null);
-
-                    if( $datePredicted )
-                        $payment->setDatePredicted(new \DateTime($datePredicted));
-                    else
-                        $payment->setDatePredicted(null);
-
-                    $payment->setRate($rate)
-                        ->setStatus($status);
+                        $payment->setAmount($this->params()->fromPost('amount'))
+                            ->setComment($this->params()->fromPost('comment'))
+                            ->setActivity($activity)
+                            ->setCodeTransaction($this->params()->fromPost('codeTransaction'))
+                            ->setCurrency($this->getEntityManager()
+                                ->getRepository(Currency::class)
+                                ->find($this->params()->fromPost('currencyId')));
 
 
-                    $this->getEntityManager()->flush($payment);
+                        $status = $this->params()->fromPost('status');
+                        $rate = $this->params()->fromPost('rate');
+                        $datePredicted = $this->params()->fromPost('datePredicted');
+                        $datePayment = $this->params()->fromPost('datePayment');
 
-                    $this->getNotificationService()->purgeNotificationPayment($payment);
-                    $this->getNotificationService()->generatePaymentsNotifications($payment);
+                        if( $datePayment )
+                            $payment->setDatePayment(new \DateTime($datePayment));
+                        else
+                            $payment->setDatePayment(null);
 
-                    return $this->getResponseOk("Le versement a bien été modifié");
+                        if( $datePredicted )
+                            $payment->setDatePredicted(new \DateTime($datePredicted));
+                        else
+                            $payment->setDatePredicted(null);
+
+                        $payment->setRate($rate)
+                            ->setStatus($status);
+
+
+                        $this->getEntityManager()->flush($payment);
+                        $this->getNotificationService()->generatePaymentsNotifications($payment);
+                        return $this->getResponseOk("Le versement a bien été ajouté");
+                    }
+
+                    elseif ($action == 'update' ){
+                        /** @var ActivityPayment $payment */
+                        $payment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($this->params()->fromPost('id'));
+
+                        $payment->setAmount($this->params()->fromPost('amount'))
+                            ->setComment($this->params()->fromPost('comment'))
+                            ->setActivity($activity)
+                            ->setCodeTransaction($this->params()->fromPost('codeTransaction'))
+                            ->setCurrency($this->getEntityManager()
+                                ->getRepository(Currency::class)
+                                ->find($this->params()->fromPost('currencyId')));
+
+
+                        $status = $this->params()->fromPost('status');
+                        $rate = $this->params()->fromPost('rate');
+                        $datePredicted = $this->params()->fromPost('datePredicted');
+                        $datePayment = $this->params()->fromPost('datePayment');
+
+                        if( $datePayment )
+                            $payment->setDatePayment(new \DateTime($datePayment));
+                        else
+                            $payment->setDatePayment(null);
+
+                        if( $datePredicted )
+                            $payment->setDatePredicted(new \DateTime($datePredicted));
+                        else
+                            $payment->setDatePredicted(null);
+
+                        $payment->setRate($rate)
+                            ->setStatus($status);
+
+
+                        $this->getEntityManager()->flush($payment);
+
+                        $this->getNotificationService()->purgeNotificationPayment($payment);
+                        $this->getNotificationService()->generatePaymentsNotifications($payment);
+
+                        return $this->getResponseOk("Le versement a bien été modifié");
+                    }
+
+                    else {
+                        return $this->getResponseBadRequest('Action inconnue');
+                    }
             }
 
             $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')

@@ -10,6 +10,7 @@ namespace Oscar\View\Helpers;
 
 
 use Oscar\Service\ConfigurationParser;
+use Oscar\Service\OscarConfigurationService;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\View\Helper\AbstractHtmlElement;
@@ -19,7 +20,7 @@ class Options extends AbstractHtmlElement implements ServiceLocatorAwareInterfac
     use ServiceLocatorAwareTrait;
 
     /**
-     * @return ConfigurationParser
+     * @return OscarConfigurationService
      */
     private function getConfiguration()
     {
@@ -27,7 +28,7 @@ class Options extends AbstractHtmlElement implements ServiceLocatorAwareInterfac
     }
 
     public function theme(){
-        return $this->getConfiguration()->getConfiguration('theme');
+        return $this->getConfiguration()->getTheme();
     }
 
     public function oscarNumSeparator(){

@@ -1,5 +1,5 @@
 <template>
-    <article class="card">
+    <article class="card" :class="'activity-item-' +activity.statutId">
         <h3 class="card-title">
             <span class="picto" :class="'status-'+activity.statutId">
                 <i class="icon"></i>
@@ -12,6 +12,11 @@
                 {{ activity.label }}
 
                 <a :href="'/activites-de-recherche/fiche-detaillee/' + activity.id" class="more">Fiche</a>
+
+                <span v-if="activity.has_workpackages" class="cartouche blue xs">
+                    <i class="icon-calendar"></i>
+                    Soumis aux feuille de temps
+                </span>
 
                 <!--<a data-confirm="Supprimer définitivement cette activité ?" data-href="/activites-de-recherche/delete/10609" class="del">Supprimer</a>-->
             </span>

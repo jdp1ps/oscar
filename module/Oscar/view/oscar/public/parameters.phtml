@@ -92,6 +92,27 @@
                     </h3>
 
                     <section class="data-list">
+                        <small>Personnes pour lesquelles vous êtes autorisé à compléter les feuilles de temps.</small>
+                        <div class="data-row card">
+                            <div class="data-label" style="flex: 1; white-space: normal">
+                                <strong>Déclarant(s)</strong><br>
+                            </div>
+                            <div class="data-value"  style="flex: 4">
+                                    <?php foreach($person->getTimesheetsFor() as $p): ?>
+                                        <article>
+                                            <strong>
+                                                <i class="icon-user"></i> <?= $p ?>
+                                            </strong>
+                                            <a href="<?= $this->url('timesheet/declarant') ?>?person=<?= $p->getId() ?>" class="btn btn-default btn-xs">
+                                                <i class="icon-calendar"></i>
+                                                Compléter la feuille de temps
+                                            </a>
+
+                                        </article>
+                                    <?php endforeach; ?>
+                            </div>
+                        </div>
+
                         <small>Les <strong>déclarants</strong> sont les personnes pour lesquelles vous devrez valider les déclarations Hors-Projet.</small>
                         <div class="data-row card">
                             <div class="data-label" style="flex: 1; white-space: normal">
@@ -160,7 +181,7 @@
                         Vue.use(VueResource);
                         Vue.filter('heures', function(v){
                             var heure = Math.floor(v);
-                            var minutes = (v-heure)*60;
+                            var minutes = Math.round((v-heure)*60);
                             return heure +':' +minutes;
                         });
                         new Vue({

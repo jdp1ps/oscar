@@ -55,6 +55,11 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
             $object->setLadapLogin($this->getFieldValue($jsonData, 'login'));
         }
 
+        // Récupération de la répartition horaire
+        if(property_exists($jsonData, 'schelude')) {
+            $object->setScheduleKey($jsonData->schelude);
+        }
+
         // @TODO utiliser la méthode parent getFieldValue pour tous ces champs
         if (property_exists($jsonData, 'groups')) {
             $object->setLdapMemberOf($jsonData->groups);

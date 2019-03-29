@@ -169,7 +169,7 @@ class ContractDocument extends AbstractVersionnedDocument
 
 
 
-    public function toJson( $options ){
+    public function toJson( $options=false ){
         $defaultOptions = [
             'urlDelete' => false,
             'urlDownload' => false,

@@ -64,7 +64,8 @@ class OscarUserContext extends UserContext
 
         // Accès niveau 1 : N+1
         $subodinates = $personRepository->getSubordinatesIds($this->getCurrentPerson()->getId());
-        if( $access > 0 && count($subodinates) > 0 ) return true;
+
+        if( $access > 0 && (count($subodinates) > 0 || count($this->getCurrentPerson()->getTimesheetsFor()) > 0)) return true;
 
         // Accès niveau 2 : Membre de l'organisation
         $idsOrga = $organisationRepository->getOrganizationsIdsForPerson($this->getCurrentPerson()->getId());
@@ -466,7 +467,6 @@ class OscarUserContext extends UserContext
             foreach ($privileges as $privilege) {
                 $_PRIVILEGES[] = $privilege->getFullCode();
             }
-
         }
 
         return $_PRIVILEGES;
@@ -586,6 +586,8 @@ class OscarUserContext extends UserContext
             return $this->getPrivilegesProjet($entity);
         } elseif ($entity instanceof Activity) {
             return $this->getPrivilegesActivity($entity);
+        } elseif( $entity instanceof Organization ){
+            return $this->getPrivilegesOrganization($entity);
         } else {
             throw new \Exception('La ressource fournie doit être un projet ou une activité');
         }
@@ -794,6 +796,17 @@ class OscarUserContext extends UserContext
         return $tmpActivities[$key];
     }
 
+    public function getPrivilegesOrganization( Organization $organization ){
+        if( !$this->getCurrentPerson() ){
+            return [];
+        }
+        else {
+            $roles = $this->getRolesPersonInOrganization($this->getCurrentPerson(), $organization);
+            $privileges = $this->getPrivilegesRoles($roles);
+            return $privileges;
+        }
+    }
+
     public function getPrivilegesActivity(Activity $entity)
     {
         if (!$this->getCurrentPerson()) {
@@ -815,13 +828,15 @@ class OscarUserContext extends UserContext
 
     }
 
-    public function getPrivilegesOrganization( Organization $organization ){
-        if (!$this->getCurrentPerson()) {
-            return [];
-        } else {
-            return $this->getPersonPrivilegesInOrganization($organization);
-        }
-    }
+////    public function getPrivilegesOrganization( Organization $organization ){
+//        if (!$this->getCurrentPerson()) {
+//            return [];
+//        } else {
+//            $roles = $this->getRolesPersonInOrganization($this->getCurrentPerson(), $organization);
+//            var_dump($roles);
+//            die();
+//        }
+//    }
 
 
 
@@ -844,7 +859,8 @@ class OscarUserContext extends UserContext
 
             // Puis si besoin, les rôles hérités de l'application
             if ($ressource) {
-                return in_array($privilege, $this->getPrivileges($ressource));
+                $privileges = $this->getPrivileges($ressource);
+                return in_array($privilege, $privileges);
             }
         } catch (\Exception $e) {
 
@@ -854,5 +870,46 @@ class OscarUserContext extends UserContext
         return false;
     }
 
+    public function hasPrivilegeInOrganizations($privilege){
+        $person = $this->getCurrentPerson();
 
+        if( !$person ){
+            return false;
+        }
+
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($person->getOrganizations() as $personOrganization) {
+            if( $personOrganization->isPrincipal() && $this->hasPrivileges($privilege, $personOrganization->getOrganization()) ){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $privilege
+     * @return Organization[]
+     * @throws \Exception
+     */
+    public function getOrganizationsWithPrivilege($privilege){
+        $person = $this->getCurrentPerson();
+
+        if( !$person ){
+            return false;
+        }
+        /** @var PersonService $personService */
+        $personService = $this->getServiceLocator()->get('PersonService');
+        $organizations = $personService->getPersonOrganizations($person, true, true);
+        $result = [];
+
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($organizations as $personOrganization) {
+            if( $this->hasPrivilegeInOrganizations($privilege, $personOrganization) ){
+                $result[] = $personOrganization;
+            }
+        }
+
+        return $result;
+    }
 }

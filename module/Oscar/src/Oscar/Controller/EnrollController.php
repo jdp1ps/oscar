@@ -194,7 +194,7 @@ class EnrollController extends AbstractOscarController
 
                 case ActivityPerson::class :
                     $urlEnrollerShow = 'contract/show';
-                    $this->getNotificationService()->generateNotificationsForActivity($enroll->getProject(), $enroll->getPerson());
+                    $this->getNotificationService()->generateNotificationsForActivity($enroll->getActivity(), $enroll->getPerson());
                     break;
 
                 case ActivityOrganization::class :

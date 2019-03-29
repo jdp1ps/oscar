@@ -93,6 +93,14 @@
                         </small>
                     </div>
                 <?php endif ?>
+                <?php if( $entity->getTva() ): ?>
+                    <div><small>
+                            TVA :
+                            <b><?= $entity->getTva() ?></b>
+                        </small>
+                    </div>
+                <?php endif ?>
+
             </div>
             <?php endif; ?>
         </h1>
@@ -287,23 +295,23 @@
                             <div class="oscar-sorter">
                                 <i class=" icon-sort"></i>
                                 Tier les résultats par :
-                                <a @click.prevent="order('dateUpload')" href="#" v-bind:class="cssSort('dateUpload')" class="oscar-sorter-item">
+                                <a @click.prevent="order('dateUpload')" href="#" :class="cssSort('dateUpload')" class="oscar-sorter-item">
                                     Date d'upload
                                     <i class="icon-angle-down" v-show="sortDirection == 1"></i>
                                     <i class="icon-angle-up" v-show="sortDirection == -1"></i>
                                 </a>
-                                <a @click.prevent="order('fileName')" href="#" v-bind:class="cssSort('fileName')" class="oscar-sorter-item">
+                                <a @click.prevent="order('fileName')" href="#" :class="cssSort('fileName')" class="oscar-sorter-item">
                                     Nom du fichier
                                     <i class="icon-angle-down" v-show="sortDirection == 1"></i>
                                     <i class="icon-angle-up" v-show="sortDirection == -1"></i>
                                 </a>
-                                <a @click.prevent="order('categoryText')" href="#" v-bind:class="cssSort('categoryText')" class="oscar-sorter-item">
+                                <a @click.prevent="order('categoryText')" href="#" :class="cssSort('categoryText')" class="oscar-sorter-item">
                                     Type de document
                                     <i class="icon-angle-down" v-show="sortDirection == 1"></i>
                                     <i class="icon-angle-up" v-show="sortDirection == -1"></i>
                                 </a>
                             </div>
-                            <document v-for="document in sortedDocument" v-bind:document="document" v-bind:documentTypes="documentTypes"></document>
+                            <document v-for="document in sortedDocument" :document="document" :documentTypes="documentTypes"></document>
                         </div>
                     </script>
 
@@ -422,7 +430,16 @@
     </div>
     <hr>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
-        <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
+        <?php if( count($entity->getWorkPackages()) == 0 ) : ?>
+
+        <?php else: ?>
+            <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
+        <?php if( !$entity->getProject() ): ?>
+        <div class="alert alert-danger">
+            <i class="icon-attention-1"></i>
+            Cette activité doit être associée à un projet pour garantir le fonctionnement des feuilles de temps.
+        </div>
+        <?php endif; ?>
         <h3>Validateurs</h3>
         <div class="row">
             <div class="col-md-4">
@@ -496,111 +513,67 @@
         <?php endforeach; ?>
     <?php endif; ?>
 
-        <?php /*if( ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $entity) ||
-                $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $entity) ) &&
-                $entity->hasDeclarers()): ?>
+<?php endif; ?>
 
-            <a href="<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>#timesheet" class="btn btn-default">
-                <i class="icon-doc-xls"></i>
-                Validation des déclarations
-            </a>
-        <?php endif;*/ ?>
-        <?php /*if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION, $entity) ): ?>
 
-            <?php if( count($entity->getWorkPackages()) == 0 ): ?>
-                <p class="alert-infos">
-                    <i class="icon-info"></i>
-                    Vous devez créer des lots de travail et leur assigner des déclarants pour permettre la déclaration d'heures.
-                </p>
-            <?php else: ?>
-
-                <div class="dropdown">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Ajouter des créneaux pour <i class="caret"></i>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <?php foreach( $entity->getPersonsDeep() as $person ): ?>
-
-                            <li><a class="dropdown-item <?= !$entity->hasDeclarant($person->getPerson()) ? 'disabled' : '' ?>" href="<?= $this->url('timesheet/usurpation', ['idactivity' => $entity->getId(), 'idperson' => $person->getPerson()->getId()]) ?>">
-                                    <?= $person->getPerson() ?>
-
-                                    <?php if(!$entity->hasDeclarant($person)): ?>
-                                        <small> (N'est pas identifié(e) comme déclarant(e) dans un lot de travail)</small>
-                                    <?php endif; ?>
-                                </a>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-        <?php endif; ?>
-
-    <?php endif;  */ ?>
 
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
 if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
     <section>
         <h2><i class="icon-archive"></i> Lot de travail</h2>
+        <?php if( !($entity->getProject() && $entity->getAcronym()) ): ?>
+        <div class="alert alert-danger">
+            <?php if( !$entity->getProject() ): ?>
+                <p>L'activité doit appartenir à un projet pour activer les lots de travail</p>
+            <?php elseif (!$entity->getAcronym() ): ?>
+                <p>Le projet <strong><?= $entity->getProject() ?></strong> n'a pas d'acronyme !</p>
+            <?php endif; ?>
+        </div>
+        <?php else: ?>
         <div id="workpackages"></div>
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
+            <script>
+                require(['vue', 'vue-resource', 'bootbox', 'Workpackage'], function(Vue, VueResource, Bootbox, Workpackage){
+                    Vue.use(VueResource);
+
+                    Vue.http.options.emulateJSON = true;
+                    Vue.http.options.emulateHTTP = true;
+
+                    Vue.filter('heures', function(v){
+                        var heures = parseInt(v);
+                        var minutes = Math.round((parseFloat(v) - heures)*60);
+                        if( minutes == 0 ) minutes = '';
+                        else if (minutes < 10) minutes = ':0' +minutes;
+                        else minutes = ':'+minutes
+                       return heures+minutes;
+                    });
+
+                    // Transmission du jeton
+                    Vue.http.interceptors.push((request, next) => {
+                        request.headers.set('X-CSRF-TOKEN', '<?= $tokenValue ?>');
+                        request.headers.set('Authorization', 'OSCAR TOKEN');
+                        next();
+                    });
+
+                    new Vue({
+                        render: function(h){
+                            return h(Workpackage.default,{ props: {
+                                    url: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>',
+                                    token: '<?= $tokenValue ?>',
+                                    isValidateur: true,
+                                    editable: true,
+                                    Bootbox: Bootbox,
+                                }})
+                        },
+                        el: '#workpackages'
+                    })
+                });
+            </script>
+        <?php endif; ?>
+        <?php endif; ?>
     </section>
 
-
-
-
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-    <script>
-        require(['vue', 'vue-resource', 'bootbox', 'Workpackage'], function(Vue, VueResource, Bootbox, Workpackage){
-            Vue.use(VueResource);
-
-            Vue.http.options.emulateJSON = true;
-            Vue.http.options.emulateHTTP = true;
-
-            // Transmission du jeton
-            Vue.http.interceptors.push((request, next) => {
-                request.headers.set('X-CSRF-TOKEN', '<?= $tokenValue ?>');
-                request.headers.set('Authorization', 'OSCAR TOKEN');
-                next();
-            });
-
-            new Vue({
-                render: function(h){
-                    return h(Workpackage.default,{ props: {
-                        url: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>',
-                        token: '<?= $tokenValue ?>',
-                        isValidateur: true,
-                        editable: true,
-                        Bootbox: Bootbox,
-                    }})
-                },
-                el: '#workpackages'
-            })
-        });
-        /*
-        require(['workpackageperson', 'mm'], function(Workpackageperson, moment){
-            var wp = new Workpackageperson.default({
-                http: {
-                    root: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>'
-                },
-                data:{
-                    token: '<?= $tokenValue ?>',
-                    isValidateur: true,
-                    editable: true
-
-                },
-                el: '#workpackages'
-            });
-
-            wp.$on('valider', function(){
-                window.location = '<?= $this->url('timesheet/validation', ['idactivity' => $entity->getId()]) ?>';
-            });
-
-            wp.$on('declarer', function(){
-                window.location = '<?= $this->url('timesheet/declaration2', ['idactivity' => $entity->getId()]) ?>';
-            });
-        })*/
-    </script>
-    <?php endif; ?>
     <?php endif; ?>
 
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ): ?>
@@ -666,8 +639,6 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
 <div id="activityclone"></div>
 <script>
     require(['activityclone', 'vue'], function(Activityclone, Vue){
-        console.log('Clonage');
-
         var activityClone = new Vue({
             render(h){
                 return h(Activityclone.default, {

@@ -160,4 +160,12 @@ class RoleRepository extends EntityRepository
             ->getResult();
         return $roles;
     }
+
+    public function getRolesLdapFilter( $ldapFilter = null ){
+        $qb = $this->createQueryBuilder('r');
+        if( $ldapFilter == null ){
+            $qb->where('r.ldapFilter IS NOT NULL');
+        }
+        return $qb->getQuery()->getResult();
+    }
 }

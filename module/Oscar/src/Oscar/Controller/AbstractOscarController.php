@@ -15,11 +15,13 @@ use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\ProjectRepository;
+use Oscar\Exception\OscarException;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityTypeService;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
+use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
@@ -27,6 +29,7 @@ use Oscar\Service\ProjectService;
 use Oscar\Service\SearchService;
 use Oscar\Service\SessionService;
 use Oscar\Service\UserParametersService;
+use Symfony\Component\Yaml\Parser;
 use UnicaenAuth\Service\UserContext;
 use Zend\Http\Request;
 use Zend\Http\Response;
@@ -42,6 +45,46 @@ use Zend\View\Model\JsonModel;
  */
 class AbstractOscarController extends AbstractActionController
 {
+    /**
+     * @return OscarConfigurationService
+     */
+    public function getOscarConfigurationService(){
+        return $this->getServiceLocator()->get('OscarConfig');
+    }
+
+    protected function getYamlConfigPath(){
+        $dir = realpath(__DIR__.'/../../../../../config/autoload/');
+        $file = $dir.'/oscar-editable.yml';
+
+        if( !file_exists($file) ){
+            if( !is_writeable($dir) ){
+                throw new OscarException("Impossible d'écrire la configuration dans le dossier $dir");
+            }
+        }
+        else if (!is_writeable($file)) {
+            throw new OscarException("Impossible d'écrire le fichier $file");
+        }
+        return $file;
+    }
+
+    protected function getEditableConfRoot(){
+        $path = $this->getYamlConfigPath();
+        if( file_exists($path) ){
+            $parser = new Parser();
+            return $parser->parse(file_get_contents($path));
+        } else {
+            return [];
+        }
+    }
+
+    protected function getEditableConfKey($key, $default = null){
+        $conf = $this->getEditableConfRoot();
+        if( array_key_exists($key, $conf) ){
+            return $conf[$key];
+        } else {
+            return $default;
+        }
+    }
 
     /**
      * @param $key

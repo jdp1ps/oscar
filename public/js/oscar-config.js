@@ -40,7 +40,6 @@ requirejs.config({
         'privileges': 'components/build/privileges',
         'organizationrole': 'components/build/organizationrole',
         'roles': 'components/build/roles',
-        'workpackageperson': 'components/build/workpackageperson',
         'ical': 'vendor/ical.js/build/ical.min',
         'timesheet': 'components/build/timesheet',
         'in-the-box' : 'vendor/in-the-box/build/InTheBox',
@@ -57,7 +56,7 @@ requirejs.config({
         'io' : 'http://127.0.0.1:3000/socket.io/socket.io.js',
         'notifications' : 'oscar/dist/Notification',
         'activity' : 'components/build/activity',
-        'Typedocument' : 'components/build/Typedocument',
+        'TypeDocument' : 'oscar/dist/TypeDocument',
         'milestones' : 'oscar/dist/Milestones',
         'authentification' : 'oscar/dist/Authentification',
         'payments' : 'oscar/dist/Payments',
@@ -79,7 +78,13 @@ requirejs.config({
         'TimesheetPersonResume' : 'oscar/dist/TimesheetPersonResume',
         'ResumeActivity' : 'oscar/dist/ResumeActivity',
         'PersonsList' : 'oscar/dist/PersonsList',
-        'Workpackage': 'oscar/dist/WorkpackageUI'
+        'Tva': 'oscar/dist/Tva',
+        'ActivityRequest': 'oscar/dist/ActivityRequest',
+        'ActivityRequestAdmin': 'oscar/dist/ActivityRequestAdmin',
+        'Workpackage': 'oscar/dist/WorkpackageUI',
+        'ConfigStringList': 'oscar/dist/ConfigStringList',
+        'ActivityPersons': 'oscar/dist/ActivityPersons',
+        'Keyvalue': 'oscar/dist/Keyvalue',
     },
     shim: {
         "bootstrap": {

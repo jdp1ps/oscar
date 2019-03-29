@@ -807,6 +807,9 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     public function getType()
     {
+        if( $this->getTypeObj() ){
+            return (string) $this->getTypeObj();
+        }
         return $this->type;
     }
 
@@ -954,6 +957,14 @@ class Organization implements ResourceInterface, IConnectedObject
         return $this;
     }
 
+    public function fullOrShortName( $displayClose = false )
+    {
+        if( $this->getFullName() ){
+            return $this->getFullName();
+        } else {
+            return $this->getShortName();
+        }
+    }
 
 
     public function displayName( $displayClose = false )
@@ -961,7 +972,8 @@ class Organization implements ResourceInterface, IConnectedObject
         return
             ($this->isClose() && $displayClose ? '!FERME! ' : '').
             ($this->getCode() ? '['.$this->getCode().'] ' : '').
-            ($this->getShortName() ? $this->getShortName() : $this->getFullName()).
+            ($this->getShortName() ? $this->getShortName().' ' : '').
+            ($this->getFullName() ? $this->getFullName().' ' : '').
             ($this->getCity() ? '(' . $this->getCity() . ')' : '');
     }
 

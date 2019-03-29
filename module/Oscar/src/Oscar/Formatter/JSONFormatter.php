@@ -12,8 +12,11 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Entity\Role;
+use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OscarUserContext;
 
@@ -31,6 +34,17 @@ class JSONFormatter
     public function __construct(OscarUserContext $oscarUserContext)
     {
         $this->oscarUserContext = $oscarUserContext;
+    }
+
+    /**
+     * @param $collection
+     */
+    public function objectsCollectionToJson( $collection, $compact = true ){
+        $out = [];
+        foreach ($collection as $item) {
+            $out[] = $this->format($item, $compact);
+        }
+        return $out;
     }
 
     /**
@@ -66,9 +80,11 @@ class JSONFormatter
 
         $datas['project'] = $activity->getProject() ? $this->formatProject($activity->getProject(), false) : null;
         $datas['project_id'] = $activity->getProject()?$activity->getProject()->getId():null;
+        $datas['statutId'] = $activity->getStatus();
 
         $datas['persons'] = null;
         $datas['persons_primary'] = null;
+        $datas['has_workpackages'] = count($activity->getWorkPackages()) > 0;
 
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity) ) {
 
@@ -166,7 +182,9 @@ class JSONFormatter
     }
 
     public function format($object, $compact = true){
-        switch (get_class($object)) {
+        $class = get_class($object);
+
+        switch ($class) {
             case Activity::class:
                 return $this->formatActivity($object, $compact);
 
@@ -178,6 +196,15 @@ class JSONFormatter
 
             case Organization::class:
                 return $this->formatOrganization($object, $compact);
+
+            case OrganizationRole::class:
+                return $object->toJson();
+
+            case Role::class:
+                return $object->toJson();
+
+            default:
+                throw new OscarException("Impossible de convertir $class au format JSON");
         }
 
     }

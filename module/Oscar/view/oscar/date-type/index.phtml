@@ -16,7 +16,7 @@ $facet;
     <?php foreach( $entities as $entity ):
         if( $facet != $entity['facet'] ){
             $text = $facet = $entity['facet'];
-            if( !$text ) $text = '<i>Non définit</i>';
+            if( !$text ) $text = '<i>Non défini</i>';
 
             echo "<h3>$text</h3>";
         }

@@ -13,12 +13,26 @@ return array(
         'socket' => false,
 
         'theme' => 'oscar',
+        'themes' => ['oscar', 'adaj', 'debug'],
+
+        // Pour les opérations automatique, permet d'obtenir depuis la base de donnée la devise à utiliser
+        // dans les activités de recherche si rien n'est spécifié. (valeur de la colonne 'label').
+        'defaultCurrency' => 'Euro',
 
         /////////////////////////////////////////////////////////////////////////////////// oscar_num_separator [string]
         /// Permet de modifier le formalisme de la numérotation automatique dans Oscar, il faut également modifier
         ///  la fonction Postgresql associée (doc/numerotation.md)
         ///
         'oscar_num_separator' => 'DRI',
+
+
+        'export' => [
+            'payments' => [
+                'separator' => '$$',
+                'persons' => '',
+                'organizations' => 'Composante responsable,Laboratoire,Financeur'
+            ]
+        ],
 
 
         ////////////////////////////////////////////////////////////////////// listPersonIncludeActivityMember [boolean]
@@ -29,7 +43,10 @@ return array(
         ///
         'listPersonIncludeActivityMember' => false,
 
-        // ./doc/connectors.md
+        'allow_activity_request' => 'leader',
+
+        ////////////////////////////////////////////////////////////////////// connectors [array]
+        // Voir documentation ./doc/connectors.md
         'connectors' => [
             'organization' => [],
             'person' => []
@@ -141,52 +158,19 @@ return array(
         //  - 3 = Person dans l'organisation, et dans les activités
         'listPersonnel' => 0,
 
+        // Modèles horaires
         'scheduleModeles' => [
-            'fulltime' => [
-                'label' => 'Plein temps',
-                'week' => 35.0,
-                'days' => [
-                    1 => 7.0,
-                    2 => 7.0,
-                    3 => 7.0,
-                    4 => 7.0,
-                    5 => 7.0
-                ]
-            ],
-
-            'halftime' => [
-                'label' => 'Mi-temps',
-                'week' => 17.5,
-                'days' => [
-                    1 => 3.5,
-                    2 => 3.5,
-                    3 => 3.5,
-                    4 => 3.5,
-                    5 => 3.5
-                ]
-            ],
-
-            'parttime' => [
-                'label' => 'Mi-temps',
-                'week' => 30.0,
-                'days' => [
-                    1 => 6.0,
-                    2 => 6.0,
-                    3 => 6.0,
-                    4 => 6.0,
-                    5 => 6.0
-                ]
-            ],
+            // A définir dans local.php
         ],
 
         'horslots' => [
-            'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
-            'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
-            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
-            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
-            //  'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
-            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
-            'other' => [ 'code' => 'other', 'label' => 'Divers',  'description' => 'Autre activité', 'icon' => true ],
+//            'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
+//            'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+//            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
+//            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
+//            //  'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
+//            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+//            'other' => [ 'code' => 'other', 'label' => 'Divers',  'description' => 'Autre activité', 'icon' => true ],
         ],
 
 
@@ -195,6 +179,9 @@ return array(
         'paths' => [
             // Documents des activités
             'document_oscar' => realpath( __DIR__.'/../../data/documents/activity/'),
+
+            // Documents des demandes d'activités
+            'document_request' => realpath( __DIR__.'/../../data/documents/request'),
 
             // Documents 'publiques"
             'document_admin_oscar' => realpath( __DIR__.'/../../data/documents/public/'),

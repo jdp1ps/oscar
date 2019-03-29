@@ -106,7 +106,7 @@ rm MAINTENANCE
 
 
 
-# ANNEXE : Requètes de maintenance
+# ANNEXE : Requêtes de maintenance
 
 > Les requêtes ici ne sont utilisées que dans le cadre du développement 
 

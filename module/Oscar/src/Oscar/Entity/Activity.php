@@ -151,14 +151,6 @@ class Activity implements ResourceInterface
     private $centaureNumConvention;
 
     /**
-     * Nature de la subvension.
-     *
-     * @var GrantSource
-     * @ORM\ManyToOne(targetEntity="GrantSource")
-     */
-    private $source;
-
-    /**
      * Type d'activité
      *
      * @var ActivityType
@@ -316,6 +308,7 @@ class Activity implements ResourceInterface
      *
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="ActivityPayment", mappedBy="activity", cascade={"remove"})
+     * @ORM\OrderBy({"datePayment" = "ASC", "datePredicted" = "ASC"})
      */
     protected $payments;
 
@@ -709,24 +702,6 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return GrantSource
-     */
-    public function getSource()
-    {
-        return $this->source;
-    }
-
-    /**
-     * @param GrantSource $source
-     */
-    public function setSource($source)
-    {
-        $this->source = $source;
-
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getAmount()
@@ -842,7 +817,8 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @param datetime $dateSigned
+     * @param $dateSigned
+     * @return Activity
      */
     public function setDateSigned($dateSigned)
     {
@@ -1708,6 +1684,34 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * Retourne la date de début sous la forme d'une chaîne de caractère.
+     *
+     * @param string $format
+     * @return string
+     */
+    public function getDateStartStr( $format = 'Y-m-d' ){
+        if( $this->getDateStart() ){
+            return $this->getDateStart()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Retourne la date de fin sous la forme d'une chaîne de caractère.
+     *
+     * @param string $format
+     * @return string
+     */
+    public function getDateEndStr( $format = 'Y-m-d' ){
+        if( $this->getDateEnd() ){
+            return $this->getDateEnd()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * Retourne les données préparées pour le génération des documents
      */
     public function documentDatas(){
@@ -1715,14 +1719,15 @@ class Activity implements ResourceInterface
         //
         $datas = [
             'id' => $this->getId(),
+            'acronym' => $this->getAcronym(),
             'amount' => $this->getAmount(),
             'pfi' => $this->getCodeEOTP(),
             'oscar' => $this->getOscarNum(),
             'montant' => number_format((double)$this->getAmount(), 2, ',', ' ') . $this->getCurrency()->getSymbol(),
-            'annee-debut' => $this->getDateStart()->format('Y'),
-            'annee-fin' => $this->getDateEnd()->format('Y'),
-            'debut' => $this->getDateStart()->format('d/m/Y'),
-            'fin' => $this->getDateEnd()->format('d/m/Y'),
+            'annee-debut' => $this->getDateStartStr('Y'),
+            'annee-fin' => $this->getDateEndStr('Y'),
+            'debut' => $this->getDateStartStr('d/m/Y'),
+            'fin' => $this->getDateEndStr('d/m/Y'),
             'intitule' => $this->getLabel(),
             'label' => $this->getLabel(),
             'acronym' => $this->getAcronym(),
@@ -1733,6 +1738,7 @@ class Activity implements ResourceInterface
 
 
         $persons = [];
+
         foreach ($this->getPersonsDeep() as $personActivity){
             $roleStr = (string)$personActivity->getRoleObj();
             if( !array_key_exists($roleStr, $persons) ){
@@ -1741,10 +1747,13 @@ class Activity implements ResourceInterface
             $persons[$roleStr][] = (string) $personActivity->getPerson();
         }
         foreach ($persons as $role=>$ps) {
-            $datas[$sluger->slugify($role)] = implode(', ', $ps);
+            $slug = $sluger->slugify($role);
+            $datas[$slug] = implode(', ', $ps);
+            $datas["$slug-list"] = $ps;
         }
 
         $organizations = [];
+
         foreach ($this->getOrganizationsDeep() as $organisationActivity){
             $roleStr = (string)$organisationActivity->getRoleObj();
             if( !array_key_exists($roleStr, $organizations) ){
@@ -1752,16 +1761,72 @@ class Activity implements ResourceInterface
             }
             $organizations[$roleStr][] = (string) $organisationActivity->getOrganization();
         }
+
         foreach ($organizations as $role=>$ps) {
-            $datas[$sluger->slugify($role)] = implode(', ', $ps);
+            $slug = $sluger->slugify($role);
+            $datas[$slug] = implode(', ', $ps);
+            $datas["$slug-list"] = $ps;
         }
+
+        $jalons = [];
+        /** @var ActivityDate $milestone */
+        foreach ($this->getMilestones() as $milestone) {
+            $milestoneStr = $milestone->getType()->getLabel();
+            if( !array_key_exists($milestoneStr, $jalons) ){
+                $jalons[$milestoneStr] = [];
+            }
+            $jalons[$milestoneStr][] = $milestone->getDateStart()->format('d/m/Y');
+        }
+
+        foreach ($jalons as $type=>$date) {
+            $slug = $sluger->slugify($type);
+            $datas['jalon-'.$slug] = implode(', ', $date);
+            $datas["jalon-$slug-list"] = $date;
+        }
+
+        // $slug = $sluger->slugify($milestone->getType()->getLabel());
+
+        $versementsPrevus = [];
+        $versementsPrevusStr = [];
+        $versementsPrevusDate = [];
+        $versementsEffectues = [];
+        $versementsEffectuesStr = [];
+        $versementsEffectuesDate = [];
+
+        /** @var ActivityPayment $payment */
+        foreach ($this->getPayments() as $payment){
+
+            $amount = number_format($payment->getAmount(), 2) . ' ' . $this->getCurrency()->getSymbol();
+
+            if($payment->getDatePayment()){
+                $date = $payment->getDatePayment()->format('d/m/Y');
+                $versementsEffectues[] = $amount;
+                $versementsEffectuesStr[] = $amount . ' le ' . $date;
+                $versementsEffectuesDate[] = $date;
+            } else {
+                $date = $payment->getDatePredicted()->format('d/m/Y');
+
+                $versementsPrevus[] = $amount;
+                $versementsPrevusStr[] = $amount . ' le ' . $date;
+                $versementsPrevusDate[] = $payment->getDatePredicted()->format('d/m/Y');
+            }
+        }
+        $datas['versements-prevus'] = implode(', ', $versementsPrevusStr);
+        $datas['versements-effectues'] = implode(', ', $versementsEffectuesStr);
+
+        $datas['versementPrevuMontant'] = $versementsPrevus;
+        $datas['versementPrevuDate'] = $versementsPrevusDate;
+
+        $datas['versement-effectue-montant'] = $versementsPrevus;
+        $datas['versement-effectue-date'] = $versementsPrevusDate;
+
 
         return $datas;
 
 
     }
 
-    public function csv()
+    public function csv($dateFormat='Y-m-d')
     {
         return array(
             'id' => $this->getId(),
@@ -1769,16 +1834,15 @@ class Activity implements ResourceInterface
             'Projet' => $this->getProject() ? $this->getProject()->getLabel() : '',
             'Intitulé' => $this->getLabel(),
             'PFI' => $this->getCodeEOTP(),
-            'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format('Y-m-d') : '',
+            'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format($dateFormat) : '',
             'Montant' => number_format($this->getAmount(), 2, ',', ' '),
             'numéro SAIC' => $this->getCentaureNumConvention(),
             'numéro oscar' => $this->getOscarNum(),
             'Type' => $this->getActivityType() ? (string)$this->getActivityType() : '',
             'Statut' => Activity::getStatusLabel(),
-            'Début' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
-            'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
-            'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
-            'source' => $this->getSource() ? (string)$this->getSource() : "",
+            'Début' => $this->getDateStart() ? $this->getDateStart()->format($dateFormat) : '',
+            'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format($dateFormat) : '',
+            'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format($dateFormat) : '',
             'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, ',', ' '),
             'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ' '),
             'Frais de gestion' => number_format($this->getFraisDeGestion(), 2, ',', ''),
@@ -1802,7 +1866,6 @@ class Activity implements ResourceInterface
             'Début',
             'Fin',
             'Date de signature',
-            'source',
             'versement effectué',
             'versement prévu',
             'Frais de gestion',
@@ -1871,7 +1934,6 @@ class Activity implements ResourceInterface
             'dateStart' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
             'dateEnd' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
             'dateSigned' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
-            'source' => $this->getSource() ? (string)$this->getSource() : "",
             'paymentReceived' => $this->getTotalPaymentReceived(),
             'paymentProvided' => $this->getTotalPaymentProvided(),
         );
@@ -1898,20 +1960,6 @@ class Activity implements ResourceInterface
     public function getResourceId()
     {
         return self::class;
-    }
-
-    public function getDateStartStr(){
-        if( $this->getDateStart() ){
-            return $this->getDateStart()->format('Y-m-d');
-        }
-        return "";
-    }
-
-    public function getDateEndStr(){
-        if( $this->getDateEnd() ){
-            return $this->getDateEnd()->format('Y-m-d');
-        }
-        return "";
     }
 
     public function toJson()

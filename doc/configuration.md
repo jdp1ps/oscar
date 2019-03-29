@@ -11,7 +11,38 @@ Notez que toutes les valeurs présentes dans ce fichier peuvent être surchargé
 
 ## config/autoload/local.php
 
-Ce fichier va contenir la configuration technique et métier de l'application. Les paramètres spécifiques à Oscar sont situés dans le clef **oscar**. Un fichier d'exemple `config/autoload/local.php.dist` est disponible dans le dépôt. Ce fichier propose les paramètres obligatoires ainsi que ceux facultatifs (commentés).
+Ce fichier va contenir la configuration technique et métier de l'application. Les paramètres spécifiques à Oscar sont situés dans le clef **oscar**. 
+
+```php
+<?php
+// config/autoload.local.php
+// ...
+return array(
+    // Clef oscar avec la configuration
+    'oscar' => [
+        // Configuration Oscar ICI
+    ],
+    
+    // Autres configuration
+    'doctrine' => array(
+        'connection' => array(
+            'orm_default' => array(
+                // ...
+                'params' => array(
+                    'host'     => 'localhost',
+                    'port'     => '5432',
+                    'user'     => 'oscar',
+                    'password' => 'azerty',
+                    'dbname'   => 'oscar_dev',
+                    'charset'  => 'utf8'
+                ),
+            ),
+        ),
+    ),
+);
+```
+
+Un fichier d'exemple `config/autoload/local.php.dist` est disponible dans le dépôt. Ce fichier propose les paramètres obligatoires ainsi que ceux facultatifs (commentés).
 
 Vous pouvez utiliser la commande `php public/index.php oscar test:config` pour tester la conformité de votre configuration. Ce test, sans être exaustif, vous alertera si des paramètres sont manquants ou mal configurés.
 
@@ -84,6 +115,7 @@ Le deuxième système s'appuie sur le moteur de recherche **Elastic Search**. Ce
 On indique ensuite à Oscar l'adresse de l'instance **Elastic Search** :
 
 ```php
+<?php
 // config/autoload/local.php
 return array(
     // (...)
@@ -112,6 +144,7 @@ return array(
 Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installation complémentaire.
 
 ```php
+<?php
 // config/autoload/local.php
 return array(
     // (...)
@@ -161,7 +194,7 @@ Une option permet de masquer certains champs :
 
  - Discipline
  - Frais de gestion
- 
+
 Pour cela, modifier le configuration Oscar dans le fichier `config/autoload/local.php` : 
 
 ```php
@@ -178,5 +211,43 @@ return array(
             'fraisDeGestion'],
     // ...
     ]
+);
+```
+
+## Demande d'activité
+
+Présentation et configuration des [Demande d'activité](./activity-request.md)
+
+
+## Export des versements
+
+Oscar propose différentes options pour régler la sortie CSV pour l'export des versements. Voici les options par défaut : 
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // ...
+    'oscar' => [
+    	// Exports
+        'export' => [
+        
+        	// Export des versements
+            'payments' => [
+            
+            	// Chaîne de séparation
+                'separator' => '$$',
+                
+                // Rôles des personnes
+                // intitulés des rôles des personnes séparés par une virgule
+                'persons' => '',
+                
+                // Rôles des organisation
+                // intitulés des rôles des organisations séparés par une virgule
+                'organizations' => 'Composante responsable,Laboratoire,Financeur'
+            ]
+        ],
+     // ..
+     ]
 );
 ```

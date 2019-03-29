@@ -84,8 +84,6 @@ class TimesheetController extends AbstractOscarController
         if( $this->isAjax() ){
             switch ($method) {
                 case 'POST':
-                    $this->getLogger()->debug(print_r($_POST, true));
-
                     $validationPeriodId = (int) $this->params()->fromPost('validationperiod_id');
                     $action             = $this->params()->fromPost('action');
 
@@ -116,8 +114,6 @@ class TimesheetController extends AbstractOscarController
                         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
                         }
-
-                        $this->getLogger()->debug("VALIDATION SCIENTIFIQUE");
 
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
@@ -274,8 +270,6 @@ class TimesheetController extends AbstractOscarController
         if( $this->isAjax() ){
             switch ($method) {
                 case 'POST':
-                    $this->getLogger()->debug(print_r($_POST, true));
-
                     $validationPeriodId = (int) $this->params()->fromPost('validationperiod_id');
                     $action             = $this->params()->fromPost('action');
 
@@ -306,8 +300,6 @@ class TimesheetController extends AbstractOscarController
                         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
                         }
-
-                        $this->getLogger()->debug("VALIDATION SCIENTIFIQUE");
 
                         return $this->getResponseDeprecated("En cours de modification SCI");
 
@@ -549,6 +541,7 @@ class TimesheetController extends AbstractOscarController
                 $this->getResponseBadRequest("Impossible de trouver l'activité");
             }
             $datas = $timesheetService->getPersonTimesheetsCSV($person, $activity, false);
+
             $filename = $activity->getAcronym() . '-' . $activity->getOscarNum().'-'.$person->getLadapLogin().'.csv';
 
             $handler = fopen('/tmp/' . $filename, 'w');
@@ -602,24 +595,21 @@ class TimesheetController extends AbstractOscarController
             $spreadsheet->getActiveSheet()->setCellValue('A1', "Déclaration");
             $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
             $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
-            $spreadsheet->getActiveSheet()->setCellValue('C5', "ACRO");
+            $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
+            $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
 
-            $spreadsheet->getActiveSheet()->setCellValue('U3', "U3"); //$fmt->format($activity->getDateStart()));
-            $spreadsheet->getActiveSheet()->setCellValue('U4', 'U4'); // $fmt->format($activity->getDateEnd()));
-            $spreadsheet->getActiveSheet()->setCellValue('U5', 'U5'); //$activity->getOscarNum());
-            $spreadsheet->getActiveSheet()->setCellValue('U6', 'EOTP'); //$activity->getCodeEOTP());
+            $spreadsheet->getActiveSheet()->setCellValue('U3', $datas['debut']); //$fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue('U4', $datas['fin']); // $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
+            $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
 
             $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
             $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
-            //$spreadsheet->getActiveSheet()->setCellValue('A9', "UE - " . $activity->getAcronym());
 
-
-            $this->getLogger()->debug(print_r($datas, true));
             $line = $lineWpStart;
 
             foreach ($datas['declarations']['activities'] as $groupData) {
                 $labelG = $groupData['label'];
-                $this->getLogger()->debug($labelG);
 
                 $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
                 $spreadsheet->getActiveSheet()->setCellValue('A'.$line, $labelG);
@@ -680,8 +670,6 @@ class TimesheetController extends AbstractOscarController
             $line++;
 
             foreach( $this->getOthersWP() as $other ){
-                $this->getLogger()->debug(print_r($other, true));
-                // foreach ($datas['declarations']['activities'] as $groupData) {
                 $spreadsheet->getActiveSheet()->insertNewRowBefore(($line +1));
                 $spreadsheet->getActiveSheet()->setCellValue('B'.$line, $other['label']);
                 $daysDatas = $datas['declarations']['others']['Hors-lot']['subgroup'][$other['label']]['days'];
@@ -788,16 +776,57 @@ class TimesheetController extends AbstractOscarController
         if( !$period )
             return $this->getResponseBadRequest("La période est non définit");
 
-        // Liste des types de créneau valide
-        $resume = $this->getTimesheetService()->getPersonPeriods($this->getCurrentPerson(), $period);
+        $personId = $this->params()->fromQuery('person', null);
 
+        if( $personId && $personId != $this->getCurrentPerson()->getId() ) {
+            $person = $this->getPersonService()->getPersonById($personId, true);
+            if( !($this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
+                throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $person");
+            }
+        } else {
+            $person = $this->getCurrentPerson();
+        }
+
+        // Liste des types de créneau valide
+        $resume = $this->getTimesheetService()->getPersonPeriods($person, $period);
+
+        // par défaut, mois qui précède
+        if( $period == null ){
+            $now = new \DateTime();
+            $now->sub( new \DateInterval('P1M'));
+            $period = $now->format('Y-m');
+        }
 
         if( $this->getHttpXMethod() == "POST" ){
 
             $request = $this->getRequest();
             $events = json_decode($request->getPost('timesheets', '[]'), true);
-            if (count($events)) {
+            $removePrevious = $request->getPost('previousicsuidremove', null) == 'remove';
 
+            if( $removePrevious === true ){
+                $uid = $request->getPost('previousicsuid', null);
+                if( $uid ){
+                    $periodInfos = DateTimeUtils::periodBounds($period);
+
+                    $qb = $this->getEntityManager()->createQueryBuilder();
+                    $qb->delete(TimeSheet::class, 't');
+                    $qb->where('t.icsFileUid = :icsuid');
+                    $qb->andWhere('t.person = :person');
+                    $qb->andWhere('t.dateFrom >= :dateFrom');
+                    $qb->andWhere('t.dateTo <= :dateTo');
+
+                    $qb->setParameters([
+                        'icsuid' => $uid,
+                        'person' => $person,
+                        'dateFrom' => $periodInfos['start'],
+                        'dateTo' => $periodInfos['end'],
+                    ]);
+
+                    $qb->getQuery()->execute();
+                }
+            }
+
+            if (count($events)) {
                 try {
                     foreach ($events as $event) {
                         // Récupération des dates
@@ -816,7 +845,7 @@ class TimesheetController extends AbstractOscarController
                             ->setIcsFileName($event['icsfilename'])
                             ->setIcsFileDateAdded(new \DateTime())
                             ->setDateFrom($from)
-                            ->setPerson($this->getCurrentPerson())
+                            ->setPerson($person)
                             ->setComment($event['summary'])
                             ->setDateTo($to);
 
@@ -848,22 +877,17 @@ class TimesheetController extends AbstractOscarController
 
         }
 
-        // par défaut, mois qui précède
-        if( $period == null ){
-            $now = new \DateTime();
-            $now->sub( new \DateInterval('P1M'));
-            $period = $now->format('Y-m');
-        }
+        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
+        $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($person);
 
-        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getCurrentPerson(), $period);
-        $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($this->getCurrentPerson());
-
+//        var_dump($correspondances); die();
 
         return [
             'exists' => $resume,
             'period' => $period,
             'periodMax' => $datas['periodMax'],
             'datas' => $datas,
+            'person' => $person,
             'correspondances' => $correspondances
         ];
     }
@@ -1167,7 +1191,8 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarationAction()
     {
-        return $this->getResponseDeprecated("Cette fonctionnalité n'existe plus");
+        die("test");
+        return [];
     }
 
     protected function getQueryData()
@@ -1292,14 +1317,9 @@ class TimesheetController extends AbstractOscarController
         return $this->getTimesheetService()->getOthersWP();
     }
 
-    /**
-     * API REST pour déclarer des heures.
-     *
-     */
-    public function declarantAPIAction()
+
+    public function sendTimesheet(Person $person)
     {
-        /** @var Person $person */
-        $person = $this->getCurrentPerson();
 
         // JOUR
         $datas = json_decode($this->params()->fromPost('timesheets'));
@@ -1309,7 +1329,6 @@ class TimesheetController extends AbstractOscarController
         if( $action == "fix-reject" ){
             return $this->getResponseNotImplemented("Le FIX des rejets n'est pas encore implanté.");
         }
-
 
         $timesheets = [];
 
@@ -1345,7 +1364,7 @@ class TimesheetController extends AbstractOscarController
             }
 
             if( $start > $now ){
-                return $this->getResponseBadRequest('Vous ne pouvez pas anticiper votre déclaration');
+                return $this->getResponseBadRequest('Vous ne pouvez pas anticiper une déclaration');
             }
 
             $wp = null;
@@ -1442,7 +1461,6 @@ class TimesheetController extends AbstractOscarController
                 ->setStatus($status)
                 ->setPerson($person);
 
-            $this->getLogger()->debug("Traitement du créneau " . $timesheet . ' créneaux');
             $timesheets[] = $timesheet;
 
         }
@@ -1465,8 +1483,7 @@ class TimesheetController extends AbstractOscarController
             return $this->getResponseInternalError("Vous avez été déconnecté de Oscar");
         }
 
-        $output = [];
-
+        // Méthode d'accès
         $method = $this->getHttpXMethod();
 
         // Durée d'un jour "normal"
@@ -1475,40 +1492,76 @@ class TimesheetController extends AbstractOscarController
         $month = (int)$this->params()->fromQuery('month', $today->format('m'));
         $format = $this->params()->fromQuery('format', null);
         $period = sprintf('%s-%s', $year, $month);
+        $declarerId = $this->params()->fromQuery('person', null);
+        $usurpation = false;
+
+        if( $declarerId ){
+            $usurpation = $declarerId;
+        } else {
+            $declarerId = $this->getCurrentPerson()->getId();
+        }
 
         /** @var Person $currentPerson */
-        $currentPerson = $this->getCurrentPerson();
+        $currentPerson = $this->getPersonService()->getPersonById($declarerId); //$this->getCurrentPerson();
+
+        // On test l'authorisation à l'usurpation si besoin
+        if( $declarerId != $this->getCurrentPerson()->getId() ){
+            if( !($this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $currentPerson->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
+                throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $currentPerson");
+            }
+        }
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
+
         if( $this->isAjax() || $format == 'json' ) {
             switch ($method) {
 
-                // Envois des créneaux
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Récupération des créneaux de la période
                 case 'GET' :
-                    return $this->ajaxResponse($this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period));
+                    $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);
+                    if( $usurpation )
+                        $datas['usurpation'] = $usurpation;
+
+                    return $this->ajaxResponse($datas);
                     break;
 
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Envoi de données
                 case 'POST' :
                     $action = $this->params()->fromPost('action', 'send');
+                    $comments = $this->params()->fromPost('comments', null);
+
+                    if( $comments ){
+                        $comments = json_decode($comments, JSON_OBJECT_AS_ARRAY);
+                    }
+
+                    // Ajout des créneaux
+                    if( $action == 'add' ){
+                        return $this->sendTimesheet($currentPerson);
+                    }
 
                     // Réenvoi de la déclaration
                     if( $action == 'resend' ){
-                        $periodId = $this->params()->fromPost('period_id');
-                        /** @var ValidationPeriod $period */
-                        $period = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($periodId);
-                        if( $period->getDeclarer() == $currentPerson ){
-                            try {
-                                $timesheetService->verificationPeriod($currentPerson, $period->getYear(), $period->getMonth());
-                                $timesheetService->reSendValidation($period);
-                                return $this->getResponseOk();
-                            } catch (\Exception $e ){
-                                return $this->getResponseInternalError(sprintf('Impossible de réenvoyer la déclaration : %s', $e->getMessage()));
-                            }
-                        } else {
-                            return $this->getResponseUnauthorized("Cette déclaration n'est pas la votre.");
-                        }
+                        $timesheetService->reSendPeriod($year, $month, $currentPerson);
+                        return $this->getResponseOk();
+//
+//                        $periodId = $this->params()->fromPost('period_id');
+//                        /** @var ValidationPeriod $period */
+//                        $period = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($periodId);
+//                        if( $period->getDeclarer() == $currentPerson ){
+//                            try {
+//                                $timesheetService->verificationPeriod($currentPerson, $period->getYear(), $period->getMonth());
+//                                $timesheetService->reSendValidation($period, $comments);
+//                                return $this->getResponseOk();
+//                            } catch (\Exception $e ){
+//                                return $this->getResponseInternalError(sprintf('Impossible de réenvoyer la déclaration : %s', $e->getMessage()));
+//                            }
+//                        } else {
+//                            return $this->getResponseUnauthorized("Cette déclaration n'est pas la votre.");
+//                        }
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));
@@ -1531,7 +1584,7 @@ class TimesheetController extends AbstractOscarController
                     try {
                         $from = new \DateTime($datas->from);
                         $to = new \DateTime($datas->to);
-                        $timesheetService->sendPeriod($from, $to, $currentPerson);
+                        $timesheetService->sendPeriod($from, $to, $currentPerson, $comments);
                         return $this->getResponseOk();
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError('Erreur de soumission de la période : ' . $e->getMessage());
@@ -1539,6 +1592,8 @@ class TimesheetController extends AbstractOscarController
                     return $this->getResponseNotImplemented("Erreur inconnue");
                     break;
 
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Suppression
                 case 'DELETE' :
                     try {
                         $idsCreneaux = explode(',', $this->params()->fromQuery('id'));
@@ -1547,12 +1602,13 @@ class TimesheetController extends AbstractOscarController
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError($e->getMessage());
                     }
-
                     break;
             }
         }
-
-        return $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);;
+        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);
+        if( $usurpation )
+            $datas['usurpation'] = $usurpation;
+        return $datas;
     }
 
 

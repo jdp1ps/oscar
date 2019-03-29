@@ -12,13 +12,14 @@ home:
             controller: Public
             action: index
 
-testcalendar:
+requestactivity:
     type: literal
     options:
-        route: /testcalendar
+        route: /request-activity
         defaults:
-            controller: Public
-            action: testCalendar
+            controller: Activity
+            action: requestFor
+
 
 changelog:
     type: literal
@@ -447,6 +448,13 @@ person:
                 defaults:
                     action: show
 
+        delete:
+            type: segment
+            options:
+                route: '/delete/:id'
+                defaults:
+                    action: delete
+
         access:
             type: segment
             options:
@@ -678,9 +686,15 @@ contract:
         route: /activites-de-recherche
         defaults:
             controller: Activity
-            action: index
-    may_terminate: true
+
+    may_terminate: false
     child_routes:
+        debug:
+            type: segment
+            options:
+                route: /debug
+                defaults:
+                    action: debug
 
         api:
             type: segment
@@ -720,6 +734,13 @@ contract:
                 defaults:
                     action: show
 
+        requestadmin:
+            type: literal
+            options:
+                route: /admin-request
+                defaults:
+                    action: adminDemande
+
         exportjson:
             type: segment
             options:
@@ -733,7 +754,6 @@ contract:
                 route: /generer-document/:id/:doc
                 defaults:
                     action: generatedDocument
-
 
         show2:
             type: segment
@@ -808,13 +828,6 @@ contract:
                 route: /generer-notifications/:id
                 defaults:
                     action: generateNotifications
-
-        number:
-            type: segment
-            options:
-                route: /numeroter/:id
-                defaults:
-                    action: number
         csv:
             type: segment
             options:
@@ -1372,6 +1385,7 @@ administration:
             action: index
     may_terminate: true
 
+
     child_routes:
         accueil:
             type: segment
@@ -1380,6 +1394,21 @@ administration:
                 route: /accueil
                 defaults:
                     action: accueil
+        parameters:
+            type: segment
+            may_terminate: true
+            options:
+                route: /parameters
+                defaults:
+                    action: parameters
+
+        numerotation:
+            type: segment
+            may_terminate: true
+            options:
+                route: /numerotation
+                defaults:
+                    action: numerotation
 
         connectors_home:
             type: segment
@@ -1441,6 +1470,13 @@ administration:
                 route: /discipline
                 defaults:
                     action: discipline
+        tva:
+            type: segment
+            may_terminate: true
+            options:
+                route: /tva
+                defaults:
+                    action: tva
 
         privileges:
             type: segment

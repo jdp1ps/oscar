@@ -25,6 +25,22 @@
                     Voir les privilèges
                 </a>
             <?php endif; ?>
+
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
+            <form action="<?= $this->url('person/delete', ['id' => $entity->getId()]) ?>" method="post">
+                <button type="submit" class="btn btn-default btn-xs">
+                    <i class="icon-lock"></i>
+                    Supprimer
+                </button>
+            </form>
+            <?php endif; ?>
+
+            <?php if( $allowTimesheet ): ?>
+                <a href="<?= $this->url('timesheet/declarant') ?>?person=<?= $entity->getId() ?>" class="btn btn-default btn-xs">
+                    <i class="icon-calendar"></i>
+                    Compléter la feuille de temps
+                </a>
+            <?php endif; ?>
         </p>
 
 
@@ -99,10 +115,14 @@
                 </div>
                 <nav class="admin-bar text-center">
                     <div class="btn-group">
+
+                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
                         <a class="btn btn-default btn-xs" href="<?= $this->url('person/edit', ['id'=>$entity->getId()]) ?>">
                             <i class="icon-pencil"></i>
                             Éditer les informations
                         </a>
+                        <?php endif; ?>
+
                         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
                             <a class="btn btn-default btn-xs" href="<?= $this->url('person/notification', ['id'=>$entity->getId()]) ?>">
                                 <i class="icon-bell"></i>
@@ -120,7 +140,7 @@
                 <p>Les informations hiérarchiques sont utilisées par Oscar pour déterminer les personnes en charge lors de la procédure de <strong>validation des feuilles de temps</strong>.</p>
                 <hr>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <h4><i class="icon-group"></i>Est validé par (N+1)</h4>
                         <?php if( count($referents) ): ?>
                             <?php foreach ($referents as $referent): ?>
@@ -207,7 +227,7 @@
                         </script>
                         <?php endif; ?>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <h4><i class="icon-group"></i>Valide les déclarations pour (N-1)</h4>
                         <?php if( $subordinates ): ?>
                             <?php foreach ($subordinates as $subordinate) :?>
@@ -227,6 +247,90 @@
                             Personne
                         <?php endif; ?>
                     </div>
+
+                    <div class="col-md-4">
+                        <h4><i class="icon-calendar"></i>Délégation</h4>
+                        <p class="oscar-help"><small>
+                                <i class="icon-help-circled"></i>
+                                Les personnes listées ici sont authorisées à remplir les feuilles de temps de <strong><?= $entity ?></strong>
+                            </small></p>
+
+                            <?php foreach ($entity->getTimesheetsBy() as $p) :?>
+                                <article class="card card-xs">
+                                    <i class="icon-user"></i>
+                                    <a href="<?= $this->url('person/show', ['id' => $p->getId() ]); ?>"><?= $p ?></a>
+                                    <?php if( $manageUsurpation ): ?>
+                                        <form action="" method="post" class="form-inline">
+                                            <input type="hidden" name="action" value="removeusurpation" />
+                                            <input type="hidden" name="person_id" value="<?= $p->getId() ?>" />
+                                            <button type="submit" class="btn btn-danger btn-xs" title="supprimer"><i class="icon-trash"></i></button>
+                                        </form>
+                                    <?php endif; ?>
+                                </article>
+                            <?php endforeach; ?>
+
+                        <?php if($manageUsurpation): ?>
+                            <button id="editUsurpation" class="btn btn-xs btn-primary" onclick="$('#usurpationEditor').show(); $('#editUsurpation').hide();">
+                                <i class="icon-plus-circled"></i> Ajouter</button>
+
+                            <form id="usurpationEditor" action="" method="POST" style="display: none">
+                                Ajouter un délégué pour les feuilles de temps :
+                                <input type="hidden" value="addusurpation" name="action">
+                                <select name="person_id" class="selectPerson"></select>
+                                <button type="submit" class="btn btn-xs btn-primary">Enregistrer</button>
+                                <button type="button" class="btn btn-xs btn-default" onclick="$('#usurpationEditor').hide(); $('#editUsurpation').show();">Annuler</button>
+                            </form>
+
+                            <script>
+                                var formatRepo = function (repo) {
+                                    if (repo.loading) return repo.text;
+
+                                    var markup = '<div class="clearfix">';
+                                    markup += repo.label || repo.text;
+                                    markup += '</div>';
+
+                                    return markup;
+                                };
+
+                                var formatRepoSelection = function (repo) {
+                                    return repo.label || repo.text;
+                                };
+
+                                require(['jquery', 'select2'], function($, select2){
+                                    $(".selectPerson").select2({
+                                            placeholder: 'Rechercher une personne...',
+                                            width: '100%',
+                                            allowClear: true,
+                                            ajax: {
+                                                url: '<?= $this->url('person/search') ?>',
+                                                dataType: 'json',
+                                                delay: 250,
+                                                data: function (params) {
+                                                    return {
+                                                        q: params.term, // search term
+                                                        page: params.page
+                                                    };
+                                                },
+                                                processResults: function (data, page) {
+                                                    return {results: data.datas};
+                                                },
+                                                cache: true
+                                            },
+                                            escapeMarkup: function (markup) {
+                                                return markup;
+                                            },
+                                            minimumInputLength: 3,
+                                            id: function (dt) {
+                                                return dt.uid;
+                                            },
+                                            templateResult: formatRepo, // omitted for brevity, see the source of this page
+                                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                                        }
+                                    );
+                                })
+                            </script>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </section>
         </div>
@@ -242,7 +346,7 @@
                         Vue.use(VueResource);
                         Vue.filter('heures', function(v){
                             var heure = Math.floor(v);
-                            var minutes = (v-heure)*60;
+                            var minutes = Math.round((v-heure)*60);
                             return heure +':' +minutes;
                         });
                        new Vue({
@@ -320,6 +424,11 @@
                     </div>
 
                     <div class="data-row">
+                        <div class="data-label">Modèle horaire</div>
+                        <div class="data-value"><?= $entity->getScheduleKey() ?></div>
+                    </div>
+
+                    <div class="data-row">
                         <div class="data-label">LDAP > Activité</div>
                         <div class="data-value"><?= $entity->getLdapDisabled() ? "Inactif" : "Actif" ?></div>
                     </div>
@@ -365,10 +474,11 @@
 
                     <div class="data-row">
                         <div class="data-label">Groupes LDAP</div>
+
                         <div class="data-value">
                             <?php if( $entity->getLdapMemberOf() ): ?>
                                 <nav class="options-menu right">
-                                    <a href="#" onclick="$('.ldap-groups').toggleClass('show-off')">
+                                    <a href="#" id="toogleButton">
                                         <i class="icon-eye"></i> Groupes sans effets</a>
                                 </nav>
                                 <ul class="ldap-groups">
@@ -383,6 +493,14 @@
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 </ul>
+                                <script>
+                                    (function(){
+                                        document.querySelector('#toogleButton').addEventListener('click', function(evt){
+                                            evt.preventDefault();
+                                            document.querySelector('.ldap-groups').classList.toggle('show-off');
+                                        })
+                                    })();
+                                </script>
                             <?php else: ?>
                                 <div class="alert alert-info">
                                     Aucun groupe LDAP

@@ -1,7 +1,15 @@
 # Configuration
 config/autoload/local.php
+config/autoload/oscar-editable.yml
 config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
+
+trash
+
+# Développement
+databases_maintenance/backup/*
+databases_maintenance/copy-prod-to-local.sh
+!databases_maintenance/backup/.gitkeep
 
 tmp
 sandbox
@@ -38,16 +46,31 @@ socket/config.json
 
 # Data & Cache
 data/**.*
+
+# Cache Doctrine
 data/DoctrineORMModule
+
+# Index de recherche Lucene
 data/luceneindex
+
+# Dossiers des mails pour les tests
 data/mails
-data/documents
+!data/mails/.gitkeep
+
+# Emplacement des documents par défaut
+data/documents/**.*
+data/documents/activity/**
+!data/documents/activity/.gitkeep
+data/documents/public/**
+!data/documents/public/.gitkeep
+data/documents/request/**
+!data/documents/request/.gitkeep
+
+# Fichiers d'exemple
 !data/timesheet_model.xls
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
-!data/documents/activity/.gitkeep
-!data/documents/public/.gitkeep
-!data/mails/.gitkeep
+
 
 # Residus
 public/js/oscar/dist/index.html

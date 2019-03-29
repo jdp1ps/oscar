@@ -9,20 +9,18 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
-use Doctrine\DBAL\Query\QueryBuilder;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
-use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
-use Oscar\Entity\ActivityType;
+use Oscar\Entity\ActivityRequest;
+use Oscar\Entity\ActivityRequestRepository;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
 use Oscar\Entity\Notification;
+use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
@@ -39,14 +37,12 @@ use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ActivityRequestService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Oscar\Validator\EOTP;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\Http\PhpEnvironment\Request;
-use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
@@ -64,27 +60,44 @@ class ProjectGrantController extends AbstractOscarController
         return [];
     }
 
+    public function debugAction(){
+        var_dump($this->getConfiguration('oscar.editable'));
+        /*$customNum = $this->getActivityService()->getCustomNum();
+        var_dump($customNum);*/
+        die("DEBUG END");
+    }
+
     /**
      * @url /activites-de-recherche/api
      * @return JsonModel
      */
     public function apiAction(){
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
+
+        // On test les droits de la personne
+        $person = $this->getCurrentPerson();
+
         ////////////////////////////////////////////////////////////////////////
         // Paramètres envoyés à l'API
         $q = $this->params()->fromQuery('q', '');
         $page = (int) $this->params()->fromQuery('p', 1);
         $rbp = (int) $this->params()->fromQuery('rbp', 10);
 
-        // Récupération des IDS via l'indexeur
+
+        // IDS des activités de la personne
+        $idsPerson = array_unique($this->getActivityService()->getActivitiesIdsPerson($person));
+
+
         if( !$q ){
-            $activityIds = null;
-            $totalQuery = $this->getActivityService()->getTotalActivitiesInDb();
-        }
-        else {
-            $activityIds = $this->getActivityService()->search($q);
+            $activityIds = $idsPerson;
             $totalQuery = count($activityIds);
         }
+        else {
+            $activityIds = array_intersect($this->getActivityService()->search($q), $idsPerson);
+            $totalQuery = count($activityIds);
+        }
+
+
+
         $totalPages = ceil($totalQuery / $rbp);
         $error = null;
         ////////////////////////////////////////////////////////////////////////
@@ -125,6 +138,358 @@ class ProjectGrantController extends AbstractOscarController
         ]);
     }
 
+    public function adminDemandeAction()
+    {
+        /** @var Person $demandeur */
+        $demandeur = $this->getOscarUserContext()->getCurrentPerson();
+
+        if( !$demandeur ){
+            throw new OscarException(_('Oscar ne vous connait pas.'));
+        }
+
+        $organizations  = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE);
+        $asAdmin        = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_ADMIN);
+        $spot = null;
+
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
+            $spot = "global";
+        }
+        elseif (count($organizations)) {
+            $spot = "organizations";
+        } else {
+            throw new UnAuthorizedException("Vous n'avez pas l'autorisation d'accéder à ces informations");
+        }
+
+        if( $this->isAjax() ){
+            $method = $this->getHttpXMethod();
+            switch ($method) {
+                case "GET":
+                    try {
+                        /** @var ActivityRequestRepository $demandeActiviteRepository */
+                        $demandeActiviteRepository = $this->getEntityManager()->getRepository(ActivityRequest::class);
+
+                        $statusTxt = $this->params()->fromQuery('status', '');
+                        if( trim($statusTxt) == '' ){
+                            $status = [];
+                        } else {
+                            $status = explode(',', $statusTxt);
+                        }
+
+                        if( count($status) == 0 ){
+                            $activityRequest = [];
+                        } else {
+                            if( $spot == 'global'){
+                                $activityRequests = $demandeActiviteRepository->getAll($status);
+                            }
+                            elseif ($spot == 'organizations') {
+                                $activityRequests = $demandeActiviteRepository->getAllForOrganizations($organizations, $status);
+                            }
+                            else {
+                                return $this->getResponseBadRequest('Mauvais contexte !');
+                            }
+                        }
+
+                        $datas = [
+                            'activityRequests' => []
+                        ];
+                        /** @var ActivityRequest $activityRequest */
+                        foreach ($activityRequests as $activityRequest) {
+                            $datas['activityRequests'][] = $activityRequest->toJson();
+                        }
+
+                        return $this->jsonOutput($datas);
+                    } catch (\Exception $e){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+                    break;
+
+                case "POST":
+                    try {
+                        $action = $this->params()->fromPost('action');
+                        $rolePerson = $this->params()->fromPost('personRoleId');
+                        $roleOrganisation = $this->params()->fromPost('organisationRoleId');
+
+                        /** @var ActivityRequestService $requestActivityService */
+                        $activityRequestService = $this->getServiceLocator()->get("ActivityRequestService");
+
+                        /** @var ActivityRequest $request */
+                        $request = $activityRequestService->getActivityRequest($this->params()->fromPost('id'));
+
+                        if( $spot == 'organizations'){
+                            if( !in_array($request->getOrganisation(), $organizations) ){
+                                throw new UnAuthorizedException("Vous n'avez pas les droits suffisants pour valider cette demande.");
+                            }
+                        }
+
+                        if( $action == "valid" ){
+                            $personData = [
+                                'roleid' => $rolePerson,
+                            ];
+
+                            $organisationData = [
+                                'roleid' => $roleOrganisation,
+                            ];
+
+                            $activityRequestService->valid($request, $this->getCurrentPerson(), $personData, $organisationData);
+                        }
+                        elseif ($action == "reject") {
+                            $activityRequestService->reject($request, $this->getCurrentPerson());
+                        }
+                        else {
+                            return $this->getResponseBadRequest("Impossible de résoudre l'action '$action'.");
+                        }
+
+                        return $this->getResponseOk();
+
+                    } catch (\Exception $e ){
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+            }
+            return $this->getResponseBadRequest("MAUVAISE UTILISATION ($method)");
+        }
+
+
+
+        $jsonFormatter = new JSONFormatter($this->getOscarUserContext());
+
+
+        return [
+            'asAdmin' => $asAdmin,
+            'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(),
+            'rolesOrganisation' => $jsonFormatter->objectsCollectionToJson($this->getOrganizationService()->getAvailableRolesOrganisationActivity()),
+        ];
+    }
+
+    public function requestForAction()
+    {
+        /** @var Person $demandeur */
+        $demandeur = $this->getOscarUserContext()->getCurrentPerson();
+
+        if( !$demandeur ){
+            throw new OscarException(_('Oscar ne vous connait pas.'));
+        }
+
+        if( !($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST) ||
+            $this->getOscarUserContext()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_REQUEST)) ){
+            throw new UnAuthorizedException('Droits insuffisants');
+        }
+
+
+
+        /** @var Organization[] $organizationsPerson */
+        $organizationsPerson = $this->getPersonService()->getPersonOrganizations($demandeur);
+
+        //// CONFIGURATION
+        $dest = $this->getConfiguration('oscar.paths.document_request');    // Emplacement des documents
+        $organizations = [];
+        $lockMessage = [];
+
+        /** @var ActivityRequestService $activityRequestService */
+        $activityRequestService = $this->getServiceLocator()->get('ActivityRequestService');
+
+        $dlFile = $this->params()->fromQuery("dl", null);
+        $rdlFile = $this->params()->fromQuery("rdl", null);
+
+        if( $dlFile || $rdlFile ){
+            $idRequest = $this->params()->fromQuery("id");
+            $demande = $activityRequestService->getActivityRequest($idRequest);
+
+            // todo REVOIR CETTE PARTIE
+
+            if( $dlFile ) {
+                $fileInfo = $demande->getFileInfosByFile($dlFile);
+                $filepath = $this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
+                $filename = $fileInfo['name'];
+                $filetype = $fileInfo['type'];
+                $size = filesize($filepath);
+                $content = file_get_contents($filepath);
+                // todo test d'accès
+                header('Content-Disposition: attachment; filename=' . $filename);
+                header('Content-Length: ' . $size);
+                header('Content-type: '.$filetype);
+                echo $content;
+                die();
+            } else {
+                $files = $demande->getFiles();
+                $newFiles = [];
+                foreach ($files as $file) {
+                    if( $file['file'] == $rdlFile ){
+                        @unlink($this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'. $file['file']);
+                    } else {
+                        $newFiles[] = $file;
+                    }
+                }
+                $demande->setFiles($newFiles);
+                $this->getEntityManager()->flush($demande);
+                return $this->getResponseOk("Fichier supprimé");
+            }
+        }
+
+        /** @var Organization $o */
+        foreach ($organizationsPerson as $o ){
+            $organizations[$o->getId()] = (string) $o;
+        }
+
+        $method = $this->getHttpXMethod();
+
+        if( $this->isAjax() ){
+
+            $action = $this->params()->fromPost('action', null);
+            $idDemande = $this->params()->fromPost("id", null);
+
+            try {
+                switch ($method) {
+                    case "GET" :
+                        $limit = 5;
+
+                        $statusTxt = $this->params()->fromQuery('status', '');
+                        if( trim($statusTxt) == '' ){
+                            $status = [];
+                        } else {
+                            $status = explode(',', $statusTxt);
+                        }
+
+                        $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json', $status);
+
+                        if( count($demandes) >= $limit ){
+                            $lockMessage[] = "Vous avez atteint la limite des demandes autorisées.";
+                        }
+
+                        return $this->jsonOutput([
+                            'allowNew' => count($lockMessage) == 0,
+                            'activityRequests' => $demandes,
+                            'total' => count($demandes),
+                            'demandeur' => (string) $this->getCurrentPerson(),
+                            'demandeur_id' => $this->getCurrentPerson()->getId(),
+                            'organisations' => $organizations,
+                            'lockMessages' => $lockMessage
+                        ]);
+
+                    case "DELETE":
+                        $idDemande = $this->params()->fromQuery('id');
+                        $requestActivity = $activityRequestService->getActivityRequest($idDemande);
+                        $activityRequestService->deleteActivityRequest($requestActivity);
+                        return $this->getResponseOk("Suppression de la demande terminée");
+
+                    case "POST":
+                        switch( $action ){
+                            case 'send' :
+                                $demande = $activityRequestService->getActivityRequest($idDemande);
+                                $activityRequestService->sendActivityRequest($demande, $this->getCurrentPerson());
+                                return $this->getResponseOk();
+                        }
+
+                        $datas = [
+                            "id" => $idDemande,
+                            "label" => strip_tags(trim($this->params()->fromPost('label'))),
+                            "description" => strip_tags(trim($this->params()->fromPost('description'))),
+                            "amount" => floatval(str_replace(',', '.', $this->params()->fromPost('amount'))),
+                            "dateStart" => $this->params()->fromPost('dateStart'),
+                            "dateEnd" => $this->params()->fromPost('dateEnd'),
+                            "organisation_id" => $this->params()->fromPost('organisation_id')
+                        ];
+
+                        // Création ou Mise à jour
+                        if( $datas['id'] ){
+                            $activityRequest = $activityRequestService->getActivityRequest($datas['id']);
+                        } else {
+                            $activityRequest = new ActivityRequest();
+                            $this->getEntityManager()->persist($activityRequest);
+                        }
+
+                        if( $activityRequest->getStatus() != ActivityRequest::STATUS_DRAFT ){
+                            throw new OscarException("Vous ne pouvez pas modifier une demande en cours de traitement");
+                        }
+
+                        if( $datas['organisation_id'] ){
+                            $organization = $this->getEntityManager()->getRepository(Organization::class)->find($datas['organisation_id']);
+                        } else {
+                            $organization = null;
+                        }
+
+                        if( $datas['dateStart'] && $datas['dateStart'] != "null" ){
+                            $datas['dateStart'] = new \DateTime($datas['dateStart']);
+                        } else {
+                            $datas['dateStart'] = null;
+                        }
+                        if( $datas['dateEnd'] && $datas['dateEnd'] != "null" ){
+                            $datas['dateEnd'] = new \DateTime($datas['dateEnd']);
+                        } else {
+                            $datas['dateEnd'] = null;
+                        }
+
+                        if( $_FILES ){
+                            $datas['files'] = [];
+                            $nbr = count($_FILES['files']['tmp_name']);
+                            for( $i=0; $i<$nbr; $i++ ){
+                                $size = $_FILES['files']['size'][$i];
+                                $type = $_FILES['files']['type'][$i];
+                                $name = $_FILES['files']['name'][$i];
+                                $filepathname = date('Y-m-d_H:i:s').'-'.md5(rand(0,10000));
+                                $filepath = $dest .'/' . $filepathname;
+                                if( $size > 0 ){
+                                    if( move_uploaded_file($_FILES['files']['tmp_name'][$i], $filepath) ){
+                                        $datas['files'][] = [
+                                            'name' => $name,
+                                            'type' => $type,
+                                            'size' => $size,
+                                            'file' => $filepathname
+                                        ];
+                                    } else {
+                                        throw new OscarException("Impossible de téléverser votre fichier $name." . error_get_last());
+                                    }
+                                }
+                            }
+
+                            $datas['files'] = array_merge($datas['files'], $activityRequest->getFiles());
+
+                            try {
+
+
+                                $activityRequest->setLabel($datas['label'])
+                                    ->setCreatedBy($this->getCurrentPerson())
+                                    ->setDescription($datas['description'])
+                                    ->setOrganisation($organization)
+                                    ->setDateStart($datas['dateStart'])
+                                    ->setDateEnd($datas['dateEnd'])
+                                    ->setAmount($datas['amount'])
+                                    ->setFiles($datas['files']);
+
+                                $this->getEntityManager()->flush();
+
+                                return [
+                                    'success' => "Votre demande a bien été envoyée"
+                                ];
+
+                            } catch (\Exception $e ){
+                                $this->getLogger()->error("Impossible d'enregistrer la demande d'activité : " . $e->getMessage());
+                                throw new OscarException("Impossible d'enregistrer le demande : " . $e->getMessage());
+                            }
+                        }
+
+
+                }
+            } catch (OscarException $e) {
+                return $this->getResponseInternalError($e->getMessage());
+            }
+        }
+
+        $usedFileds = [
+            'label' => true,
+            'description' => true,
+            'documents' => true
+        ];
+
+        return [
+            'demandeur' => $demandeur,
+            'form' => $usedFileds,
+            'organizations' => $organizations,
+            'lockMessage' => $lockMessage
+        ];
+    }
+
+
+
     /**
      * Génération automatique de documents.
      *
@@ -133,6 +498,21 @@ class ProjectGrantController extends AbstractOscarController
     public function generatedDocumentAction(){
         $id = $this->params()->fromRoute('id');
         $doc = $this->params()->fromRoute('doc');
+
+        if( $doc == "dump" ){
+            echo "<table border='1'>";
+            $activity = $this->getProjectGrantService()->getGrant($id);
+            foreach ($activity->documentDatas() as $key=>$value) {
+                echo "<tr>";
+                if( is_array($value) ){
+                    echo "<th>$key</th><td><small>[LIST]</small></td><td>" . implode(", ", $value) . "</td>";
+                } else {
+                    echo "<th>$key</th><td><small>STRING</small></td><td><code>" . $value . "</code></td>";
+                }
+                echo "</tr>";
+            }
+            die("</table>");
+        }
 
         $configDocuments = $this->getConfiguration('oscar.generated-documents.activity');
         if( !array_key_exists($doc, $configDocuments) ){
@@ -143,9 +523,30 @@ class ProjectGrantController extends AbstractOscarController
         $activity = $this->getProjectGrantService()->getGrant($id);
 
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
+        $documentDatas = $activity->documentDatas();
 
-        foreach ($activity->documentDatas() as $key=>$value) {
-            $templateProcessor->setValue($key, $value);
+        foreach ($documentDatas as $key=>$value) {
+            if( is_array($value) ){
+
+            } else {
+                $templateProcessor->setValue($key, $value);
+            }
+        }
+
+        // versements
+        try {
+            $versementsPrevus = $documentDatas['versementPrevuMontant'];
+            $versementsPrevusDate = $documentDatas['versementPrevuDate'];
+            if( count($versementsPrevus) ){
+                $templateProcessor->cloneRow('versementPrevuMontant', count($versementsPrevus));
+                for( $i=0; $i<count($versementsPrevus); $i++){
+                    $templateProcessor->setValue('versementPrevuMontant#'.($i+1), $versementsPrevus[$i]);
+                    $templateProcessor->setValue('versementPrevuDate#'.($i+1), $versementsPrevusDate[$i]);
+                }
+            }
+
+        } catch (\Exception $e ){
+            $this->getLogger()->warning("Le template $doc ne contient pas de variable $key");
         }
 
         $filename = 'oscar-' . $activity->getOscarNum().'-' . $doc. '.docx';
@@ -170,14 +571,14 @@ class ProjectGrantController extends AbstractOscarController
      */
     public function editAction()
     {
-
-
         $id = $this->params()->fromRoute('id');
+        $numerotationKeys = $this->getEditableConfKey('numerotation', []);
+        $numerotationEditable = $this->getOscarConfigurationService()->getNumerotationEditable();
         $projectGrant = $this->getProjectGrantService()->getGrant($id);
         $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
 
-
         $form = new ProjectGrantForm();
+        $form->setNumbers($numerotationKeys, $numerotationEditable);
         $form->setServiceLocator($this->getServiceLocator());
         $form->init();
         $form->bind($projectGrant);
@@ -197,10 +598,11 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         $view = new ViewModel([
+            'numerotationKeys' => $numerotationKeys,
             'hidden' => $hidden,
             'form' => $form,
             'activity' => $projectGrant,
-            'numbers_keys' => $keys = $this->getActivityService()->getDistinctNumbersKey()
+            'numbers_keys' => $numerotationKeys
         ]);
         $view->setTemplate('oscar/project-grant/form');
 
@@ -217,7 +619,10 @@ class ProjectGrantController extends AbstractOscarController
             'persons' => $this->params()->fromQuery('keeppersons', false),
             'milestones' => $this->params()->fromQuery('keepmilestones', false),
             'workpackages' => $this->params()->fromQuery('keepworkpackage', false),
+            'admdata' => $this->params()->fromQuery('keepadmdata', false),
         ];
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_DUPLICATE);
 
         try {
             $id = $this->params()->fromRoute('id');
@@ -227,7 +632,8 @@ class ProjectGrantController extends AbstractOscarController
                 ['id' => $duplicated->getId()]);
 
         } catch (\Exception $e) {
-            die("<pre>ERROR\n : " . $e->getTraceAsString());
+            $this->getLogger()->error($e->getMessage());
+            throw new OscarException($e->getMessage());
         }
     }
 
@@ -272,7 +678,6 @@ class ProjectGrantController extends AbstractOscarController
         return $activity;
     }
 
-
     public function exportJSONAction(){
 
         $id = $this->params()->fromRoute('id', null);
@@ -308,7 +713,6 @@ class ProjectGrantController extends AbstractOscarController
         header('Content-type: application/json');
         die(json_encode($json));
     }
-
 
     public function generateNotificationsAction(){
 
@@ -391,7 +795,12 @@ class ProjectGrantController extends AbstractOscarController
 
         $payments = $this->getProjectGrantService()->getPaymentsByActivityId($ids,
             $organizations);
+
         $formatter = new ActivityPaymentFormatter();
+        $formatter->setRolesOrganizations($this->getConfiguration('oscar.export.payments.organizations'));
+        $formatter->setRolesPerson($this->getConfiguration('oscar.export.payments.persons'));
+        $formatter->setSeparator($this->getConfiguration('oscar.export.payments.separator'));
+
         $csv = [];
 
         // Fichier temporaire
@@ -414,7 +823,6 @@ class ProjectGrantController extends AbstractOscarController
         die();
     }
 
-
     /** Export les données en CSV. */
     public function csvAction()
     {
@@ -430,6 +838,9 @@ class ProjectGrantController extends AbstractOscarController
             ->from(Activity::class, 'a');
 
         $parameters = [];
+
+        $separator = $this->getOscarConfigurationService()->getExportSeparator();
+        $dateFormat = $this->getOscarConfigurationService()->getExportDateFormat();
 
         if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
 
@@ -488,11 +899,13 @@ class ProjectGrantController extends AbstractOscarController
             }
         }
 
+
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
             ->select('r.label')
             ->from(OrganizationRole::class, 'r')
             ->getQuery()
             ->getResult();
+
         $rolesOrganisations = [];
 
         foreach( $rolesOrganizationsQuery as $role ){
@@ -520,24 +933,42 @@ class ProjectGrantController extends AbstractOscarController
             $rolesPersons[$role] = [];
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // --- JALONS
-        // Récupération des différents types de jalons
-        $jalonsQuery = $this->getEntityManager()->getRepository(DateType::class)->findAll();
-        $jalons = [];
-
-        /** @var DateType $jalon */
-        foreach ($jalonsQuery as $jalon) {
-            $jalons[$jalon->getLabel()] = [];
-
-            $header = $jalon->getLabel();
+        $numbers = [];
+        // Numérotation
+        foreach( $this->getOscarConfigurationService()->getNumerotationKeys() as $key ){
+            $header = $key;
             if( $keep === true || in_array($header, $keep) ){
                 $columns[$header] = true;
                 $headers[] = $header;
             } else {
                 $columns[$header] = false;
             }
+            $numbers[$header] = [];
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // --- JALONS
+        // Récupération des différents types de jalons
+        $jalonsQuery = $this->getEntityManager()->getRepository(DateType::class)->findAll();
+        $jalons = [];
+        $jalonsFait = [];
+
+        /** @var DateType $jalon */
+        foreach ($jalonsQuery as $jalon) {
+            $header = $jalon->getLabel();
             $jalons[$header] = [];
+            if( $keep === true || in_array($header, $keep) ){
+                $columns[$header] = true;
+                $headers[] = $header;
+
+                if( $jalon->isFinishable() ){
+                    $headers[] = "Fait";
+                    $columns[$header."_fait"] = true;
+                    $jalonsFait[$header] = [];
+                }
+            } else {
+                $columns[$header] = false;
+            }
         }
 
         fputcsv($handler, $headers);
@@ -548,43 +979,76 @@ class ProjectGrantController extends AbstractOscarController
             $rolesCurrent = $rolesOrganisations;
             $rolesPersonsCurrent = $rolesPersons;
             $jalonsCurrent = $jalons;
+            $jalonsFaitCurrent = $jalonsFait;
+
+
 
             if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
                 $entity)
             ) {
+                /** @var ActivityOrganization $org */
                 foreach( $entity->getOrganizationsDeep() as $org ){
-                     $rolesCurrent[$org->getRole()][] = (string)$org->getOrganization();
+                     $rolesCurrent[$org->getRole()][] = (string)$org->getOrganization()->fullOrShortName();
                 }
 
                 foreach( $entity->getPersonsDeep() as $per ){
                      $rolesPersonsCurrent[$per->getRole()][] = (string)$per->getPerson();
                 }
+
                 /** @var ActivityDate $mil */
                 foreach( $entity->getMilestones() as $mil ){
 
-                    $jalonsCurrent[$mil->getType()->getLabel()][] = $mil->getDateStart() ?
-                        $mil->getDateStart()->format('Y-m-d') :
-                        'nop';
+                    $jalonKey = $mil->getType()->getLabel();
+
+                    $jalonsCurrent[$jalonKey][] = $mil->getDateStart() ?
+                        $mil->getDateStart()->format($dateFormat) :
+                        '';
+
+                    if( array_key_exists($jalonKey, $jalonsFaitCurrent) ){
+                        // Calcule de l'état du jalon
+                        $dn = "";
+                        if( $mil->isFinishable() ){
+                            $dn = "non";
+                            if( $mil->getFinished() > 0 ){
+                                $dn = "en cours";
+                            }
+                            if( $mil->isFinished() ){
+                                $dn = $mil->getDateFinish() ? $mil->getDateFinish()->format($dateFormat) : 'oui';
+                            }
+                        }
+                        $jalonsFaitCurrent[$jalonKey][] = $dn;
+                    }
                 }
 
-                foreach ( $entity->csv() as $col=>$value ){
+
+                foreach ( $entity->csv($dateFormat) as $col=>$value ){
                     if( $columns[$col] === true )
                         $datas[] = $value;
                 }
 
                 foreach( $rolesCurrent as $role=>$organisations ){
                     if( $columns[$role] === true )
-                        $datas[] = $organisations ? implode('|', array_unique($organisations)) : ' ';
+                        $datas[] = ($organisations ? implode($separator, array_unique($organisations)) : '');
                 }
 
                 foreach( $rolesPersonsCurrent as $role=>$persons ){
                     if( $columns[$role] === true )
-                        $datas[] = $persons ? implode('|', array_unique($persons)) : ' ';
+                        $datas[] =  $persons ? implode($separator, array_unique($persons)) : '';
+                }
+
+                foreach ( $numbers as $key=>$value ){
+                    if( $columns[$key] === true )
+                        $datas[] = $entity->getNumber($key);
                 }
 
                 foreach( $jalonsCurrent as $jalon2=>$date ){
-                    if( $columns[$jalon2] === true )
-                        $datas[] = $date ? implode('|', array_unique($date)) : ' ';
+                    if( $columns[$jalon2] === true ) {
+                        $datas[] =  implode($separator, $date);
+                        if( array_key_exists($jalon2, $jalonsFaitCurrent) ){
+                            $done = $jalonsFaitCurrent[$jalon2];
+                            $datas[] =  implode($separator, $done);
+                        }
+                    }
                 }
                 fputcsv($handler, $datas);
             }
@@ -627,7 +1091,12 @@ class ProjectGrantController extends AbstractOscarController
 
         $projectGrant = new Activity();
         $projectGrant->setProject($project);
+
+        $numerotationKeys = $this->getEditableConfKey('numerotation', []);
+        $numerotationEditable = $this->getOscarConfigurationService()->getNumerotationEditable();
+
         $form = new ProjectGrantForm();
+        $form->setNumbers($numerotationKeys, $numerotationEditable);
         $form->setServiceLocator($this->getServiceLocator());
         $form->init();
         $form->setObject($projectGrant);
@@ -662,6 +1131,8 @@ class ProjectGrantController extends AbstractOscarController
             'hidden' => $hidden,
             'activity' => $projectGrant,
             'project' => $project,
+            'numerotationKeys' => $numerotationKeys,
+            'numbers_keys' => $numerotationKeys
         ]);
 
         $view->setTemplate('oscar/project-grant/form');
@@ -867,10 +1338,10 @@ class ProjectGrantController extends AbstractOscarController
             /** @var \Zend\Http\Request $request */
             $request = $this->getRequest();
             if ($request->isPost()) {
-                $project = $this->getProjectService()->getProject($request->getPost('project_id'));
-                if (!$project) {
-                    throw new \Exception('Aucun projet ne correspond');
-                }
+                try{
+                    $project = $this->getProjectService()->getProject($request->getPost('project_id'));
+                } catch (\Exception $e) {}
+
                 if ($entity->getProject()) {
                     $entity->getProject()->touch();
                 }
@@ -905,15 +1376,16 @@ class ProjectGrantController extends AbstractOscarController
     public function personsAction()
     {
 
+        // Récupération de l'activités
         $activity = $this->getProjectGrantService()->getGrant($this->params()->fromRoute('id'));
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PERSON_SHOW,
-            $activity);
+
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PERSON_SHOW, $activity);
+
         $out = [];
 
-        $editableA = $deletableA = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE,
-            $activity);
-        $editableP = $deletableP = $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_PERSON_MANAGE,
-            $activity->getProject());
+        $editableA = $deletableA = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
+        $editableP = $deletableP = $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_PERSON_MANAGE, $activity->getProject());
 
         /**
          * @var ActivityPerson $activityPerson
@@ -958,8 +1430,7 @@ class ProjectGrantController extends AbstractOscarController
             ];
         }
 
-        echo json_encode($out);
-        die();
+        return $this->ajaxResponse($out);
     }
 
     public function organizationsAction()
@@ -1309,7 +1780,7 @@ class ProjectGrantController extends AbstractOscarController
                         $key = $result[1];
                         $value = $result[2];
                         $qb->andWhere('c.numbers LIKE :numbersearch');
-                        $parameters['numbersearch'] = '%"' . $key . '";s:%:"' . $value . '";%';
+                        $parameters['numbersearch'] = '%"' . $key . '";s:%:"%' . $value . '%";%';
                     } else {
                         // La saisie est un numéro SAIC
                         if (preg_match("/^[0-9]{4}SAIC.*/mi", $search)) {
@@ -1710,8 +2181,7 @@ class ProjectGrantController extends AbstractOscarController
                 ->leftJoin('m2.person', 'pers2')
                 ->leftJoin('p2.organization', 'orga2');
         }
-
-            return $this->applyAdvancedSearch($qb);
+        return $this->applyAdvancedSearch($qb);
     }
 
     /**
@@ -1722,8 +2192,6 @@ class ProjectGrantController extends AbstractOscarController
         die("DEPRECATED");
         return $this->getResponseDeprecated();
     }
-
-
 
     public function almostStartAction()
     {
@@ -1741,12 +2209,9 @@ class ProjectGrantController extends AbstractOscarController
 
         ]);
 
-
         $view->setTemplate('oscar/activity/list-view.phtml');
-
         return $view;
     }
-
 
     public function almostDoneAction()
     {
@@ -1770,8 +2235,5 @@ class ProjectGrantController extends AbstractOscarController
     {
         return $this->getResponseNotImplemented();
     }
-
     ////////////////////////////////////////////////////////////////////////////
-
-
 }

@@ -17,6 +17,7 @@ use ZfcUser\Entity\UserInterface;
  * User entity abstract mother class.
  * @ORM\Entity
  * @ORM\Table(name="authentification")
+ * @ORM\Entity(repositoryClass="Oscar\Entity\AuthentificationRepository")
  */
 class Authentification implements UserInterface, ProviderInterface
 {
@@ -273,7 +274,7 @@ class Authentification implements UserInterface, ProviderInterface
     /**
      * Get role.
      *
-     * @return array
+     * @return Role[]
      */
     public function getRoles()
     {

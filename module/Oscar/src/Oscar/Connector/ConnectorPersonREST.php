@@ -11,12 +11,14 @@ namespace Oscar\Connector;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Monolog\Logger;
+use mysql_xdevapi\Exception;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Role;
 use Oscar\Exception\ConnectorException;
+use Oscar\Utils\PhpPolyfill;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\ServiceManager\ServiceManager;
@@ -102,6 +104,8 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
         $url = $this->getParameter('url_persons');
 
+        $repport->addnotice("REQUEST : " . $url);
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -123,66 +127,74 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
         /////////////////////////////////////
         ////// Patch 2.7 "Lewis" GIT#286 ////
-        $json = json_decode($return);
-        $personsDatas = null;
-        if( property_exists($json, 'persons') ){
-            $personsDatas = $json->persons;
-        } else {
-            $personsDatas = $json;
-        }
-        ////////////////////////////////////
+        try {
+            $json = PhpPolyfill::jsonDecode($return);
+            $personsDatas = null;
 
-        foreach( $personsDatas as $personData ){
-
-            if( ! property_exists($personData, 'uid') ){
-                $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData->uid, true)));
-                continue;
+            if( is_object($json) && property_exists($json, 'persons') ){
+                $personsDatas = $json->persons;
+            } else {
+                $personsDatas = $json;
             }
 
-            try {
-                /** @var Person $personOscar */
-                $personOscar = $personRepository->getPersonByConnectorID($this->getName(),
-                    $personData->uid);
-                $action = "update";
-            } catch( NoResultException $e ){
-                $personOscar = $personRepository->newPersistantPerson();
-                $action = "add";
-
-            } catch( NonUniqueResultException $e ){
-                $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
-                continue;
+            if( !is_array($personsDatas) ){
+                throw new \Exception("L'API n'a pas retourné un tableau de donnée");
             }
+            $repport->addnotice(count($personsDatas). " a traiter.");
+            ////////////////////////////////////
 
+            foreach( $personsDatas as $personData ){
 
+                if( ! property_exists($personData, 'uid') ){
+                    $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData->uid, true)));
+                    continue;
+                }
 
-            if($personData->dateupdated == null
+                try {
+                    /** @var Person $personOscar */
+                    $personOscar = $personRepository->getPersonByConnectorID($this->getName(),
+                        $personData->uid);
+                    $action = "update";
+                } catch( NoResultException $e ){
+                    $personOscar = $personRepository->newPersistantPerson();
+                    $action = "add";
+
+                } catch( NonUniqueResultException $e ){
+                    $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
+                    continue;
+                }
+
+                if( $personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null
                     || $personOscar->getDateSyncLdap() < $personData->dateupdated
                     || $force == true )
-            {
-                $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
+                {
+                    $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
 
-                if( $this->getPersonHydrator()->isSuspect() ){
-                    $repport->addRepport($this->getPersonHydrator()->getRepport());
-                }
+                    if( $this->getPersonHydrator()->isSuspect() ){
+                        $repport->addRepport($this->getPersonHydrator()->getRepport());
+                    }
 
-                $personRepository->flush($personOscar);
+                    $personRepository->flush($personOscar);
 
-                if( $action == 'add' ){
-                    $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
+                    if( $action == 'add' ){
+                        $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
+                    } else {
+                        $repport->addupdated(sprintf("%s a été mis à jour.", $personOscar->log()));
+                    }
                 } else {
-                    $repport->addupdated(sprintf("%s a été mis à jour.", $personOscar->log()));
+                    $repport->addnotice(sprintf("%s est à jour.", $personOscar->log()));
                 }
-            } else {
-                $repport->addnotice(sprintf("%s est à jour.", $personOscar->log()));
             }
+        } catch (\Exception $e ){
+            throw new \Exception("Impossible de synchroniser les personnes : " . $e->getMessage());
         }
+
         return $repport;
     }
 
     function syncPerson(Person $person)
     {
-        $this->getLogger()->debug(sprintf("Synchronisation de %s", $person));
         if ($person->getConnectorID($this->getName())) {
 
             $url = sprintf($this->getParameter('url_person'), $person->getConnectorID($this->getName()));

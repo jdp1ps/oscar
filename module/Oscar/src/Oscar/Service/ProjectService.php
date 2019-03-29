@@ -351,10 +351,10 @@ class ProjectService implements ServiceLocatorAwareInterface, EntityManagerAware
     ////////////////////////////////////////////////////////////////////////////
     public function getProjectsByUserEmail($email)
     {
-        $this->getLogger()->debug(sprintf("Liste des projets pour '%s'", $email));
         $projects = $this->getEntityManager()
             ->getRepository('Oscar\Entity\Person')
             ->findOneBy(['email' => $email]);
+
         if ($projects) {
             return $projects->getProjectAffectations();
         } else {

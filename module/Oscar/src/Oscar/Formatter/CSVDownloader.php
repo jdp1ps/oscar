@@ -30,7 +30,7 @@ class CSVDownloader
     }
 
     public function downloadCSV( $csvPath ){
-        $this->download($csvPath, 'xls', 'text/csv');
+        $this->download($csvPath, 'csv', 'text/csv');
     }
 
     private function download($path, $extension, $mime){

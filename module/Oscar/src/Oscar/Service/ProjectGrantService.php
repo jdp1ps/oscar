@@ -27,6 +27,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
+use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
@@ -34,6 +35,7 @@ use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Utils\StringUtils;
 use Oscar\Validator\EOTP;
+use PHPUnit\Runner\Exception;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -42,6 +44,20 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
 {
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+    /**
+     * @return OscarConfigurationService
+     */
+    public function getOscarConfigurationService(){
+        return $this->getServiceLocator()->get('OscarConfig');
+    }
+
+    public function getTypeDocument( $typeDocumentId, $throw=false ){
+        $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($typeDocumentId);
+        if( $type == null && $throw === true )
+            throw new OscarException(sprintf(_("Le type de document %s n'existe pas"), $typeDocumentId));
+        return $type;
+    }
 
     public function getWorkPackagePersonPeriod( Person $person, $year, $month ){
 
@@ -80,9 +96,24 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
      */
     public function getTotalActivitiesInDb()
     {
-        $query = $activities = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
+        $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
         $query->select('COUNT(a.id)');
         return $query->getQuery()->getSingleScalarResult();
+    }
+
+    public function getActivitiesIdsPerson( Person $person ){
+        $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
+        $query->select('a.id')
+            ->leftJoin('a.persons', 'apers')
+            ->leftJoin('apers.person', 'pers1')
+            ->leftJoin('a.project','aprj')
+            ->leftJoin('aprj.members', 'pprs')
+            ->leftJoin('pprs.person', 'pers2')
+            ->where('pers1 = :person OR pers2 = :person')
+            ->setParameter('person', $person)
+        ;
+        $activities = $query->getQuery()->getResult();
+        return array_map('current', $activities);
     }
 
     public function getProjectsIdsSearch($text){
@@ -189,6 +220,34 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
 
         return $datas;
+    }
+
+    public function getCustomNum() {
+        static $customNum;
+        if( $customNum === null ){
+            // Récupération des différentes numérotations
+            $customNum = [];
+
+            $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
+                ->select('a.numbers')
+                ->distinct();
+            echo "<pre>";
+            foreach ($query->getQuery()->getResult(Query::HYDRATE_ARRAY) as $r) {
+                if( $r['numbers'] ){
+                    foreach ($r['numbers'] as $key=>$value){
+                        if( !$value ){
+                            echo "$key\n";
+                        }
+                        if( !in_array($key, $customNum) ){
+                            $customNum[] = $key;
+                        }
+                    }
+                }
+            }
+
+        }
+        return $customNum;
+
     }
 
     public function exportJson( $object ){
@@ -310,7 +369,8 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             'core' => Activity::csvHeaders(),
             'organizations' => [],
             'persons' => [],
-            'milestones' => []
+            'milestones' => [],
+            'numerotation' => $this->getOscarConfigurationService()->getNumerotationKeys()
         ];
 
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
@@ -358,6 +418,51 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $numbersKey = array_unique($key);
         }
         return $numbersKey;
+    }
+
+    public function getDistinctNumberKeyUnreferenced(){
+        $exists = $this->getDistinctNumbersKey();
+        $referenced = $this->getServiceLocator()->get('OscarConfig')->getOptionalConfiguration('editable.numerotation', []);
+        $unique = [];
+        foreach ($exists as $key){
+            if( !in_array($key, $referenced) ){
+                $unique[] = $key;
+            }
+        }
+        return $unique;
+    }
+
+    /**
+     * @return array
+     */
+    public function getActivitiesWithUnreferencedNumbers(){
+
+        // Clefs connues
+        $authorisedKeys = $this->getOscarConfigurationService()->getNumerotationKeys();
+        $this->getServiceLocator()->get('Logger')->debug("Clefs connues : " . print_r($authorisedKeys, true));
+
+        // Récupération des activités ayant des numérotations
+        $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
+            ->where('a.numbers IS NOT NULL AND a.numbers != \'N;\' AND a.numbers != \'a:0:{}\'');
+
+        // On isole les activités ayant des clefs de numérotation "Hors configuration"
+        $activities = [];
+
+        /** @var Activity $activity */
+        foreach ($query->getQuery()->getResult() as $activity) {
+            $hasUnknow = false;
+            foreach(array_keys($activity->getNumbers()) as $key){
+                if( !in_array($key, $authorisedKeys) ){
+                    $this->getServiceLocator()->get('Logger')->debug("$key n'est pas référencé");
+                    $hasUnknow = true;
+                }
+            }
+            if( $hasUnknow === true ){
+                $activities[] = $activity;
+            }
+        }
+
+        return $activities;
     }
 
     public function getPaymentsByActivityId( array $idsActivity, $organizations = null )
@@ -695,6 +800,41 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         return $this->getEntityManager()->getRepository(TVA::class)->findAll();
     }
 
+    public function getTVAsValuesOptions()
+    {
+        $out = [];
+        foreach ($this->getTVAsForJson() as $tva) {
+            $out[$tva['id']] = $tva['label'] . ($tva['active'] ? '' : ' (Obsolète)');
+        }
+        return $out;
+    }
+
+    public function getTVAsForJson(){
+        try {
+            $query = $this->getEntityManager()->getRepository(TVA::class)->createQueryBuilder('t')
+                ->select('t.id, t.label, t.rate, t.active AS active, count(a) as used')
+                ->groupBy('t.id')
+                ->orderBy('t.rate')
+                ->leftJoin(Activity::class, 'a', 'WITH', 't.id = a.tva');
+
+            $tvas = [];
+            foreach ($query->getQuery()->getResult() as $tva ){
+                $tvas[] = [
+                    'id' => $tva['id'],
+                    'label' => $tva['label'],
+                    'rate' => $tva['rate'],
+                    'active' => $tva['active'],
+                    'used' => $tva['used'],
+                ];
+            }
+
+            return $tvas;
+        } catch (\Exception $e ){
+            throw new OscarException($e->getMessage());
+        }
+
+    }
+
     /**
      * Retourne la liste des types de dates pour alimenter un Select.
      *
@@ -756,7 +896,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
         $qb = $this->getEntityManager()->getRepository(Activity::class)
             ->createQueryBuilder('a')
             ->leftJoin('a.type', 't')
-            ->leftJoin('a.source', 's')
             ->leftJoin('a.tva', 'tv')
             ->leftJoin('a.currency', 'c')
             ->leftJoin('a.project', 'p')
@@ -775,12 +914,29 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
         $newActivity->setProject($source->getProject())
             ->setType($source->getType())
-            ->setSource($source->getSource())
             ->setTva($source->getTva())
             ->setCurrency($source->getCurrency())
             ->setLabel('Copie de ' . $source->getLabel())
             ->setDescription('')
             ->setAmount(0.0);
+
+        if( $options['admdata'] ){
+            $newActivity->setAmount($source->getAmount())
+                ->setAssietteSubventionnable($source->getAssietteSubventionnable())
+                ->setFinancialImpact($source->getFinancialImpact())
+                ->setDescription($source->getDescription())
+                ->setStatus($source->getStatus())
+                ->setDateOpened($source->getDateOpened())
+                ->setDateSigned($source->getDateSigned())
+                ->setNoteFinanciere($source->getNoteFinanciere())
+                ->setDateStart($source->getDateStart())
+                ->setDateEnd($source->getDateEnd())
+                ->setCodeEOTP($source->getCodeEOTP())
+            ;
+            $newActivity->setFraisDeGestion($source->getFraisDeGestion());
+            $newActivity->getAssietteSubventionnable($source->getAssietteSubventionnable());
+
+        }
 
         $this->getEntityManager()->flush($newActivity);
 
@@ -852,8 +1008,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
 
                     $this->getEntityManager()->flush($wpPerson);
                 }
-
-
             }
         }
 
@@ -1186,23 +1340,6 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
     }
 
     /**
-     * @return GrantSource[]
-     */
-    public function getSources()
-    {
-        $array = [];
-        foreach ($this->getEntityManager()
-            ->createQueryBuilder()
-            ->select('s')
-            ->from(GrantSource::class, 's')
-            ->getQuery()
-            ->getResult() as $grantSource) {
-            $array[$grantSource->getId()] = strval($grantSource);
-        }
-        return $array;
-    }
-
-    /**
      * @param integer[] $ids
      */
     public function getDisciplinesById( $ids )
@@ -1321,14 +1458,13 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
             $roleClaude = '';
         }
         $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('c, p, m, per, org, src, t, d, pr', 'at', 'org', 'dt')
+            ->select('c, p, m, per, org, t, d, pr', 'at', 'org', 'dt')
             ->from(Activity::class, 'c')
             ->leftJoin('c.organizations', 'p', Query\Expr\Join::WITH, 'p.status = 1' . $roleClaude)
             ->leftJoin('c.persons', 'm', Query\Expr\Join::WITH, 'm.status = 1' . $roleClaude)
             ->leftJoin('m.person', 'per')
             ->leftJoin('c.project', 'pr')
             ->leftJoin('c.activityType', 'at')
-            ->leftJoin('c.source', 'src')
             ->leftJoin('c.type', 't')
             ->leftJoin('c.documents', 'd')
             ->leftJoin('d.typeDocument', 'dt')

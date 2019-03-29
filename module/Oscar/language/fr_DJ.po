@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ZendSkeletonApplication\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-26 16:15+0200\n"
-"PO-Revision-Date: 2018-10-26 16:15+0200\n"
+"POT-Creation-Date: 2019-01-25 12:01+0100\n"
+"PO-Revision-Date: 2019-01-25 12:02+0100\n"
 "Last-Translator: Evan Coury <me@evancoury.com>\n"
 "Language-Team: ZF Contibutors <zf-devteam@zend.com>\n"
 "Language: fr_FR\n"
@@ -35,15 +35,33 @@ msgid "Rôle '%s' inconnu."
 msgstr ""
 
 #: ../src/Oscar/Controller/OrganizationController.php:770
-#: ../src/Oscar/Controller/PersonController.php:718
-#: ../src/Oscar/Controller/PersonController.php:759
+#: ../src/Oscar/Controller/PersonController.php:949
+#: ../src/Oscar/Controller/PersonController.php:990
 msgid "Données sauvegardées."
 msgstr ""
 
+#: ../src/Oscar/Controller/ProjectGrantController.php:140
+#: ../src/Oscar/Controller/ProjectGrantController.php:262
+msgid "Oscar ne vous connait pas."
+msgstr ""
+
+#: ../src/Oscar/Controller/PublicController.php:60
+#: ../src/Oscar/Service/UserParametersService.php:109
+msgid "Impossible de modifier la répartition horaire"
+msgstr ""
+
+#: ../src/Oscar/Controller/PublicController.php:77
+#: ../src/Oscar/Controller/PublicController.php:86
+#: ../src/Oscar/Service/UserParametersService.php:53
+msgid "Impossible de modifier le mode de déclaration"
+msgstr ""
+
+#: ../src/Oscar/Form/ActivityRequestForm.php:31
 #: ../src/Oscar/Form/ProjectGrantForm.php:42
 msgid "Intitulé de l'activité"
 msgstr "Intitulé de l'accord"
 
+#: ../src/Oscar/Form/ActivityRequestForm.php:45
 #: ../src/Oscar/Form/ProjectGrantForm.php:56
 msgid "Description"
 msgstr "Description"
@@ -64,9 +82,62 @@ msgstr "Type d'accord"
 msgid "Devise"
 msgstr ""
 
-#: ../src/Oscar/Service/PersonService.php:666
+#: ../src/Oscar/Service/ConfigurationAwareTrait.php:37
+#, fuzzy
+#| msgid "Vous n'êtes pas connecté(e)"
+msgid "'Vous n'êtes pas authentifié."
+msgstr "Vous n'êtes pas connecté(e)"
+
+#: ../src/Oscar/Service/ConfigurationAwareTrait.php:49
+#, fuzzy
+#| msgid "Votre compte n'est associé à aucun projet/activité de recherche"
+msgid "Votre compte n'est associé à aucune personne"
+msgstr "Votre compte n'est associé à aucun projet/accord"
+
+#: ../src/Oscar/Service/PersonService.php:813
 #, php-format
 msgid "Impossible de synchroniser les informations pour '%s'"
+msgstr ""
+
+#: ../src/Oscar/Service/PersonService.php:1034
+#, php-format
+msgid "La personne avec l'identifiant %s n'est pas présente dans la base de données."
+msgstr ""
+
+#: ../src/Oscar/Service/PersonService.php:1048
+#, php-format
+msgid "Le rôle avec l'identifiant %s n'est pas présente dans la base de données."
+msgstr ""
+
+#: ../src/Oscar/Service/TimesheetService.php:3052
+msgid "Déclaration rejetée"
+msgstr ""
+
+#: ../src/Oscar/Service/TimesheetService.php:3060
+msgid "Déclaration validée"
+msgstr ""
+
+#: ../src/Oscar/Service/TimesheetService.php:3068
+msgid "Validation en attente"
+msgstr ""
+
+#: ../src/Oscar/Service/UserParametersService.php:40
+#: ../src/Oscar/Service/UserParametersService.php:60
+msgid "Cette option ne peut pas être modifiée"
+msgstr ""
+
+#: ../src/Oscar/Service/UserParametersService.php:50
+#, php-format
+msgid "%s a modifié le mode de déclaration en %s"
+msgstr ""
+
+#: ../src/Oscar/Service/UserParametersService.php:71
+#, php-format
+msgid "%s a modifié la fréqence de ces notifications '%s'."
+msgstr ""
+
+#: ../src/Oscar/Service/UserParametersService.php:76
+msgid "Impossible de modifier la fréquence des notification"
 msgstr ""
 
 #: ../view/layout/layout.phtml:100
@@ -82,166 +153,208 @@ msgid "Mes structures"
 msgstr ""
 
 #: ../view/layout/layout.phtml:109
+msgid "Personnel"
+msgstr ""
+
+#: ../view/layout/layout.phtml:112
 msgid "Documents pratiques"
 msgstr ""
 
-#: ../view/layout/layout.phtml:142
+#: ../view/layout/layout.phtml:116
+#: ../view/oscar/project-grant/request-for.phtml:35
+#: ../view/oscar/public/index.phtml:141
+msgid "Demande d'activité"
+msgstr "Demande d'accord"
+
+#: ../view/layout/layout.phtml:149
 #: ../view/partials/menu-project-activity.phtml:47
 msgid "Prochains versements"
 msgstr ""
 
-#: ../view/layout/layout.phtml:143
+#: ../view/layout/layout.phtml:150
 #: ../view/partials/menu-project-activity.phtml:48
 msgid "Versements en retard"
 msgstr ""
 
-#: ../view/layout/layout.phtml:144
+#: ../view/layout/layout.phtml:151
 #: ../view/partials/menu-project-activity.phtml:49
 msgid "Écarts de paiement"
 msgstr ""
 
-#: ../view/layout/layout.phtml:145
+#: ../view/layout/layout.phtml:152
 #: ../view/partials/menu-project-activity.phtml:50
 msgid "Tous les versements"
 msgstr ""
 
-#: ../view/layout/layout.phtml:154
+#: ../view/layout/layout.phtml:161
 #: ../view/partials/menu-project-activity.phtml:55
 msgid "Tous les jalons"
 msgstr ""
 
-#: ../view/layout/layout.phtml:155 ../view/layout/layout.phtml:174
+#: ../view/layout/layout.phtml:162 ../view/layout/layout.phtml:182
 msgid "Gérer les types de jalon"
 msgstr ""
 
-#: ../view/layout/layout.phtml:162
+#: ../view/layout/layout.phtml:169
 #: ../view/partials/menu-project-activity.phtml:18
 #: ../view/partials/menu-project-activity.phtml:31
 msgid "Activités"
 msgstr "Accords"
 
-#: ../view/layout/layout.phtml:164
+#: ../view/layout/layout.phtml:171
 #: ../view/partials/menu-project-activity.phtml:32
 msgid "Liste des activités"
 msgstr "Liste des accords"
 
-#: ../view/layout/layout.phtml:165
+#: ../view/layout/layout.phtml:172
 #: ../view/partials/menu-project-activity.phtml:39
 msgid "Nouvelle activité"
 msgstr "Nouvel accord"
 
-#: ../view/layout/layout.phtml:166
+#: ../view/layout/layout.phtml:173
 msgid "Bientôt terminées"
 msgstr ""
 
-#: ../view/layout/layout.phtml:167
+#: ../view/layout/layout.phtml:174
+#: ../view/oscar/project-grant/admin-demande.phtml:43
+msgid "Gérer les demandes d'activité"
+msgstr "Gérer les demandes d'accord"
+
+#: ../view/layout/layout.phtml:175
 #: ../view/partials/menu-project-activity.phtml:42
 msgid "Débutant prochainement"
 msgstr ""
 
-#: ../view/layout/layout.phtml:168
+#: ../view/layout/layout.phtml:176
 msgid "Liste des documents téléversés"
 msgstr ""
 
-#: ../view/layout/layout.phtml:170
+#: ../view/layout/layout.phtml:178
 msgid "Gérer les types d'activité"
 msgstr "Gérer les types d'accord"
 
-#: ../view/layout/layout.phtml:182
+#: ../view/layout/layout.phtml:190
 #: ../view/partials/menu-project-activity.phtml:23
 msgid "Projets"
 msgstr ""
 
-#: ../view/layout/layout.phtml:184
+#: ../view/layout/layout.phtml:192
 #: ../view/partials/menu-project-activity.phtml:24
 msgid "Liste des projets"
 msgstr ""
 
-#: ../view/layout/layout.phtml:186
+#: ../view/layout/layout.phtml:194
 #: ../view/partials/menu-project-activity.phtml:26
 msgid "Créer un projet"
 msgstr ""
 
-#: ../view/layout/layout.phtml:194
+#: ../view/layout/layout.phtml:202
 msgid "Organisations"
 msgstr ""
 
-#: ../view/layout/layout.phtml:196
+#: ../view/layout/layout.phtml:204
 msgid "Liste des organisations"
 msgstr ""
 
-#: ../view/layout/layout.phtml:198
+#: ../view/layout/layout.phtml:206
 msgid "Nouvelle organisation"
 msgstr ""
 
-#: ../view/layout/layout.phtml:199
+#: ../view/layout/layout.phtml:207
 msgid "Fusion d'organisations"
 msgstr ""
 
-#: ../view/layout/layout.phtml:200
+#: ../view/layout/layout.phtml:208
 msgid "Scission d'organisations"
 msgstr ""
 
-#: ../view/layout/layout.phtml:210
+#: ../view/layout/layout.phtml:218
 msgid "Liste des personnes"
 msgstr ""
 
-#: ../view/layout/layout.phtml:211
+#: ../view/layout/layout.phtml:219
 msgid "Liste des responsables"
 msgstr ""
 
-#: ../view/layout/layout.phtml:213
+#: ../view/layout/layout.phtml:221
 msgid "Ajouter une personne"
 msgstr ""
 
-#: ../view/layout/layout.phtml:216
+#: ../view/layout/layout.phtml:224
 msgid "Liste des déclarants"
 msgstr "Liste des déclarants"
 
-#: ../view/layout/layout.phtml:226
+#: ../view/layout/layout.phtml:234
 #: ../view/partials/menu-administration.phtml:48
 msgid "Activités sans projet"
 msgstr "Accords sans projet"
 
-#: ../view/layout/layout.phtml:227
+#: ../view/layout/layout.phtml:235
 #: ../view/partials/menu-administration.phtml:52
 msgid "Projets sans activité"
 msgstr "Projet vide"
 
-#: ../view/layout/layout.phtml:229
+#: ../view/layout/layout.phtml:237
 #: ../view/partials/menu-administration.phtml:60
 msgid "Synchronisation des donnèes"
 msgstr ""
 
-#: ../view/layout/layout.phtml:233
+#: ../view/layout/layout.phtml:241
 #: ../view/partials/menu-administration.phtml:64
 msgid "Mise à jour de l'index de recherche"
 msgstr ""
 
-#: ../view/layout/layout.phtml:237
+#: ../view/layout/layout.phtml:245
 msgid "Gérer les types d'organisation"
 msgstr "Gérer les types d'organisation"
 
-#: ../view/layout/layout.phtml:241
-#: ../view/partials/menu-administration.phtml:92
+#: ../view/layout/layout.phtml:249
+#: ../view/partials/menu-administration.phtml:95
 msgid "Gérer les disciplines"
 msgstr "Gérer les types d'organisation"
 
-#: ../view/layout/layout.phtml:251
+#: ../view/layout/layout.phtml:259
 msgid "Gestion des droits"
 msgstr ""
 
-#: ../view/layout/layout.phtml:252
+#: ../view/layout/layout.phtml:260
 #: ../view/partials/menu-administration.phtml:70
 msgid "Authentifications actives"
 msgstr ""
 
-#: ../view/layout/layout.phtml:253
+#: ../view/layout/layout.phtml:261
 msgid "Affectation des structures"
 msgstr ""
 
-#: ../view/layout/layout.phtml:254
+#: ../view/layout/layout.phtml:262
 msgid "Gestion des types de documents"
+msgstr ""
+
+#: ../view/oscar/administration/accueil.phtml:29
+#: ../view/oscar/administration/accueil.phtml:44
+#: ../view/oscar/administration/accueil.phtml:59
+#: ../view/oscar/administration/accueil.phtml:74
+#: ../view/oscar/administration/accueil.phtml:89
+msgid "Configurer"
+msgstr ""
+
+#: ../view/oscar/administration/accueil.phtml:109
+#: ../view/oscar/administration/accueil.phtml:126
+#: ../view/oscar/administration/accueil.phtml:143
+#: ../view/oscar/administration/accueil.phtml:160
+#: ../view/oscar/administration/accueil.phtml:177
+#: ../view/oscar/administration/accueil.phtml:225
+#: ../view/oscar/administration/accueil.phtml:244
+#: ../view/oscar/administration/accueil.phtml:263
+msgid "Afficher"
+msgstr ""
+
+#: ../view/oscar/administration/accueil.phtml:184
+msgid "OScar"
+msgstr ""
+
+#: ../view/oscar/administration/accueil.phtml:196
+msgid "Exécuter"
 msgstr ""
 
 #: ../view/oscar/project-grant/advanced-search.phtml:6
@@ -265,15 +378,15 @@ msgstr ""
 msgid "Données administratives"
 msgstr ""
 
-#: ../view/oscar/project-grant/form.phtml:55
+#: ../view/oscar/project-grant/form.phtml:57
 msgid "Informations financières"
 msgstr ""
 
-#: ../view/oscar/project-grant/form.phtml:110
+#: ../view/oscar/project-grant/form.phtml:114
 msgid "Numérotation"
 msgstr ""
 
-#: ../view/oscar/project-grant/form.phtml:126
+#: ../view/oscar/project-grant/form.phtml:130
 msgid "Enregistrer"
 msgstr ""
 
@@ -289,6 +402,10 @@ msgstr ""
 #, php-format
 msgid "%s résultats(s)"
 msgstr ""
+
+#: ../view/oscar/project/current-user-projects.phtml:27
+msgid "Mes activités de recherche"
+msgstr "Mes accords"
 
 #: ../view/oscar/public/index.phtml:69
 msgid "Se connecter"
@@ -319,18 +436,22 @@ msgid "Rôle des organisations"
 msgstr "Gérer les types d'organisation"
 
 #: ../view/partials/menu-administration.phtml:77
+msgid "Configuration et maintenance"
+msgstr ""
+
+#: ../view/partials/menu-administration.phtml:80
 msgid "Types d'activité"
 msgstr "Gérer les types d'accord"
 
-#: ../view/partials/menu-administration.phtml:80
+#: ../view/partials/menu-administration.phtml:83
 msgid "Types de jalon"
 msgstr ""
 
-#: ../view/partials/menu-administration.phtml:84
+#: ../view/partials/menu-administration.phtml:87
 msgid "Types de documents"
 msgstr ""
 
-#: ../view/partials/menu-administration.phtml:88
+#: ../view/partials/menu-administration.phtml:91
 msgid "Types d'organisation"
 msgstr "Types d'organisation"
 
@@ -455,9 +576,6 @@ msgstr ""
 
 #~ msgid "Votre mot de passe"
 #~ msgstr "Votre mot de passe"
-
-#~ msgid "Vous n'êtes pas connecté(e)"
-#~ msgstr "Vous n'êtes pas connecté(e)"
 
 #~ msgid "Connexion"
 #~ msgstr "Connexion"

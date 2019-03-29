@@ -28,7 +28,8 @@
   "require-dev": {
     "phpmd/phpmd": "@stable",
     "twig/twig": "^2.0@dev",
-    "phpunit/phpunit": "^6"
+    "phpunit/phpunit": "^6",
+    "zendframework/zend-developer-tools":   "^1.0"
   },
   "minimum-stability": "stable",
   "config": {

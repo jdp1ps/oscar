@@ -1,0 +1,22 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 11/12/18
+ * Time: 10:19
+ */
+?>
+<div class="container">
+    <div id="app"></div>
+    <script>
+        require(['vue', 'vue-resource', 'Tva'], function(Vue, VueResource, Tva){
+            Vue.use(VueResource);
+            new Vue({
+                el: "#app",
+                render: function(h){
+                    return h(Tva.default);
+                }
+            })
+        })
+    </script>
+</div>

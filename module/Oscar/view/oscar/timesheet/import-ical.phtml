@@ -1,4 +1,5 @@
 <section class="container">
+
     <?php if( !$datas['editable'] ): ?>
         <div class="alert alert-danger">
             <h1>Vous ne pouvez pas modifier cette période</h1>
@@ -9,6 +10,8 @@
             <h1>Vous ne pouvez pas modifier cette période</h1>
             <?= $datas['submitableInfos'] ?></div>
     <?php else: ?>
+
+
 
     <div id="app"></div>
 
@@ -46,8 +49,11 @@
                 render(h){
                     return h(ImportIcalUI.default, {
                         props: {
+                            icsUidList: <?= json_encode($datas['icsUidList']) ?>,
                             ICAL: window.ICAL,
                             moment: moment,
+                            personId: <?= $person->getId() ?>,
+                            person: "<?= $person ?>",
                             dayLength: 7.5,
                             periodStart: '<?= $period ?>',
                             periodMax: '<?= $periodMax ?>',

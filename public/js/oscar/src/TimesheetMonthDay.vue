@@ -1,11 +1,8 @@
 <template>
     <div class="day"
          @click="handlerClick"
-         @click.shift.prevent.stop="$emit('debug', day)"
          :class="{'locked': day.locked, 'error': (day.total > day.maxLength)}"
          >
-
-
 
         <span class="label">{{ day.i }}</span>
 
@@ -14,7 +11,7 @@
             Erreur
         </span>
 
-        <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label">
+        <span class="cartouche wp xs" v-for="d in groupProject" :title="d.label" :style="{ 'background-color': d.color }">
             <i v-if="d.status_id == null" class="icon-draft"></i>
             <i v-else :class="'icon-' + d.status_id"></i>
             {{ d.acronym }}
@@ -63,7 +60,6 @@
         &.wp { background-color: #6a5999; }
         &.conflict { background: #AA0000; }
     }
-
 </style>
 
 <script>
@@ -73,7 +69,19 @@
 
         props: {
             others: { required: true },
-            day: { require: true }
+            day: { required: true },
+            projectscolors: { required: true, default: null }
+        },
+
+        data(){
+            return {
+                colors: ["#093b8c",
+                    "#098c29",
+                    "#8c2109",
+                    "#4c098c",
+                    "#8c0971",
+                    "#8c6f09"]
+            }
         },
 
         filters: {
@@ -91,12 +99,12 @@
                if( this.day.declarations ) {
                    this.day.declarations.forEach(d => {
                        if (!groups.hasOwnProperty(d.acronym)) {
-                        console.log(JSON.stringify(d.status_id));
                            groups[d.acronym] = {
                                label: d.label,
                                acronym: d.acronym,
                                duration: 0.0,
-                               status_id: d.status_id
+                               status_id: d.status_id,
+                               color: this.getProjectColor(d.acronym)
                            }
                        }
 
@@ -109,6 +117,20 @@
         },
 
         methods: {
+            /**
+             *
+             * @param acronym
+             */
+            getProjectColor(acronym){
+                if( this.projectscolors && this.projectscolors.hasOwnProperty(acronym) ){
+                    return this.projectscolors[acronym];
+                }
+                else {
+//                    let rand = Math.floor(Math.random()*this.colors.length);
+                    return '#8c0971'
+                }
+            },
+
             totalOther(code){
                 let t = 0.0;
                 this.day[code].forEach(d => {

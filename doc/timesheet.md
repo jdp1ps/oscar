@@ -131,6 +131,71 @@ Les personnes ayant le privilège **Personne > peut modifier la répartition hor
 
 Cette configuration est établie pour les prochaines déclarations envoyées.
 
+En modifiant la répartition horaire depuis la fiche personne, vous pouvez configurer Oscar pour proposer des modèle prédéfinit de répartition : 
+
+```php
+return array(
+    // ...
+
+    // Oscar
+    'oscar' => [
+        // ...
+
+        // Exemples de modèle horaire
+        'scheduleModeles' => [
+            'full35' => [
+                'label' => 'Plein temps (35 heures)',
+                'week' => 35.0,
+                'days' => [
+                    1 => 7.0,
+                    2 => 7.0,
+                    3 => 7.0,
+                    4 => 7.0,
+                    5 => 7.0
+                ]
+            ],
+            'full37' => [
+                'label' => 'Plein temps (37 heures)',
+                'week' => 37.0,
+                'days' => [
+                    1 => 7.5,
+                    2 => 7.5,
+                    3 => 7.5,
+                    4 => 7.5,
+                    5 => 7.0
+                ]
+            ],
+
+            'half35' => [
+                'label' => 'Mi-temps',
+                'week' => 17.5,
+                'days' => [
+                    1 => 3.5,
+                    2 => 3.5,
+                    3 => 3.5,
+                    4 => 3.5,
+                    5 => 3.5
+                ]
+            ],
+
+            'parttime' => [
+                'label' => 'Temps patiel',
+                'week' => 30.0,
+                'days' => [
+                    1 => 6.0,
+                    2 => 6.0,
+                    3 => 6.0,
+                    4 => 6.0,
+                    5 => 6.0
+                ]
+            ],
+        ],
+    ]
+)
+```
+
+Ces modèles seront disponibles pour remplir automatiquement la répartition de la personne et également proposée pour une synchronisation via les connector (A venir).
+
 **Evolution prévue 1** : Une option permettra d'autoriser le déclarant à soumettre sa répartition horaire. La personne en charge de modifier la répartition horaire pourra valider la modification demandée.
 
 **Evolution prévue 2** : Une option permettra d'autoriser le N+1 du déclarant à valider/modifier sa répartition horaire.
@@ -138,7 +203,7 @@ Cette configuration est établie pour les prochaines déclarations envoyées.
 
 #### Choix "Hors-Lot" disponibles
 
-Oscar permet de configurer les créneaux disponibles hors activité. La clef `horslots` permet de choisir et personnaliser les options proposées. 
+Pour configurer les créneaux disponibles hors activité. La clef `horslots` **doit être défini** dans le fichier `config/autoload/local.php`.
 
 ```php
 <?php
@@ -159,7 +224,7 @@ return array(
 );
 ``` 
 
-**IMPORTANT** : Une fois les catégories Hors-Lots disponibles configurées, il n'est pas recommandé de la modifier.
+**IMPORTANT** : Une fois les catégories Hors-Lots disponibles configurées, il ne faut pas la modifier, en effet, des créneaux pourraient avoir été 
 
 #### Mécanisme général
 
@@ -265,4 +330,16 @@ Cet écran propose un récapitulatif par mois des déclarations
 
 Et le détails de chaque déclaration
 ![Synthèse 2](images/synthes-activite-details.png)
+
+
+## Usurpation
+
+Oscar intègre un mécanisme d'*usurpation* pour autoriser un tiers de compléter la feuille de temps d'une autre personne.
+
+L'interface de saisie est accessible depuis la fiche de la personne.
+
+### Globale
+
+Cette fonctionnalité peut être accordée de façon générale via les privilèges, ou individuellement à partir de la fiche personne : 
+
 

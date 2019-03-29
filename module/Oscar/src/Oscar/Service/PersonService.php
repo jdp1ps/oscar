@@ -2,13 +2,13 @@
 
 namespace Oscar\Service;
 
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\AuthentificationRepository;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
@@ -22,6 +22,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
+use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Utils\UnicaenDoctrinePaginator;
@@ -227,61 +228,16 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
     public function getRolesPrincipaux( $privilege = null){
         $query = $this->getEntityManager()->getRepository(Role::class)->createQueryBuilder('r');
-die($privilege);
         if( $privilege != null ){
             $query->innerJoin('r.privileges', 'p')
                 ->where('p.code = :privilege')
             ->setParameter('privilege', $privilege);
-
-            echo $query->getDQL();
-
         }
 
         return $query->getQuery()->getResult();
 
     }
 
-
-    public function getRolesApplication( Person $person ){
-
-        /** @var Authentification $auth */
-        $auth = $this->getEntityManager()->getRepository(Authentification::class)->createQueryBuilder('a')
-            ->where('a.username = :login')
-            ->leftJoin('a.roles', 'r')
-            ->setParameter('login', $person->getLadapLogin())
-            ->getQuery()
-            ->getSingleResult();
-
-        $rolesFixes = [];
-
-        /** @var Role $role */
-        foreach ($auth->getRoles() as $role) {
-            $rolesFixes[$role->getId()] = $role->getRoleId();
-        }
-
-        $ldapRoles = $this->getEntityManager()->getRepository(Role::class)
-            ->createQueryBuilder('r', 'r.ldapFilter')
-            ->where('r.ldapFilter IS NOT NULL')
-            ->getQuery()
-            ->getResult(AbstractQuery::HYDRATE_ARRAY);
-
-        $roles = [];
-        $re = '/\(memberOf=(.*)\)/';
-        echo "role :\n";
-
-        foreach ($ldapRoles as $role ){
-            $ldapRoleStr = preg_replace($re, '$1', $role['ldapFilter']);
-            if( in_array($ldapRoleStr, $person->getLdapMemberOf()) ){
-                $roles[$role['id']] = $role['roleId'];
-            }
-        }
-
-        return [
-            'auth' => $auth->getDisplayName(),
-            'roles_fixes' => $rolesFixes,
-            'roles_ldap' => $roles
-        ];
-    }
 
     /**
      * Retourne la liste des organizations où la personne a un rôle principale.
@@ -290,11 +246,6 @@ die($privilege);
      */
     public function getOrganizationsPersonWithPrincipalRole(Person $person){
 
-        $rolesObj = $this->getRolesPrincipaux( Privileges::ACTIVITY_SHOW);
-
-        foreach ($rolesObj as $role) {
-            echo $role->getRoleId() . "<br>";
-        }
 
         $roles = $this->getOscarUserContext()->getRoleIdPrimary();
 
@@ -324,8 +275,6 @@ die($privilege);
         // Résultat
         $persons = [];
 
-        $this->getLoggerService()->debug("Récupération des personnes ayant le privilège $privilegeFullCode sur $activity");
-
         /** @var PrivilegeRepository $privilegeRepository */
         $privilegeRepository = $this->getEntityManager()->getRepository(Privilege::class);
 
@@ -346,10 +295,7 @@ die($privilege);
                 }
             }
 
-            $this->getLoggerService()->debug("Rôles : " . implode(',', $rolesIds));
-
             if( $includeApp ) {
-
 
                 // Selection des personnes qui ont le filtre LDAP (Niveau applicatif)
                 if ($ldapFilters) {
@@ -394,7 +340,6 @@ die($privilege);
 
             foreach ($activity->getPersonsDeep() as $p ){
                 if( in_array($p->getRole(), $rolesIds) ){
-                    $this->getLoggerService()->debug('Person : ' . $p->getPerson());
                     $persons[$p->getPerson()->getId()] = $p->getPerson();
                 }
             }
@@ -405,17 +350,13 @@ die($privilege);
 
                 /** @var OrganizationPerson $personOrganization */
                 if( $organization->isPrincipal() ) {
-                    $this->getLoggerService()->debug("Recherche dans " . $organization->getOrganization());
                     foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
                         if (in_array($personOrganization->getRole(), $rolesIds)) {
-                            $this->getLoggerService()->debug('Person : ' . $personOrganization->getPerson());
                             $persons[$personOrganization->getPerson()->getId()] = $personOrganization->getPerson();
                         }
                     }
                 }
             }
-
-            $this->getLoggerService()->debug("PERSONNES : " . count($persons));
 
             return $persons;
 
@@ -519,6 +460,68 @@ die($privilege);
         }
     }
 
+    public function getPersonAuthentification( Person $person ){
+        /** @var AuthentificationRepository $repo */
+        $repo = $this->getEntityManager()->getRepository(Authentification::class);
+
+        return $repo->getAuthentificationPerson($person);
+    }
+
+    /**
+     * Retourne la liste des roles de la person définit manuellement sur l'authentification ou obtenu via les
+     * groupes LDAP
+     * @return Role[]
+     */
+    public function getRolesApplication(Person $person){
+
+        /** @var Role[] $inRoles */
+        $inRoles = [];
+
+        // Récupération des rôles via l'authentification
+        $authentification = $this->getPersonAuthentification($person);
+
+        /** @var Role $role */
+        foreach ($authentification->getRoles() as $role) {
+            $inRoles[$role->getRoleId()] = $role;
+        }
+
+        if( $person->getLdapMemberOf() ){
+
+            // Récupération des rôles avec des filtres LDAP
+            $roles = $this->getEntityManager()->getRepository(Role::class)->getRolesLdapFilter();
+            /** @var Role $role */
+            foreach ($roles as $role) {
+
+                // Le rôle est déjà présent "en dur"
+                if( array_key_exists($role->getRoleId(), $inRoles) ) continue;
+
+                // Test des rôles via le filtreLDAP
+                $roleLdapFilter = $role->getLdapFilter();
+
+                foreach ($person->getLdapMemberOf() as $memberOf) {
+                    if( strpos($roleLdapFilter, $memberOf) >= 0 ){
+                        $inRoles[$role->getRoleId()] = $role;
+                        continue 2;
+                    }
+                }
+            }
+        }
+
+        return $inRoles;
+    }
+
+    /**
+     * @param Person $person
+     * @return string[]
+     */
+    public function getRolesApplicationArray(Person $person){
+        return array_keys($this->getRolesApplication($person));
+    }
+
+    public function getRolesAuthentification(Authentification $authentification){
+        return $authentification->getRoles();
+    }
+
     public function getCoWorkerIds( $idPerson ){
         /** @var OrganizationRepository $organizationRepository */
         $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
@@ -562,6 +565,20 @@ die($privilege);
             ->getResult();
 
         return array_map('current', $nm1);
+    }
+
+    /**
+     * Retourne la liste des IDS des personnes qui ont autorisé la délégation du remplissage des feuilles de temps.
+     * @param $idPerson
+     */
+    public function getTimesheetDelegationIds( $idPerson ){
+        /** @var Person $person */
+        $person = $this->getPersonRepository()->find($idPerson);
+        $ids = [];
+        foreach ($person->getTimesheetsFor() as $p) {
+            $ids[] = $p->getId();
+        }
+        return $ids;
     }
 
     /**
@@ -1059,17 +1076,47 @@ die($privilege);
         return preg_replace("/p0*([0-9]*)/", "$1", $codeLdap);
     }
 
-    public function getRolesLdap(){
-        $roles = [];
-        $ldapPersons =  $this->getServiceLdap()->searchSimplifiedEntries(
-            self::LDAP_PERSONS,
-            self::STAFF_ACTIVE_OR_DISABLED,
-            [],
-            'cn'
-        );
-        die('ROLES LDAP');
 
+    /**
+     * Retourne la liste des rôles disponibles niveau activité.
+     *
+     * @return Role[]
+     */
+    public function getAvailableRolesPersonActivity(){
+        /** @var RoleRepository $roleRepository */
+        $roleRepository = $this->getEntityManager()->getRepository(Role::class);
+        $roles = $roleRepository->getRolesAtActivityArray();
+        return $roles;
     }
+
+    /**
+     * @param $id
+     * @param bool $throw
+     * @return null|Person
+     * @throws OscarException
+     */
+    public function getPersonById($id, $throw = false){
+        $person = $this->getEntityManager()->getRepository(Person::class)->find($id);
+        if( $throw === true && $person == null ){
+            throw new OscarException(sprintf(_("La personne avec l'identifiant %s n'est pas présente dans la base de données."), $id));
+        }
+        return $person;
+    }
+
+    /**
+     * @param $id
+     * @param bool $throw
+     * @return null|Role
+     * @throws OscarException
+     */
+    public function getRolePersonById($id, $throw = false){
+        $role = $this->getEntityManager()->getRepository(Role::class)->find($id);
+        if( $throw === true && $role == null ){
+            throw new OscarException(sprintf(_("Le rôle avec l'identifiant %s n'est pas présente dans la base de données."), $id));
+        }
+        return $role;
+    }
+
 
     public function getPersonsPrincipalInActivityIncludeOrganization( Activity $activity ){
         $persons = [];
@@ -1108,6 +1155,7 @@ die($privilege);
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('p')
+            // ->leftJoin('p.timesheetsBy', 'tb')
             ->from(Person::class, 'p');
 
         return $queryBuilder;
@@ -1225,6 +1273,38 @@ die($privilege);
         }
         $this->getEntityManager()->remove($organizationPerson);
         $this->getEntityManager()->flush();
+    }
+
+
+    /**
+     * Retourne la liste des organisations de la personne.
+     *
+     * @param Person $person
+     * @param bool $date Si $date est non-false, on test la date donnée
+     * @param bool $pincipal TRUE : Tiens compte uniquement des rôles 'principaux'
+     * @return array
+     */
+    public function getPersonOrganizations( Person $person, $date = false, $pincipal = false ){
+
+        $qb = $this->getEntityManager()->getRepository(Organization::class)
+            ->createQueryBuilder('o')
+            ->innerJoin('o.persons', 'op')
+            ->where('op.person = :person')
+            ->setParameter('person', $person);
+
+        if( $date !== false ){
+            $date = $date === true ? new \DateTime() : $date;
+            $qb->andWhere('op.dateStart IS NULL OR op.dateStart <= :date');
+            $qb->andWhere('op.dateEnd >= :date OR op.dateEnd IS NULL');
+            $qb->setParameter('date', $date);
+        }
+
+        if( $pincipal === true ){
+            $qb->innerJoin('op.roleObj', 'r')
+                ->andWhere('r.principal = true');
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
 

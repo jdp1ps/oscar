@@ -224,37 +224,6 @@ class ProjectController extends AbstractOscarController
         );
     }
 
-    protected function saveIfNeeded(
-        Project $entity,
-        RequestInterface $request,
-        ProjectForm $form
-    )
-    {
-        $form->setData($entity->toArray());
-        if ($request->isPost()) {
-            $posted = $this->getRequest()->getPost();
-            $entity->setLabel($posted['label']);
-            $entity->setDescription($posted['description']);
-            $entity->setAcronym($posted['acronym']);
-            //var_dump($posted);
-            $grants = $posted['grants'];
-            $grantSources = $this->getEntityManager()->getRepository('Oscar\Entity\GrantSource')->findAll();
-
-            foreach ($grants as $grant) {
-                if ($grant['id']) {
-                    $g = $this->getEntityManager()->getRepository('Oscar\Entity\ProjectGrant')->find($grant['id']);
-                } else {
-                    $g = new Activity();
-                    $this->getEntityManager()->persist($g);
-                    $entity->addGrant($g);
-                }
-                $g->setAmount($grant['amount'])
-                    ->setProject($entity)
-                    ->setSource($this->getEntityManager()->getRepository('Oscar\Entity\GrantSource')->find($grant['source']));
-            }
-            $this->getEntityManager()->flush();
-        }
-    }
 
     /**
      * Liste des projets de l'utilisateur courant.
@@ -263,36 +232,10 @@ class ProjectController extends AbstractOscarController
      */
     public function currentUserProjectsAction()
     {
-        /** @var UserInterface $currentUser */
-        $currentUser = $this->getOscarUserContext()->getDbUser();
-        //var_dump($this->getOscarUserContext()->getDbUser());
-        if( !$currentUser ){
-            $currentUser = $this->getOscarUserContext()->getLdapUser();
-        }
-        
-	/** @var Person|null $currentPerson */
-        $currentPerson = $this->getOscarUserContext()->getCurrentPerson();
 
-
-        if ($currentUser === null) {
-           // die("Bad move, checkmate !");
-        }
-
-        $email = $currentPerson ? $currentPerson->getEmail() : $currentUser->getEmail();
-
-        /** @var $projectRepo ProjectRepository */
-        $projectRepo = $this->getEntityManager()->getRepository('Oscar\Entity\Project');
-	
-	try {
-		$projects = $projectRepo->getByUserEmail($email);
-	} catch( \Exception $e ) {
-		$this->getLogger()->error($e->getMessage() . "\n" . $e->getTraceAsString());
-		$projects = [];
-	}
 
         return [
-            'email' => $email,
-            'projects' => $projects,
+
         ];
     }
 

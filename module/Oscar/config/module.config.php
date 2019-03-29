@@ -15,7 +15,6 @@ use Oscar\View\Helpers\UnicaenDoctrinePaginatorHelper;
 $conf = new Symfony\Component\Yaml\Parser();
 
 return array(
-    'oscar-access' => $conf->parse(file_get_contents(__DIR__ . '/oscar-access.yml')),
 
     'bjyauthorize' => [
 
@@ -48,9 +47,21 @@ return array(
                         "index", "accessAPI", "roleAPI",
                         "userLogs", 'userRoles', 'organizationRole',
                         'organizationRoleApi', 'activityIndexBuild', 'organizationType',
-                        'discipline'],
+                        'discipline', 'tva'],
                     'roles' => ['user']
                 ],
+
+                [ 'controller' =>  'Administration',
+                    'action' => ['parameters'],
+                    'roles' => ['Administrateur']
+                ],
+
+                [ 'controller' =>  'Administration',
+                    'action' => ['numerotation'],
+                    'roles' => ['Administrateur']
+                ],
+
+
 
                 [ 'controller' =>  'Administration',
                     'action' => ['accueil', 'connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
@@ -103,7 +114,7 @@ return array(
                 [   'controller' =>   'Activity',
                     'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
                         'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
-                        'notifications', 'generateNotifications', 'generatedDocument', 'api', 'apiUi'],
+                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande', 'api'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
@@ -115,8 +126,8 @@ return array(
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
                 ],
                 [ 'controller' =>   'Activity',
-                    'action' => [],
-                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
+                    'action' => ['debug'],
+                    'roles' => ['Administrateur']
                 ],
 
                 // DEPENSES
@@ -204,7 +215,7 @@ return array(
                     'action' => [
                         'indexPersonActivity', 'sauvegarde', 'declaration', 'validations', 'resume',
                         "declaration2", "indexActivity", "validateTimesheet",
-                        'usurpation', 'excel', 'organizationLeader',
+                        'excel', 'organizationLeader',
                         'declarant', 'declarantAPI', 'validationActivity',
                         'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
                         'importIcal', 'declarations', 'resumeActivity',
@@ -221,7 +232,7 @@ return array(
                 // PERSON
                 ///////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Person',
-                    'action' => ['personnel', 'access'],
+                    'action' => ['personnel', 'access', 'delete'],
                     'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',
@@ -791,6 +802,7 @@ return array(
             'MailingService' => \Oscar\Service\MailingService::class,
             'SessionService' => \Oscar\Service\SessionService::class,
             'UserParametersService' => \Oscar\Service\UserParametersService::class,
+            'ActivityRequestService' => \Oscar\Service\ActivityRequestService::class,
         ],
 
         'factories' => array(
@@ -832,7 +844,6 @@ return array(
             /** Système de distribution des mails */
             'MailTransport' => function( $sm ){
                 $conf = $sm->get('Config')['oscar']['mailer']['transport'];
-                $sm->get('Logger')->debug(print_r($conf, true));
                 $transport = new Swift_SmtpTransport($conf['host'], $conf['port'], $conf['security'] );
                 $transport->setUsername($conf['username'])
                     ->setPassword($conf['password']);
@@ -853,7 +864,9 @@ return array(
 //            },
 
             'OscarConfig' => function( $sm ){
-                return new \Oscar\Service\ConfigurationParser($sm->get('Config')['oscar']);
+                $config = new \Oscar\Service\OscarConfigurationService();
+                $config->setServiceLocator($sm);
+                return $config;
             },
 
             'PersonOrganizationConnectors' => function( $sm ){
@@ -882,8 +895,6 @@ return array(
             'Person' => \Oscar\Controller\PersonController::class,
             'Organization' => \Oscar\Controller\OrganizationController::class,
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
-            'CentaureSync' => \Oscar\Controller\CentaureSyncController::class,
-            'Contract' => \Oscar\Controller\ContractController::class,
             'Activity' => \Oscar\Controller\ProjectGrantController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,

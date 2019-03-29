@@ -12,6 +12,7 @@
     "root": "droit-role-visualisation",
     "code": "role-edition",
     "libelle": "\u00c9dition des r\u00f4les",
+    "libelle": "\u00c9dition des r\u00f4les",
     "fullcode": "droit-role-edition"
   },
   "droit-privilege-visualisation": {
@@ -30,7 +31,29 @@
     "fullcode": "droit-privilege-edition"
   },
 
+  "ACTIVITY-REQUEST": {
+    "category_id": 2,
+    "spot": 4,
+    "code": "REQUEST",
+    "libelle": "Faire une demande d'activité",
+    "fullcode": "ACTIVITY-REQUEST"
+  },
 
+  "ACTIVITY-REQUEST_MANAGE": {
+    "category_id": 2,
+    "spot": 4,
+    "code": "REQUEST_MANAGE",
+    "libelle": "Traiter les demandes d'activité",
+    "fullcode": "ACTIVITY-REQUEST_MANAGE"
+  },
+
+  "ACTIVITY-REQUEST_ADMIN": {
+    "category_id": 2,
+    "spot": 4,
+    "code": "REQUEST_ADMIN",
+    "libelle": "Administrer toutes les demandes d'activité",
+    "fullcode": "ACTIVITY-REQUEST_ADMIN"
+  },
 
   "ACTIVITY-INDEX": {
     "category_id": 2,
@@ -39,6 +62,7 @@
     "libelle": "Afficher \/ rechercher dans les activit\u00e9s",
     "fullcode": "ACTIVITY-INDEX"
   },
+
   "ACTIVITY-EXPORT": {
     "category_id": 2,
     "spot": 4,
@@ -107,7 +131,7 @@
     "spot": 7,
     "root": "ACTIVITY-PAYMENT_SHOW",
     "code": "PAYMENT_MANAGE",
-    "libelle": "Gestion des versements d'une activit\u00e9s",
+    "libelle": "Gestion des versements d'une activit\u00e9",
     "fullcode": "ACTIVITY-PAYMENT_MANAGE"
   },
 
@@ -154,7 +178,7 @@
 
   "ACTIVITY-DUPLICATE": {
     "category_id": 2,
-    "spot": 3,
+    "spot": 4,
     "code": "DUPLICATE",
     "libelle": "Peut dupliquer l'activit\u00e9",
     "fullcode": "ACTIVITY-DUPLICATE"
@@ -218,7 +242,7 @@
     "category_id": 1,
     "spot": 6,
     "code": "INDEX",
-    "libelle": "Lister et recherche dans les projets",
+    "libelle": "Lister et rechercher dans les projets",
     "fullcode": "PROJECT-INDEX"
   },
   "PROJECT-SHOW": {
@@ -350,6 +374,7 @@
     "libelle": "Voir les donn\u00e9es administratives",
     "fullcode": "PERSON-INFOS_RH"
   },
+
   "PERSON-VIEW_TIMESHEET": {
     "category_id": 3,
     "spot": 7,
@@ -358,7 +383,13 @@
     "fullcode": "PERSON-VIEW_TIMESHEET"
   },
 
-
+  "PERSON-FEED_TIMESHEET": {
+    "category_id": 3,
+    "spot": 7,
+    "code": "FEED_TIMESHEET",
+    "libelle": "Peut compléter les feuilles de temps de n'importe quel déclarant",
+    "fullcode": "PERSON-FEED_TIMESHEET"
+  },
 
   "ORGANIZATION-INDEX": {
     "category_id": 4,
@@ -598,12 +629,28 @@
     "fullcode": "MAINTENANCE-ACTIVITYTYPE_MANAGE"
   },
 
+  "MAINTENANCE-DOCUMENTTYPE_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "DOCUMENTTYPE_MANAGE",
+    "libelle": "Configurer les types de document disponibles",
+    "fullcode": "MAINTENANCE-DOCUMENTTYPE_MANAGE"
+  },
+
   "MAINTENANCE-MILESTONETYPE_MANAGE": {
     "spot": 7,
     "category_id": 6,
     "code": "MILESTONETYPE_MANAGE",
     "libelle": "Configurer les types de jalons disponibles",
     "fullcode": "MAINTENANCE-MILESTONETYPE_MANAGE"
+  },
+
+  "MAINTENANCE-TVA_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "TVA_MANAGE",
+    "libelle": "Configurer les TVAs disponibles",
+    "fullcode": "MAINTENANCE-TVA_MANAGE"
   },
 
   "MAINTENANCE-DISCIPLINE_MANAGE": {
@@ -613,6 +660,15 @@
     "libelle": "Configurer les disciplines disponibles pour les activités",
     "fullcode": "MAINTENANCE-DISCIPLINE_MANAGE"
   },
+
+  "MAINTENANCE-NUMEROTATION_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "NUMEROTATION_MANAGE",
+    "libelle": "Configurer les numérotations disponibles pour les activités",
+    "fullcode": "MAINTENANCE-NUMEROTATION_MANAGE"
+  },
+
 
   "MAINTENANCE-ORGANIZATIONTYPE_MANAGE": {
     "spot": 7,
@@ -634,7 +690,7 @@
     "spot": 7,
     "category_id": 6,
     "code": "NOTIFICATION_PERSON",
-    "libelle": "Peut notifier manuellement un personne",
+    "libelle": "Peut notifier manuellement une personne",
     "fullcode": "MAINTENANCE-NOTIFICATION_PERSON"
   }
 }

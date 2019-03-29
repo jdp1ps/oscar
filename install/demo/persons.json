@@ -13,6 +13,7 @@
     "uid": "normanosborn",
     "firstname": "Norman",
     "lastname": "Osborn",
+    "schelude": "half35",
     "mail": "g.goblin@oscorp.com",
     "roles": {
       "OSCORP": ["Directeur de laboratoire"]

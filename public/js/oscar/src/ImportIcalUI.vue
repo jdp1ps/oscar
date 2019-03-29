@@ -1,6 +1,14 @@
 <template>
     <section class="oscar-ui import-ical">
-        <h1>Imporation de calendrier</h1>
+        <h1>Imporation de calendrier pour <strong>{{ person }}</strong></h1>
+
+        <div class="alert alert-danger" v-if="icsUidList && icsUidList.length > 0">
+            Vous avez déjà importé des fichiers ICS pour cette période, pensez à vérifier si ce nouvel import ne provoque pas l'apparition de doublons :
+            <ul>
+                <li v-for="name, id in icsUidList"><strong>{{ name }}</strong> <small>( UID: {{ id }})</small></li>
+            </ul>
+        </div>
+
         <div class="overlay" v-if="debug">
             <div class="overlay-content">
                 <a href="#" @click="debug = null">CLOSE</a>
@@ -8,7 +16,22 @@
             </div>
         </div>
 
-        <div class="overlay" v-if="editCorrespondance">
+        <div class="overlay" v-if="alertImport">
+            <div class="overlay-content">
+                <h3>
+                    <i class="icon-attention-1"></i>
+                    Vous avez déjà importer cet ICAL
+                </h3>
+
+                <p>Sans autre action de votre part, les données déjà importer depuis cet ICAL seront mise à jours</p>
+                <hr>
+
+                <a href="#" @click="alertImport = ''" class="btn btn-primary">
+                    <i class="icon-cancel-outline"></i> Fermer</a>
+            </div>
+        </div>
+
+        <div class="overlay" v-if="editCorrespondance" :class="(tutostep > 0 && tutostep != 4) ? 'blur' : ''">
             <div class="overlay-content">
                 <i class="icon-cancel-outline overlay-closer" @click="editCorrespondance = null"></i>
 
@@ -36,48 +59,99 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6">
-                <h3>Critères d'importation</h3>
-                <div>
-                    Période de <periodselector :period="periodStart" :max="periodMax" @change="handlerPeriodChange($event)" />
+            <div class="col-md-4" :class="(tutostep > 0 && tutostep != 1) ? 'blur' : ''">
+                <div class="card">
+                    <h3>Etape 1 : <strong>Mois à importer</strong></h3>
+                    <p class="basline">Choississez le mois à importer (Vous ne pouvez importer que un mois terminé)</p>
+                    <div>
+                        Période de <periodselector :period="periodStart" :max="periodMax" @change="handlerPeriodChange($event)" />
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <h3>Fichier ICS (Format ICAL)</h3>
-                <input type="file" @change="handlerFileSelected">
+            <div class="col-md-8" :class="(tutostep > 0 && tutostep != 2) ? 'blur' : ''">
+                <div class="card">
+                    <h3>Etape 2 : <strong>Fichier ICS (Format ICAL)</strong></h3>
+                    <p class="basline">Selectionnez le fichier ICAL (format ICS) à charger depuis votre ordinateur</p>
+                    <input type="file" @change="handlerFileSelected">
+                </div>
             </div>
         </div>
 
-        <div v-if="timesheets == null"></div>
-        <div v-else-if="timesheets.length == 0">
+        <div v-if="timesheets != null && timesheets.length == 0">
             <div class="alert alert-info">
                 Aucun créneau chargé depuis le fichier ICS
             </div>
         </div>
+
         <div class="row" v-else>
+            <div class="col-md-4">
+                <div class="card">
+
+                <h3>
+                    Étape 3 : <strong>Ajuster les correspondances</strong>
+                    <small>
+                        <i class="icon-help-circled"></i> Aide
+                    </small>
+
+                </h3>
+
+                <div class="alert alert-info">
+                    <p>
+                        Vous trouverez ici les <strong>intitulés</strong> chargés depuis le calendrier.
+                    </p>
+                </div>
+
+                <div v-if="timesheets != null && timesheets.length > 0">
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="icon-filter"></i></div>
+                        <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter" />
+                    </div>
+                    <hr>
+                    <div v-for="label in labels" class="card xs correspondance" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
+                        <div class="in-ical">
+                            <i class="icon-tag"></i> <strong>{{ label }}</strong>
+                        </div>
+
+                        <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info">
+                        <i class="icon-link-outline"></i>
+                        {{ labelsCorrespondance[label.toLowerCase()].label }}
+                    </span>
+
+                        <nav>
+                            <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
+                            <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
+                        </nav>
+                    </div>
+                </div>
+                </div>
+
+            </div>
             <div class="col-md-8">
-                <h2><i class="icon-pin"></i>Créneaux trouvés</h2>
+                <div class="card">
+                <h3>Étape 4 : <strong>Vérifiez et finaliser</strong></h3>
 
-                <p class="alert alert-info">
-                    <i class="icon-info-circled"></i>
-                    Voici les créneaux trouvès dans le calendrier que vous avez chargé. Une fois les créneaux validés,
-                    vous pourrez toujours les modifier ou les supprimer depuis l'interface de déclaration.
-                </p>
+                <div v-if="timesheets != null && timesheets.length > 0">
 
-                <table class="table table-condensed">
-                    <thead>
+                    <p class="alert alert-info">
+                        <i class="icon-info-circled"></i>
+                        Voici les créneaux trouvès dans le calendrier que vous avez chargé. Une fois les créneaux importés,
+                        vous pourrez toujours les modifier ou les supprimer depuis l'interface de déclaration.
+                    </p>
+
+                    <table class="table table-condensed">
+                        <thead>
                         <tr>
                             <th>&nbsp;</th>
                             <th>Jours</th>
                             <th>Créneaux</th>
-                            <th>Importables</th>
-                            <th>Existant</th>
-                            <th>TOTAL</th>
+                            <th>Heures trouvées</th>
+                            <!--<th>Existant</th>-->
+                            <!--<th>TOTAL</th>-->
                         </tr>
-                    </thead>
+                        </thead>
 
-                    <tbody v-for="p in byPeriod" class="period">
+                        <tbody v-for="p in byPeriod" class="period">
                         <tr class="month-heading" :class="{ 'deja-envoyee': exists[p.code] && exists[p.code].hasValidation }">
                             <th colspan="6">
                                 <i class="icon-calendar"></i>
@@ -110,7 +184,11 @@
                                         <i class="icon-trash" @click="handlerRemoveTimesheet(t)" title="Supprimer ce créneau"></i>
                                     </nav>
                                     <small v-if="!t.importable"><i class="icon-cancel-circled"></i>Ce créneau ne peut pas être importé.</small>
-                                    <small v-else-if="!t.imported">Ce créneau sera ignoré</small>
+                                    <small v-else-if="!t.imported">
+                                        Ce créneau sera ignoré :
+                                        <span v-if="t.warning">{{ t.warning }}</span>
+                                        <span v-else>Pas de correspondance pour ce type de créneau</span>
+                                    </small>
                                 </div>
                             </td>
 
@@ -118,74 +196,70 @@
                                 <strong>{{ d.totalImport | displayMinutes }}</strong>
                             </td>
 
-                            <td class="jour-heures">
-                                <em v-if="d.exists > 0.0">{{ d.exists | displayMinutes }}</em>
-                                <em v-else>~</em>
-                            </td>
-                            <td class="jour-heures" :class="{ 'excess': d.total > d.max }">
-                                <i class="icon-attention" title="Dépassement du temps autorisé" v-if="d.total > d.max"></i>
-                                {{ d.total | displayMinutes }}
-                            </td>
+                            <!--<td class="jour-heures">-->
+                                <!--<em v-if="d.exists > 0.0">{{ d.exists | displayMinutes }}</em>-->
+                                <!--<em v-else>~</em>-->
+                            <!--</td>-->
+                            <!--<td class="jour-heures" :class="{ 'excess': d.total > d.max }">-->
+                                <!--<i class="icon-attention" title="Dépassement du temps autorisé" v-if="d.total > d.max"></i>-->
+                                <!--{{ d.total | displayMinutes }}-->
+                            <!--</td>-->
 
                         </tr>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+
+                </div>
+                </div>
             </div>
-            <div class="col-md-4">
-                <h2>
-                    <i class="icon-tags"></i>
-                    Intitulés et correspondance</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-4">&nbsp;</div>
+            <div class="col-md-8">
+                <form action="" method="post" v-if="sendData.length" style="margin-bottom: 3em">
+                    <input type="hidden" v-model="JSON.stringify(sendData)" name="timesheets" />
+                    <div class="alert alert-warning" v-if="alreadyImported">
+                        <h3>Importation précédente ?</h3>
 
-                <div class="alert alert-info">
-                    <p>
-                        Vous trouverez ici les <strong>intitulés</strong> chargés depuis le calendrier.
-                    </p>
-
-                    <p>
-
-                    </p>
-                </div>
-
-                <div class="input-group">
-                    <div class="input-group-addon"><i class="icon-filter"></i></div>
-                    <input type="text" class="form-input form-control" placeholder="Filter les intitulés..." v-model="labelFilter" />
-                </div>
-
-                <hr>
+                        <input type="hidden" name="previousicsuid" :value="importedIcsFileUid" >
 
 
-                <div v-for="label in labels" class="card xs correspondance" :class="{ 'match' : labelsCorrespondance[label.toLowerCase()] }">
-                    <div class="in-ical">
-                        <i class="icon-tag"></i> <strong>{{ label }}</strong>
+                        <label for="action1" class="radio-selection" :class="previousicsuidaction == 'remove' ? 'selected' : ''">
+                            <i class="icon icon-cw-outline"></i>
+                            <span>Mettre à jour les anciens créneaux (Supprimer ceux qui n'existent plus, ajouter les nouveau et modifier ceux qui ont été modifiés)</span>
+                            <input type="radio" name="previousicsuidremove" v-model="previousicsuidaction" value="remove" id="action1" checked>
+                        </label>
+
+                        <label for="action2" class="radio-selection" :class="previousicsuidaction == 'keep' ? 'selected' : ''">
+                            <i class="icon icon-attention"></i>
+                            <span>
+                                Concerver les anciens créneaux importés et <strong>ajouter les nouveaux</strong>.<br>
+                                <small>Cette action risque d'ajouter des créneaux en double dans votre déclaration, pensez à bien vérifier les informations avant de soumettre votre déclaration</small>
+                            </span>
+
+                            <input type="radio" name="previousicsuidremove" v-model="previousicsuidaction" value="keep" id="action2">
+                        </label>
+
+
                     </div>
-
-                    <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info">
-                        <i class="icon-link-outline"></i>
-                        {{ labelsCorrespondance[label.toLowerCase()].label }}
-                    </span>
-
-                    <nav>
-                        <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
-                        <a href="#" class="text-danger" @click.prevent="handlerEditCorrespondance(label)" title="Modifier la correspondance"><i class="icon-edit"></i></a>
-                    </nav>
-                </div>
+                    <button type="submit" class="btn btn-primary btn-lg">Importer les créneaux</button>
+                </form>
 
             </div>
         </div>
-        <form action="" method="post" v-if="sendData.length">
-            <input type="hidden" v-model="JSON.stringify(sendData)" name="timesheets"/>
-            <button type="submit" class="btn btn-xs btn-primary">Envoyer</button>
-        </form>
+
+
 
     </section>
 </template>
 <script>
-    // poi watch --format umd --moduleName  ImportIcalUI --filename.css ImportIcalUI.css --filename.js ImportIcalUI.js --dist public/js/oscar/dist public/js/oscar/src/ImportIcalUI.vue
+    // nodejs ./node_modules/.bin/poi watch --format umd --moduleName  ImportIcalUI --filename.css ImportIcalUI.css --filename.js ImportIcalUI.js --dist public/js/oscar/dist public/js/oscar/src/ImportIcalUI.vue
 
 
     export default {
         data(){
             return {
+                previousicsuidaction: 'remove',
                 selectedFile: null,
                 daysString: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
                 timesheets: null,
@@ -194,7 +268,10 @@
                 periodEnd: "2018-12",
                 debug: null,
                 labelsCorrespondance: {},
-                editCorrespondance: null
+                editCorrespondance: null,
+                tutostep: 0,
+                importedIcsFileUid: null,
+                alertImport: ""
             }
         },
 
@@ -203,16 +280,29 @@
         },
 
         props: {
+            icsUidList: { required: true },
             ICAL: { required: true },
             moment: { required: true },
             dayLength: { required: true },
             exists: { default: {} },
             correspondances: { required: true },
             periodStart: { required: true },
-            periodMax: { required: true }
+            periodMax: { required: true },
+            person: { required: true },
+            personId: { required: true }
         },
 
         computed: {
+
+            alreadyImported(){
+                let imported = false;
+                Object.keys(this.icsUidList).forEach(uid => {
+                    if( uid == this.importedIcsFileUid )
+                        imported = true;
+                });
+                return imported;
+            },
+
             sendData(){
                 if( !this.timesheets ) return [];
                 let datas = [];
@@ -335,7 +425,7 @@
             },
 
             handlerPeriodChange( period ){
-                document.location = '?period=' + period;
+                document.location = '?period=' + period+"&person=" + this.personId;
             },
 
             handlerRemoveTimesheet(timesheet){
@@ -350,7 +440,7 @@
                             t.destinationId = -1;
                             t.destinationLabel = "";
                             t.imported = false;
-                        } else {
+                        } else {editCorrespondance
                             if(  t.importable == true ){
                                 t.destinationCode = dest.code;
                                 t.destinationId = dest.id;
@@ -362,6 +452,9 @@
                     }
                 })
                 this.labelsCorrespondance[editCorrespondance.toLowerCase()] = dest;
+                if( window.localStorage ){
+                    window.localStorage.setItem('labelsCorrespondance', JSON.stringify(this.labelsCorrespondance));
+                }
                 this.editCorrespondance = null;
             },
 
@@ -422,6 +515,11 @@
                 var icsfilename = icsData[1][0][3];
                 var icsfileuid = icsData[1][1][3];
                 var icsfiledateaddedd = moment().format('YYYY-MM-DD');
+
+                this.importedIcsFileUid = icsfileuid;
+                if( this.alreadyImported ){
+                    this.alertImport = "Vous avez déjà importez ce calendrier, les créneaux de l'importation précédente seront supprimés";
+                }
 
                 // Events
                 icsData[2].forEach((d) => {
@@ -730,11 +828,14 @@
                         console.log(' TO => ', new Date(rrule.until))
                         console.log(' TO => ', this.ending)
                         console.log(' TO => ', end)
-                    } else {
-                        console.log(' ================ ', items.length, ' créé(s)')
                     }
                     return items;
                 }
+        },
+        mounted(){
+            if( window.localStorage && window.localStorage.getItem('labelsCorrespondance') ){
+                this.labelsCorrespondance = JSON.parse(window.localStorage.getItem('labelsCorrespondance'));
+            }
         }
     }
 </script>

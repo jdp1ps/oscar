@@ -138,10 +138,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             $msg = 'exception: ' . $e->getParam('exception')->getMessage();
         } elseif ( is_string($e->getParam('exception'))) {
             $msg = 'error: ' . $e->getParam('exception');
-        } else {
-            $msg = "Erreur non identifiée";
-        }
-
+	} else {
+		return;
+	}	
         $this->getLogger()->error("$base $msg");
     }
     public function onUserLogin( $e ){
@@ -215,18 +214,12 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
                 $action = $match->getParam('action');
                 $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
-
-
                 $userInfos = $this->getCurrentUserInfo();
                 $base = $userInfos['base'];
-
                 $method = $request->getMethod();
-
-
-                $userid = $userContext->getDbUser() ? $userContext->getDbUser()->getid() : -1;
                 $contextId = $match->getParam('id', '?');
                 $message = sprintf('%s [%s] %s:%s %s', $base, $method, $controller, $action, $uri);
-                // $this->getLogger()->debug($message);
+                $this->getLogger()->debug($message);
 
             } catch (\Exception $e) {
                 error_log($e->getMessage());

@@ -16,6 +16,7 @@ use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Exception\ConnectorException;
 use Oscar\Factory\JsonToOrganization;
+use Oscar\Utils\PhpPolyfill;
 use UnicaenApp\Mapper\Ldap\People;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -128,41 +129,53 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
 
             /////////////////////////////////////
             ////// Patch 2.7 "Lewis" GIT#286 ////
-            $json = json_decode($return);
-            $jsonDatas = null;
-            if( property_exists($json, 'organizations') ){
-                $jsonDatas = $json->organizations;
-            } else {
-                $jsonDatas = $json;
-            }
-            ////////////////////////////////////
-
-            foreach( $jsonDatas as $data ){
-
-                try {
-                    /** @var Person $personOscar */
-                    $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
-                    $action = "update";
-                } catch( NoResultException $e ){
-                    $organization = $repository->newPersistantObject();
-                    $action = "add";
-                }
-
-                if($organization->getDateUpdated() < new \DateTime($data->dateupdated) || $force == true ){
-
-                    $organization = $this->hydrateWithDatas($organization, $data);
-                    $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
-
-                    $repository->flush($organization);
-                    if( $action == 'add' ){
-                        $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
-                    } else {
-                        $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
-                    }
-
+            try {
+                $json = PhpPolyfill::jsonDecode($return);
+                $jsonDatas = null;
+                if( property_exists($json, 'organizations') ){
+                    $jsonDatas = $json->organizations;
                 } else {
-                    $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
+                    $jsonDatas = $json;
                 }
+
+                if( !is_array($jsonDatas) ){
+                    throw new \Exception("L'API n'a pas retourné un tableau de donnée");
+                }
+                ////////////////////////////////////
+
+                foreach( $jsonDatas as $data ){
+                    try {
+                        /** @var Person $personOscar */
+                        $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
+                        $action = "update";
+                    } catch( NoResultException $e ){
+                        $organization = $repository->newPersistantObject();
+                        $action = "add";
+                    }
+                    if( !property_exists($data, 'dateupdated') ){
+                        $dateupdated = date('Y-m-d H:i:s');
+                    } else {
+                        $dateupdated = $data->dateupdated;
+                    }
+                    if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
+
+                        $organization = $this->hydrateWithDatas($organization, $data);
+                        if( property_exists($data, 'type') )
+                            $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
+
+                        $repository->flush($organization);
+                        if( $action == 'add' ){
+                            $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
+                        } else {
+                            $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
+                        }
+
+                    } else {
+                        $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
+                    }
+                }
+            } catch (\Exception $e ){
+                $repport->adderror($e->getMessage());
             }
         } else {
             $repport->adderror("Le service REST n'a retourné aucun résultat.");
@@ -188,8 +201,12 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
             $return = curl_exec($curl);
             curl_close($curl);
 
-            $organizationData = json_decode($return);
-            return $this->hydrateWithDatas($organization, $organizationData);
+            try {
+                $organizationData = PhpPolyfill::jsonDecode($return);
+                return $this->hydrateWithDatas($organization, $organizationData);
+            } catch (\Exception $e) {
+                throw new \Exception("Impossible de traiter des données : " . $e->getMessage());
+            }
 
         } else {
             throw new \Exception('Impossible de synchroniser la structure ' . $organization);

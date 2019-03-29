@@ -1,0 +1,20 @@
+#!/bin/bash
+
+## Accès à la base de données en production pour faire le backup des données
+PROD_HOST=servername
+PROD_USER=username
+PROD_BASE=database
+BACKUP=backup/oscar-prod-backup.sql
+
+## Accès local
+LOCAL_HOST=localhost
+LOCAL_USER=oscar
+LOCAL_BASE=oscar_dev
+
+## DUMP vers fichier
+echo "DUMP PROD $PROD_USER@$PROD_HOST/$PROD_BASE to $BACKUP"
+pg_dump --clean --no-owner -h $PROD_HOST -U $PROD_USER $PROD_BASE > $BACKUP
+
+## Chargement depuis le fichier
+echo "LOAD BACKUP FROM $BACKUP TO $USER@$HOST/$BASE"
+psql -h $LOCAL_HOST -U $LOCAL_USER $LOCAL_BASE < $BACKUP

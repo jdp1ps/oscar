@@ -24,9 +24,18 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
 
     use ServiceLocatorAwareTrait;
 
+    private $numbers;
+    private $editable;
+
+    public function setNumbers($numbers, $editable){
+        $this->numbers = $numbers;
+        $this->editable = $editable;
+    }
+
     public function init()
     {
         $hydrator = new ProjectGrantFormHydrator();
+        $hydrator->setNumbers($this->numbers);
         $hydrator->setServiceLocator($this->getServiceLocator());
         $this->setHydrator($hydrator);
 
@@ -138,7 +147,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'name'   => 'tva',
             'options' => [
                 'label' => "TVA",
-                'value_options' => Util::collectionAsOptions($grantService->getTVAs())
+                'value_options' => $this->getServiceLocator()->get('ProjectGrantService')->getTVAsValuesOptions()
             ],
             'attributes' => [
                 'class' => 'form-control'
@@ -219,7 +228,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
                 'label' => 'Début du contrat'
             ],
             'attributes' => [
-                'class' => 'input-date'
+                'class' => 'input-date form-control'
             ],
             'type'=>'Text'
         ]);
@@ -231,7 +240,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
                 'label' => 'Fin du contrat'
             ],
             'attributes' => [
-                'class' => 'input-date'
+                'class' => 'input-date form-control'
             ],
             'type'=>'Text'
         ]);
@@ -243,7 +252,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
                 'label' => 'Date de signature'
             ],
             'attributes' => [
-                'class' => 'input-date'
+                'class' => 'input-date form-control'
             ],
             'type'=>'Text'
         ]);
@@ -255,16 +264,15 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
                 'label' => "Création du PFI"
             ],
             'attributes' => [
-                'class' => 'input-date'
+                'class' => 'input-date form-control'
             ],
             'type'=>'Text'
         ]);
 
+
         // DateOpened
-        $this->add([
-            'name'   => 'numbers',
-            'type'=>KeyValue::class
-        ]);
+        $this->add(new KeyValue('numbers', ['keys' => $this->numbers, 'editable' => $this->editable]));
+
 
         // Type
         $this->add([

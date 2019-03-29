@@ -176,6 +176,7 @@
 .icon-flag:before { content: '\e8ae'; } /* '' */
 .icon-bell-1:before { content: '\e8af'; } /* '' */
 .icon-link-ext:before { content: '\f08e'; } /* '' */
+.icon-check-empty:before { content: '\f096'; } /* '' */
 .icon-bookmark-empty:before { content: '\f097'; } /* '' */
 .icon-rss:before { content: '\f09e'; } /* '' */
 .icon-filter:before { content: '\f0b0'; } /* '' */
