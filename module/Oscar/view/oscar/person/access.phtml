@@ -11,6 +11,11 @@
     <h1>Accès pour <strong><?= $person ?></strong></h1>
     <div id="app"></div>
 
+    <style>
+        .icon-ok-circled { color: #00AA00 }
+        .icon-minus-circled { color: #7f0027 }
+    </style>
+
     <script>
         require(['vue'], function(Vue){
            new Vue({
@@ -91,7 +96,6 @@
             <th rowspan="2">Privilèges</th>
             <th rowspan="2">Application</th>
             <th :colspan="Object.keys(organizations).length">Organisations</th>
-            <th rowspan="2">Activitès</th>
         </tr>
         <tr>
             <th v-for="o in organizations">{{ o.label }}
@@ -105,13 +109,12 @@
             <th><small>{{p.category }}/{{ p.label }}</small></th>
             <td>
             <i class="icon-ok-circled" v-if="isAppAllow(p)"></i>
-            <i v-else class="icon-cancel-circled-outline"></i>
+            <i v-else class="icon-minus-circled"></i>
             </td>
             <td v-for="o in organizations">
             <i class="icon-ok-circled" v-if="isOrgAllow(p, o)"></i>
-            <i v-else class="icon-cancel-circled-outline"></i>
+            <i v-else class="icon-minus-circled"></i>
             </td>
-            <td>~</td>
         </tr>
     </tbody>
     </table>
