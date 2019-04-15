@@ -1731,6 +1731,10 @@ class Activity implements ResourceInterface
             'intitule' => $this->getLabel(),
             'label' => $this->getLabel(),
             'acronym' => $this->getAcronym(),
+            'tva' => $this->getTva() ? (string)$this->getTva() : '',
+            'assiette-subventionnable' => (string) $this->getAssietteSubventionnable(),
+            'note-financiere' => $this->getNoteFinanciere(),
+
             'type' => (string)$this->getActivityType(),
         ];
 
