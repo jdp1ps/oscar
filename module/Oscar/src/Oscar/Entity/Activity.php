@@ -1934,6 +1934,7 @@ class Activity implements ResourceInterface
             'dateStart' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
             'dateEnd' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
             'dateSigned' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
+            'dateUpdated' => $this->getDateUpdated() ? $this->getDateUpdated()->format('Y-m-d') : '',
             'paymentReceived' => $this->getTotalPaymentReceived(),
             'paymentProvided' => $this->getTotalPaymentProvided(),
         );

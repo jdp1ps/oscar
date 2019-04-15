@@ -73,10 +73,14 @@ class JSONFormatter
     public function formatActivity( Activity $activity, $compact=true ){
         $datas = $activity->toArray();
 
-        $datas['amount'] = [
-            'value' => $activity->getAmount(),
-            'currency' => $activity->getCurrency()->getSymbol()
-        ];
+        $datas['amount'] = null;
+
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity) ) {
+            $datas['amount'] = [
+                'value' => $activity->getAmount(),
+                'currency' => $activity->getCurrency()->getSymbol()
+            ];
+        }
 
         $datas['project'] = $activity->getProject() ? $this->formatProject($activity->getProject(), false) : null;
         $datas['project_id'] = $activity->getProject()?$activity->getProject()->getId():null;

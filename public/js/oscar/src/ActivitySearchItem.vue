@@ -22,13 +22,13 @@
             </span>
 
 
-            <span class="montant recette">
+            <span class="montant recette" v-if="activity.amount">
                 <span class="currency" :title="activity.amount.value +' ' + activity.amount.currency">
                     <span class="value">{{ activity.amount.value | money}}</span>
                     <span class="currency">{{ activity.amount.currency }}</span>
                 </span>
             </span>
-        </h3>
+        </h3>amount
 
         <div class="card-content">
             <div class="row metas">
@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <p class="text-highlight">
+            <p class="text-highlight"  v-if="activity.persons">
                 <i class="icon-user grey"></i>Membres :
                 <span v-for="persons, role in activity.persons">
                     <span v-for="person in persons" class="person cartouche xs" :title="person.affectation">
@@ -86,7 +86,7 @@
                 </span>
             </p>
 
-            <p class="text-highlight"><i class="icon-building-filled grey"></i>Partenaires :
+            <p class="text-highlight" v-if="activity.organizations"><i class="icon-building-filled grey"></i>Partenaires :
                 <span v-for="organizations, role in activity.organizations">
                     <span v-for="organization in organizations"   class="organization cartouche xs">
                         <i :class="'icon-' + (organization.spot == 'activity' ? 'cube' : 'cubes')"></i>
@@ -103,10 +103,7 @@
             <div v-else>
                 <i class="icon-attention-1"></i> Cette activité n'a pas de projet
             </div>
-
         </div>
-
-        <pre style="display: none">{{ activity }}</pre>
     </article>
 </template>
 <script>
