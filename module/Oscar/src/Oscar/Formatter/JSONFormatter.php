@@ -126,56 +126,62 @@ class JSONFormatter
             }
         }
 
-        $datas['organizations'] = [];
-        $datas['organizations_primary'] = [];
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity) ) {
 
-        foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
-            $role = $activityOrganization->getRole();
+            $datas['organizations'] = [];
+            $datas['organizations_primary'] = [];
 
-            $organization = [
-                'id' => $activityOrganization->getOrganization()->getId(),
-                'role' => $role,
-                'displayName' => (string)$activityOrganization->getOrganization(),
+            foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
+                $role = $activityOrganization->getRole();
+
+                $organization = [
+                    'id' => $activityOrganization->getOrganization()->getId(),
+                    'role' => $role,
+                    'displayName' => (string)$activityOrganization->getOrganization(),
 //                'email' => $activityOrganization->getOrganization()->getEmail(),
-                'start' => $this->formatDateISO($activityOrganization->getDateStart()),
-                'end' => $this->formatDateISO($activityOrganization->getDateEnd()),
-                'spot' => get_class($activityOrganization) == ActivityOrganization::class ? 'activity' : 'project'
-            ];
+                    'start' => $this->formatDateISO($activityOrganization->getDateStart()),
+                    'end' => $this->formatDateISO($activityOrganization->getDateEnd()),
+                    'spot' => get_class($activityOrganization) == ActivityOrganization::class ? 'activity' : 'project'
+                ];
 
-            $principal = $activityOrganization->getRoleObj() && $activityOrganization->getRoleObj()->isPrincipal();
+                $principal = $activityOrganization->getRoleObj() && $activityOrganization->getRoleObj()->isPrincipal();
 
-            if( $principal ){
-                if( !array_key_exists($role, $datas['organizations']) ){
-                    $datas['organizations_primary'][$role] = [];
+                if ($principal) {
+                    if (!array_key_exists($role, $datas['organizations'])) {
+                        $datas['organizations_primary'][$role] = [];
+                    }
+                    $datas['organizations_primary'][$role][] = $organization;
+                } else {
+                    if (!array_key_exists($role, $datas['organizations'])) {
+                        $datas['organizations'][$role] = [];
+                    }
+                    $datas['organizations'][$role][] = $organization;
                 }
-                $datas['organizations_primary'][$role][] = $organization;
-            } else {
-                if( !array_key_exists($role, $datas['organizations']) ){
-                    $datas['organizations'][$role] = [];
-                }
-                $datas['organizations'][$role][] = $organization;
+            }
+        }
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity) ) {
+            $datas['payments'] = [];
+            /** @var ActivityPayment $payment */
+            foreach ($activity->getPayments() as $payment) {
+                $datas['payments'][] = [
+                    'amount' => $payment->getAmount(),
+                    'date' => $payment->getDatePayment() ? $payment->getDatePayment()->format('Y-m-d') : null,
+                    'predicted' => $payment->getDatePredicted() ? $payment->getDatePredicted()->format('Y-m-d') : null
+
+                ];
             }
         }
 
-        $datas['payments'] = [];
-        /** @var ActivityPayment $payment */
-        foreach ($activity->getPayments() as $payment) {
-            $datas['payments'][] = [
-                'amount' => $payment->getAmount(),
-                'date' => $payment->getDatePayment() ? $payment->getDatePayment()->format('Y-m-d') : null,
-                'predicted' => $payment->getDatePredicted() ? $payment->getDatePredicted()->format('Y-m-d') : null
-
-            ];
-        }
-
-        $datas['milestones'] = [];
-        /** @var ActivityDate $milestone */
-        foreach ($activity->getMilestones() as $milestone) {
-            $type = (string) $milestone->getType();
-            $datas['milestones'][] = [
-                'type' => $type,
-                'date' => $milestone->getDateStart()->format('Y-m-d')
-            ];
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity) ) {
+            $datas['milestones'] = [];
+            /** @var ActivityDate $milestone */
+            foreach ($activity->getMilestones() as $milestone) {
+                $type = (string)$milestone->getType();
+                $datas['milestones'][] = [
+                    'type' => $type,
+                    'date' => $milestone->getDateStart()->format('Y-m-d')
+                ];
+            }
         }
 
         return $datas;
