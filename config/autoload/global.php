@@ -203,20 +203,20 @@ return array(
 
         'urlAbsolute' => 'http://localhost:8080',
 
-        // Système d'envoi des mails
-        'mailer' => [
-            'transport' => [
-                'type' => 'file',
-                'path' => realpath(__DIR__.'/../../data/mails'),
-            ],
-            'administrators' => [],
-            'from' => [ 'oscar-bot@oscar.fr' => 'Oscar Bot'],
-            'copy' => [],
-            'send' => false,
-            'send_false_exception' => [],
-            'template' => realpath(__DIR__.'/../../module/Oscar/view/mail.phtml'),
-            'subjectPrefix' => '[OSCAR DEV]'
-        ],
+//        // Système d'envoi des mails
+//        'mailer' => [
+//            'transport' => [
+//                'type' => 'file',
+//                'path' => realpath(__DIR__.'/../../data/mails'),
+//            ],
+//            'administrators' => [],
+//            'from' => [ 'oscar-bot@oscar.fr' => 'Oscar Bot'],
+//            'copy' => [],
+//            'send' => false,
+//            'send_false_exception' => [],
+//            'template' => realpath(__DIR__.'/../../module/Oscar/view/mail.phtml'),
+//            'subjectPrefix' => '[OSCAR DEV]'
+//        ],
 
         ////////////////////////////////////////////////////////////////////////
         // Validation des données
