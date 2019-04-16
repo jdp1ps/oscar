@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack:///./public/js/oscar/src/OscarGrowl.vue"],"names":[],"mappings":"AACA,aACI,eACA,SACA,QACA,UAAY","file":"activitysearchui.css","sourcesContent":["\n.oscar-growl {\n    position: fixed;\n    top: 50px;\n    right: 0;\n    z-index: 10;\n}\n\n\n\n// WEBPACK FOOTER //\n// ./public/js/oscar/src/OscarGrowl.vue"],"sourceRoot":""}
