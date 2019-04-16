@@ -125,6 +125,7 @@
             <h1 class="col-md-9">{{ title }}</h1>
             <nav class="col-md-3">
                 &nbsp;
+                État des demandes affichées :
                 <jckselector :choose="listStatus" :selected="selectedStatus" @change="selectedStatus = $event"/>
             </nav>
         </header>
