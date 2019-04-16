@@ -390,6 +390,8 @@ class PersonController extends AbstractOscarController
             $orderBy = $orders[0];
         }
 
+
+
         $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
             'filter_roles' => $filterRoles,
             'order_by' => $orderBy,

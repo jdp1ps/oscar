@@ -25,6 +25,7 @@ use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Strategy\Search\PersonSearchStrategy;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -48,6 +49,46 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
      */
     public function getRepository(){
         return $this->getEntityManager()->getRepository(Person::class);
+    }
+
+    /**
+     * @return PersonSearchStrategy
+     */
+    public function getSearchEngineStrategy()
+    {
+        static $searchStrategy;
+        if( $searchStrategy === null ){
+            $opt = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('strategy.person.search_engine');
+            $class = new \ReflectionClass($opt['class']);
+            $searchStrategy = $class->newInstanceArgs($opt['params']);
+        }
+        return $searchStrategy;
+    }
+/*
+    public function search($what)
+    {
+        return $this->getSearchEngineStrategy()->search($what);
+    }
+/****/
+    public function searchDelete( $id )
+    {
+        $this->getSearchEngineStrategy()->remove($id);
+    }
+
+    public function searchUpdate( Person $person )
+    {
+        $this->getSearchEngineStrategy()->update($person);
+    }
+
+    public function searchIndex_reset()
+    {
+        $this->getSearchEngineStrategy()->resetIndex();
+    }
+
+    public function searchIndexRebuild(){
+        $this->searchIndex_reset();
+        $persons = $this->getEntityManager()->getRepository(Person::class)->findAll();
+        return $this->getSearchEngineStrategy()->rebuildIndex($persons);
     }
 
     public function getManagers( $person ){
@@ -365,19 +406,18 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
     }
 
+
+
     public function search($what){
-        /** @var ProjectGrantService $activityService */
-        $activityService = $this->getServiceLocator()->get('ActivityService');
-        $idsActivities = $activityService->search($what);
-        $idsProjects = $activityService->searchProject($what);
-        return $this->getBaseQuery()
-            ->leftJoin('p.projectAffectations', 'pj')
-            ->leftJoin('p.activities', 'ac')
-            ->where('ac.activity IN(:activityIds) OR pj.project IN (:projectIds)')
-            ->setParameters([
-                'activityIds' => $idsActivities,
-                'projectIds' => $idsProjects,
-            ]);
+
+        $ids = $this->getSearchEngineStrategy()->search($what);
+
+        $query = $this->getRepository()->createQueryBuilder('p')
+            ->where('p.id IN(:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery();
+
+        return $query->getResult();
     }
 
     public function getByIds( array $ids )
@@ -681,10 +721,14 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         else {
             if ($search !== null) {
 
+                $ids = $this->getSearchEngineStrategy()->search($search);
+                $query->where('p.id IN(:ids)')->setParameter('ids', $ids);
+
+                /*
                 $searchR = str_replace('*', '%', $search);
 
                 $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
-                    ->setParameter('search', '%' . strtolower($searchR) . '%');
+                    ->setParameter('search', '%' . strtolower($searchR) . '%');*/
             }
         }
 

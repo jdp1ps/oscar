@@ -1780,6 +1780,21 @@ class ConsoleController extends AbstractOscarController
         echo var_export($code);
     }
 
+    public function searchPersonAction()
+    {
+        $what = $this->getRequest()->getParam('exp');
+
+        if (!$what) {
+            die("Vous ne cherchez rien...\n");
+        } else {
+            echo sprintf("Recherche '%s' dans les personnes...\n", $what);
+            $persons = $this->getPersonService()->search($what);
+            foreach ($persons as $person) {
+                echo sprintf("[%s] %s'\n", $person->getId(), (string)$person);
+            }
+        }
+    }
+
     public function searchActivityAction()
     {
         $what = $this->getRequest()->getParam('exp');
@@ -1805,16 +1820,8 @@ class ConsoleController extends AbstractOscarController
                     }
                     break;
                 case 'person':
-                    try {
-                        $persons = $this->getPersonService()->search($what)->getQuery()->getResult();
-                        foreach ($persons as $person) {
-                            echo sprintf(" - [%s] %s\n", $person->getId(),
-                                (string)$person);
-                        }
-                    } catch (\Exception $e) {
-                        die(sprintf("Erreur %s, %s", $e->getMessage(),
-                            $e->getTraceAsString()));
-                    }
+                    // todo Faire pointer vers la recherche standard des personnes
+                    throw new \Exception("Option modifiée");
 
                     break;
                 default:
@@ -1854,6 +1861,19 @@ class ConsoleController extends AbstractOscarController
     {
         try {
             $repport = $this->getActivityService()->searchIndex_rebuild();
+            $output = new ConnectorRepportToPlainText();
+            $output->format($repport);
+
+        } catch (\Exception $e) {
+            die(sprintf("ERROR '%s' : \n %s\nDONE\n", $e->getMessage(),
+                $e->getTraceAsString()));
+        }
+    }
+
+    public function buildSearchPersonAction()
+    {
+        try {
+            $repport = $this->getPersonService()->searchIndexRebuild();
             $output = new ConnectorRepportToPlainText();
             $output->format($repport);
 

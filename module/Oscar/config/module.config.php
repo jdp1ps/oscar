@@ -692,6 +692,27 @@ return array(
                         ),
                     ),
                 ),
+
+                'oscar_searchperson_rebuild' => array(
+                    'options' => array(
+                        'route' => 'oscar person:search:build',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'buildSearchPerson',
+                        ),
+                    ),
+                ),
+
+                'oscar_searchperson_search' => array(
+                    'options' => array(
+                        'route' => 'oscar person:search <exp>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'searchPerson',
+                        ),
+                    ),
+                ),
+
                 //////////////////////////////////////////////////////// HARPÉGE
                 'console_check_persons' => [
                     'options' => array(
