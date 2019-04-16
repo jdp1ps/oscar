@@ -39,7 +39,7 @@ $settings = array(
         'log_path' => '/tmp/oscar-ldap.log'
     ],
     'app_infos' => array(
-        'nom'     => 'OSCAR',
+        'nom'     => 'O.S.C.A.R',
         'desc'    => 'Organisation et Suivi des Contrats et des Activités de Recherche',
         'version' => 'beta',
         'date'    => '2016',

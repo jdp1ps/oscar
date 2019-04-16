@@ -901,18 +901,15 @@ class OscarUserContext extends UserContext
         /** @var PersonService $personService */
         $personService = $this->getServiceLocator()->get('PersonService');
         $organizations = $personService->getPersonOrganizations($person, true, true);
+        $result = [];
 
         /** @var OrganizationPerson $personOrganization */
         foreach ($organizations as $personOrganization) {
-            if( $this->hasPrivileges($privilege, $personOrganization) ){
-                $organizations[] = $personOrganization;
+            if( $this->hasPrivilegeInOrganizations($privilege, $personOrganization) ){
+                $result[] = $personOrganization;
             }
         }
 
-        return $organizations;
+        return $result;
     }
-
-
-
-
 }

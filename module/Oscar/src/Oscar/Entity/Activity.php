@@ -1781,6 +1781,10 @@ class Activity implements ResourceInterface
             'intitule' => $this->getLabel(),
             'label' => $this->getLabel(),
             'acronym' => $this->getAcronym(),
+            'tva' => $this->getTva() ? (string)$this->getTva() : '',
+            'assiette-subventionnable' => (string) $this->getAssietteSubventionnable(),
+            'note-financiere' => $this->getNoteFinanciere(),
+
             'type' => (string)$this->getActivityType(),
         ];
 
@@ -1986,6 +1990,7 @@ class Activity implements ResourceInterface
             'dateStart' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
             'dateEnd' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
             'dateSigned' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
+            'dateUpdated' => $this->getDateUpdated() ? $this->getDateUpdated()->format('Y-m-d') : '',
             'paymentReceived' => $this->getTotalPaymentReceived(),
             'paymentProvided' => $this->getTotalPaymentProvided(),
         );

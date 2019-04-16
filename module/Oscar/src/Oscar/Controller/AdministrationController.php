@@ -132,7 +132,12 @@ class AdministrationController extends AbstractOscarController
 
                 case 'POST':
                     $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
-                    $added = $this->params()->fromPost('str');
+                    $added = trim($this->params()->fromPost('str'));
+
+                    if( $added == "" ){
+                        return $this->getResponseInternalError("Impossible d'ajouter une valeur vide.");
+                    }
+
                     if( in_array($added, $numerotation) ){
                         return $this->getResponseInternalError("Le type '$added' existe déjà.");
                     }

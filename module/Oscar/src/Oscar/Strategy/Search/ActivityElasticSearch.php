@@ -33,7 +33,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
     /**
      * @return string
      */
-    public function getIndex(): string
+    public function getIndex()
     {
         return $this->index;
     }
@@ -41,7 +41,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
     /**
      * @return string
      */
-    public function getType(): string
+    public function getType()
     {
         return $this->type;
     }
@@ -175,6 +175,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             'numerotation' => $activity->getNumbers(),
             'oscar' => $activity->getOscarNum(),
             'activitytype' => $activity->getActivityType() ? (string)$activity->getActivityType() : '',
+            'numbers' => $activity->getNumbers(),
             'eotp' => $activity->getCodeEOTP(),
             'acronym' => $activity->getAcronym(),
             'activity_id' => $activity->getId(),

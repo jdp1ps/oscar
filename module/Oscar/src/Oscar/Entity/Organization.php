@@ -807,6 +807,9 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     public function getType()
     {
+        if( $this->getTypeObj() ){
+            return (string) $this->getTypeObj();
+        }
         return $this->type;
     }
 

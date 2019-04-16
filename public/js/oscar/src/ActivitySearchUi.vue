@@ -38,7 +38,7 @@
     import OscarGrowl from './OscarGrowl.vue';
     import OscarBus from './OscarBus.js';
 
-    //poi watch --format umd --moduleName  ActivitySearchUi --filename.css ActivitySearchUi.css --filename.js ActivitySearchUi.js --dist public/js/oscar/dist public/js/oscar/src/ActivitySearchUi.vue
+    //node node_modules/.bin/poi watch --format umd --moduleName  ActivitySearchUi --filename.css ActivitySearchUi.css --filename.js ActivitySearchUi.js --dist public/js/oscar/dist public/js/oscar/src/ActivitySearchUi.vue
 
 
     export default {

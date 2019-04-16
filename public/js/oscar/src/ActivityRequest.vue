@@ -121,10 +121,29 @@
             </div>
         </transition>
 
+        <transition name="fade">
+            <div class="overlay" v-if="sendData">
+                <div class="alert">
+                    <h3>Envoyer la demande <strong>{{ sendData.label }}</strong> ?</h3>
+                    <nav>
+                        <button type="reset" class="btn btn-danger" @click.prevent="sendData = null">
+                            <i class="icon-cancel-outline"></i>
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn btn-success" @click.prevent="performSend">
+                            <i class="icon-ok-circled"></i>
+                            Confirmer
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
         <header class="row">
             <h1 class="col-md-9">{{ title }}</h1>
             <nav class="col-md-3">
                 &nbsp;
+                État des demandes affichées :
                 <jckselector :choose="listStatus" :selected="selectedStatus" @change="selectedStatus = $event"/>
             </nav>
         </header>
@@ -216,15 +235,15 @@
                 </div>
             </div>
             <nav v-if="a.sendable">
-                <a href="#" @click.prevent.stop="handlerEdit(a)" class="btn btn-primary">
+                <a href="#" @click.prevent.stop="handlerEdit(a)" class="btn btn-default">
                     <i class="icon-edit"></i>
                     Modifier</a>
                 <a href="#" @click.prevent.stop="handlerDelete(a)" class="btn btn-danger">
                     <i class="icon-trash"></i>
                     Supprimer</a>
-                <a href="#" @click.prevent.stop="handlerSend(a)" class="btn btn-default">
+                <a href="#" @click.prevent.stop="handlerSend(a)" class="btn btn-success">
                     <i class="icon-paper-plane"></i>
-                    soumettre</a>
+                    Envoyer</a>
             </nav>
         </article>
         </section>
@@ -253,6 +272,7 @@
             return {
                 formData: null,
                 addFile: false,
+                sendData: null,
                 addableFiles: null,
                 file: null,
                 loading: "",
@@ -342,6 +362,11 @@
             },
 
             handlerSend(demande){
+                this.sendData = demande;
+            },
+
+            performSend(){
+                let demande = this.sendData;
                 let form = new FormData();
                 form.append('action', 'send');
                 form.append('id', demande.id);
@@ -352,6 +377,9 @@
                     })
                     .catch( err => {
                         this.error = err.body;
+                    })
+                    .then( foo => {
+                        this.sendData = null;
                     })
             },
 
