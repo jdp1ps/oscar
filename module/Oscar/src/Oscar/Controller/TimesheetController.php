@@ -850,7 +850,7 @@ class TimesheetController extends AbstractOscarController
                             ->setDateTo($to);
 
                         if ($event['destinationId']) {
-                            $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($event['destinationId']);
+                            $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->findOneBy(['id' => $event['destinationId'] ]);
                             if (!$wp) {
                                 return $this->getResponseInternalError("Lot de travail inconnue");
                             }
