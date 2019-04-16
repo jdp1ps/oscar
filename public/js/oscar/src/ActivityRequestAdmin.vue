@@ -52,6 +52,10 @@
                                 </div>
                             </section>
                             <hr class="separator">
+                            <button type="reset" class="btn btn-danger" @click.prevent="confirmProccess = null">
+                                <i class="icon-cancel-outline"></i>
+                                Annuler
+                            </button>
                             <button type="button" class="btn btn-default" @click="confirmProccess.step = 2">
                                 Suivant
                                 <i class="icon-right-outline"></i>
