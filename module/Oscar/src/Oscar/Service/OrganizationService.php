@@ -298,31 +298,4 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         return $queryBuilder;
     }
 
-    const STRUCTURES_BASE_DN = 'ou=structures,dc=unicaen,dc=fr';
-    const STAFF_ACTIVE_OR_DISABLED                = 'ou=people,dc=unicaen,dc=fr';
-
-    private function areSameOrganization( Organization $organizationA, Organization $organizationB ){
-        if( $organizationA->getCentaureId() == $organizationB->getCentaureId() ){
-            return true;
-        }
-        ?><pre>;
-        <?= $organizationA ?>
-        <?= $organizationB ?>
-        </pre>
-        <?php
-    }
-    
-    public function syncLdap($router)
-    {
-        $sync = new ImportOrganizationLdapStrategy($this->getServiceLdap(), $this->getEntityManager(), $router);
-        return $sync->importAll();
-    }
-
-    /**
-     * @return \UnicaenApp\Mapper\Ldap\Structure
-     */
-    protected function getServiceLdap()
-    {
-        return $this->getServiceLocator()->get('ldap_structure_service')->getMapper();
-    }
 }

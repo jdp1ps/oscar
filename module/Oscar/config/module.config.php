@@ -249,7 +249,7 @@ return array(
                     'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',
-                    'action' => ['edit', 'new', 'syncLdap', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],
+                    'action' => ['edit', 'new', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
                 ],
                 [ 'controller' =>   'Person',
@@ -287,7 +287,7 @@ return array(
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_SHOW
                 ],
                 [ 'controller' =>   'Organization',
-                    'action' => ['edit', 'new', 'syncLdap', 'merge', 'close'],
+                    'action' => ['edit', 'new', 'merge', 'close'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_EDIT
                 ],
                 [ 'controller' =>   'Organization',

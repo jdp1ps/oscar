@@ -34,10 +34,6 @@ use Zend\View\Model\ViewModel;
 
 class OrganizationController extends AbstractOscarController
 {
-    public function syncLdapAction()
-    {
-        return $this->getOrganizationService()->syncLdap($this->plugin('url'));
-    }
 
     /**
      * @return OrganizationService
