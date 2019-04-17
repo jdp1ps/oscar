@@ -239,7 +239,8 @@ De la même façon, 2 URL peuvent être utilisées pour synchroniser les donnée
     "phone" : "",
     "url" : "",
     "email" : "",
-    "siret" : ""
+    "siret" : "",
+    "type": "Type d'organisation tel que configuré dans Oscar"
 }
 ```
 
