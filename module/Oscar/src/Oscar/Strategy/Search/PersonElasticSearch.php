@@ -154,6 +154,7 @@ class PersonElasticSearch implements PersonSearchStrategy
         $projects = [];
         $activities = [];
         $organizations = [];
+        $connectors = [];
 
         /** @var OrganizationPerson $personOrganization */
         foreach ($person->getOrganizations() as $personOrganization) {
@@ -173,6 +174,11 @@ class PersonElasticSearch implements PersonSearchStrategy
                 $activities[] = $activity;
             }
         }
+        if( $person->getConnectors() ){
+            foreach ($person->getConnectors() as $name=>$value) {
+                $connectors[] = $value;
+            }
+        }
 
         return [
             'id' => $person->getId(),
@@ -183,7 +189,8 @@ class PersonElasticSearch implements PersonSearchStrategy
             'affectation' => $person->getLdapAffectation(),
             'location' => $person->getLdapSiteLocation(),
             'organizations' => $organizations,
-            'activities' => $activities
+            'activities' => $activities,
+            'connectors' => $connectors
         ];
     }
 

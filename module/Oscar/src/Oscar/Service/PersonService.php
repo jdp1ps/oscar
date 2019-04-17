@@ -966,16 +966,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $queryBuilder;
     }
 
-    const LDAP_FILTER_EMAIL = '(mail=%s)';
-
-    /**
-     * @return \UnicaenApp\Mapper\Ldap\People
-     */
-    protected function getServiceLdap()
-    {
-        return $this->getServiceLocator()->get('ldap_people_service')->getMapper();
-    }
-
     /**
      * @return NotificationService
      */
