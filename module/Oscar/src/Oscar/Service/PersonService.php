@@ -64,12 +64,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
         return $searchStrategy;
     }
-/*
-    public function search($what)
-    {
-        return $this->getSearchEngineStrategy()->search($what);
-    }
-/****/
+
+
     public function searchDelete( $id )
     {
         $this->getSearchEngineStrategy()->remove($id);
@@ -91,7 +87,13 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $this->getSearchEngineStrategy()->rebuildIndex($persons);
     }
 
-    public function getManagers( $person ){
+    /**
+     * Retourne les N+1 de la personne.
+     *
+     * @param Person $person
+     * @return array
+     */
+    public function getManagers( Person $person ){
         if( !$person ) return [];
 
         $qb = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
@@ -101,7 +103,13 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $qb->setParameter('person', $person)->getQuery()->getResult();
     }
 
-    public function getSubordinates( $person ){
+    /**
+     * Retourne les N-1 de la personne.
+     *
+     * @param Person $person
+     * @return array
+     */
+    public function getSubordinates( Person $person ){
         if( !$person ) return [];
 
         $qb = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
@@ -146,12 +154,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             ->where('r.referent = :personId')
             ->setParameter('personId', $personId);
         return $query->getQuery()->getResult();
-    }
-
-
-
-    public function getNP1( Person $person, $date = null ){
-        // @todo
     }
 
     /**
@@ -587,7 +589,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $coWorkersIds = array_unique(array_merge($coWorkersIds, $engaged));
         }
 
-
         return $coWorkersIds;
     }
 
@@ -721,18 +722,21 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         else {
             if ($search !== null) {
 
-                $ids = $this->getSearchEngineStrategy()->search($search);
-                $query->where('p.id IN(:ids)')->setParameter('ids', $ids);
+                try {
+                    $ids = $this->getSearchEngineStrategy()->search($search);
+                    $query->where('p.id IN(:ids)')->setParameter('ids', $ids);
+                } catch( \Exception $e ){
+                    $this->getLoggerService()->warn(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
 
-                /*
-                $searchR = str_replace('*', '%', $search);
+                    // Ancienne méthode
+                    $searchR = str_replace('*', '%', $search);
+                    $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
+                        ->setParameter('search', '%' . strtolower($searchR) . '%');
 
-                $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
-                    ->setParameter('search', '%' . strtolower($searchR) . '%');*/
+                }
+
             }
         }
-
-
 
         // FILTRE : Application des filtres sur les rôles
         if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {
@@ -876,249 +880,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             ->getResult();
     }
 
-    const LDAP_PERSONS = '(&(eduPersonAffiliation=member)(!(eduPersonaffiliation=student)))';
-    public function getLdapPersons()
-    {
-        return $this->getServiceLdap()->searchSimplifiedEntries(
-            self::LDAP_PERSONS,
-            self::STAFF_ACTIVE_OR_DISABLED,
-            [],
-            'cn'
-        );
-    }
-
-    /**
-     * Synchronise les informations depuis l'annuaire LDAP.
-     *
-     * @param $person
-     */
-    public function syncLdap(Person $person)
-    {
-        $ldapDatas = $this->getFromLdap($person);
-        if( !$ldapDatas ){
-            return;
-        }
-        $structureMapper = $this->getServiceLocator()->get('ldap_structure_mapper');
-
-        // Affectation administrative
-        try {
-            $affectations = $ldapDatas->getAffectationsAdmin($structureMapper,
-                true);
-            if (count($affectations) >= 1) {
-                $person->setLdapAffectation(array_values($affectations)[0]);
-            }
-        } catch (\Exception $e) {
-        }
-
-        try {
-            $person->setLadapLogin($ldapDatas->getSupannAliasLogin())
-                ->setCodeLdap($ldapDatas->getUid())
-                ->setLdapDisabled($ldapDatas->getEstDesactive())
-                ->setLdapSiteLocation($ldapDatas->getUcbnSiteLocalisation())
-                ->setLdapStatus($ldapDatas->getUcbnStatus())
-                ->setDateSyncLdap(new \DateTime())
-                ->setDateUpdated(new \DateTime())
-                ->setPhone($ldapDatas->getTelephoneNumber());
-            $this->getEntityManager()->flush($person);
-        } catch (\Exception $e) {
-            throw new \Exception(sprintf(_("Impossible de synchroniser les informations pour '%s'"),
-                $person));
-        }
-
-        return true;
-    }
-
-    /**
-     * Ecrase les données dans Person avec celle issue de LDAP.
-     * @param Person $person
-     * @param array|\UnicaenApp\Entity\Ldap\People $ldapData Données LDAP
-     */
-    public function pushLdapDataToPerson( Person &$person, $ldapData )
-    {
-        if( ! $ldapData instanceof \UnicaenApp\Entity\Ldap\People ){
-            $ldapData = new \UnicaenAuth\Entity\Ldap\People($ldapData);
-        }
-
-        $localisations = $ldapData->getUcbnSiteLocalisation();
-        if (is_array($localisations)){
-            if( count($localisations)>0  ){
-                $localisations = $localisations[0];
-            } else {
-                $localisations = '';
-            }
-        }
-
-        $person->setLadapLogin($ldapData->getSupannAliasLogin())
-            ->setLastname($ldapData->getNomUsuel())
-            ->setFirstname($ldapData->getGivenName())
-            ->setCodeLdap($ldapData->getUid())
-            ->setCodeHarpege($this->convertCodeLdapToCodeHarpege($ldapData->getUid()))
-            ->setEmail($ldapData->getMail())
-            ->setLdapDisabled($ldapData->getEstDesactive())
-            ->setLdapSiteLocation($localisations)
-            ->setLdapStatus($ldapData->getUcbnStatus())
-            ->setDateSyncLdap(new \DateTime())
-            ->setDateUpdated(new \DateTime())
-            ->setPhone($ldapData->getTelephoneNumber());
-        return $person;
-    }
-
-    /**
-     * Charge des données Ldap pour la personne donnée.
-     *
-     * @param Person $person
-     *
-     * @return \UnicaenApp\Entity\Ldap\People
-     *
-     * @throws \Exception
-     */
-    protected function getFromLdap(Person $person)
-    {
-
-        if ($person->getCodeLdap()) {
-            return $this->getServiceLdap()->findOneByUid($person->getCodeLdap());
-        } else {
-            $datas = $this->getLdapDatasFromEmail($person->getEmail());
-
-            if (count($datas) !== 1) {
-                throw new \Exception(count($datas) === 0 ? sprintf('Aucun résultat depuis "%s"',
-                    $person->getEmail()) : 'Trop de résultat');
-            }
-
-            return new \UnicaenApp\Entity\Ldap\People($datas[0]);
-        }
-    }
-
-    /**
-     * @param $email
-     *
-     * @return array
-     */
-    protected function getLdapDatasFromEmail($email)
-    {
-        return $this->getServiceLdap()->searchSimplifiedEntries(
-            sprintf(self::LDAP_FILTER_EMAIL, $email),
-            People::UTILISATEURS_BASE_DN,
-            [],
-            'cn'
-        );
-    }
-
-    /**
-     * Recherche dans le personnel (staff)
-     */
-    const LDAP_SEARCH_STAFF = '(&(|(supannAliasLogin=%s)(cn=%s*))(eduPersonAffiliation=staff))';
-
-    public function searchStaff( $search )
-    {
-
-        $result = [];
-
-        $oscarDatas = $this->searchInOscar($search)->getQuery()->getResult();
-
-        /** @var Person $od */
-        foreach( $oscarDatas as $od ){
-            $found = false;
-            /*
-            foreach( $ldapDatas as $index=>$ld ){
-                if( $ld['uid'] == $od->getCodeLdap() || $ld['mail'] == $od->getEmail() ){
-                    $this->pushLdapDataToPerson($od, $ld);
-                    $this->getEntityManager()->flush($od);
-                    $result[] = $od;
-                    $found = true;
-                    unset($ldapDatas[$index]);
-                    break;
-                }
-            }*/
-            if( $found === false ){
-                $result[] = $od;
-            }
-        }
-        /*
-        try {
-            $ldapDatas = $this->searchInLdap($search);
-            foreach ($ldapDatas as $ldapData) {
-                $person = $this->createPersonFromLdapDatas($ldapData);
-                $result[] = $person;
-            }
-        } catch( \Exception $e ){
-
-        }
-        */
-
-        return $result;
-    }
-
-    /**
-     * Compare la liste issue de oscar et celle issue de ldap, synchronise les
-     * données Oscar avec celles de Ldap, et ajoute (si besoin) les données de
-     * Ldap dans oscar.
-     *
-     * @param $oscarDatas
-     * @param $ldapData
-     */
-    private function blendLdapToOscar( $oscarDatas, $ldapData )
-    {
-
-    }
-
-    /**
-     * Création de la personne à partir des données LDap.
-     *
-     * @param \UnicaenApp\Entity\Ldap\People|array $ldapDatas Données issues de LDap
-     * @param boolean $flush Flag pour "flusher" la personne automatiquement.
-     * @return Person
-     * @throws \Exception
-     */
-    public function createPersonFromLdapDatas( $ldapDatas, $flush=true )
-    {
-        try {
-            $person = new Person();
-            $this->getEntityManager()->persist($person);
-            $this->pushLdapDataToPerson($person, $ldapDatas);
-            if( $flush ){
-                $this->getEntityManager()->flush($person);
-            }
-            return $person;
-        } catch( \Exception $e ){
-            throw new \Exception(sprintf("Impossible de créer la personne à partir des données LDap (%s)", $e->getMessage()));
-        }
-
-    }
-
-    private function searchInLdap( $search, $includeStudent=false )
-    {
-        return $this->getServiceLdap()->searchSimplifiedEntries(
-            sprintf(self::LDAP_SEARCH_STAFF, $search, $search),
-            self::STAFF_ACTIVE_OR_DISABLED,
-            [],
-            'cn'
-        );
-    }
-
-    const STAFF_ACTIVE_OR_DISABLED                = 'ou=people,dc=unicaen,dc=fr';
-
-    private function searchInOscar( $search )
-    {
-        $query = $this->getBaseQuery();
-        if ($search !== null) {
-            $query->andWhere('lower(p.firstname) LIKE :search')
-                ->orWhere('lower(p.lastname) LIKE :search')
-                ->orWhere('LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search')
-                ->orWhere('LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
-                ->setParameter('search', strtolower($search).'%');
-        }
-        return $query;
-    }
-
-
-    public function convertCodeHarpegeToCodeLdap($codeHarpege){
-        return 'p' . str_pad("".intval($codeHarpege), 8, '0', STR_PAD_LEFT);
-    }
-
-    public function convertCodeLdapToCodeHarpege($codeLdap){
-        return preg_replace("/p0*([0-9]*)/", "$1", $codeLdap);
-    }
 
 
     /**

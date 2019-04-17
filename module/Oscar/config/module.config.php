@@ -239,10 +239,7 @@ return array(
                     'action' => ['search', 'synchronize'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
                 ],
-                [ 'controller' =>   'Person',
-                    'action' => ['syncHarpege', 'syncLdap2'],
-                    'privileges' => \Oscar\Provider\Privileges::PERSON_SYNC_LDAP,
-                ],
+
                 [ 'controller' =>   'Person',
                     'action' => ['index', 'boss'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
@@ -744,16 +741,6 @@ return array(
                     ),
                 ],
 
-                ////////////////////////////////////////////////////////////////
-                'console_syncldap' => array(
-                    'options' => array(
-                        'route' => 'oscar sync:ldap',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'syncLdap',
-                        ),
-                    ),
-                ),
                 'oscar_search_find' => array(
                     'options' => array(
                         'route' => 'oscar search:find <search>',
