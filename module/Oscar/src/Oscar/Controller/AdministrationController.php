@@ -887,11 +887,13 @@ class AdministrationController extends AbstractOscarController
 
 
     public function organizationRoleApiAction(){
+        $this->getLogger()->debug("> ORGANISATIONROLE API");
         $this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
         $roleId = $this->params('roleid', null);
         /** @var Request $request */
         $request = $this->getRequest();
         if( $roleId == null ){
+            $this->getLogger()->debug("Pas de ROLEID");
             ////////////////////////////////////////////////////////////////////
             // GET : Liste des rôles
             if( $this->getHttpXMethod() == 'GET' ){

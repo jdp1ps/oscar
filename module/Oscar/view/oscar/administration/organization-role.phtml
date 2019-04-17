@@ -13,15 +13,17 @@
         require(['vue', 'vue-resource', 'organizationrole'], function(Vue, VueResource, OrganizationRole){
 
             Vue.use(VueResource);
+            Vue.http.options.emulateJSON = true;
+            Vue.http.options.emulateHTTP = true
 
-            var organisationrole = new OrganizationRole.default({
-                http: {
-                    root: '<?= $this->url('administration/organizationrole/api') ?>'
-                },
-                data: {
-                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_ROLEORGA_EDITION) ? 'true' : 'false' ?>
-                },
-                el: '#roles'
+            new Vue({
+                el: '#roles',
+                render(h){
+                    return h(OrganizationRole.default, { props: {
+                        url: '<?= $this->url('administration/organizationrole/api') ?>',
+                        manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_ROLEORGA_EDITION) ? 'true' : 'false' ?>
+                    }});
+                }
             });
         })
     </script>
