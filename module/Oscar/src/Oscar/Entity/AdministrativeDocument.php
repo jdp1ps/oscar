@@ -22,9 +22,31 @@ class AdministrativeDocument extends AbstractVersionnedDocument
      */
     private $id;
 
+
     public function getId()
     {
         return $this->id;
     }
 
+    /**
+     * @var
+     * @ORM\ManyToOne(targetEntity="AdministrativeDocumentSection")
+     */
+    private $section = null;
+
+    /**
+     * @return mixed
+     */
+    public function getSection()
+    {
+        return $this->section;
+    }
+
+    /**
+     * @param mixed $section
+     */
+    public function setSection($section)
+    {
+        $this->section = $section;
+    }
 }
