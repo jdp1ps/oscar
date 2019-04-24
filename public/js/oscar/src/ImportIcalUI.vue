@@ -430,28 +430,31 @@
             },
 
             handlerChangeCorrespondance(editCorrespondance, dest){
+                let newTimesheets = [];
                 this.timesheets.forEach(t => {
                     if( t.label == editCorrespondance ){
+                        console.log("Traitement", dest);
                         if ( dest == null ){
                             t.destinationCode = "";
                             t.destinationId = -1;
                             t.destinationLabel = "";
                             t.imported = false;
-                        } else {editCorrespondance
+                        } else {
                             if(  t.importable == true ){
                                 t.destinationCode = dest.code;
-                                t.destinationId = dest.id;
+                                t.destinationId = dest.wp_id;
                                 t.destinationLabel = dest.label;
                                 t.imported = true;
                             }
                         }
-
                     }
+                    newTimesheets.push(t);
                 })
-                this.labelsCorrespondance[editCorrespondance.toLowerCase()] = dest;
+                this.labelsCorrespondance[editCorrespondance] = dest;
                 if( window.localStorage ){
                     window.localStorage.setItem('labelsCorrespondance', JSON.stringify(this.labelsCorrespondance));
                 }
+                this.timesheets = newTimesheets;
                 this.editCorrespondance = null;
             },
 
@@ -478,6 +481,9 @@
             },
 
             handlerRemoveLabel( label ){
+
+                this.handlerChangeCorrespondance(label, null);
+
                 let newTimesheets = [];
                 this.timesheets.forEach(timesheet => {
                     if( timesheet.label != label ){
