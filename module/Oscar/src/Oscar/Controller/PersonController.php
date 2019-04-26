@@ -482,7 +482,7 @@ class PersonController extends AbstractOscarController
         if (strlen($search) < 2) {
             return $this->getResponseBadRequest("Not enough chars (4 required");
         }
-        $datas = $this->getPersonService()->searchStaff($search);
+        $datas = $this->getPersonService()->search($search);
 
         $json = [
             'datas' => []

@@ -86,6 +86,14 @@ timesheet:
                 route: /resolve-invalid-labels
                 defaults:
                     action: resolveInvalidLabels
+
+        syntheseactivity:
+            type: segment
+            options:
+                route: /synthese-activity/:id
+                defaults:
+                    action: syntheseActivity
+
         activity:
             type: segment
             options:

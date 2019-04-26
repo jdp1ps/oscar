@@ -491,6 +491,179 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function syntheseActivityAction(){
+
+        echo "<pre>";
+
+        $currentActivityId = $this->params()->fromRoute('id');
+        $month = $this->params()->fromQuery('month', date('m'));
+        $year = $this->params()->fromQuery('year', date('Y'));
+
+
+        $enteteLots = [];
+        $enteteProjets = [];
+        $enteteOthers = [];
+        $entetePerson = [];
+
+        $totalLots = [];
+        $totalProjets = [];
+        $totalOthers = [];
+        $totalPersons = [];
+
+
+
+        $lots = []; // Données des lots
+        $others = []; // Données des hors-lots
+        $projects = []; // Données des autres projets
+
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($currentActivityId);
+        $period = DateTimeUtils::getCodePeriod($year, $month);
+
+        /** @var WorkPackage $wp */
+        foreach ($activity->getWorkPackages() as $wp ){
+            $wpId = $wp->getId();
+            $enteteLots[$wpId] = sprintf("%s - %s", $wp->getActivity()->getAcronym(), $wp->getCode());
+            $totalLots[$wpId] = 0.0;
+        }
+
+        foreach ($this->getTimesheetService()->getOthersWP() as $other) {
+            $code = $other['code'];
+            $enteteOthers[$code] = $other['label'];
+            $totalOthers[$code] = 0.0;
+        }
+
+
+        foreach ($activity->getDeclarers() as $person ){
+            $personId = $person->getId();
+            $totalPersons[$personId] = 0.0;
+            $lots[$personId] = [];
+            $entetePerson[$personId] = (string)$person;
+
+            foreach ($enteteLots as $wpId=>$wpLabel){
+                $lots[$personId][$wpId] = 0.0;
+            }
+
+            $others[$personId] = [];
+            foreach ($enteteOthers as $otherCode=>$otherLabel){
+                $others[$personId][$otherCode] = 0.0;
+            }
+            $projects[$personId] = [];
+        }
+
+
+
+        foreach ($activity->getDeclarers() as $person ){
+            
+            $timePerson = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
+            $personId = $person->getId();
+
+            foreach ($timePerson['workpackages'] as $idActivityPerson=>$activityDetails){
+                $acronym = $activityDetails['acronym'];
+                $activity_id = $activityDetails['activity_id'];
+                $workpackage_id = $activityDetails['id'];
+                $total = $activityDetails['total'];
+
+                if( $activity_id != $currentActivityId ){
+                    if( !array_key_exists($activity_id, $enteteProjets) ){
+                        $enteteProjets[$activity_id] = $acronym;
+                        $totalProjets[$activity_id] = 0.0;
+                        foreach ($projects as $p=>$d){
+                            $projects[$p][$activity_id] = 0.0;
+                        }
+                    }
+                    $totalProjets[$activity_id] += $total;
+                    $projects[$personId][$activity_id] += $total;
+
+                } else {
+                    $lots[$personId][$workpackage_id] += $total;
+                    $totalPersons[$personId] += $total;
+                    $totalLots[$workpackage_id] += $total;
+                }
+            }
+
+            var_dump($timePerson);
+
+            foreach ($timePerson['otherWP'] as $codeOther=>$dataOther) {
+                $total = $dataOther['total'];
+                $totalOthers[$codeOther] += $total;
+                $others[$personId][$codeOther] += $total;
+                $totalPersons[$personId] += $total;
+            }
+        }
+
+        var_dump($projects);
+
+        echo "<table border='1'>";
+        /*
+         *
+         * $enteteLots = [];
+        $enteteProjets = [];
+        $enteteOthers = [];
+         */
+        echo "<thead><tr><th>Personne</th>";
+        foreach ($enteteLots as $id=>$label){
+            echo "<th class='lot heading active'>$label</th>";
+        }
+        foreach ($enteteProjets as $id=>$label){
+            echo "<th class='lot heading off'>$label</th>";
+        }
+        foreach ($enteteOthers as $id=>$label){
+            echo "<th class='hors-lot heading off'>$label</th>";
+        }
+        echo "<th>Total</th>";
+        echo "</tr></thead>";
+
+        echo "<tbody>";
+
+        $totalMonth = 0.0;
+
+        foreach ($entetePerson as $idPerson=>$labelPerson) {
+            echo "<tr><th>$labelPerson</th>";
+
+            foreach ($lots[$idPerson] as $id=>$label){
+                echo "<th class='lot heading active'>$label</th>";
+            }
+            foreach ($projects[$idPerson] as $id=>$label){
+                echo "<th class='lot heading off'>$label</th>";
+            }
+            foreach ($others[$idPerson] as $id=>$label){
+                echo "<th class='hors-lot heading off'>$label</th>";
+            }
+
+            echo "<th>" . $totalPersons[$idPerson] . "</th>";
+
+            $totalMonth += $totalPersons[$idPerson];
+
+            echo "</tr>";
+        }
+
+        echo "<tr><th>Total</th>";
+        foreach ($totalLots as $id=>$total){
+            echo "<th class='lot total active'>$total</th>";
+        }
+
+        foreach ($totalProjets as $id=>$total){
+            echo "<th class='lot total'>$total</th>";
+        }
+
+        foreach ($totalOthers as $id=>$total){
+            echo "<th class='hors-lot total'>$total</th>";
+        }
+        echo "<th class='hors-lot total'>$totalMonth</th>";
+        echo "</tr>";
+
+        echo "</tbody>";
+
+
+        echo "</table>";
+        var_dump($lots);
+//        var_dump($lots);
+//        var_dump($projects);
+//        var_dump($others);
+        die("Synthèse activité " . $activity);
+    }
+
 
     /**
      * Exportation et visualisation des feuilles de temps.

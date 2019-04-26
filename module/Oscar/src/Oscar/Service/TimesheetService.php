@@ -2196,11 +2196,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             if (!$t->getActivity()) {
+
+                $otherInfo = $this->getOthersWPByCode($t->getLabel());
+                $label = $otherInfo['label'];
+                $code = $otherInfo['code'];
+
                 $datas = [
                     'id' => $t->getId(),
                     'int' => $dayInt,
-                    'label' => $this->getOthersWPByCode($t->getLabel())['label'],
-                    'code' => $t->getLabel(),
+                    'label' => $label,
+                    'code' => $code,
                     'description' => $t->getComment(),
                     'duration' => $t->getDuration(),
                     'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : 'draft',
@@ -2212,7 +2217,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $daysInfos[$dayInt]['duration'] += $duree;
                 $daysInfos[$dayInt]['total'] += $duree;
                 $periodTotal += $duree;
-                $others[$key]['total'] += $duree;
+                $others[$code]['total'] += $duree;
                 continue;
             }
 

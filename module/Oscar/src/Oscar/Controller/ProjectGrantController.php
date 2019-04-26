@@ -74,6 +74,7 @@ class ProjectGrantController extends AbstractOscarController
     public function apiAction(){
 
         // On test les droits de la personne
+        // On test les droits de la personne
         $person = $this->getCurrentPerson();
 
         ////////////////////////////////////////////////////////////////////////
@@ -1311,6 +1312,11 @@ class ProjectGrantController extends AbstractOscarController
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');;
+        $syntheseActivity = $timesheetService->getActivitySyntesis($activity->getId());
 
         return [
             'generatedDocuments' => $this->getConfiguration('oscar.generated-documents.activity'),

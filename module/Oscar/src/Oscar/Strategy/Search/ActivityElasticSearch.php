@@ -18,7 +18,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
 {
     private $elasticSearchClient;
     private $hosts;
-    private $index = 'oscar';
+    private $index = 'oscar-activity';
     private $type = 'activity';
 
     /**

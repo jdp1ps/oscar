@@ -219,7 +219,7 @@ return array(
                         'declarant', 'declarantAPI', 'validationActivity',
                         'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
                         'importIcal', 'declarations', 'resumeActivity',
-                        'resolveInvalidLabels'
+                        'resolveInvalidLabels', 'syntheseActivity'
                     ],
                     'roles' => ['user']
                 ],

@@ -20,7 +20,7 @@ class PersonElasticSearch implements PersonSearchStrategy
 {
     private $elasticSearchClient;
     private $hosts;
-    private $index = 'oscar';
+    private $index = 'oscar-person';
     private $type = 'person';
 
     /**
