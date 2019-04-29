@@ -8,19 +8,17 @@
             <h2 class="row">
                 <span><i class="icon-calendar"></i>
                 {{ p.label | formatPeriod }}</span>
-                <span class="total">
-                    {{ p.total | formatDuration }}
-                </span>
+                <small class="total">
+                    Total pour <?= $activity->getAcronym() ?> :
+                    <strong>{{ p.total | formatDuration }} </strong>
+                </small>
 
             </h2>
 
             <article v-for="l in p.persons" class="card card-xs">
-                <h3 class="row">
+                <h4 class="row">
                 <strong class="person">
                     <i class="icon-user"></i> {{ l.label }}
-
-                    <a v-if="filterPersonId == null" href="#" @click.prevent="filterPersonId = l.personId"><small>Afficher uniquement <strong>{{ l.label }}</strong></small></a>
-                    <a v-else href="#" @click.prevent="filterPersonId = null"><small>Afficher tout le monde</small></a>
                 </strong>
 
 
@@ -36,16 +34,26 @@
                     <?= $activity->getAcronym() ?> :
                     {{ l.main | formatDuration }}
                 </strong>
-                </h3>
+                </h4>
+                <div><a v-if="filterPersonId == null" href="#" @click.prevent="filterPersonId = l.personId"><small>Afficher uniquement <strong>{{ l.label }}</strong></small></a>
+                    <a v-else href="#" @click.prevent="filterPersonId = null"><small>Afficher tout le monde</small></a></div>
                 <section class="details">
                     <article v-for="d in l.details" class="detail row">
                         <strong v-if="d.type == 'wp'">
                             <i class="icon-cubes"></i> {{ d.context }}
                         </strong>
                         <em v-else>
-                            <i :class="'icon-'+d.context"></i> {{ d.context }}
+                            <i :class="'icon-'+d.context"></i> {{ d.context | formatHorsLot }}
                         </em>
                         <strong>{{ d.duration | formatDuration }}</strong>
+                    </article>
+                    <article class="detail row">
+                        <strong>
+                            Total pour cette période :
+                        </strong>
+                        <strong>
+                            {{ l.total | formatDuration }}
+                        </strong>
                     </article>
                 </section>
             </article>
@@ -59,6 +67,11 @@
     }
     .row :last-child {
         margin-left: auto;
+        text-align: right;
+    }
+    .period h4 {
+        margin: 0;
+        padding: 0;
     }
     .period > article h3 {
         display: flex;
@@ -71,6 +84,7 @@
         margin-left: auto;
     }
     .period .detail {
+        margin: 0 1em;
         border-bottom: solid thin #fff;
         background: #ddeafe;
         padding-left: 2em;
@@ -104,6 +118,15 @@
         Vue.filter('formatPeriod', function(period){
             let split = period.split('-');
             return months[split[1]] +" " +split[0];
+        });
+
+        let horslot = <?= json_encode($horslot) ?>;
+
+        Vue.filter('formatHorsLot', function(text){
+            if( horslot.hasOwnProperty(text) ){
+                return horslot[text].label;
+            }
+            return text;
         });
 
        new Vue({

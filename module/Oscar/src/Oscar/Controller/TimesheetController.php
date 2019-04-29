@@ -503,6 +503,7 @@ class TimesheetController extends AbstractOscarController
         return [
             'activityId' => $activity_id,
             'activity' => $activity,
+            'horslot' => $this->getTimesheetService()->getOthersWP(),
             'datas' => $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds)
         ];
     }
