@@ -493,6 +493,9 @@ class TimesheetController extends AbstractOscarController
 
     public function synthesisAllAction(){
         $activity_id = $this->params()->fromQuery('activity_id');
+        $format = $this->params()->fromQuery('format', '');
+        $period             = $this->params()->fromQuery('period', null);
+
         $personsIds = [];
         /** @var Activity $activity */
         $activity = $this->getEntityManager()->find(Activity::class, $activity_id);
@@ -500,11 +503,64 @@ class TimesheetController extends AbstractOscarController
             $personsIds[] = $person->getId();
         }
 
+        $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds);
+        $horslots = $this->getTimesheetService()->getOthersWP();
+        $modele = $this->getConfiguration('oscar.paths.timesheet_synthesis_modele');
+
+        if( $format == "excel" ){
+
+            $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
+            $lineWpFormula = '=SUM(C%s:AG%s)';
+            $rowWpFormula = '=SUM(%s10:%s%s)';
+
+            // Début des LOTS
+            $lineWpStart = 10;
+
+            /** @var \PHPExcel $spreadsheet */
+            $spreadsheet = \PHPExcel_IOFactory::load($modele);
+
+
+            $spreadsheet->getActiveSheet()->setCellValue('A1', "Déclaration");
+            $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
+            $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
+            $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
+            $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
+
+            $spreadsheet->getActiveSheet()->setCellValue('U3', $datas['debut']); //$fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue('U4', $datas['fin']); // $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
+            $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
+
+            $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
+            $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
+
+            $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
+
+            $spreadsheet->getActiveSheet()->insertNewColumnBefore('D');
+
+            $name = "TEST_EXPORT.xls";
+            $filepath = '/tmp/'. $name;
+
+            $edited->save($filepath);
+
+            header('Content-Type: application/octet-stream');
+            header("Content-Transfer-Encoding: Binary");
+            header("Content-disposition: attachment; filename=\"" . $name . "\"");
+
+            $contentfile = readfile($filepath);
+
+            unlink($filepath);
+
+            die($contentfile);
+
+
+        }
+
         return [
             'activityId' => $activity_id,
             'activity' => $activity,
-            'horslot' => $this->getTimesheetService()->getOthersWP(),
-            'datas' => $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds)
+            'horslot' => $horslots,
+            'datas' => $datas
         ];
     }
 
