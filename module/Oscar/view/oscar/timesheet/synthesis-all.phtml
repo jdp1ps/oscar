@@ -1,0 +1,180 @@
+<div id="app">
+    <section class="container">
+        <h1>Déclaration pour <strong>[<?= $activity->getAcronym() ?>]</strong> <em><?= $activity->getLabel() ?></em></h1>
+
+        <section v-for="y in packed" class="period">
+            <h1 class="row">{{ y.label }} <strong class="total">{{ y.total | formatDuration }}</strong></h1>
+            <section v-for="p in y.periods" class="period">
+            <h2 class="row">
+                <span><i class="icon-calendar"></i>
+                {{ p.label | formatPeriod }}</span>
+                <span class="total">
+                    {{ p.total | formatDuration }}
+                </span>
+
+            </h2>
+
+            <article v-for="l in p.persons" class="card card-xs">
+                <h3 class="row">
+                <strong class="person">
+                    <i class="icon-user"></i> {{ l.label }}
+
+                    <a v-if="filterPersonId == null" href="#" @click.prevent="filterPersonId = l.personId"><small>Afficher uniquement <strong>{{ l.label }}</strong></small></a>
+                    <a v-else href="#" @click.prevent="filterPersonId = null"><small>Afficher tout le monde</small></a>
+                </strong>
+
+
+                <small class="other">
+                    +
+                    <i class="icon-tags"></i>
+                    {{ l.others | formatDuration }}
+                    ( soit au total {{ l.total | formatDuration }})
+                </small>
+
+                <strong class="main">
+                    <i class="icon-cubes"></i>
+                    <?= $activity->getAcronym() ?> :
+                    {{ l.main | formatDuration }}
+                </strong>
+                </h3>
+                <section class="details">
+                    <article v-for="d in l.details" class="detail row">
+                        <strong v-if="d.type == 'wp'">
+                            <i class="icon-cubes"></i> {{ d.context }}
+                        </strong>
+                        <em v-else>
+                            <i :class="'icon-'+d.context"></i> {{ d.context }}
+                        </em>
+                        <strong>{{ d.duration | formatDuration }}</strong>
+                    </article>
+                </section>
+            </article>
+        </section>
+        </section>
+    </section>
+</div>
+<style>
+    .row {
+        display: flex;
+    }
+    .row :last-child {
+        margin-left: auto;
+    }
+    .period > article h3 {
+        display: flex;
+    }
+    .period > article h3 .total, .period > article h3 .main, .period > article h3 .other {
+        flex: 1;
+    }
+    .period > article h3 .person {
+        flex: 3;
+        margin-left: auto;
+    }
+    .period .detail {
+        border-bottom: solid thin #fff;
+        background: #ddeafe;
+        padding-left: 2em;
+        display: flex;
+    }
+</style>
+<script>
+    require(['vue'], function(Vue){
+        var months = {
+            '01': 'Janvier',
+            '02': 'Février',
+            '03': 'Mars',
+            '04': 'Avril',
+            '05': 'Mai',
+            '06': 'Juin',
+            '07': 'Juillet',
+            '08': 'Aout',
+            '09': 'Septembre',
+            '10': 'Octobre',
+            '11': 'Novembre',
+            '12': 'Décembre'
+        };
+
+
+        Vue.filter('formatDuration', function(heure){
+            var h = Math.floor(heure);
+            var m = Math.round((heure - h) * 60);
+            return h +'h'+ (m < 10 ? '0'+m : m);
+        });
+
+        Vue.filter('formatPeriod', function(period){
+            let split = period.split('-');
+            return months[split[1]] +" " +split[0];
+        });
+
+       new Vue({
+           el: "#app",
+
+           data() {
+               return {
+                   pack: 'period',
+                   lines: <?= json_encode($datas) ?>,
+                   activityId: <?= $activityId ?>,
+                   filterPersonId: null
+               }
+           },
+
+           computed: {
+               packed(){
+                   var output = {};
+
+                   this.lines.forEach( line => {
+
+                       let splitPeriod = line.period.split('-');
+                       let year = splitPeriod[0];
+                       let period = line.period;
+                       let personId = line.person_id;
+                       let person = line.displayname;
+                       let duration = parseFloat(line.duration);
+
+                       if( this.filterPersonId && this.filterPersonId != personId ) return;
+
+                       if( !output.hasOwnProperty(year) ){
+                           output[year] = {
+                               label: year,
+                               periods: {},
+                               total: 0.0
+                           };
+                       }
+
+                       if( !output[year].periods.hasOwnProperty(period) ){
+                           output[year].periods[period] = {
+                               label: period,
+                               persons: {},
+                               total: 0.0
+                           };
+                       }
+
+                       if( !output[year].periods[period].persons.hasOwnProperty(personId) ){
+                           output[year].periods[period].persons[personId] = {
+                               label: person,
+                               personId: personId,
+                               main: 0.0,
+                               others: 0.0,
+                               total: 0.0,
+                               details: []
+                           };
+                       }
+
+                        if( line.activity_id == this.activityId ){
+                            output[year].periods[period].persons[personId].main += duration;
+                            output[year].total  += duration;
+                            output[year].periods[period].total += duration;
+                        } else {
+                            output[year].periods[period].persons[personId].others += duration;
+                        }
+
+                       output[year].periods[period].persons[personId].total += duration;
+                       output[year].periods[period].persons[personId].details.push(line);
+                   });
+
+                   return output;
+               }
+           }
+       })
+    });
+</script>

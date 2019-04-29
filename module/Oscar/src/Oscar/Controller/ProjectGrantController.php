@@ -1316,7 +1316,7 @@ class ProjectGrantController extends AbstractOscarController
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');;
-        $syntheseActivity = $timesheetService->getActivitySyntesis($activity->getId());
+        // $syntheseActivity = $timesheetService->getActivitySyntesis($activity->getId());
 
         return [
             'generatedDocuments' => $this->getConfiguration('oscar.generated-documents.activity'),

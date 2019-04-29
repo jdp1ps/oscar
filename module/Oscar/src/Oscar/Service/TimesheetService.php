@@ -1173,6 +1173,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $configApp;
     }
 
+    public function getDatasDeclarersSynthesis( $personIds ){
+        return $this->getTimesheetRepository()->getDatasDeclarerSynthesis($personIds);
+    }
+
     public function getMonthDuration(Person $person, $year, $month)
     {
         $daysInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);

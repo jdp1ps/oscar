@@ -80,6 +80,15 @@ timesheet:
     may_terminate: false
 
     child_routes:
+        synthesis:
+            type: segment
+            options:
+                route: /synthesis
+                defaults:
+                    action: synthesisAll
+
+
+
         resolve:
             type: segment
             options:

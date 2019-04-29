@@ -491,6 +491,22 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function synthesisAllAction(){
+        $activity_id = $this->params()->fromQuery('activity_id');
+        $personsIds = [];
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->find(Activity::class, $activity_id);
+        foreach ($activity->getDeclarers() as $person) {
+            $personsIds[] = $person->getId();
+        }
+
+        return [
+            'activityId' => $activity_id,
+            'activity' => $activity,
+            'datas' => $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds)
+        ];
+    }
+
     public function syntheseActivityAction(){
 
         echo "<pre>";
