@@ -2367,6 +2367,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $debut = "";
         $num = [];
         $pfi = [];
+        $totalPeriod = 0.0;
 
         $validationsDone = [];
 
@@ -2446,22 +2447,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
             }
 
+            $declarations[$path][$group]['subgroup'][$subGroup]['total'] += $timesheet->getDuration();
             $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] += $timesheet->getDuration();
             $declarations[$path][$group]['subgroup'][$subGroup]['days']['total'] += $timesheet->getDuration();
             $declarations[$path][$group]['total'] += $timesheet->getDuration();
+            $totalPeriod += $timesheet->getDuration();
 
         }
-        /*
-                     $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
-            $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
-
-            $spreadsheet->getActiveSheet()->setCellValue('U3', $datas['debut']); //$fmt->format($activity->getDateStart()));
-            $spreadsheet->getActiveSheet()->setCellValue('U4', $datas['fin']); // $fmt->format($activity->getDateEnd()));
-            $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
-            $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
-
-
-         */
 
         $output = [
             'person' => (string)$person,
@@ -2472,6 +2464,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'person_id' => $person->getId(),
             'period' => $period,
             'totalDays' => $periodBounds['totalDays'],
+            'total' => $totalPeriod,
             'daysInfos' => $this->getDaysPeriodInfosPerson($person, $periodBounds['year'], $periodBounds['month']),
             'declarations' => $declarations,
         ];

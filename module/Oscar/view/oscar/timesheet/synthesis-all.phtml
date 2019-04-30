@@ -2,6 +2,72 @@
     <section class="container">
         <h1>Déclaration pour <strong>[<?= $activity->getAcronym() ?>]</strong> <em><?= $activity->getLabel() ?></em></h1>
 
+
+        <div class="overlay" v-if="infosPerson">
+            <div class="overlay-content" style="flex-basis: 90%; max-height: 90%">
+                <h2>
+                    Détails pour
+                    <strong>{{ infosPerson.person }}</strong>
+                    pour <em>{{ infosPerson.period || formatPeriod }}</em>
+
+                    <a href="#" @click.prevent="infosPerson = null"><i class="icon-cancel-outline"></i></a>
+                </h2>
+
+                <table class="table bordered">
+                    <thead>
+                        <tr>
+                            <th> ~ </th>
+                            <th v-for="d, i in infosPerson.days"><small>{{ d.label }}</small> {{ d.i }}</th>
+                            <th> Total </th>
+                        </tr>
+                    </thead>
+                    <tbody v-for="activity in organize(infosPerson).activities">
+                        <tr>
+                            <th :colspan="infosPerson.dayNbr + 2"><h3><i class="icon-cube"></i>{{ activity.acronym }}</h3></th>
+                        </tr>
+                        <tr v-for="workpackage in activity.workpackages">
+                            <th>{{ workpackage.code }}</th>
+                            <td v-for="d, i in infosPerson.days" class="day" :class="{ 'off': d.locked }">
+                                <strong v-if="workpackage.days[i]">
+                                    {{ workpackage.days[i] | formatDuration }}
+                               </strong>
+                               <small v-else>0.0</small>
+                            </td>
+                            <th class="total">{{ workpackage.total | formatDuration }}</th>
+                        </tr>
+                        <tr>
+                            <th>Total</th>
+                            <td :colspan="infosPerson.dayNbr">&nbsp;</td>
+                            <th>{{ activity.total | formatDuration }}</th>
+                        </tr>
+                    </tbody>
+                    <tbody>
+                    <tr>
+                        <th :colspan="infosPerson.dayNbr + 2"><h3><i class="icon-tags"></i>Hors-lot</h3></th>
+                    </tr>
+                    <tr v-for="other in organize(infosPerson).others">
+                        <th>{{ other.label }}</th>
+                        <td v-for="d, i in infosPerson.days" class="day" :class="{ 'off': d.locked }">
+                            <strong v-if="other.days[i]">
+                                {{ other.days[i] | formatDuration }}
+                            </strong>
+                            <small v-else>0.0</small>
+                        </td>
+                        <th class="total">{{ other.total | formatDuration }}</th>
+                    </tr>
+
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Total</th>
+                            <th v-for="d, i in infosPerson.days" class="day" :class="{'off': d.locked }"><small>{{ d.total | formatDuration }}</small></th>
+                            <th>{{ infosPerson.total | formatDuration }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
         <section v-for="y in packed" class="period">
             <h1 class="row">{{ y.label }} <strong class="total">{{ y.total | formatDuration }}</strong></h1>
             <section v-for="p in y.periods" class="period">
@@ -14,21 +80,13 @@
                 </small>
 
             </h2>
-
             <article v-for="l in p.persons" class="card card-xs">
                 <h4 class="row">
                 <strong class="person">
                     <i class="icon-user"></i> {{ l.label }}
+
+                    <a href="#" @click.prevent="details(l.personId, p.label)">Détails</a>
                 </strong>
-
-
-                <small class="other">
-                    +
-                    <i class="icon-tags"></i>
-                    {{ l.others | formatDuration }}
-                    ( soit au total {{ l.total | formatDuration }})
-                </small>
-
                 <strong class="main">
                     <i class="icon-cubes"></i>
                     <?= $activity->getAcronym() ?> :
@@ -79,6 +137,25 @@
     .period > article h3 .total, .period > article h3 .main, .period > article h3 .other {
         flex: 1;
     }
+
+    .day {
+        text-align: right;
+        border-right: solid thin #e0e0e0;
+    }
+
+    .table {
+        font-size: .8em;
+    }
+    .day.off {
+        background: #eee8d5;
+    }
+
+    .day.fill {
+        background: #0b97c4;
+    }
+    .day.off.fill {
+        background: #7f0027;
+    }
     .period > article h3 .person {
         flex: 3;
         margin-left: auto;
@@ -92,7 +169,10 @@
     }
 </style>
 <script>
-    require(['vue'], function(Vue){
+    require(['vue', 'vue-resource'], function(Vue, VueResource){
+
+        Vue.use(VueResource);
+
         var months = {
             '01': 'Janvier',
             '02': 'Février',
@@ -112,7 +192,7 @@
         Vue.filter('formatDuration', function(heure){
             var h = Math.floor(heure);
             var m = Math.round((heure - h) * 60);
-            return h +'h'+ (m < 10 ? '0'+m : m);
+            return h +':'+ (m < 10 ? '0'+m : m);
         });
 
         Vue.filter('formatPeriod', function(period){
@@ -137,7 +217,94 @@
                    pack: 'period',
                    lines: <?= json_encode($datas) ?>,
                    activityId: <?= $activityId ?>,
-                   filterPersonId: null
+                   filterPersonId: null,
+                   infosPerson: null
+               }
+           },
+
+           methods: {
+               details: function(personId, period){
+                    console.log(personId, period);
+                    this.$http.get('/feuille-de-temps/synthesis?person_id=' +personId +'&format=json&period=' +period).then(
+                        ok => {
+                            this.infosPerson = ok.data;
+                        }
+                    );
+                },
+               organize(personDatas){
+                   let datas = {
+                        activities: {},
+                        others: {}
+                   };
+
+                   Object.keys(personDatas.activities).forEach( activityId => {
+                       var activity = personDatas.activities[activityId];
+                       datas.activities[activityId] = {
+                           acronym: activity.acronym,
+                           id: activity.id,
+                           label: activity.label,
+                           total: activity.total,
+                           workpackages: {},
+                           days: {}
+                       };
+                   });
+
+                   Object.keys(personDatas.workpackages).forEach(wpId => {
+                       var wp = personDatas.workpackages[wpId];
+                       datas.activities[wp.activity_id].workpackages[wpId] = {
+                           code: wp.code,
+                           id: wp.id,
+                           label: wp.label,
+                           total: wp.total,
+                           days: {}
+                       };
+                   });
+
+                   Object.keys(personDatas.otherWP).forEach(otherKey => {
+                       var other = personDatas.otherWP[otherKey];
+                       datas.others[otherKey] = {
+                           label: other.label,
+                           code: other.code,
+                           total: other.total,
+                           days: {}
+                       };
+                   });
+
+                   Object.keys(personDatas.days).forEach(date => {
+                       console.log("DATE", date);
+                       var day = personDatas.days[date];
+
+                       if( day.declarations ){
+                           day.declarations.forEach( declaration => {
+                              var wpId = declaration.wp_id;
+                              var activityId = declaration.activity_id;
+                              var duration = declaration.duration;
+
+                               if( !datas.activities[activityId].days.hasOwnProperty(date) ){
+                                   datas.activities[activityId].days[date] = 0.0;
+                               }
+                               datas.activities[activityId].days[date] += duration;
+
+                               if( !datas.activities[activityId].workpackages[wpId].days.hasOwnProperty(date) ){
+                                   datas.activities[activityId].workpackages[wpId].days[date] = 0.0;
+                               }
+                               datas.activities[activityId].workpackages[wpId].days[date] += duration;
+                           });
+                       }
+                       if( day.othersWP ){
+                          day.othersWP.forEach( otherInfos => {
+                               var otherKey = otherInfos.code;
+                               var duration = otherInfos.duration;
+                               if( !datas.others[otherKey].days.hasOwnProperty(date) ){
+                                   datas.others[otherKey].days[date] = 0.0;
+                               }
+                               datas.others[otherKey].days[date] += duration;
+                           })
+
+                       }
+                   });
+
+                   return datas;
                }
            },
 

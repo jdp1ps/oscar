@@ -492,20 +492,67 @@ class TimesheetController extends AbstractOscarController
     }
 
     public function synthesisAllAction(){
-        $activity_id = $this->params()->fromQuery('activity_id');
-        $format = $this->params()->fromQuery('format', '');
-        $period             = $this->params()->fromQuery('period', null);
 
-        $personsIds = [];
-        /** @var Activity $activity */
-        $activity = $this->getEntityManager()->find(Activity::class, $activity_id);
-        foreach ($activity->getDeclarers() as $person) {
-            $personsIds[] = $person->getId();
+        // Données reçues
+        $activity_id    = $this->params()->fromQuery('activity_id', null);
+        $person_id      = $this->params()->fromQuery('person_id', null);
+        $format         = $this->params()->fromQuery('format', '');
+        $period         = $this->params()->fromQuery('period', null);
+        $error          = null;
+
+        // Synthèse pour une activités
+        if( $activity_id != null ){
+
+            $personsIds = [];
+
+            /** @var Activity $activity */
+            $activity = $this->getEntityManager()->find(Activity::class, $activity_id);
+
+            if( !$activity ){
+                return $this->getResponseInternalError(sprintf(_("Activité introuvable")));
+            }
+
+            foreach ($activity->getDeclarers() as $person) {
+                $personsIds[] = $person->getId();
+            }
+
+            if( count($personsIds) == 0 ){
+                return $this->getResponseInternalError(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
+            }
+
+            $this->getLogger()->debug("Récupération de la synthèse pour $activity");
+
+            $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds);
+            $horslots = $this->getTimesheetService()->getOthersWP();
+        }
+        // Synthèse pour la personne
+        elseif ( $person_id != null ){
+            $person = $this->getPersonService()->getPerson($person_id);
+            if( !$person ){
+                return $this->getResponseInternalError(_("La personne est introuvable"));
+            }
+            if( !$period ){
+                return $this->getResponseBadRequest(_("Vous devez spécifier la période"));
+            }
+            $split = explode('-', $period);
+            $periodOk = DateTimeUtils::getCodePeriod($split[0], $split[1]);
+            $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
         }
 
-        $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds);
-        $horslots = $this->getTimesheetService()->getOthersWP();
+        else {
+            return $this->getResponseBadRequest("Paramètres de l'API insuffisants");
+        }
+
+
+
         $modele = $this->getConfiguration('oscar.paths.timesheet_synthesis_modele');
+
+        $output = [
+            'activityId' => $activity_id,
+            'activity' => $activity,
+            'horslot' => $horslots,
+            'datas' => $datas
+        ];
 
         if( $format == "excel" ){
 
@@ -554,6 +601,10 @@ class TimesheetController extends AbstractOscarController
             die($contentfile);
 
 
+        }
+
+        if( $format == "json" ){
+            return $this->jsonOutput($datas);
         }
 
         return [

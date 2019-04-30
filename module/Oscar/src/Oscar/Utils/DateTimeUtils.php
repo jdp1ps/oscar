@@ -99,6 +99,7 @@ class DateTimeUtils {
     public static function getCodePeriod($year, $month){
         $year = (int)$year;
         $month = (int)$month;
+        if( $month < 1 || $month > 12 ) throw new \Exception(_("Mois invalide"));
         return sprintf('%s-%s', $year,  ($month < 10 ? '0' . $month : $month));
     }
 
