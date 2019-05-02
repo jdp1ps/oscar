@@ -491,6 +491,18 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    /**
+     * Centralisation de la consultation des feuilles de temps d'une personne / activité
+     * Selon les critères envoyés.
+     *
+     * @return array|JsonModel
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     * @throws \PHPExcel_Exception
+     * @throws \PHPExcel_Reader_Exception
+     * @throws \PHPExcel_Writer_Exception
+     */
     public function synthesisAllAction(){
 
         // Données reçues
@@ -500,6 +512,7 @@ class TimesheetController extends AbstractOscarController
         $period         = $this->params()->fromQuery('period', null);
         $error          = null;
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Synthèse pour une activités
         if( $activity_id != null ){
 
@@ -512,6 +525,10 @@ class TimesheetController extends AbstractOscarController
                 return $this->getResponseInternalError(sprintf(_("Activité introuvable")));
             }
 
+            // Contrôle des droits d'accès
+            $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+
+            // Obtention des IDS des déclarants
             foreach ($activity->getDeclarers() as $person) {
                 $personsIds[] = $person->getId();
             }
@@ -519,21 +536,32 @@ class TimesheetController extends AbstractOscarController
             if( count($personsIds) == 0 ){
                 return $this->getResponseInternalError(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
             }
-
-            $this->getLogger()->debug("Récupération de la synthèse pour $activity");
-
             $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds);
             $horslots = $this->getTimesheetService()->getOthersWP();
         }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Synthèse pour la personne
         elseif ( $person_id != null ){
+
             $person = $this->getPersonService()->getPerson($person_id);
+
             if( !$person ){
                 return $this->getResponseInternalError(_("La personne est introuvable"));
             }
+
+            // Contrôle des droits d'accès
+            $global = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW);
+            if( !$global ){
+                if( !in_array($this->getCurrentPerson(), $this->getPersonService()->getManagers($person)) ){
+                    return $this->getResponseUnauthorized("Vous n'avez pas les droits pour voir la feuille de temps de $person");
+                }
+            }
+
             if( !$period ){
                 return $this->getResponseBadRequest(_("Vous devez spécifier la période"));
             }
+
             $split = explode('-', $period);
             $periodOk = DateTimeUtils::getCodePeriod($split[0], $split[1]);
             $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
@@ -617,7 +645,7 @@ class TimesheetController extends AbstractOscarController
 
     public function syntheseActivityAction(){
 
-        echo "<pre>";
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
 
         $currentActivityId = $this->params()->fromRoute('id');
         $month = $this->params()->fromQuery('month', date('m'));

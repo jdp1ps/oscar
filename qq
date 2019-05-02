@@ -1,0 +1,87 @@
+[1mdiff --git a/module/Oscar/src/Oscar/Controller/TimesheetController.php b/module/Oscar/src/Oscar/Controller/TimesheetController.php[m
+[1mindex e5107a28..4c841d3e 100644[m
+[1m--- a/module/Oscar/src/Oscar/Controller/TimesheetController.php[m
+[1m+++ b/module/Oscar/src/Oscar/Controller/TimesheetController.php[m
+[36m@@ -491,6 +491,18 @@[m [mclass TimesheetController extends AbstractOscarController[m
+         ];[m
+     }[m
+ [m
+[32m+[m[32m    /**[m
+[32m+[m[32m     * Centralisation de la consultation des feuilles de temps d'une personne / activité[m
+[32m+[m[32m     * Selon les critères envoyés.[m
+[32m+[m[32m     *[m
+[32m+[m[32m     * @return array|JsonModel[m
+[32m+[m[32m     * @throws \Doctrine\ORM\ORMException[m
+[32m+[m[32m     * @throws \Doctrine\ORM\OptimisticLockException[m
+[32m+[m[32m     * @throws \Doctrine\ORM\TransactionRequiredException[m
+[32m+[m[32m     * @throws \PHPExcel_Exception[m
+[32m+[m[32m     * @throws \PHPExcel_Reader_Exception[m
+[32m+[m[32m     * @throws \PHPExcel_Writer_Exception[m
+[32m+[m[32m     */[m
+     public function synthesisAllAction(){[m
+ [m
+         // Données reçues[m
+[36m@@ -500,6 +512,7 @@[m [mclass TimesheetController extends AbstractOscarController[m
+         $period         = $this->params()->fromQuery('period', null);[m
+         $error          = null;[m
+ [m
+[32m+[m[32m        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////[m
+         // Synthèse pour une activités[m
+         if( $activity_id != null ){[m
+ [m
+[36m@@ -512,6 +525,10 @@[m [mclass TimesheetController extends AbstractOscarController[m
+                 return $this->getResponseInternalError(sprintf(_("Activité introuvable")));[m
+             }[m
+ [m
+[32m+[m[32m            // Contrôle des droits d'accès[m
+[32m+[m[32m            $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);[m
+[32m+[m
+[32m+[m[32m            // Obtention des IDS des déclarants[m
+             foreach ($activity->getDeclarers() as $person) {[m
+                 $personsIds[] = $person->getId();[m
+             }[m
+[36m@@ -519,21 +536,32 @@[m [mclass TimesheetController extends AbstractOscarController[m
+             if( count($personsIds) == 0 ){[m
+                 return $this->getResponseInternalError(sprintf(_("Il n'y a pas de déclarants dans cette activité")));[m
+             }[m
+[31m-[m
+[31m-            $this->getLogger()->debug("Récupération de la synthèse pour $activity");[m
+[31m-[m
+             $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds);[m
+             $horslots = $this->getTimesheetService()->getOthersWP();[m
+         }[m
+[32m+[m
+[32m+[m[32m        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////[m
+         // Synthèse pour la personne[m
+         elseif ( $person_id != null ){[m
+[32m+[m
+             $person = $this->getPersonService()->getPerson($person_id);[m
+[32m+[m
+             if( !$person ){[m
+                 return $this->getResponseInternalError(_("La personne est introuvable"));[m
+             }[m
+[32m+[m
+[32m+[m[32m            // Contrôle des droits d'accès[m
+[32m+[m[32m            $global = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW);[m
+[32m+[m[32m            if( !$global ){[m
+[32m+[m[32m                if( !in_array($this->getCurrentPerson(), $this->getPersonService()->getManagers($person)) ){[m
+[32m+[m[32m                    return $this->getResponseUnauthorized("Vous n'avez pas les droits pour voir la feuille de temps de $person");[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m
+             if( !$period ){[m
+                 return $this->getResponseBadRequest(_("Vous devez spécifier la période"));[m
+             }[m
+[32m+[m
+             $split = explode('-', $period);[m
+             $periodOk = DateTimeUtils::getCodePeriod($split[0], $split[1]);[m
+             $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);[m
+[36m@@ -617,7 +645,7 @@[m [mclass TimesheetController extends AbstractOscarController[m
+ [m
+     public function syntheseActivityAction(){[m
+ [m
+[31m-        echo "<pre>";[m
+[32m+[m[32m        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);[m
+ [m
+         $currentActivityId = $this->params()->fromRoute('id');[m
+         $month = $this->params()->fromQuery('month', date('m'));[m
