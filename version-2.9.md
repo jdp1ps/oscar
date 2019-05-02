@@ -7,6 +7,8 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 ## Hotfix 
 
+ - 2 mai 2019 : La modale d'avertissement dans le formulaire de modification des organisations/personnes n'est plus affichée pour les organisations/personnes ayant été synchonisées initalement par un connecteur qui n'est pas référencé dans la configuration. (Typiquement, lors de l'utilisation d'un import initial).
+
  - 26 Mars 2019 : Le Fix de l'anomalie #20765 impose de relancer manuellement l'indexation, cela règle le problème de recherche avec *wildcard* sur les numéros Oscar
 
 

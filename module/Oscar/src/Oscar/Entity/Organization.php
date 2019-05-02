@@ -60,9 +60,12 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * Return TRUE si l'objet a un connector.
+     * Si $connecteur est renseigné, localise le teste uniquement sur ce connecteur
      */
-    public function isConnected(){
+    public function isConnected( $connectors = null){
+
         foreach ($this->getConnectors() as $connector=>$value ){
+            if( $connectors != null && !in_array($connector, $connectors) ) continue;
             if( $value ){
                 return true;
             }

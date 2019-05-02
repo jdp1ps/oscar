@@ -736,7 +736,6 @@ class OrganizationController extends AbstractOscarController
         $id = $this->params()->fromRoute('id', 0);
         $em = $this->getEntityManager();
 
-
         $result = $em->createQueryBuilder()
             ->select('p')
             ->from(Organization::class, 'p')
