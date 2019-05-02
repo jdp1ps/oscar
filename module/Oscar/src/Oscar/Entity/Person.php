@@ -208,8 +208,9 @@ class Person implements ResourceInterface
     /**
      * Return TRUE si l'objet a un connector.
      */
-    public function isConnected(){
+    public function isConnected( $connectors = null){
         foreach ($this->getConnectors() as $connector=>$value ){
+            if( $connectors != null && !in_array($connector, $connectors) ) continue;
             if( $value ){
                 return true;
             }

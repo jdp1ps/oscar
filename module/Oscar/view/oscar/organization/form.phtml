@@ -8,7 +8,7 @@
 
 
 
-    <?php if($organization && $organization->isConnected()): ?>
+    <?php if($organization && $organization->isConnected($connectors)): ?>
         <div class="modal fade" tabindex="-1" role="dialog" id="infos">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
