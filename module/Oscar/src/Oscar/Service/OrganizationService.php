@@ -17,6 +17,7 @@ use Oscar\Entity\OrganizationType;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
+use Oscar\Strategy\Search\OrganizationSearchStrategy;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\Structure;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -39,6 +40,54 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
 
     private $cacheCountries = null;
     private $cacheConnectors = null;
+
+    /**
+     * @return OrganizationSearchStrategy
+     */
+    public function getSearchEngineStrategy()
+    {
+        static $searchStrategy;
+        if( $searchStrategy === null ){
+            $opt = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('strategy.organization.search_engine');
+            $class = new \ReflectionClass($opt['class']);
+            $searchStrategy = $class->newInstanceArgs($opt['params']);
+        }
+        return $searchStrategy;
+    }
+
+    public function search($expression)
+    {
+        $ids = $this->getSearchEngineStrategy()->search($expression);
+        if( count($ids) ){
+            $query = $this->getEntityManager()->getRepository(Organization::class)->createQueryBuilder('o');
+            $query->where('o.id IN(:ids)')->setParameter('ids', $ids);
+            return $query->getQuery()->getResult();
+        } else {
+            return [];
+        }
+    }
+
+
+    public function searchDelete( $id )
+    {
+        $this->getSearchEngineStrategy()->remove($id);
+    }
+
+    public function searchUpdate( Person $person )
+    {
+        $this->getSearchEngineStrategy()->update($person);
+    }
+
+    public function searchIndex_reset()
+    {
+        $this->getSearchEngineStrategy()->resetIndex();
+    }
+
+    public function searchIndexRebuild(){
+        $this->searchIndex_reset();
+        $persons = $this->getEntityManager()->getRepository(Organization::class)->findAll();
+        return $this->getSearchEngineStrategy()->rebuildIndex($persons);
+    }
 
     /**
      * Retourne la liste des Roles disponible pour une organisation dans une activité.
@@ -188,6 +237,8 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     public function getOrganizationsSearchPaged($search, $page, $filter=[])
     {
         $qb = $this->getBaseQuery();
+        $ids = [];
+
         if ($search) {
 
             // Recherche sur le connector
@@ -204,22 +255,29 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
             }
             else {
 
-                $qb
-                    ->orWhere('LOWER(o.shortName) LIKE :search')
-                    ->orWhere('LOWER(o.fullName) LIKE :search')
-                    ->orWhere('LOWER(o.city) LIKE :search')
-                    ->orWhere('o.zipCode = :searchStrict')
-                    ->orWhere('LOWER(o.code) LIKE :search');
+                if( $this->getSearchEngineStrategy() ){
+                    $ids = $this->getSearchEngineStrategy()->search($search);
+                    $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
+                }
+                else {
+                    $qb
+                        ->orWhere('LOWER(o.shortName) LIKE :search')
+                        ->orWhere('LOWER(o.fullName) LIKE :search')
+                        ->orWhere('LOWER(o.city) LIKE :search')
+                        ->orWhere('o.zipCode = :searchStrict')
+                        ->orWhere('LOWER(o.code) LIKE :search');
 
-                if (strlen($search) == 14)
-                    $qb->orWhere('o.siret = :searchStrict');
+                    if (strlen($search) == 14)
+                        $qb->orWhere('o.siret = :searchStrict');
 
 
-                $qb->setParameters([
-                        'search' => '%' . strtolower($search) . '%',
-                        'searchStrict' => strtolower($search),
-                    ]
-                );
+                    $qb->setParameters([
+                            'search' => '%' . strtolower($search) . '%',
+                            'searchStrict' => strtolower($search),
+                        ]
+                    );
+
+                }
             }
 
         }

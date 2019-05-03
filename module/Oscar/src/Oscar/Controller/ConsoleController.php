@@ -1795,6 +1795,21 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
+    public function searchOrganizationAction()
+    {
+        $what = $this->getRequest()->getParam('exp');
+
+        if (!$what) {
+            die("Vous ne cherchez rien...\n");
+        } else {
+            echo sprintf("Recherche '%s' dans les organisations...\n", $what);
+            $organizations = $this->getOrganizationService()->search($what);
+            foreach ($organizations as $organization) {
+                echo sprintf("[%s] %s'\n", $organization->getId(), (string)$organization);
+            }
+        }
+    }
+
     public function searchActivityAction()
     {
         $what = $this->getRequest()->getParam('exp');
@@ -1882,6 +1897,20 @@ class ConsoleController extends AbstractOscarController
                 $e->getTraceAsString()));
         }
     }
+
+    public function buildSearchOrganizationAction()
+    {
+        try {
+            $repport = $this->getOrganizationService()->searchIndexRebuild();
+            $output = new ConnectorRepportToPlainText();
+            $output->format($repport);
+
+        } catch (\Exception $e) {
+            die(sprintf("ERROR '%s' : \n %s\nDONE\n", $e->getMessage(),
+                $e->getTraceAsString()));
+        }
+    }
+
 
     /** #####################################################################
      *

@@ -670,7 +670,7 @@ return array(
                     ),
                 ),
 
-                'oscar_search' => array(
+                'oscar_activity_search' => array(
                     'options' => array(
                         'route' => 'oscar activity:search <exp> <obj>',
                         'defaults' => array(
@@ -700,12 +700,32 @@ return array(
                     ),
                 ),
 
+                'oscar_searchporganization_rebuild' => array(
+                    'options' => array(
+                        'route' => 'oscar organizations:search:build',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'buildSearchOrganization',
+                        ),
+                    ),
+                ),
+
                 'oscar_searchperson_search' => array(
                     'options' => array(
                         'route' => 'oscar person:search <exp>',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'searchPerson',
+                        ),
+                    ),
+                ),
+
+                'oscar_organization_search' => array(
+                    'options' => array(
+                        'route' => 'oscar organizations:search <exp>',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'searchOrganization',
                         ),
                     ),
                 ),
