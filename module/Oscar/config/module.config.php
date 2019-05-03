@@ -692,7 +692,7 @@ return array(
 
                 'oscar_searchperson_rebuild' => array(
                     'options' => array(
-                        'route' => 'oscar person:search:build',
+                        'route' => 'oscar persons:search:build',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'buildSearchPerson',
