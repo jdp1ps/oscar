@@ -30,7 +30,7 @@ class AdministrativeDocument extends AbstractVersionnedDocument
 
     /**
      * @var
-     * @ORM\ManyToOne(targetEntity="AdministrativeDocumentSection")
+     * @ORM\ManyToOne(targetEntity="AdministrativeDocumentSection", inversedBy="documents")
      */
     private $section = null;
 

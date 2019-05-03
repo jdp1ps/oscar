@@ -16,6 +16,7 @@ use Oscar\Entity\Person;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\ProjectRepository;
 use Oscar\Exception\OscarException;
+use Oscar\OscarVersion;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityTypeService;
 use Oscar\Service\ConfigurationParser;
@@ -45,6 +46,41 @@ use Zend\View\Model\JsonModel;
  */
 class AbstractOscarController extends AbstractActionController
 {
+
+    public function oscarRest( $default, $get, $post=null)
+    {
+        $format = $this->params()->fromQuery('format', 'html');
+
+        if ($this->isAjax()) {
+            $format = 'json';
+        }
+
+        if ($format == 'html') {
+            return $default();
+        } else {
+            $method = $this->getHttpXMethod();
+            switch( $method ){
+                case "GET" :
+                    $datas = $get();
+                    break;
+
+                case "POST" :
+                    if( !is_callable($post) ) {
+                        return $this->getResponseNotImplemented();
+                    }
+                    $datas = $post();
+                    break;
+
+                default:
+                    return $this->getResponseBadRequest("Mauvaise méthod $method");
+            }
+
+            $datas['version'] = OscarVersion::getBuild();
+            return $this->jsonOutput($datas);
+        }
+    }
+
+
     /**
      * @return OscarConfigurationService
      */

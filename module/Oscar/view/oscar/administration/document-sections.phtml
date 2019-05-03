@@ -1,0 +1,16 @@
+<div class="container">
+    <h1>Section des documents publiques</h1>
+    <div id="app"></div>
+    <script>
+        require(['vue', 'vue-resource', 'DocumentSectionAdmin'], function(Vue, VueResource, DocumentSectionAdmin) {
+            console.log('OK');
+            Vue.use(VueResource);
+            new Vue({
+                el: "#app",
+                render: function(h){
+                    return h(DocumentSectionAdmin.default);
+                }
+            })
+        })
+    </script>
+</div>

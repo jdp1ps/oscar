@@ -912,6 +912,7 @@ administrativedocument:
             controller: AdministrativeDocument
             action: index
     may_terminate: true
+
     child_routes:
         upload:
             type: segment
@@ -1411,6 +1412,14 @@ administration:
 
 
     child_routes:
+        documents-sections:
+            type: segment
+            may_terminate: true
+            options:
+                route: /documents-sections
+                defaults:
+                    action: documentSections
+
         accueil:
             type: segment
             may_terminate: true

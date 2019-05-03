@@ -86,6 +86,7 @@ requirejs.config({
         'ActivityPersons': 'oscar/dist/ActivityPersons',
         'ActivityGant': 'oscar/dist/ActivityGant',
         'Keyvalue': 'oscar/dist/Keyvalue',
+        'DocumentSectionAdmin': 'oscar/dist/DocumentSectionAdmin'
     },
     shim: {
         "bootstrap": {

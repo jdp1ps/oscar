@@ -17,6 +17,9 @@ class AdministrativeDocumentController extends AbstractOscarController
 {
     private $versionnedDocumentService;
 
+
+
+
     /**
      * Retourne l'emplacement où sont stoqués les documents depuis le fichier
      * de configuration local.php

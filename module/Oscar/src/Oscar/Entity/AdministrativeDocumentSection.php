@@ -8,6 +8,7 @@
 
 namespace Oscar\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 
@@ -23,6 +24,15 @@ class AdministrativeDocumentSection
      */
     private $id;
 
+    /**
+     * AdministrativeDocumentSection constructor.
+     * @param $id
+     */
+    public function __construct()
+    {
+        $this->documents = new ArrayCollection();
+    }
+
     public function getId()
     {
         return $this->id;
@@ -36,6 +46,13 @@ class AdministrativeDocumentSection
      */
     private $label;
 
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="AdministrativeDocument", mappedBy="section")
+     */
+    protected $documents;
+
     /**
      * Description.
      *
@@ -43,6 +60,25 @@ class AdministrativeDocumentSection
      * @ORM\Column(type="text", nullable=true)
      */
     private $description;
+
+
+
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getDocuments(): ArrayCollection
+    {
+        return $this->documents;
+    }
+
+    /**
+     * @param ArrayCollection $documents
+     */
+    public function setDocuments(ArrayCollection $documents): void
+    {
+        $this->documents = $documents;
+    }
 
     /**
      * @return string

@@ -11,6 +11,7 @@ namespace Oscar\Controller;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Monolog\Formatter\JsonFormatter;
+use Oscar\Entity\AdministrativeDocumentSection;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Discipline;
 use Oscar\Entity\LogActivity;
@@ -42,11 +43,46 @@ class AdministrationController extends AbstractOscarController
         return [];
     }
 
+    public function documentSectionsAction()
+    {
+        return $this->oscarRest(
+            function(){
+                return [
+
+                ];
+            },
+            function(){
+
+                return [
+                    'sections' => $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->createQueryBuilder('s')->getQuery()->getArrayResult()
+                ];
+            },
+            function(){
+                $id     = $this->params()->fromPost('id', null);
+                if( $id ){
+                    $section = $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->find($id);
+                    if( !$section ){
+                        throw new \Exception("Section introuvable");
+                    }
+                } else {
+                    $section = new AdministrativeDocumentSection();
+                    $this->getEntityManager()->persist($section);
+                }
+
+                $label  = $this->params()->fromPost('label');
+                $section->setLabel($label);
+                try {
+                    $this->getEntityManager()->flush($section);
+                    return ["response" => "Enregistrement terminé"];
+                } catch (\Exception $e ){
+                    throw new \Exception($e->getMessage());
+                }
+            }
+        );
+    }
+
     public function parametersAction()
     {
-
-
-
         if( $this->getHttpXMethod() == "POST" ){
             $option = $this->params()->fromPost('parameter_name');
             switch ($option) {
