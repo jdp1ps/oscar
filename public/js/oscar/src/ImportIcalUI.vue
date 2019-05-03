@@ -40,7 +40,7 @@
                 </h3>
                 <p>Selectionnez une correspondance pour ce type de créneau : </p>
                 <section class="list">
-                    <article v-for="c in correspondances" class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance.toLowerCase()] == c }" @click="handlerChangeCorrespondance(editCorrespondance, c)">
+                    <article v-for="c in correspondances" class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance] == c }" @click="handlerChangeCorrespondance(editCorrespondance, c)">
                         <h3>
                             <i class="icon-cube" v-if="c.wp_code"></i>
                             <i class="icon-tag" v-else></i>
@@ -48,7 +48,7 @@
                             <small>{{ c.description }}</small>
                         </h3>
                     </article>
-                    <article class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance.toLowerCase()] == null }" @click="handlerChangeCorrespondance(editCorrespondance, null)">
+                    <article class="correspondance-choose" :class="{ 'selected': labelsCorrespondance[editCorrespondance] == null }" @click="handlerChangeCorrespondance(editCorrespondance, null)">
                         <em><i class="icon-cancel-circled"></i></em>
                         <h3>
                             <strong>Ignorer ces créneaux</strong>
@@ -113,10 +113,10 @@
                             <i class="icon-tag"></i> <strong>{{ label }}</strong>
                         </div>
 
-                        <span v-if="labelsCorrespondance[label.toLowerCase()] && labelsCorrespondance[label.toLowerCase()] != null" class="cartouche card-info">
-                        <i class="icon-link-outline"></i>
-                        {{ labelsCorrespondance[label.toLowerCase()].label }}
-                    </span>
+                        <span v-if="labelsCorrespondance[label] && (labelsCorrespondance[label] != null && labelsCorrespondance[label] != undefined)" class="cartouche card-info">
+                            <i class="icon-link-outline"></i>
+                            {{ labelsCorrespondance[label].label }}
+                        </span>
 
                         <nav>
                             <a href="#" class="text-danger" @click.prevent="handlerRemoveLabel(label)" title="Retirer les créneaux"><i class="icon-trash"></i></a>
@@ -309,6 +309,7 @@
                 });
                 return datas;
             },
+
             labels(){
                 let labels = [];
                 if( this.timesheets ){
@@ -430,7 +431,9 @@
             },
 
             handlerChangeCorrespondance(editCorrespondance, dest){
+                console.log("Modification de la correspondance", editCorrespondance, " > ", dest);
                 let newTimesheets = [];
+
                 this.timesheets.forEach(t => {
                     if( t.label == editCorrespondance ){
                         console.log("Traitement", dest);
@@ -449,11 +452,18 @@
                         }
                     }
                     newTimesheets.push(t);
-                })
-                this.labelsCorrespondance[editCorrespondance] = dest;
-                if( window.localStorage ){
-                    window.localStorage.setItem('labelsCorrespondance', JSON.stringify(this.labelsCorrespondance));
+                });
+
+                if( dest == null ){
+                    this.labelsCorrespondance [editCorrespondance] = null;
+                } else {
+                    this.labelsCorrespondance [editCorrespondance] = dest;
                 }
+
+                if( window.localStorage ){
+                    window.localStorage.setItem('labelsCorrespondance', JSON.stringify(this.labelsCorrespondance ));
+                }
+
                 this.timesheets = newTimesheets;
                 this.editCorrespondance = null;
             },
@@ -481,17 +491,9 @@
             },
 
             handlerRemoveLabel( label ){
-
+                console.log("Suppression de la correspondance pour " , label);
                 this.handlerChangeCorrespondance(label, null);
-
-                let newTimesheets = [];
-                this.timesheets.forEach(timesheet => {
-                    if( timesheet.label != label ){
-                        newTimesheets.push(timesheet);
-                    }
-                })
-                this.timesheets = newTimesheets;
-            },
+                },
 
             handlerFileSelected(e) {
                 var fr = new FileReader();
@@ -725,28 +727,29 @@
 
             findCorrespondance( text ){
 
-                let tofind = text.toLowerCase();
+                let tofind = text;
 
                 if( !this.labelsCorrespondance.hasOwnProperty(tofind) ){
                     this.labelsCorrespondance[tofind] = null;
 
                     let match = null;
+                    let toFindLC = tofind.toLowerCase();
 
                     for( var i=0; i<this.correspondances.length; i++ ){
 
                         let wps = this.correspondances[i];
 
 
-                        if( wps.code && (tofind.indexOf(wps.code.toLowerCase()) > -1 || tofind.indexOf(wps.label.toLowerCase()) > -1) ){
+                        if( wps.code && (toFindLC.indexOf(wps.code.toLowerCase()) > -1 || toFindLC.indexOf(wps.label.toLowerCase()) > -1) ){
                             match = wps;
                             this.labelsCorrespondance[tofind] = match;
                             return this.labelsCorrespondance[tofind];
                         }
 
-                        if( wps.acronym && tofind.indexOf(wps.acronym.toLowerCase()) > -1 ){
+                        if( wps.acronym && toFindLC.indexOf(wps.acronym.toLowerCase()) > -1 ){
                             match = wps;
 
-                            if( tofind.indexOf(wps.wp_code.toLowerCase()) > -1 ){
+                            if( toFindLC.indexOf(wps.wp_code.toLowerCase()) > -1 ){
                                 this.labelsCorrespondance[tofind] = match;
                                 return this.labelsCorrespondance[tofind];
                             }
