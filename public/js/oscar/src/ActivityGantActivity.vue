@@ -5,6 +5,7 @@
             <abbr title="">{{ a.acronym }}</abbr>
             <strong><i class="icon-cube"></i> {{ a.label }}</strong>
         </span>
+
         <div v-if="open">
             <small>
                 du {{ a.dateStart }} au {{ a.dateEnd }} <br>
@@ -13,6 +14,11 @@
             <pre>
                 {{ a }}
             </pre>
+        </div>
+
+        <div v-for="p in a.persons">
+            <i class="icon-user"></i>
+            {{ p.displayName }}
         </div>
     </div>
 </template>

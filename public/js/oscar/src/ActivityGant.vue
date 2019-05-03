@@ -3,7 +3,7 @@
         <h1>Vue gant</h1>
         <div id="vue" style="position: relative; padding: 1em; padding-top: 5em">
 
-            <activity v-for="a in activitiesDisplay" :activity="a" />
+            <activity v-for="a in activitiesDisplay" :activity="a" :key="a.id"/>
             <!--
             <div  class="activity" style="" :style="{ 'left': a.left +'px', 'width': a.width+'px'}">
                 <abbr title="">{{ a.acronym }}</abbr>
@@ -25,6 +25,7 @@
                 </article>
             </div>
         </div>
+
         <pre>{{ dateBounds }}</pre>
         <pre>{{ $data }}</pre>
     </div>
@@ -122,20 +123,18 @@
 
                         let persons = {};
 
-                        Object.keys(activity.persons).forEach( role => {
-                            activity.persons[role].forEach( person => {
-                                let personid = person.id;
-                                if( !persons.hasOwnProperty(personid) ){
-                                    persons[personid] = person;
-                                    persons[personid].roles = [];
-                                }
-                                persons[personid].roles.push(role);
+                        if( activity.persons ){
+                            Object.keys(activity.persons).forEach( role => {
+                                activity.persons[role].forEach( person => {
+                                    let personid = person.id;
+                                    if( !persons.hasOwnProperty(personid) ){
+                                        persons[personid] = person;
+                                        persons[personid].roles = [];
+                                    }
+                                    persons[personid].roles.push(role);
+                                });
                             });
-
-
-                        });
-
-
+                        }
 
                         activities.push({
                             left: left,
