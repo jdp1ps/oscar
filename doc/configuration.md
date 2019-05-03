@@ -137,6 +137,99 @@ return array(
 > la clef `params` prend bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
 
 
+## Recherche des personnes
+
+Depuis *Oscar 2.10 (Creed)*, la recherche des personnes peut utiliser le système de recherche basé sur **ElasticSearch** (Fortement recommandé) afin d'obtenir des résultats plus pertinents.
+
+Vous devez configurer la stratégie de recherche dans le fichier de configuration `config/autoload/local.php` : 
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+  // ...
+
+  // Système de recherche
+  'strategy' => [
+    // ...
+    'person' => [
+      'search_engine' => [
+        // Elasticsearch
+        'class' => \Oscar\Strategy\Search\PersonElasticSearch::class,
+        'params' => [['localhost:9200']]
+      ]
+    ]
+  ]
+);
+```
+
+> Une fois activée, pensez à lancer la commande de reconstruction d'index de recherche : 
+
+```bash
+# Reconstruction de l'index de recherche
+php pubic/index.php oscar persons:search:build
+```
+
+
+### Elastic Search
+
+Le deuxième système s'appuie sur le moteur de recherche **Elastic Search**. Ce système implique de disposer d'une instance d'**Elastic Search** accessible.
+
+[Installation d'ElasticSearch sous Debian](./install-elasticsearch.md)
+
+On indique ensuite à Oscar l'adresse de l'instance **Elastic Search** :
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // (...)
+
+    // Oscar
+    'oscar' => [
+        'strategy' => [
+            'activity' => [
+                'search_engine' => [
+                    'class' => \Oscar\Strategy\Search\ActivityElasticSearch::class,
+                    'params' => [['127.0.0.1:9200']]
+                ]
+            ]
+        ],
+    ],
+);
+```
+
+> la clef `params` prend bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
+
+
+### Zend Lucene
+
+> Depuis la version 2.5.x, l'utilisation de Zend Lucene est dépréciée au profit de Elasticsearch.
+
+Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installation complémentaire.
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // (...)
+
+    // Oscar
+    'oscar' => [
+        // (...)
+        'strategy' => [
+            'activity' => [
+                'search_engine' => [
+                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
+                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
+                ]
+            ]
+        ],
+    ],
+);
+```
+
+
 ### Zend Lucene
 
 > Depuis la version 2.5.x, l'utilisation de Zend Lucene est dépréciée au profit de Elasticsearch.
