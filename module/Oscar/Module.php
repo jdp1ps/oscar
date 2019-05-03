@@ -311,9 +311,11 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             '# PERSONNES',
             'oscar persons:sync <connectorkey>' => 'Lance la synchronisation des personnes depuis les différents connecteurs.',
             'oscar persons:search:connector <connector> <value>' => 'Recherche les personnes ayant pour le connecteur <connector> la valeur <value>',
+            'oscar persons:search:build ' => 'Reconstruction de l\'index de recherche (ElasticSearch)' ,
+            'oscar person:search <expression>' => 'Lance une recherche sur les personnes' ,
 
             '# ORGANISATIONS',
-            'oscar organizations:sync <connectorkey>' => 'Lance la synchronisation des organization depuis les différents connecteurs.',
+            'oscar organizations:sync <connectorkey>' => 'Lance la synchronisation des organizations depuis les différents connecteurs.',
 
             '# NOTIFICATIONS',
             'oscar notifications:generate <tagid>' => 'Génère les notifications pour l\'activité, la valeur \'all\' permet de générer les notifications pour toutes les activités',
