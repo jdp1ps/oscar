@@ -47,7 +47,7 @@ use Zend\View\Model\JsonModel;
 class AbstractOscarController extends AbstractActionController
 {
 
-    public function oscarRest( $default, $get, $post=null)
+    public function oscarRest( $default, $get, $post=null, $delete=null)
     {
         $format = $this->params()->fromQuery('format', 'html');
 
@@ -59,6 +59,14 @@ class AbstractOscarController extends AbstractActionController
             return $default();
         } else {
             $method = $this->getHttpXMethod();
+
+
+            $fakeAction = $this->params()->fromPost('action', null);
+
+            if( $fakeAction == 'delete' ){
+                $method = 'DELETE';
+            }
+
             switch( $method ){
                 case "GET" :
                     $datas = $get();
@@ -69,6 +77,13 @@ class AbstractOscarController extends AbstractActionController
                         return $this->getResponseNotImplemented();
                     }
                     $datas = $post();
+                    break;
+
+                case "DELETE" :
+                    if( !is_callable($delete) ) {
+                        return $this->getResponseNotImplemented();
+                    }
+                    $datas = $delete();
                     break;
 
                 default:

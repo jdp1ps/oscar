@@ -101,6 +101,27 @@
   }
 }
 
+.widget {
+  .widget-loading-message {
+    display: none;
+  }
+
+  &.loading {
+    .widget-content {
+      filter: blur(.25em);
+    }
+    .widget-loading-message {
+      display: block;
+      position: absolute;
+      z-index: 5;
+      text-align: center;
+      left: 25%;
+      right: 25%;
+      top: 40%;
+    }
+  }
+}
+
 
 .label i[class *= "icon-"] {
   color: white !important;

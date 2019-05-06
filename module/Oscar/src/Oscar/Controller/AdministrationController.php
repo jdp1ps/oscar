@@ -52,12 +52,13 @@ class AdministrationController extends AbstractOscarController
 
                 ];
             },
+            // GET
             function(){
-
                 return [
                     'sections' => $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->createQueryBuilder('s')->getQuery()->getArrayResult()
                 ];
             },
+            // POST
             function(){
                 $id     = $this->params()->fromPost('id', null);
                 if( $id ){
@@ -74,10 +75,26 @@ class AdministrationController extends AbstractOscarController
                 $section->setLabel($label);
                 try {
                     $this->getEntityManager()->flush($section);
-                    return ["response" => "Enregistrement terminé"];
+                    return ["response" => "Section enregistrée"];
                 } catch (\Exception $e ){
                     throw new \Exception($e->getMessage());
                 }
+            },
+            function(){
+                $id     = $this->params()->fromPost('id', null);
+
+                $section = $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->find($id);
+                if( !$section ){
+                    throw new \Exception("Section introuvable");
+                }
+                try {
+                    $this->getEntityManager()->remove($section);
+                    $this->getEntityManager()->flush($section);
+                } catch (\Exception $e ){
+                    throw $e;
+                }
+                return ["response" => "Section supprimée"];
+
             }
         );
     }
