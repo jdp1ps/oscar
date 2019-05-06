@@ -661,6 +661,14 @@
     "fullcode": "MAINTENANCE-DISCIPLINE_MANAGE"
   },
 
+  "MAINTENANCE-DOCPUBSEC_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "DOCPUBSEC_MANAGE",
+    "libelle": "Configurer les sections des documents publiques",
+    "fullcode": "MAINTENANCE-DOCPUBSEC_MANAGE"
+  },
+
   "MAINTENANCE-NUMEROTATION_MANAGE": {
     "spot": 7,
     "category_id": 6,

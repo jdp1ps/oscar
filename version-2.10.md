@@ -24,3 +24,6 @@ Un export Excel de ces données sera proposé. A noté que pour les interconnexi
 
 
 
+## Section des documents publiques
+
+Les documents publiques peuvent maintenant être organisés en section. Les sections doivent être configurées dans la partie configuration par l'administrateur.

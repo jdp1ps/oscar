@@ -45,6 +45,7 @@ class AdministrationController extends AbstractOscarController
 
     public function documentSectionsAction()
     {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
         return $this->oscarRest(
             function(){
                 return [

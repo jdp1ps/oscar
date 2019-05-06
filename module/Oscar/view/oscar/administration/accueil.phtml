@@ -31,6 +31,21 @@
             <p>Options générales de l'application</p>
         </article>
 
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-docs"></i>
+                    Sections des documents publiques
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DOCPUBSEC_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/documents-sections') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Configuration des sections de document (documents publiques)</p>
+        </article>
+
         <h2>
             <i class="icon-tags"></i>
             Nomenclatures
