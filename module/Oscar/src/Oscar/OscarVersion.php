@@ -11,7 +11,7 @@ namespace Oscar;
 class OscarVersion
 {
     const MAJOR = 2;
-    const MINOR = 9;
+    const MINOR = 10;
     const PATCH = 1;
     const NAME = "Matrix";
 
