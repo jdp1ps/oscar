@@ -10,7 +10,9 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\AbstractVersionnedDocument;
 use Oscar\Entity\AdministrativeDocument;
+use Oscar\Entity\AdministrativeDocumentSection;
 use Oscar\Exception\OscarException;
+use Oscar\Provider\Privileges;
 use Oscar\Service\VersionnedDocumentService;
 
 class AdministrativeDocumentController extends AbstractOscarController
@@ -60,9 +62,70 @@ class AdministrativeDocumentController extends AbstractOscarController
      * @return array
      */
     public function indexAction() {
+
+        $method = $this->getHttpXMethod();
+        if( $method == "POST" ){
+            $this->getOscarUserContext()->check(Privileges::ADMINISTRATIVE_DOCUMENT_DELETE);
+            $sectionId = $this->params()->fromPost('section_id');
+            $section = null;
+            if( $sectionId )
+                $section = $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->find($sectionId);
+
+            $documentId = $this->params()->fromPost('id');
+            /** @var AdministrativeDocument $document */
+            $document = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->find($documentId);
+            if( !$document ){
+                return $this->getResponseInternalError("Document introuvable");
+            }
+
+            $documents = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->findBy(['fileName' => $document->getFileName()]);
+
+            foreach ($documents as $document) {
+                $document->setSection($section);
+            }
+
+            $this->getEntityManager()->flush($documents);
+        }
+
         return [
-            'documents' => $this->getVersionnedDocumentService()->getDocumentsPublished()->getQuery()->getResult()
+            'documents' => $this->getAdministrativeDocumentPacked(),
+            'sections' => $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->findAll(),
+            'moveable' => $this->getOscarUserContext()->hasPrivileges(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE)
         ];
+    }
+
+    public function getAdministrativeDocumentPacked(){
+        $query = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->createQueryBuilder('d')
+            ->leftJoin('d.section', s)
+            ->leftJoin('d.person', 'o')
+            ->orderBy('d.fileName', 'ASC')
+            ->addOrderBy('d.version', 'DESC')
+            ->where('d.status = :status');
+
+        $query->setParameter('status', AbstractVersionnedDocument::STATUS_PUBLISH);
+
+        $output = [];
+        $documents = $query->getQuery()->getResult();
+
+        /** @var AdministrativeDocument $document */
+        foreach ($documents as $document) {
+            $section = $document->getSection() ? $document->getSection()->getLabel() : "";
+            if( !array_key_exists($section, $output) ){
+                $output[$section] = [];
+            }
+
+            $filename = $document->getFileName();
+            if( !array_key_exists($filename, $output[$section]) ){
+                $output[$section][$filename] = [
+                    'main' => $document,
+                    'older' => []
+                ];
+            } else {
+                $output[$section][$filename]['older'][] = $document;
+            }
+        }
+
+        return $output;
     }
 
     /**
@@ -74,15 +137,19 @@ class AdministrativeDocumentController extends AbstractOscarController
         try {
             $docId = $this->params()->fromQuery('id', null);
             $docReplaced = null;
+            $section = null;
             if ($docId) {
+                /** @var AdministrativeDocument $doc */
                 if ($doc = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->find($docId)) {
                     $docReplaced = $doc->getFileName();
+                    $section = $doc->getSection();
                 }
             }
             $documentService = $this->getVersionnedDocumentService();
 
             $documentService->performRequest($this->getRequest(), $docReplaced,
                 function (AbstractVersionnedDocument $document) {
+
                     $this->getActivityLogService()->addUserInfo(
                         sprintf("a déposé le document '%s'",
                             $document->getFileName()), 'AdministrativeDocument',
@@ -90,6 +157,11 @@ class AdministrativeDocumentController extends AbstractOscarController
                     );
 
                     $this->redirect()->toRoute('administrativedocument');
+                },
+
+                function( AdministrativeDocument $document, $datas ) use ($documentService, $section){
+                    $document->setSection($section);
+                    return $document;
                 });
             return [
 
@@ -119,6 +191,7 @@ class AdministrativeDocumentController extends AbstractOscarController
      * @throws OscarException
      */
     public function deleteAction() {
+
         $idDoc = $this->params()->fromRoute('id');
         try {
             $this->getVersionnedDocumentService()->deleteDocument($idDoc);

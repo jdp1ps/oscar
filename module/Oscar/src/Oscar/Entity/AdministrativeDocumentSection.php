@@ -67,7 +67,7 @@ class AdministrativeDocumentSection
     /**
      * @return ArrayCollection
      */
-    public function getDocuments(): ArrayCollection
+    public function getDocuments()
     {
         return $this->documents;
     }
@@ -75,7 +75,7 @@ class AdministrativeDocumentSection
     /**
      * @param ArrayCollection $documents
      */
-    public function setDocuments(ArrayCollection $documents): void
+    public function setDocuments($documents)
     {
         $this->documents = $documents;
     }
@@ -111,4 +111,11 @@ class AdministrativeDocumentSection
     {
         $this->description = $description;
     }
+
+    public function __toString()
+    {
+        return $this->getLabel();
+    }
+
+
 }

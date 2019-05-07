@@ -105,7 +105,7 @@ class VersionnedDocumentService {
             try {
                 $doc = $this->getDocument($document)->getQuery()->getSingleResult();
             } catch( \Exception $e ){
-                throw new OscarException();
+                throw new OscarException("Document introuvable");
             }
         } else {
             $doc = $document;
@@ -118,7 +118,6 @@ class VersionnedDocumentService {
         foreach( $documents as $d ){
             $d->setStatus(AbstractVersionnedDocument::STATUS_DELETE);
         }
-
         $this->getEntityManager()->flush();
     }
 
