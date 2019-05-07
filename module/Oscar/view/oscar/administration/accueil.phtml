@@ -270,7 +270,7 @@
                     <i class="icon-cw-outline"></i>
                     Reconstruire l'index de recherche des activités</strong>
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD) ):?>
-                    <a href="<?= $this->url('administration/connectors_home') ?>" class="right">
+                    <a href="<?= $this->url('administration/activity_index') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Exécuter") ?>
                     </a>
@@ -283,7 +283,7 @@
             </p>
             <p class="alert-warning alert">
                 Cette opération est coûteuse en ressource et peut dépasser la durée d'execution autorisée. Il est préférable de réaliser cette opération de amintenance depuis l'utilitaire en ligne de commande :
-                <br>$ <code>php public/index oscar activity:search:build</code>
+                <br>$ <code>php public/index.php oscar activity:search:build</code>
             </p>
         </article>
 
