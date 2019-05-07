@@ -1,12 +1,10 @@
 <div class="container">
     <h1>Téléversement d'un document administratif</h1>
-
     <?php if( isset($data) && $data['error'] ):?>
         <div class="alert alert-danger">
             <?= $data['error'] ?>
         </div>
     <?php endif; ?>
-
     <form action="" method="post" enctype="multipart/form-data">
         <div class="row">
 
@@ -16,8 +14,14 @@
             </div>
 
             <div class="col-md-6">
-                <label for="type">Type de document</label>
-                <small>A venir</small>
+                <label for="section">Section</label>
+                <select name="section_id" id="section">
+                    <option value="">Général</option>
+                    <?php foreach ($sections as $section): ?>
+                        <option value="<?= $section->getId() ?>" <?= $defaultSection == $section->getId() ? ' selected' : '' ?>><?= $section->getLabel() ?></option>
+                    <?php endforeach; ?>
+                </select>
+
             </div>
         </div>
         <div class="row">
@@ -35,11 +39,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
     </form>
 </div>
 

@@ -138,11 +138,13 @@ class AdministrativeDocumentController extends AbstractOscarController
             $docId = $this->params()->fromQuery('id', null);
             $docReplaced = null;
             $section = null;
+            $defaultSection = null;
             if ($docId) {
                 /** @var AdministrativeDocument $doc */
                 if ($doc = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->find($docId)) {
                     $docReplaced = $doc->getFileName();
                     $section = $doc->getSection();
+                    $defaultSection = $section->getId();
                 }
             }
             $documentService = $this->getVersionnedDocumentService();
@@ -160,11 +162,31 @@ class AdministrativeDocumentController extends AbstractOscarController
                 },
 
                 function( AdministrativeDocument $document, $datas ) use ($documentService, $section){
-                    $document->setSection($section);
+                    $sec = null;
+                    $secInit = $section ? $section->getId() : null;
+                    $secId = null;
+                    if( $datas['section_id'] ){
+                        $sec = $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->find($datas['section_id']);
+                        $secId = $sec->getId();
+                    }
+
+                    if( $secInit != $secId ){
+                        $docs = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->findBy([
+                            'fileName' => $document->getFileName()
+                        ]);
+                        foreach ($docs as $doc) {
+                            $doc->setSection($sec);
+                        }
+                        $this->getEntityManager()->flush($docs);
+                    }
+
+
+                    $document->setSection($sec);
                     return $document;
                 });
             return [
-
+                "defaultSection" => $defaultSection,
+                "sections" => $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->findAll()
             ];
         } catch( \Exception $e ){
             throw new OscarException($e->getMessage());
