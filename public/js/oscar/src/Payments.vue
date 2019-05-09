@@ -140,7 +140,6 @@
                             <textarea name="comment" class="form-control form-control"
                                       placeholder="Commentaire"
                                       v-model="formData.comment"></textarea>
-
                         </div>
 
                         <nav class="text-center">
@@ -249,12 +248,6 @@
             }
         },
 
-        filters: {
-          money(value){
-              return Number.parseFloat(value).toFixed(2);
-          }
-        },
-
         methods: {
             getPaymentDateValue( payment ){
                 if( payment.status == 2 )
@@ -313,7 +306,7 @@
 
                 var datas = new FormData();
                 datas.append('id', this.formData.id);
-                datas.append('amount', this.formData.amount);
+                datas.append('amount', this.formData.amount.toString().replace(',', '.'));
                 datas.append('currencyId', this.formData.currencyId);
                 datas.append('rate', this.formData.rate);
                 datas.append('datePredicted', this.formData.datePredicted ? this.formData.datePredicted : "");

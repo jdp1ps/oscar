@@ -400,7 +400,7 @@
                 </div>
 
                 <script>
-                    require(['ActivityModel', 'vue','vue-resource', 'mm','payments'], function(ActivityModel, Vue, VueResource, moment, payments){
+                    require(['ActivityModel', 'vue','vue-resource', 'mm','payments', 'VueFilters'], function(ActivityModel, Vue, VueResource, moment, payments, VueFilters){
                         Vue.use(VueResource);
 
                         Vue.filter('moment', function(value){
@@ -408,9 +408,10 @@
                             return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
                         });
 
-                        Vue.filter('money', function(value){
-                            return Number.parseFloat(value).toFixed(2);
-                        });
+                        Vue.filter('money', VueFilters.default.money);
+                        // Vue.filter('money', function(value){
+                        //     return VueFilters.default.money(value);
+                        // });
 
                         new Vue({ data: ActivityModel });
 
