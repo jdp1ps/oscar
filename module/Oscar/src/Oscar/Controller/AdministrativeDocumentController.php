@@ -139,6 +139,9 @@ class AdministrativeDocumentController extends AbstractOscarController
             $docReplaced = null;
             $section = null;
             $defaultSection = null;
+            $person = $this.$this->getOscarUserContext()->getCurrentPerson();
+
+
             if ($docId) {
                 /** @var AdministrativeDocument $doc */
                 if ($doc = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->find($docId)) {
@@ -161,7 +164,7 @@ class AdministrativeDocumentController extends AbstractOscarController
                     $this->redirect()->toRoute('administrativedocument');
                 },
 
-                function( AdministrativeDocument $document, $datas ) use ($documentService, $section){
+                function( AdministrativeDocument $document, $datas ) use ($documentService, $section, $person){
                     $sec = null;
                     $secInit = $section ? $section->getId() : null;
                     $secId = null;
@@ -182,6 +185,7 @@ class AdministrativeDocumentController extends AbstractOscarController
 
 
                     $document->setSection($sec);
+                    $document->setPerson($person);
                     return $document;
                 });
             return [

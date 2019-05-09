@@ -55,7 +55,15 @@
         </nav>
         <p class="text-highlight">
             Téléversé le <time><?= $this->moment($document['main']->getDateUpdoad())->full() ?></time>
-            par <?= $document['main']->getPerson() ? $this->person($document['main']->getPerson()) : '<span class="no-data">Inconnu</span>' ?>
+            par
+            <?php if($document['main']->getPerson()): ?>
+                <strong>
+                    <i class="icon-user"></i>
+                    <?= $document['main']->getPerson() ?>
+                </strong>
+            <?php else: ?>
+                <span class="no-data">Inconnu</span>
+            <?php endif; ?>
         </p>
         <div class="card-content versions">
             <?php if( count($document['older']) > 0 ):?>
