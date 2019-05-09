@@ -45,5 +45,5 @@ $ crontab -e
 
 ```cron
 # Déclenchement de la procédure toutes les heures
-5 * * * * php /path/to/oscar/public/index.php oscar notifications:mails:persons
+00 */1 * * * php /path/to/oscar/public/index.php oscar notifications:mails:persons
 ```
