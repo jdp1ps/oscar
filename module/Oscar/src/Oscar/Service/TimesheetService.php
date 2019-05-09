@@ -2204,12 +2204,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $otherInfo = $this->getOthersWPByCode($t->getLabel());
                 $label = $otherInfo['label'];
                 $code = $otherInfo['code'];
+                $group = $otherInfo['group'];
 
                 $datas = [
                     'id' => $t->getId(),
                     'int' => $dayInt,
                     'label' => $label,
                     'code' => $code,
+                    'group' => $group,
                     'description' => $t->getComment(),
                     'duration' => $t->getDuration(),
                     'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : 'draft',
@@ -2252,6 +2254,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'credentials' => $this->resolveTimeSheetCredentials($t),
                 'validations' => $this->resolveTimeSheetValidation($t),
                 'label' => $t->getLabel(),
+                'group' => 'research',
                 'comment' => $t->getComment(),
                 'activity_id' => $activity_id,
                 'activity' => (string)$activity,
