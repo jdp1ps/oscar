@@ -27,3 +27,11 @@ Un export Excel de ces données sera proposé. A noté que pour les interconnexi
 ## Section des documents publiques
 
 Les documents publiques peuvent maintenant être organisés en section. Les sections doivent être configurées dans la partie configuration par l'administrateur.
+
+
+
+## FIX/ISSUES
+
+ - Les montants de la vue versement utilise maintenant l'espace comme séparateur des milliers.
+ - L'affichage du temps écoulé des documents se base maintenant sur les minutes pour éviter l'affichage "Il y'a 11 heures sur un fichier déposé à n'importe quel moment de la journée"
+ - La personne "uploadant" est correctement stoquée
