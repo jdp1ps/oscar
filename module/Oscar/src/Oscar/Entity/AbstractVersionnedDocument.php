@@ -34,7 +34,7 @@ abstract class AbstractVersionnedDocument
      * Date de dépôt du fichier.
      *
      * @var datetime
-     * @ORM\Column(type="date", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $dateUpdoad;
 
@@ -86,9 +86,20 @@ abstract class AbstractVersionnedDocument
     private $status = self::STATUS_PUBLISH;
 
     /**
+     * AbstractVersionnedDocument constructor.
+     * @param datetime $dateUpdoad
+     */
+    public function __construct()
+    {
+        $this->dateUpdoad = new \DateTime();
+    }
+
+    /**
      * @return mixed
      */
     abstract public function getId();
+
+
 
     /**
      * @return mixed
