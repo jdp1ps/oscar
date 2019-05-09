@@ -97,7 +97,7 @@ return array(
 
             // Jeudi de l'assension
             $ascension = new DateTime(date('Y-m-d', $easterDate));
-            $ascension->add(new DateInterval('P40D'));
+            $ascension->add(new DateInterval('P39D'));
             $feries[$ascension->format('n')][$ascension->format('Y-n-j')] = "Jour ferié (Jeudi de l'ascension)";
 
             // Pentecôte
