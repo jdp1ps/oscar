@@ -244,6 +244,31 @@
             <?php endif; ?>
 
             <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
+            <section id="organizations" class="has-btn">ORGANIZATIONS
+            </section>
+            <script>
+                require(['vue', 'vue-resource', 'EntityWithRole'], function(Vue, VueResource, EntityWithRole){
+                    Vue.use(VueResource);
+                    Vue.http.options.emulateJSON = true;
+                    Vue.http.options.emulateHTTP = true;
+                    new Vue({
+                        el: "#organizations",
+                        render(h){
+                            return h(EntityWithRole.default, { props: {
+                                    url: "<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>",
+                                    urlNew: "<?= $this->url('organizationactivity/new', ['idenroller' => $entity->getId()]) ?>",
+                                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE) ? "true" : false ?>,
+                                    roles: <?= json_encode($rolesOrganizations) ?>
+                                }});
+                        }
+
+                    })
+                });
+            </script>
+            <?php endif; ?>
+
+
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
             <section id="partners" class="has-btn">
                 <h2><i class="icon-group"></i> Partenaires</h2>
 

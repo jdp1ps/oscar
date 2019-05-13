@@ -1263,6 +1263,11 @@ class ProjectGrantController extends AbstractOscarController
         // Check access
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_SHOW, $entity);
 
+        $rolesOrganizations = [];
+        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE) ){
+            $rolesOrganizations = $this->getOscarUserContext()->getRolesOrganizationInActivity();
+        }
+
 
         //////////////////////////////////////////////////////////// Passage WTF
         // Si l'on supprime le bloc suivant, l'affichage des partenaires
@@ -1336,6 +1341,8 @@ class ProjectGrantController extends AbstractOscarController
 
             // Personnes pouvant voir cette activité
             'involvedPerson' => $involvedPersonsJSON,
+
+            'rolesOrganizations' => $rolesOrganizations,
 
             // Notifications précalculées
             'notifications' => $this->getEntityManager()->getRepository(Notification::class)
@@ -1468,6 +1475,8 @@ class ProjectGrantController extends AbstractOscarController
         $editableP = $deletableP = $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_ORGANIZATION_MANAGE,
             $activity->getProject());
 
+        $showable = $this->getOscarUserContext()->hasPrivileges(Privileges::ORGANIZATION_SHOW);
+
         $classRoutes = [
             ActivityOrganization::class => 'organizationactivity',
             ActivityPerson::class => 'personactivity',
@@ -1497,14 +1506,18 @@ class ProjectGrantController extends AbstractOscarController
             $urlEdit = $editableA ? $this->url()->fromRoute($classRoutes[$class] . '/edit',
                 ['idenroll' => $activityOrganization->getId()]) : false;
 
+            $urlShow = $showable ? $this->url()->fromRoute('organization/show', ['id' => $activityOrganization->getOrganization()->getId()]) : false;
+
             $out[] = [
                 'id' => $activityOrganization->getId(),
+                'roleId' => $activityOrganization->getRoleObj()->getId(),
                 'role' => $activityOrganization->getRole(),
                 'roleLabel' => $activityOrganization->getRole(),
                 'rolePrincipal' => $activityOrganization->isPrincipal(),
                 'urlDelete' => $urlDelete,
                 'context' => $context,
                 'urlEdit' => $urlEdit,
+                'urlShow' => $urlShow,
                 'enroller' => $activity->getId(),
                 'enrollerLabel' => (string)$activity,
                 'editable' => $editable,
@@ -1516,9 +1529,7 @@ class ProjectGrantController extends AbstractOscarController
                 'end' => $activityOrganization->getDateEnd()
             ];
         }
-
-        echo json_encode($out);
-        die();
+        return $this->jsonOutput($out);
     }
 
     /**

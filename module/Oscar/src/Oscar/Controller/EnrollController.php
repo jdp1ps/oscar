@@ -608,6 +608,7 @@ class EnrollController extends AbstractOscarController
     ////////////////////////////////////////////////////////////////////////////
     public function organizationActivityNewAction()
     {
+        $this->getLogger()->debug("AJOUT D'une ORGANISATIOn dans une ACTIVITÉ");
         return $this->saveEnroll(ActivityOrganization::class);
     }
 
