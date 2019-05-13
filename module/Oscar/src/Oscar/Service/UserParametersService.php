@@ -56,7 +56,8 @@ class UserParametersService implements ServiceLocatorAwareInterface, EntityManag
 
     public function performChangeFrequency( $userInput )
     {
-        if( !$this->getConfiguration('oscar.declarationsHoursOverwriteByAuth', false) ){
+        $changeable = $this->getConfiguration('oscar.notifications.override', false);
+        if( !$changeable ){
             throw new OscarException(_('Cette option ne peut pas être modifiée'));
         }
 
