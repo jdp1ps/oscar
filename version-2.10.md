@@ -32,6 +32,7 @@ Les documents publiques peuvent maintenant être organisés en section. Les sect
 
 ## FIX/ISSUES
 
+ - Dans la fiche organisation (nouvelle organisation), le contrôle de l'existant utilise maintenant le nom complet et l'acronyme, le champ "Nom complet" a été placé en tête.
  - Les montants de la vue versement utilise maintenant l'espace comme séparateur des milliers.
  - L'affichage du temps écoulé des documents se base maintenant sur les minutes pour éviter l'affichage "Il y'a 11 heures sur un fichier déposé à n'importe quel moment de la journée"
  - La personne "uploadant" est correctement stoquée

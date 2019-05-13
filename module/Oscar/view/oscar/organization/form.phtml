@@ -37,20 +37,30 @@
 
     <ul class="errors">
         <?php foreach ($form->getMessages() as $msg): ?>
-            <li><?= var_dump($msg) ?></li>
+            <li><?= $msg ?></li>
         <?php endforeach; ?>
     </ul>
 
-    <div class="form-group" id="short">
-        <div class="input-group input-group-lg">
-            <span class="input-group-addon">Nom court / Acronyme</span>
-            <?= $this->formInput($form->get('shortName')) ?>
-            <?= $this->formElementErrors($form->get('shortName')); ?>
+    <div id="completer">
+        <div class="form-group">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">Nom complet</span>
+                <?= $this->formInput($form->get('fullName')) ?>
+            </div>
+            <?= $this->formElementErrors($form->get('fullName')); ?>
+        </div>
+
+        <div class="form-group" id="short">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">Nom court / Acronyme</span>
+                <?= $this->formInput($form->get('shortName')) ?>
+                <?= $this->formElementErrors($form->get('shortName')); ?>
+            </div>
         </div>
     </div>
 
     <div class="form-group">
-        <div class="input-group input-group-lg">
+        <div class="input-group input-group-sm">
             <span class="input-group-addon">Code interne</span>
             <?= $this->formInput($form->get('code')) ?>
             <?= $this->formElementErrors($form->get('code')); ?>
@@ -62,17 +72,6 @@
             <?= $this->formSelect($form->get('typeObj')) ?>
             <?= $this->formElementErrors($form->get('typeObj')); ?>
         </div>
-        <?php /*
-        <div class="input-group input-group-lg">
-            <span class="input-group-addon">Type </span>
-            <?= $this->formInput($form->get('type')) ?>
-        </div>
-        <datalist id="types">
-            <?php foreach ($types as $type): ?>
-            <option value="<?= $type ?>">
-            <?php endforeach; ?>
-        </datalist>
-         */?>
     </div>
 
     <div class="form-group">
@@ -81,14 +80,6 @@
             <?= $this->formInput($form->get('siret')) ?>
             <?= $this->formElementErrors($form->get('siret')); ?>
         </div>
-    </div>
-
-    <div class="form-group">
-        <div class="input-group input-group-sm">
-            <span class="input-group-addon">Nom complet</span>
-            <?= $this->formInput($form->get('fullName')) ?>
-        </div>
-        <?= $this->formElementErrors($form->get('fullName')); ?>
     </div>
 
     <div class="form-group">
@@ -253,39 +244,50 @@
             new Vue({
                 data: {
                   shortName: "",
+                    fullName: "",
                     lastsearch: null,
                     show: true,
                     filter: "",
-                    organizations: [{id: 1, label:"Test1"}, {id: 2, label:"Test2"}]
+                    organizations: []
                 },
-                template: `<div class="input-group input-group-lg">
-    <span class="input-group-addon">Nom court / Acronyme</span>
-    <input type="text" class="form-control" v-model="shortName" name="shortName">
-    <span class="input-group-addon">
-    <span v-show="filteredOrganizations.length && filter.length > 2" class="already">
-        <span @click="show = !show">
-            <i class="icon-building-filled"></i>
-            <span class="label label-danger">{{ filteredOrganizations.length }}</span>
+                template: `
+<div>
+<div class="form-group">
+    <div class="input-group input-group-lg">
+        <span class="input-group-addon">Nom complet</span>
+        <input type="text" class="form-control" v-model="fullName" name="fullName">
+        <span class="input-group-addon">
+        <span v-show="filteredOrganizations.length && filter.length > 2" class="already">
+            <span @click="show = !show">
+                <i class="icon-building-filled"></i>
+                <span class="label label-danger">{{ filteredOrganizations.length }}</span>
+            </span>
+            <section v-show="filteredOrganizations.length && show" class="organizations">
+            <small>Cette organisation existe probablement déjà : </small>
+            <div v-for="o in filteredOrganizations" :class="{'disbaled': o.closed}">
+                <small>
+                    <i class="icon-building-filled"></i> {{ o.label }}
+
+                    <a :href="'/organization/show/'+o.id">
+                        <i class="icon-target"></i>
+                        Fiche</a>
+
+                </small>
+            </div>
+        </section>
         </span>
-        <section v-show="filteredOrganizations.length && show" class="organizations">
-        <small>Cette organisation existe probablement déjà : </small>
-        <div v-for="o in filteredOrganizations" :class="{'disbaled': o.closed}">
-            <small>
-                <i class="icon-building-filled"></i> {{ o.label }}
+        </span>
+     </div>
+</div>
+<div class="form-group">
+    <div class="input-group input-group-sm">
+        <span class="input-group-addon">Nom court / Acronyme</span>
+        <input type="text" class="form-control" v-model="shortName" name="shortName">
+     </div>
+    </div>
+</div>`,
 
-                <a :href="'/organization/show/'+o.id">
-                    <i class="icon-target"></i>
-                    Fiche</a>
-
-            </small>
-        </div>
-    </section>
-    </span>
-    </span>
-
- </div>`,
-
-                el: "#short",
+                el: "#completer",
 
                 computed: {
                     filteredOrganizations(){
@@ -299,14 +301,13 @@
                     }
                 },
 
-                watch: {
-                    shortName: function(newval, oldval){
+                methods: {
+                    triggerComplete: function(newval, oldval){
                         this.filter = newval;
                         if( newval.length > 2 ){
                             if( newval.indexOf(this.lastsearch) != 0 ){
-                                console.log('Search for ', newval);
                                 this.lastsearch = newval;
-                                this.$http.get('/organization?q=' +newval).then(
+                                this.$http.get('/organization?q=' +newval+'*').then(
                                     (success) => {
                                         this.organizations = success.data.datas;
                                     },
@@ -318,6 +319,15 @@
                                 console.log('Les résultats précédents inclus la saisie actuel')
                             }
                         }
+                    }
+                },
+
+                watch: {
+                    fullName: function(newval, oldval){
+                        this.triggerComplete(newval, oldval);
+                    },
+                    shortName: function(newval, oldval){
+                        this.triggerComplete(newval, oldval);
                     }
                 }
             })
