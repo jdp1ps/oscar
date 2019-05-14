@@ -4805,6 +4805,18 @@ pre.alert-danger, pre.alert-info {
   }
 }
 
+.icon-clickable {
+  cursor: pointer;
+  &:hover {
+    color: white;
+    text-shadow: 0 0 3px rgba(0,0,0,.5);
+  }
+}
+.text-clickable {
+  cursor: pointer;
+  &:hover { text-decoration: underline }
+}
+
 .separator-bottom {
   padding-bottom: .3em;
   margin-bottom: .3em;

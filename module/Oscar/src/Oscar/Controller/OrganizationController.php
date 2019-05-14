@@ -93,7 +93,6 @@ class OrganizationController extends AbstractOscarController
 
         $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search, $page, $filter);
 
-
         if ($this->getRequest()->isXmlHttpRequest()) {
             $result = [ 'datas' => []];
             foreach ($organizations as $data) {

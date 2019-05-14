@@ -447,7 +447,9 @@ class PersonController extends AbstractOscarController
                 'datas' => []
             ];
             foreach ($datas as $data) {
-                $json['datas'][] = $data->toArray();
+                $personData = $data->toArray();
+
+                $json['datas'][] = $personData;
             }
             $view = new JsonModel();
             $view->setVariables($json);

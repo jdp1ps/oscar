@@ -1284,6 +1284,7 @@ class ProjectGrantController extends AbstractOscarController
         $pvRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
         $declarations = $pvRepo->getValidationPeriodsByActivity($entity);
 
+        $rolesPersons = $this->getOscarUserContext()->getAllRoleIdPersonInActivity();
 
         $activityTypeChain = $this->getActivityTypeService()->getActivityTypeChain($entity->getActivityType());
 
@@ -1343,6 +1344,7 @@ class ProjectGrantController extends AbstractOscarController
             'involvedPerson' => $involvedPersonsJSON,
 
             'rolesOrganizations' => $rolesOrganizations,
+            'rolesPersons' => $rolesPersons,
 
             // Notifications précalculées
             'notifications' => $this->getEntityManager()->getRepository(Notification::class)
@@ -1415,6 +1417,7 @@ class ProjectGrantController extends AbstractOscarController
 
         $editableA = $deletableA = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
         $editableP = $deletableP = $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_PERSON_MANAGE, $activity->getProject());
+        $showable = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW);
 
         /**
          * @var ActivityPerson $activityPerson
@@ -1439,6 +1442,10 @@ class ProjectGrantController extends AbstractOscarController
                 $deletable = $deletableP;
                 $context = "project";
             }
+            $urlShow = false;
+            if( $showable ){
+                $urlShow = $showable ? $this->url()->fromRoute('person/show', ['id' => $activityPerson->getPerson()->getId()]) : false;
+            }
 
             $out[] = [
                 'id' => $activityPerson->getId(),
@@ -1448,6 +1455,7 @@ class ProjectGrantController extends AbstractOscarController
                 'urlDelete' => $urlDelete,
                 'context' => $context,
                 'urlEdit' => $urlEdit,
+                'urlShow' => $urlShow,
                 'enroller' => $activity->getId(),
                 'enrollerLabel' => $activity->getLabel(),
                 'editable' => $editable,

@@ -155,47 +155,20 @@
     <div class="row">
         <div class="col-md-8">
 
-            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_SHOW, $entity)): ?>
-
-            <section id="members-activity" class="has-btn">
-                <h2><i class="icon-group"></i> Membres</h2>
-
-
-                <div class="subsection">
-
-                    <div id="persons-activity" class="enrollerPack"></div>
-
-                    <script>
-                        require(['EnrollerPack'], function(EnrollerPack){
-                            EnrollerPack({
-                                label: "personne",
-                                urlDatas: '<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>',
-                                lsname: "activity_persons",
-                                el: '#persons-activity'
-                            });
-                        });
-                    </script>
-
-
-                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE, $entity)): ?>
-                        <div class="btn-area">
-                            <a href="<?= $this->url('personactivity/new', ['idenroller'=>$entity->getId()]) ?>" class="smoke" data-modalform>
-                                <i class="icon-user"></i>
-                                Ajouter un membre pour cette activité
-                            </a>
-                        </div>
-                    <?php endif; ?>
-
-                </div>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
-                <section id="involved">
-
-                </section>
-                <script>
-                    require(['vue'], function(Vue){
-                        new Vue({
-                            el: '#involved',
-                            template: `<div>
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
+                <section class="has-btn">
+                    <h2>
+                        <i class="icon-group"></i>
+                        Membres
+                    </h2>
+                    <section id="organizations" class="has-btn"></section>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
+                        <section id="involved"></section>
+                        <script>
+                            require(['vue'], function(Vue){
+                                new Vue({
+                                    el: '#involved',
+                                    template: `<div>
                                 <h4 @click="displayed = !displayed" style="cursor: pointer">
                                     <i class="icon-right-dir" v-show="displayed === false"></i>
                                     <i class="icon-sort-down" v-show="displayed === true"></i>
@@ -216,35 +189,58 @@
                                     </span>
                                 </section>
                                 </div>`,
-                            data: {
-                                displayed: false,
-                                filter: "",
-                                persons: <?= $involvedPerson ?>
-                            },
-                            computed: {
-                                filteredPersons(){
-                                    var ret;
-                                    if( !this.filter ) ret = this.persons;
-                                    else {
-                                        var criteria = this.filter;
-                                        ret = this.persons.filter(p => p.displayname.indexOf(criteria)>=0 ||  p.affectation.indexOf(criteria)>=0 );
+                                    data: {
+                                        displayed: false,
+                                        filter: "",
+                                        persons: <?= $involvedPerson ?>
+                                    },
+                                    computed: {
+                                        filteredPersons(){
+                                            var ret;
+                                            if( !this.filter ) ret = this.persons;
+                                            else {
+                                                var criteria = this.filter;
+                                                ret = this.persons.filter(p => p.displayname.indexOf(criteria)>=0 ||  p.affectation.indexOf(criteria)>=0 );
+                                            }
+                                            return ret.sort( (a, b) => a.displayname.localeCompare(b.displayname));
+
+                                        }
                                     }
-                                    return ret.sort( (a, b) => a.displayname.localeCompare(b.displayname));
-
-                                }
+                                })
+                            })
+                        </script>
+                    <?php endif; ?>
+                </section>
+                <script>
+                    require(['vue', 'vue-resource', 'EntityWithRole'], function(Vue, VueResource, EntityWithRole){
+                        Vue.use(VueResource);
+                        Vue.http.options.emulateJSON = true;
+                        Vue.http.options.emulateHTTP = true;
+                        new Vue({
+                            el: "#organizations",
+                            render(h){
+                                return h(EntityWithRole.default, { props: {
+                                        url: "<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>",
+                                        urlNew: "<?= $this->url('personactivity/new', ['idenroller' => $entity->getId()]) ?>",
+                                        manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE) ? "true" : false ?>,
+                                        title: "Personne",
+                                        roles: <?= json_encode($rolesPersons) ?>
+                                    }});
                             }
+
                         })
-                    })
+                    });
                 </script>
-
-
-                <?php endif; ?>
-            </section>
-            <hr />
             <?php endif; ?>
 
+
             <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
-            <section id="organizations" class="has-btn">ORGANIZATIONS
+            <section class="has-btn">
+                <h2>
+                    <i class="icon-building-filled"></i>
+                    Partenaires
+                </h2>
+                <section id="organizations" class="has-btn"></section>
             </section>
             <script>
                 require(['vue', 'vue-resource', 'EntityWithRole'], function(Vue, VueResource, EntityWithRole){
@@ -258,6 +254,7 @@
                                     url: "<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>",
                                     urlNew: "<?= $this->url('organizationactivity/new', ['idenroller' => $entity->getId()]) ?>",
                                     manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE) ? "true" : false ?>,
+                                    title: "Organisation",
                                     roles: <?= json_encode($rolesOrganizations) ?>
                                 }});
                         }
@@ -265,35 +262,6 @@
                     })
                 });
             </script>
-            <?php endif; ?>
-
-
-            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
-            <section id="partners" class="has-btn">
-                <h2><i class="icon-group"></i> Partenaires</h2>
-
-                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE, $entity)): ?>
-                    <div class="btn-area">
-                        <a href="<?= $this->url('organizationactivity/new', ['idenroller'=>$entity->getId()]) ?>" class="smoke" data-modalform>
-                            <i class="icon-user"></i>
-                            Ajouter un partenaire pour cette activité
-                        </a>
-                    </div>
-                <?php endif; ?>
-                <div class="subsection">
-                    <div id="organizations-activity" class="enrollerPack"></div>
-                </div>
-                <script>
-                    require(['EnrollerPack'], function(EnrollerPack){
-                        EnrollerPack({
-                            label: "organisation",
-                            urlDatas: '<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>',
-                            lsname: "activity_organizations",
-                            el: '#organizations-activity'
-                        });
-                    });
-                </script>
-            </section>
             <?php endif; ?>
 
             <?php

@@ -1,6 +1,6 @@
 <template>
     <div>
-
+        <code>{{ entityEdited }}</code>
         <div class="overlay" v-if="entityDelete">
             <div class="overlay-content">
                 <i class="icon-cancel-outline overlay-closer" @click="entityDelete = null"></i>
@@ -25,7 +25,12 @@
                 <i class="icon-cancel-outline overlay-closer" @click="entityEdited = null"></i>
 
                 <form :action="entityEdited.urlEdit" method="post" @submit.prevent="performEdit">
-                    <h2>Rôle de <strong>{{ entityEdited.enrolledLabel }}</strong> : </h2>
+                    <h2>
+                        <span v-if="entityEdited.enrolledLabel">
+                            Modifier <strong>{{ entityEdited.enrolledLabel }}</strong>
+                            en tant que <em>{{ entityEdited.role }}</em>
+                        </span>
+                    </h2>
                     <input type="hidden" name="enroled" class="form-control select2" v-model="entityEdited.enrolled" />
 
                     <div class="form-group">
@@ -57,8 +62,6 @@
                         </button>
                     </nav>
                 </form>
-
-                <pre>{{ entityEdited }}</pre>
             </div>
         </div>
 
@@ -69,7 +72,18 @@
                 <h2>Rôle de <strong>{{ entityNew.enroledLabel }}</strong> : </h2>
                 <input type="hidden" name="enroled" class="form-control select2" v-model="entityNew.enrolled" />
 
-                <organizationselector @change="handlerEnrolledSelected($event)"/>
+                <span v-if="entityNew.enroledLabel" class="cartouche">
+                    {{ entityNew.enroledLabel }}
+                    <i class="icon-cancel-alt icon-clickable" @click="handlerCancel"></i>
+                    <span class="addon" v-if="entityNew.role">
+                        {{ roles[entityNew.role] }}
+                    </span>
+                </span>
+                <div class="form-group" v-else>
+                    <label class=" control-label" for="enroled">{{ title }}</label>
+                    <personselector @change="handlerEnrolledSelected($event)" v-if="title == 'Personne'"/>
+                    <organizationselector @change="handlerEnrolledSelected($event)" v-else/>
+                </div>
 
                 <div class="form-group">
                     <label class=" control-label" for="role">Rôle</label>
@@ -79,8 +93,6 @@
                         </option>
                     </select>
                 </div>
-
-                <pre>{{ entityNew }}</pre>
 
                 <div class="form-group">
                     <label class="form-label control-label" for="dateStart">Date de début</label>
@@ -101,13 +113,11 @@
                         Enregistrer
                     </button>
                 </nav>
-
-                <pre>{{ entityNew }}</pre>
             </div>
         </div>
 
-        <nav class="admin-bar">
-            <a class="link" @click="handlerNew()">
+        <nav class="admin-bar text-right">
+            <a class="oscar-link" @click="handlerNew()">
                 <i class="icon-doc-add"></i>
                 Nouveau
             </a>
@@ -115,7 +125,8 @@
         <span class="cartouche" v-for="e in entities" :class="{'primary': e.rolePrincipal }">
             <i v-if="e.context == 'activity'" class="icon-cube"></i>
             <i v-else class="icon-cubes"></i>
-            {{ e.enrolledLabel }}
+            <span class="text-clickable" @click="open(e.urlShow)" v-if="e.urlShow">{{ e.enrolledLabel }}</span>
+            <span v-else>{{ e.enrolledLabel }}</span>
             <span class="addon">
                 {{ e.roleLabel }}
                 <i class="icon-pencil-1 icon-clickable" v-if="e.urlEdit" @click="handlerEdit(e)"></i>
@@ -127,17 +138,20 @@
 <script>
 // nodejs node_modules/.bin/poi watch --format umd --moduleName  EntityWithRole --filename.js EntityWithRole.js --dist public/js/oscar/dist public/js/oscar/src/EntityWithRole.vue
 import OrganizationAutoCompleter from "./OrganizationAutoCompleter";
+import PersonAutoCompleter from "./PersonAutoCompleter";
 
 export default {
     components: {
-        organizationselector: OrganizationAutoCompleter
+        organizationselector: OrganizationAutoCompleter,
+        personselector: PersonAutoCompleter
     },
 
     props: {
         url: { required: true },
         urlNew: { required: true },
         roles: { required: true },
-        manage: { required: false }
+        manage: { required: true, default: false },
+        title: { required: true }
     },
 
     data(){
@@ -153,6 +167,7 @@ export default {
 
     methods: {
         handlerEdit(item) {
+            console.log("EDIT", item);
             this.entityEdited = item;
         },
 
@@ -166,13 +181,24 @@ export default {
                 end: '',
                 start: '',
                 role: null,
-                enroled: null
+                enroled: null,
+                enroledLabel: ""
             };
         },
 
         handlerEnrolledSelected(data){
             this.entityNew.enroled = data.id;
             this.entityNew.enroledLabel = data.label;
+        },
+
+        handlerCancel(){
+            this.entityNew.enroled = null;
+            this.entityNew.enroledLabel = "";
+            this.entityNew.role = null;
+        },
+
+        open(url){
+          document.location = url;
         },
 
         performDelete(){

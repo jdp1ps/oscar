@@ -8883,6 +8883,17 @@ pre.alert-danger, pre.alert-info {
       .overlay .overlay-content .overlay-closer:hover {
         color: #222; }
 
+.icon-clickable {
+  cursor: pointer; }
+  .icon-clickable:hover {
+    color: white;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5); }
+
+.text-clickable {
+  cursor: pointer; }
+  .text-clickable:hover {
+    text-decoration: underline; }
+
 .separator-bottom {
   padding-bottom: .3em;
   margin-bottom: .3em;

@@ -802,6 +802,7 @@ class Person implements ResourceInterface
             'firstName'             => $this->getFirstname(),
             'lastName'              => $this->getLastname(),
             'displayname'           => $this->getDisplayName(),
+            'label'           => $this->getDisplayName(),
             'text'                  => $this->getDisplayName(),
             'email'                 => $this->getEmail(),
             'phone'                 => $this->getPhone(),
