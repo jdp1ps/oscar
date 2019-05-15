@@ -125,15 +125,17 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
             throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
         }
 
-        if( count($return) > 0 ){
+        if( $return ){
 
             /////////////////////////////////////
             ////// Patch 2.7 "Lewis" GIT#286 ////
             try {
                 $json = PhpPolyfill::jsonDecode($return);
+
                 $jsonDatas = null;
-                if( property_exists($json, 'organizations') ){
-                    $jsonDatas = $json->organizations;
+
+                if( is_object($json) && property_exists($json, 'organizations') ){
+                    $jsonDatas = $json->persons;
                 } else {
                     $jsonDatas = $json;
                 }
