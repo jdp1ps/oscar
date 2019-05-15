@@ -118,6 +118,49 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         $this->resetIndex();
         $repport->addnotice("Index réinitialisé");
 
+        /******** CONFIGURATION DU MAPPING
+        $params = [
+            'index' => $this->getIndex(),
+            'type' => $this->getType(),
+            'body' => [
+                'my_type2' => [
+                    '_source' => [
+                        'enabled' => true
+                    ],
+                    'properties' => [
+                        'first_name' => [
+                            'type' => 'keyword',
+                            'analyzer' => 'standard'
+                        ],
+                        'age' => [
+                            'type' => 'integer'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+         *  'id' => $organization->getId(),
+        'code' => $organization->getCode(),
+        'shortname' => $organization->getShortName(),
+        'fullname' => $organization->getFullName(),
+        'email' => $organization->getEmail(),
+        'city' => $organization->getCity(),
+        'country' => $organization->getCountry(),
+        'zipcode' => $organization->getZipCode(),
+        //            'address1' => $organization->getStreet1(),
+        //            'address2' => $organization->getStreet2(),
+        //            'address3' => $organization->getStreet3(),
+        'siret' => $organization->getSiret(),
+        'country' => $organization->getCountry(),
+        'persons' => $persons,
+        'activities' => $activities,
+        'connectors' => $connectors
+
+        $response = $this->getClient()->indices()->putMapping($params);
+        /****/
+
+
         $i = 0;
         /** @var Activity $organization */
         foreach ($organizations as $organization) {
