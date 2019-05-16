@@ -536,7 +536,23 @@ return array(
 );
 ```
 
+### Relation Person / Authentification
 
+Une option a été ajouté pour force Oscar à ignorer la casse lorsque il établit la relation entre l'indentifiant de connexion et le login de la fiche personne. Par défaut cette option est ignorée, pour l'activier, éditer le fichier de configuration local : 
+
+```php
+<?php
+// config/autoload.local.php
+// ...
+return array(
+    // ...
+    // Oscar
+    'oscar' => [
+        // ...
+        'authPersonNormalize' => true,
+    ]
+);
+```
 
 ### Usurpation
 

@@ -1602,6 +1602,9 @@ class ProjectGrantController extends AbstractOscarController
     {
         $this->organizationsPerimeter = $this->getOscarUserContext()->getOrganisationsPersonPrincipal($this->getOscarUserContext()->getCurrentPerson(),
             true);
+        if( count($this->organizationsPerimeter) <= 0 ){
+            throw new UnAuthorizedException();
+        }
 
         return $this->advancedSearchAction();
     }

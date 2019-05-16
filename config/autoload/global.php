@@ -25,6 +25,10 @@ return array(
         ///
         'oscar_num_separator' => 'DRI',
 
+        ////////////////////////////////////////////////////////////////////////////////// authPersonNormalize [boolean]
+        /// Permet d'ignorer la casse lors de la jonction entre les personnes et l'authentification
+        'authPersonNormalize' => false,
+
 
         'export' => [
             'payments' => [
