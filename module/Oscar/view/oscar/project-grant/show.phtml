@@ -212,7 +212,7 @@
                     <?php endif; ?>
                 </section>
                 <script>
-                    require(['vue', 'vue-resource', 'EntityWithRole'], function(Vue, VueResource, EntityWithRole){
+                    require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
                         Vue.use(VueResource);
                         Vue.http.options.emulateJSON = true;
                         Vue.http.options.emulateHTTP = true;
@@ -224,7 +224,8 @@
                                         urlNew: "<?= $this->url('personactivity/new', ['idenroller' => $entity->getId()]) ?>",
                                         manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE) ? "true" : false ?>,
                                         title: "Personne",
-                                        roles: <?= json_encode($rolesPersons) ?>
+                                        roles: <?= json_encode($rolesPersons) ?>,
+                                        moment: moment
                                     }});
                             }
 
@@ -243,7 +244,7 @@
                 <section id="organizations" class="has-btn"></section>
             </section>
             <script>
-                require(['vue', 'vue-resource', 'EntityWithRole'], function(Vue, VueResource, EntityWithRole){
+                require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
                     Vue.use(VueResource);
                     Vue.http.options.emulateJSON = true;
                     Vue.http.options.emulateHTTP = true;
@@ -255,7 +256,8 @@
                                     urlNew: "<?= $this->url('organizationactivity/new', ['idenroller' => $entity->getId()]) ?>",
                                     manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE) ? "true" : false ?>,
                                     title: "Organisation",
-                                    roles: <?= json_encode($rolesOrganizations) ?>
+                                    roles: <?= json_encode($rolesOrganizations) ?>,
+                                    moment: moment
                                 }});
                         }
 

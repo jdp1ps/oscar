@@ -21,7 +21,7 @@
         </div>
 
         <div class="overlay" v-if="entityEdited">
-            <div class="overlay-content">
+            <div class="overlay-content" style="overflow: visible">
                 <i class="icon-cancel-outline overlay-closer" @click="entityEdited = null"></i>
 
                 <form :action="entityEdited.urlEdit" method="post" @submit.prevent="performEdit">
@@ -33,22 +33,32 @@
                     </h2>
                     <input type="hidden" name="enroled" class="form-control select2" v-model="entityEdited.enrolled" />
 
-                    <div class="form-group">
-                        <label class=" control-label" for="role">Rôle</label>
-                        <select name="role" class=" form-control" v-model="entityEdited.roleId">
-                            <option :value="roleId" v-for="role, roleId in roles">
-                                {{ role }}
-                            </option>
-                        </select>
-                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class=" control-label" for="role">Rôle</label>
+                                <select name="role" class=" form-control" v-model="entityEdited.roleId">
+                                    <option :value="roleId" v-for="role, roleId in roles">
+                                        {{ role }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label class="form-label control-label" for="dateStart">Date de début</label>
-                        <input type="text" name="dateStart" class="form-control datepicker form-control" placeholder="Date de début" v-model="entityEdited.start">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label control-label" for="dateEnd">Date de fin</label>
-                        <input type="text" name="dateEnd" class="form-control datepicker form-control" placeholder="Date de fin" v-model="entityEdited.end">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label control-label" for="dateStart">Date de début</label>
+                                <datepicker :moment="moment"
+                                            :value="entityEdited.start"
+                                            @input="value => {entityEdited.start = value}"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label control-label" for="dateEnd">Date de fin</label>
+                                <datepicker :moment="moment"
+                                            :value="entityEdited.end"
+                                            @input="value => {entityEdited.end = value}"/>
+                            </div>
+                        </div>
                     </div>
 
                     <nav class="admin-bar">
@@ -66,41 +76,51 @@
         </div>
 
         <div class="overlay" v-if="entityNew">
-            <div class="overlay-content">
+            <div class="overlay-content" style="overflow: visible">
                 <i class="icon-cancel-outline overlay-closer" @click="entityNew = null"></i>
 
                 <h2>Rôle de <strong>{{ entityNew.enroledLabel }}</strong> : </h2>
                 <input type="hidden" name="enroled" class="form-control select2" v-model="entityNew.enrolled" />
 
-                <span v-if="entityNew.enroledLabel" class="cartouche">
-                    {{ entityNew.enroledLabel }}
-                    <i class="icon-cancel-alt icon-clickable" @click="handlerCancel"></i>
-                    <span class="addon" v-if="entityNew.role">
-                        {{ roles[entityNew.role] }}
-                    </span>
-                </span>
-                <div class="form-group" v-else>
-                    <label class=" control-label" for="enroled">{{ title }}</label>
-                    <personselector @change="handlerEnrolledSelected($event)" v-if="title == 'Personne'"/>
-                    <organizationselector @change="handlerEnrolledSelected($event)" v-else/>
-                </div>
+                <div class="row">
+                    <div class="col-md-6">
 
-                <div class="form-group">
-                    <label class=" control-label" for="role">Rôle</label>
-                    <select name="role" class=" form-control" v-model="entityNew.role">
-                        <option :value="roleId" v-for="role, roleId in roles">
-                            {{ role }}
-                        </option>
-                    </select>
-                </div>
+                        <span v-if="entityNew.enroledLabel" class="cartouche">
+                            {{ entityNew.enroledLabel }}
+                            <i class="icon-cancel-alt icon-clickable" @click="handlerCancel"></i>
+                            <span class="addon" v-if="entityNew.role">
+                                {{ roles[entityNew.role] }}
+                            </span>
+                        </span>
+                        <div class="form-group" v-else>
+                            <label class=" control-label" for="enroled">{{ title }}</label>
+                            <personselector @change="handlerEnrolledSelected($event)" v-if="title == 'Personne'"/>
+                            <organizationselector @change="handlerEnrolledSelected($event)" v-else/>
+                        </div>
 
-                <div class="form-group">
-                    <label class="form-label control-label" for="dateStart">Date de début</label>
-                    <input type="text" name="dateStart" class="form-control datepicker form-control" placeholder="Date de début" v-model="entityNew.start">
-                </div>
-                <div class="form-group">
-                    <label class="form-label control-label" for="dateEnd">Date de fin</label>
-                    <input type="text" name="dateEnd" class="form-control datepicker form-control" placeholder="Date de fin" v-model="entityNew.end">
+                        <div class="form-group">
+                            <label class=" control-label" for="role">Rôle</label>
+                            <select name="role" class=" form-control" v-model="entityNew.role">
+                                <option :value="roleId" v-for="role, roleId in roles">
+                                    {{ role }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label control-label" for="dateStart">Date de début</label>
+                            <datepicker :moment="moment"
+                                        :value="entityNew.start"
+                                        @input="value => {entityNew.start = value}"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label control-label" for="dateEnd">Date de fin</label>
+                            <datepicker :moment="moment"
+                                        :value="entityNew.end"
+                                        @input="value => {entityNew.end = value}"/>
+                        </div>
+                    </div>
                 </div>
 
                 <nav class="admin-bar">
@@ -139,11 +159,13 @@
 // nodejs node_modules/.bin/poi watch --format umd --moduleName  EntityWithRole --filename.js EntityWithRole.js --dist public/js/oscar/dist public/js/oscar/src/EntityWithRole.vue
 import OrganizationAutoCompleter from "./OrganizationAutoCompleter";
 import PersonAutoCompleter from "./PersonAutoCompleter";
+import Datepicker from "./Datepicker";
 
 export default {
     components: {
         organizationselector: OrganizationAutoCompleter,
-        personselector: PersonAutoCompleter
+        personselector: PersonAutoCompleter,
+        datepicker: Datepicker
     },
 
     props: {
@@ -151,7 +173,8 @@ export default {
         urlNew: { required: true },
         roles: { required: true },
         manage: { required: true, default: false },
-        title: { required: true }
+        title: { required: true },
+        moment: { required: true }
     },
 
     data(){
@@ -167,7 +190,6 @@ export default {
 
     methods: {
         handlerEdit(item) {
-            console.log("EDIT", item);
             this.entityEdited = item;
         },
 

@@ -1451,6 +1451,7 @@ class ProjectGrantController extends AbstractOscarController
                 'id' => $activityPerson->getId(),
                 'role' => $activityPerson->getRole(),
                 'roleLabel' => $activityPerson->getRole(),
+                'roleId' => $activityPerson->getRoleObj()->getId(),
                 'rolePrincipal' => $activityPerson->isPrincipal(),
                 'urlDelete' => $urlDelete,
                 'context' => $context,
@@ -1533,8 +1534,8 @@ class ProjectGrantController extends AbstractOscarController
 //                'hash' => (string)$activityOrganization,
                 'enrolled' => $activityOrganization->getOrganization()->getId(),
                 'enrolledLabel' => $activityOrganization->getOrganization()->getFullName(),
-                'start' => $activityOrganization->getDateStart(),
-                'end' => $activityOrganization->getDateEnd()
+                'start' => DateTimeUtils::toStr($activityOrganization->getDateStart(), 'Y-m-d'),
+                'end' => DateTimeUtils::toStr($activityOrganization->getDateEnd(), 'Y-m-d')
             ];
         }
         return $this->jsonOutput($out);
