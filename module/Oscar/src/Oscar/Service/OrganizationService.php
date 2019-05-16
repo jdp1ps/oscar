@@ -276,10 +276,8 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
                             'searchStrict' => strtolower($search),
                         ]
                     );
-
                 }
             }
-
         }
 
         if (isset($filter['type']) && $filter['type']){
@@ -315,7 +313,18 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
             }
 
             $qb->andWhere('o.id IN (:ids)')
-            ->setParameter('ids', $ids);
+                ->setParameter('ids', $ids);
+        }
+
+        if( count($ids) ){
+            $case = '(CASE ';
+            $i = 0;
+            foreach ($ids as $id) {
+                $case .= sprintf('WHEN o.id = \'%s\' THEN %s ', $id, $i++);
+            }
+            $case .= " ELSE $id END) AS HIDDEN ORD";
+            $qb->addSelect($case);
+            $qb->orderBy("ORD", 'ASC');
         }
 
         return new UnicaenDoctrinePaginator($qb, $page);
@@ -350,9 +359,7 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('o')
-            ->from(Organization::class, 'o')
-            ->orderBy('o.shortName')
-            ->addOrderBy('o.fullName');
+            ->from(Organization::class, 'o');
         return $queryBuilder;
     }
 

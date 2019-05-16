@@ -65,30 +65,7 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         return $this->elasticSearchClient;
     }
 
-    public function search($search)
-    {
-        $params = [
-            'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'body' => [
-                'size' => 10000,
-                'query' => [
-                    'query_string' => [
-                        'query' => $search
-                    ]
-                ]
-            ]
-        ];
 
-        $response = $this->getClient()->search($params);
-        $ids = [];
-        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
-            foreach ($response['hits']['hits'] as $hit) {
-                $ids[] = $hit["_id"];
-            }
-        }
-        return $ids;
-    }
 
     public function add(Organization $organization)
     {
@@ -118,46 +95,9 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         $this->resetIndex();
         $repport->addnotice("Index réinitialisé");
 
-        /******** CONFIGURATION DU MAPPING
-        $params = [
-            'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'body' => [
-                'my_type2' => [
-                    '_source' => [
-                        'enabled' => true
-                    ],
-                    'properties' => [
-                        'first_name' => [
-                            'type' => 'keyword',
-                            'analyzer' => 'standard'
-                        ],
-                        'age' => [
-                            'type' => 'integer'
-                        ]
-                    ]
-                ]
-            ]
-        ];
 
-         *  'id' => $organization->getId(),
-        'code' => $organization->getCode(),
-        'shortname' => $organization->getShortName(),
-        'fullname' => $organization->getFullName(),
-        'email' => $organization->getEmail(),
-        'city' => $organization->getCity(),
-        'country' => $organization->getCountry(),
-        'zipcode' => $organization->getZipCode(),
-        //            'address1' => $organization->getStreet1(),
-        //            'address2' => $organization->getStreet2(),
-        //            'address3' => $organization->getStreet3(),
-        'siret' => $organization->getSiret(),
-        'country' => $organization->getCountry(),
-        'persons' => $persons,
-        'activities' => $activities,
-        'connectors' => $connectors
 
-        $response = $this->getClient()->indices()->putMapping($params);
+
         /****/
 
 
@@ -189,6 +129,56 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         if (!empty($params['body'])) {
             $this->getClient()->bulk($params);
         }
+
+
+//        'id' => $organization->getId(),
+//        'code' => $organization->getCode(),
+//        'shortname' => $organization->getShortName(),
+//        'fullname' => $organization->getFullName(),
+//        'email' => $organization->getEmail(),
+//        'city' => $organization->getCity(),
+//        'country' => $organization->getCountry(),
+//        'zipcode' => $organization->getZipCode(),
+//        //            'address1' => $organization->getStreet1(),
+//        //            'address2' => $organization->getStreet2(),
+//        //            'address3' => $organization->getStreet3(),
+//        'siret' => $organization->getSiret(),
+//        'country' => $organization->getCountry(),
+//        'persons' => $persons,
+//        'activities' => $activities,
+//        'connectors' => $connectors
+        /******** CONFIGURATION DU MAPPING ***/
+        $params = [
+            'index' => $this->getIndex(),
+            'type' => $this->getType(),
+            'body' => [
+                $this->getType() => [
+                    '_source' => [
+                        'enabled' => true
+                    ],
+                    'properties' => [
+                        'code' => [
+                            'type' => 'text'
+                        ],
+                        'shortname' => [
+                            'type' => 'text',
+                            'boost' => 5
+                        ],
+                        'fullname' => [
+                            'type' => 'text',
+                            'boost' => 5
+                        ],
+                        'email' => [
+                            'type' => 'text'
+                        ],
+                    ]
+                ]
+            ]
+        ];
+
+        $response = $this->getClient()->indices()->putMapping($params);
+
+
         return $repport;
     }
 
@@ -241,6 +231,32 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
             'activities' => $activities,
             'connectors' => $connectors
         ];
+    }
+
+    public function search($search)
+    {
+        $params = [
+            'index' => $this->getIndex(),
+            'type' => $this->getType(),
+            'body' => [
+                'size' => 10000,
+                'query' => [
+                    'query_string' => [
+                        'fields' => ['code^5', 'shortname^5', 'fullname^5', 'email', 'city', 'siret', 'country', 'connectors', 'zipcode', 'persons^3', 'activities'],
+                        'query' => $search,
+                    ]
+                ]
+            ]
+        ];
+
+        $response = $this->getClient()->search($params);
+        $ids = [];
+        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
+            foreach ($response['hits']['hits'] as $hit) {
+                $ids[] = $hit["_id"];
+            }
+        }
+        return $ids;
     }
 
     public function remove($id)
