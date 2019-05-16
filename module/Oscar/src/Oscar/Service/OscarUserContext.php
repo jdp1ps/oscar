@@ -283,7 +283,7 @@ class OscarUserContext extends UserContext
         $person = $person == null ? $this->getCurrentPerson() : $person;
         /** @var OrganizationPerson $affectation */
         foreach ($person->getOrganizations() as $affectation) {
-            if( $affectation->isPrincipal() )
+            if( !$affectation->isOutOfDate() && $affectation->isPrincipal() )
                 $organizations[] = $id === true ? $affectation->getOrganization()->getId() : $affectation->getOrganization();
         }
 
@@ -304,7 +304,7 @@ class OscarUserContext extends UserContext
         $rolesLead = $this->getRoleIdPrimary();
         /** @var OrganizationPerson $affectation */
         foreach ($person->getOrganizations() as $affectation) {
-            if (in_array($affectation->getRole(), $rolesLead)) {
+            if (!$affectation->isOutOfDate() && in_array($affectation->getRole(), $rolesLead)) {
                 return true;
             }
         }
@@ -349,7 +349,6 @@ class OscarUserContext extends UserContext
 
         try {
             if ($this->getLdapUser()) {
-
                 // PATCH Limoges
                 // au cas ou le supannAliasLogin n'est pas fournis...
                 $pseudo = $this->getLdapUser()->getSupannAliasLogin();
@@ -363,7 +362,6 @@ class OscarUserContext extends UserContext
         } catch (NoResultException $ex) {
             // ... can happening with users stored in database directly
         }
-
         return null;
     }
 

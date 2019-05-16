@@ -44,6 +44,16 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
 
     /**
+     * Retourne la configuration OSCAR.
+     *
+     * @return ConfigurationParser
+     */
+    protected function getOscarConfig()
+    {
+        return $this->getServiceLocator()->get('OscarConfig');
+    }
+
+    /**
      * @return PersonRepository
      */
     public function getRepository(){
@@ -402,12 +412,21 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         }
 
         if( !isset($this->_cachePersonLdapLogin[$login]) ){
-            // $this->getServiceLocator()->get('Logger')->info('Request BDD with ' . $login);
-            $this->_cachePersonLdapLogin[$login] = $this->getBaseQuery()
-                ->where('p.ladapLogin = :login')
-                ->setParameter('login', $login)
-                ->getQuery()
-                ->getSingleResult();
+            $query = $this->getBaseQuery()
+                ->setParameter('login', $login);
+
+            $normalize = $this->getOscarConfig()->getConfiguration('authPersonNormalize', false);
+
+            if( $normalize == true ){
+                
+                $query->where('LOWER(p.ladapLogin) = :login')
+                    ->setParameter('login', strtolower($login));
+            } else {
+                $query->where('p.ladapLogin = :login')
+                    ->setParameter('login', $login);
+            }
+
+            $this->_cachePersonLdapLogin[$login] = $query->getQuery()->getSingleResult();
         }
         return $this->_cachePersonLdapLogin[$login];
     }
