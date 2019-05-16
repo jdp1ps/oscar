@@ -89,6 +89,15 @@ class EnrollController extends AbstractOscarController
             throw new OscarException("Erreur, données manquantes, veuillez reessayer");
         }
 
+        switch ($class) {
+            case OrganizationPerson::class :
+                $route = 'organization/show';
+                $routeOpt = ['id' => $enroll->getOrganization()->getId()];
+                break;
+            default:
+                return $this->getResponseInternalError("Objet $class non pris en charge");
+        }
+
         try {
             $datet = new \DateTime($date);
         } catch (\Exception $e ){
@@ -98,13 +107,14 @@ class EnrollController extends AbstractOscarController
         try {
             $enroll->setDateEnd($datet);
             $this->getEntityManager()->flush($enroll);
+
+            $this->redirect()->toRoute($route, $routeOpt);
+
         } catch (\Exception $e ){
             $msg = sprinf("Impossible de mettre le rôle de la person à jour : %s", $e->getMessage());
             $this->getActivityLogService()->addUserInfo($msg, "organizationperson", $enroll->getId());
             throw new OscarException($msg);
         }
-        var_dump($datet);
-        die(" / " . $date);
     }
 
     /**
