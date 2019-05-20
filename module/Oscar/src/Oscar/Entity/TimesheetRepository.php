@@ -47,4 +47,42 @@ class TimesheetRepository extends EntityRepository {
 
         return $result;
     }
+
+    public function getPersonPeriodSynthesis($personIds, $period){
+        if( count($personIds) == 0 ){
+            throw new \Exception("Aucune personne");
+        }
+
+        if( !$period ){
+            throw new \Exception("Période manquante");
+        }
+
+        $query = "SELECT 
+            CONCAT(pr.firstname, ' ', pr.lastname) as person, 
+            p.acronym acronym,
+            t.person_id,
+            t.label,
+            COALESCE(w.code, t.label) as itemkey,
+            t.activity_id,
+            t.workpackage_id,
+            EXTRACT(EPOCH from dateto - datefrom) / 3600 as duration,
+            to_char(t.datefrom, 'YYYY-MM') as period, 
+            t.activity_id
+        FROM timesheet t 
+        LEFT JOIN workpackage w ON w.id = workpackage_id 
+        LEFT JOIN activity a ON a.id = t.activity_id 
+        LEFT JOIN project p ON p.id = a.project_id 
+        LEFT JOIN person pr ON t.person_id = pr.id
+        WHERE 
+        
+            person_id IN(".implode(',',$personIds).")
+            AND
+            to_char(t.datefrom, 'YYYY-MM')  = '$period'
+            ;";
+
+        $rsm = new ResultSetMapping();
+        $result = $this->getEntityManager()->getConnection()->fetchAll($query);
+
+        return $result;
+    }
 }

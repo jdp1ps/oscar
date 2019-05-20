@@ -491,6 +491,24 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function synthesisActivityPeriodAction()
+    {
+
+        // Données reçues
+        $activity_id = $this->params()->fromQuery('activity_id', null);
+        $format = $this->params()->fromQuery('format', '');
+        $period = $this->params()->fromQuery('period', null);
+        $error = null;
+
+        $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
+        if( $format == 'html' ){
+            return $output;
+        }
+        else {
+            return $this->jsonOutput($output);
+        }
+    }
+
     /**
      * Centralisation de la consultation des feuilles de temps d'une personne / activité
      * Selon les critères envoyés.

@@ -23,6 +23,7 @@ use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\DateTimeUtilsTest;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
+use Zend\Db\Sql\Ddl\Constraint\ForeignKey;
 use Zend\Form\Element\Time;
 use Zend\Log\Logger;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -1185,6 +1186,125 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $total += $dayInfo['duration'];
         }
         return $total;
+    }
+
+    public function getSynthesisActivityPeriod($idActivity, $period){
+        $output = [
+            'activity' => null,
+            'persons' => []
+        ];
+
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
+        $personIds = [];
+
+        foreach ($activity->getDeclarers() as $person) {
+            $personIds[] = $person->getId();
+        }
+
+
+        $strData = [];
+
+        $lots = [];
+        $lotsStr = [];
+
+
+        /** @var $lot WorkPackage */
+        foreach( $activity->getWorkPackages() as $lot){
+            $lots[$lot->getId()] = $lot->toArray();
+            $lotsStr[] = $lot->getCode();
+        }
+
+        $ceStr = [];
+
+        $datas = $this->getTimesheetRepository()->getPersonPeriodSynthesis($personIds, $period);
+
+        foreach ($datas as $d){
+
+            if( $d['activity_id'] && $d['activity_id'] != $idActivity ){
+                $acronym = $d['acronym'];
+                if( !in_array($acronym, $ceStr) ){
+                    $ceStr[] = $d['acronym'];
+                }
+            }
+        }
+
+        $others = $this->getOthersWP();
+
+        foreach ($activity->getDeclarers() as $person) {
+            $personIds[] = $person->getId();
+            $output['persons'][$person->getId()] = $this->getTimesheetDatasPersonPeriod($person, $period);
+            $strData[(string)$person] = [
+                'main' => [],
+                'ce' => [],
+                'otherresearch' => 0.0,
+                'others' => [],
+                'totalMain' => 0.0,
+                'totalProjets' => 0.0,
+//                'totalProjets' => 0.0,
+                'totalResearch' => 0.0,
+                //'totalProjets' => 0.0,
+            ];
+
+            foreach ($lotsStr as $l){
+                $strData[(string)$person]['main'][$l] = 0.0;
+            }
+            foreach ($ceStr as $p){
+                $strData[(string)$person]['ce'][$p] = 0.0;
+            }
+            foreach ($others as $key=>$other) {
+                if( $key != 'research' ){
+                    $strData[(string)$person]['others'][$key] = 0.0;
+                }
+            }
+        }
+
+        foreach ($datas as $d){
+            $group = 'research';
+            $person = $d['person'];
+            $key = $d['itemkey'];
+            $duration = (float)$d['duration'];
+
+            $activityId = $d['activity_id'];
+
+            // Hors-lot
+            if( !$activityId ){
+                if( $key == 'research' ){
+                    $strData[$person]['otherresearch'] += $duration;
+                    $strData[$person]['totalResearch'] += $duration;
+                } else {
+                    $strData[$person]['others'][$key] += $duration;
+                }
+
+            } else {
+                // Projet
+                if($activityId == $idActivity){
+                    if( !array_key_exists($key, $strData[$person]['main']) ){
+                        $strData[$person]['main'][$key] = 0.0;
+                    }
+                    $strData[$person]['totalMain'] += $duration;
+                    $strData[$person]['main'][$key] += $duration;
+                } else {
+                    $acronym = $d['acronym'];
+                    $strData[$person]['ce'][$acronym] += $duration;
+                    $strData[$person]['totalProjects'] += $duration;
+                }
+                $strData[$person]['totalResearch'] += $duration;
+            }
+        }
+
+        $output['foo'] = $strData;
+        $output['others'] = $others;
+        $output['ces'] = $ceStr;
+        $output['datas'] = $datas;
+        $output['wps'] = $lots;
+        $output['activity'] = $activity->toArray();
+
+
+
+
+
+        return $output;
     }
 
     public function getActivitiesWithDeclarant( Person $person ){

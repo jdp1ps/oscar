@@ -1,0 +1,94 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 20/05/19
+ * Time: 14:55
+ */
+?>
+<style>
+    .main {
+        background: #0b97c4;
+    }
+    .research {
+        background: #92a6c4;
+    }
+    .duration {
+        text-align: right;
+    }
+</style>
+<table class="table table-bordered">
+    <thead>
+    <th>En tête</th>
+    <th colspan="<?= count($wps)+1 ?>" class="main">
+        <h2><?= $activity['projectacronym'] ?></h2>
+        <small><?= $activity['label'] ?></small>
+    </th>
+    <th colspan="<?= count($ces) +2 ?>" class="research">Recherche</th>
+    <th colspan="<?= count($others) ?>" class="horslot">Hors-lots</th>
+
+    </thead>
+    <thead>
+        <th>&nbsp;</th>
+        <?php foreach ($wps as $id=>$wp): ?>
+            <th class="main">
+                <strong><?= $wp['code'] ?></strong><br>
+                <small><?= $wp['label'] ?></small>
+            </th>
+        <?php endforeach; ?>
+            <th class="main">
+                <strong>Total</strong>
+            </th>
+        <?php foreach ($ces as $acronym): ?>
+            <th class="research ce">
+                <strong><?= $acronym ?></strong>
+            </th>
+        <?php endforeach; ?>
+
+        <th class="research">Autres recherches</th>
+        <th class="main">
+            <strong>Total recherche</strong>
+        </th>
+
+        <?php foreach ($others as $k=>$other): if($k == 'research') continue;?>
+            <th class="other horslot">
+                <strong><?= $other['label'] ?></strong>
+            </th>
+        <?php endforeach; ?>
+
+    </thead>
+    <tbody>
+<?php foreach ($foo as $person=>$line): ?>
+    <tr>
+        <th><?= $person ?></th>
+
+        <?php foreach ($line['main'] as $wp=>$duration): ?>
+            <td class="main duration">
+                <?= $this->duration($duration) ?>
+            </td>
+        <?php endforeach; ?>
+        <th class="main duration">
+            <strong><?= $this->duration($line['totalMain']) ?></strong>
+        </th>
+        <?php foreach ($line['ce'] as $acronym=>$duration): ?>
+            <td class="ce research duration">
+                <?= $this->duration($duration) ?>
+            </td>
+        <?php endforeach; ?>
+        <td class="research duration">
+            <?= $this->duration($line['otherresearch']) ?>
+        </td>
+        <th class="main duration">
+            <strong><?= $this->duration($line['totalResearch']) ?></strong>
+        </th>
+        <?php foreach ($line['others'] as $code=>$duration): if($code == 'research') continue;?>
+            <td class="horslot other <?= $code ?> duration">
+                <?= $this->duration($duration) ?>
+            </td>
+        <?php endforeach; ?>
+
+    </tr>
+
+<?php endforeach; ?>
+    </tbody>
+</table>

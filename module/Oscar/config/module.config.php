@@ -219,7 +219,7 @@ return array(
                         'declarant', 'declarantAPI', 'validationActivity',
                         'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
                         'importIcal', 'declarations', 'resumeActivity',
-                        'resolveInvalidLabels', 'syntheseActivity', 'synthesisAll'
+                        'resolveInvalidLabels', 'syntheseActivity', 'synthesisAll', 'synthesisActivityPeriod'
                     ],
                     'roles' => ['user']
                 ],
@@ -962,6 +962,7 @@ return array(
             'dater' => DateRenderer::class,
             'unAllowed' => \Oscar\View\Helpers\UnAllowed::class,
             'hasAccess' => \Oscar\View\Helpers\Access::class,
+            'duration' => \Oscar\View\Helpers\Duration::class,
             'moment' => \Oscar\View\Helpers\Moment::class,
             'activity' => \Oscar\View\Helpers\ActivityHtml::class,
             'strEmpty' => \Oscar\View\Helpers\StrEmpty::class,

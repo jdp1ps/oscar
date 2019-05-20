@@ -7,8 +7,7 @@
 /** @var Person $person */
 $person = $enroll->getPerson();
 ?>
-<article class="card person-card">
-
+<article class="card person-card" style="<?= $enroll->isOutOfDate() ? 'opacity: .5' : '' ?>">
     <span class="intitule">
         <?php if($person->getEmail()): ?>
             <img class="portrait"
@@ -16,12 +15,16 @@ $person = $enroll->getPerson();
                  alt="">
         <?php endif; ?>
         <span class="fullname">
+            <?php if( $enroll->isOutOfDate() ): ?>
+            <i class="icon-block"></i>
+            <?php endif; ?>
+            <i></i>
             <span class="firstname"><?= $person->getFirstname() ?></span>
             <span class="lastname"><?= $person->getLastname() ?></span>
             <span class="affectation">(<?= $person->getLdapAffectation() ?>)</span>
 
             <?php if( $enroll->getDateEnd() ): ?>
-                <div class="role"style="<?= $enroll->isOutOfDate() ? 'opacity: .5' : '' ?>">
+                <div class="role">
                     <?= $enroll->getRole() ?>
                     <small> ( <?= ($enroll->isPast() ? 'fini depuis le ' : 'prendra effet le' ) . $this->moment($enroll->getDateEnd()) ?>)</small>
                 </div>

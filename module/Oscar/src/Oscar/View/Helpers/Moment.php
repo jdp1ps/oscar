@@ -20,6 +20,7 @@ class Moment extends AbstractHtmlElement
     const DEFAULT_FORMAT_TIME = 'H:m';
     const DEFAULT_FORMAT_DATETIME = 'l d F Y [à] H:m:s';
     const DEFAULT_LOCALE = 'fr_FR';
+
     /** @var  \Moment\Moment */
     private $moment;
     private $format = self::DEFAULT_FORMAT_DATETIME;

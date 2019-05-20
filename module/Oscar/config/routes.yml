@@ -80,6 +80,14 @@ timesheet:
     may_terminate: false
 
     child_routes:
+        synthesisactivity:
+            type: segment
+            options:
+                route: /synthesisactivity
+                defaults:
+                    action: synthesisActivityPeriod
+
+
         synthesis:
             type: segment
             options:

@@ -13,7 +13,7 @@ class OscarVersion
     const MAJOR = 2;
     const MINOR = 10;
     const PATCH = 1;
-    const NAME = "Matrix";
+    const NAME = "Creed";
 
     public static function getBuild(){
         $commitHash = trim(exec('git log -1 --pretty="%h" -n1 HEAD'));
