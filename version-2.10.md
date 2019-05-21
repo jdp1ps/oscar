@@ -23,7 +23,7 @@ En cliquant sur **Détails**, une vue plus précise permet de voir la répartiti
 Un export Excel de ces données sera proposé. A noter que pour les interconnexions avec d'autres applications de votre SI, ces informations sont accessibles au format JSON à la même adresse en ajoutant `&format=json` à la requète.
 
 
-## Section des documents publiques
+## Section des documents publics
 
 Les documents publics peuvent maintenant être organisés en section. Les sections doivent être configurées dans la partie configuration par l'administrateur.
 
