@@ -20,12 +20,12 @@ En cliquant sur **Détails**, une vue plus précise permet de voir la répartiti
 
 ![Synthèse des heures](./doc/images/synthes-2-002.png)
 
-Un export Excel de ces données sera proposé. A noté que pour les interconnexions avec d'autres application de votre SI, ces informations sont accessibles auformat JSON à la même adresse en ajoutant `&format=json` à la requète.
+Un export Excel de ces données sera proposé. A noter que pour les interconnexions avec d'autres applications de votre SI, ces informations sont accessibles au format JSON à la même adresse en ajoutant `&format=json` à la requète.
 
 
 ## Section des documents publiques
 
-Les documents publiques peuvent maintenant être organisés en section. Les sections doivent être configurées dans la partie configuration par l'administrateur.
+Les documents publics peuvent maintenant être organisés en section. Les sections doivent être configurées dans la partie configuration par l'administrateur.
 
 
 
@@ -34,5 +34,5 @@ Les documents publiques peuvent maintenant être organisés en section. Les sect
  - Refonte de la gestion des partenaires/membres dans le fiche activité
  - Dans la fiche organisation (nouvelle organisation), le contrôle de l'existant utilise maintenant le nom complet et l'acronyme, le champ "Nom complet" a été placé en tête.
  - Les montants de la vue versement utilise maintenant l'espace comme séparateur des milliers.
- - L'affichage du temps écoulé des documents se base maintenant sur les minutes pour éviter l'affichage "Il y'a 11 heures sur un fichier déposé à n'importe quel moment de la journée"
+ - L'affichage du temps écoulé des documents se base maintenant sur les minutes pour éviter l'affichage "Il y a 11 heures sur un fichier déposé à n'importe quel moment de la journée"
  - La personne "uploadant" est correctement stoquée
