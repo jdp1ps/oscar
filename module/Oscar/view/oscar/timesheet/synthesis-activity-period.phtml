@@ -5,90 +5,133 @@
  * Date: 20/05/19
  * Time: 14:55
  */
+
+$labels = [
+    "abs" => "Absent",
+    "education" => "Éducation",
+    "other" => "Autre"
+]
 ?>
 <style>
+    small {
+        font-weight: 100;
+    }
+    th {
+        vertical-align: center;
+    }
     .main {
         background: #0b97c4;
     }
     .research {
         background: #92a6c4;
     }
+    .education {
+        background: #90c4a9;
+    }
+    .abs {
+        background: #b6c493;
+    }
+    .other {
+        background: #b698c4;
+    }
     .duration {
         text-align: right;
     }
 </style>
-<table class="table table-bordered">
+<table class="table table-condensed" style="border: 0">
     <thead>
-    <th>En tête</th>
-    <th colspan="<?= count($wps)+1 ?>" class="main">
-        <h2><?= $activity['projectacronym'] ?></h2>
-        <small><?= $activity['label'] ?></small>
-    </th>
-    <th colspan="<?= count($ces) +2 ?>" class="research">Recherche</th>
-    <th colspan="<?= count($others) ?>" class="horslot">Hors-lots</th>
+        <tr>
+            <th>&nbsp;</th>
+            <th class="research" colspan="<?= count($wps)+1 +count($ces)+2 ?>"><i class="icon-beaker"></i> Recherche</th>
 
-    </thead>
-    <thead>
-        <th>&nbsp;</th>
+            <?php foreach ($othersGroups as $k=>$othersGroup):?>
+                <th class="<?= $k ?>" colspan="<?= count($othersGroup)+(count($othersGroup)>1 ? 1 : 0) ?>"><?= $labels[$k] ?></th>
+            <?php endforeach; ?>
+        </tr>
+        <tr>
+            <th>&nbsp;</th>
+            <th colspan="<?= count($wps)+1 ?>" class="main">
+                <strong title="<?= $activity['label'] ?>">
+                    <i class="icon-cube"></i>
+                    <?= $activity['projectacronym'] ?></strong>
+            </th>
+            <?php foreach ($ces as $acronym): ?>
+                <th class="research ce" rowspan="2">
+                    <strong><i class="icon-cube"></i><?= $acronym ?></strong>
+                </th>
+            <?php endforeach; ?>
+
+            <th class="research" rowspan="2">Autres</th>
+            <th class="main" rowspan="2"><strong>TOTAL</strong></th>
+            <?php foreach ($othersGroups as $k=>$othersGroup):?>
+                <?php foreach ($othersGroup as $other):?>
+            <th class="<?= $k ?>" rowspan="2"><?= $other['label'] ?></th>
+                <?php endforeach; ?>
+                <?php if(count($othersGroup) > 1): ?>
+                    <th class="<?= $k ?>" rowspan="2">Total</th>
+                <?php endif; ?>
+            <?php endforeach; ?>
+
+            <th>&nbsp;</th>
+        </tr>
+        <tr>
+            <th>&nbsp;</th>
         <?php foreach ($wps as $id=>$wp): ?>
             <th class="main">
-                <strong><?= $wp['code'] ?></strong><br>
-                <small><?= $wp['label'] ?></small>
-            </th>
-        <?php endforeach; ?>
-            <th class="main">
-                <strong>Total</strong>
-            </th>
-        <?php foreach ($ces as $acronym): ?>
-            <th class="research ce">
-                <strong><?= $acronym ?></strong>
+                <strong title="<?= $wp['label'] ?>">
+                    <?= $wp['code'] ?>
+                </strong>
             </th>
         <?php endforeach; ?>
 
-        <th class="research">Autres recherches</th>
         <th class="main">
-            <strong>Total recherche</strong>
+            <strong>Total</strong>
         </th>
-
-        <?php foreach ($others as $k=>$other): if($k == 'research') continue;?>
-            <th class="other horslot">
-                <strong><?= $other['label'] ?></strong>
+            <th class="">
+                <strong>TOTAL MOIS</strong>
             </th>
-        <?php endforeach; ?>
-
+        </tr>
     </thead>
     <tbody>
 <?php foreach ($foo as $person=>$line): ?>
     <tr>
-        <th><?= $person ?></th>
-
+        <th style="background: #fff"><i class="icon-user"></i><?= $person ?></th>
         <?php foreach ($line['main'] as $wp=>$duration): ?>
             <td class="main duration">
                 <?= $this->duration($duration) ?>
             </td>
         <?php endforeach; ?>
-        <th class="main duration">
+        <td class="main duration">
             <strong><?= $this->duration($line['totalMain']) ?></strong>
-        </th>
+        </td>
+
         <?php foreach ($line['ce'] as $acronym=>$duration): ?>
             <td class="ce research duration">
                 <?= $this->duration($duration) ?>
             </td>
         <?php endforeach; ?>
+
         <td class="research duration">
             <?= $this->duration($line['otherresearch']) ?>
         </td>
-        <th class="main duration">
+        <td class="main duration">
             <strong><?= $this->duration($line['totalResearch']) ?></strong>
-        </th>
-        <?php foreach ($line['others'] as $code=>$duration): if($code == 'research') continue;?>
-            <td class="horslot other <?= $code ?> duration">
-                <?= $this->duration($duration) ?>
-            </td>
+        </td>
+
+        <?php foreach ($othersGroups as $k=>$othersGroup): $group = $othersGroup['group']; ?>
+            <?php foreach ($othersGroup as $other):?>
+                <td class="<?= $k ?> duration"><?= $this->duration($line['others'][$other['code']]) ?></td>
+            <?php endforeach; ?>
+            <?php if(count($othersGroup) > 1): ?>
+            <td class="<?= $k ?> duration"><strong><?= $this->duration($line['totaux'][$k]) ?></strong></td>
+            <?php endif; ?>
         <?php endforeach; ?>
 
+        <td style="background: #fff" class="duration">
+            <?= $line['totaux']['total'] ?>
+        </td>
     </tr>
-
 <?php endforeach; ?>
     </tbody>
 </table>
+<pre><?php var_dump($othersGroups) ?></pre>

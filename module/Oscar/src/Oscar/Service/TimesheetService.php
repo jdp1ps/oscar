@@ -1202,11 +1202,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $personIds[] = $person->getId();
         }
 
-
         $strData = [];
-
         $lots = [];
         $lotsStr = [];
+        $othersGroups = [];
 
 
         /** @var $lot WorkPackage */
@@ -1220,7 +1219,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $datas = $this->getTimesheetRepository()->getPersonPeriodSynthesis($personIds, $period);
 
         foreach ($datas as $d){
-
             if( $d['activity_id'] && $d['activity_id'] != $idActivity ){
                 $acronym = $d['acronym'];
                 if( !in_array($acronym, $ceStr) ){
@@ -1231,6 +1229,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $others = $this->getOthersWP();
 
+        foreach ($others as $key=>$other) {
+            if( $key == 'research' ) continue;
+            $group = $other['group'];
+            if( !array_key_exists($group, $othersGroups) ){
+                $othersGroups[$group] = [];
+            }
+            $othersGroups[$group][$key] = $other;
+        }
+
         foreach ($activity->getDeclarers() as $person) {
             $personIds[] = $person->getId();
             $output['persons'][$person->getId()] = $this->getTimesheetDatasPersonPeriod($person, $period);
@@ -1239,6 +1246,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'ce' => [],
                 'otherresearch' => 0.0,
                 'others' => [],
+                'othersGroups' => [],
+                'totaux' => [
+                    'total' => 0.0
+                ],
                 'totalMain' => 0.0,
                 'totalProjets' => 0.0,
 //                'totalProjets' => 0.0,
@@ -1249,12 +1260,17 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             foreach ($lotsStr as $l){
                 $strData[(string)$person]['main'][$l] = 0.0;
             }
+
             foreach ($ceStr as $p){
                 $strData[(string)$person]['ce'][$p] = 0.0;
             }
+
             foreach ($others as $key=>$other) {
                 if( $key != 'research' ){
                     $strData[(string)$person]['others'][$key] = 0.0;
+                    $strData[(string)$person]['totaux'][$other['group']] = 0.0;
+                } else {
+                    $strData[(string)$person]['othersGroups'][$other['group']] = 0.0;
                 }
             }
         }
@@ -1269,13 +1285,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             // Hors-lot
             if( !$activityId ){
+                $group = $others[$key]['group'];
+
                 if( $key == 'research' ){
                     $strData[$person]['otherresearch'] += $duration;
                     $strData[$person]['totalResearch'] += $duration;
                 } else {
                     $strData[$person]['others'][$key] += $duration;
+                    $strData[$person]['totaux'][$group] += $duration;
                 }
-
             } else {
                 // Projet
                 if($activityId == $idActivity){
@@ -1291,18 +1309,16 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 }
                 $strData[$person]['totalResearch'] += $duration;
             }
+            $strData[$person]['totaux']['total'] += $duration;
         }
 
         $output['foo'] = $strData;
         $output['others'] = $others;
+        $output['othersGroups'] = $othersGroups;
         $output['ces'] = $ceStr;
         $output['datas'] = $datas;
         $output['wps'] = $lots;
         $output['activity'] = $activity->toArray();
-
-
-
-
 
         return $output;
     }
