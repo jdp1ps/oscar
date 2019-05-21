@@ -12,7 +12,7 @@ Le système de recherche des personnes a été amélioré et permet maintenant d
 
 ## Synthèse (2019/05)
 
-Une option de **synthèse générale (v2)** est accessible depuis la fiche d'une activité. Elle offre une vision globale aux chargés de valorisation sur l'état des heures déclarées pour un projet, par période et par personne, elle permet de contrôler rapidement le cumule des heures : 
+Une option de **synthèse générale (v2)** est accessible depuis la fiche d'une activité. Elle offre une vision globale aux chargés de valorisation sur l'état des heures déclarées pour un projet, par période et par personne, elle permet de contrôler rapidement le cumul des heures : 
 
 ![Synthèse des heures](./doc/images/synthes-2-001.png)
 
