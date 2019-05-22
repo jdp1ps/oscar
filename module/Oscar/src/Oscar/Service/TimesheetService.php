@@ -1194,50 +1194,99 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'persons' => []
         ];
 
+        /** @var string[] $ceStr Liste des acronymes des autres activités */
+        $ceStr = [];
+
+        $strData = [];
+
+        $totaux = [
+            // Totaux Lots
+            'wps' => [
+
+            ],
+
+            'totalMain' => 0.0,
+
+            // Totaux autres projets
+            'ce' => [
+
+            ],
+            'totalCe' => 0.0,
+
+            // Totaux hors-lots
+            'others' => [
+
+            ],
+
+            // Total groupes
+            'groups' => [
+
+            ],
+
+            // Total
+            'total'     => 0.0
+        ];
+
+
+        /** @var [] $others Détails des Hors-Lots */
+        $others = $this->getOthersWP();
+
         /** @var Activity $activity */
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
+
+        /** @var integer[] $personIds Identififiants des déclarants de l'activité */
         $personIds = [];
 
+        /** @var Person $person */
         foreach ($activity->getDeclarers() as $person) {
             $personIds[] = $person->getId();
         }
 
-        $strData = [];
-        $lots = [];
+        /** @var string[] $lotsStr Liste des codes des lots de travail de l'activité */
         $lotsStr = [];
-        $othersGroups = [];
 
+        /** @var [] $lots Détails des Lots de travail de l'activité */
+        $lots = [];
 
         /** @var $lot WorkPackage */
         foreach( $activity->getWorkPackages() as $lot){
             $lots[$lot->getId()] = $lot->toArray();
             $lotsStr[] = $lot->getCode();
+            $totaux['wps'][$lot->getCode()] = 0.0;
         }
 
-        $ceStr = [];
+        // Hors-lots
+        $othersGroups = [];
 
+        // Données des déclarants pour la période
         $datas = $this->getTimesheetRepository()->getPersonPeriodSynthesis($personIds, $period);
 
+        // Parse préabable pour obtenir la liste des autres projets dans lesquel les déclarants sont identifiés
         foreach ($datas as $d){
             if( $d['activity_id'] && $d['activity_id'] != $idActivity ){
                 $acronym = $d['acronym'];
                 if( !in_array($acronym, $ceStr) ){
-                    $ceStr[] = $d['acronym'];
+                    $ceStr[] = $acronym;
+                    $totaux['ce'][$acronym] = 0.0;
                 }
             }
         }
 
-        $others = $this->getOthersWP();
-
         foreach ($others as $key=>$other) {
-            if( $key == 'research' ) continue;
+
+            $totaux['others'][$key] = 0.0;
+
             $group = $other['group'];
+
             if( !array_key_exists($group, $othersGroups) ){
                 $othersGroups[$group] = [];
+                $totaux['groups'][$group] = 0.0;
             }
+
             $othersGroups[$group][$key] = $other;
         }
 
+        // INITIALISATION de la SORTIE
         foreach ($activity->getDeclarers() as $person) {
             $personIds[] = $person->getId();
             $output['persons'][$person->getId()] = $this->getTimesheetDatasPersonPeriod($person, $period);
@@ -1251,10 +1300,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'total' => 0.0
                 ],
                 'totalMain' => 0.0,
-                'totalProjets' => 0.0,
-//                'totalProjets' => 0.0,
+                'totalProjects' => 0.0,
                 'totalResearch' => 0.0,
-                //'totalProjets' => 0.0,
             ];
 
             foreach ($lotsStr as $l){
@@ -1266,12 +1313,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             foreach ($others as $key=>$other) {
-                if( $key != 'research' ){
-                    $strData[(string)$person]['others'][$key] = 0.0;
-                    $strData[(string)$person]['totaux'][$other['group']] = 0.0;
-                } else {
-                    $strData[(string)$person]['othersGroups'][$other['group']] = 0.0;
+                $group = $other['group'];
+
+                $strData[(string)$person]['others'][$key] = 0.0;
+                $strData[(string)$person]['totaux'][$group] = 0.0;
+
+                if( !array_key_exists($group, $strData[(string)$person]['othersGroups']) ){
+                    $strData[(string)$person]['othersGroups'][$group] = [
+                        'total' => 0.0,
+                        'others' => []
+                    ];
                 }
+                $strData[(string)$person]['othersGroups'][$group]['others'][$key] = 0.0;
             }
         }
 
@@ -1280,20 +1333,25 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $person = $d['person'];
             $key = $d['itemkey'];
             $duration = (float)$d['duration'];
-
             $activityId = $d['activity_id'];
 
             // Hors-lot
             if( !$activityId ){
                 $group = $others[$key]['group'];
 
-                if( $key == 'research' ){
+                $strData[$person]['others'][$key] += $duration;
+                $strData[$person]['othersGroups'][$group]['others'][$key] += $duration;
+                $strData[$person]['othersGroups'][$group]['total'] += $duration;
+                $strData[$person]['totaux'][$group] += $duration;
+
+                if( $group == 'research' ){
                     $strData[$person]['otherresearch'] += $duration;
                     $strData[$person]['totalResearch'] += $duration;
-                } else {
-                    $strData[$person]['others'][$key] += $duration;
-                    $strData[$person]['totaux'][$group] += $duration;
+                    $totaux['totalResearch'] += $duration;
                 }
+                $totaux['groups'][$group] += $duration;
+                $totaux['others'][$key] += $duration;
+
             } else {
                 // Projet
                 if($activityId == $idActivity){
@@ -1302,23 +1360,31 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     }
                     $strData[$person]['totalMain'] += $duration;
                     $strData[$person]['main'][$key] += $duration;
+                    $totaux['wps'][$key] += $duration;
+                    $totaux['totalMain'] += $duration;
                 } else {
                     $acronym = $d['acronym'];
                     $strData[$person]['ce'][$acronym] += $duration;
                     $strData[$person]['totalProjects'] += $duration;
+                    $totaux['totalCe'] += $duration;
+                    $totaux['ce'][$acronym] += $duration;
                 }
+                $totaux['totalResearch'] += $duration;
                 $strData[$person]['totalResearch'] += $duration;
             }
             $strData[$person]['totaux']['total'] += $duration;
+            $totaux['total'] += $duration;
         }
 
         $output['foo'] = $strData;
         $output['others'] = $others;
         $output['othersGroups'] = $othersGroups;
         $output['ces'] = $ceStr;
-        $output['datas'] = $datas;
+       // $output['datas'] = $datas;
+        $output['totaux'] = $totaux;
         $output['wps'] = $lots;
         $output['activity'] = $activity->toArray();
+
 
         return $output;
     }
