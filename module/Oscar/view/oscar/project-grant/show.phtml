@@ -489,14 +489,17 @@
         </div>
 
         <h3>Synthèse de déclarations</h3>
+
+        <!--
         <a href="<?= $this->url('timesheet/activity', ['id' => $entity->getId()]) ?>"
            class="btn btn-primary btn-large">
             <i class="icon-calendar"></i>
             Synthèse générale
-        </a>
+        </a>-->
+
             <a href="<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId() ?>" class="btn btn-primary btn-large">
             <i class="icon-calendar"></i>
-            Synthèse générale 2
+            Synthèse pour cette activité
         </a>
 
 
