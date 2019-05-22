@@ -72,8 +72,15 @@
             <h1 class="row">{{ y.label }} <strong class="total">{{ y.total | formatDuration }}</strong></h1>
             <section v-for="p in y.periods" class="period">
             <h2 class="row">
-                <span><i class="icon-calendar"></i>
-                {{ p.label | formatPeriod }}</span>
+                <span>
+                    <i class="icon-calendar"></i>
+                    {{ p.label | formatPeriod }}
+                    <a :href="'/feuille-de-temps/synthesisactivity?activity_id=<?= $activity->getId() ?>&format=html&period=' + p.label" class="btn btn-xs btn-primary">
+                        <i class="icon-calendar"></i>
+                        Feuille de temps de l'activité
+                    </a>
+                </span>
+
                 <small class="total">
                     Total pour <?= $activity->getAcronym() ?> :
                     <strong>{{ p.total | formatDuration }} </strong>
@@ -82,19 +89,34 @@
             </h2>
             <article v-for="l in p.persons" class="card card-xs">
                 <h4 class="row">
-                <strong class="person">
-                    <i class="icon-user"></i> {{ l.label }}
+                    <strong class="person">
+                        <i class="icon-user"></i> {{ l.label }}
 
-                    <a href="#" @click.prevent="details(l.personId, p.label)">Détails</a>
-                </strong>
-                <strong class="main">
-                    <i class="icon-cubes"></i>
-                    <?= $activity->getAcronym() ?> :
-                    {{ l.main | formatDuration }}
-                </strong>
+                        <a href="#" @click.prevent="details(l.personId, p.label)" class="btn btn-xs btn-primary">
+                            <i class="icon-calendar"></i>
+                            Répartition mensuelle
+                        </a>
+
+                        <a :href="'/feuille-de-temps/excel?action=export&period=' +p.label +'&personid=' + l.personId" class="btn btn-xs btn-default">
+                            <i class="icon-file-excel"></i>
+                            Feuille de temps (Excel)
+                        </a>
+
+                    </strong>
+                    <strong class="main">
+                        <i class="icon-cubes"></i>
+                        <?= $activity->getAcronym() ?> :
+                        {{ l.main | formatDuration }}
+                    </strong>
                 </h4>
-                <div><a v-if="filterPersonId == null" href="#" @click.prevent="filterPersonId = l.personId"><small>Afficher uniquement <strong>{{ l.label }}</strong></small></a>
-                    <a v-else href="#" @click.prevent="filterPersonId = null"><small>Afficher tout le monde</small></a></div>
+                <div>
+                    <a v-if="filterPersonId == null" href="#" @click.prevent="filterPersonId = l.personId">
+                        <small>Afficher uniquement <strong>{{ l.label }}</strong></small>
+                    </a>
+                    <a v-else href="#" @click.prevent="filterPersonId = null">
+                        <small>Afficher tout le monde</small>
+                    </a>
+                </div>
                 <section class="details">
                     <article v-for="d in l.details" class="detail row">
                         <strong v-if="d.type == 'wp'">

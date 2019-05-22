@@ -37,6 +37,8 @@ $labels = [
     .duration {
         text-align: right;
     }
+
+
 </style>
 <table class="table table-condensed" style="border: 0">
     <thead>
@@ -45,7 +47,10 @@ $labels = [
             <th class="research" colspan="<?= count($wps)+1 +count($ces)+2 ?>"><i class="icon-beaker"></i> Recherche</th>
 
             <?php foreach ($othersGroups as $k=>$othersGroup):?>
-                <th class="<?= $k ?>" colspan="<?= count($othersGroup)+(count($othersGroup)>1 ? 1 : 0) ?>"><?= $labels[$k] ?></th>
+                <th class="<?= $k ?>" colspan="<?= count($othersGroup)+(count($othersGroup)>1 ? 1 : 0) ?>">
+                    <i class="icon-<?= $k ?>"></i>
+                    <?= $labels[$k] ?>
+                </th>
             <?php endforeach; ?>
         </tr>
         <tr>

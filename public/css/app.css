@@ -7207,10 +7207,16 @@ span[class*="status-400"] .icon:before {
 [class*="icon-conges"]:before {
   content: '\e8a2'; }
 
+[class*="icon-abs"]:before {
+  content: '\e8a2'; }
+
 [class*="icon-training"]:before {
   content: '\e88c'; }
 
 [class*="icon-teaching"]:before {
+  content: '\e877'; }
+
+[class*="icon-education"]:before {
   content: '\e877'; }
 
 [class*="icon-sickleave"]:before {
