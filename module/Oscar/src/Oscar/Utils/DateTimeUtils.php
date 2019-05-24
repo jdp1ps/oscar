@@ -27,18 +27,26 @@ class DateTimeUtils {
 
         $dateRef = new \DateTime(sprintf('%s-01', $period));
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
+        $dateFin = $dateRef->format('Y-m-'. $nbr);
+
+        $fmt = datefmt_create('fr_FR', \IntlDateFormatter::FULL, \IntlDateFormatter::NONE, 'Europe/Paris', \IntlDateFormatter::GREGORIAN);
+
+        $startLabel = datefmt_format($fmt, $dateRef->getTimestamp());
+        $endLabel = datefmt_format($fmt, (new \DateTime($dateFin))->getTimestamp());
+        $periodLabel = $dateRef->format('M Y');
 
         $datas = [
             'totalDays' => $nbr,
             'year' => $dateRef->format('Y'),
             'month' => $dateRef->format('m'),
+            'periodLabel' => $periodLabel,
             'start' => $dateRef->format('Y-m-01 00:00:00'),
+            'startLabel' => $startLabel,
             'firstDay' => $dateRef->format('Y-m-01'),
             'end' => $dateRef->format('Y-m-' . $nbr .' 23:59:59'),
+            'endLabel' => $endLabel,
             'lastDay' => $dateRef->format('Y-m-'. $nbr),
         ];
-
-
 
         $daysLabel = ['', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
         $i = 1;

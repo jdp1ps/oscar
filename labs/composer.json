@@ -1,0 +1,12 @@
+{
+    "name": "bouvry/generate-excel",
+    "authors": [
+        {
+            "name": "bouvry",
+            "email": "stephane.bouvry@unicaen.fr"
+        }
+    ],
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.6"
+    }
+}

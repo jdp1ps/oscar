@@ -1191,7 +1191,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function getSynthesisActivityPeriod($idActivity, $period){
         $output = [
             'activity' => null,
-            'persons' => []
+            'persons' => [],
+            'period' => DateTimeUtils::periodBounds($period)
         ];
 
         /** @var string[] $ceStr Liste des acronymes des autres activités */
