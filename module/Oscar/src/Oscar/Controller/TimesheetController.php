@@ -26,6 +26,7 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
+use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\TimesheetService;
@@ -501,11 +502,19 @@ class TimesheetController extends AbstractOscarController
         $error = null;
 
         $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
-        if( $format == 'html' ){
-            return $output;
+        if( $format == 'json' ){
+            return $this->jsonOutput($output);
+        }
+        elseif ($format == "excel") {
+            $formatter = new TimesheetActivityPeriodFormatter();
+            $formatter->output($output, 'excel');
+        }
+        elseif ($format == "pdf") {
+            $formatter = new TimesheetActivityPeriodFormatter();
+            $formatter->output($output, 'pdf');
         }
         else {
-            return $this->jsonOutput($output);
+            return $output;
         }
     }
 

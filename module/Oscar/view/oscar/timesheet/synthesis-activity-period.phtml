@@ -53,6 +53,24 @@ $labels = [
     }
 </style>
 
+    <div class="container-fluid">
+
+        <h1>
+            <em>Synthèse des déclarations pour</em><br>
+            <strong><?= $activity['projectacronym'] ?></strong> <?= $activity['project'] ?><br>
+            <i class="icon-calendar"></i> Du <strong><?= $period['startLabel'] ?></strong>
+            au <strong><?= $period['endLabel'] ?></strong>
+        </h1>
+        <p>
+            <a class="btn btn-primary" href="/feuille-de-temps/synthesisactivity?activity_id=<?= $activity['id'] ?>&format=excel&period=<?= $period['year'] ?>-<?= $period['month'] ?>">
+                <i class="icon-file-excel"></i>
+            Télécharger la version Excel
+            </a>
+            <a class="btn btn-primary disabled" href="/feuille-de-temps/synthesisactivity?activity_id=<?= $activity['id'] ?>&format=pdf&period=<?= $period['year'] ?>-<?= $period['month'] ?>">
+                <i class="icon-file-pdf"></i>
+                Télécharger la version PDF (bientôt disponible)
+            </a>
+        </p>
 <table class="table table-condensed" style="border: 0">
     <thead>
         <tr>
@@ -65,7 +83,7 @@ $labels = [
 
             $colEDU = count()
             ?>
-            <th class="research" colspan="<?= $colWP + $colCE + $colSEARCH +1 ?>"><i class="icon-beaker"></i> Recherche</th>
+            <th class="research" colspan="<?= $colWP + $colCE + $colSEARCH +1 ?>"><i class="icon-beaker"></i> Recherches</th>
 
             <?php foreach ($othersGroups as $k=>$othersGroup): if( $k == 'research') continue;?>
                 <th class="<?= $k ?>" colspan="<?= count($othersGroup)+(count($othersGroup)>1 ? 1 : 0) ?>">
@@ -77,9 +95,9 @@ $labels = [
         <tr>
             <th>&nbsp;</th>
 
-            <th class="research" colspan="<?= $colWP ?>"><i class="icon-cubes"></i> PROJET</th>
-            <th class="research" colspan="<?= $colCE ?>"><i class="icon-cubes"></i> autres projets</th>
-            <th class="research" colspan="<?= $colSEARCH ?>"><i class="icon-cubes"></i> autres recherches</th>
+            <th class="research" colspan="<?= $colWP ?>"><i class="icon-cubes"></i> <?= $activity['label'] ?></th>
+            <th class="research" colspan="<?= $colCE ?>"><i class="icon-cubes"></i> Projets</th>
+            <th class="research" colspan="<?= $colSEARCH ?>"><i class="icon-cubes"></i> Autres</th>
             <th class="research" rowspan="2">TOTAL</th>
 
             <?php foreach ($othersGroups as $k=>$othersGroup): if( $k == 'research') continue;?>
@@ -271,73 +289,4 @@ $labels = [
     </tr>
     </tfoot>
 </table>
-
-<?php /*
-<table class="table table-condensed" style="border: 0">
-    <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th class="research" colspan="<?= count($wps)+1 +count($ces)+1 + count($research) ?>"><i class="icon-beaker"></i> Recherche</th>
-
-            <?php foreach ($othersGroups as $k=>$othersGroup): if( $k == 'research') continue;?>
-                <th class="<?= $k ?>" colspan="<?= count($othersGroup)+(count($othersGroup)>1 ? 1 : 0) ?>">
-                    <i class="icon-<?= $k ?>"></i>
-                    <?= $labels[$k] ?>
-                </th>
-            <?php endforeach; ?>
-        </tr>
-        <tr>
-            <th>&nbsp;</th>
-            <th colspan="<?= count($wps)+1 ?>" class="main">
-                <strong title="<?= $activity['label'] ?>">
-                    <i class="icon-cube"></i>
-                    <?= $activity['projectacronym'] ?></strong>
-            </th>
-            <?php foreach ($ces as $acronym): ?>
-                <th class="research ce" rowspan="2">
-                    <strong><i class="icon-cube"></i><?= $acronym ?></strong>
-                </th>
-            <?php endforeach; ?>
-
-            <?php foreach ($othersGroups as $k=>$othersGroup): if( $k != 'research') continue;?>
-                <th class="<?= $k ?>" colspan="<?= count($othersGroup)+(count($othersGroup)>1 ? 1 : 0) ?>">
-                    <i class="icon-<?= $k ?>"></i>
-                    <?= $labels[$k] ?>
-                </th>
-            <?php endforeach; ?>
-
-            <th class="main" rowspan="2"><strong>TOTAL</strong></th>
-            <?php foreach ($othersGroups as $k=>$othersGroup): if( $k == 'research') continue; ?>
-                <?php foreach ($othersGroup as $other):?>
-            <th class="<?= $k ?>" rowspan="2"><?= $other['label'] ?></th>
-                <?php endforeach; ?>
-                <?php if(count($othersGroup) > 1): ?>
-                    <th class="<?= $k ?>" rowspan="2">Total</th>
-                <?php endif; ?>
-            <?php endforeach; ?>
-
-            <th>&nbsp;</th>
-        </tr>
-        <tr>
-            <th>&nbsp;</th>
-        <?php foreach ($wps as $id=>$wp): ?>
-            <th class="main">
-                <strong title="<?= $wp['label'] ?>">
-                    <?= $wp['code'] ?>
-                </strong>
-            </th>
-        <?php endforeach; ?>
-
-        <th class="main">
-            <strong>Total</strong>
-        </th>
-        </th>
-            <th class="">
-                <strong>TOTAL MOIS</strong>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-/****/
-
-?>
+        </div>

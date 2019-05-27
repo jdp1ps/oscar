@@ -23,7 +23,8 @@
     "elasticsearch/elasticsearch": "^6.0",
     "swiftmailer/swiftmailer": "^6.0",
     "zendframework/zend-text": "^2.4",
-    "phpoffice/phpword": "^0.14.0"
+    "phpoffice/phpword": "^0.14.0",
+    "phpoffice/phpspreadsheet": "^1.6"
   },
   "require-dev": {
     "phpmd/phpmd": "@stable",
