@@ -205,20 +205,51 @@ Ces modèles seront disponibles pour remplir automatiquement la répartition de 
 
 Pour configurer les créneaux disponibles hors activité. La clef `horslots` **doit être défini** dans le fichier `config/autoload/local.php`.
 
+**Ajout version 2.10 "Creed"** : Afin de gérer les sous-totaux dans le rendu des feuilles de temps, une clef `group` a été ajoutée et necessite une des valeurs ci-dessous :
+                                 
+- `research` : Comptabilisé comme recherche (produire un sous-total avec les heures des Projets)
+- `abs` : Créneaux non-travaillé (Congès, Arret maladie)
+- `education` : Créneaux comptabilisés comme enseignement
+- `other` : Autre
+
 ```php
 <?php
 // config/autoload/local.php
 return array(
-   
     'oscar' => [
-        // ...
+        // EXEMPLE
         'horslots' => [
-            'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => '', 'icon' => true ],
-            'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => '', 'icon' => true ],
-            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => '', 'icon' => true ],
-            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
-            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => '', 'icon' => true ],
-            'other' => [ 'code' => 'other', 'label' => 'Divers',  'description' => 'Autre activité', 'icon' => true ],
+            'conges' => [ 
+                'code' => 'conges',
+                'group' => 'abs',
+                'label' => 'Congés',  
+                'description' => '', 
+                'icon' => true ],
+            'training' => [ 
+                'code' => 'training',  
+                'label' => 'Formation',  
+                'description' => '', 
+                'icon' => true ],
+            'teaching' => [ 
+                'code' => 'teaching',  
+                'label' => 'Enseignement',  
+                'description' => '', 
+                'icon' => true ],
+            'sickleave' => [ 
+                'code' => 'sickleave', 
+                'label' => 'Arrêt maladie',  
+                'description' => '', 
+                'icon' => true ],
+            'research' => [ 
+                'code' => 'research', 
+                'label' => 'Autre recherche',  
+                'description' => '', 
+                'icon' => true ],
+            'other' => [ 
+                'code' => 'other', 
+                'label' => 'Divers',  
+                'description' => 'Autre activité', 
+                'icon' => true ],
         ],
     ]
 );

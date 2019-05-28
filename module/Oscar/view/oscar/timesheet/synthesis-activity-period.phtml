@@ -96,7 +96,9 @@ $labels = [
             <th>&nbsp;</th>
 
             <th class="research" colspan="<?= $colWP ?>"><i class="icon-cubes"></i> <?= $activity['label'] ?></th>
+            <?php if( count($ces) > 0): ?>
             <th class="research" colspan="<?= $colCE ?>"><i class="icon-cubes"></i> Projets</th>
+            <?php endif; ?>
             <th class="research" colspan="<?= $colSEARCH ?>"><i class="icon-cubes"></i> Autres</th>
             <th class="research" rowspan="2">TOTAL</th>
 

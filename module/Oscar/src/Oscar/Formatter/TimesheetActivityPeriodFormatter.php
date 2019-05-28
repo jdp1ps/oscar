@@ -187,7 +187,7 @@ class TimesheetActivityPeriodFormatter
         die();
     }
 
-    
+
 
     public function output($datas, $outputFormat='excel'){
 

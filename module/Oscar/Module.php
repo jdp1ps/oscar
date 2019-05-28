@@ -315,6 +315,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             'oscar person:search <expression>' => 'Lance une recherche sur les personnes' ,
 
             '# ORGANISATIONS',
+            'oscar organizations:search:build' => 'Reconstruction de l\'index de recherche (ElasticSearch)',
             'oscar organizations:sync <connectorkey>' => 'Lance la synchronisation des organizations depuis les différents connecteurs.',
 
             '# NOTIFICATIONS',

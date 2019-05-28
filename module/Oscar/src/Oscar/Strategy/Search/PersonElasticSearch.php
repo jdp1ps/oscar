@@ -67,6 +67,31 @@ class PersonElasticSearch implements PersonSearchStrategy
 
     public function search($search)
     {
+        /****
+        'firstname' => $person->getFirstname(),
+        'lastname' => $person->getLastname(),
+        'fullname' => $person->getDisplayName(),
+        'email' => $person->getEmail(),
+        'affectation' => $person->getLdapAffectation(),
+        'location' => $person->getLdapSiteLocation(),
+        'organizations' => $organizations,
+        'activities' => $activities,
+        'connectors' => $connectors
+        /******/
+        $params = [
+            'index' => $this->getIndex(),
+            'type' => $this->getType(),
+            'body' => [
+                'size' => 10000,
+                'query' => [
+                    'query_string' => [
+                        'fields' => ['lastname^5', 'fullname^5', 'firstname^2', 'email', 'affectation', 'location', 'organizations', 'activities', 'connectors'],
+                        'query' => $search,
+                    ]
+                ]
+            ]
+        ];
+        /*
         $params = [
             'index' => $this->getIndex(),
             'type' => $this->getType(),
@@ -78,7 +103,7 @@ class PersonElasticSearch implements PersonSearchStrategy
                     ]
                 ]
             ]
-        ];
+        ];/****/
 
         $response = $this->getClient()->search($params);
         $ids = [];
