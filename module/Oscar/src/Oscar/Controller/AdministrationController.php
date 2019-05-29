@@ -231,6 +231,7 @@ class AdministrationController extends AbstractOscarController
     }
 
     public function accueilAction(){
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_MENU_ADMIN);
         return [];
     }
 
@@ -387,6 +388,9 @@ class AdministrationController extends AbstractOscarController
     }
 
     public function connectorsHomeAction(){
+
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+
         $configOscar = $this->getServiceLocator()->get('OscarConfig');
         $configConnectors = $configOscar->getConfiguration('connectors');
 
@@ -454,6 +458,8 @@ class AdministrationController extends AbstractOscarController
      */
     public function connectorConfigureAction()
     {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+
         $connectorType = $this->params()->fromRoute('connectortype');
         $connectorName = $this->params()->fromRoute('connectorname');
 
@@ -479,6 +485,8 @@ class AdministrationController extends AbstractOscarController
      */
     public function connectorExecuteAction()
     {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+
         $connectorType = $this->params()->fromRoute('connectortype');
         $connectorName = $this->params()->fromRoute('connectorname');
         $force = $this->params()->fromQuery('force', false);
@@ -520,6 +528,7 @@ class AdministrationController extends AbstractOscarController
      */
     public function connectorsConfigAction()
     {
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
 
         ///////////////////////////////////// Connecteurs PERSON <> ORGANIZATION
         $personOrganizationConnectors = $this->getServiceLocator()
@@ -848,7 +857,7 @@ class AdministrationController extends AbstractOscarController
 
     public function rolesAction()
     {
-        $authenticated = $this->getEntityManager()->getRepository(Role::class)->findAll();
+        $this->getOscarUserContext()->check(Privileges::DROIT_ROLE_VISUALISATION);
         $out = [];
         return ["roles" => json_encode($out)];
     }

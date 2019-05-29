@@ -43,29 +43,33 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['users', 'roles', 'rolesEdit',
-                        "index", "accessAPI", "roleAPI",
-                        "userLogs", 'userRoles', 'organizationRole',
-                        'organizationRoleApi', 'activityIndexBuild', 'organizationType',
-                        'discipline', 'tva'],
+                    'action' => [
+                        "accessAPI",
+                        'accueil', // OK
+                        'activityIndexBuild', // OK
+                        'discipline', // OK
+                        'users',
+                        'roles',
+                        'rolesEdit',
+                        "index",
+                        "roleAPI",
+                        "userLogs",
+                        'userRoles',
+                        'organizationRole',
+                        'organizationRoleApi',
+                        'organizationType',
+                        'tva',
+                        'connectorsConfig',
+                        'connectorTest',
+                        'connectorExecute',
+                        'connectorsHome',
+                        'connectorConfigure',
+                        'typeDocument',
+                        'typeDocumentApi',
+                        'numerotation',
+                        'parameters'
+                    ],
                     'roles' => ['user']
-                ],
-
-                [ 'controller' =>  'Administration',
-                    'action' => ['parameters'],
-                    'roles' => ['Administrateur']
-                ],
-
-                [ 'controller' =>  'Administration',
-                    'action' => ['numerotation'],
-                    'roles' => ['Administrateur']
-                ],
-
-
-
-                [ 'controller' =>  'Administration',
-                    'action' => ['accueil', 'connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
-                    'roles' => ['Administrateur']
                 ],
 
                 [ 'controller' =>  'Connector',
