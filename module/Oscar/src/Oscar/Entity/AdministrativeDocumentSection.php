@@ -83,7 +83,7 @@ class AdministrativeDocumentSection
     /**
      * @return string
      */
-    public function getLabel(): string
+    public function getLabel()
     {
         return $this->label;
     }
@@ -91,7 +91,7 @@ class AdministrativeDocumentSection
     /**
      * @param string $label
      */
-    public function setLabel(string $label): void
+    public function setLabel(string $label)
     {
         $this->label = $label;
     }
@@ -99,7 +99,7 @@ class AdministrativeDocumentSection
     /**
      * @return string
      */
-    public function getDescription(): string
+    public function getDescription()
     {
         return $this->description;
     }
@@ -107,7 +107,7 @@ class AdministrativeDocumentSection
     /**
      * @param string $description
      */
-    public function setDescription(string $description): void
+    public function setDescription(string $description)
     {
         $this->description = $description;
     }
