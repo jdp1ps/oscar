@@ -43,29 +43,33 @@ return array(
                 ],
 
                 [ 'controller' =>  'Administration',
-                    'action' => ['users', 'roles', 'rolesEdit',
-                        "index", "accessAPI", "roleAPI",
-                        "userLogs", 'userRoles', 'organizationRole',
-                        'organizationRoleApi', 'activityIndexBuild', 'organizationType',
-                        'discipline', 'tva', 'documentSections'],
+                    'action' => [
+                        "accessAPI",
+                        'accueil', // OK
+                        'activityIndexBuild', // OK
+                        'discipline', // OK
+                        'users',
+                        'roles',
+                        'rolesEdit',
+                        "index",
+                        "roleAPI",
+                        "userLogs",
+                        'userRoles',
+                        'organizationRole',
+                        'organizationRoleApi',
+                        'organizationType',
+                        'tva',
+                        'connectorsConfig',
+                        'connectorTest',
+                        'connectorExecute',
+                        'connectorsHome',
+                        'connectorConfigure',
+                        'typeDocument',
+                        'typeDocumentApi',
+                        'numerotation',
+                        'parameters'
+                    ],
                     'roles' => ['user']
-                ],
-
-                [ 'controller' =>  'Administration',
-                    'action' => ['parameters'],
-                    'roles' => ['Administrateur']
-                ],
-
-                [ 'controller' =>  'Administration',
-                    'action' => ['numerotation'],
-                    'roles' => ['Administrateur']
-                ],
-
-
-
-                [ 'controller' =>  'Administration',
-                    'action' => ['accueil', 'connectorsConfig', 'connectorTest', 'connectorExecute', 'connectorsHome', 'connectorConfigure','typeDocument', 'typeDocumentApi'],
-                    'roles' => ['Administrateur']
                 ],
 
                 [ 'controller' =>  'Connector',
@@ -689,47 +693,6 @@ return array(
                         ),
                     ),
                 ),
-
-                'oscar_searchperson_rebuild' => array(
-                    'options' => array(
-                        'route' => 'oscar persons:search:build',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'buildSearchPerson',
-                        ),
-                    ),
-                ),
-
-                'oscar_searchporganization_rebuild' => array(
-                    'options' => array(
-                        'route' => 'oscar organizations:search:build',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'buildSearchOrganization',
-                        ),
-                    ),
-                ),
-
-                'oscar_searchperson_search' => array(
-                    'options' => array(
-                        'route' => 'oscar person:search <exp>',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'searchPerson',
-                        ),
-                    ),
-                ),
-
-                'oscar_organization_search' => array(
-                    'options' => array(
-                        'route' => 'oscar organizations:search <exp>',
-                        'defaults' => array(
-                            'controller' => 'Console',
-                            'action' => 'searchOrganization',
-                        ),
-                    ),
-                ),
-
                 //////////////////////////////////////////////////////// HARPÉGE
                 'console_check_persons' => [
                     'options' => array(
