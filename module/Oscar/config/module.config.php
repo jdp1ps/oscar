@@ -67,7 +67,8 @@ return array(
                         'typeDocument',
                         'typeDocumentApi',
                         'numerotation',
-                        'parameters'
+                        'parameters',
+                        'access'
                     ],
                     'roles' => ['user']
                 ],

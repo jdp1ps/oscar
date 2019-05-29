@@ -1428,6 +1428,14 @@ administration:
                 defaults:
                     action: documentSections
 
+        access:
+            type: segment
+            may_terminate: true
+            options:
+                route: /access
+                defaults:
+                    action: access
+
         accueil:
             type: segment
             may_terminate: true

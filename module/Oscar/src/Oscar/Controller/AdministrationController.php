@@ -144,6 +144,10 @@ class AdministrationController extends AbstractOscarController
         ];
     }
 
+    public function accessAction(){
+        return [];
+    }
+
     protected function saveEditableConfKey($key, $value){
         $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
     }
