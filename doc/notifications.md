@@ -15,6 +15,9 @@ L'option **fixed** permet de configurer des envois imposés sous la forme d'un t
 return [
     'oscar' => [
         /*** Notifications ***/
+        // L'utilisateur peut configurer la fréquence des notifications
+        'override' => false,
+        
         'notifications' => [
             // Envoi automatique
             'fixed' => ['Mer8'] // ex: IMPOSE une notification chaque mercredis à 8 heures

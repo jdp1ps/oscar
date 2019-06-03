@@ -193,8 +193,11 @@ return array(
                /****/
             ]
         ],
+
         /*** Notifications ***/
         'notifications' => [
+            // L'utilisateur peut configurer la fréquence des notifications
+            'override' => false,
 
             // Envoi automatique
             'fixed' => ['Mer8', 'Lun20'] // ex: IMPOSE une notification chaque mercredis à 8 heure et Lundis à 20 heures
