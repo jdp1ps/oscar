@@ -16,6 +16,7 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\OrganizationPerson;
@@ -210,6 +211,34 @@ class NotificationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         return $_object_privilege_persons[$activityId][$privilege];
+    }
+
+
+    /**
+     * Déclenche l'envoi d'un document lors de l'upload.
+     *
+     * @param ContractDocument $document
+     * @throws \Exception
+     */
+    public function generateActivityDocumentUploaded( ContractDocument $document ){
+        $personToNotify = $this->getPersonsIdFor(Privileges::ACTIVITY_DOCUMENT_SHOW, $document->getGrant());
+        $documentText   = $document->getFileName();
+        $uploaderText   = (string) $document->getPerson();
+        $activityText   = $document->getGrant()->log();
+
+        // Notification de base à la date D
+        $message = sprintf("%s a déposé le document %s dans l'activité %s.",
+           $uploaderText,
+            $documentText,
+            $activityText
+        );
+
+        $this->getLogger()->debug("PERSONNES NOTIFIEES DOCUMENT : " . implode(',', $personToNotify));
+
+        $this->notification($message,
+            $personToNotify, Notification::OBJECT_ACTIVITY,
+            $document->getGrant()->getId(), "activity", new \DateTime(),
+            new \DateTime(), false);
     }
 
 
