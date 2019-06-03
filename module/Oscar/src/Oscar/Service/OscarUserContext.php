@@ -390,6 +390,7 @@ class OscarUserContext extends UserContext
      */
     public function check($privilege, $entity = null)
     {
+        $this->getServiceLocator()->get('Logger')->debug('Test ' . $privilege);
         if (!$this->hasPrivileges($privilege, $entity)) {
             throw new UnAuthorizedException('Droits insuffisants');
         }

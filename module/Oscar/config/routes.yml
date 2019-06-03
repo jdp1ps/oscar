@@ -1375,6 +1375,7 @@ depense:
         defaults:
             controller: Depense
     child_routes:
+
         activity:
             type: segment
             may_terminate: true
@@ -1382,6 +1383,15 @@ depense:
                 route: /activity/:idactivity
                 defaults:
                     action: activity
+
+        manage:
+            type: segment
+            may_terminate: true
+            options:
+                route: /manage-type
+                defaults:
+                    action: manageSpendTypeGroup
+
 
 
 

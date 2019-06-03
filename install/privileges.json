@@ -574,6 +574,14 @@
     "fullcode": "DEPENSE-SHOW"
   },
 
+  "MAINENANCE-SPENDTYPEGROUP_MANAGE": {
+    "category_id": 6,
+    "spot": 7,
+    "code": "SPENDTYPEGROUP_MANAGE",
+    "libelle": "Configuration des types de dépenses",
+    "fullcode": "MAINTENANCE-SPENDTYPEGROUP_MANAGE"
+  },
+
 
   "droit-USER_VISUALISATION": {
     "category_id": 7,

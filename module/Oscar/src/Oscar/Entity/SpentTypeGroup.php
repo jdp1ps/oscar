@@ -7,6 +7,7 @@
 
 namespace Oscar\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -49,7 +50,7 @@ class SpentTypeGroup implements ITrackable
      */
     public function __construct()
     {
-
+        $this->spentTypes = new ArrayCollection();
     }
 
     /**
@@ -132,8 +133,20 @@ class SpentTypeGroup implements ITrackable
         $this->spentTypes = $spentTypes;
     }
 
+    public function toJson(){
+        return [
+            'id'    => $this->getId(),
+            'label' => $this->getLabel(),
+            'parent' => $this->getParent() ? $this->getParent()->getId() : null,
+            'description' => $this->getDescription(),
+            'code' => $this->getCode()
+        ];
+    }
+
     public function __toString()
     {
         return $this->getLabel();
     }
+
+
 }

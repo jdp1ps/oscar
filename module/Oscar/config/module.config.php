@@ -138,7 +138,7 @@ return array(
                 // DEPENSES
                 // --- VERSEMENTS
                 [ 'controller' =>   'Depense',
-                    'action' => ['activity'],
+                    'action' => ['activity', 'manageSpendTypeGroup'],
                     'roles' => ['user'],
                 ],
 

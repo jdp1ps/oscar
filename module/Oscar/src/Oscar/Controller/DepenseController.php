@@ -13,9 +13,27 @@ use Zend\View\Model\JsonModel;
 
 class DepenseController extends AbstractOscarController
 {
+    public function getSpentService(){
+        return $this->getServiceLocator()->get('DepenseService');
+    }
+
+    public function manageSpendTypeGroupAction()
+    {
+
+        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
+        $format = $this->params()->fromQuery('format', 'html');
+        if( $format == 'json' ){
+            die("JSON");
+        } else {
+            return [];
+        }
+        die("TODO");
+    }
+
+
     /**
      * Retourne la liste des dépenses pour l'activité
-     */
+     *
     public function activityAction()
     {
         $idActivity = $this->params()->fromRoute('idactivity', null);
@@ -59,17 +77,16 @@ class DepenseController extends AbstractOscarController
                 ]
             ];
 
-            /**
-            $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
-                ->addSelect('c')
-                ->innerJoin('p.activity', 'a')
-                ->innerJoin('p.currency', 'c')
-                ->where('a.id = :idactivity')
-                ->orderBy('p.status', 'DESC')
-                ->addOrderBy('p.datePayment');
-            $entities = $qb->setParameter('idactivity', $idActivity)->getQuery()->getResult(Query::HYDRATE_ARRAY);
-             *
-             */
+
+//            $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
+//                ->addSelect('c')
+//                ->innerJoin('p.activity', 'a')
+//                ->innerJoin('p.currency', 'c')
+//                ->where('a.id = :idactivity')
+//                ->orderBy('p.status', 'DESC')
+//                ->addOrderBy('p.datePayment');
+//            $entities = $qb->setParameter('idactivity', $idActivity)->getQuery()->getResult(Query::HYDRATE_ARRAY);
+
             $view = new JsonModel($entities);
             return $view;
         }
@@ -77,5 +94,6 @@ class DepenseController extends AbstractOscarController
         return $this->getResponseBadRequest("Appel non conforme");
 
     }
+    /******/
 
 }
