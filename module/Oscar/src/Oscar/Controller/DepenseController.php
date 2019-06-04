@@ -9,12 +9,17 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\Activity;
 use Oscar\Provider\Privileges;
+use Oscar\Service\SpentService;
+use Zend\Http\Request;
 use Zend\View\Model\JsonModel;
 
 class DepenseController extends AbstractOscarController
 {
+    /**
+     * @return SpentService
+     */
     public function getSpentService(){
-        return $this->getServiceLocator()->get('DepenseService');
+        return $this->getServiceLocator()->get('SpentService');
     }
 
     public function manageSpendTypeGroupAction()
@@ -22,8 +27,45 @@ class DepenseController extends AbstractOscarController
 
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
         $format = $this->params()->fromQuery('format', 'html');
-        if( $format == 'json' ){
-            die("JSON");
+
+
+        $method = $this->getHttpXMethod();
+
+        $this->getLogger()->debug("SPENTTYPE - $method");
+
+        switch ($method) {
+            case Request::METHOD_PUT:
+                try {
+                    $this->getLogger()->debug(print_r($_POST, true));
+                    $result = $this->getSpentService()->createSpentTypeGroup($this->params()->fromPost());
+                    return $this->getResponseOk();
+                } catch (\Exception $e) {
+                    $this->getLogger()->error($e->getMessage());
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+
+            case Request::METHOD_POST:
+                try {
+                    $this->getLogger()->debug(print_r($_POST, true));
+                    $result = $this->getSpentService()->updateSpentTypeGroup($this->params()->fromPost());
+                    return $this->getResponseOk();
+                } catch (\Exception $e) {
+                    $this->getLogger()->error($e->getMessage());
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+
+            case Request::METHOD_GET:
+                break;
+
+            default:
+                return $this->getResponseBadRequest();
+        }
+
+
+        if( $format == 'json' || $this->isAjax() ){
+            return $this->jsonOutput([
+                'spenttypegroups' => $this->getSpentService()->getAllArray()
+            ]);
         } else {
             return [];
         }

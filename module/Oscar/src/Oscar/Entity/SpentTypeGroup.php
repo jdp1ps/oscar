@@ -12,8 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Dates des Activités (Jalons)
- *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="SpentTypeGroupRepository")
  */
 class SpentTypeGroup implements ITrackable
 {
@@ -34,6 +33,16 @@ class SpentTypeGroup implements ITrackable
      * @ORM\Column(type="string")
      */
     private $code;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $rgt;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $lft;
 
     /**
      * @var
@@ -67,6 +76,7 @@ class SpentTypeGroup implements ITrackable
     public function setLabel($label)
     {
         $this->label = $label;
+        return $this;
     }
 
     /**
@@ -83,6 +93,7 @@ class SpentTypeGroup implements ITrackable
     public function setDescription($description)
     {
         $this->description = $description;
+        return $this;
     }
 
     /**
@@ -99,6 +110,7 @@ class SpentTypeGroup implements ITrackable
     public function setCode($code)
     {
         $this->code = $code;
+        return $this;
     }
 
     /**
@@ -133,13 +145,51 @@ class SpentTypeGroup implements ITrackable
         $this->spentTypes = $spentTypes;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getRgt()
+    {
+        return $this->rgt;
+    }
+
+    /**
+     * @param mixed $rgt
+     */
+    public function setRgt($rgt)
+    {
+        $this->rgt = $rgt;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLft()
+    {
+        return $this->lft;
+    }
+
+    /**
+     * @param integer $lft
+     * @return $this
+     */
+    public function setLft($lft)
+    {
+        $this->lft = $lft;
+        return $this;
+    }
+
+
     public function toJson(){
         return [
             'id'    => $this->getId(),
             'label' => $this->getLabel(),
             'parent' => $this->getParent() ? $this->getParent()->getId() : null,
             'description' => $this->getDescription(),
-            'code' => $this->getCode()
+            'code' => $this->getCode(),
+            'rgt' => $this->getRgt(),
+            'lft' => $this->getLft()
         ];
     }
 

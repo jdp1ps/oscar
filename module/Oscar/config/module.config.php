@@ -795,6 +795,7 @@ return array(
             'SessionService' => \Oscar\Service\SessionService::class,
             'UserParametersService' => \Oscar\Service\UserParametersService::class,
             'ActivityRequestService' => \Oscar\Service\ActivityRequestService::class,
+            'SpentService' => \Oscar\Service\SpentService::class,
         ],
 
         'factories' => array(

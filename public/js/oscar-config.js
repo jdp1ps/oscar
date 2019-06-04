@@ -89,6 +89,7 @@ requirejs.config({
         'DocumentSectionAdmin': 'oscar/dist/DocumentSectionAdmin',
         'EntityWithRole': 'oscar/dist/EntityWithRole',
         'SpentGroupAdmin': 'oscar/dist/SpentGroupAdmin',
+        'SpentGroupItem': 'oscar/dist/SpentGroupItem',
     },
     shim: {
         "bootstrap": {

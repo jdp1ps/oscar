@@ -9,11 +9,12 @@
 <div class="container">
     <div id="app"></div>
     <script>
-        require(['vue', 'vue-resource', 'SpentGroupAdmin'], function(Vue, VueResource, SpentGroupAdmin){
+        require(['vue', 'vue-resource', 'SpentGroupAdmin', 'SpentGroupItem'], function(Vue, VueResource, SpentGroupAdmin, SpentGroupItem){
             Vue.use(VueResource);
 
             Vue.http.options.emulateJSON = true;
             Vue.http.options.emulateHTTP = true;
+            Vue.component("spenttypeitem", SpentGroupItem.default);
 
             new Vue({
                 el: "#app",
