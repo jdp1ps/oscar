@@ -139,7 +139,7 @@ class AdministrativeDocumentController extends AbstractOscarController
             $docReplaced = null;
             $section = null;
             $defaultSection = null;
-            $person = $this.$this->getOscarUserContext()->getCurrentPerson();
+            $person = $this->getOscarUserContext()->getCurrentPerson();
 
 
             if ($docId) {
