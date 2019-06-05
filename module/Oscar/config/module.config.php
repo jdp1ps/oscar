@@ -48,6 +48,7 @@ return array(
                         'accueil', // OK
                         'activityIndexBuild', // OK
                         'discipline', // OK
+                        'documentSections',
                         'users',
                         'roles',
                         'rolesEdit',
