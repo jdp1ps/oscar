@@ -1,11 +1,10 @@
 <template>
 
-        <article class="card spenttype" :class="{ 'dragged': dragged }" @mousedown.stop="startDrag($event)" @mouseup="stopDrag" @mouseleave="stopDrag">
+        <article class="card spenttype" :class="{ 'dragged': dragged }" draggable="true" @drag="handlerDrag">
             <h3 class="card-title">
-                <span>
+                <span class="handler">
                     [{{ spenttypegroup.id}} ]
                     {{ spenttypegroup.label }}
-                    --- {{ waitdrop }}
                 </span>
                 <p class="small">{{ spenttypegroup.description }}</p>
                 <small>
@@ -17,7 +16,7 @@
                         Supprimer</a>
                 </small>
             </h3>
-            <div class="card-content" @mouseover="inside = true" @mouseleave="inside = false" :class="{ 'inside' : waitdrop && inside }">
+            <div class="card-content">
                 <spenttypeitem v-for="s in spenttypegroup.children"
                                :spenttypegroup="s"
                                :waitdrop="waitdrop"
@@ -37,6 +36,18 @@
 
 </template>
 <style scoped>
+    .spenttype {
+        -moz-user-select: none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        /* Required to make elements draggable in old WebKit */
+        -khtml-user-drag: element;
+        -webkit-user-drag: element;
+    }
+    .spenttype .handler {
+        cursor: pointer;
+    }
     .dragged {
         background: #0b97c4;
         box-shadow: 0 0 1em rgba(0,0,0,1);
@@ -69,13 +80,8 @@
             }
         },
         methods: {
-            startDrag(evt){
-                this.dragged = true;
-                this.$emit('drag', this.$el);
-            },
-            stopDrag(){
-                this.dragged = false;
-                this.$emit('stopdrag', this.spenttypegroup);
+            handlerDrag(evt){
+                console.log(evt);
             }
         }
     }
