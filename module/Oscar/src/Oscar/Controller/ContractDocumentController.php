@@ -171,6 +171,9 @@ class ContractDocumentController extends AbstractOscarController
 
             $datas = $documentService->performRequest($this->getRequest(), $docReplaced,
                 function (ContractDocument $document) use( $activity ) {
+
+                    $this->getNotificationService()->generateActivityDocumentUploaded($document);
+
                     $this->getActivityLogService()->addUserInfo(
                                 sprintf("a déposé le document '%s' dans l'activité %s", $document->getFileName(), $activity->log()),
                                 'Activity', $activity->getId()
