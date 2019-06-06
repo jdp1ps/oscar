@@ -106,6 +106,10 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
         }
     }
 
+    public function moved( $movedId, $destination ){
+        throw new OscarException("Déplacement de $movedId vers $destination");
+    }
+
 
     public function updateSpentTypeGroup( $datas ){
         $this->checkDatas($datas);

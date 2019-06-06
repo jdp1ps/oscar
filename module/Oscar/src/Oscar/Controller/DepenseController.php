@@ -47,7 +47,11 @@ class DepenseController extends AbstractOscarController
             case Request::METHOD_POST:
                 try {
                     $this->getLogger()->debug(print_r($_POST, true));
-                    $result = $this->getSpentService()->updateSpentTypeGroup($this->params()->fromPost());
+                    if( $this->params()->fromPost("moved") ){
+                        $result = $this->getSpentService()->moved($this->params()->fromPost('moved'), $this->params()->fromPost('to'));
+                    } else {
+                        $result = $this->getSpentService()->updateSpentTypeGroup($this->params()->fromPost());
+                    }
                     return $this->getResponseOk();
                 } catch (\Exception $e) {
                     $this->getLogger()->error($e->getMessage());

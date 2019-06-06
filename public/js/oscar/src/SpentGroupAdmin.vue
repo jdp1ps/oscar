@@ -62,42 +62,25 @@
                 </div>
             </div>
         </transition>
-        <div @mousemove="handlerMouseMove($event)">
+        <div>
+
+            <div class="card-content"
+                 @drop.stop="handlerDrop"
+                 @dragenter.stop.prevent="handlerDragEnter"
+                 @dragleave.stop.prevent="handlerDragLeave"
+                 @dragover.stop.prevent="handlerDragOver">
+
         <spenttypeitem v-for="s in tree"
                        :spenttypegroup="s"
                        :key="s.id"
                        :waitdrop="waitdrop"
+                       @dragitem="handlerDragItem"
+                       @dropitem="handlerDropItem"
                        @edit="handlerEdit($event)"
-                       @drag="handlerDrag($event)"
-                       @stopdrag="handlerStopDrag($event)"
                        @new="handlerNew(e, $event.id)"
                        @delete="handlerDelete($event)"/>
+            </div>
         </div>
-
-        <!--<article v-for="d in tree" class="card">-->
-            <!--<h3 class="card-title">-->
-                <!--<span>-->
-                    <!--[{{d.id}}]-->
-                    <!--{{ d.label }}-->
-                <!--</span>-->
-                <!--<p class="small">{{ d.description }}</p>-->
-                <!--<small>-->
-                    <!--<a href="#" @click.prevent="handlerEdit(d)">-->
-                        <!--<i class="icon-pencil"></i>-->
-                        <!--Éditer</a>-->
-                    <!--<a href="#" @click.prevent="handlerDelete(d)">-->
-                        <!--<i class="icon-trash"></i>-->
-                        <!--Supprimer</a>-->
-                <!--</small>-->
-            <!--</h3>-->
-            <!--<div class="card-content">-->
-                <!--<pre>{{ d }}</pre>-->
-                <!--<button type="button" class="btn btn-primary btn-xs" @click.prevent="handlerNew($event, d.id)">-->
-                    <!--<i class="icon-plus-circled"></i>-->
-                    <!--Nouveau type de dépense-->
-                <!--</button>-->
-            <!--</div>-->
-        <!--</article>-->
         <hr>
         <button type="button" class="btn btn-primary" @click.prevent="handlerNew">
             <i class="icon-plus-circled"></i>
@@ -119,7 +102,8 @@
                 deleteData: null,
                 spenttypegroups: [],
                 waitdrop: false,
-                dragged: null
+                dragged: null,
+                moved: null
             }
         },
 
@@ -200,25 +184,27 @@
                     description: ""
                 };
             },
-            handlerDrag( evt ){
-                console.log("ça drag !");
-                this.dragged = evt;
-                this.waitdrop = true;
+
+
+            //////////////////////////////////////////////////////////////////////////////////////////////// DRAG & DROP
+            handlerDragItem( spenttypeitem ){
+                this.moved = spenttypeitem;
             },
 
-            handlerMouseMove(e){
-                if( this.waitdrop ){
-                    if( this.dragged ){
-                        // console.log(e.movementY, e);
-                        let posY = parseInt(this.dragged.style.top) + e.movementY;
-                        console.log(this.dragged.offsetTop);
-                        this.dragged.style.top = (this.dragged.offsetTop + e.movementY) +'px';
-                    }
-                }
+            handlerDropItem( spenttypeitem ){
+                this.move(this.moved, spenttypeitem.id);
             },
-            handlerStopDrag( evt ){
-                console.log("ça drag plus !");
-                this.waitdrop = false;
+
+            handlerDrop( spenttypeitem ){
+                this.move(this.moved, 'root');
+            },
+
+            handlerDragEnter( spenttypeitem ){
+                this.inside = true;
+            },
+
+            handlerDragLeave( spenttypeitem ){
+                this.inside = false;
             },
 
             handlerEdit( spenttypegroup ){
@@ -237,6 +223,26 @@
 
             handlerDelete( spentgroup ){
                 this.deleteData = spentgroup;
+            },
+
+            move( moved, to){
+                console.log("Déplacement", moved, to);
+
+                let data = new FormData();
+
+                data.append('moved', moved.id);
+                data.append('to', to);
+
+                this.$http
+                    .post('?', data)
+
+                    .then( ok => {
+                        this.fetch();
+                        this.formData = null;
+                    }, ko => {
+                        console.log(ko);
+                        this.error = ko.body;
+                    });
             },
 
             performDelete(){
