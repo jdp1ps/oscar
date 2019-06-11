@@ -49,14 +49,36 @@ class DepenseController extends AbstractOscarController
                     $this->getLogger()->debug(print_r($_POST, true));
                     if( $this->params()->fromPost("moved") ){
                         $result = $this->getSpentService()->moved($this->params()->fromPost('moved'), $this->params()->fromPost('to'));
-                    } else {
+                    }
+                    elseif ($this->params()->fromPost("admin")) {
+                        $this->getSpentService()->admin($this->params()->fromPost('admin'));
+                    }
+
+                    else {
                         $result = $this->getSpentService()->updateSpentTypeGroup($this->params()->fromPost());
                     }
-                    return $this->getResponseOk();
+                    return $this->jsonOutput([
+                        'spenttypegroups' => $this->getSpentService()->getAllArray()
+                    ]);
                 } catch (\Exception $e) {
                     $this->getLogger()->error($e->getMessage());
                     return $this->getResponseInternalError($e->getMessage());
                 }
+
+            case Request::METHOD_DELETE:
+                try {
+                    $this->getLogger()->debug(print_r($_GET, true));
+                    $deleteId = $this->params()->fromQuery('id');
+                    $result = $this->getSpentService()->deleteNode(
+                        $this->getSpentService()->getSpentGroupNodeData($deleteId));
+                    return $this->jsonOutput([
+                        'spenttypegroups' => $this->getSpentService()->getAllArray()
+                    ]);
+                } catch (\Exception $e) {
+                    $this->getLogger()->error($e->getMessage());
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+
 
             case Request::METHOD_GET:
                 break;

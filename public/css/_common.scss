@@ -4937,3 +4937,66 @@ pre.alert-danger, pre.alert-info {
     background: $colorRed;
   }
 }
+
+
+.spentarea {
+  background: rgba(#fefefd, .2);
+  padding: 1em;
+  border: 1px solid #ececec;
+}
+
+.spenttype {
+
+  border: 2px solid #ddd;
+  border-left-color: #777777;
+  background: #efefef;
+  box-shadow: none;
+  position: relative;
+  left: 0px;
+  transition: all .3s ;
+
+  &.hover { box-shadow: none;  left: 4px}
+
+  &.selectable.hover{
+    background: #ecfbfe;
+  }
+
+  &.selected{
+    pointer-events: none;
+    background: $colorBlue;
+    border: $colorOrange;
+  }
+
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element;
+
+
+  .handler {
+    cursor: pointer;
+  }
+
+  &:hover>h3 small {
+    opacity: 1;
+  }
+
+  >h3 small {
+    opacity: .5;
+  }
+
+  &.selectable {
+    cursor: pointer;
+    &.hover {
+      border-color: $colorBlue;
+    }
+  }
+
+  .card-title small {
+    flex: auto;
+  }
+}
+

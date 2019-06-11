@@ -106,10 +106,126 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
         }
     }
 
-    public function moved( $movedId, $destination ){
-        throw new OscarException("Déplacement de $movedId vers $destination");
+    public function getSpentGroupNodeData( $userInput ){
+        $instance = null;
+
+        if( is_object($userInput) ){
+            if( $userInput instanceof SpentTypeGroup ){
+                $instance = $userInput;
+            } else {
+                throw new OscarException("Mauvaise entrée utilisateur, impossible de traiter ce type de donnée");
+            }
+        }
+
+        if( $userInput == "root" ){
+            return [
+                'id' => 'root',
+                'label' => 'root',
+                'description' => 'root',
+                'lft' => 0,
+                'rgt' => $this->getSpentTypeRepository()->count()*2
+            ];
+        }
+
+        $spentGroup = $this->getSpentTypeRepository()->find($userInput);
+        if( $spentGroup ){
+            $instance = $spentGroup;
+        } else {
+            throw new OscarException("Le type de dépense n'a pas été trouvé");
+        }
+
+        return [
+            'id' => $instance->getId(),
+            'label' => $instance->getLabel(),
+            'description' => $instance->getDescription(),
+            'lft' => $instance->getLft(),
+            'rgt' => $instance->getRgt()
+        ];
     }
 
+    public function deleteNode( $spent, $deleteEntity = true )
+    {
+        $lft = $spent['lft'];
+        $rgt = $spent['rgt'];
+        $decalage = $rgt - $lft + 1;
+
+        if( $deleteEntity === true ) {
+            // Suppression
+            $this->getEntityManager()->createNativeQuery(
+                'DELETE FROM spenttypegroup WHERE lft >= :lft AND rgt <= :rgt',
+                new ResultSetMapping()
+            )->execute(['lft' => $lft, 'rgt' => $rgt]);
+        }
+
+        // Mise à jour des bornes
+        $this->getEntityManager()->createNativeQuery(
+            'UPDATE spenttypegroup SET rgt = rgt - :decalage WHERE rgt > :rgt', new ResultSetMapping()
+        )->execute(['decalage' => $decalage, 'rgt' => $rgt, 'lft' => $lft]);
+
+        $this->getEntityManager()->createNativeQuery(
+            'UPDATE spenttypegroup SET lft = lft - :decalage WHERE lft >= :lft', new ResultSetMapping()
+        )->execute(['decalage' => $decalage, 'rgt' => $rgt, 'lft' => $lft]);
+    }
+
+    public function moved( $movedId, $destination ){
+
+        /** @var SpentTypeGroup $move */
+        $move = $this->getSpentTypeRepository()->find($movedId);
+
+        $sizeBranch = $move->getRgt() - $move->getLft() +1;
+
+        $this->getLogger()->debug("Taille de la branche : $sizeBranch");
+
+        $borneMovedLeft = $move->getLft();
+        $borneMovedRight = $move->getRgt();
+
+        $this->getEntityManager()->createNativeQuery(
+            'UPDATE spenttypegroup SET lft = lft - :rgt, rgt = rgt - :rgt WHERE lft >= :lft AND rgt <= :rgt', new ResultSetMapping()
+        )->execute(['lft' => $borneMovedLeft, 'rgt' => $borneMovedRight]);
+
+
+        $this->getEntityManager()->createNativeQuery(
+            'UPDATE spenttypegroup SET lft = lft - :size, rgt = rgt - :size WHERE lft >= :lft', new ResultSetMapping()
+        )->execute(['lft' => $borneMovedRight, 'size' => $sizeBranch]);
+
+
+        /** @var SpentTypeGroup dest */
+        $dest = $this->getSpentTypeRepository()->find($destination);
+
+        $destPoint = $dest->getLft() + 1;
+        $this->getLogger()->debug("Point d'entrée : $destPoint");
+
+        // TROU
+        $this->getEntityManager()->createNativeQuery(
+            'UPDATE spenttypegroup SET lft = lft + :size WHERE lft >= :lft', new ResultSetMapping()
+        )->execute(['lft' => $destPoint, 'size' => $sizeBranch]);
+
+        $this->getEntityManager()->createNativeQuery(
+            'UPDATE spenttypegroup SET rgt = rgt + :size WHERE rgt >= :rgt', new ResultSetMapping()
+        )->execute(['rgt' => $destPoint, 'size' => $sizeBranch]);
+
+        // ON replace la branche
+        $deplacement = $sizeBranch + $destPoint -1;
+        $this->getEntityManager()->createNativeQuery(
+            'UPDATE spenttypegroup SET lft = lft + :size, rgt = rgt + :size WHERE rgt <= :pos', new ResultSetMapping()
+        )->execute(['size' => $deplacement, 'pos' => 0 ]);
+
+
+
+
+    }
+
+
+    public function admin(){
+
+        $i = 0;
+        /** @var SpentTypeGroup $node */
+        foreach ($this->getSpentTypeRepository()->findAll() as $node){
+            $node->setLft(++$i)->setRgt(++$i);
+        }
+        $this->getEntityManager()->flush();
+
+    }
 
     public function updateSpentTypeGroup( $datas ){
         $this->checkDatas($datas);
@@ -149,6 +265,19 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
         return $this->getEntityManager()->getRepository(SpentTypeGroup::class);
     }
 
+    /**
+     * @return Logger
+     */
+    protected function getLogger(){
+        return $this->getServiceLocator()->get('Logger');
+    }
+
+    /**
+     * Vérification des données reçues depuis la saisie utilisateur.
+     *
+     * @param $datas
+     * @throws OscarException
+     */
     protected function checkDatas( $datas ){
         if( !$datas['label'] ){
             throw new OscarException(_("Vous devez renseigner un intitulé."));

@@ -9,6 +9,7 @@ namespace Oscar\Entity;
 
 
 use Doctrine\ORM\EntityRepository;
+use Oscar\Exception\OscarException;
 
 /**
  * Class SpentTypeGroupRepository
@@ -27,10 +28,46 @@ class SpentTypeGroupRepository extends EntityRepository{
         return $query->getQuery()->getResult()[0];
     }
 
+    /**
+     * Retourne tous les types de dépenses.
+     *
+     * @return array
+     */
     public function getAll(){
         $query = $this->createQueryBuilder('t')
             ->select('t')
             ->orderBy('t.lft', 'ASC');
         return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne le nombre de types.
+     *
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function count(){
+        $qb = $this->createQueryBuilder('t')
+            ->select('count(t.id)');
+
+        return $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Retourne les liste des types de dépenses en fonction des bornes données.
+     *
+     * @param $lft
+     * @param $rgt
+     * @return mixed
+     */
+    public function getBranchByBounds( $lft, $rgt ){
+
+        $brancheDeplacee = $this->createQueryBuilder('t')
+            ->where('t.lft >= :lft AND t.rgt <= :rgt ')
+            ->setParameters(['lft' => $lft, 'rgt' => $rgt])
+            ->getQuery();
+
+        return $brancheDeplacee->getResult();;
     }
 }

@@ -17,7 +17,6 @@
                     <label for="form_description">Description</label>
                     <textarea type="text" class="form-control" v-model="formData.description" id="form_description" />
                     <hr>
-                    <pre>{{ formData }}</pre>
                     <nav>
                         <button type="submit" class="btn btn-primary">
                             <i class="icon-floppy"></i>
@@ -62,30 +61,46 @@
                 </div>
             </div>
         </transition>
-        <div>
 
-            <div class="card-content"
-                 @drop.stop="handlerDrop"
-                 @dragenter.stop.prevent="handlerDragEnter"
-                 @dragleave.stop.prevent="handlerDragLeave"
-                 @dragover.stop.prevent="handlerDragOver">
 
-        <spenttypeitem v-for="s in tree"
+        <transition name="fade">
+            <div class="alert alert-info" v-if="mode == 'selection'">
+                <p>Choisissez un élément à déplacer...</p>
+            </div>
+            <div class="alert alert-info" v-else-if="mode == 'destination'">
+                <p>... choisissez l'emplacement où le déplacer.</p>
+            </div>
+        </transition>
+        <div class="card-content spentarea">
+            <spenttypeitem v-for="s in tree"
                        :spenttypegroup="s"
                        :key="s.id"
-                       :waitdrop="waitdrop"
-                       @dragitem="handlerDragItem"
-                       @dropitem="handlerDropItem"
+                       :selection="selection"
+                       :mode="mode"
+                       @selection="handlerSelection($event)"
+                       @destination="handlerDestination($event)"
                        @edit="handlerEdit($event)"
                        @new="handlerNew(e, $event.id)"
                        @delete="handlerDelete($event)"/>
+                <hr>
+
+                <button type="button" class="btn btn-primary" @click.prevent="handlerModeSelection">
+                    <i class="icon-plus-circled"></i>
+                    Réorganiser
+                </button>
+
+                <button type="button" class="btn btn-primary" @click.prevent="handlerNew">
+                    <i class="icon-plus-circled"></i>
+                    Nouveau type de dépense
+                </button>
+
+                <button type="button" class="btn btn-primary" @click.prevent="resetTree">
+                    <i class="icon-plus-circled"></i>
+                    Reset Tree
+                </button>
             </div>
-        </div>
-        <hr>
-        <button type="button" class="btn btn-primary" @click.prevent="handlerNew">
-            <i class="icon-plus-circled"></i>
-            Nouveau type de dépense
-        </button>
+    <pre>SELECTION: {{ selection }}
+DESTINATION : {{ destination }}    </pre>
     </section>
 </template>
 <script>
@@ -97,13 +112,14 @@
         },
         data(){
             return {
+                mode: 'default', // default | selection | destination
+                selection: false,
+                destination: null,
                 formData: null,
                 error: null,
                 deleteData: null,
                 spenttypegroups: [],
-                waitdrop: false,
-                dragged: null,
-                moved: null
+                waitdrop: false
             }
         },
 
@@ -138,12 +154,83 @@
                     }
                 });
 
+                while (parents.length > 1) {
+                    parents[parents.length-2].children.push(parents.pop());
+                }
+
+                console.log(parents);
+
                 return parents[0].children;
             }
         },
 
         methods:{
 
+            handlerModeSelection(){
+                this.mode = "selection";
+            },
+
+            handlerSelection(selection){
+                this.selection = selection;
+                this.mode = 'destination';
+            },
+
+            handlerDestination(destination){
+                this.move(this.selection, destination);
+                this.selection = false;
+                this.mode = 'default';
+            },
+
+            handlerModeMove(){
+                this.mode = "move";
+            },
+
+            resetTree(){
+                let data = new FormData(), send;
+                data.append('admin', "reset");
+                this.$http.post('?', data).then(ok => {
+                        this.fetch();
+                        this.formData = null;
+                    });
+            },
+
+            move( moved, to){
+                let data = new FormData();
+                data.append('moved', moved.id);
+                data.append('to', to.id);
+                this.$http
+                    .post('?', data)
+
+                    .then( ok => {
+                        this.fetch();
+                        this.formData = null;
+                    }, ko => {
+                        this.error = ko.body;
+                    });
+            },
+
+            performDelete(){
+                let spentgroup = this.deleteData;
+                this.$http.delete('?id=' + spentgroup.id).then(
+                    ok => {
+                        this.spenttypegroups = ok.data.spenttypegroups;
+                    },
+                    ko => {
+                        this.error = ko.body;
+                    }
+                ).then( foo => this.deleteData = null );
+            },
+
+            fetch(){
+                this.$http.get().then(
+                    ok => {
+                        this.spenttypegroups = ok.data.spenttypegroups;
+                    },
+                    ko => {
+                        this.error = ko.body;
+                    }
+                );
+            },
 
             handlerSubmit(){
                 let data = new FormData(), send;
@@ -220,54 +307,8 @@
                 this.formData = null;
             },
 
-
             handlerDelete( spentgroup ){
                 this.deleteData = spentgroup;
-            },
-
-            move( moved, to){
-                console.log("Déplacement", moved, to);
-
-                let data = new FormData();
-
-                data.append('moved', moved.id);
-                data.append('to', to);
-
-                this.$http
-                    .post('?', data)
-
-                    .then( ok => {
-                        this.fetch();
-                        this.formData = null;
-                    }, ko => {
-                        console.log(ko);
-                        this.error = ko.body;
-                    });
-            },
-
-            performDelete(){
-                let spentgroup = this.deleteData;
-                this.$http.delete('?id=' + spentgroup.id).then(
-                    ok => {
-                        console.log(ok);
-                    },
-                    ko => {
-                        console.log(ko);
-                        this.error = ko.body;
-                    }
-                ).then( foo => this.deleteData = null );
-            },
-
-            fetch(){
-                this.$http.get().then(
-                    ok => {
-                        console.log(ok);
-                        this.spenttypegroups = ok.data.spenttypegroups;
-                    },
-                    ko => {
-                        console.log(ko);
-                    }
-                );
             }
         },
         mounted(){

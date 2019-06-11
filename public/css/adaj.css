@@ -8998,5 +8998,47 @@ pre.alert-danger, pre.alert-info {
   .bubble.bubble-danger {
     background: #DD423E; }
 
+.spentarea {
+  background: rgba(254, 254, 253, 0.2);
+  padding: 1em;
+  border: 1px solid #ececec; }
+
+.spenttype {
+  border: 2px solid #ddd;
+  border-left-color: #777777;
+  background: #efefef;
+  box-shadow: none;
+  position: relative;
+  left: 0px;
+  transition: all .3s;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element; }
+  .spenttype.hover {
+    box-shadow: none;
+    left: 4px; }
+  .spenttype.selectable.hover {
+    background: #ecfbfe; }
+  .spenttype.selected {
+    pointer-events: none;
+    background: #30b0d5;
+    border: #C69951; }
+  .spenttype .handler {
+    cursor: pointer; }
+  .spenttype:hover > h3 small {
+    opacity: 1; }
+  .spenttype > h3 small {
+    opacity: .5; }
+  .spenttype.selectable {
+    cursor: pointer; }
+    .spenttype.selectable.hover {
+      border-color: #30b0d5; }
+  .spenttype .card-title small {
+    flex: auto; }
+
 body {
   background: #f2f3eb; }

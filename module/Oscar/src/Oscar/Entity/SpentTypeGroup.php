@@ -195,7 +195,7 @@ class SpentTypeGroup implements ITrackable
 
     public function __toString()
     {
-        return $this->getLabel();
+        return sprintf("%s (%s, %s)", $this->getLabel(), $this->getRgt(), $this->getLft());
     }
 
 
