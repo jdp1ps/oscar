@@ -90,6 +90,8 @@ requirejs.config({
         'EntityWithRole': 'oscar/dist/EntityWithRole',
         'SpentGroupAdmin': 'oscar/dist/SpentGroupAdmin',
         'SpentGroupItem': 'oscar/dist/SpentGroupItem',
+        'EstimatedSpentActivity': 'oscar/dist/EstimatedSpentActivity',
+        'EstimatedSpentActivityItem': 'oscar/dist/EstimatedSpentActivityItem',
     },
     shim: {
         "bootstrap": {

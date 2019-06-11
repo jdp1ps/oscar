@@ -57,29 +57,23 @@ function renderLine( $line, $years, $level = 1 ){
 </style>
 <div class="container-fluid">
     <h1>Dépenses prévisionnelles</h1>
+    <div id="app">APP</div>
+    <script>
+        require(['vue', 'vue-resource', 'EstimatedSpentActivity', 'EstimatedSpentActivityItem'], function(Vue, VueResource,EstimatedSpentActivity, EstimatedSpentActivityItem){
+            Vue.component('estimatedspentactivityitem', EstimatedSpentActivityItem.default);
+            var v = new Vue({
+                'render': function(h){
+                    return h(EstimatedSpentActivity.default, { props: { years: <?= json_encode($years) ?>, types: <?= json_encode($types) ?>}});
+                }
+            });
 
+            v.$on('*', function(){
+                console.log('bar !');
+            });
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Nature des dépenses</th>
-                <?php foreach ($years as $year): ?>
-                    <th class="year"><?= $year ?></th>
-                <?php endforeach; ?>
-                <th class="total">TOTAL</th>
-            </tr>
-        </thead>
+            v.$mount('#app');
 
-        <tbody>
-        <?php foreach ($types['children'] as $type): ?>
-            <?= renderLine($type, $years) ?>
-        <?php endforeach; ?>
+        })
+    </script>
 
-        </tbody>
-    </table>
-    <pre>
-        <?php var_dump($years) ?>
-        <hr>
-        <?php var_dump($types) ?>
-    </pre>
 </div>
