@@ -54,6 +54,13 @@ class SpentTypeGroup implements ITrackable
     private $spentTypes;
 
     /**
+     * @return bool
+     */
+    public function isLeaf(){
+        return $this->getLft() + 1 == $this->getRgt();
+    }
+
+    /**
      * SpentTypeGroup constructor.
      * @param string $label
      */
@@ -195,7 +202,7 @@ class SpentTypeGroup implements ITrackable
 
     public function __toString()
     {
-        return sprintf("%s (%s, %s)", $this->getLabel(), $this->getRgt(), $this->getLft());
+        return sprintf("%s (%s, %s)", $this->getLabel(), $this->getLft(), $this->getRgt());
     }
 
 

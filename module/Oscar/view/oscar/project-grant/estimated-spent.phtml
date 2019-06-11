@@ -5,10 +5,81 @@
  * Date: 11/06/19
  * Time: 11:48
  */
+
+
+function renderLine( $line, $years, $level = 1 ){
+    $id = $line['id'];
+    if( count($line['children']) > 0 ){
+        $out = "<tr class='level-$level'>";
+        $out .= "<th class='heading'>";
+        $out .= $line['label'];
+        $out .= "</th>";
+        foreach ($years as $year) {
+            $out .= "<th> &nbsp;</th>";
+        }
+        $out .= "<th>TOTAL</th>";
+        $out .= "</tr>";
+
+        foreach ($line['children'] as $l) {
+            $out .= renderLine($l, $years, $level+1);
+        }
+
+
+    } else {
+        $out = "<tr class='computed'>";
+        $out .= "<th class='heading'>";
+        $out .= $line['label'];
+        $out .= "</th>";
+        foreach ($years as $year) {
+            $name = "spent[$year][$id]";
+            $out .= "<td><input type='text' name='$name' placeholder='0.0' /></td>";
+        }
+        $out .= "<td>0.0</td>";
+        $out .= "</tr>";
+
+    }
+
+    return $out;
+
+}
 ?>
+<style>
+    .level-1 {
+        font-size: 2em;
+    }
+    .level-2 {
+        padding-left: 1em;
+        font-size: 1.6em;
+    }
+    .computed .heading {
+        padding-left: 2em;
+    }
+</style>
 <div class="container-fluid">
     <h1>Dépenses prévisionnelles</h1>
+
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nature des dépenses</th>
+                <?php foreach ($years as $year): ?>
+                    <th class="year"><?= $year ?></th>
+                <?php endforeach; ?>
+                <th class="total">TOTAL</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        <?php foreach ($types['children'] as $type): ?>
+            <?= renderLine($type, $years) ?>
+        <?php endforeach; ?>
+
+        </tbody>
+    </table>
     <pre>
+        <?php var_dump($years) ?>
+        <hr>
         <?php var_dump($types) ?>
     </pre>
 </div>

@@ -1269,7 +1269,8 @@ class ProjectGrantController extends AbstractOscarController
         $types = $spentService->getTypesTree();
 
         return [
-            'types' => $types
+            'years' => $spentService->getYearsListActivity($entity),
+            'types' => $types,
         ];
     }
 

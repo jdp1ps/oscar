@@ -211,17 +211,118 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
         )->execute(['size' => $deplacement, 'pos' => 0 ]);
     }
 
-    public function getTypesTree(){
-        $output = [];
 
-        $output = [
-            'rgt' => 0,
-            'lft' => 1,
+    public function getYearsListActivity( Activity $activity ){
+
+        if( !$activity->getDateStart() )
+            throw new OscarException(sprintf(_("L'activité %s n'a pas de date de début"), $activity));
+
+        if( !$activity->getDateEnd() )
+            throw new OscarException(sprintf(_("L'activité %s n'a pas de date de fin"), $activity));
+
+        if( $activity->getDateEnd() < $activity->getDateStart() ){
+            throw new OscarException(sprintf(_("L'activité %s a une date de fin antérieur à sa date de début"), $activity));
+        }
+
+        $yearStart  = (int) $activity->getDateStart()->format('Y');
+        $yearEnd    = (int) $activity->getDateEnd()->format('Y');
+
+        $years = [];
+        for( $i = $yearStart; $i <= $yearEnd; $i++ ){
+            $years[] = $i;
+        }
+
+        return $years;
+    }
+
+    public function getTypesTree(){
+
+        /****
+        let dest = {
+            lft: 0,
+            rgt: this.spenttypegroups.length * 2 + 1,
+            children: []
+        };
+
+        let parents = [dest];
+
+
+        this.spenttypegroups.forEach( item => {
+            let l = item.lft;
+            let r = item.rgt;
+            let lastParent = parents[parents.length-1];
+
+            while (r > lastParent.rgt) {
+                parents[parents.length-2].children.push(lastParent);
+                parents.pop();
+                lastParent = parents[parents.length-1];
+            }
+
+            if( r > l+1 ){
+                item.children = [];
+                parents.push(item);
+            } else {
+                lastParent.children.push(item);
+            }
+        });
+
+        while (parents.length > 1) {
+        parents[parents.length-2].children.push(parents.pop());
+        }
+
+        console.log(parents);
+
+        return parents[0].children;
+         */
+
+
+        $types = $this->getSpentTypeRepository()->getAll();
+        $root = [
+            'label' => 'root',
+            'lft' => 0,
+            'rgt' => count($types)*2 + 1,
             'children' => []
         ];
 
+        $parents = [$root];
+        $typesArray = [];
 
-        return $output;
+        /** @var SpentTypeGroup $type */
+        foreach ($types as $type) {
+            $this->getLogger()->debug("------------------------------------");
+            $this->getLogger()->debug("Traitement de $type");
+            $item = $type->toJson();
+            $l = $type->getLft();
+            $r = $type->getRgt();
+            $lastParent = &$parents[count($parents)-1];
+            $this->getLogger()->debug("L : $l");
+            $this->getLogger()->debug("R : $r");
+
+
+            while ($r > $lastParent['rgt']) {
+
+                $parents[count($parents)-2]['children'][] = array_pop($parents);
+                $lastParent = &$parents[count($parents)-1];
+            }
+
+            $this->getLogger()->debug("Parent : " . $lastParent['label']);
+
+            if( $r > $l+1 ){
+                $this->getLogger()->debug("$type a des enfants, ajouté à la liste des parents");
+                $item['children'] = [];
+                $parents[] = $item;
+            } else {
+                $this->getLogger()->debug("Ajout de ".$item['label'] . " dans " . $lastParent['label']);
+                $item['parent_id'] = $lastParent['id'];
+                $lastParent['children'][] = $item;
+            }
+        }
+
+        while (count($parents) > 1) {
+            $parents[count($parents) - 2]['children'][] = array_pop($parents);
+        }
+
+        return $parents[0];
     }
 
 
