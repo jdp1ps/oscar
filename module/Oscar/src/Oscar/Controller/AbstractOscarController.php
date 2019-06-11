@@ -29,6 +29,7 @@ use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
 use Oscar\Service\SearchService;
 use Oscar\Service\SessionService;
+use Oscar\Service\SpentService;
 use Oscar\Service\UserParametersService;
 use Symfony\Component\Yaml\Parser;
 use UnicaenAuth\Service\UserContext;
@@ -101,6 +102,13 @@ class AbstractOscarController extends AbstractActionController
      */
     public function getOscarConfigurationService(){
         return $this->getServiceLocator()->get('OscarConfig');
+    }
+
+    /**
+     * @return SpentService
+     */
+    public function getSpentService(){
+        return $this->getServiceLocator()->get('SpentService');
     }
 
     protected function getYamlConfigPath(){

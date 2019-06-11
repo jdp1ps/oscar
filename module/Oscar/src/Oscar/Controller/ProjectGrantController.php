@@ -1252,6 +1252,30 @@ class ProjectGrantController extends AbstractOscarController
     /**
      * Fiche pour une activité de recherche.
      */
+    public function estimatedSpentAction()
+    {
+        // Identifiant de l'activité
+        $id = $this->params()->fromRoute('id');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
+
+
+        $spentService = $this->getSpentService();
+
+        $types = $spentService->getTypesTree();
+
+        return [
+            'types' => $types
+        ];
+    }
+
+    /**
+     * Fiche pour une activité de recherche.
+     */
     public function showAction()
     {
         // Identifiant de l'activité

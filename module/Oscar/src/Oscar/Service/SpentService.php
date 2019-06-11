@@ -209,10 +209,19 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
         $this->getEntityManager()->createNativeQuery(
             'UPDATE spenttypegroup SET lft = lft + :size, rgt = rgt + :size WHERE rgt <= :pos', new ResultSetMapping()
         )->execute(['size' => $deplacement, 'pos' => 0 ]);
+    }
+
+    public function getTypesTree(){
+        $output = [];
+
+        $output = [
+            'rgt' => 0,
+            'lft' => 1,
+            'children' => []
+        ];
 
 
-
-
+        return $output;
     }
 
 

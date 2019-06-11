@@ -766,6 +766,13 @@ contract:
                 defaults:
                     action: show
 
+        estimated-spent:
+            type: segment
+            options:
+                route: /depenses-previsionnelles/:id
+                defaults:
+                    action: estimatedSpent
+
         requestadmin:
             type: literal
             options:
