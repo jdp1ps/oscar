@@ -4940,8 +4940,8 @@ pre.alert-danger, pre.alert-info {
 
 
 .spentarea {
-  background: rgba(#fefefd, .2);
-  padding: 1em;
+  background: rgba(#ccc, .25);
+  padding: 8px;
   border: 1px solid #ececec;
 }
 
@@ -4954,6 +4954,9 @@ pre.alert-danger, pre.alert-info {
   position: relative;
   left: 0px;
   transition: all .3s ;
+  box-shadow: none;
+
+  &:hover { box-shadow: none; }
 
   &.hover { box-shadow: none;  left: 4px}
 
@@ -4974,7 +4977,6 @@ pre.alert-danger, pre.alert-info {
   /* Required to make elements draggable in old WebKit */
   -khtml-user-drag: element;
   -webkit-user-drag: element;
-
 
   .handler {
     cursor: pointer;
@@ -4997,6 +4999,14 @@ pre.alert-danger, pre.alert-info {
 
   .card-title small {
     flex: auto;
+  }
+
+  .spenttype {
+    font-size: .9em;
+  }
+
+  h3 small {
+    text-align: right;
   }
 }
 

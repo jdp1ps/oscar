@@ -23,6 +23,10 @@
                     <a href="#" @click.prevent="$emit('delete', spenttypegroup)">
                         <i class="icon-trash"></i>
                         Supprimer</a>
+
+                    <a href="#" @click.prevent="$emit('new', spenttypegroup)">
+                        <i class="icon-doc-add"></i>
+                        Nouveau</a>
                 </small>
             </h3>
             <div class="card-content spentarea">

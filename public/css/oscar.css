@@ -8999,8 +8999,8 @@ pre.alert-danger, pre.alert-info {
     background: #DD423E; }
 
 .spentarea {
-  background: rgba(254, 254, 253, 0.2);
-  padding: 1em;
+  background: rgba(204, 204, 204, 0.25);
+  padding: 8px;
   border: 1px solid #ececec; }
 
 .spenttype {
@@ -9011,6 +9011,7 @@ pre.alert-danger, pre.alert-info {
   position: relative;
   left: 0px;
   transition: all .3s;
+  box-shadow: none;
   -moz-user-select: none;
   -khtml-user-select: none;
   -webkit-user-select: none;
@@ -9018,6 +9019,8 @@ pre.alert-danger, pre.alert-info {
   /* Required to make elements draggable in old WebKit */
   -khtml-user-drag: element;
   -webkit-user-drag: element; }
+  .spenttype:hover {
+    box-shadow: none; }
   .spenttype.hover {
     box-shadow: none;
     left: 4px; }
@@ -9039,3 +9042,7 @@ pre.alert-danger, pre.alert-info {
       border-color: #30b0d5; }
   .spenttype .card-title small {
     flex: auto; }
+  .spenttype .spenttype {
+    font-size: .9em; }
+  .spenttype h3 small {
+    text-align: right; }
