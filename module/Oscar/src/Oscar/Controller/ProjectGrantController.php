@@ -9,6 +9,7 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
+use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityOrganization;
@@ -1873,6 +1874,8 @@ class ProjectGrantController extends AbstractOscarController
                                 }
                                 $filterIds = [];
 
+                            } catch (BadRequest400Exception $e) {
+                                $error = "Expression de recherche incorrecte";
                             }
                             if( $projectview == 'on' ){
                                 $projectIds = $this->getActivityService()->getProjectsIdsSearch($search);

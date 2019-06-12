@@ -139,7 +139,7 @@ return array(
 
 ## Recherche des personnes
 
-Depuis *Oscar 2.10 (Creed)*, la recherche des personnes peut utiliser le système de recherche basé sur **ElasticSearch** (Fortement recommandé) afin d'obtenir des résultats plus pertinents.
+Depuis *Oscar 2.10 (Creed)*, la recherche des personnes utilise le système de recherche basé sur **ElasticSearch** afin d'obtenir des résultats plus pertinents.
 
 Vous devez configurer la stratégie de recherche dans le fichier de configuration `config/autoload/local.php` : 
 

@@ -311,7 +311,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
             '# PERSONNES',
             'oscar persons:sync <connectorkey>' => 'Lance la synchronisation des personnes depuis les différents connecteurs.',
             'oscar persons:search:connector <connector> <value>' => 'Recherche les personnes ayant pour le connecteur <connector> la valeur <value>',
-            'oscar persons:search:build ' => 'Reconstruction de l\'index de recherche (ElasticSearch)' ,
+            'oscar persons:search:build' => 'Reconstruction de l\'index de recherche (ElasticSearch)' ,
             'oscar person:search <expression>' => 'Lance une recherche sur les personnes' ,
 
             '# ORGANISATIONS',
