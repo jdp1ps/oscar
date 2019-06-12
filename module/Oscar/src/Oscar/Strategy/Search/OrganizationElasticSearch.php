@@ -147,36 +147,37 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
 //        'persons' => $persons,
 //        'activities' => $activities,
 //        'connectors' => $connectors
-        /******** CONFIGURATION DU MAPPING ***/
-        $params = [
-            'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'body' => [
-                $this->getType() => [
-                    '_source' => [
-                        'enabled' => true
-                    ],
-                    'properties' => [
-                        'code' => [
-                            'type' => 'text'
-                        ],
-                        'shortname' => [
-                            'type' => 'text',
-                            'boost' => 5
-                        ],
-                        'fullname' => [
-                            'type' => 'text',
-                            'boost' => 5
-                        ],
-                        'email' => [
-                            'type' => 'text'
-                        ],
-                    ]
-                ]
-            ]
-        ];
 
-        $response = $this->getClient()->indices()->putMapping($params);
+//        /******** CONFIGURATION DU MAPPING ***/
+//        $params = [
+//            'index' => $this->getIndex(),
+//            'type' => $this->getType(),
+//            'body' => [
+//                $this->getType() => [
+//                    '_source' => [
+//                        'enabled' => true
+//                    ],
+//                    'properties' => [
+//                        'code' => [
+//                            'type' => 'text'
+//                        ],
+//                        'shortname' => [
+//                            'type' => 'text',
+//                            'boost' => 5
+//                        ],
+//                        'fullname' => [
+//                            'type' => 'text',
+//                            'boost' => 5
+//                        ],
+//                        'email' => [
+//                            'type' => 'text'
+//                        ],
+//                    ]
+//                ]
+//            ]
+//        ];
+//
+//        $response = $this->getClient()->indices()->putMapping($params);
 
 
         return $repport;
@@ -215,7 +216,7 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
 
         return [
             'id' => $organization->getId(),
-            'code' => $organization->getCode(),
+            'code' => $organization->getCode() ? $organization->getCode() : "",
             'shortname' => $organization->getShortName(),
             'fullname' => $organization->getFullName(),
             'email' => $organization->getEmail(),

@@ -520,6 +520,26 @@ return array(
                     ),
                 ),
 
+                'oscar_persons_search_build' => array(
+                    'options' => array(
+                        'route' => 'oscar persons:search:build',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'buildSearchPerson',
+                        ),
+                    ),
+                ),
+
+                'oscar_organizations_search_build' => array(
+                    'options' => array(
+                        'route' => 'oscar organizations:search:build',
+                        'defaults' => array(
+                            'controller' => 'Console',
+                            'action' => 'buildSearchOrganization',
+                        ),
+                    ),
+                ),
+
                 'oscar_organizations_sync' => [
                     'options' => [
                         'route' => 'oscar organizations:sync <connectorkey> [--force|-f] [--verbose|-v]',
@@ -529,6 +549,8 @@ return array(
                         ],
                     ],
                 ],
+
+
 
 
                 // -------------------------------------------------------------
