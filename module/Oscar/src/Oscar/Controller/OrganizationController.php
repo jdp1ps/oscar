@@ -10,6 +10,7 @@ namespace Oscar\Controller;
 
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\Query;
+use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 use Oscar\Connector\IConnector;
 use Oscar\Connector\IConnectorOrganization;
 use Oscar\Entity\Activity;
@@ -84,6 +85,8 @@ class OrganizationController extends AbstractOscarController
         $search = $this->params()->fromQuery('q', '');
         $type = $this->params()->fromQuery('t', []);
         $active = $this->params()->fromQuery('active', '');
+        $error = null;
+        $organizations = null;
 
         $filter = [
             'roles' => $this->params()->fromQuery('roles', []),
@@ -91,7 +94,11 @@ class OrganizationController extends AbstractOscarController
             'active' => $active,
         ];
 
-        $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search, $page, $filter);
+        try {
+            $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search, $page, $filter);
+        } catch (BadRequest400Exception $e) {
+            $error = _("Expression de recherche incorrecte");
+        }
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             $result = [ 'datas' => []];
@@ -106,6 +113,7 @@ class OrganizationController extends AbstractOscarController
 
         return array(
             'entities' => $organizations,
+            'error' => $error,
             'search' => $search,
             'types' => $this->getOrganizationService()->getOrganizationTypesSelect(),
             'type' => $type,

@@ -52,6 +52,16 @@ $markText = function( $text, $search ){
 
     <h3 class="text-center"><?= count($entities) ?> Résultat(s)</h3>
 
+
+    <?php if($error): ?>
+    <div class="alert alert-danger">
+        <?= $error ?>
+    </div>
+    <?php endif; ?>
+
+
+    <?php if($entities): ?>
+
     <?php /** @var \Oscar\Entity\Organization $entity */
     foreach( $entities as $entity ):
         $nbrProjects = count($entity->getProjects());
@@ -161,7 +171,9 @@ $markText = function( $text, $search ){
     }
     ?>
     <?= $this->pager($entities, $this->url().'?q='.urlencode($search).'&'.(implode('&', $types)).'&page=%s') ?>
+    <?php endif; ?>
 </section>
+
 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_DELETE)): ?>
 <div style="position: fixed; bottom: 3em; right: 1em">
     <button id="fuzzion">FUSIONNER les organisations selectionnées</button>
