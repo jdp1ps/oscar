@@ -219,43 +219,48 @@ return array(
     'oscar' => [
         // EXEMPLE
         'horslots' => [
-            'conges' => [ 
+            'conges' => [
                 'code' => 'conges',
                 'group' => 'abs',
-                'label' => 'Congés',  
-                'description' => '', 
+                'label' => 'Congés',
+                'description' => '',
                 'icon' => true ],
-            'training' => [ 
-                'code' => 'training',  
-                'label' => 'Formation',  
-                'description' => '', 
+            'training' => [
+                'code' => 'training',
+                'group' => 'other',
+                'label' => 'Formation',
+                'description' => '',
                 'icon' => true ],
-            'teaching' => [ 
-                'code' => 'teaching',  
-                'label' => 'Enseignement',  
-                'description' => '', 
+            'teaching' => [
+                'group' => 'education',
+                'code' => 'teaching',
+                'label' => 'Enseignement',
+                'description' => '',
                 'icon' => true ],
-            'sickleave' => [ 
-                'code' => 'sickleave', 
-                'label' => 'Arrêt maladie',  
-                'description' => '', 
+            'sickleave' => [
+                'group' => 'abs',
+                'code' => 'sickleave',
+                'label' => 'Arrêt maladie',
+                'description' => '',
                 'icon' => true ],
-            'research' => [ 
-                'code' => 'research', 
-                'label' => 'Autre recherche',  
-                'description' => '', 
+            'research' => [
+                'group' => 'research',
+                'code' => 'research',
+                'label' => 'Autre recherche',
+                'description' => '',
                 'icon' => true ],
-            'other' => [ 
-                'code' => 'other', 
-                'label' => 'Divers',  
-                'description' => 'Autre activité', 
+            'other' => [
+                'group' => 'other',
+                'code' => 'other',
+                'label' => 'Divers',
+                'description' => 'Autre activité',
                 'icon' => true ],
         ],
     ]
 );
 ``` 
 
-**IMPORTANT** : Une fois les catégories Hors-Lots disponibles configurées, il ne faut pas la modifier, en effet, des créneaux pourraient avoir été 
+**IMPORTANT** : Une fois les catégories Hors-Lots disponibles configurées, il ne faut pas les modifier, en effet, des créneaux pourraient avoir été utilisés avec cette qualification et necessiter de la maintenance sur la base de données pour réaffecter ces créneaux dans une autre catégorie.
 
 #### Mécanisme général
 
