@@ -600,7 +600,7 @@ class TimesheetController extends AbstractOscarController
 
 
 
-        $modele = $this->getConfiguration('oscar.paths.timesheet_synthesis_modele');
+
 
         $output = [
             'activityId' => $activity_id,
@@ -610,6 +610,8 @@ class TimesheetController extends AbstractOscarController
         ];
 
         if( $format == "excel" ){
+
+            $modele = $this->getConfiguration('oscar.paths.timesheet_synthesis_modele');
 
             $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
             $lineWpFormula = '=SUM(C%s:AG%s)';
