@@ -5,6 +5,7 @@
     "mail": "albert.einstein@jacksay.com",
     "login": "alberteinstein",
     "uid": "alberteinstein",
+    "dateupdated": "2019-07-30",
     "roles": {
       "14": ["Responsable scientifique"]
     }
@@ -14,6 +15,7 @@
     "firstname": "Norman",
     "lastname": "Osborn",
     "schelude": "half35",
+    "dateupdated": "2019-06-10",
     "mail": "g.goblin@oscorp.com",
     "roles": {
       "OSCORP": ["Directeur de laboratoire"]
@@ -29,6 +31,7 @@
     "firstname": "Maurice",
     "lastname": "Solovine",
     "mail": "maurice.solovine@jacksay.com",
+    "dateupdated": "2018-06-10",
     "login": "mauricesolovine",
     "uid": "mauricesolovine",
     "roles": {
@@ -40,6 +43,7 @@
     "lastname": "Grossmann",
     "mail": "marcel.grossmann@jacksay.com",
     "login": "marcelgrossmann",
+    "dateupdated": "2018-06-10",
     "uid": "marcelgrossmann",
     "referents": ["maxplank"]
   },
@@ -47,6 +51,7 @@
     "firstname": "Max",
     "lastname": "Plank",
     "mail": "max.plank@jacksay.com",
+    "dateupdated": "2018-06-10",
     "login": "maxplank",
     "uid": "maxplank",
     "roles": {
@@ -60,6 +65,7 @@
     "lastname": "Bohr",
     "mail": "niels.bohr@jacksay.com",
     "login": "nielsbohr",
+    "dateupdated": "2018-06-10",
     "uid": "nielsbohr"
   },
   {
@@ -67,6 +73,7 @@
     "lastname": "Schrödinger",
     "mail": "erwin.schrodinger@jacksay.com",
     "login": "erwinschrodinger",
+    "dateupdated": "2018-06-10",
     "uid": "erwinschrodinger"
   },
   {
@@ -74,6 +81,7 @@
     "lastname": "Administrateur",
     "mail": "romane.administrateur@jacksay.com",
     "login": "administrateur",
+    "dateupdated": "2018-06-10",
     "uid": "administrateur"
   },
   {
@@ -81,6 +89,7 @@
     "lastname": "Responsable",
     "mail": "raphaelle.responsable@jacksay.com",
     "login": "responsable",
+    "dateupdated": "2018-06-10",
     "uid": "responsable"
   },
   {
@@ -88,6 +97,7 @@
     "lastname": "Déclarant",
     "mail": "sarah.declarant@jacksay.com",
     "login": "declarant",
+    "dateupdated": "2018-06-10",
     "uid": "declarant"
   },
   {
@@ -96,6 +106,7 @@
     "mail": "emmanuelle.direction@jacksay.com",
     "login": "direction",
     "uid": "direction",
+    "dateupdated": "2018-06-10",
     "roles": {
       "LABO1": ["Directeur de composante"]
     }
