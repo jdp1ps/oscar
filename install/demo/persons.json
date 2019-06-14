@@ -10,17 +10,7 @@
 
     }
   },
-  {
-    "uid": "normanosborn",
-    "firstname": "Norman",
-    "lastname": "Osborn",
-    "schelude": "half35",
-    "dateupdated": "2019-06-10",
-    "mail": "g.goblin@oscorp.com",
-    "roles": {
-      "OSCORP": ["Directeur de laboratoire"]
-    }
-  },
+
   {
     "firstname": "Cet enregistrement sera ignoré, pas d'UID",
     "lastname": "",

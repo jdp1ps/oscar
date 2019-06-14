@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use mysql_xdevapi\Exception;
 use Oscar\Connector\IConnectedRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Data\DataExtractorFullname;
@@ -21,6 +22,27 @@ use Oscar\Import\Data\DataExtractorFullname;
 class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
+
+
+    public function removePerson(Person $person){
+        $this->getEntityManager()->remove($person);
+    }
+
+
+    public function getUidsConnector($connector){
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('p.connectors')
+            ->from(Person::class, 'p')
+            ->where('p.connectors LIKE :search')
+            ->setParameter('search', '%"' . $connector . '";s:%');
+
+        $uids = [];
+        foreach ($qb->getQuery()->getArrayResult() as $a){
+            $uids[] = $a['connectors']['rest'];
+        }
+
+        return $uids;
+    }
 
     public function getPersonsIdsForActivitiesids( $activitiesIds ){
         $queryActivity = $this->createQueryBuilder('p')

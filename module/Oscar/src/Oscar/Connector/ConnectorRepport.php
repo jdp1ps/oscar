@@ -140,7 +140,7 @@ class ConnectorRepport
     }
 
     public function addremoved( $message ){
-        $this->removeds[] = [
+        $this->removed[] = [
             'time' => time(),
             'message' => '[-] ' . $message
         ];

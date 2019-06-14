@@ -67,6 +67,8 @@ class ConnectorPersonJSON implements ConnectorInterface
             $repport->addRepport($this->connectorPersonHydrator->getRepport());
 
             if( $this->connectorPersonHydrator->isSuspect() ){
+                $repport->addwarning("Données suspectes pour $person");
+
                 continue;
             }
 
@@ -84,6 +86,7 @@ class ConnectorPersonJSON implements ConnectorInterface
                 $repport->adderror($message . " a échoué : " . $e->getMessage());
             }
         }
+        $this->flush();
         return $repport;
     }
 
