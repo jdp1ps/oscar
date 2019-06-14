@@ -146,7 +146,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             foreach( $personsDatas as $personData ){
 
                 if( ! property_exists($personData, 'uid') ){
-                    $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData->uid, true)));
+                    $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData, true)));
                     continue;
                 }
 

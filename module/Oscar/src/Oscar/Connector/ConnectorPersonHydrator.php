@@ -118,7 +118,32 @@ class ConnectorPersonHydrator
         }
 
 
+        ///////////////////////////////////
+        /// Récupération des rôles synchronisés par organisation
+        $syncRoles = [];
+        /** @var OrganizationPerson $organizationperson */
+        foreach ($personOscar->getOrganizations() as $organizationperson) {
+            if( $organizationperson->getOrigin() == $connectorName ){
+                $organizationCode = $organizationperson->getOrganization()->getCode();
+                if( !array_key_exists($organizationCode, $syncRoles) ){
+                    $syncRoles[$organizationCode] = [];
+                }
+                if( !in_array($organizationperson->getRoleObj()->getRoleId(), $syncRoles[$organizationCode]) ){
+                    $syncRoles[$organizationCode][] = $organizationperson->getRoleObj()->getRoleId();
+                }
+            }
+        }
+        if( $syncRoles ){
+           // print_r($syncRoles);
+            // Purge des rôles supprimés
+            foreach ($syncRoles as $code=>$roles){
+                echo " - $personOscar : ". implode(",", $roles) . " dans $code \n";
+            }
+        }
+
+
         if (property_exists($personData, 'roles')) {
+
             foreach ($personData->roles as $organizationCode => $roles) {
 
                 try {
@@ -126,7 +151,13 @@ class ConnectorPersonHydrator
                     $organization = $this->getOrganisationByCode($organizationCode);
 
                     if ($organization) {
+
                         foreach ($roles as $roleId) {
+                            if( array_key_exists($organizationCode, $syncRoles) ){
+                                if( in_array($roleId, $syncRoles[$organizationCode]) ){
+                                    array_splice($syncRoles[$organizationCode], array_search($roleId, $syncRoles[$organizationCode]), 1);
+                                }
+                            }
                             if (array_key_exists($roleId, $rolesOscar)) {
                                 if (!$organization->hasPerson($personOscar,
                                     $roleId)) {
@@ -156,6 +187,20 @@ class ConnectorPersonHydrator
                     $this->repport->addwarning(sprintf("L'organisation avec le code '%s' est présente plusieurs fois.",
                         $organizationCode));
                 }
+            }
+        }
+
+        // Purge des rôles supprimés
+        foreach ($syncRoles as $code=>$roles){
+
+            /** @var OrganizationPerson $organizationPerson */
+            foreach ($personOscar->getOrganizations() as $organizationPerson) {
+                if( $organizationPerson->getOrigin() == $connectorName &&
+                    $organizationPerson->getOrganization()->getCode() == $code &&
+                    in_array($organizationperson->getRoleObj()->getRoleId(), $roles)) {
+                        $this->repport->addremoved(sprintf("Suppression du rôle %s de %s dans %s", $organizationPerson->getRole(), $organizationPerson->getPerson(), $organizationPerson->getOrganization()));
+                        //$this->entityManager->remove($organizationPerson);
+                    }
             }
         }
 
