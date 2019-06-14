@@ -739,11 +739,19 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
         // RECHERCHE sur le nom/prenom/email
         else {
-            if ($search !== null) {
+            if ($search != "") {
 
                 try {
                     $ids = $this->getSearchEngineStrategy()->search($search);
-                    $query->where('p.id IN(:ids)')->setParameter('ids', $ids);
+
+                    if( array_key_exists('ids', $filters) ){
+                        array_intersect($filters['ids'], $ids);
+                    } else {
+                        $filters['ids'] = $ids;
+                    }
+//                    $query->where('p.id IN(:ids)')->setParameter('ids', $ids);
+
+
                 } catch( \Exception $e ){
                     $this->getLoggerService()->warn(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
 
@@ -871,6 +879,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $query->andWhere('p.id IN(:filterIds)')
                 ->setParameter('filterIds', $filters['ids']);
         }
+
+//        var_dump($query->getDQL()); die();
 
         return new UnicaenDoctrinePaginator($query, $currentPage,
             $resultByPage);
