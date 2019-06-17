@@ -9,13 +9,17 @@
         >
             <h3 class="card-title">
                 <span class="handler">
-                    [{{ spenttypegroup.id}} ]
+                    <strong class="code" :class="{ 'blind' : spenttypegroup.blind }">{{ spenttypegroup.code }}</strong>
                     {{ spenttypegroup.label }}
-                    ( {{ spenttypegroup.lft }} , {{ spenttypegroup.rgt }} )
-                    [ sel: {{ selection }}, m: {{mode}} ]
                 </span>
                 <p class="small">{{ spenttypegroup.description }}</p>
                 <small>
+                    <a href="#" @click.prevent="$emit('blind', spenttypegroup)">
+                        <i class="icon-eye-off"></i>
+                        <span v-if="spenttypegroup.blind">Utiliser</span>
+                        <span v-else>Ne pas utiliser</span>
+                    </a>
+
                     <a href="#" @click.prevent="$emit('edit', spenttypegroup)">
                         <i class="icon-pencil"></i>
                         Éditer</a>
@@ -29,7 +33,7 @@
                         Nouveau</a>
                 </small>
             </h3>
-            <div class="card-content spentarea">
+            <div class="card-content spentarea" v-if="!spenttypegroup.blind">
                 <spenttypeitem v-for="s in spenttypegroup.children"
                                :spenttypegroup="s"
                                :waitdrop="waitdrop"
@@ -39,6 +43,7 @@
                                @edit="$emit('edit', $event)"
                                @selection="$emit('selection', $event)"
                                @destination="$emit('destination', $event)"
+                               @blind="$emit('blind', $event)"
                                @delete="$emit('delete', $event)"
                                @new="$emit('new', $event)"
                 />

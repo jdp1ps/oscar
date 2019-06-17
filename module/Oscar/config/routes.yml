@@ -1445,6 +1445,14 @@ administration:
                 defaults:
                     action: documentSections
 
+        plan-comptable-loader:
+            type: segment
+            may_terminate: true
+            options:
+                route: /maj-plan-comptable
+                defaults:
+                    action: planComptableLoaded
+
         access:
             type: segment
             may_terminate: true

@@ -80,6 +80,7 @@
                        @selection="handlerSelection($event)"
                        @destination="handlerDestination($event)"
                        @edit="handlerEdit($event)"
+                       @blind="handlerBlind($event)"
                        @new="handlerNew(e, $event.id)"
                        @delete="handlerDelete($event)"/>
                 <hr>
@@ -221,6 +222,8 @@ DESTINATION : {{ destination }}    </pre>
                 ).then( foo => this.deleteData = null );
             },
 
+
+
             fetch(){
                 this.$http.get().then(
                     ok => {
@@ -260,6 +263,18 @@ DESTINATION : {{ destination }}    </pre>
                         this.error = ko.body;
                     }
                 );
+            },
+
+            handlerBlind(spentGroupType){
+                let data = new FormData();
+
+                data.append('action', "blind");
+                data.append('id', spentGroupType.id);
+
+                this.$http.post('?', data).then(ok => {
+                        this.fetch();
+                        this.formData = null;
+                    });
             },
 
             handlerNew( evt, inside = 'root' ){

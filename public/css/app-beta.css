@@ -9019,6 +9019,14 @@ pre.alert-danger, pre.alert-info {
   /* Required to make elements draggable in old WebKit */
   -khtml-user-drag: element;
   -webkit-user-drag: element; }
+  .spenttype .code {
+    background: #30b0d5;
+    display: inline-block;
+    font-weight: 100;
+    padding: 2px;
+    border-radius: 2px; }
+    .spenttype .code.blind {
+      background: #DD423E; }
   .spenttype:hover {
     box-shadow: none; }
   .spenttype.hover {

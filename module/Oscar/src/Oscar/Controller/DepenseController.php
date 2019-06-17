@@ -53,6 +53,12 @@ class DepenseController extends AbstractOscarController
                     elseif ($this->params()->fromPost("admin")) {
                         $this->getSpentService()->admin($this->params()->fromPost('admin'));
                     }
+                    elseif ($this->params()->fromPost("action") == 'blind') {
+                        $spent = $this->getSpentService()->getSpentTypeById($this->params()->fromPost('id'));
+                        $spent->setBlind(!$spent->getBlind());
+                        $this->getEntityManager()->flush($spent);
+                        return $this->getResponseOk();
+                    }
 
                     else {
                         $result = $this->getSpentService()->updateSpentTypeGroup($this->params()->fromPost());

@@ -45,6 +45,11 @@ class SpentTypeGroup implements ITrackable
     private $lft;
 
     /**
+     * @ORM\Column(type="boolean", options={"default" : false})
+     */
+    private $blind;
+
+    /**
      * @var
      * @ORM\ManyToOne(targetEntity="SpentTypeGroup")
      */
@@ -58,6 +63,22 @@ class SpentTypeGroup implements ITrackable
      */
     public function isLeaf(){
         return $this->getLft() + 1 == $this->getRgt();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBlind()
+    {
+        return $this->blind;
+    }
+
+    /**
+     * @param mixed $blind
+     */
+    public function setBlind($blind): void
+    {
+        $this->blind = $blind;
     }
 
     /**
@@ -195,6 +216,7 @@ class SpentTypeGroup implements ITrackable
             'parent' => $this->getParent() ? $this->getParent()->getId() : null,
             'description' => $this->getDescription(),
             'code' => $this->getCode(),
+            'blind' => $this->getBlind(),
             'rgt' => $this->getRgt(),
             'lft' => $this->getLft()
         ];
@@ -202,7 +224,7 @@ class SpentTypeGroup implements ITrackable
 
     public function __toString()
     {
-        return sprintf("%s (%s, %s)", $this->getLabel(), $this->getLft(), $this->getRgt());
+        return sprintf("[%s] %s (%s, %s)", $this->getCode(), $this->getLabel(), $this->getLft(), $this->getRgt());
     }
 
 

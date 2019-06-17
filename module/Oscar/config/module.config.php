@@ -69,7 +69,8 @@ return array(
                         'typeDocumentApi',
                         'numerotation',
                         'parameters',
-                        'access'
+                        'access',
+                        'planComptableLoaded'
                     ],
                     'roles' => ['user']
                 ],

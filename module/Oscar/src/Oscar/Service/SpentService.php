@@ -46,6 +46,60 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
         return $array;
     }
 
+    public function getSpentTypeById($id){
+        return $this->getSpentTypeRepository()->find($id);
+    }
+
+
+    public function orderSpentsByCode(){
+        $spents = $this->getSpentTypesIndexCode();
+        $bound = 1;
+        $open = [];
+        foreach ($spents as $code=>$spent) {
+            $openIndex = count($open)-1;
+            if( $openIndex >= 0 ){
+                /** @var SpentTypeGroup $lastOpen */
+                $lastOpen = &$open[$openIndex];
+                while (strlen($lastOpen->getCode()) >= strlen($spent->getCode())) {
+                    $lastOpen->setRgt($bound++);
+                    array_pop($open);
+                    $openIndex--;
+                    if( $openIndex < 0 ){
+                        break;
+                    }
+                    $lastOpen = $open[$openIndex];
+
+                }
+            }
+            $spent->setLft($bound++);
+            $open[] = $spent;
+
+        }
+
+        while (count($open) > 0) {
+            $open[count($open)-1]->setRgt($bound++);
+            array_pop($open);
+        }
+
+        foreach ($spents as $code=>&$spent) {
+            echo $spent."<br>";
+        }
+
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @return SpentTypeGroup[]
+     */
+    public function getSpentTypesIndexCode(){
+        $spents = [];
+        /** @var SpentTypeGroup $spent */
+        foreach ($this->getSpentTypeRepository()->findBy([],['code' => 'ASC']) as $spent) {
+            $spents[$spent->getCode()] = $spent;
+        }
+        return $spents;
+    }
+
     public function createSpentTypeGroup( $datas ){
         $this->checkDatas($datas);
 

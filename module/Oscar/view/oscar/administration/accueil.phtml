@@ -169,6 +169,21 @@
             </h3>
             <p>Gestion des types de dépense.</p>
         </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-euro"></i>
+                    Plan comptable générale
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/plan-comptable-loader') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Chargement du plan comptable générale (officiel).</p>
+        </article>
     </section>
 
     <section>

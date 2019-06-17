@@ -4956,6 +4956,17 @@ pre.alert-danger, pre.alert-info {
   transition: all .3s ;
   box-shadow: none;
 
+  .code {
+    background: $colorBlue;
+    display: inline-block;
+    font-weight: 100;
+    padding: 2px;
+    border-radius: 2px;
+    &.blind {
+      background: $colorRed;
+    }
+  }
+
   &:hover { box-shadow: none; }
 
   &.hover { box-shadow: none;  left: 4px}
