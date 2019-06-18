@@ -291,49 +291,11 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
 
     public function getTypesTree(){
 
-        /****
-        let dest = {
-            lft: 0,
-            rgt: this.spenttypegroups.length * 2 + 1,
-            children: []
-        };
-
-        let parents = [dest];
-
-
-        this.spenttypegroups.forEach( item => {
-            let l = item.lft;
-            let r = item.rgt;
-            let lastParent = parents[parents.length-1];
-
-            while (r > lastParent.rgt) {
-                parents[parents.length-2].children.push(lastParent);
-                parents.pop();
-                lastParent = parents[parents.length-1];
-            }
-
-            if( r > l+1 ){
-                item.children = [];
-                parents.push(item);
-            } else {
-                lastParent.children.push(item);
-            }
-        });
-
-        while (parents.length > 1) {
-        parents[parents.length-2].children.push(parents.pop());
-        }
-
-        console.log(parents);
-
-        return parents[0].children;
-         */
-
-
         $types = $this->getSpentTypeRepository()->getAll();
         $root = [
             'label' => 'root',
             'lft' => 0,
+            'corpus' => '',
             'rgt' => count($types)*2 + 1,
             'children' => []
         ];
@@ -343,40 +305,88 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
 
         /** @var SpentTypeGroup $type */
         foreach ($types as $type) {
-            $this->getLogger()->debug("------------------------------------");
-            $this->getLogger()->debug("Traitement de $type");
             $item = $type->toJson();
+            $item['corpus'] = $item['label'];
             $l = $type->getLft();
             $r = $type->getRgt();
-            $lastParent = &$parents[count($parents)-1];
-            $this->getLogger()->debug("L : $l");
-            $this->getLogger()->debug("R : $r");
 
+            $lastParent = &$parents[count($parents)-1];
 
             while ($r > $lastParent['rgt']) {
-
-                $parents[count($parents)-2]['children'][] = array_pop($parents);
+                $child = array_pop($parents);
+                $parents[count($parents)-1]['corpus'] .= $child['corpus'];
+                $parents[count($parents)-1]['children'][] = $child;
                 $lastParent = &$parents[count($parents)-1];
             }
 
-            $this->getLogger()->debug("Parent : " . $lastParent['label']);
-
             if( $r > $l+1 ){
-                $this->getLogger()->debug("$type a des enfants, ajouté à la liste des parents");
                 $item['children'] = [];
                 $parents[] = $item;
             } else {
-                $this->getLogger()->debug("Ajout de ".$item['label'] . " dans " . $lastParent['label']);
                 $item['parent_id'] = $lastParent['id'];
                 $lastParent['children'][] = $item;
+                $lastParent['corpus'] .= $item['corpus'] . ' ';
+
             }
         }
 
         while (count($parents) > 1) {
-            $parents[count($parents) - 2]['children'][] = array_pop($parents);
+            $child = array_pop($parents);
+            $parents[count($parents) - 1]['corpus'] .= $child['corpus'];
+            $parents[count($parents) - 1]['children'][] = $child;
         }
 
         return $parents[0];
+    }
+
+    public function loadPCG(){
+        $filepath = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('spenttypesource');
+
+        $spentTypes = $this->getSpentTypesIndexCode() ;
+
+        $re = '/(\d+)\.?/';
+
+        if (($handle = fopen($filepath, "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+
+                if( preg_match($re, $data[0], $matches) ){
+                    $code = $matches[1];
+                    $label = $data[1];
+                }
+
+                else if (preg_match($re, $data[1], $matches) ){
+                    $code = $matches[1];
+                    $label = $data[2];
+                }
+
+                else if (preg_match($re, $data[2], $matches) ){
+                    $code = $matches[1];
+                    $label = $data[3];
+                }
+
+                else if (preg_match($re, $data[3], $matches) ){
+                    $code = $matches[1];
+                    $label = $data[4];
+                }
+
+                else {
+                    continue;
+                }
+
+                if( array_key_exists($code, $spentTypes) ){
+
+                } else {
+                    $spentType = new SpentTypeGroup();
+                    $this->getEntityManager()->persist($spentType);
+                    $spentType->setCode($code)->setLabel($label)->setLft(1)->setRgt(2)->setDescription("");
+                    $this->getEntityManager()->flush($spentType);
+                }
+            }
+            fclose($handle);
+        }
+
+        $this->orderSpentsByCode();
+
     }
 
 

@@ -47,7 +47,7 @@ class SpentTypeGroup implements ITrackable
     /**
      * @ORM\Column(type="boolean", options={"default" : false})
      */
-    private $blind;
+    private $blind = false;
 
     /**
      * @var

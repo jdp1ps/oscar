@@ -1,5 +1,5 @@
 <template>
-    <section style="position: relative">
+    <section style="position: relative" class="depenses-previsionnelle">
 
         <transition name="fade">
             <div class="overlay" v-if="error">
@@ -33,26 +33,26 @@
         </transition>
 
         <section>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>Nature des dépenses</th>
-                    <th class="year" v-for="year in years">{{ year }}</th>
-                    <th class="total">TOTAL</th>
-                </tr>
-                </thead>
+            <header class="line">
+                <div class="intitule">
+                    Nature des dépenses
+                </div>
+                <div class="year" v-for="year in years">
+                    {{ year }}
+                </div>
+                <div class="total">Total</div>
+            </header>
 
-                <estimatedspentactivityitem :type="t" :years="years" v-for="t in types.children" />
+            <section class="search">
+                <input type="search" v-model="filter" class="form-control" placeholder="Rechercher..."/>
+                <h1>{{ filter }}</h1>
+            </section>
+            <section v-if="types">
+                <estimatedspentactivityitem :type="t" :years="years" v-for="t in types.children" :key="t.id" v-if="types" :filter="filter"/>
+            </section>
+            <!--<pre>{{ types.children }}</pre>-->
 
-
-            </table>
-            <pre>{{ types }}</pre>
         </section>
-
-
-        <h3 @click="handlerClick">FORM ICI</h3>
-        <pre>{{ years }}</pre>
-        <pre>{{ types }}</pre>
     </section>
 </template>
 <script>
@@ -66,7 +66,7 @@
 
         data(){
             return {
-
+                filter: ""
             }
         },
 
@@ -76,6 +76,8 @@
                 this.$emit('foo', 'toto');
             }
         },
+
+
         mounted(){
             console.log('MOUNTED');
             this.$emit('foo', 'test 1');

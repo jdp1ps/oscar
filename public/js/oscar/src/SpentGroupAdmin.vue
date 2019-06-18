@@ -32,6 +32,30 @@
         </transition>
 
         <transition name="fade">
+            <div class="overlay" v-if="confirm">
+                <div class="alert alert-danger">
+                    <h3>
+                        {{ confirm }}
+                        <a href="#" @click.prevent="error =null" class="float-right">
+                            <i class="icon-cancel-outline"></i>
+                        </a>
+                    </h3>
+                    <hr>
+                    <nav>
+                        <button type="submit" class="btn btn-success" @click.prevent="handlerConfirm">
+                            <i class="icon-ok-circled"></i>
+                            Valider
+                        </button>
+                        <button type="reset" class="btn btn-danger" @click.prevent="confirm = null">
+                            <i class="icon-cancel-outline"></i>
+                            Annuler
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
+        <transition name="fade">
             <div class="overlay" v-if="error">
                 <div class="alert alert-danger">
                     <h3>Erreur
@@ -85,6 +109,7 @@
                        @delete="handlerDelete($event)"/>
                 <hr>
 
+            <!--
                 <button type="button" class="btn btn-primary" @click.prevent="handlerModeSelection">
                     <i class="icon-plus-circled"></i>
                     Réorganiser
@@ -99,9 +124,12 @@
                     <i class="icon-plus-circled"></i>
                     Reset Tree
                 </button>
+                -->
+            <button type="button" class="btn btn-primary" @click.prevent="loadPCG">
+                <i class="icon-database"></i>
+                Charger le <strong>Plan Comptable Générale</strong>
+            </button>
             </div>
-    <pre>SELECTION: {{ selection }}
-DESTINATION : {{ destination }}    </pre>
     </section>
 </template>
 <script>
@@ -120,13 +148,13 @@ DESTINATION : {{ destination }}    </pre>
                 error: null,
                 deleteData: null,
                 spenttypegroups: [],
+                confirm: "",
                 waitdrop: false
             }
         },
 
         computed: {
             tree(){
-
                 let dest = {
                     lft: 0,
                     rgt: this.spenttypegroups.length * 2 + 1,
@@ -135,37 +163,58 @@ DESTINATION : {{ destination }}    </pre>
 
                 let parents = [dest];
 
+                try {
 
-                this.spenttypegroups.forEach( item => {
-                    let l = item.lft;
-                    let r = item.rgt;
-                    let lastParent = parents[parents.length-1];
+                    this.spenttypegroups.forEach(item => {
+                        let l = item.lft;
+                        let r = item.rgt;
+                        let lastParent = parents[parents.length - 1];
 
-                    while (r > lastParent.rgt) {
-                        parents[parents.length-2].children.push(lastParent);
-                        parents.pop();
-                        lastParent = parents[parents.length-1];
+                        while (r > lastParent.rgt) {
+                            parents[parents.length - 2].children.push(lastParent);
+                            parents.pop();
+                            lastParent = parents[parents.length - 1];
+                        }
+
+                        if (r > l + 1) {
+                            item.children = [];
+                            parents.push(item);
+                        } else {
+                            lastParent.children.push(item);
+                        }
+                    });
+
+                    while (parents.length > 1) {
+                        parents[parents.length - 2].children.push(parents.pop());
                     }
-
-                    if( r > l+1 ){
-                        item.children = [];
-                        parents.push(item);
-                    } else {
-                        lastParent.children.push(item);
-                    }
-                });
-
-                while (parents.length > 1) {
-                    parents[parents.length-2].children.push(parents.pop());
+                } catch (e) {
+                    this.error = "Liste des types de dépenses corrompu";
                 }
-
-                console.log(parents);
 
                 return parents[0].children;
             }
         },
 
         methods:{
+
+            handlerConfirm(){
+                let data = new FormData(), send;
+                data.append('admin', "reset");
+                this.$http.post('?', data).then(
+                    ok => {
+                        this.fetch();
+                        this.formData = null;
+                        this.confirm = "";
+                    })
+                    .catch( ko => {
+                        this.error = ko.body;
+                        this.confirm = "";
+                    });
+            },
+
+            loadPCG(){
+              this.confirm = "Remettre le plan comptable par défaut (plan comptable générale) ? ";
+            },
 
             handlerModeSelection(){
                 this.mode = "selection";

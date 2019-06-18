@@ -4945,6 +4945,32 @@ pre.alert-danger, pre.alert-info {
   border: 1px solid #ececec;
 }
 
+.depenses-previsionnelle {
+  background: #efefef;
+  .line { display: flex; border-top: thin solid #e0cfc2 }
+
+  .line.sizing-1 > .intitule { font-weight: 900; padding-left: 1em }
+  .line.sizing-2 > .intitule { font-weight: 700; padding-left: 2em }
+  .line.sizing-3 > .intitule { font-weight: 500; padding-left: 3em }
+  .line.sizing-4 > .intitule { font-weight: 300; padding-left: 4em }
+  .line.sizing-5 > .intitule { font-weight: 100; padding-left: 5em }
+
+  .code { background: #0b93d5; color: #fefefd; display: inline-block; padding: 0 .25em; border-radius: 2px}
+
+  .intitule {
+    flex: 3 0 ;
+  }
+  .year {
+    flex: 0 0 10em;
+    input { text-align: right }
+  }
+  .total {
+    flex: 0 0 10em;
+    padding-left: 1em;
+    font-weight: 400;
+  }
+}
+
 .spenttype {
 
   border: 2px solid #ddd;

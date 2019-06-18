@@ -46,61 +46,7 @@ class AdministrationController extends AbstractOscarController
 
     public function planComptableLoadedAction()
     {
-        $filepath = $this->getConfiguration('oscar.spenttypesource');
-
-        $spentTypes = $this->getSpentService()->getSpentTypesIndexCode() ;
-
-        echo "$filepath\n<br>";
-        $row = 1;
-
-        $re = '/(\d+)\.?/';
-
-        if (($handle = fopen($filepath, "r")) !== FALSE) {
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-
-
-
-                if( preg_match($re, $data[0], $matches) ){
-                    $code = $matches[1];
-                    $label = $data[1];
-                }
-
-                else if (preg_match($re, $data[1], $matches) ){
-                    $code = $matches[1];
-                    $label = $data[2];
-                }
-
-                else if (preg_match($re, $data[2], $matches) ){
-                    $code = $matches[1];
-                    $label = $data[3];
-                }
-
-                else if (preg_match($re, $data[3], $matches) ){
-                    $code = $matches[1];
-                    $label = $data[4];
-                }
-
-                else {
-                    continue;
-                }
-
-                if( array_key_exists($code, $spentTypes) ){
-
-                } else {
-                    $spentType = new SpentTypeGroup();
-                    $this->getEntityManager()->persist($spentType);
-                    $spentType->setCode($code)->setLabel($label)->setLft(1)->setRgt(2)->setDescription("");
-                    $this->getEntityManager()->flush($spentType);
-                    echo "Création de <strong>$code</strong> : <em>$label</em><br>";
-                }
-
-//                echo "<strong>$code</strong> : <i>$label</i><br>\n";
-            }
-            fclose($handle);
-        }
-
-        $this->getSpentService()->orderSpentsByCode();
-        die("Chargement du plan comptable");
+        return $this->getResponseDeprecated();
     }
 
     public function documentSectionsAction()

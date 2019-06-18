@@ -9003,6 +9003,43 @@ pre.alert-danger, pre.alert-info {
   padding: 8px;
   border: 1px solid #ececec; }
 
+.depenses-previsionnelle {
+  background: #efefef; }
+  .depenses-previsionnelle .line {
+    display: flex;
+    border-top: thin solid #e0cfc2; }
+  .depenses-previsionnelle .line.sizing-1 > .intitule {
+    font-weight: 900;
+    padding-left: 1em; }
+  .depenses-previsionnelle .line.sizing-2 > .intitule {
+    font-weight: 700;
+    padding-left: 2em; }
+  .depenses-previsionnelle .line.sizing-3 > .intitule {
+    font-weight: 500;
+    padding-left: 3em; }
+  .depenses-previsionnelle .line.sizing-4 > .intitule {
+    font-weight: 300;
+    padding-left: 4em; }
+  .depenses-previsionnelle .line.sizing-5 > .intitule {
+    font-weight: 100;
+    padding-left: 5em; }
+  .depenses-previsionnelle .code {
+    background: #0b93d5;
+    color: #fefefd;
+    display: inline-block;
+    padding: 0 .25em;
+    border-radius: 2px; }
+  .depenses-previsionnelle .intitule {
+    flex: 3 0; }
+  .depenses-previsionnelle .year {
+    flex: 0 0 10em; }
+    .depenses-previsionnelle .year input {
+      text-align: right; }
+  .depenses-previsionnelle .total {
+    flex: 0 0 10em;
+    padding-left: 1em;
+    font-weight: 400; }
+
 .spenttype {
   border: 2px solid #ddd;
   border-left-color: #777777;
