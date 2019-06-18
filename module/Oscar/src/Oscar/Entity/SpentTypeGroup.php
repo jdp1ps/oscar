@@ -35,6 +35,11 @@ class SpentTypeGroup implements ITrackable
     private $code;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $annexe;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $rgt;
@@ -63,6 +68,23 @@ class SpentTypeGroup implements ITrackable
      */
     public function isLeaf(){
         return $this->getLft() + 1 == $this->getRgt();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAnnexe()
+    {
+        return $this->annexe;
+    }
+
+    /**
+     * @param mixed $annexe
+     */
+    public function setAnnexe($annexe)
+    {
+        $this->annexe = $annexe;
+        return $this;
     }
 
     /**
@@ -215,6 +237,7 @@ class SpentTypeGroup implements ITrackable
             'label' => $this->getLabel(),
             'parent' => $this->getParent() ? $this->getParent()->getId() : null,
             'description' => $this->getDescription(),
+            'annexe' => $this->getAnnexe(),
             'code' => $this->getCode(),
             'blind' => $this->getBlind(),
             'rgt' => $this->getRgt(),

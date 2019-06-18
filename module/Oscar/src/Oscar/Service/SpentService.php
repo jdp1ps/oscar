@@ -105,10 +105,12 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
 
         $label = $datas['label'];
         $code = $datas['code'];
+        $annexe = $datas['annexe'];
         $description = $datas['description'];
 
         $type = new SpentTypeGroup();
         $type->setLabel($label)
+            ->setAnnexe($annexe)
             ->setCode($code)
             ->setDescription($description);
 
@@ -419,6 +421,7 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
 
         $label = $datas['label'];
         $code = $datas['code'];
+        $annexe = $datas['annexe'];
         $description = $datas['description'];
 
         if( array_key_exists('inside', $datas) ){
@@ -427,6 +430,7 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
 
         $spentTypeGroup->setLabel($label)
             ->setDescription($description)
+            ->setAnnexe($annexe)
             ->setCode($code);
 
         $this->getEntityManager()->flush($spentTypeGroup);

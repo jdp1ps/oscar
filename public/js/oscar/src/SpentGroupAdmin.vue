@@ -1,7 +1,7 @@
 <template>
     <section style="position: relative">
         <h1>Type de dépense</h1>
-
+        <pre>{{ masses }}</pre>
         <transition name="fade">
             <div class="overlay" v-if="formData">
                 <form action="" @submit.prevent="handlerSubmit">
@@ -13,6 +13,14 @@
                     <label for="form_code">Code</label>
                     <small>Ce code est celui utilisé par les services financiers pour qualifier ce type de dépense</small>
                     <input type="text" class="form-control" v-model="formData.code" id="form_code" />
+
+                    <label for="annexe">Annexe</label>
+                    <small>Ce code est celui utilisé par les services financiers pour qualifier ce type de dépense</small>
+                    <select name="annexe" id="annexe" v-model="formData.annexe" class="form-control">
+                        <option value="">Ne pas utiliser</option>
+                        <option :value="a" v-for="label, a in masses">{{ label }}</option>
+                    </select>
+
 
                     <label for="form_description">Description</label>
                     <textarea type="text" class="form-control" v-model="formData.description" id="form_description" />
@@ -98,6 +106,7 @@
         <div class="card-content spentarea">
             <spenttypeitem v-for="s in tree"
                        :spenttypegroup="s"
+                           :annexes="masses"
                        :key="s.id"
                        :selection="selection"
                        :mode="mode"
@@ -127,7 +136,7 @@
                 -->
             <button type="button" class="btn btn-primary" @click.prevent="loadPCG">
                 <i class="icon-database"></i>
-                Charger le <strong>Plan Comptable Générale</strong>
+                Charger le <strong>Plan Comptable Général</strong>
             </button>
             </div>
     </section>
@@ -277,6 +286,7 @@
                 this.$http.get().then(
                     ok => {
                         this.spenttypegroups = ok.data.spenttypegroups;
+                        this.masses = ok.data.masses;
                     },
                     ko => {
                         this.error = ko.body;
@@ -290,6 +300,7 @@
                 data.append('label', this.formData.label);
                 data.append('description', this.formData.description);
                 data.append('code', this.formData.code);
+                data.append('annexe', this.formData.annexe);
                 data.append('inside', this.formData.inside);
 
                 if( this.formData.id ){
@@ -331,6 +342,7 @@
                     id: "",
                     label: "",
                     code: "",
+                    annexe: "",
                     inside: inside,
                     description: ""
                 };
@@ -362,6 +374,7 @@
                 this.formData = {
                     id: spenttypegroup.id,
                     label: spenttypegroup.label,
+                    annexe: spenttypegroup.annexe,
                     code: spenttypegroup.code,
                     description: spenttypegroup.description
                 };

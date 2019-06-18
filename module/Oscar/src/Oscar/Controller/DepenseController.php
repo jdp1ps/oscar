@@ -97,11 +97,11 @@ class DepenseController extends AbstractOscarController
 
         if( $format == 'json' || $this->isAjax() ){
             return $this->jsonOutput([
-                'spenttypegroups' => $this->getSpentService()->getAllArray()
+                'spenttypegroups' => $this->getSpentService()->getAllArray(),
+                'masses' => $this->getConfiguration('oscar.spenttypeannexes')
             ]);
         } else {
             return [];
         }
-        die("TODO");
     }
 }

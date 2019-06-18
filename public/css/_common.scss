@@ -4971,6 +4971,8 @@ pre.alert-danger, pre.alert-info {
   }
 }
 
+
+
 .spenttype {
 
   border: 2px solid #ddd;
@@ -4982,11 +4984,17 @@ pre.alert-danger, pre.alert-info {
   transition: all .3s ;
   box-shadow: none;
 
+  .annexe {
+    background: #777777;
+    padding: 0 4px;
+    display: inline-block;
+  }
+
   .code {
     background: $colorBlue;
     display: inline-block;
     font-weight: 100;
-    padding: 2px;
+    padding: 0 .25em;
     border-radius: 2px;
     &.blind {
       background: $colorRed;

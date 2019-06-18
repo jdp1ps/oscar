@@ -9,8 +9,18 @@
         >
             <h3 class="card-title">
                 <span class="handler">
+
+                    <i class="icon-angle-down" @click="open = false" v-if="open"></i>
+                    <i class="icon-angle-right" @click="open = true" v-else></i>
+
+
                     <strong class="code" :class="{ 'blind' : spenttypegroup.blind }">{{ spenttypegroup.code }}</strong>
                     {{ spenttypegroup.label }}
+
+                    <span v-for="aLabel, a in annexes" :title="aLabel" class="annexe">{{ a }}</span>
+                    <strong :class="'annexe-' + spenttypegroup.annexe" v-if="spenttypegroup.annexe">{{ spenttypegroup.annexe }}</strong>
+
+
                 </span>
                 <p class="small">{{ spenttypegroup.description }}</p>
                 <small>
@@ -33,8 +43,9 @@
                         Nouveau</a>
                 </small>
             </h3>
-            <div class="card-content spentarea" v-if="!spenttypegroup.blind">
+            <div class="card-content spentarea" v-if="!spenttypegroup.blind" v-show="open">
                 <spenttypeitem v-for="s in spenttypegroup.children"
+                               :annexes="annexes"
                                :spenttypegroup="s"
                                :waitdrop="waitdrop"
                                :key="s.id"
@@ -62,13 +73,17 @@
             },
             mode: {
                 required: true
+            },
+            annexes: {
+                required: true
             }
         },
         data(){
             return {
                 movable: false,
                 selectable: false,
-                hover: false
+                hover: false,
+                open: true
             }
         },
 
