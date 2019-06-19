@@ -8,6 +8,7 @@
 namespace Oscar\Controller;
 
 use Oscar\Entity\Activity;
+use Oscar\Entity\SpentTypeGroup;
 use Oscar\Provider\Privileges;
 use Oscar\Service\SpentService;
 use Zend\Http\Request;
@@ -57,6 +58,18 @@ class DepenseController extends AbstractOscarController
                     elseif ($this->params()->fromPost("action") == 'blind') {
                         $spent = $this->getSpentService()->getSpentTypeById($this->params()->fromPost('id'));
                         $spent->setBlind(!$spent->getBlind());
+                        $this->getEntityManager()->flush($spent);
+                        return $this->getResponseOk();
+                    }
+
+                    elseif ($this->params()->fromPost("action") == 'annexe') {
+                        /** @var SpentTypeGroup $spent */
+                        $spent = $this->getSpentService()->getSpentTypeById($this->params()->fromPost('id'));
+                        $annexe = $spent->getAnnexe();
+                        $newAnnexe = $this->params()->fromPost('annexe');
+
+                        // @todo Contrôler la validitée de l'annexe
+                        $spent->setAnnexe( $annexe == $newAnnexe ? '' : $newAnnexe);
                         $this->getEntityManager()->flush($spent);
                         return $this->getResponseOk();
                     }

@@ -4984,10 +4984,27 @@ pre.alert-danger, pre.alert-info {
   transition: all .3s ;
   box-shadow: none;
 
+  &.level-1 > h3 { font-weight: 900 }
+  &.level-2 > h3 { font-weight: 700 }
+  &.level-3 > h3 { font-weight: 500 }
+  &.level-4 > h3 { font-weight: 300 }
+  &.level-5 > h3 { font-weight: 100 }
+
   .annexe {
     background: #777777;
     padding: 0 4px;
     display: inline-block;
+    font-weight: 300;
+    cursor: pointer;
+    &.active {
+      background: $colorGreen;
+      cursor: default;
+    }
+    &:hover {
+      background: $colorBlue;
+    }
+    &:first-of-type { border-radius: 4px 0 0 4px; border-right: thin solid rgba(255,255,255,.25) }
+    &:last-of-type { border-radius: 0 4px 4px 0; border-left: thin solid rgba(255,255,255,.25) }
   }
 
   .code {
@@ -5044,10 +5061,6 @@ pre.alert-danger, pre.alert-info {
 
   .card-title small {
     flex: auto;
-  }
-
-  .spenttype {
-    font-size: .9em;
   }
 
   h3 small {

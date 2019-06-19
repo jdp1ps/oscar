@@ -1,26 +1,31 @@
 <template>
 
         <article class="card spenttype"
-                 :class="{ 'movable': mode == 'move', 'selectable': selection && selection != spenttypegroup, 'selected': selection == spenttypegroup, 'hover': hover }"
+                 :class="'level-' + level"
                  @click.stop.prevent="handlerClick"
                  @mousehover="handlerOver(true)"
                  @mouseout="handlerOver(false)"
 
         >
+            <!-- :class="{ 'movable': mode == 'move', 'selectable': selection && selection != spenttypegroup, 'selected': selection == spenttypegroup, 'hover': hover }" -->
             <h3 class="card-title">
                 <span class="handler">
 
                     <i class="icon-angle-down" @click="open = false" v-if="open"></i>
                     <i class="icon-angle-right" @click="open = true" v-else></i>
 
-
                     <strong class="code" :class="{ 'blind' : spenttypegroup.blind }">{{ spenttypegroup.code }}</strong>
                     {{ spenttypegroup.label }}
 
-                    <span v-for="aLabel, a in annexes" :title="aLabel" class="annexe">{{ a }}</span>
-                    <strong :class="'annexe-' + spenttypegroup.annexe" v-if="spenttypegroup.annexe">{{ spenttypegroup.annexe }}</strong>
+                    <code>A:{{ spenttypegroup.annexe }}</code>
 
-
+                    <span v-if="annexelock == false">
+                        <span v-for="aLabel, a in annexes"
+                              @click.prevent="handlerAnnexe(spenttypegroup, a)"
+                              :title="aLabel" class="annexe"
+                              :class="{'active': spenttypegroup.annexe == a}">
+                            {{ a }}</span>
+                    </span>
                 </span>
                 <p class="small">{{ spenttypegroup.description }}</p>
                 <small>
@@ -49,8 +54,11 @@
                                :spenttypegroup="s"
                                :waitdrop="waitdrop"
                                :key="s.id"
+                               :level="level+1"
                                :mode="mode"
                                :selection="selection"
+                               :annexelock="spenttypegroup.annexe != '' || annexelock"
+                               @annexe="$emit('annexe', $event)"
                                @edit="$emit('edit', $event)"
                                @selection="$emit('selection', $event)"
                                @destination="$emit('destination', $event)"
@@ -76,6 +84,12 @@
             },
             annexes: {
                 required: true
+            },
+            annexelock: {
+                default: false
+            },
+            level: {
+                default: 1
             }
         },
         data(){
@@ -96,6 +110,10 @@
                     console.log("destination");
                     this.$emit('destination', this.spenttypegroup);
                 }
+            },
+
+            handlerAnnexe(spenttype, annexe){
+                this.$emit('annexe', { 'spenttype': spenttype, 'annexe': annexe});
             },
 
             handlerOver(direction){

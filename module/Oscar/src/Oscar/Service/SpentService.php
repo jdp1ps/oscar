@@ -297,18 +297,21 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
         $root = [
             'label' => 'root',
             'lft' => 0,
-            'corpus' => '',
+            // 'corpus' => '',
             'rgt' => count($types)*2 + 1,
+            'empty' => true,
             'children' => []
         ];
 
         $parents = [$root];
         $typesArray = [];
 
+
         /** @var SpentTypeGroup $type */
         foreach ($types as $type) {
             $item = $type->toJson();
-            $item['corpus'] = $item['label'];
+           // $item['corpus'] = $item['label'];
+            $item['empty'] = $type->getAnnexe() == '';
             $l = $type->getLft();
             $r = $type->getRgt();
 
@@ -316,8 +319,11 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
 
             while ($r > $lastParent['rgt']) {
                 $child = array_pop($parents);
-                $parents[count($parents)-1]['corpus'] .= $child['corpus'];
+               // $parents[count($parents)-1]['corpus'] .= $child['corpus'];
                 $parents[count($parents)-1]['children'][] = $child;
+                if( $child['empty'] == false ){
+                    $parents[count($parents)-1]['children'][] = false;
+                }
                 $lastParent = &$parents[count($parents)-1];
             }
 
@@ -327,15 +333,24 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
             } else {
                 $item['parent_id'] = $lastParent['id'];
                 $lastParent['children'][] = $item;
-                $lastParent['corpus'] .= $item['corpus'] . ' ';
+               // $lastParent['corpus'] .= $item['corpus'] . ' ';
+                if( $item['empty'] == false ){
+                    //die($item['code']);
+                    foreach ($parents as &$p ){
+                        $p['empty'] = false;
+                    }
+                }
 
             }
         }
 
         while (count($parents) > 1) {
             $child = array_pop($parents);
-            $parents[count($parents) - 1]['corpus'] .= $child['corpus'];
+           // $parents[count($parents) - 1]['corpus'] .= $child['corpus'];
             $parents[count($parents) - 1]['children'][] = $child;
+            if( $child['empty'] == false ){
+                $parents[count($parents)-1]['children'][] = false;
+            }
         }
 
         return $parents[0];

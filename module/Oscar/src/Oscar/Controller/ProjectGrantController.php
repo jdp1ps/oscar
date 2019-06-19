@@ -1268,10 +1268,22 @@ class ProjectGrantController extends AbstractOscarController
         $spentService = $this->getSpentService();
 
         $types = $spentService->getTypesTree();
+        $years = $spentService->getYearsListActivity($entity);
+
+        $values = [];
+
+        foreach( $this->getSpentService()->getAllArray() as $spent ){
+            $values[$spent['id']] = [];
+            foreach ($years as $year) {
+                $values[$spent['id']][$year] = 0.0;
+            }
+        }
+
 
         return [
-            'years' => $spentService->getYearsListActivity($entity),
+            'years' => $years,
             'types' => $types,
+            'values' => $values,
         ];
     }
 

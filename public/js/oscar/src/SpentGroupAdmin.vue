@@ -105,11 +105,11 @@
         </transition>
         <div class="card-content spentarea">
             <spenttypeitem v-for="s in tree"
-                       :spenttypegroup="s"
-                           :annexes="masses"
+                       :spenttypegroup="s" :annexes="masses"
                        :key="s.id"
                        :selection="selection"
                        :mode="mode"
+                       @annexe="handlerAnnexe"
                        @selection="handlerSelection($event)"
                        @destination="handlerDestination($event)"
                        @edit="handlerEdit($event)"
@@ -205,6 +205,24 @@
         },
 
         methods:{
+
+            handlerAnnexe(args){
+
+                let data = new FormData(), send;
+                data.append('id', args.spenttype.id);
+                data.append('annexe', args.annexe);
+                data.append('action', 'annexe');
+                this.$http.post('?', data).then(
+                    ok => {
+                        this.fetch();
+                        this.formData = null;
+                        this.confirm = "";
+                    })
+                    .catch( ko => {
+                        this.error = ko.body;
+                        this.confirm = "";
+                    });
+            },
 
             handlerConfirm(){
                 let data = new FormData(), send;

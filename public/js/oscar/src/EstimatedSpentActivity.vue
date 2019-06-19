@@ -48,7 +48,7 @@
                 <h1>{{ filter }}</h1>
             </section>
             <section v-if="types">
-                <estimatedspentactivityitem :type="t" :years="years" v-for="t in types.children" :key="t.id" v-if="types" :filter="filter"/>
+                <estimatedspentactivityitem :type="t" :years="years" v-for="t in types.children" :key="t.id" v-if="t" :filter="filter" :values="values" @changevalue="handlerUpdateValue($event)"/>
             </section>
             <!--<pre>{{ types.children }}</pre>-->
 
@@ -61,7 +61,8 @@
     export default {
         props: {
             types: { required: true },
-            years: { required: true }
+            years: { required: true },
+            values: { required: true }
         },
 
         data(){
@@ -70,17 +71,11 @@
             }
         },
 
-        methods:{
-            handlerClick(){
-                console.log('click');
-                this.$emit('foo', 'toto');
+        methods: {
+            handlerUpdateValue(datas){
+                console.log(datas);
+                this.values[datas.id][datas.year] = datas.value;
             }
-        },
-
-
-        mounted(){
-            console.log('MOUNTED');
-            this.$emit('foo', 'test 1');
         }
     }
 </script>

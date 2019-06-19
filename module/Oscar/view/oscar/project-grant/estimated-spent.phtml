@@ -6,7 +6,7 @@
             Vue.component('estimatedspentactivityitem', EstimatedSpentActivityItem.default);
             var v = new Vue({
                 'render': function(h){
-                    return h(EstimatedSpentActivity.default, { props: { years: <?= json_encode($years) ?>, types: <?= json_encode($types) ?>}});
+                    return h(EstimatedSpentActivity.default, { props: { years: <?= json_encode($years) ?>, types: <?= json_encode($types) ?>, values: <?= json_encode($values)?>}});
                 }
             });
 

@@ -9056,11 +9056,38 @@ pre.alert-danger, pre.alert-info {
   /* Required to make elements draggable in old WebKit */
   -khtml-user-drag: element;
   -webkit-user-drag: element; }
+  .spenttype.level-1 > h3 {
+    font-weight: 900; }
+  .spenttype.level-2 > h3 {
+    font-weight: 700; }
+  .spenttype.level-3 > h3 {
+    font-weight: 500; }
+  .spenttype.level-4 > h3 {
+    font-weight: 300; }
+  .spenttype.level-5 > h3 {
+    font-weight: 100; }
+  .spenttype .annexe {
+    background: #777777;
+    padding: 0 4px;
+    display: inline-block;
+    font-weight: 300;
+    cursor: pointer; }
+    .spenttype .annexe.active {
+      background: #499D1F;
+      cursor: default; }
+    .spenttype .annexe:hover {
+      background: #30b0d5; }
+    .spenttype .annexe:first-of-type {
+      border-radius: 4px 0 0 4px;
+      border-right: thin solid rgba(255, 255, 255, 0.25); }
+    .spenttype .annexe:last-of-type {
+      border-radius: 0 4px 4px 0;
+      border-left: thin solid rgba(255, 255, 255, 0.25); }
   .spenttype .code {
     background: #30b0d5;
     display: inline-block;
     font-weight: 100;
-    padding: 2px;
+    padding: 0 .25em;
     border-radius: 2px; }
     .spenttype .code.blind {
       background: #DD423E; }
@@ -9087,8 +9114,6 @@ pre.alert-danger, pre.alert-info {
       border-color: #30b0d5; }
   .spenttype .card-title small {
     flex: auto; }
-  .spenttype .spenttype {
-    font-size: .9em; }
   .spenttype h3 small {
     text-align: right; }
 
