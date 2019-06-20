@@ -1,5 +1,134 @@
 <div class="container-fluid">
     <h1>Dépenses prévisionnelles</h1>
+
+
+
+    <div id="app" style="display: none">
+        <pre>{{ totaux }}</pre>
+        <section class="previsionnel">
+            <header class="line" >
+                <span class="cell cell-code">
+                        <code class="code">code</code>
+                    </span>
+                <strong class="cell">Intitulé</strong>
+                <span class="year cell" v-for="year in years">
+                        {{ year }}
+                    </span>
+                <span class="total cell"> TOTAL</span>
+            </header>
+            <section class="masse" v-for="masse, keyMasse in masses">
+                <h1>{{ masse }}</h1>
+
+                <article v-for="line in lines" v-if="line.annexe == keyMasse" class="line" >
+                    <span class="cell cell-code">
+                        <code class="code">{{ line.code }}</code>
+                    </span>
+                    <strong class="cell">{{ line.label }}</strong>
+                    <span class="year cell" v-for="year in years">
+                        <input type="text" @change="handlerChange($event, line.code, year)"
+                               :name="'previsionnel[' +line.code +'][' +year +']'"
+                               class="form-control" :value="value(line.code, year)"
+                               placeholder="0.0" style="display: inline-block"/>
+                    </span>
+                    <span class="total cell"> {{ totaux[line.code] }}</span>
+                </article>
+
+            </section>
+        </section>
+    </div>
+    <style>
+        .previsionnel {
+            padding: 1em;
+            background: #fff;
+        }
+        .line {
+            display: flex;
+            border-bottom: solid thin #e0e0e0;
+        }
+        .line .cell {
+            flex: 1;
+            border-right: solid thin #e0e0e0;
+            margin: .2em 0;
+            padding: 0 .2em;
+        }
+
+        header .cell {
+            font-weight: 900;
+        }
+
+        header .year {
+            text-align: center;
+        }
+
+        .masse .line:nth-child(even) {
+            background: #efefef;
+        }
+
+        .line .cell-code { flex: 0 0 4em; }
+        .line .cell.year { flex: 0 0 7em;}
+        .line .cell.total { flex: 0 0 10em; text-align: right }
+
+        .cell-code code { font-weight: 100}
+    </style>
+    <script>
+        require(["vue"], function(Vue){
+           new Vue({
+               el: "#app",
+               data: {
+                   masses: <?= json_encode($masses) ?>,
+                   lines: <?= json_encode($lines) ?>,
+                   years: <?= json_encode($years) ?>,
+                   values: <?= json_encode($values) ?>,
+                   totaux: {}
+               },
+
+               methods: {
+                   handlerChange(evt, code, year){
+                       var value = parseFloat(evt.target.value)?parseFloat(evt.target.value):0;
+                       if( !this.values.hasOwnProperty(code) ){
+                           this.values[code] = {};
+                       }
+                       this.values[code][year] = value;
+
+                       var total = 0.0;
+                       Object.keys(this.values[code]).forEach( k => {
+                           console.log(code, k);
+                           total += this.values[code][k];
+                       });
+                       this.totaux[code] = total;
+
+
+
+                       console.log(this.values, this.totaux);
+
+                   },
+
+                   value(code, year){
+                       var total = 0.0;
+
+                       try {
+                           total = this.values[code][year];
+                       } catch (e) {
+                           total = '';
+                       }
+
+                       return total;
+                   }
+               },
+
+               created: function(){
+
+                   console.log("Created", this.lines);
+                   this.lines.forEach(line => {
+                      this.totaux[line.code] = 0.0;
+                   });
+               }
+           });
+           document.querySelector('#app').style.display = 'block';
+        });
+    </script>
+
+    <?php /*
     <div id="app">APP</div>
     <script>
         require(['vue', 'vue-resource', 'EstimatedSpentActivity', 'EstimatedSpentActivityItem'], function(Vue, VueResource,EstimatedSpentActivity, EstimatedSpentActivityItem){
@@ -17,6 +146,6 @@
             v.$mount('#app');
 
         })
-    </script>
+    </script> */ ?>
 
 </div>

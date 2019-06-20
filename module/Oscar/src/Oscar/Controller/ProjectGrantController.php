@@ -1267,6 +1267,12 @@ class ProjectGrantController extends AbstractOscarController
 
         $spentService = $this->getSpentService();
 
+        $lines = $spentService->getLinesByMasse();
+        $masses = $spentService->getMasses();
+        /*
+        echo "<pre>"; var_dump($lines);
+        die();
+        */
         $types = $spentService->getTypesTree();
         $years = $spentService->getYearsListActivity($entity);
 
@@ -1281,6 +1287,8 @@ class ProjectGrantController extends AbstractOscarController
 
 
         return [
+            'lines' => $lines,
+            'masses' => $masses,
             'years' => $years,
             'types' => $types,
             'values' => $values,

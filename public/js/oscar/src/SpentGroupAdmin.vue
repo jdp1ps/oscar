@@ -1,7 +1,6 @@
 <template>
     <section style="position: relative">
         <h1>Type de dépense</h1>
-        <pre>{{ masses }}</pre>
         <transition name="fade">
             <div class="overlay" v-if="formData">
                 <form action="" @submit.prevent="handlerSubmit">
@@ -50,7 +49,7 @@
                     </h3>
                     <hr>
                     <nav>
-                        <button type="submit" class="btn btn-success" @click.prevent="handlerConfirm">
+                        <button type="submit" class="btn btn-success" @click.prevent="confirmHandler()">
                             <i class="icon-ok-circled"></i>
                             Valider
                         </button>
@@ -117,26 +116,14 @@
                        @new="handlerNew(e, $event.id)"
                        @delete="handlerDelete($event)"/>
                 <hr>
-
-            <!--
-                <button type="button" class="btn btn-primary" @click.prevent="handlerModeSelection">
-                    <i class="icon-plus-circled"></i>
-                    Réorganiser
-                </button>
-
-                <button type="button" class="btn btn-primary" @click.prevent="handlerNew">
-                    <i class="icon-plus-circled"></i>
-                    Nouveau type de dépense
-                </button>
-
-                <button type="button" class="btn btn-primary" @click.prevent="resetTree">
-                    <i class="icon-plus-circled"></i>
-                    Reset Tree
-                </button>
-                -->
             <button type="button" class="btn btn-primary" @click.prevent="loadPCG">
                 <i class="icon-database"></i>
                 Charger le <strong>Plan Comptable Général</strong>
+            </button>
+
+            <button type="button" class="btn btn-primary" @click.prevent="sortTree">
+                <i class="icon-sitemap"></i>
+                Réorganiser par code
             </button>
             </div>
     </section>
@@ -158,6 +145,7 @@
                 deleteData: null,
                 spenttypegroups: [],
                 confirm: "",
+                confirmHandler: null,
                 waitdrop: false
             }
         },
@@ -207,7 +195,6 @@
         methods:{
 
             handlerAnnexe(args){
-
                 let data = new FormData(), send;
                 data.append('id', args.spenttype.id);
                 data.append('annexe', args.annexe);
@@ -239,8 +226,29 @@
                     });
             },
 
+            handlerConfirmSort(){
+                let data = new FormData(), send;
+                data.append('admin', "sort");
+                this.$http.post('?', data).then(
+                    ok => {
+                        this.fetch();
+                        this.formData = null;
+                        this.confirm = "";
+                    })
+                    .catch( ko => {
+                        this.error = ko.body;
+                        this.confirm = "";
+                    });
+            },
+
             loadPCG(){
-              this.confirm = "Remettre le plan comptable par défaut (plan comptable générale) ? ";
+              this.confirm = "Remettre le plan comptable par défaut (plan comptable général) ? ";
+                this.confirmHandler = this.handlerConfirm;
+            },
+
+            sortTree(){
+                this.confirm = "Réorganiser l'arbre par code";
+                this.confirmHandler = this.handlerConfirmSort;
             },
 
             handlerModeSelection(){

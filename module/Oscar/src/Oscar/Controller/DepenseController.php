@@ -51,8 +51,12 @@ class DepenseController extends AbstractOscarController
                     if( $this->params()->fromPost("moved") ){
                         $result = $this->getSpentService()->moved($this->params()->fromPost('moved'), $this->params()->fromPost('to'));
                     }
-                    elseif ($this->params()->fromPost("admin")) {
+                    elseif ($this->params()->fromPost("admin") == 'reset') {
                         $this->getSpentService()->loadPCG();
+                        return $this->getResponseOk();
+                    }
+                    elseif ($this->params()->fromPost("admin") == 'sort') {
+                        $this->getSpentService()->orderSpentsByCode();
                         return $this->getResponseOk();
                     }
                     elseif ($this->params()->fromPost("action") == 'blind') {

@@ -291,6 +291,24 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
         return $years;
     }
 
+    /**
+     * Retourne la liste des lignes de budget regroupées par masse
+     * @return array
+     */
+    public function getLinesByMasse(){
+        $query = $this->getSpentTypeRepository()->createQueryBuilder('s')
+            ->orderBy('s.annexe', 'ASC')
+            ->addOrderBy('s.code', 'ASC')
+            ->where("s.annexe != ''");
+
+        $result = $query->getQuery()->getArrayResult();
+        return $result;
+    }
+
+    public function getMasses(){
+        return $this->getServiceLocator()->get('OscarConfig')->getConfiguration('spenttypeannexes');
+    }
+
     public function getTypesTree(){
 
         $types = $this->getSpentTypeRepository()->getAll();
@@ -434,10 +452,10 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
             throw new OscarException(_("Le type de dépense n'a pas été trouvé"));
         }
 
-        $label = $datas['label'];
-        $code = $datas['code'];
-        $annexe = $datas['annexe'];
-        $description = $datas['description'];
+        $label          = $datas['label'];
+        $code           = $datas['code'];
+        $annexe         = $datas['annexe'];
+        $description    = $datas['description'];
 
         if( array_key_exists('inside', $datas) ){
             $inside = $datas['inside'];

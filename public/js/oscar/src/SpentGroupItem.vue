@@ -17,9 +17,7 @@
                     <strong class="code" :class="{ 'blind' : spenttypegroup.blind }">{{ spenttypegroup.code }}</strong>
                     {{ spenttypegroup.label }}
 
-                    <code>A:{{ spenttypegroup.annexe }}</code>
-
-                    <span v-if="annexelock == false">
+                     <span v-if="annexelock == false">
                         <span v-for="aLabel, a in annexes"
                               @click.prevent="handlerAnnexe(spenttypegroup, a)"
                               :title="aLabel" class="annexe"
