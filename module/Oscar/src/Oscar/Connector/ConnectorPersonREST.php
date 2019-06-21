@@ -182,7 +182,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
                 if( $personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null
-                    || $personOscar->getDateSyncLdap() < $personData->dateupdated
+                    || $personOscar->getDateSyncLdap()->format('Y-m-d') < $personData->dateupdated
                     || $force == true )
                 {
                     $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
