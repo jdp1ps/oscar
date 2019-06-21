@@ -9,7 +9,7 @@ En complément, plusieurs options de configuration DOIVENT être complétées :
 ### Groupe hors-lots
 
 
-Afin de gérer les sous-totaux dans le rendu des feuilles de temps, une clef `group` qui nécessite une de ces valeurs clef :
+Afin de gérer les sous-totaux dans le rendu des feuilles de temps, vous devez spécifier une clef `group` pour chaques choix "Hors-lot" avec une des valeurs suivantes :
 
  - `research` : Comptabilisé comme recherche (produire un sous-total avec les heures des Projets)
  - `abs` : Créneaux non-travaillé (Congès, Arret maladie)
@@ -63,7 +63,15 @@ La documentation des feuilles de temps est à jour [Configuration des feuilles d
 
 ## Système de recherche des Personnes (2019/05)
 
-Le système de recherche des personnes a été amélioré et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des personnes](./doc/configuration.md#recherche-des-personnes)
+Cette option **implique des changements dans la configuration !**
+
+Le système de recherche des personnes a été améliorée et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des personnes](./doc/configuration.md#recherche-des-personnes)
+
+## Système de recherche des Organisations (2019/06)
+
+Cette option **implique des changements dans la configuration !**
+
+Le système de recherche des organisations a été améliorée et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des organisations](./doc/configuration.md#recherche-des-organisations)
 
 
 ## Synthèse (2019/05)

@@ -170,6 +170,39 @@ return array(
 php pubic/index.php oscar persons:search:build
 ```
 
+## Recherche des organisations
+
+Depuis *Oscar 2.10 (Creed)*, la recherche des organisations utilise le système de recherche basé sur **ElasticSearch** afin d'obtenir des résultats plus pertinents.
+
+Vous devez configurer la stratégie de recherche dans le fichier de configuration `config/autoload/local.php` : 
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+  // ...
+
+  // Système de recherche
+  'strategy' => [
+    // ...
+    'person' => [
+      'search_engine' => [
+        // Elasticsearch
+        'class' => \Oscar\Strategy\Search\OrganizationElasticSearch::class,
+        'params' => [['localhost:9200']]
+      ]
+    ]
+  ]
+);
+```
+
+> Une fois activée, pensez à lancer la commande de reconstruction d'index de recherche : 
+
+```bash
+# Reconstruction de l'index de recherche
+php pubic/index.php oscar organizations:search:build
+```
+
 
 ### Elastic Search
 
@@ -200,62 +233,6 @@ return array(
 ```
 
 > la clef `params` prend bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
-
-
-### Zend Lucene
-
-> Depuis la version 2.5.x, l'utilisation de Zend Lucene est dépréciée au profit de Elasticsearch.
-
-Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installation complémentaire.
-
-```php
-<?php
-// config/autoload/local.php
-return array(
-    // (...)
-
-    // Oscar
-    'oscar' => [
-        // (...)
-        'strategy' => [
-            'activity' => [
-                'search_engine' => [
-                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
-                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
-                ]
-            ]
-        ],
-    ],
-);
-```
-
-
-### Zend Lucene
-
-> Depuis la version 2.5.x, l'utilisation de Zend Lucene est dépréciée au profit de Elasticsearch.
-
-Ce système (moins performant) repose sur la librairie **Lucene** de **Zend**. Il ne nécessite pas d'application tiers ou d'installation complémentaire.
-
-```php
-<?php
-// config/autoload/local.php
-return array(
-    // (...)
-
-    // Oscar
-    'oscar' => [
-        // (...)
-        'strategy' => [
-            'activity' => [
-                'search_engine' => [
-                    'class' => \Oscar\Strategy\Search\ActivityZendLucene::class,
-                    'params' => [realpath(__DIR__) . '/../../data/luceneindex']
-                ]
-            ]
-        ],
-    ],
-);
-```
 
 
 ## Mailer
