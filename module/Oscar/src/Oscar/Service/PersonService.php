@@ -875,9 +875,25 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                 ->setParameter(':ids', $ids);
         }
 
+
+
         if( array_key_exists('ids', $filters) ){
             $query->andWhere('p.id IN(:filterIds)')
                 ->setParameter('filterIds', $filters['ids']);
+
+            if( $search && count($filters['ids']) > 0 ){
+                // On ne trie que les 30 premiers
+                $limit = 30;
+                $case = '(CASE ';
+                $i = 0;
+                foreach ($filters['ids'] as $id) {
+                    if( $i++ < $limit )
+                        $case .= sprintf('WHEN p.id = \'%s\' THEN %s ', $id, $i++);
+                }
+                $case .= " ELSE $id END) AS HIDDEN ORD";
+                $query->addSelect($case);
+                $query->orderBy("ORD", 'ASC');
+            }
         }
 
 //        var_dump($query->getDQL()); die();
