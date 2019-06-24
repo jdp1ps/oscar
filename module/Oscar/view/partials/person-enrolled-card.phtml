@@ -32,7 +32,6 @@ $person = $enroll->getPerson();
                 <div class="role"><?= $enroll->getRole() ?></div>
             <?php endif; ?>
 
-
             <?php if( $enroll->getDateStart() ): ?>
             <small>Depuis le <?= $this->moment($enroll->getDateStart()) ?></small>
             <?php endif; ?>
@@ -44,9 +43,17 @@ $person = $enroll->getPerson();
     <span class="email"><?= $person->getEmail() ?></span>
     <nav>
         <a href="<?= $this->url('person/show', ['id' => $person->getId()]) ?>" class="link-show"><i class="icon-zoom-in-outline"></i> Fiche</a>
-        <a href="<?= $urlDelete ?>" class="link-show"><i class="icon-trash"></i> Supprimer ce rôle</a>
-        <?php if( isset($urlClose) ):?>
-            <button data-enrollid="<?= $enroll->getId() ?>">Résilier</button>
+
+        <?php if( $enroll->getOrigin() ): ?>
+            <span class="cartouche primary" style="cursor: help" title="Ce rôle est issue de la synchronisation">
+                <i class="icon-plug"></i>
+                <?= $enroll->getOrigin() ?></span>
+        <?php else: ?>
+            <a href="<?= $urlDelete ?>" class="link-show"><i class="icon-trash"></i> Supprimer ce rôle</a>
+            <?php if( isset($urlClose) ):?>
+                <button data-enrollid="<?= $enroll->getId() ?>">Résilier</button>
+            <?php endif; ?>
         <?php endif; ?>
+
     </nav>
 </article>

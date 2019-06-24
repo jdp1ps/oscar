@@ -317,10 +317,14 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         }
 
         if( count($ids) ){
+            // On ne trie que les 30 premiers
+            $limit = 30;
+            $nbr = 0;
             $case = '(CASE ';
             $i = 0;
             foreach ($ids as $id) {
-                $case .= sprintf('WHEN o.id = \'%s\' THEN %s ', $id, $i++);
+                if( $nbr++ < $limit )
+                    $case .= sprintf('WHEN o.id = \'%s\' THEN %s ', $id, $i++);
             }
             $case .= " ELSE $id END) AS HIDDEN ORD";
             $qb->addSelect($case);

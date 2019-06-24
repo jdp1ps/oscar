@@ -587,7 +587,7 @@ return array(
                 ],
                 'oscar_persons_sync' => [
                     'options' => array(
-                        'route' => 'oscar persons:sync <connectorkey> [-f|--force] [-v|--verbose]',
+                        'route' => 'oscar persons:sync <connectorkey> [-f|--force] [-v|--verbose] [-p|--purge]',
                         'defaults' => array(
                             'controller' => 'Console',
                             'action' => 'personsSync',

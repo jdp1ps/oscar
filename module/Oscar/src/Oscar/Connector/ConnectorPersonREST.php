@@ -8,6 +8,7 @@
 namespace Oscar\Connector;
 
 
+use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Monolog\Logger;
@@ -28,6 +29,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     use ServiceLocatorAwareTrait, ConnectorParametersTrait;
 
     private $editable = false;
+    private $options;
 
     /** @var  ConnectorPersonHydrator */
     private $personHydrator = null;
@@ -69,6 +71,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     {
         $this->setServiceLocator($sm);
         $this->loadParameters($configFilePath);
+        $this->options = [];
     }
 
 
@@ -88,6 +91,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             $this->personHydrator = new ConnectorPersonHydrator(
                 $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
             );
+            $this->personHydrator->setPurge($this->getOptionPurge());
         }
         return $this->personHydrator;
     }
@@ -100,7 +104,12 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
      */
     function syncPersons(PersonRepository $personRepository, $force)
     {
+        if( $this->getOptionPurge() ){
+            $exist = $personRepository->getUidsConnector($this->getName());
+        }
+
         $repport = new ConnectorRepport();
+        $this->getPersonHydrator()->setPurge($this->getOptionPurge());
 
         $url = $this->getParameter('url_persons');
 
@@ -140,14 +149,21 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             if( !is_array($personsDatas) ){
                 throw new \Exception("L'API n'a pas retourné un tableau de donnée");
             }
-            $repport->addnotice(count($personsDatas). " a traiter.");
+            $repport->addnotice(count($personsDatas). " résultat(s) a traiter.");
             ////////////////////////////////////
 
             foreach( $personsDatas as $personData ){
 
                 if( ! property_exists($personData, 'uid') ){
-                    $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData->uid, true)));
+                    $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData, true)));
                     continue;
+                }
+
+                if( $this->getOptionPurge() ){
+                    $uid = $personData->uid;
+                    if( ($index = array_search($uid, $exist)) >= 0 ){
+                        array_splice($exist, $index, 1);
+                    }
                 }
 
                 try {
@@ -166,14 +182,12 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
                 if( $personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null
-                    || $personOscar->getDateSyncLdap() < $personData->dateupdated
+                    || $personOscar->getDateSyncLdap()->format('Y-m-d') < $personData->dateupdated
                     || $force == true )
                 {
                     $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
 
-                    if( $this->getPersonHydrator()->isSuspect() ){
-                        $repport->addRepport($this->getPersonHydrator()->getRepport());
-                    }
+                    $repport->addRepport($this->getPersonHydrator()->getRepport());
 
                     $personRepository->flush($personOscar);
 
@@ -186,9 +200,24 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                     $repport->addnotice(sprintf("%s est à jour.", $personOscar->log()));
                 }
             }
+
+            if( $this->getOptionPurge() ){
+                foreach ($exist as $uid){
+                    $personOscarToDelete = $personRepository->getPersonByConnectorID($this->getName(), $uid);
+                    try {
+                        // todo Gérer les suppression
+                        // $personRepository->removePerson($personOscarToDelete);
+                        $repport->addremoved("Suppression (non implémentée) de $personOscarToDelete");
+                    } catch (\Exception $e){
+                        $repport->addwarning("$personOscarToDelete n'a pas été supprimé car il est actif dans les activités : " . $e->getMessage());
+                    }
+                }
+            }
         } catch (\Exception $e ){
             throw new \Exception("Impossible de synchroniser les personnes : " . $e->getMessage());
         }
+
+        $personRepository->flush(null);
 
         return $repport;
     }
@@ -226,6 +255,26 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         }
 
     }
+
+    public function setOption($optionName, $optionValue){
+        $this->options[$optionName] = $optionValue;
+    }
+
+    public function getOption($optionName, $defaultValue=null){
+        if( array_key_exists($optionName, $this->options) ){
+            return $this->options[$optionName];
+        }
+        return $defaultValue;
+    }
+
+    public function getOptionPurge(){
+        return $this->getOption('purge', false);
+    }
+
+    public function setOptionPurge( $boolean ){
+        return $this->setOption('purge', $boolean);
+    }
+
 
     /**
      * @return Logger

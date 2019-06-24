@@ -2033,6 +2033,7 @@ class ConsoleController extends AbstractOscarController
     public function personsSyncAction()
     {
         $force = $this->getRequest()->getParam('force', false);
+        $purge = $this->getRequest()->getParam('purge', false);
         $verbose = $this->getRequest()->getParam('verbose', false);
         $connectorName = $this->getRequest()->getParam('connectorkey');
         echo "Execution de 'person.$connectorName' (" . ($force ? 'FORCE' : 'NORMAL') . ") : \n";
@@ -2044,6 +2045,7 @@ class ConsoleController extends AbstractOscarController
 
             // Récupération du connector
             $connector = $connectorService->getConnector('person.' . $connectorName);
+            $connector->setOption('purge', $purge);
 
             /** @var ConnectorRepport $repport */
             $repport = $connector->execute($force);

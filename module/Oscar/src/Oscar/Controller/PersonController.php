@@ -376,6 +376,8 @@ class PersonController extends AbstractOscarController
         $orderBy = $this->params()->fromQuery('orderby', 'lastname');
         $leader = $this->params()->fromQuery('leader', '');
         $format = $this->params()->fromQuery('format', '');
+        $datas = [];
+        $error = null;
 
         // Liste des critères de trie disponibles
         $orders = [
@@ -391,12 +393,16 @@ class PersonController extends AbstractOscarController
         }
 
 
-
-        $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
-            'filter_roles' => $filterRoles,
-            'order_by' => $orderBy,
-            'leader' => $leader
-        ]);
+        try {
+            $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
+                'filter_roles' => $filterRoles,
+                'order_by' => $orderBy,
+                'leader' => $leader
+            ]);
+        } catch (BadRequest400Exception $e){
+            $error = "Expression de recherche incorrecte.";
+            throw $e;
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Export CSV
@@ -444,7 +450,8 @@ class PersonController extends AbstractOscarController
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             $json = [
-                'datas' => []
+                'datas' => [],
+                'error' => $error
             ];
             foreach ($datas as $data) {
                 $personData = $data->toArray();
@@ -466,6 +473,7 @@ class PersonController extends AbstractOscarController
             'roles' => $roles,
             'search' => $search,
             'persons' => $datas,
+            'error' => $error,
             'filter_roles' =>  $filterRoles,
             'orderBy' => $orderBy,
             'orders' => $orders,
@@ -482,7 +490,7 @@ class PersonController extends AbstractOscarController
     {
         $search = $this->params()->fromQuery('q', '');
         if (strlen($search) < 2) {
-            return $this->getResponseBadRequest("Not enough chars (4 required");
+            return $this->getResponseBadRequest("Not enough chars (2 required");
         }
         $datas = $this->getPersonService()->search($search);
 
