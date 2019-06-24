@@ -1,8 +1,6 @@
 <template>
     <section style="position: relative" class="depenses-previsionnelle">
 
-        <pre>{{ types }}</pre>
-
         <transition name="fade">
             <div class="overlay" v-if="error">
                 <div class="alert alert-danger">

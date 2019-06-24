@@ -4,8 +4,7 @@
 
 
     <div id="app" style="display: none">
-        <pre>{{ totaux }}</pre>
-        <section class="previsionnel">
+        <section class="previsionnel" v-if="values">
             <header class="line" >
                 <span class="cell cell-code">
                         <code class="code">code</code>
@@ -24,13 +23,15 @@
                         <code class="code">{{ line.code }}</code>
                     </span>
                     <strong class="cell">{{ line.label }}</strong>
+<!--                    <span>{{ values[line.id] }}</span>-->
                     <span class="year cell" v-for="year in years">
-                        <input type="text" @change="handlerChange($event, line.code, year)"
+                        <input type="text" @change="handlerChange($event, line.id, year)"
                                :name="'previsionnel[' +line.code +'][' +year +']'"
-                               class="form-control" :value="value(line.code, year)"
+                                :value="values[line.id] ? values[line.id][year] : 'unknow'"
+                               class="form-control"
                                placeholder="0.0" style="display: inline-block"/>
                     </span>
-                    <span class="total cell"> {{ totaux[line.code] }}</span>
+                    <span class="total cell"> {{ totaux[line.id] }}</span>
                 </article>
 
             </section>
