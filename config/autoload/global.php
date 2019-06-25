@@ -30,6 +30,10 @@ return array(
         'authPersonNormalize' => false,
 
 
+        // Active l'option autorisant l'importation de calendrier pour les déclarants
+        'importEnable' => true,
+
+
         'export' => [
             'payments' => [
                 'separator' => '$$',

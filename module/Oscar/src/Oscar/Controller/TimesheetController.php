@@ -1126,6 +1126,9 @@ class TimesheetController extends AbstractOscarController
         // -------------------------------------------------------------------------------------------------------------
         // Période URL
         $period = $this->params()->fromQuery('period', null);
+        if( !$this->getOscarConfigurationService()->getConfiguration('importEnable') ){
+            throw new OscarException("Cette option n'est activée");
+        }
 
         if( !$period )
             return $this->getResponseBadRequest("La période est non définit");

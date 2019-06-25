@@ -2219,6 +2219,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $submitable = false;
         $submitableInfos = "Vous ne pouvez pas soumettre cette période pour une raison inconnue";
+        $importEnable = $this->getOscarConfig()->getConfiguration('importEnable');
 
         $hasConflict = false;
 
@@ -2478,6 +2479,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'icsUidList' => $icsUidList,
             'feries' => $this->getLockedDays($year, $month),
             'person' => (string)$person,
+            'importEnable' => $importEnable,
             'person_id' => $person->getId(),
             'period' => $periodFirstDay->format('Y-m'),
             'periodMax' => $periodMax,
