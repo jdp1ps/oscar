@@ -6,8 +6,26 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 En complément, plusieurs options de configuration DOIVENT être complétées :
 
-### Groupe hors-lots
 
+### Nouveau 25 Juin : Importation ICAL en option
+
+Une option `importEnable` a été ajouté pour rendre optionnel la fonctionnalité pour importer les ICAL dans les feuilles de temps. Pour retirer cette fonctionnalité, éditer le fichier de configuration `config/autoload/local.php` : 
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // Oscar
+    'oscar' => [
+        // ...
+        'importEnable' => false,
+        
+        // ...
+    ]
+);
+```
+
+### Groupe hors-lots
 
 Afin de gérer les sous-totaux dans le rendu des feuilles de temps, vous devez spécifier une clef `group` pour chaques choix "Hors-lot" avec une des valeurs suivantes :
 
@@ -67,11 +85,15 @@ Cette option **implique des changements dans la configuration !**
 
 Le système de recherche des personnes a été améliorée et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des personnes](./doc/configuration.md#recherche-des-personnes)
 
+Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
+
 ## Système de recherche des Organisations (2019/06)
 
 Cette option **implique des changements dans la configuration !**
 
 Le système de recherche des organisations a été améliorée et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des organisations](./doc/configuration.md#recherche-des-organisations)
+
+Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
 
 
 ## Synthèse (2019/05)
