@@ -387,6 +387,7 @@
                                           :workPackages="ts.workpackages"
                                           :others="ts.otherWP"
                                           :selection="selectionWP"
+                                          :editable="ts.editable"
                                           :label="dayLabel"
                                           :day-excess="ts.dayExcess"
                                           :copiable="clipboardDataDay"
@@ -475,6 +476,7 @@
                             <strong>{{ (selectedWeek.totalOpen - selectedWeek.total) | duration }} heure(s)</strong>
                             avec une des activités ci-dessous :
                         </p>
+
                         <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillSelectedWP"
                                     @select="fillSelectedWP = $event; fillWeek(selectedWeek, fillSelectedWP);"
                                     :usevalidation="true"></wpselector>
@@ -1389,15 +1391,20 @@
             },
 
             editTimesheet(timesheet, day) {
-
                 this.editedTimesheet = timesheet;
                 this.commentaire = timesheet.comment;
                 this.selectedDay = day;
                 this.dayMenuTime = timesheet.duration;
-
                 if (timesheet.wp_id) {
                     this.selectionWP = this.getWorkpackageById(timesheet.wp_id);
                 }
+                else if (timesheet.code) {
+                    this.selectionWP = this.getHorsLotByCode(timesheet.code);
+                }
+            },
+
+            getHorsLotByCode(code){
+                return this.ts.otherWP[code];
             },
 
             getWorkpackageById(id) {
@@ -1406,51 +1413,18 @@
 
             reSendPeriod(periodValidation) {
                 this.sendMonth("resend");
-
-                // if (periodValidation.status != 'conflict') {
-                //     this.error = 'Vous ne pouvez pas soumettre cette déclaration, status incorrect';
-                //     return;
-                // }
-                //
-                // this.bootbox.confirm('Réenvoyer la déclaration ?', ok => {
-                //     if (ok) {
-                //         // Données à envoyer
-                //         var datas = new FormData();
-                //         datas.append('action', 'resend');
-                //         datas.append('period_id', periodValidation.id);
-                //
-                //         this.loading = true;
-                //
-                //         this.$http.post('', datas).then(
-                //             ok => {
-                //                 this.fetch();
-                //             },
-                //             ko => {
-                //                 this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
-                //             }
-                //         ).then(foo => {
-                //             this.selectedWeek = null;
-                //             this.loading = false;
-                //         });
-                //     }
-                // })
             },
 
             sendMonth(action="sendmonth") {
-
                 this.sendaction = action;
-
                 if ( !(this.ts.submitable == true || this.ts.hasConflict == true) ) {
                     this.error = 'Vous ne pouvez pas soumettre vos déclarations pour cette période : ' + this.ts.submitableInfos;
                     return;
                 }
-
                 let aggregatProjet = {};
 
                 Object.keys(this.ts.days).forEach(d => {
-
                     let day = this.ts.days[d];
-
                     if( day.othersWP && day.othersWP.length ){
                         day.othersWP.forEach(timesheet => {
                            let key = timesheet.code;
@@ -1474,8 +1448,6 @@
                             aggregatProjet[key].push(timesheet.comment);
                         }
                     });
-
-
                 });
 
                 Object.keys(aggregatProjet).forEach(id => {
@@ -1514,7 +1486,6 @@
 
             fillWeek(week, wp) {
                 let data = [];
-
                 week.days.forEach(d => {
                     if (!(d.closed || d.locked || d.duration >= d.dayLength)) {
                         data.push({
@@ -1630,7 +1601,6 @@
 
                 this.loading = "Enregistrement des créneaux";
 
-                //this.$http.post('/feuille-de-temps/declarant-api', formData).then(
                 this.$http.post(this.url, formData).then(
                     ok => {
                         this.fetch(false);
@@ -1741,6 +1711,7 @@
                     this.fetch(true);
                 }
             },
+
             fetch(clear = true) {
 
                 this.loading = "Chargement de la période";
@@ -1754,7 +1725,6 @@
 
                 if (this.selectedDay)
                     daySelected = this.selectedDay.i;
-
 
                 this.$http.get(this.url + '&month=' + this.month + '&year=' + this.year).then(
                     ok => {
@@ -1775,6 +1745,8 @@
                 });
             }
         },
+
+
         mounted() {
             moment = this.moment;
             this.month = this.defaultMonth;
@@ -1789,10 +1761,6 @@
                     this._colorsProjects = {};
                 }
             }
-
-
-
-
             this.fetch(true)
         }
     }

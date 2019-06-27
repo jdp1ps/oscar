@@ -27,7 +27,7 @@
             <i class="icon-attention"></i> Le temps déclaré <strong>excède la durée autorisée</strong>. Vous ne pourrez pas soumettre votre feuille de temps.
         </div>
 
-        <div>
+        <div v-if="editable">
             Compléter avec :
             <wpselector :others="others" :workpackages="workPackages" @select="addToWorkpackage" :selection="selection"></wpselector>
         </div>
@@ -68,6 +68,7 @@
                     <div class="total">{{ t.duration | duration2(day.dayLength) }}</div>
                     <div class="left">
                         <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
+                        <i class="icon-edit" @click="$emit('edittimesheet', t, day)"></i>
                     </div>
                 </article>
                 <hr>
@@ -127,7 +128,7 @@
         [class*="icon-"]{
             text-align: center;
         }
-        .icon-trash {
+        .icon-trash, .icon-edit {
             cursor: pointer;
             text-align: center;
             &:hover {
@@ -156,6 +157,9 @@
             },
             others: {
                 require: true
+            },
+            editable: {
+                required: true,
             },
             day: {
                require: true
@@ -271,7 +275,6 @@
             },
 
             hasDeclarationHWP(code){
-                console.log(code, this.day[code], this.day);
                 return this.day[code] && this.day[code].length;
             }
         }
