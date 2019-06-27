@@ -417,17 +417,19 @@
                         <i class="icon-angle-left"></i> Revenir au mois
                     </a>
 
-                    <h4>Jours : </h4>
+                    <h4>Jours (OK): </h4>
                     <article class="card xs total repport-item"
                              :class="{ 'locked': d.locked, 'closed': d.closed, 'excess': d.duration > ts.dayExcess }"
                              v-for="d in selectedWeek.days"
                              @click="handlerSelectData(d)">
-
                         <div class="week-header" :class="{ 'text-thin' : d.closed || d.locked }">
                                 <span class="">
+                                    <i class="icon-calendar"></i>
                                     <i class="icon-minus-circled" v-if="d.closed"></i>
                                     <i class="icon-lock" v-else-if="d.locked"></i>
-                                    <i class="icon-calendar" v-else></i>
+                                    <i class="icon-ok-circled" v-else-if="d.total > d.amplitudemin && d.total < d.amplitudemax " style="color: #2d7800"></i>
+                                    <i class="icon-help-circled" v-else style="color: #777777"></i>
+
                                     {{ d.data | datefull }}
 
                                     <i class="icon-attention-circled" style="color: red"
@@ -500,6 +502,8 @@
                                     @select="fillMonthWP = $event; handlerFillMonth(fillMonthWP)"></wpselector>
                     </section>
 
+                    <hr>
+
                     <section v-for="week in weeks" v-if="ts" class="card xs">
                         <header class="week-header" @click="selectWeek(week)">
                                 <span>
@@ -509,7 +513,7 @@
                                     <i class="icon-attention-circled" style="color: #993d00"
                                        v-else-if="week.total > week.weekExcess"
                                        title="La déclaration est incomplète pour cette période"></i>
-                                    <i class="icon-ok-circled" style="color: #5c9ccc" v-else></i>
+                                    <i class="icon-ok-circled" style="color: #2d7800" v-else></i>
                                 </span>
                             <small>
                                 <strong :class="(week.total > week.weekExcess)?'has-titled-error':''"
