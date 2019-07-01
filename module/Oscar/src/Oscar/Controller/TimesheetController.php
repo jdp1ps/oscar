@@ -538,6 +538,7 @@ class TimesheetController extends AbstractOscarController
         $format         = $this->params()->fromQuery('format', '');
         $period         = $this->params()->fromQuery('period', null);
         $error          = null;
+        $validations = null;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Synthèse pour une activités
@@ -560,10 +561,19 @@ class TimesheetController extends AbstractOscarController
                 $personsIds[] = $person->getId();
             }
 
+            // Période
+            $start  = $activity->getDateStart()->format('Y-m');
+            $end    = $activity->getDateEnd()->format('Y-m');
+
+
+
             if( count($personsIds) == 0 ){
                 return $this->getResponseInternalError(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
             }
+
+            $validations = $this->getTimesheetService()->getDatasValidationPersonsPeriod($personsIds, $start, $end);
             $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds);
+
             $horslots = $this->getTimesheetService()->getOthersWP();
         }
 
@@ -606,7 +616,8 @@ class TimesheetController extends AbstractOscarController
             'activityId' => $activity_id,
             'activity' => $activity,
             'horslot' => $horslots,
-            'datas' => $datas
+            'datas' => $datas,
+            'validations' => $validations
         ];
 
         if( $format == "excel" ){
@@ -668,7 +679,8 @@ class TimesheetController extends AbstractOscarController
             'activityId' => $activity_id,
             'activity' => $activity,
             'horslot' => $horslots,
-            'datas' => $datas
+            'datas' => $datas,
+            'validations' => $validations
         ];
     }
 
