@@ -1178,12 +1178,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getTimesheetRepository()->getDatasDeclarerSynthesis($personIds);
     }
 
-    public function getDatasValidationPersonsPeriod($personsIds, $start, $end){
+    public function getDatasValidationPersonsPeriod($personsIds, $yearStart, $yearEnd){
         $datas = [];
 
-        $this->getLogger()->debug("Validations entre $start et $end");
+        $this->getLogger()->debug("Validations entre $yearStart et $yearEnd");
 
-        $validations = $this->getValidationPeriodRepository()->getDatasValidationPersonsPeriod($personsIds, $start,$end);
+        $validations = $this->getValidationPeriodRepository()->getDatasValidationPersonsPeriod($personsIds, $yearStart,$yearEnd);
 
         $this->getLogger()->debug("Validations : " . count($validations));
 
@@ -1196,6 +1196,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $objectgroup = $validation['objectgroup'];
             $object_id = $validation['object_id'];
             $dateSend = $validation['datesend'];
+
+            $this->getLogger()->debug("Validation $objectgroup > $object > $object_id : $period");
+
 
             if(!array_key_exists($period, $datas)){
                 $datas[$period] = [];

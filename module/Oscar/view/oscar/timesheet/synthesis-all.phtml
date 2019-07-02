@@ -1,6 +1,5 @@
 <div id="app">
     <section class="container">
-        <pre>{{ validations }}</pre>
         <h1>Déclaration pour <strong>[<?= $activity->getAcronym() ?>]</strong> <em><?= $activity->getLabel() ?></em>
         </h1>
         <div class="overlay" v-if="infosPerson">
@@ -130,7 +129,7 @@
                             <strong v-if="d.type == 'wp'">
                                 <i class="icon-cubes"></i> {{ d.context }}
 
-                                <strong v-if="d.validation" class="cartouche default"
+                                <strong v-if="d.validation" class="cartouche default xs"
                                         :class="'status-' + d.validation.status">
                                     <i :class="'icon-' + d.validation.status"></i>
                                     {{ d.validation.status | statusText }}</strong>
@@ -138,7 +137,7 @@
                             <em v-else>
                                 <i :class="'icon-'+d.context"></i> {{ d.context | formatHorsLot }}
 
-                                <strong v-if="d.validation" class="cartouche default"
+                                <strong v-if="d.validation" class="cartouche default xs"
                                         :class="'status-' + d.validation.status">
                                     <i :class="'icon-' + d.validation.status"></i>
                                     {{ d.validation.status | statusText}}</strong>
@@ -216,6 +215,22 @@
         padding-left: 2em;
         display: flex;
     }
+
+    .cartouche.status-send-prj {
+        background-color: #1b7cc4;
+    }
+    .cartouche.status-send-sci {
+        background-color: #20bcc4;
+    }
+    .cartouche.status-send-adm {
+        background-color: #1fc48f;
+    }
+    .cartouche.status-valid {
+        background-color: #189c17;
+    }
+    .cartouche.status-reject {
+        background-color: #a6091a;
+    }
 </style>
 <script>
     require(['vue', 'vue-resource'], function (Vue, VueResource) {
@@ -236,8 +251,7 @@
             '11': 'Novembre',
             '12': 'Décembre'
         };
-
-
+        
         Vue.filter('formatDuration', function (heure) {
             var h = Math.floor(heure);
             var m = Math.round((heure - h) * 60);

@@ -562,8 +562,8 @@ class TimesheetController extends AbstractOscarController
             }
 
             // Période
-            $start  = $activity->getDateStart()->format('Y-m');
-            $end    = $activity->getDateEnd()->format('Y-m');
+            $start  = $activity->getDateStart()->format('Y');
+            $end    = $activity->getDateEnd()->format('Y');
 
 
 
