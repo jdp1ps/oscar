@@ -387,6 +387,7 @@
                                           :workPackages="ts.workpackages"
                                           :others="ts.otherWP"
                                           :selection="selectionWP"
+                                          :editable="ts.editable"
                                           :label="dayLabel"
                                           :day-excess="ts.dayExcess"
                                           :copiable="clipboardDataDay"
@@ -416,17 +417,19 @@
                         <i class="icon-angle-left"></i> Revenir au mois
                     </a>
 
-                    <h4>Jours : </h4>
+                    <h4>Jours (OK): </h4>
                     <article class="card xs total repport-item"
                              :class="{ 'locked': d.locked, 'closed': d.closed, 'excess': d.duration > ts.dayExcess }"
                              v-for="d in selectedWeek.days"
                              @click="handlerSelectData(d)">
-
                         <div class="week-header" :class="{ 'text-thin' : d.closed || d.locked }">
                                 <span class="">
+                                    <i class="icon-calendar"></i>
                                     <i class="icon-minus-circled" v-if="d.closed"></i>
                                     <i class="icon-lock" v-else-if="d.locked"></i>
-                                    <i class="icon-calendar" v-else></i>
+                                    <i class="icon-ok-circled" v-else-if="d.total > d.amplitudemin && d.total < d.amplitudemax " style="color: #2d7800"></i>
+                                    <i class="icon-help-circled" v-else style="color: #777777"></i>
+
                                     {{ d.data | datefull }}
 
                                     <i class="icon-attention-circled" style="color: red"
@@ -475,6 +478,7 @@
                             <strong>{{ (selectedWeek.totalOpen - selectedWeek.total) | duration }} heure(s)</strong>
                             avec une des activités ci-dessous :
                         </p>
+
                         <wpselector :others="ts.otherWP" :workpackages="ts.workpackages" :selection="fillSelectedWP"
                                     @select="fillSelectedWP = $event; fillWeek(selectedWeek, fillSelectedWP);"
                                     :usevalidation="true"></wpselector>
@@ -498,6 +502,8 @@
                                     @select="fillMonthWP = $event; handlerFillMonth(fillMonthWP)"></wpselector>
                     </section>
 
+                    <hr>
+
                     <section v-for="week in weeks" v-if="ts" class="card xs">
                         <header class="week-header" @click="selectWeek(week)">
                                 <span>
@@ -507,7 +513,7 @@
                                     <i class="icon-attention-circled" style="color: #993d00"
                                        v-else-if="week.total > week.weekExcess"
                                        title="La déclaration est incomplète pour cette période"></i>
-                                    <i class="icon-ok-circled" style="color: #5c9ccc" v-else></i>
+                                    <i class="icon-ok-circled" style="color: #2d7800" v-else></i>
                                 </span>
                             <small>
                                 <strong :class="(week.total > week.weekExcess)?'has-titled-error':''"
@@ -1389,15 +1395,20 @@
             },
 
             editTimesheet(timesheet, day) {
-
                 this.editedTimesheet = timesheet;
                 this.commentaire = timesheet.comment;
                 this.selectedDay = day;
                 this.dayMenuTime = timesheet.duration;
-
                 if (timesheet.wp_id) {
                     this.selectionWP = this.getWorkpackageById(timesheet.wp_id);
                 }
+                else if (timesheet.code) {
+                    this.selectionWP = this.getHorsLotByCode(timesheet.code);
+                }
+            },
+
+            getHorsLotByCode(code){
+                return this.ts.otherWP[code];
             },
 
             getWorkpackageById(id) {
@@ -1406,51 +1417,18 @@
 
             reSendPeriod(periodValidation) {
                 this.sendMonth("resend");
-
-                // if (periodValidation.status != 'conflict') {
-                //     this.error = 'Vous ne pouvez pas soumettre cette déclaration, status incorrect';
-                //     return;
-                // }
-                //
-                // this.bootbox.confirm('Réenvoyer la déclaration ?', ok => {
-                //     if (ok) {
-                //         // Données à envoyer
-                //         var datas = new FormData();
-                //         datas.append('action', 'resend');
-                //         datas.append('period_id', periodValidation.id);
-                //
-                //         this.loading = true;
-                //
-                //         this.$http.post('', datas).then(
-                //             ok => {
-                //                 this.fetch();
-                //             },
-                //             ko => {
-                //                 this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
-                //             }
-                //         ).then(foo => {
-                //             this.selectedWeek = null;
-                //             this.loading = false;
-                //         });
-                //     }
-                // })
             },
 
             sendMonth(action="sendmonth") {
-
                 this.sendaction = action;
-
                 if ( !(this.ts.submitable == true || this.ts.hasConflict == true) ) {
                     this.error = 'Vous ne pouvez pas soumettre vos déclarations pour cette période : ' + this.ts.submitableInfos;
                     return;
                 }
-
                 let aggregatProjet = {};
 
                 Object.keys(this.ts.days).forEach(d => {
-
                     let day = this.ts.days[d];
-
                     if( day.othersWP && day.othersWP.length ){
                         day.othersWP.forEach(timesheet => {
                            let key = timesheet.code;
@@ -1474,8 +1452,6 @@
                             aggregatProjet[key].push(timesheet.comment);
                         }
                     });
-
-
                 });
 
                 Object.keys(aggregatProjet).forEach(id => {
@@ -1514,7 +1490,6 @@
 
             fillWeek(week, wp) {
                 let data = [];
-
                 week.days.forEach(d => {
                     if (!(d.closed || d.locked || d.duration >= d.dayLength)) {
                         data.push({
@@ -1630,7 +1605,6 @@
 
                 this.loading = "Enregistrement des créneaux";
 
-                //this.$http.post('/feuille-de-temps/declarant-api', formData).then(
                 this.$http.post(this.url, formData).then(
                     ok => {
                         this.fetch(false);
@@ -1741,6 +1715,7 @@
                     this.fetch(true);
                 }
             },
+
             fetch(clear = true) {
 
                 this.loading = "Chargement de la période";
@@ -1754,7 +1729,6 @@
 
                 if (this.selectedDay)
                     daySelected = this.selectedDay.i;
-
 
                 this.$http.get(this.url + '&month=' + this.month + '&year=' + this.year).then(
                     ok => {
@@ -1775,6 +1749,8 @@
                 });
             }
         },
+
+
         mounted() {
             moment = this.moment;
             this.month = this.defaultMonth;
@@ -1789,10 +1765,6 @@
                     this._colorsProjects = {};
                 }
             }
-
-
-
-
             this.fetch(true)
         }
     }

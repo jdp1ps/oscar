@@ -4,7 +4,9 @@
          :class="{'locked': day.locked, 'error': (day.total > day.maxLength)}"
          >
 
-        <span class="label">{{ day.i }}</span>
+        <span class="label">
+            {{ day.i }}
+        </span>
 
         <span v-if="day.total > day.maxLength" class="text-danger">
             <i class="icon-attention"></i>

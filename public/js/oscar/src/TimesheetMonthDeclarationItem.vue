@@ -22,7 +22,6 @@
        <div class="left buttons-icon">
             <i class="icon-trash" @click="$emit('removetimesheet', d)" :class="d.credentials.deletable != true ? 'disabled':''"></i>
             <i class="icon-edit" @click="$emit('edittimesheet', d)"  :class="d.credentials.editable != true ? 'disabled':''"></i>
-            <i class="icon-bug" @click="$emit('debug', d)"></i>
         </div>
     </article>
 </template>

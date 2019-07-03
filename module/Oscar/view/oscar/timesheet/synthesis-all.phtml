@@ -1,8 +1,7 @@
 <div id="app">
     <section class="container">
-        <h1>Déclaration pour <strong>[<?= $activity->getAcronym() ?>]</strong> <em><?= $activity->getLabel() ?></em></h1>
-
-
+        <h1>Déclaration pour <strong>[<?= $activity->getAcronym() ?>]</strong> <em><?= $activity->getLabel() ?></em>
+        </h1>
         <div class="overlay" v-if="infosPerson">
             <div class="overlay-content" style="flex-basis: 90%; max-height: 90%">
                 <h2>
@@ -15,31 +14,35 @@
 
                 <table class="table bordered">
                     <thead>
-                        <tr>
-                            <th> ~ </th>
-                            <th v-for="d, i in infosPerson.days"><small>{{ d.label }}</small> {{ d.i }}</th>
-                            <th> Total </th>
-                        </tr>
+                    <tr>
+                        <th> ~</th>
+                        <th v-for="d, i in infosPerson.days">
+                            <small>{{ d.label }}</small>
+                            {{ d.i }}
+                        </th>
+                        <th> Total</th>
+                    </tr>
                     </thead>
                     <tbody v-for="activity in organize(infosPerson).activities">
-                        <tr>
-                            <th :colspan="infosPerson.dayNbr + 2"><h3><i class="icon-cube"></i>{{ activity.acronym }}</h3></th>
-                        </tr>
-                        <tr v-for="workpackage in activity.workpackages">
-                            <th>{{ workpackage.code }}</th>
-                            <td v-for="d, i in infosPerson.days" class="day" :class="{ 'off': d.locked }">
-                                <strong v-if="workpackage.days[i]">
-                                    {{ workpackage.days[i] | formatDuration }}
-                               </strong>
-                               <small v-else>0.0</small>
-                            </td>
-                            <th class="total">{{ workpackage.total | formatDuration }}</th>
-                        </tr>
-                        <tr>
-                            <th>Total</th>
-                            <td :colspan="infosPerson.dayNbr">&nbsp;</td>
-                            <th>{{ activity.total | formatDuration }}</th>
-                        </tr>
+                    <tr>
+                        <th :colspan="infosPerson.dayNbr + 2"><h3><i class="icon-cube"></i>{{ activity.acronym }}</h3>
+                        </th>
+                    </tr>
+                    <tr v-for="workpackage in activity.workpackages">
+                        <th>{{ workpackage.code }}</th>
+                        <td v-for="d, i in infosPerson.days" class="day" :class="{ 'off': d.locked }">
+                            <strong v-if="workpackage.days[i]">
+                                {{ workpackage.days[i] | formatDuration }}
+                            </strong>
+                            <small v-else>0.0</small>
+                        </td>
+                        <th class="total">{{ workpackage.total | formatDuration }}</th>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td :colspan="infosPerson.dayNbr">&nbsp;</td>
+                        <th>{{ activity.total | formatDuration }}</th>
+                    </tr>
                     </tbody>
                     <tbody>
                     <tr>
@@ -58,11 +61,13 @@
 
                     </tbody>
                     <tfoot>
-                        <tr>
-                            <th>Total</th>
-                            <th v-for="d, i in infosPerson.days" class="day" :class="{'off': d.locked }"><small>{{ d.total | formatDuration }}</small></th>
-                            <th>{{ infosPerson.total | formatDuration }}</th>
-                        </tr>
+                    <tr>
+                        <th>Total</th>
+                        <th v-for="d, i in infosPerson.days" class="day" :class="{'off': d.locked }">
+                            <small>{{ d.total | formatDuration }}</small>
+                        </th>
+                        <th>{{ infosPerson.total | formatDuration }}</th>
+                    </tr>
                     </tfoot>
                 </table>
             </div>
@@ -71,73 +76,86 @@
         <section v-for="y in packed" class="period">
             <h1 class="row">{{ y.label }} <strong class="total">{{ y.total | formatDuration }}</strong></h1>
             <section v-for="p in y.periods" class="period">
-            <h2 class="row">
+                <h2 class="row">
                 <span>
                     <i class="icon-calendar"></i>
                     {{ p.label | formatPeriod }}
-                    <a :href="'/feuille-de-temps/synthesisactivity?activity_id=<?= $activity->getId() ?>&format=html&period=' + p.label" class="btn btn-xs btn-primary">
+                    <a :href="'/feuille-de-temps/synthesisactivity?activity_id=<?= $activity->getId() ?>&format=html&period=' + p.label"
+                       class="btn btn-xs btn-primary">
                         <i class="icon-calendar"></i>
                         Feuille de temps de l'activité
                     </a>
                 </span>
 
-                <small class="total">
-                    Total pour <?= $activity->getAcronym() ?> :
-                    <strong>{{ p.total | formatDuration }} </strong>
-                </small>
+                    <small class="total">
+                        Total pour <?= $activity->getAcronym() ?> :
+                        <strong>{{ p.total | formatDuration }} </strong>
+                    </small>
 
-            </h2>
-            <article v-for="l in p.persons" class="card card-xs">
-                <h4 class="row">
-                    <strong class="person">
-                        <i class="icon-user"></i> {{ l.label }}
+                </h2>
+                <article v-for="l in p.persons" class="card card-xs">
+                    <h4 class="row">
+                        <strong class="person">
+                            <i class="icon-user"></i> {{ l.label }}
 
-                        <a href="#" @click.prevent="details(l.personId, p.label)" class="btn btn-xs btn-primary">
-                            <i class="icon-calendar"></i>
-                            Répartition mensuelle
+                            <a href="#" @click.prevent="details(l.personId, p.label)" class="btn btn-xs btn-primary">
+                                <i class="icon-calendar"></i>
+                                Répartition mensuelle
+                            </a>
+
+                            <a :href="'/feuille-de-temps/excel?action=export&period=' +p.label +'&personid=' + l.personId"
+                               class="btn btn-xs btn-default">
+                                <i class="icon-file-excel"></i>
+                                Feuille de temps (Excel)
+                            </a>
+
+                        </strong>
+                        <strong class="main">
+                            <i class="icon-cubes"></i>
+                            <?= $activity->getAcronym() ?> :
+                            {{ l.main | formatDuration }}
+                        </strong>
+                    </h4>
+                    <div>
+                        <a v-if="filterPersonId == null" href="#" @click.prevent="filterPersonId = l.personId">
+                            <small>Afficher uniquement <strong>{{ l.label }}</strong></small>
                         </a>
-
-                        <a :href="'/feuille-de-temps/excel?action=export&period=' +p.label +'&personid=' + l.personId" class="btn btn-xs btn-default">
-                            <i class="icon-file-excel"></i>
-                            Feuille de temps (Excel)
+                        <a v-else href="#" @click.prevent="filterPersonId = null">
+                            <small>Afficher tout le monde</small>
                         </a>
+                    </div>
+                    <section class="details">
+                        <article v-for="d in l.details" class="detail row">
+                            <strong v-if="d.type == 'wp'">
+                                <i class="icon-cubes"></i> {{ d.context }}
 
-                    </strong>
-                    <strong class="main">
-                        <i class="icon-cubes"></i>
-                        <?= $activity->getAcronym() ?> :
-                        {{ l.main | formatDuration }}
-                    </strong>
-                </h4>
-                <div>
-                    <a v-if="filterPersonId == null" href="#" @click.prevent="filterPersonId = l.personId">
-                        <small>Afficher uniquement <strong>{{ l.label }}</strong></small>
-                    </a>
-                    <a v-else href="#" @click.prevent="filterPersonId = null">
-                        <small>Afficher tout le monde</small>
-                    </a>
-                </div>
-                <section class="details">
-                    <article v-for="d in l.details" class="detail row">
-                        <strong v-if="d.type == 'wp'">
-                            <i class="icon-cubes"></i> {{ d.context }}
-                        </strong>
-                        <em v-else>
-                            <i :class="'icon-'+d.context"></i> {{ d.context | formatHorsLot }}
-                        </em>
-                        <strong>{{ d.duration | formatDuration }}</strong>
-                    </article>
-                    <article class="detail row">
-                        <strong>
-                            Total pour cette période :
-                        </strong>
-                        <strong>
-                            {{ l.total | formatDuration }}
-                        </strong>
-                    </article>
-                </section>
-            </article>
-        </section>
+                                <strong v-if="d.validation" class="cartouche default xs"
+                                        :class="'status-' + d.validation.status">
+                                    <i :class="'icon-' + d.validation.status"></i>
+                                    {{ d.validation.status | statusText }}</strong>
+                            </strong>
+                            <em v-else>
+                                <i :class="'icon-'+d.context"></i> {{ d.context | formatHorsLot }}
+
+                                <strong v-if="d.validation" class="cartouche default xs"
+                                        :class="'status-' + d.validation.status">
+                                    <i :class="'icon-' + d.validation.status"></i>
+                                    {{ d.validation.status | statusText}}</strong>
+                            </em>
+                            <strong>{{ d.duration | formatDuration }}</strong>
+
+                        </article>
+                        <article class="detail row">
+                            <strong>
+                                Total pour cette période :
+                            </strong>
+                            <strong>
+                                {{ l.total | formatDuration }}
+                            </strong>
+                        </article>
+                    </section>
+                </article>
+            </section>
         </section>
     </section>
 </div>
@@ -145,17 +163,21 @@
     .row {
         display: flex;
     }
+
     .row :last-child {
         margin-left: auto;
         text-align: right;
     }
+
     .period h4 {
         margin: 0;
         padding: 0;
     }
+
     .period > article h3 {
         display: flex;
     }
+
     .period > article h3 .total, .period > article h3 .main, .period > article h3 .other {
         flex: 1;
     }
@@ -168,6 +190,7 @@
     .table {
         font-size: .8em;
     }
+
     .day.off {
         background: #eee8d5;
     }
@@ -175,13 +198,16 @@
     .day.fill {
         background: #0b97c4;
     }
+
     .day.off.fill {
         background: #7f0027;
     }
+
     .period > article h3 .person {
         flex: 3;
         margin-left: auto;
     }
+
     .period .detail {
         margin: 0 1em;
         border-bottom: solid thin #fff;
@@ -189,9 +215,25 @@
         padding-left: 2em;
         display: flex;
     }
+
+    .cartouche.status-send-prj {
+        background-color: #1b7cc4;
+    }
+    .cartouche.status-send-sci {
+        background-color: #20bcc4;
+    }
+    .cartouche.status-send-adm {
+        background-color: #1fc48f;
+    }
+    .cartouche.status-valid {
+        background-color: #189c17;
+    }
+    .cartouche.status-conflict {
+        background-color: #a6091a;
+    }
 </style>
 <script>
-    require(['vue', 'vue-resource'], function(Vue, VueResource){
+    require(['vue', 'vue-resource'], function (Vue, VueResource) {
 
         Vue.use(VueResource);
 
@@ -209,184 +251,207 @@
             '11': 'Novembre',
             '12': 'Décembre'
         };
-
-
-        Vue.filter('formatDuration', function(heure){
+        
+        Vue.filter('formatDuration', function (heure) {
             var h = Math.floor(heure);
             var m = Math.round((heure - h) * 60);
-            return h +':'+ (m < 10 ? '0'+m : m);
+            return h + ':' + (m < 10 ? '0' + m : m);
         });
 
-        Vue.filter('formatPeriod', function(period){
+        var statusList = {
+            'valid': "Validé",
+            'send-prj': "Validation projet",
+            'send-sci': "Validation scientifique",
+            'send-adm': "Validation administrative",
+            'conflict': "Refusé",
+        };
+
+        Vue.filter('statusText', function (status) {
+            return statusList[status] ? statusList[status] : "Inconnu";
+        });
+
+        Vue.filter('formatPeriod', function (period) {
             let split = period.split('-');
-            return months[split[1]] +" " +split[0];
+            return months[split[1]] + " " + split[0];
         });
 
         let horslot = <?= json_encode($horslot) ?>;
 
-        Vue.filter('formatHorsLot', function(text){
-            if( horslot.hasOwnProperty(text) ){
+        Vue.filter('formatHorsLot', function (text) {
+            if (horslot.hasOwnProperty(text)) {
                 return horslot[text].label;
             }
             return text;
         });
 
-       new Vue({
-           el: "#app",
+        new Vue({
+            el: "#app",
 
-           data() {
-               return {
-                   pack: 'period',
-                   lines: <?= json_encode($datas) ?>,
-                   activityId: <?= $activityId ?>,
-                   filterPersonId: null,
-                   infosPerson: null
-               }
-           },
+            data() {
+                return {
+                    pack: 'period',
+                    lines: <?= json_encode($datas) ?>,
+                    validations: <?= json_encode($validations) ?>,
+                    activityId: <?= $activityId ?>,
+                    filterPersonId: null,
+                    infosPerson: null
+                }
+            },
 
-           methods: {
-               details: function(personId, period){
-                    console.log(personId, period);
-                    this.$http.get('/feuille-de-temps/synthesis?person_id=' +personId +'&format=json&period=' +period).then(
+            methods: {
+                details: function (personId, period) {
+                    this.$http.get('/feuille-de-temps/synthesis?person_id=' + personId + '&format=json&period=' + period).then(
                         ok => {
                             this.infosPerson = ok.data;
                         }
                     );
                 },
-               organize(personDatas){
-                   let datas = {
+                organize(personDatas) {
+                    let datas = {
                         activities: {},
                         others: {}
-                   };
+                    };
 
-                   Object.keys(personDatas.activities).forEach( activityId => {
-                       var activity = personDatas.activities[activityId];
-                       datas.activities[activityId] = {
-                           acronym: activity.acronym,
-                           id: activity.id,
-                           label: activity.label,
-                           total: activity.total,
-                           workpackages: {},
-                           days: {}
-                       };
-                   });
+                    Object.keys(personDatas.activities).forEach(activityId => {
+                        var activity = personDatas.activities[activityId];
+                        datas.activities[activityId] = {
+                            acronym: activity.acronym,
+                            id: activity.id,
+                            label: activity.label,
+                            total: activity.total,
+                            workpackages: {},
+                            days: {}
+                        };
+                    });
 
-                   Object.keys(personDatas.workpackages).forEach(wpId => {
-                       var wp = personDatas.workpackages[wpId];
-                       datas.activities[wp.activity_id].workpackages[wpId] = {
-                           code: wp.code,
-                           id: wp.id,
-                           label: wp.label,
-                           total: wp.total,
-                           days: {}
-                       };
-                   });
+                    Object.keys(personDatas.workpackages).forEach(wpId => {
+                        var wp = personDatas.workpackages[wpId];
+                        datas.activities[wp.activity_id].workpackages[wpId] = {
+                            code: wp.code,
+                            id: wp.id,
+                            label: wp.label,
+                            total: wp.total,
+                            days: {}
+                        };
+                    });
 
-                   Object.keys(personDatas.otherWP).forEach(otherKey => {
-                       var other = personDatas.otherWP[otherKey];
-                       datas.others[otherKey] = {
-                           label: other.label,
-                           code: other.code,
-                           total: other.total,
-                           days: {}
-                       };
-                   });
+                    Object.keys(personDatas.otherWP).forEach(otherKey => {
+                        var other = personDatas.otherWP[otherKey];
+                        datas.others[otherKey] = {
+                            label: other.label,
+                            code: other.code,
+                            total: other.total,
+                            days: {}
+                        };
+                    });
 
-                   Object.keys(personDatas.days).forEach(date => {
-                       console.log("DATE", date);
-                       var day = personDatas.days[date];
+                    Object.keys(personDatas.days).forEach(date => {
+                        var day = personDatas.days[date];
 
-                       if( day.declarations ){
-                           day.declarations.forEach( declaration => {
-                              var wpId = declaration.wp_id;
-                              var activityId = declaration.activity_id;
-                              var duration = declaration.duration;
+                        if (day.declarations) {
+                            day.declarations.forEach(declaration => {
+                                var wpId = declaration.wp_id;
+                                var activityId = declaration.activity_id;
+                                var duration = declaration.duration;
 
-                               if( !datas.activities[activityId].days.hasOwnProperty(date) ){
-                                   datas.activities[activityId].days[date] = 0.0;
-                               }
-                               datas.activities[activityId].days[date] += duration;
+                                if (!datas.activities[activityId].days.hasOwnProperty(date)) {
+                                    datas.activities[activityId].days[date] = 0.0;
+                                }
+                                datas.activities[activityId].days[date] += duration;
 
-                               if( !datas.activities[activityId].workpackages[wpId].days.hasOwnProperty(date) ){
-                                   datas.activities[activityId].workpackages[wpId].days[date] = 0.0;
-                               }
-                               datas.activities[activityId].workpackages[wpId].days[date] += duration;
-                           });
-                       }
-                       if( day.othersWP ){
-                          day.othersWP.forEach( otherInfos => {
-                               var otherKey = otherInfos.code;
-                               var duration = otherInfos.duration;
-                               if( !datas.others[otherKey].days.hasOwnProperty(date) ){
-                                   datas.others[otherKey].days[date] = 0.0;
-                               }
-                               datas.others[otherKey].days[date] += duration;
-                           })
+                                if (!datas.activities[activityId].workpackages[wpId].days.hasOwnProperty(date)) {
+                                    datas.activities[activityId].workpackages[wpId].days[date] = 0.0;
+                                }
+                                datas.activities[activityId].workpackages[wpId].days[date] += duration;
+                            });
+                        }
+                        if (day.othersWP) {
+                            day.othersWP.forEach(otherInfos => {
+                                var otherKey = otherInfos.code;
+                                var duration = otherInfos.duration;
+                                if (!datas.others[otherKey].days.hasOwnProperty(date)) {
+                                    datas.others[otherKey].days[date] = 0.0;
+                                }
+                                datas.others[otherKey].days[date] += duration;
+                            })
 
-                       }
-                   });
+                        }
+                    });
+                    return datas;
+                }
+            },
 
-                   return datas;
-               }
-           },
+            computed: {
+                packed() {
+                    var output = {};
 
-           computed: {
-               packed(){
-                   var output = {};
+                    this.lines.forEach(line => {
 
-                   this.lines.forEach( line => {
+                        let splitPeriod = line.period.split('-');
+                        let year = splitPeriod[0];
+                        let period = line.period;
+                        let personId = line.person_id;
+                        let person = line.displayname;
+                        let duration = parseFloat(line.duration);
 
-                       let splitPeriod = line.period.split('-');
-                       let year = splitPeriod[0];
-                       let period = line.period;
-                       let personId = line.person_id;
-                       let person = line.displayname;
-                       let duration = parseFloat(line.duration);
+                        if (this.filterPersonId && this.filterPersonId != personId) return;
 
-                       if( this.filterPersonId && this.filterPersonId != personId ) return;
+                        // Série de IF pour créer l'objet rangé
+                        if (!output.hasOwnProperty(year)) {
+                            output[year] = {
+                                label: year,
+                                periods: {},
+                                total: 0.0
+                            };
+                        }
 
-                       if( !output.hasOwnProperty(year) ){
-                           output[year] = {
-                               label: year,
-                               periods: {},
-                               total: 0.0
-                           };
-                       }
+                        if (!output[year].periods.hasOwnProperty(period)) {
+                            output[year].periods[period] = {
+                                label: period,
+                                persons: {},
+                                total: 0.0
+                            };
+                        }
 
-                       if( !output[year].periods.hasOwnProperty(period) ){
-                           output[year].periods[period] = {
-                               label: period,
-                               persons: {},
-                               total: 0.0
-                           };
-                       }
+                        if (!output[year].periods[period].persons.hasOwnProperty(personId)) {
+                            output[year].periods[period].persons[personId] = {
+                                label: person,
+                                personId: personId,
+                                main: 0.0,
+                                others: 0.0,
+                                total: 0.0,
+                                details: []
+                            };
+                        }
 
-                       if( !output[year].periods[period].persons.hasOwnProperty(personId) ){
-                           output[year].periods[period].persons[personId] = {
-                               label: person,
-                               personId: personId,
-                               main: 0.0,
-                               others: 0.0,
-                               total: 0.0,
-                               details: []
-                           };
-                       }
-
-                        if( line.activity_id == this.activityId ){
+                        // On renseigne le cumul des heures selon si on est
+                        // sur l'activité en cours ou du hors-lot
+                        if (line.activity_id == this.activityId) {
                             output[year].periods[period].persons[personId].main += duration;
-                            output[year].total  += duration;
+                            output[year].total += duration;
                             output[year].periods[period].total += duration;
                         } else {
                             output[year].periods[period].persons[personId].others += duration;
                         }
 
-                       output[year].periods[period].persons[personId].total += duration;
-                       output[year].periods[period].persons[personId].details.push(line);
-                   });
+                        // On teste les validations disponibles pour la période
+                        if (this.validations && this.validations[period] && this.validations[period][personId]) {
+                            if (line.activity_id && this.validations[period][personId].activity[line.activity_id]) {
+                                line.validation = this.validations[period][personId].activity[line.activity_id];
+                            } else if (line.context && this.validations[period][personId].other[line.context]) {
+                                line.validation = this.validations[period][personId].other[line.context];
+                            } else {
+                                line.validation = null;
+                            }
+                        }
 
-                   return output;
-               }
-           }
-       })
+                        output[year].periods[period].persons[personId].total += duration;
+                        output[year].periods[period].persons[personId].details.push(line);
+                    });
+
+                    return output;
+                }
+            }
+        })
     });
 </script>

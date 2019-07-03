@@ -1178,6 +1178,51 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getTimesheetRepository()->getDatasDeclarerSynthesis($personIds);
     }
 
+    public function getDatasValidationPersonsPeriod($personsIds, $yearStart, $yearEnd){
+        $datas = [];
+
+        $this->getLogger()->debug("Validations entre $yearStart et $yearEnd");
+
+        $validations = $this->getValidationPeriodRepository()->getDatasValidationPersonsPeriod($personsIds, $yearStart,$yearEnd);
+
+        $this->getLogger()->debug("Validations : " . count($validations));
+
+
+        foreach ($validations as $validation){
+            $declarerId = $validation['declarer_id'];
+            $id = $validation['id'];
+            $period = sprintf('%s-%s', $validation['year'], $validation['month'] < 10 ? '0'.$validation['month']:$validation['month']);
+            $object = $validation['object'];
+            $objectgroup = $validation['objectgroup'];
+            $object_id = $validation['object_id'];
+            $dateSend = $validation['datesend'];
+
+            $this->getLogger()->debug("Validation $objectgroup > $object > $object_id : $period");
+
+
+            if(!array_key_exists($period, $datas)){
+                $datas[$period] = [];
+            }
+
+            if(!array_key_exists($declarerId, $datas[$period])){
+                $datas[$period][$declarerId] = [
+                    'activity' => [],
+                    'other' => [],
+                ];
+            }
+
+            if( $objectgroup == "workpackage" ){
+                $datas[$period][$declarerId]['activity'][$validation['object_id']] = $validation;
+            }
+            if( $objectgroup == "other" ){
+                $datas[$period][$declarerId]['other'][$validation['object']] = $validation;
+            }
+        }
+
+        return $datas;
+
+    }
+
     public function getMonthDuration(Person $person, $year, $month)
     {
         $daysInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);
@@ -2219,6 +2264,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $submitable = false;
         $submitableInfos = "Vous ne pouvez pas soumettre cette période pour une raison inconnue";
+        $importEnable = $this->getOscarConfig()->getConfiguration('importEnable');
 
         $hasConflict = false;
 
@@ -2478,6 +2524,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'icsUidList' => $icsUidList,
             'feries' => $this->getLockedDays($year, $month),
             'person' => (string)$person,
+            'importEnable' => $importEnable,
             'person_id' => $person->getId(),
             'period' => $periodFirstDay->format('Y-m'),
             'periodMax' => $periodMax,

@@ -126,6 +126,9 @@ return array(
 //            ],
         ],
 
+        // Désactive / Active l'option d'importation des calendriers
+        'importEnable' => false,
+
 
         ////////////////////////////////////////////////////////////////////////
         //
