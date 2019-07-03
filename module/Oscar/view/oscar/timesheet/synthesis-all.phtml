@@ -228,7 +228,7 @@
     .cartouche.status-valid {
         background-color: #189c17;
     }
-    .cartouche.status-reject {
+    .cartouche.status-conflict {
         background-color: #a6091a;
     }
 </style>
@@ -263,7 +263,7 @@
             'send-prj': "Validation projet",
             'send-sci': "Validation scientifique",
             'send-adm': "Validation administrative",
-            'reject': "Refusé",
+            'conflict': "Refusé",
         };
 
         Vue.filter('statusText', function (status) {
