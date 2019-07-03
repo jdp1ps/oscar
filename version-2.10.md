@@ -4,6 +4,8 @@
 
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
 
+> Cette mise à jour implique le **Mettre à jour les librairies PHP** avec *composer*. Si des paquets PHP sont manquants, composer vous les indiquera.
+
 En complément, plusieurs options de configuration DOIVENT être complétées :
 
 
