@@ -367,6 +367,10 @@ class EnrollController extends AbstractOscarController
                 $role = $roles[$roleIndex];
                 $roleObj = $this->getRoleObj($class, $roleIndex);
 
+                if( !$roleObj ){
+                    return $this->getResponseInternalError("Rôle inconnu");
+                }
+
                 $dateStart = $this->params()->fromPost('dateStart');
                 if ($dateStart) {
                     $dateStart = new \DateTime($dateStart);

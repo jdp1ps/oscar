@@ -20,6 +20,21 @@
             </div>
         </div>
 
+        <div class="overlay" v-if="error">
+            <div class="overlay-content">
+                <i class="icon-cancel-outline overlay-closer" @click="error = ''"></i>
+
+                <h2>Erreur : <strong>{{ error }}</strong></h2>
+
+                <nav class="admin-bar">
+                    <button class="btn btn-default button-back" @click="error = ''">
+                        <i class="icon-angle-left"></i>
+                        Annuler
+                    </button>
+                </nav>
+            </div>
+        </div>
+
         <div class="overlay" v-if="entityEdited">
             <div class="overlay-content" style="overflow: visible">
                 <i class="icon-cancel-outline overlay-closer" @click="entityEdited = null"></i>
@@ -182,7 +197,8 @@ export default {
             entities: [],
             entityEdited: null,
             entityDelete: null,
-            entityNew: null
+            entityNew: null,
+            error: null
         };
     },
 
@@ -198,7 +214,6 @@ export default {
         },
 
         handlerNew(){
-            console.log(this.urlNew);
             this.entityNew = {
                 end: '',
                 start: '',
@@ -225,9 +240,9 @@ export default {
 
         performDelete(){
             this.$http.post(this.entityDelete.urlDelete, {}).then( ok => {
-                console.log("OK", ok);
+
             }, ko => {
-                console.log('ERROR', ko);
+                this.error = "Erreur : " + ko.body;
             }).then( foo => {
                 this.entityDelete = null;
                 this.fetch();
@@ -243,7 +258,7 @@ export default {
             this.$http.post(this.entityEdited.urlEdit, data).then( ok => {
                 console.log("OK", ok);
             }, ko => {
-                console.log('ERROR', ko);
+                this.error = "Erreur : " + ko.body;
             }).then( foo => {
                 this.entityEdited = null;
                 this.fetch();
@@ -260,7 +275,7 @@ export default {
             this.$http.post(this.urlNew+'/'+this.entityNew.enroled, data).then( ok => {
                 console.log("OK", ok);
             }, ko => {
-                console.log('ERROR', ko);
+                this.error = "Erreur : " + ko.body;
             }).then( foo => {
                 this.entityNew = null;
                 this.fetch();
@@ -270,11 +285,10 @@ export default {
 
         fetch(){
             this.$http.get(this.url).then(ok => {
-                console.log(ok)
                 this.entities = ok.body;
             },
             ko => {
-                console.error(ko)
+                this.error = "Erreur : " + ko.body;
             });
         }
     },
