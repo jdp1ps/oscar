@@ -379,6 +379,7 @@ class OrganizationController extends AbstractOscarController
             if( $form->isValid() ){
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush($entity);
+                $this->getOrganizationService()->getSearchEngineStrategy()->add($entity);
                 $this->redirect()->toRoute('organization/show', ['id'=>$entity->getId()]);
             }
         }
