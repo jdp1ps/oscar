@@ -770,6 +770,7 @@ class OrganizationController extends AbstractOscarController
                     LogActivity::LEVEL_INCHARGE
                 );
                 $em->flush($entity);
+                $this->getOrganizationService()->getSearchEngineStrategy()->update($entity);
                 $this->flashMessenger()->addSuccessMessage(_('Données sauvegardées.'));
                 $this->redirect()->toRoute('organization/show', ['id' => $id]);
             }
