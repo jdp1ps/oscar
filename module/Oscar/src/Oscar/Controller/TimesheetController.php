@@ -1914,23 +1914,23 @@ class TimesheetController extends AbstractOscarController
 
                     // Réenvoi de la déclaration
                     if( $action == 'resend' ){
-                        $timesheetService->reSendPeriod($year, $month, $currentPerson);
-                        return $this->getResponseOk();
-//
-//                        $periodId = $this->params()->fromPost('period_id');
-//                        /** @var ValidationPeriod $period */
-//                        $period = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($periodId);
-//                        if( $period->getDeclarer() == $currentPerson ){
-//                            try {
-//                                $timesheetService->verificationPeriod($currentPerson, $period->getYear(), $period->getMonth());
-//                                $timesheetService->reSendValidation($period, $comments);
-//                                return $this->getResponseOk();
-//                            } catch (\Exception $e ){
-//                                return $this->getResponseInternalError(sprintf('Impossible de réenvoyer la déclaration : %s', $e->getMessage()));
-//                            }
-//                        } else {
-//                            return $this->getResponseUnauthorized("Cette déclaration n'est pas la votre.");
-//                        }
+                        try {
+                            $timesheetService->reSendPeriod($year, $month, $currentPerson);
+                            return $this->getResponseOk();
+                        }catch (OscarException $e){
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
+                    }
+
+                    if( $action == 'comment' ){
+                        try {
+                            $timesheetService->saveCommentFromPost($currentPerson, $_POST);
+                            return $this->getResponseOk();
+                        }catch (OscarException $e){
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
+
+                        return $this->getResponseNotImplemented("Enregistrement de commentaire");
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));

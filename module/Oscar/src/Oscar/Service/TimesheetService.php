@@ -9,6 +9,7 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\Referent;
 use Oscar\Entity\TimeSheet;
+use Oscar\Entity\TimesheetCommentPeriod;
 use Oscar\Entity\TimesheetRepository;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
@@ -374,6 +375,44 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         foreach ($validationsPeriods as $validationPeriod) {
             $this->reSendValidation($validationPeriod);
         }
+    }
+
+    public function saveCommentFromPost( Person $person, $datasPosted ){
+        $period = DateTimeUtils::extractPeriodDatasFromString($datasPosted['period']);
+        $type = $datasPosted['type'];
+        $id = (int)$datasPosted['id'];
+        $code = $datasPosted['code'];
+        $content = $datasPosted['content'];
+
+        $out = [
+            'period' => $period,
+            'validation' => ''
+        ];
+
+        /** @var ValidationPeriod $validation */
+        $validation = $this->getPeriodValidation($person, $period['month'], $period['year']);
+
+        if( $validation ){
+            throw new OscarException("Cette période est en cours de validation");
+        }
+
+        $comment = $this->getCommentPeriodObject($id ? $id : $code, $person, $period['year'], $period['month']);
+
+
+        if( $comment ){
+            $comment->setComment($content);
+        } else {
+            $comment = new TimesheetCommentPeriod();
+            $this->getEntityManager()->persist($comment);
+            $comment->setDeclarer($person)
+                ->setObject($code ? $code : 'activity')
+                ->setComment($content)
+                ->setObjectGroup($code ? 'wp' : 'activity')
+                ->setObjectId($id)
+                ->setYear($period['year'])
+                ->setMonth($period['month']);
+        }
+        $this->getEntityManager()->flush($comment);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2570,10 +2609,52 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
     public function getCommentPeriod($activityOrKey, $person, $year, $month){
-        if( is_string($activityOrKey) ){
-            return "Commentaire Hors-Lot";
+        $obj = $this->getCommentPeriodObject($activityOrKey, $person, $year, $month);
+        if( $obj ){
+            return $obj->getComment();
         } else {
-            return "Comentaire Activité";
+            return "Empty";
+        }
+    }
+
+    /**
+     * @param $activityOrKey
+     * @param $person
+     * @param $year
+     * @param $month
+     * @return TimesheetCommentPeriod|null
+     * @throws OscarException
+     */
+    public function getCommentPeriodObject($activityOrKey, $person, $year, $month){
+
+        $query = $this->getEntityManager()->getRepository(TimesheetCommentPeriod::class)->createQueryBuilder('c')
+            ->where('c.year = :year AND c.month = :month AND c.declarer = :declarer');
+
+        $parameters = [
+            'year' => $year,
+            'month'=> $month,
+            'declarer'=> $person,
+        ];
+
+
+        if( is_string($activityOrKey) ){
+            $this->getLogger()->debug("Récupération pour le hors-lot $activityOrKey");
+            $query->andWhere('c.object = :code');
+            $parameters['code'] = $activityOrKey;
+        } else {
+            $this->getLogger()->debug("Récupération pour l'activité $activityOrKey");
+            $query->andWhere('c.object_id = :id');
+            $parameters['id'] = $activityOrKey;
+        }
+        $obj = $query->setParameters($parameters)->getQuery()->getResult();
+        if( !$obj ){
+            return null;
+        } else {
+            if( count($obj) > 1 ){
+                throw new OscarException("Plusieurs commentaires enregistrés pour le même objet, contacter l'administrateur pour u'il corrige le problème");
+            } else {
+                return $obj[0];
+            }
         }
     }
 

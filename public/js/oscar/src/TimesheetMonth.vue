@@ -18,12 +18,9 @@
                     </h2>
 
                     Votre commentaire :
-                    <textarea name="comment" class="form-control" id="" cols="30" rows="10" v-model="commentEditedContent">
-
-                    </textarea>
-
+                    <textarea name="comment" class="form-control" id="" cols="30" rows="10" v-model="commentEditedContent"></textarea>
                     <nav class="buttons">
-                        <button class="btn btn-primary" @click="sendComment">Enregistrer le commentaire</button>
+                        <button class="btn btn-primary" @click="handlerSendComment">Enregistrer le commentaire</button>
                         <button class="btn btn-default" @click="commentEdited = null">Annuler</button>
                     </nav>
                 </div>
@@ -632,7 +629,6 @@
                                         <i class="icon-chat-alt"></i>
                                         Commentaire
                                     </button>
-                                    <small>{{ a }}</small>
                                 </span>
                             <small class="subtotal">
                                 <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
@@ -1353,9 +1349,47 @@
             handledEditComment(type, data){
                 console.log("MODIFICATION COMMENTAIRE ", type, data);
 
-                this.commentEditedLabel = "Commentaire pour les créneaux : " + data.label;
+                this.commentEditedLabel = data.label;
                 this.commentEdited = data;
                 this.commentEditedContent = data.comment;
+
+            },
+
+            handlerSendComment(){
+                var type, id, code;
+                if( this.commentEdited.id ){
+                    type = 'wp';
+                    id = this.commentEdited.id;
+                    code = "";
+                } else {
+                    type = 'hl';
+                    code = this.commentEdited.code;
+                    id = "";
+                }
+                var formData = new FormData();
+                formData.append('action', 'comment');
+                formData.append('period', this.ts.period);
+                formData.append('type', type);
+                formData.append('id', id);
+                formData.append('code', code);
+                formData.append('content', this.commentEditedContent);
+
+                console.log("Envoi du commentaire");
+
+                this.$http.post('', formData).then(
+                    ok => {
+                        this.fetch();
+                    },
+                    ko => {
+                        this.error = AjaxResolve.resolve("Impossible d'enregistrer le commentaire", ko);
+                    }
+                ).then(foo => {
+                    this.selectedWeek = null;
+                    this.screensend = null;
+                    this.loading = false;
+                    this.commentEdited = null;
+                });
+
 
             },
 
