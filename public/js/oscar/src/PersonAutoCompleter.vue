@@ -39,7 +39,7 @@
         methods: {
             search(){
                 this.loading = true;
-                this.$http.get(this.url +this.expression).then(
+                this.$http.get(this.url +this.expression +"*").then(
                     ok => {
                         this.persons = ok.body.datas;
                         this.showSelector = true;

@@ -379,6 +379,7 @@ class OrganizationController extends AbstractOscarController
             if( $form->isValid() ){
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush($entity);
+                $this->getOrganizationService()->getSearchEngineStrategy()->add($entity);
                 $this->redirect()->toRoute('organization/show', ['id'=>$entity->getId()]);
             }
         }
@@ -769,6 +770,7 @@ class OrganizationController extends AbstractOscarController
                     LogActivity::LEVEL_INCHARGE
                 );
                 $em->flush($entity);
+                $this->getOrganizationService()->getSearchEngineStrategy()->update($entity);
                 $this->flashMessenger()->addSuccessMessage(_('Données sauvegardées.'));
                 $this->redirect()->toRoute('organization/show', ['id' => $id]);
             }
