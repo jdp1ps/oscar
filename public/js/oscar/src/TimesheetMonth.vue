@@ -9,6 +9,28 @@
         </transition>
 
         <transition name="fade">
+            <div class="overlay" v-if="commentEdited">
+                <div class="overlay-content">
+
+                    <h2>
+                        <i class="icon-paper-plane"></i> Commentaire pour
+                        <strong>{{ commentEditedLabel }}</strong>
+                    </h2>
+
+                    Votre commentaire :
+                    <textarea name="comment" class="form-control" id="" cols="30" rows="10" v-model="commentEditedContent">
+
+                    </textarea>
+
+                    <nav class="buttons">
+                        <button class="btn btn-primary" @click="sendComment">Enregistrer le commentaire</button>
+                        <button class="btn btn-default" @click="commentEdited = null">Annuler</button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
+        <transition name="fade">
             <div class="overlay" v-if="screensend">
                 <div class="overlay-content">
 
@@ -545,7 +567,7 @@
                     <h4><i class="icon-tags"></i> Hors-lot</h4>
 
                     <section class="card xs" v-for="a in ts.otherWP" v-if="a.total > 0">
-                        <div class="week-header interaction-off">
+                        <div class="week-header">
                                 <span>
                                     <i :class="'icon-'+a.code"></i>
                                     {{ a.label }}
@@ -562,6 +584,10 @@
                                        title="Cette déclaration est valide"></i>
                                     <br>
                                     <em class="text-thin">{{ a.description }}</em>
+                                     <button class="btn btn-default btn-xs" @click.prevent.default="handledEditComment('hl', a)">
+                                        <i class="icon-chat-alt"></i>
+                                        Commentaire
+                                    </button>
                                 </span>
                             <small>
                                 <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
@@ -583,12 +609,12 @@
                         Vous n'être identifié comme déclarant sur aucune activité pour cette période. Si cette situation
                         vous semble anormale, prenez contact avec votre responsable scientifique.
                     </p>
-                    <section class="card xs" v-for="a in ts.activities" @click="configureColor = true" v-else>
-                        <div class="week-header interaction-off">
+                    <section class="card xs" v-for="a in ts.activities" v-else>
+                        <div class="week-header">
 
                                 <span >
                                     <strong>{{ a.acronym }}</strong>
-                                    <span class="icon-tag" :style="{'color': _colorsProjects[a.acronym] }">&nbsp;</span>
+                                    <span class="icon-tag" :style="{'color': _colorsProjects[a.acronym] }" @click="configureColor = true">&nbsp;</span>
                                     <i v-if="a.validation_state == null"></i>
                                     <i class="icon-cube" v-else-if="a.validation_state.status == 'send-prj'"
                                        title="Validation projet en attente"></i>
@@ -602,7 +628,11 @@
                                        title="Cette déclaration est valide"></i>
                                     <br>
                                     <em class="text-thin">{{ a.label }}</em>
-
+                                     <button class="btn btn-default btn-xs" @click.prevent.default="handledEditComment('prj', a)">
+                                        <i class="icon-chat-alt"></i>
+                                        Commentaire
+                                    </button>
+                                    <small>{{ a }}</small>
                                 </span>
                             <small class="subtotal">
                                 <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
@@ -1007,6 +1037,10 @@
                     type: 'infos',
                 },
 
+                commentEdited: null,
+                commentEditedLabel: "",
+                commentEditedContent: "",
+
                 configureColor: false,
 
                 _colorsProjects: null,
@@ -1316,6 +1350,15 @@
         },
 
         methods: {
+            handledEditComment(type, data){
+                console.log("MODIFICATION COMMENTAIRE ", type, data);
+
+                this.commentEditedLabel = "Commentaire pour les créneaux : " + data.label;
+                this.commentEdited = data;
+                this.commentEditedContent = data.comment;
+
+            },
+
             getAcronymColor(acronym){
                 if( this._colorsProjects.hasOwnProperty(acronym) ){
                     return this._colorsProjects[acronym];

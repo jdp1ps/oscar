@@ -2249,6 +2249,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $periodMax = sprintf('%s-%s', $todayYear, $todayMonth);
 
         $daysInfosPerson = $this->getDaysPeriodInfosPerson($person, $year, $month);
+
         $daysInfos = [];
         foreach ($daysInfosPerson as $dayNum => $data) {
             $daysInfos[(int)$dayNum] = $data;
@@ -2345,6 +2346,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             /** @var ValidationPeriod $period */
             $periodActivityValidation = $this->getValidationPeriodActivityAt($workPackage->getActivity(), $person, $year, $month);
 
+            $comment = $this->getCommentPeriod($workPackage->getActivity(), $person, $year, $month);
+
             if (!array_key_exists($activity->getId(), $activities)) {
                 $activities[$activity->getId()] = [
                     'id' => $activity->getId(),
@@ -2353,7 +2356,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'project_id' => $activity->getProject()->getId(),
                     'label' => $activity->getLabel(),
                     'total' => 0.0,
-                    'validation_state' => $periodActivityValidation ? $periodActivityValidation->json() : null
+                    'validation_state' => $periodActivityValidation ? $periodActivityValidation->json() : null,
+                    'comment' => $comment
                 ];
             }
 
@@ -2406,6 +2410,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         foreach ($others as $key => $datas) {
             $periodHL = $this->getValidationPeriosOutOfWorkpackageAt($person, $year, $month, $key);
+            $comment = $this->getCommentPeriod($key, $person, $year, $month);
 
             if ($isPeriodSend) {
                 $validationUp = $periodHL && $periodHL->isOpenForDeclaration();
@@ -2414,6 +2419,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             $others[$key]['validation_state'] = $periodHL ? $periodHL->json() : null;
+            $others[$key]['comment'] = $comment;
             $others[$key]['validation_up'] = $validationUp;
             $others[$key]['total'] = 0.0;
         }
@@ -2560,6 +2566,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         ];
 
         return $output;
+    }
+
+
+    public function getCommentPeriod($activityOrKey, $person, $year, $month){
+        if( is_string($activityOrKey) ){
+            return "Commentaire Hors-Lot";
+        } else {
+            return "Comentaire Activité";
+        }
     }
 
 
