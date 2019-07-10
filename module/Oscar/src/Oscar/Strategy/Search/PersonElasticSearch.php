@@ -85,7 +85,7 @@ class PersonElasticSearch implements PersonSearchStrategy
                 'size' => 10000,
                 'query' => [
                     'query_string' => [
-                        'fields' => ['lastname^5', 'fullname^5', 'firstname^2', 'email', 'affectation', 'location', 'organizations', 'activities', 'connectors'],
+                        'fields' => ['fullname^5','lastname^5', 'firstname^2', 'email', 'affectation', 'location', 'organizations', 'activities', 'connectors'],
                         'query' => $search,
                     ]
                 ]
