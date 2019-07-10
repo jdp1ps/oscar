@@ -1915,7 +1915,7 @@ class TimesheetController extends AbstractOscarController
                     // Réenvoi de la déclaration
                     if( $action == 'resend' ){
                         try {
-                            $timesheetService->reSendPeriod($year, $month, $currentPerson);
+                            $timesheetService->reSendPeriod($year, $month, $currentPerson, $comments);
                             return $this->getResponseOk();
                         }catch (OscarException $e){
                             return $this->getResponseInternalError($e->getMessage());

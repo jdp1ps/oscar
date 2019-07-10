@@ -355,6 +355,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             throw new OscarException("Erreur d'état");
         }
 
+        $this->saveComment($validationPeriod->getDeclarer(), $validationPeriod->getObjectId() > 0 ? $validationPeriod->getObjectId() : $validationPeriod->getObject(), $validationPeriod->getYear(), $validationPeriod->getMonth(), $comment);
+
         $validationPeriod->addLog('Réenvoi de la déclaration pour validation', (string)$validationPeriod->getDeclarer());
         $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP1)->setComment($comment);
 
@@ -368,35 +370,34 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         return true;
     }
-    public function reSendPeriod( $year, $month, Person $declarer ){
+    public function reSendPeriod( $year, $month, Person $declarer, $comments ){
         $validationsPeriods = $this->getValidationPeriods((int)$year, (int)$month, $declarer);
 
         /** @var ValidationPeriod $validationPeriod */
         foreach ($validationsPeriods as $validationPeriod) {
-            $this->reSendValidation($validationPeriod);
+            if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
+                $key = $validationPeriod->getObjectId();
+            } else {
+                $key = $validationPeriod->getObject();
+            }
+            // récupération du commentaire
+            $comment = array_key_exists($key, $comments) ? $comments[$key] : "";
+            $this->reSendValidation($validationPeriod, $comment);
         }
     }
 
-    public function saveCommentFromPost( Person $person, $datasPosted ){
-        $period = DateTimeUtils::extractPeriodDatasFromString($datasPosted['period']);
-        $type = $datasPosted['type'];
-        $id = (int)$datasPosted['id'];
-        $code = $datasPosted['code'];
-        $content = $datasPosted['content'];
-
-        $out = [
-            'period' => $period,
-            'validation' => ''
-        ];
-
+    public function saveComment( Person $person, $objectKey, $year, $month, $content ){
         /** @var ValidationPeriod $validation */
-        $validation = $this->getPeriodValidation($person, $period['month'], $period['year']);
+        $validation = $this->getPeriodValidation($person, $month, $year);
 
-        if( $validation ){
-            throw new OscarException("Cette période est en cours de validation");
+        $id = intval($objectKey);
+        $code = $objectKey;
+        $mode = 'wp';
+        if( !$id ){
+            $mode = 'hl';
         }
 
-        $comment = $this->getCommentPeriodObject($id ? $id : $code, $person, $period['year'], $period['month']);
+        $comment = $this->getCommentPeriodObject($mode == 'wp' ? $id : $code, $person, $year, $month);
 
 
         if( $comment ){
@@ -409,10 +410,34 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 ->setComment($content)
                 ->setObjectGroup($code ? 'wp' : 'activity')
                 ->setObjectId($id)
-                ->setYear($period['year'])
-                ->setMonth($period['month']);
+                ->setYear($year)
+                ->setMonth($month);
         }
         $this->getEntityManager()->flush($comment);
+    }
+
+    public function saveCommentFromPost( Person $person, $datasPosted ){
+        $period = DateTimeUtils::extractPeriodDatasFromString($datasPosted['period']);
+        $type = $datasPosted['type'];
+        $id = (int)$datasPosted['id'];
+        $code = $datasPosted['code'];
+        $content = $datasPosted['content'];
+        $month = $period['month'];
+        $year = $period['year'];
+
+        $mode = 'hl';
+        if( $id ){
+            $mode = 'wp';
+        }
+
+        $out = [
+            'period' => $period,
+            'validation' => ''
+        ];
+
+        $this->saveComment($person, $mode == 'wp' ? $id : $code, $year, $month, $content);
+
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3316,7 +3341,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
 
                 if( $comments && array_key_exists($objectCommentKey, $comments) ){
+                    $this->getLogger()->debug('Comment KEY : '. $objectCommentKey);
                     $comment = array_key_exists($objectCommentKey, $comments) ? $comments[$objectCommentKey] : '';
+
                 }
                 $declarations[$key] = [
                     'objectId' => $objectId,
@@ -3325,6 +3352,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'log' => "Déclaration envoyée",
                     'comment' => $comment
                 ];
+
+                $this->saveComment();
 
                 $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup, $comment);
             }

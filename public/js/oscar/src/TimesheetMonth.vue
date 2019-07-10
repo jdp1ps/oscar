@@ -1586,8 +1586,6 @@
             },
 
             sendMonthProceed(){
-                console.log(JSON.parse(JSON.stringify(this.screensend)));
-                return;
 
                 // Données à envoyer
                 var datas = new FormData();
