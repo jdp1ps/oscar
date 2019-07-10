@@ -2613,7 +2613,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         if( $obj ){
             return $obj->getComment();
         } else {
-            return "Empty";
+            return "";
         }
     }
 

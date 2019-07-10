@@ -35,7 +35,7 @@ class SpentTypeGroup implements ITrackable
     private $code;
 
     /**
-     * @ORM\Column(type="string", options={"default" : ""})
+     * @ORM\Column(type="string", options={"default" : ""}, nullable=true)
      */
     private $annexe;
 
