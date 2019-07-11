@@ -494,7 +494,6 @@ class TimesheetController extends AbstractOscarController
 
     public function synthesisActivityPeriodAction()
     {
-
         // Données reçues
         $activity_id = $this->params()->fromQuery('activity_id', null);
         $format = $this->params()->fromQuery('format', '');
@@ -502,6 +501,7 @@ class TimesheetController extends AbstractOscarController
         $error = null;
 
         $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
+
         if( $format == 'json' ){
             return $this->jsonOutput($output);
         }
@@ -1916,21 +1916,6 @@ class TimesheetController extends AbstractOscarController
                     if( $action == 'resend' ){
                         $timesheetService->reSendPeriod($year, $month, $currentPerson);
                         return $this->getResponseOk();
-//
-//                        $periodId = $this->params()->fromPost('period_id');
-//                        /** @var ValidationPeriod $period */
-//                        $period = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($periodId);
-//                        if( $period->getDeclarer() == $currentPerson ){
-//                            try {
-//                                $timesheetService->verificationPeriod($currentPerson, $period->getYear(), $period->getMonth());
-//                                $timesheetService->reSendValidation($period, $comments);
-//                                return $this->getResponseOk();
-//                            } catch (\Exception $e ){
-//                                return $this->getResponseInternalError(sprintf('Impossible de réenvoyer la déclaration : %s', $e->getMessage()));
-//                            }
-//                        } else {
-//                            return $this->getResponseUnauthorized("Cette déclaration n'est pas la votre.");
-//                        }
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));

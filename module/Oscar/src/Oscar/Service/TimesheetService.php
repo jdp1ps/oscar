@@ -1233,6 +1233,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $total;
     }
 
+
+    /**
+     * Production/structuration des données de synthèse MENSUELLE avec une activité de référence.
+     *
+     * @param $idActivity
+     * @param $period
+     * @return array
+     * @throws \Exception
+     */
     public function getSynthesisActivityPeriod($idActivity, $period){
         $output = [
             'activity' => null,
@@ -1247,30 +1256,24 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $totaux = [
             // Totaux Lots
-            'wps' => [
-
-            ],
-
+            'wps' => [],
+            // Total des heures pour l'activités de référence
             'totalMain' => 0.0,
 
             // Totaux autres projets
-            'ce' => [
-
-            ],
+            'ce' => [],
             'totalCe' => 0.0,
 
             // Totaux hors-lots
-            'others' => [
-
-            ],
+            'others' => [],
 
             // Total groupes
-            'groups' => [
-
-            ],
+            'groups' => [],
 
             // Total
-            'total'     => 0.0
+            'total'     => 0.0,
+
+            'comments' => []
         ];
 
 
@@ -1307,6 +1310,29 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Données des déclarants pour la période
         $datas = $this->getTimesheetRepository()->getPersonPeriodSynthesis($personIds, $period);
 
+
+        $validations = $this->getValidationsPeriodPersons($personIds, $period);
+
+        $comments = [];
+
+        /** @var ValidationPeriod $validation */
+        foreach ($validations as $validation){
+            $declarerKey = (string)$validation->getDeclarer();
+            $key = $validation->getObjectId();
+            if( $key < 1) {
+                $key = $validation->getObject();
+            }
+
+            if( !array_key_exists($declarerKey, $comments) ){
+                $comments[(string)$validation->getDeclarer()] = [];
+            }
+
+            $comments[$declarerKey][$key] = [
+                'comment'   => $validation->getComment(),
+                'status'    => $validation->getStatus()
+            ];
+        }
+
         // Parse préabable pour obtenir la liste des autres projets dans lesquel les déclarants sont identifiés
         foreach ($datas as $d){
             if( $d['activity_id'] && $d['activity_id'] != $idActivity ){
@@ -1317,6 +1343,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 }
             }
         }
+
+
 
         foreach ($others as $key=>$other) {
 
@@ -1426,11 +1454,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $output['others'] = $others;
         $output['othersGroups'] = $othersGroups;
         $output['ces'] = $ceStr;
-       // $output['datas'] = $datas;
         $output['totaux'] = $totaux;
         $output['wps'] = $lots;
+        $output['comments'] = $comments;
         $output['activity'] = $activity->toArray();
-
 
         return $output;
     }
@@ -2767,19 +2794,40 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $this->_cacheValidationsPeriodPerson[$key] = $datas;
         }
         return $this->_cacheValidationsPeriodPerson[$key];
+    }
 
+    /**
+     * @param $personIds
+     * @param $period
+     * @return ValidationPeriod[]
+     * @throws OscarException
+     */
+    public function getValidationsPeriodPersons($personIds, $period){
+
+        // extraction de la période
+        $periodDatas = DateTimeUtils::extractPeriodDatasFromString($period);
+        $month = $periodDatas['month'];
+        $year = $periodDatas['year'];
+
+
+        $validationsQuery = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('v')
+            ->where('v.declarer IN(:personIds) AND v.month = :month AND v.year = :year')
+            ->setParameters([
+                'personIds' => $personIds,
+                'month' => $month,
+                'year' => $year,
+            ]);
+
+        $validations = $validationsQuery->getQuery()->getResult();
+
+        return $validations;
     }
 
     public function getValidationHorsLotByReferent(Person $referent)
     {
-
         $validations = [];
-
         if ($referent) {
-
             $subordinates = $this->getServiceLocator()->get('PersonService')->getSubordinates($referent);
-
-
             if (count($subordinates))
                 $validations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
                     ->where('vp.declarer IN(:persons)')
@@ -2787,8 +2835,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     ->getQuery()
                     ->getResult();
         }
-
-
         return $validations;
     }
 

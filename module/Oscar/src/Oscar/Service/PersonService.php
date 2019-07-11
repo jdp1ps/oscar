@@ -749,19 +749,13 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                     } else {
                         $filters['ids'] = $ids;
                     }
-//                    $query->where('p.id IN(:ids)')->setParameter('ids', $ids);
-
-
                 } catch( \Exception $e ){
                     $this->getLoggerService()->warn(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
-
                     // Ancienne méthode
                     $searchR = str_replace('*', '%', $search);
                     $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
                         ->setParameter('search', '%' . strtolower($searchR) . '%');
-
                 }
-
             }
         }
 

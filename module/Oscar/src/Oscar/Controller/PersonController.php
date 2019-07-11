@@ -376,6 +376,13 @@ class PersonController extends AbstractOscarController
         $orderBy = $this->params()->fromQuery('orderby', 'lastname');
         $leader = $this->params()->fromQuery('leader', '');
         $format = $this->params()->fromQuery('format', '');
+        $size = $this->params()->fromQuery('l', 'n');
+
+        $limit = 50;
+        if($size == 'm'){
+            $limit = 20;
+        }
+
         $datas = [];
         $error = null;
 
@@ -398,7 +405,7 @@ class PersonController extends AbstractOscarController
                 'filter_roles' => $filterRoles,
                 'order_by' => $orderBy,
                 'leader' => $leader
-            ]);
+            ], $limit);
         } catch (BadRequest400Exception $e){
             $error = "Expression de recherche incorrecte.";
             throw $e;
