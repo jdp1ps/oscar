@@ -45,9 +45,8 @@
             search(){
                 this.loading = true;
 
-                this.request = this.$http.get(this.url +this.expression, {
+                this.$http.get(this.url +this.expression, {
                     before( r ){
-                        console.log("Before", r);
                         if( this.request ){
                             this.request.abort();
                         }
