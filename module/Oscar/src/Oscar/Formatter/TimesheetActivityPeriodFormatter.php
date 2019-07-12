@@ -595,10 +595,19 @@ class TimesheetActivityPeriodFormatter
         $widthComment = floor(($fullWidth - 2)/4)*2;
 
         foreach ($datas['foo'] as $person=>$line) {
+
+            $comment = "";
+
+            if( array_key_exists($person, $datas['comments']) ){
+                foreach ($datas['comments'][$person] as $key=>$content) {
+                    $comment .= $content['comment']."\n";
+                }
+            }
+
             $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(60);
             $this->drawCell("", 0, true );
             $this->drawCell($person, $widthPerson, true, 'personComment');
-            $this->drawCell("...", $widthComment, true, 'comment');
+            $this->drawCell($comment, $widthComment, true, 'comment');
 
             $this->nextLine();
             $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(4);

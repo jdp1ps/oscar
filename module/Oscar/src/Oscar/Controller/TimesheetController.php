@@ -494,7 +494,6 @@ class TimesheetController extends AbstractOscarController
 
     public function synthesisActivityPeriodAction()
     {
-
         // Données reçues
         $activity_id = $this->params()->fromQuery('activity_id', null);
         $format = $this->params()->fromQuery('format', '');
@@ -502,6 +501,7 @@ class TimesheetController extends AbstractOscarController
         $error = null;
 
         $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
+
         if( $format == 'json' ){
             return $this->jsonOutput($output);
         }
@@ -1929,8 +1929,6 @@ class TimesheetController extends AbstractOscarController
                         }catch (OscarException $e){
                             return $this->getResponseInternalError($e->getMessage());
                         }
-
-                        return $this->getResponseNotImplemented("Enregistrement de commentaire");
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));
