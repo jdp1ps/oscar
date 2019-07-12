@@ -1912,13 +1912,17 @@ class TimesheetController extends AbstractOscarController
                         return $this->sendTimesheet($currentPerson);
                     }
 
+                    $datas = json_decode($this->params()->fromPost('datas'));
+
                     // Réenvoi de la déclaration
                     if( $action == 'resend' ){
-                        $timesheetService->reSendPeriod($year, $month, $currentPerson);
+                        $from = new \DateTime($datas->from);
+                        $to = new \DateTime($datas->to);
+//                        $timesheetService->sendPeriod($from, $to, $currentPerson, $comments);
+                        $timesheetService->reSendPeriod($from, $to, $currentPerson, $comments);
                         return $this->getResponseOk();
                     }
 
-                    $datas = json_decode($this->params()->fromPost('datas'));
 
                     if( !$datas ){
                         return $this->getResponseBadRequest('Problème de transmission des données');

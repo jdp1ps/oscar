@@ -367,13 +367,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         return true;
     }
-    public function reSendPeriod( $year, $month, Person $declarer ){
-        $validationsPeriods = $this->getValidationPeriods((int)$year, (int)$month, $declarer);
+    public function reSendPeriod( $from, $to, Person $declarer, $comments ){
 
-        /** @var ValidationPeriod $validationPeriod */
-        foreach ($validationsPeriods as $validationPeriod) {
-            $this->reSendValidation($validationPeriod);
+        $year = (int)$from->format('Y');
+        $month = (int)$from->format('m');
+
+        // Suppression des anciennes déclarations
+        $validations = $this->getValidationPeriods($year, $month, $declarer);
+        foreach ($validations as $v){
+            $this->getEntityManager()->remove($v);
         }
+        $this->getEntityManager()->flush();
+
+        $this->sendPeriod($from, $to, $$declarer, $comments);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2318,6 +2324,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         foreach ($periodValidations as $periodValidation) {
             if( $periodValidation->hasConflict() ){
                 $hasConflict = true;
+                $editable = true;
             }
             $data = $periodValidation->json();
             if ($periodValidation->getObjectId() > 0) {
@@ -2340,7 +2347,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if (count($periodValidations)) {
                 $submitable = false;
                 $submitableInfos = "Vous avez déja envoyé cette période pour validation";
-                $editable = false;
+                $editable = $hasConflict;
                 $editableInfos = "Vous avez déja envoyé cette période pour validation";
             } else {
                 $submitable = true;
