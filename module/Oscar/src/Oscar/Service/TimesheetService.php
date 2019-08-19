@@ -1279,6 +1279,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             // Total
             'total'     => 0.0,
 
+            // Total (hors ABS)
+            'totalWork' => 0.0,
+
             'comments' => []
         ];
 
@@ -1382,6 +1385,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'totalMain' => 0.0,
                 'totalProjects' => 0.0,
                 'totalResearch' => 0.0,
+                'totalWork' => 0.0
             ];
 
             foreach ($lotsStr as $l){
@@ -1429,6 +1433,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $strData[$person]['totalResearch'] += $duration;
                     $totaux['totalResearch'] += $duration;
                 }
+
+                // sous total travaillé
+                if( $group != 'abs' ){
+                    $totaux['totalWork'] += $duration;
+                    $strData[$person]['totaux']['totalWork'] += $duration;
+                }
                 $totaux['groups'][$group] += $duration;
                 $totaux['others'][$key] += $duration;
 
@@ -1446,11 +1456,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $acronym = $d['acronym'];
                     $strData[$person]['ce'][$acronym] += $duration;
                     $strData[$person]['totalProjects'] += $duration;
+                    $strData[$person]['totalWork'] += $duration;
                     $totaux['totalCe'] += $duration;
                     $totaux['ce'][$acronym] += $duration;
+                    $totaux['totalWork'] += $duration;
                 }
                 $totaux['totalResearch'] += $duration;
                 $strData[$person]['totalResearch'] += $duration;
+                $strData[$person]['totaux']['totalWork'] += $duration;
+                $totaux['totalWork'] += $duration;
             }
             $strData[$person]['totaux']['total'] += $duration;
             $totaux['total'] += $duration;

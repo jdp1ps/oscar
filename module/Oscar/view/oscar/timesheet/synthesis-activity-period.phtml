@@ -218,6 +218,10 @@ $labels = [
                 <?php endif; ?>
             <?php endforeach; ?>
 
+            <td class="duration">
+                <strong><?= $this->duration($line['totaux']['totalWork']) ?></strong>
+            </td>
+
             <td style="background: #fff" class="duration">
                 <strong><?= $this->duration($line['totaux']['total']) ?></strong>
             </td>
@@ -283,7 +287,10 @@ $labels = [
             <?php endif; ?>
         <?php endforeach; ?>
         <td class="duration">
-            <strong><?= $this->duration($totaux['total']) ?></strong>
+            <strong><?= $this->duration($totaux['totalWork']) ?></strong>
+        </td>
+        <td class="duration">
+            <em><?= $this->duration($totaux['total']) ?></em>
         </td>
 
 
