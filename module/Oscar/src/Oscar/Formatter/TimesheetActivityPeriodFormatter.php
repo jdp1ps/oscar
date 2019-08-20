@@ -488,9 +488,10 @@ class TimesheetActivityPeriodFormatter
             $this->drawCell($r['label'], 0, true, 'headOther');
         }
 
-        $this->drawCell('TOTAL', 0, true, 'person');
+        $this->drawCell('Total actif', 0, true, 'person');
 
         $colSign = $this->getCurrentCol();
+        $this->drawCell('TOTAL', 0, true, 'person');
         $this->drawCell('Signature', 0, true, 'person');
 
         $this->nextLine();
@@ -536,6 +537,7 @@ class TimesheetActivityPeriodFormatter
                 $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
             }
 
+            $this->drawCell($line['totaux']['totalWork'], 0, true, 'totalColumn');
             $this->drawCell($line['totaux']['total'], 0, true, 'totalColumn');
             $this->drawCell(' ', 0, true, 'person');
             $this->nextLine();
@@ -582,6 +584,7 @@ class TimesheetActivityPeriodFormatter
             $this->drawCell($value, 0, true, 'cellTotalBottom');
         }
 
+        $this->drawCell($totaux['totalWork'], 0, true, 'cellTotalBottom');
         $this->drawCell($totaux['total'], 0, true, 'cellTotalBottom');
 
         $this->nextLine();

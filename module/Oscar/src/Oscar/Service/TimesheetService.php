@@ -370,21 +370,22 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         return true;
     }
-    public function reSendPeriod( $year, $month, Person $declarer, $comments ){
-        $validationsPeriods = $this->getValidationPeriods((int)$year, (int)$month, $declarer);
 
-        /** @var ValidationPeriod $validationPeriod */
-        foreach ($validationsPeriods as $validationPeriod) {
-            if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
-                $key = $validationPeriod->getObjectId();
-            } else {
-                $key = $validationPeriod->getObject();
-            }
-            // récupération du commentaire
-            $comment = array_key_exists($key, $comments) ? $comments[$key] : "";
-            $this->reSendValidation($validationPeriod, $comment);
-        }
-    }
+//    public function reSendPeriod( $year, $month, Person $declarer, $comments ){
+//        $validationsPeriods = $this->getValidationPeriods((int)$year, (int)$month, $declarer);
+//
+//        /** @var ValidationPeriod $validationPeriod */
+//        foreach ($validationsPeriods as $validationPeriod) {
+//            if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
+//                $key = $validationPeriod->getObjectId();
+//            } else {
+//                $key = $validationPeriod->getObject();
+//            }
+//            // récupération du commentaire
+//            $comment = array_key_exists($key, $comments) ? $comments[$key] : "";
+//            $this->reSendValidation($validationPeriod, $comment);
+//        }
+//    }
 
     public function saveComment( Person $person, $objectKey, $year, $month, $content ){
         /** @var ValidationPeriod $validation */
@@ -437,6 +438,21 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $this->saveComment($person, $mode == 'wp' ? $id : $code, $year, $month, $content);
 
+}
+
+    public function reSendPeriod( $from, $to, Person $declarer, $comments ){
+
+        $year = (int)$from->format('Y');
+        $month = (int)$from->format('m');
+
+        // Suppression des anciennes déclarations
+        $validations = $this->getValidationPeriods($year, $month, $declarer);
+        foreach ($validations as $v){
+            $this->getEntityManager()->remove($v);
+        }
+        $this->getEntityManager()->flush();
+
+        $this->sendPeriod($from, $to, $$declarer, $comments);
 
     }
 
@@ -1337,6 +1353,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             // Total
             'total'     => 0.0,
 
+            // Total (hors ABS)
+            'totalWork' => 0.0,
+
             'comments' => []
         ];
 
@@ -1440,6 +1459,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'totalMain' => 0.0,
                 'totalProjects' => 0.0,
                 'totalResearch' => 0.0,
+                'totalWork' => 0.0
             ];
 
             foreach ($lotsStr as $l){
@@ -1487,6 +1507,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $strData[$person]['totalResearch'] += $duration;
                     $totaux['totalResearch'] += $duration;
                 }
+
+                // sous total travaillé
+                if( $group != 'abs' ){
+                    $totaux['totalWork'] += $duration;
+                    $strData[$person]['totaux']['totalWork'] += $duration;
+                }
                 $totaux['groups'][$group] += $duration;
                 $totaux['others'][$key] += $duration;
 
@@ -1504,11 +1530,15 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $acronym = $d['acronym'];
                     $strData[$person]['ce'][$acronym] += $duration;
                     $strData[$person]['totalProjects'] += $duration;
+                    $strData[$person]['totalWork'] += $duration;
                     $totaux['totalCe'] += $duration;
                     $totaux['ce'][$acronym] += $duration;
+                    $totaux['totalWork'] += $duration;
                 }
                 $totaux['totalResearch'] += $duration;
                 $strData[$person]['totalResearch'] += $duration;
+                $strData[$person]['totaux']['totalWork'] += $duration;
+                $totaux['totalWork'] += $duration;
             }
             $strData[$person]['totaux']['total'] += $duration;
             $totaux['total'] += $duration;
@@ -2367,6 +2397,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $periodValidations = $this->getPeriodValidation($person, $month, $year);
         $isPeriodSend = count($periodValidations);
         $periodValidationsDt = [];
+        $periodSendable = false;
 
         $from = $periodFirstDay->format('Y-m-d');
         $to = $periodLastDay->format('Y-m-d');
@@ -2383,6 +2414,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         foreach ($periodValidations as $periodValidation) {
             if( $periodValidation->hasConflict() ){
                 $hasConflict = true;
+                $editable = true;
+                $periodSendable = true;
             }
             $data = $periodValidation->json();
             if ($periodValidation->getObjectId() > 0) {
@@ -2396,6 +2429,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Période pas encore commencée
         if ($periodFutur) {
             $periodInfos = "Ce mois n'a pas encore commencé";
+            $periodSendable = false;
         }
 
         if ($periodFinished) {
@@ -2403,9 +2437,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             // Il y'a des déclarations
             if (count($periodValidations)) {
-                $submitable = false;
+                $submitable = $hasConflict;
                 $submitableInfos = "Vous avez déja envoyé cette période pour validation";
-                $editable = false;
+                $editable = $hasConflict;
                 $editableInfos = "Vous avez déja envoyé cette période pour validation";
             } else {
                 $submitable = true;
@@ -2455,7 +2489,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $validationUp = false;
 
             if ($isPeriodSend) {
-                $validationUp = $periodActivityValidation && $periodActivityValidation->isOpenForDeclaration();
+                $validationUp = true; //$periodActivityValidation && $periodActivityValidation->isOpenForDeclaration();
             } else {
                 $validationUp = true;
             }
@@ -2504,7 +2538,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $comment = $this->getCommentPeriod($key, $person, $year, $month);
 
             if ($isPeriodSend) {
-                $validationUp = $periodHL && $periodHL->isOpenForDeclaration();
+                $validationUp = true; //$periodHL && $periodHL->isOpenForDeclaration();
             } else {
                 $validationUp = true;
             }
@@ -3340,15 +3374,53 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function sendPeriod($from, $to, $sender, $comments=null)
     {
-
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
+
+        $this->getLogger()->debug("Envois de la période : $fromMonth - $toMonth");
 
         if ($fromMonth != $toMonth)
             throw new Exception("La période à traiter n'est pas un mois...");
 
         $mois = (integer)$from->format('m');
         $annee = (integer)$from->format('Y');
+
+
+
+        // Déclarations de la période
+        $declarations = $this->getValidationPeriods($annee, $mois, $sender);
+
+        // Si la période a déjà des déclaration
+        if (count($declarations) > 0) {
+
+            // On test si une des validations est en conflit ?
+            $error = true;
+            /** @var ValidationPeriod $declaration */
+            foreach ($declarations as $declaration) {
+                if($declaration->hasConflict()){
+                    $error = false;
+                }
+            }
+
+            // Si on n'a pas de conflit => ERREUR
+            if( $error ) {
+                throw new OscarException("Vous avez déjà envoyé des déclarations pour cette période");
+            }
+
+            // Sinon on supprime les anciennes validations
+            else {
+                $this->getLogger()->debug("Suppression des anciennes déclarations");
+                /** @var ValidationPeriod $v */
+                foreach ($declarations as $v){
+                    /** @var TimeSheet $t */
+                    foreach ($v->getTimesheets() as $t){
+                        $t->setValidationPeriod(null);
+                    }
+                    $this->getEntityManager()->remove($v);
+                }
+                $this->getEntityManager()->flush($v);
+            }
+        }
 
         // Créneaux de la périodes
         $timesheets = $this->getQueryTimesheetsPersonPeriod($sender, $from, $to)->getResult();
@@ -3357,12 +3429,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             throw new OscarException("Aucun créneau à soumettre pour cette période.");
         }
 
-        // Déclarations de la période
-        $declarations = $this->getValidationPeriods($annee, $mois, $sender);
-
-        if (count($declarations) > 0) {
-            throw new OscarException("Vous avez déjà envoyé des déclarations pour cette période");
-        }
 
         $declarations = [];
 
@@ -3398,8 +3464,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'log' => "Déclaration envoyée",
                     'comment' => $comment
                 ];
-
-                $this->saveComment();
+                // saveComment( Person $person, $objectKey, $year, $month, $content )
+                $this->saveComment($sender, $key, $annee, $mois, $comment);
 
                 $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup, $comment);
             }

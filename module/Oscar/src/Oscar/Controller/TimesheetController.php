@@ -1792,6 +1792,7 @@ class TimesheetController extends AbstractOscarController
 
                 /** @var ValidationPeriod $vp */
                 foreach ($validationPeriods as $vp) {
+                    $this->getLogger()->debug("$vp");
                     if( $vp->getStatus() == ValidationPeriod::STATUS_CONFLICT ){
                         $unauthorizedError = "Vous ne pouvez pas modifier une déclaration en cours de validation. Seul les créneaux marqués en erreur peuvent être modifiés";
                         $hasConflict = true;
@@ -1799,8 +1800,10 @@ class TimesheetController extends AbstractOscarController
                 }
 
                 // Aucune procédure de validation spécifique pour ce type de créneau
-                if( !$validationPeriod || !$validationPeriod->hasConflict() ){
-                    return $this->getResponseBadRequest($unauthorizedError);
+                if( $validationPeriod ){
+                    if( !$validationPeriod->hasConflict() ){
+                        return $this->getResponseBadRequest($unauthorizedError);
+                    }
                 }
             }
 
@@ -1912,16 +1915,6 @@ class TimesheetController extends AbstractOscarController
                         return $this->sendTimesheet($currentPerson);
                     }
 
-                    // Réenvoi de la déclaration
-                    if( $action == 'resend' ){
-                        try {
-                            $timesheetService->reSendPeriod($year, $month, $currentPerson, $comments);
-                            return $this->getResponseOk();
-                        }catch (OscarException $e){
-                            return $this->getResponseInternalError($e->getMessage());
-                        }
-                    }
-
                     if( $action == 'comment' ){
                         try {
                             $timesheetService->saveCommentFromPost($currentPerson, $_POST);
@@ -1929,9 +1922,26 @@ class TimesheetController extends AbstractOscarController
                         }catch (OscarException $e){
                             return $this->getResponseInternalError($e->getMessage());
                         }
+
+                        return $this->getResponseNotImplemented("Enregistrement de commentaire");
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));
+
+                    // FIX : Déplacer le test d'envois/réenvois
+                    // nb : Le traitement de l'envoi/réenvois a été centralisé dans le TimesheetService
+                    // dans la méthode d'envoi.
+
+                    // Réenvoi de la déclaration
+//                    if( $action == 'resend' ){
+//                        throw new \Exception("DEBUG");
+//                        $from = new \DateTime($datas->from);
+//                        $to = new \DateTime($datas->to);
+////                        $timesheetService->sendPeriod($from, $to, $currentPerson, $comments);
+//                        $timesheetService->reSendPeriod($from, $to, $currentPerson, $comments);
+//                        return $this->getResponseOk();
+//                    }
+
 
                     if( !$datas ){
                         return $this->getResponseBadRequest('Problème de transmission des données');

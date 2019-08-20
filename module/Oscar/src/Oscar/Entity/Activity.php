@@ -1769,7 +1769,7 @@ class Activity implements ResourceInterface
         //
         $datas = [
             'id' => $this->getId(),
-            'acronym' => $this->getAcronym(),
+            'acronym' => htmlspecialchars($this->getAcronym()),
             'amount' => $this->getAmount(),
             'pfi' => $this->getCodeEOTP(),
             'oscar' => $this->getOscarNum(),
@@ -1778,9 +1778,8 @@ class Activity implements ResourceInterface
             'annee-fin' => $this->getDateEndStr('Y'),
             'debut' => $this->getDateStartStr('d/m/Y'),
             'fin' => $this->getDateEndStr('d/m/Y'),
-            'intitule' => $this->getLabel(),
-            'label' => $this->getLabel(),
-            'acronym' => $this->getAcronym(),
+            'intitule' => htmlspecialchars($this->getLabel()),
+            'label' => htmlspecialchars($this->getLabel()),
             'tva' => $this->getTva() ? (string)$this->getTva() : '',
             'assiette-subventionnable' => (string) $this->getAssietteSubventionnable(),
             'note-financiere' => $this->getNoteFinanciere(),
