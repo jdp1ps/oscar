@@ -2322,6 +2322,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $periodValidations = $this->getPeriodValidation($person, $month, $year);
         $isPeriodSend = count($periodValidations);
         $periodValidationsDt = [];
+        $periodSendable = false;
 
         $from = $periodFirstDay->format('Y-m-d');
         $to = $periodLastDay->format('Y-m-d');
@@ -2339,6 +2340,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             if( $periodValidation->hasConflict() ){
                 $hasConflict = true;
                 $editable = true;
+                $periodSendable = true;
             }
             $data = $periodValidation->json();
             if ($periodValidation->getObjectId() > 0) {
@@ -2352,6 +2354,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         // Période pas encore commencée
         if ($periodFutur) {
             $periodInfos = "Ce mois n'a pas encore commencé";
+            $periodSendable = false;
         }
 
         if ($periodFinished) {
@@ -2359,7 +2362,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             // Il y'a des déclarations
             if (count($periodValidations)) {
-                $submitable = false;
+                $submitable = $hasConflict;
                 $submitableInfos = "Vous avez déja envoyé cette période pour validation";
                 $editable = $hasConflict;
                 $editableInfos = "Vous avez déja envoyé cette période pour validation";
@@ -2408,7 +2411,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $validationUp = false;
 
             if ($isPeriodSend) {
-                $validationUp = $periodActivityValidation && $periodActivityValidation->isOpenForDeclaration();
+                $validationUp = true; //$periodActivityValidation && $periodActivityValidation->isOpenForDeclaration();
             } else {
                 $validationUp = true;
             }
@@ -2456,7 +2459,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $periodHL = $this->getValidationPeriosOutOfWorkpackageAt($person, $year, $month, $key);
 
             if ($isPeriodSend) {
-                $validationUp = $periodHL && $periodHL->isOpenForDeclaration();
+                $validationUp = true; //$periodHL && $periodHL->isOpenForDeclaration();
             } else {
                 $validationUp = true;
             }
@@ -3240,15 +3243,53 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function sendPeriod($from, $to, $sender, $comments=null)
     {
-
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
+
+        $this->getLogger()->debug("Envois de la période : $fromMonth - $toMonth");
 
         if ($fromMonth != $toMonth)
             throw new Exception("La période à traiter n'est pas un mois...");
 
         $mois = (integer)$from->format('m');
         $annee = (integer)$from->format('Y');
+
+
+
+        // Déclarations de la période
+        $declarations = $this->getValidationPeriods($annee, $mois, $sender);
+
+        // Si la période a déjà des déclaration
+        if (count($declarations) > 0) {
+
+            // On test si une des validations est en conflit ?
+            $error = true;
+            /** @var ValidationPeriod $declaration */
+            foreach ($declarations as $declaration) {
+                if($declaration->hasConflict()){
+                    $error = false;
+                }
+            }
+
+            // Si on n'a pas de conflit => ERREUR
+            if( $error ) {
+                throw new OscarException("Vous avez déjà envoyé des déclarations pour cette période");
+            }
+
+            // Sinon on supprime les anciennes validations
+            else {
+                $this->getLogger()->debug("Suppression des anciennes déclarations");
+                /** @var ValidationPeriod $v */
+                foreach ($declarations as $v){
+                    /** @var TimeSheet $t */
+                    foreach ($v->getTimesheets() as $t){
+                        $t->setValidationPeriod(null);
+                    }
+                    $this->getEntityManager()->remove($v);
+                }
+                $this->getEntityManager()->flush($v);
+            }
+        }
 
         // Créneaux de la périodes
         $timesheets = $this->getQueryTimesheetsPersonPeriod($sender, $from, $to)->getResult();
@@ -3257,12 +3298,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             throw new OscarException("Aucun créneau à soumettre pour cette période.");
         }
 
-        // Déclarations de la période
-        $declarations = $this->getValidationPeriods($annee, $mois, $sender);
-
-        if (count($declarations) > 0) {
-            throw new OscarException("Vous avez déjà envoyé des déclarations pour cette période");
-        }
 
         $declarations = [];
 
