@@ -66,9 +66,9 @@
                         <small>{{ t.description }}</small>
                     </strong>
                     <div class="total">{{ t.duration | duration2(day.dayLength) }}</div>
-                    <div class="left">
-                        <i class="icon-trash" @click="$emit('removetimesheet', t)"></i>
-                        <i class="icon-edit" @click="$emit('edittimesheet', t, day)"></i>
+                    <div class="left buttons-icon">
+                        <i class="icon-trash" @click="$emit('removetimesheet', t)" :class="day.editable != true ? 'disabled':''"></i>
+                        <i class="icon-edit" @click="$emit('edittimesheet', t, day)"  :class="day.editable != true ? 'disabled':''"></i>
                     </div>
                 </article>
                 <hr>
