@@ -102,9 +102,9 @@
                             </a>
                         </span>
 
-                        <a :href="'/feuille-de-temps/excel?action=export&period=' +p.period +'&personid=' + p.person_id">
+                        <a :href="'/feuille-de-temps/excel?action=export2&period=' +p.period +'&personid=' + p.person_id">
                             <i class="icon-download-outline"></i>
-                            Prévisualiser (Excel)
+                            Prévisualiser (PDF)
                         </a>
                     </td>
                 </tr>

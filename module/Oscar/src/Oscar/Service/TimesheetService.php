@@ -2672,15 +2672,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $num = [];
         $pfi = [];
         $totalPeriod = 0.0;
+        $totalGroup = [];
 
         $validationsDone = [];
 
         $declarations = [
             'activities' => [],
-            'others' => []
+            'others' => [],
+            'totalGroup' => []
         ];
 
         $others = $this->getOthersWP();
+
+        $daysInfos = $this->getDaysPeriodInfosPerson($person, $periodBounds['year'], $periodBounds['month']);
 
         /** @var TimeSheet $timesheet */
         foreach ($query->getQuery()->getResult() as $timesheet) {
@@ -2705,26 +2709,30 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $subGroup = $timesheet->getLabel();
             $subGroupId = 'invalid ID';
             $subGroupType = 'invalid Type';
+            $groupFamily = 'research';
             $day = $timesheet->getDateFrom()->format('d');
 
             if ($timesheet->getActivity()) {
                 $path = 'activities';
                 $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
                 $groupType = 'activity';
+                $groupFamily = 'research';
                 $groupId = $timesheet->getActivity()->getId();
                 $subGroup = sprintf('%s - %s', $timesheet->getWorkpackage()->getCode(), $timesheet->getWorkpackage()->getLabel());
                 $subGroupId = $timesheet->getWorkpackage()->getId();
                 $subGroupType = "wp";
+                $label = $subGroup;
             }
 
             if (array_key_exists($timesheet->getLabel(), $others)) {
                 $path = 'others';
-                $group = 'Hors-lot';
+                $group = $others[$timesheet->getLabel()]['label'];
                 $groupId = -1;
                 $groupType = 'others';
-                $subGroup = $others[$timesheet->getLabel()]['label'];
+                $groupFamily = $others[$timesheet->getLabel()]['group'];
                 $subGroupId = $timesheet->getLabel();
                 $subGroupType = $timesheet->getLabel();
+                $label = $others[$timesheet->getLabel()]['label'];
             }
 
             if (!array_key_exists($group, $declarations[$path])) {
@@ -2732,25 +2740,38 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'label' => $group,
                     'id' => $groupId,
                     'type' => $groupType,
+                    'group' => $groupFamily,
                     'total' => 0.0,
                     'subgroup' => [],
                 ];
             }
 
+            if (!array_key_exists($groupFamily, $totalGroup)) {
+                $totalGroup[$groupFamily] = [
+                    'total' => 0.0,
+                    'days' => []
+                ];
+            }
+
             if (!array_key_exists($subGroup, $declarations[$path][$group]['subgroup'])) {
                 $declarations[$path][$group]['subgroup'][$subGroup] = [
-                    'label' => $subGroup,
+                    'label' => $label,
                     'id' => $subGroupId,
                     'type' => $subGroupType,
+                    'group' => $groupFamily,
                     'total' => 0.0,
                     'days' => [],
                 ];
             }
 
             if (!array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days'])) {
-                $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
+                $declarations[$path][$group]['subgroup'][$subGroup]['days']["$day"] = 0.0;
             }
 
+            $daysInfos[intval($day)]['duration'] += $timesheet->getDuration();
+
+            $totalGroup[$groupFamily]['total'] += $timesheet->getDuration();
+            $totalGroup[$groupFamily]['days']["$day"] += $timesheet->getDuration();
             $declarations[$path][$group]['subgroup'][$subGroup]['total'] += $timesheet->getDuration();
             $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] += $timesheet->getDuration();
             $declarations[$path][$group]['subgroup'][$subGroup]['days']['total'] += $timesheet->getDuration();
@@ -2762,17 +2783,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $output = [
             'person' => (string)$person,
             'commentaires' => $commentaires,
+            'totalGroup' => $totalGroup,
             'num' => implode(', ', $num),
             'pfi' => implode(', ', $pfi),
             'acronyms' => implode(', ', $acronyms),
             'person_id' => $person->getId(),
             'period' => $period,
             'totalDays' => $periodBounds['totalDays'],
+            'totalGroup' => $totalGroup,
             'total' => $totalPeriod,
-            'daysInfos' => $this->getDaysPeriodInfosPerson($person, $periodBounds['year'], $periodBounds['month']),
+            'daysInfos' => $daysInfos,
             'declarations' => $declarations,
         ];
-
 
         return $output;
     }

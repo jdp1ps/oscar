@@ -103,10 +103,16 @@
                                 Répartition mensuelle
                             </a>
 
-                            <a :href="'/feuille-de-temps/excel?action=export&period=' +p.label +'&personid=' + l.personId"
+                            <!--<a :href="'/feuille-de-temps/excel?action=export&period=' +p.label +'&personid=' + l.personId"
                                class="btn btn-xs btn-default">
                                 <i class="icon-file-excel"></i>
-                                Feuille de temps (Excel)
+                                Feuille de temps (PDF)
+                            </a>-->
+
+                            <a :href="'/feuille-de-temps/excel?action=export2&period=' +p.label +'&personid=' + l.personId"
+                               class="btn btn-xs btn-default">
+                                <i class="icon-file-excel"></i>
+                                Feuille de temps (PDF)
                             </a>
 
                         </strong>

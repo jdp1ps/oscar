@@ -8,37 +8,30 @@
   "description": "",
 
   "require": {
-    "unicaen/auth": "^1.2",
-    "unicaen/app": "^1.3.10",
-    "symfony/yaml": "^3.3",
-    "monolog/monolog": "^1.23",
-    "kmelia/monolog-stdout-handler": "^1.2",
-    "fightbulc/moment": "^1.26",
+    "unicaen/app": "^1.3",
+    "unicaen/auth": "^1.3",
     "oro/doctrine-extensions": "^1.2",
-    "cocur/slugify": "^3.0",
-    "erusev/parsedown": "^1.6",
+    "symfony/yaml": "^3.3",
+    "fightbulc/moment": "^1.30",
+    "cocur/slugify": "^3.2",
+    "erusev/parsedown": "^1.7",
     "zf1/zend-search-lucene": "^1.12",
     "jacksay/php-file-extension": "^0.0.1",
-    "phpoffice/phpexcel": "^1.8",
-    "elasticsearch/elasticsearch": "^6.0",
-    "swiftmailer/swiftmailer": "^6.0",
-    "zendframework/zend-text": "^2.4",
-    "phpoffice/phpword": "^0.14.0",
-    "phpoffice/phpspreadsheet": "^1.6"
+    "elasticsearch/elasticsearch": "^7.2",
+    "monolog/monolog": "^1.24",
+    "kmelia/monolog-stdout-handler": "^1.2",
+    "phpoffice/phpspreadsheet": "^1.9",
+    "dompdf/dompdf": "^0.8.3",
+    "swiftmailer/swiftmailer": "^6.2",
+    "phpoffice/phpword": "^0.16.0",
+    "phpoffice/phpexcel": "^1.8"
   },
   "require-dev": {
-    "phpmd/phpmd": "@stable",
-    "twig/twig": "^2.0@dev",
-    "phpunit/phpunit": "^6",
-    "zendframework/zend-developer-tools":   "^1.0"
+    
   },
-  "minimum-stability": "stable",
   "config": {
     "github-protocols": ["https", "ssh"],
-    "secure-http": false,
-    "platform": {
-      "php": "7.0"
-    }
+    "secure-http": false
   },
   "autoload": {
     "psr-0": {

@@ -27,6 +27,8 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
+use Oscar\Formatter\TimesheetPersonPeriodFormatter;
+use Oscar\Formatter\TimesheetPersonPeriodFormatter2;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\TimesheetService;
@@ -924,6 +926,12 @@ class TimesheetController extends AbstractOscarController
             header('Content-type: plain/text');
 
             die(file_get_contents('/tmp/' . $filename));
+        }
+
+        if( $action == "export2" ){
+            $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
+            $formatter = new TimesheetPersonPeriodFormatter2();
+            $formatter->output($datas);
         }
 
         if( $action == "export" ){
