@@ -931,7 +931,8 @@ class TimesheetController extends AbstractOscarController
         if( $action == "export2" ){
             $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
             $formatter = new TimesheetPersonPeriodFormatter2();
-            $formatter->output($datas);
+            $out = $this->params()->fromQuery('out', 'pdf');
+            $formatter->output($datas, $out);
         }
 
         if( $action == "export" ){

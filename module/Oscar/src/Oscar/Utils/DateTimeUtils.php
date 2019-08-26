@@ -117,8 +117,16 @@ class DateTimeUtils {
         if( $matches ){
             $month = intval($matches[0][2]);
             $year = intval($matches[0][1]);
+
+            $fmt = datefmt_create('fr_FR', \IntlDateFormatter::FULL, \IntlDateFormatter::NONE, 'Europe/Paris', \IntlDateFormatter::GREGORIAN, 'MMMM Y');
+
+
+            $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
+            $periodLabel = $fmt->format($dateRef);
+
             return [
                 'period' => sprintf('%s-%s', $year, $month),
+                'periodLabel' => $periodLabel,
                 'periodCode' => sprintf('%s-%s', $year,  ($month < 10 ? '0' . $month : $month)),
                 'month' => $month,
                 'year' => $year,

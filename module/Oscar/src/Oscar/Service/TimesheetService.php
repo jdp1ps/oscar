@@ -2,8 +2,10 @@
 
 namespace Oscar\Service;
 
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
@@ -21,6 +23,7 @@ use Oscar\Provider\Privileges;
 use Oscar\Utils\ConfigurationMergable;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\DateTimeUtilsTest;
+use Oscar\Utils\StringUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Db\Sql\Ddl\Constraint\ForeignKey;
@@ -2673,6 +2676,8 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $pfi = [];
         $totalPeriod = 0.0;
         $totalGroup = [];
+        $organizationsPrimary = [];
+        $activities = [];
 
         $validationsDone = [];
 
@@ -2702,6 +2707,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 if( !in_array($timesheet->getActivity()->getCodeEOTP(), $pfi) ) $pfi[] = $timesheet->getActivity()->getCodeEOTP();
                 if( !in_array($timesheet->getActivity()->getAcronym(), $acronyms) ) $acronyms[] = $timesheet->getActivity()->getAcronym();
                 if( !in_array($timesheet->getActivity()->getOscarNum(), $num) ) $num[] = $timesheet->getActivity()->getOscarNum();
+                if( !in_array($timesheet->getActivity(), $activities) ){
+                    $activities[] = $timesheet->getActivity();
+                }
             }
 
             $group = 'Projet inconnue';
@@ -2780,15 +2788,37 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         }
 
+        /** @var Activity $activity */
+        foreach ($activities as $activity){
+            /** @var ActivityOrganization $activityOrganization */
+            foreach ($activity->getOrganizations() as $activityOrganization) {
+                if($activityOrganization->isPrincipal()){
+                    $role = (string)$activityOrganization->getRole();
+                    $organization = (string)$activityOrganization->getOrganization();
+                    if( !array_key_exists($role, $organizationsPrimary) ){
+                        $organizationsPrimary[$role] = [];
+                    }
+                    if( !in_array($organization, $organizationsPrimary[$role]) ){
+                        $organizationsPrimary[$role][] = $organization;
+                    }
+                }
+            }
+        }
+
+        $periodLabel = DateTimeUtils::extractPeriodDatasFromString($period);
+
         $output = [
+            'filename' => Slugify::create()->slugify("feuille de temps $person $period"),
             'person' => (string)$person,
             'commentaires' => $commentaires,
             'totalGroup' => $totalGroup,
+            'organizations' => $organizationsPrimary,
             'num' => implode(', ', $num),
             'pfi' => implode(', ', $pfi),
             'acronyms' => implode(', ', $acronyms),
             'person_id' => $person->getId(),
             'period' => $period,
+            'periodLabel' => $periodLabel['periodLabel'],
             'totalDays' => $periodBounds['totalDays'],
             'totalGroup' => $totalGroup,
             'total' => $totalPeriod,
