@@ -377,6 +377,7 @@ class PersonController extends AbstractOscarController
         $leader = $this->params()->fromQuery('leader', '');
         $format = $this->params()->fromQuery('format', '');
         $size = $this->params()->fromQuery('l', 'n');
+        $declarers = $this->params()->fromQuery('declarers', '');
 
         $limit = 50;
         if($size == 'm'){
@@ -404,7 +405,8 @@ class PersonController extends AbstractOscarController
             $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
                 'filter_roles' => $filterRoles,
                 'order_by' => $orderBy,
-                'leader' => $leader
+                'leader' => $leader,
+                'declarers' => $declarers
             ], $limit);
         } catch (BadRequest400Exception $e){
             $error = "Expression de recherche incorrecte.";
@@ -484,7 +486,8 @@ class PersonController extends AbstractOscarController
             'filter_roles' =>  $filterRoles,
             'orderBy' => $orderBy,
             'orders' => $orders,
-            'leader' => $leader
+            'leader' => $leader,
+            'declarers' => $declarers,
         );
     }
 

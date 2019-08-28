@@ -23,6 +23,7 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\PersonSearchStrategy;
@@ -692,6 +693,24 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $resultByPage);
     }
 
+
+    /**
+     * Retourne la liste des identifiants des personnes qui déclarent des feuilles de temps.
+     *
+     * @return array
+     */
+    public function getDeclarersIds(){
+        $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
+            ->from(Person::class, 'p')
+            ->innerJoin('p.workPackages', 'wp')
+            ->getQuery()
+            ->getResult(Query::HYDRATE_ARRAY);
+
+        $declarersIds = array_map('current', $persons);
+
+        return $declarersIds;
+    }
+
     /**
      * @param string|null $search
      * @param int         $currentPage
@@ -710,6 +729,16 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
         $query->leftJoin('p.organizations', 'o')
             ->leftJoin('p.activities', 'a');
+
+        if( $filters['declarers'] == 'on' ){
+            $ids = $this->getDeclarersIds();
+            if( array_key_exists('ids', $filters) ){
+                $filters['ids'] = array_intersect($filters['ids'], $ids);
+            }
+            else {
+                $filters['ids'] = $ids;
+            }
+        }
 
 
         if( $filters['leader'] ){

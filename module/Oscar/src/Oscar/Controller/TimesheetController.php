@@ -567,8 +567,6 @@ class TimesheetController extends AbstractOscarController
             $start  = $activity->getDateStart()->format('Y');
             $end    = $activity->getDateEnd()->format('Y');
 
-
-
             if( count($personsIds) == 0 ){
                 return $this->getResponseInternalError(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
             }
@@ -857,6 +855,39 @@ class TimesheetController extends AbstractOscarController
 //        var_dump($projects);
 //        var_dump($others);
         die("Synthèse activité " . $activity);
+    }
+
+    /**
+     * Permet d'exporter les informations de déclaration pour une activité entre 2 dates
+     */
+    public function exportActivityDatesAction(){
+
+        // Récupération des infos demandées
+        $activityId     = $this->params()->fromQuery('activity_id');
+        $periodDebut    = $this->params()->fromQuery('from', null);
+        $periodFin      = $this->params()->fromQuery('to', null);
+
+        if( !$activityId ){
+            throw new OscarException(_("Données insuffisantes"));
+        }
+
+        $activity = $this->getActivityService()->getActivityById($activityId);
+
+        // TODO Ajouter un test sur l'existance des dates (normalement, on ne peut pas avoir de feuilles de temps sur une activité non datée
+        // période de début/fin
+        if( !$periodDebut )
+            $periodDebut = $activity->getDateStart()->format('m-Y');
+
+        // période de début/fin
+        if( !$periodFin )
+            $periodFin = $activity->getDateEnd()->format('m-Y');
+
+
+        // TODO Tester que la période demandée est cohérente
+        $datas = $this->getTimesheetService()->getDatasActivityDates($activity, $periodDebut, $periodFin);
+
+        var_dump($datas);
+        die("Synthèse entre $periodDebut et $periodFin");
     }
 
 

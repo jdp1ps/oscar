@@ -90,6 +90,24 @@ class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManager
        return $this->getEntityManager()->getRepository(Activity::class);
     }
 
+
+    /**
+     * @param $id
+     * @param bool $throw
+     * @return Activity|null
+     * @throws OscarException
+     */
+    public function getActivityById( $id, $throw=true ){
+        $activity = $this->getActivityRepository()->find($id);
+        if( !$activity ){
+            if( !$throw)
+                throw new OscarException("Impossible de charger l'activité");
+            else
+                return null;
+        }
+        return $activity;
+    }
+
     /**
      * Retourne le nombre d'activités total en BDD.
      * @return mixed

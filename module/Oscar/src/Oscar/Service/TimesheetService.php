@@ -2829,6 +2829,33 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $output;
     }
 
+    public function getDatasActivityDates(Activity $activity, $periodDebut, $periodFin){
+        $datas = [
+            'activity_id' => $activity->getId(),
+            'activity_label' => (string)$activity,
+            'periode_debut' => $periodDebut,
+            'periode_fin' => $periodFin,
+        ];
+
+        // Obtention des IDS des déclarants
+        $personsIds = [];
+        foreach ($activity->getDeclarers() as $person) {
+            $personsIds[] = $person->getId();
+        }
+
+        if( count($personsIds) == 0 ){
+            throw new OscarException(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
+        }
+
+        //$validations = $this->getTimesheetService()->getDatasValidationPersonsPeriod($personsIds, $start, $end);
+        $datas = $this->getDatasDeclarersSynthesis($personsIds);
+
+        $horslots = $this->getOthersWP();
+
+
+        return $datas;
+    }
+
 
     private $_cacheValidationsPeriodPerson = [];
 
