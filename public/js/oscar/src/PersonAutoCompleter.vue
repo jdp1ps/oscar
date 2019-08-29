@@ -20,7 +20,7 @@
     </div>
 </template>
 <script>
-    import OscarBus from './OscarBus.js';
+    //import OscarBus from './OscarBus.js';
 
     export default {
         data(){
@@ -44,7 +44,6 @@
         methods: {
             search(){
                 this.loading = true;
-
                 this.$http.get(this.url +this.expression, {
                     before( r ){
                         if( this.request ){
@@ -58,7 +57,7 @@
                         this.showSelector = true;
                     },
                     ko => {
-                        OscarBus.message('Erreur de recherche sur la personne', 'error');
+                        // OscarBus.message('Erreur de recherche sur la personne', 'error');
                     }
                 ).then( foo => {
                     this.loading = false;

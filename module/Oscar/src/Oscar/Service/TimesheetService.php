@@ -403,6 +403,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $out;
     }
 
+    public function getValidationsPeriodPerson( Person $person ){
+        $out = [];
+        $validationsPeriods = $this->getValidationPeriodRepository()->getValidationsPeriodPerson($person->getId());
+        return $validationsPeriods;
+    }
+
     /** Retourne la liste des périodes en conflits */
     public function getPeriodsConflictPerson( Person $person ){
         $periods = $this->getValidationPeriodRepository()->getValidationPeriodPersonWithConflict($person->getId());
