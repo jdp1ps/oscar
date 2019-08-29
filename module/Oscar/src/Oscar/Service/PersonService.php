@@ -727,9 +727,12 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
         $query = $this->getBaseQuery();
 
-        $query->leftJoin('p.organizations', 'o')
+        // PATCH : Visiblement, ces INNER JOIN provoquent un delais
+        // de requêtage de l'espace
+        /*
+         $query->leftJoin('p.organizations', 'o')
             ->leftJoin('p.activities', 'a');
-
+        */
         if( $filters['declarers'] == 'on' ){
             $ids = $this->getDeclarersIds();
             if( array_key_exists('ids', $filters) ){
@@ -739,7 +742,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                 $filters['ids'] = $ids;
             }
         }
-
 
         if( $filters['leader'] ){
             $query = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
@@ -762,7 +764,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             try {
                 $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery($connector, $connectorValue);
             }catch( \Exception $e ){
-                die($e->getTraceAsString());
+                $this->getLoggerService()->err("Requête sur le connecteur : " . $e->getMessage());
+                throw new OscarException("Impossible d'obtenir les personnes via l'UI de connector");
             }
         }
 
@@ -779,7 +782,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                         $filters['ids'] = $ids;
                     }
                 } catch( \Exception $e ){
-                    $this->getLoggerService()->warn(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
+                    $this->getLoggerService()->err(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
                     // Ancienne méthode
                     $searchR = str_replace('*', '%', $search);
                     $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
@@ -830,7 +833,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                 }
 
             } catch(\Exception $e ){
-                throw $e;
+                $this->getLoggerService()->err("Impossible de charger les personnes via les rôles des authentifications : " . $e->getMessage());
+                throw new OscarException("Erreur de chargement des rôles via l'authentification");
             }
 
 
@@ -844,9 +848,10 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
             if( $filterLdap ) {
 
+
                 // Récupération des IDPERSON avec les filtres LDAP
                 $rsm = new Query\ResultSetMapping();
-                $rsm->addScalarResult('person_id', 'person_id');;
+                $rsm->addScalarResult('person_id', 'person_id');
                 $native = $this->getEntityManager()->createNativeQuery(
                     'select distinct id as person_id from person where ' . implode(' OR ',
                         $filterLdap),
@@ -858,8 +863,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                         $ids[] = $row['person_id'];
                     }
                 } catch (\Exception $e) {
-                    echo $e->getMessage() . "\n";
-                    echo $e->getTraceAsString();
+                    $this->getLoggerService()->err("Impossible de charger les personnes via les filtres LDAP : " . $e->getMessage());
+                    throw new OscarException("Impossible de charger les personnes via les filtres LDAP");
                 }
             }
 
@@ -889,7 +894,9 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                     $ids[] = $row['person_id'];
                 };
             } catch(\Exception $e ){
-                throw $e;
+                $msg = "Impossible de charger les personnes via leur implication dans les organisations/activités";
+                $this->getLoggerService()->err("$msg : " . $e->getMessage());
+                throw new OscarException($msg);
             }
 
             // On compète la requète en réduisant les résultats à la liste
@@ -919,10 +926,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             }
         }
 
-//        var_dump($query->getDQL()); die();
-
-        return new UnicaenDoctrinePaginator($query, $currentPage,
-            $resultByPage);
+        return new UnicaenDoctrinePaginator($query, $currentPage, $resultByPage);
     }
 
     /**

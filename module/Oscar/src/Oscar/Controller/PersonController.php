@@ -384,6 +384,8 @@ class PersonController extends AbstractOscarController
             $limit = 20;
         }
 
+        $time = time();
+
         $datas = [];
         $error = null;
 
@@ -476,6 +478,8 @@ class PersonController extends AbstractOscarController
         $roles = $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed();
 
         $dbroles =$this->getPersonService()->getRolesByAuthentification();
+
+        $this->getLogger()->debug("ACTION take " . (time() - $time));
 
         return array(
             'dbroles' => $dbroles,
@@ -616,6 +620,12 @@ class PersonController extends AbstractOscarController
 
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson()) ){
             $allowTimesheet = true;
+
+            /** @var TimesheetService $timesheetService */
+            $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+            $validations = $timesheetService->getValidationsPeriodPerson($person);
+
         }
 
 
@@ -833,6 +843,7 @@ class PersonController extends AbstractOscarController
             'manageHierarchie' => $manageHierarchie,
             'manageUsurpation' => $manageUsurpation,
             'subordinates' => $subordinates,
+            'validations' => $validations,
             'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
             'auth' => $auth,
             'allowTimesheet' => $allowTimesheet,
