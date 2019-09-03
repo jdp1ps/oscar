@@ -233,7 +233,7 @@ return array(
             // Il s'agit de l'expression régulière utilisée par Oscar pour
             // vérifier la validité formelle du PFI saisi.
             // ex: 209ED2024
-            'pfi' => '/^[0-9]{3}[A-Z]{2,3}[0-9]{2,4}$/mi'
+            'pfi' => '/^([0-9]{3}[A-Z]{2,3}[0-9]{2,4})|([0-9]{3}C[0-9]{3}[A-Z]{1}[FPI]?)$/mi'
         ]
     ],
 
