@@ -39,4 +39,12 @@ class Options extends AbstractHtmlElement implements ServiceLocatorAwareInterfac
         return $this->getConfiguration()->getConfiguration('importEnable');
     }
 
+    public function hasTimesheetPreview(){
+        return $this->getConfiguration()->getConfiguration('timesheet_preview');
+    }
+
+    public function allowTimesheetExcel(){
+        return $this->getConfiguration()->getConfiguration('timesheet_allow_excel');
+    }
+
 }

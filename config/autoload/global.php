@@ -202,6 +202,15 @@ return array(
             'activity' => []
         ],
 
+        // Emplacement du template pour les feuilles de temps individuelle mensurelle
+        'timesheet_person_month_template' => realpath(__DIR__.'/../../data/templates/timesheet_person_month.default.html.php'),
+
+        // Permet de télécharger les feuilles de temps avant validation
+        'timesheet_preview' => true,
+        'timesheet_allow_excel' => true,
+
+        //
+
         // Notification par défaut
         /*** Notifications ***/
         'notifications' => [
@@ -275,6 +284,7 @@ return array(
                 ]
             ),
         ),
+
         'driver' => array(
             'oscar_entities' => array(
                 'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',

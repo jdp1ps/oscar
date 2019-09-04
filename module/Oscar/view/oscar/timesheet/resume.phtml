@@ -30,7 +30,11 @@
             new Vue({
                 el: "#app",
                 render: function(h){
-                    return h(TimesheetPersonResume.default, { props: { datas: <?= json_encode($datas) ?>}});
+                    return h(TimesheetPersonResume.default, { props: {
+                            datas: <?= json_encode($datas) ?>,
+                            timesheetpreview: <?= $this->options()->hasTimesheetPreview() ? 'true':'false' ?>,
+                            timesheetexcel: <?= $this->options()->allowTimesheetExcel() ? 'true':'false' ?>
+                    }});
                 }
             })
         });
