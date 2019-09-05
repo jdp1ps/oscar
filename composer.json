@@ -24,7 +24,8 @@
     "dompdf/dompdf": "^0.8.3",
     "swiftmailer/swiftmailer": "^6.2",
     "phpoffice/phpword": "^0.16.0",
-    "phpoffice/phpexcel": "^1.8"
+    "phpoffice/phpexcel": "^1.8",
+    "zendframework/zend-text": "~2.4"
   },
   "require-dev": {
     
