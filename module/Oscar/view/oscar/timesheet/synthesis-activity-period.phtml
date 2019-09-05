@@ -14,26 +14,105 @@ $labels = [
 ]
 ?>
 <style>
+    body {
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif;
+    }
+    table {
+        width: 100%;
+        max-width: 100%;
+        border-collapse: collapse;
+    }
+    tr { border: thin solid #adb6bd}
+    td {}
+    thead h1 {
+        font-weight: normal;
+    }
+
+    thead th {
+        text-align: center;
+    }
+
+    tbody th:nth-child(odd) {
+        background-color: #c0e1f1;
+    }
+    tbody th:nth-child(even) {
+        background-color: #cde7f1;
+    }
+
+    .label { text-align: left }
+    .subgroup {
+        font-size: 9px;
+    }
+    .subgroup .label {
+        font-weight: normal;
+    }
+    th {
+        border: thin solid #adb6bd;
+    }
+    thead td {
+        background: #e3e8e6;
+    }
+    thead td.value, tfoot td.value {
+        /*background: #f1f6f4;*/
+        text-align: left;
+        font-weight: 900;
+    }
+    thead td.valueLabel, tfoot td.valueLabel {
+        text-align: right;
+    }
+
+    tbody td {
+        text-align: right;
+        /*background: #f5faf8;*/
+        padding: 4px;
+        border: thin solid #e4edf4;
+    }
+    tbody td:nth-child(odd){
+       /* background: #e3e8e6;*/
+    }
+    .feed {
+        font-weight: bold;
+    }
+    .empty {
+        font-size: 10px;
+    }
+    .lock {
+        background: #fff !important;
+    }
+    .soustotal {
+        font-weight: bold;
+        font-size: 12px;
+    }
+    .total {
+        font-weight: 700;
+        font-size: 14px;
+    }
+</style>
+<style>
     small {
         font-weight: 100;
+        display: block;
+        border-top: thin solid #777;
     }
     th {
         vertical-align: center;
+        font-weight: normal;
     }
     .main {
-        background: #0b97c4;
+        background: #97c6d6;
     }
     .research {
-        background: #92a6c4;
+        background: #b1c6e5;
     }
     .education {
-        background: #90c4a9;
+        background: #a6e3c7;
     }
     .abs {
-        background: #b6c493;
+        background: #d6e4b2;
     }
     .other {
-        background: #b698c4;
+        background: #d7b5e5;
     }
     .duration {
         text-align: right;
@@ -41,14 +120,10 @@ $labels = [
     tr {
         border: none;
     }
-    th {
-        border: solid thin rgba(255,255,255,.2);
-    }
-    .table > thead > tr > th {
+    .table tr > th {
         border: none;
     }
     .table > thead > tr th {
-        border: solid thin rgba(255,255,255,.2);
         vertical-align: center;
     }
 </style>
@@ -56,11 +131,14 @@ $labels = [
     <div class="container-fluid">
 
         <h1>
-            <em>Synthèse des déclarations pour</em><br>
+            <em style="font-weight: 100">Synthèse des déclarations </em> :
             <strong><?= $activity['projectacronym'] ?></strong> <?= $activity['project'] ?><br>
+            <small>
             <i class="icon-calendar"></i> Du <strong><?= $period['startLabel'] ?></strong>
             au <strong><?= $period['endLabel'] ?></strong>
+            </small>
         </h1>
+        <?php if( $format != 'pdf' && $format != 'html'): ?>
         <p>
             <a class="btn btn-primary" href="/feuille-de-temps/synthesisactivity?activity_id=<?= $activity['id'] ?>&format=excel&period=<?= $period['year'] ?>-<?= $period['month'] ?>">
                 <i class="icon-file-excel"></i>
@@ -71,6 +149,7 @@ $labels = [
                 Télécharger la version PDF (bientôt disponible)
             </a>
         </p>
+        <?php endif; ?>
 <table class="table table-condensed" style="border: 0">
     <thead>
         <tr>
@@ -91,11 +170,13 @@ $labels = [
                     <?= $labels[$k] ?>
                 </th>
             <?php endforeach; ?>
+            <th rowspan="3">Total actif</th>
+            <th rowspan="3">TOTAL</th>
         </tr>
         <tr>
             <th>&nbsp;</th>
 
-            <th class="research" colspan="<?= $colWP ?>"><i class="icon-cubes"></i> <?= $activity['label'] ?></th>
+            <th class="research" colspan="<?= $colWP ?>"><i class="icon-cubes"></i> <strong><?= $activity['projectacronym'] ?></strong> <?= $activity['label'] ?></th>
             <?php if( count($ces) > 0): ?>
             <th class="research" colspan="<?= $colCE ?>"><i class="icon-cubes"></i> Projets</th>
             <?php endif; ?>
@@ -114,7 +195,6 @@ $labels = [
                     </th>
                 <?php endif; ?>
             <?php endforeach; ?>
-
         </tr>
         <tr>
             <th>&nbsp;</th>
@@ -147,7 +227,6 @@ $labels = [
                     <?= $labels[$k] ?>
                 </th>
             <?php endforeach; ?>
-
         </tr>
     </thead>
     <tbody>
@@ -230,8 +309,8 @@ $labels = [
     </tbody>
 
     <tfoot>
-    <tr>
-        <th>&nbsp;</th>
+    <tr style="border-top: 4px solid #000">
+        <th>Total période</th>
         <?php foreach( $totaux['wps'] as $wp=>$duration ): ?>
             <th class="duration">
                 <strong><?= $this->duration($duration) ?></strong>

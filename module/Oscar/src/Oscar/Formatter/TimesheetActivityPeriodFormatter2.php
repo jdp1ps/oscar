@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
 
-class TimesheetActivityPeriodFormatter
+class TimesheetActivityPeriodFormatter2
 {
     private $currentLineIndex;
     private $currentColIndex;
@@ -503,11 +503,10 @@ class TimesheetActivityPeriodFormatter
 
             // Recherche
             $this->drawCell($person, 0, true, 'person');
-
             foreach ($datas['wps'] as $wp) {
                 $code = $wp['code'];
                 $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
-                $this->drawCell(number_format($line['main'][$code], 2), 0, true, $line['main'][$code] ? 'withValue' : 'noValue');
+                $this->drawCell($line['main'][$code], 0, true, $line['main'][$code] ? 'withValue' : 'noValue');
             }
 
             $this->drawCell($line['totalMain'], 0, true, 'totalColumn');

@@ -10,6 +10,7 @@ namespace Oscar\Controller;
 
 use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\Query;
+use Dompdf\Dompdf;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
@@ -41,6 +42,7 @@ use Zend\Mvc\Router\Http\Method;
 use Zend\Validator\Date;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
+use Zend\View\Renderer\PhpRenderer;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et
@@ -512,8 +514,29 @@ class TimesheetController extends AbstractOscarController
             $formatter->output($output, 'excel');
         }
         elseif ($format == "pdf") {
-            $formatter = new TimesheetActivityPeriodFormatter();
-            $formatter->output($output, 'pdf');
+
+            $output['format'] = 'pdf';
+            $filename = $output['activity']['numOscar'].'-'.$output['period']['year'].'-'.$output['period']['month'];
+            $view = new ViewModel($output);
+            $view->setTemplate('oscar/timesheet/synthesis-activity-period');
+            $view->setTerminal(true);
+
+            $viewRender = $this->getServiceLocator()->get('ViewRenderer');
+            $html = $viewRender->render($view);
+            $dompdf = new Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+            $dompdf->stream($filename);
+            die();
+        }
+        elseif ($format == "html") {
+            $output['format'] = 'html';
+            $view = new ViewModel($output);
+            $view->setTemplate('oscar/timesheet/synthesis-activity-period');
+            $view->setTerminal(true);
+
+            return $view;
         }
         else {
             return $output;
