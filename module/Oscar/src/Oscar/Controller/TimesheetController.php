@@ -43,6 +43,8 @@ use Zend\Validator\Date;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 use Zend\View\Renderer\PhpRenderer;
+use Zend\View\Resolver\AggregateResolver;
+use Zend\View\Resolver\TemplateMapResolver;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et
@@ -517,14 +519,9 @@ class TimesheetController extends AbstractOscarController
 
             $output['format'] = 'pdf';
             $filename = $output['activity']['numOscar'].'-'.$output['period']['year'].'-'.$output['period']['month'];
-            $view = new ViewModel($output);
-            $view->setTemplate('oscar/timesheet/synthesis-activity-period');
-            $view->setTerminal(true);
 
-            $viewRender = $this->getServiceLocator()->get('ViewRenderer');
-            $html = $viewRender->render($view);
             $dompdf = new Dompdf();
-            $dompdf->loadHtml($html);
+            $dompdf->loadHtml($html = $this->getTimesheetActivitySynthesisRenderer($output));
             $dompdf->setPaper('A4', 'landscape');
             $dompdf->render();
             $dompdf->stream($filename);
@@ -532,15 +529,30 @@ class TimesheetController extends AbstractOscarController
         }
         elseif ($format == "html") {
             $output['format'] = 'html';
-            $view = new ViewModel($output);
-            $view->setTemplate('oscar/timesheet/synthesis-activity-period');
-            $view->setTerminal(true);
-
-            return $view;
+            $html = $this->getTimesheetActivitySynthesisRenderer($output);
+            die($html);
         }
         else {
             return $output;
         }
+    }
+
+    private function getTimesheetActivitySynthesisRenderer( $datas ){
+        $templatePath = $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template');
+
+        $view = new ViewModel($datas);
+        $view->setTemplate('timesheet_activity_synthesis');
+        $view->setTerminal(true);
+
+        $viewRender = $this->getServiceLocator()->get('ViewRenderer');
+        $resolver = new AggregateResolver();
+        $map = new TemplateMapResolver([
+            'timesheet_activity_synthesis' => $templatePath
+        ]);
+        $viewRender->setResolver($resolver);
+        $resolver->attach($map);
+
+        return $viewRender->render($view);
     }
 
     /**

@@ -202,8 +202,11 @@ return array(
             'activity' => []
         ],
 
-        // Emplacement du template pour les feuilles de temps individuelle mensurelle
+        // Emplacement du template pour les feuilles de temps individuelles mensuelles
         'timesheet_person_month_template' => realpath(__DIR__.'/../../data/templates/timesheet_person_month.default.html.php'),
+
+        // Emplacement du template pour les feuilles de temps des synthèse des activités
+        'timesheet_activity_synthesis_template' => realpath(__DIR__.'/../../data/templates/timesheet_activity_synthesis.default.html.php'),
 
         // Permet de télécharger les feuilles de temps avant validation
         'timesheet_preview' => false,
