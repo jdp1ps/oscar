@@ -1,5 +1,9 @@
 # version 2.10 "Creed"
 
+## ATTENTION : PHP 7.3
+
+La version *Creed* necessite une mise à jour des librairies PHP via **composer**, vous devrez préalablement faire une mise à jour de la version de PHP en passant à la version **PHP 7.3**. Attention, Postgresql doit rester en version 9.x. 
+
 ## Appliquer cette mise à jour depuis Oscar 2.9
 
 Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
@@ -7,6 +11,10 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 > Cette mise à jour implique le **Mettre à jour les librairies PHP** avec *composer*. Si des paquets PHP sont manquants, composer vous les indiquera.
 
 En complément, plusieurs options de configuration DOIVENT être complétées :
+
+### Documents des feuilles de temps
+
+Cette version inclue des outils pour générer des feuilles de temps au format PDF à partir des saisies utilisateur. Plus d'information [Feuilles de temps dans Oscar](doc/timesheet.md)
 
 
 ### Nouveau 25 Juin : Importation ICAL en option
