@@ -371,11 +371,9 @@ Et le détails de chaque déclaration
 
 ## Documents générés
 
-Les documents générés disposent de plusieurs options
+Les documents générés disposent de plusieurs options disponibles dans l'interface de configuration Oscar
 
-### Pour les personnes
-
-
+![Synthèse 2](images/timesheet-options.png)
 
 
 ## Usurpation
@@ -383,6 +381,8 @@ Les documents générés disposent de plusieurs options
 Oscar intègre un mécanisme d'*usurpation* pour autoriser un tiers de compléter la feuille de temps d'une autre personne.
 
 L'interface de saisie est accessible depuis la fiche de la personne.
+
+
 
 ### Globale
 
