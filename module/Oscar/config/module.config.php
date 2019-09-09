@@ -822,6 +822,27 @@ return array(
         ],
 
         'factories' => array(
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// Formatteurs
+            ///
+            ///
+
+            // Synthèse des déclarations d'une feuille de temps mensuelle (HTML)
+            'TimesheetActivityPeriodHtmlFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $renderer = $sm->get('ViewRenderer');
+                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_activity_synthesis_template');
+                return new \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter($templatePath, $renderer);
+            },
+
+            // Synthèse des déclarations d'une feuille de temps mensuelle (PDF)
+            'TimesheetActivityPeriodPdfFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $renderer = $sm->get('ViewRenderer');
+                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_activity_synthesis_template');
+                return new \Oscar\Formatter\TimesheetActivityPeriodPdfFormatter($templatePath, $renderer);
+            },
+
+
             'RoleProvider' => function (\Zend\ServiceManager\ServiceManager $sm){
                 return new \Oscar\Provider\RoleProvider( $sm->get('doctrine.entitymanager.orm_default') );
             },

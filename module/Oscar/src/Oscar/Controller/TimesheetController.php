@@ -28,6 +28,8 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
+use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
+use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodFormatter2;
 use Oscar\Formatter\TimesheetsMonthFormatter;
@@ -498,6 +500,12 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    /**
+     * Accès à la synthèse des déclaration pour une activité.
+     *
+     * @return array|JsonModel
+     * @throws OscarException
+     */
     public function synthesisActivityPeriodAction()
     {
         // Données reçues
@@ -506,30 +514,35 @@ class TimesheetController extends AbstractOscarController
         $period = $this->params()->fromQuery('period', null);
         $error = null;
 
+        // Contrôle d'accès
+        $activity = $this->getActivityService()->getActivityById($activity_id, true);
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+
         $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
 
         if( $format == 'json' ){
             return $this->jsonOutput($output);
         }
         elseif ($format == "excel") {
+            // TODO à revoir/supprimer
+            // Sur le plan métier, les fonctionnels de Tours ne trouve pas utilse de disposer d'un excel
+            // modifiable. A Caen, il est utilisé pour réaliser des synthèses/bilan
             $formatter = new TimesheetActivityPeriodFormatter();
             $formatter->output($output, 'excel');
         }
         elseif ($format == "pdf") {
-
             $output['format'] = 'pdf';
-            $filename = $output['activity']['numOscar'].'-'.$output['period']['year'].'-'.$output['period']['month'];
-
-            $dompdf = new Dompdf();
-            $dompdf->loadHtml($html = $this->getTimesheetActivitySynthesisRenderer($output));
-            $dompdf->setPaper('A4', 'landscape');
-            $dompdf->render();
-            $dompdf->stream($filename);
+            /** @var TimesheetActivityPeriodHtmlFormatter $formatter */
+            $formatter = $this->getServiceLocator()->get('TimesheetActivityPeriodPdfFormatter');
+            $html = $formatter->render($output);
             die();
         }
         elseif ($format == "html") {
             $output['format'] = 'html';
-            $html = $this->getTimesheetActivitySynthesisRenderer($output);
+            /** @var TimesheetActivityPeriodPdfFormatter $formatter */
+            $formatter = $this->getServiceLocator()->get('TimesheetActivityPeriodHtmlFormatter');
+            $html = $formatter->render($output);
             die($html);
         }
         else {
@@ -537,23 +550,6 @@ class TimesheetController extends AbstractOscarController
         }
     }
 
-    private function getTimesheetActivitySynthesisRenderer( $datas ){
-        $templatePath = $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template');
-
-        $view = new ViewModel($datas);
-        $view->setTemplate('timesheet_activity_synthesis');
-        $view->setTerminal(true);
-
-        $viewRender = $this->getServiceLocator()->get('ViewRenderer');
-        $resolver = new AggregateResolver();
-        $map = new TemplateMapResolver([
-            'timesheet_activity_synthesis' => $templatePath
-        ]);
-        $viewRender->setResolver($resolver);
-        $resolver->attach($map);
-
-        return $viewRender->render($view);
-    }
 
     /**
      * Centralisation de la consultation des feuilles de temps d'une personne / activité
