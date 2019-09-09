@@ -2123,25 +2123,44 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $query->getQuery()->getResult();
     }
 
+    /**
+     * Annulation des déclarations d'une personne pour la période (mois) données.
+     *
+     * @param Person $person
+     * @param $period
+     * @return bool
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function deleteValidationPeriodPerson(Person $person, $period)
     {
         $spli = explode('-', $period);
         $year = (int)$spli[0];
         $month = (int)$spli[1];
 
-        $query = $this->getEntityManager()->createQueryBuilder('vp')
-            ->delete(ValidationPeriod::class, 'vp')
+        // TODO Probablement plus rapide avec des requêtes natives
+
+        // Récupération des déclarations
+        $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
             ->where('vp.year = :year AND vp.month = :month AND vp.declarer = :person')
             ->setParameters([
                 'year' => $year,
                 'month' => $month,
                 'person' => $person,
             ])
-            ->getQuery();
+            ->getQuery()->getResult();
 
-        $query->execute();
+        /** @var ValidationPeriod $declaration */
+        foreach ($declarations as $declaration){
+            /** @var TimeSheet $ts */
+            foreach ($declaration->getTimesheets() as $ts) {
+                $ts->setValidationPeriod(null);
+            }
+            $this->getEntityManager()->remove($declaration);
+        }
+        $this->getEntityManager()->flush();
+
         return true;
-
     }
 
     /**

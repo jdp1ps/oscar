@@ -2130,11 +2130,15 @@ class TimesheetController extends AbstractOscarController
                 case 'DELETE':
                     $person_id = $this->params()->fromQuery('person_id');
                     $period = $this->params()->fromQuery('period');
-                    if( $person_id ){
-                        $person = $this->getPersonService()->getPerson($person_id);
+                    try {
+                        if( $person_id ){
+                            $person = $this->getPersonService()->getPerson($person_id);
+                        }
+                        $this->getTimesheetService()->deleteValidationPeriodPerson($person, $period);
+                        return $this->getResponseOk();
+                    } catch (\Exception $e) {
+                        return $this->getResponseInternalError($e->getMessage());
                     }
-                    $this->getTimesheetService()->deleteValidationPeriodPerson($person, $period);
-                    return $this->getResponseOk();
 
                 default:
                     return $this->getResponseInternalError("Non pris en charge");
