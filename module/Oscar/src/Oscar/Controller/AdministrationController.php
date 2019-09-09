@@ -119,10 +119,16 @@ class AdministrationController extends AbstractOscarController
                     $dateFormat = $this->params()->fromPost('dateformat');
                     $this->getOscarConfigurationService()->setExportSeparator($separator);
                     $this->getOscarConfigurationService()->setExportDateFormat($dateFormat);
+                    return $this->redirect()->toRoute('administration/parameters');
 
+                case "timesheet_preview":
+                    $value = $this->params()->fromPost('parameter_value') == "on";
+                    $this->getOscarConfigurationService()->setTimesheetPreview($value);
+                    return $this->redirect()->toRoute('administration/parameters');
 
-
-
+                case "timesheet_excel":
+                    $value = $this->params()->fromPost('parameter_value') == "on";
+                    $this->getOscarConfigurationService()->setTimesheetExcel($value);
                     return $this->redirect()->toRoute('administration/parameters');
 
                 default:
@@ -134,6 +140,8 @@ class AdministrationController extends AbstractOscarController
         }
 
         return [
+            'timesheet_preview' => $this->getOscarConfigurationService()->getTimesheetPreview(),
+            'timesheet_excel' => $this->getOscarConfigurationService()->getTimesheetExcel(),
             'allow_numerotation_custom' => $this->getOscarConfigurationService()->getNumerotationEditable(),
             'themes' => $this->getOscarConfigurationService()->getConfiguration('themes'),
             'theme' => $this->getOscarConfigurationService()->getTheme(),

@@ -368,6 +368,16 @@ Et le détails de chaque déclaration
 ![Synthèse 2](images/synthes-activite-details.png)
 
 
+
+## Documents générés
+
+Les documents générés disposent de plusieurs options
+
+### Pour les personnes
+
+
+
+
 ## Usurpation
 
 Oscar intègre un mécanisme d'*usurpation* pour autoriser un tiers de compléter la feuille de temps d'une autre personne.

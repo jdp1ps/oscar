@@ -206,8 +206,10 @@ return array(
         'timesheet_person_month_template' => realpath(__DIR__.'/../../data/templates/timesheet_person_month.default.html.php'),
 
         // Permet de télécharger les feuilles de temps avant validation
-        'timesheet_preview' => true,
-        'timesheet_allow_excel' => true,
+        'timesheet_preview' => false,
+
+        // Propose une version Excel pour les feuilles de temps mensuelle des personnes/activités
+        'timesheet_allow_excel' => false,
 
         //
 

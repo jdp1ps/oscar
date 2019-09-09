@@ -1468,7 +1468,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $strData[$person]['totalWork'] += $duration;
                     $totaux['totalCe'] += $duration;
                     $totaux['ce'][$acronym] += $duration;
-                    $totaux['totalWork'] += $duration;
                 }
                 $totaux['totalResearch'] += $duration;
                 $strData[$person]['totalResearch'] += $duration;

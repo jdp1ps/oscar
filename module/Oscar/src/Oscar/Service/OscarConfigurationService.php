@@ -137,6 +137,22 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         }
     }
 
+    public function getTimesheetExcel(){
+        return $this->getEditableConfKey('timesheet_excel', false);
+    }
+
+    public function setTimesheetExcel( $bool ){
+        $this->saveEditableConfKey('timesheet_excel', (boolean)$bool ? true : false );
+    }
+
+    public function getTimesheetPreview(){
+        return $this->getEditableConfKey('timesheet_preview', false);
+    }
+
+    public function setTimesheetPreview( $bool ){
+        $this->saveEditableConfKey('timesheet_preview', (boolean)$bool ? true : false );
+    }
+
 
     public function getExportSeparator(){
         return $this->getEditableConfKey('export_format', '|');
