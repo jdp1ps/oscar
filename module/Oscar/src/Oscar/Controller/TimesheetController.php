@@ -32,6 +32,8 @@ use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodFormatter2;
+use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
+use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\TimesheetService;
@@ -719,6 +721,8 @@ class TimesheetController extends AbstractOscarController
 
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
 
+        die();
+
         $currentActivityId = $this->params()->fromRoute('id');
         $month = $this->params()->fromQuery('month', date('m'));
         $year = $this->params()->fromQuery('year', date('Y'));
@@ -963,17 +967,16 @@ class TimesheetController extends AbstractOscarController
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
 
+        // nom du fichier
+
+
         if( $action == "csv" ){
-
             die("Cette fonctionnalité est provisoirement indisponible.");
-
             if( !$activity ){
                 $this->getResponseBadRequest("Impossible de trouver l'activité");
             }
             $datas = $timesheetService->getPersonTimesheetsCSV($person, $activity, false);
-
             $filename = $activity->getAcronym() . '-' . $activity->getOscarNum().'-'.$person->getLadapLogin().'.csv';
-
             $handler = fopen('/tmp/' . $filename, 'w');
 
              /** @var ActivityPayment $payment */
@@ -982,19 +985,33 @@ class TimesheetController extends AbstractOscarController
             }
 
             fclose($handler);
-
             header('Content-Disposition: attachment; filename='.$filename);
             header('Content-Length: ' . filesize('/tmp/' . $filename));
             header('Content-type: plain/text');
-
             die(file_get_contents('/tmp/' . $filename));
         }
 
         if( $action == "export2" ){
-            $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
-            $formatter = new TimesheetPersonPeriodFormatter2($this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'));
+            // Variante
             $out = $this->params()->fromQuery('out', 'pdf');
-            $formatter->output($datas, $out);
+            $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
+            $datas['format'] = $out;
+
+            if( $out == 'pdf' ){
+                /** @var TimesheetPersonPeriodPdfFormatter $formatter */
+                $formatter = $this->getServiceLocator()->get('TimesheetPersonPeriodPdfFormatter');
+                $formatter->render($datas);
+                die();
+            }
+            elseif ($out == 'html') {
+                /** @var TimesheetPersonPeriodHtmlFormatter $formatter */
+                $formatter = $this->getServiceLocator()->get('TimesheetPersonPeriodHtmlFormatter');
+                $html = $formatter->render($datas);
+                die($html);
+            }
+            else {
+                return $this->getResponseBadRequest("Format non-géré");
+            }
         }
 
         if( $action == "export" ){
@@ -1502,9 +1519,13 @@ class TimesheetController extends AbstractOscarController
         }
     }
 
+    /**
+     * @deprecated
+     * @return Response
+     */
     public function usurpationAction()
     {
-        die("DESACTIVE");
+        return $this->getResponseDeprecated("Cette fonctionnalité n'est plus disponible");
     }
 
     public function resumeActivityAction(){
@@ -1624,15 +1645,6 @@ class TimesheetController extends AbstractOscarController
             'datas' => $invalidLabels,
             'othersWP'=> $destinations
         ];
-    }
-
-    /**
-     * Déclaration des heures.
-     */
-    public function declarationAction()
-    {
-        die("test");
-        return [];
     }
 
     protected function getQueryData()
@@ -1895,7 +1907,6 @@ class TimesheetController extends AbstractOscarController
                 $this->getEntityManager()->persist($timesheet);
             }
 
-
             $timesheet->setWorkpackage($wp)
                 ->setComment($comment)
                 ->setDateFrom($start)
@@ -1905,7 +1916,6 @@ class TimesheetController extends AbstractOscarController
                 ->setPerson($person);
 
             $timesheets[] = $timesheet;
-
         }
 
         $this->getEntityManager()->flush($timesheets);
@@ -1987,21 +1997,6 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));
-
-                    // FIX : Déplacer le test d'envois/réenvois
-                    // nb : Le traitement de l'envoi/réenvois a été centralisé dans le TimesheetService
-                    // dans la méthode d'envoi.
-
-                    // Réenvoi de la déclaration
-//                    if( $action == 'resend' ){
-//                        throw new \Exception("DEBUG");
-//                        $from = new \DateTime($datas->from);
-//                        $to = new \DateTime($datas->to);
-////                        $timesheetService->sendPeriod($from, $to, $currentPerson, $comments);
-//                        $timesheetService->reSendPeriod($from, $to, $currentPerson, $comments);
-//                        return $this->getResponseOk();
-//                    }
-
 
                     if( !$datas ){
                         return $this->getResponseBadRequest('Problème de transmission des données');

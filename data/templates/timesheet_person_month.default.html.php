@@ -1,8 +1,6 @@
 <style>
-    body {
-        font-size: 12px;
-        font-family: Helvetica, Arial, sans-serif;
-    }
+    <?php include __DIR__.'/common.css'; ?>
+/*
     table {
         width: 100%;
         max-width: 100%;
@@ -71,7 +69,7 @@
     .total {
         font-weight: 700;
         font-size: 14px;
-    }
+    }*/
 </style>
 <table>
     <thead>
@@ -142,7 +140,6 @@
         </tr>
     <?php endif; ?>
 
-
     <?php /* for($i = 0; $i<ceil(count($datas['organizations'])/2); $i++) { ?>
         <tr>
             <td>&nbsp;</td>
@@ -165,45 +162,60 @@
 
     <?php }*/ ?>
 
-
     <tr>
-        <td colspan="<?= $width ?>">&nbsp;</td>
+        <td colspan="<?= $width ?>">&nbsp;
+            <?php if($datas['format'] == 'html'): ?>
+            <a href="/feuille-de-temps/excel?action=export2&period=<?= $datas['period'] ?>&personid=<?= $datas['person_id'] ?>&out=pdf">Télécharger</a>
+            <?php endif; ?>
+        </td>
     </tr>
-    <tr>
-        <th><?= $datas['period'] ?></th>
+<!--    <tr>-->
+<!--        <td colspan="--><?//= $width ?><!--" style="text-align: left">&nbsp;<pre>--><?php //var_dump($datas) ?><!--</pre></td>-->
+<!--    </tr>-->
+    </thead>
+</table>
+
+<table>
+    <!-- LISTE DES JOURS -->
+    <thead>
+    <tr class="dateHeading">
+        <th><?= $datas['periodLabel'] ?></th>
         <?php foreach($datas['daysInfos'] as $i=>$day): ?>
-            <th><small style="font-weight: 100; font-size: 8px"><?= $day['label']?></small><br><?= $i ?></th>
+            <th class="<?= $day['locked'] ? 'lock' : '' ?>">
+                <small><?= $day['label']?></small>
+                <?= $i ?>
+            </th>
         <?php endforeach; ?>
         <th>TOTAL</th>
     </tr>
     </thead>
     <tbody>
     <tr class="group">
-        <th class="label" colspan="20">Recherche</th>
+        <th class="grouptitle" colspan="<?= $width ?>">Recherche</th>
     </tr>
     <?php foreach ($datas['declarations']['activities'] as $labelActivity=>$dataActivity):?>
         <tr class="group">
-            <th class="label" colspan="<?= $width ?>"><?= $dataActivity['label'] ?></th>
+            <th class="research" colspan="<?= $width ?>"><?= $dataActivity['label'] ?></th>
         </tr>
         <?php foreach ($dataActivity['subgroup'] as $labelActivity=>$dataGroup):?>
             <tr class="subgroup">
-                <th class="label"> - <?= $dataGroup['label'] ?></th>
+                <th class="research"> - <strong><?= $dataActivity['acronym'] ?></strong> <?= $dataGroup['label'] ?></th>
                 <?php foreach ($datas['daysInfos'] as $i=>$day):
                     $dayKey = $i<10?"0$i":"$i";
-                    $value = 0;
+                    $value = 0.0;
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataGroup['days']) ){
                         $value = number_format($dataGroup['days'][$dayKey], 2);
-                        $class = "feed";
+                        $class = "value";
                     }
                     if( $day['locked'] ){
                         $class = 'lock';
-                        $value = $value == '0' ? '.' : $value;
+                        $value = $value == 0 ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?>"><?= $value ?></td>
+                    <td class="<?= $class ?> research"><?= $value ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal"><?= number_format($dataGroup['total'],2) ?></td>
+                <td class="soustotal research"><?= number_format($dataGroup['total'],2) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -211,29 +223,29 @@
     <?php foreach ($datas['declarations']['others'] as $otherKey=>$dataOther):?>
         <?php foreach ($dataOther['subgroup'] as $otherKey=>$dataOtherGroup): if( $dataOtherGroup['group'] != 'research' ) continue; ?>
             <tr class="subgroup">
-                <th class="label"><strong><?= $dataOtherGroup['label'] ?></strong></th>
+                <th class="research"><strong><?= $dataOtherGroup['label'] ?></strong></th>
                 <?php foreach ($datas['daysInfos'] as $i=>$day):
                     $dayKey = $i<10?"0$i":"$i";
                     $value = 0.0;
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataOtherGroup['days']) ){
                         $value = number_format($dataOtherGroup['days'][$dayKey], 2);
-                        $class = "feed";
+                        $class = "value";
                     }
                     if( $day['locked'] ){
                         $class = 'lock';
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?>"><?= $value ?></td>
+                    <td class="<?= $class ?> research"><?= $value ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal"><?= number_format($dataOtherGroup['total'],2) ?></td>
+                <td class="soustotal research"><?= number_format($dataOtherGroup['total'],2) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
 
     <tr class="subgroup">
-        <th class="label">TOTAL RECHERCHE</th>
+        <th class="research">TOTAL RECHERCHE</th>
         <?php foreach ($datas['daysInfos'] as $i=>$day):
             $dayKey = $i<10?"0$i":"$i";
             $value = 0.0;
@@ -241,90 +253,118 @@
             if( array_key_exists($dayKey, $datas['totalGroup']['research']['days']) ){
                 $value = $datas['totalGroup']['research']['days'][$dayKey]; //number_format($dataOtherGroup['days'][$dayKey], 2);
                 if( $value ) $value = number_format($value, 2);
-                $class = "feed";
+                $class = "value";
             }
             if( $day['locked'] ){
                 $class = 'lock';
                 $value = $value == '0' ? '.' : $value;
             }
             ?>
-            <td class="<?= $class ?>"><?= $value ?></td>
+            <td class="<?= $class ?> research"><?= $value ?></td>
         <?php endforeach; ?>
-        <td class="soustotal"><?= number_format($datas['totalGroup']['research']['total'],2) ?></td>
+        <td class="soustotal research"><?= number_format($datas['totalGroup']['research']['total'],2) ?></td>
     </tr>
 
     <tr class="group">
-        <th class="label" colspan="<?= $width ?>">Inactivité</th>
-    </tr>
-    <?php foreach ($datas['declarations']['others'] as $otherKey=>$dataOther):?>
-        <?php foreach ($dataOther['subgroup'] as $otherKey=>$dataOtherGroup): if( $dataOtherGroup['group'] != 'abs' ) continue; ?>
-            <tr class="subgroup">
-                <th class="label"> - <?= $dataOtherGroup['label'] ?></th>
-                <?php foreach ($datas['daysInfos'] as $i=>$day):
-                    $dayKey = $i<10?"0$i":"$i";
-                    $value = 0;
-                    $class = 'empty';
-                    if( array_key_exists($dayKey, $dataOtherGroup['days']) ){
-                        $value = number_format($dataOtherGroup['days'][$dayKey], 2);
-                        $class = "feed";
-                    }
-                    if( $day['locked'] ){
-                        $class = 'lock';
-                        $value = $value == '0' ? '.' : $value;
-                    }
-                    ?>
-                    <td class="<?= $class ?>"><?= $value ?></td>
-                <?php endforeach; ?>
-                <td class="soustotal"><?= number_format($dataOtherGroup['total'],2) ?></td>
-            </tr>
-        <?php endforeach; ?>
-    <?php endforeach; ?>
-
-    <tr class="group">
-        <th class="label" colspan="<?= $width ?>">Autres</th>
+        <th colspan="<?= $width ?>">Hors-lot</th>
     </tr>
 
     <?php foreach ($datas['declarations']['others'] as $otherKey=>$dataOther):?>
         <?php foreach ($dataOther['subgroup'] as $otherKey=>$dataOtherGroup): if( $dataOtherGroup['group'] == 'research' || $dataOtherGroup['group'] == 'abs' ) continue; ?>
             <tr class="subgroup">
-                <th class="label"> - <?= $dataOtherGroup['label'] ?></th>
+                <th class="<?= $dataOtherGroup['group'] ?>"> - <?= $dataOtherGroup['label'] ?></th>
                 <?php foreach ($datas['daysInfos'] as $i=>$day):
                     $dayKey = $i<10?"0$i":"$i";
                     $value = '0';
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataOtherGroup['days']) ){
                         $value = number_format($dataOtherGroup['days'][$dayKey], 2);
-                        $class = "feed";
+                        $class = "value";
                     }
                     if( $day['locked'] ){
                         $class = 'lock';
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?>"><?= $value ?></td>
+                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $value ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal"><?= number_format($dataOtherGroup['total'],2) ?></td>
+                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= number_format($dataOtherGroup['total'],2) ?></td>
+            </tr>
+        <?php endforeach; ?>
+    <?php endforeach; ?>
+
+
+
+            <tr class="group">
+                <th class="label" style="border-bottom: solid black 2px">Activité effective</th>
+                <?php foreach ($datas['daysInfos'] as $i=>$day):
+                    $dayKey = $i<10?"0$i":"$i";
+                    $value = '0';
+                    $class = 'empty';
+                    if( array_key_exists($dayKey, $datas['active']['days']) ){
+                        $value = number_format($datas['active']['days'][$dayKey], 2);
+                        $class = "value";
+                    }
+                    if( $day['locked'] ){
+                        $class = 'lock';
+                        $value = $value == '0' ? '.' : $value;
+                    }
+                    ?>
+                    <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $value ?></td>
+                <?php endforeach; ?>
+                <td class="soustotal" style="border-bottom: solid black 2px"><?= number_format($datas['active']['total'],2) ?></td>
+            </tr>
+
+
+
+
+<!--    <tr class="group">-->
+<!--        <td class="" colspan="--><?//= $width ?><!--" style="text-align: left">--><?php //var_dump($datas) ?><!--</td>-->
+<!--    </tr>-->
+    <tr class="group">
+        <th class="" colspan="<?= $width ?>">Inactivité</th>
+    </tr>
+    <?php foreach ($datas['declarations']['others'] as $otherKey=>$dataOther):?>
+        <?php foreach ($dataOther['subgroup'] as $otherKey=>$dataOtherGroup): if( $dataOtherGroup['group'] != 'abs' ) continue; ?>
+            <tr class="subgroup">
+                <th class="<?= $dataOtherGroup['group'] ?>"> - <?= $dataOtherGroup['label'] ?></th>
+                <?php foreach ($datas['daysInfos'] as $i=>$day):
+                    $dayKey = $i<10?"0$i":"$i";
+                    $value = 0;
+                    $class = 'empty';
+                    if( array_key_exists($dayKey, $dataOtherGroup['days']) ){
+                        $value = number_format($dataOtherGroup['days'][$dayKey], 2);
+                        $class = "value";
+                    }
+                    if( $day['locked'] ){
+                        $class = 'lock';
+                        $value = $value == '0' ? '.' : $value;
+                    }
+                    ?>
+                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $value ?></td>
+                <?php endforeach; ?>
+                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= number_format($dataOtherGroup['total'],2) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
 
     <tr class="group">
-        <th class="label" >Total pour la période</th>
+        <th class="" style="border-bottom: solid black 2px">Total pour la période</th>
         <?php foreach ($datas['daysInfos'] as $i=>$day):
             $value = $day['duration'];
             $class = 'empty';
             if( $value ){
                 $value = number_format($value, 2);
-                $class = "feed";
+                $class = "value";
             }
             if( $day['locked'] ){
                 $class = 'lock';
                 $value = $value == '0' ? '.' : $value;
             }
             ?>
-            <td class="<?= $class ?>"><?= $value ?></td>
+            <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $value ?></td>
         <?php endforeach; ?>
-        <td class="total"><?= number_format($datas['total'],2) ?></td>
+        <td class="total" style="border-bottom: solid black 2px"><?= number_format($datas['total'],2) ?></td>
     </tr>
 
     </tbody>
@@ -361,11 +401,11 @@
     </tr>
     <tr>
         <td>&nbsp;</td>
-        <td colspan="<?= ($col) ?>" class="value" style="height: 75px">&nbsp;</td>
+        <td colspan="<?= ($col) ?>" class="value" style="height: 2em">&nbsp;</td>
         <td>&nbsp;</td>
-        <td colspan="<?= ($col) ?>" class="value" style="height: 75px">&nbsp;</td>
+        <td colspan="<?= ($col) ?>" class="value" style="height: 2em">&nbsp;</td>
         <td>&nbsp;</td>
-        <td colspan="<?= $col ?>" class="value" style="height: 75px">&nbsp;</td>
+        <td colspan="<?= $col ?>" class="value" style="height: 2em">&nbsp;</td>
         <td>&nbsp;</td>
     </tr>
 

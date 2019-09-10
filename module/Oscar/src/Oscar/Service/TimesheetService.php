@@ -2703,6 +2703,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $organizationsPrimary = [];
         $activities = [];
 
+        // Sous total de l'activité effective
+        $active = [
+            'total' => 0.0,
+            'days' => []
+        ];
+
         $validationsDone = [];
 
         $declarations = [
@@ -2737,6 +2743,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             $group = 'Projet inconnue';
+            $acronym = '';
             $groupId = null;
             $subGroup = $timesheet->getLabel();
             $subGroupId = 'invalid ID';
@@ -2754,6 +2761,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $subGroupId = $timesheet->getWorkpackage()->getId();
                 $subGroupType = "wp";
                 $label = $subGroup;
+                $acronym = $timesheet->getActivity()->getAcronym();
             }
 
             if (array_key_exists($timesheet->getLabel(), $others)) {
@@ -2773,6 +2781,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'id' => $groupId,
                     'type' => $groupType,
                     'group' => $groupFamily,
+                    'acronym' => $acronym,
                     'total' => 0.0,
                     'subgroup' => [],
                 ];
@@ -2798,6 +2807,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             if (!array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days'])) {
                 $declarations[$path][$group]['subgroup'][$subGroup]['days']["$day"] = 0.0;
+            }
+
+            if( $groupFamily != 'abs' ){
+                if( !array_key_exists($day, $active['days']) ){
+                    $active['days'][$day] = 0.0;
+                }
+                $active['total'] += $timesheet->getDuration();
+                $active['days'][$day] += $timesheet->getDuration();
             }
 
             $daysInfos[intval($day)]['duration'] += $timesheet->getDuration();
@@ -2834,6 +2851,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $output = [
             'filename' => Slugify::create()->slugify("feuille de temps $person $period"),
             'person' => (string)$person,
+            'active' => $active,
             'commentaires' => $commentaires,
             'totalGroup' => $totalGroup,
             'organizations' => $organizationsPrimary,

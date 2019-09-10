@@ -828,18 +828,30 @@ return array(
             ///
             ///
 
-            // Synthèse des déclarations d'une feuille de temps mensuelle (HTML)
+            // ACTIVITÉ > MENSUELLE (HTML)
             'TimesheetActivityPeriodHtmlFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
                 $renderer = $sm->get('ViewRenderer');
                 $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_activity_synthesis_template');
                 return new \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter($templatePath, $renderer);
             },
 
-            // Synthèse des déclarations d'une feuille de temps mensuelle (PDF)
+            // ACTIVITÉ > MENSUELLE (PDF)
             'TimesheetActivityPeriodPdfFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
                 $renderer = $sm->get('ViewRenderer');
                 $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_activity_synthesis_template');
                 return new \Oscar\Formatter\TimesheetActivityPeriodPdfFormatter($templatePath, $renderer);
+            },
+
+            // ACTIVITÉ > MENSUELLE (HTML)
+            TimesheetPersonPeriodHtmlFormatter::class => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_person_month_template');
+                return new \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter($templatePath);
+            },
+
+            // ACTIVITÉ > MENSUELLE (HTML)
+            TimesheetPersonPeriodPdfFormatter::class => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_person_month_template');
+                return new \Oscar\Formatter\TimesheetPersonPeriodPdfFormatter($templatePath);
             },
 
 
