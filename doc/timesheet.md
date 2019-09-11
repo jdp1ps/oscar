@@ -30,6 +30,23 @@ Une interface permet de charger les informations depuis un calendrier (ICAL/ICS)
 
 ![Nouvelle inteface de déclaration](images/import-ical.png)
 
+Vous pouvez **désactiver cette option** dans la configuration générale : 
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // Oscar
+    'oscar' => [
+        // ...
+        // Désactiver (false) ou Activer (true) l'importation des ICAL
+        'importEnable' => false,
+        
+        // ...
+    ]
+);
+```
+
 
 ### Suivi des déclarations
 
