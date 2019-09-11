@@ -983,8 +983,6 @@ class ProjectGrantController extends AbstractOscarController
             $jalonsCurrent = $jalons;
             $jalonsFaitCurrent = $jalonsFait;
 
-
-
             if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
                 $entity)
             ) {
@@ -1053,6 +1051,8 @@ class ProjectGrantController extends AbstractOscarController
                     }
                 }
                 fputcsv($handler, $datas);
+            } else {
+                $this->getLogger()->warn("Pas le droit d'exporter : " . $entity->getId() . $entity->getLabel());
             }
         }
         fclose($handler);
