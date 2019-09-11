@@ -43,7 +43,7 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <h5>Responsable uniquement</h5>
                 <p class="help">
                     N'affichera que les personnes ayant un rôle à responsabilité dans les organisations
@@ -56,15 +56,28 @@
 
                 </label>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <h5>Déclarants</h5>
                 <p class="help">
                     Ne filtre que les personnes ayant des feuilles de temps
                 </p>
-                <label for="leader">
+                <label for="declarers">
                     <div class="material-switch">
                         <input id="declarers" name="declarers" value="on" type="checkbox" <?= $declarers ? 'checked' : '' ?>/>
                         <label for="declarers" class="label-primary"></label>
+                    </div>
+
+                </label>
+            </div>
+            <div class="col-md-2">
+                <h5>N+1</h5>
+                <p class="help">
+                    Afficher les personnes ayant été désigné comme NP1, <strong>les NP1 sont les personnes chargées de réaliser la validation administratif des créneaux Hors-Lot dans les feuilles de temps.</strong>
+                </p>
+                <label for="np1">
+                    <div class="material-switch">
+                        <input id="np1" name="np1" value="on" type="checkbox" <?= $np1 ? 'checked' : '' ?>/>
+                        <label for="np1" class="label-primary"></label>
                     </div>
 
                 </label>

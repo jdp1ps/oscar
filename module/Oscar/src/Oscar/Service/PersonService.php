@@ -712,6 +712,20 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     }
 
     /**
+     * Retourne la liste des identifiants des personnes référentes (N+1 - Ils assurent la validation administrative d'une
+     * ou plusieurs personnes).
+     */
+    public function getNp1Ids(){
+        $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
+            ->from(Referent::class, 'r')
+            ->innerJoin('r.referent', 'p')
+            ->getQuery()
+            ->getResult(Query::HYDRATE_ARRAY);
+        $np1Ids = array_map('current', $persons);
+        return $np1Ids;
+    }
+
+    /**
      * @param string|null $search
      * @param int         $currentPage
      * @param int         $resultByPage
@@ -735,6 +749,17 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         */
         if( $filters['declarers'] == 'on' ){
             $ids = $this->getDeclarersIds();
+            if( array_key_exists('ids', $filters) ){
+                $filters['ids'] = array_intersect($filters['ids'], $ids);
+            }
+            else {
+                $filters['ids'] = $ids;
+            }
+        }
+
+        // FIltrer les IDS des personnes nommées N+1 explicitement (Objet 'Referent')
+        if( $filters['np1'] == 'on' ){
+            $ids = $this->getNp1Ids();
             if( array_key_exists('ids', $filters) ){
                 $filters['ids'] = array_intersect($filters['ids'], $ids);
             }
