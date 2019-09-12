@@ -256,6 +256,7 @@
                     </div>
                     <div class="col-md-4">
                         <h4><i class="icon-group"></i>Valide les déclarations pour (N-1)</h4>
+                        <p><strong><?= $entity ?></strong> a la charge de valider les déclarations Hors-Lot pour les personnes suivantes : </p>
                         <?php if( $subordinates ): ?>
                             <?php foreach ($subordinates as $subordinate) :?>
                                 <article class="card card-xs">
@@ -270,6 +271,23 @@
                                     <?php endif; ?>
                                 </article>
                             <?php endforeach; ?>
+                            <div id="managereferents"></div>
+                            <script>
+                                require(['vue', 'vue-resource', 'Referent'], function(Vue, VueResource, Referent){
+                                    Vue.use(VueResource);
+                                    new Vue({
+                                        el: '#managereferents',
+                                        render(h){
+                                            return h(Referent.default, {props:{
+                                                referentId: <?= $entity->getId() ?>,
+                                                declarationsToDo: <?= json_encode($declarationsToDo) ?>,
+                                                declarationsFor: <?= json_encode(array_map(function($p){return $p->getPerson()->getDisplayName(); }, $subordinates)) ?>,
+                                                displayName: "<?= $entity->getDisplayName() ?>"}});
+                                        }
+                                    })
+                                })
+                            </script>
+
                         <?php else: ?>
                             Personne
                         <?php endif; ?>

@@ -87,6 +87,7 @@ requirejs.config({
         'ActivityGant': 'oscar/dist/ActivityGant',
         'Keyvalue': 'oscar/dist/Keyvalue',
         'DocumentSectionAdmin': 'oscar/dist/DocumentSectionAdmin',
+        'Referent': 'oscar/dist/Referent',
         'EntityWithRole': 'oscar/dist/EntityWithRole'
     },
     shim: {

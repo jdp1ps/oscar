@@ -241,7 +241,7 @@ class Person implements ResourceInterface
 
     public function getCustomSettingsKey( $key ){
         $custom = $this->getCustomSettingsObj();
-        if( array_key_exists($key, $custom) ){
+        if( is_array($custom) && array_key_exists($key, $custom) ){
             return $custom[$key];
         }
         return null;

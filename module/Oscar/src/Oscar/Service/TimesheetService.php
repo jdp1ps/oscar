@@ -2968,17 +2968,47 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $validations;
     }
 
-    public function getValidationHorsLotByReferent(Person $referent)
+    /**
+     * Retourne la liste des déclarations en fonction du validateur (référent)
+     * @param Person $referent
+     * @param null|string $filter Filtre de l'état
+     * @return ValidationPeriod[]
+     * @throws OscarException
+     */
+    public function getValidationHorsLotByReferent(Person $referent, $filter=null)
     {
         $validations = [];
         if ($referent) {
             $subordinates = $this->getServiceLocator()->get('PersonService')->getSubordinates($referent);
             if (count($subordinates))
-                $validations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
+                $parameters = [
+                    'persons' => $subordinates,
+                    'group' => ValidationPeriod::GROUP_OTHER,
+                ];
+
+                $validationsQuery = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
                     ->where('vp.declarer IN(:persons)')
-                    ->setParameter('persons', $subordinates)
-                    ->getQuery()
-                    ->getResult();
+                    ->andWhere('vp.objectGroup = :group');
+
+                if( $filter == "tovalid" ){
+                    $parameters['step'] = ValidationPeriod::STATUS_VALID;
+                    $validationsQuery->andWhere('vp.status != :step');
+                }
+
+                elseif ($filter == 'valid' ) {
+                    $parameters['step'] = ValidationPeriod::STATUS_VALID;
+                    $validationsQuery->andWhere('vp.status = :step');
+                }
+
+                elseif ($filter == null ){
+
+
+                } else {
+                    throw new OscarException("Mauvaise utilisation de la méthode : getValidationHorsLotByReferent");
+                }
+
+                $validationsQuery->setParameters($parameters);
+                $validations = $validationsQuery->getQuery()->getResult();
         }
         return $validations;
     }
