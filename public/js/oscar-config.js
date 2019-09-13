@@ -88,6 +88,7 @@ requirejs.config({
         'Keyvalue': 'oscar/dist/Keyvalue',
         'DocumentSectionAdmin': 'oscar/dist/DocumentSectionAdmin',
         'Referent': 'oscar/dist/Referent',
+        'ReferentUI': 'oscar/dist/ReferentUI',
         'EntityWithRole': 'oscar/dist/EntityWithRole'
     },
     shim: {

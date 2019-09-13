@@ -505,8 +505,11 @@
 
 
         <h3>Déclarants</h3>
-        <?php foreach ($entity->getPersonsDeep() as $personActivity): ?>
+        <?php
+        $declarers = [];
+        foreach ($entity->getPersonsDeep() as $personActivity): ?>
             <?php if( $entity->hasDeclarant($personActivity->getPerson()) ):
+                $declarers[] = $personActivity->getPerson()->toJson();
                 $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($entity);
                 ?>
 
@@ -520,6 +523,19 @@
                 </a>
             <?php endif; ?>
         <?php endforeach; ?>
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
+            <div id="referents"></div>
+            <script>
+                require(['vue', 'vue-resource', 'ReferentUI'], function(Vue, VueResource, ReferentUI){
+                    //new Vue({
+                    //    el: '#referents',
+                    //    render(h){ return h(ReferentUI.default, { props: {
+                    //            persons: <?//= json_encode($declarers) ?>
+                    //        }}) }
+                    //})
+                });
+            </script>
+        <?php endif; ?>
     <?php endif; ?>
 
 <?php endif; ?>
