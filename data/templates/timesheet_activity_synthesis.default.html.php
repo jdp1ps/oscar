@@ -157,6 +157,7 @@ $labels = [
         </tr>
         </thead>
         <tbody>
+
         <?php foreach ($foo as $person=>$line): ?>
             <tr>
                 <th><?= $person ?></th>
@@ -194,21 +195,6 @@ $labels = [
                 <td class="research totalcategory <?= $line['totalResearch'] ? 'value' : 'empty' ?>">
                     <?= $this->duration($line['totalResearch']) ?>
                 </td>
-
-                <pre><?= print_r($line['othersGroups']['research'], true) ?></pre>
-
-                <?php foreach ($line['othersGroups']['research'] as $dt): ?>
-                    <?php foreach ($dt['others'] as $duration): ?>
-                        <td class="ce research">
-                            <?= $this->duration($duration) ?>
-                        </td>
-                    <?php endforeach; ?>
-                    <?php if( count($dt['others']) > 1): ?>
-                        <td class="ce research">
-                            <?= $this->duration($dt['total']) ?>
-                        </td>
-                    <?php endif; ?>
-                <?php endforeach; ?>
 
                 <?php foreach ($line['othersGroups'] as $group=>$dt): if($group == 'research') continue;?>
                     <?php foreach ($dt['others'] as $other=>$duration): ?>
@@ -270,14 +256,15 @@ $labels = [
                         <?= $this->duration($totaux['others'][$code]) ?>
                     </th>
                 <?php endforeach; ?>
-                <?php if( count($dt['others']) > 1): ?>
+
+                <?php if( count($dt) > 1): ?>
                     <th class="research <?= $totaux['groups']['research'] ? 'value' : 'empty' ?>">
                         <?= $this->duration($totaux['groups']['research']) ?>
                     </th>
                 <?php endif; ?>
             <?php endforeach; ?>
             <th class="research <?= $totaux['totalResearch'] ? 'value' : 'empty' ?>">
-                <?= $this->duration($totaux['totalResearch']) ?>
+                =<?= $this->duration($totaux['totalResearch']) ?>
             </th>
 
             <?php foreach ($othersGroups as $group=>$dt): if($group == 'research') continue;?>
