@@ -25,7 +25,7 @@ Feuille de temps personnel (par personne / par mois)
 Document de synthèse mensuelle pour une activité
 ![Document de synthèse mensuelle d'une activité](doc/images/feuille-de-temps-activite-mensuelle.png)
 
-Une ligne de sous-total **Activité effective** qui exclue les créneaux Hors-Lot du groupe **abs** a été ajouté
+Une ligne de sous-total **Activité effective** qui exclue les créneaux Hors-Lot du groupe **abs** a été ajoutée
 
 La modification des gabarits de mise en page a été simplifiée.
 
@@ -34,14 +34,14 @@ Plus d'information [Feuilles de temps dans Oscar](doc/timesheet.md)
 
 ### Gestion des N+1 (2019/09)
 
-Cette version a ajouté une fonctionnalité pour **ajouter des N+1** (Personnes en charge de valider les déclaration Hors-Lot des déclarants) à partir de la fiche d'un N+1. La fonctionnalité permet soit de **renforcer** (affecter à une autre personne les même subordonnés) ou de **remplacer** le N+1.
+Cette version a ajouté une fonctionnalité pour **ajouter des N+1** (Personnes en charge de valider les déclaration Hors-Lot des déclarants) à partir de la fiche d'un N+1. La fonctionnalité permet soit de **ajouter un valideur** (affecter à une autre personne les même subordonnés) ou de **remplacer** le N+1.
 
 La liste des personnes dispose maintenant d'un filtre **N+1**
 
 
 ### Nouveau 25 Juin : Importation ICAL en option
 
-Une option `importEnable` a été ajouté pour rendre optionnel la fonctionnalité pour importer les ICAL dans les feuilles de temps. Pour retirer cette fonctionnalité, éditer le fichier de configuration `config/autoload/local.php` : 
+Une option `importEnable` a été ajoutée pour rendre optionnelle la fonctionnalité pour importer les ICAL dans les feuilles de temps. Pour retirer cette fonctionnalité, éditer le fichier de configuration `config/autoload/local.php` : 
 
 ```php
 <?php
@@ -62,7 +62,7 @@ return array(
 Afin de gérer les sous-totaux dans le rendu des feuilles de temps, vous devez spécifier une clef `group` pour chaques choix "Hors-lot" avec une des valeurs suivantes :
 
  - `research` : Comptabilisé comme recherche (produire un sous-total avec les heures des Projets)
- - `abs` : Créneaux non-travaillé (Congès, Arret maladie)
+ - `abs` : Créneaux non-travaillés (Congès, Arret maladie)
  - `education` : Créneaux comptabilisés comme enseignement
  - `other` : Autre
 
@@ -115,7 +115,7 @@ La documentation des feuilles de temps est à jour [Configuration des feuilles d
 
 Cette option **implique des changements dans la configuration !**
 
-Le système de recherche des personnes a été améliorée et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des personnes](./doc/configuration.md#recherche-des-personnes)
+Le système de recherche des personnes a été amélioré et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des personnes](./doc/configuration.md#recherche-des-personnes)
 
 Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
 
@@ -123,7 +123,7 @@ Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index d
 
 Cette option **implique des changements dans la configuration !**
 
-Le système de recherche des organisations a été améliorée et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des organisations](./doc/configuration.md#recherche-des-organisations)
+Le système de recherche des organisations a été amélioré et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des organisations](./doc/configuration.md#recherche-des-organisations)
 
 Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
 
@@ -153,6 +153,6 @@ Les documents publics peuvent maintenant être organisés en section. Les sectio
  - Lenteur dans l'autocompeteur des personnes (requête modifiée)
  - Refonte de la gestion des partenaires/membres dans le fiche activité
  - Dans la fiche organisation (nouvelle organisation), le contrôle de l'existant utilise maintenant le nom complet et l'acronyme, le champ "Nom complet" a été placé en tête.
- - Les montants de la vue versement utilise maintenant l'espace comme séparateur des milliers.
+ - La vue versement utilise maintenant l'espace comme séparateur des milliers pour les montants.
  - L'affichage du temps écoulé des documents se base maintenant sur les minutes pour éviter l'affichage "Il y a 11 heures sur un fichier déposé à n'importe quel moment de la journée"
  - La personne "uploadant" est correctement stoquée
