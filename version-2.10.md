@@ -12,9 +12,31 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 En complément, plusieurs options de configuration DOIVENT être complétées :
 
-### Documents des feuilles de temps
+## Nouveautés
 
-Cette version inclue des outils pour générer des feuilles de temps au format PDF à partir des saisies utilisateur. Plus d'information [Feuilles de temps dans Oscar](doc/timesheet.md)
+### Documents des feuilles de temps (2019/09)
+
+Cette version inclue des outils pour générer des feuilles de temps au format PDF à partir des saisies utilisateur. 
+
+Feuille de temps personnel (par personne / par mois)
+![Feuille de temps mensuelle d'une personne](./doc/images/feuille-de-temps-personne.png)
+
+
+Document de synthèse mensuelle pour une activité
+![Document de synthèse mensuelle d'une activité](doc/images/feuille-de-temps-activite-mensuelle.png)
+
+Une ligne de sous-total **Activité effective** qui exclue les créneaux Hors-Lot du groupe **abs** a été ajouté
+
+La modification des gabarits de mise en page a été simplifiée.
+
+Plus d'information [Feuilles de temps dans Oscar](doc/timesheet.md)
+
+
+### Gestion des N+1 (2019/09)
+
+Cette version a ajouté une fonctionnalité pour **ajouter des N+1** (Personnes en charge de valider les déclaration Hors-Lot des déclarants) à partir de la fiche d'un N+1. La fonctionnalité permet soit de **renforcer** (affecter à une autre personne les même subordonnés) ou de **remplacer** le N+1.
+
+La liste des personnes dispose maintenant d'un filtre **N+1**
 
 
 ### Nouveau 25 Juin : Importation ICAL en option
@@ -89,7 +111,7 @@ return array(
 
 La documentation des feuilles de temps est à jour [Configuration des feuilles de temps](./doc/timesheet.md)
 
-## Système de recherche des Personnes (2019/05)
+### Système de recherche des Personnes (2019/05)
 
 Cette option **implique des changements dans la configuration !**
 
@@ -97,7 +119,7 @@ Le système de recherche des personnes a été améliorée et permet maintenant 
 
 Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
 
-## Système de recherche des Organisations (2019/06)
+### Système de recherche des Organisations (2019/06)
 
 Cette option **implique des changements dans la configuration !**
 
@@ -106,7 +128,7 @@ Le système de recherche des organisations a été améliorée et permet mainten
 Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
 
 
-## Synthèse (2019/05)
+### Synthèse (2019/05)
 
 Une option de **synthèse générale (v2)** est accessible depuis la fiche d'une activité. Elle offre une vision globale aux chargés de valorisation sur l'état des heures déclarées pour un projet, par période et par personne, elle permet de contrôler rapidement le cumul des heures :
 
@@ -119,7 +141,7 @@ En cliquant sur **Détails**, une vue plus précise permet de voir la répartiti
 Une version excel de la synthèse est disponible.
 
 
-## Section des documents publics
+### Section des documents publics
 
 Les documents publics peuvent maintenant être organisés en section. Les sections doivent être configurées dans la partie configuration par l'administrateur.
 
@@ -127,6 +149,8 @@ Les documents publics peuvent maintenant être organisés en section. Les sectio
 
 ## FIX/ISSUES
 
+ - Optimisation des resultats de recherche et option de recherche "proche" activée
+ - Lenteur dans l'autocompeteur des personnes (requête modifiée)
  - Refonte de la gestion des partenaires/membres dans le fiche activité
  - Dans la fiche organisation (nouvelle organisation), le contrôle de l'existant utilise maintenant le nom complet et l'acronyme, le champ "Nom complet" a été placé en tête.
  - Les montants de la vue versement utilise maintenant l'espace comme séparateur des milliers.
