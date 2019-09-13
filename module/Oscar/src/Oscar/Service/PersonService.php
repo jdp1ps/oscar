@@ -308,6 +308,46 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return true;
     }
 
+    /**
+     * Remplace la personne référente par une autre personne.
+     * @param Person $personNewReferent
+     * @param Person $fromPerson
+     * @return bool
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function  refererentReplaceBy( Person $personNewReferent, Person $fromPerson ){
+        // Liste des Referent existant
+        $referents = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->select('r')
+            ->where('r.referent = :personReferent')
+            ->setParameters(['personReferent' => $fromPerson ])
+            ->getQuery()
+            ->getResult();
+
+        /** @var Referent $referent */
+        foreach ($referents as $referent) {
+            $this->getLoggerService()->notice(sprintf("$personNewReferent a remplacé $fromPerson pour " . $referent->getPerson()));
+            $referent->setReferent($personNewReferent);
+        }
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        // Mise à jour des déclarations en attentes
+        $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod){
+            $this->getLoggerService()->notice(sprintf("$personNewReferent est maintenant validateur administratif pour $$validationPeriod"));
+            $validationPeriod->removeValidatorAdm($fromPerson);
+            $validationPeriod->addValidatorAdm($personNewReferent);
+        }
+        $this->getEntityManager()->flush();
+        return true;
+    }
+
     public function refererentAddFromReferent(Person $personNewReferent, Person $fromPerson)
     {
         try {

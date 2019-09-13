@@ -843,15 +843,17 @@ return array(
             },
 
             // ACTIVITÉ > MENSUELLE (HTML)
-            TimesheetPersonPeriodHtmlFormatter::class => function(\Zend\ServiceManager\ServiceManager $sm) {
+            'TimesheetPersonPeriodHtmlFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $renderer = $sm->get('ViewRenderer');
                 $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_person_month_template');
-                return new \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter($templatePath);
+                return new \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter($templatePath, $renderer);
             },
 
             // ACTIVITÉ > MENSUELLE (HTML)
-            TimesheetPersonPeriodPdfFormatter::class => function(\Zend\ServiceManager\ServiceManager $sm) {
+            'TimesheetPersonPeriodPdfFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $renderer = $sm->get('ViewRenderer');
                 $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_person_month_template');
-                return new \Oscar\Formatter\TimesheetPersonPeriodPdfFormatter($templatePath);
+                return new \Oscar\Formatter\TimesheetPersonPeriodPdfFormatter($templatePath, $renderer);
             },
 
 

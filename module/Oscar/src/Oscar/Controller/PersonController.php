@@ -785,16 +785,14 @@ class PersonController extends AbstractOscarController
                     }
 
                     if($mode == 'replace'){
-                        echo "Remplacer $referent par $newReferent<br>\n";
                         $this->getPersonService()->refererentReplaceBy($newReferent, $referent);
+                        return $this->redirect()->toRoute('person/show', ['id' => $newReferent->getId()]);
 
                     }
                     else {
                         $this->getPersonService()->refererentAddFromReferent($newReferent, $referent);
                         return $this->redirect()->toRoute('person/show', ['id' => $newReferent->getId()]);
                     }
-
-
                     die("TODO");
 
 
