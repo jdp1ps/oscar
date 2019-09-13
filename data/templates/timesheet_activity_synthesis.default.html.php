@@ -70,7 +70,7 @@ $labels = [
             $colonneAbs = count($othersGroups['abs']);
             $colonneAbsTotal = $colonneAbs > 1 ? 1 : 0;
 
-            $colonneOthers = count($othersGroups['others']);
+            $colonneOthers = count($othersGroups['other']);
             $colonneOthersTotal = $colonneOthers > 1 ? 1 : 0;
 
             $colonneOthers = count($othersGroups['education']);
@@ -81,8 +81,6 @@ $labels = [
             $colspanLot = count($wps) -1 +1;
             $colspanCE = count($ces) -1;
             if( $colspanCE > 1 ) $colspanCE +=1;
-
-            $colEDU = count()
             ?>
             <th class="research" colspan="<?= $colonneCategorieRecherche + $colonneCategorieRechercheTotal ?>">Recherches</th>
 
@@ -197,8 +195,10 @@ $labels = [
                     <?= $this->duration($line['totalResearch']) ?>
                 </td>
 
+                <pre><?= print_r($line['othersGroups']['research'], true) ?></pre>
+
                 <?php foreach ($line['othersGroups']['research'] as $dt): ?>
-                    <?php foreach ($dt['others'] as $other=>$duration): ?>
+                    <?php foreach ($dt['others'] as $duration): ?>
                         <td class="ce research">
                             <?= $this->duration($duration) ?>
                         </td>

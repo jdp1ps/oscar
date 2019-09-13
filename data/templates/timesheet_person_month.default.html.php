@@ -414,6 +414,6 @@
     </tr>
     </tfoot>
 </table>
-<?php if( $outputFormat == 'html' ): ?>
+<?php if( isset($outputFormat) && $outputFormat == 'html' ): ?>
     <a href="?action=export2&out=pdf&period=<?= $datas['period'] ?>&personid=<?= $_REQUEST['personid'] ?>">Télécharger le PDF</a>
 <?php endif; ?>

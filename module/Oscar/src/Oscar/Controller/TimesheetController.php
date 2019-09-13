@@ -537,18 +537,15 @@ class TimesheetController extends AbstractOscarController
             $output['format'] = 'pdf';
             /** @var TimesheetActivityPeriodHtmlFormatter $formatter */
             $formatter = $this->getServiceLocator()->get('TimesheetActivityPeriodPdfFormatter');
-            $html = $formatter->render($output);
+            $formatter->render($output);
             die();
         }
-        elseif ($format == "html") {
+        else {
             $output['format'] = 'html';
             /** @var TimesheetActivityPeriodPdfFormatter $formatter */
             $formatter = $this->getServiceLocator()->get('TimesheetActivityPeriodHtmlFormatter');
             $html = $formatter->render($output);
             die($html);
-        }
-        else {
-            return $output;
         }
     }
 

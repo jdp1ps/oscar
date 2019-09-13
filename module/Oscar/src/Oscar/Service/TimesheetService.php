@@ -1291,6 +1291,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             // Total (hors ABS)
             'totalWork' => 0.0,
 
+            // Total Recherche (Workpackage + groupe 'research')
+            'totalResearch' => 0.0,
+
             'comments' => []
         ];
 
@@ -1389,7 +1392,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'others' => [],
                 'othersGroups' => [],
                 'totaux' => [
-                    'total' => 0.0
+                    'total' => 0.0,
+                    'totalWork' => 0.0,
+                    'totalResearch' => 0.0
                 ],
                 'totalMain' => 0.0,
                 'totalProjects' => 0.0,
@@ -1869,7 +1874,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $dayIndex = ($i % 7);
             $dayOfWeek = $dayIndex +1;
 
-            $duration = $daysDetails['days'][$dayOfWeek];
+            $duration = array_key_exists($dayOfWeek, $daysDetails['days']) ? $daysDetails['days'][$dayOfWeek] : 0;
             $maxlength = $daysDetails['max'];
             $minlength = $daysDetails['min'];
 
@@ -2820,11 +2825,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $daysInfos[intval($day)]['duration'] += $timesheet->getDuration();
 
             $totalGroup[$groupFamily]['total'] += $timesheet->getDuration();
+
+            if(!array_key_exists($day, $totalGroup[$groupFamily]['days'])) $totalGroup[$groupFamily]['days'][$day] = 0.0;
             $totalGroup[$groupFamily]['days']["$day"] += $timesheet->getDuration();
+
             $declarations[$path][$group]['subgroup'][$subGroup]['total'] += $timesheet->getDuration();
+
+
+            if(!array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days'])) $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
             $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] += $timesheet->getDuration();
-            $declarations[$path][$group]['subgroup'][$subGroup]['days']['total'] += $timesheet->getDuration();
+
+//            $declarations[$path][$group]['subgroup'][$subGroup]['days']['total'] += $timesheet->getDuration();
             $declarations[$path][$group]['total'] += $timesheet->getDuration();
+
             $totalPeriod += $timesheet->getDuration();
 
         }
