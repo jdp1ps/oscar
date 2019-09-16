@@ -4,13 +4,34 @@
 
 La version *Creed* necessite une mise à jour des librairies PHP via **composer**, vous devrez préalablement faire une mise à jour de la version de PHP en passant à la version **PHP 7.3**. Attention, Postgresql doit rester en version 9.x. 
 
-## Appliquer cette mise à jour depuis Oscar 2.9
+### Mise à jour de PHP sur Debian
 
-Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
+```bash
+apt update
+apt upgrade
+apt install php7.3 php7.3-bz2 php7.3-cli php7.3-curl php7.3-dom php7.3-gd php7.3-intl php7.3-ldap php7.3-mbstring php7.3-pgsql php7.3-xml php7.3-zip
+update-alternatives --set php /usr/bin/php7.3
+update-alternatives --set phar /usr/bin/phar7.3
+update-alternatives --set phar.phar /usr/bin/phar.phar7.3
+```
 
-> Cette mise à jour implique le **Mettre à jour les librairies PHP** avec *composer*. Si des paquets PHP sont manquants, composer vous les indiquera.
+Puis mettre à jour Oscar : 
 
-En complément, plusieurs options de configuration DOIVENT être complétées :
+```bash
+# MAJ Oscar
+git checkout creed
+git pull
+
+# MAJ des librairies PHP
+composer install
+
+# MAJ de la BDD
+php vendor/doctrine-module orm:schema-tool:update --dump-sql
+php vendor/doctrine-module orm:schema-tool:update --force
+```
+
+> Lors de la mise à jour des librairies PHP, si vous avec les composants PHP manquants, insallez les via `apt` (merci des les signaler pour les ajouter à la liste des prérequis PHP de la documentation)
+
 
 ## Nouveautés
 
