@@ -202,6 +202,20 @@ return array(
             'activity' => []
         ],
 
+        // Emplacement du template pour les feuilles de temps individuelles mensuelles
+        'timesheet_person_month_template' => realpath(__DIR__.'/../../data/templates/timesheet_person_month.default.html.php'),
+
+        // Emplacement du template pour les feuilles de temps des synthèse des activités
+        'timesheet_activity_synthesis_template' => realpath(__DIR__.'/../../data/templates/timesheet_activity_synthesis.default.html.php'),
+
+        // Permet de télécharger les feuilles de temps avant validation
+        'timesheet_preview' => false,
+
+        // Propose une version Excel pour les feuilles de temps mensuelle des personnes/activités
+        'timesheet_allow_excel' => false,
+
+        //
+
         // Notification par défaut
         /*** Notifications ***/
         'notifications' => [
@@ -233,7 +247,7 @@ return array(
             // Il s'agit de l'expression régulière utilisée par Oscar pour
             // vérifier la validité formelle du PFI saisi.
             // ex: 209ED2024
-            'pfi' => '/^[0-9]{3}[A-Z]{2,3}[0-9]{2,4}$/mi'
+            'pfi' => '/^([0-9]{3}[A-Z]{2,3}[0-9]{2,4})|([0-9]{3}C[0-9]{3}[A-Z]{1}[FPI]?)$/mi'
         ]
     ],
 
@@ -275,6 +289,7 @@ return array(
                 ]
             ),
         ),
+
         'driver' => array(
             'oscar_entities' => array(
                 'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',

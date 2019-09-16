@@ -2,8 +2,10 @@
 
 namespace Oscar\Service;
 
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
@@ -21,6 +23,7 @@ use Oscar\Provider\Privileges;
 use Oscar\Utils\ConfigurationMergable;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\DateTimeUtilsTest;
+use Oscar\Utils\StringUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Db\Sql\Ddl\Constraint\ForeignKey;
@@ -398,6 +401,12 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ];
         }
         return $out;
+    }
+
+    public function getValidationsPeriodPerson( Person $person ){
+        $out = [];
+        $validationsPeriods = $this->getValidationPeriodRepository()->getValidationsPeriodPerson($person->getId());
+        return $validationsPeriods;
     }
 
     /** Retourne la liste des périodes en conflits */
@@ -1282,6 +1291,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             // Total (hors ABS)
             'totalWork' => 0.0,
 
+            // Total Recherche (Workpackage + groupe 'research')
+            'totalResearch' => 0.0,
+
             'comments' => []
         ];
 
@@ -1380,7 +1392,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 'others' => [],
                 'othersGroups' => [],
                 'totaux' => [
-                    'total' => 0.0
+                    'total' => 0.0,
+                    'totalWork' => 0.0,
+                    'totalResearch' => 0.0
                 ],
                 'totalMain' => 0.0,
                 'totalProjects' => 0.0,
@@ -1459,7 +1473,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     $strData[$person]['totalWork'] += $duration;
                     $totaux['totalCe'] += $duration;
                     $totaux['ce'][$acronym] += $duration;
-                    $totaux['totalWork'] += $duration;
                 }
                 $totaux['totalResearch'] += $duration;
                 $strData[$person]['totalResearch'] += $duration;
@@ -1861,7 +1874,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $dayIndex = ($i % 7);
             $dayOfWeek = $dayIndex +1;
 
-            $duration = $daysDetails['days'][$dayOfWeek];
+            $duration = array_key_exists($dayOfWeek, $daysDetails['days']) ? $daysDetails['days'][$dayOfWeek] : 0;
             $maxlength = $daysDetails['max'];
             $minlength = $daysDetails['min'];
 
@@ -2691,15 +2704,27 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $num = [];
         $pfi = [];
         $totalPeriod = 0.0;
+        $totalGroup = [];
+        $organizationsPrimary = [];
+        $activities = [];
+
+        // Sous total de l'activité effective
+        $active = [
+            'total' => 0.0,
+            'days' => []
+        ];
 
         $validationsDone = [];
 
         $declarations = [
             'activities' => [],
-            'others' => []
+            'others' => [],
+            'totalGroup' => []
         ];
 
         $others = $this->getOthersWP();
+
+        $daysInfos = $this->getDaysPeriodInfosPerson($person, $periodBounds['year'], $periodBounds['month']);
 
         /** @var TimeSheet $timesheet */
         foreach ($query->getQuery()->getResult() as $timesheet) {
@@ -2717,33 +2742,42 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 if( !in_array($timesheet->getActivity()->getCodeEOTP(), $pfi) ) $pfi[] = $timesheet->getActivity()->getCodeEOTP();
                 if( !in_array($timesheet->getActivity()->getAcronym(), $acronyms) ) $acronyms[] = $timesheet->getActivity()->getAcronym();
                 if( !in_array($timesheet->getActivity()->getOscarNum(), $num) ) $num[] = $timesheet->getActivity()->getOscarNum();
+                if( !in_array($timesheet->getActivity(), $activities) ){
+                    $activities[] = $timesheet->getActivity();
+                }
             }
 
             $group = 'Projet inconnue';
+            $acronym = '';
             $groupId = null;
             $subGroup = $timesheet->getLabel();
             $subGroupId = 'invalid ID';
             $subGroupType = 'invalid Type';
+            $groupFamily = 'research';
             $day = $timesheet->getDateFrom()->format('d');
 
             if ($timesheet->getActivity()) {
                 $path = 'activities';
                 $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
                 $groupType = 'activity';
+                $groupFamily = 'research';
                 $groupId = $timesheet->getActivity()->getId();
                 $subGroup = sprintf('%s - %s', $timesheet->getWorkpackage()->getCode(), $timesheet->getWorkpackage()->getLabel());
                 $subGroupId = $timesheet->getWorkpackage()->getId();
                 $subGroupType = "wp";
+                $label = $subGroup;
+                $acronym = $timesheet->getActivity()->getAcronym();
             }
 
             if (array_key_exists($timesheet->getLabel(), $others)) {
                 $path = 'others';
-                $group = 'Hors-lot';
+                $group = $others[$timesheet->getLabel()]['label'];
                 $groupId = -1;
                 $groupType = 'others';
-                $subGroup = $others[$timesheet->getLabel()]['label'];
+                $groupFamily = $others[$timesheet->getLabel()]['group'];
                 $subGroupId = $timesheet->getLabel();
                 $subGroupType = $timesheet->getLabel();
+                $label = $others[$timesheet->getLabel()]['label'];
             }
 
             if (!array_key_exists($group, $declarations[$path])) {
@@ -2751,49 +2785,130 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'label' => $group,
                     'id' => $groupId,
                     'type' => $groupType,
+                    'group' => $groupFamily,
+                    'acronym' => $acronym,
                     'total' => 0.0,
                     'subgroup' => [],
                 ];
             }
 
+            if (!array_key_exists($groupFamily, $totalGroup)) {
+                $totalGroup[$groupFamily] = [
+                    'total' => 0.0,
+                    'days' => []
+                ];
+            }
+
             if (!array_key_exists($subGroup, $declarations[$path][$group]['subgroup'])) {
                 $declarations[$path][$group]['subgroup'][$subGroup] = [
-                    'label' => $subGroup,
+                    'label' => $label,
                     'id' => $subGroupId,
                     'type' => $subGroupType,
+                    'group' => $groupFamily,
                     'total' => 0.0,
                     'days' => [],
                 ];
             }
 
             if (!array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days'])) {
-                $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
+                $declarations[$path][$group]['subgroup'][$subGroup]['days']["$day"] = 0.0;
             }
 
+            if( $groupFamily != 'abs' ){
+                if( !array_key_exists($day, $active['days']) ){
+                    $active['days'][$day] = 0.0;
+                }
+                $active['total'] += $timesheet->getDuration();
+                $active['days'][$day] += $timesheet->getDuration();
+            }
+
+            $daysInfos[intval($day)]['duration'] += $timesheet->getDuration();
+
+            $totalGroup[$groupFamily]['total'] += $timesheet->getDuration();
+
+            if(!array_key_exists($day, $totalGroup[$groupFamily]['days'])) $totalGroup[$groupFamily]['days'][$day] = 0.0;
+            $totalGroup[$groupFamily]['days']["$day"] += $timesheet->getDuration();
+
             $declarations[$path][$group]['subgroup'][$subGroup]['total'] += $timesheet->getDuration();
+
+
+            if(!array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days'])) $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
             $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] += $timesheet->getDuration();
-            $declarations[$path][$group]['subgroup'][$subGroup]['days']['total'] += $timesheet->getDuration();
+
+//            $declarations[$path][$group]['subgroup'][$subGroup]['days']['total'] += $timesheet->getDuration();
             $declarations[$path][$group]['total'] += $timesheet->getDuration();
+
             $totalPeriod += $timesheet->getDuration();
 
         }
 
+        /** @var Activity $activity */
+        foreach ($activities as $activity){
+            /** @var ActivityOrganization $activityOrganization */
+            foreach ($activity->getOrganizations() as $activityOrganization) {
+                if($activityOrganization->isPrincipal()){
+                    $role = (string)$activityOrganization->getRole();
+                    $organization = (string)$activityOrganization->getOrganization();
+                    if( !array_key_exists($role, $organizationsPrimary) ){
+                        $organizationsPrimary[$role] = [];
+                    }
+                    if( !in_array($organization, $organizationsPrimary[$role]) ){
+                        $organizationsPrimary[$role][] = $organization;
+                    }
+                }
+            }
+        }
+
+        $periodLabel = DateTimeUtils::extractPeriodDatasFromString($period);
+
         $output = [
+            'filename' => Slugify::create()->slugify("feuille de temps $person $period"),
             'person' => (string)$person,
+            'active' => $active,
             'commentaires' => $commentaires,
+            'totalGroup' => $totalGroup,
+            'organizations' => $organizationsPrimary,
             'num' => implode(', ', $num),
             'pfi' => implode(', ', $pfi),
             'acronyms' => implode(', ', $acronyms),
             'person_id' => $person->getId(),
             'period' => $period,
+            'periodLabel' => $periodLabel['periodLabel'],
             'totalDays' => $periodBounds['totalDays'],
+            'totalGroup' => $totalGroup,
             'total' => $totalPeriod,
-            'daysInfos' => $this->getDaysPeriodInfosPerson($person, $periodBounds['year'], $periodBounds['month']),
+            'daysInfos' => $daysInfos,
             'declarations' => $declarations,
         ];
 
-
         return $output;
+    }
+
+    public function getDatasActivityDates(Activity $activity, $periodDebut, $periodFin){
+        $datas = [
+            'activity_id' => $activity->getId(),
+            'activity_label' => (string)$activity,
+            'periode_debut' => $periodDebut,
+            'periode_fin' => $periodFin,
+        ];
+
+        // Obtention des IDS des déclarants
+        $personsIds = [];
+        foreach ($activity->getDeclarers() as $person) {
+            $personsIds[] = $person->getId();
+        }
+
+        if( count($personsIds) == 0 ){
+            throw new OscarException(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
+        }
+
+        //$validations = $this->getTimesheetService()->getDatasValidationPersonsPeriod($personsIds, $start, $end);
+        $datas = $this->getDatasDeclarersSynthesis($personsIds);
+
+        $horslots = $this->getOthersWP();
+
+
+        return $datas;
     }
 
 
@@ -2866,17 +2981,47 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $validations;
     }
 
-    public function getValidationHorsLotByReferent(Person $referent)
+    /**
+     * Retourne la liste des déclarations en fonction du validateur (référent)
+     * @param Person $referent
+     * @param null|string $filter Filtre de l'état
+     * @return ValidationPeriod[]
+     * @throws OscarException
+     */
+    public function getValidationHorsLotByReferent(Person $referent, $filter=null)
     {
         $validations = [];
         if ($referent) {
             $subordinates = $this->getServiceLocator()->get('PersonService')->getSubordinates($referent);
             if (count($subordinates))
-                $validations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
+                $parameters = [
+                    'persons' => $subordinates,
+                    'group' => ValidationPeriod::GROUP_OTHER,
+                ];
+
+                $validationsQuery = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
                     ->where('vp.declarer IN(:persons)')
-                    ->setParameter('persons', $subordinates)
-                    ->getQuery()
-                    ->getResult();
+                    ->andWhere('vp.objectGroup = :group');
+
+                if( $filter == "tovalid" ){
+                    $parameters['step'] = ValidationPeriod::STATUS_VALID;
+                    $validationsQuery->andWhere('vp.status != :step');
+                }
+
+                elseif ($filter == 'valid' ) {
+                    $parameters['step'] = ValidationPeriod::STATUS_VALID;
+                    $validationsQuery->andWhere('vp.status = :step');
+                }
+
+                elseif ($filter == null ){
+
+
+                } else {
+                    throw new OscarException("Mauvaise utilisation de la méthode : getValidationHorsLotByReferent");
+                }
+
+                $validationsQuery->setParameters($parameters);
+                $validations = $validationsQuery->getQuery()->getResult();
         }
         return $validations;
     }

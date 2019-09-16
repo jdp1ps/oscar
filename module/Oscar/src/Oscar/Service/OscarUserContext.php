@@ -189,6 +189,20 @@ class OscarUserContext extends UserContext
         return $_ROLES;
     }
 
+    /**
+     * Retourne la liste des rolesID
+     *
+     * @return array
+     */
+    public function getRoleId()
+    {
+        static $_ROLES_ALL;
+        if ($_ROLES_ALL === null) {
+            $_ROLES_ALL = array_map(function($r){ return $r->getRoleId(); }, $this->getOscarRoles());
+        }
+        return $_ROLES_ALL;
+    }
+
 
     /**
      * Retourne la liste des roles "principaux".

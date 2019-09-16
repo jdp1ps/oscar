@@ -23,6 +23,8 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
+use Oscar\Entity\ValidationPeriod;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\PersonSearchStrategy;
@@ -44,9 +46,12 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
 
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// ACCESSEURS de SERVICE
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     * Retourne la configuration OSCAR.
-     *
      * @return ConfigurationParser
      */
     protected function getOscarConfig()
@@ -55,10 +60,57 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     }
 
     /**
+     * @return OrganizationService
+     */
+    protected function getOrganizationService()
+    {
+        return $this->getServiceLocator()->get('OrganizationService');
+    }
+
+    /**
      * @return PersonRepository
      */
     public function getRepository(){
         return $this->getEntityManager()->getRepository(Person::class);
+    }
+
+    /**
+     * @return NotificationService
+     */
+    protected function getNotificationService(){
+        return $this->getServiceLocator()->get('NotificationService');
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLoggerService(){
+        return $this->getServiceLocator()->get('Logger');
+    }
+
+
+    /**
+     * @return ActivityLogService
+     */
+    protected function getActivityLogService()
+    {
+        return $this->getServiceLocator()->get('ActivityLogService');
+    }
+
+    /**
+     * @return OscarUserContext
+     */
+    protected function getOscarUserContext()
+    {
+        return $this->getServiceLocator()->get('OscarUserContext');
+    }
+
+    /**
+     * @return Person
+     */
+    protected function getCurrentPerson()
+    {
+        return $this->getOscarUserContext()->getCurrentPerson();
     }
 
     /**
@@ -75,22 +127,42 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $searchStrategy;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// SYSTÈME de RECHERCHE
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Supprimer la personne de l'index de recherche.
+     * @param $id
+     */
     public function searchDelete( $id )
     {
         $this->getSearchEngineStrategy()->remove($id);
     }
 
+    /**
+     * Mise à jour de la personne dans l'index.
+     * @param Person $person
+     */
     public function searchUpdate( Person $person )
     {
         $this->getSearchEngineStrategy()->update($person);
     }
 
+    /**
+     * Remise à zéro de l'index
+     */
     public function searchIndex_reset()
     {
         $this->getSearchEngineStrategy()->resetIndex();
     }
 
+    /**
+     * Reconstruction de l'index de recherche
+     * @return mixed
+     */
     public function searchIndexRebuild(){
         $this->searchIndex_reset();
         $persons = $this->getEntityManager()->getRepository(Person::class)->findAll();
@@ -98,10 +170,64 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     }
 
     /**
-     * Retourne les N+1 de la personne.
-     *
+     * Recherche textuelle parmis les personnes.
+     * @param $what
+     * @return Person[]
+     */
+    public function search($what){
+        $ids = $this->getSearchEngineStrategy()->search($what);
+
+        $query = $this->getRepository()->createQueryBuilder('p')
+            ->where('p.id IN(:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery();
+
+        return $query->getResult();
+    }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// RECUPÉRATION des DONNÉES
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// RECUPERATION d'OBJET (Person/Referent) /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Retourne la liste des Person via une liste d'ID.
+     * @param array $ids
+     * @return Person[]
+     */
+    public function getPersonsByIds( array $ids ){
+        $qb = $this->getBaseQuery()
+            ->where('p.id IN (:ids)')
+            ->setParameter('ids', $ids);
+        return $qb->getQuery()->execute();
+    }
+
+    /**
+     * Retourne l'objet Referent
+     * @param $referentId
+     * @param bool $throw
+     * @return Referent|null
+     * @throws OscarException
+     */
+    public function getReferentById( $referentId, $throw = true ){
+        $referent = $this->getEntityManager()->getRepository(Referent::class)->find($referentId);
+        if( $throw === true && !$referent ){
+            throw new OscarException("Impossible de charger le référent");
+        }
+        return $referent;
+    }
+
+    /// RECUPERATION de COLLECTION (Person/Referent) ///////////////////////////////////////////////////////////////////
+
+    /**
+     * Retourne les N+1 (Référents) de la personne.
      * @param Person $person
-     * @return array
+     * @return Person[]
      */
     public function getManagers( Person $person ){
         if( !$person ) return [];
@@ -114,10 +240,21 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     }
 
     /**
-     * Retourne les N-1 de la personne.
-     *
+     * Retourne les personnes référentes de la personne.
+     * @param $personId ID du subordonné
+     * @return Referent[]
+     */
+    public function getReferentsPerson( $personId ){
+        $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->where('r.person = :personId')
+            ->setParameter('personId', $personId);
+        return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne les N-1 (Subordonnés) de la personne.
      * @param Person $person
-     * @return array
+     * @return Person[]
      */
     public function getSubordinates( Person $person ){
         if( !$person ) return [];
@@ -129,9 +266,37 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $qb->setParameter('person', $person)->getQuery()->getResult();
     }
 
+    /**
+     * Retourne les personnes subordonnées du référent.
+     * @param $personId ID du référents
+     * @return Referent[]
+     */
+    public function getSubordinatesPerson( $personId ){
+        $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->where('r.referent = :personId')
+            ->setParameter('personId', $personId);
+        return $query->getQuery()->getResult();
+    }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// AJOUT
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Ajoute un référent à la personne
+     * @param $referent_id ID du référent
+     * @param $person_id ID du subordonné
+     * @return bool
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function addReferent( $referent_id, $person_id ){
-        $referent = $this->getPerson($referent_id);
-        $person = $this->getPerson($person_id);
+        $referent = $this->getPersonById($referent_id, true);
+        $person = $this->getPersonById($person_id, true);
 
         // @todo Vérifier si le référent n'est pas déjà identifié
 
@@ -143,28 +308,126 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return true;
     }
 
-    public function removeReferentById( $referent_id ){
-        $referent = $this->getEntityManager()->getRepository(Referent::class)->find($referent_id);
-        $this->getEntityManager()->remove($referent);
+    /**
+     * Remplace la personne référente par une autre personne.
+     * @param Person $personNewReferent
+     * @param Person $fromPerson
+     * @return bool
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function  refererentReplaceBy( Person $personNewReferent, Person $fromPerson ){
+        // Liste des Referent existant
+        $referents = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->select('r')
+            ->where('r.referent = :personReferent')
+            ->setParameters(['personReferent' => $fromPerson ])
+            ->getQuery()
+            ->getResult();
+
+        /** @var Referent $referent */
+        foreach ($referents as $referent) {
+            $this->getLoggerService()->notice(sprintf("$personNewReferent a remplacé $fromPerson pour " . $referent->getPerson()));
+            $referent->setReferent($personNewReferent);
+        }
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        // Mise à jour des déclarations en attentes
+        $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod){
+            $this->getLoggerService()->notice(sprintf("$personNewReferent est maintenant validateur administratif pour $$validationPeriod"));
+            $validationPeriod->removeValidatorAdm($fromPerson);
+            $validationPeriod->addValidatorAdm($personNewReferent);
+        }
         $this->getEntityManager()->flush();
         return true;
     }
 
+    public function refererentAddFromReferent(Person $personNewReferent, Person $fromPerson)
+    {
+        try {
+            // Liste des subordonnés / création des référents
+            $subordinates = $this->getSubordinates($fromPerson);
 
+            foreach ($subordinates as $subordinate) {
+                $this->getLoggerService()->notice(sprintf("$personNewReferent est maintenant référent pour $subordinate"));
+                $r = new Referent();
+                $this->getEntityManager()->persist($r);
+                $r->setPerson($subordinate)
+                    ->setReferent($personNewReferent);
+            }
 
-    public function getReferentsPerson( $personId ){
-        $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
-            ->where('r.person = :personId')
-            ->setParameter('personId', $personId);
-        return $query->getQuery()->getResult();
+            // Déclarations
+            /** @var TimesheetService $timesheetService */
+            $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+            $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
+            /** @var ValidationPeriod $validationPeriod */
+            foreach ($validationPeriods as $validationPeriod){
+                $this->getLoggerService()->notice(sprintf("$personNewReferent est maintenant validateur administratif pour $$validationPeriod"));
+                $validationPeriod->addValidatorAdm($personNewReferent);
+            }
+            $this->getEntityManager()->flush();
+        }
+        catch ( \Exception $e ){
+            throw new OscarException("Impossible d'ajouter le référent '$personNewReferent' à partir de '$fromPerson' : " . $e->getMessage());
+        }
     }
 
-    public function getSubordinatesPerson( $personId ){
-        $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
-            ->where('r.referent = :personId')
-            ->setParameter('personId', $personId);
-        return $query->getQuery()->getResult();
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// SUPPRESSION
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Supprime le référent.
+     * @param $referent_id
+     * @return bool
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function removeReferentById( $referent_id ){
+        try {
+            $referent = $this->getReferentById($referent_id);
+            $this->getEntityManager()->remove($referent);
+            $this->getEntityManager()->flush();
+            return true;
+        } catch ( \Exception $e ){
+            throw new OscarException(sprintf(_('Impossible de supprimer le référent(%s) : %s', $referent_id, $e->getMessage())));
+        }
     }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// AUTRES
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Retourne la liste des organizations où la personne a un rôle principale.
+     * @param Person $person
+     * @return Organization[]
+     */
+    public function getOrganizationsPersonWithPrincipalRole(Person $person){
+        return $this->getOrganizationService()->getOrganizationsWithPersonRolled($person, null, true);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// MAILINGS
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Lance la procédure de relance par email pour les personnes ayant souscrit à
@@ -217,13 +480,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             }
         }
     }
-
-
-    protected function getDateMoment($date){
-        $moment = new Moment($date);
-        return $moment->format('l d F Y');
-    }
-
 
     public function mailNotificationsPerson( $person, $debug = true ){
         /** @var ConfigurationParser $configOscar */
@@ -279,42 +535,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $mailer->send($mail);
     }
 
-    public function getRolesPrincipaux( $privilege = null){
-        $query = $this->getEntityManager()->getRepository(Role::class)->createQueryBuilder('r');
-        if( $privilege != null ){
-            $query->innerJoin('r.privileges', 'p')
-                ->where('p.code = :privilege')
-            ->setParameter('privilege', $privilege);
-        }
 
-        return $query->getQuery()->getResult();
-
-    }
-
-
-    /**
-     * Retourne la liste des organizations où la personne a un rôle principale.
-     *
-     * @param Person $person
-     */
-    public function getOrganizationsPersonWithPrincipalRole(Person $person){
-
-
-        $roles = $this->getOscarUserContext()->getRoleIdPrimary();
-
-        $structures = $this->getEntityManager()->getRepository(Organization::class)->createQueryBuilder('o')
-            ->innerJoin('o.persons', 'p')
-            ->innerJoin('p.roleObj', 'r')
-            ->where('p.person = :person AND r.roleId IN(:roles)')
-            ->setParameters([
-               'person'    => $person,
-               'roles'     => $roles,
-            ])
-            ->getQuery()
-            ->getResult();
-
-        return $structures;
-    }
 
     /**
      * Charge en profondeur la liste des personnes disposant du privilége sur une
@@ -419,26 +640,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
     }
 
 
-
-    public function search($what){
-
-        $ids = $this->getSearchEngineStrategy()->search($what);
-
-        $query = $this->getRepository()->createQueryBuilder('p')
-            ->where('p.id IN(:ids)')
-            ->setParameter('ids', $ids)
-            ->getQuery();
-
-        return $query->getResult();
-    }
-
-    public function getByIds( array $ids )
-    {
-        $qb = $this->getBaseQuery()
-            ->where('p.id IN (:ids)')
-            ->setParameter('ids', $ids);
-        return $qb->getQuery()->execute();
-    }
 
 
     private $_cachePersonLdapLogin;
@@ -692,6 +893,38 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $resultByPage);
     }
 
+
+    /**
+     * Retourne la liste des identifiants des personnes qui déclarent des feuilles de temps.
+     *
+     * @return array
+     */
+    public function getDeclarersIds(){
+        $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
+            ->from(Person::class, 'p')
+            ->innerJoin('p.workPackages', 'wp')
+            ->getQuery()
+            ->getResult(Query::HYDRATE_ARRAY);
+
+        $declarersIds = array_map('current', $persons);
+
+        return $declarersIds;
+    }
+
+    /**
+     * Retourne la liste des identifiants des personnes référentes (N+1 - Ils assurent la validation administrative d'une
+     * ou plusieurs personnes).
+     */
+    public function getNp1Ids(){
+        $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
+            ->from(Referent::class, 'r')
+            ->innerJoin('r.referent', 'p')
+            ->getQuery()
+            ->getResult(Query::HYDRATE_ARRAY);
+        $np1Ids = array_map('current', $persons);
+        return $np1Ids;
+    }
+
     /**
      * @param string|null $search
      * @param int         $currentPage
@@ -708,9 +941,32 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
         $query = $this->getBaseQuery();
 
-        $query->leftJoin('p.organizations', 'o')
+        // PATCH : Visiblement, ces INNER JOIN provoquent un delais
+        // de requêtage de l'espace
+        /*
+         $query->leftJoin('p.organizations', 'o')
             ->leftJoin('p.activities', 'a');
+        */
+        if( $filters['declarers'] == 'on' ){
+            $ids = $this->getDeclarersIds();
+            if( array_key_exists('ids', $filters) ){
+                $filters['ids'] = array_intersect($filters['ids'], $ids);
+            }
+            else {
+                $filters['ids'] = $ids;
+            }
+        }
 
+        // FIltrer les IDS des personnes nommées N+1 explicitement (Objet 'Referent')
+        if( $filters['np1'] == 'on' ){
+            $ids = $this->getNp1Ids();
+            if( array_key_exists('ids', $filters) ){
+                $filters['ids'] = array_intersect($filters['ids'], $ids);
+            }
+            else {
+                $filters['ids'] = $ids;
+            }
+        }
 
         if( $filters['leader'] ){
             $query = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
@@ -733,7 +989,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             try {
                 $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery($connector, $connectorValue);
             }catch( \Exception $e ){
-                die($e->getTraceAsString());
+                $this->getLoggerService()->err("Requête sur le connecteur : " . $e->getMessage());
+                throw new OscarException("Impossible d'obtenir les personnes via l'UI de connector");
             }
         }
 
@@ -750,7 +1007,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                         $filters['ids'] = $ids;
                     }
                 } catch( \Exception $e ){
-                    $this->getLoggerService()->warn(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
+                    $this->getLoggerService()->err(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
                     // Ancienne méthode
                     $searchR = str_replace('*', '%', $search);
                     $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
@@ -801,7 +1058,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                 }
 
             } catch(\Exception $e ){
-                throw $e;
+                $this->getLoggerService()->err("Impossible de charger les personnes via les rôles des authentifications : " . $e->getMessage());
+                throw new OscarException("Erreur de chargement des rôles via l'authentification");
             }
 
 
@@ -815,9 +1073,10 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
             if( $filterLdap ) {
 
+
                 // Récupération des IDPERSON avec les filtres LDAP
                 $rsm = new Query\ResultSetMapping();
-                $rsm->addScalarResult('person_id', 'person_id');;
+                $rsm->addScalarResult('person_id', 'person_id');
                 $native = $this->getEntityManager()->createNativeQuery(
                     'select distinct id as person_id from person where ' . implode(' OR ',
                         $filterLdap),
@@ -829,8 +1088,8 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                         $ids[] = $row['person_id'];
                     }
                 } catch (\Exception $e) {
-                    echo $e->getMessage() . "\n";
-                    echo $e->getTraceAsString();
+                    $this->getLoggerService()->err("Impossible de charger les personnes via les filtres LDAP : " . $e->getMessage());
+                    throw new OscarException("Impossible de charger les personnes via les filtres LDAP");
                 }
             }
 
@@ -860,7 +1119,9 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
                     $ids[] = $row['person_id'];
                 };
             } catch(\Exception $e ){
-                throw $e;
+                $msg = "Impossible de charger les personnes via leur implication dans les organisations/activités";
+                $this->getLoggerService()->err("$msg : " . $e->getMessage());
+                throw new OscarException($msg);
             }
 
             // On compète la requète en réduisant les résultats à la liste
@@ -890,10 +1151,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             }
         }
 
-//        var_dump($query->getDQL()); die();
-
-        return new UnicaenDoctrinePaginator($query, $currentPage,
-            $resultByPage);
+        return new UnicaenDoctrinePaginator($query, $currentPage, $resultByPage);
     }
 
     /**
@@ -1005,44 +1263,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         return $queryBuilder;
     }
 
-    /**
-     * @return NotificationService
-     */
-    protected function getNotificationService(){
-        return $this->getServiceLocator()->get('NotificationService');
-    }
 
-    /**
-     * @return Logger
-     */
-    protected function getLoggerService(){
-        return $this->getServiceLocator()->get('Logger');
-    }
-
-
-    /**
-     * @return ActivityLogService
-     */
-    protected function getActivityLogService()
-    {
-        return $this->getServiceLocator()->get('ActivityLogService');
-    }
-
-    /**
-     * @return OscarUserContext
-     */
-    protected function getOscarUserContext()
-    {
-        return $this->getServiceLocator()->get('OscarUserContext');
-    }
-
-    /**
-     * @return Person
-     */
-    protected function getCurrentPerson()
-    {
-        return $this->getOscarUserContext()->getCurrentPerson();
-    }
 
 
 

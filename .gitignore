@@ -66,6 +66,10 @@ data/documents/public/**
 data/documents/request/**
 !data/documents/request/.gitkeep
 
+# Gabarits
+data/templates/timesheet_activity_synthesis.html.php
+data/templates/timesheet_person_month.html.php
+
 # Fichiers d'exemple
 !data/timesheet_model.xls
 !data/backup_oscar-empty.sql

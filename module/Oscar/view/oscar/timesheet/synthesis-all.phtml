@@ -80,11 +80,18 @@
                 <span>
                     <i class="icon-calendar"></i>
                     {{ p.label | formatPeriod }}
-                    <a :href="'/feuille-de-temps/synthesisactivity?activity_id=<?= $activity->getId() ?>&format=html&period=' + p.label"
+                    <a :href="'/feuille-de-temps/synthesisactivity?activity_id=<?= $activity->getId() ?>&format=pdf&period=' + p.label"
                        class="btn btn-xs btn-primary">
-                        <i class="icon-calendar"></i>
+                        <i class="icon-file-pdf"></i>
                         Feuille de temps de l'activité
                     </a>
+                    <?php if( $this->options()->allowTimesheetExcel() ): ?>
+                    <a :href="'/feuille-de-temps/synthesisactivity?activity_id=<?= $activity->getId() ?>&format=excel&period=' + p.label"
+                       class="btn btn-xs btn-default">
+                        <i class="icon-file-excel"></i>
+                        version excel
+                    </a>
+                    <?php endif; ?>
                 </span>
 
                     <small class="total">
@@ -103,10 +110,16 @@
                                 Répartition mensuelle
                             </a>
 
-                            <a :href="'/feuille-de-temps/excel?action=export&period=' +p.label +'&personid=' + l.personId"
+                            <!--<a :href="'/feuille-de-temps/excel?action=export&period=' +p.label +'&personid=' + l.personId"
                                class="btn btn-xs btn-default">
                                 <i class="icon-file-excel"></i>
-                                Feuille de temps (Excel)
+                                Feuille de temps (PDF)
+                            </a>-->
+
+                            <a :href="'/feuille-de-temps/excel?action=export2&period=' +p.label +'&personid=' + l.personId"
+                               class="btn btn-xs btn-default">
+                                <i class="icon-file-excel"></i>
+                                Feuille de temps (PDF)
                             </a>
 
                         </strong>

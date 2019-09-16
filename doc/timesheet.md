@@ -385,11 +385,58 @@ Et le détails de chaque déclaration
 ![Synthèse 2](images/synthes-activite-details.png)
 
 
+
+## Documents générés
+
+Les documents générés disposent de plusieurs options disponibles dans l'interface de configuration Oscar
+
+![Synthèse 2](images/timesheet-options.png)
+
+
+### Personnalisation des rendus
+
+Vous pouvez modifier le rendu des documents en dupliquant les gabarits fournit par défaut : 
+
+ - Rendu des feuilles de temps individuelle mensuelle (`data/templates/timesheet_person_month.default.html.php`)
+ - Rendu des feuilles de temps de synthèse mensuelle des activités (`data/templates/timesheet_activity_synthesis.default.html.php`)
+ 
+Vous pouvez dupliquer les templates : 
+
+```bash
+cp data/templates/timesheet_person_month.default.html.php data/templates/timesheet_person_month.html.php
+cp data/templates/timesheet_activity_synthesis.default.html.php data/templates/timesheet_activity_synthesis.html.php
+``` 
+
+Puis surchargez la configuration dans le fichier `config/autoload/local.php` :
+
+```php
+<?php
+// config/autoload/local/php
+return array(
+    // ..
+    'oscar' => [
+        // ...
+        // Emplacement du template pour les feuilles de temps individuelles mensuelles
+        'timesheet_person_month_template' => realpath(__DIR__.'/../../data/templates/timesheet_person_month.html.php'),
+
+        // Emplacement du template pour les feuilles de temps des synthèse des activités
+        'timesheet_activity_synthesis_template' => realpath(__DIR__.'/../../data/templates/timesheet_activity_synthesis.html.php'),
+        
+        //...
+    ]
+);
+```
+
+> Les fichiers `data/templates/timesheet_person_month.html.php` et `data/templates/timesheet_activity_synthesis.html.php` seront ignorés par GIT.
+
+
 ## Usurpation
 
 Oscar intègre un mécanisme d'*usurpation* pour autoriser un tiers de compléter la feuille de temps d'une autre personne.
 
 L'interface de saisie est accessible depuis la fiche de la personne.
+
+
 
 ### Globale
 

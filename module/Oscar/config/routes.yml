@@ -95,7 +95,12 @@ timesheet:
                 defaults:
                     action: synthesisAll
 
-
+        export_activity_dates:
+            type: segment
+            options:
+                route: /synthesis-activity-dates
+                defaults:
+                    action: exportActivityDates
 
         resolve:
             type: segment

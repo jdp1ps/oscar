@@ -2,21 +2,25 @@
 /**
  * Created by PhpStorm.
  * User: bouvry
- * Date: 27/05/19
- * Time: 11:31
+ * Date: 21/08/19
+ * Time: 16:51
  */
 
 namespace Oscar\Formatter;
 
-use PhpOffice\PhpSpreadsheet\IOFactory;
+
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-
-
-class TimesheetActivityPeriodFormatter
+class TimesheetPersonPeriodFormatter
 {
+
+    public function format($datas, $options=null){
+        echo "<pre>";
+        var_dump($datas);
+        die("TODO");
+    }
+
     private $currentLineIndex;
     private $currentColIndex;
     private $letters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
@@ -139,7 +143,7 @@ class TimesheetActivityPeriodFormatter
         // Styles
         if( $style != null ){
             if( !array_key_exists($style, $this->styles) ){
-                throw new Exception("Style '$style' non référencé'");
+                throw new \Exception("Style '$style' non référencé'");
             }
 
             $this->getActiveSheet()->getStyle($this->getCurrentCellPosition())->applyFromArray($this->styles[$style]);
@@ -171,7 +175,7 @@ class TimesheetActivityPeriodFormatter
         header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
 
-        $writer = new Xlsx($this->spreadsheet);
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($this->spreadsheet);
         $writer->save('php://output');
         die();
     }
@@ -183,7 +187,7 @@ class TimesheetActivityPeriodFormatter
 
         // TODO orientation paysage avec DOMPdf
         $writer = IOFactory::createWriter($this->spreadsheet, 'Dompdf');
-            // new Mpdf($this->spreadsheet);
+        // new Mpdf($this->spreadsheet);
         $writer->save('php://output');
         die();
     }
@@ -273,10 +277,58 @@ class TimesheetActivityPeriodFormatter
 
         $baseFontSize = 10;
 
-        $headResearch = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
+        $headDayEven = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
             'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
-            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ff$colorResearch" ]],];
-        $this->addStyle("headResearch", $headResearch);
+            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ff71BDAE" ]],];
+
+        $this->addStyle("headDayEven", $headDayEven);
+
+        $headDayOdd = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
+            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffA3DCCF" ]],];
+
+        $headDayLock = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
+            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffdae5e2" ]],];
+
+
+        $cellEmpty = [ 'font' => [ 'normal' => true, 'size' => $baseFontSize],
+            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+            ];
+        $this->addStyle("cellEmpty", $cellEmpty);
+
+        $cellLock = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
+            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffdae5e2" ]],
+        ];
+        $this->addStyle("cellLock", $cellLock);
+
+        $cellValued = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
+            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffdae5e2" ]],
+            ];
+        $this->addStyle("cellValued", $cellValued);
+
+        $headGroup = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
+            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffdae5e2" ]],
+            ];
+        $this->addStyle("headGroup", $headGroup);
+
+        $headSubGroup = [ 'font' => [ 'normal' => true, 'size' => $baseFontSize],
+            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffA3DCCF" ]],
+        ];
+        $this->addStyle("headSubGroup", $headSubGroup);
+
+
+        $this->addStyle("headDayOdd", $headDayOdd);
+        $this->addStyle("headResearch", $headDayOdd);
+        $this->addStyle("headDay", $headDayOdd);
+        $this->addStyle("headDayLock", $headDayLock);
+
+
+
 
         $headAbs = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
             'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
@@ -303,6 +355,8 @@ class TimesheetActivityPeriodFormatter
             'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
         ];
         $this->addStyle("withValue", $withValue);
+
+
 
         $cellTotalBottom = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize+1 ],
             'borders' => [
@@ -390,21 +444,21 @@ class TimesheetActivityPeriodFormatter
         $this->addStyle("totalColumn", $totalColumn);
 
 
-        $wpWidth            = count($datas['wps']);
-        $ceWidth            = count($datas['ces']);
-        $educationWidth     = count($datas['othersGroups']['education']);
-        $absWidth           = count($datas['othersGroups']['abs']);
-        $otherWidth         = count($datas['othersGroups']['other']);
-        $researchWidth      = count($datas['othersGroups']['research']);
+        $daysWidth            = count($datas['daysInfos']);
+        $ceWidth            = 0;
+        $educationWidth     = 0;
+        $absWidth           = 0;
+        $otherWidth         = 0;
+        $researchWidth      = 0;
 
-        $fullWidth = $wpWidth + $ceWidth + $educationWidth + $absWidth + $otherWidth + $researchWidth + 3;
+        $fullWidth = 4 + $daysWidth + 3;
 
 
         $sizing = floor(($fullWidth -4) / 4);
 
 
         $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(40);
-        $this->drawCell("FEUILLE de TEMPS", $fullWidth, true, 'entete');
+        $this->drawCell("FEUILLE de TEMPS de " . $datas['person'], $fullWidth, true, 'entete');
         $this->nextLine();
         $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(30);
         $this->drawCell($datas['activity']['label'], $fullWidth, true, 'entete');
@@ -462,94 +516,97 @@ class TimesheetActivityPeriodFormatter
         $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(30);
         $this->drawCell(" ", 0, true);
 
+
 // LOTS
-        foreach ($datas['wps'] as $wp) {
-            $this->drawCell($wp['code'], 0, true, 'headResearch');
+        $this->drawCell($datas['period'], 7, true, 'headResearch');
+
+        $odd = true;
+        foreach ($datas['daysInfos'] as $i=>$day) {
+
+            $this->drawCell(/*$day['label'] . */"$i", 0, true, $day['locked'] ? 'headDayLock' : ($odd ? 'headDayOdd' : 'headDayEven'));
+            $odd = !$odd;
         }
         $this->drawCell('Total', 0, true, 'headResearch');
-
-        foreach ($datas['ces'] as $ce) {
-            $this->drawCell($ce, 0, true, 'headResearch');
-        }
-        foreach ($datas['othersGroups']['research'] as $r) {
-            $this->drawCell($r['label'], 0, true, 'headResearch');
-        }
-
-        $this->drawCell('Total', 0, true, 'headResearch');
-
-        foreach ($datas['othersGroups']['education'] as $r) {
-            $this->drawCell($r['label'], 0, true, 'headEducation');
-        }
-
-        foreach ($datas['othersGroups']['abs'] as $r) {
-            $this->drawCell($r['label'], 0, true, 'headAbs');
-        }
-
-        foreach ($datas['othersGroups']['other'] as $r) {
-            $this->drawCell($r['label'], 0, true, 'headOther');
-        }
-
-        $this->drawCell('Total actif', 0, true, 'person');
-
-        $colSign = $this->getCurrentCol();
-        $this->drawCell('TOTAL', 0, true, 'person');
-        $this->drawCell('Signature', 0, true, 'person');
 
         $this->nextLine();
 
-        foreach ($datas['foo'] as $person=>$line) {
 
-            $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(20);
-
-            // Recherche
-            $this->drawCell($person, 0, true, 'person');
-
-            foreach ($datas['wps'] as $wp) {
-                $code = $wp['code'];
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
-                $this->drawCell(number_format($line['main'][$code], 2), 0, true, $line['main'][$code] ? 'withValue' : 'noValue');
-            }
-
-            $this->drawCell($line['totalMain'], 0, true, 'totalColumn');
-
-            foreach ($datas['ces'] as $ce) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
-                $this->drawCell($line['ce'][$ce], 0, true, $line['ce'][$ce] ? 'withValue' : 'noValue');
-            }
-
-            foreach ($datas['othersGroups']['research'] as $r) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
-                $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
-            }
-            $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
-            $this->drawCell($line['totalResearch'], 0, true, 'totalColumn');
-
-            foreach ($datas['othersGroups']['education'] as $r) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorEducationBG");
-                $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
-            }
-
-            foreach ($datas['othersGroups']['abs'] as $r) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorAbsBG");
-                $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
-            }
-
-            foreach ($datas['othersGroups']['other'] as $r) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorOtherBG");
-                $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
-            }
-
-            $this->drawCell($line['totaux']['totalWork'], 0, true, 'totalColumn');
-            $this->drawCell($line['totaux']['total'], 0, true, 'totalColumn');
-            $this->drawCell(' ', 0, true, 'person');
+        foreach ($datas['declarations']['activities'] as $labelActivity=>$dataActivity) {
+            $this->drawCell('', 0, true);
+            $this->drawCell($labelActivity, 7, true, 'headGroup');
             $this->nextLine();
+
+            foreach ($dataActivity['subgroup'] as $labelLot=>$datalot) {
+                $this->drawCell('', 1, true);
+                $this->drawCell($labelLot, 6, true, 'headSubGroup');
+
+                foreach ($datas['daysInfos'] as $i=>$day) {
+                    $dayKey = $i<10 ? "0$i" : "$i";
+                    $class = 'cellEmpty';
+                    $value = '0';
+
+                    if( array_key_exists($dayKey, $datalot['days']) ){
+                        $class = 'cellValued';
+                        $value = number_format($datalot['days'][$dayKey], 2);
+                    }
+
+                    if( $day['locked'] ){
+                        $class = 'cellLock';
+                        $value = $value == '0' ? '' : $value;
+                    }
+                    $this->drawCell($value, 0, true, $class);
+                }
+                $this->drawCell($datalot['total'], 0, true, 'headResearch');
+
+                $this->nextLine();
+            }
         }
+
+        foreach ($datas['declarations']['others'] as $otherLabel=>$otherData) {
+            $this->drawCell('', 0, true);
+            $this->drawCell($otherLabel, 7, true, 'headGroup');
+            $this->nextLine();
+
+            foreach ($otherData['subgroup'] as $labelLot=>$dataLot) {
+                $this->drawCell('', 1, true);
+                $this->drawCell($labelLot, 6, true, 'headSubGroup');
+
+                foreach ($datas['daysInfos'] as $i=>$day) {
+                    $dayKey = $i<10 ? "0$i" : "$i";
+                    $class = 'cellEmpty';
+                    $value = '0';
+
+                    if( array_key_exists($dayKey, $dataLot['days']) ){
+                        $class = 'cellValued';
+                        $value = $dataLot['days'][$dayKey];
+                    }
+
+                    if( $day['locked'] == true ){
+                        $class = 'cellLock';
+                        $value = $value == '0' ? '' : $value;
+                    }
+                    $this->drawCell($value, 0, true, $class);
+                }
+                $this->drawCell($dataLot['total'], 0, true, 'headResearch');
+
+                $this->nextLine();
+            }
+        }
+
+        $this->nextLine();
+
+        $this->drawCell('', 1, true);
+        $this->drawCell("TOTAL / jour", 6, true, 'headSubGroup');
+
+//echo "<pre>"; var_dump($datas); die();
 
 // LIGNE TOTAL
         $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(20);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Recherche
+
+        $this->nextLine();
         $this->drawCell("Total", 0, true, 'person');
 
 // LOTS
@@ -621,7 +678,7 @@ class TimesheetActivityPeriodFormatter
 
 
         $this->autoSizeColumns();
-        $this->getActiveSheet()->getColumnDimension($colSign)->setAutoSize(false)->setWidth('20');
+
 
         $this->getActiveSheet()->getPageSetup()
             ->setFitToPage(true)

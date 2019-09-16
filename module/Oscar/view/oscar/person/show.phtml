@@ -140,6 +140,33 @@
                 <p>Les informations hiérarchiques sont utilisées par Oscar pour déterminer les personnes en charge lors de la procédure de <strong>validation des feuilles de temps</strong>.</p>
                 <hr>
                 <div class="row">
+                    <div class="col-md-12">
+                        <ul>
+                        <?php
+                        /** @var \Oscar\Entity\ValidationPeriod $validationPeriod */
+                        foreach ($validations as $validationPeriod): ?>
+                            <li><?= $validationPeriod ?>
+                                <?php if($validationPeriod->getObjectGroup() == \Oscar\Entity\ValidationPeriod::GROUP_WORKPACKAGE): ?>
+                                    <?php if(count($validationPeriod->getValidatorsSci()) == 0): ?>
+                                        <span class="cartouche danger">
+                                            <i class="icon-beaker"></i> Aucun validateur scientifique
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if(count($validationPeriod->getValidatorsPrj()) == 0): ?>
+                                        <span class="cartouche danger">
+                                            <i class="icon-cubes"></i> Aucun validateur projet
+                                        </span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                <?php if(count($validationPeriod->getValidatorsAdm()) == 0): ?>
+                                <i class="icon-attention-1"></i> Aucun validateur administratif !
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-4">
                         <h4><i class="icon-group"></i>Est validé par (N+1)</h4>
                         <?php if( count($referents) ): ?>
@@ -229,6 +256,7 @@
                     </div>
                     <div class="col-md-4">
                         <h4><i class="icon-group"></i>Valide les déclarations pour (N-1)</h4>
+                        <p><strong><?= $entity ?></strong> a la charge de valider les déclarations Hors-Lot pour les personnes suivantes : </p>
                         <?php if( $subordinates ): ?>
                             <?php foreach ($subordinates as $subordinate) :?>
                                 <article class="card card-xs">
@@ -243,6 +271,26 @@
                                     <?php endif; ?>
                                 </article>
                             <?php endforeach; ?>
+
+                            <?php if( $manageHierarchie ): ?>
+                            <div id="managereferents"></div>
+                            <script>
+                                require(['vue', 'vue-resource', 'Referent'], function(Vue, VueResource, Referent){
+                                    Vue.use(VueResource);
+                                    new Vue({
+                                        el: '#managereferents',
+                                        render(h){
+                                            return h(Referent.default, {props:{
+                                                referentId: <?= $entity->getId() ?>,
+                                                declarationsToDo: <?= json_encode($declarationsToDo) ?>,
+                                                declarationsFor: <?= json_encode(array_map(function($p){return $p->getPerson()->getDisplayName(); }, $subordinates)) ?>,
+                                                displayName: "<?= $entity->getDisplayName() ?>"}});
+                                        }
+                                    })
+                                })
+                            </script>
+                            <?php endif; ?>
+
                         <?php else: ?>
                             Personne
                         <?php endif; ?>

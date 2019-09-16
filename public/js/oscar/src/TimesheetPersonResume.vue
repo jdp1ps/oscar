@@ -56,10 +56,24 @@
                                         {{ v }}</strong>
                                 </small>
                             </span>
-                            <a :href="'/feuille-de-temps/excel?action=export&period=' +p.period +'&personid=' + p.person_id" v-if="p.validation_state == 'valid'">
-                                <i class="icon-download-outline"></i>
-                                Télécharger la feuille de temps (Excel)
-                            </a>
+
+                            <span v-if="p.validation_state == 'valid'" class="btn-group btn-group-sm">
+                                <a href="#" class="btn" style="color: #555; pointer-events: none">
+                                    <i class="icon-calendar"></i>
+                                       Feuille de temps
+                                </a>
+
+                                <a :href="'/feuille-de-temps/excel?action=export&period=' +p.period +'&personid=' + p.person_id" v-if="timesheetexcel" class="btn btn-primary btn-sm">
+                                    <i class="icon-file-excel"></i>
+                                    Excel
+                                </a>
+                                <a :href="'/feuille-de-temps/excel?action=export2&period=' +p.period +'&personid=' + p.person_id" v-if="p.validation_state == 'valid'" class="btn btn-primary  btn-sm">
+                                    <i class="icon-file-pdf"></i>
+                                    PDF
+                                </a>
+                            </span>
+
+
                             <em v-if="p.validations_id.length == 0">
                                Pas de déclaration envoyée
                             </em>
@@ -102,9 +116,9 @@
                             </a>
                         </span>
 
-                        <a :href="'/feuille-de-temps/excel?action=export&period=' +p.period +'&personid=' + p.person_id">
-                            <i class="icon-download-outline"></i>
-                            Prévisualiser (Excel)
+                        <a :href="'/feuille-de-temps/excel?action=export2&period=' +p.period +'&personid=' + p.person_id" v-if="timesheetpreview && p.validation_state != 'valid'" class="btn btn-default btn-sm">
+                            <i class="icon-file-pdf"></i>
+                            Prévisualiser (PDF)
                         </a>
                     </td>
                 </tr>
@@ -130,6 +144,12 @@
         props: {
             datas: {
                 required: true
+            },
+            timesheetpreview: {
+                default: false
+            },
+            timesheetexcel: {
+                default: false
             }
         },
 

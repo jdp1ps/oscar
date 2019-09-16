@@ -225,7 +225,8 @@ return array(
                         'declarant', 'declarantAPI', 'validationActivity',
                         'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
                         'importIcal', 'declarations', 'resumeActivity',
-                        'resolveInvalidLabels', 'syntheseActivity', 'synthesisAll', 'synthesisActivityPeriod'
+                        'resolveInvalidLabels', 'syntheseActivity', 'synthesisAll', 'synthesisActivityPeriod',
+                        'exportActivityDates'
                     ],
                     'roles' => ['user']
                 ],
@@ -821,6 +822,41 @@ return array(
         ],
 
         'factories' => array(
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// Formatteurs
+            ///
+            ///
+
+            // ACTIVITÉ > MENSUELLE (HTML)
+            'TimesheetActivityPeriodHtmlFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $renderer = $sm->get('ViewRenderer');
+                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_activity_synthesis_template');
+                return new \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter($templatePath, $renderer);
+            },
+
+            // ACTIVITÉ > MENSUELLE (PDF)
+            'TimesheetActivityPeriodPdfFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $renderer = $sm->get('ViewRenderer');
+                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_activity_synthesis_template');
+                return new \Oscar\Formatter\TimesheetActivityPeriodPdfFormatter($templatePath, $renderer);
+            },
+
+            // ACTIVITÉ > MENSUELLE (HTML)
+            'TimesheetPersonPeriodHtmlFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $renderer = $sm->get('ViewRenderer');
+                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_person_month_template');
+                return new \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter($templatePath, $renderer);
+            },
+
+            // ACTIVITÉ > MENSUELLE (HTML)
+            'TimesheetPersonPeriodPdfFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
+                $renderer = $sm->get('ViewRenderer');
+                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_person_month_template');
+                return new \Oscar\Formatter\TimesheetPersonPeriodPdfFormatter($templatePath, $renderer);
+            },
+
+
             'RoleProvider' => function (\Zend\ServiceManager\ServiceManager $sm){
                 return new \Oscar\Provider\RoleProvider( $sm->get('doctrine.entitymanager.orm_default') );
             },

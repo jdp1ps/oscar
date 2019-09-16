@@ -164,6 +164,14 @@ class ValidationPeriodRepository extends EntityRepository
         return $out;
     }
 
+    public function getValidationsPeriodPerson( $personId ){
+       return $this->createQueryBuilder('vp')
+            ->where('vp.declarer = :person')
+            ->setParameters(['person' => $personId])
+           ->getQuery()
+           ->getResult();
+    }
+
     /**
      * Retourne LA procédure de validation pour : La période, l'activité et la personne.
      *

@@ -41,6 +41,14 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
     private $cacheConnectors = null;
 
     /**
+     * @return OscarUserContext
+     */
+    protected function getOscarUserContext()
+    {
+        return $this->getServiceLocator()->get('OscarUserContext');
+    }
+
+    /**
      * Retourne la liste des Roles disponible pour une organisation dans une activité.
      */
     public function getAvailableRolesOrganisationActivity(){
@@ -51,6 +59,41 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         $o = $this->getOrganization($id);
         $this->getEntityManager()->remove($o);
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * Retourne la liste des Organizations pour la personne
+     * @param Person $person
+     * @param null $specifiqueRoleIds
+     * @param bool $rolePrincipaux
+     * @return Organization[]
+     */
+    public function getOrganizationsWithPersonRolled(Person $person, $specifiqueRoleIds = null, $rolePrincipaux = false){
+
+        // Filtrer les rôles
+
+        if( $rolePrincipaux == true ){
+            $roles = $this->getOscarUserContext()->getRoleIdPrimary();
+        } else {
+            $roles = $this->getOscarUserContext()->getRoleId();
+        }
+
+        if( $specifiqueRoleIds ){
+            $roles = array_intersect($roles, $specifiqueRoleIds);
+        }
+
+        $structures = $this->getEntityManager()->getRepository(Organization::class)->createQueryBuilder('o')
+            ->innerJoin('o.persons', 'p')
+            ->innerJoin('p.roleObj', 'r')
+            ->where('p.person = :person AND r.roleId IN(:roles)')
+            ->setParameters([
+                'person'    => $person,
+                'roles'     => $roles,
+            ])
+            ->getQuery()
+            ->getResult();
+
+        return $structures;
     }
 
     public function getConnectorsList()

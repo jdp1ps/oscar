@@ -1289,6 +1289,13 @@ class ValidationPeriod
         return $this;
     }
 
+    public function removeValidatorAdm( Person $person ){
+        if (!$this->getValidatorsAdm()->contains($person)) {
+            $this->getValidatorsAdm()->removeElement($person);
+        }
+        return $this;
+    }
+
     /**
      * Retourne la clef de trie pour le rangement mensuel.
      *

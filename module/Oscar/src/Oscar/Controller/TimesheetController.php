@@ -10,6 +10,7 @@ namespace Oscar\Controller;
 
 use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\Query;
+use Dompdf\Dompdf;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
@@ -27,6 +28,12 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
+use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
+use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
+use Oscar\Formatter\TimesheetPersonPeriodFormatter;
+use Oscar\Formatter\TimesheetPersonPeriodFormatter2;
+use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
+use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\TimesheetService;
@@ -39,6 +46,9 @@ use Zend\Mvc\Router\Http\Method;
 use Zend\Validator\Date;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
+use Zend\View\Renderer\PhpRenderer;
+use Zend\View\Resolver\AggregateResolver;
+use Zend\View\Resolver\TemplateMapResolver;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et
@@ -492,6 +502,12 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    /**
+     * Accès à la synthèse des déclaration pour une activité.
+     *
+     * @return array|JsonModel
+     * @throws OscarException
+     */
     public function synthesisActivityPeriodAction()
     {
         // Données reçues
@@ -500,23 +516,39 @@ class TimesheetController extends AbstractOscarController
         $period = $this->params()->fromQuery('period', null);
         $error = null;
 
+        // Contrôle d'accès
+        $activity = $this->getActivityService()->getActivityById($activity_id, true);
+
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+
         $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
 
         if( $format == 'json' ){
             return $this->jsonOutput($output);
         }
         elseif ($format == "excel") {
+            // TODO à revoir/supprimer
+            // Sur le plan métier, les fonctionnels de Tours ne trouve pas utilse de disposer d'un excel
+            // modifiable. A Caen, il est utilisé pour réaliser des synthèses/bilan
             $formatter = new TimesheetActivityPeriodFormatter();
             $formatter->output($output, 'excel');
         }
         elseif ($format == "pdf") {
-            $formatter = new TimesheetActivityPeriodFormatter();
-            $formatter->output($output, 'pdf');
+            $output['format'] = 'pdf';
+            /** @var TimesheetActivityPeriodHtmlFormatter $formatter */
+            $formatter = $this->getServiceLocator()->get('TimesheetActivityPeriodPdfFormatter');
+            $formatter->render($output);
+            die();
         }
         else {
-            return $output;
+            $output['format'] = 'html';
+            /** @var TimesheetActivityPeriodPdfFormatter $formatter */
+            $formatter = $this->getServiceLocator()->get('TimesheetActivityPeriodHtmlFormatter');
+            $html = $formatter->render($output);
+            die($html);
         }
     }
+
 
     /**
      * Centralisation de la consultation des feuilles de temps d'une personne / activité
@@ -564,8 +596,6 @@ class TimesheetController extends AbstractOscarController
             // Période
             $start  = $activity->getDateStart()->format('Y');
             $end    = $activity->getDateEnd()->format('Y');
-
-
 
             if( count($personsIds) == 0 ){
                 return $this->getResponseInternalError(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
@@ -687,6 +717,8 @@ class TimesheetController extends AbstractOscarController
     public function syntheseActivityAction(){
 
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
+
+        die();
 
         $currentActivityId = $this->params()->fromRoute('id');
         $month = $this->params()->fromQuery('month', date('m'));
@@ -857,6 +889,39 @@ class TimesheetController extends AbstractOscarController
         die("Synthèse activité " . $activity);
     }
 
+    /**
+     * Permet d'exporter les informations de déclaration pour une activité entre 2 dates
+     */
+    public function exportActivityDatesAction(){
+
+        // Récupération des infos demandées
+        $activityId     = $this->params()->fromQuery('activity_id');
+        $periodDebut    = $this->params()->fromQuery('from', null);
+        $periodFin      = $this->params()->fromQuery('to', null);
+
+        if( !$activityId ){
+            throw new OscarException(_("Données insuffisantes"));
+        }
+
+        $activity = $this->getActivityService()->getActivityById($activityId);
+
+        // TODO Ajouter un test sur l'existance des dates (normalement, on ne peut pas avoir de feuilles de temps sur une activité non datée
+        // période de début/fin
+        if( !$periodDebut )
+            $periodDebut = $activity->getDateStart()->format('m-Y');
+
+        // période de début/fin
+        if( !$periodFin )
+            $periodFin = $activity->getDateEnd()->format('m-Y');
+
+
+        // TODO Tester que la période demandée est cohérente
+        $datas = $this->getTimesheetService()->getDatasActivityDates($activity, $periodDebut, $periodFin);
+
+        var_dump($datas);
+        die("Synthèse entre $periodDebut et $periodFin");
+    }
+
 
     /**
      * Exportation et visualisation des feuilles de temps.
@@ -899,17 +964,16 @@ class TimesheetController extends AbstractOscarController
         $timesheetService = $this->getServiceLocator()->get('TimesheetService');
 
 
+        // nom du fichier
+
+
         if( $action == "csv" ){
-
             die("Cette fonctionnalité est provisoirement indisponible.");
-
             if( !$activity ){
                 $this->getResponseBadRequest("Impossible de trouver l'activité");
             }
             $datas = $timesheetService->getPersonTimesheetsCSV($person, $activity, false);
-
             $filename = $activity->getAcronym() . '-' . $activity->getOscarNum().'-'.$person->getLadapLogin().'.csv';
-
             $handler = fopen('/tmp/' . $filename, 'w');
 
              /** @var ActivityPayment $payment */
@@ -918,12 +982,33 @@ class TimesheetController extends AbstractOscarController
             }
 
             fclose($handler);
-
             header('Content-Disposition: attachment; filename='.$filename);
             header('Content-Length: ' . filesize('/tmp/' . $filename));
             header('Content-type: plain/text');
-
             die(file_get_contents('/tmp/' . $filename));
+        }
+
+        if( $action == "export2" ){
+            // Variante
+            $out = $this->params()->fromQuery('out', 'pdf');
+            $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
+            $datas['format'] = $out;
+
+            if( $out == 'pdf' ){
+                /** @var TimesheetPersonPeriodPdfFormatter $formatter */
+                $formatter = $this->getServiceLocator()->get('TimesheetPersonPeriodPdfFormatter');
+                $formatter->render($datas);
+                die();
+            }
+            elseif ($out == 'html') {
+                /** @var TimesheetPersonPeriodHtmlFormatter $formatter */
+                $formatter = $this->getServiceLocator()->get('TimesheetPersonPeriodHtmlFormatter');
+                $html = $formatter->render($datas);
+                die($html);
+            }
+            else {
+                return $this->getResponseBadRequest("Format non-géré");
+            }
         }
 
         if( $action == "export" ){
@@ -1431,9 +1516,13 @@ class TimesheetController extends AbstractOscarController
         }
     }
 
+    /**
+     * @deprecated
+     * @return Response
+     */
     public function usurpationAction()
     {
-        die("DESACTIVE");
+        return $this->getResponseDeprecated("Cette fonctionnalité n'est plus disponible");
     }
 
     public function resumeActivityAction(){
@@ -1553,15 +1642,6 @@ class TimesheetController extends AbstractOscarController
             'datas' => $invalidLabels,
             'othersWP'=> $destinations
         ];
-    }
-
-    /**
-     * Déclaration des heures.
-     */
-    public function declarationAction()
-    {
-        die("test");
-        return [];
     }
 
     protected function getQueryData()
@@ -1824,7 +1904,6 @@ class TimesheetController extends AbstractOscarController
                 $this->getEntityManager()->persist($timesheet);
             }
 
-
             $timesheet->setWorkpackage($wp)
                 ->setComment($comment)
                 ->setDateFrom($start)
@@ -1834,7 +1913,6 @@ class TimesheetController extends AbstractOscarController
                 ->setPerson($person);
 
             $timesheets[] = $timesheet;
-
         }
 
         $this->getEntityManager()->flush($timesheets);
@@ -1916,21 +1994,6 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));
-
-                    // FIX : Déplacer le test d'envois/réenvois
-                    // nb : Le traitement de l'envoi/réenvois a été centralisé dans le TimesheetService
-                    // dans la méthode d'envoi.
-
-                    // Réenvoi de la déclaration
-//                    if( $action == 'resend' ){
-//                        throw new \Exception("DEBUG");
-//                        $from = new \DateTime($datas->from);
-//                        $to = new \DateTime($datas->to);
-////                        $timesheetService->sendPeriod($from, $to, $currentPerson, $comments);
-//                        $timesheetService->reSendPeriod($from, $to, $currentPerson, $comments);
-//                        return $this->getResponseOk();
-//                    }
-
 
                     if( !$datas ){
                         return $this->getResponseBadRequest('Problème de transmission des données');

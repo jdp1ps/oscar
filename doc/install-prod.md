@@ -6,7 +6,7 @@ L'installation a été testée sous Debian et Ubuntu Server
 
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
- - PHP 7.0+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql, mcrypt, intl, DOM/XML)
+ - PHP 7.3+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql, mcrypt, intl, DOM/XML, mbstring, gd, zip)
  - Postgresql 9.4+
  - Annuaire LDAP (supann)
 
@@ -62,19 +62,19 @@ apt-get install apache2
 
 # PHP + Modules PHP
 apt-get install \
-    php7.0 \
-    php7.0-bz2 \
-    php7.0-cli \
-    php7.0-curl \
-    php7.0-dom \
-    php7.0-gd \
-    php7.0-intl \
-    php7.0-ldap \
-    php7.0-mbstring \
-    php7.0-mcrypt \
-    php7.0-pgsql \
-    php7.0-xml \
-    php7.0-zip
+    php7.3 \
+    php7.3-bz2 \
+    php7.3-cli \
+    php7.3-curl \
+    php7.3-dom \
+    php7.3-gd \
+    php7.3-intl \
+    php7.3-ldap \
+    php7.3-mbstring \
+    php7.3-mcrypt \
+    php7.3-pgsql \
+    php7.3-xml \
+    php7.3-zip
 ```
 
 Installez également le client postgresql qui sera necessaire pour importer la structure initale de la base de donnée :

@@ -30,6 +30,7 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Entity\TimeSheet;
+use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Form\MergeForm;
@@ -377,11 +378,15 @@ class PersonController extends AbstractOscarController
         $leader = $this->params()->fromQuery('leader', '');
         $format = $this->params()->fromQuery('format', '');
         $size = $this->params()->fromQuery('l', 'n');
+        $declarers = $this->params()->fromQuery('declarers', '');
+        $np1 = $this->params()->fromQuery('np1', '');
 
         $limit = 50;
         if($size == 'm'){
             $limit = 20;
         }
+
+        $time = time();
 
         $datas = [];
         $error = null;
@@ -399,12 +404,13 @@ class PersonController extends AbstractOscarController
             $orderBy = $orders[0];
         }
 
-
         try {
             $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
                 'filter_roles' => $filterRoles,
                 'order_by' => $orderBy,
-                'leader' => $leader
+                'leader' => $leader,
+                'declarers' => $declarers,
+                'np1' => $np1
             ], $limit);
         } catch (BadRequest400Exception $e){
             $error = "Expression de recherche incorrecte.";
@@ -453,8 +459,6 @@ class PersonController extends AbstractOscarController
             die();
         }
 
-
-
         if ($this->getRequest()->isXmlHttpRequest()) {
             $json = [
                 'datas' => [],
@@ -472,7 +476,6 @@ class PersonController extends AbstractOscarController
         }
 
         $roles = $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed();
-
         $dbroles =$this->getPersonService()->getRolesByAuthentification();
 
         return array(
@@ -484,7 +487,9 @@ class PersonController extends AbstractOscarController
             'filter_roles' =>  $filterRoles,
             'orderBy' => $orderBy,
             'orders' => $orders,
-            'leader' => $leader
+            'leader' => $leader,
+            'declarers' => $declarers,
+            'np1' => $np1,
         );
     }
 
@@ -606,18 +611,19 @@ class PersonController extends AbstractOscarController
         $page = $this->params()->fromQuery('page', 1);
         $person = $this->getPersonService()->getPerson($id);
 
-
         $manageHierarchie = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
         $manageUsurpation = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
         $allowTimesheet = false;
 
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson()) ){
             $allowTimesheet = true;
+            $validations = $timesheetService->getValidationsPeriodPerson($person);
         }
 
-
         if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW) ){
-
             // N+1 ?
             /** @var PersonRepository $personRepository */
             $personRepository = $this->getEntityManager()->getRepository(Person::class);
@@ -702,14 +708,27 @@ class PersonController extends AbstractOscarController
                 default:
                     return $this->getResponseInternalError("Action non-reconnue");
                     break;
-
             }
         }
 
+        //
+        // Déclaration en attente
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        $declarations = [];
+        /** @var ValidationPeriod $declaration */
+        foreach ($timesheetService->getValidationToDoPerson($person) as $declaration) {
+            $declarer = $declaration->getDeclarer()->getDisplayName();
+            if( !in_array($declarer, $declarations) ){
+                $declarations[] = $declarer;
+            }
+        }
+
+
+
         if( $method == "POST" ){
-
             $action = $this->params()->fromPost('action', null);
-
             if( in_array($action, ['addusurpation', 'removeusurpation'] ) ){
                 $person_id = $this->params()->fromPost('person_id', null);
                 if( !$person_id ){
@@ -756,6 +775,27 @@ class PersonController extends AbstractOscarController
                 return $this->getResponseUnauthorized();
             }
             switch( $action ) {
+                case 'flipreferent' :
+
+                    $referent = $this->getPersonService()->getPersonById($this->params()->fromPost('referent_id'), true);
+                    $newReferent = $this->getPersonService()->getPersonById($this->params()->fromPost('person_id'), true);
+                    $mode = $this->params()->fromPost('mode');
+                    if( !in_array($mode, ['add', 'replace']) ){
+                        throw new OscarException("Mauvaise requête");
+                    }
+
+                    if($mode == 'replace'){
+                        $this->getPersonService()->refererentReplaceBy($newReferent, $referent);
+                        return $this->redirect()->toRoute('person/show', ['id' => $newReferent->getId()]);
+
+                    }
+                    else {
+                        $this->getPersonService()->refererentAddFromReferent($newReferent, $referent);
+                        return $this->redirect()->toRoute('person/show', ['id' => $newReferent->getId()]);
+                    }
+                    die("TODO");
+
+
                 case 'referent' :
                     $referent_id = $this->params()->fromPost('referent_id', null);
                     $person_id = $this->params()->fromPost('person_id', null);
@@ -829,7 +869,9 @@ class PersonController extends AbstractOscarController
             'referents' => $referents,
             'manageHierarchie' => $manageHierarchie,
             'manageUsurpation' => $manageUsurpation,
+            'declarationsToDo' => $declarations,
             'subordinates' => $subordinates,
+            'validations' => $validations,
             'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
             'auth' => $auth,
             'allowTimesheet' => $allowTimesheet,
@@ -845,7 +887,7 @@ class PersonController extends AbstractOscarController
     {
         // Récupération des personnes à fusionner
         $personIds = explode(',', $this->params()->fromQuery('ids', ''));
-        $persons = $this->getPersonService()->getByIds($personIds);
+        $persons = $this->getPersonService()->getPersonsByIds($personIds);
         $personConnector = array_keys($this->getServiceLocator()->get('Config')['oscar']['connectors']['person']);
         $hydrator = new PersonFormHydrator($personConnector);
         $form = new MergeForm;

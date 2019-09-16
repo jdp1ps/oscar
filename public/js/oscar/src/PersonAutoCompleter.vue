@@ -6,10 +6,13 @@
         </span>
         <div class="choose" style="position: absolute; z-index: 3000; max-height: 400px; overflow: hidden; overflow-y: scroll" v-show="persons.length > 0 && showSelector">
             <div class="choice" :key="c.id" v-for="c in persons" @click.prevent.stop="handlerSelectPerson(c)">
-                <img :src="'https://www.gravatar.com/avatar/'+c.mailMd5+'?s=50'" :alt="c.displayname" style="width: 50px; height: 50px">
+                <div style="display: block; width: 50px; height: 50px" >
+                    <img :src="'https://www.gravatar.com/avatar/'+c.mailMd5+'?s=50'" :alt="c.displayname" style="width: 100%" />
+
+                </div>
                 <div class="infos">
-                    <strong style="font-weight: 700; font-size: 1.1em">{{ c.displayname }}</strong><br>
-                    <span style="font-weight: 100; font-size: .8em"><i class="icon-location"></i>
+                    <strong style="font-weight: 700; font-size: 1.1em; padding-left: 0">{{ c.displayname }}</strong><br>
+                    <span style="font-weight: 100; font-size: .8em; padding-left: 0"><i class="icon-location"></i>
                         {{ c.affectation }}
                         <span v-if="c.ucbnSiteLocalisation"> ~ {{ c.ucbnSiteLocalisation }}</span>
                     </span><br>
@@ -20,7 +23,7 @@
     </div>
 </template>
 <script>
-    import OscarBus from './OscarBus.js';
+    //import OscarBus from './OscarBus.js';
 
     export default {
         data(){
@@ -44,7 +47,6 @@
         methods: {
             search(){
                 this.loading = true;
-
                 this.$http.get(this.url +this.expression, {
                     before( r ){
                         if( this.request ){
@@ -58,7 +60,7 @@
                         this.showSelector = true;
                     },
                     ko => {
-                        OscarBus.message('Erreur de recherche sur la personne', 'error');
+                        // OscarBus.message('Erreur de recherche sur la personne', 'error');
                     }
                 ).then( foo => {
                     this.loading = false;
