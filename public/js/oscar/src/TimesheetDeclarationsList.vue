@@ -50,15 +50,13 @@
             <div class="persons-list col-1">
                 <h3><i class="icon-sort"></i> Filtres</h3>
                 <h4><i class="icon-group"></i> Déclarants</h4>
-                <article v-for="p in declarants" @click.prevent="handlerFilterPerson(p)" class="link">
-                    <i class="icon-user"></i> {{ p }}
-                    <i class="icon-cancel-outline" v-if="p == filterPerson" @click.stop.prevent="filterPerson = ''"></i>
+                <article v-for="p in declarants" @click.prevent="handlerFilterPerson(p.person, p.person_id)" class="list-item" :class="{'selected': p.person == filterPerson }">
+                    <i class="icon-user"></i> {{ p.person }}
                 </article>
 
                 <h4><i class="icon-cubes"></i> Activités</h4>
-                <article v-for="a in activities" @click.prevent="handlerFilterActivity(a)" class="link">
+                <article v-for="a in activities" @click.prevent="handlerFilterActivity(a)" class="list-item" :class="{'selected': a == filterActivity }">
                     <i class="icon-cube"></i> {{ a }}
-                    <i class="icon-trash" v-if="a == filterActivity" @click.stop.prevent="filterActivity = ''"></i>
                 </article>
             </div>
             <div class="declarations-list col-4">
@@ -80,9 +78,9 @@
 
                     <nav>
                         <a href="#" class="btn btn-default btn-xs" @click.prevent.stop="handlerChangeSchedule(line)">
-                            <i class="icon-clock"></i>Modifier les horaires</a>
+                            <i class="icon-clock"></i>Horaires</a>
                         <a href="#" class="btn btn-danger btn-xs" @click.prevent.stop="handlerCancelDeclaration(line)">
-                            <i class="icon-trash"></i>Annuler cette déclaration</a>
+                            <i class="icon-trash"></i>Annuler</a>
                     </nav>
 
                     <transition name="slide">
@@ -136,7 +134,19 @@
                 </section>
             </div>
             <div class="declaration-details col-2">
-                <h3>Détails</h3>
+                <div v-if="filterPerson">
+                    <h3><i class="icon-cog"></i> {{ filterPerson }}</h3>
+                    <p class="help help-block">Selectionnez un validateur pour les <strong>créneaux Hors-Lot</strong> de <strong>{{ filterPerson }}</strong> : </p>
+                    <personautocompleter @change="handlerSelectValidateur" />
+                    <form action="" method="post">
+                        <input type="hidden" name="action" value="addvalidator" />
+                        <input type="hidden" name="person" :value="selectedPerson" />
+                        <input type="hidden" name="validatorId" :value="validatorId" />
+                        <button type="submit" class="btn btn-primary" :class="{ 'disabled' : !validatorId }">Ajouter <strong>{{ validatorLabel }}</strong> comme validateur hors-lot</button>
+                    </form>
+                </div>
+                <h3><i class="icon-zoom-in-outline"></i>
+                    Détails</h3>
                 <p class="alert alert-info" v-if="!selectedValidation">
                     Selectionnez une ligne d'une déclaration pour afficher les détails et <strong>gérer les validateurs</strong>
                 </p>
@@ -235,7 +245,7 @@
     </section>
 </template>
 <script>
-    // poi watch --format umd --moduleName  TimesheetDeclarationsList --filename.css TimesheetDeclarationsList.css --filename.js TimesheetDeclarationsList.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetDeclarationsList.vue
+    // nodejs node_modules/.bin/poi watch --format umd --moduleName  TimesheetDeclarationsList --filename.css TimesheetDeclarationsList.css --filename.js TimesheetDeclarationsList.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetDeclarationsList.vue
     import AjaxResolve from "./AjaxResolve";
     import PersonAutoCompleter from "./PersonAutoCompleter";
     import PersonSchedule from "./PersonSchedule";
@@ -267,17 +277,26 @@
                 create: false,
                 addedPerson: null,
                 filterPerson: "",
-                filterActivity: ""
+                filterActivity: "",
+                selectedPerson: null,
+                validatorId: null,
+                validatorLabel: null
             }
         },
 
         computed: {
             declarants(){
-                let declarants = [];
+                let declarants = {};
                 if( this.declarations ){
                     Object.keys(this.declarations).forEach( k => {
-                        if( declarants.indexOf(this.declarations[k].person) < 0 ){
-                            declarants.push(this.declarations[k].person)
+                        let person = this.declarations[k].person;
+                        let person_id = this.declarations[k].person_id;
+
+                        if( !declarants.hasOwnProperty(person) ){
+                            declarants[person] = {
+                                person: person,
+                                person_id: person_id
+                            }
                         }
                     })
                 }
@@ -367,6 +386,11 @@
                 person_id: line.person_id,
                 period: line.period,
               };
+            },
+
+            handlerSelectValidateur(validator){
+              this.validatorLabel = validator.displayname;
+              this.validatorId = validator.id;
             },
 
             handlerAdd(type){
@@ -487,14 +511,15 @@
             //////////////////////////////////////
             // Application des filtres d'affichage
 
-            handlerFilterPerson( person ){
+            handlerFilterPerson( person, personId ){
                 this.selectedValidation = null;
-                this.filterPerson = person;
+                this.filterPerson = this.filterPerson == person ? "" : person;
+                this.selectedPerson = personId;
             },
 
             handlerFilterActivity( activity ){
                 this.selectedValidation = null;
-                this.filterActivity = activity;
+                this.filterActivity = this.filterActivity == activity ? "" : activity;
             }
         },
 

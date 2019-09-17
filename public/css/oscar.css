@@ -5540,11 +5540,30 @@ button.close {
 .declarations-ui {
   background: #e2e2e2;
   height: 80vh; }
-
-.declarations-list {
-  max-height: 100%;
-  overflow-y: auto;
-  padding-right: .5em; }
+  .declarations-ui .list-item {
+    font-size: .8em;
+    background: #eee;
+    transition: all .3s;
+    display: block;
+    cursor: pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 175px;
+    margin-bottom: 2px; }
+    .declarations-ui .list-item:hover {
+      background: #fff; }
+    .declarations-ui .list-item.selected {
+      background: #222;
+      color: #eee; }
+  .declarations-ui .persons-list {
+    padding-left: .5em;
+    max-height: 100%;
+    overflow-y: auto; }
+  .declarations-ui .declarations-list {
+    max-height: 100%;
+    overflow-y: auto;
+    padding-right: .5em; }
 
 .data-list {
   color: #999; }
