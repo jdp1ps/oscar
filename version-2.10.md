@@ -26,8 +26,8 @@ git pull
 composer install
 
 # MAJ de la BDD
-php vendor/doctrine-module orm:schema-tool:update --dump-sql
-php vendor/doctrine-module orm:schema-tool:update --force
+php vendor/bin/doctrine-module orm:schema-tool:update --dump-sql
+php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
 
 > Lors de la mise à jour des librairies PHP, si vous avec les composants PHP manquants, insallez les via `apt` (merci des les signaler pour les ajouter à la liste des prérequis PHP de la documentation)
