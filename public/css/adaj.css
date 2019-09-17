@@ -5534,6 +5534,17 @@ button.close {
     flex-grow: 1; }
   .cols > .col-2 {
     flex-grow: 2; }
+  .cols > .col-4 {
+    flex-grow: 4; }
+
+.declarations-ui {
+  background: #e2e2e2;
+  height: 80vh; }
+
+.declarations-list {
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: .5em; }
 
 .data-list {
   color: #999; }

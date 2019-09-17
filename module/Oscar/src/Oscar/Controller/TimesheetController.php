@@ -2065,6 +2065,7 @@ class TimesheetController extends AbstractOscarController
     public function declarationsAction()
     {
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
+
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();
             switch ($method) {

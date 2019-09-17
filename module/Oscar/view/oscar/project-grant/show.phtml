@@ -527,12 +527,12 @@
             <div id="referents"></div>
             <script>
                 require(['vue', 'vue-resource', 'ReferentUI'], function(Vue, VueResource, ReferentUI){
-                    //new Vue({
-                    //    el: '#referents',
-                    //    render(h){ return h(ReferentUI.default, { props: {
-                    //            persons: <?//= json_encode($declarers) ?>
-                    //        }}) }
-                    //})
+                    new Vue({
+                        el: '#referents',
+                        render(h){ return h(ReferentUI.default, { props: {
+                                persons: <?= json_encode($declarers) ?>
+                            }}) }
+                    })
                 });
             </script>
         <?php endif; ?>

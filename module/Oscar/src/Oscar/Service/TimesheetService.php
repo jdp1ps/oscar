@@ -153,6 +153,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'person' => (string)$declaration->getDeclarer(),
                     'person_id' => $declaration->getDeclarer()->getId(),
                     'settings' => $declaration->getSchedule(),
+
+                    // Problèmes possibles dans une des lignes de la déclaration
+                    'warnings' => [],
                     'declarations' => [],
                 ];
             }
@@ -165,8 +168,19 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                 $label = (string)$activity->getFullLabel();
 
             } else {
-
                 $label = $this->getOthersWPByCode($object)['label'];
+            }
+
+            if( $declaration->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
+                if( count($declaration->getValidatorsPrj()) == 0 ){
+                    $output[$dataKey]['warnings'][] = _('Aucun validateur projet pour cette déclaration ')  . $label;
+                }
+                if( count($declaration->getValidatorsSci()) == 0 ){
+                    $output[$dataKey]['warnings'][] = _('Aucun validateur scientifique pour la déclaration ') . $label ;
+                }
+            }
+            if( count($declaration->getValidatorsAdm()) == 0 ){
+                $output[$dataKey]['warnings'][] = _('Aucun validateur administratif pour cette déclaration ')  . $label;
             }
 
             $declarationDatas = $declaration->toJson();
