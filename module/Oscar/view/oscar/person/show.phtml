@@ -138,12 +138,11 @@
             <section class="col">
                 <h2><i class="icon-sitemap"></i> Hiérarchie</h2>
                 <p>Les informations hiérarchiques sont utilisées par Oscar pour déterminer les personnes en charge lors de la procédure de <strong>validation des feuilles de temps</strong>.</p>
-                <hr>
+                <?php /* <hr>
                 <div class="row">
                     <div class="col-md-12">
                         <ul>
                         <?php
-                        /** @var \Oscar\Entity\ValidationPeriod $validationPeriod */
                         foreach ($validations as $validationPeriod): ?>
                             <li><?= $validationPeriod ?>
                                 <?php if($validationPeriod->getObjectGroup() == \Oscar\Entity\ValidationPeriod::GROUP_WORKPACKAGE): ?>
@@ -166,6 +165,7 @@
                         </ul>
                     </div>
                 </div>
+                /****/ ?>
                 <div class="row">
                     <div class="col-md-4">
                         <h4><i class="icon-group"></i>Est validé par (N+1)</h4>
