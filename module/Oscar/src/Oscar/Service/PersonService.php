@@ -299,6 +299,16 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $person = $this->getPersonById($person_id, true);
 
         // @todo Vérifier si le référent n'est pas déjà identifié
+        $verif = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
+            ->where('r.referent = :referent AND r.person = :person')
+            ->setParameters([
+                'referent' => $referent,
+                'person' => $person
+            ])->getQuery()->getResult();
+        if( count($verif) > 0 ){
+            throw new OscarException("$referent est déjà identifié comme référent pour $person");
+        }
+
 
         $referentRec = new Referent();
         $this->getEntityManager()->persist($referentRec);
@@ -306,6 +316,23 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
         $this->getEntityManager()->flush($referentRec);
 
         return true;
+    }
+
+    public function addReferentToDeclarerHorsLot(Person $declarer, Person $referent, $flush = false){
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+
+        // Mise à jour des déclarations en attentes
+        $validationPeriods = $timesheetService->getValidationHorsLotToValidateByPerson($declarer, true);
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod){
+            $this->getLoggerService()->notice(sprintf("$referent est maintenant validateur administratif pour $validationPeriod"));
+            $validationPeriod->addValidatorAdm($referent);
+        }
+
+        if( $flush == true && count($validationPeriods) > 0 )
+            $this->getEntityManager()->flush();
     }
 
     /**

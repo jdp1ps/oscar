@@ -135,19 +135,49 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
     }
 
+    /**
+     * Retourne les référents de la personnes sous la forme d'un tableau.
+     * @param Person $person
+     * @return array
+     */
+    public function getDeclarantInfos(Person $person){
+        $datas = $person->toJson();
+        $datas['referents'] = [];
+        $referents = $this->getPersonService()->getReferentsPerson($person->getId());
+
+        /** @var Referent $referent */
+        foreach ($referents as $referent) {
+            $referentDisplayName = $referent->getReferent()->getDisplayName();
+            $referentId = $referent->getReferent()->getId();
+            if( !array_key_exists($referentId, $datas['referents'])){
+                $datas['referents'][$referentId] = [
+                    'id' => $referentId,
+                    'displayname' => $referentDisplayName
+                ];
+            }
+        }
+        return $datas;
+    }
+
 
     public function getDatasDeclarations()
     {
-        $output = [];
+        $output = [
+            "periods" => [],
+            "declarants" => []
+        ];
+
+        // --- Récupération des déclarations
         $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->findAll();
+
         /** @var ValidationPeriod $declaration */
         foreach ($declarations as $declaration) {
             $period = sprintf('%s-%s', $declaration->getYear(), $declaration->getMonth());
             $personId = $declaration->getDeclarer()->getId();
             $dataKey = sprintf('%s_%s', $period, $personId);
 
-            if (!array_key_exists($dataKey, $output)) {
-                $output[$dataKey] = [
+            if (!array_key_exists($dataKey, $output['periods'])) {
+                $output['periods'][$dataKey] = [
                     'key' => $dataKey,
                     'period' => $period,
                     'person' => (string)$declaration->getDeclarer(),
@@ -158,6 +188,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
                     'warnings' => [],
                     'declarations' => [],
                 ];
+            }
+
+            if( !array_key_exists($personId, $output['declarants']) ){
+                $output['declarants'][$personId] = $this->getDeclarantInfos($declaration->getDeclarer());
             }
 
             $object = $declaration->getObject();
@@ -173,14 +207,14 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
             if( $declaration->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
                 if( count($declaration->getValidatorsPrj()) == 0 ){
-                    $output[$dataKey]['warnings'][] = _('Aucun validateur projet pour cette déclaration ')  . $label;
+                    $periods[$dataKey]['warnings'][] = _('Aucun validateur projet pour cette déclaration ')  . $label;
                 }
                 if( count($declaration->getValidatorsSci()) == 0 ){
-                    $output[$dataKey]['warnings'][] = _('Aucun validateur scientifique pour la déclaration ') . $label ;
+                    $periods[$dataKey]['warnings'][] = _('Aucun validateur scientifique pour la déclaration ') . $label ;
                 }
             }
             if( count($declaration->getValidatorsAdm()) == 0 ){
-                $output[$dataKey]['warnings'][] = _('Aucun validateur administratif pour cette déclaration ')  . $label;
+                $periods[$dataKey]['warnings'][] = _('Aucun validateur administratif pour cette déclaration ')  . $label;
             }
 
             $declarationDatas = $declaration->toJson();
@@ -189,8 +223,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $declarationDatas['period'] = $period;
             $declarationDatas['validation'] = $declaration->getState();
 
-            $output[$dataKey]['declarations'][] = $declarationDatas;
+            $output['periods'][$dataKey]['declarations'][] = $declarationDatas;
         }
+
         return $output;
     }
 
@@ -2993,6 +3028,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $validations = $validationsQuery->getQuery()->getResult();
 
         return $validations;
+    }
+
+    public function getValidationHorsLotToValidateByPerson( Person $person ){
+        /** @var ValidationPeriodRepository $validationPeriodRepository */
+        $validationPeriodRepository = $this->getEntityManager()->getRepository(ValidationPeriod::class);
+
+        $validations = $validationPeriodRepository->getValidationPeriodsOutWPToValidate($person->getId());
+
+        if( count($validations) == 0 )
+            throw new OscarException("Aucune déclarations Hors-Lot en attente pour $person");
+
+       return $validations;
     }
 
     /**

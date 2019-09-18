@@ -35,6 +35,28 @@
         </transition>
 
         <transition name="fade">
+            <div class="overlay" v-if="addvalidatorperson">
+                <div class="overlay-content" style="overflow-y: visible">
+                    <span class="overlay-closer" @click="addvalidatorperson = null">X</span>
+                    <h3>Assigner un validateur Hors-lot</h3>
+                    <p class="alert alert-info">Selectionnez un validateur pour les <strong>créneaux Hors-Lot</strong> de <strong>{{ filterPerson }}</strong>.
+                    Cet opération affectera également le validateur pour les déclarations en cours non-validée.
+                    </p>
+
+                    <personautocompleter @change="handlerSelectValidateur" />
+                    <form action="" method="post">
+                        <input type="hidden" name="action" value="addvalidator" />
+                        <input type="hidden" name="person" :value="selectedPerson.id" />
+                        <input type="hidden" name="validatorId" :value="validatorId" />
+                        <button type="submit" class="btn btn-primary" :class="{ 'disabled' : !validatorId }">Ajouter <strong>{{ validatorLabel }}</strong> comme validateur hors-lot</button>
+                    </form>
+                    <button @click="addvalidatorperson = null">Annuler</button>
+                </div>
+            </div>
+        </transition>
+
+
+        <transition name="fade">
             <div class="overlay" v-if="schedule">
                 <div class="overlay-content" style="overflow-y: visible">
                     <personschedule :schedule="schedule.schedule"
@@ -50,8 +72,9 @@
             <div class="persons-list col-1">
                 <h3><i class="icon-sort"></i> Filtres</h3>
                 <h4><i class="icon-group"></i> Déclarants</h4>
-                <article v-for="p in declarants" @click.prevent="handlerFilterPerson(p.person, p.person_id)" class="list-item" :class="{'selected': p.person == filterPerson }">
-                    <i class="icon-user"></i> {{ p.person }}
+                <article v-for="p in declarers" @click.prevent="handlerFilterPerson(p)" class="list-item" :class="{'selected': p.displayname == filterPerson }">
+                    <i class="icon-user"></i> {{ p.displayname }}
+                    <i class="icon-attention-1" v-if="p.referents.length == 0"></i>
                 </article>
 
                 <h4><i class="icon-cubes"></i> Activités</h4>
@@ -77,6 +100,10 @@
                     </span>
 
                     <nav>
+
+                        <a :href="'/feuille-de-temps/excel?action=export2&period=' + line.period +'&personid=' + line.person_id" class="btn btn-default btn-xs">
+                            <i class="icon-file-pdf"></i>Voir</a>
+
                         <a href="#" class="btn btn-default btn-xs" @click.prevent.stop="handlerChangeSchedule(line)">
                             <i class="icon-clock"></i>Horaires</a>
                         <a href="#" class="btn btn-danger btn-xs" @click.prevent.stop="handlerCancelDeclaration(line)">
@@ -136,14 +163,21 @@
             <div class="declaration-details col-2">
                 <div v-if="filterPerson">
                     <h3><i class="icon-cog"></i> {{ filterPerson }}</h3>
-                    <p class="help help-block">Selectionnez un validateur pour les <strong>créneaux Hors-Lot</strong> de <strong>{{ filterPerson }}</strong> : </p>
-                    <personautocompleter @change="handlerSelectValidateur" />
-                    <form action="" method="post">
-                        <input type="hidden" name="action" value="addvalidator" />
-                        <input type="hidden" name="person" :value="selectedPerson" />
-                        <input type="hidden" name="validatorId" :value="validatorId" />
-                        <button type="submit" class="btn btn-primary" :class="{ 'disabled' : !validatorId }">Ajouter <strong>{{ validatorLabel }}</strong> comme validateur hors-lot</button>
-                    </form>
+                    <div v-if="selectedPerson.referents.length == 0" class="alert alert-danger">
+                        Aucun référent pour <strong>valider les déclarations Hors-lot</strong>
+                    </div>
+                    <div v-else>
+                    <h4>Validateur :</h4>
+                    <ul>
+                        <li v-for="r in selectedPerson.referents" class="cartouche cartouche-default">{{ r.displayname }}</li>
+                    </ul>
+                    </div>
+                    <button class="btn-primary btn" @click="addvalidatorperson = true">
+                        Ajouter un validateur pour les créneaux <strong>Hors-Lot</strong>
+                    </button>
+                    <a class="btn-primary btn" :href="'/person/show/' + selectedPerson.id">
+                        Voir la fiche de <strong>{{ filterPerson }}</strong>
+                    </a>
                 </div>
                 <h3><i class="icon-zoom-in-outline"></i>
                     Détails</h3>
@@ -271,7 +305,8 @@
             return {
                 loading: null,
                 schedule: null,
-                declarations: [],
+                declarations: {},
+                declarers: {},
                 error: null,
                 selectedValidation: null,
                 create: false,
@@ -280,7 +315,8 @@
                 filterActivity: "",
                 selectedPerson: null,
                 validatorId: null,
-                validatorLabel: null
+                validatorLabel: null,
+                addvalidatorperson: null
             }
         },
 
@@ -475,10 +511,11 @@
 
                 this.$http.get('').then(
                     ok => {
-                        for( let item in ok.body ){
-                            ok.body[item].open = false;
+                        for( let item in ok.body.periods ){
+                            ok.body.periods[item].open = false;
                         }
-                        this.declarations = ok.body
+                        this.declarations = ok.body.periods;
+                        this.declarers = ok.body.declarants;
                     },
                     ko => {
                         this.error = AjaxResolve.resolve('Impossible de charger les données', ko);
@@ -511,10 +548,10 @@
             //////////////////////////////////////
             // Application des filtres d'affichage
 
-            handlerFilterPerson( person, personId ){
+            handlerFilterPerson( person ){
                 this.selectedValidation = null;
-                this.filterPerson = this.filterPerson == person ? "" : person;
-                this.selectedPerson = personId;
+                this.filterPerson = this.filterPerson == person.displayname ? "" : person.displayname;
+                this.selectedPerson = person;
             },
 
             handlerFilterActivity( activity ){

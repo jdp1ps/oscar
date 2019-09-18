@@ -2067,8 +2067,32 @@ class TimesheetController extends AbstractOscarController
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
         $method = $this->getHttpXMethod();
 
-        if( $method == 'POST' ){
-            return  $this->getResponseNotImplemented();
+        if( $method == 'POST' && !$this->isAjax() ){
+            $action = $this->params()->fromPost('action');
+            switch( $action ){
+                case 'addvalidator':
+                    $declarer = $this->getPersonService()->getPersonById($this->params()->fromPost('person'), true);
+                    $validator = $this->getPersonService()->getPersonById($this->params()->fromPost('validatorId'), true);
+                    try {
+                        $this->getLogger()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
+                        $this->getPersonService()->addReferentToDeclarerHorsLot($declarer, $validator, true);
+                    } catch (\Exception $e){
+                        $this->getLogger()->error($e->getMessage());
+                        $this->flashMessenger()->addErrorMessage("$validator n'a pas été ajouté aux déclarations : " . $e->getMessage());
+                    }
+
+                    try {
+                        $this->getLogger()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
+                        $this->getPersonService()->addReferent($validator->getId(), $declarer->getId());
+                    } catch ( \Exception $e ){
+                        $this->getLogger()->error($e->getMessage());
+                        $this->flashMessenger()->addErrorMessage("$validator n'a pas été assigné comme validateur Hors-Lot pour $declarer : " . $e->getMessage());
+
+                    }
+                    return $this->redirect()->toRoute('timesheet/declarations');
+                default:
+                    return $this->getResponseBadRequest();
+            }
         }
 
         if( $this->isAjax() ){
