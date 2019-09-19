@@ -7,7 +7,7 @@ Avant de déclencher une mise à jour, pensez là lire les patchnotes des versio
 Faites une sauvegarde de l'application en copiant le dossier oscar : 
 
 ```bash
-cp /path/to/oscar /tmp/oscar_save
+cp -r /path/to/oscar /tmp/oscar_save
 ```
 
 Faites une sauvegarde de la BDD pour pouvoir revenir en arrière en cas de problème.
