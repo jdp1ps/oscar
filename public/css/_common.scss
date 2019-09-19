@@ -71,6 +71,16 @@
 @import url(select2-bootstrap.css);
 
 
+////////////////////////////////////////////////////////////////////////////////
+// USUELS
+////////////////////////////////////////////////////////////////////////////////
+.reactive {
+  cursor: pointer;
+}
+
+
+
+
 // Modification
 .card {
   h2, h3, h4 {
@@ -87,18 +97,9 @@
       font-size: 1.4em;
     }
   }
-
-  &.active {
-    border-left: 4px #0b93d5 solid;
-  }
-
-  &.error {
-    border-left: 4px #9e0505 solid;
-  }
-
-  &.disabled {
-    border-left: 4px #5a5a5a solid;
-  }
+  &.active { border-left: 4px #0b93d5 solid;}
+  &.error { border-left: 4px #9e0505 solid;}
+  &.disabled { border-left: 4px #5a5a5a solid;}
 }
 
 .widget {
@@ -122,29 +123,23 @@
   }
 }
 
-
 .label i[class *= "icon-"] {
   color: white !important;
 }
 
 .options-menu {
-
   display: flex;
   font-weight: 100;
   font-size: .75em;
-
   a {
     color: $colorGreyMedium;
     text-decoration: underline;
     padding: 2px 4px;
   }
-
   &.right {
     >:first-child {
       margin-left: auto;
     }
-
-
   }
 }
 
@@ -251,6 +246,13 @@
     flex-grow: 4;
   }
 }
+
+.nav.nav-tabs > li > a {
+  font-size: .8em;
+  padding: 8px 1px;
+}
+
+
 .declarations-ui {
   background: #e2e2e2;
   height: 80vh;
@@ -294,10 +296,6 @@
   }
 }
 
-
-
-
-
 .data-list {
   color: $colorGreyMedium;
   .data-row {
@@ -330,7 +328,6 @@
     }
   }
 }
-
 
 .oscar-link {
   color: lighten(black, 25%);

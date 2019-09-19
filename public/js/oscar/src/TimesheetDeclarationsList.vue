@@ -69,18 +69,31 @@
         <h1>Liste des déclarations</h1>
 
         <div class="declarations-ui cols">
-            <div class="persons-list col-1">
+            <div class="persons-list col-1 onglets">
                 <h3><i class="icon-sort"></i> Filtres</h3>
-                <h4><i class="icon-group"></i> Déclarants</h4>
-                <article v-for="p in declarers" @click.prevent="handlerFilterPerson(p)" class="list-item" :class="{'selected': p.displayname == filterPerson }">
-                    <i class="icon-user"></i> {{ p.displayname }}
-                    <i class="icon-attention-1" v-if="p.referents.length == 0"></i>
-                </article>
+                <div>
 
-                <h4><i class="icon-cubes"></i> Activités</h4>
-                <article v-for="a in activities" @click.prevent="handlerFilterActivity(a)" class="list-item" :class="{'selected': a == filterActivity }">
-                    <i class="icon-cube"></i> {{ a }}
-                </article>
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#declarants" aria-controls="home" role="tab" data-toggle="tab"><i class="icon-group"></i> Déclarants</a></li>
+                        <li role="presentation"><a href="#activities" aria-controls="profile" role="tab" data-toggle="tab"><i class="icon-cubes"></i> Activités</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="declarants">
+                            <article v-for="p in declarers" @click.prevent="handlerFilterPerson(p)" class="list-item" :class="{'selected': p.displayname == filterPerson }">
+                                <i class="icon-user"></i> {{ p.displayname }}
+                                <i class="icon-attention-1" v-if="p.referents.length == 0"></i>
+                            </article>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="activities">
+                            <article v-for="a in activities" @click.prevent="handlerFilterActivity(a)" class="list-item" :class="{'selected': a == filterActivity }">
+                                <i class="icon-cube"></i> {{ a }}
+                            </article>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="declarations-list col-4">
                 <h2><i class="icon-calendar"></i> Déclaration</h2>
@@ -88,7 +101,7 @@
                 <!--                                        -->
                 <!--       DECLARATION                      -->
                 <!--                                        -->
-                <section v-for="line,k in filteredDeclarations" class="card declaration" @click="line.open = !line.open">
+                <section v-for="line,k in filteredDeclarations" class="card declaration reactive" @click="line.open = !line.open">
                     <span class="opener">
                         <i class="icon-angle-down" v-if="line.open"></i>
                         <i class="icon-angle-right" v-else></i>

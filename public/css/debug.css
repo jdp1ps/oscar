@@ -5414,6 +5414,9 @@ button.close {
 .openable.open .icon-openable:before {
   content: '\e860'; }
 
+.reactive {
+  cursor: pointer; }
+
 .card h2, .card h3, .card h4 {
   margin: 0 0 .25em;
   padding: 0; }
@@ -5536,6 +5539,10 @@ button.close {
     flex-grow: 2; }
   .cols > .col-4 {
     flex-grow: 4; }
+
+.nav.nav-tabs > li > a {
+  font-size: .8em;
+  padding: 8px 1px; }
 
 .declarations-ui {
   background: #e2e2e2;
