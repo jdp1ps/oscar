@@ -33,24 +33,36 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOrganizationService;
+use Oscar\Traits\UseOrganizationServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Utils\StringUtils;
 use Oscar\Validator\EOTP;
 use PHPUnit\Runner\Exception;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class ProjectGrantService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService,
+    UseOscarUserContextService, UsePersonService, UseOrganizationService
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
-
-    /**
-     * @return OscarConfigurationService
-     */
-    public function getOscarConfigurationService(){
-        return $this->getServiceLocator()->get('OscarConfig');
-    }
+    use UseOscarConfigurationServiceTrait,
+        UseEntityManagerTrait,
+        UseLoggerServiceTrait,
+        UseOscarUserContextServiceTrait,
+        UsePersonServiceTrait,
+        UseOrganizationServiceTrait
+        ;
 
     public function getTypeDocument( $typeDocumentId, $throw=false ){
         $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($typeDocumentId);

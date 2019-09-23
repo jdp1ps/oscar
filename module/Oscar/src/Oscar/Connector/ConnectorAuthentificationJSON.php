@@ -13,7 +13,7 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Role;
 use Zend\Crypt\Password\Bcrypt;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Cette classe assure le chargement d'authentification en base de données

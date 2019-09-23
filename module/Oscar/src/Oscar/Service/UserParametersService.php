@@ -14,8 +14,8 @@ use Oscar\Exception\OscarException;
 use Oscar\Utils\ValidationInput;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class UserParametersService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface, ConfigurationAwareInterface
 {

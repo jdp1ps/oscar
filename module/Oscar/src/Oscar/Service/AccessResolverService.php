@@ -13,7 +13,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\UserAccessDefinition;
 use UnicaenAuth\Service\UserContext;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use ZendTest\XmlRpc\Server\Exception;
 
 /**

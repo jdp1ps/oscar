@@ -12,7 +12,7 @@ use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Exception\ConnectorException;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\ServiceManager;
 

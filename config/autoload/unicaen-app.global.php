@@ -47,6 +47,10 @@ $settings = array(
         'mentionsLegales'        => 'http://www.unicaen.fr/outils-portail-institutionnel/mentions-legales/',
         'informatiqueEtLibertes' => 'http://www.unicaen.fr/outils-portail-institutionnel/informatique-et-libertes/',
     ),
+
+   // 'session_refresh_period' => 0, // 0 <=> aucune requête exécutée
+
+
 );
 
 /**
@@ -54,4 +58,35 @@ $settings = array(
  */
 return array(
     'unicaen-app' => $settings,
+    //
+    // Session configuration.
+    //
+    'session_config' => [
+        // Session cookie will expire in 1 hour.
+        'cookie_lifetime' => 60*60*1,
+        // Session data will be stored on server maximum for 30 days.
+        'gc_maxlifetime'     => 60*60*24*30,
+    ],
+    //
+    // Session manager configuration.
+    //
+    'session_manager' => [
+        // Session validators (used for security).
+        'validators' => [
+            \Zend\Session\Validator\RemoteAddr::class,
+            \Zend\Session\Validator\HttpUserAgent::class,
+
+            // Erreur rencontrée avec ce validateur lorsqu'on passe en "Version pour ordinateur" sur un téléphone Android :
+            // `Fatal error: Uncaught Zend\Session\Exception\RuntimeException: Session validation failed
+            //  in /var/www/app/vendor/zendframework/zend-session/src/SessionManager.php on line 162`
+            //HttpUserAgent::class,
+        ]
+    ],
+    //
+    // Session storage configuration.
+    //
+    'session_storage' => [
+        'type' => \Zend\Session\Storage\SessionArrayStorage::class
+    ],
+
 );

@@ -13,8 +13,8 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Service\AccessResolverService;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\View\Helper\AbstractHtmlElement;
 
 class UserUIHelper extends AbstractHtmlElement implements ServiceLocatorAwareInterface

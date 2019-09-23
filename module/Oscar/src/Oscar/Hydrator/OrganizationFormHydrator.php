@@ -9,7 +9,7 @@ namespace Oscar\Hydrator;
 
 
 use Oscar\Entity\Organization;
-use Zend\Stdlib\Hydrator\HydratorInterface;
+use Zend\Hydrator\HydratorInterface;
 
 class OrganizationFormHydrator implements HydratorInterface
 {

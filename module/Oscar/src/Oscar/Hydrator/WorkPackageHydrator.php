@@ -10,9 +10,9 @@ namespace Oscar\Hydrator;
 use Oscar\Entity\WorkPackage;
 use Oscar\Hydrator\Hydrator;
 use Oscar\Utils\DateTimeUtils;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Stdlib\Hydrator\HydratorInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\Hydrator\HydratorInterface;
 
 class WorkPackageHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

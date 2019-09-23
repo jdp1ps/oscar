@@ -10,8 +10,8 @@ namespace Oscar\Entity;
 use Doctrine\ORM\EntityRepository;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenAuth\Service\UserContext;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class ActivityLogRepository extends EntityRepository
 {

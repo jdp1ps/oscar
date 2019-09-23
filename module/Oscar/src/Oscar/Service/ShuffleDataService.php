@@ -15,8 +15,8 @@ use Oscar\Entity\Person;
 use Oscar\Entity\Project;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class ShuffleDataService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
 {

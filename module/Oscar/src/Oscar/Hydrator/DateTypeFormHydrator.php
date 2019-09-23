@@ -11,9 +11,9 @@ namespace Oscar\Hydrator;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\DateType;
 use Oscar\Entity\OscarFacet;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Stdlib\Hydrator\HydratorInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\Hydrator\HydratorInterface;
 
 class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

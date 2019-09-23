@@ -30,6 +30,14 @@ use Oscar\Service\ProjectService;
 use Oscar\Service\SearchService;
 use Oscar\Service\SessionService;
 use Oscar\Service\UserParametersService;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerTrait;
 use Symfony\Component\Yaml\Parser;
 use UnicaenAuth\Service\UserContext;
 use Zend\Http\Request;
@@ -44,8 +52,10 @@ use Zend\View\Model\JsonModel;
  *
  * Class AbstractOscarController
  */
-class AbstractOscarController extends AbstractActionController
+class AbstractOscarController extends AbstractActionController implements UseOscarConfigurationService, UseOscarUserContextService, UseLoggerService
 {
+    use UseOscarConfigurationServiceTrait, UseOscarUserContextServiceTrait, UseLoggerServiceTrait;
+
 
     public function oscarRest( $default, $get, $post=null, $delete=null)
     {
@@ -95,14 +105,6 @@ class AbstractOscarController extends AbstractActionController
         }
     }
 
-
-    /**
-     * @return OscarConfigurationService
-     */
-    public function getOscarConfigurationService(){
-        return $this->getServiceLocator()->get('OscarConfig');
-    }
-
     protected function getYamlConfigPath(){
         $dir = realpath(__DIR__.'/../../../../../config/autoload/');
         $file = $dir.'/oscar-editable.yml';
@@ -137,32 +139,6 @@ class AbstractOscarController extends AbstractActionController
         }
     }
 
-    /**
-     * @param $key
-     * @return mixed
-     */
-    protected function getConfiguration($key){
-        static $config;
-        if( $config == null ){
-            $config = new ConfigurationParser($this->getServiceLocator()->get('Config'));
-        }
-        return $config->getConfiguration($key);
-    }
-
-    /**
-     * @return UserParametersService
-     */
-    public function getUserParametersService(){
-        return $this->getServiceLocator()->get('UserParametersService');
-    }
-
-    /**
-     * @return SessionService
-     */
-    protected function getSessionService(){
-        return $this->getServiceLocator()->get('SessionService');
-    }
-
 
     protected function getHttpXMethod(){
         /** @var Request $request */
@@ -188,14 +164,8 @@ class AbstractOscarController extends AbstractActionController
         return $this->params()->fromRoute('controller').':'.$this->params()->fromRoute('action');
     }
 
-    private $_currentPerson;
     protected function getCurrentPerson(){
-        if( $this->_currentPerson === null ){
-            $this->_currentPerson = "intruder";
-
-            $this->_currentPerson = $this->getOscarUserContext()->getCurrentPerson();
-        }
-        return $this->_currentPerson;
+        return $this->getOscarUserContextService()->getCurrentPerson();
     }
 
     protected function ajaxResponse($datas)
@@ -225,7 +195,7 @@ class AbstractOscarController extends AbstractActionController
 
     protected function isAllow($role)
     {
-        $roles = $this->getUserContext()->getIdentityRoles();
+        $roles = $this->getOscarUserContextService()->getIdentityRoles();
 
         return isset($roles[$role]);
     }
@@ -259,116 +229,12 @@ class AbstractOscarController extends AbstractActionController
         return $this->getHttpResponse(Response::STATUS_CODE_401, $message);
     }
 
-
-    /**
-     * @return Logger
-     */
-    protected function getLogger()
-    {
-        return $this->getServiceLocator()->get('logger');
-    }
-    
-    /**
-     * @return \Oscar\Service\AccessResolverService
-     */
-    protected function getAccessResolverService()
-    {
-        return $this->getServiceLocator()->get('AccessResolverService');
-    }
-
-    /**
-     * @return OscarUserContext
-     */
-    protected function getOscarUserContext()
-    {
-        return $this->getServiceLocator()->get('OscarUserContext');
-    }
-
-    /**
-     * @return NotificationService
-     */
-    protected function getNotificationService(){
-        return $this->getServiceLocator()->get('NotificationService');
-    }
-
-    /***
-     * @return SearchService
-     */
-    protected function getSearchProjectService()
-    {
-        return $this->getServiceLocator()->get('Search');
-    }
-
-    /**
-     * @return ProjectService
-     */
-    protected function getProjectService()
-    {
-        return $this->getServiceLocator()->get('ProjectService');
-    }
-
-    /**
-     * @return ProjectGrantService
-     */
-    protected function getActivityService()
-    {
-        return $this->getServiceLocator()->get('ProjectGrantService');
-    }
-
-    /**
-     * @return ActivityTypeService
-     */
-    protected function getActivityTypeService()
-    {
-        return $this->getServiceLocator()->get('ActivityTypeService');
-    }
-
-    /**
-     * @return UserContext
-     */
-    protected function getUserContext()
-    {
-        return $this->getServiceLocator()->get('authUserContext');
-    }
-
-    /**
-     * @return PersonService
-     */
-    protected function getPersonService()
-    {
-        return $this->getServiceLocator()->get('PersonService');
-    }
-
-    /**
-     * @return OrganizationService
-     */
-    protected function getOrganizationService()
-    {
-        return $this->getServiceLocator()->get('OrganizationService');
-    }
-
-    /**
-     * @return ActivityLogService
-     */
-    protected function getActivityLogService()
-    {
-        return $this->getServiceLocator()->get('ActivityLogService');
-    }
-
-    /**
-     * @return ProjectGrantService
-     */
-    protected function getProjectGrantService()
-    {
-        return $this->getServiceLocator()->get('ProjectGrantService');
-    }
-
     /**
      * @return \UnicaenAuth\Entity\Ldap\People
      */
     protected function getLdapUser()
     {
-        return $this->getUserContext()->getLdapUser();
+        return $this->getOscarUserContextService()->getUserContext()->getLdapUser();
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -376,57 +242,6 @@ class AbstractOscarController extends AbstractActionController
     // Repositories
     //
     ////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * @return ProjectRepository
-     */
-    protected function getProjectRepository()
-    {
-        return $this->getEntityManager()->getRepository('Oscar\Entity\Project');
-    }
-
-    /**
-     * @return EntityManager
-     */
-    protected function getEntityManager()
-    {
-        return $this->getServiceLocator()->get('doctrine.entitymanager.orm_default');
-    }
-
-    /**
-     * @return ProjectGrantRepository
-     */
-    protected function getGrantRepository()
-    {
-        return $this->getEntityManager()->getRepository('\Oscar\Entity\ProjectGrant');
-    }
-
-    /**
-     * @return ActivityLogRepository
-     */
-    protected function getActivity()
-    {
-        return $this->getEntityManager()->getRepository('Oscar\Entity\Activity');
-    }
-
-
-    protected function log($message=null)
-    {
-        if ($message === null) {
-            $controller = $this->params()->fromRoute('controller');
-            $method = $this->params()->fromRoute('action');
-            $user = 'Unknow User';
-            if ($this->getUserContext()->getLdapUser()) {
-                $user = $this->getUserContext()->getLdapUser()->getDisplayName();
-            }
-            elseif ($this->getUserContext()->getDbUser()) {
-                $user = $this->getUserContext()->getDbUser()->getUsername();
-            }
-
-            $message = $controller.'::'.$method . ' by ' . $user;
-        }
-        $this->addActivity($message);
-    }
 
     protected function addActivity(
         $message,

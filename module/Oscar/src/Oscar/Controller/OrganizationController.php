@@ -29,7 +29,7 @@ use Oscar\Service\OrganizationService;
 use Oscar\Utils\EntityHydrator;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\PhpEnvironment\Request;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 

@@ -11,6 +11,7 @@ namespace Oscar\Service;
 use BjyAuthorize\Acl\HierarchicalRoleInterface;
 use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\NoResultException;
+use mysql_xdevapi\Exception;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
@@ -27,12 +28,18 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use UnicaenAuth\Acl\NamedRole;
 use UnicaenAuth\Service\UserContext;
 use Zend\Http\Request;
 use Zend\Json\Server\Exception\HttpException;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Cette classe centralise les informations liées à l'authentification et à l'identité
@@ -41,14 +48,56 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  *
  * @package Oscar\Service
  */
-class OscarUserContext extends UserContext
+class OscarUserContext implements UseOscarConfigurationService, UseLoggerService, UseEntityManager
 {
+
+    use UseOscarConfigurationServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait;
+
+    /** @var UserContext */
+    protected $userContext;
+
+    /**
+     * @return UserContext
+     */
+    public function getUserContext(): UserContext
+    {
+        return $this->userContext;
+    }
+
+    /**
+     * @param UserContext $userContext
+     */
+    public function setUserContext(UserContext $userContext): void
+    {
+        $this->userContext = $userContext;
+    }
+
+
+    /**
+     * @return PersonService
+     */
+    public function getPersonService(): PersonService
+    {
+        return $this->personService;
+    }
+
+    /**
+     * @param PersonService $personService
+     */
+    public function setPersonService(PersonService $personService): void
+    {
+        $this->personService = $personService;
+    }
+
+
+
+
 
     public function hasPersonnelAccess(){
         if( !$this->getCurrentPerson() ){
             return false;
         }
-        $access = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('listPersonnel');
+        $access = $this->getOscarConfigurationService()->getConfiguration('listPersonnel');
 
         // OFF
         if( $access == 0 ) return false;
@@ -63,7 +112,7 @@ class OscarUserContext extends UserContext
         $organisationRepository = $this->getEntityManager()->getRepository(Organization::class);
 
         // Accès niveau 1 : N+1
-        $subodinates = $personRepository->getSubordinatesIds($this->getCurrentPerson()->getId());
+        $subodinates = $this->getPersonService()->getSubordinateIds($this->getCurrentPerson()->getId());
 
         if( $access > 0 && (count($subodinates) > 0 || count($this->getCurrentPerson()->getTimesheetsFor()) > 0)) return true;
 
@@ -83,7 +132,7 @@ class OscarUserContext extends UserContext
      * @return null|Authentification
      */
     public function getAuthentification(){
-        if( $this->getDbUser() ){
+        if( $this->getUserContext()->getDbUser() ){
             return $this->getEntityManager()->getRepository(Authentification::class)->find($this->getDbUser()->getId());
         }
         return null;
@@ -97,7 +146,8 @@ class OscarUserContext extends UserContext
      */
     public function getAvailabledRoles()
     {
-        return $this->getServiceAuthorize()->getRoles();
+        throw new Exception("FIX IT !");
+        //return $this->getUserContext()getServiceAuthorize()->getRoles();
     }
 
     public function getRequestToken(){
@@ -358,22 +408,21 @@ class OscarUserContext extends UserContext
      */
     public function getCurrentPerson()
     {
-        /** @var PersonService $personService */
-        $personService = $this->getServiceLocator()->get('PersonService');
 
         try {
-            if ($this->getLdapUser()) {
+            if ($this->getUserContext()->getLdapUser()) {
                 // PATCH Limoges
                 // au cas ou le supannAliasLogin n'est pas fournis...
-                $pseudo = $this->getLdapUser()->getSupannAliasLogin();
+                $pseudo = $this->getUserContext()->getLdapUser()->getSupannAliasLogin();
                 if( !$pseudo ){
-                    $pseudo = $this->getLdapUser()->getUid();
+                    $pseudo = $this->getUserContext()->getLdapUser()->getUid();
                 }
-                return $personService->getPersonByLdapLogin($pseudo);
-            } elseif ($this->getDbUser()) {
-                return $personService->getPersonByLdapLogin($this->getDbUser()->getUsername());
+                return $this->getPersonService()->getPersonByLdapLogin($pseudo);
+            } elseif ($this->getUserContext()->getDbUser()) {
+                return $this->getPersonService()->getPersonByLdapLogin($this->getUserContext()->getDbUser()->getUsername());
             }
         } catch (NoResultException $ex) {
+            $this->getLoggerService()->error("getCurrentPerson() => " . $ex->getMessage());
             // ... can happening with users stored in database directly
         }
         return null;
@@ -383,18 +432,13 @@ class OscarUserContext extends UserContext
      * @param Authentification $authentification
      * @return null|Person
      */
-    public function getPersonFromAuthentification(
-        Authentification $authentification
-    ) {
-        /** @var PersonService $personService */
-        $personService = $this->getServiceLocator()->get('PersonService');
+    public function getPersonFromAuthentification( Authentification $authentification ) {
 
         try {
-            return $personService->getPersonByLdapLogin($authentification->getUsername());
+            return $this->getPersonService()->getPersonByLdapLogin($authentification->getUsername());
         } catch (NoResultException $ex) {
             // ... can happening with users stored in database directly
         }
-
         return null;
     }
 
@@ -408,10 +452,6 @@ class OscarUserContext extends UserContext
             throw new UnAuthorizedException('Droits insuffisants');
         }
     }
-
-
-
-
 
     /**
      * Test si l'utilisteur courant a le role $roleId en tenant compte de la
@@ -435,7 +475,7 @@ class OscarUserContext extends UserContext
         };
 
         /** @var HierarchicalRoleInterface $role */
-        foreach ($this->getIdentityRoles() as $role) {
+        foreach ($this->getUserContext()->getIdentityRoles() as $role) {
             if ($recursiveCheck($role, $roleId)) {
                 return true;
             }
@@ -495,9 +535,9 @@ class OscarUserContext extends UserContext
         if ($_ROLESID === null) {
             $_ROLESID = [];
 
-            if ($this->getIdentity()) {
+            if ($this->getUserContext()->getIdentity()) {
                 /** @var HierarchicalRoleInterface $role */
-                foreach ($this->getIdentityRoles() as $role) {
+                foreach ($this->getUserContext()->getIdentityRoles() as $role) {
                     $_ROLESID = array_merge($_ROLESID,
                         $this->getRoleIdRecursive($role));
                 }

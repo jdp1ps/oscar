@@ -11,9 +11,9 @@ use Oscar\Entity\Activity;
 use Oscar\Hydrator\Hydrator;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Utils\DateTimeUtils;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Stdlib\Hydrator\HydratorInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\Hydrator\HydratorInterface;
 
 class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

@@ -9,8 +9,8 @@ namespace Oscar\Controller;
 
 use Oscar\Service\ActivityLogService;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class ActivityLogController extends AbstractOscarController
 {

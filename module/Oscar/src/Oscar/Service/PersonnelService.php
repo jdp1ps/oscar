@@ -6,8 +6,8 @@ use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Oscar\Entity\Person;
 use Oscar\Entity\PublicPeople;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Class PersonnelService.

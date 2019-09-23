@@ -15,8 +15,8 @@ use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenAuth\Acl\NamedRole;
 use UnicaenAuth\Entity\Db\Role;
 use UnicaenAuth\Service\UserContext;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\ServiceManager;
 

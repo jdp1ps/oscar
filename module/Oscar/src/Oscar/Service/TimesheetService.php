@@ -20,6 +20,24 @@ use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
+use Oscar\Traits\UseActivityService;
+use Oscar\Traits\UseActivityServiceTrait;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UseOrganizationService;
+use Oscar\Traits\UseOrganizationServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Utils\ConfigurationMergable;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\DateTimeUtilsTest;
@@ -29,27 +47,40 @@ use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Db\Sql\Ddl\Constraint\ForeignKey;
 use Zend\Form\Element\Time;
 use Zend\Log\Logger;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Gestion des Personnes :
  *  - Collaborateurs
  *  - Membres de projet/organisation.
  */
-class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class TimesheetService implements UseOscarUserContextService, UseOscarConfigurationService, UsePersonService,
+                                    UseOrganizationService, UseEntityManager, UseLoggerService,
+                                    UseActivityService, UseNotificationService, UseActivityLogService
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+    use UseOscarUserContextServiceTrait,
+        UseOscarConfigurationServiceTrait,
+        UsePersonServiceTrait,
+        UseOrganizationServiceTrait,
+        UseEntityManagerTrait,
+        UseLoggerServiceTrait,
+        UseNotificationServiceTrait,
+        UseActivityServiceTrait,
+        UseActivityLogServiceTrait;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     /**
-     * Retourne la configuration OSCAR.
-     *
-     * @return ConfigurationParser
+     * TimesheetService constructor.
      */
-    protected function getOscarConfig()
+    public function __construct()
     {
-        return $this->getServiceLocator()->get('OscarConfig');
+
     }
+
 
     /**
      * Supprimer la Person $person de  la validation.
@@ -487,15 +518,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getValidationPeriodRepository()->getValidationPeriodsOutWP($person ? $person->getId() : null);
     }
 
-
-    /**
-     * @return OscarUserContext
-     */
-    protected function getOscarUserContext()
-    {
-        return $this->getServiceLocator()->get('OscarUserContext');
-    }
-
     /**
      * @return ValidationPeriodRepository
      */
@@ -673,7 +695,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
         static $others;
         if ($others == null) {
-            $others = $this->getOscarConfig()->getConfiguration('horslots');
+            $others = $this->getOscarConfigurationService()->getConfiguration('horslots');
         }
         return $others;
     }
@@ -1145,9 +1167,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function isDeclarationsHoursPerson(Person $person)
     {
 
-        $declarationShours = $default = $this->getOscarConfig()->getConfiguration('declarationsHours');
+        $declarationShours = $default = $this->getOscarConfigurationService()->getConfiguration('declarationsHours');
 
-        if ($this->getOscarConfig()->getConfiguration('declarationsHoursOverwriteByAuth')) {
+        if ($this->getOscarConfigurationService()->getConfiguration('declarationsHoursOverwriteByAuth')) {
             try {
                 if (!$person || !$person->getLadapLogin()) {
                     throw new \Exception("Cette personne n'existe pas ou n'a pas de login valide.");
@@ -1204,9 +1226,9 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
     public function getDayLengthPerson(Person $person)
     {
-        $configApp = $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength');
+        $configApp = $this->getOscarConfigurationService()->getConfiguration('declarationsDurations.dayLength');
         $configApp['from'] = 'application';
-        $scheduleConfig = $this->getOscarConfig()->getConfiguration('scheduleModeles');
+        $scheduleConfig = $this->getOscarConfigurationService()->getConfiguration('scheduleModeles');
         $personModele = $person->getCustomSettingsKey('scheduleModele');
 
 
@@ -1711,7 +1733,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $maxPeriod = $now->getTimestamp();
 
         $datas = [
-            'owner' => $person == $this->getOscarUserContext()->getCurrentPerson(),
+            'owner' => $person == $this->getOscarUserContextService()->getCurrentPerson(),
             'minDate' => "",
             'maxDate' => "",
             'periods' => [],
@@ -1896,10 +1918,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $decaleDay = $dateRef->format('N') - 1;
         $daysLabels = [];
 
-        $weekendAllowed = $this->getOscarConfig()->getConfiguration('declarationsWeekend') == false;
+        $weekendAllowed = $this->getOscarConfigurationService()->getConfiguration('declarationsWeekend') == false;
 
-        $amplitudeMax = $this->getOscarConfig()->getConfiguration('declarationAmplitudeMax');
-        $amplitudeMin = $this->getOscarConfig()->getConfiguration('declarationAmplitudeMin');
+        $amplitudeMax = $this->getOscarConfigurationService()->getConfiguration('declarationAmplitudeMax');
+        $amplitudeMin = $this->getOscarConfigurationService()->getConfiguration('declarationAmplitudeMin');
 
         $daysDetails = $this->getDayLengthPerson($person);
 
@@ -2031,11 +2053,11 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $month += $duration;
         }
 
-        $limitWeekMax = $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max');
-        $limitMonthMax = $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.max');
+        $limitWeekMax = $this->getOscarConfigurationService()->getConfiguration('declarationsDurations.weekLength.max');
+        $limitMonthMax = $this->getOscarConfigurationService()->getConfiguration('declarationsDurations.monthLength.max');
 
         // @todo Faire comme pour la semaine
-        $limitMonthMin = $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.min');
+        $limitMonthMin = $this->getOscarConfigurationService()->getConfiguration('declarationsDurations.monthLength.min');
 
         foreach ($weeksMaxCount as $week => $weekDuration) {
             if ($weekDuration > $limitWeekMax) {
@@ -2392,7 +2414,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         $submitable = false;
         $submitableInfos = "Vous ne pouvez pas soumettre cette période pour une raison inconnue";
-        $importEnable = $this->getOscarConfig()->getConfiguration('importEnable');
+        $importEnable = $this->getOscarConfigurationService()->getConfiguration('importEnable');
 
         $hasConflict = false;
 
@@ -2468,7 +2490,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $activities = [];
         $workPackages = [];
 
-        $availableWorkPackages = $this->getServiceLocator()->get('ActivityService')->getWorkPackagePersonPeriod($person, $year, $month);
+        $availableWorkPackages = $this->getActivityService()->getWorkPackagePersonPeriod($person, $year, $month);
         /** @var WorkPackagePerson $workPackagePerson */
         foreach ($availableWorkPackages as $workPackagePerson) {
             $workPackage = $workPackagePerson->getWorkPackage();
@@ -2680,10 +2702,10 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             'editableInfos' => $editableInfos,
             'period_total_days' => $totalDays,
             'dayNbr' => $totalDays,
-            'dayLength' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.value'),
-            'dayExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.dayLength.max'),
-            'weekExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.weekLength.max'),
-            'monthExcess' => $this->getOscarConfig()->getConfiguration('declarationsDurations.monthLength.max'),
+            'dayLength' => $this->getOscarConfigurationService()->getConfiguration('declarationsDurations.dayLength.value'),
+            'dayExcess' => $this->getOscarConfigurationService()->getConfiguration('declarationsDurations.dayLength.max'),
+            'weekExcess' => $this->getOscarConfigurationService()->getConfiguration('declarationsDurations.weekLength.max'),
+            'monthExcess' => $this->getOscarConfigurationService()->getConfiguration('declarationsDurations.monthLength.max'),
             'activities' => $activities,
             'workpackages' => $workPackages,
             'otherWP' => $others,
@@ -3053,7 +3075,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
         $validations = [];
         if ($referent) {
-            $subordinates = $this->getServiceLocator()->get('PersonService')->getSubordinates($referent);
+            $subordinates = $this->getPersonService()->getSubordinates($referent);
             if (count($subordinates))
                 $parameters = [
                     'persons' => $subordinates,
@@ -3308,7 +3330,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function setTimesheetToSend(TimeSheet &$timeSheet)
     {
         $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE)
-            ->setSendBy((string)$this->getOscarUserContext()->getCurrentPerson())
+            ->setSendBy((string)$this->getOscarUserContextService()->getCurrentPerson())
             ->setRejectedSciComment(null)
             ->setRejectedSciAt(null)
             ->setRejectedSciBy(null)
@@ -3341,7 +3363,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         }
 
         /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get('NotificationService');
+        $notificationService = $this->getNotificationService();
         $activityNotification = [];
 
         foreach ($datas as $data) {
@@ -3364,7 +3386,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         try {
             $notificationService->notifyActivitiesTimesheetSend($activityNotification);
         } catch (\Exception $e) {
-            //$this->getServiceLocator()->get('Logger')->error($e->getMessage() ." - " . $e->getTraceAsString());
+            $this->getLoggerService()->error($e->getMessage());
         }
         return $timesheets;
     }
@@ -3394,50 +3416,6 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $timesheets;
     }
 
-    /**
-     * Charge les emplois du temps "extérieurs"
-     * @param Person $person
-     */
-    public function getExternal(Person $person)
-    {
-        // TODO Récupération des créneaux 'externes'
-        return [/*
-            [
-                'id'                => null,
-                'activity_id'       => null,
-                'activity_label'    => null,
-                'label'             => 'conges',
-                'status'             => 'info',
-                'owner'    => "Stéphane Bouvry",
-                'owner_id'    => 5063,
-                'start' => "2018-04-05T09:00:00+02:00",
-                'end' => "2018-04-05T16:30:00+02:00",
-                'credentials'    => [
-                    'deletable' => false,
-                    'editable' => false,
-                    'sendable' => false,
-                    'validableAdm' => false,
-                    'validableSci' => false,
-                ],
-            ]*/
-        ];
-    }
-
-    /**
-     * @return PersonService
-     */
-    protected function getPersonService()
-    {
-        return $this->getServiceLocator()->get('PersonService');
-    }
-
-    /**
-     * @return Logger
-     */
-    protected function getLogger()
-    {
-        return $this->getServiceLocator()->get('Logger');
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
@@ -3701,7 +3679,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             }
 
             /** @var ActivityLogService $als */
-            $als = $this->getServiceLocator()->get('ActivityLogService');
+            $als = $this->getActivityLogService();
             $als->addUserInfo($msg, 'Activity', $period->getObjectId());
             $this->getEntityManager()->flush($period);
             $this->notificationsValidationPeriod($period);
@@ -3732,7 +3710,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $msg = sprintf("a rejeté de la déclaration %s", $period);
 
             /** @var ActivityLogService $als */
-            $als = $this->getServiceLocator()->get('ActivityLogService');
+            $als = $this->getActivityLogService();
             $als->addUserInfo($msg, 'Activity', $period->getObjectId());
 
             $this->getEntityManager()->flush($validationPeriods);
@@ -3930,7 +3908,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     public function resolveTimeSheetCredentials(TimeSheet $timeSheet, $person = null)
     {
         if ($person == null) {
-            $person = $this->getOscarUserContext()->getCurrentPerson();
+            $person = $this->getOscarUserContextService()->getCurrentPerson();
         }
 
         /** @var ValidationPeriod $periodValidation */
@@ -3977,13 +3955,13 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         if ($timeSheet->getStatus() == TimeSheet::STATUS_TOVALIDATE) {
             $validableSci = $timeSheet->getValidatedSciAt() ?
                 false :
-                $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
                     $timeSheet->getActivity());
 
             // Validation administrative
             $validableAdm = $timeSheet->getValidatedAdminAt() ?
                 false :
-                $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
                     $timeSheet->getActivity());
         }
 
@@ -4013,18 +3991,18 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
     {
         foreach ($datas as $data) {
             if (array_key_exists('id', $data) && $data['id'] != null) {
-                $this->getServiceLocator()->get('Logger')->info("MAJ " . $data['id']);
+                $this->getLoggerService()->info("MAJ " . $data['id']);
                 $timeSheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($data['id']);
             } else {
-                $this->getServiceLocator()->get('Logger')->info("ADD " . $data['id']);
+                $this->getLoggerService()->info("ADD " . $data['id']);
                 $timeSheet = new TimeSheet();
                 $this->getEntityManager()->persist($timeSheet);
             }
 
-            $this->getServiceLocator()->get('Logger')->info("owner " . $by);
+            $this->getLoggerService()->info("owner " . $by);
             $status = TimeSheet::STATUS_INFO;
 
-            $this->getServiceLocator()->get('Logger')->info(print_r($data, true));
+            $this->getLoggerService()->info(print_r($data, true));
 
             if (isset($data['idworkpackage']) && $data['idworkpackage'] != 'null') {
                 /** @var WorkPackage $workPackage */
@@ -4101,7 +4079,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $timesheets = $this->getTimesheetRepository()->getTimesheetsByIcsFileUid($icsUid);
 
 
-        $this->getServiceLocator()->get('Logger')->info("Nombre de créneaux à traiter : " . count($timesheets));
+        $this->getLoggerService()->info("Nombre de créneaux à traiter : " . count($timesheets));
 
         // Liste des problèmes
         $warnings = [];
@@ -4136,7 +4114,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
         $locked = [];
 
         if ($loadInitiale == true) {
-            $datas = $this->getServiceLocator()->get('Configuration');
+            $datas = $this->getOscarConfigurationService()->getConfigArray();
             $lockedEachMonth = $datas['oscar']['closedDays'];
             $lockedEachSpecifics = $datas['oscar']['closedDaysExtras'];
             $lockedEachMonth($locked, $annee, $mois);
@@ -4283,7 +4261,7 @@ class TimesheetService implements ServiceLocatorAwareInterface, EntityManagerAwa
      */
     protected function getServiceNotification()
     {
-        return $this->getServiceLocator()->get("NotificationService");
+        return $this->getNotificationService();
     }
 
     protected function sendStackedNotifications()

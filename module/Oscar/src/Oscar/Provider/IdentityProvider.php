@@ -14,9 +14,9 @@ use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenAuth\Provider\Identity\ChainableProvider;
 use UnicaenAuth\Provider\Identity\ChainEvent;
 use UnicaenAuth\Service\UserContext;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use BjyAuthorize\Provider\Identity\ProviderInterface as IdentityProviderInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Gestion de l'identité courante dans Oscar.

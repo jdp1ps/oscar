@@ -39,18 +39,6 @@ class PrototypeController extends AbstractOscarController
         );
     }
 
-    public function ldapAction()
-    {
-        /** @var $personnelService \Oscar\Service\PersonnelService */
-        $personnelService = $this->getServiceLocator()->get('PersonnelService');
-
-        /** @var $projectService \Oscar\Service\ProjectService */
-        $projectService = $this->getServiceLocator()->get('ProjectService');
-        $projectService->getProjectsByUserEmail($this->getLdapUser()->getEmail());
-
-        die('done');
-    }
-
     public function traitAction()
     {
         $infinite = new \Oscar\Entity\ProjectMember();

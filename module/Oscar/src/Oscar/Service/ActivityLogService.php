@@ -14,8 +14,8 @@ use Oscar\Entity\Person;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenAuth\Service\UserContext;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use ZfcUser\Mapper\UserInterface;
 
 class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManagerAwareInterface

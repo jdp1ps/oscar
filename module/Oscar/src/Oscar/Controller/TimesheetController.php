@@ -9,46 +9,28 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
-use Doctrine\ORM\Query;
-use Dompdf\Dompdf;
 use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
-use Oscar\Entity\ActivityPerson;
-use Oscar\Entity\ActivityType;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
-use Oscar\Entity\Privilege;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
-use Oscar\Form\ActivityDateForm;
-use Oscar\Form\ActivityTypeForm;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
-use Oscar\Formatter\TimesheetPersonPeriodFormatter;
-use Oscar\Formatter\TimesheetPersonPeriodFormatter2;
 use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
-use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
+use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
-use PhpOffice\PhpWord\Style\Fill;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\Http\Request;
 use Zend\Http\Response;
-use Zend\Mvc\Router\Http\Method;
-use Zend\Validator\Date;
 use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
-use Zend\View\Renderer\PhpRenderer;
-use Zend\View\Resolver\AggregateResolver;
-use Zend\View\Resolver\TemplateMapResolver;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et
@@ -58,8 +40,48 @@ use Zend\View\Resolver\TemplateMapResolver;
  */
 class TimesheetController extends AbstractOscarController
 {
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
+    /** @var TimesheetService */
+    private $timesheetService;
+
+    /** @var PersonService */
+    private $personService;
+
     /**
-     * @return \Doctrine\ORM\EntityRepository
+     * @return TimesheetService
+     */
+    public function getTimesheetService() :TimesheetService {
+        return $this->timesheetService;
+    }
+
+    /**
+     * @param TimesheetService $s
+     */
+    public function setTimesheetService( TimesheetService $s ){
+        $this->timesheetService = $s;
+    }
+
+    /**
+     * @return PersonService
+     */
+    public function getPersonService(): PersonService
+    {
+        return $this->personService;
+    }
+
+    /**
+     * @param PersonService $personService
+     */
+    public function setPersonService(PersonService $personService): void
+    {
+        $this->personService = $personService;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /**
+     * @return PersonService
      */
     protected function getPersonFromRoute(){
         $idPerson = $this->params()->fromRoute('idperson');
@@ -90,7 +112,7 @@ class TimesheetController extends AbstractOscarController
         $currentPerson = $this->getCurrentPerson();
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getTimesheetService();
 
         if( $this->isAjax() ){
             switch ($method) {
@@ -105,7 +127,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "valid-prj" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -122,7 +144,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "valid-sci" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
                         }
 
@@ -140,7 +162,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "valid-adm" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider administrativement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -158,7 +180,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "reject-prj" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -178,7 +200,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "reject-sci" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter scientifiquement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -198,7 +220,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "reject-adm" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter administrativement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -241,9 +263,9 @@ class TimesheetController extends AbstractOscarController
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($validationPeriod->getObjectId());
             }
 
-            $validablePrj = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
-            $validableSci = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
-            $validableAdm = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+            $validablePrj = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
+            $validableSci = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+            $validableAdm = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
 
             $periodInfos['validable_prj'] = $validablePrj;
             $periodInfos['validable_sci'] = $validableSci;
@@ -276,7 +298,7 @@ class TimesheetController extends AbstractOscarController
         $currentPerson = $this->getCurrentPerson();
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getTimesheetService();
 
         if( $this->isAjax() ){
             switch ($method) {
@@ -291,7 +313,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "valid-prj" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -308,7 +330,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "valid-sci" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
                         }
 
@@ -328,7 +350,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "valid-adm" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider administrativement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -348,7 +370,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "reject-prj" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -368,7 +390,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "reject-sci" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter scientifiquement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -388,7 +410,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if( $action == "reject-adm" ){
-                        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
+                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
                             $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter administrativement la déclaration");
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
@@ -431,9 +453,9 @@ class TimesheetController extends AbstractOscarController
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($validationPeriod->getObjectId());
             }
 
-            $validablePrj = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
-            $validableSci = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
-            $validableAdm = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+            $validablePrj = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
+            $validableSci = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
+            $validableAdm = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
 
             $periodInfos['validable_prj'] = $validablePrj;
             $periodInfos['validable_sci'] = $validableSci;
@@ -519,7 +541,7 @@ class TimesheetController extends AbstractOscarController
         // Contrôle d'accès
         $activity = $this->getActivityService()->getActivityById($activity_id, true);
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
         $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
 
@@ -586,7 +608,7 @@ class TimesheetController extends AbstractOscarController
             }
 
             // Contrôle des droits d'accès
-            $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
             // Obtention des IDS des déclarants
             foreach ($activity->getDeclarers() as $person) {
@@ -618,7 +640,7 @@ class TimesheetController extends AbstractOscarController
             }
 
             // Contrôle des droits d'accès
-            $global = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW);
+            $global = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW);
             if( !$global ){
                 if( !in_array($this->getCurrentPerson(), $this->getPersonService()->getManagers($person)) ){
                     return $this->getResponseUnauthorized("Vous n'avez pas les droits pour voir la feuille de temps de $person");
@@ -716,7 +738,7 @@ class TimesheetController extends AbstractOscarController
 
     public function syntheseActivityAction(){
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
 
         die();
 
@@ -947,7 +969,7 @@ class TimesheetController extends AbstractOscarController
         }
 
         if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
-            $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
             $personId = $personIdQuery;
         } else {
             $personId = $currentPersonId;
@@ -961,7 +983,7 @@ class TimesheetController extends AbstractOscarController
         }
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getTimesheetService();
 
 
         // nom du fichier
@@ -1234,7 +1256,7 @@ class TimesheetController extends AbstractOscarController
 
         if( $personId && $personId != $this->getCurrentPerson()->getId() ) {
             $person = $this->getPersonService()->getPersonById($personId, true);
-            if( !($this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
+            if( !($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
                 throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $person");
             }
         } else {
@@ -1377,15 +1399,15 @@ class TimesheetController extends AbstractOscarController
     public function organizationLeaderAction(){
 
         /** @var TimesheetService $timesheetsService */
-        $timesheetsService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetsService = $this->getTimesheetService();
 
         $organizationId = $this->params()->fromQuery('id', null);
 
         $organizationsTimesheets = [];
 
         if( $organizationId != null ){
-            if( !( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
-                || $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI)
+            if( !( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
+                || $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI)
                 )) {
                 throw new UnAuthorizedException("Droits insuffisants");
             }
@@ -1393,7 +1415,7 @@ class TimesheetController extends AbstractOscarController
             $label = (string) $organisation;
             $roleOk = null;
 
-            foreach ($this->getOscarUserContext()->getDbUser()->getRoles() as $role){
+            foreach ($this->getOscarUserContextService()->getDbUser()->getRoles() as $role){
                 if( $role->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI) || $role->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM) ){
                   $roleOk = $role;
                 }
@@ -1446,7 +1468,7 @@ class TimesheetController extends AbstractOscarController
                             $projectId = $project->getId();
 
                             if( !array_key_exists($activityId, $urlActivity) ){
-                                if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity) ){
+                                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity) ){
                                     $urlActivity[$activityId] = $this->url()->fromRoute('contract/show', ['id' => $activityId]);
                                 } else {
                                     $urlActivity[$activityId] = null;
@@ -1454,7 +1476,7 @@ class TimesheetController extends AbstractOscarController
                             }
 
                             if( !array_key_exists($projectId, $urlProject) ){
-                                if( $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_SHOW, $activity->get) ){
+                                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_SHOW, $activity->get) ){
                                     $urlProject[$projectId] = $this->url()->fromRoute('project/show', ['id' => $projectId]);
                                 } else {
                                     $urlProject[$projectId] = null;
@@ -1529,7 +1551,7 @@ class TimesheetController extends AbstractOscarController
 
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('id'));
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
 
         $format = $this->params()->fromQuery('format', null);
@@ -1610,7 +1632,7 @@ class TimesheetController extends AbstractOscarController
     public function resolveInvalidLabelsAction(){
 
         // TODO
-        // $this->getOscarUserContext()->check(Privileges::)
+        // $this->$this->getOscarUserContextService()->check(Privileges::)
 
         $invalidLabels = $this->getTimesheetService()->getInvalidLabels();
         $destinations = $this->getTimesheetService()->getOthersWP();
@@ -1661,13 +1683,6 @@ class TimesheetController extends AbstractOscarController
     }
 
     /**
-     * @return TimesheetService
-     */
-    protected function getTimesheetService(){
-        return $this->getServiceLocator()->get('TimesheetService');
-    }
-
-    /**
      * todo Valide une déclaration de temps
      */
     public function validateTimesheetAction()
@@ -1683,9 +1698,9 @@ class TimesheetController extends AbstractOscarController
                 $activity));
         }
 
-        if( !($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)
+        if( !($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)
             ||
-            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) ){
+            $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) ){
             throw new UnAuthorizedException();
         }
 
@@ -1724,7 +1739,7 @@ class TimesheetController extends AbstractOscarController
                     } else {
                         $action = $this->getRequest()->getPost()['do'];
                         $events = json_decode($this->getRequest()->getPost()['events'], true);
-                        $timesheets = $this->processAction($action, $events, $timeSheetService, $activity, $this->getOscarUserContext()->getCurrentPerson());
+                        $timesheets = $this->processAction($action, $events, $timeSheetService, $activity, $this->getOscarUserContextService()->getCurrentPerson());
                         $response = new JsonModel([
                             'timesheets' => $timesheets
                         ]);
@@ -1929,7 +1944,7 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarantAction(){
 
-        if( !$this->getOscarUserContext()->getCurrentPerson() ){
+        if( !$this->getOscarUserContextService()->getCurrentPerson() ){
             return $this->getResponseInternalError("Vous avez été déconnecté de Oscar");
         }
 
@@ -1956,13 +1971,13 @@ class TimesheetController extends AbstractOscarController
 
         // On test l'authorisation à l'usurpation si besoin
         if( $declarerId != $this->getCurrentPerson()->getId() ){
-            if( !($this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $currentPerson->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
+            if( !($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $currentPerson->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
                 throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $currentPerson");
             }
         }
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getTimesheetService();
 
 
         if( $this->isAjax() || $format == 'json' ) {
@@ -2064,7 +2079,7 @@ class TimesheetController extends AbstractOscarController
 
     public function declarationsAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
         $method = $this->getHttpXMethod();
 
         if( $method == 'POST' && !$this->isAjax() ){

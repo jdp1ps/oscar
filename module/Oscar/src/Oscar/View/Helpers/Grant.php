@@ -10,29 +10,21 @@ namespace Oscar\View\Helpers;
 
 
 use Oscar\Service\OscarUserContext;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Zend\View\Helper\AbstractHtmlElement;
 
-class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
+class Grant extends AbstractHtmlElement implements UseOscarUserContextService
 {
-    use ServiceLocatorAwareTrait;
-
-    /**
-     * @return OscarUserContext
-     */
-    private function getOscarUserContext()
-    {
-        return $this->getServiceLocator()->getServiceLocator()->get('OscarUserContext');
-    }
+    use UseOscarUserContextServiceTrait;
 
     public function connected()
     {
-        return $this->getOscarUserContext()->getCurrentPerson() !== null;
+        return $this->getOscarUserContextService()->getCurrentPerson() !== null;
     }
 
     public function isBoss(){
-        return $this->connected() && $this->getOscarUserContext()->hasRolePrincipalInAnyOrganisations();
+        return $this->connected() && $this->getOscarUserContextService()->hasRolePrincipalInAnyOrganisations();
     }
 
     /**
@@ -41,52 +33,59 @@ class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
      * @return boolean
      */
     public function hasPersonnelAccess(){
-        return $this->connected() && $this->getOscarUserContext()->hasPersonnelAccess();
+        return $this->connected() && $this->getOscarUserContextService()->hasPersonnelAccess();
     }
 
 
     public function isDeclarer(){
-        return $this->connected() && $this->getOscarUserContext()->isDeclarer();
+        return $this->connected() && $this->getOscarUserContextService()->isDeclarer();
     }
 
     public function getRolesPrincipauxPersonForActivity(){
-        return $this->getOscarUserContext()->getRoleIdPrimary();
+        return $this->getOscarUserContextService()->getRoleIdPrimary();
     }
 
     public function getRolesPrincipauxOrganization(){
-        return $this->getOscarUserContext()->getRolesOrganisationLeader();
+        return $this->getOscarUserContextService()->getRolesOrganisationLeader();
     }
 
+    /**
+     * @deprecated
+     * @return string
+     */
     public function getSocketUrl(){
-        $config = $this->getServiceLocator()->getServiceLocator()->get('Config');
-        return $config['oscar']['socket']['url'];
+        return '';
     }
 
+    /**
+     * @deprecated
+     * @return bool
+     */
     public function hasSocket(){
-        return (bool) $this->getServiceLocator()->getServiceLocator()->get('Config')['oscar']['socket'];
+        return false;
     }
 
     public function privileges()
     {
-        return $this->getOscarUserContext()->getBasePrivileges();
+        return $this->getOscarUserContextService()->getBasePrivileges();
     }
 
     public function privilege( $privilege, $resource = null )
     {
-        return $this->getOscarUserContext()->hasPrivileges($privilege, $resource);
+        return $this->getOscarUserContextService()->hasPrivileges($privilege, $resource);
     }
 
     public function hasPrivilegeInOrganizations($privilege){
-        return $this->getOscarUserContext()->hasPrivilegeInOrganizations($privilege);
+        return $this->getOscarUserContextService()->hasPrivilegeInOrganizations($privilege);
     }
 
     public function getPrivileges( $entity ){
-        return $this->getOscarUserContext()->getPrivileges($entity);
+        return $this->getOscarUserContextService()->getPrivileges($entity);
     }
 
     public function role( $role  )
     {
-        return $this->getOscarUserContext()->hasRole($role);
+        return $this->getOscarUserContextService()->hasRole($role);
     }
 
     /**
@@ -94,7 +93,7 @@ class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
      */
     public function getAllRoleIdPerson()
     {
-        return $this->getOscarUserContext()->getAllRoleIdPerson();
+        return $this->getOscarUserContextService()->getAllRoleIdPerson();
     }
 
     /**
@@ -102,7 +101,7 @@ class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
      */
     public function getAllRoleIdPersonInActivity()
     {
-        return $this->getOscarUserContext()->getAllRoleIdPersonInActivity();
+        return $this->getOscarUserContextService()->getAllRoleIdPersonInActivity();
     }
 
     /**
@@ -110,25 +109,23 @@ class Grant extends AbstractHtmlElement implements ServiceLocatorAwareInterface
      */
     public function getAllRoleIdOrganizationInActivity()
     {
-        return $this->getOscarUserContext()->getRolesOrganizationInActivity();
+        return $this->getOscarUserContextService()->getRolesOrganizationInActivity();
     }
 
     public function ressourcePrivileges($r)
     {
-        return $this->getOscarUserContext()->getPrivileges($r);
+        return $this->getOscarUserContextService()->getPrivileges($r);
     }
 
     public function dbUser()
     {
-        return $this->getOscarUserContext()->getDbUser();
+        return $this->getOscarUserContextService()->getDbUser();
     }
 
     /**
      * @return null|\Oscar\Entity\Person
      */
     public function getCurrentPerson(){
-        return $this->getOscarUserContext()->getCurrentPerson();
+        return $this->getOscarUserContextService()->getCurrentPerson();
     }
-
-
 }

@@ -8,7 +8,7 @@
 namespace Oscar\Hydrator;
 
 
-use Zend\Stdlib\Hydrator\HydratorInterface;
+use Zend\Hydrator\HydratorInterface;
 
 class ContractDocumentFormHydrator implements HydratorInterface
 {

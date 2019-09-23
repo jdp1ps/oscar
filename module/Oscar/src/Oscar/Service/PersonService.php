@@ -28,44 +28,31 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\PersonSearchStrategy;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Log\Logger;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Gestion des Personnes :
  *  - Collaborateurs
  *  - Membres de projet/organisation.
  */
-class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class PersonService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait;
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///
-    /// ACCESSEURS de SERVICE
-    ///
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /**
-     * @return ConfigurationParser
-     */
-    protected function getOscarConfig()
-    {
-        return $this->getServiceLocator()->get('OscarConfig');
-    }
-
-    /**
-     * @return OrganizationService
-     */
-    protected function getOrganizationService()
-    {
-        return $this->getServiceLocator()->get('OrganizationService');
-    }
 
     /**
      * @return PersonRepository
@@ -79,13 +66,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
      */
     protected function getNotificationService(){
         return $this->getServiceLocator()->get('NotificationService');
-    }
-
-    /**
-     * @return Logger
-     */
-    protected function getLoggerService(){
-        return $this->getServiceLocator()->get('Logger');
     }
 
 
@@ -102,7 +82,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
      */
     protected function getOscarUserContext()
     {
-        return $this->getServiceLocator()->get('OscarUserContext');
+        return $this->getOscarUserContextService();
     }
 
     /**
@@ -184,8 +164,6 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
 
         return $query->getResult();
     }
-
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
@@ -685,7 +663,7 @@ class PersonService implements ServiceLocatorAwareInterface, EntityManagerAwareI
             $query = $this->getBaseQuery()
                 ->setParameter('login', $login);
 
-            $normalize = $this->getOscarConfig()->getConfiguration('authPersonNormalize', false);
+            $normalize = $this->getOscarConfigurationService()->getConfiguration('authPersonNormalize', false);
 
             if( $normalize == true ){
                 

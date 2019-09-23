@@ -14,6 +14,8 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\TimesheetService;
+use Oscar\Traits\UseTimesheetService;
+use Oscar\Traits\UseTimesheetServiceTrait;
 use Zend\EventManager\Event;
 use Zend\Mvc\Application;
 use Zend\View\Model\ViewModel;
@@ -21,8 +23,18 @@ use Zend\View\Model\ViewModel;
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
-class PublicController extends AbstractOscarController
+class PublicController extends AbstractOscarController implements UseTimesheetService
 {
+    use UseTimesheetServiceTrait;
+
+    /**
+     * PublicController constructor.
+     * @param $timesheetService
+     */
+    public function __construct(){}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     public function gitlogAction(){
         exec('git log --pretty=format:"<span class="hash">%h</span><span class="author">%an</span><time>%ai</time><span class="message">%s</span>"', $log);
@@ -32,7 +44,7 @@ class PublicController extends AbstractOscarController
     public function parametersAction()
     {
         /** @var Authentification $auth */
-        $auth = $this->getOscarUserContext()->getAuthentification();
+        $auth = $this->getCurrentPerson();
 
         if( !$this->getCurrentPerson() ){
             throw new OscarException("Votre compte n'est associé à aucune fiche Personne dans Oscar");
@@ -137,24 +149,26 @@ class PublicController extends AbstractOscarController
      */
     public function indexAction()
     {
-
+        $this->getLoggerService()->debug("indexAction");
         $person = null;
-        /** @var TimesheetService $timeSheetService */
-        $timeSheetService = $this->getServiceLocator()->get('TimesheetService');
 
         $validations = [];
         $isValidator = false;
-        $person = $this->getOscarUserContext()->getCurrentPerson();
+        $person = $this->getOscarUserContextService()->getCurrentPerson();
         $isRequestValidator = false;
         $requestValidations = false;
+        $periodsRejected = [];
 
         if ($person) {
+            /** @var TimesheetService $timeSheetService */
+            $timeSheetService = $this->getTimesheetService();
+
             try {
                 $periodsRejected = $timeSheetService->getPeriodsConflictPerson($person);
                 $isValidator = $timeSheetService->isValidator($person);
                 $validations = $timeSheetService->getValidationToDoPerson($person);
             } catch (\Exception $e) {
-                $this->getLogger()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
+                $this->getLoggerService()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
             }
 
 
@@ -177,7 +191,7 @@ class PublicController extends AbstractOscarController
                 }
 
             } catch (\Exception $e) {
-                $this->getLogger()->error("Impossible de charger les demandes d'activité pour $person : " . $e->getMessage());
+                $this->getLoggerService()->error("Impossible de charger les demandes d'activité pour $person : " . $e->getMessage());
             }
         }
 

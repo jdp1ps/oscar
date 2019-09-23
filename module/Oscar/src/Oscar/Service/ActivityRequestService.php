@@ -22,20 +22,20 @@ use Oscar\Entity\Notification;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Class ActivityRequestService
  * @package Oscar\Service
  */
-class ActivityRequestService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
-{
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+class ActivityRequestService implements UseEntityManager {
 
-
+    use UseEntityManagerTrait;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// RÉCUPÉRATION DES DONNÉES

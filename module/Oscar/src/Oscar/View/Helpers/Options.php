@@ -11,20 +11,22 @@ namespace Oscar\View\Helpers;
 
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\OscarConfigurationService;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\View\Helper\AbstractHtmlElement;
 
-class Options extends AbstractHtmlElement implements ServiceLocatorAwareInterface
+class Options extends AbstractHtmlElement implements UseOscarConfigurationService
 {
-    use ServiceLocatorAwareTrait;
+    use UseOscarConfigurationServiceTrait;
 
     /**
      * @return OscarConfigurationService
      */
     private function getConfiguration()
     {
-        return $this->getServiceLocator()->getServiceLocator()->get('OscarConfig');
+        return $this->getOscarConfigurationService();
     }
 
     public function theme(){

@@ -5,7 +5,7 @@ namespace Oscar\Form;
 use Oscar\Hydrator\OrganizationFormHydrator;
 use Zend\Form\Element;
 use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>

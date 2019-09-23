@@ -227,7 +227,7 @@ $this->headScript();
 	})();
 	</script>
 
-        <?php if( $this->grant()->dbUser() ): ?>
+        <?php if( $this->grant()->getCurrentPerson() ): ?>
         <script>
 		    var socket, notifications;
 	

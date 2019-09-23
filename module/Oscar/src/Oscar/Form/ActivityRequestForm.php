@@ -16,8 +16,8 @@ use Zend\Filter\StringTrim;
 use Zend\Form\Form;
 use Zend\InputFilter\InputFilterProviderInterface;
 use Oscar\Hydrator\ProjectGrantFormHydrator;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class ActivityRequestForm extends Form implements InputFilterProviderInterface, ServiceLocatorAwareInterface
 {

@@ -13,7 +13,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use UnicaenCode\Controller\Controller;
 use Zend\Http\Request;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 
 class ConnectorController extends AbstractOscarController
 {

@@ -802,31 +802,26 @@ return array(
         'invokables' => [
             'OrganizationService' => OrganizationService::class,
             'ProjectService' => ProjectService::class,
-            'PersonService' => PersonService::class,
             'AccessResolverService' => AccessResolverService::class,
             'ActivityLogService' => \Oscar\Service\ActivityLogService::class,
-            'ProjectGrantService' => \Oscar\Service\ProjectGrantService::class,
-            'ActivityService' => \Oscar\Service\ProjectGrantService::class,
             'ContractDocumentService' => \Oscar\Service\ContractDocumentService::class,
             'ActivityTypeService' => \Oscar\Service\ActivityTypeService::class,
-            'OscarUserContext' => \Oscar\Service\OscarUserContext::class,
             'ConnectorService' => \Oscar\Service\ConnectorService::class,
-            'TimesheetService' => \Oscar\Service\TimesheetService::class,
-            'NotificationService' => \Oscar\Service\NotificationService::class,
             'MilestoneService' => \Oscar\Service\MilestoneService::class,
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             'MailingService' => \Oscar\Service\MailingService::class,
             'SessionService' => \Oscar\Service\SessionService::class,
             'UserParametersService' => \Oscar\Service\UserParametersService::class,
-            'ActivityRequestService' => \Oscar\Service\ActivityRequestService::class,
         ],
 
         'factories' => array(
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /// Formatteurs
-            ///
-            ///
+            \Oscar\Service\ActivityRequestService::class => \Oscar\Service\ActivityRequestServiceFactory::class,
+            \Oscar\Service\NotificationService::class => \Oscar\Service\NotificationServiceFactory::class,
+            \Oscar\Service\OscarConfigurationService::class => \Oscar\Service\OscarConfigurationServiceFactory::class,
+            \Oscar\Service\OscarUserContext::class => \Oscar\Service\OscarUserContextFactory::class,
+            \Oscar\Service\PersonService::class => \Oscar\Service\PersonServiceFactory::class,
+            \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
+            \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
 
             // ACTIVITÉ > MENSUELLE (HTML)
             'TimesheetActivityPeriodHtmlFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
@@ -867,9 +862,8 @@ return array(
             },
 
             'Logger' => function ($sm) {
-                $logger = new \Monolog\Logger('main');
-                $logger->pushHandler(new StdoutHandler());
-                $logger->pushHandler(new \Monolog\Handler\StreamHandler(realpath(dirname(__FILE__).'/../../../logs').'/oscar.log'));
+                $logger = new \Monolog\Logger('oscar');
+                $logger->pushHandler(new \Monolog\Handler\StreamHandler(realpath(dirname(__FILE__).'/../../../logs').'/oscar.log', \Monolog\Logger::WARNING));
                 return $logger;
             },
 
@@ -907,19 +901,6 @@ return array(
                 return new Swift_Mailer($sm->get('MailTransport'));
             },
 
-//            'OscarMailer' => function( $sm ){
-//                $mailer = new \Oscar\Service\OscarMailerService(
-//                    $sm->get('Mailer'), $sm->get('Config')['oscar']['mailer']
-//                );
-//                return $mailer;
-//            },
-
-            'OscarConfig' => function( $sm ){
-                $config = new \Oscar\Service\OscarConfigurationService();
-                $config->setServiceLocator($sm);
-                return $config;
-            },
-
             'PersonOrganizationConnectors' => function( $sm ){
                 return $sm->get('OscarConfig')->getConfiguration('connector.person_organization');
             }
@@ -940,7 +921,7 @@ return array(
     // On doit déclaré ici les Controlleurs 'invoquables'
     'controllers' => array(
         'invokables' => array(
-            'Public' => \Oscar\Controller\PublicController::class,
+            //'Public' => \Oscar\Controller\PublicController::class,
             'Administration' => \Oscar\Controller\AdministrationController::class,
             'Project' => \Oscar\Controller\ProjectController::class,
             'Person' => \Oscar\Controller\PersonController::class,
@@ -956,12 +937,15 @@ return array(
             'ActivityDate' => \Oscar\Controller\ActivityDateController::class,
             'ActivityPayment' => \Oscar\Controller\ActivityPaymentController::class,
             'WorkPackage' => \Oscar\Controller\WorkPackageController::class,
-            'Timesheet' => \Oscar\Controller\TimesheetController::class,
             'Notification' => \Oscar\Controller\NotificationController::class,
             'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentController::class,
             'Depense' => \Oscar\Controller\DepenseController::class,
             'Connector' => \Oscar\Controller\ConnectorController::class,
         ),
+        'factories' => [
+            'Public'    => \Oscar\Controller\PublicControllerFactory::class,
+            'Timesheet' => \Oscar\Controller\TimesheetControllerFactory::class,
+        ]
     ),
 
     // Emplacement des templates
@@ -994,13 +978,21 @@ return array(
             'activityTypeHlp' => \Oscar\View\Helpers\ActivityTypeHelper::class,
             'userUI' => \Oscar\View\Helpers\UserUIHelper::class,
             'Currency' => \Oscar\View\Helpers\Currency::class,
-            'hasRole' => \Oscar\View\Helpers\HasRole::class,
-            'hasPrivilege' => \Oscar\View\Helpers\HasPrivilege::class,
-            'grant' => \Oscar\View\Helpers\Grant::class,
-            'options' => \Oscar\View\Helpers\Options::class,
             'keyvalue' => \Oscar\View\Helpers\KeyValueHelper::class,
             'slugify' => \Oscar\View\Helpers\Slugify::class,
         ],
+        'factories' => [
+            'Grant' => \Oscar\View\Helpers\GrantFactory::class,
+            'hasRole' => \Oscar\View\Helpers\HasRoleFactory::class,
+            'options' => \Oscar\View\Helpers\OptionsFactory::class,
+        ],
+        'abstract_factories' => [
+            'HasPrivilege' => \Oscar\Factory\ViewHelperInvokatorFactory::class,
+        ],
+        'aliases' => [
+            'grant' => 'Grant',
+            'hasPrivilege' => 'HasPrivilege',
+        ]
     ],
 
     // Formulaires

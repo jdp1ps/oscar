@@ -43,7 +43,7 @@ class SearchController extends AbstractOscarController
         $searchFor = $request->getParam('search');
 
         $this->getActivity()->addActivity(
-            sprintf("%s a lancé la recherche '%s'", $this->getLdapUser(), $searchFor),
+            sprintf("%s a lancé la recherche '%s'", $this->getCurrentPerson(), $searchFor),
             LogActivity::DEFAULT_LEVEL, 'Search'
         );
 

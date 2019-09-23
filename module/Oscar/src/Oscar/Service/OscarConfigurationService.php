@@ -12,8 +12,8 @@ namespace Oscar\Service;
 use Oscar\Exception\OscarException;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class OscarConfigurationService implements ServiceLocatorAwareInterface
 {
@@ -25,6 +25,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     protected function getConfig(){
         return $this->getServiceLocator()->get('Config')['oscar'];
+    }
+
+    public function getConfigArray(){
+        return $this->getServiceLocator()->get('Config');
     }
 
     /**
@@ -122,6 +126,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function setNumerotationEditable( $boolean ){
         $this->saveEditableConfKey(self::allow_numerotation_custom, $boolean);
+    }
+
+    public function getValidationPFI(){
+        return $this->getConfiguration('validation.pfi');
     }
 
     public function getTheme(){

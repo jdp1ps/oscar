@@ -41,6 +41,8 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\TimesheetService;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\PhpEnvironment\Request;
@@ -56,16 +58,30 @@ use Zend\View\Model\ViewModel;
  */
 class ProjectGrantController extends AbstractOscarController
 {
+    /** @var ActivityRequestService */
+    private $activityRequestService;
+
+    /**
+     * @return ActivityRequestService
+     */
+    public function getActivityRequestService(): ActivityRequestService
+    {
+        return $this->activityRequestService;
+    }
+
+    /**
+     * @param ActivityRequestService $activityRequestService
+     */
+    public function setActivityRequestService(ActivityRequestService $activityRequestService): void
+    {
+        $this->activityRequestService = $activityRequestService;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public function apiUiAction(){
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
         return [];
-    }
-
-    public function debugAction(){
-        var_dump($this->getConfiguration('oscar.editable'));
-        /*$customNum = $this->getActivityService()->getCustomNum();
-        var_dump($customNum);*/
-        die("DEBUG END");
     }
 
     /**
@@ -212,7 +228,7 @@ class ProjectGrantController extends AbstractOscarController
                         $roleOrganisation = $this->params()->fromPost('organisationRoleId');
 
                         /** @var ActivityRequestService $requestActivityService */
-                        $activityRequestService = $this->getServiceLocator()->get("ActivityRequestService");
+                        $activityRequestService = $this->getActivityRequestService();
 
                         /** @var ActivityRequest $request */
                         $request = $activityRequestService->getActivityRequest($this->params()->fromPost('id'));
@@ -287,7 +303,7 @@ class ProjectGrantController extends AbstractOscarController
         $lockMessage = [];
 
         /** @var ActivityRequestService $activityRequestService */
-        $activityRequestService = $this->getServiceLocator()->get('ActivityRequestService');
+        $activityRequestService = $this->getActivityRequestService();
 
         $dlFile = $this->params()->fromQuery("dl", null);
         $rdlFile = $this->params()->fromQuery("rdl", null);
@@ -300,7 +316,7 @@ class ProjectGrantController extends AbstractOscarController
 
             if( $dlFile ) {
                 $fileInfo = $demande->getFileInfosByFile($dlFile);
-                $filepath = $this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
+                $filepath = $this->getOscarConfigurationService()->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
                 $filename = $fileInfo['name'];
                 $filetype = $fileInfo['type'];
                 $size = filesize($filepath);
@@ -316,7 +332,7 @@ class ProjectGrantController extends AbstractOscarController
                 $newFiles = [];
                 foreach ($files as $file) {
                     if( $file['file'] == $rdlFile ){
-                        @unlink($this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'. $file['file']);
+                        @unlink($this->getOscarConfigurationService()->getCOnfiguration('paths.document_request').'/'. $file['file']);
                     } else {
                         $newFiles[] = $file;
                     }
@@ -579,9 +595,14 @@ class ProjectGrantController extends AbstractOscarController
         $projectGrant = $this->getProjectGrantService()->getGrant($id);
         $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
 
+        //////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////
         $form = new ProjectGrantForm();
         $form->setNumbers($numerotationKeys, $numerotationEditable);
-        $form->setServiceLocator($this->getServiceLocator());
+        // TODO Transmettre les services au formulaire
+
+        //////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////
         $form->init();
         $form->bind($projectGrant);
 
@@ -725,7 +746,7 @@ class ProjectGrantController extends AbstractOscarController
         $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
 
         /** @var NotificationService $serviceNotification */
-        $serviceNotification = $this->getServiceLocator()->get('NotificationService');
+        $serviceNotification = $this->getNotificationService();
 
         $serviceNotification->generateNotificationsForActivity($entity);
 
@@ -1115,7 +1136,10 @@ class ProjectGrantController extends AbstractOscarController
 
         $form = new ProjectGrantForm();
         $form->setNumbers($numerotationKeys, $numerotationEditable);
-        $form->setServiceLocator($this->getServiceLocator());
+        ///////////////////////////////////////////////////////////////
+        // TODO Transmettre les service au ProjectGrantForm
+        // $form->setServiceLocator($this->getServiceLocator());
+        ///////////////////////////////////////////////////////////////
         $form->init();
         $form->setObject($projectGrant);
 
@@ -1203,7 +1227,7 @@ class ProjectGrantController extends AbstractOscarController
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity);
 
         /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get('NotificationService');
+        $notificationService = $this->getNotificationService();
 
         $notificationJson = [];
         foreach ($notificationService->notificationsActivity($entity) as $n) {
@@ -1307,7 +1331,7 @@ class ProjectGrantController extends AbstractOscarController
                 }
                 $involvedPersonsJSON = json_encode($involvedPersons);
             } catch ( \Exception $e ){
-                $this->log($e->getMessage());
+                $this->getLoggerService()->error($e->getMessage());
             }
         }
 
@@ -1318,12 +1342,7 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
-
-
-        /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');;
-        // $syntheseActivity = $timesheetService->getActivitySyntesis($activity->getId());
+        $timesheetService = $this->getActivityTypeService();
 
         return [
             'generatedDocuments' => $this->getConfiguration('oscar.generated-documents.activity'),
@@ -1819,7 +1838,7 @@ class ProjectGrantController extends AbstractOscarController
                     $oscarNumSeparator = $this->getConfiguration("oscar.oscar_num_separator");
 
                     // La saisie est un PFI
-                    if (preg_match($this->getServiceLocator()->get("Config")['oscar']['validation']['pfi'], $search)) {
+                    if (preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
                         $parameters['search'] = $search;
                         $qb->andWhere('c.codeEOTP = :search');
                     } elseif (preg_match('/(.*)=(.*)/', $search, $result)) {

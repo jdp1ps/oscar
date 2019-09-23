@@ -18,8 +18,8 @@ use Oscar\Exception\ConnectorException;
 use Oscar\Factory\JsonToOrganization;
 use Oscar\Utils\PhpPolyfill;
 use UnicaenApp\Mapper\Ldap\People;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\ServiceManager\ServiceManager;
 
 class ConnectorOrganizationREST implements ServiceLocatorAwareInterface

@@ -10,18 +10,18 @@ namespace Oscar\View\Helpers;
 
 
 use Oscar\Service\OscarUserContext;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\View\Helper\AbstractHtmlElement;
 
-class HasRole extends AbstractHtmlElement implements ServiceLocatorAwareInterface
+class HasRole extends AbstractHtmlElement implements UseOscarUserContextService
 {
-    use ServiceLocatorAwareTrait;
+    use UseOscarUserContextServiceTrait;
 
     function __invoke( $role )
     {
-        /** @var OscarUserContext $s */
-        $s = $this->getServiceLocator()->getServiceLocator()->get('OscarUserContext');
-        return $s->hasRole($role);
+        return $this->getOscarUserContextService()->hasRole($role);
     }
 }

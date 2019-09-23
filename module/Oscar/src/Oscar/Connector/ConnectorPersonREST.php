@@ -20,8 +20,8 @@ use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Role;
 use Oscar\Exception\ConnectorException;
 use Oscar\Utils\PhpPolyfill;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\ServiceManager\ServiceManager;
 
 class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterface
