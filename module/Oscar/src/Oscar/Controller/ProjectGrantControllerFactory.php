@@ -9,9 +9,12 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
+use Monolog\Logger;
 use Oscar\Service\ActivityRequestService;
+use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\TimesheetService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -24,7 +27,10 @@ class ProjectGrantControllerFactory implements FactoryInterface
     {
         $c = new PublicController($container->get(TimesheetService::class));
 
+        $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
+        $c->setEntityManager($container->get(EntityManager::class));
+        $c->setLoggerService($container->get('Logger'));
         $c->setActivityRequestService($container->get(ActivityRequestService::class));
 
         $c->setLoggerService($container->get('Logger'));

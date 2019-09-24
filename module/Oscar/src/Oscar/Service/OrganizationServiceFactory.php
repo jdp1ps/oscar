@@ -23,7 +23,7 @@ class OrganizationServiceFactory implements FactoryInterface
         $oscarUserContext = new OrganizationService();
         $oscarUserContext->setEntityManager($container->get(EntityManager::class));
         $oscarUserContext->setOscarConfigurationService($container->get(OscarConfigurationService::class));
-        $oscarUserContext->setUserContext($container->get(UserContext::class));
+        $oscarUserContext->setOscarUserContextService($container->get(OscarUserContext::class));
         $oscarUserContext->setPersonService($container->get(PersonService::class));
         $oscarUserContext->setLoggerService($container->get("Logger"));
 

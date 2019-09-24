@@ -17,6 +17,14 @@ use Oscar\Entity\OrganizationType;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\Structure;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -32,10 +40,36 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  *
  * Class OrganizationService
  */
-class OrganizationService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class OrganizationService implements UseOscarConfigurationService, UseEntityManager, UseOscarUserContextService, UseLoggerService
 {
 
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+    use UseOscarConfigurationServiceTrait,
+        UseEntityManagerTrait,
+        UseLoggerServiceTrait,
+        UseOscarUserContextServiceTrait
+        ;
+
+    /** @var PersonService */
+    private $personService;
+
+    /**
+     * @return PersonService
+     */
+    public function getPersonService(): PersonService
+    {
+        return $this->personService;
+    }
+
+    /**
+     * @param PersonService $personService
+     */
+    public function setPersonService(PersonService $personService): void
+    {
+        $this->personService = $personService;
+    }
+
+
+
 
     private $cacheCountries = null;
     private $cacheConnectors = null;
@@ -45,7 +79,7 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
      */
     protected function getOscarUserContext()
     {
-        return $this->getServiceLocator()->get('OscarUserContext');
+        return $this->getOscarUserContextService();
     }
 
     /**
@@ -368,19 +402,5 @@ class OrganizationService implements ServiceLocatorAwareInterface, EntityManager
         <?= $organizationB ?>
         </pre>
         <?php
-    }
-    
-    public function syncLdap($router)
-    {
-        $sync = new ImportOrganizationLdapStrategy($this->getServiceLdap(), $this->getEntityManager(), $router);
-        return $sync->importAll();
-    }
-
-    /**
-     * @return \UnicaenApp\Mapper\Ldap\Structure
-     */
-    protected function getServiceLdap()
-    {
-        return $this->getServiceLocator()->get('ldap_structure_service')->getMapper();
     }
 }

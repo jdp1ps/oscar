@@ -800,13 +800,11 @@ return array(
     // Service (métier)
     'service_manager' => array(
         'invokables' => [
-            'OrganizationService' => OrganizationService::class,
             'ProjectService' => ProjectService::class,
             'AccessResolverService' => AccessResolverService::class,
             'ActivityLogService' => \Oscar\Service\ActivityLogService::class,
             'ContractDocumentService' => \Oscar\Service\ContractDocumentService::class,
             'ActivityTypeService' => \Oscar\Service\ActivityTypeService::class,
-            'ConnectorService' => \Oscar\Service\ConnectorService::class,
             'MilestoneService' => \Oscar\Service\MilestoneService::class,
             'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             'MailingService' => \Oscar\Service\MailingService::class,
@@ -816,94 +814,21 @@ return array(
 
         'factories' => array(
             \Oscar\Service\ActivityRequestService::class => \Oscar\Service\ActivityRequestServiceFactory::class,
+            \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
+            'Logger' => \Oscar\Service\LoggerServiceFactory::class,
             \Oscar\Service\NotificationService::class => \Oscar\Service\NotificationServiceFactory::class,
+            \Oscar\Service\OrganizationService::class => \Oscar\Service\OrganizationServiceFactory::class,
             \Oscar\Service\OscarConfigurationService::class => \Oscar\Service\OscarConfigurationServiceFactory::class,
             \Oscar\Service\OscarUserContext::class => \Oscar\Service\OscarUserContextFactory::class,
             \Oscar\Service\PersonService::class => \Oscar\Service\PersonServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
+            \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter::class => \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatterFactory::class,
             \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
-
-            // ACTIVITÉ > MENSUELLE (HTML)
-            'TimesheetActivityPeriodHtmlFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
-                $renderer = $sm->get('ViewRenderer');
-                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_activity_synthesis_template');
-                return new \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter($templatePath, $renderer);
-            },
-
-            // ACTIVITÉ > MENSUELLE (PDF)
-            'TimesheetActivityPeriodPdfFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
-                $renderer = $sm->get('ViewRenderer');
-                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_activity_synthesis_template');
-                return new \Oscar\Formatter\TimesheetActivityPeriodPdfFormatter($templatePath, $renderer);
-            },
-
-            // ACTIVITÉ > MENSUELLE (HTML)
-            'TimesheetPersonPeriodHtmlFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
-                $renderer = $sm->get('ViewRenderer');
-                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_person_month_template');
-                return new \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter($templatePath, $renderer);
-            },
-
-            // ACTIVITÉ > MENSUELLE (HTML)
-            'TimesheetPersonPeriodPdfFormatter' => function(\Zend\ServiceManager\ServiceManager $sm) {
-                $renderer = $sm->get('ViewRenderer');
-                $templatePath = $sm->get('OscarConfig')->getConfiguration('timesheet_person_month_template');
-                return new \Oscar\Formatter\TimesheetPersonPeriodPdfFormatter($templatePath, $renderer);
-            },
-
-
-            'RoleProvider' => function (\Zend\ServiceManager\ServiceManager $sm){
-                return new \Oscar\Provider\RoleProvider( $sm->get('doctrine.entitymanager.orm_default') );
-            },
-
-            'PersonnelService' => function ($sm) {
-                $service = new PersonnelService();
-                return $service->setServiceManager($sm);
-            },
-
-            'Logger' => function ($sm) {
-                $logger = new \Monolog\Logger('oscar');
-                $logger->pushHandler(new \Monolog\Handler\StreamHandler(realpath(dirname(__FILE__).'/../../../logs').'/oscar.log', \Monolog\Logger::WARNING));
-                return $logger;
-            },
-
-            'Search' => function ($sm) {
-                $service = new SearchService(
-                    realpath(__DIR__ . '/../../../data/search')
-                );
-                return $service;
-            },
-
-            'Sifac' => function( $sm ){
-                $sifac = new \Oscar\Provider\SifacBridge();
-                $sifac->configure($sm->get('Config')['doctrine']['connection']['sifac']['params']);
-                return $sifac;
-            },
-
-            'harpege' => function( $sm ){
-                $harpege = new Oscar\Provider\Person\SyncPersonHarpege();
-                $harpege->configure($sm->get('Config')['doctrine']['connection']['harpege']['params']);
-                return $harpege;
-            },
-
-            /** Système de distribution des mails */
-            'MailTransport' => function( $sm ){
-                $conf = $sm->get('Config')['oscar']['mailer']['transport'];
-                $transport = new Swift_SmtpTransport($conf['host'], $conf['port'], $conf['security'] );
-                $transport->setUsername($conf['username'])
-                    ->setPassword($conf['password']);
-                return $transport;
-
-
-            },
-
-            'Mailer' => function( $sm ){
-                return new Swift_Mailer($sm->get('MailTransport'));
-            },
-
-            'PersonOrganizationConnectors' => function( $sm ){
-                return $sm->get('OscarConfig')->getConfiguration('connector.person_organization');
-            }
+            \Oscar\Formatter\TimesheetActivityPeriodPdfFormatter::class => \Oscar\Formatter\TimesheetActivityPeriodPdfFormatterFactory::class,
+            \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter::class => \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatterFactory::class,
+            \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter::class => \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatterFactory::class,
+            \Oscar\Formatter\TimesheetPersonPeriodPdfFormatter::class => \Oscar\Formatter\TimesheetPersonPeriodPdfFormatterFactory::class,
+            'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class
         ),
     ),
 
@@ -927,7 +852,6 @@ return array(
             'Person' => \Oscar\Controller\PersonController::class,
             'Organization' => \Oscar\Controller\OrganizationController::class,
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
-            'Activity' => \Oscar\Controller\ProjectGrantController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
             'Console' => \Oscar\Controller\ConsoleController::class,
@@ -945,6 +869,7 @@ return array(
         'factories' => [
             'Public'    => \Oscar\Controller\PublicControllerFactory::class,
             'Timesheet' => \Oscar\Controller\TimesheetControllerFactory::class,
+            'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
         ]
     ),
 

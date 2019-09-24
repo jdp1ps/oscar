@@ -36,9 +36,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
-use Oscar\Provider\Person\SyncPersonHarpege;
 use Oscar\Provider\Privileges;
-use Oscar\Service\PersonnelService;
 use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\UnicaenDoctrinePaginator;
@@ -172,7 +170,7 @@ class PersonController extends AbstractOscarController
 
     public function personnelAction(){
 
-        $access = $this->getConfiguration('oscar.listPersonnel');
+        $access = $this->getOscarConfigurationService()->getConfiguration('listPersonnel');
 
         if( $access == 0 ){
             throw new BadRequest400Exception("Cette fonctionnalité n'est pas activé");
@@ -293,56 +291,6 @@ class PersonController extends AbstractOscarController
         return [
             'entities' => $activities
         ];
-    }
-
-    /**
-     * @deprecated
-     */
-    public function syncAction()
-    {
-        /** @var $personnelService PersonnelService */
-        $personnelService = $this->getServiceLocator()->get('PersonnelService');
-        $personRepo = $this->getEntityManager()->getRepository('\Oscar\Entity\Person');
-
-        $persons = $personnelService->searchStaff('l', false);
-
-        // Passage par ID LDAP
-        foreach ($persons as $key => $person) {
-            $inOscar = $personRepo->findOneBy([
-                'codeLdap' => $person['id'],
-            ]);
-            if ($inOscar) {
-                echo $person['displayname']." existe déjà avec l'identifiant LDAP valide.\n";
-                unset($persons[$key]);
-            }
-        }
-        // Passage par EMAIL LDAP
-        foreach ($persons as $key => $person) {
-            $inOscar = $personRepo->findOneBy([
-                'email' => $person['mail'],
-            ]);
-            if ($inOscar) {
-                if (!$inOscar->getCodeLdap()) {
-                    echo "Ajout de l'ID LDAP à ".$person['displayname'].' (mail: '.$person['mail'].')';
-                    $inOscar->setCodeLdap($person['id']);
-                    $this->getEntityManager()->flush($inOscar);
-                    unset($persons[$key]);
-                }
-            }
-        }
-
-        foreach ($persons as $key => $person) {
-            echo 'Création de '.$person['displayname']." dans Oscar...\n";
-            $new = new Person();
-            $this->getEntityManager()->persist($new);
-            $new->setCodeLdap($person['id'])
-                ->setEmail($person['mail'])
-                ->setFirstname($person['prenom'])
-                ->setLastname($person['nom']);
-            $this->getEntityManager()->flush($new);
-        }
-
-        die('DONE');
     }
 
     public function notificationPersonAction(){

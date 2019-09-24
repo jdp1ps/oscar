@@ -9,6 +9,8 @@ use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\ProjectMember;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -21,9 +23,9 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  *  - Collaborateurs
  *  - Membres de projet/organisation.
  */
-class ConnectorService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class ConnectorService implements UseOscarConfigurationService
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+    use UseOscarConfigurationServiceTrait;
 
 
     private $_CONNECTORS_INSTANCE = [];
@@ -32,8 +34,9 @@ class ConnectorService implements ServiceLocatorAwareInterface, EntityManagerAwa
 
         // Création de l'instance
         if( !array_key_exists($connectorName, $this->_CONNECTORS_INSTANCE) ){
+
             /** @var ConfigurationParser $oscarConfig */
-            $oscarConfig = $this->getServiceLocator()->get('OscarConfig');
+            $oscarConfig = $this->getOscarConfigurationService();
 
             // Configuration du connecteur
             $connectorConfig = $oscarConfig->getConfiguration('connectors.'.$connectorName);

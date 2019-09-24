@@ -27,6 +27,25 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
 {
     use UseTimesheetServiceTrait;
 
+    /** @var ActivityRequestService */
+    public $activityRequestService;
+
+    /**
+     * @return mixed
+     */
+    public function getActivityRequestService()
+    {
+        return $this->activityRequestService;
+    }
+
+    /**
+     * @param mixed $activityRequestService
+     */
+    public function setActivityRequestService($activityRequestService): void
+    {
+        $this->activityRequestService = $activityRequestService;
+    }
+
     /**
      * PublicController constructor.
      * @param $timesheetService

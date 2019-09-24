@@ -64,15 +64,6 @@ class ProjectService implements ServiceLocatorAwareInterface, EntityManagerAware
         }
     }
 
-    /**
-     * @return SearchService
-     */
-    protected function getSearchService()
-    {
-        return $this->getServiceLocator()->get('search');
-    }
-
-
     public function fusion( Project $main, Project $fusionned ){
         echo "Fusion de " . $main->getId() ." " . $fusionned->getId() ." <br />";
         /** @var Activity $activity */

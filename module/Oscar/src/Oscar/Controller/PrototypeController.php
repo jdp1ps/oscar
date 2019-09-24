@@ -2,7 +2,6 @@
 
 namespace Oscar\Controller;
 
-use Oscar\Service\PersonnelService;
 use Zend\View\Model\ViewModel;
 
 /**

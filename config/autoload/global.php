@@ -198,6 +198,9 @@ return array(
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
         ],
 
+        'log_path' => __DIR__ . '/../../logs/oscar.log',
+        'log_level' => \Monolog\Logger::WARNING,
+
         'generated-documents' => [
             'activity' => []
         ],
