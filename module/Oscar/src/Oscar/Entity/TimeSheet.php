@@ -188,6 +188,7 @@ class TimeSheet implements ITrackable
     /**
      * @var ValidationPeriod
      * @ORM\ManyToOne(targetEntity="ValidationPeriod", inversedBy="timesheets")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     private $validationPeriod;
 
