@@ -37,15 +37,43 @@ use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ActivityRequestService;
 use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseTimesheetService;
+use Oscar\Traits\UseTimesheetServiceTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
-class PersonController extends AbstractOscarController
+class PersonController extends AbstractOscarController implements UsePersonService, UseTimesheetService
 {
+    use UsePersonServiceTrait, UseTimesheetServiceTrait;
+
+    /** @var ActivityRequestService */
+    private $activityRequestService;
+
+    /**
+     * @return ActivityRequestService
+     */
+    public function getActivityRequestService(): ActivityRequestService
+    {
+        return $this->activityRequestService;
+    }
+
+    /**
+     * @param ActivityRequestService $activityRequestService
+     */
+    public function setActivityRequestService(ActivityRequestService $activityRequestService): void
+    {
+        $this->activityRequestService = $activityRequestService;
+    }
+
+
+
     /**
      * Liste des personnes issue de Ldap.
      *
@@ -60,7 +88,7 @@ class PersonController extends AbstractOscarController
 
     public function deleteAction(){
         $method = $this->getHttpXMethod();
-        $this->getOscarUserContext()->check(Privileges::PERSON_EDIT);
+        $this->getOscarUserContextService()->check(Privileges::PERSON_EDIT);
         try {
             if( $method != 'POST' ){
                 return $this->getResponseBadRequest("Opération non-authorisée");
@@ -93,7 +121,7 @@ class PersonController extends AbstractOscarController
 
             $this->getEntityManager()->remove($person);
             $this->getEntityManager()->flush();
-            if( $this->getOscarUserContext()->check(Privileges::PERSON_INDEX) ){
+            if( $this->getOscarUserContextService()->check(Privileges::PERSON_INDEX) ){
                 $this->redirect()->toRoute('person/index');
             }
             $this->redirect()->toRoute('home');
@@ -111,7 +139,7 @@ class PersonController extends AbstractOscarController
     public function accessAction(){
 
 
-        $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
 
         $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
 
@@ -197,7 +225,7 @@ class PersonController extends AbstractOscarController
 
 
 
-        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_INDEX) ){
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_INDEX) ){
             $params['ids'] = array_merge($idCoWorkers, $idSubordinates, $idTimesheet);
         }
 
@@ -252,7 +280,7 @@ class PersonController extends AbstractOscarController
 
     public function grantAction()
     {
-        $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
         $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
 
         $organizations = [];
@@ -260,15 +288,15 @@ class PersonController extends AbstractOscarController
         /** @var OrganizationPerson $personOrganization */
         foreach( $person->getOrganizations() as $personOrganization ){
             $organizations[$personOrganization->getOrganization()->getId()] = [
-                'rôles' => $this->getOscarUserContext()->getRolesPersonInOrganization($person, $personOrganization->getOrganization()),
-                'privileges' => $this->getOscarUserContext()->getPersonPrivilegesInOrganization($person, $personOrganization->getOrganization())
+                'rôles' => $this->getOscarUserContextService()->getRolesPersonInOrganization($person, $personOrganization->getOrganization()),
+                'privileges' => $this->getOscarUserContextService()->getPersonPrivilegesInOrganization($person, $personOrganization->getOrganization())
             ];
 
         }
 
         var_dump($organizations);
 
-        //$userCOntext = $this->getOscarUserContext()->getPri
+        //$userCOntext = $this->$this->getOscarUserContextService()->getPri
         return [
             'person' => $person
         ];
@@ -559,19 +587,19 @@ class PersonController extends AbstractOscarController
         $page = $this->params()->fromQuery('page', 1);
         $person = $this->getPersonService()->getPerson($id);
 
-        $manageHierarchie = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
-        $manageUsurpation = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_EDIT);
+        $manageHierarchie = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_EDIT);
+        $manageUsurpation = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_EDIT);
         $allowTimesheet = false;
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getTimesheetService();
 
-        if( $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson()) ){
+        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson()) ){
             $allowTimesheet = true;
             $validations = $timesheetService->getValidationsPeriodPerson($person);
         }
 
-        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW) ){
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW) ){
             // N+1 ?
             /** @var PersonRepository $personRepository */
             $personRepository = $this->getEntityManager()->getRepository(Person::class);
@@ -603,12 +631,12 @@ class PersonController extends AbstractOscarController
             switch( $action ){
                 case 'schedule':
                     /** @var TimesheetService $timesheetService */
-                    $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+                    $timesheetService = $this->getTimesheetService();
 
                     $models = $this->getConfiguration('oscar.scheduleModeles');
 
                     if( $method == "POST" ){
-                        $this->getOscarUserContext()->check(Privileges::PERSON_MANAGE_SCHEDULE);
+                        $this->getOscarUserContextService()->check(Privileges::PERSON_MANAGE_SCHEDULE);
 
                         try {
                             $daysLength = $this->params()->fromPost('days');
@@ -662,7 +690,7 @@ class PersonController extends AbstractOscarController
         //
         // Déclaration en attente
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getTimesheetService();
 
         $declarations = [];
         /** @var ValidationPeriod $declaration */
@@ -688,7 +716,7 @@ class PersonController extends AbstractOscarController
                     throw new OscarException("Impossible de gérer la délagation des feuilles de temps, la personne n'a pas été trouvée.");
                 }
 
-                if( $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) ){
+                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) ){
 
                     switch( $action ) {
                         case 'addusurpation' :
@@ -807,13 +835,13 @@ class PersonController extends AbstractOscarController
         $subordinates = $this->getPersonService()->getSubordinatesPerson($person);
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getTimesheetService();
 
         return [
             'schedule'  => $timesheetService->getDayLengthPerson($person),
             'entity' => $person,
             'ldapRoles' => $roles,
-            'scheduleEditable' => $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_MANAGE_SCHEDULE),
+            'scheduleEditable' => $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_MANAGE_SCHEDULE),
             'referents' => $referents,
             'manageHierarchie' => $manageHierarchie,
             'manageUsurpation' => $manageUsurpation,
@@ -836,7 +864,7 @@ class PersonController extends AbstractOscarController
         // Récupération des personnes à fusionner
         $personIds = explode(',', $this->params()->fromQuery('ids', ''));
         $persons = $this->getPersonService()->getPersonsByIds($personIds);
-        $personConnector = array_keys($this->getServiceLocator()->get('Config')['oscar']['connectors']['person']);
+        $personConnector = array_keys($this->getOscarConfigurationService()->getConfiguration('connectors.person'));
         $hydrator = new PersonFormHydrator($personConnector);
         $form = new MergeForm;
         $form->preInit($hydrator, $persons);
@@ -1031,16 +1059,5 @@ class PersonController extends AbstractOscarController
         $view->setTemplate('/oscar/person/form');
 
         return $view;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // Usuals Getters
-    /**
-     * @return PersonService
-     */
-    protected function getPersonService()
-    {
-        return $this->getServiceLocator()->get('PersonService');
     }
 }

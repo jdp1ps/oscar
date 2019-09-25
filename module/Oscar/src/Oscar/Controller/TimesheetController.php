@@ -30,7 +30,9 @@ use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Zend\Http\Request;
 use Zend\Http\Response;
+use Zend\Mvc\Console\View\Renderer;
 use Zend\View\Model\JsonModel;
+use Zend\View\Renderer\PhpRenderer;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et
@@ -47,12 +49,24 @@ class TimesheetController extends AbstractOscarController
     /** @var PersonService */
     private $personService;
 
+    /** @var PhpRenderer */
+    private $viewRenderer;
 
-    /// Formatteurs
-    private $timesheetActivityPeriodPdfFormatter;
-    private $timesheetActivityPeriodHtmlFormatter;
-    private $timesheetPersonPeriodHtmlFormatter;
-    private $timesheetPersonPeriodPdfFormatter;
+    /**
+     * @return Renderer
+     */
+    public function getViewRenderer(): PhpRenderer
+    {
+        return $this->viewRenderer;
+    }
+
+    /**
+     * @param Renderer $viewRenderer
+     */
+    public function setViewRenderer(PhpRenderer $viewRenderer): void
+    {
+        $this->viewRenderer = $viewRenderer;
+    }
 
     /**
      * @return TimesheetService
@@ -75,72 +89,6 @@ class TimesheetController extends AbstractOscarController
     {
         return $this->personService;
     }
-
-    /**
-     * @return mixed
-     */
-    public function getTimesheetActivityPeriodPdfFormatter()
-    {
-        return $this->timesheetActivityPeriodPdfFormatter;
-    }
-
-    /**
-     * @param mixed $timesheetActivityPeriodPdfFormatter
-     */
-    public function setTimesheetActivityPeriodPdfFormatter($timesheetActivityPeriodPdfFormatter): void
-    {
-        $this->timesheetActivityPeriodPdfFormatter = $timesheetActivityPeriodPdfFormatter;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTimesheetActivityPeriodHtmlFormatter()
-    {
-        return $this->timesheetActivityPeriodHtmlFormatter;
-    }
-
-    /**
-     * @param mixed $timesheetActivityPeriodHtmlFormatter
-     */
-    public function setTimesheetActivityPeriodHtmlFormatter($timesheetActivityPeriodHtmlFormatter): void
-    {
-        $this->timesheetActivityPeriodHtmlFormatter = $timesheetActivityPeriodHtmlFormatter;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTimesheetPersonPeriodHtmlFormatter()
-    {
-        return $this->timesheetPersonPeriodHtmlFormatter;
-    }
-
-    /**
-     * @param mixed $timesheetPersonPeriodHtmlFormatter
-     */
-    public function setTimesheetPersonPeriodHtmlFormatter($timesheetPersonPeriodHtmlFormatter): void
-    {
-        $this->timesheetPersonPeriodHtmlFormatter = $timesheetPersonPeriodHtmlFormatter;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTimesheetPersonPeriodPdfFormatter()
-    {
-        return $this->timesheetPersonPeriodPdfFormatter;
-    }
-
-    /**
-     * @param mixed $timesheetPersonPeriodPdfFormatter
-     */
-    public function setTimesheetPersonPeriodPdfFormatter($timesheetPersonPeriodPdfFormatter): void
-    {
-        $this->timesheetPersonPeriodPdfFormatter = $timesheetPersonPeriodPdfFormatter;
-    }
-
-
 
     /**
      * @param PersonService $personService
@@ -630,15 +578,19 @@ class TimesheetController extends AbstractOscarController
         }
         elseif ($format == "pdf") {
             $output['format'] = 'pdf';
-            /** @var TimesheetActivityPeriodHtmlFormatter $formatter */
-            $formatter = $this->getServiceLocator()->get(TimesheetActivityPeriodPdfFormatter::class);
+            $formatter = new TimesheetActivityPeriodPdfFormatter(
+                $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+                $this->getViewRenderer()
+            );
             $formatter->render($output);
             die();
         }
         else {
             $output['format'] = 'html';
-            /** @var TimesheetActivityPeriodPdfFormatter $formatter */
-            $formatter = $this->getServiceLocator()->get(TimesheetActivityPeriodHtmlFormatter::class);
+            $formatter =  new TimesheetPersonPeriodHtmlFormatter(
+                $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+                $this->getViewRenderer()
+            );
             $html = $formatter->render($output);
             die($html);
         }
@@ -1090,14 +1042,19 @@ class TimesheetController extends AbstractOscarController
             $datas['format'] = $out;
 
             if( $out == 'pdf' ){
-                /** @var TimesheetPersonPeriodPdfFormatter $formatter */
-                $formatter = $this->getServiceLocator()->get('TimesheetPersonPeriodPdfFormatter');
+                $formatter = new TimesheetPersonPeriodPdfFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+                    $this->getViewRenderer()
+                );
                 $formatter->render($datas);
                 die();
             }
             elseif ($out == 'html') {
-                /** @var TimesheetPersonPeriodHtmlFormatter $formatter */
-                $formatter = $this->getServiceLocator()->get('TimesheetPersonPeriodHtmlFormatter');
+                $formatter = new TimesheetPersonPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+                    $this->getViewRenderer()
+                );
+                $formatter->render($datas);
                 $html = $formatter->render($datas);
                 die($html);
             }

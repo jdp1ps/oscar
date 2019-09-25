@@ -26,6 +26,8 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\OrganizationIdentificationForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OrganizationService;
+use Oscar\Traits\UseOrganizationService;
+use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Utils\EntityHydrator;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\PhpEnvironment\Request;
@@ -33,16 +35,11 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
-class OrganizationController extends AbstractOscarController
+class OrganizationController extends AbstractOscarController implements UseOrganizationService
 {
+    use UseOrganizationServiceTrait;
 
-    /**
-     * @return OrganizationService
-     */
-    protected function getOrganizationService()
-    {
-        return $this->getServiceLocator()->get('OrganizationService');
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function deleteAction(){
 

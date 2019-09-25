@@ -30,6 +30,8 @@ use Oscar\Service\ProjectService;
 use Oscar\Service\SearchService;
 use Oscar\Service\SessionService;
 use Oscar\Service\UserParametersService;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -54,9 +56,9 @@ use Zend\View\Model\JsonModel;
  *
  * Class AbstractOscarController
  */
-class AbstractOscarController extends AbstractActionController implements UseOscarConfigurationService, UseOscarUserContextService, UseLoggerService, UseEntityManager
+class AbstractOscarController extends AbstractActionController implements UseOscarConfigurationService, UseOscarUserContextService, UseLoggerService, UseEntityManager, UseActivityLogService
 {
-    use UseOscarConfigurationServiceTrait, UseOscarUserContextServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait;
+    use UseOscarConfigurationServiceTrait, UseOscarUserContextServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait, UseActivityLogServiceTrait;
 
 
     public function oscarRest( $default, $get, $post=null, $delete=null)

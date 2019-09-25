@@ -800,7 +800,6 @@ return array(
     // Service (métier)
     'service_manager' => array(
         'invokables' => [
-            'ProjectService' => ProjectService::class,
             'AccessResolverService' => AccessResolverService::class,
             'ActivityLogService' => \Oscar\Service\ActivityLogService::class,
             'ContractDocumentService' => \Oscar\Service\ContractDocumentService::class,
@@ -821,13 +820,9 @@ return array(
             \Oscar\Service\OscarConfigurationService::class => \Oscar\Service\OscarConfigurationServiceFactory::class,
             \Oscar\Service\OscarUserContext::class => \Oscar\Service\OscarUserContextFactory::class,
             \Oscar\Service\PersonService::class => \Oscar\Service\PersonServiceFactory::class,
+            ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
-            \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter::class => \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatterFactory::class,
             \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
-            \Oscar\Formatter\TimesheetActivityPeriodPdfFormatter::class => \Oscar\Formatter\TimesheetActivityPeriodPdfFormatterFactory::class,
-            \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter::class => \Oscar\Formatter\TimesheetActivityPeriodHtmlFormatterFactory::class,
-            \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter::class => \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatterFactory::class,
-            \Oscar\Formatter\TimesheetPersonPeriodPdfFormatter::class => \Oscar\Formatter\TimesheetPersonPeriodPdfFormatterFactory::class,
             'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class
         ),
     ),
@@ -849,8 +844,6 @@ return array(
             //'Public' => \Oscar\Controller\PublicController::class,
             'Administration' => \Oscar\Controller\AdministrationController::class,
             'Project' => \Oscar\Controller\ProjectController::class,
-            'Person' => \Oscar\Controller\PersonController::class,
-            'Organization' => \Oscar\Controller\OrganizationController::class,
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
@@ -870,6 +863,8 @@ return array(
             'Public'    => \Oscar\Controller\PublicControllerFactory::class,
             'Timesheet' => \Oscar\Controller\TimesheetControllerFactory::class,
             'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
+            'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
+            'Person' => \Oscar\Controller\PersonControllerFactory::class
         ]
     ),
 

@@ -9,9 +9,11 @@
 namespace Oscar\Controller;
 
 
+use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
+use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
@@ -26,12 +28,12 @@ class TimesheetControllerFactory implements FactoryInterface
         $c = new TimesheetController();
 
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
+        $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
+        $c->setEntityManager($container->get(EntityManager::class));
         $c->setLoggerService($container->get('Logger'));
         $c->setTimesheetService($container->get(TimesheetService::class));
         $c->setPersonService($container->get(PersonService::class));
-
-        $c->setTimesheetActivityPeriodHtmlFormatter($container->get(TimesheetActivityPeriodHtmlFormatter::class));
-
+        $c->setViewRenderer($container->get('ViewRenderer'));
         return $c;
     }
 
