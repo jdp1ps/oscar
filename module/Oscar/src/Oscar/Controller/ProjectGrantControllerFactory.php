@@ -13,9 +13,13 @@ use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Monolog\Logger;
+use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityRequestService;
+use Oscar\Service\ActivityTypeService;
+use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
@@ -25,15 +29,19 @@ class ProjectGrantControllerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $c = new PublicController($container->get(TimesheetService::class));
+        $c = new ProjectGrantController($container->get(TimesheetService::class));
 
+        $c->setLoggerService($container->get('Logger'));
         $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setEntityManager($container->get(EntityManager::class));
         $c->setLoggerService($container->get('Logger'));
         $c->setActivityRequestService($container->get(ActivityRequestService::class));
-
-        $c->setLoggerService($container->get('Logger'));
+        $c->setOrganizationService($container->get(OrganizationService::class));
+        $c->setActivityService($container->get(ProjectGrantService::class));
+        $c->setActivityTypeService($container->get(ActivityTypeService::class));
+        $c->setTimesheetService($container->get(TimesheetService::class));
+        $c->setActivityLogService($container->get(ActivityLogService::class));
         return $c;
     }
 

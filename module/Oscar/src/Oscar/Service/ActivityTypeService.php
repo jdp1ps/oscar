@@ -12,14 +12,16 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityType;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class ActivityTypeService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class ActivityTypeService implements UseEntityManager
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+    use UseEntityManagerTrait;
 
     /**
      * @param $id
@@ -184,7 +186,6 @@ class ActivityTypeService implements ServiceLocatorAwareInterface, EntityManager
         } catch( \Exception $e ){
             return null;
         }
-
     }
 
     /**
@@ -296,7 +297,6 @@ class ActivityTypeService implements ServiceLocatorAwareInterface, EntityManager
 
     public function moveAfter( $moved, $dest )
     {
-
         $brancheDeplacee = $this->getBaseQuery()
             ->where('t.lft >= :lft AND t.rgt <= :rgt ')
             ->setParameters(['lft' => $moved->getLft(), 'rgt' => $moved->getRgt()])
@@ -428,5 +428,4 @@ class ActivityTypeService implements ServiceLocatorAwareInterface, EntityManager
             ->from(ActivityType::class, 't')
             ->orderBy('t.lft', 'ASC');
     }
-
 }

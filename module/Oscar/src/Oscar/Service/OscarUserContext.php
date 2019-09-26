@@ -56,6 +56,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /** @var UserContext */
     protected $userContext;
 
+    protected $sessionContainer;
+
     /**
      * @return UserContext
      */

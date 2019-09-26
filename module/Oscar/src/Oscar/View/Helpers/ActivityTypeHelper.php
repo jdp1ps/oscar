@@ -28,7 +28,7 @@ class ActivityTypeHelper extends AbstractHtmlElement implements ServiceLocatorAw
             return '<i class="no-data">Pas de type</i>';
         } else {
             $sl = $this->getServiceLocator()->getServiceLocator();
-            $types = $sl->get('ActivityTypeService')->getActivityTypeChain($activity);
+            $types = $sl->get(ActivityTypeService::class)->getActivityTypeChain($activity);
             if( count($types) > 0 && $types[0]->getLabel() === 'ROOT' ){
                 array_shift($types);
             }

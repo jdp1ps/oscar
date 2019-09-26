@@ -2,27 +2,27 @@
 /**
  * Created by PhpStorm.
  * User: bouvry
- * Date: 25/09/19
- * Time: 13:44
+ * Date: 26/09/19
+ * Time: 17:29
  */
 
-namespace Oscar\Service;
+namespace Oscar\View\Helpers;
 
 
-use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class MilestoneServiceFactory implements FactoryInterface
+class LinksFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $s = new MilestoneService();
-        $s->setServiceLocator($container);
-        $s->setEntityManager($container->get(EntityManager::class));
-        return $s;
+        $link = new Links();
+        $link->setServiceLocator($container);
+        return $link;
+
     }
+
 }

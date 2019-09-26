@@ -396,6 +396,6 @@ class Links extends AbstractHtmlElement implements ServiceLocatorAwareInterface
      * @return OscarUserContext
      */
     private function OscarUserContext(){
-        return $this->getServiceLocator()->getServiceLocator()->get('OscarUserContext');
+        return $this->getServiceLocator()->get(OscarUserContext::class);
     }
 }

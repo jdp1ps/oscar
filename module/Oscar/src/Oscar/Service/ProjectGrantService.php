@@ -64,6 +64,27 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         UseOrganizationServiceTrait
         ;
 
+    /** @var MilestoneService */
+    private $milestoneService;
+
+    /**
+     * @return MilestoneService
+     */
+    public function getMilestoneService(): MilestoneService
+    {
+        return $this->milestoneService;
+    }
+
+    /**
+     * @param MilestoneService $milestoneService
+     */
+    public function setMilestoneService(MilestoneService $milestoneService): void
+    {
+        $this->milestoneService = $milestoneService;
+    }
+
+
+
     public function getTypeDocument( $typeDocumentId, $throw=false ){
         $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($typeDocumentId);
         if( $type == null && $throw === true )
@@ -452,7 +473,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function getDistinctNumberKeyUnreferenced(){
         $exists = $this->getDistinctNumbersKey();
-        $referenced = $this->getServiceLocator()->get('OscarConfig')->getOptionalConfiguration('editable.numerotation', []);
+        $referenced = $this->getOscarConfigurationService()->getOptionalConfiguration('editable.numerotation', []);
         $unique = [];
         foreach ($exists as $key){
             if( !in_array($key, $referenced) ){
@@ -469,7 +490,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
         // Clefs connues
         $authorisedKeys = $this->getOscarConfigurationService()->getNumerotationKeys();
-        $this->getServiceLocator()->get('Logger')->debug("Clefs connues : " . print_r($authorisedKeys, true));
+        $this->getLoggerService()->debug("Clefs connues : " . print_r($authorisedKeys, true));
 
         // Récupération des activités ayant des numérotations
         $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
@@ -483,7 +504,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $hasUnknow = false;
             foreach(array_keys($activity->getNumbers()) as $key){
                 if( !in_array($key, $authorisedKeys) ){
-                    $this->getServiceLocator()->get('Logger')->debug("$key n'est pas référencé");
+                    $this->getLoggerService()->debug("$key n'est pas référencé");
                     $hasUnknow = true;
                 }
             }
@@ -675,7 +696,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      * @return array
      */
     public function getMilestones( $idActivity ){
-        return $this->getServiceLocator()->get('MilestoneService')->getMilestonesByActivityId( $idActivity );
+        return $this->getMilestoneService()->getMilestonesByActivityId( $idActivity );
     }
 
     public function searchIndex_rebuild()

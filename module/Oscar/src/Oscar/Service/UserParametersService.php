@@ -11,21 +11,29 @@ namespace Oscar\Service;
 
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Utils\ValidationInput;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class UserParametersService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface, ConfigurationAwareInterface
+class UserParametersService implements UseOscarConfigurationService, UseEntityManager, UseActivityLogService, UseOscarUserContextService
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait, ConfigurationAwareTrait;
+    use UseActivityLogServiceTrait, UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseOscarUserContextServiceTrait;
 
     /**
-     * @return ActivityLogService
+     * @return \Oscar\Entity\Authentification|null
      */
-    protected function getActivityLogService(){
-        return $this->getServiceLocator()->get('ActivityLogService');
+    protected function getCurrentAuth(){
+        return $this->getOscarUserContextService()->getAuthentification();
     }
 
     /**
@@ -36,7 +44,7 @@ class UserParametersService implements ServiceLocatorAwareInterface, EntityManag
      */
     public function performChangeDeclarationMode( $userInput )
     {
-        if( !$this->getConfiguration('oscar.declarationsHoursOverwriteByAuth', false) ){
+        if( !$this->getOscarConfigurationService()->getConfiguration('oscar.declarationsHoursOverwriteByAuth', false) ){
             throw new OscarException(_('Cette option ne peut pas être modifiée'));
         }
 
@@ -56,7 +64,7 @@ class UserParametersService implements ServiceLocatorAwareInterface, EntityManag
 
     public function performChangeFrequency( $userInput )
     {
-        if( !$this->getConfiguration('oscar.notifications.override', false) ){
+        if( !$this->getOscarConfigurationService()->getConfiguration('oscar.notifications.override', false) ){
             throw new OscarException(_('Cette option ne peut pas être modifiée'));
         }
 
@@ -115,6 +123,6 @@ class UserParametersService implements ServiceLocatorAwareInterface, EntityManag
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function scheduleEditable(){
-        return $this->getConfiguration('oscar.userSubmitSchedule');
+        return $this->getOscarConfigurationService()->getConfiguration('oscar.userSubmitSchedule');
     }
 }

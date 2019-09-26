@@ -39,13 +39,13 @@ class AdministrationController extends AbstractOscarController
 {
     public function indexAction()
     {
-        $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
         return [];
     }
 
     public function documentSectionsAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
         return $this->oscarRest(
             function(){
                 return [
@@ -163,7 +163,7 @@ class AdministrationController extends AbstractOscarController
     public function numerotationAction()
     {
 
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);
 
 
         $invalidActivityNumbers = $this->getActivityService()->getActivitiesWithUnreferencedNumbers();
@@ -228,7 +228,7 @@ class AdministrationController extends AbstractOscarController
 
     public function tvaAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_TVA_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_TVA_MANAGE);
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();
             switch ( $method ){
@@ -297,13 +297,13 @@ class AdministrationController extends AbstractOscarController
     }
 
     public function accueilAction(){
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
         return [];
     }
 
     public function disciplineAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
 
         $disciplines = $this->getEntityManager()->getRepository(Discipline::class)->getDisciplinesCounted();
         $method = $this->getHttpXMethod();
@@ -364,14 +364,14 @@ class AdministrationController extends AbstractOscarController
 
 
     public function activityIndexBuildAction(){
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SEARCH_BUILD);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SEARCH_BUILD);
         return [
             'repport' => $this->getActivityService()->searchIndex_rebuild()
         ];
     }
 
     public function organizationTypeAction(){
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE);
         $datas = [];
 
         if( ($action = $this->params()->fromQuery('action')) ){
@@ -455,7 +455,7 @@ class AdministrationController extends AbstractOscarController
 
     public function connectorsHomeAction(){
 
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
 
         $configOscar = $this->getServiceLocator()->get('OscarConfig');
         $configConnectors = $configOscar->getConfiguration('connectors');
@@ -524,7 +524,7 @@ class AdministrationController extends AbstractOscarController
      */
     public function connectorConfigureAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
 
         $connectorType = $this->params()->fromRoute('connectortype');
         $connectorName = $this->params()->fromRoute('connectorname');
@@ -551,7 +551,7 @@ class AdministrationController extends AbstractOscarController
      */
     public function connectorExecuteAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
 
         $connectorType = $this->params()->fromRoute('connectortype');
         $connectorName = $this->params()->fromRoute('connectorname');
@@ -594,7 +594,7 @@ class AdministrationController extends AbstractOscarController
      */
     public function connectorsConfigAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
 
         ///////////////////////////////////// Connecteurs PERSON <> ORGANIZATION
         $personOrganizationConnectors = $this->getServiceLocator()
@@ -633,7 +633,7 @@ class AdministrationController extends AbstractOscarController
         /** @var Request $request */
         $request = $this->getRequest();
 
-        $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
 
         $idRolePrivilege = $this->params()->fromRoute('idroleprivilege', null);
         $method = $this->getHttpXMethod();
@@ -645,7 +645,7 @@ class AdministrationController extends AbstractOscarController
         } else {
             switch ($this->getHttpXMethod()) {
                 case 'PATCH':
-                    $this->getOscarUserContext()->check(Privileges::DROIT_PRIVILEGE_EDITION);
+                    $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_EDITION);
                     $privilegeId = $request->getPost('privilegeid');
                     $roleId = $request->getPost('roleid');
 
@@ -707,7 +707,7 @@ class AdministrationController extends AbstractOscarController
 
     public function usersAction()
     {
-        $this->getOscarUserContext()->check(Privileges::DROIT_USER_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_USER_VISUALISATION);
         $authenticated = $this->getEntityManager()->getRepository(Authentification::class)->findAll();
         $roleDb = $this->getEntityManager()->getRepository(Role::class)->findAll();
 
@@ -721,7 +721,7 @@ class AdministrationController extends AbstractOscarController
             $d = $auth->toJson();
             $person = null;
             try {
-                $p = $this->getOscarUserContext()->getPersonFromAuthentification($auth);
+                $p = $this->getOscarUserContextService()->getPersonFromAuthentification($auth);
                 if( $p )
                     $person = $p->toJson();
             } catch ( \Exception $e ){
@@ -741,7 +741,7 @@ class AdministrationController extends AbstractOscarController
     }
 
     public function userRolesAction(){
-        if( !$this->getOscarUserContext()->hasPrivileges(Privileges::DROIT_USER_EDITION) ){
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_USER_EDITION) ){
             return $this->getResponseUnauthorized();
         }
 
@@ -791,7 +791,7 @@ class AdministrationController extends AbstractOscarController
     }
 
     public function userLogsAction(){
-        $this->getOscarUserContext()->check(Privileges::DROIT_USER_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_USER_VISUALISATION);
         $userid = $this->params('userid');
         $logs=[];
         $activitiesLog = $this->getEntityManager()->getRepository(LogActivity::class)->findBy(['userId' => $userid],['dateCreated'=>'DESC'], 100);
@@ -824,7 +824,7 @@ class AdministrationController extends AbstractOscarController
      */
     private function getJsonRole(Role $role)
     {
-        $manage = $this->getOscarUserContext()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
+        $manage = $this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
         $datas = $role->asArray();
         $datas['editable'] = $role->getRoleId() == "Administrateur" ? false : $manage;
         $datas['deletable'] = $role->getRoleId() == "Administrateur" ? false : $manage;
@@ -839,7 +839,7 @@ class AdministrationController extends AbstractOscarController
      */
     public function roleAPIAction()
     {
-        $this->getOscarUserContext()->check(Privileges::DROIT_USER_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_USER_VISUALISATION);
         /** @var Request $request */
         $request = $this->getRequest();
         try {
@@ -847,7 +847,7 @@ class AdministrationController extends AbstractOscarController
 
             if ($roleId) {
 
-                $this->getOscarUserContext()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
+                $this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
 
                 /** @var Role $role */
                 $role = $this->getEntityManager()->getRepository(Role::class)->find($roleId);
@@ -892,7 +892,7 @@ class AdministrationController extends AbstractOscarController
             } else {
                 // Création
                 if ($this->getHttpXMethod() == "POST") {
-                    $this->getOscarUserContext()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
+                    $this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
                     $role = $this->getEntityManager()->getRepository(Role::class)->findOneBy(['roleId' => $request->getPost('roleId')]);
                     if ($role) {
                         return $this->getResponseBadRequest(sprintf("le nom de rôle '%s' est déjà utilisé",
@@ -923,14 +923,14 @@ class AdministrationController extends AbstractOscarController
 
     public function rolesAction()
     {
-        $this->getOscarUserContext()->check(Privileges::DROIT_ROLE_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_ROLE_VISUALISATION);
         $out = [];
         return ["roles" => json_encode($out)];
     }
 
     public function rolesEditAction()
     {
-        $this->getOscarUserContext()->check(Privileges::DROIT_ROLE_EDITION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_ROLE_EDITION);
         /** @var Request $request */
         $request = $this->getRequest();
         try {
@@ -956,14 +956,14 @@ class AdministrationController extends AbstractOscarController
     //
     ////////////////////////////////////////////////////////////////////////////
     public function organizationRoleAction(){
-        $this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
         return [];
     }
 
 
     public function organizationRoleApiAction(){
         $this->getLogger()->debug("> ORGANISATIONROLE API");
-        $this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
+        $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
         $roleId = $this->params('roleid', null);
         /** @var Request $request */
         $request = $this->getRequest();
@@ -983,7 +983,7 @@ class AdministrationController extends AbstractOscarController
             ////////////////////////////////////////////////////////////////////
             // POST : Nouveau rôle
             elseif( $this->getHttpXMethod() == 'POST' ){
-                $this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_EDITION);
+                $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_EDITION);
                 $role = new OrganizationRole();
                 $role->setLabel($request->getPost('label'))
                     ->setDescription($request->getPost('description'))
@@ -994,7 +994,7 @@ class AdministrationController extends AbstractOscarController
             }
         }
         else {
-            $this->getOscarUserContext()->check(Privileges::DROIT_ROLEORGA_EDITION);
+            $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_EDITION);
             $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($roleId);
             if( !$role ){
                 return $this->getResponseInternalError("Ce rôle est introuvable dans la base de données.");
@@ -1023,7 +1023,7 @@ class AdministrationController extends AbstractOscarController
      * Gestion des types de documents.
      */
     public function typeDocumentAction() {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
         return new ViewModel(array(
 
         ));
@@ -1032,7 +1032,7 @@ class AdministrationController extends AbstractOscarController
 
     public function typeDocumentApiAction() {
 
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
         $method = $this->getHttpXMethod();
 
         switch ($method) {

@@ -13,6 +13,10 @@ use Moment\Moment;
 use Oscar\Exception\OscarException;
 use Oscar\Strategy\Mailer\Swift_Transport_FileOutput;
 use Oscar\Strategy\Mailer\SwiftTransportFileOutput;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Utils\StringUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -25,9 +29,9 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  * Class MailingService
  * @package Oscar\Service
  */
-class MailingService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class MailingService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface, UseEntityManager, UseOscarConfigurationService
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+    use ServiceLocatorAwareTrait, EntityManagerAwareTrait, UseEntityManagerTrait, UseOscarConfigurationServiceTrait;
 
     /**
      * Retourne la configuration Oscar pour l'envoi des mails.
@@ -37,7 +41,7 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
     protected function getConfig(){
         static $config;
         if( $config === null )
-            $config = new ConfigurationParser($this->getServiceLocator()->get('Config')['oscar']['mailer']);
+            $config = $this->getOscarConfigurationService()->getConfiguration('mailer');
 
         return $config;
     }
@@ -64,24 +68,24 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
         static $transport;
         if( $transport === null ){
 
-            switch( $this->getConfig()->getConfiguration('transport.type') ){
+            switch( $this->getOscarConfigurationService()->getConfiguration('mailer.transport.type') ){
                 case 'smtp':
                     $transport = (new \Swift_SmtpTransport(
-                        $this->getConfig()->getConfiguration('transport.host'),
-                        $this->getConfig()->getConfiguration('transport.port'),
-                        $this->getConfig()->getConfiguration('transport.security')))
-                        ->setUsername($this->getConfig()->getConfiguration('transport.username'))
-                        ->setPassword($this->getConfig()->getConfiguration('transport.password'))
+                        $this->getOscarConfigurationService()->getConfiguration('mailer.transport.host'),
+                        $this->getOscarConfigurationService()->getConfiguration('mailer.transport.port'),
+                        $this->getOscarConfigurationService()->getConfiguration('mailer.transport.security')))
+                        ->setUsername($this->getOscarConfigurationService()->getConfiguration('mailer.transport.username'))
+                        ->setPassword($this->getOscarConfigurationService()->getConfiguration('mailer.transport.password'))
                     ;
 
                     break;
 
                 case 'sendmail':
-                    $transport = new \Swift_SendmailTransport($this->getConfig()->getConfiguration('transport.cmd'));
+                    $transport = new \Swift_SendmailTransport($this->getOscarConfigurationService()->getConfiguration('mailer.transport.cmd'));
                     break;
 
                 case 'file':
-                    return new SwiftTransportFileOutput($this->getConfig()->getConfiguration('transport.path', '/tmp'));
+                    return new SwiftTransportFileOutput($this->getOscarConfigurationService()->getConfiguration('mailer.transport.path', '/tmp'));
 
 
                 default:
@@ -100,8 +104,8 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
      */
     public function newMessage( $subject = "", $content = []){
         $msg = new \Swift_Message();
-        $msg->setFrom($this->getConfig()->getConfiguration('from'))
-            ->setSubject($this->getConfig()->getConfiguration('subjectPrefix') . $subject)
+        $msg->setFrom($this->getOscarConfigurationService()->getConfiguration('mailer.from'))
+            ->setSubject($this->getOscarConfigurationService()->getConfiguration('subjectPrefix') . $subject)
         ;
         if( $content && is_array($content) && array_key_exists('body', $content) ){
             $body = $content['body'];
@@ -120,7 +124,7 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
      */
     public function getBodyTemplate( $body, $title=""){
         ob_start();
-        include $this->getConfig()->getConfiguration('template');
+        include $this->getOscarConfigurationService()->getConfiguration('template');
         return ob_get_clean();
     }
 
@@ -132,8 +136,8 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
      */
     public function send( \Swift_Message $msg ){
 
-        $send = $this->getConfig()->getConfiguration('send', false);
-        $exceptions = $this->getConfig()->getConfiguration('send_false_exception', []);
+        $send = $this->getOscarConfigurationService()->getConfiguration('send', false);
+        $exceptions = $this->getOscarConfigurationService()->getConfiguration('send_false_exception', []);
 
         if( $send == false ){
             // On test si le mail est dans l'exception

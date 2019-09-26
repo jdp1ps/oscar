@@ -801,19 +801,17 @@ return array(
     'service_manager' => array(
         'invokables' => [
             'AccessResolverService' => AccessResolverService::class,
-            'ActivityLogService' => \Oscar\Service\ActivityLogService::class,
-            'ContractDocumentService' => \Oscar\Service\ContractDocumentService::class,
-            'ActivityTypeService' => \Oscar\Service\ActivityTypeService::class,
             'MilestoneService' => \Oscar\Service\MilestoneService::class,
-            'ShuffleService' => \Oscar\Service\ShuffleDataService::class,
             'MailingService' => \Oscar\Service\MailingService::class,
             'SessionService' => \Oscar\Service\SessionService::class,
-            'UserParametersService' => \Oscar\Service\UserParametersService::class,
         ],
 
         'factories' => array(
+            \Oscar\Service\ActivityLogService::class => \Oscar\Service\ActivityLogServiceFactory::class,
             \Oscar\Service\ActivityRequestService::class => \Oscar\Service\ActivityRequestServiceFactory::class,
+            \Oscar\Service\ActivityTypeService::class => \Oscar\Service\ActivityTypeServiceFactory::class,
             \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
+            \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             'Logger' => \Oscar\Service\LoggerServiceFactory::class,
             \Oscar\Service\NotificationService::class => \Oscar\Service\NotificationServiceFactory::class,
             \Oscar\Service\OrganizationService::class => \Oscar\Service\OrganizationServiceFactory::class,
@@ -823,7 +821,8 @@ return array(
             ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
             \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
-            'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class
+            'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class,
+            \Oscar\Service\UserParametersService::class => \Oscar\Service\UserParametersServiceFactory::class
         ),
     ),
 
@@ -841,8 +840,6 @@ return array(
     // On doit déclaré ici les Controlleurs 'invoquables'
     'controllers' => array(
         'invokables' => array(
-            //'Public' => \Oscar\Controller\PublicController::class,
-            'Administration' => \Oscar\Controller\AdministrationController::class,
             'Project' => \Oscar\Controller\ProjectController::class,
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
@@ -860,6 +857,7 @@ return array(
             'Connector' => \Oscar\Controller\ConnectorController::class,
         ),
         'factories' => [
+            'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
             'Public'    => \Oscar\Controller\PublicControllerFactory::class,
             'Timesheet' => \Oscar\Controller\TimesheetControllerFactory::class,
             'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
@@ -894,16 +892,17 @@ return array(
             'activity' => \Oscar\View\Helpers\ActivityHtml::class,
             'strEmpty' => \Oscar\View\Helpers\StrEmpty::class,
             'fileSize' => \Oscar\View\Helpers\Filesize::class,
-            'link' => \Oscar\View\Helpers\Links::class,
-            'activityTypeHlp' => \Oscar\View\Helpers\ActivityTypeHelper::class,
             'userUI' => \Oscar\View\Helpers\UserUIHelper::class,
             'Currency' => \Oscar\View\Helpers\Currency::class,
+            'currency' => \Oscar\View\Helpers\Currency::class,
             'keyvalue' => \Oscar\View\Helpers\KeyValueHelper::class,
             'slugify' => \Oscar\View\Helpers\Slugify::class,
         ],
         'factories' => [
+            'activityTypeHlp' => \Oscar\View\Helpers\ActivityTypeHelperFactory::class,
             'Grant' => \Oscar\View\Helpers\GrantFactory::class,
             'hasRole' => \Oscar\View\Helpers\HasRoleFactory::class,
+            'link' => \Oscar\View\Helpers\LinksFactory::class,
             'options' => \Oscar\View\Helpers\OptionsFactory::class,
         ],
         'abstract_factories' => [

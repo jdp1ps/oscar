@@ -8,6 +8,8 @@
 
 namespace Oscar\Traits;
 
+use Oscar\Entity\Person;
+use Oscar\Exception\OscarException;
 use Oscar\Service\OscarUserContext;
 
 trait UseOscarUserContextServiceTrait
@@ -30,5 +32,17 @@ trait UseOscarUserContextServiceTrait
      */
     public function getOscarUserContextService() :OscarUserContext {
         return $this->oscarUserContextService;
+    }
+
+    /**
+     * @return Person
+     * @throws OscarException
+     */
+    public function getCurrentPerson(){
+        $person = $this->getOscarUserContext()->getCurrentPerson();
+        if( !$person ){
+            throw new OscarException(_("Votre compte n'est associé à aucune personne"));
+        }
+        return $person;
     }
 }

@@ -11,6 +11,10 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Person;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenAuth\Service\UserContext;
@@ -18,22 +22,25 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use ZfcUser\Mapper\UserInterface;
 
-class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
-{
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+class ActivityLogService implements UseOscarUserContextService, UseEntityManager {
+
+    use UseOscarUserContextServiceTrait, UseEntityManagerTrait;
 
     /**
-     * @return UserContext
+     * @return \UnicaenAuth\Entity\Ldap\People
      */
-    protected function getUserContext()
-    {
-        return $this->getServiceLocator()->get('authUserContext');
+    protected function getLdapUser() {
+        return $this->getOscarUserContextService()->getUserContext()->getLdapUser();
     }
 
-
-    protected function addUserLog()
-    {
+    /**
+     * @return \ZfcUser\Entity\UserInterface
+     */
+    protected function getDbUser(){
+        return $this->getOscarUserContextService()->getUserContext()->getDbUser();
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected function addActivity($message, $type, $level, $userId, $context, $contextId, $data)
     {
@@ -69,12 +76,12 @@ class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManager
     public function getCurrentPerson()
     {
         if ($this->_currentPerson === null) {
-            if ($this->getUserContext()->getLdapUser()) {
+            if ($this->getLdapUser()) {
                 $this->_currentPerson = "ldapuser";
-                $login = $this->getUserContext()->getLdapUser()->getSupannAliasLogin();
+                $login = $this->$this->getLdapUser()->getSupannAliasLogin();
             }
-            elseif ( $this->getUserContext()->getDbUser() ){
-                $login = $this->getUserContext()->getDbUser()->getUsername();
+            elseif ( $this->$this->getDbUser() ){
+                $login = $this->$this->getDbUser()->getUsername();
             }
             if ($login) {
                 $this->_currentPerson = $this->getEntityManager()->getRepository(Person::class)->findOneBy([
@@ -94,11 +101,11 @@ class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManager
             $personText = $person;
         } elseif( $person ) {
             $personText = $person->log();
-        } elseif ( $this->getUserContext()->getDbUser() ) {
-            $personText = $this->getUserContext()->getDbUser()->getId().':'.$this->getUserContext()->getDbUser()->getDisplayName();
+        } elseif ( $this->getDbUser() ) {
+            $personText = $this->getDbUser()->getId().':'.$this->getDbUser()->getDisplayName();
         }
         $message = sprintf($personText.' %s', $message);
-        return $this->addInfo($message, $this->getUserContext()->getDbUser(), $level, $context, $contextId);
+        return $this->addInfo($message, $this->getDbUser(), $level, $context, $contextId);
     }
 
 

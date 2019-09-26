@@ -39,7 +39,10 @@ use Oscar\Formatter\JSONFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
+use Oscar\Service\ActivityTypeService;
 use Oscar\Service\NotificationService;
+use Oscar\Service\OrganizationService;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
@@ -61,6 +64,90 @@ class ProjectGrantController extends AbstractOscarController
     /** @var ActivityRequestService */
     private $activityRequestService;
 
+    /** @var OrganizationService */
+    private $organizationService;
+
+    /** @var ProjectGrantService */
+    private $activityService;
+
+    /** @var ActivityTypeService */
+    private $activityTypeService;
+
+    /** @var TimesheetService */
+    private $timesheetService;
+
+    /**
+     * @return TimesheetService
+     */
+    public function getTimesheetService(): TimesheetService
+    {
+        return $this->timesheetService;
+    }
+
+    /**
+     * @param TimesheetService $timesheetService
+     */
+    public function setTimesheetService(TimesheetService $timesheetService): void
+    {
+        $this->timesheetService = $timesheetService;
+    }
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(): ProjectGrantService
+    {
+        return $this->activityService;
+    }
+
+    /**
+     * @return ActivityTypeService
+     */
+    public function getActivityTypeService(): ActivityTypeService
+    {
+        return $this->activityTypeService;
+    }
+
+    /**
+     * @param ActivityTypeService $activityTypeService
+     */
+    public function setActivityTypeService(ActivityTypeService $activityTypeService): void
+    {
+        $this->activityTypeService = $activityTypeService;
+    }
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getActivityService(): ProjectGrantService
+    {
+        return $this->activityService;
+    }
+
+    /**
+     * @param ProjectGrantService $activityService
+     */
+    public function setActivityService(ProjectGrantService $activityService): void
+    {
+        $this->activityService = $activityService;
+    }
+
+    /**
+     * @return OrganizationService
+     */
+    public function getOrganizationService(): OrganizationService
+    {
+        return $this->organizationService;
+    }
+
+    /**
+     * @param OrganizationService $organizationService
+     */
+    public function setOrganizationService(OrganizationService $organizationService): void
+    {
+        $this->organizationService = $organizationService;
+    }
+
     /**
      * @return ActivityRequestService
      */
@@ -80,7 +167,7 @@ class ProjectGrantController extends AbstractOscarController
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function apiUiAction(){
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_INDEX);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_INDEX);
         return [];
     }
 
@@ -125,7 +212,7 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         // Formatteur > JSON
-        $jsonFormatter = new JSONFormatter($this->getOscarUserContext());
+        $jsonFormatter = new JSONFormatter($this->getOscarUserContextService());
 
         // Récupération des activités effective
         $activities = $this->getActivityService()->getActivitiesByIds($activityIds, $page, $rbp);
@@ -159,17 +246,17 @@ class ProjectGrantController extends AbstractOscarController
     public function adminDemandeAction()
     {
         /** @var Person $demandeur */
-        $demandeur = $this->getOscarUserContext()->getCurrentPerson();
+        $demandeur = $this->getOscarUserContextService()->getCurrentPerson();
 
         if( !$demandeur ){
             throw new OscarException(_('Oscar ne vous connait pas.'));
         }
 
-        $organizations  = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE);
-        $asAdmin        = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_ADMIN);
+        $organizations  = $this->getOscarUserContextService()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE);
+        $asAdmin        = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_REQUEST_ADMIN);
         $spot = null;
 
-        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
+        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
             $spot = "global";
         }
         elseif (count($organizations)) {
@@ -268,7 +355,7 @@ class ProjectGrantController extends AbstractOscarController
 
 
 
-        $jsonFormatter = new JSONFormatter($this->getOscarUserContext());
+        $jsonFormatter = new JSONFormatter($this->getOscarUserContextService());
 
 
         return [
@@ -281,14 +368,14 @@ class ProjectGrantController extends AbstractOscarController
     public function requestForAction()
     {
         /** @var Person $demandeur */
-        $demandeur = $this->getOscarUserContext()->getCurrentPerson();
+        $demandeur = $this->getOscarUserContextService()->getCurrentPerson();
 
         if( !$demandeur ){
             throw new OscarException(_('Oscar ne vous connait pas.'));
         }
 
-        if( !($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST) ||
-            $this->getOscarUserContext()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_REQUEST)) ){
+        if( !($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_REQUEST) ||
+            $this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_REQUEST)) ){
             throw new UnAuthorizedException('Droits insuffisants');
         }
 
@@ -298,7 +385,7 @@ class ProjectGrantController extends AbstractOscarController
         $organizationsPerson = $this->getPersonService()->getPersonOrganizations($demandeur);
 
         //// CONFIGURATION
-        $dest = $this->getConfiguration('oscar.paths.document_request');    // Emplacement des documents
+        $dest = $this->getOscarConfigurationService()->getConfiguration('paths.document_request');    // Emplacement des documents
         $organizations = [];
         $lockMessage = [];
 
@@ -532,7 +619,7 @@ class ProjectGrantController extends AbstractOscarController
             die("</table>");
         }
 
-        $configDocuments = $this->getConfiguration('oscar.generated-documents.activity');
+        $configDocuments = $this->getOscarConfigurationService()->getConfiguration('generated-documents.activity');
         if( !array_key_exists($doc, $configDocuments) ){
              throw new OscarException("Modèle de document non disponible (problème de configuration");
         }
@@ -593,7 +680,7 @@ class ProjectGrantController extends AbstractOscarController
         $numerotationKeys = $this->getEditableConfKey('numerotation', []);
         $numerotationEditable = $this->getOscarConfigurationService()->getNumerotationEditable();
         $projectGrant = $this->getProjectGrantService()->getGrant($id);
-        $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
+        $hidden = $this->getOscarConfigurationService()->getConfiguration('activity_hidden_fields');
 
         //////////////////////////////////////////////////////
         //////////////////////////////////////////////////////
@@ -645,7 +732,7 @@ class ProjectGrantController extends AbstractOscarController
             'admdata' => $this->params()->fromQuery('keepadmdata', false),
         ];
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_DUPLICATE);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DUPLICATE);
 
         try {
             $id = $this->params()->fromRoute('id');
@@ -668,7 +755,7 @@ class ProjectGrantController extends AbstractOscarController
         $activity = $this->getActivityFromRoute();
 
         // Contrôle des droits
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_CHANGE_PROJECT,
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_CHANGE_PROJECT,
             $activity);
 
         // Création du projet
@@ -741,7 +828,7 @@ class ProjectGrantController extends AbstractOscarController
 
         $entity = $this->getActivityFromRoute();
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
 
         $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
 
@@ -760,7 +847,7 @@ class ProjectGrantController extends AbstractOscarController
     {
         try {
             $projectGrant = $this->getActivityFromRoute();
-            $this->getOscarUserContext()->check(Privileges::ACTIVITY_DELETE,
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DELETE,
                 $projectGrant);
             $project = $projectGrant->getProject();
             $this->getLogger()->info(sprintf('Suppression de %s - %s', $projectGrant, $projectGrant->getId()));
@@ -803,9 +890,9 @@ class ProjectGrantController extends AbstractOscarController
             return $this->getResponseBadRequest();
         }
 
-        if (!$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
+        if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
             // Croisement
-            $this->organizationsPerimeter = $this->getOscarUserContext()->getOrganisationsPersonPrincipal($this->getOscarUserContext()->getCurrentPerson(),
+            $this->organizationsPerimeter = $this->getOscarUserContextService()->getOrganisationsPersonPrincipal($this->getOscarUserContextService()->getCurrentPerson(),
                 true);
             if ($this->getOrganizationPerimeter()) {
                 $organizations = $this->getOrganizationPerimeter();
@@ -820,9 +907,9 @@ class ProjectGrantController extends AbstractOscarController
             $organizations);
 
         $formatter = new ActivityPaymentFormatter();
-        $formatter->setRolesOrganizations($this->getConfiguration('oscar.export.payments.organizations'));
-        $formatter->setRolesPerson($this->getConfiguration('oscar.export.payments.persons'));
-        $formatter->setSeparator($this->getConfiguration('oscar.export.payments.separator'));
+        $formatter->setRolesOrganizations($this->getOscarConfigurationService()->getConfiguration('export.payments.organizations'));
+        $formatter->setRolesPerson($this->getOscarConfigurationService()->getConfiguration('export.payments.persons'));
+        $formatter->setSeparator($this->getOscarConfigurationService()->getConfiguration('export.payments.separator'));
 
         $csv = [];
 
@@ -865,11 +952,11 @@ class ProjectGrantController extends AbstractOscarController
         $separator = $this->getOscarConfigurationService()->getExportSeparator();
         $dateFormat = $this->getOscarConfigurationService()->getExportDateFormat();
 
-        if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
+        if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
 
         } else {
-            $this->organizationsPerimeter = $this->getOscarUserContext()
-                ->getOrganisationsPersonPrincipal($this->getOscarUserContext()->getCurrentPerson(),
+            $this->organizationsPerimeter = $this->getOscarUserContextService()
+                ->getOrganisationsPersonPrincipal($this->getOscarUserContextService()->getCurrentPerson(),
                 true);
 
             $qb->leftJoin('a.project', 'pr')
@@ -1004,7 +1091,7 @@ class ProjectGrantController extends AbstractOscarController
             $jalonsCurrent = $jalons;
             $jalonsFaitCurrent = $jalonsFait;
 
-            if ($this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
+            if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
                 $entity)
             ) {
                 /** @var ActivityOrganization $org */
@@ -1116,16 +1203,16 @@ class ProjectGrantController extends AbstractOscarController
         // Récupération du projet (si précisé)
         $projectId = $this->params()->fromRoute('projectid', null);
 
-        $hidden = $this->getConfiguration('oscar.activity_hidden_fields');
+        $hidden = $this->getOscarConfigurationService()->getConfiguration('activity_hidden_fields');
 
         // Contrôle des droits
         if ($projectId) {
             $project = $this->getProjectService()->getProject($projectId);
-            $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_EDIT,
+            $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_EDIT,
                 $project);
         } else {
             $project = null;
-            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EDIT);
+            $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT);
         }
 
         $projectGrant = new Activity();
@@ -1193,11 +1280,11 @@ class ProjectGrantController extends AbstractOscarController
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
         // Check access
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_SHOW,
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DOCUMENT_SHOW,
             $entity);
-        $deletable = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
-        $uploadable = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
-        $personShow = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW);
+        $deletable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
+        $uploadable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
+        $personShow = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW);
 
         $out = [];
         /** @var ContractDocument $doc */
@@ -1224,7 +1311,7 @@ class ProjectGrantController extends AbstractOscarController
         $entity = $this->getActivityFromRoute();
 
         // Check access
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity);
 
         /** @var NotificationService $notificationService */
         $notificationService = $this->getNotificationService();
@@ -1257,7 +1344,7 @@ class ProjectGrantController extends AbstractOscarController
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
         // Check access
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_SHOW, $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_SHOW, $entity);
 
         switch ($method) {
             case 'GET' :
@@ -1266,7 +1353,7 @@ class ProjectGrantController extends AbstractOscarController
                 else
                     return [
                         'activity' => $entity,
-                        'json' => $this->getActivityService()->getActivityJson($id, $this->getOscarUserContext())
+                        'json' => $this->getActivityService()->getActivityJson($id, $this->getOscarUserContextService())
                     ];
                 break;
             default :
@@ -1286,11 +1373,11 @@ class ProjectGrantController extends AbstractOscarController
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
         // Check access
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_SHOW, $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_SHOW, $entity);
 
         $rolesOrganizations = [];
-        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE) ){
-            $rolesOrganizations = $this->getOscarUserContext()->getRolesOrganizationInActivity();
+        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE) ){
+            $rolesOrganizations = $this->getOscarUserContextService()->getRolesOrganizationInActivity();
         }
 
 
@@ -1309,7 +1396,7 @@ class ProjectGrantController extends AbstractOscarController
         $pvRepo = $this->getEntityManager()->getRepository(ValidationPeriod::class);
         $declarations = $pvRepo->getValidationPeriodsByActivity($entity);
 
-        $rolesPersons = $this->getOscarUserContext()->getAllRoleIdPersonInActivity();
+        $rolesPersons = $this->getOscarUserContextService()->getAllRoleIdPersonInActivity();
 
         $activityTypeChain = $this->getActivityTypeService()->getActivityTypeChain($entity->getActivityType());
 
@@ -1323,7 +1410,7 @@ class ProjectGrantController extends AbstractOscarController
         $activity = $this->getProjectGrantService()->getGrant($id);
 
         $involvedPersons = null; $involvedPersonsJSON = null;
-        if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_ACCESS, $activity) ){
+        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_PERSON_ACCESS, $activity) ){
             try {
                 $involved = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(Privileges::ACTIVITY_SHOW, $activity, true);
                 foreach ($involved as $p){
@@ -1342,10 +1429,10 @@ class ProjectGrantController extends AbstractOscarController
         }
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getActivityTypeService();
+        $timesheetService = $this->getTimesheetService();
 
         return [
-            'generatedDocuments' => $this->getConfiguration('oscar.generated-documents.activity'),
+            'generatedDocuments' => $this->getOscarConfigurationService()->getConfiguration('generated-documents.activity'),
             'entity' => $activity,
 
             'currencies' => $currencies,
@@ -1358,7 +1445,7 @@ class ProjectGrantController extends AbstractOscarController
             'declarations' => $declarations,
 
             // Jeton de sécurité
-            'tokenValue' => $this->getOscarUserContext()->getTokenValue(true),
+            'tokenValue' => "", // $this->getOscarUserContextService()->getTokenValue(true),
 
             // Personnes pouvant voir cette activité
             'involvedPerson' => $involvedPersonsJSON,
@@ -1431,13 +1518,13 @@ class ProjectGrantController extends AbstractOscarController
         $activity = $this->getProjectGrantService()->getGrant($this->params()->fromRoute('id'));
 
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PERSON_SHOW, $activity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_SHOW, $activity);
 
         $out = [];
 
-        $editableA = $deletableA = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
-        $editableP = $deletableP = $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_PERSON_MANAGE, $activity->getProject());
-        $showable = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW);
+        $editableA = $deletableA = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
+        $editableP = $deletableP = $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_PERSON_MANAGE, $activity->getProject());
+        $showable = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW);
 
         /**
          * @var ActivityPerson $activityPerson
@@ -1495,16 +1582,16 @@ class ProjectGrantController extends AbstractOscarController
     {
 
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('id'));
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PERSON_SHOW,
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_SHOW,
             $activity);
         $out = [];
 
-        $editableA = $deletableA = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+        $editableA = $deletableA = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE,
             $activity);
-        $editableP = $deletableP = $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_ORGANIZATION_MANAGE,
+        $editableP = $deletableP = $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_ORGANIZATION_MANAGE,
             $activity->getProject());
 
-        $showable = $this->getOscarUserContext()->hasPrivileges(Privileges::ORGANIZATION_SHOW);
+        $showable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ORGANIZATION_SHOW);
 
         $classRoutes = [
             ActivityOrganization::class => 'organizationactivity',
@@ -1621,7 +1708,7 @@ class ProjectGrantController extends AbstractOscarController
 
     public function activitiesOrganizationsAction()
     {
-        $this->organizationsPerimeter = $this->getOscarUserContext()->getOrganisationsPersonPrincipal($this->getOscarUserContext()->getCurrentPerson(),
+        $this->organizationsPerimeter = $this->getOscarUserContextService()->getOrganisationsPersonPrincipal($this->getOscarUserContextService()->getCurrentPerson(),
             true);
         if( count($this->organizationsPerimeter) <= 0 ){
             throw new UnAuthorizedException();
@@ -1835,7 +1922,7 @@ class ProjectGrantController extends AbstractOscarController
             } else {
                 if ($search) {
 
-                    $oscarNumSeparator = $this->getConfiguration("oscar.oscar_num_separator");
+                    $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration("oscar_num_separator");
 
                     // La saisie est un PFI
                     if (preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
@@ -1954,7 +2041,7 @@ class ProjectGrantController extends AbstractOscarController
                                 $person = $this->getPersonService()->getPerson($value1);
                                 $persons[$person->getId()] = $person;
                                 $crit['val1Label'] = $person->getDisplayName();
-                                $crit['val2Label'] = $value2 >= 0 ? $this->getOscarUserContext()->getAllRoleIdPerson()[$value2] : '';
+                                $crit['val2Label'] = $value2 >= 0 ? $this->getOscarUserContextService()->getAllRoleIdPerson()[$value2] : '';
                                 $query = $queryPersonNoRole;
                                 if ($value2 >= 0) {
                                     $queryParam['roleObj'] = $this->getEntityManager()->getRepository(Role::class)->find($value2);
@@ -1973,7 +2060,7 @@ class ProjectGrantController extends AbstractOscarController
                                 $organization = $this->getOrganizationService()->getOrganization($value1);
                                 $organizations[$organization->getId()] = $organization;
                                 $crit['val1Label'] = (string)$organization;
-                                $crit['val2Label'] = $value2 >= 0 ? $this->getOscarUserContext()->getRolesOrganizationInActivity()[$value2] : '';
+                                $crit['val2Label'] = $value2 >= 0 ? $this->getOscarUserContextService()->getRolesOrganizationInActivity()[$value2] : '';
                                 if ($value2 > 0) {
                                     $roleOrganisation = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($value2);
                                     $queryParam['roleObj'] = $roleOrganisation;

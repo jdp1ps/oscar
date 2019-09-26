@@ -26,7 +26,7 @@
     "phpoffice/phpexcel": "^1.8"
   },
   "require-dev": {
-    
+    "zendframework/zend-developer-tools": "^1.2"
   },
   "config": {
     "github-protocols": ["https", "ssh"],

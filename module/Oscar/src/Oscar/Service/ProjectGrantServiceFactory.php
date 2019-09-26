@@ -24,6 +24,7 @@ class ProjectGrantServiceFactory implements FactoryInterface
         $s->setOscarUserContextService($container->get(OscarUserContext::class));
         $s->setPersonService($container->get(PersonService::class));
         $s->setOrganizationService($container->get(OrganizationService::class));
+        $s->setMilestoneService($container->get(MilestoneService::class));
         return $s;
     }
 }
