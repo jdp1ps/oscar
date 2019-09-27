@@ -848,21 +848,21 @@ return array(
             'Enroll' => \Oscar\Controller\EnrollController::class,
             'ActivityType' => \Oscar\Controller\ActivityTypeController::class,
             'DateType' => \Oscar\Controller\DateTypeController::class,
-            'ActivityDate' => \Oscar\Controller\ActivityDateController::class,
-            'ActivityPayment' => \Oscar\Controller\ActivityPaymentController::class,
-            'WorkPackage' => \Oscar\Controller\WorkPackageController::class,
-            'Notification' => \Oscar\Controller\NotificationController::class,
             'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentController::class,
             'Depense' => \Oscar\Controller\DepenseController::class,
             'Connector' => \Oscar\Controller\ConnectorController::class,
         ),
         'factories' => [
+            'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
+            'ActivityDate' => \Oscar\Controller\ActivityDateControllerFactory::class,
+            'ActivityPayment' => \Oscar\Controller\ActivityPaymentControllerFactory::class,
             'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
+            'Notification' => \Oscar\Controller\NotificationControllerFactory::class,
+            'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
             'Public'    => \Oscar\Controller\PublicControllerFactory::class,
             'Timesheet' => \Oscar\Controller\TimesheetControllerFactory::class,
-            'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
-            'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
-            'Person' => \Oscar\Controller\PersonControllerFactory::class
+            'Person' => \Oscar\Controller\PersonControllerFactory::class,
+            'WorkPackage' => \Oscar\Controller\WorkPackageControllerFactory::class,
         ]
     ),
 

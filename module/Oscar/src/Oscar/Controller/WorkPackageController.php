@@ -30,12 +30,6 @@ use Zend\View\Model\ViewModel;
  */
 class WorkPackageController extends AbstractOscarController
 {
-    public function indexAction()
-    {
-        return [
-            'entities' => $this->getEntityManager()->getRepository(WorkPackage::class)->findAll()
-        ];
-    }
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
@@ -44,11 +38,11 @@ class WorkPackageController extends AbstractOscarController
      */
     public function restAction(){
 
-        try {
-            $this->getOscarUserContext()->checkToken();
-        } catch( \Exception $e ){
-            return $this->getResponseBadRequest($e->getMessage());
-        }
+//        try {
+//            $this->getOscarUserContextService()->checkToken();
+//        } catch( \Exception $e ){
+//            return $this->getResponseBadRequest($e->getMessage());
+//        }
 
         $idactivity = $this->params()->fromRoute('idactivity', null);
         $method = $this->getHttpXMethod();
@@ -72,7 +66,7 @@ class WorkPackageController extends AbstractOscarController
         // Mise à jour d'un déclarant
 
         if( $method == 'POST' ) {
-            if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
+            if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
                 return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
             }
 
@@ -197,7 +191,7 @@ class WorkPackageController extends AbstractOscarController
 
         if( $method == 'DELETE' ){
 
-            if( !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
+            if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
                 return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
             }
 
@@ -240,55 +234,61 @@ class WorkPackageController extends AbstractOscarController
         }
 
         ////////////////////////////////////////////// Aggrègation des personnes/rôles
-        $persons = [];
-        /** @var Person $person */
-        foreach( $activity->getPersonsDeep() as $person ){
-            $personId = $person->getPerson()->getId();
-            if( !isset($persons[$personId]) ){
-                $persons[$personId] = $person->getPerson()->toArray();
-                $persons[$personId]['roles'] = [];
+        ///
+        try {
+            $persons = [];
+            /** @var Person $person */
+            foreach( $activity->getPersonsDeep() as $person ){
+                $personId = $person->getPerson()->getId();
+                if( !isset($persons[$personId]) ){
+                    $persons[$personId] = $person->getPerson()->toArray();
+                    $persons[$personId]['roles'] = [];
+                }
+                $persons[$personId]['roles'][] = $person->getRole();
             }
-            $persons[$personId]['roles'][] = $person->getRole();
+
+            $workPackages = $this->getEntityManager()->getRepository(WorkPackage::class)->createQueryBuilder('w')
+                ->select('w')
+                ->where('w.activity = :activity')
+                ->leftJoin('w.persons', 'p')
+                ->leftJoin('p.person', 'pr')
+                ->setParameter('activity', $activity)
+                ->orderBy('w.code')
+                ->getQuery()
+                ->getResult();
+
+            $declarant = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_COMMIT, $activity) && $activity->hasDeclarant($this->getCurrentPerson());
+            $validateur = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)
+                || $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+            /** @var WorkPackage $workPackage */
+            foreach( $workPackages as $workPackage){
+                $wp = $workPackage->toArray();
+                $wp['isDeclarant'] = $declarant;
+                $wp['isValidateur'] = $validateur;
+                $workpackages[] = $wp;
+            }
+
+
+            // Accès générale
+            $response = [
+                'editable' => $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE),
+                'isDeclarant' => $declarant,
+                'isValidateur' => $validateur,
+                'workpackages' => $workpackages,
+                'persons' => array_values($persons)
+            ];
+
+            $json = new JsonModel();
+            if( $method == 'GET' ){
+                $json->setVariables($response);
+                return $json;
+            }
+
+            return $this->getResponseNotImplemented('Aïe, ' . $method);
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError($e->getMessage());
         }
 
-        $workPackages = $this->getEntityManager()->getRepository(WorkPackage::class)->createQueryBuilder('w')
-            ->select('w')
-            ->where('w.activity = :activity')
-            ->leftJoin('w.persons', 'p')
-            ->leftJoin('p.person', 'pr')
-            ->setParameter('activity', $activity)
-            ->orderBy('w.code')
-            ->getQuery()
-            ->getResult();
-
-        $declarant = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_COMMIT, $activity) && $activity->hasDeclarant($this->getCurrentPerson());
-        $validateur = $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)
-                || $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
-        /** @var WorkPackage $workPackage */
-        foreach( $workPackages as $workPackage){
-            $wp = $workPackage->toArray();
-            $wp['isDeclarant'] = $declarant;
-            $wp['isValidateur'] = $validateur;
-            $workpackages[] = $wp;
-        }
-
-
-        // Accès générale
-        $response = [
-            'editable' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE),
-            'isDeclarant' => $declarant,
-            'isValidateur' => $validateur,
-            'workpackages' => $workpackages,
-            'persons' => array_values($persons)
-        ];
-
-        $json = new JsonModel();
-        if( $method == 'GET' ){
-            $json->setVariables($response);
-            return $json;
-        }
-
-        return $this->getResponseNotImplemented('Aïe, ' . $method);
     }
 
     ////////////////////////////////////////////////////////////////////////////

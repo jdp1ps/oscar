@@ -281,7 +281,6 @@ workpackage:
         route: /lot-de-travail
         defaults:
             controller: WorkPackage
-            action: index
     may_terminate: true
     child_routes:
         # Nouveau lot de travail

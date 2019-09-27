@@ -25,6 +25,8 @@ class ProjectGrantServiceFactory implements FactoryInterface
         $s->setPersonService($container->get(PersonService::class));
         $s->setOrganizationService($container->get(OrganizationService::class));
         $s->setMilestoneService($container->get(MilestoneService::class));
+        $s->setNotificationService($container->get(NotificationService::class));
+        $s->setActivityLogService($container->get(ActivityLogService::class));
         return $s;
     }
 }

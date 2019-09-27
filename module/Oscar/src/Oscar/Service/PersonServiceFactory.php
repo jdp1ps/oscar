@@ -21,7 +21,6 @@ class PersonServiceFactory implements FactoryInterface
         $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $s->setEntityManager($container->get(EntityManager::class));
         $s->setLoggerService($container->get('Logger'));
-//        $s->setOscarUserContextService($container->get(OscarUserContext::class));
         return $s;
     }
 }

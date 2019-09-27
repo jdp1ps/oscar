@@ -21,12 +21,34 @@ use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\MilestoneService;
 use Oscar\Service\NotificationService;
+use Oscar\Service\ProjectGrantService;
 use Zend\Http\Request;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
 class ActivityDateController extends AbstractOscarController
 {
+    /** @var ProjectGrantService */
+    private $projectGrantService;
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(): ProjectGrantService
+    {
+        return $this->projectGrantService;
+    }
+
+    /**
+     * @param ProjectGrantService $projectGrantService
+     */
+    public function setProjectGrantService(ProjectGrantService $projectGrantService): void
+    {
+        $this->projectGrantService = $projectGrantService;
+    }
+
+
+
     /**
      * @return MilestoneService
      */

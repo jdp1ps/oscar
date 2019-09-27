@@ -13,6 +13,8 @@ use Oscar\Entity\Authentification;
 use Oscar\Entity\Person;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -22,9 +24,9 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use ZfcUser\Mapper\UserInterface;
 
-class ActivityLogService implements UseOscarUserContextService, UseEntityManager {
+class ActivityLogService implements UseOscarUserContextService, UseEntityManager, UseLoggerService {
 
-    use UseOscarUserContextServiceTrait, UseEntityManagerTrait;
+    use UseOscarUserContextServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait;
 
     /**
      * @return \UnicaenAuth\Entity\Ldap\People
@@ -94,7 +96,7 @@ class ActivityLogService implements UseOscarUserContextService, UseEntityManager
 
     public function addUserInfo($message, $context = 'Application', $contextId = -1, $level = LogActivity::LEVEL_ADMIN)
     {
-        $this->getServiceLocator()->get('Logger')->info($message);
+        $this->getLoggerService()->info($message);
         $person = $this->getCurrentPerson();
         $personText = "Anonymous";
         if( is_string($person) ){

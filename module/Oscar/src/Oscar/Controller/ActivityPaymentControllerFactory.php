@@ -1,0 +1,37 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 27/09/19
+ * Time: 14:09
+ */
+
+namespace Oscar\Controller;
+
+
+use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
+use Oscar\Service\NotificationService;
+use Oscar\Service\OscarConfigurationService;
+use Oscar\Service\OscarUserContext;
+use Oscar\Service\PersonService;
+use Oscar\Service\ProjectGrantService;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Zend\ServiceManager\Factory\FactoryInterface;
+
+class ActivityPaymentControllerFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $c = new ActivityPaymentController();
+        $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
+        $c->setLoggerService($container->get('Logger'));
+        $c->setOscarUserContextService($container->get(OscarUserContext::class));
+        $c->setProjectGrantService($container->get(ProjectGrantService::class));
+        $c->setNotificationService($container->get(NotificationService::class));
+        $c->setPersonService($container->get(PersonService::class));
+        return $c;
+    }
+
+}

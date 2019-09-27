@@ -33,6 +33,8 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -54,9 +56,10 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService,
-    UseOscarUserContextService, UsePersonService, UseOrganizationService
+    UseOscarUserContextService, UsePersonService, UseOrganizationService, UseActivityLogService
 {
     use UseOscarConfigurationServiceTrait,
+        UseActivityLogServiceTrait,
         UseEntityManagerTrait,
         UseLoggerServiceTrait,
         UseOscarUserContextServiceTrait,
@@ -64,8 +67,13 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         UseOrganizationServiceTrait
         ;
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
+    ///
     /** @var MilestoneService */
     private $milestoneService;
+
+    /** @var NotificationService */
+    private $notificationService;
 
     /**
      * @return MilestoneService
@@ -82,6 +90,23 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
         $this->milestoneService = $milestoneService;
     }
+
+    /**
+     * @return NotificationService
+     */
+    public function getNotificationService(): NotificationService
+    {
+        return $this->notificationService;
+    }
+
+    /**
+     * @param NotificationService $notificationService
+     */
+    public function setNotificationService(NotificationService $notificationService): void
+    {
+        $this->notificationService = $notificationService;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -709,7 +734,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function specificSearch( $what, &$qb, $activityAlias='c' )
     {
-        $oscarNumSeparator = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('oscar_num_separator');
+        $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration('oscar_num_separator');
         $fieldName = uniqid('num_');
         if (preg_match(EOTP::REGEX_EOTP, $what)) {
             $qb->andWhere($activityAlias.'.codeEOTP = :' . $fieldName)
@@ -743,7 +768,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
         static $searchStrategy;
         if( $searchStrategy === null ){
-            $opt = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('strategy.activity.search_engine');
+            $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.activity.search_engine');
             $class = new \ReflectionClass($opt['class']);
             $searchStrategy = $class->newInstanceArgs($opt['params']);
         }
@@ -790,19 +815,18 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     }
 
     /**
-     * @return ActivityTypeService
+     * @param $idActivitypayment
+     * @param bool $throw
+     * @return ActivityPayment|null
+     * @throws OscarException
      */
-    private function getActivityTypeService()
+    public function getActivityPaymentById( $idActivitypayment, $throw = true ) :?ActivityPayment
     {
-        return $this->getServiceLocator()->get('ActivityTypeService');
-    }
-
-    /**
-     * @return ActivityLogService
-     */
-    private function getActivityLogService()
-    {
-        return $this->getServiceLocator()->get('ActivityLogService');
+        $activitypayment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($idActivitypayment);
+        if( !$activitypayment && $throw ){
+            throw new OscarException("Le payment $idActivitypayment est introuvable !");
+        }
+        return $activitypayment;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -821,25 +845,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
         return Activity::getStatusSelect()[$key];
     }
-
-    public function number( Activity $activity )
-    {
-        if( $activity->getOscarId() !== null ){
-            throw new Exception(sprintf("L'activité %s est déjà numérotée.", $activity));
-        }
-        echo "".$activity->getDateCreated()->format('Y-m-d')."<br>\n";
-        $q = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
-            ->select('MAX(a.id) AS last_id, MIN(a.id) as first_id, CONCAT("toto","tutu")')
-
-            ->where('YEAR(a.dateCreated) = :year')
-            ->setParameter('year', $activity->getDateCreated()->format('Y'));
-        $r = $q->getQuery()->getResult();
-        echo "année de référence : " . $activity->getDateCreated()->format('Y') . "<br>" . $q->getQuery()->getDQL();
-        var_dump($r);
-        die($r);
-    }
-
-
 
     /**
      * Retourne la liste des TVAs supportées dans Oscar.
@@ -1067,6 +1072,13 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         return $newActivity;
 
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// ACTIVITY PAYMENT
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @param $idActivityPayment
@@ -1092,11 +1104,130 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $this->getActivityLogService()->addUserInfo(sprintf("a supprimer le verserment de %s %s sur l'activité %s", $activityPayment->getAmount(), $activityPayment->getCurrency(), $activityPayment->getActivity()->log()));
             return true;
         } catch( \Exception $e ){
+            $this->getLoggerService()->error($e->getMessage());
             if( $throw ){
-                throw new \Exception(sprintf("Impossible de supprimer le versement '%s'.", $activityPayment->getId()));
+                throw new OscarException(sprintf("Impossible de supprimer le versement '%s'.", $activityPayment->getId()));
             }
             return false;
         }
+    }
+
+    public function updateActivityPayment( $data ){
+        /** @var ActivityPayment $payment */
+        $payment = $this->getActivityPayment($this->params()->fromPost('id'));
+
+        $payment->setAmount($data['amount'])
+            ->setComment($data['comment'])
+            ->setCodeTransaction($data['codeTransaction'])
+            ->setCurrency($this->getEntityManager()
+            ->getRepository(Currency::class)
+            ->find($data['currencyId']));
+
+
+        $status = $data['status'];
+        $rate = $data['rate'];
+        $datePredicted = $data['datePredicted'];
+        $datePayment = $data['datePayment'];
+
+        if( $datePayment )
+            $payment->setDatePayment(new \DateTime($datePayment));
+        else
+            $payment->setDatePayment(null);
+
+        if( $datePredicted )
+            $payment->setDatePredicted(new \DateTime($datePredicted));
+        else
+            $payment->setDatePredicted(null);
+        $payment->setRate($rate)
+            ->setStatus($status);
+        $this->getEntityManager()->flush($payment);
+        $this->getNotificationService()->purgeNotificationPayment($payment);
+        $this->getNotificationService()->generatePaymentsNotifications($payment);
+        return $payment;
+    }
+
+    public function addNewActivityPayment( $datas, $notification = true ){
+
+        $payment = new ActivityPayment();
+
+        // TODO Vérifier les données de création du nouveau payment
+
+        $this->getEntityManager()->persist($payment);
+
+        $payment->setAmount($datas['amount'])
+            ->setComment($datas['comment'])
+            ->setActivity($datas['activity'])
+            ->setCodeTransaction($datas['codeTransaction'])
+            ->setCurrency($this->getEntityManager()
+                ->getRepository(Currency::class)
+                ->find($datas['currencyId']));
+
+
+        $status = $datas['status'];
+        $rate = $datas['rate'];
+        $datePredicted = $datas['datePredicted'];
+        $datePayment = $datas['datePayment'];
+
+        if( $datePayment )
+            $payment->setDatePayment(new \DateTime($datePayment));
+        else
+            $payment->setDatePayment(null);
+
+        if( $datePredicted )
+            $payment->setDatePredicted(new \DateTime($datePredicted));
+        else
+            $payment->setDatePredicted(null);
+
+        $payment->setRate($rate)
+            ->setStatus($status);
+
+
+        $this->getEntityManager()->flush($payment);
+        $this->getNotificationService()->generatePaymentsNotifications($payment);
+        return $payment;
+    }
+
+    public function getListActivityPaymentByActivity( Activity $activity, $format = 'array' ){
+        $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
+            ->addSelect('c')
+            ->innerJoin('p.activity', 'a')
+            ->leftJoin('p.currency', 'c')
+            ->where('a.id = :idactivity')
+            ->orderBy('p.status', 'DESC')
+            ->addOrderBy('p.datePayment');
+
+        $qb->setParameter('idactivity', $activity->getId());
+
+
+        $hydratationMode = Query::HYDRATE_OBJECT;
+        if( $format == 'array' ){
+            $hydratationMode = Query::HYDRATE_ARRAY;
+        }
+
+        $result = $qb->getQuery()->getResult($hydratationMode);
+
+        return $result;
+    }
+
+    public function getListActivityPayment( $search = '', $page = 1 ){
+        $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
+            ->addSelect('c, COALESCE(p.datePredicted, p.datePayment) as HIDDEN dateSort')
+            ->innerJoin('p.activity', 'a')
+            ->innerJoin('p.currency', 'c')
+            ->addOrderBy('dateSort', 'DESC');
+
+        if( $search ){
+            if( !$this->specificSearch($search, $qb, 'a') ){
+                $ids = $this->getProjectGrantService()->search($search);
+                $qb->andWhere('a.id in (:ids)')
+                    ->setParameter('ids', $ids);
+            }
+        }
+
+        return [
+            'search' => $search,
+            'payments' => new UnicaenDoctrinePaginator($qb, $page, 50)
+        ];
     }
 
     ////////////////////////////////////////////////////////////////////////////

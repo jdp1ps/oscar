@@ -19,6 +19,9 @@ use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityPaymentForm;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
+use Oscar\Service\NotificationService;
+use Oscar\Service\PersonService;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Request;
 use Zend\View\Model\JsonModel;
@@ -26,12 +29,77 @@ use Zend\View\Model\ViewModel;
 
 class ActivityPaymentController extends AbstractOscarController
 {
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
+    /** @var ProjectGrantService */
+    private $projectGrantService;
+
+    /** @var NotificationService */
+    private $notificationService;
+
+    /** @var PersonService */
+    private $personService;
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(): ProjectGrantService
+    {
+        return $this->projectGrantService;
+    }
+
+    /**
+     * @param ProjectGrantService $projectGrantService
+     */
+    public function setProjectGrantService(ProjectGrantService $projectGrantService): void
+    {
+        $this->projectGrantService = $projectGrantService;
+    }
+
+    /**
+     * @return NotificationService
+     */
+    public function getNotificationService(): NotificationService
+    {
+        return $this->notificationService;
+    }
+
+    /**
+     * @param NotificationService $notificationService
+     */
+    public function setNotificationService(NotificationService $notificationService): void
+    {
+        $this->notificationService = $notificationService;
+    }
+
+    /**
+     * @return PersonService
+     */
+    public function getPersonService(): PersonService
+    {
+        return $this->personService;
+    }
+
+    /**
+     * @param PersonService $personService
+     */
+    public function setPersonService(PersonService $personService): void
+    {
+        $this->personService = $personService;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
+
+
+
+
+
     /**
      * Retourne les versements à venir dans les 15 jours à venir.
      */
     public function incomeAction()
     {
-        $payments = $this->getActivityService()->getPaymentsIncoming();
+        $payments = $this->getProjectGrantService()->getPaymentsIncoming();
         return [
             'payments' => $payments,
             'getDate' => 'getDatePredicted'
@@ -43,7 +111,7 @@ class ActivityPaymentController extends AbstractOscarController
      */
     public function lateAction()
     {
-        $payments = $this->getActivityService()->getPaymentsLate();
+        $payments = $this->getProjectGrantService()->getPaymentsLate();
         return [
             'payments' => $payments,
             'getDate' => 'getDatePredicted'
@@ -55,7 +123,7 @@ class ActivityPaymentController extends AbstractOscarController
      */
     public function differenceAction()
     {
-        $payments = $this->getActivityService()->getPaymentsDifference();
+        $payments = $this->getProjectGrantService()->getPaymentsDifference();
         return [
             'payments' => $payments,
             'getDate' => 'getDatePredicted'
@@ -75,110 +143,68 @@ class ActivityPaymentController extends AbstractOscarController
         // Appel avec une idActivity => appel ajax depuis la fiche détaillée de
         // l'activité.
         if( $idActivity ) {
-            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
-            $this->getOscarUserContext()->check(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
+            $activity = $this->getProjectGrantService()->getActivityById($idActivity);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
 
             $method = $this->getHttpXMethod();
-            $this->getLogger()->info($method);
+            $this->getLoggerService()->info($method);
 
-            if( $method != "GET" && !$this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity) ){
+            if( $method != "GET" && !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity) ){
                 $this->getResponseBadRequest("Vous ne disposez pas des droits suffisants pour gérer les versements");
             }
 
             switch($method){
                 case 'DELETE':
-                    /** @var ActivityPayment $payment */
-                    $payment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($this->params()->fromQuery('id'));
-                    $this->getNotificationService()->purgeNotificationPayment($payment);
-                    $this->getEntityManager()->remove($payment);
-                    $this->getEntityManager()->flush();
+                    try {
+                        /** @var ActivityPayment $payment */
+                        $payment = $this->getProjectGrantService()->getActivityPaymentById($this->params()->fromQuery('id'));
+                        $this->getNotificationService()->purgeNotificationPayment($payment);
+                        $this->getProjectGrantService()->deleteActivityPayment($payment);
+                        return $this->getResponseOk("Le versement a bien été supprimé");
+                    } catch ( \Exception $e ){
+                        $this->getLoggerService()->error($e->getTraceAsString());
+                        return $this->getResponseInternalError(sprintf(_("Impossible de supprimer le payment : %s"), $e->getMessage()));
+                    }
 
-                    return $this->getResponseOk("Le versement a bien été supprimé");
 
                 case 'PUT':
                     return $this->getResponseDeprecated();
 
 
                 case 'POST':
-
                     $action = $this->params()->fromPost('action');
 
+                    $postedDatas = [
+                        'amount'            => $this->params()->fromPost('amount'),
+                        'activity'          => $activity,
+                        'comment'           => $this->params()->fromPost('comment'),
+                        'codeTransaction'   => $this->params()->fromPost('codeTransaction'),
+                        'currencyId'        => $this->params()->fromPost('currencyId'),
+                        'status'            => $this->params()->fromPost('status'),
+                        'rate'              => $this->params()->fromPost('rate'),
+                        'datePredicted'     => $this->params()->fromPost('datePredicted'),
+                        'datePayment'       => $this->params()->fromPost('datePayment'),
+                    ];
+
+
                     if( $action == 'create' ){
-                        /** @var ActivityPayment $payment */
-                        $payment = new ActivityPayment();
-                        $this->getEntityManager()->persist($payment);
-
-                        $payment->setAmount($this->params()->fromPost('amount'))
-                            ->setComment($this->params()->fromPost('comment'))
-                            ->setActivity($activity)
-                            ->setCodeTransaction($this->params()->fromPost('codeTransaction'))
-                            ->setCurrency($this->getEntityManager()
-                                ->getRepository(Currency::class)
-                                ->find($this->params()->fromPost('currencyId')));
-
-
-                        $status = $this->params()->fromPost('status');
-                        $rate = $this->params()->fromPost('rate');
-                        $datePredicted = $this->params()->fromPost('datePredicted');
-                        $datePayment = $this->params()->fromPost('datePayment');
-
-                        if( $datePayment )
-                            $payment->setDatePayment(new \DateTime($datePayment));
-                        else
-                            $payment->setDatePayment(null);
-
-                        if( $datePredicted )
-                            $payment->setDatePredicted(new \DateTime($datePredicted));
-                        else
-                            $payment->setDatePredicted(null);
-
-                        $payment->setRate($rate)
-                            ->setStatus($status);
-
-
-                        $this->getEntityManager()->flush($payment);
-                        $this->getNotificationService()->generatePaymentsNotifications($payment);
-                        return $this->getResponseOk("Le versement a bien été ajouté");
+                        try {
+                            $this->getProjectGrantService()->addNewActivityPayment($postedDatas);
+                            return $this->getResponseOk("Le versement a bien été ajouté");
+                        } catch ( \Exception $e ){
+                            $this->getLoggerService()->error($e->getTraceAsString());
+                            return $this->getResponseInternalError(sprintf(_("Impossible d'ajouter le payment : %s"), $e->getMessage()));
+                        }
                     }
 
                     elseif ($action == 'update' ){
-                        /** @var ActivityPayment $payment */
-                        $payment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($this->params()->fromPost('id'));
-
-                        $payment->setAmount($this->params()->fromPost('amount'))
-                            ->setComment($this->params()->fromPost('comment'))
-                            ->setActivity($activity)
-                            ->setCodeTransaction($this->params()->fromPost('codeTransaction'))
-                            ->setCurrency($this->getEntityManager()
-                                ->getRepository(Currency::class)
-                                ->find($this->params()->fromPost('currencyId')));
-
-
-                        $status = $this->params()->fromPost('status');
-                        $rate = $this->params()->fromPost('rate');
-                        $datePredicted = $this->params()->fromPost('datePredicted');
-                        $datePayment = $this->params()->fromPost('datePayment');
-
-                        if( $datePayment )
-                            $payment->setDatePayment(new \DateTime($datePayment));
-                        else
-                            $payment->setDatePayment(null);
-
-                        if( $datePredicted )
-                            $payment->setDatePredicted(new \DateTime($datePredicted));
-                        else
-                            $payment->setDatePredicted(null);
-
-                        $payment->setRate($rate)
-                            ->setStatus($status);
-
-
-                        $this->getEntityManager()->flush($payment);
-
-                        $this->getNotificationService()->purgeNotificationPayment($payment);
-                        $this->getNotificationService()->generatePaymentsNotifications($payment);
-
-                        return $this->getResponseOk("Le versement a bien été modifié");
+                        try {
+                            $postedDatas['id'] = $this->params()->fromPost('id');
+                            $this->getProjectGrantService()->updateActivityPayment($postedDatas);
+                            return $this->getResponseOk("Le versement a bien été modifié");
+                        } catch ( \Exception $e ){
+                            return $this->getResponseInternalError(sprintf(_("Impossible de modifier le payment : %s"), $e->getMessage()));
+                        }
                     }
 
                     else {
@@ -186,42 +212,15 @@ class ActivityPaymentController extends AbstractOscarController
                     }
             }
 
-            $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
-                ->addSelect('c')
-                ->innerJoin('p.activity', 'a')
-                ->leftJoin('p.currency', 'c')
-                ->where('a.id = :idactivity')
-                ->orderBy('p.status', 'DESC')
-                ->addOrderBy('p.datePayment');
-            $entities = $qb->setParameter('idactivity', $idActivity)->getQuery()->getResult(Query::HYDRATE_ARRAY);
-            $view = new JsonModel($entities);
+            $view = new JsonModel($this->getProjectGrantService()->getListActivityPaymentByActivity($activity));
 
             return $view;
         }
 
         // Page "Liste"
         else {
-
             $search = $this->params()->fromQuery('q', '');
-
-            $qb = $this->getEntityManager()->getRepository(ActivityPayment::class)->createQueryBuilder('p')
-                ->addSelect('c, COALESCE(p.datePredicted, p.datePayment) as HIDDEN dateSort')
-                ->innerJoin('p.activity', 'a')
-                ->innerJoin('p.currency', 'c')
-                ->addOrderBy('dateSort', 'DESC');
-
-            if( $search ){
-                if( !$this->getActivityService()->specificSearch($search, $qb, 'a') ){
-                    $ids = $this->getActivityService()->search($search);
-                    $qb->andWhere('a.id in (:ids)')
-                        ->setParameter('ids', $ids);
-                }
-            }
-
-            return [
-                'search' => $search,
-                'payments' => new UnicaenDoctrinePaginator($qb, $page, 50)
-            ];
+            return $this->getProjectGrantService()->getListActivityPayment($search, $page);
         }
 
     }
@@ -233,7 +232,7 @@ class ActivityPaymentController extends AbstractOscarController
 
         /** @var Activity $entity */
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity);
         if( !$entity ){
             return $this->getResponseNotFound("Activité non trouvée");
         }
@@ -265,7 +264,7 @@ class ActivityPaymentController extends AbstractOscarController
 
         /** @var Activity $entity */
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity);
 
         if( !$entity ){
             return $this->getResponseNotFound("Activité non trouvée");
@@ -293,14 +292,14 @@ class ActivityPaymentController extends AbstractOscarController
         $response = new JsonModel();
 
         /** @var ActivityPayment $entity */
-        $entity = $this->getActivityService()->getActivityPayment($this->params()->fromRoute('id'));
+        $entity = $this->getProjectGrantService()->getActivityPayment($this->params()->fromRoute('id'));
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity->getActivity());
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity->getActivity());
 
         if( $request->getMethod() === "DELETE" ){
             try {
                 $entity->getActivity()->touch();
-                $this->getActivityService()->deleteActivityPayment($entity);
+                $this->getProjectGrantService()->deleteActivityPayment($entity);
                 $this->getEntityManager()->flush();
 
                 $this->getActivityLogService()->addUserInfo(
@@ -362,7 +361,7 @@ class ActivityPaymentController extends AbstractOscarController
         $idActivity = $this->params()->fromRoute('idactivity');
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity);
 
 
         $entity = new ActivityPayment();
