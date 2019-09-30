@@ -1889,15 +1889,18 @@ class TimesheetController extends AbstractOscarController
 
             if( $timesheetId ){
                 $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
+
+                if( !$timesheet ){
+                    continue;
+                }
+
                 $credentials = $this->getTimesheetService()->resolveTimeSheetCredentials($timesheet, $person);
 
                 if( !$credentials['editable'] ){
                     return $this->getResponseInternalError("Vous n'avez pas le droit de modififier le créneau");
                 }
 
-                if( !$timesheet ){
-                    return $this->getResponseInternalError("Ce créneau n'existe plus.");
-                }
+
 
             } else {
                 $timesheet = new TimeSheet();

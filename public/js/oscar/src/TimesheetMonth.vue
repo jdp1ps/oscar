@@ -417,7 +417,7 @@
                         <i class="icon-angle-left"></i> Revenir au mois
                     </a>
 
-                    <h4>Jours (OK): </h4>
+                    <h4>Jours : </h4>
                     <article class="card xs total repport-item"
                              :class="{ 'locked': d.locked, 'closed': d.closed, 'excess': d.duration > ts.dayExcess }"
                              v-for="d in selectedWeek.days"
@@ -639,26 +639,28 @@
                         </section>
                     </div>
 
-                    <nav class="buttons-bar">
-                        <button class="btn btn-primary" style="margin-left: auto" v-if="ts.submitable"
-                                :class="{ 'disabled': !ts.submitable, 'enabled': ts.submitable }"
-                                @click="sendMonth()">
-                            <i class="icon-upload"></i>
-                            <i class="icon-spinner animate-spin" v-show="loading"></i>
-                            <span>
+
+                </div>
+                <nav class="buttons-bar">
+                    <button class="btn btn-primary" style="margin-left: auto" v-if="ts.submitable"
+                            :class="{ 'disabled': !ts.submitable, 'enabled': ts.submitable }"
+                            @click="sendMonth()">
+                        <i class="icon-upload"></i>
+                        <i class="icon-spinner animate-spin" v-show="loading"></i>
+                        <span>
                                     Soumettre mes déclarations
                                 </span>
-                        </button>
-                        <button class="btn btn-primary" v-else-if="ts.hasConflict" @click="reSendPeriod()">
-                            Réenvoyer
-                        </button>
-                        <span v-else>
+                    </button>
+                    <button class="btn btn-primary" v-else-if="ts.hasConflict" @click="reSendPeriod()">
+                        Réenvoyer
+                    </button>
+                    <span v-else>
                             Vous ne pouvez pas soumettre cette période<br>
                                 <small>{{ ts.submitableInfos }}</small>
                             </span>
-                    </nav>
-                </div>
+                </nav>
             </section>
+
         </section>
     </section>
 </template>
