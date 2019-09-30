@@ -12,7 +12,6 @@
                 <strong><?= $person ?></strong>
                 pour
                 <strong><?= $periodLabel ?></strong>
-                ( TEST )
             </h1>
         </th>
     </tr>
@@ -311,7 +310,6 @@
     </tr>
     </tfoot>
 </table>
-    <pre><?php print_r($declarations) ?></pre>
 <?php if( isset($outputFormat) && $outputFormat == 'html' ): ?>
     <a href="?action=export2&out=pdf&period=<?= $period ?>&personid=<?= $_REQUEST['personid'] ?>">Télécharger le PDF</a>
 <?php endif; ?>
