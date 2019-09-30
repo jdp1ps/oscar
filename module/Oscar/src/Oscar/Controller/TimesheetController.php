@@ -1805,6 +1805,10 @@ class TimesheetController extends AbstractOscarController
             $year = (integer)$start->format('Y');
             $dayKey = $start->format('Y-n-j');
 
+            if( $duration <= 0 ){
+                throw new OscarException("Vous ne pouvez pas ajouter de créneau avec une durée nulle");
+            }
+
             // Récupération des jours bloqués
             $locked = $this->getTimesheetService()->getLockedDays($year, $month);
 
@@ -1993,7 +1997,11 @@ class TimesheetController extends AbstractOscarController
 
                     // Ajout des créneaux
                     if( $action == 'add' ){
-                        return $this->sendTimesheet($currentPerson);
+                        try {
+                            return $this->sendTimesheet($currentPerson);
+                        } catch (\Exception $e){
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
                     }
 
                     $datas = json_decode($this->params()->fromPost('datas'));

@@ -48,21 +48,21 @@
                                         <i class="icon-archive"></i> {{ wp.label }}
                                     </th>
                                     <td v-for="d in ts.days">
-                                        <strong v-if="wp.days[d.i]">{{ wp.days[d.i] | duration2 }}</strong>
+                                        <strong v-if="wp.days[d.i]">{{ wp.days[d.i] | duration2(d.dayLength) }}</strong>
                                         <small v-else>-</small>
                                     </td>
                                     <th class="total">
-                                        {{ wp.total | duration2  }}
+                                        {{ wp.total | duration2(monthLength)  }}
                                     </th>
                                 </tr>
 
                                 <tr class="activity-line-total">
                                     <th colspan="2">Total</th>
                                     <td v-for="d in ts.days">
-                                        <strong v-if="activity.days[d.i]">{{ activity.days[d.i] | duration2 }}</strong>
+                                        <strong v-if="activity.days[d.i]">{{ activity.days[d.i] | duration2(d.dayLength) }}</strong>
                                         <small v-else>-</small>
                                     </td>
-                                    <th class="total">{{ activity.total | duration2 }}</th>
+                                    <th class="total">{{ activity.total | duration2(monthLength) }}</th>
                                 </tr>
 
                             </template>
@@ -88,11 +88,11 @@
                                     <textarea v-model="screensend[hl.code]"></textarea>
                                 </td>
                                 <td v-for="d in ts.days">
-                                    <strong v-if="hl.days[d.i]">{{ hl.days[d.i] | duration2 }}</strong>
+                                    <strong v-if="hl.days[d.i]">{{ hl.days[d.i] | duration2(d.dayLength) }}</strong>
                                     <small v-else>-</small>
                                 </td>
                                 <th class="total">
-                                    {{ hl.total | duration2  }}
+                                    {{ hl.total | duration2(monthLength)  }}
                                 </th>
                             </tr>
                         </tbody>
@@ -109,11 +109,11 @@
                                      =
                                 </th>
                                 <td v-for="d in ts.days">
-                                    <strong v-if="d.total">{{ d.total | duration2 }}</strong>
+                                    <strong v-if="d.total">{{ d.total | duration2(d.dayLength) }}</strong>
                                     <small v-else>-</small>
                                 </td>
                                 <th class="total">
-                                    {{ ts.total | duration2  }}
+                                    {{ ts.total | duration2(monthLength)  }}
                                 </th>
                             </tr>
                         </tbody>

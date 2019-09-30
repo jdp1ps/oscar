@@ -17,6 +17,7 @@
 
         <?php if( $declarationInHours == true ): ?>
         Vue.filter('duration2', function(duree, total){
+
             let h = Math.floor(duree);
             let m = Math.round((duree - h)*60);
             if( m < 10 ) m = '0'+m;
@@ -24,6 +25,7 @@
         });
         <?php else: ?>
         Vue.filter('duration2', function(duree, total){
+            if( total == undefined ) return duree;
             if( duree == 0 ) return 0.0;
             return Math.round( 100 / total * duree) + "%";
         });
