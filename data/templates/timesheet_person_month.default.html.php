@@ -12,6 +12,7 @@
                 <strong><?= $person ?></strong>
                 pour
                 <strong><?= $periodLabel ?></strong>
+                ( TEST )
             </h1>
         </th>
     </tr>
@@ -108,7 +109,7 @@
                     $value = 0.0;
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataGroup['days']) ){
-                        $value = $this->duration($dataGroup['days'][$dayKey]);
+                        $value = $dataGroup['days'][$dayKey];
                         $class = "value";
                     }
                     if( $day['locked'] ){
@@ -132,7 +133,7 @@
                     $value = 0.0;
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataOtherGroup['days']) ){
-                        $value = number_format($dataOtherGroup['days'][$dayKey], 2);
+                        $value = $dataOtherGroup['days'][$dayKey];
                         $class = "value";
                     }
                     if( $day['locked'] ){
@@ -155,7 +156,7 @@
             $class = 'empty';
             if( array_key_exists($dayKey, $totalGroup['research']['days']) ){
                 $value = $totalGroup['research']['days'][$dayKey]; //number_format($dataOtherGroup['days'][$dayKey], 2);
-                if( $value ) $value = number_format($value, 2);
+                if( $value ) $value = $value;
                 $class = "value";
             }
             if( $day['locked'] ){
@@ -181,7 +182,7 @@
                     $value = '0';
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataOtherGroup['days']) ){
-                        $value = number_format($dataOtherGroup['days'][$dayKey], 2);
+                        $value = $dataOtherGroup['days'][$dayKey];
                         $class = "value";
                     }
                     if( $day['locked'] ){
@@ -205,7 +206,7 @@
                     $value = '0';
                     $class = 'empty';
                     if( array_key_exists($dayKey, $active['days']) ){
-                        $value = number_format($active['days'][$dayKey], 2);
+                        $value = $active['days'][$dayKey];
                         $class = "value";
                     }
                     if( $day['locked'] ){
@@ -213,7 +214,7 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $value ?></td>
+                    <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $this->duration($value) ?></td>
                 <?php endforeach; ?>
                 <td class="soustotal" style="border-bottom: solid black 2px"><?= $this->duration($active['total']) ?></td>
             </tr>
@@ -310,6 +311,7 @@
     </tr>
     </tfoot>
 </table>
+    <pre><?php print_r($declarations) ?></pre>
 <?php if( isset($outputFormat) && $outputFormat == 'html' ): ?>
     <a href="?action=export2&out=pdf&period=<?= $period ?>&personid=<?= $_REQUEST['personid'] ?>">Télécharger le PDF</a>
 <?php endif; ?>
