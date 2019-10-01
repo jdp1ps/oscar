@@ -21,8 +21,10 @@ class MilestoneServiceFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $s = new MilestoneService();
-        $s->setServiceLocator($container);
+        $s->setLoggerService($container->get('Logger'));
+        $s->setOscarUserContextService($container->get(OscarUserContext::class));
         $s->setEntityManager($container->get(EntityManager::class));
+        $s->setNotificationService($container->get(NotificationService::class));
         return $s;
     }
 }

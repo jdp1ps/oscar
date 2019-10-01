@@ -31,6 +31,9 @@ class ActivityDateController extends AbstractOscarController
     /** @var ProjectGrantService */
     private $projectGrantService;
 
+    /** @var MilestoneService */
+    private $milestoneService;
+
     /**
      * @return ProjectGrantService
      */
@@ -47,33 +50,27 @@ class ActivityDateController extends AbstractOscarController
         $this->projectGrantService = $projectGrantService;
     }
 
-
-
     /**
      * @return MilestoneService
      */
-    protected function getMilestoneService(){
-        return $this->getServiceLocator()->get('MilestoneService');
+    public function getMilestoneService(): MilestoneService
+    {
+        return $this->milestoneService;
     }
 
-
-    public function indexAction()
+    /**
+     * @param MilestoneService $milestoneService
+     */
+    public function setMilestoneService(MilestoneService $milestoneService): void
     {
-        $idActivity = $this->params()->fromRoute('idactivity');
-        if ($idActivity) {
-            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
-            $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
-            $view = new JsonModel(array_values($this->getActivityService()->getMilestones($idActivity)));
-            return $view;
-        } else {
-            $qb = $this->getEntityManager()->createQueryBuilder()
-                ->select('m')
-                ->from(ActivityDate::class, 'm')
-                ->orderBy('m.dateStart', 'DESC');
-            return [
-                'milestones' => $qb->getQuery()->getResult()
-            ];
-        }
+        $this->milestoneService = $milestoneService;
+    }
+
+    public function indexAction(){
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_MILESTONE_SHOW);
+        return [
+            'milestones' => $this->getMilestoneService()->getMilestones()
+        ];
     }
 
     /**
@@ -84,123 +81,112 @@ class ActivityDateController extends AbstractOscarController
     public function activityAction()
     {
         try {
-            $idActivity = $this->params()->fromRoute('idactivity');
-            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
-            $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
+            $activity = $this->getProjectGrantService()->getActivityById($this->params()->fromRoute('idactivity'));
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
 
-            if ($idActivity) {
+            $method = $this->getHttpXMethod();
 
-                $method = $this->getHttpXMethod();
+            $types = $this->getMilestoneService()->getMilestoneTypes('array');
 
-                $types = $this->getEntityManager()->createQueryBuilder()
-                    ->select('t')
-                    ->orderBy('t.facet')
-                    ->addOrderBy('t.label')
-                    ->from(DateType::class, 't')
-                    ->getQuery()
-                    ->getResult(Query::HYDRATE_ARRAY);
+            $milestones = array_values($this->getProjectGrantService()->getMilestones($activity->getId()));
 
-                $milestones = array_values($this->getActivityService()->getMilestones($idActivity));
+            // Données envoyées
+            $data = [
+                'milestones' => $milestones,
+                'types' => $types,
+                'creatable' => $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity)
+            ];
 
-                // Données envoyées
-                $data = [
-                    'milestones' => $milestones,
-                    'types' => $types,
-                    'creatable' => $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity)
-                ];
+            try {
+                switch ($method) {
+                    case 'DELETE':
+                        $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+                        $milestone = $this->getMilestoneService()->getMilestone($this->params()->fromQuery('id'));
+                        $this->getMilestoneService()->deleteMilestoneById($milestone->getId());
+                        $this->getActivityLogService()->addUserInfo(
+                            sprintf("a supprimé le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
+                            'Activity',
+                            $milestone->getActivity()->getId()
+                        );
+                        return $this->getResponseOk("Jalon supprimé");
+                        break;
 
-                try {
-                    switch ($method) {
-                        case 'DELETE':
-                                $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
-                                $milestone = $this->getMilestoneService()->getMilestone($this->params()->fromQuery('id'));
-                                $this->getMilestoneService()->deleteMilestoneById($milestone->getId());
-                                $this->getActivityLogService()->addUserInfo(
-                                    sprintf("a supprimé le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
-                                    'Activity',
-                                    $milestone->getActivity()->getId()
-                                );
-                                return $this->getResponseOk("Jalon supprimé");
-                            break;
+                    case 'GET':
+                        // Default
+                        break;
 
-                        case 'GET':
-                            // Default
-                            break;
+                    case 'POST':
+                        $action = $this->params()->fromPost('action', 'update');
 
-                        case 'POST':
-                            $action = $this->params()->fromPost('action', 'update');
+                        if( $action == 'create' ){
+                            $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+                            $milestone = $this->getMilestoneService()->createFromArray([
+                                'type_id' => $_POST['type'],
+                                'comment' => $_POST['comment'],
+                                'dateStart' => $_POST['dateStart'],
+                                'activity_id' => $activity->getId(),
+                            ]);
+                            $this->getActivityLogService()->addUserInfo(
+                                sprintf("a ajouté le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
+                                'Activity',
+                                $milestone->getActivity()->getId()
+                            );
+                            return $this->ajaxResponse($milestone->toArray());
+                        }
 
-                            if( $action == 'create' ){
-                                $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
-                                $milestone = $this->getMilestoneService()->createFromArray([
-                                    'type_id' => $_POST['type'],
-                                    'comment' => $_POST['comment'],
-                                    'dateStart' => $_POST['dateStart'],
-                                    'activity_id' => $activity->getId(),
-                                ]);
-                                $this->getActivityLogService()->addUserInfo(
-                                    sprintf("a ajouté le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
-                                    'Activity',
-                                    $milestone->getActivity()->getId()
-                                );
-                                return $this->ajaxResponse($milestone->toArray());
-                            }
+                        $milestone = $this->getMilestoneService()->getMilestone($this->params()->fromPost('id'));
 
-                            $milestone = $this->getMilestoneService()->getMilestone($this->params()->fromPost('id'));
+                        ////////////////////////////////////////////////////////////
+                        // Marquer le jalon comme terminé / non-terminé
+                        if ($action == 'valid' || $action == 'unvalid' || $action == 'inprogress') {
+                            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
 
-                            ////////////////////////////////////////////////////////////
-                            // Marquer le jalon comme terminé / non-terminé
-                            if ($action == 'valid' || $action == 'unvalid' || $action == 'inprogress') {
-                                $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
+                            $this->getActivityLogService()->addUserInfo(
+                                sprintf("a modifié l'état du jalon %s dans  l'activité %s pour %s", $milestone, $milestone->getActivity()->log(), $action),
+                                'Activity',
+                                $milestone->getActivity()->getId()
+                            );
 
-                                $this->getActivityLogService()->addUserInfo(
-                                    sprintf("a modifié l'état du jalon %s dans  l'activité %s pour %s", $milestone, $milestone->getActivity()->log(), $action),
-                                    'Activity',
-                                    $milestone->getActivity()->getId()
-                                );
+                            $milestone = $this->getMilestoneService()->setMilestoneProgression($milestone, $action);
+                            return $this->ajaxResponse($milestone->toArray());
 
-                                $milestone = $this->getMilestoneService()->setMilestoneProgression($milestone, $action);
-                                return $this->ajaxResponse($milestone->toArray());
+                        } // Mise à jour
+                        else if ($action == 'update') {
 
-                            } // Mise à jour
-                            else if ($action == 'update') {
+                            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+                            $typeId = $this->params()->fromPost('type');
+                            $comment = $this->params()->fromPost('comment');
+                            $date = $this->params()->fromPost('dateStart');
 
-                                $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
-                                $typeId = $this->params()->fromPost('type');
-                                $comment = $this->params()->fromPost('comment');
-                                $date = $this->params()->fromPost('dateStart');
+                            $milestone = $this->getMilestoneService()->updateFromArray($milestone, [
+                                'type_id' => $typeId,
+                                'comment' => $comment,
+                                'dateStart' => $date,
+                            ]);
 
-                                $milestone = $this->getMilestoneService()->updateFromArray($milestone, [
-                                   'type_id' => $typeId,
-                                   'comment' => $comment,
-                                   'dateStart' => $date,
-                                ]);
+                            $this->getActivityLogService()->addUserInfo(
+                                sprintf("a modifié le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
+                                'Activity',
+                                $milestone->getActivity()->getId()
+                            );
 
-                                $this->getActivityLogService()->addUserInfo(
-                                    sprintf("a modifié le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
-                                    'Activity',
-                                    $milestone->getActivity()->getId()
-                                );
+                            return $this->ajaxResponse($milestone->toArray());
+                        } else {
+                            return $this->getResponseBadRequest("Cette action n'est pas supportée.");
+                        }
+                        break;
+                    default:
+                        return $this->getResponseBadRequest("Protocol bullshit");
 
-                                return $this->ajaxResponse($milestone->toArray());
-                            } else {
-                                return $this->getResponseBadRequest("Cette action n'est pas supportée.");
-                            }
-                            break;
-                        default:
-                            return $this->getResponseBadRequest("Protocol bullshit");
-
-                    }
-                } catch (\Exception $e ){
-                    return $this->getResponseInternalError($e->getMessage());
                 }
-
-                $view = new JsonModel($data);
-
-                return $view;
-            } else {
-                return $this->getResponseInternalError();
+            } catch (\Exception $e ){
+                return $this->getResponseInternalError($e->getMessage());
             }
+
+            $view = new JsonModel($data);
+
+            return $view;
+
         }
         catch( UnAuthorizedException $e ){
             return $this->getResponseBadRequest();
@@ -214,15 +200,15 @@ class ActivityDateController extends AbstractOscarController
         $response = new JsonModel();
 
         /** @var ActivityDate $activityDate */
-        $activityDate = $this->getActivityService()->getActivityDate($this->params()->fromRoute('id'));
+        $activityDate = $this->getProjectGrantService()->getActivityDate($this->params()->fromRoute('id'));
 
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activityDate->getActivity());
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activityDate->getActivity());
 
 
         if ($request->getMethod() === "DELETE") {
             try {
                 $activityDate->getActivity()->touch();
-                $this->getActivityService()->deleteActivityDate($activityDate);
+                $this->getProjectGrantService()->deleteActivityDate($activityDate);
                 $this->getActivityLogService()->addUserInfo(
                     sprintf("a supprimé le jalon %s dans  l'activité %s", $activityDate, $activityDate->getActivity()->log()),
                     'Activity',

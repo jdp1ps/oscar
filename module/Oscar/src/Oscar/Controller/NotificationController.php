@@ -26,40 +26,52 @@ use Zend\View\Model\JsonModel;
  */
 class NotificationController extends AbstractOscarController
 {
-    public function testAction()
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /** @var NotificationService */
+    private $notificationService;
+
+    /**
+     * @return NotificationService
+     */
+    public function getNotificationService(): NotificationService
     {
-        throw $this->getResponseBadRequest('INACTIVE FUNCTION');
+        return $this->notificationService;
     }
 
+    /**
+     * @param NotificationService $notificationService
+     */
+    public function setNotificationService(NotificationService $notificationService): void
+    {
+        $this->notificationService = $notificationService;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function historyAction()
     {
-        // $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
-        $personId = $this->getCurrentPerson()->getId();
-
-        /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get('NotificationService');
-
+        $personId = $this->getOscarUserContextService()->getCurrentPerson()->getId();
         try {
             return [
-                'notifications' => $notificationService->getAllNotificationsPerson($personId)
+                'notifications' => $this->getNotificationService()->getAllNotificationsPerson($personId)
             ];
         } catch (\Exception $e ){
-            return $this->getResponseInternalError($e->getMessage()." - " . $e->getTraceAsString());
+            $this->getLoggerService()->error("notifications > history : " . $e->getMessage());
+            return $this->getResponseInternalError(sprintf("Impossible de charger l'historiques des notifications : %s", $e->getMessage()));
         }
     }
 
-
     public function indexAction()
     {
-        if( !$this->getCurrentPerson() ){
+        if( !$this->getOscarUserContextService()->getCurrentPerson() ){
             return [];
         }
         // $this->getOscarUserContext()->check(Privileges::PERSON_NOTIFICATION_MENU);
-        $personId = $this->getCurrentPerson()->getId();
+        $personId = $this->getOscarUserContextService()->getCurrentPerson()->getId();
 
         /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get('NotificationService');
+        $notificationService = $this->getNotificationService();
 
 
         if ($this->getHttpXMethod() == "DELETE") {
@@ -67,7 +79,7 @@ class NotificationController extends AbstractOscarController
             if( $ids ){
                 $ids = explode(',',$ids);
                 try {
-                    $notificationService->deleteNotificationsPersonById($ids, $this->getCurrentPerson());
+                    $notificationService->deleteNotificationsPersonById($ids, $this->getOscarUserContextService()->getCurrentPerson());
                     return $this->getResponseOk('Notifications supprimées');
                 } catch( \Exception $e ){
                     return $this->getResponseInternalError($e->getMessage());

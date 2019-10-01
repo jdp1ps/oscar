@@ -17,15 +17,24 @@ use Oscar\Entity\DateType;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Log\Logger;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUserContextService, UseNotificationService
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+    use UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait, UseNotificationServiceTrait;
 
     public function getMilestonesByActivityId( $idActivity ){
         // Droit d'accès
@@ -34,19 +43,11 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
         return $this->getMiletonesByActivity($activity);
     }
 
-
-    /**
-     * @return OscarUserContext
-     */
-    protected function getOscarUserContext(){
-        return $this->getServiceLocator()->get('OscarUserContext');
-    }
-
     /**
      * @return Person
      */
     public function getCurrentPerson(){
-        return $this->getOscarUserContext()->getCurrentPerson();
+        return $this->getOscarUserContextServiceService()->getCurrentPerson();
     }
 
     /**
@@ -57,14 +58,47 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
         if( $person ){
             return $person->log();
         } else {
-            $dbUser = $this->getOscarUserContext()->getDbUser();
+            $dbUser = $this->getOscarUserContextService()->getUserContext()->getDbUser();
             return 'BD ' . $dbUser->getDisplayName(). '(' . $dbUser->getEmail() . ')';
         }
     }
 
+    /**
+     *
+     * @param string $format
+     * @return mixed
+     */
+    public function getMilestoneTypes($format = 'object'){
+        $hydratationMode = Query::HYDRATE_OBJECT;
+        if( $format == 'array' ){
+            $hydratationMode = Query::HYDRATE_ARRAY;
+        }
+
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('t')
+            ->orderBy('t.facet')
+            ->addOrderBy('t.label')
+            ->from(DateType::class, 't');
+
+        $result = $qb->getQuery()->getResult($hydratationMode);
+
+        return $result;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMilestones(){
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('m')
+            ->from(ActivityDate::class, 'm')
+            ->orderBy('m.dateStart', 'DESC');
+        return $qb->getQuery()->getResult();
+    }
+
     public function getMiletonesByActivity( Activity $activity ){
         /** @var OscarUserContext $oscarUserContext */
-        $oscarUserContext = $this->getServiceLocator()->get('OscarUserContext');
+        $oscarUserContext = $this->getOscarUserContextService();
 
         // Check générale du la visibilité
         $oscarUserContext->check(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
@@ -114,13 +148,6 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
     }
 
     /**
-     * @return Logger
-     */
-    protected function getLogger(){
-        return $this->getServiceLocator()->get('Logger');
-    }
-
-    /**
      * @param $milestoneId
      * @return ActivityDate
      * @throws OscarException
@@ -130,7 +157,7 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
             $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(['id' => $milestoneId]);
         } catch ( \Exception $e ){
             $message = sprintf("Erreur BDD, Impossible de charger le jalon '%s' : %s !", $milestoneId, $e->getMessage());
-            $this->getLogger()->err($message);
+            $this->getLoggerService()->err($message);
             throw new OscarException($message);
         }
         if( !$milestone ){
@@ -243,18 +270,8 @@ class MilestoneService implements ServiceLocatorAwareInterface, EntityManagerAwa
             ->setType($type);
         $this->getEntityManager()->flush($milestone);
 
-        /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get('NotificationService');
-
-        $notificationService->generateMilestoneNotifications($milestone);
+        $this->getNotificationService()->generateMilestoneNotifications($milestone);
 
         return $milestone;
-    }
-
-    /**
-     * @return NotificationService
-     */
-    protected function getNotificationService(){
-        return $this->getServiceLocator()->get('NotificationService');
     }
 }

@@ -80,10 +80,10 @@ class ActivityLogService implements UseOscarUserContextService, UseEntityManager
         if ($this->_currentPerson === null) {
             if ($this->getLdapUser()) {
                 $this->_currentPerson = "ldapuser";
-                $login = $this->$this->getLdapUser()->getSupannAliasLogin();
+                $login = $this->getLdapUser()->getSupannAliasLogin();
             }
-            elseif ( $this->$this->getDbUser() ){
-                $login = $this->$this->getDbUser()->getUsername();
+            elseif ( $this->getDbUser() ){
+                $login = $this->getDbUser()->getUsername();
             }
             if ($login) {
                 $this->_currentPerson = $this->getEntityManager()->getRepository(Person::class)->findOneBy([

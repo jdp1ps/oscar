@@ -12,6 +12,7 @@ namespace Oscar\Controller;
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
+use Oscar\Service\NotificationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -27,8 +28,7 @@ class NotificationControllerFactory implements FactoryInterface
         $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setEntityManager($container->get(EntityManager::class));
+        $c->setNotificationService($container->get(NotificationService::class));
         return $c;
     }
-
-
 }

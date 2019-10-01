@@ -801,7 +801,6 @@ return array(
     'service_manager' => array(
         'invokables' => [
             'AccessResolverService' => AccessResolverService::class,
-            'MilestoneService' => \Oscar\Service\MilestoneService::class,
             'MailingService' => \Oscar\Service\MailingService::class,
             'SessionService' => \Oscar\Service\SessionService::class,
         ],
@@ -813,6 +812,7 @@ return array(
             \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             'Logger' => \Oscar\Service\LoggerServiceFactory::class,
+            \Oscar\Service\MilestoneService::class => \Oscar\Service\MilestoneServiceFactory::class,
             \Oscar\Service\NotificationService::class => \Oscar\Service\NotificationServiceFactory::class,
             \Oscar\Service\OrganizationService::class => \Oscar\Service\OrganizationServiceFactory::class,
             \Oscar\Service\OscarConfigurationService::class => \Oscar\Service\OscarConfigurationServiceFactory::class,
