@@ -108,7 +108,7 @@
                     $value = 0.0;
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataGroup['days']) ){
-                        $value = $this->duration($dataGroup['days'][$dayKey]);
+                        $value = $dataGroup['days'][$dayKey];
                         $class = "value";
                     }
                     if( $day['locked'] ){
@@ -116,9 +116,9 @@
                         $value = $value == 0 ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?> research"><?= $value ?></td>
+                    <td class="<?= $class ?> research"><?= $this->duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal research"><?= number_format($dataGroup['total'],2) ?></td>
+                <td class="soustotal research"><?= $this->duration($dataGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -132,7 +132,7 @@
                     $value = 0.0;
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataOtherGroup['days']) ){
-                        $value = number_format($dataOtherGroup['days'][$dayKey], 2);
+                        $value = $dataOtherGroup['days'][$dayKey];
                         $class = "value";
                     }
                     if( $day['locked'] ){
@@ -140,9 +140,9 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?> research"><?= $value ?></td>
+                    <td class="<?= $class ?> research"><?= $this->duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal research"><?= number_format($dataOtherGroup['total'],2) ?></td>
+                <td class="soustotal research"><?= $this->duration($dataGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -155,7 +155,7 @@
             $class = 'empty';
             if( array_key_exists($dayKey, $totalGroup['research']['days']) ){
                 $value = $totalGroup['research']['days'][$dayKey]; //number_format($dataOtherGroup['days'][$dayKey], 2);
-                if( $value ) $value = number_format($value, 2);
+                if( $value ) $value = $value;
                 $class = "value";
             }
             if( $day['locked'] ){
@@ -163,9 +163,9 @@
                 $value = $value == '0' ? '.' : $value;
             }
             ?>
-            <td class="<?= $class ?> research"><?= $value ?></td>
+            <td class="<?= $class ?> research"><?= $this->duration($value) ?></td>
         <?php endforeach; ?>
-        <td class="soustotal research"><?= number_format($totalGroup['research']['total'],2) ?></td>
+        <td class="soustotal research"><?= $this->duration($totalGroup['research']['total']) ?></td>
     </tr>
 
     <tr class="group">
@@ -181,7 +181,7 @@
                     $value = '0';
                     $class = 'empty';
                     if( array_key_exists($dayKey, $dataOtherGroup['days']) ){
-                        $value = number_format($dataOtherGroup['days'][$dayKey], 2);
+                        $value = $dataOtherGroup['days'][$dayKey];
                         $class = "value";
                     }
                     if( $day['locked'] ){
@@ -189,9 +189,9 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $value ?></td>
+                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $this->duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= number_format($dataOtherGroup['total'],2) ?></td>
+                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= $this->duration($dataOtherGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -205,7 +205,7 @@
                     $value = '0';
                     $class = 'empty';
                     if( array_key_exists($dayKey, $active['days']) ){
-                        $value = number_format($active['days'][$dayKey], 2);
+                        $value = $active['days'][$dayKey];
                         $class = "value";
                     }
                     if( $day['locked'] ){
@@ -213,9 +213,9 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $value ?></td>
+                    <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $this->duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal" style="border-bottom: solid black 2px"><?= number_format($active['total'],2) ?></td>
+                <td class="soustotal" style="border-bottom: solid black 2px"><?= $this->duration($active['total']) ?></td>
             </tr>
     <tr class="group">
         <th class="" colspan="<?= $width ?>">Inactivité</th>
@@ -237,9 +237,9 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $value ?></td>
+                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $this->duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= number_format($dataOtherGroup['total'],2) ?></td>
+                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= $this->duration($dataOtherGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -254,13 +254,13 @@
                 $class = "value";
             }
             if( $day['locked'] ){
-                $class = 'lock';
+                $class = 'lock empty';
                 $value = $value == '0' ? '.' : $value;
             }
             ?>
-            <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $value ?></td>
+            <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $this->duration($value) ?></td>
         <?php endforeach; ?>
-        <td class="total" style="border-bottom: solid black 2px"><?= number_format($total,2) ?></td>
+        <td class="total" style="border-bottom: solid black 2px"><?= $this->duration($total) ?></td>
     </tr>
 
     </tbody>
