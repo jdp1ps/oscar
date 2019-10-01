@@ -523,7 +523,8 @@
                 </a>
             <?php endif; ?>
         <?php endforeach; ?>
-            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
+            <?php /* TODO Gestion des référents depuis la fiche activité ****
+ if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
             <div id="referents"></div>
             <script>
                 require(['vue', 'vue-resource', 'ReferentUI'], function(Vue, VueResource, ReferentUI){
@@ -535,7 +536,7 @@
                     })
                 });
             </script>
-        <?php endif; ?>
+        <?php endif; /*****/ ?>
     <?php endif; ?>
 
 <?php endif; ?>
