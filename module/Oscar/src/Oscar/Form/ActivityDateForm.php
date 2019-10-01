@@ -6,6 +6,7 @@ use Doctrine\ORM\Query;
 use Oscar\Entity\DateType;
 use Oscar\Hydrator\ActivityDateFormHydrator;
 use Oscar\Hydrator\DateTypeFormHydrator;
+use Oscar\Service\ProjectGrantService;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Form\Element\Select;
@@ -14,14 +15,31 @@ use Zend\InputFilter\InputFilterProviderInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class ActivityDateForm extends Form implements ServiceLocatorAwareInterface
+class ActivityDateForm extends Form
 {
-    use ServiceLocatorAwareTrait;
+    /** @var ProjectGrantService */
+    private $projectGrantService;
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(): ProjectGrantService
+    {
+        return $this->projectGrantService;
+    }
+
+    /**
+     * @param ProjectGrantService $projectGrantService
+     */
+    public function setProjectGrantService(ProjectGrantService $projectGrantService): void
+    {
+        $this->projectGrantService = $projectGrantService;
+    }
 
     public function init()
     {
         $hydrator = new ActivityDateFormHydrator();
-        $hydrator->setServiceLocator($this->getServiceLocator());
+        $hydrator->setProjectGrantService($this->getProjectGrantService());
         $this->setHydrator($hydrator);
 
         $this->add(array(
@@ -53,7 +71,7 @@ class ActivityDateForm extends Form implements ServiceLocatorAwareInterface
 
 
 
-        $types = $this->getServiceLocator()->get('ActivityService')->getDateTypesSelect();
+        $types = $this->getProjectGrantService()->getDateTypesSelect();
 
         // Types de date
         $dateType = new Select();

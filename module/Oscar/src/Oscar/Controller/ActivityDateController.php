@@ -224,8 +224,8 @@ class ActivityDateController extends AbstractOscarController
         } else {
             $form = new ActivityDateForm();
             $idActivity = $this->params()->fromRoute('idactivity');
-            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
-            $form->setServiceLocator($this->getServiceLocator());
+            $activity = $this->getProjectGrantService()->getActivityById($idActivity);
+            $form->setProjectGrantService($this->getProjectGrantService());
 
             $form->init();
             $form->bind($activityDate);
@@ -270,7 +270,7 @@ class ActivityDateController extends AbstractOscarController
         $activityDate->setActivity($activity)
             ->setDateStart(new \DateTime());
 
-        $form->setServiceLocator($this->getServiceLocator());
+        $form->setProjectGrantService($this->getProjectGrantService());
         $form->setObject($activityDate);
         $form->init();
 

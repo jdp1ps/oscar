@@ -318,7 +318,7 @@ class ActivityPaymentController extends AbstractOscarController
             /** @var ActivityPaymentForm $form */
             $form = new ActivityPaymentForm();
             $form->setAttribute('action', $this->url()->fromRoute(null, ['idactivity' => $entity->getActivity()->getId(), 'id' => $entity->getId()]));
-            $form->setServiceLocator($this->getServiceLocator());
+            $form->setProjectGrantService($this->getProjectGrantService());
             $form->init();
             $form->bind($entity);
             if( $request->isPost() ){
@@ -326,7 +326,7 @@ class ActivityPaymentController extends AbstractOscarController
                 if($form->isValid()){
                     $entity->getActivity()->touch();
 
-                    $this->getEntityManager()->flush();
+                    $this->getProjectGrantService()->getEntityManager()->flush();
                     $this->getActivityLogService()->addUserInfo(
                         sprintf(" a modifié le %s dans l'activité %s", $entity, $entity->getActivity()->log()),
                         'Activity',

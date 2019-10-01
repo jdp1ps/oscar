@@ -32,10 +32,14 @@ use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -49,9 +53,9 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  *  - Collaborateurs
  *  - Membres de projet/organisation.
  */
-class PersonService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService
+class PersonService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService, UseNotificationService, UseProjectGrantService
 {
-    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait;
+    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait, UseNotificationServiceTrait, UseProjectGrantServiceTrait;
 
 
     /**
@@ -59,22 +63,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      */
     public function getRepository(){
         return $this->getEntityManager()->getRepository(Person::class);
-    }
-
-    /**
-     * @return NotificationService
-     */
-    protected function getNotificationService(){
-        return $this->getServiceLocator()->get('NotificationService');
-    }
-
-
-    /**
-     * @return ActivityLogService
-     */
-    protected function getActivityLogService()
-    {
-        return $this->getServiceLocator()->get('ActivityLogService');
     }
 
     /**
@@ -100,7 +88,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     {
         static $searchStrategy;
         if( $searchStrategy === null ){
-            $opt = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('strategy.person.search_engine');
+            $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.person.search_engine');
             $class = new \ReflectionClass($opt['class']);
             $searchStrategy = $class->newInstanceArgs($opt['params']);
         }
@@ -476,7 +464,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $settings['frequency'] = [];
             }
 
-            $settings['frequency'] = array_merge($settings['frequency'], $this->getServiceLocator()->get('OscarConfig')->getConfiguration('notifications.fixed'));
+            $settings['frequency'] = array_merge($settings['frequency'], $this->getOscarConfigurationService()->getConfiguration('notifications.fixed'));
 
             if( in_array($cron, $settings['frequency']) ){
                 $this->mailNotificationsPerson($person);
@@ -488,7 +476,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     public function mailNotificationsPerson( $person, $debug = true ){
         /** @var ConfigurationParser $configOscar */
-        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+        $configOscar = $this->getOscarConfigurationService();
 
         if( $debug ){
             $log = function($msg){
@@ -807,7 +795,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $coWorkersIds = $personRepository->getPersonIdsInOrganizations($orgaIds);
 
         // Inclue les personnes impliquées dans des activités ?
-        $listPersonIncludeActivityMember = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('listPersonnel');
+        $listPersonIncludeActivityMember = $this->getOscarConfigurationService()->getConfiguration('listPersonnel');
         if( $listPersonIncludeActivityMember == 3 ) {
             $engaged = $personRepository->getPersonIdsForOrganizationsActivities($orgaIds);
 
@@ -876,7 +864,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         if( $search ){
             /** @var ProjectGrantService $activityService */
-            $activityService = $this->getServiceLocator()->get("ActivityService");
+            $activityService = $this->getProjectGrantService();
 
             $ids = $activityService->search($search);
 

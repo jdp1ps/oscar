@@ -19,9 +19,12 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\ProjectRepository;
+use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectForm;
 use Oscar\Form\ProjectIdentificationForm;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ProjectGrantService;
+use Oscar\Service\ProjectService;
 use Oscar\Utils\EntityHydrator;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
@@ -34,39 +37,47 @@ use ZfcUser\Entity\UserInterface;
 
 class ProjectController extends AbstractOscarController
 {
+    /** @var ProjectService */
+    private $projectService;
+
+    /** @var ProjectGrantService */
+    private $projectGrantService;
+
     /**
-     * @return \Doctrine\ORM\EntityRepository
+     * @return ProjectService
      */
-    protected function getRepository()
+    public function getProjectService(): ProjectService
     {
-        return $this->getEntityManager()->getRepository('Oscar\Entity\Project');
+        return $this->projectService;
     }
 
     /**
-     *
-     * @return \Oscar\Service\ProjectService
+     * @param ProjectService $projectService
      */
-    protected function getProjectService()
+    public function setProjectService(ProjectService $projectService): void
     {
-        return $this->getServiceLocator()->get('ProjectService');
+        $this->projectService = $projectService;
+    }
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(): ProjectGrantService
+    {
+        return $this->projectGrantService;
+    }
+
+    /**
+     * @param ProjectGrantService $projectGrantService
+     */
+    public function setProjectGrantService(ProjectGrantService $projectGrantService): void
+    {
+        $this->projectGrantService = $projectGrantService;
     }
 
     ////////////////////////////////////////////////////////////////////////////
     // ACTIONS                                                                //
     ////////////////////////////////////////////////////////////////////////////
-
-    public function rebuildIndexAction()
-    {
-        $projects = $this->getEntityManager()->getRepository('Oscar\Entity\Project')->all();
-        $serviceSearch = $this->getServiceLocator()->get('Search');
-        $serviceSearch->resetIndex();
-
-        foreach ($projects as $project) {
-            $serviceSearch->addNewProject($project);
-        }
-
-        return 'INDEX REBUILD';
-    }
 
     protected function htmlProjectDetail($project)
     {
@@ -79,28 +90,27 @@ class ProjectController extends AbstractOscarController
         return $view;
     }
 
-    protected function getRouteProject()
+    protected function getRouteProject($throw = false)
     {
-        $id = $this->params()->fromRoute('id', 0);
-        return $this->getRepository(Project::class)->find($id);
-
+        $id = $this->params()->fromRoute('id', null);
+        if( !$id && $throw ){
+            throw new OscarException(sprintf("Impossible de charger le projet, paramètre ID manquant."));
+        }
+        try {
+            return $this->getProjectService()->getProject($id);
+        } catch ( \Exception $e ){
+            if( $throw ){
+                throw new OscarException(sprintf("Impossible de charger le projet(%s)", $id));
+            }
+            return null;
+        }
     }
 
     public function deleteAction()
     {
         $p = $this->getRouteProject();
-        try {
-            $this->getEntityManager()->remove($p);
-            $this->getEntityManager()->flush();
-            //$this->getProjectService()->
-        } catch (\Exception $e) {
-            die(sprintf("Impossible de supprimer le projet %s : %s", $p, $e->getMessage()));
-        }
-        $this->getActivityLogService()->addUserInfo(
-            sprintf("a supprimé le projet %s", $p->log())
-        );
+        $this->getProjectService()->deleteProject($p);
         $this->redirect()->toRoute('project/mine');
-
     }
 
     /**
@@ -117,17 +127,10 @@ class ProjectController extends AbstractOscarController
 
         try {
             $id = $this->params()->fromRoute('id', 0);
-            $documents = $this->getEntityManager()->getRepository(ContractDocument::class)
-                ->createQueryBuilder('d')
-                ->innerJoin('d.grant', 'a')
-                ->innerJoin('a.project', 'p', Query\Expr\Join::WITH, 'p.id = :id')
-                ->orderBy('d.dateUpdoad', 'DESC')
-                ->setParameters(['id' => $id])
-                ->getQuery()->getResult();
-            $entity = $this->getProjectRepository()->getSingle($id,
-                $queryOptions);
+            $entity = $this->getProjectService()->getProject($id, true);
+            $documents = $this->getProjectService()->getProjectDocuments($entity);
 
-            $this->getOscarUserContext()->check(Privileges::PROJECT_SHOW, $entity);
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_SHOW, $entity);
 
             if ($this->getRequest()->isXmlHttpRequest()) {
                 return $this->htmlProjectDetail($entity);
@@ -135,7 +138,7 @@ class ProjectController extends AbstractOscarController
 
 
             return array(
-                'access' => $this->getAccessResolverService()->getProjectAccess($entity),
+               // 'access' => $this->getAccessResolverService()->getProjectAccess($entity),
                 'project' => $entity,
                 'documents' => $documents,
                 'logs' => $this->getActivityLogService()->projectActivities($entity->getId())->getQuery()->getResult()
@@ -196,12 +199,13 @@ class ProjectController extends AbstractOscarController
             $form->setData($request->getPost());
 
             if($form->isValid()) {
-                $this->getEntityManager()->persist($entity);
+                $em = $this->getProjectService()->getEntityManager();
+                $em->persist($entity);
 
                 $entity->setDateUpdated(new \DateTime())
                     ->setDateCreated(new \DateTime());
 
-                $this->getEntityManager()->flush();
+                $em->flush();
 
                 $this->getActivityLogService()->addUserInfo(
                     sprintf('a créé le projet %s', $entity->log()),
@@ -232,8 +236,6 @@ class ProjectController extends AbstractOscarController
      */
     public function currentUserProjectsAction()
     {
-
-
         return [
 
         ];
@@ -242,9 +244,9 @@ class ProjectController extends AbstractOscarController
     public function currentUserStructureProjectsAction()
     {
         /** @var Person|null $currentPerson */
-        $currentPerson = $this->getOscarUserContext()->getCurrentPerson();
+        $currentPerson = $this->getOscarUserContextService()->getCurrentPerson();
 
-        $roles = $this->getOscarUserContext()->getRoleIdPrimary();
+        $roles = $this->getOscarUserContextService()->getRoleIdPrimary();
 
         $structures = $this->getEntityManager()->getRepository(OrganizationPerson::class)->createQueryBuilder('s')
             ->where('s.person = :person AND s.role IN(:roles)')
@@ -270,13 +272,13 @@ class ProjectController extends AbstractOscarController
             }
             /** @var ProjectPartner $partner */
             foreach($organizationPerson->getOrganization()->getProjects() as $partner ){
-                if( in_array($partner->getRole(), $this->getOscarUserContext()->getRolesOrganisationLeader()))
+                if( in_array($partner->getRole(), $this->getOscarUserContextService()->getRolesOrganisationLeader()))
                     $projects[$orgaId]['projects'][] = $partner->getProject();
             }
             /** @var ActivityOrganization $activityPartner */
             foreach($organizationPerson->getOrganization()->getActivities() as $activityPartner ){
                 // Cas des activités sans projet
-                if( $activityPartner->getActivity()->getProject() && in_array($activityPartner->getRole(), $this->getOscarUserContext()->getRolesOrganisationLeader()) )
+                if( $activityPartner->getActivity()->getProject() && in_array($activityPartner->getRole(), $this->getOscarUserContextService()->getRolesOrganisationLeader()) )
                     $projects[$orgaId]['projects'][] = $activityPartner->getActivity()->getProject();
             }
         }
@@ -298,9 +300,9 @@ class ProjectController extends AbstractOscarController
     {
         $id = $this->params()->fromRoute('id', 0);
 
-        $entity = $this->getEntityManager()->getRepository(Project::class)->find($id);
+        $entity = $this->getProjectService()->getProject($id, true);
 
-        $this->getOscarUserContext()->check(Privileges::PROJECT_EDIT, $entity);
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_EDIT, $entity);
 
         $form = new ProjectIdentificationForm();
         $form->init();
@@ -312,7 +314,7 @@ class ProjectController extends AbstractOscarController
 
             if( $form->isValid() ){
                 $entity->touch();
-                $this->getEntityManager()->flush($entity);
+                $this->getProjectService()->getEntityManager()->flush($entity);
                 $this->getActivityLogService()->addUserInfo(
                     sprintf("a mis à jour les informations du projet %s.", $entity->log()),
                     $this->getDefaultContext(),
@@ -606,10 +608,10 @@ class ProjectController extends AbstractOscarController
     public function addActivitiesAction()
     {
         $projectId = $this->params()->fromRoute('id');
-        $project = $this->getProjectById($projectId);
-
-        if( !$project ){
-            return $this->getResponseInternalError(sprintf("Projet de destination '%s' inconnu.", $projectId));
+        try {
+            $project = $this->getProjectService()->getProject($projectId, true);
+        } catch (\Exception $e ){
+            return $this->getResponseInternalError($e->getMessage());
         }
 
         $activitiesIds = $this->params()->fromPost('activities_ids', []);

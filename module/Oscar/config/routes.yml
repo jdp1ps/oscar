@@ -325,6 +325,7 @@ project:
             action: index
     may_terminate: true
     child_routes:
+
         ### Projets de l'utilisateur connecté
         structure:
             type: literal

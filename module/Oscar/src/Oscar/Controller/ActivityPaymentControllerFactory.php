@@ -11,6 +11,7 @@ namespace Oscar\Controller;
 
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
+use Oscar\Service\ActivityLogService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
@@ -27,6 +28,7 @@ class ActivityPaymentControllerFactory implements FactoryInterface
         $c = new ActivityPaymentController();
         $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $c->setLoggerService($container->get('Logger'));
+        $c->setActivityLogService($container->get(ActivityLogService::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setProjectGrantService($container->get(ProjectGrantService::class));
         $c->setNotificationService($container->get(NotificationService::class));

@@ -8,13 +8,17 @@
  */
 namespace Oscar\Service;
 
+use Doctrine\ORM\Query\Expr\Join;
 use Monolog\Logger;
+use mysql_xdevapi\Exception;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
+use Oscar\Exception\OscarException;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -315,12 +319,35 @@ class ProjectService implements ServiceLocatorAwareInterface, EntityManagerAware
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getProject($id)
+    public function getProject($id, $throw=false)
     {
-        return $this->getBaseQuery()->where('p.id = :id')
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getSingleResult();
+        try {
+            $project = $this->getBaseQuery()->where('p.id = :id')
+                ->setParameter('id', $id)
+                ->getQuery()
+                ->getSingleResult();
+            return $project;
+        } catch ( \Exception $e ){
+            if( $throw ){
+                throw new OscarException(sprintf("Impossible de charger le projet(%s) : %s", $id, $e->getMessage()));
+            }
+            return null;
+        }
+    }
+
+    /**
+     * @param Project $project
+     * @return bool
+     * @throws OscarException
+     */
+    public function deleteProject( Project $project ){
+        try {
+            $this->getEntityManager()->remove($project);
+            $this->getEntityManager()->flush($project);
+            return true;
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf("Impossible de supprimer le projet %s : %s", $p, $e->getMessage()));
+        }
     }
 
     /**
@@ -333,6 +360,24 @@ class ProjectService implements ServiceLocatorAwareInterface, EntityManagerAware
     {
         return $this->getBaseQuery()->where('g.codeEOTP = :eotp')
             ->setParameter('eotp', $eotp);
+    }
+
+
+    /**
+     * @param Project $project
+     * @return ContractDocument[]
+     */
+    public function getProjectDocuments( Project $project )
+    {
+        $documents = $this->getEntityManager()->getRepository(ContractDocument::class)
+            ->createQueryBuilder('d')
+            ->innerJoin('d.grant', 'a')
+            ->innerJoin('a.project', 'p', Join::WITH, 'p.id = :id')
+            ->orderBy('d.dateUpdoad', 'DESC')
+            ->setParameters(['id' => $project->getId()])
+            ->getQuery()->getResult();
+
+        return $documents;
     }
 
     ////////////////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Utils\DateTimeUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -21,9 +22,26 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\Hydrator\HydratorInterface;
 
-class ActivityPaymentFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
+class ActivityPaymentFormHydrator implements HydratorInterface
 {
-    use ServiceLocatorAwareTrait;
+    /** @var ProjectGrantService */
+    private $projectGrantService;
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(): ProjectGrantService
+    {
+        return $this->projectGrantService;
+    }
+
+    /**
+     * @param ProjectGrantService $projectGrantService
+     */
+    public function setProjectGrantService(ProjectGrantService $projectGrantService): void
+    {
+        $this->projectGrantService = $projectGrantService;
+    }
 
     /**
      * @param ActivityPayment $object
@@ -66,6 +84,6 @@ class ActivityPaymentFormHydrator implements HydratorInterface, ServiceLocatorAw
      * @return null|Currency
      */
     protected function getCurrency( $id ){
-        return $this->getServiceLocator()->get('ActivityService')->getCurrency($id);
+        return $this->getProjectGrantService()->getCurrency($id);
     }
 }

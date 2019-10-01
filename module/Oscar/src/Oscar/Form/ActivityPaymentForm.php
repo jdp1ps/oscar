@@ -17,14 +17,30 @@ use Zend\InputFilter\InputFilterProviderInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class ActivityPaymentForm extends Form implements ServiceLocatorAwareInterface, InputFilterProviderInterface, ElementInterface
+class ActivityPaymentForm extends Form implements InputFilterProviderInterface, ElementInterface
 {
-    use ServiceLocatorAwareTrait;
+    private $projectGrantService;
+
+    /**
+     * @return mixed
+     */
+    public function getProjectGrantService() :ProjectGrantService
+    {
+        return $this->projectGrantService;
+    }
+
+    /**
+     * @param mixed $projectGrantService
+     */
+    public function setProjectGrantService( ProjectGrantService $projectGrantService): void
+    {
+        $this->projectGrantService = $projectGrantService;
+    }
 
     public function init()
     {
         $hydrator = new ActivityPaymentFormHydrator();
-        $hydrator->setServiceLocator($this->getServiceLocator());
+        $hydrator->setProjectGrantService($this->getProjectGrantService());
         $this->setHydrator($hydrator);
 
         $this->add(array(
@@ -98,9 +114,7 @@ class ActivityPaymentForm extends Form implements ServiceLocatorAwareInterface, 
         ]);
 
         // Types de date
-        /** @var ProjectGrantService $s */
-        $s = $this->getServiceLocator()->get('ActivityService');
-        $currencies = $s->getCurrenciesSelect();
+        $currencies = $this->getProjectGrantService()->getCurrenciesSelect();
         $this->add([
             'name'   => 'currency',
             'options' => [

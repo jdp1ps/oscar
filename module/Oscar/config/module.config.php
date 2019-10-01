@@ -818,7 +818,7 @@ return array(
             \Oscar\Service\OscarConfigurationService::class => \Oscar\Service\OscarConfigurationServiceFactory::class,
             \Oscar\Service\OscarUserContext::class => \Oscar\Service\OscarUserContextFactory::class,
             \Oscar\Service\PersonService::class => \Oscar\Service\PersonServiceFactory::class,
-            ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
+            \Oscar\Service\ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
             \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
             'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class,
@@ -840,7 +840,6 @@ return array(
     // On doit déclaré ici les Controlleurs 'invoquables'
     'controllers' => array(
         'invokables' => array(
-            'Project' => \Oscar\Controller\ProjectController::class,
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
@@ -859,6 +858,7 @@ return array(
             'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
             'Notification' => \Oscar\Controller\NotificationControllerFactory::class,
             'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
+            'Project' => \Oscar\Controller\ProjectControllerFactory::class,
             'Public'    => \Oscar\Controller\PublicControllerFactory::class,
             'Timesheet' => \Oscar\Controller\TimesheetControllerFactory::class,
             'Person' => \Oscar\Controller\PersonControllerFactory::class,
