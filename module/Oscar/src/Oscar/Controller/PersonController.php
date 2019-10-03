@@ -40,8 +40,14 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
+use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Traits\UseProjectService;
+use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Traits\UseTimesheetService;
 use Oscar\Traits\UseTimesheetServiceTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
@@ -49,9 +55,9 @@ use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
-class PersonController extends AbstractOscarController implements UsePersonService, UseTimesheetService
+class PersonController extends AbstractOscarController implements UsePersonService, UseTimesheetService, UseProjectService, UseProjectGrantService, UseNotificationService
 {
-    use UsePersonServiceTrait, UseTimesheetServiceTrait;
+    use UsePersonServiceTrait, UseTimesheetServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -633,7 +639,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                     /** @var TimesheetService $timesheetService */
                     $timesheetService = $this->getTimesheetService();
 
-                    $models = $this->getConfiguration('oscar.scheduleModeles');
+                    $models = $this->getOscarConfigurationService()->getConfiguration('scheduleModeles');
 
                     if( $method == "POST" ){
                         $this->getOscarUserContextService()->check(Privileges::PERSON_MANAGE_SCHEDULE);
@@ -854,7 +860,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             'projects'  => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
             'activities' => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),
             'traces' => $traces,
-            'connectors' =>array_keys($this->getConfiguration('oscar.connectors.person'))
+            'connectors' =>array_keys($this->getOscarConfigurationService()->getConfiguration('connectors.person'))
         ];
     }
 
@@ -982,7 +988,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         $form = new \Oscar\Form\PersonForm();
 
         try {
-            $connectors =  $this->getConfiguration('oscar.connectors.person');
+            $connectors =  $this->getOscarConfigurationService()->getConfiguration('connectors.person');
             $personConnector = array_keys($connectors);
 
 

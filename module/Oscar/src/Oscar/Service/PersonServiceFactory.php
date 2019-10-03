@@ -19,9 +19,7 @@ class PersonServiceFactory extends AbstractServiceFactory implements FactoryInte
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $s = new PersonService();
-
-        return $this->init($s, $container);
+        $s = $this->init($s, $container);
+        return $s;
     }
-
-
 }

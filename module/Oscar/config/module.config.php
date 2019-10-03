@@ -394,6 +394,16 @@ return array(
         'router' => array(
             'routes' => array(
 
+                'oscar_execute_command' => [
+                    'options' => [
+                        'route' => 'exec <command>',
+                        'defaults' => [
+                            'controller' => 'Console',
+                            'action' => 'execute',
+                        ],
+                    ]
+                ],
+
                 'notification_activity_generate' => [
                     'options' => [
                         'route' => 'oscar notifications:generate <idactivity>',
@@ -797,8 +807,15 @@ return array(
     'router' => array(
         'routes' => $conf->parse(file_get_contents(__DIR__ . '/routes.yml'))
     ),
+
     // Service (métier)
     'service_manager' => array(
+
+//        // Automatisation ???
+//        'abstract_factories' => [
+//            \Oscar\Factory\OscarFactory::class
+//        ],
+
         'invokables' => [
             'AccessResolverService' => AccessResolverService::class,
             'MailingService' => \Oscar\Service\MailingService::class,
@@ -843,7 +860,6 @@ return array(
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
-            'Console' => \Oscar\Controller\ConsoleController::class,
             'Enroll' => \Oscar\Controller\EnrollController::class,
             'ActivityType' => \Oscar\Controller\ActivityTypeController::class,
             'DateType' => \Oscar\Controller\DateTypeController::class,
@@ -856,6 +872,7 @@ return array(
             'ActivityDate' => \Oscar\Controller\ActivityDateControllerFactory::class,
             'ActivityPayment' => \Oscar\Controller\ActivityPaymentControllerFactory::class,
             'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
+            \Oscar\Controller\ConsoleController::class => \Oscar\Factory\OscarUseFactory::class,
             'Notification' => \Oscar\Controller\NotificationControllerFactory::class,
             'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
             'Project' => \Oscar\Controller\ProjectControllerFactory::class,
@@ -863,6 +880,9 @@ return array(
             'Timesheet' => \Oscar\Controller\TimesheetControllerFactory::class,
             'Person' => \Oscar\Controller\PersonControllerFactory::class,
             'WorkPackage' => \Oscar\Controller\WorkPackageControllerFactory::class,
+        ],
+        "aliases" => [
+            'Console' => \Oscar\Controller\ConsoleController::class
         ]
     ),
 

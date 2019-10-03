@@ -37,6 +37,7 @@ use Oscar\Entity\RoleOrganization;
 use Oscar\Entity\RoleRepository;
 use Oscar\Entity\WorkPackage;
 use Oscar\Exception\OscarException;
+use Oscar\Factory\OscarUseFactory;
 use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
@@ -46,6 +47,26 @@ use Oscar\Service\MailingService;
 use Oscar\Service\NotificationService;
 use Oscar\Strategy\Search\ActivityElasticSearch;
 use Oscar\Strategy\Search\ActivityZendLucene;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Traits\UseProjectService;
+use Oscar\Traits\UseProjectServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\ActivityCSVToObject;
 use Oscar\Utils\PhpPolyfill;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -57,9 +78,46 @@ use Zend\Console\Prompt\Line;
 use Zend\Console\Prompt\Password;
 use Zend\Console\Prompt\Select;
 use Zend\Crypt\Password\Bcrypt;
+use Zend\Mvc\Console\Controller\AbstractConsoleController;
 
-class ConsoleController extends AbstractOscarController
+class ConsoleController extends AbstractConsoleController implements UseEntityManager, UsePersonService, UseProjectService, UseProjectGrantService, UseNotificationService, UseOscarConfigurationService, UseOscarUserContextService, UseLoggerService, UseActivityLogService, UseServiceContainer
 {
+    use UseEntityManagerTrait, UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait,
+        UseOscarConfigurationServiceTrait, UseOscarUserContextServiceTrait, UseLoggerServiceTrait, UseActivityLogServiceTrait, UseServiceContainerTrait;
+
+
+    /// GENERIC
+    public function executeAction(){
+
+        // Récupération de la commande sous la forme
+        // package:sous-package:classe-a-trouver > Oscar\Command\Package\SousPackage\ClasseATrouverCommand
+        $command =  $this->params()->fromRoute('command');
+
+        // Extraction de la classe hypothétique depuis la commande
+        $class = 'Oscar\Command';
+        foreach ( explode(':', $command) as $w ){
+            $class .= '\\';
+            foreach (explode('-', $w) as $sw) {
+                $class .= ucfirst($sw);
+            }
+        }
+        $class.='Command';
+
+        if( !class_exists($class) ){
+            throw new OscarException("La commande '$class' n'existe pas !");
+        } else {
+            $reflexionClass = new \ReflectionClass($class);
+            $args = [];
+            foreach ($reflexionClass->getConstructor()->getParameters() as $param) {
+                $args[] = $this->getServiceContainer()->get($param->getClass()->name);
+            }
+            var_dump($args);
+
+        }
+
+        //$this->
+
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     ///
@@ -403,7 +461,7 @@ class ConsoleController extends AbstractOscarController
         $id = $this->params('idactivity');
 
         /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get('NotificationService');
+        $notificationService = $this->getNotificationService();
 
         if ($id == 'all') {
             $notificationService->generateNotificationsActivities(true);
@@ -539,7 +597,7 @@ class ConsoleController extends AbstractOscarController
         $this->checkModule('json');
         $this->checkModule('ldap', 'warn');
         $this->checkModule('mbstring');
-        $this->checkModule('mcrypt');
+//        $this->checkModule('mcrypt');
         $this->checkModule('openssl');
         $this->checkModule('pdo_pgsql');
         $this->checkModule('posix', 'warn');
@@ -1659,39 +1717,11 @@ class ConsoleController extends AbstractOscarController
         }
     }
 
-
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///
-    /// CADUCQUE
-    ///
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /**
-     * @deprecated
-     * @throws \Exception
-     */
-    public function shuffleAction()
-    {
-        throw new \Exception("Fonctionnalité dépréciée");
-    }
-
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// CONSOLE
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /**
-     * @return AdapterInterface
-     */
-    protected function getConsole()
-    {
-        return $this->getServiceLocator()->get('console');
-    }
 
     /**
      * @param $msg Succes à afficher

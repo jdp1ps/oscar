@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "17f405d34815d3bedf8efde2ef550f5c",
+    "content-hash": "84e8b34681753882f0eff9622c4f9c88",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -159,16 +159,16 @@
         },
         {
             "name": "doctrine/annotations",
-            "version": "v1.7.0",
+            "version": "v1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "fa4c4e861e809d6a1103bd620cce63ed91aedfeb"
+                "reference": "904dca4eb10715b92569fbcd79e201d5c349b6bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/fa4c4e861e809d6a1103bd620cce63ed91aedfeb",
-                "reference": "fa4c4e861e809d6a1103bd620cce63ed91aedfeb",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/904dca4eb10715b92569fbcd79e201d5c349b6bc",
+                "reference": "904dca4eb10715b92569fbcd79e201d5c349b6bc",
                 "shasum": ""
             },
             "require": {
@@ -177,7 +177,7 @@
             },
             "require-dev": {
                 "doctrine/cache": "1.*",
-                "phpunit/phpunit": "^7.5@dev"
+                "phpunit/phpunit": "^7.5"
             },
             "type": "library",
             "extra": {
@@ -223,7 +223,7 @@
                 "docblock",
                 "parser"
             ],
-            "time": "2019-08-08T18:11:40+00:00"
+            "time": "2019-10-01T18:55:10+00:00"
         },
         {
             "name": "doctrine/cache",
@@ -990,16 +990,16 @@
         },
         {
             "name": "doctrine/orm",
-            "version": "v2.6.3",
+            "version": "v2.6.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/orm.git",
-                "reference": "434820973cadf2da2d66e7184be370084cc32ca8"
+                "reference": "b52ef5a1002f99ab506a5a2d6dba5a2c236c5f43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/434820973cadf2da2d66e7184be370084cc32ca8",
-                "reference": "434820973cadf2da2d66e7184be370084cc32ca8",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/b52ef5a1002f99ab506a5a2d6dba5a2c236c5f43",
+                "reference": "b52ef5a1002f99ab506a5a2d6dba5a2c236c5f43",
                 "shasum": ""
             },
             "require": {
@@ -1014,9 +1014,8 @@
                 "symfony/console": "~3.0|~4.0"
             },
             "require-dev": {
-                "doctrine/coding-standard": "^1.0",
-                "phpunit/phpunit": "^6.5",
-                "squizlabs/php_codesniffer": "^3.2",
+                "doctrine/coding-standard": "^5.0",
+                "phpunit/phpunit": "^7.5",
                 "symfony/yaml": "~3.4|~4.0"
             },
             "suggest": {
@@ -1042,16 +1041,16 @@
             ],
             "authors": [
                 {
+                    "name": "Guilherme Blanco",
+                    "email": "guilhermeblanco@gmail.com"
+                },
+                {
                     "name": "Roman Borschel",
                     "email": "roman@code-factory.org"
                 },
                 {
                     "name": "Benjamin Eberlei",
                     "email": "kontakt@beberlei.de"
-                },
-                {
-                    "name": "Guilherme Blanco",
-                    "email": "guilhermeblanco@gmail.com"
                 },
                 {
                     "name": "Jonathan Wage",
@@ -1068,7 +1067,7 @@
                 "database",
                 "orm"
             ],
-            "time": "2018-11-20T23:46:46+00:00"
+            "time": "2019-09-20T14:30:26+00:00"
         },
         {
             "name": "doctrine/persistence",
@@ -1353,16 +1352,16 @@
         },
         {
             "name": "elasticsearch/elasticsearch",
-            "version": "v7.2.2",
+            "version": "v7.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/elastic/elasticsearch-php.git",
-                "reference": "eefeaa8decab4056d6457d179147cd885faf6653"
+                "reference": "f8b5d2beeeb22a5a59aabb183b5bcd7e70878d2f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/eefeaa8decab4056d6457d179147cd885faf6653",
-                "reference": "eefeaa8decab4056d6457d179147cd885faf6653",
+                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/f8b5d2beeeb22a5a59aabb183b5bcd7e70878d2f",
+                "reference": "f8b5d2beeeb22a5a59aabb183b5bcd7e70878d2f",
                 "shasum": ""
             },
             "require": {
@@ -1409,7 +1408,7 @@
                 "elasticsearch",
                 "search"
             ],
-            "time": "2019-08-30T08:20:06+00:00"
+            "time": "2019-09-30T12:52:38+00:00"
         },
         {
             "name": "erusev/parsedown",
@@ -3784,11 +3783,11 @@
         },
         {
             "name": "unicaen/app",
-            "version": "3.0.0",
+            "version": "3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://git.unicaen.fr/lib/unicaen/app",
-                "reference": "60f849dad5a25d6acc4eb66f6d5e7945cb54bfd8"
+                "reference": "6daaa57c924d4396557e9487b3d8c7f431a58371"
             },
             "require": {
                 "beberlei/assert": "^2.9",
@@ -3844,15 +3843,15 @@
                 ]
             },
             "description": "Module de base des applications unicaen",
-            "time": "2019-09-16T13:15:55+00:00"
+            "time": "2019-09-27T13:37:16+00:00"
         },
         {
             "name": "unicaen/auth",
-            "version": "3.0.1",
+            "version": "3.0.5",
             "source": {
                 "type": "git",
                 "url": "https://git.unicaen.fr/lib/unicaen/auth",
-                "reference": "7e159b7be6be62e381dd6c2fac58f10f4423b854"
+                "reference": "d42aebe4a75f55536f526e1047e2153bd19397fc"
             },
             "require": {
                 "jasig/phpcas": "^1.3",
@@ -3875,15 +3874,15 @@
                 ]
             },
             "description": "Module d'authentification pour les applications Unicaen",
-            "time": "2019-09-18T12:02:04+00:00"
+            "time": "2019-09-30T13:53:09+00:00"
         },
         {
             "name": "unicaen/bjy-authorize",
-            "version": "3.0.0",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://git.unicaen.fr/lib/unicaen/bjy-authorize",
-                "reference": "d5f887c34e059de39dd875b40ee239fa4967864f"
+                "reference": "3923fc0ec9346abada75bd4f9581c1ec9c41d73b"
             },
             "require": {
                 "doctrine/common": "^2.7",
@@ -3936,7 +3935,7 @@
                 "zf2",
                 "zfc-user"
             ],
-            "time": "2019-09-18T07:15:38+00:00"
+            "time": "2019-09-30T13:42:16+00:00"
         },
         {
             "name": "zendframework/zend-authentication",
@@ -4721,16 +4720,16 @@
         },
         {
             "name": "zendframework/zend-i18n",
-            "version": "2.9.0",
+            "version": "2.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-i18n.git",
-                "reference": "6d69af5a04e1a4de7250043cb1322f077a0cdb7f"
+                "reference": "e17a54b3aee333ab156958f570cde630acee8b07"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-i18n/zipball/6d69af5a04e1a4de7250043cb1322f077a0cdb7f",
-                "reference": "6d69af5a04e1a4de7250043cb1322f077a0cdb7f",
+                "url": "https://api.github.com/repos/zendframework/zend-i18n/zipball/e17a54b3aee333ab156958f570cde630acee8b07",
+                "reference": "e17a54b3aee333ab156958f570cde630acee8b07",
                 "shasum": ""
             },
             "require": {
@@ -4738,7 +4737,7 @@
                 "zendframework/zend-stdlib": "^2.7 || ^3.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7.27 || ^6.5.8 || ^7.1.2",
+                "phpunit/phpunit": "^5.7.27 || ^6.5.14 || ^7.5.16",
                 "zendframework/zend-cache": "^2.6.1",
                 "zendframework/zend-coding-standard": "~1.0.0",
                 "zendframework/zend-config": "^2.6",
@@ -4785,7 +4784,7 @@
                 "i18n",
                 "zf"
             ],
-            "time": "2018-05-16T16:39:13+00:00"
+            "time": "2019-09-30T12:04:37+00:00"
         },
         {
             "name": "zendframework/zend-i18n-resources",
@@ -6133,28 +6132,28 @@
         },
         {
             "name": "zendframework/zend-session",
-            "version": "2.8.6",
+            "version": "2.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-session.git",
-                "reference": "8e67629ba7ddc67e3b03157615156317535bffa7"
+                "reference": "0a0c7ae4d8be608e30ecff714c86164ccca19ca3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-session/zipball/8e67629ba7ddc67e3b03157615156317535bffa7",
-                "reference": "8e67629ba7ddc67e3b03157615156317535bffa7",
+                "url": "https://api.github.com/repos/zendframework/zend-session/zipball/0a0c7ae4d8be608e30ecff714c86164ccca19ca3",
+                "reference": "0a0c7ae4d8be608e30ecff714c86164ccca19ca3",
                 "shasum": ""
             },
             "require": {
                 "php": "^5.6 || ^7.0",
                 "zendframework/zend-eventmanager": "^2.6.2 || ^3.0",
-                "zendframework/zend-stdlib": "^2.7 || ^3.0"
+                "zendframework/zend-stdlib": "^3.2.1"
             },
             "require-dev": {
                 "container-interop/container-interop": "^1.1",
                 "mongodb/mongodb": "^1.0.1",
                 "php-mock/php-mock-phpunit": "^1.1.2 || ^2.0",
-                "phpunit/phpunit": "^5.7.5 || >=6.0.13 <6.5.0",
+                "phpunit/phpunit": "^5.7.27 || ^6.5.14 || ^7.5.16",
                 "zendframework/zend-cache": "^2.6.1",
                 "zendframework/zend-coding-standard": "~1.0.0",
                 "zendframework/zend-db": "^2.7",
@@ -6173,8 +6172,8 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.8.x-dev",
-                    "dev-develop": "2.9.x-dev"
+                    "dev-master": "2.9.x-dev",
+                    "dev-develop": "2.10.x-dev"
                 },
                 "zf": {
                     "component": "Zend\\Session",
@@ -6190,13 +6189,13 @@
             "license": [
                 "BSD-3-Clause"
             ],
-            "description": "manage and preserve session data, a logical complement of cookie data, across multiple page requests by the same client",
+            "description": "Object-oriented interface to PHP sessions and storage",
             "keywords": [
                 "ZendFramework",
                 "session",
                 "zf"
             ],
-            "time": "2019-08-11T19:14:12+00:00"
+            "time": "2019-09-20T12:50:51+00:00"
         },
         {
             "name": "zendframework/zend-stdlib",
