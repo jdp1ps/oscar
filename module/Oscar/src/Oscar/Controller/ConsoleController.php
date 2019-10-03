@@ -111,8 +111,8 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
             foreach ($reflexionClass->getConstructor()->getParameters() as $param) {
                 $args[] = $this->getServiceContainer()->get($param->getClass()->name);
             }
-            var_dump($args);
-
+            $commandInstance = $reflexionClass->newInstanceArgs($args);
+            $commandInstance->execute($this);
         }
 
         //$this->
