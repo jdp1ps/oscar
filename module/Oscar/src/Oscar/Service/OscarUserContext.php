@@ -91,6 +91,35 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         $this->personService = $personService;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// AUTHENTIFICATION
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public function getAuthentifications(array $options){
+
+        $query = $this->getEntityManager()
+            ->getRepository(Authentification::class)
+            ->createQueryBuilder('a')
+            ->select('a.id', 'a.username', 'a.email', 'a.dateLogin', "a.displayName", "p.id as IDPERSON")
+            ->leftJoin(Person::class, 'p', 'WITH', 'p.ladapLogin = a.username');
+
+        $sort = "a.".$options['sort'];
+        if( $sort == 'a.personId' ){
+            $sort = 'p.id';
+        }
+
+        if( array_key_exists('search', $options) ){
+            $query->where('a.username LIKE :search OR a.email LIKE :search OR a.displayName LIKE :search')
+                ->setParameter('search', '%' . $options['search'] . '%');
+        }
+
+        return $query
+            ->addOrderBy($sort, $options['direction'])
+            ->getQuery()->getResult()
+            ;
+    }
+
 
 
 

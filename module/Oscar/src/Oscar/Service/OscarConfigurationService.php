@@ -10,6 +10,7 @@ namespace Oscar\Service;
 
 
 use Oscar\Exception\OscarException;
+use Oscar\OscarVersion;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
@@ -29,6 +30,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function getConfigArray(){
         return $this->getServiceLocator()->get('Config');
+    }
+
+    public function getVersion(){
+        return OscarVersion::getBuild();
     }
 
     /**

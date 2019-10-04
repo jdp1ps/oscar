@@ -25,7 +25,8 @@
     "phpoffice/phpword": "^0.16.0",
     "phpoffice/phpexcel": "^1.8",
     "zendframework/zend-console": "^2.8",
-    "zendframework/zend-mvc-console": "^1.2"
+    "zendframework/zend-mvc-console": "^1.2",
+    "symfony/console": "^4.3"
   },
   "require-dev": {
     "zendframework/zend-developer-tools": "^1.2"
