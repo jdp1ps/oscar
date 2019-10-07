@@ -16,6 +16,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\AuthentificationRepository;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRepository;
@@ -27,6 +28,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
+use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
@@ -91,6 +93,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         $this->personService = $personService;
     }
 
+    /**
+     * @return AuthentificationRepository
+     */
+    public function getAuthentificationRepository(){
+        return $this->getEntityManager()->getRepository(Authentification::class);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// AUTHENTIFICATION
@@ -98,8 +107,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public function getAuthentifications(array $options){
 
-        $query = $this->getEntityManager()
-            ->getRepository(Authentification::class)
+        $query = $this->getAuthentificationRepository()
             ->createQueryBuilder('a')
             ->select('a.id', 'a.username', 'a.email', 'a.dateLogin', "a.displayName", "p.id as IDPERSON")
             ->leftJoin(Person::class, 'p', 'WITH', 'p.ladapLogin = a.username');
@@ -118,6 +126,18 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             ->addOrderBy($sort, $options['direction'])
             ->getQuery()->getResult()
             ;
+    }
+
+    /**
+     * @param string $login
+     * @return Authentification|null
+     */
+    public function getAuthentificationByLogin( string $login, $throw=false ){
+        $authentification = $this->getAuthentificationRepository()->findOneBy(['username' => $login]);
+        if( !$authentification && $throw == true ){
+            throw new OscarException("Aucune authentification trouvé");
+        }
+        return $authentification;
     }
 
 

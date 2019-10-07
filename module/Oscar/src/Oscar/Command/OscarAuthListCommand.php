@@ -45,7 +45,7 @@ class OscarAuthListCommand extends OscarCommandAbstract
         $this
             ->setDescription("Affiche la liste des authentifications")
             ->setHelp("")
-            ->addOption('sort', 's', InputOption::VALUE_OPTIONAL, 'Champ utilisé pour le trie ('. implode(', ', array_keys($this->getFields())).')', 'id')
+            ->addOption('sort', 's', InputOption::VALUE_OPTIONAL, 'Champ utilisé pour le trie ('. implode(', ', array_values($this->getFields())).')', 'id')
             ->addOption('search', 'e', InputOption::VALUE_OPTIONAL, 'Expression de recherche sur le nom/email/identifiant')
             ->addOption('desc', 'd', InputOption::VALUE_NONE, "Direction du trie DESC")
         ;
@@ -61,8 +61,12 @@ class OscarAuthListCommand extends OscarCommandAbstract
 
         // Options de recherche / trie
         $options = [];
+        $sort = 'id';
 
-
+        if( !(in_array($fieldSortInput, array_keys($this->getFields())) || in_array($fieldSortInput, array_values($this->getFields())))  ){
+            $output->writeln("<error>Le champ $fieldSortInput n'est pas valide pour le trie, les champs valides sont : ". implode(", ", array_values($this->getFields())) ."</error>");
+            return;
+        }
         foreach ($this->getFields() as $label=>$key) {
             if( $label == $fieldSortInput || $key == $fieldSortInput ){
                 $sort = $key;

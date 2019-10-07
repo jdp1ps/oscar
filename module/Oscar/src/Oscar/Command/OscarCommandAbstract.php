@@ -48,5 +48,8 @@ abstract class OscarCommandAbstract extends Command
 
         $outputStyle = new OutputFormatterStyle('yellow', 'default', ['bold']);
         $output->getFormatter()->setStyle('none', $outputStyle);
+
+        $outputStyle = new OutputFormatterStyle('cyan', 'default', ['bold']);
+        $output->getFormatter()->setStyle('title', $outputStyle);
     }
 }

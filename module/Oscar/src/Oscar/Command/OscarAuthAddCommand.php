@@ -18,7 +18,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
+use Zend\Crypt\Password\Bcrypt;
 use Zend\ServiceManager\ServiceManager;
 
 class OscarAuthAddCommand extends OscarCommandAbstract
@@ -40,25 +42,75 @@ class OscarAuthAddCommand extends OscarCommandAbstract
 
         $helper = $this->getHelper('question');
 
-//        $question = new ChoiceQuestion(
-//            'Entrez un identifiant : ',
-//            ['red', 'green', 'blue'],
-//            '0,1'
-//        );
-        $question = new Question("Entrez l'identifiant : ");
+        $output->writeln("<title>### CREATION d'UN UTILISATEUR ###</title>");
+
+        // -------------------------------------------------------------------------------------------------------------
+        // LOGIN
+        $question = new Question("Entrez un <bold>identifiant</bold> : ");
         $identifiant = $helper->ask($input, $output, $question);
-        $output->writeln("Saisie : " . $identifiant);
 
-        $question = new Question("Entrez le mot de passe : ");
-        $question->setHidden(false);
-        $question->setHiddenFallback(false);
-        $question->setMaxAttempts(2);
+        /** @var OscarUserContext $oscarUserContextService */
+        $oscarUserContextService = $this->getServicemanager()->get(OscarUserContext::class);
+
+        try {
+            $exist = $oscarUserContextService->getAuthentificationByLogin($identifiant, false);
+            if( $exist ){
+                throw new \Exception("Un utilisateur utilise déjà cet identifiant !");
+            }
+        } catch ( \Exception $e ){
+            $output->writeln("<error>Problème d'identifiant : ". $e->getMessage().".</error>");
+            return;
+        }
+
+        // TODO Vérifier l'email saisi
+
+        // -------------------------------------------------------------------------------------------------------------
+        // EMAIL
+        $question = new Question("Entrez l' <bold>adresse éléctronique</bold> : ");
+        $email = $helper->ask($input, $output, $question);
+
+        // DISPLAYNAME
+        $question = new Question("Entrez le <bold>nom affiché</bold> : ");
+        $displayName = $helper->ask($input, $output, $question);
+
+
+        // -------------------------------------------------------------------------------------------------------------
+        // PASSWORD
+        $options = $this->getServicemanager()->get('zfcuser_module_options');
+        $bcrypt = new Bcrypt();
+        $bcrypt->setCost($options->getPasswordCost());
+        $question = new Question("Entrez un <bold>mot de passe (>=8 caractères)</bold> : ");
+        $question->setHidden(true);
+        $question->setHiddenFallback(true);
         $password = $helper->ask($input, $output, $question);
-        $output->writeln("Password : " . $password);
+        $passwordCrypted = $bcrypt->create($password);
+
+        $output->writeln("<title>Création d'une authentification : </title>");
+        $output->writeln(" - Identifiant : <bold>$identifiant</bold>");
+        $output->writeln(" - Nom affiché : <bold>$displayName</bold>");
+        $output->writeln(" - Courriel : <bold>$email</bold>");
+        $output->writeln(" - Mot de passe : <bold>******</bold>");
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion("Créer l'utilisateur (y|N) ?", false);
+
+        if (!$helper->ask($input, $output, $question)) {
+            return;
+        }
+
+        try {
+            $auth = new Authentification();
+            $auth->setPassword($passwordCrypted);
+            $auth->setDisplayName($displayName);
+            $auth->setUsername($identifiant);
+            $auth->setEmail($email);
+            $oscarUserContextService->getEntityManager()->persist($auth);
+            $oscarUserContextService->getEntityManager()->flush();
+            $output->writeln("<success>L'utilisateur $identifiant a bien été créé</success>");
+        } catch (\Exception $e ){
+            $output->writeln("<error>Impossible de créé $identifiant : " . $e->getMessage());
+        }
 
 
-
-
-
+        /****/
     }
 }
