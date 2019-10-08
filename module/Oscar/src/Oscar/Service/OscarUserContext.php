@@ -129,6 +129,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     }
 
     /**
+     * @param $roleId
+     * @return Role|null
+     */
+    public function getRoleByRoleId($roleId){
+        return $this->getEntityManager()->getRepository(Role::class)->findOneBy(['roleId' => $roleId]);
+    }
+
+    /**
      * @param string $login
      * @return Authentification|null
      */
