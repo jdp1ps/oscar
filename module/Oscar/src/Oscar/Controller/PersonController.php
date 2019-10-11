@@ -1028,6 +1028,7 @@ class PersonController extends AbstractOscarController
                     $this->getDefaultContext(), $person->getId(),
                     LogActivity::LEVEL_INCHARGE
                 );
+                $this->getPersonService()->getSearchEngineStrategy()->update($person);
                 $this->flashMessenger()->addSuccessMessage(_('Données sauvegardées.'));
                 $this->redirect()->toRoute('person/show', ['id'=>$person->getId()]);
             }
@@ -1069,6 +1070,7 @@ class PersonController extends AbstractOscarController
                     $this->getDefaultContext(), $person->getId(),
                     LogActivity::LEVEL_INCHARGE
                 );
+                $this->getPersonService()->getSearchEngineStrategy()->add($person);
                 $this->flashMessenger()->addSuccessMessage(_('Données sauvegardées.'));
                 $this->redirect()->toRoute('person/show', ['id'=>$person->getId()]);
             }
