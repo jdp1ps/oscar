@@ -17,6 +17,8 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\AuthentificationRepository;
+use Oscar\Entity\LogActivity;
+use Oscar\Entity\LogActivityRepository;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRepository;
@@ -36,6 +38,8 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
 use UnicaenAuth\Acl\NamedRole;
 use UnicaenAuth\Service\UserContext;
 use Zend\Http\Request;
@@ -50,10 +54,18 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  *
  * @package Oscar\Service
  */
-class OscarUserContext implements UseOscarConfigurationService, UseLoggerService, UseEntityManager
+class OscarUserContext implements UseOscarConfigurationService, UseLoggerService, UseEntityManager, UsePersonService
 {
 
-    use UseOscarConfigurationServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait;
+    use UseOscarConfigurationServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait, UsePersonServiceTrait;
+
+
+    // Méthode d'authentification
+    const AUTHENTIFICATION_METHOD_DB    = 'BDD';
+    const AUTHENTIFICATION_METHOD_LDAP  = 'LDAP';
+    const AUTHENTIFICATION_METHOD_SHIB  = 'SHIB';
+    const AUTHENTIFICATION_METHOD_NONE  = 'NONE';
+
 
     /** @var UserContext */
     protected $userContext;
@@ -76,28 +88,44 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         $this->userContext = $userContext;
     }
 
-
-    /**
-     * @return PersonService
-     */
-    public function getPersonService(): PersonService
-    {
-        return $this->personService;
-    }
-
-    /**
-     * @param PersonService $personService
-     */
-    public function setPersonService(PersonService $personService): void
-    {
-        $this->personService = $personService;
-    }
-
     /**
      * @return AuthentificationRepository
      */
     public function getAuthentificationRepository(){
         return $this->getEntityManager()->getRepository(Authentification::class);
+    }
+
+    public function getAuthentificationMethod() :string
+    {
+        if ( $this->getUserContext()->getLdapUser() ){
+            return self::AUTHENTIFICATION_METHOD_LDAP;
+        }
+        elseif( $this->getUserContext()->getDbUser() ){
+            return self::AUTHENTIFICATION_METHOD_DB;
+        }
+        elseif ( $this->getUserContext()->getShibUser() ){
+            return self::AUTHENTIFICATION_METHOD_SHIB;
+        }
+        else {
+            return self::AUTHENTIFICATION_METHOD_NONE;
+        }
+    }
+
+
+    /**
+     * @return string Retourne une chaîne (utilisée dans les logs pour donner des informations sur l'utilisateur actif).
+     */
+    public function getCurrentUserLog() :string
+    {
+        if( $this->getCurrentPerson() ){
+            return sprintf('[P:%s] %s (%s)', $this->getCurrentPerson()->getId(), $this->getCurrentPerson()->getDisplayName(), $this->getAuthentificationMethod());
+        }
+        elseif ($this->getUserContext()->getIdentityUsername()) {
+            return sprintf('[UnPerson] %s (%s)', $this->getUserContext()->getIdentityUsername(), $this->getAuthentificationMethod());
+        }
+        else {
+            return 'Unlogged';
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +154,33 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             ->addOrderBy($sort, $options['direction'])
             ->getQuery()->getResult()
             ;
+    }
+
+    public function getLogsAuthentification( Authentification $authentification, $options = [] ){
+
+        $parameters = [
+            'authentification_id' => $authentification->getId()
+        ];
+        $stack = 20;
+        $date = null;
+
+        /** @var LogActivityRepository $logActivityRepository */
+        $logActivityRepository = $this->getEntityManager()->getRepository(LogActivity::class);
+        $query = $logActivityRepository->createQueryBuilder('l')
+            ->where('l.userId = :authentification_id')
+            ;
+
+        if( $date == null ){
+            $date = strtotime('-1 months');
+            $since = date("Y-m-d 00:00:00", $date);
+            $query->andWhere("l.dateCreated > :since");
+            $parameters['since'] = $since;
+        }
+
+        $query->setParameters($parameters);
+
+        return $query->getQuery()->getResult();
+
     }
 
     /**

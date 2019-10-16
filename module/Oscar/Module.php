@@ -18,15 +18,19 @@ use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\Authentification;
 use Oscar\Exception\OscarException;
 use Oscar\Service\ActivityLogService;
+use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use UnicaenAuth\Authentication\Adapter\Ldap;
 use UnicaenAuth\Event\UserAuthenticatedEvent;
+use UnicaenAuth\Provider\Identity\ChainEvent;
 use UnicaenAuth\Service\UserContext;
 use Zend\Console\Adapter\AdapterInterface;
 use Zend\EventManager\Event;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\ModuleManager\Feature\ConsoleBannerProviderInterface;
 use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
+use Zend\ModuleManager\ModuleEvent;
+use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\Http\RouteMatch;
@@ -82,184 +86,310 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
         return $this->getEntityManager()->getRepository('Oscar\Entity\Activity');
     }
 
+    // FIX : ZendFramework 3
+    public function init(ModuleManager $manager){
+        global $_REQUEST;
+        $this->log("---\n##### INIT MODULE OSCAR");
+        $this->log("\nurl : " . ($_REQUEST && $_REQUEST['uri'] ? $_REQUEST['uri'] : "?"));
+        $this->log("...\n");
 
 
-    public function onBootstrap(MvcEvent $e)
-    {
-        $this->_serviceManager = $e->getApplication()->getServiceManager();
+        $eventManager = $manager->getEventManager();
+        $sharedEventManager = $eventManager->getSharedManager();
 
-        $e->getApplication()->getServiceManager()->get('translator');
-        $eventManager = $e->getApplication()->getEventManager();
-        $moduleRouteListener = new ModuleRouteListener();
-        $moduleRouteListener->attach($eventManager);
+        $eventManager->attach('*', [$this, 'onStar'], 100);
 
-        // On capte l'authentification
-        $e->getApplication()->getEventManager()->getSharedManager()->attach(
-            //'ZfcUser\Authentication\Adapter\AdapterChain',
-            "*",
-            'authenticate.success',
-            array($this, 'onUserLogin'),
-           100
-        );
+        // UnicaenAuth\Authentication\Storage\ChainEvent
 
-        // todo Remplacer l'étoile si possible
-        $e->getApplication()->getEventManager()->getSharedManager()->attach(
-            '*',
-            'authentication.ldap.error',
-            array($this, 'onAuthentificationError'),
-            100);
+        $sharedEventManager->attach('*', UserAuthenticatedEvent::PRE_PERSIST, [$this, 'onStar'], 200);
 
-        // Envoi des erreurs dans les LOGS
-        $e->getApplication()->getEventManager()->getSharedManager()->attach(
-            '*',
-            'dispatch.error',
-            array($this, 'onDispatchError'));
+        $sharedEventManager->attach(__NAMESPACE__, 'dispatch', [$this, 'onDispatch'], 100);
+        // ERREURS
+        $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR, [$this, 'onError'], 100);
+        $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_RENDER_ERROR, [$this, 'onError'], 100);
+
+        // $sharedEventManager->attach(UserAuthenticatedEvent::class, UserAuthenticatedEvent::PRE_PERSIST, [$this, 'onUserLogin'], 100);
 
         // Log des accès
-        $e->getApplication()->getEventManager()->attach('*', function ($e) {
-            $this->trapEvent($e);
-        });
+       // $sharedEventManager->attach('*',"*", [$this, 'onUserLogin'], 100);
+
+//        $sharedEventManager->attach(__NAMESPACE__, 'route', [$this, 'onRoute'], 100);
     }
 
-    /**
-     * @param $event Event
-     */
-    public function onAuthentificationError($event){
-        $msg = preg_replace('/\[0x\d* \((.*)\):/','$1', $event->getParam('result')->getMessages()[1]);
-        $this->getServiceManager()->get('Logger')->error($msg);
-    }
-
-    public function onDispatchError( $e ){
-
-        $userInfos = $this->getCurrentUserInfo();
-        $base = $userInfos['base'];
-
-        if( $e->getParam('exception') instanceof \Exception ){
-            $msg = 'exception: ' . $e->getParam('exception')->getMessage();
-        } elseif ( is_string($e->getParam('exception'))) {
-            $msg = 'error: ' . $e->getParam('exception');
-	} else {
-		return;
-	}	
-        $this->getLogger()->error("$base $msg");
-    }
-    public function onUserLogin( $e ){
-
-        $dbUser = null;
-
-        $this->getLogger()->addInfo(sprintf('Chargement du bdUser avec identity = %s', (string)$e->getIdentity()));
-
-		if( is_string($e->getIdentity()) ){
-			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $e->getIdentity()]);
-		} else {
-			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
-		}
-
-		if( $dbUser ) {
-            try {
-                $dbUser->setDateLogin(new \DateTime());
-                $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
-                $this->getEntityManager()->flush($dbUser);
-            } catch (\Exception $e) {
-                error_log("Mise à jour du dbUser impossible : " . $e->getMessage());
-            }
-
-            /** @var PersonService $personService */
-            $personService = $this->_serviceManager->get('PersonService');
-            try {
-                $person = $personService->getPersonByLdapLogin($dbUser->getUsername());
-                $str = $person->log();
-            } catch (NoResultException $e) {
-                $str = $dbUser->getUsername() . ' - DBUSER';
-            } catch (NonUniqueResultException $e ){
-                throw new OscarException("Votre fiche personne apparaît en double dans la base de données, veuillez contacter l'administrateur pour que le problème soit corrigé.");
-            }
-
-            $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
-                $str), $dbUser);
-        } else {
-            error_log("dbUser manquant !");
+    protected function log( $msg ){
+        static $handler;
+        if( $handler === null ){
+            $myfile = fopen("/tmp/oscar-debug.log", "a") or die("Unable to open file!");
         }
-
+        fwrite($myfile, sprintf("%s\t%s", date('Y-m-d H:i:s'), $msg));
     }
 
-    protected function trapEvent($event)
+    public function onUserLogin( Event $event){
+        /** @var Logger $logger */
+        $msg = "Evt Manager " . $event->getName() ."\n";
+        $this->log($msg);
+    }
+
+    public function onStar( Event $event ){
+        $msg = '['.get_class($event) . '] ' . $event->getName() . ' - ' . $event->getTarget() . "\n";
+        $this->log($msg);
+    }
+
+    public function onDispatch(MvcEvent $event)
     {
-
-
         /** @var Request $request */
         $request = $event->getRequest();
-        $sm = $event->getApplication()->getServiceManager();
 
-        if ($event->getName() === 'route') {
-            try {
-                $sm = $event->getApplication()->getServiceManager();
+        /** @var Logger $logger */
+        $logger = $event->getApplication()->getServiceManager()->get('Logger');
 
-                /** @var UserContext */
-                $userContext = $sm->get('authUserContext');
+        /** @var OscarUserContext $userContext */
+        $userContext = $event->getApplication()->getServiceManager()->get(OscarUserContext::class);
 
-                /** @var EntityManager $entityManager */
-                $entityManager = $sm->get('doctrine.entitymanager.orm_default');
-
-                /** @var ActivityLogRepository $activity */
-                $activity = $entityManager->getRepository('Oscar\Entity\LogActivity');
-
-                /** @var RouteMatch $match */
-                $match = $event->getParams()['route-match'];
-
-                $controller = $match->getParam('controller');
-
-                if( $controller == 'Console')
-                    return;
-
-                $action = $match->getParam('action');
-                $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
-                $userInfos = $this->getCurrentUserInfo();
-                $base = $userInfos['base'];
-                $method = $request->getMethod();
-                $contextId = $match->getParam('id', '?');
-                $message = sprintf('%s [%s] %s:%s %s', $base, $method, $controller, $action, $uri);
-                $this->getLogger()->debug($message);
-
-            } catch (\Exception $e) {
-                error_log($e->getMessage());
-            }
+        $uri = 'none';
+        if(isset($_SERVER['REQUEST_URI'])) {
+            $uri = $_SERVER['REQUEST_URI'];
         }
+
+        $logger->notice(sprintf('[tgt:  %s] %s uri : %s', $event->getTarget(), $userContext->getCurrentUserLog(), $uri));
+
+//        if ($event->getName() === 'route') {
+//            /** @var ServiceManager $sm */
+//            $sm = $event->getApplication()->getServiceManager();
+//
+//            try {
+//                $sm = $event->getApplication()->getServiceManager();
+//
+//                /** @var UserContext */
+//                $userContext = $sm->get('authUserContext');
+//
+//                /** @var EntityManager $entityManager */
+//                $entityManager = $sm->get('doctrine.entitymanager.orm_default');
+//
+//                /** @var ActivityLogRepository $activity */
+//                $activity = $entityManager->getRepository('Oscar\Entity\LogActivity');
+//
+//                /** @var RouteMatch $match */
+//                $match = $event->getParams()['route-match'];
+//
+//                $controller = $match->getParam('controller');
+//
+//                if ($controller == 'Console')
+//                    return;
+//
+//                $action = $match->getParam('action');
+//                $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
+//                $userInfos = $this->getCurrentUserInfo();
+//                $base = $userInfos['base'];
+//                $method = $request->getMethod();
+//                $contextId = $match->getParam('id', '?');
+//                $message = sprintf('%s [%s] %s:%s %s', $base, $method, $controller, $action, $uri);
+//                $this->getLogger()->debug($message);
+//
+//            } catch (\Exception $e) {
+//                error_log($e->getMessage());
+//            }
+//        }
     }
 
-    protected function getCurrentUserInfo(){
+    public function onError(MvcEvent $event) {
 
-        static $userInfos;
-        if( $userInfos === null ){
-            $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+        /** @var Logger $logger */
+        $logger = $event->getApplication()->getServiceManager()->get('Logger');
 
-            $userContext = $this->getUserContext();
-
-            if( $this->getUserContext()->getLdapUser() ){
-                $auth           = 'ldap';
-                $login          = $userContext->getLdapUser()->getUsername();
-                $displayName    = $userContext->getLdapUser()->getDisplayName();
-            }
-            elseif ( $userContext->getDbUser() ){
-                $auth           = 'bdd';
-                $login          = $userContext->getDbUser()->getUsername();
-                $displayName    = $userContext->getDbUser()->getDisplayName();
-            } else {
-                $auth = "no";
-                $displayName = 'Anonymous';
-                $login = 'visitor';
-            }
-
-            $userInfos = [
-                'ip' => $ip,
-                'auth' => $auth,
-                'username' => $login,
-                'display' => $displayName,
-                'base' => sprintf('%s@%s (%s:%s)', $login, $ip, $auth, $displayName)
-            ];
+        /** @var \Exception $exception */
+        $exception = $event->getParam('exception');
+        if( $exception != null ){
+            $exceptionName = $exception->getMessage();
+            $file = $exception->getFile();
+            $line = $exception->getLine();
+            $trace = $exception->getTraceAsString();
         }
-        return $userInfos;
+
+        $errorMessage = $event->getError();
+        $controllerName = $event->getController();
+
+        $logger->error($errorMessage);
+
     }
+
+//    public function onBootstrap(MvcEvent $e)
+//    {
+//
+//        $this->_serviceManager = $e->getApplication()->getServiceManager();
+//
+//        $e->getApplication()->getServiceManager()->get('translator');
+//        $eventManager = $e->getApplication()->getEventManager();
+//        $moduleRouteListener = new ModuleRouteListener();
+//        $moduleRouteListener->attach($eventManager);
+//
+//        // On capte l'authentification
+//        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+//            //'ZfcUser\Authentication\Adapter\AdapterChain',
+//            "*",
+//            'authenticate.success',
+//            array($this, 'onUserLogin'),
+//           100
+//        );
+//
+//        // todo Remplacer l'étoile si possible
+//        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+//            '*',
+//            'authentication.ldap.error',
+//            array($this, 'onAuthentificationError'),
+//            100);
+//
+//        // Envoi des erreurs dans les LOGS
+//        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+//            '*',
+//            'dispatch.error',
+//            array($this, 'onDispatchError'));
+//
+//        // Log des accès
+//        $e->getApplication()->getEventManager()->attach('*', function ($e) {
+//            $this->trapEvent($e);
+//        });
+//    }
+
+//    /**
+//     * @param $event Event
+//     */
+//    public function onAuthentificationError($event){
+//        $msg = preg_replace('/\[0x\d* \((.*)\):/','$1', $event->getParam('result')->getMessages()[1]);
+//        $this->getServiceManager()->get('Logger')->error($msg);
+//    }
+//
+//    public function onDispatchError( $e ){
+//
+//        $userInfos = $this->getCurrentUserInfo();
+//        $base = $userInfos['base'];
+//
+//        if( $e->getParam('exception') instanceof \Exception ){
+//            $msg = 'exception: ' . $e->getParam('exception')->getMessage();
+//        } elseif ( is_string($e->getParam('exception'))) {
+//            $msg = 'error: ' . $e->getParam('exception');
+//	} else {
+//		return;
+//	}
+//        $this->getLogger()->error("$base $msg");
+//    }
+//    public function onUserLogin( $e ){
+//
+//        $dbUser = null;
+//
+//        $this->getLogger()->addInfo(sprintf('Chargement du bdUser avec identity = %s', (string)$e->getIdentity()));
+//
+//		if( is_string($e->getIdentity()) ){
+//			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $e->getIdentity()]);
+//		} else {
+//			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
+//		}
+//
+//		if( $dbUser ) {
+//            try {
+//                $dbUser->setDateLogin(new \DateTime());
+//                $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
+//                $this->getEntityManager()->flush($dbUser);
+//            } catch (\Exception $e) {
+//                error_log("Mise à jour du dbUser impossible : " . $e->getMessage());
+//            }
+//
+//            /** @var PersonService $personService */
+//            $personService = $this->_serviceManager->get('PersonService');
+//            try {
+//                $person = $personService->getPersonByLdapLogin($dbUser->getUsername());
+//                $str = $person->log();
+//            } catch (NoResultException $e) {
+//                $str = $dbUser->getUsername() . ' - DBUSER';
+//            } catch (NonUniqueResultException $e ){
+//                throw new OscarException("Votre fiche personne apparaît en double dans la base de données, veuillez contacter l'administrateur pour que le problème soit corrigé.");
+//            }
+//
+//            $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
+//                $str), $dbUser);
+//        } else {
+//            error_log("dbUser manquant !");
+//        }
+//
+//    }
+//
+//    protected function trapEvent($event)
+//    {
+//
+//
+//        /** @var Request $request */
+//        $request = $event->getRequest();
+//        $sm = $event->getApplication()->getServiceManager();
+//
+//        if ($event->getName() === 'route') {
+//            try {
+//                $sm = $event->getApplication()->getServiceManager();
+//
+//                /** @var UserContext */
+//                $userContext = $sm->get('authUserContext');
+//
+//                /** @var EntityManager $entityManager */
+//                $entityManager = $sm->get('doctrine.entitymanager.orm_default');
+//
+//                /** @var ActivityLogRepository $activity */
+//                $activity = $entityManager->getRepository('Oscar\Entity\LogActivity');
+//
+//                /** @var RouteMatch $match */
+//                $match = $event->getParams()['route-match'];
+//
+//                $controller = $match->getParam('controller');
+//
+//                if( $controller == 'Console')
+//                    return;
+//
+//                $action = $match->getParam('action');
+//                $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
+//                $userInfos = $this->getCurrentUserInfo();
+//                $base = $userInfos['base'];
+//                $method = $request->getMethod();
+//                $contextId = $match->getParam('id', '?');
+//                $message = sprintf('%s [%s] %s:%s %s', $base, $method, $controller, $action, $uri);
+//                $this->getLogger()->debug($message);
+//
+//            } catch (\Exception $e) {
+//                error_log($e->getMessage());
+//            }
+//        }
+//    }
+//
+//    protected function getCurrentUserInfo(){
+//
+//        static $userInfos;
+//        if( $userInfos === null ){
+//            $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+//
+//            $userContext = $this->getUserContext();
+//
+//            if( $this->getUserContext()->getLdapUser() ){
+//                $auth           = 'ldap';
+//                $login          = $userContext->getLdapUser()->getUsername();
+//                $displayName    = $userContext->getLdapUser()->getDisplayName();
+//            }
+//            elseif ( $userContext->getDbUser() ){
+//                $auth           = 'bdd';
+//                $login          = $userContext->getDbUser()->getUsername();
+//                $displayName    = $userContext->getDbUser()->getDisplayName();
+//            } else {
+//                $auth = "no";
+//                $displayName = 'Anonymous';
+//                $login = 'visitor';
+//            }
+//
+//            $userInfos = [
+//                'ip' => $ip,
+//                'auth' => $auth,
+//                'username' => $login,
+//                'display' => $displayName,
+//                'base' => sprintf('%s@%s (%s:%s)', $login, $ip, $auth, $displayName)
+//            ];
+//        }
+//        return $userInfos;
+//    }
 
     public function getConfig()
     {

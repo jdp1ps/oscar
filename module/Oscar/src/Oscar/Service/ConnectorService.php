@@ -17,6 +17,7 @@ use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceManager;
 
 /**
  * Gestion des Personnes :
@@ -27,6 +28,24 @@ class ConnectorService implements UseOscarConfigurationService
 {
     use UseOscarConfigurationServiceTrait;
 
+    /** @var ServiceManager */
+    private $serviceManager;
+
+    /**
+     * @return ServiceManager
+     */
+    public function getServiceManager(): ServiceManager
+    {
+        return $this->serviceManager;
+    }
+
+    /**
+     * @param ServiceManager $serviceManager
+     */
+    public function setServiceManager(ServiceManager $serviceManager): void
+    {
+        $this->serviceManager = $serviceManager;
+    }
 
     private $_CONNECTORS_INSTANCE = [];
 
@@ -48,7 +67,7 @@ class ConnectorService implements UseOscarConfigurationService
             // Création de l'instance
             $_CONNECTORS_INSTANCE[$connectorName] = new $connectorConfig['class'];
             $_CONNECTORS_INSTANCE[$connectorName]->init(
-                $this->getServiceLocator(),
+                $this->getServiceManager(),
                 $connectorConfig['params'],
                 $connectorShortName);
 

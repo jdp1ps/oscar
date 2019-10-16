@@ -19,7 +19,9 @@ class ConnectorServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        // TODO: Implement __invoke() method.
+        $service = new ConnectorService();
+        $service->setOscarConfigurationService($container->get(OscarConfigurationService::class));
+        $service->setServiceManager($container);
+        return $service;
     }
-
 }
