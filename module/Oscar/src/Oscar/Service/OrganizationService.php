@@ -264,6 +264,17 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      */
     public function getOrganizationsSearchPaged($search, $page, $filter=[])
     {
+        $qb = $this->getSearchNativeQuery($search, $filter);
+        return new UnicaenDoctrinePaginator($qb, $page);
+    }
+
+    /**
+     * @param $search
+     * @param $filter
+     * @return \Doctrine\ORM\QueryBuilder
+     * @throws OscarException
+     */
+    protected function getSearchNativeQuery($search, $filter){
         $qb = $this->getBaseQuery();
         if ($search) {
 
@@ -349,10 +360,9 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             }
 
             $qb->andWhere('o.id IN (:ids)')
-            ->setParameter('ids', $ids);
+                ->setParameter('ids', $ids);
         }
-
-        return new UnicaenDoctrinePaginator($qb, $page);
+        return $qb;
     }
 
     /**
@@ -374,6 +384,38 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getOrganizations()
     {
         return $this->getBaseQuery()->getQuery()->getResult();
+    }
+
+    public function getOrganizationsByIds( array $ids ){
+        $query = $this->getBaseQuery()->where('o.id IN(:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery();
+        return $query->getResult();
+    }
+
+    public function getSearchEngineStrategy()
+    {
+        static $searchStrategy;
+        if( $searchStrategy === null ){
+            try {
+                $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.organization.search_engine');
+                $class = new \ReflectionClass($opt['class']);
+                $searchStrategy = $class->newInstanceArgs($opt['params']);
+            } catch (\Exception $e ){
+                return null;
+            }
+        }
+        return $searchStrategy;
+    }
+
+    public function search( $search ){
+        $strategy = $this->getSearchEngineStrategy();
+        if( $strategy ){
+            $ids = $strategy->search($search);
+            return $this->getOrganizationsByIds($ids);
+        } else {
+            return $this->getSearchNativeQuery($search, [])->getQuery()->getResult();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////

@@ -88,36 +88,23 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
     // FIX : ZendFramework 3
     public function init(ModuleManager $manager){
-        global $_REQUEST;
-        $this->log("---\n##### INIT MODULE OSCAR");
-        $this->log("\nurl : " . ($_REQUEST && $_REQUEST['uri'] ? $_REQUEST['uri'] : "?"));
-        $this->log("...\n");
-
 
         $eventManager = $manager->getEventManager();
         $sharedEventManager = $eventManager->getSharedManager();
 
-        $eventManager->attach('*', [$this, 'onStar'], 100);
+        //$sharedEventManager->attach('*', UserAuthenticatedEvent::PRE_PERSIST, [$this, 'onStar'], 200);
 
-        // UnicaenAuth\Authentication\Storage\ChainEvent
-
-        $sharedEventManager->attach('*', UserAuthenticatedEvent::PRE_PERSIST, [$this, 'onStar'], 200);
-
-        $sharedEventManager->attach(__NAMESPACE__, 'dispatch', [$this, 'onDispatch'], 100);
         // ERREURS
         $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR, [$this, 'onError'], 100);
         $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_RENDER_ERROR, [$this, 'onError'], 100);
 
-        // $sharedEventManager->attach(UserAuthenticatedEvent::class, UserAuthenticatedEvent::PRE_PERSIST, [$this, 'onUserLogin'], 100);
-
-        // Log des accès
-       // $sharedEventManager->attach('*',"*", [$this, 'onUserLogin'], 100);
-
-//        $sharedEventManager->attach(__NAMESPACE__, 'route', [$this, 'onRoute'], 100);
+        // Route
+        $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_ROUTE, [$this, 'onRoute'], 100);
     }
 
-    protected function log( $msg ){
-        static $handler;
+    protected function logError( $msg, $person="utilisateurX" ){
+        static $handler, $person;
+
         if( $handler === null ){
             $myfile = fopen("/tmp/oscar-debug.log", "a") or die("Unable to open file!");
         }
@@ -127,73 +114,32 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
     public function onUserLogin( Event $event){
         /** @var Logger $logger */
         $msg = "Evt Manager " . $event->getName() ."\n";
-        $this->log($msg);
+        $this->error($msg);
     }
 
-    public function onStar( Event $event ){
-        $msg = '['.get_class($event) . '] ' . $event->getName() . ' - ' . $event->getTarget() . "\n";
-        $this->log($msg);
-    }
-
-    public function onDispatch(MvcEvent $event)
-    {
-        /** @var Request $request */
-        $request = $event->getRequest();
-
+    public function onRoute( MvcEvent $mvcEvent ){
+        die();
         /** @var Logger $logger */
-        $logger = $event->getApplication()->getServiceManager()->get('Logger');
+        $logger = $mvcEvent->getApplication()->getServiceManager()->get('Logger');
+        $time = date('Y-m-d H:i:s');
 
-        /** @var OscarUserContext $userContext */
-        $userContext = $event->getApplication()->getServiceManager()->get(OscarUserContext::class);
-
-        $uri = 'none';
-        if(isset($_SERVER['REQUEST_URI'])) {
-            $uri = $_SERVER['REQUEST_URI'];
+        if (php_sapi_name() == "cli") {
+            // Do not execute HTTPS redirect in console mode.
+            $person = "~CLI";
+            $uri = "\$command-line";
+        } else {
+            /** @var OscarUserContext $oscarUserContext */
+            $oscarUserContext = $mvcEvent->getApplication()->getServiceManager()->get(OscarUserContext::class);
+            $person = $oscarUserContext->getCurrentUserLog();
+            $uri = $mvcEvent->getRequest()->getUri();
         }
-
-        $logger->notice(sprintf('[tgt:  %s] %s uri : %s', $event->getTarget(), $userContext->getCurrentUserLog(), $uri));
-
-//        if ($event->getName() === 'route') {
-//            /** @var ServiceManager $sm */
-//            $sm = $event->getApplication()->getServiceManager();
-//
-//            try {
-//                $sm = $event->getApplication()->getServiceManager();
-//
-//                /** @var UserContext */
-//                $userContext = $sm->get('authUserContext');
-//
-//                /** @var EntityManager $entityManager */
-//                $entityManager = $sm->get('doctrine.entitymanager.orm_default');
-//
-//                /** @var ActivityLogRepository $activity */
-//                $activity = $entityManager->getRepository('Oscar\Entity\LogActivity');
-//
-//                /** @var RouteMatch $match */
-//                $match = $event->getParams()['route-match'];
-//
-//                $controller = $match->getParam('controller');
-//
-//                if ($controller == 'Console')
-//                    return;
-//
-//                $action = $match->getParam('action');
-//                $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
-//                $userInfos = $this->getCurrentUserInfo();
-//                $base = $userInfos['base'];
-//                $method = $request->getMethod();
-//                $contextId = $match->getParam('id', '?');
-//                $message = sprintf('%s [%s] %s:%s %s', $base, $method, $controller, $action, $uri);
-//                $this->getLogger()->debug($message);
-//
-//            } catch (\Exception $e) {
-//                error_log($e->getMessage());
-//            }
-//        }
+        $msg = sprintf("%s access by %s to %s", $time, $person, $uri);
+        $logger->error($msg);
     }
+
+
 
     public function onError(MvcEvent $event) {
-
         /** @var Logger $logger */
         $logger = $event->getApplication()->getServiceManager()->get('Logger');
 
@@ -209,187 +155,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
         $errorMessage = $event->getError();
         $controllerName = $event->getController();
 
-        $logger->error($errorMessage);
-
+        $logger->error($controllerName." : " . $errorMessage ."\n--- \n " . $trace);
     }
 
-//    public function onBootstrap(MvcEvent $e)
-//    {
-//
-//        $this->_serviceManager = $e->getApplication()->getServiceManager();
-//
-//        $e->getApplication()->getServiceManager()->get('translator');
-//        $eventManager = $e->getApplication()->getEventManager();
-//        $moduleRouteListener = new ModuleRouteListener();
-//        $moduleRouteListener->attach($eventManager);
-//
-//        // On capte l'authentification
-//        $e->getApplication()->getEventManager()->getSharedManager()->attach(
-//            //'ZfcUser\Authentication\Adapter\AdapterChain',
-//            "*",
-//            'authenticate.success',
-//            array($this, 'onUserLogin'),
-//           100
-//        );
-//
-//        // todo Remplacer l'étoile si possible
-//        $e->getApplication()->getEventManager()->getSharedManager()->attach(
-//            '*',
-//            'authentication.ldap.error',
-//            array($this, 'onAuthentificationError'),
-//            100);
-//
-//        // Envoi des erreurs dans les LOGS
-//        $e->getApplication()->getEventManager()->getSharedManager()->attach(
-//            '*',
-//            'dispatch.error',
-//            array($this, 'onDispatchError'));
-//
-//        // Log des accès
-//        $e->getApplication()->getEventManager()->attach('*', function ($e) {
-//            $this->trapEvent($e);
-//        });
-//    }
-
-//    /**
-//     * @param $event Event
-//     */
-//    public function onAuthentificationError($event){
-//        $msg = preg_replace('/\[0x\d* \((.*)\):/','$1', $event->getParam('result')->getMessages()[1]);
-//        $this->getServiceManager()->get('Logger')->error($msg);
-//    }
-//
-//    public function onDispatchError( $e ){
-//
-//        $userInfos = $this->getCurrentUserInfo();
-//        $base = $userInfos['base'];
-//
-//        if( $e->getParam('exception') instanceof \Exception ){
-//            $msg = 'exception: ' . $e->getParam('exception')->getMessage();
-//        } elseif ( is_string($e->getParam('exception'))) {
-//            $msg = 'error: ' . $e->getParam('exception');
-//	} else {
-//		return;
-//	}
-//        $this->getLogger()->error("$base $msg");
-//    }
-//    public function onUserLogin( $e ){
-//
-//        $dbUser = null;
-//
-//        $this->getLogger()->addInfo(sprintf('Chargement du bdUser avec identity = %s', (string)$e->getIdentity()));
-//
-//		if( is_string($e->getIdentity()) ){
-//			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $e->getIdentity()]);
-//		} else {
-//			$dbUser = $this->getEntityManager()->getRepository(Authentification::class)->find($e->getIdentity());
-//		}
-//
-//		if( $dbUser ) {
-//            try {
-//                $dbUser->setDateLogin(new \DateTime());
-//                $dbUser->setSecret(md5($dbUser->getId() . '#' . time()));
-//                $this->getEntityManager()->flush($dbUser);
-//            } catch (\Exception $e) {
-//                error_log("Mise à jour du dbUser impossible : " . $e->getMessage());
-//            }
-//
-//            /** @var PersonService $personService */
-//            $personService = $this->_serviceManager->get('PersonService');
-//            try {
-//                $person = $personService->getPersonByLdapLogin($dbUser->getUsername());
-//                $str = $person->log();
-//            } catch (NoResultException $e) {
-//                $str = $dbUser->getUsername() . ' - DBUSER';
-//            } catch (NonUniqueResultException $e ){
-//                throw new OscarException("Votre fiche personne apparaît en double dans la base de données, veuillez contacter l'administrateur pour que le problème soit corrigé.");
-//            }
-//
-//            $this->getServiceActivity()->addInfo(sprintf('%s vient de se connecter à l\'application.',
-//                $str), $dbUser);
-//        } else {
-//            error_log("dbUser manquant !");
-//        }
-//
-//    }
-//
-//    protected function trapEvent($event)
-//    {
-//
-//
-//        /** @var Request $request */
-//        $request = $event->getRequest();
-//        $sm = $event->getApplication()->getServiceManager();
-//
-//        if ($event->getName() === 'route') {
-//            try {
-//                $sm = $event->getApplication()->getServiceManager();
-//
-//                /** @var UserContext */
-//                $userContext = $sm->get('authUserContext');
-//
-//                /** @var EntityManager $entityManager */
-//                $entityManager = $sm->get('doctrine.entitymanager.orm_default');
-//
-//                /** @var ActivityLogRepository $activity */
-//                $activity = $entityManager->getRepository('Oscar\Entity\LogActivity');
-//
-//                /** @var RouteMatch $match */
-//                $match = $event->getParams()['route-match'];
-//
-//                $controller = $match->getParam('controller');
-//
-//                if( $controller == 'Console')
-//                    return;
-//
-//                $action = $match->getParam('action');
-//                $uri = method_exists($request, 'getRequestUri') ? $request->getRequestUri() : 'console';
-//                $userInfos = $this->getCurrentUserInfo();
-//                $base = $userInfos['base'];
-//                $method = $request->getMethod();
-//                $contextId = $match->getParam('id', '?');
-//                $message = sprintf('%s [%s] %s:%s %s', $base, $method, $controller, $action, $uri);
-//                $this->getLogger()->debug($message);
-//
-//            } catch (\Exception $e) {
-//                error_log($e->getMessage());
-//            }
-//        }
-//    }
-//
-//    protected function getCurrentUserInfo(){
-//
-//        static $userInfos;
-//        if( $userInfos === null ){
-//            $ip = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-//
-//            $userContext = $this->getUserContext();
-//
-//            if( $this->getUserContext()->getLdapUser() ){
-//                $auth           = 'ldap';
-//                $login          = $userContext->getLdapUser()->getUsername();
-//                $displayName    = $userContext->getLdapUser()->getDisplayName();
-//            }
-//            elseif ( $userContext->getDbUser() ){
-//                $auth           = 'bdd';
-//                $login          = $userContext->getDbUser()->getUsername();
-//                $displayName    = $userContext->getDbUser()->getDisplayName();
-//            } else {
-//                $auth = "no";
-//                $displayName = 'Anonymous';
-//                $login = 'visitor';
-//            }
-//
-//            $userInfos = [
-//                'ip' => $ip,
-//                'auth' => $auth,
-//                'username' => $login,
-//                'display' => $displayName,
-//                'base' => sprintf('%s@%s (%s:%s)', $login, $ip, $auth, $displayName)
-//            ];
-//        }
-//        return $userInfos;
-//    }
 
     public function getConfig()
     {
@@ -409,17 +177,7 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
     public function getConsoleBanner(AdapterInterface $console)
     {
-        return "
-     `:+sssso/-`       `-/osssso//.       `-/ossss+:.        :////:        /////////-.`    `.`          `.`    ```.                   `....`
-   :hNMMNmmmNMMmo`    -dMMNmmmmNNMo     -yNMMNmmmmNNM       /MMMMMM/       MMMMNNNNMMMmo    :-         `:-   ----::                 .-:....::`
-  oMMMN+.  `-hMMMm.   mMMM:`   .-/:    +NMMNs-`   .-+      .NMMNmMMN.      MMMMs..-+MMMM/   -:`       .:-       `:-                .:.     `:-
- -MMMM/       dMMMh   mMMMho/--.`     -MMMM+              `dMMM::MMMd`     MMMMo   -MMMM:   .:.      -:.        -:`               .:.       ::
- oMMMM        oMMMM   .ymMMMMMNmdy-   oMMMM               yMMMo  oMMMy     MMMMmdddNMNy:     ::    `-:`         :-                ::       `:-
- /MMMM.       yMMMm     .-/+shdMMMN-  /MMMM.             +MMMN/::/NMMM+    MMMMmyhmMMNh-     -:`  `::`         .:.               .:.       -:`
- `mMMMh`     :MMMM/   :`      `yMMMo   dMMMd.       `   -NMMMMMMMMMMMMN-   MMMMo  `oMMMN/    `:- .:-           ::                .:.      .:.
-  .yMMMms++ohNMMm/    MNdyo+++sNMMm.   `sMMMNho+++shN  `mMMM/....../MMMm`  MMMMo    +MMMN:    ::.:-        ```.:-```      `-`     ::`   `-:.
-    -ohmNMMMNdy/`     shdmNMMMNmh+`      .+ydNMMMNmhs  oddds        sdddo  dddd/     /dddh.   .--.        `--------.      --      `.-::--.`
-    ";
+        return "OSCAR";
     }
 
     public function getConsoleUsage(AdapterInterface $console)

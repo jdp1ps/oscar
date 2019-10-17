@@ -15,6 +15,7 @@ use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
 use Oscar\Entity\Role;
 use Oscar\Service\ConnectorService;
+use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
@@ -26,17 +27,16 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class OscarPersonsSyncCommand extends OscarCommandAbstract
+class OscarOrganizationsSyncCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:persons:sync';
+    protected static $defaultName = 'oscar:organizations:sync';
 
     protected function configure()
     {
         $this
-            ->setDescription("Execute la synchronisation des personnes")
+            ->setDescription("Execute la synchronisation des organisations")
             ->addArgument("connectorname", InputArgument::REQUIRED, "Connector (rest)")
             ->addOption('no-rebuild','b', InputOption::VALUE_NONE, 'Ignore la reconstruction de l\'index de recherche après la mise à jour')
-            ->addOption('purge','p', InputOption::VALUE_NONE, 'Supprime les personnes d\'Oscar si elles ne sont plus proposées dans la source distante (et qu\'elles ne sont pas utilisées dans Oscar')
         ;
     }
 
@@ -49,7 +49,7 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
 
         $io = new SymfonyStyle($input, $output);
 
-        $io->title("Synchronisation des personnes");
+        $io->title("Synchronisation des organisations");
 
         $connectorName = $input->getArgument('connectorname');
 
@@ -59,15 +59,12 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
         $io->section("Connector infos : ");
         $io->writeln("Connecteur : <bold>$connectorName</bold>");
 
-        $purge = $input->getOption('purge');
-
         /** @var ConnectorService $connectorService */
         $connectorService = $this->getServicemanager()->get(ConnectorService::class);
 
-        $connector = $connectorService->getConnector("person.".$connectorName);
+        $connector = $connectorService->getConnector("organization.".$connectorName);
 
         try {
-            $connector->setOptionPurge($input->getOption('purge'));
             $repport = $connector->execute();
             foreach ($repport->getRepportStates() as $type => $out) {
                 $short = substr($type, 0, 3);
@@ -81,21 +78,25 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
         }
 
 
-        $io->section("Reconstruction de l'index de recherche : ");
-        if( !$input->getOption('no-rebuild') ){
-            /** @var PersonService $personService */
-            $personService = $this->getServicemanager()->get(PersonService::class);
-
-            try {
-                $persons = $personService->getPersons();
-                $personService->getSearchEngineStrategy()->rebuildIndex($persons);
-                $io->success(sprintf('Index de recherche mis à jour avec %s personnes indexées', count($persons)));
-            } catch ( \Exception $e ){
-                $io->error($e->getMessage());
-            }
-        } else {
-            $io->warning("Pas de reconstruction d'index");
-        }
+//        $io->section("Reconstruction de l'index de recherche : ");
+//        if( !$input->getOption('no-rebuild') ){
+//            $io->warning("Fonctionnalité à venir");
+//            // TODO Indexation des organisations
+//
+////            /** @var OrganizationService $organizationService */
+////            $organizationService = $this->getServicemanager()->get(OrganizationService::class);
+////            try {
+////                $organizations = $organizationService->getOrganizations();
+////                $organizationService->getSearchEngineStrategy()->rebuildIndex($organizations);
+////                $io->success(sprintf('Index de recherche mis à jour avec %s personnes indexées', count($organizations)));
+////            } catch ( \Exception $e ){
+////                $io->error($e->getMessage());
+////            }
+//
+//
+//        } else {
+//            $io->warning("Pas de reconstruction d'index");
+//        }
 
 
     }

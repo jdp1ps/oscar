@@ -205,9 +205,8 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 foreach ($exist as $uid){
                     $personOscarToDelete = $personRepository->getPersonByConnectorID($this->getName(), $uid);
                     try {
-                        // todo Gérer les suppression
-                        // $personRepository->removePerson($personOscarToDelete);
-                        $repport->addremoved("Suppression (non implémentée) de $personOscarToDelete");
+                        $personRepository->removePerson($personOscarToDelete);
+                        $repport->addremoved("Suppression de $personOscarToDelete");
                     } catch (\Exception $e){
                         $repport->addwarning("$personOscarToDelete n'a pas été supprimé car il est actif dans les activités : " . $e->getMessage());
                     }

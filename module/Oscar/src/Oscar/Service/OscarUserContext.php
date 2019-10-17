@@ -117,15 +117,22 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      */
     public function getCurrentUserLog() :string
     {
-        if( $this->getCurrentPerson() ){
-            return sprintf('[P:%s] %s (%s)', $this->getCurrentPerson()->getId(), $this->getCurrentPerson()->getDisplayName(), $this->getAuthentificationMethod());
+        $person         = 'UNPERSON';
+        $identitifiant  = "NOUID";
+        $method         = 'UNLOG';
+
+        if ($this->getUserContext()->getLdapUser()) {
+            $method = 'LDAP';
+            $identitifiant = $this->getUserContext()->getLdapUser()->getSupannAliasLogin() ?? $this->getUserContext()->getLdapUser()->getUid();
+
+        } elseif ($this->getUserContext()->getDbUser()) {
+            $method = 'BDD';
+            $identitifiant = $this->getUserContext()->getDbUser()->getUsername();
         }
-        elseif ($this->getUserContext()->getIdentityUsername()) {
-            return sprintf('[UnPerson] %s (%s)', $this->getUserContext()->getIdentityUsername(), $this->getAuthentificationMethod());
-        }
-        else {
-            return 'Unlogged';
-        }
+
+        $person = $this->getPersonService()->getPersonByLdapLogin($identitifiant) ?? 'NoPerson';
+
+        return sprintf('[P:%s] %s (%s)', $person, $identitifiant, $method);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -536,7 +543,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 return $this->getPersonService()->getPersonByLdapLogin($this->getUserContext()->getDbUser()->getUsername());
             }
         } catch (NoResultException $ex) {
-            $this->getLoggerService()->error("getCurrentPerson() => " . $ex->getMessage());
+            // $this->getLoggerService()->warning("getCurrentPerson() => " . $ex->getMessage());
             // ... can happening with users stored in database directly
         }
         return null;

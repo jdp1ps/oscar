@@ -12,6 +12,9 @@ return array(
         // Par défaut, pas de socket
         'socket' => false,
 
+        // Rapports de synchronisation
+        'repport_directory' => __DIR__ .'/../../data/repports/',
+
         'theme' => 'oscar',
         'themes' => ['oscar', 'adaj', 'debug'],
 
