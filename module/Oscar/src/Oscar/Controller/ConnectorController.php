@@ -28,13 +28,15 @@ class ConnectorController extends AbstractOscarController
         $personId = $request->getQuery('v');
 
         $connectorsAvailabled = array_keys($this->getConfiguration('oscar.connectors.person'));
+
         if( ! in_array($connectorName, $connectorsAvailabled) ){
             return $this->getResponseBadRequest('Connecteur indisponible');
         } else {
-            /** @var Person $person */
-            $person = $this->getEntityManager()->getRepository(Person::class)->getPersonsByConnectorID($connectorName, $personId);
-            if( count($person) == 1 ){
-                $person = $person[0];
+            $personService = $this->getPersonService();
+            $persons = $personService->getRepository()->getPersonsByConnectorID($connectorName, $personId);
+
+            if( count($persons) == 1 ){
+                $person = $persons[0];
                 $class = $this->getConfiguration('oscar.connectors.person')[$connectorName]['class'];
                 $connector = $this->getServiceLocator()->get('ConnectorService')->getConnector('person.' . $connectorName);
                 $connector->syncPerson($person);
@@ -42,10 +44,10 @@ class ConnectorController extends AbstractOscarController
                 return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
             } else {
                 $match = [];
-                foreach($person as $p){
+                foreach($persons as $p){
                     $match[] = (string)$p;
                 }
-                throw new OscarException("Impossible de charger la personne.");
+                throw new OscarException("Plusieurs personne partage le connecteur ID '$personId' : " . implode(',', $match));
             }
         }
         return $this->getResponseNotImplemented('Synchronisation des personnes non implantée');

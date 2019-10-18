@@ -224,6 +224,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
     function syncPerson(Person $person)
     {
+
         if ($person->getConnectorID($this->getName())) {
 
             $url = sprintf($this->getParameter('url_person'), $person->getConnectorID($this->getName()));
