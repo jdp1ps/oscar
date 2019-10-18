@@ -9,12 +9,15 @@
 namespace Oscar\Command;
 
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\SchemaValidator;
 use Moment\Moment;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
 use Oscar\Entity\Role;
 use Oscar\OscarVersion;
+use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
@@ -27,10 +30,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Yaml\Parser;
+use Zend\Config\Reader\Yaml;
 
 class OscarCheckConfigCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:check:search';
+    protected static $defaultName = 'oscar:check:config';
 
     protected function configure()
     {
@@ -60,19 +65,15 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         $configEditablePath = 'config/autoload/oscar-editable.yml';
         $configEditablePathReal = realpath($rootPath.$configEditablePath);
 
-
-
-
-
-
         $io->writeln("N°Version : <bold>". OscarVersion::getBuild() ."</bold>");
+        $io->writeln("Configuration : <bold>". $configPathReal ."</bold>");
+        $io->writeln("System : <bold>".php_uname()."</bold>");
 
 
         $io->section("PHP Requirements : ");
         //php_ini_loaded_file
-        $io->writeln(" - System : <bold>".php_uname()."</bold>");
 
-        $io->writeln(" - PHP version : <bold>".PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION."</bold> (<bold>".phpversion()."</bold>)");
+        $io->write(" - PHP version : <bold>".PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION."</bold> (<bold>".phpversion()."</bold>)");
         if( PHP_VERSION_ID < 70000 ) {
             $io->error('Major version required !');
             return;
@@ -80,83 +81,67 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         else
             $io->write("<green>OK</green>\n");
 
-        $io->writeln(" - php.ini ");
+        $io->writeln("\n - php.ini ");
         $io->writeln(php_ini_loaded_file());
 
-        $io->section("Modules PHP");
+        $io->section("Modules");
 
-        $this->checkModule('bz2', $io);
-        $this->checkModule('curl', $io);
-        $this->checkModule('fileinfo', $io);
-        $this->checkModule('gd', $io);
-        $this->checkModule('iconv', $io);
-        $this->checkModule('json', $io);
-        $this->checkModule('ldap', $io, 'warn');
-        $this->checkModule('mbstring', $io);
-        $this->checkModule('openssl', $io);
-        $this->checkModule('pdo_pgsql', $io);
-        $this->checkModule('posix', $io, 'warn');
-        $this->checkModule('Reflection', $io);
-        $this->checkModule('session', $io);
-        $this->checkModule('xml', $io);
-        $this->checkModule('zip', $io);
-        $this->checkModule('toto', $io);
 
-        $io->writeln("");
-        $io->writeln(" ### OSCAR configuration : ");
 
-        $io->write(" * Fichier de configuration ");
-        $io->write($configPath);
-        $io->write(" ... ");
+        $modulesRequires = ['bz2', 'curl', 'fileinfo', 'gd', 'iconv', 'json', 'ldap', 'mbstring', 'openssl', 'pdo_pgsql', 'posix', 'Reflection', 'session', 'xml', 'zip', 'toto'];
+        foreach ($modulesRequires as $moduleName) {
+            $row[] = $this->checkModule($moduleName, $io);
+        }
+
+        $io->table(['Modules PHP', 'Version', 'Statut'], $row);
+
+        $io->section(" OSCAR configuration : ");
+
+        $io->write(" - Configuration LOCAL <bold>$configPath</bold> : ");
 
         if( $configPathReal && !file_exists($configPathReal) ){
-            $io->writeln("ERROR");
-            $this->consoleError("Le fichier de configuration '$configPath' n'existe pas/n'est pas accessible");
+            $io->error("ERROR : Le fichier de configuration '$configPath' n'existe pas/n'est pas accessible");
             return;
         }
-        $io->writeln("$configPathReal OK");
+        $io->writeln("<green>OK</green>");
 
-        $io->write(" * Fichier de configuration éditable ");
-        $io->write($configEditablePath);
-        $io->write(" ... ");
-
+        $io->write(" - Configuration éditable (<bold>$configEditablePath</bold>) :  ");
         if( $configEditablePathReal && !file_exists($configEditablePathReal) ){
-            $io->writeln("ERROR");
-            $this->consoleError("Le fichier de configuration '$configEditablePath' n'existe pas/n'est pas accessible");
+            $io->error("Le fichier de configuration n'existe pas/n'est pas accessible");
             return;
         }
         if( !is_writable($configEditablePath) ){
-            $io->writeln("ERROR");
-            $this->consoleError("Le fichier de configuration '$configEditablePath' n'est pas éditable");
+            $io->error("Le fichier de configuration n'est pas éditable");
             return;
         }
-        $io->writeln("$configEditablePathReal OK");
+        $io->writeln("<green>OK</green>");
 
-        // Chargement de la configuration
-        $example = require($configPath);
-        $config = new ConfigurationParser($example);
+
+
+        $config = new ConfigurationParser($this->getServicemanager()->get(OscarConfigurationService::class)->getConfigArray());
+        $em = $this->getServicemanager()->get(EntityManager::class);
 
         try {
             $io->write(" * Accès à la base de données ");
             $io->write($config->getConfiguration('doctrine.connection.orm_default.params.host'));
             $io->write(" ... ");
 
-            if ($this->getEntityManager()->getConnection()->isConnected()) {
+            if ($em->getConnection()->isConnected()) {
                 $io->writeln("OK");
             }
 
-            $validator = new SchemaValidator($this->getEntityManager());
+            $validator = new SchemaValidator($em);
             $errors = $validator->validateMapping();
 
             $io->write(" * Modèle de donnée ");
             if (count($errors) > 0) {
-                $this->consoleError("Obsolète");
+                $io->warning("Obsolète");
                 foreach( $errors as $error ){
-                    $this->consoleError(" - " . $error . " - " . print_r($error));
+                    $io->error(" - " . $error . " - " . print_r($error));
                 }
-                $this->consoleError("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
+                $io->error("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
             } else {
-                $this->consoleSuccess("OK");
+                $io->success("OK");
             }
 
         } catch (\Exception $e ){
@@ -166,39 +151,36 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // DOSSIERS / FICHIERS
         try {
-            $io->writeln("");
-            $io->writeln(" ### Emplacements des fichiers/Dossiers : ");
+            $io->section("Emplacements des fichiers/Dossiers : ");
 
             $pathDocuments = $config->getConfiguration('oscar.paths.document_oscar');
-            $this->checkPath($pathDocuments, "Stoquage des documents > ACTIVITÉS");
+            $this->checkPath($io, $pathDocuments, "Stoquage des documents > ACTIVITÉS");
 
             $pathDocuments = $config->getConfiguration('oscar.paths.document_admin_oscar');
-            $this->checkPath($pathDocuments, "Stoquage des documents > ADMINISTRATIFS");
+            $this->checkPath($io, $pathDocuments, "Stoquage des documents > ADMINISTRATIFS");
 
             $pathDocuments = $config->getConfiguration('oscar.paths.timesheet_modele');
-            $this->checkPath($pathDocuments, "Modèle de document > FEUILLE DE TEMPS");
+            $this->checkPath($io, $pathDocuments, "Modèle de document > FEUILLE DE TEMPS");
 
             $pathDocuments = $config->getConfiguration('oscar.mailer.template');
-            $this->checkPath($pathDocuments, "Modèle de mail > TEMPLATE");
+            $this->checkPath($io, $pathDocuments, "Modèle de mail > TEMPLATE");
 
         } catch ( OscarException $e ){
-            $this->consoleError(sprintf("Configuration manquante : %s", $e->getMessage()));
+            $io->error(sprintf("Configuration manquante : %s", $e->getMessage()));
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // MAILER
         try {
-            $io->writeln("");
-            $io->writeln(" ### Configuration du mailer : ");
+            $io->section(" ### Configuration du mailer : ");
 
             $urlAbsolute = $config->getConfiguration('oscar.urlAbsolute');
             $io->write(" * URL absolue : ");
             if( $urlAbsolute == "http://localhost:8080" ){
-                $io->write(' !DEV! ' . $urlAbsolute);
+                $io->write('<bold> !DEV! ' . $urlAbsolute .'</bold>');
             } else {
                 $io->write($urlAbsolute);
             }
-            $io->writeln("");
 
             $io->write(" * Transport : ");
             $typeTransport = $config->getConfiguration('oscar.mailer.transport.type');
@@ -229,19 +211,20 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $io->writeln("");
 
         } catch ( OscarException $e ){
-            $this->consoleError(sprintf("Configuration manquante : %s", $e->getMessage()));
+            $io->error(sprintf("Configuration manquante : %s", $e->getMessage()));
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// MOTEUR de RECHERCHE
-        $io->writeln("");
-        $io->writeln(" ### Système d'indexation des activités : ");
+
+        $io->section(" ### Système d'indexation des activités : ");
 
         try {
             $searchClass = $config->getConfiguration('oscar.strategy.activity.search_engine.class');
 
+
             // ELASTIC SEARCH
-            if( $searchClass == ActivityElasticSearch::class ){
+            if( $searchClass == 'Oscar\Strategy\Search\ActivityElasticSearch' ){
 
                 $io->write(" * Moteur Elastic Search ");
                 $nodesUrl = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
@@ -255,9 +238,9 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                     $infos = curl_exec($curl);
                     if( ($error = curl_error($curl)) ){
-                        $this->consoleError("Error : " . $error);
+                        $io->write("<error>Error : " . $error ."</error>");
                     } else {
-                        $this->consoleSuccess("OK (Response 200)");
+                        $io->write("<green>OK (Response 200)</green>");
                     }
                     curl_close($curl);
                 }
@@ -268,10 +251,10 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 $this->checkPath($params[0], "Dossier pour l'index de recherche LUCENE");
             }
             else {
-                $this->consoleWarn(" ~ INDEXEUR : Système de recherche non testable...");
+                $io->warning(" ~ INDEXEUR : Système de recherche non testable...");
             }
         } catch ( OscarException $e ){
-            $this->consoleError(sprintf(" ! INDEXEUR : Configuration du système de recherche incomplet : %s", $e->getMessage()));
+            $io->error(sprintf(" ! INDEXEUR : Configuration du système de recherche incomplet : %s", $e->getMessage()));
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,33 +263,30 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $connectorsOrganisation = $config->getConfiguration('oscar.connectors.organization');
             foreach ($connectorsOrganisation as $conn=>$params) {
                 $connecteurName = sprintf(" * CONNECTEUR ORGANISATION '%s'", $conn);
-                $io->writeln("");
-                $io->writeln(" ### Connecteur ORGANIZATION $conn : ");
+
+                $io->section(" ### Connecteur ORGANIZATION $conn : ");
                 $class = $config->getConfiguration("oscar.connectors.organization.$conn.class");
                 $params = $config->getConfiguration("oscar.connectors.organization.$conn.params");
 
-                if ($this->checkPath($params, "Fichier de configuration", 'r') ){
-                    $paramsPhp = Yaml::parse(file_get_contents($params));
-
-                    $io->write(" * Accès au connecteur ");
-                    $io->write($paramsPhp['url_organizations']);
-                    $io->write(" ... ");
-
+                if ($this->checkPath($io, $params, "Fichier de configuration", 'r') ){
+                    $parser = new Parser();
+                    $paramsPhp = $parser->parse(file_get_contents($params));
+                    $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_organizations']));
                     $curl = curl_init();
                     curl_setopt($curl, CURLOPT_URL, $paramsPhp['url_organizations']);
                     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                     $infos = curl_exec($curl);
                     if( ($error = curl_error($curl)) ){
-                        $this->consoleError($error);
+                        $io->write(" <error>ERROR : " . $error ."</error>");
                     } else {
-                        $this->consoleSuccess("OK");
+                        $io->write(" <green>OK</green>");
                     }
                     curl_close($curl);
                 }
             }
 
         } catch ( OscarException $e ){
-            $this->consoleWarn(sprintf(" ~ CONNECTOR > ORGANIZATION : Pas de connecteur organisation : %s", $e->getMessage()));
+            $io->warning(sprintf(" ~ CONNECTOR > ORGANIZATION : Pas de connecteur organisation : %s", $e->getMessage()));
         }
 
         try {
@@ -314,57 +294,73 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             foreach ($connectors as $conn=>$params) {
                 $connecteurName = sprintf(" * CONNECTEUR PERSON '%s'", $conn);
 
-                $io->writeln("");
-                $io->writeln(" ### Connecteur PERSON $conn : ");
+                $io->section(" ### Connecteur PERSON $conn : ");
 
 
                 $class = $config->getConfiguration("oscar.connectors.person.$conn.class");
                 $params = $config->getConfiguration("oscar.connectors.person.$conn.params");
 
-                if ($this->checkPath($params, "Fichier de configuration", 'r') ){
-                    $paramsPhp = Yaml::parse(file_get_contents($params));
+                if ($this->checkPath($io, $params, "Fichier de configuration", 'r') ){
+                    $parser = new Parser();
+                    $paramsPhp = $parser->parse(file_get_contents($params));
 
-                    $io->write(" * Accès au connecteur ");
-                    $io->write($paramsPhp['url_persons']);
-                    $io->write(" ... ");
+                    $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_persons']));
 
                     $curl = curl_init();
                     curl_setopt($curl, CURLOPT_URL, $paramsPhp['url_persons']);
                     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                     $infos = curl_exec($curl);
                     if( ($error = curl_error($curl)) ){
-                        $this->consoleError(" ! Connector no response : " . $error);
+                        $io->write(" <error>ERROR : " . $error ."</error>");
                     } else {
-                        $this->consoleSuccess("OK");
+                        $io->write(" <green>OK</green>");
                     }
                     curl_close($curl);
                 }
             }
 
         } catch ( OscarException $e ){
-            $this->consoleWarn(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
+            $io->warning(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
         }
+    }
+
+    protected function checkPath(SymfonyStyle $io, $path, $text, $level = 'error', $allowed = 'rw'){
+
+        $io->write(" - Path <bold>$path</bold> : ");
+
+        if( !file_exists($path) ){
+            $io->writeln("<error>Le chemin n'existe pas / inaccessible</error>");
+            return false;
+        }
+
+        if( !is_readable($path) ){
+            $io->writeln("<error>Chemin inaccessible en lecture.</error>");
+            return false;
+        }
+
+        if( strpos($allowed, 'w') > -1 && !is_writable($path) ){
+            $io->writeln("<error>Chemin inacessible en écriture.</error>");
+            return false;
+        }
+
+        $io->writeln("<green>OK!</green>");
+        return true;
     }
 
     protected function checkModule($module, SymfonyStyle $io, $level = 'error'){
 
         $badOut = $level == 'warn' ? 'warning' : 'error';
-
         $msg = $level == 'warn' ? "WARNING" : "ERROR";
+        $out = [];
 
-        $io->write(" * Module PHP ");
-        $io->write("<bold>$module</bold>");
-        $io->write(' ('.phpversion($module).')');
-        $io->write(" ... ");
+        $out[] = "<bold>$module</bold>";
+        $out[] = phpversion($module) ?: '???';
 
         if( !extension_loaded($module) ){
-            if( $level == 'error' ){
-                $io->error("Missing $module !!!");
-            }
-            return false;
+            $out[] = "<error>Missing $module !!!</error>";
+        } else {
+            $out[] = "<green>Installed</green>";
         }
-
-        $io->write("<green>Installed</green>\n");
-        return true;
+        return $out;
     }
 }
