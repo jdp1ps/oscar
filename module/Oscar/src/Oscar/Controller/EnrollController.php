@@ -24,6 +24,10 @@ use Oscar\Entity\TraitRole;
 use Oscar\Exception\OscarException;
 use Oscar\Form\RoleForm;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\View\Model\ViewModel;
 
@@ -34,9 +38,9 @@ use Zend\View\Model\ViewModel;
  * Class EnrollController
  * @package Oscar\Controller
  */
-class EnrollController extends AbstractOscarController
+class EnrollController extends AbstractOscarController implements UsePersonService
 {
-
+    use UsePersonServiceTrait;
 
     /**
      * Retourne la liste des rôles éligibles selon l'association $class.

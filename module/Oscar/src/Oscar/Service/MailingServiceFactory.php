@@ -22,6 +22,8 @@ class MailingServiceFactory implements FactoryInterface
     {
         $s = new MailingService();
         $s->setEntityManager($container->get(EntityManager::class));
+        $s->setLoggerService($container->get('Logger'));
+        $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         return $s;
     }
 }

@@ -867,12 +867,12 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
     public function testMailingAction()
     {
         /** @var MailingService $mailer */
-        $mailer = $this->getServiceLocator()->get('MailingService');
+        $mailer = $this->getServiceContainer()->get(MailingService::class);
 
-        $administrators = $this->getConfiguration('oscar.mailer.administrators');
+        $administrators = $this->getOscarConfigurationService()->getConfiguration('mailer.administrators');
         $mails = implode(',', $administrators);
 
-        $this->consoleKeyValue("Envoi effectif", $this->getConfiguration('oscar.mailer.send') ? 'OUI' : 'NON');
+        $this->consoleKeyValue("Envoi effectif", $this->getOscarConfigurationService()->getConfiguration('mailer.send') ? 'OUI' : 'NON');
         $this->getConsole()->writeLine("Le mail de test va être envoyé aux adresses : ", ColorInterface::WHITE);
 
         foreach ($administrators as $mail => $text) {
@@ -886,7 +886,7 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
                 $message = $mailer->newMessage("Test de mail", [
                     'body' => "Si vous lisez ce message, c'est que la configuration de l'envoi de courriel fonctionne."
                     // Ou que vous êtes entrains de lire le code source
-                ])->setTo($this->getConfiguration('oscar.mailer.administrators'));
+                ])->setTo($this->getOscarConfigurationService()->getConfiguration('mailer.administrators'));
                 $mailer->send($message, true);
                 $this->consoleSuccess("Oscar a bien envoyé le mail de test");
             } catch (\Exception $err) {

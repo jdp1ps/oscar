@@ -561,9 +561,6 @@ return array(
                     ],
                 ],
 
-
-
-
                 // -------------------------------------------------------------
 
                 'oscar_search_update' => array(
@@ -818,7 +815,6 @@ return array(
 
         'invokables' => [
             'AccessResolverService' => AccessResolverService::class,
-            'MailingService' => \Oscar\Service\MailingService::class,
             'SessionService' => \Oscar\Service\SessionService::class,
         ],
 
@@ -829,6 +825,7 @@ return array(
             \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             'Logger' => \Oscar\Service\LoggerServiceFactory::class,
+            \Oscar\Service\MailingService::class => \Oscar\Service\MailingServiceFactory::class,
             \Oscar\Service\MilestoneService::class => \Oscar\Service\MilestoneServiceFactory::class,
             \Oscar\Service\NotificationService::class => \Oscar\Service\NotificationServiceFactory::class,
             \Oscar\Service\OrganizationService::class => \Oscar\Service\OrganizationServiceFactory::class,
@@ -860,7 +857,6 @@ return array(
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
-            'Enroll' => \Oscar\Controller\EnrollController::class,
             'ActivityType' => \Oscar\Controller\ActivityTypeController::class,
             'DateType' => \Oscar\Controller\DateTypeController::class,
             'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentController::class,
@@ -872,6 +868,7 @@ return array(
             'ActivityDate' => \Oscar\Controller\ActivityDateControllerFactory::class,
             'ActivityPayment' => \Oscar\Controller\ActivityPaymentControllerFactory::class,
             'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
+            \Oscar\Controller\EnrollController::class => \Oscar\Controller\EnrollControllerFactory::class,
             \Oscar\Controller\ConsoleController::class => \Oscar\Factory\OscarUseFactory::class,
             'Notification' => \Oscar\Controller\NotificationControllerFactory::class,
             'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
@@ -882,7 +879,8 @@ return array(
             'WorkPackage' => \Oscar\Controller\WorkPackageControllerFactory::class,
         ],
         "aliases" => [
-            'Console' => \Oscar\Controller\ConsoleController::class
+            'Console' => \Oscar\Controller\ConsoleController::class,
+            'Enroll' => \Oscar\Controller\EnrollController::class
         ]
     ),
 

@@ -15,6 +15,8 @@ use Oscar\Strategy\Mailer\Swift_Transport_FileOutput;
 use Oscar\Strategy\Mailer\SwiftTransportFileOutput;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Utils\StringUtils;
@@ -29,9 +31,9 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  * Class MailingService
  * @package Oscar\Service
  */
-class MailingService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface, UseEntityManager, UseOscarConfigurationService
+class MailingService implements UseEntityManager, UseOscarConfigurationService, UseLoggerService
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait, UseEntityManagerTrait, UseOscarConfigurationServiceTrait;
+    use UseEntityManagerTrait, UseOscarConfigurationServiceTrait, UseLoggerServiceTrait;
 
     /**
      * Retourne la configuration Oscar pour l'envoi des mails.
@@ -105,7 +107,7 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
     public function newMessage( $subject = "", $content = []){
         $msg = new \Swift_Message();
         $msg->setFrom($this->getOscarConfigurationService()->getConfiguration('mailer.from'))
-            ->setSubject($this->getOscarConfigurationService()->getConfiguration('subjectPrefix') . $subject)
+            ->setSubject($this->getOscarConfigurationService()->getConfiguration('mailer.subjectPrefix') . $subject)
         ;
         if( $content && is_array($content) && array_key_exists('body', $content) ){
             $body = $content['body'];
@@ -124,7 +126,7 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
      */
     public function getBodyTemplate( $body, $title=""){
         ob_start();
-        include $this->getOscarConfigurationService()->getConfiguration('template');
+        include $this->getOscarConfigurationService()->getConfiguration('mailer.template');
         return ob_get_clean();
     }
 
@@ -136,8 +138,9 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
      */
     public function send( \Swift_Message $msg ){
 
-        $send = $this->getOscarConfigurationService()->getConfiguration('send', false);
-        $exceptions = $this->getOscarConfigurationService()->getConfiguration('send_false_exception', []);
+        $send = $this->getOscarConfigurationService()->getConfiguration('mailer.send', false);
+        $exceptions = $this->getOscarConfigurationService()->getConfiguration('mailer.send_false_exception', []);
+        $logger = $this->getLoggerService();
 
         if( $send == false ){
             // On test si le mail est dans l'exception
@@ -151,12 +154,12 @@ class MailingService implements ServiceLocatorAwareInterface, EntityManagerAware
                 if( count($newTo) ){
                     $msg->setTo($newTo)->setCc([]);
                     $this->getMailer()->send($msg);
-                    $this->getServiceLocator()->get('Logger')->info(sprintf(' + MAIL DISTRIBUÉ : %s', StringUtils::formatMail($msg->getTo())));
+                    $logger->info(sprintf(' + MAIL DISTRIBUÉ : %s', StringUtils::formatMail($msg->getTo())));
                 } else {
-                    $this->getServiceLocator()->get('Logger')->info(sprintf(' ~ Email pour %s non-distribué (Hors exceptions)', StringUtils::formatMail($msg->getTo())));
+                    $logger->info(sprintf(' ~ Email pour %s non-distribué (Hors exceptions)', StringUtils::formatMail($msg->getTo())));
                 }
             } else {
-                $this->getServiceLocator()->get('Logger')->info(sprintf(' ~ Email pour %s non distribué (Pas d\'exception)', StringUtils::formatMail($msg->getTo())));
+                $logger->info(sprintf(' ~ Email pour %s non distribué (Pas d\'exception)', StringUtils::formatMail($msg->getTo())));
             }
         } else {
             $this->getMailer()->send($msg);
