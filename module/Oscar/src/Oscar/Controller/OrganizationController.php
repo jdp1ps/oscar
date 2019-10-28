@@ -26,8 +26,14 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\OrganizationIdentificationForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OrganizationService;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseOrganizationService;
 use Oscar\Traits\UseOrganizationServiceTrait;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Traits\UseProjectService;
+use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Utils\EntityHydrator;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\PhpEnvironment\Request;
@@ -35,9 +41,9 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
-class OrganizationController extends AbstractOscarController implements UseOrganizationService
+class OrganizationController extends AbstractOscarController implements UseOrganizationService, UseProjectService, UseProjectGrantService, UseActivityLogService
 {
-    use UseOrganizationServiceTrait;
+    use UseOrganizationServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseActivityLogServiceTrait;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -358,7 +364,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             'connectors' => $this->getOrganizationService()->getConnectorsList(),
             'organization' => $this->getOrganizationService()->getOrganization($organizationId),
             'projects' => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectOrganization($organizationId), $page),
-            'activities' => $this->getActivityService()->byOrganizationWithoutProject($organizationId),
+            'activities' => $this->getProjectGrantService()->byOrganizationWithoutProject($organizationId),
         ];
     }
 

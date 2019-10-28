@@ -283,7 +283,7 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         try {
             return $this->getClient()->update($params);
         } catch (Missing404Exception $e){
-            return $this->addActivity($organization);
+            return $this->add($organization);
         }
     }
 

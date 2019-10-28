@@ -135,16 +135,11 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         if( $this->cacheConnectors == null ){
             $this->cacheConnectors = [];
             // todo Utiliser le service qui gère l'accès à la configuration
-            $config = $this->getServiceLocator()->get('Config');
+            $config = $this->getOscarConfigurationService();
 
-            $paths = explode('.', 'oscar.connectors.organization');
-            foreach ($paths as $path) {
-                if( !isset($config[$path]) ){
-                    throw new \Exception("Clef $path absente dans la configuration");
-                }
-                $config = $config[$path];
-            }
-            $this->cacheConnectors = array_keys($config);
+            $connectors = $config->getConfiguration('connectors.organization');
+
+            $this->cacheConnectors = array_keys($connectors);
         }
         return $this->cacheConnectors;
     }
