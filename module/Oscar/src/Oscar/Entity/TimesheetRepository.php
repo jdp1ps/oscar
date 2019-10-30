@@ -29,6 +29,21 @@ class TimesheetRepository extends EntityRepository {
             ->getResult();
     }
 
+    /**
+     * Retourne le nombre de créneaux créés par le personne
+     * @param $personId
+     * @return mixed
+     */
+    public function countTimesheetsForPerson( $personId ){
+        $qb = $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->where('t.person = :person')
+            ;
+
+
+        return $qb->setParameter('person', $personId)->getQuery()->getSingleScalarResult();
+    }
+
 
     /**
      * Retourne la liste des déclarations qui ont un lot de travail.

@@ -191,6 +191,28 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
+    /**
+     * Retourne le nombre de créneau de la personne.
+     *
+     * @param $personId
+     * @return int
+     */
+    public function getPersonTimesheetsCount( $personId ){
+        return $this->getTimesheetRepository()->countTimesheetsForPerson($personId);
+    }
+
+    /**
+     * Retourne TRUE/FALSE si la personnes a déclarée des créneaux.
+     *
+     * @param $personId
+     * @return bool
+     */
+    public function getPersonHasTimesheets( $personId )
+    {
+        return  $this->getPersonTimesheetsCount($personId) > 0;
+    }
+
+
     public function getDatasDeclarations()
     {
         $output = [

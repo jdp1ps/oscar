@@ -599,6 +599,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getTimesheetService();
+        $hasTimesheets = $timesheetService->getPersonHasTimesheets($person->getId());
 
         if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson()) ){
             $allowTimesheet = true;
@@ -849,6 +850,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             'ldapRoles' => $roles,
             'scheduleEditable' => $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_MANAGE_SCHEDULE),
             'referents' => $referents,
+            'hasTimesheets' => $hasTimesheets,
             'manageHierarchie' => $manageHierarchie,
             'manageUsurpation' => $manageUsurpation,
             'declarationsToDo' => $declarations,

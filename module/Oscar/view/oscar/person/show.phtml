@@ -100,9 +100,13 @@
                                     <div class="data-label">Feuille de temps</div>
                                     <div class="data-value">
                                         <?php if( count($entity->getWorkPackages()) ): ?>
-                                            <a href="<?= $this->url('timesheet/excel') ?>?personid=<?= $entity->getId() ?>" >
+                                            <a href="<?= $this->url('timesheet/resume') ?>?person_id=<?= $entity->getId() ?>"
+                                                class="btn <?=  $hasTimesheets ? 'btn-primary' : 'btn-default disabled' ?>">
                                                 <i class="icon-calendar"></i>
-                                                Voir les feuilles de temps
+                                                Voir les feuilles de temps de <strong><?= $entity ?></strong>
+                                                <?php if(!$hasTimesheets): ?>
+                                                    <small>(N'a encore rien déclaré)</small>
+                                                <?php endif; ?>
                                             </a>
                                         <?php else: ?>
                                             Cette personne n'a pas été identifiée comme déclarant sur un lot de travail
