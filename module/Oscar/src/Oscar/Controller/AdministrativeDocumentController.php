@@ -65,7 +65,7 @@ class AdministrativeDocumentController extends AbstractOscarController
 
         $method = $this->getHttpXMethod();
         if( $method == "POST" ){
-            $this->getOscarUserContext()->check(Privileges::ADMINISTRATIVE_DOCUMENT_DELETE);
+            $this->getOscarUserContextService()->check(Privileges::ADMINISTRATIVE_DOCUMENT_DELETE);
             $sectionId = $this->params()->fromPost('section_id');
             $section = null;
             if( $sectionId )
@@ -90,7 +90,7 @@ class AdministrativeDocumentController extends AbstractOscarController
         return [
             'documents' => $this->getAdministrativeDocumentPacked(),
             'sections' => $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->findAll(),
-            'moveable' => $this->getOscarUserContext()->hasPrivileges(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE)
+            'moveable' => $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE)
         ];
     }
 
@@ -139,7 +139,7 @@ class AdministrativeDocumentController extends AbstractOscarController
             $docReplaced = null;
             $section = null;
             $defaultSection = null;
-            $person = $this->getOscarUserContext()->getCurrentPerson();
+            $person = $this->getOscarUserContextService()->getCurrentPerson();
 
 
             if ($docId) {
