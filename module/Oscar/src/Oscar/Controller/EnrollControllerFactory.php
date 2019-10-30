@@ -16,6 +16,8 @@ use Oscar\Service\ActivityLogService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
+use Oscar\Service\ProjectGrantService;
+use Oscar\Service\ProjectService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -31,6 +33,8 @@ class EnrollControllerFactory implements FactoryInterface
         $c->setLoggerService($container->get('Logger'));
 
         $c->setPersonService($container->get(PersonService::class));
+        $c->setProjectService($container->get(ProjectService::class));
+        $c->setProjectGrantService($container->get(ProjectGrantService::class));
         $c->setActivityLogService($container->get(ActivityLogService::class));
         return $c;
     }

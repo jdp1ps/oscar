@@ -28,6 +28,10 @@ use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Traits\UseProjectService;
+use Oscar\Traits\UseProjectServiceTrait;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\View\Model\ViewModel;
 
@@ -38,9 +42,9 @@ use Zend\View\Model\ViewModel;
  * Class EnrollController
  * @package Oscar\Controller
  */
-class EnrollController extends AbstractOscarController implements UsePersonService
+class EnrollController extends AbstractOscarController implements UsePersonService, UseProjectService, UseProjectGrantService
 {
-    use UsePersonServiceTrait;
+    use UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait;
 
     /**
      * Retourne la liste des rôles éligibles selon l'association $class.
@@ -180,11 +184,11 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
             // Mise à jour de l'index
             if( get_class($enroll->getEnroller()) == Activity::class ){
-                $this->getActivityService()->searchUpdate($enroll->getEnroller());
+                $this->getProjectGrantService->searchUpdate($enroll->getEnroller());
             }
             if( get_class($enroll->getEnroller()) == Project::class ){
                 foreach ($enroll->getEnroller()->getActivities() as $activity) {
-                    $this->getActivityService()->searchUpdate($activity);
+                    $this->getProjectGrantService->searchUpdate($activity);
                 }
             }
 
@@ -531,7 +535,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             if( $enroller->getProject() ){
                 $this->getProjectService()->searchUpdate($enroller->getProject());
             } else {
-                $this->getActivityService()->searchUpdate($enroller);
+                $this->getProjectGrantService->searchUpdate($enroller);
             }
         } else {
             $this->getLogger()->error(sprintf("Impossible d'actualiser %s avec le context '%s", $enroller, $context));

@@ -8,6 +8,7 @@
  */
 namespace Oscar\Service;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use Monolog\Logger;
 use mysql_xdevapi\Exception;
@@ -19,6 +20,8 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -29,18 +32,40 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  * Cette classe fournit des automatismes liés à la manipulation et la
  * consultation des projets.
  */
-class ProjectService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class ProjectService implements UseServiceContainer
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////// ACCES SERVICES
+
+    use UseServiceContainerTrait;
+
+    public function getServiceLocator(){
+        return $this->getServiceContainer();
+    }
 
     /**
      * @return Logger
      */
     public function getLogger()
     {
-        return $this->getServiceLocator()->get('Logger');
+        return $this->getServiceContainer()->get('Logger');
     }
 
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(){
+        return $this->getServiceContainer()->get(ProjectGrantService::class);
+    }
+
+    /**
+     * @return EntityManager
+     */
+    public function getEntityManager(){
+        return $this->getServiceContainer()->get(EntityManager::class);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function fixMovePartnersToActivities( Project $project, $flush =
     true )
@@ -265,7 +290,7 @@ class ProjectService implements ServiceLocatorAwareInterface, EntityManagerAware
     public function searchUpdate( Project $project )
     {
         /** @var ProjectGrantService $activityService */
-        $activityService = $this->getServiceLocator()->get("ActivityService");
+        $activityService = $this->getProjectGrantService();
 
         foreach($project->getActivities() as $activity ){
             $activityService->searchUpdate($activity);
@@ -278,7 +303,7 @@ class ProjectService implements ServiceLocatorAwareInterface, EntityManagerAware
      */
     public function search( $search )
     {
-        $idsProject = $this->getServiceLocator()->get('ActivityService')->searchProject($search);
+        $idsProject = $this->getProjectGrantService()->searchProject($search);
         return $qb = $this->getBaseQuery()
             ->where('p.id IN (:ids)')
             ->setParameter('ids', $idsProject);

@@ -20,6 +20,7 @@ class ProjectServiceFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $s = new ProjectService();
+        $s->setServiceContainer($container);
         return $s;
     }
 }
