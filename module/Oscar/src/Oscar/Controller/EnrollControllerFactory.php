@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Oscar\Service\ActivityLogService;
+use Oscar\Service\NotificationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
@@ -36,6 +37,7 @@ class EnrollControllerFactory implements FactoryInterface
         $c->setProjectService($container->get(ProjectService::class));
         $c->setProjectGrantService($container->get(ProjectGrantService::class));
         $c->setActivityLogService($container->get(ActivityLogService::class));
+        $c->setNotificationService($container->get(NotificationService::class));
         return $c;
     }
 

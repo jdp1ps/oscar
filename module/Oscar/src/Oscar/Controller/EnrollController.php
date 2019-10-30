@@ -26,6 +26,8 @@ use Oscar\Form\RoleForm;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
+use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
@@ -42,9 +44,9 @@ use Zend\View\Model\ViewModel;
  * Class EnrollController
  * @package Oscar\Controller
  */
-class EnrollController extends AbstractOscarController implements UsePersonService, UseProjectService, UseProjectGrantService
+class EnrollController extends AbstractOscarController implements UsePersonService, UseProjectService, UseProjectGrantService, UseNotificationService
 {
-    use UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait;
+    use UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait;
 
     /**
      * Retourne la liste des rôles éligibles selon l'association $class.
