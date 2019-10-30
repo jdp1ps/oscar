@@ -7,7 +7,9 @@
 
 namespace Oscar\Service;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\ResultSetMapping;
+use Monolog\Logger;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Person;
@@ -17,6 +19,8 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenAuth\Service\UserContext;
@@ -24,10 +28,44 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use ZfcUser\Mapper\UserInterface;
 
-class ActivityLogService implements UseOscarUserContextService, UseEntityManager, UseLoggerService {
+class ActivityLogService implements UseServiceContainer {
 
-    use UseOscarUserContextServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait;
+    // Pour ce service, j'utilise directement le container
+    // afin d'éviter les références cyclique que Zend ne
+    // gère pas nativement.
+    // J'ai fait des recherches sur des composants tiers
+    // (PHP-DI) mais le manque de documentation sur le sujet
+    // méritera d'y consacrer du temps (quand on en aura à perdre)
+    use UseServiceContainerTrait;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return OscarUserContext
+     */
+    public function getOscarUserContextService(){
+        return $this->getServiceContainer()->get(OscarUserContext::class);
+    }
+
+    /**
+     * @return EntityManager
+     */
+    public function getEntityManager(){
+        return $this->getServiceContainer()->get(EntityManager::class);
+    }
+
+    /**
+     * @return Logger
+     */
+    public function getLogger(){
+        return $this->getServiceContainer()->get('Logger');
+    }
+
+    public function getLoggerService(){
+        return $this->getLogger();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * @return \UnicaenAuth\Entity\Ldap\People
      */
