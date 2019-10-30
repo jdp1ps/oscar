@@ -856,7 +856,6 @@ return array(
         'invokables' => array(
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
-            'ContractDocument' => \Oscar\Controller\ContractDocumentController::class,
             'ActivityType' => \Oscar\Controller\ActivityTypeController::class,
             'DateType' => \Oscar\Controller\DateTypeController::class,
             'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentController::class,
@@ -870,6 +869,7 @@ return array(
             'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
             \Oscar\Controller\EnrollController::class => \Oscar\Controller\EnrollControllerFactory::class,
             \Oscar\Controller\ConsoleController::class => \Oscar\Factory\OscarUseFactory::class,
+            'ContractDocument' => \Oscar\Controller\ContractDocumentControllerFactory::class,
             'Notification' => \Oscar\Controller\NotificationControllerFactory::class,
             'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
             'Project' => \Oscar\Controller\ProjectControllerFactory::class,

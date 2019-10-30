@@ -13,8 +13,13 @@ use Oscar\Entity\ContractDocument;
 use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ActivityLogService;
 use Oscar\Service\ContractDocumentService;
+use Oscar\Service\NotificationService;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Request;
 use Zend\Json\Server\Exception\HttpException;
@@ -25,8 +30,44 @@ use Zend\View\Model\JsonModel;
  * Class ContractDocumentController
  * @package Oscar\Controller
  */
-class ContractDocumentController extends AbstractOscarController
+class ContractDocumentController extends AbstractOscarController implements UseServiceContainer
 {
+
+    use UseServiceContainerTrait;
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getActivityService(){
+        return $this->getServiceContainer()->get(ProjectGrantService::class);
+    }
+
+    /**
+     * @return \Oscar\Service\OscarUserContext
+     */
+    public function getOscarUserContext(){
+        return $this->getOscarUserContextService();
+    }
+
+    /**
+     * @return \Psr\Container\ContainerInterface
+     */
+    public function getServiceLocator(){
+        return $this->getServiceContainer();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNotificationService() {
+        return $this->getServiceContainer()->get(NotificationService::class);
+    }
+
+    public function getActivityLogService(): ActivityLogService
+    {
+        return $this->getServiceContainer()->get(ActivityLogService::class);
+    }
+
 
     private $versionnedDocumentService;
 
@@ -44,7 +85,7 @@ class ContractDocumentController extends AbstractOscarController
      * @return ContractDocumentService
      */
     protected function getContractDocumentService(){
-        return $this->getServiceLocator()->get('ContractDocumentService');
+        return $this->getServiceContainer()->get(ContractDocumentService::class);
     }
 
     /**
@@ -192,7 +233,7 @@ class ContractDocumentController extends AbstractOscarController
             return [
                 'activity' => $activity,
                 'data'  => $datas,
-                'types' => $this->getServiceLocator()->get('ContractDocumentService')->getContractDocumentTypes()
+                'types' => $this->getContractDocumentService()->getContractDocumentTypes()
             ];
         } catch( \Exception $e ){
             throw new OscarException($e->getMessage());
@@ -204,7 +245,7 @@ class ContractDocumentController extends AbstractOscarController
     {
         $idDoc = $this->params()->fromRoute('id');
         /** @var ContractDocument $doc */
-        $doc = $this->getServiceLocator()->get('ContractDocumentService')->getDocument($idDoc)->getQuery()->getSingleResult();
+        $doc = $this->getContractDocumentService()->getDocument($idDoc)->getQuery()->getSingleResult();
 
 
         $activity = $doc->getGrant();
@@ -223,14 +264,5 @@ class ContractDocumentController extends AbstractOscarController
     public function showAction()
     {
         return $this->getResponseNotImplemented();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    /**
-     * @return ContractDocumentService
-     */
-    protected function contractDocumentService()
-    {
-        return $this->getServiceLocator()->get('ContractDocumentService');
     }
 }
