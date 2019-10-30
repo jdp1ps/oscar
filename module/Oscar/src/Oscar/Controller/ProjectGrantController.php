@@ -50,6 +50,8 @@ use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\PhpEnvironment\Request;
@@ -63,10 +65,10 @@ use Zend\View\Model\ViewModel;
  *
  * @package Oscar\Controller
  */
-class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService
+class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService, UseServiceContainer
 {
 
-    use UseNotificationServiceTrait, UsePersonServiceTrait;
+    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -693,6 +695,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         //////////////////////////////////////////////////////
         //////////////////////////////////////////////////////
         $form = new ProjectGrantForm();
+        $form->setServiceContainer($this->getServiceContainer());
         $form->setNumbers($numerotationKeys, $numerotationEditable);
         // TODO Transmettre les services au formulaire
 
@@ -1230,12 +1233,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $numerotationEditable = $this->getOscarConfigurationService()->getNumerotationEditable();
 
         $form = new ProjectGrantForm();
+        $form->setServiceContainer($this->getServiceContainer());
         $form->setNumbers($numerotationKeys, $numerotationEditable);
         ///////////////////////////////////////////////////////////////
         // TODO Transmettre les service au ProjectGrantForm
         // $form->setServiceLocator($this->getServiceLocator());
         ///////////////////////////////////////////////////////////////
-        $form->init();
+
         $form->setObject($projectGrant);
 
         /** @var Request $request */

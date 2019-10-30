@@ -9,7 +9,11 @@ namespace Oscar\Form;
 use Oscar\Entity\Activity;
 use Oscar\Entity\TimeSheet;
 use Oscar\Form\Element\KeyValue;
+use Oscar\Service\ActivityTypeService;
+use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\ProjectGrantService;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Validator\EOTP;
 use UnicaenApp\Util;
 use Zend\Filter\StringTrim;
@@ -19,10 +23,10 @@ use Oscar\Hydrator\ProjectGrantFormHydrator;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class ProjectGrantForm extends Form implements InputFilterProviderInterface, ServiceLocatorAwareInterface
+class ProjectGrantForm extends Form implements InputFilterProviderInterface, UseServiceContainer
 {
 
-    use ServiceLocatorAwareTrait;
+    use UseServiceContainerTrait;
 
     private $numbers;
     private $editable;
@@ -32,15 +36,22 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
         $this->editable = $editable;
     }
 
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(){
+        return $this->getServiceContainer()->get(ProjectGrantService::class);
+    }
+
     public function init()
     {
         $hydrator = new ProjectGrantFormHydrator();
         $hydrator->setNumbers($this->numbers);
-        $hydrator->setServiceLocator($this->getServiceLocator());
+        $hydrator->setServiceContainer($this->getServiceContainer());
         $this->setHydrator($hydrator);
 
         /** @var ProjectGrantService $grantService */
-        $grantService = $this->getServiceLocator()->get('ProjectGrantService');
+        $grantService = $this->getServiceContainer()->get(ProjectGrantService::class);
 
         $this->add([
             'type' => 'Hidden',
@@ -80,7 +91,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'name'   => 'disciplines',
             'options' => [
                 'label' => _('Discipline(s)'),
-                'value_options' => $this->getServiceLocator()->get('ProjectGrantService')->getDisciplines()
+                'value_options' => $this->getProjectGrantService()->getDisciplines()
             ],
             'attributes' => [
                 'class' => 'form-control select2',
@@ -94,7 +105,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'name'   => 'status',
             'options' => [
                 'label' => 'Statut',
-                'value_options' => $this->getServiceLocator()->get('ProjectGrantService')->getStatus()
+                'value_options' => $this->getProjectGrantService()->getStatus()
             ],
             'attributes' => [
                 'class' => 'form-control'
@@ -120,7 +131,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'name'   => 'activityType',
             'options' => [
                 'label' => _("Type d'activité"),
-                'value_options' => $this->getServiceLocator()->get('ActivityTypeService')->getActivityTypes(true)
+                'value_options' => $this->getServiceContainer()->get(ActivityTypeService::class)->getActivityTypes(true)
             ],
             'attributes' => [
                 'class' => 'form-control'
@@ -147,7 +158,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'name'   => 'tva',
             'options' => [
                 'label' => "TVA",
-                'value_options' => $this->getServiceLocator()->get('ProjectGrantService')->getTVAsValuesOptions()
+                'value_options' => $this->getProjectGrantService()->getTVAsValuesOptions()
             ],
             'attributes' => [
                 'class' => 'form-control'
@@ -289,7 +300,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
             'name'   => 'type',
             'options' => [
                 'label' => 'Type de convention',
-                'value_options' => $this->getServiceLocator()->get('ProjectGrantService')->getTypes()
+                'value_options' => $this->getProjectGrantService()->getTypes()
             ],
             'attributes' => [
                 'class' => 'form-control'
@@ -328,7 +339,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Ser
                     ['name' => StringTrim::class],
                 ],
                 'validators' => [
-                    new EOTP($this->getServiceLocator()->get('Config')['oscar']['validation']['pfi']),
+                    new EOTP($this->getServiceContainer()->get(OscarConfigurationService::class)->getConfiguration('validation.pfi')),
                 ]
             ],
 

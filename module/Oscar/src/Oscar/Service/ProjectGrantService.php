@@ -13,6 +13,7 @@ use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ActivityType;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
 use Oscar\Entity\Discipline;
@@ -47,6 +48,8 @@ use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\StringUtils;
 use Oscar\Validator\EOTP;
 use PHPUnit\Runner\Exception;
@@ -146,6 +149,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     protected function getActivityRepository()
     {
        return $this->getEntityManager()->getRepository(Activity::class);
+    }
+
+    public function getActivityTypeById( $activityTypeId ){
+        $this->getEntityManager()->getRepository(ActivityType::class)->find($activityTypeId);
     }
 
 

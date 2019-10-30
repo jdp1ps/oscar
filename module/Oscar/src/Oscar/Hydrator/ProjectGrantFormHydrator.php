@@ -10,15 +10,16 @@ namespace Oscar\Hydrator;
 use Oscar\Entity\Activity;
 use Oscar\Hydrator\Hydrator;
 use Oscar\Service\ProjectGrantService;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\DateTimeUtils;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\Hydrator\HydratorInterface;
 
-class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
+class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
 {
-
-    use ServiceLocatorAwareTrait;
+    use UseServiceContainerTrait;
 
     private $numbers;
 
@@ -98,14 +99,16 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
         return Activity::getFinancialImpactValues()[$index];
     }
 
+
+
     protected function getType( $typeId )
     {
-        return $this->getServiceLocator()->get('ProjectGrantService')->getType($typeId);
+        return $this->getProjectGrantService()->getType($typeId);
     }
 
     protected function getDisciplines( $disciplinesId )
     {
-        return $this->getServiceLocator()->get('ProjectGrantService')->getDisciplinesById($disciplinesId);
+        return $this->getProjectGrantService()->getDisciplinesById($disciplinesId);
     }
 
     protected function getTVA( $id )
@@ -115,12 +118,12 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
 
     protected function getActivityType( $typeId )
     {
-        return $this->getServiceLocator()->get('ActivityTypeService')->getActivityType($typeId);
+        return $this->getProjectGrantService()->getActivityTypeById($typeId);
     }
 
     protected function getCurrency( $currencyId )
     {
-        return $this->getServiceLocator()->get('ProjectGrantService')->getCurrency($currencyId);
+        return $this->getProjectGrantService()->getCurrency($currencyId);
     }
 
     /**
@@ -128,7 +131,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, ServiceLocatorAware
      */
     protected function getProjectGrantService()
     {
-        return $this->getServiceLocator()->get('ProjectGrantService');
+        return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
     /**
