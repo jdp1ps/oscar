@@ -23,7 +23,7 @@ class OscarUserContextFactory implements FactoryInterface
         $oscarUserContext = new OscarUserContext();
         $oscarUserContext->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $oscarUserContext->setUserContext($container->get(UserContext::class));
-        $oscarUserContext->setPersonService($container->get(PersonService::class));
+        $oscarUserContext->setServiceContainer($container);
         $oscarUserContext->setEntityManager($container->get(EntityManager::class));
         $oscarUserContext->setLoggerService($container->get("Logger"));
 

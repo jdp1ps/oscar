@@ -12,6 +12,7 @@ namespace Oscar\Service;
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseOscarUserContextService;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 class PersonServiceFactory extends AbstractServiceFactory implements FactoryInterface
@@ -19,8 +20,13 @@ class PersonServiceFactory extends AbstractServiceFactory implements FactoryInte
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $s = new PersonService();
-        $s->setActivityLogService($container->get(ActivityLogService::class));
-        $s = $this->init($s, $container);
+      //  $s->setServiceContainer($container);
+//        //$s->setActivityLogService($container->get(ActivityLogService::class));
+        $s->setOscarUserContextService($container->get(OscarUserContext::class));
+        $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));
+        $s->setEntityManager($container->get(EntityManager::class));
+        $s->setLoggerService($container->get('Logger'));
+//        //$s = $this->init($s, $container);
 
         return $s;
     }

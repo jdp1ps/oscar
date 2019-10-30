@@ -40,6 +40,8 @@ use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use UnicaenAuth\Acl\NamedRole;
 use UnicaenAuth\Service\UserContext;
 use Zend\Http\Request;
@@ -54,10 +56,10 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  *
  * @package Oscar\Service
  */
-class OscarUserContext implements UseOscarConfigurationService, UseLoggerService, UseEntityManager, UsePersonService
+class OscarUserContext implements UseOscarConfigurationService, UseLoggerService, UseEntityManager, UseServiceContainer
 {
 
-    use UseOscarConfigurationServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait, UsePersonServiceTrait;
+    use UseOscarConfigurationServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait, UseServiceContainerTrait;
 
 
     // Méthode d'authentification
@@ -78,6 +80,10 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     public function getUserContext(): UserContext
     {
         return $this->userContext;
+    }
+
+    public function getPersonService(){
+        return $this->getServiceContainer()->get(PersonService::class);
     }
 
     /**
