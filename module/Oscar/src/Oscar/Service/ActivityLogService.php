@@ -10,8 +10,10 @@ namespace Oscar\Service;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Monolog\Logger;
+use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\LogActivityRepository;
 use Oscar\Entity\Person;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
@@ -80,6 +82,8 @@ class ActivityLogService implements UseServiceContainer {
         return $this->getOscarUserContextService()->getUserContext()->getDbUser();
     }
 
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected function addActivity($message, $type, $level, $userId, $context, $contextId, $data)
@@ -130,6 +134,13 @@ class ActivityLogService implements UseServiceContainer {
             }
         }
         return $this->_currentPerson;
+    }
+
+    public function getAuthentificationActivities( $authentificationId, $limit=20 ){
+        /** @var ActivityLogRepository $repo */
+        $repo = $this->getEntityManager()->getRepository(LogActivity::class);
+
+        return $repo->getUserActivity($authentificationId, $limit);
     }
 
     public function addUserInfo($message, $context = 'Application', $contextId = -1, $level = LogActivity::LEVEL_ADMIN)

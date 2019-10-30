@@ -818,7 +818,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                 /** @var ActivityLogRepository $activityRepo */
                 $activityRepo = $this->getEntityManager()->getRepository(LogActivity::class);
 
-                $traces = $activityRepo->getUserActivity($auth->getId(), 20);
+                $traces = $this->getActivityLogService()->getAuthentificationActivities($auth->getId(), 20);
             }
         }
 
