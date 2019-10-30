@@ -20,6 +20,7 @@ use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
+use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -44,6 +45,7 @@ class ProjectGrantControllerFactory implements FactoryInterface
         $c->setTimesheetService($container->get(TimesheetService::class));
         $c->setActivityLogService($container->get(ActivityLogService::class));
         $c->setNotificationService($container->get(NotificationService::class));
+        $c->setPersonService($container->get(PersonService::class));
         return $c;
     }
 

@@ -48,6 +48,8 @@ use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\PhpEnvironment\Request;
@@ -61,10 +63,10 @@ use Zend\View\Model\ViewModel;
  *
  * @package Oscar\Controller
  */
-class ProjectGrantController extends AbstractOscarController implements UseNotificationService
+class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService
 {
 
-    use UseNotificationServiceTrait;
+    use UseNotificationServiceTrait, UsePersonServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -168,6 +170,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         $this->activityRequestService = $activityRequestService;
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
