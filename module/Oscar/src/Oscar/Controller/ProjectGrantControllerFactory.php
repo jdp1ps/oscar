@@ -16,6 +16,7 @@ use Monolog\Logger;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\ActivityTypeService;
+use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
@@ -42,6 +43,7 @@ class ProjectGrantControllerFactory implements FactoryInterface
         $c->setActivityTypeService($container->get(ActivityTypeService::class));
         $c->setTimesheetService($container->get(TimesheetService::class));
         $c->setActivityLogService($container->get(ActivityLogService::class));
+        $c->setNotificationService($container->get(NotificationService::class));
         return $c;
     }
 
