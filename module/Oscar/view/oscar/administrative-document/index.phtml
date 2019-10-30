@@ -79,7 +79,7 @@
                                     <?= $subdoc->getFileName() ?>,
                                     version <?= $subdoc->getVersion() ?></small></strong>,
                                 téléversé <time><?= $this->moment($subdoc->getDateUpdoad())->since() ?></time>
-                                par <span class="owner"><?= $subdoc->getPerson() ? $this->person($subdoc->getPerson()) : 'Anonymous' ?></span>
+                                par <span class="owner"><?= $subdoc->getPerson() ? $subdoc->getPerson() : 'Anonymous' ?></span>
                                 <?php if($downloadable): ?>
                             </a>
                         <?php endif; ?>

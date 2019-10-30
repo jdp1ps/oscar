@@ -13,11 +13,21 @@ use Oscar\Entity\AdministrativeDocument;
 use Oscar\Entity\AdministrativeDocumentSection;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ActivityLogService;
 use Oscar\Service\VersionnedDocumentService;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 
-class AdministrativeDocumentController extends AbstractOscarController
+class AdministrativeDocumentController extends AbstractOscarController implements UseServiceContainer
 {
+
+    use UseServiceContainerTrait;
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private $versionnedDocumentService;
+
+
 
 
 
@@ -31,7 +41,7 @@ class AdministrativeDocumentController extends AbstractOscarController
     protected function getDropLocation(){
         static $publicdoclocation;
         if( $publicdoclocation == null ){
-            $conf = realpath($this->getServiceLocator()->get('Config')['oscar']['paths']['document_admin_oscar']);
+            $conf = $this->getOscarConfigurationService()->getConfiguration('paths.document_admin_oscar');
             if( !file_exists($conf) || !is_writable($conf) ){
                 throw new OscarException("L'emplacement des documents n'est pas un dossier accessible en écriture");
             }

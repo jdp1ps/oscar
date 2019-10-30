@@ -12,6 +12,7 @@ namespace Oscar\Controller;
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
+use Oscar\Service\ActivityLogService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -26,6 +27,7 @@ class AdministrativeDocumentControllerFactory implements FactoryInterface
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $c->setEntityManager($container->get(EntityManager::class));
+        $c->setActivityLogService($container->get(ActivityLogService::class));
         return $c;
     }
 
