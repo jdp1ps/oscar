@@ -21,7 +21,7 @@ use Zend\View\Model\ViewModel;
 class ActivityTypeController extends AbstractOscarController implements UseActivityTypeService
 {
     use UseActivityTypeServiceTrait;
-    
+
     public function indexAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);

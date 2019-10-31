@@ -25,6 +25,9 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\OscarConfigurationService;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Traits\UseProjectServiceTrait;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Dumper;
@@ -35,8 +38,10 @@ use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
 use Zend\View\Model\ViewModel;
 
-class AdministrationController extends AbstractOscarController
+class AdministrationController extends AbstractOscarController implements UseProjectGrantService
 {
+    use UseProjectGrantServiceTrait;
+
     public function indexAction()
     {
         $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
@@ -166,7 +171,7 @@ class AdministrationController extends AbstractOscarController
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);
 
 
-        $invalidActivityNumbers = $this->getActivityService()->getActivitiesWithUnreferencedNumbers();
+        $invalidActivityNumbers = $this->getProjectGrantService()->getActivitiesWithUnreferencedNumbers();
 
         if( $this->isAjax() ) {
             $method = $this->getHttpXMethod();
@@ -233,7 +238,7 @@ class AdministrationController extends AbstractOscarController
             $method = $this->getHttpXMethod();
             switch ( $method ){
                 case 'GET':
-                    return $this->jsonOutput(['tvas' => $this->getActivityService()->getTVAsForJson()]);
+                    return $this->jsonOutput(['tvas' => $this->getProjectGrantService()->getTVAsForJson()]);
                     break;
 
                 case 'DELETE':
@@ -241,7 +246,7 @@ class AdministrationController extends AbstractOscarController
                         $id = $this->params()->fromQuery('id');
 
                         if( $id ){
-                            $tva = $this->getActivityService()->getTVA($id);
+                            $tva = $this->getProjectGrantService()->getTVA($id);
                             if( !$tva ){
                                 return $this->getResponseInternalError("Impossible de charger la TVA '$id'");
                             }
@@ -253,7 +258,7 @@ class AdministrationController extends AbstractOscarController
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError($e->getMessage());
                     }
-                    return $this->jsonOutput(['tvas' => $this->getActivityService()->getTVAsForJson()]);
+                    return $this->jsonOutput(['tvas' => $this->getProjectGrantService()->getTVAsForJson()]);
                     break;
 
                 case 'POST':
@@ -266,7 +271,7 @@ class AdministrationController extends AbstractOscarController
                         $rate = floatval($this->params()->fromPost('rate', 0.0));
 
                         if( $id ){
-                            $tva = $this->getActivityService()->getTVA($id);
+                            $tva = $this->getProjectGrantService()->getTVA($id);
                             if( !$tva ){
                                 throw new OscarException("Impossible de charger la TVA '$id'");
                             }
@@ -366,7 +371,7 @@ class AdministrationController extends AbstractOscarController
     public function activityIndexBuildAction(){
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SEARCH_BUILD);
         return [
-            'repport' => $this->getActivityService()->searchIndex_rebuild()
+            'repport' => $this->getProjectGrantService()->searchIndex_rebuild()
         ];
     }
 
@@ -403,7 +408,7 @@ class AdministrationController extends AbstractOscarController
                                 $this->getEntityManager()->remove($type);
                                 $this->getEntityManager()->flush();
                             } catch (ForeignKeyConstraintViolationException $e ){
-                                $this->getLogger()->error("Impossible de supprimer le type d'organisation: " . $e->getMessage());
+                                $this->getLoggerService()->error("Impossible de supprimer le type d'organisation: " . $e->getMessage());
                                 return $this->getResponseInternalError("Erreur : ce type d'organisation est encore utilisé.");
                             }
                             return $this->getResponseOk("Type supprimé");
@@ -962,13 +967,13 @@ class AdministrationController extends AbstractOscarController
 
 
     public function organizationRoleApiAction(){
-        $this->getLogger()->debug("> ORGANISATIONROLE API");
+        $this->getLoggerService()->debug("> ORGANISATIONROLE API");
         $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
         $roleId = $this->params('roleid', null);
         /** @var Request $request */
         $request = $this->getRequest();
         if( $roleId == null ){
-            $this->getLogger()->debug("Pas de ROLEID");
+            $this->getLoggerService()->debug("Pas de ROLEID");
             ////////////////////////////////////////////////////////////////////
             // GET : Liste des rôles
             if( $this->getHttpXMethod() == 'GET' ){
@@ -1024,11 +1029,9 @@ class AdministrationController extends AbstractOscarController
      */
     public function typeDocumentAction() {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
-        return new ViewModel(array(
-
-        ));
-
+        return new ViewModel([]);
     }
+
 
     public function typeDocumentApiAction() {
 
@@ -1061,9 +1064,9 @@ class AdministrationController extends AbstractOscarController
                 try {
                     $_PUT = $_POST;
                     $typeDocumentId = $_PUT['typedocumentid'];
-                    $this->getLogger()->info("INFO : typeDocumentActionApi() PUT mise à jour du type de document $typeDocumentId");
-                    $this->getLogger()->info(print_r($_POST, true));
-                    $typeDocument = $this->getActivityService()->getTypeDocument($typeDocumentId, true);
+                    $this->getLoggerService()->info("INFO : typeDocumentActionApi() PUT mise à jour du type de document $typeDocumentId");
+                    $this->getLoggerService()->info(print_r($_POST, true));
+                    $typeDocument = $this->getProjectGrantService()->getTypeDocument($typeDocumentId, true);
                     $typeDocument->setLabel($_PUT['label'])
                         ->setDescription($_PUT['description']);
                     $this->getEntityManager()->persist($typeDocument);
@@ -1071,13 +1074,13 @@ class AdministrationController extends AbstractOscarController
                     return $this->getResponseOk();
                 } catch (\Exception $e ){
                     $msg = sprintf(_("Impossible de mettre à jour le type de document %s : %s"), $typeDocument, $e->getMessage());
-                    $this->getLogger()->error($msg);
+                    $this->getLoggerService()->error($msg);
                     return $this->getResponseInternalError($msg);
                 }
 
             case 'DELETE' :
                 $typeDocumentId = $this->params()->fromQuery('typedocumentid');
-                $typeDocument = $this->getActivityService()->getTypeDocument($typeDocumentId, true);
+                $typeDocument = $this->getProjectGrantService()->getTypeDocument($typeDocumentId, true);
                 $this->getEntityManager()->remove($typeDocument);
                 $this->getEntityManager()->flush();
                 return $this->getResponseOk('le type de document a été supprimé.');
