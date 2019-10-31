@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Oscar\Entity\AdministrativeDocumentSectionRepository")
  */
 class AdministrativeDocumentSection
 {

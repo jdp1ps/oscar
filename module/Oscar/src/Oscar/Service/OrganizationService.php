@@ -8,12 +8,15 @@
  */
 namespace Oscar\Service;
 
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationType;
+use Oscar\Entity\OrganizationTypeRepository;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
@@ -439,5 +442,80 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         <?= $organizationB ?>
         </pre>
         <?php
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////// TYPES D'ORGANISATION
+    ///
+    public function updateOrCreateOrganizationType($datas){
+        $id = $datas['id'] ?? null;
+        $type = null;
+        if( $id ){
+            /** @var OrganizationType $urganizationType */
+            $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+        } else {
+            $type = new OrganizationType();
+            $this->getEntityManager()->persist($type);
+        }
+
+        $type->setLabel($datas['label']);
+        $type->setDescription($datas['description']);
+        $root = null;
+        $root_id = intval($datas['root_id']);
+
+        if( $root_id && $root_id != $type->getId() )
+            $root = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $root_id]);
+
+        $type->setRoot($root);
+        $this->getEntityManager()->flush();
+
+        return $type;
+    }
+
+    public function removeOrganizationType( $id ){
+        try {
+            /** @var OrganizationType $urganizationType */
+            $organizationType = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+
+            /** @var OrganizationType $t */
+            foreach ($organizationType->getChildren() as $t ){
+                $t->setRoot(null);
+            }
+
+            $this->getEntityManager()->flush();
+            $this->getEntityManager()->remove($organizationType);
+            $this->getEntityManager()->flush($organizationType);
+            return true;
+//                        $t->setRoot(null);
+//                    }
+
+        } catch (NoResultException $e){
+            throw new OscarException(sprintf(_("Impossible de charger le type d'organisation '%s'."), $id));
+        } catch (ForeignKeyConstraintViolationException $e ){
+            throw new OscarException(sprintf(_("Impossible de supprimer le type d'organisation '%s', il est encore utilisé."), $organizationType));
+        }
+
+//        if( $id ){
+//            $type = $this->getEntityManager()
+//                ->getRepository(OrganizationType::class)
+//                ->findOneBy(['id' => $id]);
+//            if( $type ){
+//                try {
+//                    foreach ($type->getChildren() as $t ){
+//                        $t->setRoot(null);
+//                    }
+//                    $this->getEntityManager()->flush();
+//                    $this->getEntityManager()->remove($type);
+//                    $this->getEntityManager()->flush();
+//                } catch (ForeignKeyConstraintViolationException $e ){
+//                    $this->getLoggerService()->error("Impossible de supprimer le type d'organisation: " . $e->getMessage());
+//                    return $this->getResponseInternalError("Erreur : ce type d'organisation est encore utilisé.");
+//                }
+//                return $this->getResponseOk("Type supprimé");
+//            } else {
+//                return $this->getResponseInternalError("Impossible de supprimer de type");
+//            }
+//
+//        }
+//        return $this->getResponseNotImplemented("En cours de développement");
+        throw new \Exception("A FAIRE !!");
     }
 }

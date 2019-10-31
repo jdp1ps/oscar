@@ -25,9 +25,15 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\OscarConfigurationService;
+use Oscar\Traits\UseAdministrativeDocumentService;
+use Oscar\Traits\UseAdministrativeDocumentServiceTrait;
+use Oscar\Traits\UseOrganizationService;
+use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Traits\UseProjectServiceTrait;
+use Oscar\Traits\UseTypeDocumentService;
+use Oscar\Traits\UseTypeDocumentServiceTrait;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Dumper;
@@ -38,9 +44,9 @@ use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
 use Zend\View\Model\ViewModel;
 
-class AdministrationController extends AbstractOscarController implements UseProjectGrantService
+class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService
 {
-    use UseProjectGrantServiceTrait;
+    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait;
 
     public function indexAction()
     {
@@ -51,6 +57,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
     public function documentSectionsAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
+
+
         return $this->oscarRest(
             function(){
                 return [
@@ -60,45 +68,22 @@ class AdministrationController extends AbstractOscarController implements UsePro
             // GET
             function(){
                 return [
-                    'sections' => $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->createQueryBuilder('s')->getQuery()->getArrayResult()
+                    'sections' => $this->getAdministrativeDocumentService()->getSections(true)
                 ];
             },
             // POST
             function(){
-                $id     = $this->params()->fromPost('id', null);
-                if( $id ){
-                    $section = $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->find($id);
-                    if( !$section ){
-                        throw new \Exception("Section introuvable");
-                    }
-                } else {
-                    $section = new AdministrativeDocumentSection();
-                    $this->getEntityManager()->persist($section);
-                }
-
-                $label  = $this->params()->fromPost('label');
-                $section->setLabel($label);
-                try {
-                    $this->getEntityManager()->flush($section);
-                    return ["response" => "Section enregistrée"];
-                } catch (\Exception $e ){
-                    throw new \Exception($e->getMessage());
-                }
+                $this->getAdministrativeDocumentService()->createOrUpdateSection($this->params()->fromPost());
+                return ["response" => "Section enregistrée"];
             },
             function(){
-                $id     = $this->params()->fromPost('id', null);
-
-                $section = $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->find($id);
-                if( !$section ){
-                    throw new \Exception("Section introuvable");
-                }
                 try {
-                    $this->getEntityManager()->remove($section);
-                    $this->getEntityManager()->flush($section);
-                } catch (\Exception $e ){
-                    throw $e;
+                    $id     = $this->params()->fromPost('id', null);
+                    $this->getAdministrativeDocumentService()->removeSection($id);
+                    return ["response" => "Section supprimée"];
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
                 }
-                return ["response" => "Section supprimée"];
 
             }
         );
@@ -139,9 +124,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 default:
                     return $this->getResponseBadRequest("Paramètres non-reconnue");
             }
-
-            echo $option;
-            die();
         }
 
         return [
@@ -388,73 +370,28 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();
-            switch( $method ){
-                case 'GET' :
-                    $datas['organizationtypes'] = $this->getOrganizationService()->getOrganizationTypes();
-                    return $this->ajaxResponse($datas);
+            try {
+                switch( $method ){
+                    case 'GET' :
+                        $datas['organizationtypes'] = $this->getOrganizationService()->getOrganizationTypes();
+                        return $this->ajaxResponse($datas);
 
-                case 'DELETE' :
-                    $id = $this->params()->fromRoute('id');
-                    if( $id ){
-                        $type = $this->getEntityManager()
-                            ->getRepository(OrganizationType::class)
-                            ->findOneBy(['id' => $id]);
-                        if( $type ){
-                            try {
-                                foreach ($type->getChildren() as $t ){
-                                    $t->setRoot(null);
-                                }
-                                $this->getEntityManager()->flush();
-                                $this->getEntityManager()->remove($type);
-                                $this->getEntityManager()->flush();
-                            } catch (ForeignKeyConstraintViolationException $e ){
-                                $this->getLoggerService()->error("Impossible de supprimer le type d'organisation: " . $e->getMessage());
-                                return $this->getResponseInternalError("Erreur : ce type d'organisation est encore utilisé.");
-                            }
-                            return $this->getResponseOk("Type supprimé");
-                        } else {
-                           return $this->getResponseInternalError("Impossible de supprimer de type");
-                        }
+                    case 'DELETE' :
+                        $id = $this->params()->fromRoute('id');
+                        $this->getOrganizationService()->removeOrganizationType($id);
+                        return $this->getResponseOk("Type d'organisation supprimée");
 
-                    }
-                    return $this->getResponseNotImplemented("En cours de développement");
+                    case 'POST' :
+                        $type = $this->getOrganizationService()->updateOrCreateOrganizationType($this->params()->fromPost());
+                        return $this->ajaxResponse([$type->toJson()]);
 
-                case 'POST' :
-                    $id = $this->params()->fromPost('id', null);
-                    $type = null;
-                    if( $id ){
-                        $type = $this->getEntityManager()
-                            ->getRepository(OrganizationType::class)
-                            ->findOneBy(['id' => $id]);
-                    }
-
-                    if( !$type ){
-                        $type = new OrganizationType();
-                        $this->getEntityManager()->persist($type);
-                    }
-
-                    $type->setLabel($this->params()->fromPost('label'));
-                    $type->setDescription($this->params()->fromPost('description'));
-                    $root = null;
-                    $root_id = intval($this->params()->fromPost('root_id'));
-
-                    if( $root_id && $root_id != $type->getId() )
-                            $root = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $root_id]);
-
-                    $type->setRoot($root);
-                    $this->getEntityManager()->flush();
-                    return $this->ajaxResponse([$type->toJson()]);
-
-                case 'PUT' :
-                    return $this->getResponseInternalError("La mise à jour n'est pas prise en charge.");
-
-                default:
-                    return $this->getResponseInternalError("Mauvaise utilisation de l'API");
+                    default:
+                        return $this->getResponseInternalError("Mauvaise utilisation de l'API");
+                }
+            } catch (\Exception $e) {
+                return $this->getResponseInternalError($e->getMessage());
             }
-
         }
-
-
         return $datas;
     }
 

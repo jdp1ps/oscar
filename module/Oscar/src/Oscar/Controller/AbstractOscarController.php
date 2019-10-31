@@ -73,39 +73,44 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
             return $default();
         } else {
             $method = $this->getHttpXMethod();
-
-
             $fakeAction = $this->params()->fromPost('action', null);
 
             if( $fakeAction == 'delete' ){
                 $method = 'DELETE';
             }
 
-            switch( $method ){
-                case "GET" :
-                    $datas = $get();
-                    break;
+            try {
+                switch( $method ){
+                    case "GET" :
+                        $datas = $get();
+                        break;
 
-                case "POST" :
-                    if( !is_callable($post) ) {
-                        return $this->getResponseNotImplemented();
-                    }
-                    $datas = $post();
-                    break;
+                    case "POST" :
+                        if( !is_callable($post) ) {
+                            return $this->getResponseNotImplemented();
+                        }
+                        $datas = $post();
+                        break;
 
-                case "DELETE" :
-                    if( !is_callable($delete) ) {
-                        return $this->getResponseNotImplemented();
-                    }
-                    $datas = $delete();
-                    break;
+                    case "DELETE" :
+                        if( !is_callable($delete) ) {
+                            return $this->getResponseNotImplemented();
+                        }
+                        try {
+                            $datas = $delete();
+                        }catch (\Exception $e){
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
+                        break;
 
-                default:
-                    return $this->getResponseBadRequest("Mauvaise méthod $method");
+                    default:
+                        return $this->getResponseBadRequest("Mauvaise méthod $method");
+                }
+                $datas['version'] = OscarVersion::getBuild();
+                return $this->jsonOutput($datas);
+            } catch (\Exception $e){
+                return $this->getResponseInternalError($e->getMessage());
             }
-
-            $datas['version'] = OscarVersion::getBuild();
-            return $this->jsonOutput($datas);
         }
     }
 

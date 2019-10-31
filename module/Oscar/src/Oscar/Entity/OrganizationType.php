@@ -13,7 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Class OrganizationType
  * @package Oscar\Entity
- * @ORM\Entity
+ * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Oscar\Entity\OrganizationTypeRepository")
  */
 class OrganizationType implements ITrackable
 {
@@ -139,6 +140,7 @@ class OrganizationType implements ITrackable
         return [
             'id' => $this->getId(),
             'label' => $this->getLabel(),
+            'description' => $this->getDescription(),
             'root_id' => $this->getRoot() ? $this->getRoot()->getId() : null,
             'children' => $children
         ];

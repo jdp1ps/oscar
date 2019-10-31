@@ -12,21 +12,27 @@ namespace Oscar\Factory;
 use Doctrine\ORM\EntityManager;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityTypeService;
+use Oscar\Service\AdministrativeDocumentService;
 use Oscar\Service\NotificationService;
+use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
+use Oscar\Service\TypeDocumentService;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityTypeService;
+use Oscar\Traits\UseAdministrativeDocumentService;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseOrganizationService;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectService;
+use Oscar\Traits\UseTypeDocumentService;
 use Psr\Container\ContainerInterface;
 
 abstract class AbstractOscarFactory
@@ -56,6 +62,7 @@ abstract class AbstractOscarFactory
             $service->setOscarUserContextService($container->get(OscarUserContext::class));
         }
 
+        // -------------------------------------------------------------------------------------------------------------
         // SERVICE MÉTIER
         if( is_subclass_of($service, UseActivityTypeService::class) ){
             $service->setActivityTypeService($container->get(ActivityTypeService::class));
@@ -71,6 +78,19 @@ abstract class AbstractOscarFactory
         if( is_subclass_of($service, UseProjectGrantService::class) ){
             $service->setProjectGrantService($container->get(ProjectGrantService::class));
         }
+
+        if( is_subclass_of($service, UseTypeDocumentService::class) ){
+            $service->setTypeDocumentService($container->get(TypeDocumentService::class));
+        }
+
+        if( is_subclass_of($service, UseAdministrativeDocumentService::class) ){
+            $service->setAdministrativeDocumentService($container->get(AdministrativeDocumentService::class));
+        }
+
+        if( is_subclass_of($service, UseOrganizationService::class) ){
+            $service->setOrganizationService($container->get(OrganizationService::class));
+        }
+
 
         // NOTIFICATION
         if( is_subclass_of($service, UseNotificationService::class) ){

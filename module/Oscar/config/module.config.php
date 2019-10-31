@@ -822,6 +822,7 @@ return array(
             \Oscar\Service\ActivityLogService::class => \Oscar\Service\ActivityLogServiceFactory::class,
             \Oscar\Service\ActivityRequestService::class => \Oscar\Service\ActivityRequestServiceFactory::class,
             \Oscar\Service\ActivityTypeService::class => \Oscar\Service\ActivityTypeServiceFactory::class,
+            \Oscar\Service\AdministrativeDocumentService::class => \Oscar\Service\AdministrativeDocumentServiceFactory::class,
             \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             'Logger' => \Oscar\Service\LoggerServiceFactory::class,
@@ -835,6 +836,7 @@ return array(
             \Oscar\Service\ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
             \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
+            \Oscar\Service\TypeDocumentService::class => \Oscar\Service\TypeDocumentServiceFactory::class,
             'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class,
             \Oscar\Service\UserParametersService::class => \Oscar\Service\UserParametersServiceFactory::class
         ),
