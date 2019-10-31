@@ -640,6 +640,10 @@ class TimesheetController extends AbstractOscarController
                 $personsIds[] = $person->getId();
             }
 
+            if( !$activity->getDateStart() || !$activity->getDateEnd() ){
+                throw new OscarException("Vous devez renseigner les dates de début et de fin de l'activité.");
+            }
+
             // Période
             $start  = $activity->getDateStart()->format('Y');
             $end    = $activity->getDateEnd()->format('Y');

@@ -20,8 +20,8 @@ class PersonServiceFactory extends AbstractServiceFactory implements FactoryInte
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $s = new PersonService();
-      //  $s->setServiceContainer($container);
-//        //$s->setActivityLogService($container->get(ActivityLogService::class));
+      //  $s->seServiceContainer($container);
+        $s->setActivityLogService($container->get(ActivityLogService::class));
         $s->setOscarUserContextService($container->get(OscarUserContext::class));
         $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $s->setEntityManager($container->get(EntityManager::class));

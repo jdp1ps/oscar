@@ -1120,7 +1120,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function updateActivityPayment( $data ){
         /** @var ActivityPayment $payment */
-        $payment = $this->getActivityPayment($this->params()->fromPost('id'));
+        $payment = $this->getActivityPayment($data['id']);
 
         $payment->setAmount($data['amount'])
             ->setComment($data['comment'])

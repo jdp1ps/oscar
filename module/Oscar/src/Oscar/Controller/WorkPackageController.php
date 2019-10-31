@@ -124,7 +124,7 @@ class WorkPackageController extends AbstractOscarController
 
 //            parse_str(file_get_contents('php://input'), $_PUT);
 //
-//            $this->getLogger()->info(print_r($_PUT, true));
+//            $this->>$this->getLoggerService()->info(print_r($_PUT, true));
 
             if( $data['workpackageid'] == -1) {
                 $code = trim($data['code']);
@@ -145,7 +145,7 @@ class WorkPackageController extends AbstractOscarController
                     return $this->getResponseInternalError('Impossible de créer le lot de travail.');
                 }
             } else {
-                $this->getLogger()->info(print_r($data['workpackageid'], true));
+                $this->getLoggerService()->info(print_r($data['workpackageid'], true));
 
             }
 
@@ -225,7 +225,7 @@ class WorkPackageController extends AbstractOscarController
                     return $this->getResponseInternalError('Ce lot de travail est déjà utilisé pour des déclarations');
                 }
                 catch( \Exception $e ){
-                    $this->getLogger()->error(get_class($e));
+                    $this->getLoggerService()->error(get_class($e));
                     return $this->getResponseInternalError('Impossible de supprimer le lot de travail. ' . $e->getMessage());
                 }
             }

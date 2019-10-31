@@ -63,7 +63,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         switch( $class ){
             case ActivityOrganization::class:
             case ProjectPartner::class:
-                $roles = $this->getOscarUserContext()->getRolesOrganizationInActivity();
+                $roles = $this->getOscarUserContextService()->getRolesOrganizationInActivity();
                 break;
 
             case ActivityPerson::class:
@@ -89,7 +89,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     private function closeEnroll($class){
 
-        $this->getOscarUserContext()->check(Privileges::PERSON_EDIT);
+        $this->getOscarUserContextService()->check(Privileges::PERSON_EDIT);
 
         /** @var OrganizationPerson $enroll */
         $enroll = $this->getEntityManager()->getRepository($class)->find($this->params()->fromRoute('idenroll'));
@@ -537,10 +537,10 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             if( $enroller->getProject() ){
                 $this->getProjectService()->searchUpdate($enroller->getProject());
             } else {
-                $this->getProjectGrantService->searchUpdate($enroller);
+                $this->getProjectGrantService()->searchUpdate($enroller);
             }
         } else {
-            $this->getLogger()->error(sprintf("Impossible d'actualiser %s avec le context '%s", $enroller, $context));
+            $this->getLoggerService()->error(sprintf("Impossible d'actualiser %s avec le context '%s", $enroller, $context));
         }
     }
 
@@ -632,7 +632,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
     public function organizationActivityNewAction()
     {
-        $this->getLogger()->debug("AJOUT D'une ORGANISATIOn dans une ACTIVITÉ");
+        $this->getLoggerService()->debug("AJOUT D'une ORGANISATIOn dans une ACTIVITÉ");
         return $this->saveEnroll(ActivityOrganization::class);
     }
 

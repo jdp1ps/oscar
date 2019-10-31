@@ -1236,8 +1236,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $form = new ProjectGrantForm();
         $form->setServiceContainer($this->getServiceContainer());
-        $form->init();
         $form->setNumbers($numerotationKeys, $numerotationEditable);
+        $form->init();
         ///////////////////////////////////////////////////////////////
         // TODO Transmettre les service au ProjectGrantForm
         // $form->setServiceLocator($this->getServiceLocator());
