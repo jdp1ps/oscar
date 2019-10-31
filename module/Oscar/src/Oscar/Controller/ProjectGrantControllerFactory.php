@@ -11,8 +11,6 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Monolog\Logger;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\ActivityTypeService;
@@ -31,21 +29,20 @@ class ProjectGrantControllerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $c = new ProjectGrantController($container->get(TimesheetService::class));
+        $c = new ProjectGrantController();
 
         $c->setLoggerService($container->get('Logger'));
         $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setEntityManager($container->get(EntityManager::class));
-        $c->setLoggerService($container->get('Logger'));
         $c->setActivityRequestService($container->get(ActivityRequestService::class));
         $c->setOrganizationService($container->get(OrganizationService::class));
-        $c->setActivityService($container->get(ProjectGrantService::class));
         $c->setActivityTypeService($container->get(ActivityTypeService::class));
         $c->setTimesheetService($container->get(TimesheetService::class));
         $c->setActivityLogService($container->get(ActivityLogService::class));
         $c->setNotificationService($container->get(NotificationService::class));
         $c->setPersonService($container->get(PersonService::class));
+        $c->setActivityService($container->get(ProjectGrantService::class));
         $c->setServiceContainer($container);
         return $c;
     }

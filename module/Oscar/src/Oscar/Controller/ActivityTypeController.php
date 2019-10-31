@@ -14,13 +14,17 @@ use Oscar\Entity\ActivityType;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseActivityTypeService;
+use Oscar\Traits\UseActivityTypeServiceTrait;
 use Zend\View\Model\ViewModel;
 
-class ActivityTypeController extends AbstractOscarController
+class ActivityTypeController extends AbstractOscarController implements UseActivityTypeService
 {
+    use UseActivityTypeServiceTrait;
+    
     public function indexAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);
         return [
             'distribution' => $this->getActivityTypeService()->distribution(),
             'entities' => $this->getActivityTypeService()->getActivityTypes()
@@ -30,7 +34,7 @@ class ActivityTypeController extends AbstractOscarController
     public function mergeAction()
     {
 
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);
 
         /** @var ActivityType $destination */
         $destination = $this->getActivityTypeService()->getActivityType($this->params()->fromRoute('id'));

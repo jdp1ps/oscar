@@ -11,6 +11,7 @@ namespace Oscar\Factory;
 
 use Doctrine\ORM\EntityManager;
 use Oscar\Service\ActivityLogService;
+use Oscar\Service\ActivityTypeService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
@@ -18,6 +19,7 @@ use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
 use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityTypeService;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseOscarConfigurationService;
@@ -34,41 +36,44 @@ abstract class AbstractOscarFactory
     {
 
         // Abstract Oscar Controller
-        if( class_implements($service, UseEntityManager::class) ){
+        if( is_subclass_of($service, UseEntityManager::class) ){
             $service->setEntityManager($container->get(EntityManager::class));
         }
 
-        if( class_implements($service, UseOscarConfigurationService::class) ){
+        if( is_subclass_of($service, UseOscarConfigurationService::class) ){
             $service->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         }
 
-        if( class_implements($service, UseLoggerService::class) ){
+        if( is_subclass_of($service, UseLoggerService::class) ){
             $service->setLoggerService($container->get('Logger'));
         }
 
-        if( class_implements($service, UseActivityLogService::class) ){
+        if( is_subclass_of($service, UseActivityLogService::class) ){
             $service->setActivityLogService($container->get(ActivityLogService::class));
         }
 
-        if( class_implements($service, UseOscarUserContextService::class) ){
+        if( is_subclass_of($service, UseOscarUserContextService::class) ){
             $service->setOscarUserContextService($container->get(OscarUserContext::class));
         }
 
         // SERVICE MÉTIER
-        if( class_implements($service, UsePersonService::class) ){
+        if( is_subclass_of($service, UseActivityTypeService::class) ){
+            $service->setActivityTypeService($container->get(ActivityTypeService::class));
+        }
+        if( is_subclass_of($service, UsePersonService::class) ){
             $service->setPersonService($container->get(PersonService::class));
         }
 
-        if( class_implements($service, UseProjectService::class) ){
+        if( is_subclass_of($service, UseProjectService::class) ){
             $service->setProjectService($container->get(ProjectService::class));
         }
 
-        if( class_implements($service, UseProjectGrantService::class) ){
+        if( is_subclass_of($service, UseProjectGrantService::class) ){
             $service->setProjectGrantService($container->get(ProjectGrantService::class));
         }
 
         // NOTIFICATION
-        if( class_implements($service, UseNotificationService::class) ){
+        if( is_subclass_of($service, UseNotificationService::class) ){
             $service->setNotificationService($container->get(NotificationService::class));
         }
 

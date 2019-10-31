@@ -50,6 +50,8 @@ use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseProjectService;
+use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\DateTimeUtils;
@@ -65,10 +67,10 @@ use Zend\View\Model\ViewModel;
  *
  * @package Oscar\Controller
  */
-class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService, UseServiceContainer
+class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService, UseServiceContainer, UseProjectService
 {
 
-    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait;
+    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -577,7 +579,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 ];
 
                             } catch (\Exception $e ){
-                                $this->getLogger()->error("Impossible d'enregistrer la demande d'activité : " . $e->getMessage());
+                                $this->getLoggerService()->error("Impossible d'enregistrer la demande d'activité : " . $e->getMessage());
                                 throw new OscarException("Impossible d'enregistrer le demande : " . $e->getMessage());
                             }
                         }
@@ -661,7 +663,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
 
         } catch (\Exception $e ){
-            $this->getLogger()->warning("Le template $doc ne contient pas de variable $key");
+            $this->getLoggerService()->warning("Le template $doc ne contient pas de variable $key");
         }
 
         $filename = 'oscar-' . $activity->getOscarNum().'-' . $doc. '.docx';
@@ -753,7 +755,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ['id' => $duplicated->getId()]);
 
         } catch (\Exception $e) {
-            $this->getLogger()->error($e->getMessage());
+            $this->getLoggerService()->error($e->getMessage());
             throw new OscarException($e->getMessage());
         }
     }
@@ -861,7 +863,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DELETE,
                 $projectGrant);
             $project = $projectGrant->getProject();
-            $this->getLogger()->info(sprintf('Suppression de %s - %s', $projectGrant, $projectGrant->getId()));
+            $this->getLoggerService()->info(sprintf('Suppression de %s - %s', $projectGrant, $projectGrant->getId()));
             $activity_id = $projectGrant->getId();
             try {
                 $this->getActivityService()->searchDelete($activity_id);
@@ -1171,7 +1173,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
                 fputcsv($handler, $datas);
             } else {
-                $this->getLogger()->warn("Pas le droit d'exporter : " . $entity->getId() . $entity->getLabel());
+                $this->getLoggerService()->warn("Pas le droit d'exporter : " . $entity->getId() . $entity->getLabel());
             }
         }
         fclose($handler);
@@ -1234,6 +1236,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $form = new ProjectGrantForm();
         $form->setServiceContainer($this->getServiceContainer());
+        $form->init();
         $form->setNumbers($numerotationKeys, $numerotationEditable);
         ///////////////////////////////////////////////////////////////
         // TODO Transmettre les service au ProjectGrantForm

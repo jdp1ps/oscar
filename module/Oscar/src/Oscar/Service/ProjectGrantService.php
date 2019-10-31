@@ -36,6 +36,8 @@ use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
+use Oscar\Traits\UseActivityTypeService;
+use Oscar\Traits\UseActivityTypeServiceTrait;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -48,18 +50,13 @@ use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
-use Oscar\Traits\UseServiceContainer;
-use Oscar\Traits\UseServiceContainerTrait;
-use Oscar\Utils\StringUtils;
+use Oscar\Traits\UseProjectService;
+use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Validator\EOTP;
 use PHPUnit\Runner\Exception;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService,
-    UseOscarUserContextService, UsePersonService, UseOrganizationService, UseActivityLogService
+class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService,
+    UseProjectService, UsePersonService, UseOrganizationService, UseActivityLogService, UseActivityTypeService
 {
     use UseOscarConfigurationServiceTrait,
         UseActivityLogServiceTrait,
@@ -67,7 +64,9 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         UseLoggerServiceTrait,
         UseOscarUserContextServiceTrait,
         UsePersonServiceTrait,
-        UseOrganizationServiceTrait
+        UseOrganizationServiceTrait,
+        UseActivityTypeServiceTrait,
+        UseProjectServiceTrait
         ;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES

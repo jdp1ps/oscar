@@ -11,22 +11,19 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
+use Oscar\Factory\AbstractOscarFactory;
+use Oscar\Traits\UseProjectGrantService;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class ProjectGrantServiceFactory implements FactoryInterface
+class ProjectGrantServiceFactory extends AbstractOscarFactory
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $s = new ProjectGrantService();
-        $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));
-        $s->setEntityManager($container->get(EntityManager::class));
-        $s->setLoggerService($container->get('Logger'));
-        $s->setOscarUserContextService($container->get(OscarUserContext::class));
-        $s->setPersonService($container->get(PersonService::class));
+        $this->init($s, $container);
         $s->setOrganizationService($container->get(OrganizationService::class));
         $s->setMilestoneService($container->get(MilestoneService::class));
         $s->setNotificationService($container->get(NotificationService::class));
-        $s->setActivityLogService($container->get(ActivityLogService::class));
         return $s;
     }
 }

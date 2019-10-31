@@ -131,7 +131,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'name'   => 'activityType',
             'options' => [
                 'label' => _("Type d'activité"),
-                'value_options' => $this->getServiceContainer()->get(ActivityTypeService::class)->getActivityTypes(true)
+                'value_options' => $this->getProjectGrantService()->getActivityTypes(true)
             ],
             'attributes' => [
                 'class' => 'form-control'
