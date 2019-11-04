@@ -54,6 +54,14 @@
                         {{ field.label }}
                     </label>
                 </div>
+
+                <h3 @click="selectSection(fieldsUI.computed)"><i class="icon-calendar"></i>Champs calculés</h3>
+                <div class="cols">
+                    <label v-for="field, i in fieldsUI.computed" class="col3">
+                        <input type="checkbox" :checked="field.selected"  @click="toggleField(field.label)"/>
+                        {{ field.label }}
+                    </label>
+                </div>
                 <hr>
                 <nav>
                     <a class="btn btn-default" @click="selectAll()">
@@ -69,7 +77,7 @@
 </template>
 <script>
 
-    // poi watch --format umd --moduleName  ActivitiesExport --filename.js ActivitiesExport.js --dist public/js/oscar/dist public/js/oscar/src/ActivitiesExport.vue
+    // nodjejs node_modules/.bin/poi watch --format umd --moduleName  ActivitiesExport --filename.js ActivitiesExport.js --dist public/js/oscar/dist public/js/oscar/src/ActivitiesExport.vue
 
     export default {
         props: {

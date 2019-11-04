@@ -44,6 +44,7 @@ use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
+use Oscar\Strategy\Activity\ExportDatas;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseNotificationService;
@@ -838,18 +839,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     public function generateNotificationsAction(){
-
         $entity = $this->getActivityFromRoute();
-
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
-
+        $this->getNotificationService()->generateNotificationsForActivity($entity);
         $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
-
-        /** @var NotificationService $serviceNotification */
-        $serviceNotification = $this->getNotificationService();
-
-        $serviceNotification->generateNotificationsForActivity($entity);
-
         return $this->redirect()->toRoute('contract/notifications', ['id' => $entity->getId()]);
     }
 
@@ -953,238 +946,43 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var Request $request */
         $request = $this->getRequest();
 
+        // Utilisé pour contrôler le périmètre d'utilisation pour les exports Hors Rôle Applicatif
         $perimeter = $this->params()->fromQuery('perimeter', '');
+
+        // Champs demandés par l'utilisateur
         $fields = $this->params()->fromPost('fields', null);
+
+        // Format
         $format = $this->params()->fromPost('format', 'csv');
 
-        $qb = $this->getEntityManager()->createQueryBuilder()->select('a')
-            ->from(Activity::class, 'a');
-
-        $parameters = [];
-
-        $separator = $this->getOscarConfigurationService()->getExportSeparator();
-        $dateFormat = $this->getOscarConfigurationService()->getExportDateFormat();
-
-        if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EXPORT)) {
-
-        } else {
-            $this->organizationsPerimeter = $this->getOscarUserContextService()
-                ->getOrganisationsPersonPrincipal($this->getOscarUserContextService()->getCurrentPerson(),
-                true);
-
-            $qb->leftJoin('a.project', 'pr')
-                ->leftJoin('pr.partners', 'o1')
-                ->leftJoin('a.organizations', 'o2')
-                ->where('o1.organization IN(:perimeter) OR o2.organization IN(:perimeter)');
-
-            $parameters = [
-                'perimeter' => $this->organizationsPerimeter
-            ];
-        }
-
-        // NOUVELLE VERSION
+        // Récupération des IDS
         if ($request->isPost()) {
             $paramID = $this->params()->fromPost('ids', '');
         } else {
             $paramID = $this->params()->fromQuery('ids', '');
-        }
+        };
 
-        if ($paramID) {
-            $ids = explode(',', $paramID);
-            $qb->andWhere('a.id IN (:ids)');
-            $parameters['ids'] = $ids;
-        }
+        $datas = new ExportDatas($this->getProjectGrantService(), $this->getOscarUserContextService());
+        $dt = $datas->output($paramID, $fields, $perimeter);
 
-        $entities = $qb->getQuery()->setParameters($parameters)->getResult();
-
-        if (!count($entities)) {
-            return $this->getResponseBadRequest("Aucun résultat à exporter");
-        }
-
-        $keep = true;
-        if( $fields ){
-            $keep = explode(',', $fields);
-        }
-
-        $columns = [];
-
-        // Fichier temporaire
         $csv = uniqid('oscar_export_activities_') . '.csv';
-        $handler = fopen('/tmp/' . $csv, 'w');
-        $headers = [];
+        $csvPath = sprintf('/tmp/%s', $csv);
+        $handler = fopen($csvPath, 'w');
 
-        foreach(Activity::csvHeaders() as $header){
-            if( $keep === true || in_array($header, $keep) ){
-                $columns[$header] = true;
-                $headers[] = $header;
-            } else {
-                $columns[$header] = false;
-            }
+        fputcsv($handler, $dt['headers']);
+
+        foreach ($dt['datas'] as $data) {
+            fputcsv($handler, $data);
         }
-
-
-        $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
-            ->select('r.label')
-            ->from(OrganizationRole::class, 'r')
-            ->getQuery()
-            ->getResult();
-
-        $rolesOrganisations = [];
-
-        foreach( $rolesOrganizationsQuery as $role ){
-            $header = $role['label'];
-            if( $keep === true || in_array($header, $keep) ){
-                $columns[$header] = true;
-                $headers[] = $header;
-            } else {
-                $columns[$header] = false;
-            }
-            $rolesOrganisations[$header] = [];
-        }
-
-        $rolesOrga = $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray();
-        $rolesPersons = [];
-
-        foreach( $rolesOrga as $role ){
-            $header = $role;
-            if( $keep === true || in_array($header, $keep) ){
-                $columns[$header] = true;
-                $headers[] = $header;
-            } else {
-                $columns[$header] = false;
-            }
-            $rolesPersons[$role] = [];
-        }
-
-        $numbers = [];
-        // Numérotation
-        foreach( $this->getOscarConfigurationService()->getNumerotationKeys() as $key ){
-            $header = $key;
-            if( $keep === true || in_array($header, $keep) ){
-                $columns[$header] = true;
-                $headers[] = $header;
-            } else {
-                $columns[$header] = false;
-            }
-            $numbers[$header] = [];
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // --- JALONS
-        // Récupération des différents types de jalons
-        $jalonsQuery = $this->getEntityManager()->getRepository(DateType::class)->findAll();
-        $jalons = [];
-        $jalonsFait = [];
-
-        /** @var DateType $jalon */
-        foreach ($jalonsQuery as $jalon) {
-            $header = $jalon->getLabel();
-            $jalons[$header] = [];
-            if( $keep === true || in_array($header, $keep) ){
-                $columns[$header] = true;
-                $headers[] = $header;
-
-                if( $jalon->isFinishable() ){
-                    $headers[] = "Fait";
-                    $columns[$header."_fait"] = true;
-                    $jalonsFait[$header] = [];
-                }
-            } else {
-                $columns[$header] = false;
-            }
-        }
-
-        fputcsv($handler, $headers);
-
-        /** @var Activity $entity */
-        foreach ($entities as $entity) {
-            $datas = [];
-            $rolesCurrent = $rolesOrganisations;
-            $rolesPersonsCurrent = $rolesPersons;
-            $jalonsCurrent = $jalons;
-            $jalonsFaitCurrent = $jalonsFait;
-
-            if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EXPORT,
-                $entity)
-            ) {
-                /** @var ActivityOrganization $org */
-                foreach( $entity->getOrganizationsDeep() as $org ){
-                     $rolesCurrent[$org->getRole()][] = (string)$org->getOrganization()->fullOrShortName();
-                }
-
-                foreach( $entity->getPersonsDeep() as $per ){
-                     $rolesPersonsCurrent[$per->getRole()][] = (string)$per->getPerson();
-                }
-
-                /** @var ActivityDate $mil */
-                foreach( $entity->getMilestones() as $mil ){
-
-                    $jalonKey = $mil->getType()->getLabel();
-
-                    $jalonsCurrent[$jalonKey][] = $mil->getDateStart() ?
-                        $mil->getDateStart()->format($dateFormat) :
-                        '';
-
-                    if( array_key_exists($jalonKey, $jalonsFaitCurrent) ){
-                        // Calcule de l'état du jalon
-                        $dn = "";
-                        if( $mil->isFinishable() ){
-                            $dn = "non";
-                            if( $mil->getFinished() > 0 ){
-                                $dn = "en cours";
-                            }
-                            if( $mil->isFinished() ){
-                                $dn = $mil->getDateFinish() ? $mil->getDateFinish()->format($dateFormat) : 'oui';
-                            }
-                        }
-                        $jalonsFaitCurrent[$jalonKey][] = $dn;
-                    }
-                }
-
-
-                foreach ( $entity->csv($dateFormat) as $col=>$value ){
-                    if( $columns[$col] === true )
-                        $datas[] = $value;
-                }
-
-                foreach( $rolesCurrent as $role=>$organisations ){
-                    if( $columns[$role] === true )
-                        $datas[] = ($organisations ? implode($separator, array_unique($organisations)) : '');
-                }
-
-                foreach( $rolesPersonsCurrent as $role=>$persons ){
-                    if( $columns[$role] === true )
-                        $datas[] =  $persons ? implode($separator, array_unique($persons)) : '';
-                }
-
-                foreach ( $numbers as $key=>$value ){
-                    if( $columns[$key] === true )
-                        $datas[] = $entity->getNumber($key);
-                }
-
-                foreach( $jalonsCurrent as $jalon2=>$date ){
-                    if( $columns[$jalon2] === true ) {
-                        $datas[] =  implode($separator, $date);
-                        if( array_key_exists($jalon2, $jalonsFaitCurrent) ){
-                            $done = $jalonsFaitCurrent[$jalon2];
-                            $datas[] =  implode($separator, $done);
-                        }
-                    }
-                }
-                fputcsv($handler, $datas);
-            } else {
-                $this->getLoggerService()->warn("Pas le droit d'exporter : " . $entity->getId() . $entity->getLabel());
-            }
-        }
-        fclose($handler);
 
         $downloader = new CSVDownloader();
 
-        $csvPath = sprintf('/tmp/%s', $csv);
+
 
         if( $format == "xls" ){
             $downloader->downloadCSVToExcel($csvPath);
-        } else {
+        }
+        else {
             $downloader->downloadCSV($csvPath);
         }
         die();

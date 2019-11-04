@@ -37,13 +37,28 @@ return array(
         'importEnable' => true,
 
 
-        'export' => [
-            'payments' => [
-                'separator' => '$$',
-                'persons' => '',
-                'organizations' => 'Composante responsable,Laboratoire,Financeur'
-            ]
-        ],
+//        'export' => [
+//            'payments' => [
+//                'separator' => '$$',
+//                'persons' => '',
+//                'organizations' => 'Composante responsable,Laboratoire,Financeur'
+//            ],
+//            'computedFields' => [
+//                'laboratoriesCodes' => [
+//                    'label' => 'Laboratoire actif (code)',
+//                    'handler' => function( \Oscar\Entity\Activity $activity ){
+//                        $labos = [];
+//                        /** @var \Oscar\Entity\ActivityOrganization $activityOrganization */
+//                        foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
+//                            if( $activityOrganization->getRole() == "Laboratoire" && !$activityOrganization->isOutOfDate() && !$activityOrganization->getOrganization()->isClose() ){
+//                                $labos[] = (string)$activityOrganization->getOrganization()->getCode() ?? 'N.D';
+//                            }
+//                        }
+//                        return count($labos) > 1 ? "Multilaboratoire" : implode(', ', $labos);
+//                    }
+//                ]
+//            ]
+//        ],
 
 
         ////////////////////////////////////////////////////////////////////// listPersonIncludeActivityMember [boolean]

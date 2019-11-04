@@ -445,6 +445,20 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         return $milestones;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// EXPORT
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public function getExportComputedFields(){
+        return $this->getOscarConfigurationService()->getExportComputedFields();
+    }
+
+    /**
+     * Retourne la liste des champs éligibles à l'export.
+     *
+     * @return array
+     */
     public function getFieldsCSV(){
 
         $headers = [
@@ -452,7 +466,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             'organizations' => [],
             'persons' => [],
             'milestones' => [],
-            'numerotation' => $this->getOscarConfigurationService()->getNumerotationKeys()
+            'numerotation' => $this->getOscarConfigurationService()->getNumerotationKeys(),
+            'computed' => []
         ];
 
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
@@ -460,6 +475,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->from(OrganizationRole::class, 'r')
             ->getQuery()
             ->getResult();
+
+        foreach ($this->getOscarConfigurationService()->getExportComputedFields() as $field) {
+            $headers['computed'][] = $field['label'];
+        }
 
         foreach( $rolesOrganizationsQuery as $role ){
             $headers['organizations'][] = $role['label'];

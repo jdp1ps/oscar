@@ -1882,7 +1882,8 @@ class Activity implements ResourceInterface
     public function csv($dateFormat='Y-m-d')
     {
         return array(
-            'id' => $this->getId(),
+            'ID' => $this->getId(),
+            'ID Projet' => $this->getProject() ? $this->getProject()->getId() : 'N.D',
             'Acronyme' => $this->getAcronym(),
             'Projet' => $this->getProject() ? $this->getProject()->getLabel() : '',
             'Intitulé' => $this->getLabel(),
@@ -1906,7 +1907,8 @@ class Activity implements ResourceInterface
     public static function csvHeaders()
     {
         return array(
-            'id',
+            'ID',
+            'ID Projet',
             'Acronyme',
             'Projet',
             'Intitulé',

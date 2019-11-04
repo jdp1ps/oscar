@@ -171,6 +171,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getEditableConfKey('export_format', '|');
     }
 
+    public function getExportComputedFields(){
+        return $this->getConfiguration('export.computedFields', []);
+    }
+
     public function setExportSeparator( $string ){
         $this->saveEditableConfKey('export_format', $string);
     }
