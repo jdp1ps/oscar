@@ -579,6 +579,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      */
     public function check($privilege, $entity = null)
     {
+        $this->getLoggerService()->debug('Test ' . $privilege);
         if (!$this->hasPrivileges($privilege, $entity)) {
             throw new UnAuthorizedException('Droits insuffisants');
         }

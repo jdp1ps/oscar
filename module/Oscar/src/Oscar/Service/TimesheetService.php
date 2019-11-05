@@ -11,6 +11,7 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\Referent;
 use Oscar\Entity\TimeSheet;
+use Oscar\Entity\TimesheetCommentPeriod;
 use Oscar\Entity\TimesheetRepository;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
@@ -459,6 +460,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             throw new OscarException("Erreur d'état");
         }
 
+        $this->saveComment($validationPeriod->getDeclarer(), $validationPeriod->getObjectId() > 0 ? $validationPeriod->getObjectId() : $validationPeriod->getObject(), $validationPeriod->getYear(), $validationPeriod->getMonth(), $comment);
+
         $validationPeriod->addLog('Réenvoi de la déclaration pour validation', (string)$validationPeriod->getDeclarer());
         $validationPeriod->setStatus(ValidationPeriod::STATUS_STEP1)->setComment($comment);
 
@@ -472,6 +475,76 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         return true;
     }
+
+//    public function reSendPeriod( $year, $month, Person $declarer, $comments ){
+//        $validationsPeriods = $this->getValidationPeriods((int)$year, (int)$month, $declarer);
+//
+//        /** @var ValidationPeriod $validationPeriod */
+//        foreach ($validationsPeriods as $validationPeriod) {
+//            if( $validationPeriod->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
+//                $key = $validationPeriod->getObjectId();
+//            } else {
+//                $key = $validationPeriod->getObject();
+//            }
+//            // récupération du commentaire
+//            $comment = array_key_exists($key, $comments) ? $comments[$key] : "";
+//            $this->reSendValidation($validationPeriod, $comment);
+//        }
+//    }
+
+    public function saveComment( Person $person, $objectKey, $year, $month, $content ){
+        /** @var ValidationPeriod $validation */
+        $validation = $this->getPeriodValidation($person, $month, $year);
+
+        $id = intval($objectKey);
+        $code = $objectKey;
+        $mode = 'wp';
+        if( !$id ){
+            $mode = 'hl';
+        }
+
+        $comment = $this->getCommentPeriodObject($mode == 'wp' ? $id : $code, $person, $year, $month);
+
+
+        if( $comment ){
+            $comment->setComment($content);
+        } else {
+            $comment = new TimesheetCommentPeriod();
+            $this->getEntityManager()->persist($comment);
+            $comment->setDeclarer($person)
+                ->setObject($code ? $code : 'activity')
+                ->setComment($content)
+                ->setObjectGroup($code ? 'wp' : 'activity')
+                ->setObjectId($id)
+                ->setYear($year)
+                ->setMonth($month);
+        }
+        $this->getEntityManager()->flush($comment);
+    }
+
+    public function saveCommentFromPost( Person $person, $datasPosted ){
+        $period = DateTimeUtils::extractPeriodDatasFromString($datasPosted['period']);
+        $type = $datasPosted['type'];
+        $id = (int)$datasPosted['id'];
+        $code = $datasPosted['code'];
+        $content = $datasPosted['content'];
+        $month = $period['month'];
+        $year = $period['year'];
+
+        $mode = 'hl';
+        if( $id ){
+            $mode = 'wp';
+        }
+
+        $out = [
+            'period' => $period,
+            'validation' => ''
+        ];
+
+        $this->saveComment($person, $mode == 'wp' ? $id : $code, $year, $month, $content);
+
+}
+
     public function reSendPeriod( $from, $to, Person $declarer, $comments ){
 
         $year = (int)$from->format('Y');
@@ -485,6 +558,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $this->getEntityManager()->flush();
 
         $this->sendPeriod($from, $to, $$declarer, $comments);
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1207,7 +1281,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
 
             } catch (\Exception $e) {
-                $this->getLogger()->err("ERROR : " . $e->getMessage());
+                $this->getLoggerService()->err("ERROR : " . $e->getMessage());
             }
         }
 
@@ -1271,7 +1345,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
         elseif ($person->getScheduleKey()) {
-            $this->getLogger()->info(print_r($person->getCustomSettingsObj(), true));
+            $this->getLoggerService()->info(print_r($person->getCustomSettingsObj(), true));
 
             if( array_key_exists($person->getScheduleKey(), $scheduleConfig) ){
                 $configApp['from'] = 'sync';
@@ -1289,11 +1363,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     public function getDatasValidationPersonsPeriod($personsIds, $yearStart, $yearEnd){
         $datas = [];
 
-        $this->getLogger()->debug("Validations entre $yearStart et $yearEnd");
+        $this->getLoggerService()->debug("Validations entre $yearStart et $yearEnd");
 
         $validations = $this->getValidationPeriodRepository()->getDatasValidationPersonsPeriod($personsIds, $yearStart,$yearEnd);
 
-        $this->getLogger()->debug("Validations : " . count($validations));
+        $this->getLoggerService()->debug("Validations : " . count($validations));
 
 
         foreach ($validations as $validation){
@@ -1305,7 +1379,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $object_id = $validation['object_id'];
             $dateSend = $validation['datesend'];
 
-            $this->getLogger()->debug("Validation $objectgroup > $object > $object_id : $period");
+            $this->getLoggerService()->debug("Validation $objectgroup > $object > $object_id : $period");
 
 
             if(!array_key_exists($period, $datas)){
@@ -2285,7 +2359,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         /** @var ValidationPeriod $validationPeriod */
         foreach ($query->getQuery()->getResult() as $validationPeriod) {
             if (array_key_exists($validationPeriod->getPeriodKey(), $result)) {
-                $this->getLogger()->err(sprintf("L'objet ValidationPeriod %s a un doublon !", $validationPeriod));
+                $this->getLoggerService()->err(sprintf("L'objet ValidationPeriod %s a un doublon !", $validationPeriod));
             }
             $result[$validationPeriod->getPeriodKey()] = $validationPeriod;
         }
@@ -2421,6 +2495,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $periodMax = sprintf('%s-%s', $todayYear, $todayMonth);
 
         $daysInfosPerson = $this->getDaysPeriodInfosPerson($person, $year, $month);
+
         $daysInfos = [];
         foreach ($daysInfosPerson as $dayNum => $data) {
             $daysInfos[(int)$dayNum] = $data;
@@ -2521,6 +2596,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             /** @var ValidationPeriod $period */
             $periodActivityValidation = $this->getValidationPeriodActivityAt($workPackage->getActivity(), $person, $year, $month);
 
+            $comment = $this->getCommentPeriod($workPackage->getActivity(), $person, $year, $month);
+
             if (!array_key_exists($activity->getId(), $activities)) {
                 $activities[$activity->getId()] = [
                     'id' => $activity->getId(),
@@ -2529,7 +2606,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     'project_id' => $activity->getProject()->getId(),
                     'label' => $activity->getLabel(),
                     'total' => 0.0,
-                    'validation_state' => $periodActivityValidation ? $periodActivityValidation->json() : null
+                    'validation_state' => $periodActivityValidation ? $periodActivityValidation->json() : null,
+                    'comment' => $comment
                 ];
             }
 
@@ -2582,6 +2660,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         foreach ($others as $key => $datas) {
             $periodHL = $this->getValidationPeriosOutOfWorkpackageAt($person, $year, $month, $key);
+            $comment = $this->getCommentPeriod($key, $person, $year, $month);
 
             if ($isPeriodSend) {
                 $validationUp = true; //$periodHL && $periodHL->isOpenForDeclaration();
@@ -2590,6 +2669,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
 
             $others[$key]['validation_state'] = $periodHL ? $periodHL->json() : null;
+            $others[$key]['comment'] = $comment;
             $others[$key]['validation_up'] = $validationUp;
             $others[$key]['total'] = 0.0;
         }
@@ -2736,6 +2816,57 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         ];
 
         return $output;
+    }
+
+
+    public function getCommentPeriod($activityOrKey, $person, $year, $month){
+        $obj = $this->getCommentPeriodObject($activityOrKey, $person, $year, $month);
+        if( $obj ){
+            return $obj->getComment();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * @param $activityOrKey
+     * @param $person
+     * @param $year
+     * @param $month
+     * @return TimesheetCommentPeriod|null
+     * @throws OscarException
+     */
+    public function getCommentPeriodObject($activityOrKey, $person, $year, $month){
+
+        $query = $this->getEntityManager()->getRepository(TimesheetCommentPeriod::class)->createQueryBuilder('c')
+            ->where('c.year = :year AND c.month = :month AND c.declarer = :declarer');
+
+        $parameters = [
+            'year' => $year,
+            'month'=> $month,
+            'declarer'=> $person,
+        ];
+
+
+        if( is_string($activityOrKey) ){
+            $this->getLoggerService()->debug("Récupération pour le hors-lot $activityOrKey");
+            $query->andWhere('c.object = :code');
+            $parameters['code'] = $activityOrKey;
+        } else {
+            $this->getLoggerService()->debug("Récupération pour l'activité $activityOrKey");
+            $query->andWhere('c.object_id = :id');
+            $parameters['id'] = $activityOrKey;
+        }
+        $obj = $query->setParameters($parameters)->getQuery()->getResult();
+        if( !$obj ){
+            return null;
+        } else {
+            if( count($obj) > 1 ){
+                throw new OscarException("Plusieurs commentaires enregistrés pour le même objet, contacter l'administrateur pour u'il corrige le problème");
+            } else {
+                return $obj[0];
+            }
+        }
     }
 
 
@@ -3471,7 +3602,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
 
-        $this->getLogger()->debug("Envois de la période : $fromMonth - $toMonth");
+        $this->getLoggerService()->debug("Envois de la période : $fromMonth - $toMonth");
 
         if ($fromMonth != $toMonth)
             throw new Exception("La période à traiter n'est pas un mois...");
@@ -3503,7 +3634,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             // Sinon on supprime les anciennes validations
             else {
-                $this->getLogger()->debug("Suppression des anciennes déclarations");
+                $this->getLoggerService()->debug("Suppression des anciennes déclarations");
                 /** @var ValidationPeriod $v */
                 foreach ($declarations as $v){
                     /** @var TimeSheet $t */
@@ -3547,7 +3678,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
 
                 if( $comments && array_key_exists($objectCommentKey, $comments) ){
+                    $this->getLoggerService()->debug('Comment KEY : '. $objectCommentKey);
                     $comment = array_key_exists($objectCommentKey, $comments) ? $comments[$objectCommentKey] : '';
+
                 }
                 $declarations[$key] = [
                     'objectId' => $objectId,
@@ -3556,6 +3689,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     'log' => "Déclaration envoyée",
                     'comment' => $comment
                 ];
+                // saveComment( Person $person, $objectKey, $year, $month, $content )
+                $this->saveComment($sender, $key, $annee, $mois, $comment);
 
                 $declarations[$key]['declaration'] = $this->createDeclaration($sender, $annee, $mois, $object, $objectId, $objectGroup, $comment);
             }

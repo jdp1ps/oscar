@@ -771,6 +771,13 @@ contract:
                 defaults:
                     action: show
 
+        estimated-spent:
+            type: segment
+            options:
+                route: /depenses-previsionnelles/:id
+                defaults:
+                    action: estimatedSpent
+
         requestadmin:
             type: literal
             options:
@@ -1380,6 +1387,7 @@ depense:
         defaults:
             controller: Depense
     child_routes:
+
         activity:
             type: segment
             may_terminate: true
@@ -1387,6 +1395,15 @@ depense:
                 route: /activity/:idactivity
                 defaults:
                     action: activity
+
+        manage:
+            type: segment
+            may_terminate: true
+            options:
+                route: /manage-type
+                defaults:
+                    action: manageSpendTypeGroup
+
 
 
 
@@ -1432,6 +1449,14 @@ administration:
                 route: /documents-sections
                 defaults:
                     action: documentSections
+
+        plan-comptable-loader:
+            type: segment
+            may_terminate: true
+            options:
+                route: /maj-plan-comptable
+                defaults:
+                    action: planComptableLoaded
 
         access:
             type: segment

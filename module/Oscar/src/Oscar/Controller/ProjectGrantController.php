@@ -1177,6 +1177,51 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * Fiche pour une activité de recherche.
      */
+    public function estimatedSpentAction()
+    {
+        // Identifiant de l'activité
+        $id = $this->params()->fromRoute('id');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
+
+
+        $spentService = $this->getSpentService();
+
+        $lines = $spentService->getLinesByMasse();
+        $masses = $spentService->getMasses();
+        /*
+        echo "<pre>"; var_dump($lines);
+        die();
+        */
+        $types = $spentService->getTypesTree();
+        $years = $spentService->getYearsListActivity($entity);
+
+        $values = [];
+
+        foreach( $this->getSpentService()->getAllArray() as $spent ){
+            $values[$spent['id']] = [];
+            foreach ($years as $year) {
+                $values[$spent['id']][$year] = 0.0;
+            }
+        }
+
+
+        return [
+            'lines' => $lines,
+            'masses' => $masses,
+            'years' => $years,
+            'types' => $types,
+            'values' => $values,
+        ];
+    }
+
+    /**
+     * Fiche pour une activité de recherche.
+     */
     public function showAction()
     {
         // Identifiant de l'activité

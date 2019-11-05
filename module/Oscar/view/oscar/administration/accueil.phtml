@@ -154,6 +154,21 @@
             </h3>
             <p>Permet de gérer les numérotations disponibles dans l'écran d'édition des activités.</p>
         </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-euro"></i>
+                    Type de dépense
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+                    <a href="<?= $this->url('depense/manage') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Gestion des types de dépense.</p>
+        </article>
     </section>
 
     <section>

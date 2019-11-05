@@ -1,0 +1,28 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 03/06/19
+ * Time: 15:43
+ */
+?>
+<div class="container">
+    <div id="app"></div>
+    <script>
+        require(['vue', 'vue-resource', 'SpentGroupAdmin', 'SpentGroupItem'], function(Vue, VueResource, SpentGroupAdmin, SpentGroupItem){
+            Vue.use(VueResource);
+
+            Vue.http.options.emulateJSON = true;
+            Vue.http.options.emulateHTTP = true;
+            Vue.component("spenttypeitem", SpentGroupItem.default);
+
+            new Vue({
+                el: "#app",
+                render(h){
+
+                    return h(SpentGroupAdmin.default);
+                }
+            })
+        })
+    </script>
+</div>

@@ -71,16 +71,6 @@
 @import url(select2-bootstrap.css);
 
 
-////////////////////////////////////////////////////////////////////////////////
-// USUELS
-////////////////////////////////////////////////////////////////////////////////
-.reactive {
-  cursor: pointer;
-}
-
-
-
-
 // Modification
 .card {
   h2, h3, h4 {
@@ -97,9 +87,18 @@
       font-size: 1.4em;
     }
   }
-  &.active { border-left: 4px #0b93d5 solid;}
-  &.error { border-left: 4px #9e0505 solid;}
-  &.disabled { border-left: 4px #5a5a5a solid;}
+
+  &.active {
+    border-left: 4px #0b93d5 solid;
+  }
+
+  &.error {
+    border-left: 4px #9e0505 solid;
+  }
+
+  &.disabled {
+    border-left: 4px #5a5a5a solid;
+  }
 }
 
 .widget {
@@ -123,23 +122,29 @@
   }
 }
 
+
 .label i[class *= "icon-"] {
   color: white !important;
 }
 
 .options-menu {
+
   display: flex;
   font-weight: 100;
   font-size: .75em;
+
   a {
     color: $colorGreyMedium;
     text-decoration: underline;
     padding: 2px 4px;
   }
+
   &.right {
     >:first-child {
       margin-left: auto;
     }
+
+
   }
 }
 
@@ -4981,6 +4986,136 @@ pre.alert-danger, pre.alert-info {
 
   &.bubble-danger {
     background: $colorRed;
+  }
+}
+
+
+.spentarea {
+  background: rgba(#ccc, .25);
+  padding: 8px;
+  border: 1px solid #ececec;
+}
+
+.depenses-previsionnelle {
+  background: #efefef;
+  .line { display: flex; border-top: thin solid #e0cfc2 }
+
+  .line.sizing-1 > .intitule { font-weight: 900; padding-left: 1em }
+  .line.sizing-2 > .intitule { font-weight: 700; padding-left: 2em }
+  .line.sizing-3 > .intitule { font-weight: 500; padding-left: 3em }
+  .line.sizing-4 > .intitule { font-weight: 300; padding-left: 4em }
+  .line.sizing-5 > .intitule { font-weight: 100; padding-left: 5em }
+
+  .code { background: #0b93d5; color: #fefefd; display: inline-block; padding: 0 .25em; border-radius: 2px}
+
+  .intitule {
+    flex: 3 0 ;
+  }
+  .year {
+    flex: 0 0 10em;
+    input { text-align: right }
+  }
+  .total {
+    flex: 0 0 10em;
+    padding-left: 1em;
+    font-weight: 400;
+  }
+}
+
+
+
+.spenttype {
+
+  border: 2px solid #ddd;
+  border-left-color: #777777;
+  background: #efefef;
+  box-shadow: none;
+  position: relative;
+  left: 0px;
+  transition: all .3s ;
+  box-shadow: none;
+
+  &.level-1 > h3 { font-weight: 900 }
+  &.level-2 > h3 { font-weight: 700 }
+  &.level-3 > h3 { font-weight: 500 }
+  &.level-4 > h3 { font-weight: 300 }
+  &.level-5 > h3 { font-weight: 100 }
+
+  .annexe {
+    background: #777777;
+    padding: 0 4px;
+    display: inline-block;
+    font-weight: 300;
+    cursor: pointer;
+    &.active {
+      background: $colorGreen;
+      cursor: default;
+    }
+    &:hover {
+      background: $colorBlue;
+    }
+    &:first-of-type { border-radius: 4px 0 0 4px; border-right: thin solid rgba(255,255,255,.25) }
+    &:last-of-type { border-radius: 0 4px 4px 0; border-left: thin solid rgba(255,255,255,.25) }
+  }
+
+  .code {
+    background: $colorBlue;
+    display: inline-block;
+    font-weight: 100;
+    padding: 0 .25em;
+    border-radius: 2px;
+    &.blind {
+      background: $colorRed;
+    }
+  }
+
+  &:hover { box-shadow: none; }
+
+  &.hover { box-shadow: none;  left: 4px}
+
+  &.selectable.hover{
+    background: #ecfbfe;
+  }
+
+  &.selected{
+    pointer-events: none;
+    background: $colorBlue;
+    border: $colorOrange;
+  }
+
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element;
+
+  .handler {
+    cursor: pointer;
+  }
+
+  &:hover>h3 small {
+    opacity: 1;
+  }
+
+  >h3 small {
+    opacity: .5;
+  }
+
+  &.selectable {
+    cursor: pointer;
+    &.hover {
+      border-color: $colorBlue;
+    }
+  }
+
+  .card-title small {
+    flex: auto;
+  }
+
+  h3 small {
+    text-align: right;
   }
 }
 

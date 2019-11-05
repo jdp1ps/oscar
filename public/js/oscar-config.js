@@ -87,6 +87,10 @@ requirejs.config({
         'ActivityGant': 'oscar/dist/ActivityGant',
         'Keyvalue': 'oscar/dist/Keyvalue',
         'DocumentSectionAdmin': 'oscar/dist/DocumentSectionAdmin',
+        'SpentGroupAdmin': 'oscar/dist/SpentGroupAdmin',
+        'SpentGroupItem': 'oscar/dist/SpentGroupItem',
+        'EstimatedSpentActivity': 'oscar/dist/EstimatedSpentActivity',
+        'EstimatedSpentActivityItem': 'oscar/dist/EstimatedSpentActivityItem',
         'Referent': 'oscar/dist/Referent',
         'ReferentUI': 'oscar/dist/ReferentUI',
         'EntityWithRole': 'oscar/dist/EntityWithRole'

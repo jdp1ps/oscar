@@ -9039,5 +9039,124 @@ pre.alert-danger, pre.alert-info {
   .bubble.bubble-danger {
     background: #DD423E; }
 
+.spentarea {
+  background: rgba(204, 204, 204, 0.25);
+  padding: 8px;
+  border: 1px solid #ececec; }
+
+.depenses-previsionnelle {
+  background: #efefef; }
+  .depenses-previsionnelle .line {
+    display: flex;
+    border-top: thin solid #e0cfc2; }
+  .depenses-previsionnelle .line.sizing-1 > .intitule {
+    font-weight: 900;
+    padding-left: 1em; }
+  .depenses-previsionnelle .line.sizing-2 > .intitule {
+    font-weight: 700;
+    padding-left: 2em; }
+  .depenses-previsionnelle .line.sizing-3 > .intitule {
+    font-weight: 500;
+    padding-left: 3em; }
+  .depenses-previsionnelle .line.sizing-4 > .intitule {
+    font-weight: 300;
+    padding-left: 4em; }
+  .depenses-previsionnelle .line.sizing-5 > .intitule {
+    font-weight: 100;
+    padding-left: 5em; }
+  .depenses-previsionnelle .code {
+    background: #0b93d5;
+    color: #fefefd;
+    display: inline-block;
+    padding: 0 .25em;
+    border-radius: 2px; }
+  .depenses-previsionnelle .intitule {
+    flex: 3 0; }
+  .depenses-previsionnelle .year {
+    flex: 0 0 10em; }
+    .depenses-previsionnelle .year input {
+      text-align: right; }
+  .depenses-previsionnelle .total {
+    flex: 0 0 10em;
+    padding-left: 1em;
+    font-weight: 400; }
+
+.spenttype {
+  border: 2px solid #ddd;
+  border-left-color: #777777;
+  background: #efefef;
+  box-shadow: none;
+  position: relative;
+  left: 0px;
+  transition: all .3s;
+  box-shadow: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element; }
+  .spenttype.level-1 > h3 {
+    font-weight: 900; }
+  .spenttype.level-2 > h3 {
+    font-weight: 700; }
+  .spenttype.level-3 > h3 {
+    font-weight: 500; }
+  .spenttype.level-4 > h3 {
+    font-weight: 300; }
+  .spenttype.level-5 > h3 {
+    font-weight: 100; }
+  .spenttype .annexe {
+    background: #777777;
+    padding: 0 4px;
+    display: inline-block;
+    font-weight: 300;
+    cursor: pointer; }
+    .spenttype .annexe.active {
+      background: #499D1F;
+      cursor: default; }
+    .spenttype .annexe:hover {
+      background: #30b0d5; }
+    .spenttype .annexe:first-of-type {
+      border-radius: 4px 0 0 4px;
+      border-right: thin solid rgba(255, 255, 255, 0.25); }
+    .spenttype .annexe:last-of-type {
+      border-radius: 0 4px 4px 0;
+      border-left: thin solid rgba(255, 255, 255, 0.25); }
+  .spenttype .code {
+    background: #30b0d5;
+    display: inline-block;
+    font-weight: 100;
+    padding: 0 .25em;
+    border-radius: 2px; }
+    .spenttype .code.blind {
+      background: #DD423E; }
+  .spenttype:hover {
+    box-shadow: none; }
+  .spenttype.hover {
+    box-shadow: none;
+    left: 4px; }
+  .spenttype.selectable.hover {
+    background: #ecfbfe; }
+  .spenttype.selected {
+    pointer-events: none;
+    background: #30b0d5;
+    border: #C69951; }
+  .spenttype .handler {
+    cursor: pointer; }
+  .spenttype:hover > h3 small {
+    opacity: 1; }
+  .spenttype > h3 small {
+    opacity: .5; }
+  .spenttype.selectable {
+    cursor: pointer; }
+    .spenttype.selectable.hover {
+      border-color: #30b0d5; }
+  .spenttype .card-title small {
+    flex: auto; }
+  .spenttype h3 small {
+    text-align: right; }
+
 body {
   background: #f2f3eb; }

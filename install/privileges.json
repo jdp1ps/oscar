@@ -135,6 +135,23 @@
     "fullcode": "ACTIVITY-PAYMENT_MANAGE"
   },
 
+  "ACTIVITY-ESTIMATEDSPENT_SHOW": {
+    "category_id": 2,
+    "spot": 7,
+    "code": "ESTIMATEDSPENT_SHOW",
+    "libelle": "Voir les dépenses prévisionnelles",
+    "fullcode": "ACTIVITY-ESTIMATEDSPENT_SHOW"
+  },
+
+  "ACTIVITY-ESTIMATEDSPENT_MANAGE": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-ESTIMATEDSPENT_SHOW",
+    "code": "ESTIMATEDSPENT_MANAGE",
+    "libelle": "Gestion des dépenses prévisionnelle de l'activit\u00e9",
+    "fullcode": "ACTIVITY-ESTIMATEDSPENT_MANAGE"
+  },
+
   "ACTIVITY-MILESTONE_SHOW": {
     "category_id": 2,
     "spot": 7,
@@ -572,6 +589,14 @@
     "code": "SHOW",
     "libelle": "Voir les d\u00e9penses",
     "fullcode": "DEPENSE-SHOW"
+  },
+
+  "MAINENANCE-SPENDTYPEGROUP_MANAGE": {
+    "category_id": 6,
+    "spot": 7,
+    "code": "SPENDTYPEGROUP_MANAGE",
+    "libelle": "Configuration des types de dépenses",
+    "fullcode": "MAINTENANCE-SPENDTYPEGROUP_MANAGE"
   },
 
 

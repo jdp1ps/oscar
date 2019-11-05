@@ -2053,6 +2053,17 @@ class TimesheetController extends AbstractOscarController
                         }
                     }
 
+                    if( $action == 'comment' ){
+                        try {
+                            $timesheetService->saveCommentFromPost($currentPerson, $_POST);
+                            return $this->getResponseOk();
+                        }catch (OscarException $e){
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
+
+                        return $this->getResponseNotImplemented("Enregistrement de commentaire");
+                    }
+
                     $datas = json_decode($this->params()->fromPost('datas'));
 
                     if( !$datas ){

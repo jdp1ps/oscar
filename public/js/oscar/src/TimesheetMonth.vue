@@ -9,6 +9,30 @@
         </transition>
 
         <transition name="fade">
+            <div class="overlay" v-if="commentEdited">
+                <div class="overlay-content">
+
+                    <h2>
+                        <i class="icon-comment"></i> Commentaire pour
+                        <strong>{{ commentEditedLabel }}</strong> pour
+                        <em>{{ mois }}</em>
+                    </h2>
+
+                    <div class="alert alert-info">
+                        Le commentaire saisi sera repris dans le feuille de temps
+                    </div>
+
+                    <textarea name="comment" class="form-control" id="" cols="30" rows="10" v-model="commentEditedContent" :class="{'disabled': !ts.editable }"></textarea>
+                    <nav class="buttons">
+                        <button class="btn btn-primary" @click="handlerSendComment" :class="{'disabled': !ts.editable }">
+                            <i class="icon-floppy"></i> Enregistrer le commentaire</button>
+                        <button class="btn btn-default" @click="commentEdited = null"><i class="icon-cancel-outline"></i>Annuler</button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
+        <transition name="fade">
             <div class="overlay" v-if="screensend">
                 <div class="overlay-content">
 
@@ -38,8 +62,7 @@
                                 <tr>
                                     <th colspan="2">&nbsp;</th>
                                     <td :colspan="ts.dayNbr">
-                                    <strong>Commentaires : </strong><br>
-                                    <textarea class="form-control" v-model="screensend[activity.id]" style="max-width: 100%"></textarea>
+                                        &nbsp;
                                     </td>
                                     <td>&nbsp;</td>
                                 </tr>
@@ -84,8 +107,7 @@
                                     {{ hl.label }}
                                 </th>
                                 <td>
-                                    <strong>Commentaire : </strong><br>
-                                    <textarea v-model="screensend[hl.code]"></textarea>
+                                    &nbsp;
                                 </td>
                                 <td v-for="d in ts.days">
                                     <strong v-if="hl.days[d.i]">{{ hl.days[d.i] | duration2(d.dayLength) }}</strong>
@@ -118,6 +140,18 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <div v-for="project in recapsend.lot">
+                        <div v-for="activity in project.activities">
+                            <h5><strong><i class="icon-cube"></i> [{{activity.acronym }}] {{ activity.label }}</strong></h5>
+                            <strong>Commentaires : </strong><br>
+                            <textarea class="form-control" v-model="screensend[activity.id]" style="max-width: 100%"></textarea>
+                        </div>
+                    </div>
+                    <div v-for="hl in recapsend.hl">
+                        <h5><strong><i class="icon" :class="'icon-' +hl.code"></i> {{hl.label }}</strong></h5>
+                        <textarea class="form-control" v-model="screensend[hl.code]" style="max-width: 100%"></textarea>
+                    </div>
 
                     <nav class="buttons">
                         <button class="btn btn-primary" @click="sendMonthProceed">Envoyer la déclaration</button>
@@ -196,7 +230,6 @@
                 </nav>
             </div>
         </div>
-
 
         <div class="overlay" v-if="popup" style="z-index: 2001">
             <div class="content container overlay-content">
@@ -308,6 +341,7 @@
                 </nav>
             </div>
         </div>
+
         <section v-if="ts" class="container-fluid" style="margin-bottom: 5em">
 
             <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE CALENDRIER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -545,7 +579,7 @@
                     <h4><i class="icon-tags"></i> Hors-lot</h4>
 
                     <section class="card xs" v-for="a in ts.otherWP" v-if="a.total > 0">
-                        <div class="week-header interaction-off">
+                        <div class="week-header">
                                 <span>
                                     <i :class="'icon-'+a.code"></i>
                                     {{ a.label }}
@@ -562,6 +596,10 @@
                                        title="Cette déclaration est valide"></i>
                                     <br>
                                     <em class="text-thin">{{ a.description }}</em>
+                                     <button class="btn btn-default btn-xs" @click.prevent.default="handledEditComment('hl', a)">
+                                        <i class="icon-chat-alt"></i>
+                                        Commentaire
+                                    </button>
                                 </span>
                             <small>
                                 <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
@@ -583,12 +621,12 @@
                         Vous n'être identifié comme déclarant sur aucune activité pour cette période. Si cette situation
                         vous semble anormale, prenez contact avec votre responsable scientifique.
                     </p>
-                    <section class="card xs" v-for="a in ts.activities" @click="configureColor = true" v-else>
-                        <div class="week-header interaction-off">
+                    <section class="card xs" v-for="a in ts.activities" v-else>
+                        <div class="week-header">
 
                                 <span >
                                     <strong>{{ a.acronym }}</strong>
-                                    <span class="icon-tag" :style="{'color': _colorsProjects[a.acronym] }">&nbsp;</span>
+                                    <span class="icon-tag" :style="{'color': _colorsProjects[a.acronym] }" @click="configureColor = true">&nbsp;</span>
                                     <i v-if="a.validation_state == null"></i>
                                     <i class="icon-cube" v-else-if="a.validation_state.status == 'send-prj'"
                                        title="Validation projet en attente"></i>
@@ -602,7 +640,10 @@
                                        title="Cette déclaration est valide"></i>
                                     <br>
                                     <em class="text-thin">{{ a.label }}</em>
-
+                                     <button class="btn btn-default btn-xs" @click.prevent.default="handledEditComment('prj', a)">
+                                        <i class="icon-chat-alt"></i>
+                                        Commentaire
+                                    </button>
                                 </span>
                             <small class="subtotal">
                                 <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
@@ -1009,6 +1050,10 @@
                     type: 'infos',
                 },
 
+                commentEdited: null,
+                commentEditedLabel: "",
+                commentEditedContent: "",
+
                 configureColor: false,
 
                 _colorsProjects: null,
@@ -1089,7 +1134,7 @@
             },
 
             recapsend() {
-                let recap = {}, hl = {};
+                let recap = {}, hl = {}, comments = {};
 
                 Object.keys(this.ts.otherWP).forEach( code => {
                     let hlDef = this.ts.otherWP[code];
@@ -1099,8 +1144,11 @@
                         code: hlDef.code,
                         label: hlDef.label,
                         days: {},
-                        total: hlDef.total
-                    }
+                        total: hlDef.total,
+                        comment: hlDef.comment
+                    };
+
+                    comments[hlDef.code] = hlDef.comment;
                 });
 
                 Object.keys(this.ts.activities).forEach(a => {
@@ -1108,7 +1156,9 @@
                     let activity = this.ts.activities[a];
                     let project_id = activity.project_id;
                     let project = activity.project;
-                    let com = "";
+                    let com = activity.comment;
+
+                    comments[activity.id] = com;
 
                     if (this.screensend && this.screensend.hasOwnProperty(a))
                         com = this.screensend[a];
@@ -1191,6 +1241,7 @@
 
                 return {
                     lot: recap,
+                    comments: comments,
                     hl: hl
                 };
             },
@@ -1318,6 +1369,53 @@
         },
 
         methods: {
+            handledEditComment(type, data){
+                console.log("MODIFICATION COMMENTAIRE ", type, data);
+
+                this.commentEditedLabel = data.label;
+                this.commentEdited = data;
+                this.commentEditedContent = data.comment;
+
+            },
+
+            handlerSendComment(){
+                if( this.ts.editable ) {
+                    var type, id, code;
+                    if (this.commentEdited.id) {
+                        type = 'wp';
+                        id = this.commentEdited.id;
+                        code = "";
+                    } else {
+                        type = 'hl';
+                        code = this.commentEdited.code;
+                        id = "";
+                    }
+                    var formData = new FormData();
+                    formData.append('action', 'comment');
+                    formData.append('period', this.ts.period);
+                    formData.append('type', type);
+                    formData.append('id', id);
+                    formData.append('code', code);
+                    formData.append('content', this.commentEditedContent);
+
+                    console.log("Envoi du commentaire");
+
+                    this.$http.post('', formData).then(
+                        ok => {
+                            this.fetch();
+                        },
+                        ko => {
+                            this.error = AjaxResolve.resolve("Impossible d'enregistrer le commentaire", ko);
+                        }
+                    ).then(foo => {
+                        this.selectedWeek = null;
+                        this.screensend = null;
+                        this.loading = false;
+                        this.commentEdited = null;
+                    });
+                }
+            },
+
             getAcronymColor(acronym){
                 if( this._colorsProjects.hasOwnProperty(acronym) ){
                     return this._colorsProjects[acronym];
@@ -1421,7 +1519,12 @@
                 this.sendMonth("resend");
             },
 
+
+            /**
+             * Dans cette méthode, les données pour constituer les comentaires sont générées.
+             */
             sendMonth(action="sendmonth") {
+
                 this.sendaction = action;
                 if ( !(this.ts.submitable == true || this.ts.hasConflict == true) ) {
                     this.error = 'Vous ne pouvez pas soumettre vos déclarations pour cette période : ' + this.ts.submitableInfos;
@@ -1429,31 +1532,52 @@
                 }
                 let aggregatProjet = {};
 
-                Object.keys(this.ts.days).forEach(d => {
-                    let day = this.ts.days[d];
-                    if( day.othersWP && day.othersWP.length ){
-                        day.othersWP.forEach(timesheet => {
-                           let key = timesheet.code;
+                // Aggrégation des commentaires des activités
+                Object.keys(this.ts.activities).forEach(a => {
+                    if( this.ts.activities[a].comment ){
+                        aggregatProjet[a] = [this.ts.activities[a].comment];
+                    } else {
+                        Object.keys(this.ts.days).forEach(d => {
+                            let day = this.ts.days[d];
+                            day.declarations.forEach(timesheet => {
+                                if( timesheet.activity_id == a ){
+                                    let key = timesheet.activity_id;
 
-                            if( !aggregatProjet.hasOwnProperty(key) ){
-                                aggregatProjet[key] = [];
-                            }
-                            if( timesheet.description && aggregatProjet[key].indexOf(timesheet.description) < 0 ){
-                                aggregatProjet[key].push(timesheet.description);
-                            }
+                                    if( !aggregatProjet.hasOwnProperty(key) ){
+                                        aggregatProjet[key] = [];
+                                    }
+
+                                    if( timesheet.comment && aggregatProjet[key].indexOf(timesheet.comment) < 0 ){
+                                        aggregatProjet[key].push(timesheet.comment);
+                                    }
+                                }
+                            });
                         });
                     }
+                });
 
-                    day.declarations.forEach(timesheet => {
-                        let key = timesheet.activity_id;
+                // Aggrégation des commentaires des Hors-Lot
+                Object.keys(this.ts.otherWP).forEach(a => {
+                    if( this.ts.otherWP[a].comment ){
+                        aggregatProjet[a] = [this.ts.otherWP[a].comment];
+                    } else {
+                        Object.keys(this.ts.days).forEach(d => {
+                            let day = this.ts.days[d];
+                            day.declarations.forEach(timesheet => {
+                                if( timesheet.activity_id == a ){
+                                    let key = timesheet.code;
 
-                        if( !aggregatProjet.hasOwnProperty(key) ){
-                            aggregatProjet[key] = [];
-                        }
-                        if( timesheet.comment && aggregatProjet[key].indexOf(timesheet.comment) < 0 ){
-                            aggregatProjet[key].push(timesheet.comment);
-                        }
-                    });
+                                    if( !aggregatProjet.hasOwnProperty(key) ){
+                                        aggregatProjet[key] = [];
+                                    }
+
+                                    if( timesheet.comment && aggregatProjet[key].indexOf(timesheet.comment) < 0 ){
+                                        aggregatProjet[key].push(timesheet.comment);
+                                    }
+                                }
+                            });
+                        });
+                    }
                 });
 
                 Object.keys(aggregatProjet).forEach(id => {
