@@ -678,7 +678,7 @@ class NotificationService implements UseLoggerService, UseEntityManager
 
 
         // Code unique
-        $hash = $serie . ':' . $dateEffective->format('YmdH:i');
+        $hash = $serie . ':' . $dateEffective->format('Ymd');
 
         /** @var Notification $notif */
         $notif = $this->getEntityManager()->getRepository(Notification::class)->findOneBy(['hash' => $hash]);

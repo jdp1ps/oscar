@@ -118,23 +118,23 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
     }
 
     public function onRoute( MvcEvent $mvcEvent ){
-        die();
-        /** @var Logger $logger */
-        $logger = $mvcEvent->getApplication()->getServiceManager()->get('Logger');
-        $time = date('Y-m-d H:i:s');
-
-        if (php_sapi_name() == "cli") {
-            // Do not execute HTTPS redirect in console mode.
-            $person = "~CLI";
-            $uri = "\$command-line";
-        } else {
-            /** @var OscarUserContext $oscarUserContext */
-            $oscarUserContext = $mvcEvent->getApplication()->getServiceManager()->get(OscarUserContext::class);
-            $person = $oscarUserContext->getCurrentUserLog();
-            $uri = $mvcEvent->getRequest()->getUri();
-        }
-        $msg = sprintf("%s access by %s to %s", $time, $person, $uri);
-        $logger->error($msg);
+//        die();
+//        /** @var Logger $logger */
+//        $logger = $mvcEvent->getApplication()->getServiceManager()->get('Logger');
+//        $time = date('Y-m-d H:i:s');
+//
+//        if (php_sapi_name() == "cli") {
+//            // Do not execute HTTPS redirect in console mode.
+//            $person = "~CLI";
+//            $uri = "\$command-line";
+//        } else {
+//            /** @var OscarUserContext $oscarUserContext */
+//            $oscarUserContext = $mvcEvent->getApplication()->getServiceManager()->get(OscarUserContext::class);
+//            $person = $oscarUserContext->getCurrentUserLog();
+//            $uri = $mvcEvent->getRequest()->getUri();
+//        }
+//        $msg = sprintf("%s access by %s to %s", $time, $person, $uri);
+//        $logger->error($msg);
     }
 
 
