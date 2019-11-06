@@ -6,15 +6,14 @@ L'installation a été testée sous Debian et Ubuntu Server
 
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
- - PHP 7.3+ (compatible 5.6+ pour le moment) (support LDAP, Postgresql, mcrypt, intl, DOM/XML, mbstring, gd, zip)
- - Postgresql 9.4+
+ - PHP 7.3+ (support LDAP, Postgresql, mcrypt, intl, DOM/XML, mbstring, gd, zip)
+ - Postgresql 9.4+ (version 10 supportée)
  - Annuaire LDAP (supann)
 
 Matériel (Recommandation)
  - CPU 2 Core 2.4 Ghz
  - RAM 4 Go
  - Espace disque 20G (Application seule, hors documents)
-
 
 
 > Prévoyez plus d'espace si vous stoquez des documents directement sur la machine hébergeant Oscar.  
@@ -61,19 +60,17 @@ Serveur web (Apache) et PHP7 :
 apt-get install apache2
 
 # PHP + Modules PHP
-apt-get install \
-    php7.3 \
+apt install \
+    php7.3-bcmath \
     php7.3-bz2 \
-    php7.3-cli \
     php7.3-curl \
     php7.3-dom \
     php7.3-gd \
     php7.3-intl \
     php7.3-ldap \
     php7.3-mbstring \
-    php7.3-mcrypt \
-    php7.3-pgsql \
-    php7.3-xml \
+    php7.3-pdo-pgsql \
+    php7.3-xml \ 
     php7.3-zip
 ```
 
@@ -119,6 +116,8 @@ git clone https://git.unicaen.fr/open-source/oscar.git
 ### Dépendances PHP
 
 *Oscar* utilise des libraires PHP tiers (vendor). Les librairies tiers sont gérées via [Composer](https://getcomposer.org/).
+
+> Si certaines librairies vous signale des dépendances PHP manquantes, installez les et signaler le nous.
 
 
 #### Installation de composer
@@ -212,6 +211,17 @@ psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 
 
 ## Configuration d'oscar
+
+### Configuration éditable 
+
+création du fichier **config/autoload/oscar-editable.yml**
+
+```bash
+touch config/autoload/oscar-editable.yml
+```
+
+Assurez vous qu'il est accessible en écriture
+
 
 ### Base de données
 
