@@ -9,7 +9,10 @@
 namespace Oscar\Command;
 
 
+use Doctrine\ORM\EntityManager;
+use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Entity\Authentification;
+use Oscar\Formatter\ConnectorRepportToPlainText;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Symfony\Component\Console\Command\Command;
@@ -25,16 +28,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Zend\Crypt\Password\Bcrypt;
 use Zend\ServiceManager\ServiceManager;
 
-class OscarAuthPassCommand extends OscarCommandAbstract
+class OscarAuthSyncCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:auth:pass';
+    protected static $defaultName = 'oscar:auth:sync';
 
     protected function configure()
     {
         $this
-            ->setDescription("Modification du mot de passe")
-            ->addOption('login', 'l', InputOption::VALUE_OPTIONAL, 'Identifiant', '')
-            ->addOption('ldap', 'p', InputOption::VALUE_NONE, "Définit le mot de passe sur la source LDAP")
+            ->setDescription("Synchronisation des authentifications depuis un fichier JSON")
+            ->addArgument('jsonPath', InputArgument::REQUIRED, 'Emplacement du fichier JSON')
         ;
     }
 
@@ -44,56 +46,47 @@ class OscarAuthPassCommand extends OscarCommandAbstract
 
         $io = new SymfonyStyle($input, $output);
 
-        $io->title("Modification du mot de passe");
-
-        $helper = $this->getHelper('question');
-        $login = $input->getOption('login');
-        $ldap = $input->getOption('ldap');
-
-        if( !$login ){
-            $question = new Question("Entrez l'<bold>identifiant</bold> : ");
-            $login = $helper->ask($input, $output, $question);
-        }
-
-        /** @var OscarUserContext $oscarUserContextService */
-        $oscarUserContextService = $this->getServicemanager()->get(OscarUserContext::class);
+        $io->title("Importation d'authentification");
 
         try {
-            $authentification = $oscarUserContextService->getAuthentificationByLogin($login, true);
-            $output->writeln("Modification du mot de passe pour <bold>$authentification</bold>.");
-        } catch ( \Exception $e ){
-            $output->writeln("<error>Impossible de charger l'authentification : ". $e->getMessage().".</error>");
-            return;
-        }
+            $jsonpath = $input->getArgument('jsonPath');
 
-        if( $ldap ){
-            $pass = 'ldap';
-            $output->writeln("Le mot de passe sera <bold>issue du LDAP</bold>.");
-        } else {
-            // PASSWORD
+            if (!$jsonpath) {
+                $io->error("ERR : Vous devez spécifier le chemin complet vers le fichier JSON");
+                return;
+            }
+
+            if( !file_exists($jsonpath) ){
+                $io->error("ERR : '$jsonpath' n'est pas un emplacement de fichier valide");
+                return;
+            }
+
+
+            $fileContent = file_get_contents($jsonpath);
+            if (!$fileContent)
+                die("ERR : Oscar n'a pas réussi à charger le contenu du fichier '$jsonpath'");
+
+            $datas = json_decode($fileContent);
+            if (!$datas)
+                die("ERR : Les données du fichier '$jsonpath' n'ont pas pu être converties au format JSON.");
+
+            // Système pour crypter les mots de pass (Zend)
             $options = $this->getServicemanager()->get('zfcuser_module_options');
             $bcrypt = new Bcrypt();
             $bcrypt->setCost($options->getPasswordCost());
-            $question = new Question("Entrez un <bold>mot de passe (>=8 caractères)</bold> : ");
-            $question->setHidden(true);
-            $question->setHiddenFallback(true);
-            $password = $helper->ask($input, $output, $question);
-            $pass = $bcrypt->create($password);
+
+            $em = $this->getServicemanager()->get(EntityManager::class);
+
+            $connectorAuthentification = new ConnectorAuthentificationJSON($datas, $em, $bcrypt);
+
+            $repport = $connectorAuthentification->syncAll();
+            $connectorFormatter = new ConnectorRepportToPlainText();
+
+            echo $connectorFormatter->format($repport);
+
+        } catch (\Exception $ex) {
+            $io->error("ERR : " . $ex->getMessage());
         }
 
-        $question = new ConfirmationQuestion("Modifier le mot de passe de <bold>$authentification</bold> (y|N) ?", false);
-
-        if (!$helper->ask($input, $output, $question)) {
-            return;
-        }
-
-        try {
-            $authentification->setPassword($pass);
-            $oscarUserContextService->getEntityManager()->persist($authentification);
-            $oscarUserContextService->getEntityManager()->flush();
-            $io->success("Le mot de passe de $authentification a bien été modifié.");
-        } catch (\Exception $e ){
-            $output->writeln("<error>Impossible de modifier le mot de passe de $authentification : " . $e->getMessage());
-        }
     }
 }
