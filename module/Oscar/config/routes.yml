@@ -1328,12 +1328,6 @@ activitypayment:
                     id: '[0-9]+'
                 defaults:
                     action: change
-        new:
-            type: segment
-            options:
-                route: /new
-                defaults:
-                    action: new
 
 ################################################################################
 ### ActivityType

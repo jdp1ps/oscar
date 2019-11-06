@@ -52,6 +52,7 @@ use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
+use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
 use PHPUnit\Runner\Exception;
 

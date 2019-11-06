@@ -332,7 +332,7 @@ class ActivityPaymentController extends AbstractOscarController
                         'Activity',
                         $entity->getActivity()->getId()
                     );
-                    die('<div class="alert alert-success">Modification terminée</div>');
+                    $this->redirect()->toRoute('payment');
                 }
             }
 
@@ -350,55 +350,5 @@ class ActivityPaymentController extends AbstractOscarController
         }
 
         die('<div class="alert alert-danger">' . $request->getMethod() . ' not implemented</div>');
-    }
-
-    public function newAction()
-    {
-
-        $form = new ActivityPaymentForm();
-        $form->setServiceLocator($this->getServiceLocator());
-        $form->init();
-        $idActivity = $this->params()->fromRoute('idactivity');
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
-
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity);
-
-
-        $entity = new ActivityPayment();
-        $entity->setActivity($activity);
-        $form->setObject($entity);
-        $form->setData($form->getHydrator()->extract($entity));
-
-        /** @var Request $request */
-        $request = $this->getRequest();
-
-        if( $request->isPost() ){
-            $form->setData($request->getPost());
-            if( $form->isValid() ){
-                $entity->getActivity()->touch();
-                $this->getEntityManager()->persist($entity);
-                $this->getEntityManager()->flush();
-                $form->get('id')->setValue($entity->getId());
-                $this->getActivityLogService()->addUserInfo(
-                    sprintf("a ajouté un %s sur l'activité %s", $entity, $entity->getActivity()->log()),
-                    'Activity',
-                    $entity->getActivity()->getId()
-                );
-                $this->redirect()->toRoute('activitypayment/edit', ['idactivity'=>$activity->getId(), 'id'=>$entity->getId()]);
-            }
-        }
-
-        $view = new ViewModel([
-            'activity' => $activity,
-            'form' => $form,
-        ]);
-
-        if( $request->isXmlHttpRequest() ){
-            $view->setTerminal(true);
-        }
-
-        $view->setTemplate('oscar/activity-payment/form.phtml');
-
-        return $view;
     }
 }
