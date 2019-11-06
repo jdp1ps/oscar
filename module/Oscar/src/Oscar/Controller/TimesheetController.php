@@ -26,6 +26,7 @@ use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\PersonService;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Zend\Http\Request;
@@ -51,6 +52,25 @@ class TimesheetController extends AbstractOscarController
 
     /** @var PhpRenderer */
     private $viewRenderer;
+
+    /** @var  ProjectGrantService */
+    private $projectGrantService;
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(): ProjectGrantService
+    {
+        return $this->projectGrantService;
+    }
+
+    /**
+     * @param ProjectGrantService $projectGrantService
+     */
+    public function setProjectGrantService(ProjectGrantService $projectGrantService)
+    {
+        $this->projectGrantService = $projectGrantService;
+    }
 
     /**
      * @return Renderer
@@ -560,7 +580,7 @@ class TimesheetController extends AbstractOscarController
         $error = null;
 
         // Contrôle d'accès
-        $activity = $this->getActivityService()->getActivityById($activity_id, true);
+        $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
@@ -954,7 +974,7 @@ class TimesheetController extends AbstractOscarController
             throw new OscarException(_("Données insuffisantes"));
         }
 
-        $activity = $this->getActivityService()->getActivityById($activityId);
+        $activity = $this->getProjectGrantService()->getActivityById($activityId);
 
         // TODO Ajouter un test sur l'existance des dates (normalement, on ne peut pas avoir de feuilles de temps sur une activité non datée
         // période de début/fin
@@ -997,9 +1017,28 @@ class TimesheetController extends AbstractOscarController
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
         }
 
+
+
         if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
+
+            if( $activity == null ){
+                //  TODO Si l'activité n'est pas fournis, il faut récupérer la liste des activités du déclarant
+                $activities = $this->getProjectGrantService()->getActivitiesPersonPeriod($personIdQuery, $period);
+                $allow = false;
+
+                foreach ($activities  as $activity) {
+                    echo "$activity\n";
+                    if($allow === false && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity)){
+                        $allow = true;
+                    }
+                }
+                if( $allow == false ){
+                    return $this->getResponseUnauthorized("Vous ne pouvez pas voir cette feuille de temps pour cette période");
+                }
+            }
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
             $personId = $personIdQuery;
+            die();
         } else {
             $personId = $currentPersonId;
         }
@@ -1013,9 +1052,6 @@ class TimesheetController extends AbstractOscarController
 
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getTimesheetService();
-
-
-        // nom du fichier
 
 
         if( $action == "csv" ){
@@ -1040,7 +1076,6 @@ class TimesheetController extends AbstractOscarController
         }
 
         if( $action == "export2" ){
-            // Variante
             $out = $this->params()->fromQuery('out', 'pdf');
             $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
             $datas['format'] = $out;

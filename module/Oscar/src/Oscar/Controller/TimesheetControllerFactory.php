@@ -16,6 +16,7 @@ use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
@@ -34,6 +35,7 @@ class TimesheetControllerFactory implements FactoryInterface
         $c->setTimesheetService($container->get(TimesheetService::class));
         $c->setPersonService($container->get(PersonService::class));
         $c->setViewRenderer($container->get('ViewRenderer'));
+        $c->setProjectGrantService($container->get(ProjectGrantService::class));
         return $c;
     }
 

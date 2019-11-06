@@ -13,6 +13,7 @@ use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
@@ -52,6 +53,7 @@ use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
+use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
 use PHPUnit\Runner\Exception;
@@ -144,7 +146,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     }
 
     /**
-     * @return ProjectGrantRepository
+     * @return ActivityRepository
      */
     protected function getActivityRepository()
     {
@@ -520,6 +522,12 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $numbersKey = array_unique($key);
         }
         return $numbersKey;
+    }
+
+    public function getActivitiesPersonPeriod( $personId, $periodStr ){
+        $period = DateTimeUtils::periodBounds($periodStr);
+        $date = new \DateTime($period['end']);
+        return $this->getActivityRepository()->getActivitiesPersonDate($personId, $date);
     }
 
     public function getDistinctNumberKeyUnreferenced(){
