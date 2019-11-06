@@ -89,5 +89,12 @@
     "password": "valorisation",
     "login": "valorisation",
     "approles": ["Chargé de valorisation"]
+  },
+  {
+    "displayname": "Responsable financier",
+    "email": "financier@oscar-demo.com",
+    "password": "financier",
+    "login": "financier",
+    "approles": ["Responsable Financier"]
   }
 ]
