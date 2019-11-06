@@ -80,6 +80,12 @@ use Zend\Console\Prompt\Select;
 use Zend\Crypt\Password\Bcrypt;
 use Zend\Mvc\Console\Controller\AbstractConsoleController;
 
+
+/**
+ * Class ConsoleController
+ * @package Oscar\Controller
+ * @deprecated Il faut maintenant déclarer les commandes dans src/Oscar/Command en suivant l'exemple
+ */
 class ConsoleController extends AbstractConsoleController implements UseEntityManager, UsePersonService, UseProjectService, UseProjectGrantService, UseNotificationService, UseOscarConfigurationService, UseOscarUserContextService, UseLoggerService, UseActivityLogService, UseServiceContainer
 {
     use UseEntityManagerTrait, UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait,
