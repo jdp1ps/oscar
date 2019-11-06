@@ -88,7 +88,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
 
 
-        $modulesRequires = ['bz2', 'curl', 'fileinfo', 'gd', 'iconv', 'json', 'ldap', 'mbstring', 'openssl', 'pdo_pgsql', 'posix', 'Reflection', 'session', 'xml', 'zip', 'toto'];
+        $modulesRequires = ['bz2', 'curl', 'fileinfo', 'gd', 'iconv', 'json', 'ldap', 'mbstring', 'openssl', 'pdo_pgsql', 'posix', 'Reflection', 'session', 'xml', 'zip'];
         foreach ($modulesRequires as $moduleName) {
             $row[] = $this->checkModule($moduleName, $io);
         }
@@ -201,7 +201,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
                     case 'file' :
                         $pathDocuments = $config->getConfiguration('oscar.mailer.transport.path');
-                        $this->checkPath($pathDocuments, "Dossier où sont archivés les mails (DEBUG)");
+                        $this->checkPath($io, $pathDocuments, "Dossier où sont archivés les mails (DEBUG)");
                         break;
                 }
             } else {
