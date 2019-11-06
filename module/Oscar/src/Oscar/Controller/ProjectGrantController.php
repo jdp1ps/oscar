@@ -2245,5 +2245,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         return $this->getResponseNotImplemented();
     }
+
+    public function newForStructure(){
+        die("EN COURS");
+    }
     ////////////////////////////////////////////////////////////////////////////
 }

@@ -7,6 +7,7 @@
 
 namespace Oscar\Service;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
 use Moment\Moment;
 use Oscar\Entity\Activity;
@@ -28,55 +29,59 @@ use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Log\Logger;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class NotificationService implements UseLoggerService, UseEntityManager
+class NotificationService implements UseServiceContainer
 {
 
-    use UseLoggerServiceTrait, UseEntityManagerTrait;
+    use UseServiceContainerTrait;
+    // use UseLoggerServiceTrait, UseEntityManagerTrait;
+//$s->setLoggerService($container->get('Logger'));
+//$s->setEntityManager($container->get(EntityManager::class));
+//$s->setOrganizationService($container->get(OrganizationService::class));
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
-    /** @var PersonService */
-    private $personService;
-
-    /** @var OrganizationService */
-    private $organizationService;
-
-    /**
-     * @return PersonService
-     */
-    public function getPersonService(): PersonService
-    {
-        return $this->personService;
+    public function getLoggerService(){
+        return $this->getServiceContainer()->get('Logger');
     }
 
     /**
-     * @param PersonService $personService
+     * @return EntityManager
      */
-    public function setPersonService(PersonService $personService): void
-    {
-        $this->personService = $personService;
+    public function getEntityManagerService(){
+        return $this->getServiceContainer()->get(EntityManager::class);
+    }
+
+    /**
+     * @return EntityManager
+     */
+    public function getEntityManager(){
+        return $this->getEntityManagerService();
     }
 
     /**
      * @return OrganizationService
      */
-    public function getOrganizationService(): OrganizationService
-    {
-        return $this->organizationService;
+    public function getOrganizationService(){
+        return $this->getServiceContainer()->get(OrganizationService::class);
     }
 
     /**
-     * @param OrganizationService $organizationService
+     * @return PersonService
      */
-    public function setOrganizationService(OrganizationService $organizationService): void
-    {
-        $this->organizationService = $organizationService;
+    public function getPersonService(){
+        return $this->getServiceContainer()->get(PersonService::class);
     }
+
+
+
+
+
 
 
 

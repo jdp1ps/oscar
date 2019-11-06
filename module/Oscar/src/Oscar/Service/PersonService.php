@@ -36,12 +36,16 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UseOrganizationService;
+use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -55,9 +59,9 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  *  - Collaborateurs
  *  - Membres de projet/organisation.
  */
-class PersonService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService, UseNotificationService, UseProjectGrantService, UseActivityLogService
+class PersonService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService, UseNotificationService, UseProjectGrantService, UseActivityLogService, UseServiceContainer
 {
-    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait, UseNotificationServiceTrait, UseProjectGrantServiceTrait, UseActivityLogServiceTrait;
+    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait, UseNotificationServiceTrait, UseProjectGrantServiceTrait, UseActivityLogServiceTrait, UseServiceContainerTrait;
 
 
     /**
@@ -288,7 +292,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     public function addReferentToDeclarerHorsLot(Person $declarer, Person $referent, $flush = false){
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
 
         // Mise à jour des déclarations en attentes
         $validationPeriods = $timesheetService->getValidationHorsLotToValidateByPerson($declarer, true);
@@ -328,7 +332,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
 
         // Mise à jour des déclarations en attentes
         $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
@@ -359,7 +363,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             // Déclarations
             /** @var TimesheetService $timesheetService */
-            $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+            $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
 
             $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
             /** @var ValidationPeriod $validationPeriod */
@@ -496,7 +500,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             return;
         }
 
-        $url = $this->getServiceLocator()
+        $url = $this->getServiceContainer()
             ->get('viewhelpermanager')
             ->get('url');
 
@@ -521,6 +525,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $content .= "<li><strong>".$formatted." (".$since.") : </strong> " .$message."</li>\n";
         }
 
+        //  TODO vérifier que ça fonctionne
         /** @var MailingService $mailer */
         $mailer = $this->getServiceLocator()->get("mailingService");
         $to = $person->getEmail();
@@ -1315,7 +1320,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     public function personOrganizationRemove( OrganizationPerson $organizationPerson ){
         if( $organizationPerson->isPrincipal() ){
             /** @var OrganizationService $os */
-            $os = $this->getServiceLocator()->get('OrganizationService');
+            $os = $this->getOrganizationService();
 
             foreach ( $os->getOrganizationActivititiesPrincipalActive($organizationPerson->getOrganization()) as $activity ){
                 $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $organizationPerson->getPerson());
@@ -1505,5 +1510,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
             $this->getNotificationService()->generateNotificationsForProject($project, $person);
         }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return OrganizationService
+     */
+    public function getOrganizationService(){
+        return $this->getServiceContainer()->get(OrganizationService::class);
     }
 }
