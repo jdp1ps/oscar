@@ -13,12 +13,12 @@ use Oscar\Service\ActivityLogService;
 interface UseActivityLogService
 {
     /**
-     * @param EntityManager $em
+     * @param ActivityLogService $em
      */
     public function setActivityLogService( ActivityLogService $em ) :void;
 
     /**
-     * @return Entitymanager
+     * @return ActivityLogService
      */
     public function getActivityLogService() :ActivityLogService ;
 }

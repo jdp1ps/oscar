@@ -20,7 +20,9 @@ use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
+use Oscar\Service\TimesheetService;
 use Oscar\Service\TypeDocumentService;
+use Oscar\Service\UserParametersService;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityTypeService;
 use Oscar\Traits\UseAdministrativeDocumentService;
@@ -32,7 +34,9 @@ use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectService;
+use Oscar\Traits\UseTimesheetService;
 use Oscar\Traits\UseTypeDocumentService;
+use Oscar\Traits\UseUserParametersService;
 use Psr\Container\ContainerInterface;
 
 abstract class AbstractOscarFactory
@@ -91,11 +95,20 @@ abstract class AbstractOscarFactory
             $service->setOrganizationService($container->get(OrganizationService::class));
         }
 
+        if( is_subclass_of($service, UseTimesheetService::class)) {
+            $service->setTimesheetService($container->get(TimesheetService::class));
+        }
 
         // NOTIFICATION
         if( is_subclass_of($service, UseNotificationService::class) ){
             $service->setNotificationService($container->get(NotificationService::class));
         }
+
+        if( is_subclass_of($service, UseUserParametersService::class) ){
+            $service->setUserParametersService($container->get(UserParametersService::class));
+        }
+
+
 
         // LOGGER
 

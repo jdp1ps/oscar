@@ -123,6 +123,6 @@ class UserParametersService implements UseOscarConfigurationService, UseEntityMa
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function scheduleEditable(){
-        return $this->getOscarConfigurationService()->getConfiguration('oscar.userSubmitSchedule');
+        return $this->getOscarConfigurationService()->getConfiguration('userSubmitSchedule');
     }
 }

@@ -12,18 +12,17 @@ namespace Oscar\Service;
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
+use Oscar\Factory\AbstractOscarFactory;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class UserParametersServiceFactory implements FactoryInterface
+class UserParametersServiceFactory extends AbstractOscarFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $s = new UserParametersService();
-        $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));
-        $s->setActivityLogService($container->get(ActivityLogService::class));
-        $s->setEntityManager($container->get(EntityManager::class));
+        $this->init($s, $container);
         return $s;
     }
 }

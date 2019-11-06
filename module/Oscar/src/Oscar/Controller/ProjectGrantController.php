@@ -977,8 +977,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $downloader = new CSVDownloader();
 
-
-
         if( $format == "xls" ){
             $downloader->downloadCSVToExcel($csvPath);
         }

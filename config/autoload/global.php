@@ -36,6 +36,12 @@ return array(
         // Active l'option autorisant l'importation de calendrier pour les déclarants
         'importEnable' => true,
 
+        // Configuration des exports :
+        // - Champ calculés : doc/activities-export.md
+        'export' => [
+            'computedFields' => []
+        ],
+
 
 //        'export' => [
 //            'payments' => [

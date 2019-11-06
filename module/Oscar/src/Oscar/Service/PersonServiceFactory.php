@@ -11,11 +11,12 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
+use Oscar\Factory\AbstractOscarFactory;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseOscarUserContextService;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class PersonServiceFactory extends AbstractServiceFactory implements FactoryInterface
+class PersonServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

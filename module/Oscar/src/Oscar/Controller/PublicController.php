@@ -14,8 +14,12 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\TimesheetService;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseTimesheetService;
 use Oscar\Traits\UseTimesheetServiceTrait;
+use Oscar\Traits\UseUserParametersService;
+use Oscar\Traits\UseUserParametersServiceTrait;
 use Zend\EventManager\Event;
 use Zend\Mvc\Application;
 use Zend\View\Model\ViewModel;
@@ -23,9 +27,9 @@ use Zend\View\Model\ViewModel;
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
-class PublicController extends AbstractOscarController implements UseTimesheetService
+class PublicController extends AbstractOscarController implements UseTimesheetService, UsePersonService, UseUserParametersService
 {
-    use UseTimesheetServiceTrait;
+    use UseTimesheetServiceTrait, UsePersonServiceTrait, UseUserParametersServiceTrait;
 
     /** @var ActivityRequestService */
     public $activityRequestService;
@@ -63,14 +67,14 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
     public function parametersAction()
     {
         /** @var Authentification $auth */
-        $auth = $this->getCurrentPerson();
+        $auth = $this->getOscarUserContextService()->getAuthentification();
 
         if( !$this->getCurrentPerson() ){
             throw new OscarException("Votre compte n'est associé à aucune fiche Personne dans Oscar");
         }
 
         // Récupération des envois automatiques
-        $forceSend = $this->getConfiguration('oscar.notifications.fixed');
+        $forceSend = $this->getOscarConfigurationService()->getConfiguration('notifications.fixed');
 
         $method = $this->getHttpXMethod();
 
@@ -79,7 +83,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         if( $this->isAjax() && $this->params()->fromQuery('a') == 'schedule' ){
 
             /** @var TimesheetService $timesheetService */
-            $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+            $timesheetService = $this->getTimesheetService();
 
             if( $method == 'GET' ){
                 $datas = $timesheetService->getDayLengthPerson($this->getCurrentPerson());
@@ -132,10 +136,10 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         }
 
         /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceLocator()->get('TimesheetService');
+        $timesheetService = $this->getTimesheetService();
 
         $declarationsHours = $timesheetService->isDeclarationsHoursPerson($this->getCurrentPerson());
-        $declarationsHoursOverwriteByAuth = $this->getConfiguration('oscar.declarationsHoursOverwriteByAuth');
+        $declarationsHoursOverwriteByAuth = $this->getOscarConfigurationService()->getConfiguration('declarationsHoursOverwriteByAuth');
 
         return [
             'subordinates' => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),

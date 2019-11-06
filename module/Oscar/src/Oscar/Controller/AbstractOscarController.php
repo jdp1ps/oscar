@@ -237,30 +237,4 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
     {
         return $this->getHttpResponse(Response::STATUS_CODE_401, $message);
     }
-
-    /**
-     * @return \UnicaenAuth\Entity\Ldap\People
-     */
-    protected function getLdapUser()
-    {
-        return $this->getOscarUserContextService()->getUserContext()->getLdapUser();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // Repositories
-    //
-    ////////////////////////////////////////////////////////////////////////////
-
-    protected function addActivity(
-        $message,
-        $level = LogActivity::DEFAULT_LEVEL,
-        $type = LogActivity::TYPE_DEBUG,
-        $context = LogActivity::DEFAULT_CONTEXT,
-        $contextId = LogActivity::DEFAULT_CONTEXTID,
-        $userId = LogActivity::DEFAULT_USER,
-        array $data = null)
-    {
-        $this->getActivity()->addActivity($message, $level, $type, $context, $contextId, $userId, $data);
-    }
 }
