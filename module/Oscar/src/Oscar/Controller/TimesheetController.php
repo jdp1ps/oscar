@@ -691,8 +691,17 @@ class TimesheetController extends AbstractOscarController
             // Contrôle des droits d'accès
             $global = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW);
             if( !$global ){
-                if( !in_array($this->getCurrentPerson(), $this->getPersonService()->getManagers($person)) ){
-                    return $this->getResponseUnauthorized("Vous n'avez pas les droits pour voir la feuille de temps de $person");
+                $allow = in_array($this->getCurrentPerson(), $this->getPersonService()->getManagers($person));
+                if( !$allow ){
+                    // Patch :
+                    // On va récupérer la liste des activités impliquant la personne pour la période, et tester si l'utilisateur
+                    // est autorisé à voir les feuilles de temps pour l'une d'elles.
+                    $activitiesDeclarer = $this->getProjectGrantService()->getActivitiesPersonPeriod($person->getId(), $period);
+                    foreach ($activitiesDeclarer as $activity) {
+                        if( $allow == false ) {
+                            $allow = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+                        }
+                    }
                 }
             }
 
@@ -708,10 +717,6 @@ class TimesheetController extends AbstractOscarController
         else {
             return $this->getResponseBadRequest("Paramètres de l'API insuffisants");
         }
-
-
-
-
 
         $output = [
             'activityId' => $activity_id,
