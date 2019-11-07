@@ -599,16 +599,22 @@ class TimesheetController extends AbstractOscarController
         elseif ($format == "pdf") {
             $output['format'] = 'pdf';
             $formatter = new TimesheetActivityPeriodPdfFormatter(
-                $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+                $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
                 $this->getViewRenderer()
             );
             $formatter->render($output);
             die();
         }
+        elseif ($format == "json") {
+            $output['format'] = 'json';
+            return $this->jsonOutput($output);
+
+            die();
+        }
         else {
             $output['format'] = 'html';
-            $formatter =  new TimesheetPersonPeriodHtmlFormatter(
-                $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+            $formatter =  new TimesheetActivityPeriodHtmlFormatter(
+                $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
                 $this->getViewRenderer()
             );
             $html = $formatter->render($output);
@@ -1032,7 +1038,7 @@ class TimesheetController extends AbstractOscarController
                 $allow = false;
 
                 foreach ($activities  as $activity) {
-                    echo "$activity\n";
+
                     if($allow === false && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity)){
                         $allow = true;
                     }
@@ -1043,7 +1049,6 @@ class TimesheetController extends AbstractOscarController
             }
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
             $personId = $personIdQuery;
-            die();
         } else {
             $personId = $currentPersonId;
         }

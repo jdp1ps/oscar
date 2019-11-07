@@ -39,7 +39,7 @@ class TimesheetPersonPeriodHtmlFormatter
         if( !$this->templatePath ){
             throw new OscarException(_("L'emplacement du gabarit de mise en forme des feuilles de temps individuelles est mal configuré."));
         }
-
+        //var_dump($datas); die();
         $datas['nbrJours'] = $nbrJours = count($datas['daysInfos']);
         $datas['width'] = $width = $nbrJours +2;
         $datas['colSize4'] = $colSize4 = ceil(($nbrJours-3) / 4);
