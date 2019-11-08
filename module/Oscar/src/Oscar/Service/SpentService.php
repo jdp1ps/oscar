@@ -27,15 +27,21 @@ use Oscar\Entity\SpentTypeGroupRepository;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Log\Logger;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
-class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class SpentService implements UseLoggerService, UseOscarConfigurationService, UseEntityManager
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+    use UseEntityManagerTrait, UseOscarConfigurationServiceTrait, UseLoggerServiceTrait;
 
     public function getAllArray(){
         $array = [];
@@ -306,7 +312,7 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
     }
 
     public function getMasses(){
-        return $this->getServiceLocator()->get('OscarConfig')->getConfiguration('spenttypeannexes');
+        return $this->getOscarConfigurationService()->getConfiguration('spenttypeannexes');
     }
 
     public function getTypesTree(){
@@ -375,7 +381,7 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
     }
 
     public function loadPCG(){
-        $filepath = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('spenttypesource');
+        $filepath = $this->getOscarConfigurationService()->getConfiguration('spenttypesource');
 
         $spentTypes = $this->getSpentTypesIndexCode() ;
 
@@ -480,7 +486,7 @@ class SpentService implements ServiceLocatorAwareInterface, EntityManagerAwareIn
      * @return Logger
      */
     protected function getLogger(){
-        return $this->getServiceLocator()->get('Logger');
+        return $this->getLoggerService();
     }
 
     /**

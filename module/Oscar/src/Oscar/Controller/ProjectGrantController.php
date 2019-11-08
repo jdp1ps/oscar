@@ -55,6 +55,8 @@ use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
+use Oscar\Traits\UseSpentService;
+use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\PhpEnvironment\Request;
@@ -68,10 +70,10 @@ use Zend\View\Model\ViewModel;
  *
  * @package Oscar\Controller
  */
-class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService, UseServiceContainer, UseProjectService
+class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService, UseServiceContainer, UseProjectService, UseSpentService
 {
 
-    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait;
+    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -1184,7 +1186,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
         // Check access
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
+       // $this->getOscarUserContext()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
 
 
         $spentService = $this->getSpentService();

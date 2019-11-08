@@ -21,6 +21,7 @@ use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
+use Oscar\Service\SpentService;
 use Oscar\Service\TimesheetService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
@@ -45,6 +46,7 @@ class ProjectGrantControllerFactory implements FactoryInterface
         $c->setPersonService($container->get(PersonService::class));
         $c->setActivityService($container->get(ProjectGrantService::class));
         $c->setProjectService($container->get(ProjectService::class));
+        $c->setSpentService($container->get(SpentService::class));
         $c->setServiceContainer($container);
         return $c;
     }

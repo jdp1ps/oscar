@@ -7,28 +7,74 @@
 
 namespace Oscar\Controller;
 
+use Doctrine\ORM\EntityManager;
+use Monolog\Logger;
 use Oscar\Entity\Activity;
 use Oscar\Entity\SpentTypeGroup;
 use Oscar\Provider\Privileges;
+use Oscar\Service\OscarConfigurationService;
+use Oscar\Service\OscarUserContext;
 use Oscar\Service\SpentService;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use Zend\Http\Request;
 use Zend\View\Model\JsonModel;
 
-class DepenseController extends AbstractOscarController
+class DepenseController extends AbstractOscarController implements UseServiceContainer
 {
+    use UseServiceContainerTrait;
+
     /**
      * @return SpentService
      */
     public function getSpentService(){
-        return $this->getServiceLocator()->get('SpentService');
+        return $this->getServiceContainer()->get(SpentService::class);
     }
+
+    /**
+     * @return OscarUserContext
+     */
+    public function getOscarUserContextService(): OscarUserContext
+    {
+        return $this->getServiceContainer()->get(OscarUserContext::class);
+    }
+
+    /**
+     * @return OscarUserContext
+     */
+    public function getOscarUserContext(){
+        return $this->getOscarUserContextService();
+    }
+
+    /**
+     * @return OscarConfigurationService
+     */
+    public function getOscarConfigurationService(): OscarConfigurationService
+    {
+        return $this->getServiceContainer()->get(OscarConfigurationService::class);
+    }
+
+    /**
+     * @return Logger
+     */
+    public function getLogger(){
+        return $this->getServiceContainer()->get('Logger');
+    }
+
+    /**
+     * @return EntityManager
+     */
+    public function getEntityManager() :EntityManager {
+        return $this->getServiceContainer()->get(EntityManager::class);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function manageSpendTypeGroupAction()
     {
 
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
         $format = $this->params()->fromQuery('format', 'html');
-
 
         $method = $this->getHttpXMethod();
 
@@ -115,7 +161,7 @@ class DepenseController extends AbstractOscarController
         if( $format == 'json' || $this->isAjax() ){
             return $this->jsonOutput([
                 'spenttypegroups' => $this->getSpentService()->getAllArray(),
-                'masses' => $this->getConfiguration('oscar.spenttypeannexes')
+                'masses' => $this->getOscarConfigurationService()->getConfiguration('spenttypeannexes')
             ]);
         } else {
             return [];

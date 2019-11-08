@@ -121,7 +121,7 @@ return array(
                 [   'controller' =>   'Activity',
                     'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
                         'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
-                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande', 'api', 'gant'],
+                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande', 'api', 'gant', 'estimatedSpent'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
@@ -140,7 +140,7 @@ return array(
                 // DEPENSES
                 // --- VERSEMENTS
                 [ 'controller' =>   'Depense',
-                    'action' => ['activity'],
+                    'action' => ['activity', 'manageSpendTypeGroup'],
                     'roles' => ['user'],
                 ],
 
@@ -837,6 +837,7 @@ return array(
             \Oscar\Service\ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
             \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
+            \Oscar\Service\SpentService::class => \Oscar\Service\SpentServiceFactory::class,
             \Oscar\Service\TypeDocumentService::class => \Oscar\Service\TypeDocumentServiceFactory::class,
             'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class,
             \Oscar\Service\UserParametersService::class => \Oscar\Service\UserParametersServiceFactory::class
@@ -859,7 +860,6 @@ return array(
         'invokables' => array(
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
             'Sync' => CentaureSync\Controller\SyncController::class,
-            'Depense' => \Oscar\Controller\DepenseController::class,
             'Connector' => \Oscar\Controller\ConnectorController::class,
         ),
         'factories' => [
@@ -870,6 +870,7 @@ return array(
             'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
             'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentControllerFactory::class,
             'DateType' => \Oscar\Controller\DateTypeControllerFactory::class,
+            'Depense' => \Oscar\Controller\DepenseControllerFactory::class,
             \Oscar\Controller\EnrollController::class => \Oscar\Controller\EnrollControllerFactory::class,
             \Oscar\Controller\ConsoleController::class => \Oscar\Factory\OscarUseFactory::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentControllerFactory::class,
