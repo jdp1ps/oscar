@@ -22,6 +22,7 @@ use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Entity\SpentLine;
 use Oscar\Entity\SpentTypeGroup;
 use Oscar\Entity\SpentTypeGroupRepository;
 use Oscar\Entity\ValidationPeriod;
@@ -502,5 +503,39 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         if( !$datas['code'] ){
             throw new OscarException(_("Le champ code doit être renseigné"));
         }
+    }
+    public function getSpentsByPFI( $pfi ){
+        return $this->getEntityManager()->getRepository(SpentLine::class)->findBy(['pfi' => $pfi]);
+    }
+
+
+    public function addSpentLine( array $data ){
+        $spentLine = new SpentLine();
+        $this->getEntityManager()->persist($spentLine);
+
+        $spentLine->setPfi($data['PFI']);
+        $spentLine->setNumSifac($data['NUMSIFAC']);
+        $spentLine->setNumCommandeAff($data['NUMCOMMANDEAFF']);
+        $spentLine->setNumPiece($data['NUMPIECE']);
+        $spentLine->setNumFournisseur($data['NUMFOURNISSEUR']);
+        $spentLine->setPieceRef($data['PIECEREF']);
+        $spentLine->setCodeSociete($data['CODESOCIETE']);
+        $spentLine->setCodeServiceFait($data['CODESERVICEFAIT']);
+        $spentLine->setCodeDomaineFonct($data['CODEDOMAINEFONCT']);
+        $spentLine->setDesignation($data['DESIGNATION']);
+        $spentLine->setTexteFacture($data['TEXTEFACTURE']);
+        $spentLine->setTypeDocument($data['TYPEDOCUMENT']);
+        $spentLine->setMontant($data['MONTANT']);
+        $spentLine->setCentreDeProfit($data['CENTREDEPROFIT']);
+        $spentLine->setCompteBudgetaire($data['COMPTEBUDGETAIRE']);
+        $spentLine->setCentreFinancier($data['CENTREFINANCIER']);
+        $spentLine->setCompteGeneral($data['COMPTEGENERAL']);
+        $spentLine->setDatePiece($data['DATEPIECE']);
+        $spentLine->setDateComptable($data['DATECOMPTABLE']);
+        $spentLine->setDateAnneeExercice($data['DATEANNEEEXERCICE']);
+        $spentLine->setDatePaiement($data['DATEPAIEMENT']);
+        $spentLine->setDateServiceFait($data['DATESERVICEFAIT']);
+
+        $this->getEntityManager()->flush($spentLine);
     }
 }

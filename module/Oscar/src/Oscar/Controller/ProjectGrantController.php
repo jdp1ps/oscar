@@ -1322,6 +1322,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    public function spentListAction(){
+        $activity = $this->getActivityService()->getActivityById($this->params()->fromRoute('id'));
+        $spents = $this->getSpentService()->getSpentsByPFI($activity->getCodeEOTP());
+        return [
+            'activity'  => $activity,
+            'spents'    => $spents
+        ];
+    }
+
     /**
      * Procédure pour modifier le projet d'un activité de recherche.
      */

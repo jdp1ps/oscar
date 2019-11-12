@@ -1,0 +1,26 @@
+
+<section class="container">
+    <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
+    <table class="table bordered table-condensed">
+        <thead>
+            <tr>
+                <th>PFI</th>
+                <th>N° SIFAC</th>
+                <th>N° PIECE</th>
+                <th>Designation</th>
+                <th>MONTANT</th>
+            </tr>
+        </thead>
+        <?php
+        /** @var \Oscar\Entity\SpentLine $spentLine */
+        foreach ($spents as $spentLine): ?>
+            <tr>
+                <td><?= $spentLine->getPfi() ?></td>
+                <td><?= $spentLine->getNumSifac() ?></td>
+                <td><?= $spentLine->getNumPiece() ?></td>
+                <td><?= $spentLine->getDesignation() ?></td>
+                <td><?= $spentLine->getMontant() ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+</section>

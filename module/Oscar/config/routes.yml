@@ -778,6 +778,13 @@ contract:
                 defaults:
                     action: estimatedSpent
 
+        list-spent:
+            type: segment
+            options:
+                route: /depenses/:id
+                defaults:
+                    action: spentList
+
         requestadmin:
             type: literal
             options:
