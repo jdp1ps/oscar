@@ -204,7 +204,24 @@ return array(
                   'editable'  => false
                ]
                /****/
+            ],
+
+            /***************************************/
+            /***** CONNECTOR SIFAC (Dépenses) ******/
+            /***************************************
+            'spent' => [
+                'sifac' => [
+                    'class'     => \Oscar\Connector\ConnectorSpentSifacOCI::class,
+                    'params'    => [
+                        'username'  => 'login',
+                        'password'  => 'p@$sM0rd',
+                        'hostname'  => 'sub.domain.ext,
+                        'SID'       => 'ED209',
+                        'port'      => '1234',
+                    ]
+                ]
             ]
+            /**************************************/
         ],
 
         /*** Notifications ***/
