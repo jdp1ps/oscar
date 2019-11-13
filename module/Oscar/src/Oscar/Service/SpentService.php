@@ -513,6 +513,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $spentLine = new SpentLine();
         $this->getEntityManager()->persist($spentLine);
 
+        $spentLine->setSyncId($data['IDSYNC']);
         $spentLine->setPfi($data['PFI']);
         $spentLine->setNumSifac($data['NUMSIFAC']);
         $spentLine->setNumCommandeAff($data['NUMCOMMANDEAFF']);

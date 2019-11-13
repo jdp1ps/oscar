@@ -35,7 +35,7 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
         $this
             ->setDescription("Permet d'obtenir les dépenses")
             ->setHelp("")
-            //->addArgument('sort', InputArgument::OPTIONAL, "Champ à utiliser pour le trie")
+            ->addArgument('pfi', InputArgument::OPTIONAL, "PFI à synchroniser")
         ;
     }
 
@@ -52,6 +52,17 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
 
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
+
+        $pfi = $input->getArgument('pfi');
+
+        if($pfi){
+            $io->writeln("PFI : $pfi");
+        } else  {
+            $q = new Question("Synchroniser toutes les dépenses ?");
+            $io->askQuestion($q);
+            $io->error("Pas encore disponible");
+            return;
+        }
 
         //
 
@@ -76,7 +87,7 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
                 /** @var ConnectorSpentSifacOCI $instance */
                 $instance = $factory->newInstanceArgs([$this->getServicemanager()->get(SpentService::class), $conf['params']]);
 
-                $instance->sync('014CG019', $io);
+                $instance->sync($pfi, $io);
             }
 
         } catch (\Exception $e ){

@@ -42,7 +42,9 @@ class ConnectorSpentSifacOCI
             try {
 
                 $stid = oci_parse($c, sprintf("select 
-MEASURE AS pfi,  
+MEASURE AS pfi, 
+RLDNR as AB9,
+STUNR as idsync, 
 awref AS numSifac,
 vrefbn as numCommandeAff,
 vobelnr as numPiece,
@@ -65,7 +67,7 @@ gjahr as dateAnneeExercice,
 zhldt AS datePaiement, 
 PSOBT AS dateServiceFait
 
-from sapsr3.v_fmifi where measure = '%s'", $pfi));
+from sapsr3.v_fmifi where measure = '%s' AND rldnr='9A'", $pfi));
 
                 if( !$stid ){
                     $out->error("ERREUR ORACLE : " . oci_error());
@@ -81,13 +83,20 @@ from sapsr3.v_fmifi where measure = '%s'", $pfi));
                 $headers = ['PFI','numSifac', 'numCommandeAff', 'numPiece', 'numFournisseur', 'pieceRef','codeSociete', 'codeServiceFait', 'codeDomaineFonct', 'designation', 'texteFacture', 'typeDocument', 'montant','centreDeProfit','compteBudgetaire','centreFinancier','centreFinancier','compteGeneral','datePiece','dateComptable','dateAnneeExercice','datePaiement','dateServiceFait','domaineActivite'];
                 $rows = [];
 
+                $out->writeln("Traitement des résultats...");
+
 //
 //
                 $nbr = 0;
                 while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
                     $nbr++;
-                    $this->spentService->addSpentLine($row);
+                    try {
+                        $this->spentService->addSpentLine($row);
+                    } catch (\Exception $e) {
+                        $out->writeln("<error>Erreur, impossible de traiter ". $row['IDSYNC']."</error>");
+                    }
                 }
+                $out->writeln("Traitement des résultats terminé");
                 $out->success(sprintf("%s résultat(s) trouvé", $nbr));
 //                $out->table($headers, $rows);
             } catch (\Exception $e) {

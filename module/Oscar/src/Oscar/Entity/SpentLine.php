@@ -28,6 +28,11 @@ class SpentLine
     private $id;
 
     /**
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $syncId;
+
+    /**
      * @ORM\Column(type="string", nullable=true)
      */
     private $pfi;
@@ -143,6 +148,22 @@ class SpentLine
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSyncId()
+    {
+        return $this->syncId;
+    }
+
+    /**
+     * @param mixed $syncId
+     */
+    public function setSyncId($syncId)
+    {
+        $this->syncId = $syncId;
     }
 
     /**
