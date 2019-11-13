@@ -57,6 +57,8 @@ $ pecl version
   Running on: Linux ED209 #67-Ubuntu SMP Thu Aug 22 16:55:30 UTC 2019 x86_64
 ```
 
+> Si vous êtes derrière un proxy, utilisez la commande `pear config-set http_proxy http://<user>:<password>@<ip_proxy>:<port>` pour régler le proxy utilisé par PEAR (il n'utilise pas le proxy système...)
+
 PECL a besoin de **phpize** qui est inclus dans la librairie **php7.3-dev** pour compiler certains module (dont OCI8 qui nous interesse): 
 
 ```bash
