@@ -389,6 +389,7 @@
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
                 <div id="payments"></div>
                 <div>
+                    <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
                     <h3>Assiette Subventionnable : <strong><?= $entity->getAssietteSubventionnable() ?></strong></h3>
                     <h3>Note financière</h3>
                     <blockquote><?= $entity->getNoteFinanciere() ?></blockquote>
