@@ -1,13 +1,23 @@
 
 <section class="container">
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
-    <table class="table bordered table-condensed">
+    <?php if($msg): ?>
+    <div class="alert alert-info"><?= $msg ?></div>
+    <?php endif; ?>
+    <?php if($error): ?>
+        <div class="alert alert-danger"><?= $error ?></div>
+    <?php endif; ?>
+    <?php if( count($spents) ): ?>
+    <table class="table table-condensed table-bordered table-condensed card">
         <thead>
             <tr>
                 <th>PFI</th>
                 <th>N° SIFAC</th>
                 <th>N° PIECE</th>
+                <th>Date Comptable</th>
+                <th>Compt. Budg</th>
                 <th>Designation</th>
+                <th>Texte</th>
                 <th>MONTANT</th>
             </tr>
         </thead>
@@ -18,9 +28,18 @@
                 <td><?= $spentLine->getPfi() ?></td>
                 <td><?= $spentLine->getNumSifac() ?></td>
                 <td><?= $spentLine->getNumPiece() ?></td>
+                <td><?= $spentLine->getDateComptable() ?></td>
+                <td><?= $spentLine->getCompteBudgetaire() ?></td>
                 <td><?= $spentLine->getDesignation() ?></td>
+                <td><?= $spentLine->getTexteFacture() ?></td>
                 <td><?= $spentLine->getMontant() ?></td>
             </tr>
         <?php endforeach; ?>
     </table>
+    <?php else: ?>
+        <form action="" method="post">
+            <button type="submit" name="action" value="update">Synchroniser</button>
+        </form>
+    <?php endif; ?>
+
 </section>

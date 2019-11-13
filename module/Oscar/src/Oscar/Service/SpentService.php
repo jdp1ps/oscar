@@ -505,7 +505,38 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
     }
     public function getSpentsByPFI( $pfi ){
-        return $this->getEntityManager()->getRepository(SpentLine::class)->findBy(['pfi' => $pfi]);
+        return $this->getEntityManager()->getRepository(SpentLine::class)->findBy(['pfi' => $pfi], ['dateComptable' => 'DESC']);
+    }
+
+    public function syncSpentsByEOTP( $eotp ){
+        if( !$eotp ){
+            throw new OscarException("Pas d'EOTP");
+        }
+        return $this->getConnector()->sync($eotp);
+    }
+
+    public function getConnector(){
+        $oscarConfig = $this->getOscarConfigurationService();
+        $connectorConfig = $oscarConfig->getConfiguration('connectors.spent');
+        $keysConfig = array_keys($connectorConfig);
+
+        if( count($keysConfig) == 0 ){
+            throw new OscarException("Pas de synchronisation des dépenses configuré");
+        }
+
+        elseif (count($keysConfig) > 1) {
+            throw new OscarException("Oscar ne prends en charge qu'une source de synchronisation pour les dépenses.");
+        }
+        else {
+
+            $conf = $connectorConfig[$keysConfig[0]];
+            $class = $conf['class'];
+            $factory = new \ReflectionClass($class);
+
+            /** @var ConnectorSpentSifacOCI $instance */
+            $instance = $factory->newInstanceArgs([$this, $conf['params']]);
+            return $instance;
+        }
     }
 
 

@@ -31,17 +31,10 @@ class ConnectorSpentSifacOCI
         $this->sifacAccess = $sifacAccess;
     }
 
-    public function sync( $pfi, SymfonyStyle $out ){
-
-        $out->writeln("Synchronize <bold>$pfi</bold>");
+    public function sync( $pfi ){
         $c = $this->getConnection();
         if( $c ){
-            $out->writeln("Connection <bold>" . $this->sifacAccess['hostname'] ."</bold> : <green>OK</green>");
-            $out->writeln("Récupération des données...");
-
-            try {
-
-                $stid = oci_parse($c, sprintf("select 
+            $stid = oci_parse($c, sprintf("select 
 MEASURE AS pfi, 
 RLDNR as AB9,
 STUNR as idsync, 
@@ -69,40 +62,25 @@ PSOBT AS dateServiceFait
 
 from sapsr3.v_fmifi where measure = '%s' AND rldnr='9A'", $pfi));
 
-                if( !$stid ){
-                    $out->error("ERREUR ORACLE : " . oci_error());
-                    return;
-                }
-
-                if( !oci_execute($stid) ){
-                    $out->error("ERREUR ORACLE : " . oci_error());
-                    return;
-                }
-
-                $datas = [];
-                $headers = ['PFI','numSifac', 'numCommandeAff', 'numPiece', 'numFournisseur', 'pieceRef','codeSociete', 'codeServiceFait', 'codeDomaineFonct', 'designation', 'texteFacture', 'typeDocument', 'montant','centreDeProfit','compteBudgetaire','centreFinancier','centreFinancier','compteGeneral','datePiece','dateComptable','dateAnneeExercice','datePaiement','dateServiceFait','domaineActivite'];
-                $rows = [];
-
-                $out->writeln("Traitement des résultats...");
-
-//
-//
-                $nbr = 0;
-                while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
-                    $nbr++;
-                    try {
-                        $this->spentService->addSpentLine($row);
-                    } catch (\Exception $e) {
-                        $out->writeln("<error>Erreur, impossible de traiter ". $row['IDSYNC']."</error>");
-                    }
-                }
-                $out->writeln("Traitement des résultats terminé");
-                $out->success(sprintf("%s résultat(s) trouvé", $nbr));
-//                $out->table($headers, $rows);
-            } catch (\Exception $e) {
-
+            if( !$stid ){
+                throw new \Exception("ORACLE - PARSE ERROR : " . oci_error());
             }
 
+            if( !oci_execute($stid) ){
+                throw new \Exception("ORACLE - QUERY ERROR : " . oci_error());
+            }
+
+            $nbr = 0;
+            while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
+                $nbr++;
+                try {
+                    $this->spentService->addSpentLine($row);
+                } catch (\Exception $e) {
+                    throw new \Exception("ERROR - TRAITEMENT IMPOSSIBLE pour ". $row['IDSYNC']." : " . $e->getMessage());
+                }
+            }
+
+            return sprintf("%s résultat(s) traité(s) pour %s.", $nbr, $pfi);
         }
     }
 

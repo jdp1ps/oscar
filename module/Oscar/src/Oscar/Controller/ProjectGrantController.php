@@ -1323,11 +1323,29 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     public function spentListAction(){
+        $action = $this->params()->fromPost('action', null);
         $activity = $this->getActivityService()->getActivityById($this->params()->fromRoute('id'));
+        $msg = "";
+        $error = "";
         $spents = $this->getSpentService()->getSpentsByPFI($activity->getCodeEOTP());
+
+        if( $action && $action == 'update' ) {
+            if( count($spents) > 0 ){
+                $msg = "Les dépenses ont déjà été synchronisées.";
+            } else {
+                try {
+                    $msg = $this->getSpentService()->syncSpentsByEOTP($activity->getCodeEOTP());
+                    $spents = $this->getSpentService()->getSpentsByPFI($activity->getCodeEOTP());
+                } catch (\Exception $e) {
+                    $error = "Impossible de mettre à jour les dépenses : " . $e->getMessage();
+                }
+            }
+        }
         return [
             'activity'  => $activity,
-            'spents'    => $spents
+            'spents'    => $spents,
+            'msg'       => $msg,
+            'error'     => $error
         ];
     }
 

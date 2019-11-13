@@ -390,6 +390,8 @@
                 <div id="payments"></div>
                 <div>
                     <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
+                    <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a>
+
                     <h3>Assiette Subventionnable : <strong><?= $entity->getAssietteSubventionnable() ?></strong></h3>
                     <h3>Note financière</h3>
                     <blockquote><?= $entity->getNoteFinanciere() ?></blockquote>
