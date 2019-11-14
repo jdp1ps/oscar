@@ -1019,7 +1019,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                 ->setDateOpened($source->getDateOpened())
                 ->setDateSigned($source->getDateSigned())
                 ->setNoteFinanciere($source->getNoteFinanciere())
-                ->setDateStart($source->getDateStart())
+                //->setDateStart($source->getDateStart())
                 ->setDateEnd($source->getDateEnd())
                 ->setCodeEOTP($source->getCodeEOTP())
             ;
@@ -1101,7 +1101,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             }
         }
 
-
+        $newActivity->setDateStart($source->getDateStart());
+        $this->getEntityManager()->flush($newActivity);
 
         return $newActivity;
 
