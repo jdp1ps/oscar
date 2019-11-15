@@ -1,6 +1,7 @@
 # OSCAR (Documentation technique)
 
- - **VERSION 2.10 "Creed"** ([Note de version](./version-2.10.md))
+ - **VERSION 2.11 "MacClane"** ([Note de version](./version-2.11.md))
+ - VERSION 2.10 "Creed" ([Note de version](./version-2.10.md))
  - VERSION 2.9 "Matrix" ([Note de version](./version-2.9.md))
  - VERSION 2.8 "Callahan" ([Note de version](./version-2.8.md))
  - VERSION 2.7 "Lewis" ([Note de version](./version-2.7.md))
