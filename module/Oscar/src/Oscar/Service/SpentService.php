@@ -46,9 +46,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
     public function getAllArray(){
         $array = [];
-        /** @var SpentTypeGroup $spendTyêGroup */
-        foreach ($this->getSpentTypeRepository()->getAll() as $spendTyêGroup) {
-            $array[] = $spendTyêGroup->toJson();
+        /** @var SpentTypeGroup $spendTypeGroup */
+        foreach ($this->getSpentTypeRepository()->getAll() as $spendTypeGroup) {
+            $array[] = $spendTypeGroup->toJson();
         }
         return $array;
     }

@@ -517,4 +517,66 @@ class SpentLine
     {
         $this->dateServiceFait = $dateServiceFait;
     }
+
+    public function getDetailsHeaders(){
+        return [
+                "ID(oscar)",
+                "PFI",
+                "Centre de profit",
+                "N° SIFAC",
+                "N° PIECE",
+                "CODE Ste",
+                "CODE Domaine Fonc.",
+                "CODE Service Fait",
+                "Date Comptable",
+                "Année Exercice",
+                "Date paiment",
+                "Date pièce",
+                "Date service fait",
+
+                "COMPT. Général",
+                "Compt. Budg",
+                "Centre profit",
+                "Centre financier",
+
+                "Designation",
+                "Texte",
+                "MONTANT",
+
+                "N° Commande Aff",
+                "N° Fournisseur",
+            ];
+    }
+    public function getDetailsDatas(){
+        return [
+            $this->getId(),
+            $this->getPfi(),
+
+            $this->getCentreDeProfit(),
+            $this->getNumSifac(),
+            $this->getNumPiece(),
+            $this->getCodeSociete(),
+            $this->getCodeDomaineFonct(),
+            $this->getCodeServiceFait(),
+
+
+            $this->getDateComptable(),
+            $this->getDateAnneeExercice(),
+            $this->getDatePaiement(),
+            $this->getDatePiece(),
+            $this->getDateServiceFait(),
+
+            $this->getCompteGeneral(),
+            $this->getCompteBudgetaire(),
+            $this->getCentreDeProfit(),
+            $this->getCentreFinancier(),
+
+            $this->getDesignation(),
+            $this->getTexteFacture(),
+            $this->getMontant(),
+            $this->getNumCommandeAff(),
+            $this->getNumFournisseur(),
+        ];
+    }
+
 }

@@ -1,5 +1,5 @@
 
-<section class="container">
+<section class="container-fluid">
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
     <?php if($msg): ?>
     <div class="alert alert-info"><?= $msg ?></div>
@@ -11,28 +11,18 @@
     <table class="table table-condensed table-bordered table-condensed card">
         <thead>
             <tr>
-                <th>PFI</th>
-                <th>N° SIFAC</th>
-                <th>N° PIECE</th>
-                <th>Date Comptable</th>
-                <th>Compt. Budg</th>
-                <th>Designation</th>
-                <th>Texte</th>
-                <th>MONTANT</th>
+                <?php foreach (\Oscar\Entity\SpentLine::getDetailsHeaders() as $h): ?>
+                    <th><?= $h ?></th>
+                <?php endforeach; ?>
             </tr>
         </thead>
         <?php
         /** @var \Oscar\Entity\SpentLine $spentLine */
         foreach ($spents as $spentLine): ?>
             <tr>
-                <td><?= $spentLine->getPfi() ?></td>
-                <td><?= $spentLine->getNumSifac() ?></td>
-                <td><?= $spentLine->getNumPiece() ?></td>
-                <td><?= $spentLine->getDateComptable() ?></td>
-                <td><?= $spentLine->getCompteBudgetaire() ?></td>
-                <td><?= $spentLine->getDesignation() ?></td>
-                <td><?= $spentLine->getTexteFacture() ?></td>
-                <td><?= $spentLine->getMontant() ?></td>
+                <?php foreach ($spentLine->getDetailsDatas() as $d): ?>
+                    <td><?= $d ?></td>
+                <?php endforeach; ?>
             </tr>
         <?php endforeach; ?>
     </table>
