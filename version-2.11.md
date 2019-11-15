@@ -12,7 +12,7 @@ Cette mise à niveau permet de bénéficier des dernières mise à jour de sécu
 
  - **Export des activités > Champs calculés** : L'administrateur peut maintenant configurer des champs calculés pour les sorties Excel/CSV. Exemple disponible dans [Configurer les champs calculés dans les export OSCAR](doc/activities-export.md)
 
- - **Utilitaire en ligne de commande** : Les commandes Oscar (php public/index.php) ont commencé à être migré progressivement vers le nouveau système de commande (basé sur le composant "Console" de Symfony, tel de recommandé par l'équipe Zend). La liste des commandes disponibles est accessible via la commande (php bin/oscar.php).
+ - **Utilitaire en ligne de commande** : Les commandes Oscar (php public/index.php) ont commencé à être migrées progressivement vers le nouveau système de commande (basé sur le composant "Console" de Symfony, tel de recommandé par l'équipe Zend). La liste des commandes disponibles est accessible via la commande (php bin/oscar.php).
 
 
 ## Correctifs
