@@ -136,9 +136,13 @@ La documentation des feuilles de temps est à jour [Configuration des feuilles d
 
 Cette option **implique des changements dans la configuration !**
 
-Le système de recherche des personnes a été amélioré et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des personnes](./doc/configuration.md#recherche-des-personnes)
+Le système de recherche des personnes a été améliorée et permet maintenant de configurer **ElasticSearch** pour les recherches. [Configuration de la recherche des personnes](./doc/configuration.md#recherche-des-personnes)
 
 Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
+
+```bash
+php public/index.php oscar persons:search:build
+```
 
 ### Système de recherche des Organisations (2019/06)
 
@@ -147,6 +151,10 @@ Cette option **implique des changements dans la configuration !**
 Le système de recherche des organisations a été amélioré et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des organisations](./doc/configuration.md#recherche-des-organisations)
 
 Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
+
+```bash
+php public/index.php oscar organizations:search:build
+```
 
 
 ### Synthèse (2019/05)
