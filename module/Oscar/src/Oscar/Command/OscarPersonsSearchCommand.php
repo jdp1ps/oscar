@@ -28,7 +28,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class OscarPersonsSearchCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:persons:search';
+    protected static $defaultName = 'persons:search';
 
     protected function configure()
     {
@@ -56,9 +56,21 @@ class OscarPersonsSearchCommand extends OscarCommandAbstract
             $ids = $personService->getSearchEngineStrategy()->search($search);
             if( count($ids) ){
                 $persons = $personService->getPersonsByIds($ids);
+                $headers = ["ID", "SYNC", "Nom complet", "Prénom", "Nom", "Affectation", "Email"];
+                $datas = [];
                 foreach ($persons as $person) {
-                    $io->writeln( sprintf('- <bold>[%s]</bold> %s (%s)', $person->getId(), $person->getDisplayName(), $person->getEmail()));
+                    $datas[] = [
+                        '<bold>[' . $person->getId() .']</bold>',
+                        $person->getConnectorsDatasStr(),
+                        $person->getDisplayName(),
+                        $person->getFirstname(),
+                        $person->getLastname(),
+                        $person->getLdapAffectation(),
+                        $person->getEmail()
+                    ];
+//                    $io->writeln( sprintf('- <bold>[%s]</bold> %s (%s)', $person->getId(), $person->getDisplayName(), $person->getEmail()));
                 }
+                $io->table($headers, $datas);
             } else {
                 $io->warning("Aucun résultats");
             }

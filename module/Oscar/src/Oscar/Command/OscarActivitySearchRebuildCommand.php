@@ -30,7 +30,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class OscarActivitySearchRebuildCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:activity:search-rebuild';
+    protected static $defaultName = 'activity:search-rebuild';
 
     protected function configure()
     {

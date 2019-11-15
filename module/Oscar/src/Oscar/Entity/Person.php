@@ -218,6 +218,14 @@ class Person implements ResourceInterface
         return false;
     }
 
+    public function getConnectorsDatasStr(){
+        $out = [];
+        foreach ($this->getConnectors() as $connector=>$value ){
+            $out[] = sprintf("%s=%s", $connector, $value);
+        }
+        return implode(', ', $out);
+    }
+
     /**
      * @return mixed
      */

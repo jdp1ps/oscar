@@ -39,4 +39,5 @@ function scanCommandFiles($dir){
 }
 $commands = scanCommandFiles($path);
 $console->addCommands($commands);
+
 $console->run();

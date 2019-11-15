@@ -28,6 +28,13 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         $this->getEntityManager()->remove($person);
     }
 
+    public function getPersonsByIds( array $ids ){
+        $qb = $this->getBaseQuery()
+            ->where('p.id IN (:ids)')
+            ->setParameter('ids', $ids);
+        return $qb->getQuery()->execute();
+    }
+
 
     public function getUidsConnector($connector){
         $qb = $this->getEntityManager()->createQueryBuilder();
@@ -38,7 +45,8 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 
         $uids = [];
         foreach ($qb->getQuery()->getArrayResult() as $a){
-            $uids[] = $a['connectors']['rest'];
+
+            $uids[] = $a['connectors'][$connector];
         }
 
         return $uids;

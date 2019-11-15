@@ -25,7 +25,7 @@ use Zend\ServiceManager\ServiceManager;
 
 class OscarAuthAddCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:auth:add';
+    protected static $defaultName = 'auth:add';
 
     protected function configure()
     {

@@ -28,7 +28,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class OscarPersonsSearchRebuildCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:persons:search-rebuild';
+    protected static $defaultName = 'persons:search-rebuild';
 
     protected function configure()
     {

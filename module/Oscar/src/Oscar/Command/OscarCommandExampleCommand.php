@@ -18,7 +18,7 @@ use Zend\ServiceManager\ServiceManager;
 
 class OscarCommandExampleCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:dev:commandexample';
+    protected static $defaultName = 'dev:commandexample';
 
     protected function configure()
     {

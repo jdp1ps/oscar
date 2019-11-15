@@ -37,7 +37,7 @@ use Zend\Config\Reader\Yaml;
 
 class OscarCheckMailerCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:check:mailer';
+    protected static $defaultName = 'check:mailer';
 
     protected function configure()
     {

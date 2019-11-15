@@ -15,7 +15,6 @@ use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
 use Oscar\Entity\Role;
 use Oscar\Service\ConnectorService;
-use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
@@ -27,17 +26,15 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class OscarOrganizationsSyncCommand extends OscarCommandAbstract
+class OscarPersonsPurgeCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'organizations:sync';
+    protected static $defaultName = 'persons:purge';
 
     protected function configure()
     {
         $this
-            ->setDescription("Execute la synchronisation des organisations")
-            ->addArgument("connectorname", InputArgument::REQUIRED, "Connector (rest)")
-            ->addOption('no-rebuild','b', InputOption::VALUE_NONE, 'Ignore la reconstruction de l\'index de recherche après la mise à jour')
-        ;
+            ->setDescription("Supprime de la liste des personnes les données non-utilisées")
+            ->addArgument("connectorname", InputArgument::REQUIRED, "Connector référent (rest)");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -49,7 +46,7 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
 
         $io = new SymfonyStyle($input, $output);
 
-        $io->title("Synchronisation des organisations");
+        $io->title("Synchronisation des personnes");
 
         $connectorName = $input->getArgument('connectorname');
 
@@ -59,12 +56,14 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
         $io->section("Connector infos : ");
         $io->writeln("Connecteur : <bold>$connectorName</bold>");
 
+
         /** @var ConnectorService $connectorService */
         $connectorService = $this->getServicemanager()->get(ConnectorService::class);
 
-        $connector = $connectorService->getConnector("organization.".$connectorName);
+        $connector = $connectorService->getConnector("person.".$connectorName);
 
         try {
+
             $repport = $connector->execute();
             foreach ($repport->getRepportStates() as $type => $out) {
                 $short = substr($type, 0, 3);
@@ -76,28 +75,5 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
         } catch (\Exception $e) {
             $io->error($e->getMessage());
         }
-
-
-//        $io->section("Reconstruction de l'index de recherche : ");
-//        if( !$input->getOption('no-rebuild') ){
-//            $io->warning("Fonctionnalité à venir");
-//            // TODO Indexation des organisations
-//
-////            /** @var OrganizationService $organizationService */
-////            $organizationService = $this->getServicemanager()->get(OrganizationService::class);
-////            try {
-////                $organizations = $organizationService->getOrganizations();
-////                $organizationService->getSearchEngineStrategy()->rebuildIndex($organizations);
-////                $io->success(sprintf('Index de recherche mis à jour avec %s personnes indexées', count($organizations)));
-////            } catch ( \Exception $e ){
-////                $io->error($e->getMessage());
-////            }
-//
-//
-//        } else {
-//            $io->warning("Pas de reconstruction d'index");
-//        }
-
-
     }
 }

@@ -30,7 +30,7 @@ use Zend\ServiceManager\ServiceManager;
 
 class OscarAuthSyncCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:auth:sync';
+    protected static $defaultName = 'auth:sync';
 
     protected function configure()
     {

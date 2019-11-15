@@ -31,7 +31,7 @@ use Zend\ServiceManager\ServiceManager;
 
 class OscarAuthPromoteCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:auth:promote';
+    protected static $defaultName = 'auth:promote';
 
     protected function configure()
     {

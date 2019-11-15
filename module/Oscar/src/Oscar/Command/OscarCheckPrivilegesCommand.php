@@ -35,7 +35,7 @@ use Zend\Config\Reader\Yaml;
 
 class OscarCheckPrivilegesCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:check:privileges';
+    protected static $defaultName = 'check:privileges';
 
     protected function configure()
     {

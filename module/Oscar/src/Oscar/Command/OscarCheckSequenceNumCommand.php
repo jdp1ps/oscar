@@ -36,12 +36,12 @@ use Zend\Config\Reader\Yaml;
 
 class OscarCheckSequenceNumCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:check:sequences-num';
+    protected static $defaultName = 'check:sequences-num';
 
     protected function configure()
     {
         $this
-            ->setDescription("Mise à jour des séquences pour les IDs")
+            ->setDescription("Mise à jour automatique de l'incrementation des séquences d'IDs pour les tables")
         ;
     }
 

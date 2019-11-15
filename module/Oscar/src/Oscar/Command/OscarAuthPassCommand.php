@@ -27,7 +27,7 @@ use Zend\ServiceManager\ServiceManager;
 
 class OscarAuthPassCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:auth:pass';
+    protected static $defaultName = 'auth:pass';
 
     protected function configure()
     {

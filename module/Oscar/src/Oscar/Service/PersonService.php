@@ -173,10 +173,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @return Person[]
      */
     public function getPersonsByIds( array $ids ){
-        $qb = $this->getBaseQuery()
-            ->where('p.id IN (:ids)')
-            ->setParameter('ids', $ids);
-        return $qb->getQuery()->execute();
+        return $this->getPersonRepository()->getPersonsByIds($ids);
     }
 
     /**

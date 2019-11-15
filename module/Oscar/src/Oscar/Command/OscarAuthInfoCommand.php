@@ -26,12 +26,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class OscarAuthInfoCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:auth:info';
+    protected static $defaultName = 'auth:info';
 
     protected function configure()
     {
         $this
             ->setDescription("Affiche la liste des authentifications")
+            ->setProcessTitle("TEST 1")
             ->addArgument("login", InputArgument::REQUIRED, "Identifiant de connexion")
         ;
     }

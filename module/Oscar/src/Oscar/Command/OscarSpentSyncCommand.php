@@ -28,7 +28,7 @@ use Zend\ServiceManager\ServiceManager;
 
 class OscarSpentSyncCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:spent:sync';
+    protected static $defaultName = 'spent:sync';
 
     protected function configure()
     {

@@ -10,6 +10,7 @@ namespace Oscar\Command;
 
 
 use Moment\Moment;
+use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
@@ -28,7 +29,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class OscarPersonsSyncCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:persons:sync';
+    protected static $defaultName = 'persons:sync';
 
     protected function configure()
     {
@@ -68,6 +69,8 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
 
         try {
             $connector->setOptionPurge($input->getOption('purge'));
+
+            /** @var ConnectorRepport $repport */
             $repport = $connector->execute();
             foreach ($repport->getRepportStates() as $type => $out) {
                 $short = substr($type, 0, 3);
@@ -79,6 +82,7 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
         } catch (\Exception $e) {
             $io->error($e->getMessage());
         }
+
 
 
         $io->section("Reconstruction de l'index de recherche : ");

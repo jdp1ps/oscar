@@ -44,7 +44,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
     function getName()
     {
-        return "rest";
+        return "json";
     }
 
     function getRemoteID()
@@ -152,6 +152,9 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             $repport->addnotice(count($personsDatas). " résultat(s) a traiter.");
             ////////////////////////////////////
 
+
+
+
             foreach( $personsDatas as $personData ){
 
                 if( ! property_exists($personData, 'uid') ){
@@ -202,13 +205,34 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             }
 
             if( $this->getOptionPurge() ){
+
+
+
                 foreach ($exist as $uid){
+                    /** @var Person $personOscarToDelete */
                     $personOscarToDelete = $personRepository->getPersonByConnectorID($this->getName(), $uid);
                     try {
-                        $personRepository->removePerson($personOscarToDelete);
-                        $repport->addremoved("Suppression de $personOscarToDelete");
+                        $activeIn = [];
+                        if( $personOscarToDelete->getActivities() ){
+                            $activeIn[] = "activité";
+                        }
+                        if( $personOscarToDelete->getProjectAffectations() ){
+                            $activeIn[] = "projet";
+                        }
+                        if( $personOscarToDelete->getOrganizations() ){
+                            $activeIn[] = "organisation";
+                        }
+
+                        if( count($activeIn) == 0 ){
+                            $personRepository->removePerson($personOscarToDelete);
+                            $repport->addremoved("Suppression de $personOscarToDelete");
+                            $personRepository->flush($personOscarToDelete);
+                        } else {
+                            $repport->addwarning("$personOscarToDelete n'a pas été supprimé car il est actif dans : " . implode(', ', $activeIn));
+                        }
+
                     } catch (\Exception $e){
-                        $repport->addwarning("$personOscarToDelete n'a pas été supprimé car il est actif dans les activités : " . $e->getMessage());
+                        $repport->adderror("$personOscarToDelete n'a pas été supprimé car il est actif dans les activités : " . $e->getMessage());
                     }
                 }
             }
@@ -233,6 +257,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             curl_setopt($curl, CURLOPT_COOKIESESSION, true);
             $return = curl_exec($curl);
             curl_close($curl);
+
             if( false === $return ){
                 $message = sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName());
                 $this->getLogger()->error($message . " - " . cubrid_error_msg());

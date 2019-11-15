@@ -29,7 +29,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class OscarOrganizationsSearchCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:organizations:search';
+    protected static $defaultName = 'organizations:search';
 
     protected function configure()
     {

@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class OscarAuthListCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:auth:list';
+    protected static $defaultName = 'auth:list';
 
     /**
      * @return array|null

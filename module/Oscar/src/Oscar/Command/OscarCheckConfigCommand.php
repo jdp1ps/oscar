@@ -35,7 +35,7 @@ use Zend\Config\Reader\Yaml;
 
 class OscarCheckConfigCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'oscar:check:config';
+    protected static $defaultName = 'check:config';
 
     protected function configure()
     {
