@@ -1899,7 +1899,8 @@ class Activity implements ResourceInterface
             'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, '.', ' '),
             'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, '.', ' '),
             'Frais de gestion' => $this->getFraisDeGestion(),
-            'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur()
+            'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
+            'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
         );
     }
 
@@ -1923,7 +1924,8 @@ class Activity implements ResourceInterface
             'versement effectué',
             'versement prévu',
             'Frais de gestion',
-            'Frais de gestion (part hébergeur)'
+            'Frais de gestion (part hébergeur)',
+            'Disciplines'
         );
     }
 
