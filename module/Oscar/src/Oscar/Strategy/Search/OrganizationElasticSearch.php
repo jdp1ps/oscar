@@ -130,56 +130,6 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
             $this->getClient()->bulk($params);
         }
 
-
-//        'id' => $organization->getId(),
-//        'code' => $organization->getCode(),
-//        'shortname' => $organization->getShortName(),
-//        'fullname' => $organization->getFullName(),
-//        'email' => $organization->getEmail(),
-//        'city' => $organization->getCity(),
-//        'country' => $organization->getCountry(),
-//        'zipcode' => $organization->getZipCode(),
-//        //            'address1' => $organization->getStreet1(),
-//        //            'address2' => $organization->getStreet2(),
-//        //            'address3' => $organization->getStreet3(),
-//        'siret' => $organization->getSiret(),
-//        'country' => $organization->getCountry(),
-//        'persons' => $persons,
-//        'activities' => $activities,
-//        'connectors' => $connectors
-
-//        /******** CONFIGURATION DU MAPPING ***/
-//        $params = [
-//            'index' => $this->getIndex(),
-//            'type' => $this->getType(),
-//            'body' => [
-//                $this->getType() => [
-//                    '_source' => [
-//                        'enabled' => true
-//                    ],
-//                    'properties' => [
-//                        'code' => [
-//                            'type' => 'text'
-//                        ],
-//                        'shortname' => [
-//                            'type' => 'text',
-//                            'boost' => 5
-//                        ],
-//                        'fullname' => [
-//                            'type' => 'text',
-//                            'boost' => 5
-//                        ],
-//                        'email' => [
-//                            'type' => 'text'
-//                        ],
-//                    ]
-//                ]
-//            ]
-//        ];
-//
-//        $response = $this->getClient()->indices()->putMapping($params);
-
-
         return $repport;
     }
 
