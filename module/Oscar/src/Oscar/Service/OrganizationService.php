@@ -253,6 +253,17 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     }
 
+    public function getSearchEngineStrategy()
+    {
+        static $searchStrategy;
+        if( $searchStrategy === null ){
+            $opt = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('strategy.organization.search_engine');
+            $class = new \ReflectionClass($opt['class']);
+            $searchStrategy = $class->newInstanceArgs($opt['params']);
+        }
+        return $searchStrategy;
+    }
+
     /**
      * Retourne le résultat de la recherche $search.
      *
