@@ -100,7 +100,7 @@
                                     <div class="data-label">Feuille de temps</div>
                                     <div class="data-value">
                                         <?php if( count($entity->getWorkPackages()) ): ?>
-                                            <a href="<?= $this->url('timesheet/excel') ?>?personid=<?= $entity->getId() ?>" >
+                                            <a href="<?= $this->url('timesheet/resume') ?>?person_id=<?= $entity->getId() ?>" >
                                                 <i class="icon-calendar"></i>
                                                 Voir les feuilles de temps
                                             </a>
