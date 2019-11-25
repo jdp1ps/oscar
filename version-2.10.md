@@ -27,6 +27,11 @@ apt install php7.3 php7.3-bz2 php7.3-cli php7.3-curl php7.3-dom php7.3-gd php7.3
 update-alternatives --set php /usr/bin/php7.3
 update-alternatives --set phar /usr/bin/phar7.3
 update-alternatives --set phar.phar /usr/bin/phar.phar7.3
+
+# MAJ du module PHP de Apache
+a2dismod php7.0
+a2enmod php7.3
+systemctl restart apache2
 ```
 
 Puis mettre à jour Oscar : 
