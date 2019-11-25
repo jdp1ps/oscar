@@ -185,7 +185,7 @@ return array(
   // Système de recherche
   'strategy' => [
     // ...
-    'person' => [
+    'organization' => [
       'search_engine' => [
         // Elasticsearch
         'class' => \Oscar\Strategy\Search\OrganizationElasticSearch::class,
@@ -200,7 +200,7 @@ return array(
 
 ```bash
 # Reconstruction de l'index de recherche
-php pubic/index.php oscar organizations:search:build
+php public/index.php oscar organizations:search:build
 ```
 
 

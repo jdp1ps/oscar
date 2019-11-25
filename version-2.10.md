@@ -7,9 +7,23 @@ La version *Creed* necessite une mise à jour des librairies PHP via **composer*
 ### Mise à jour de PHP sur Debian
 
 ```bash
+# Ajouter les dépôts PHP  (Merci Damien)
+
+# Installation des utilitaires pour gérer les certificats
+apt -y install lsb-release apt-transport-https ca-certificates
+ 
+# Récupération et mise à jour du source.list 
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php7.3.list
+
+# Mise à jour des sources
 apt update
 apt upgrade
+
+# Installation de PHP 7.3
 apt install php7.3 php7.3-bz2 php7.3-cli php7.3-curl php7.3-dom php7.3-gd php7.3-intl php7.3-ldap php7.3-mbstring php7.3-pgsql php7.3-xml php7.3-zip
+
+# Configuration de PHP 7.3 comme version de PHP par défaut
 update-alternatives --set php /usr/bin/php7.3
 update-alternatives --set phar /usr/bin/phar7.3
 update-alternatives --set phar.phar /usr/bin/phar.phar7.3
@@ -155,7 +169,6 @@ Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index d
 ```bash
 php public/index.php oscar organizations:search:build
 ```
-
 
 ### Synthèse (2019/05)
 
