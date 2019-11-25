@@ -828,6 +828,7 @@ return array(
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             'Logger' => \Oscar\Service\LoggerServiceFactory::class,
             \Oscar\Service\MailingService::class => \Oscar\Service\MailingServiceFactory::class,
+            \Oscar\Service\MaintenanceService::class => \Oscar\Service\MaintenanceServiceFactory::class,
             \Oscar\Service\MilestoneService::class => \Oscar\Service\MilestoneServiceFactory::class,
             \Oscar\Service\NotificationService::class => \Oscar\Service\NotificationServiceFactory::class,
             \Oscar\Service\OrganizationService::class => \Oscar\Service\OrganizationServiceFactory::class,

@@ -19,6 +19,7 @@ use Oscar\Entity\Role;
 use Oscar\OscarVersion;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
+use Oscar\Service\MaintenanceService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
@@ -48,12 +49,13 @@ class OscarCheckPrivilegesCommand extends OscarCommandAbstract
     {
         $this->addOutputStyle($output);
 
-        /** @var OscarUserContext $oscaruserContext */
-        $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
+        /** @var MaintenanceService $maintenanceService */
+        $maintenanceService = $this->getServicemanager()->get(MaintenanceService::class);
 
         $io = new SymfonyStyle($input, $output);
 
         $io->title("Synchronisation des privilèges");
-        $io->warning("Cette commande n'est pas encore disponible");
+
+        $todo = $maintenanceService->privilegesCheckUpdate($io);
     }
 }
