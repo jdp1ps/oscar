@@ -1100,11 +1100,11 @@ class ProjectGrantController extends AbstractOscarController
         // Contrôle des droits
         if ($projectId) {
             $project = $this->getProjectService()->getProject($projectId);
-            $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_EDIT,
+            $this->getOscarUserContext()->check(Privileges::PROJECT_EDIT,
                 $project);
         } else {
             $project = null;
-            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EDIT);
+            $this->getOscarUserContext()->check(Privileges::ACTIVITY_EDIT);
         }
 
         $projectGrant = new Activity();

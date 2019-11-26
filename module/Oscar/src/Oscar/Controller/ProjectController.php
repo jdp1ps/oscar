@@ -189,6 +189,8 @@ class ProjectController extends AbstractOscarController
         $form->init();
         $form->bind($entity);
 
+        $this->getOscarUserContext()->check(Privileges::PROJECT_EDIT);
+
         /** @var Request $request */
         $request = $this->getRequest();
         if ($this->getRequest()->isPost()) {
