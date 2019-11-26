@@ -186,6 +186,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         return [];
     }
 
+    public function debugAction(){
+        var_dump($this->getConfiguration('oscar.editable'));
+        /*$customNum = $this->getActivityService()->getCustomNum();
+        var_dump($customNum);*/
+        die("DEBUG END");
+    }
+
     /**
      * @url /activites-de-recherche/api
      * @return JsonModel
@@ -841,6 +848,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     public function generateNotificationsAction(){
+
         $entity = $this->getActivityFromRoute();
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
         $this->getNotificationService()->generateNotificationsForActivity($entity);
@@ -1019,11 +1027,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Contrôle des droits
         if ($projectId) {
             $project = $this->getProjectService()->getProject($projectId);
-            $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_EDIT,
+            $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_EDIT,
                 $project);
         } else {
             $project = null;
-            $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT);
+            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EDIT);
         }
 
         $projectGrant = new Activity();

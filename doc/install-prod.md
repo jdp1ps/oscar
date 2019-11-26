@@ -46,14 +46,31 @@ export https_proxy=http://proxy.unicaen.fr:3128
 
 ### Installation des logiciels
 
-Pour récupérer le dépôt
+#### GIT
+
+GIT est est le système de versionnage utilisé pour Oscar
 
 ```bash
 # Installation de GIT
 apt-get install git-core wget
 ```
 
-Serveur web (Apache) et PHP7 :
+#### Serveur web (Apache) et PHP7.3
+
+Commencez par ajouter les dépôts PHP 7.3 (Merci à Damien pour les informations) :
+
+```bash
+apt -y install lsb-release apt-transport-https ca-certificates 
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php7.3.list
+```
+
+Mettre à jour les sources  : 
+
+```bash
+# Installation de APACHE2
+apt update apache2
+```
 
 ```bash
 # Installation de APACHE2

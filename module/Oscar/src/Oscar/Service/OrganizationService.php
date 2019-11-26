@@ -264,6 +264,11 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $searchStrategy;
     }
 
+    public function searchIndexRebuild()
+    {
+        return $this->getSearchEngineStrategy()->rebuildIndex($this->getOrganizations());
+    }
+
     /**
      * Retourne le résultat de la recherche $search.
      *

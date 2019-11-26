@@ -75,9 +75,11 @@ data/templates/timesheet_person_month.html.php
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
 
-
 # Residus
 public/js/oscar/dist/index.html
+
+# Unicaen
+public/unicaen
 
 # Librairies
 /vendor
