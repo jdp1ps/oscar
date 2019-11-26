@@ -31,38 +31,28 @@ class MaintenanceService implements UseEntityManager
         $flush = false;
 
         if ($privilege->getCategorie()->getId() != $stdObject->category_id) {
-            try {
-                $privilege->setCategorie($this->getEntityManager()->getRepository(CategoriePrivilege::class)->find($stdObject->category_id));
-            } catch (\Exception $e) {
-                throw new \Exception("La catégorie " . $stdObject->category_id . " n'existe pas.");
-            }
-            $flush = true;
+            return true;
         }
 
         $privilegeRoot = $privilege->getRoot() ? $privilege->getRoot()->getFullCode() : null;
 
         if (property_exists($stdObject, 'root') && $privilegeRoot != $stdObject->root ) {
-            $privilege->setRoot($this->getRootByFullCode($stdObject->root));
-            $flush = true;
+            return true;
         }
 
         if ($privilege->getCode() != $stdObject->code) {
             $privilege->setCode($stdObject->code);
-            $flush = true;
+            return true;
         }
 
         if ($privilege->getSpot() != $stdObject->spot) {
             $privilege->setSpot($stdObject->spot);
-            $flush = true;
+            return true;
         }
 
         if ($privilege->getLibelle() != $stdObject->libelle) {
             $privilege->setLibelle($stdObject->libelle);
-            $flush = true;
-        }
-
-        if ($flush == true) {
-            return $privilege;
+            return true;
         }
 
         return false;
@@ -95,6 +85,8 @@ class MaintenanceService implements UseEntityManager
             return;
         }
 
+        $datasCreate = $datas;
+
         $operations = [
             'delete'    => [],
             'add'       => [],
@@ -109,6 +101,8 @@ class MaintenanceService implements UseEntityManager
         // Récupération des privilèges existants
         $privileges = $this->getEntityManager()->getRepository(Privilege::class)->findAll();
 
+
+        // Commencer par créer les activités manquantes
         /** @var Privilege $p */
         foreach ($privileges as $p) {
 
@@ -122,11 +116,12 @@ class MaintenanceService implements UseEntityManager
 
                     if (false !== $updatable) {
                         $output->writeln("<comment>Mise à jour requise</comment>");
-                        $toUpdate[] = $updatable;
+                        $toUpdate[] = [ 'privilege' => $p, 'data' => $datas->$property ];
                     } else {
                         $output->writeln("<green>OK</green>");
                     }
                     unset($datas->$property);
+                    unset($datasCreate->$property);
                 } else {
                     $toRemove[] = $p;
                     $output->writeln(sprintf("<comment>SUPPRESSION</comment>"));
@@ -152,7 +147,6 @@ class MaintenanceService implements UseEntityManager
         }
         if (count(get_object_vars($datas))) {
             $output->writeln("Il y'a " . count(get_object_vars($datas)) . " privilèges à ajouter");
-            var_dump($datas);
             $anythingToDo = true;
         }
 
@@ -161,16 +155,19 @@ class MaintenanceService implements UseEntityManager
             return;
         }
 
-        $confirm = $output->ask("Mettre à jour les privilèges ?");
-        if (!$confirm) {
+        $confirm = $output->confirm("Mettre à jour les privilèges ?", false);
+
+        if ($confirm !== true) {
+            $output->warning("Opération abandonnée");
             return;
         }
 
-        foreach ($datas as $fullCode => $privilegeData) {
+        foreach ($datasCreate as $fullCode => $privilegeData) {
+
             try {
                 if( !property_exists($privilegeData, 'category_id')){
                     $output->error('Propriété categorie_id manquante dans la configuration : ' . print_r($privilegeData, true));
-                    continue;
+                    return;
                 }
                 $newPrivilege = new Privilege();
                 $this->getEntityManager()->persist($newPrivilege);
@@ -179,32 +176,87 @@ class MaintenanceService implements UseEntityManager
                     ->setSpot($privilegeData->spot)
                     ->setLibelle($privilegeData->libelle);
 
+                if( property_exists($privilegeData, 'root')){
+                    $newPrivilege->setRoot($this->getRootByFullCode($privilegeData->root));
+                }
+
                 $this->getEntityManager()->flush($newPrivilege);
                 $output->writeln("<green>[ADD] Le privilège " . $privilegeData->code . " a bien été créé.</green>");
+
+                $toUpdate[] = [ 'privilege' => $newPrivilege, 'data' => $privilegeData ];
             } catch (\Exception $e) {
-                $output->writeln("<error>Impossible de créé le privilège " . $privilegeData->code . " : " . $e->getMessage() . "</error>");
+                $output->error("Impossible de créé le privilège " . $privilegeData->code . " : " . $e->getMessage());
+                return;
             }
         }
 
         /** @var Privilege $privilege */
-        foreach ($toUpdate as $privilege) {
+        foreach ($toUpdate as $pToUpdate) {
             try {
+                /** @var Privilege $privilege */
+                $privilege = $pToUpdate['privilege'];
+                $stdObject = $pToUpdate['data'];
+
+                if ($privilege->getCategorie()->getId() != $stdObject->category_id) {
+                    try {
+                        $privilege->setCategorie($this->getEntityManager()->getRepository(CategoriePrivilege::class)->find($stdObject->category_id));
+                    } catch (\Exception $e) {
+                        throw new \Exception("La catégorie " . $stdObject->category_id . " n'existe pas.");
+                    }
+                }
+
+                if(property_exists($stdObject, 'root')){
+                    $privilege->setRoot($this->getRootByFullCode($stdObject->root));
+                } else {
+                    $privilege->setRoot(null);
+                }
+
+                $privilege->setCode($stdObject->code);
+                $privilege->setSpot($stdObject->spot);
+                $privilege->setLibelle($stdObject->libelle);
                 $this->getEntityManager()->flush($privilege);
-                $output->writeln("<green>[UPD] Le privilège " . $privilegeData->code . " a bien été créé.</green>");
+                $output->writeln("<green>[UPD] Le privilège " . $stdObject->code . " a bien été mis à jour.</green>");
             } catch (\Exception $e) {
-                $output->writeln("<error>Impossible de mettre à jour le privilège " . $privilegeData->code . " : " . $e->getMessage() . "</error>");
+                $output->writeln("<error>Impossible de mettre à jour le privilège " . $pToUpdate['privilege'] . " : " . $e->getMessage() . "</error>");
             }
         }
 
         foreach ($toRemove as $privilege) {
             try {
+                $code = $privilege->getFullCode();
                 $this->getEntityManager()->remove($privilege);
                 $this->getEntityManager()->flush($privilege);
-                $output->writeln("<green>[DEL] Le privilège " . $privilegeData->code . " a bien été supprimé.</green>");
+                $output->writeln("<green>[DEL] Le privilège " . $code . " a bien été supprimé.</green>");
             } catch (\Exception $e) {
-                $output->writeln("<error>Impossible de supprimer le privilège " . $privilegeData->code . " : " . $e->getMessage() . "</error>");
+                $output->writeln("<error>Impossible de supprimer le privilège " . $privilege->getFullCode() . " : " . $e->getMessage() . "</error>");
             }
         }
+
+        $output->warning("Vous pouvez relancer la commande pour être sûr que les privilèges sont à jour.");
+
+    }
+
+    protected function getRootByFullCode($fullCode)
+    {
+
+
+            $re = '/(\w*)-(.*)/';
+            preg_match_all($re, $fullCode, $matches, PREG_SET_ORDER, 0);
+            $codeCategory = $matches[0][1];
+            $codePrivilege = $matches[0][2];
+            $category = $this->getEntityManager()->getRepository(CategoriePrivilege::class)->findOneBy([
+                'code' => $codeCategory
+            ]);
+            try {
+                return $this->getEntityManager()->getRepository(Privilege::class)->findOneBy([
+                    'code' => $codePrivilege,
+                    'categorie' => $category
+                ]);
+            } catch (\Exception $e) {
+                return null;
+            }
+
+
 
     }
 

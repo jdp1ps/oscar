@@ -73,6 +73,7 @@ class Privilege implements ResourceInterface
     /**
      * @var Privilege
      * @ORM\ManyToOne(targetEntity="Privilege", inversedBy="children")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     private $root;
 

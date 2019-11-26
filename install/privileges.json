@@ -591,7 +591,7 @@
     "fullcode": "DEPENSE-SHOW"
   },
 
-  "MAINENANCE-SPENDTYPEGROUP_MANAGE": {
+  "MAINTENANCE-SPENDTYPEGROUP_MANAGE": {
     "category_id": 6,
     "spot": 7,
     "code": "SPENDTYPEGROUP_MANAGE",
@@ -607,6 +607,7 @@
     "libelle": "Voir les authentifications utilisateur",
     "fullcode": "droit-USER_VISUALISATION"
   },
+
   "droit-USER_EDITION": {
     "spot": 4,
     "category_id": 7,
@@ -642,7 +643,7 @@
     "spot": 7,
     "category_id": 6,
     "code": "VALIDATION_MANAGE",
-    "libelle": "Peut gérer et modifier l'état des déclarations envoyées",
+    "libelle": "Peut gérer, modifier ou supprimer l'état des déclarations envoyées",
     "fullcode": "MAINTENANCE-VALIDATION_MANAGE"
   },
 
