@@ -8,11 +8,11 @@ Cette mise à niveau permet de bénéficier des dernières mise à jour de sécu
 
 ## Nouveautés
 
- - **Feuille de temps > déclarant** :  Modification du système de saisie des commentaires. Le déclarant peut maintenant saisir son commentaire au fil de l'eau depuis la vue mois.
+ - **Feuille de temps > déclarant** :  Modification du système de saisie des commentaires. Le déclarant peut maintenant saisir son commentaire au fil de l'eau depuis la vue mois. Cette modification permet de simplifier la gestion des commentaires, et de ne pas perdre les commentaires en cas d'annulation d'une déclaration.
 
  - **Export des activités > Champs calculés** : L'administrateur peut maintenant configurer des champs calculés pour les sorties Excel/CSV. Exemple disponible dans [Configurer les champs calculés dans les export OSCAR](doc/activities-export.md)
 
- - **Utilitaire en ligne de commande** : Les commandes Oscar (php public/index.php) ont commencé à être migrées progressivement vers le nouveau système de commande (basé sur le composant "Console" de Symfony, tel de recommandé par l'équipe Zend). La liste des commandes disponibles est accessible via la commande (php bin/oscar.php).
+ - **Utilitaire en ligne de commande** : Les commandes Oscar (php public/index.php) ont commencées à être migrées progressivement vers le nouveau système de commande (basé sur le composant "Console" de Symfony, tel de recommandé par l'équipe Zend). La liste des commandes disponibles est accessible via la commande (php bin/oscar.php).
 
 
 ## Correctifs
