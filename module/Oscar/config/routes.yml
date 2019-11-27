@@ -899,6 +899,14 @@ contract:
                 defaults:
                     action: new
 
+
+        newstructure:
+            type: segment
+            options:
+                route: /creer-structure/:organizationid
+                defaults:
+                    action: newInStructure
+
         almoststart:
             type: literal
             options:

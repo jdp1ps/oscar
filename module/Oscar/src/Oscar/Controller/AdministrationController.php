@@ -91,6 +91,24 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
     public function parametersAction()
     {
+
+        // Récupération des rôles en fonction d'un privilège :
+
+        $roles = $this->getOscarUserContextService()->getRolesWithPrivileges(Privileges::ACTIVITY_EDIT);
+        $rolesOrganisationPrincipal = $this->getOscarUserContextService()->getRolesOrganisationLeader();
+        $config = $this->getOscarConfigurationService()->getOrganizationLeaderRole();
+
+        $rolesInOrganization = [];
+        foreach ($roles as $role) {
+            $rolesInOrganization[$role->getId()] = (string)$role;
+        }
+
+        $organization_leader_role = [
+            'config' => $config,
+            'rolesInOrganization' => $rolesInOrganization,
+            'roleOrganizationPrincipal' => $rolesOrganisationPrincipal
+        ];
+
         if( $this->getHttpXMethod() == "POST" ){
             $option = $this->params()->fromPost('parameter_name');
             switch ($option) {
@@ -121,6 +139,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->getOscarConfigurationService()->setTimesheetExcel($value);
                     return $this->redirect()->toRoute('administration/parameters');
 
+                case "organization_leader_role":
+                    $value = $this->params()->fromPost('role_organization');
+                    $this->getOscarConfigurationService()->setOrganizationLeaderRole($value);
+                    return $this->redirect()->toRoute('administration/parameters');
+
                 default:
                     return $this->getResponseBadRequest("Paramètres non-reconnue");
             }
@@ -135,7 +158,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'export' => [
                 'separator' => $this->getOscarConfigurationService()->getExportSeparator(),
                 'dateformat' => $this->getOscarConfigurationService()->getExportDateFormat()
-            ]
+            ],
+            'organization_leader_role' => $organization_leader_role
         ];
     }
 

@@ -21,7 +21,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     use ServiceLocatorAwareTrait;
 
-    const allow_numerotation_custom = 'allow_numerotation_custom';
+    const allow_numerotation_custom     = 'allow_numerotation_custom';
+    const organization_leader_role      = 'organization_leader_role';
     const theme = 'theme';
 
     protected function getConfig(){
@@ -123,6 +124,14 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         } else {
             return $default;
         }
+    }
+
+    public function getOrganizationLeaderRole(){
+        return $this->getEditableConfKey(self::organization_leader_role, []);
+    }
+
+    public function setOrganizationLeaderRole($value){
+        $this->saveEditableConfKey(self::organization_leader_role, $value);
     }
 
     public function getNumerotationEditable(){

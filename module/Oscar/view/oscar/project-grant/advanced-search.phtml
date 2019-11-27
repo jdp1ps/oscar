@@ -1,4 +1,3 @@
-
 <section class="container">
     <?php if( $organizationsPerimeter ): ?>
     <h1>
@@ -308,6 +307,12 @@
                             <?= $affectation->getRole() ?>
                         </span>
                     </span>
+                    <?php if($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $affectation->getOrganization())): ?>
+                        <a href="<?= $this->url('contract/newstructure', ['organizationid' => $affectation->getOrganization()->getId()]) ?>" class="btn btn-default btn-xs">
+                            <i class="icon-plus-circled"></i>
+                            Nouvelle activité dans <strong><?= $affectation->getOrganization() ?></strong>
+                        </a>
+                    <?php endif; ?>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </p>

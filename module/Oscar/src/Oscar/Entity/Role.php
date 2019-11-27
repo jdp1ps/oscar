@@ -392,17 +392,54 @@ class Role implements HierarchicalRoleInterface
         if ($this->_levels === null) {
 
             $this->_levels = [];
-            if (($this->getSpot() & self::LEVEL_APPLICATION) > 0) {
+            if ($this->isLevelApplication()) {
                 $this->_levels[] = self::getLevelLabel(self::LEVEL_APPLICATION);
             }
-            if (($this->getSpot() & self::LEVEL_ORGANIZATION) > 0) {
+            if ($this->isLevelOrganization()) {
                 $this->_levels[] = self::getLevelLabel(self::LEVEL_ORGANIZATION);
             }
-            if (($this->getSpot() & self::LEVEL_ACTIVITY) > 0) {
+            if ($this->isLevelActivity()) {
                 $this->_levels[] = self::getLevelLabel(self::LEVEL_ACTIVITY);
             }
         }
 
         return $this->_levels;
+    }
+
+    /**
+     * Retourne TRUE si le role est du niveau demandé.
+     * @param int $level
+     * @return bool
+     */
+    public function isLevel( int $level ) :bool
+    {
+        return ($this->getSpot() & $level) > 0;
+    }
+
+    /**
+     * Retourne TRUE si le rôle est au niveau applicatif
+     * @return bool
+     */
+    public function isLevelApplication() :bool
+    {
+        return $this->isLevel(self::LEVEL_APPLICATION);
+    }
+
+    /**
+     * Retourne TRUE si le rôle est au niveau organisation
+     * @return bool
+     */
+    public function isLevelOrganization() :bool
+    {
+        return $this->isLevel(self::LEVEL_ORGANIZATION);
+    }
+
+    /**
+     * Retourne TRUE si le rôle est au niveau activité
+     * @return bool
+     */
+    public function isLevelActivity() :bool
+    {
+        return $this->isLevel(self::LEVEL_ACTIVITY);
     }
 }

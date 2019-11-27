@@ -121,6 +121,28 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
     }
 
+    public function getRolesWithPrivileges( $privilegeCode, int $roleLevel = 0 ){
+
+        $roles_privileges = [];
+        if( $roles_privileges == null || !array_key_exists($privilegeCode, $roles_privileges) ){
+            try {
+                /** @var Privilege $privilege */
+                $privilege = $this->getEntityManager()->getRepository(Privilege::class)
+                    ->getPrivilegeByCode($privilegeCode);
+
+                /** @var Role $role */
+                foreach ($privilege->getRole() as $role) {
+                    if( $roleLevel == 0 || $role->isLevel($roleLevel) ){
+                        $roles_privileges[] = $role;
+                    }
+                }
+                return $roles_privileges;
+            } catch (\Exception $e) {
+                throw new OscarException(sprintf('Impossible de charger le privilège %s : %s', $privilegeCode, $e->getMessage()));
+            }
+        }
+    }
+
 
     /**
      * @return string Retourne une chaîne (utilisée dans les logs pour donner des informations sur l'utilisateur actif).

@@ -20,6 +20,7 @@ use Oscar\Entity\ActivityRequestRepository;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
+use Oscar\Entity\LogActivity;
 use Oscar\Entity\Notification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
@@ -59,6 +60,7 @@ use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
+use Psr\Log\LogLevel;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
@@ -1012,6 +1014,88 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         return [];
     }
 
+    public function newInStructureAction(){
+
+        // Check de l'accès
+        $organization = $this->getOrganizationService()->getOrganization($this->params()->fromRoute('organizationid'));
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT, $organization);
+
+        $hidden = $this->getOscarConfigurationService()->getConfiguration('activity_hidden_fields');
+
+        $projectGrant = new Activity();
+
+
+        $numerotationKeys = $this->getEditableConfKey('numerotation', []);
+        $numerotationEditable = $this->getOscarConfigurationService()->getNumerotationEditable();
+
+        $form = new ProjectGrantForm();
+        $form->setServiceContainer($this->getServiceContainer());
+        $form->setNumbers($numerotationKeys, $numerotationEditable);
+        $form->init();
+        ///////////////////////////////////////////////////////////////
+        // TODO Transmettre les service au ProjectGrantForm
+        // $form->setServiceLocator($this->getServiceLocator());
+        ///////////////////////////////////////////////////////////////
+
+        $form->setObject($projectGrant);
+
+        /** @var Request $request */
+        $request = $this->getRequest();
+        if ($request->isPost()) {
+            $form->setData($request->getPost());
+            $form->getHydrator()->hydrate($request->getPost()->toArray(),
+                $projectGrant);
+
+            if ($form->isValid()) {
+                if ($projectGrant->getId()) {
+                    $projectGrant->setDateUpdated(new \DateTime());
+                }
+                $this->getEntityManager()->persist($projectGrant);
+                $this->getEntityManager()->flush($projectGrant);
+
+                if( !$projectGrant->hasOrganization($organization) ){
+
+                    $defaultRole = 'Laboratoire';
+                    $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->findOneBy(['label' => $defaultRole]);
+                    if( !$role ){
+                        throw new OscarException("Le rôle à utiliser n'est pas configurer");
+                    }
+
+                    $projectOrganization = new ActivityOrganization();
+                    $this->getEntityManager()->persist($projectOrganization);
+                    $projectOrganization->setOrganization($organization)
+                        ->setActivity($projectGrant)
+                        ->setRoleObj($role);
+
+                    $this->getEntityManager()->flush($projectOrganization);
+                }
+
+
+                // Mise à jour de l'index de recherche
+                $this->getActivityService()->searchUpdate($projectGrant);
+                $this->getActivityLogService()->addUserInfo("a créé l'activité ",'Activity', $projectGrant->getId());
+
+
+                $this->redirect()->toRoute('contract/show',
+                    ['id' => $projectGrant->getId()]);
+            }
+        }
+
+        $view = new ViewModel([
+            'form' => $form,
+            'organization' => $organization,
+            'hidden' => $hidden,
+            'activity' => $projectGrant,
+            'project' => null,
+            'numerotationKeys' => $numerotationKeys,
+            'numbers_keys' => $numerotationKeys
+        ]);
+
+        $view->setTemplate('oscar/project-grant/form');
+
+        return $view;
+    }
+
     /**
      * Nouvelle activité de recherche.
      *
@@ -1027,11 +1111,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Contrôle des droits
         if ($projectId) {
             $project = $this->getProjectService()->getProject($projectId);
-            $this->getOscarUserContext()->hasPrivileges(Privileges::PROJECT_EDIT,
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_EDIT,
                 $project);
         } else {
             $project = null;
-            $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_EDIT);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT);
         }
 
         $projectGrant = new Activity();

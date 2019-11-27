@@ -8,6 +8,7 @@
  */
 namespace Oscar\Controller;
 
+use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
@@ -352,6 +353,26 @@ class PersonController extends AbstractOscarController implements UsePersonServi
      */
     public function indexAction()
     {
+
+        $allow = false;
+        $justXHR = true;
+
+        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW) ){
+            $allow = true;
+            $justXHR = false;
+        } else {
+            foreach ($this->getCurrentPerson()->getOrganizations() as $organization) {
+                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $organization) ){
+                    echo "$organization";
+                    $allow = true;
+                }
+            }
+        }
+
+        if( !$allow ){
+            throw new UnAuthorizedException();
+        }
+
         // Donnèes GET
         $page = (int) $this->params()->fromQuery('page', 1);
         $search = $this->params()->fromQuery('q', '');

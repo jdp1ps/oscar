@@ -121,7 +121,7 @@ return array(
                 [   'controller' =>   'Activity',
                     'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
                         'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
-                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande', 'api', 'gant', 'estimatedSpent', 'spentList'],
+                        'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande', 'api', 'gant', 'estimatedSpent', 'spentList', 'newInStructure'],
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',
@@ -240,21 +240,12 @@ return array(
                 // PERSON
                 ///////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Person',
-                    'action' => ['personnel', 'access', 'delete'],
+                    'action' => ['personnel', 'access', 'delete', 'index', 'show'],
                     'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',
-                    'action' => ['search', 'synchronize'],
+                    'action' => ['search', 'synchronize', 'boss'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
-                ],
-
-                [ 'controller' =>   'Person',
-                    'action' => ['index', 'boss'],
-                    'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
-                ],
-                [ 'controller' =>   'Person',
-                    'action' => ['show'],
-                    'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',
                     'action' => ['edit', 'new', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],

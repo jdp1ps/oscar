@@ -5,6 +5,7 @@
  * Date: 12/12/18
  * Time: 11:02
  */
+
 ?>
 <div class="container">
     <header>
@@ -86,6 +87,36 @@
                     <hr>
                     <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
                 </form>
+            </article>
+
+
+            <article class="card">
+                <h3><i class="icon-building-filled"></i> rôle des organisations</h3>
+
+                <form action="" method="post">
+                    <p>Lorsque une personne responsable de structure crée une activité, voici l'attribution des organisations en fonction des rôles.</p>
+                    <?php foreach ($organization_leader_role['rolesInOrganization'] as $roleIn):?>
+                    <div class="card cols" style="display: flex">
+                        <div class="col-3">
+                            Si elle est <strong class="cartouche primary"><?= $roleIn ?></strong>, l'organisation aura le rôle
+                        </div>
+                        <div class="col-1">
+                            <select name="role_organization[<?= $roleIn ?>]" id="" class="select2">
+                                <option value="">Laisser choisir le rôle</option>
+                                <?php foreach ($organization_leader_role['roleOrganizationPrincipal'] as $roleOrganisation) :?>
+                                <option value="<?= $roleOrganisation ?>" <?= (array_key_exists($roleIn, $organization_leader_role['config']) && $organization_leader_role['config'][$roleIn] == $roleOrganisation) ? " SELECTED" : "" ?>><?= $roleOrganisation ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                    <hr>
+                    <input name="parameter_name" type="hidden" value="organization_leader_role" />
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+                <pre>
+
+    </pre>
             </article>
         </div>
 
