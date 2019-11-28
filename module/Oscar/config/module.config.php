@@ -104,16 +104,6 @@ return array(
                     'action' => ['delete', 'empty'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
                 ],
-                // Membres (Person)
-                [ 'controller' =>   'Enroll',
-                    'action' => ['personProjectNew', 'personProjectDelete', 'personProjectEdit'],
-                    'privileges' => \Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE
-                ],
-                // Partenaires (Orgnaization)
-                [ 'controller' =>   'Enroll',
-                    'action' => ['organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit', 'organizationPersonClose'],
-                    'privileges' => \Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE
-                ],
 
                 ////////////////////////////////////////////////////////////////
                 // ACTIVITÉS
@@ -175,18 +165,6 @@ return array(
                     'controller' => 'WorkPackage',
                     'action' => ['rest'],
                     'roles' => ['user']
-                ],
-
-                // ---  MEMBRES
-                // Persons
-                [ 'controller' =>   'Enroll',
-                    'action' => ['personActivityNew', 'personActivityDelete', 'personActivityEdit'],
-                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE,
-                ],
-                // Organization
-                [ 'controller' =>   'Enroll',
-                    'action' => ['organizationActivityNew', 'organizationActivityDelete', 'organizationActivityEdit'],
-                    'privileges' => \Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE,
                 ],
 
                 // --- Type d'activités - { controller: ActivityType, action: [new, delete, edit, index, move, merge], roles: [user] }
@@ -258,26 +236,28 @@ return array(
 
                 // Membre
                 [ 'controller' =>   'Enroll',
-                    'action' => ['personProjectNew', 'personProjectDelete', 'personProjectEdit'],
-                    'privileges' => \Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE
-                ],
+                    'action' => [
+                        'personProjectNew', 'personProjectDelete', 'personProjectEdit',
+                        'organizationPersonNew', 'organizationPersonDelete', 'organizationPersonEdit',
+                        'personActivityNew', 'personActivityDelete', 'personActivityEdit',
+                        'organizationActivityNew', 'organizationActivityDelete', 'organizationActivityEdit',
+                        'personProjectNew', 'personProjectDelete', 'personProjectEdit',
+                        'organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit', 'organizationPersonClose'
 
-                // Membre des organization
-                [ 'controller' =>   'Enroll',
-                    'action' => ['organizationPersonNew', 'organizationPersonDelete', 'organizationPersonEdit'],
-                    'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
+                    ],
+                    'roles' => ['user']
                 ],
 
                 ////////////////////////////////////////////////////////////////
                 // ORGANIZATION
                 ////////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Organization',
-                    'action' => ['delete'],
+                    'action' => ['delete', 'index'],
                     'roles' => ['user']
 
                 ],
                 [ 'controller' =>   'Organization',
-                    'action' => ['index', 'search'],
+                    'action' => ['search'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_INDEX
                 ],
 

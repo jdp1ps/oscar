@@ -44,6 +44,7 @@ class ProjectGrantControllerFactory implements FactoryInterface
         $c->setActivityLogService($container->get(ActivityLogService::class));
         $c->setNotificationService($container->get(NotificationService::class));
         $c->setPersonService($container->get(PersonService::class));
+        $c->setOrganizationService($container->get(OrganizationService::class));
         $c->setActivityService($container->get(ProjectGrantService::class));
         $c->setProjectService($container->get(ProjectService::class));
         $c->setSpentService($container->get(SpentService::class));

@@ -364,7 +364,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             $_ROLES_IDS_ACTIVITY = [];
             /** @var Role $role */
             foreach ($this->getEntityManager()->getRepository(Role::class)->findAll() as $role) {
-                if (($role->getSpot() & Role::LEVEL_ACTIVITY) > 0) {
+                if ($role->isLevelActivity()) {
                     $_ROLES_IDS_ACTIVITY[$role->getId()] = $role->getRoleId();
                 }
             }

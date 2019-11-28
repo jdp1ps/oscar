@@ -16,6 +16,7 @@ use Monolog\Logger;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
+use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -28,6 +29,7 @@ class OrganizationControllerFactory implements FactoryInterface
     {
         $c = new OrganizationController();
         $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
+        $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setLoggerService($container->get('Logger'));
         $c->setEntityManager($container->get(EntityManager::class));
         $c->setOrganizationService($container->get(OrganizationService::class));

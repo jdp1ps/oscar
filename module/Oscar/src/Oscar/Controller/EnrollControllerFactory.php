@@ -14,6 +14,7 @@ use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\NotificationService;
+use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
@@ -34,10 +35,12 @@ class EnrollControllerFactory implements FactoryInterface
         $c->setLoggerService($container->get('Logger'));
 
         $c->setPersonService($container->get(PersonService::class));
+        $c->setActivityService($container->get(ProjectGrantService::class));
         $c->setProjectService($container->get(ProjectService::class));
         $c->setProjectGrantService($container->get(ProjectGrantService::class));
         $c->setActivityLogService($container->get(ActivityLogService::class));
         $c->setNotificationService($container->get(NotificationService::class));
+        $c->setOrganizationService($container->get(OrganizationService::class));
         return $c;
     }
 

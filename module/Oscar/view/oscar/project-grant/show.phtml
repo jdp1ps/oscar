@@ -222,7 +222,7 @@
                                 return h(EntityWithRole.default, { props: {
                                         url: "<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>",
                                         urlNew: "<?= $this->url('personactivity/new', ['idenroller' => $entity->getId()]) ?>",
-                                        manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE) ? "true" : 'false' ?>,
+                                        manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE, $entity) ? "true" : 'false' ?>,
                                         title: "Personne",
                                         roles: <?= json_encode($rolesPersons) ?>,
                                         moment: moment
@@ -254,7 +254,7 @@
                             return h(EntityWithRole.default, { props: {
                                     url: "<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>",
                                     urlNew: "<?= $this->url('organizationactivity/new', ['idenroller' => $entity->getId()]) ?>",
-                                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE) ? "true" : 'false' ?>,
+                                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE, $entity) ? "true" : 'false' ?>,
                                     title: "Organisation",
                                     roles: <?= json_encode($rolesOrganizations) ?>,
                                     moment: moment

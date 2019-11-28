@@ -357,13 +357,20 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         $allow = false;
         $justXHR = true;
 
+        // On test les accès
         if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW) ){
             $allow = true;
             $justXHR = false;
         } else {
+
+            // CAS PARTICULIER
+            // ===============
+            // Si la personne est un responsable d'organisation,
+            // on doit l'autoriser à accéder au service pour l'autocompéteur
+            // des personnes.
+
             foreach ($this->getCurrentPerson()->getOrganizations() as $organization) {
-                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $organization) ){
-                    echo "$organization";
+                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $organization->getOrganization()) ){
                     $allow = true;
                 }
             }
@@ -420,10 +427,35 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             throw $e;
         }
 
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            $json = [
+                'datas' => [],
+                'error' => $error
+            ];
+            foreach ($datas as $data) {
+                $personData = $data->toArray();
+
+                $json['datas'][] = $personData;
+            }
+            $view = new JsonModel();
+            $view->setVariables($json);
+
+            return $view;
+        }
+
+        if( $justXHR == true ){
+            throw new UnAuthorizedException();
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Export CSV
         ///
         if( $format == "csv" ){
+
+            if( $justXHR == true ){
+                throw new UnAuthorizedException();
+            }
+
             // Fichier temporaire
             $baseFileName = 'oscar-export-persons';
             $filename = uniqid($baseFileName) . '.csv';
@@ -460,22 +492,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             echo file_get_contents('/tmp/' . $filename);
             @unlink('/tmp/' . $filename);
             die();
-        }
-
-        if ($this->getRequest()->isXmlHttpRequest()) {
-            $json = [
-                'datas' => [],
-                'error' => $error
-            ];
-            foreach ($datas as $data) {
-                $personData = $data->toArray();
-
-                $json['datas'][] = $personData;
-            }
-            $view = new JsonModel();
-            $view->setVariables($json);
-
-            return $view;
         }
 
         $roles = $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed();

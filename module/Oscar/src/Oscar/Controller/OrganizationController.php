@@ -84,6 +84,34 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
      */
     public function indexAction()
     {
+
+
+        $allow = false;
+        $justXHR = true;
+
+        // On test les accès
+        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ORGANIZATION_SHOW) ){
+            $allow = true;
+            $justXHR = false;
+        } else {
+
+            // CAS PARTICULIER
+            // ===============
+            // Si la personne est un responsable d'organisation,
+            // on doit l'autoriser à accéder au service pour l'autocompéteur
+            // des personnes.
+
+            foreach ($this->getCurrentPerson()->getOrganizations() as $organization) {
+                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $organization->getOrganization()) ){
+                    $allow = true;
+                }
+            }
+        }
+
+        if( !$allow ){
+            throw new UnAuthorizedException();
+        }
+
         $page = (int) $this->params()->fromQuery('page', 1);
         $search = $this->params()->fromQuery('q', '');
         $type = $this->params()->fromQuery('t', []);
@@ -112,6 +140,10 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $view->setVariables($result);
 
             return $view;
+        }
+
+        if( $justXHR == true ){
+            throw new UnAuthorizedException();
         }
 
         return array(

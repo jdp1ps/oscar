@@ -1055,6 +1055,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                 if( !$projectGrant->hasOrganization($organization) ){
 
+                    // TODO récupération du rôle par défaut
+
                     $defaultRole = 'Laboratoire';
                     $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->findOneBy(['label' => $defaultRole]);
                     if( !$role ){
@@ -1325,11 +1327,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Check access
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_SHOW, $entity);
 
-        $rolesOrganizations = [];
-        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE) ){
-            $rolesOrganizations = $this->getOscarUserContextService()->getRolesOrganizationInActivity();
-        }
-
+        $rolesOrganizations = $this->getOscarUserContextService()->getRolesOrganizationInActivity();
 
         //////////////////////////////////////////////////////////// Passage WTF
         // Si l'on supprime le bloc suivant, l'affichage des partenaires

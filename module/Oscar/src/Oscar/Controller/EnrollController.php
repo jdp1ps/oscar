@@ -26,8 +26,12 @@ use Oscar\Form\RoleForm;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
+use Oscar\Traits\UseActivityService;
+use Oscar\Traits\UseActivityServiceTrait;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UseOrganizationService;
+use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
@@ -44,9 +48,9 @@ use Zend\View\Model\ViewModel;
  * Class EnrollController
  * @package Oscar\Controller
  */
-class EnrollController extends AbstractOscarController implements UsePersonService, UseProjectService, UseProjectGrantService, UseNotificationService
+class EnrollController extends AbstractOscarController implements UsePersonService, UseProjectService, UseProjectGrantService, UseNotificationService, UseActivityService, UseOrganizationService
 {
-    use UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait;
+    use UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait, UseActivityServiceTrait, UseOrganizationServiceTrait;
 
     /**
      * Retourne la liste des rôles éligibles selon l'association $class.
@@ -462,6 +466,81 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $view;
     }
 
+    private function getEnrollDatas( $type ){
+
+        $datas = [
+
+        ];
+        $datas['idenroll']  = $idEnroll = $this->params()->fromRoute('idenroll');
+        $datas['enroll']    = $enroll = $this->getEntityManager()->getRepository($type)->find($idEnroll);
+
+        switch ($type) {
+
+            case ProjectPartner::class:
+                $datas['enroller']              = $enroll->getProject();
+                $datas['enrolled']              = $enroll->getOrganization();
+                $datas['role']                  = $this->getEntityManager()->getRepository(Role::class)->find($this->params()->fromPost('role'));
+                $datas['url_show_enroller']     = 'project/show';
+                $datas['url_show_enrolled']     = 'organization/show';
+                $datas['context']               = 'Project';
+                $datas['privilege']             = Privileges::PROJECT_ORGANIZATION_MANAGE;
+                break;
+
+            case ProjectMember::class :
+                $datas['enroller']              = $enroll->getProject();
+                $datas['enrolled']              = $enroll->getPerson();
+                $datas['role']                  = $this->getEntityManager()->getRepository(Role::class)->find($this->params()->fromPost('role'));
+                $datas['url_show_enroller']     = 'project/show';
+                $datas['url_show_enrolled']     = 'person/show';
+                $datas['context']               = 'Project';
+                $datas['privilege']             = Privileges::PROJECT_PERSON_MANAGE;
+                break;
+
+            case ActivityPerson::class :
+                $datas['enroller']              = $enroll->getActivity();
+                $datas['enrolled']              = $enroll->getPerson();
+                $datas['role']                  = $this->params()->fromPost('role', null) ?
+                    $this->getEntityManager()->getRepository(Role::class)->find($this->params()->fromPost('role')) :
+                    null;
+                $datas['url_show_enroller']     = 'contract/show';
+                $datas['url_show_enrolled']     = 'person/show';
+                $datas['context']               = 'Activity';
+                $datas['privilege']             = Privileges::ACTIVITY_PERSON_MANAGE;
+                break;
+
+            case ActivityOrganization::class :
+                $datas['enroller']              = $enroll->getActivity();
+                $datas['enrolled']              = $enroll->getOrganization();
+                $datas['role']                  = $this->params()->fromPost('role', null) ?
+                    $this->getEntityManager()->getRepository(OrganizationRole::class)->find($this->params()->fromPost('role')) :
+                    null;
+                $datas['url_show_enroller']     = 'contract/show';
+                $datas['url_show_enrolled']     = 'organization/show';
+                $datas['context']               = 'Activity';
+                $datas['privilege']             = Privileges::ACTIVITY_ORGANIZATION_MANAGE;
+                break;
+
+            case OrganizationPerson::class :
+                $datas['enroller']              = $enroll->getOrganization();
+                $datas['enrolled']              = $enroll->getPerson();
+                $datas['role']                  = $this->getEntityManager()->getRepository(Role::class)->find($this->params()->fromPost('role'));
+                $datas['url_show_enroller']     = 'organization/show';
+                $datas['url_show_enrolled']     = 'person/show';
+                $datas['context']               = 'Organization';
+                $datas['privilege']             = Privileges::ORGANIZATION_EDIT;
+                break;
+
+            default:
+                throw new \Exception('Bad usage');
+                break;
+        }
+
+        $this->getOscarUserContextService()->check($datas['privilege'], $datas['enroller']);
+
+        return $datas;
+
+    }
+
     private function deleteEnroll($type)
     {
         $idEnroll = $this->params()->fromRoute('idenroll');
@@ -558,21 +637,34 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $enroller;
     }
 
+    private function getOrganizationRoleEntity(){
+        $id = $this->params()->fromPost('role');
+        $role = $this->getProjectGrantService()->getRoleOrganizationById($id);
+        return $role;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // Person <> Project
     ////////////////////////////////////////////////////////////////////////////
     public function personProjectNewAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $this->getProjectEntity());
         return $this->saveEnroll(ProjectMember::class);
     }
 
     public function personProjectDeleteAction()
     {
-        return $this->deleteEnroll(ProjectMember::class);
+        try {
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $this->getProjectEntity());
+            return $this->deleteEnroll(ProjectMember::class);
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne : " . $e->getMessage());
+        }
     }
 
     public function personProjectEditAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $this->getProjectEntity());
         return $this->editEnroll(ProjectMember::class);
     }
 
@@ -581,16 +673,19 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
     public function organizationProjectNewAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $this->getProjectEntity());
         return $this->saveEnroll(ProjectPartner::class);
     }
 
     public function organizationProjectDeleteAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $this->getProjectEntity());
         return $this->deleteEnroll(ProjectPartner::class);
     }
 
     public function organizationProjectEditAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $this->getProjectEntity());
         return $this->editEnroll(ProjectPartner::class);
     }
 
@@ -600,11 +695,13 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
     public function organizationPersonNewAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $this->getOrganizationEntity());
         return $this->saveEnroll(OrganizationPerson::class);
     }
 
     public function organizationPersonDeleteAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $this->getOrganizationEntity());
         return $this->deleteEnroll(OrganizationPerson::class);
     }
 
@@ -614,17 +711,35 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
     public function personActivityNewAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $this->getActivityEntity());
         return $this->saveEnroll(ActivityPerson::class);
     }
 
     public function personActivityDeleteAction()
     {
-        return $this->deleteEnroll(ActivityPerson::class);
+
+        try {
+            $datas = $this->getEnrollDatas(ActivityPerson::class);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
+            $this->getPersonService()->personActivityRemove($datas['enroll']);
+            $this->updateIndex('Activity', $datas['enroller']);
+            return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne dans l'activité : " . $e->getMessage());
+        }
     }
 
     public function personActivityEditAction()
     {
-        return $this->editEnroll(ActivityPerson::class);
+        try {
+            $datas = $this->getEnrollDatas(ActivityPerson::class);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
+            $this->getPersonService()->personActivityChangeRole($datas['enroll'], $datas['role']);
+            $this->updateIndex('Activity', $datas['enroller']);
+            return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible de modifier l'affectation de cette personne dans l'activité : " . $e->getMessage());
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -632,23 +747,54 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
     public function organizationActivityNewAction()
     {
-        $this->getLoggerService()->debug("AJOUT D'une ORGANISATIOn dans une ACTIVITÉ");
-        return $this->saveEnroll(ActivityOrganization::class);
+        try {
+            /** @var Organization $organization */
+            $organization = $this->getOrganizationService()->getOrganization($this->params()->fromPost('enroled'));
+
+            /** @var  $activity */
+            $activity = $this->getActivityEntity();
+
+            /** @var RoleOrganization\ $role */
+            $role = $this->getOrganizationRoleEntity();
+
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
+
+            $this->getActivityService()->organizationActivityAdd($organization, $activity, $role, null, null, true);
+
+            return $this->redirect()->toRoute( 'contract/show', ['id'=>$activity->getId()] );
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible d'ajouter l'organisation dans l'activité : " . $e->getMessage());
+        }
     }
 
     public function organizationActivityDeleteAction()
     {
-        return $this->deleteEnroll(ActivityOrganization::class);
+        try {
+            /** @var ActivityOrganization $organizationActivity */
+            $organizationActivity = $this->getEntityManager()->getRepository(ActivityOrganization::class)->find($this->params()->fromRoute('idenroll'));
+            $activity = $organizationActivity->getActivity();
+
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $organizationActivity->getActivity());
+            $this->getActivityService()->organizationActivityRemove($organizationActivity);
+            return $this->redirect()->toRoute( 'contract/show', ['id'=>$activity->getId()]);
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne dans l'activité : " . $e->getMessage());
+        }
+
+//        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $this->getActivityEntity());
+//        return $this->deleteEnroll(ActivityOrganization::class);
     }
 
     public function organizationActivityEditAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $this->getActivityEntity());
         return $this->editEnroll(ActivityOrganization::class);
     }
 
     ////////////////////////////////////////////////////////////////////////////
     // Fin des rôles
     public function organizationPersonCloseAction(){
+        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $this->getActivityEntity());
         return $this->closeEnroll(OrganizationPerson::class);
     }
 }

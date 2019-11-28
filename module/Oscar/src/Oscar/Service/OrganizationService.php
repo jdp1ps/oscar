@@ -253,11 +253,15 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     }
 
+    public function updateIndex( Organization $organization ){
+        $this->getSearchEngineStrategy()->update($organization);
+    }
+
     public function getSearchEngineStrategy()
     {
         static $searchStrategy;
         if( $searchStrategy === null ){
-            $opt = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('strategy.organization.search_engine');
+            $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.organization.search_engine');
             $class = new \ReflectionClass($opt['class']);
             $searchStrategy = $class->newInstanceArgs($opt['params']);
         }
@@ -386,10 +390,14 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      */
     public function getOrganization($id)
     {
-        return $this->getBaseQuery()->andWhere('o.id = :id')
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getSingleResult();
+        try {
+            return $this->getBaseQuery()->andWhere('o.id = :id')
+                ->setParameter('id', $id)
+                ->getQuery()
+                ->getSingleResult();
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de trouver l'organisation '$id'.");
+        }
     }
 
     /**

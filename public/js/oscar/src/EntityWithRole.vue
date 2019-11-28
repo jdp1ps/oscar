@@ -151,7 +151,7 @@
             </div>
         </div>
 
-        <nav class="admin-bar text-right">
+        <nav class="admin-bar text-right" v-if="manage">
             <a class="oscar-link" @click="handlerNew()">
                 <i class="icon-doc-add"></i>
                 Nouveau
@@ -164,8 +164,8 @@
             <span v-else>{{ e.enrolledLabel }}</span>
             <span class="addon">
                 {{ e.roleLabel }}
-                <i class="icon-pencil-1 icon-clickable" v-if="e.urlEdit" @click="handlerEdit(e)"></i>
-                <i class="icon-trash icon-clickable" v-if="e.urlDelete" @click="handlerDelete(e)"></i>
+                <i class="icon-pencil-1 icon-clickable" v-if="manage" @click="handlerEdit(e)"></i>
+                <i class="icon-trash icon-clickable" v-if="manage" @click="handlerDelete(e)"></i>
             </span>
         </span>
     </div>
@@ -242,7 +242,7 @@ export default {
             this.$http.post(this.entityDelete.urlDelete, {}).then( ok => {
 
             }, ko => {
-                this.error = "Erreur : " + ko.body;
+                this.error = ko.body;
             }).then( foo => {
                 this.entityDelete = null;
                 this.fetch();
@@ -275,7 +275,7 @@ export default {
             this.$http.post(this.urlNew+'/'+this.entityNew.enroled, data).then( ok => {
                 console.log("OK", ok);
             }, ko => {
-                this.error = "Erreur : " + ko.body;
+                this.error = ko.status == 403 ? "Vous n'êtes pas authorisé à faire ça" : "Erreur : " + ko.body;
             }).then( foo => {
                 this.entityNew = null;
                 this.fetch();

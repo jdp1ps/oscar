@@ -1663,6 +1663,57 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->getSingleResult();
     }
 
+    /**
+     * @param $idRole
+     * @return OrganizationRole
+     */
+    public function getRoleOrganizationById($idRole){
+        try {
+            $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($idRole);
+            return $role;
+        } catch (\Exception  $e ){
+            throw new OscarException("Le rôle d'organisation '$idRole' est introuvable.");
+        }
+    }
+
+
+    public function organizationActivityAdd( Organization $organization, Activity $activity, OrganizationRole $roleOrganization, $dateStart = null, $dateEnd = null, $buildIndex = false ){
+        try {
+
+            // TODO Date de début/fin
+
+            $organizationActivity = new ActivityOrganization();
+            $this->getEntityManager()->persist($organizationActivity);
+            $organizationActivity->setOrganization($organization)
+                ->setActivity($activity)
+                ->setRoleObj($roleOrganization);
+            $this->getEntityManager()->flush($organizationActivity);
+
+            if( $buildIndex ){
+                $this->searchUpdate($activity);
+                $this->getOrganizationService()->updateIndex($organization);
+            }
+
+
+        } catch (\Exception $e){
+            throw new OscarException(sprintf(_("Impossible d'ajouter l'organisation %s comme %s dans %s : %s", $organization, $roleOrganization, $activity, $e->getMessage())));
+        }
+    }
+
+    public function organizationActivityRemove( ActivityOrganization $activityOrganization ){
+        try {
+            $activity = $activityOrganization->getActivity();
+            $organization = $activityOrganization->getOrganization();
+            $this->getEntityManager()->remove($activityOrganization);
+            $this->getEntityManager()->flush($activityOrganization);
+            $this->searchUpdate($activity);
+            $this->getOrganizationService()->updateIndex($organization);
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf(_("Impossible de supprimer %s de l'activité %s : %s", $organization, $activity, $e->getMessage())));
+        }
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////
     /**
      * @return \Doctrine\ORM\QueryBuilder
@@ -1692,5 +1743,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $qb->setParameter('dateRef', new \DateTime());
 
         return $qb;
+    }
+
+
+    public function deleteActivityPerson( ActivityPerson $activityPerson ){
+
     }
 }
