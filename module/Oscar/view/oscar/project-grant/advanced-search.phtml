@@ -307,15 +307,18 @@
                             <?= $affectation->getRole() ?>
                         </span>
                     </span>
-                    <?php if($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $affectation->getOrganization())): ?>
-                        <a href="<?= $this->url('contract/newstructure', ['organizationid' => $affectation->getOrganization()->getId()]) ?>" class="btn btn-default btn-xs">
-                            <i class="icon-plus-circled"></i>
-                            Nouvelle activité dans <strong><?= $affectation->getOrganization() ?></strong>
-                        </a>
-                    <?php endif; ?>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </p>
+            <hr>
+            <nav>
+            <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_EDIT)) : ?>
+                <a class="btn btn-primary" href="<?= $this->url('contract/new') ?>"><i class="icon-cube"></i> <?= $this->translate("Nouvelle activité") ?></a>
+            <?php endif; ?>
+            <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::PROJECT_EDIT)) : ?>
+                <a class="btn btn-primary" href="<?= $this->url('project/new') ?>"><i class="icon-cubes"></i> <?= $this->translate("Nouveau projet") ?></a>
+            <?php endif; ?>
+            </nav>
         <?php endif; ?>
 
         <h3><i class="icon-sliders"></i>

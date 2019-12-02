@@ -373,6 +373,35 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $_ROLES_IDS_ACTIVITY;
     }
 
+    public function getCurrentUserOrganisationPrincipal(){
+        $organizations = [];
+        /** @var OrganizationPerson $organizationPerson */
+        foreach ($this->getCurrentPerson()->getOrganizations() as $organizationPerson) {
+            if( !$organizationPerson->isOutOfDate() && $organizationPerson->getRoleObj()->isPrincipal() ){
+                $organizations[$organizationPerson->getOrganization()->getId()] = $organizationPerson->getOrganization();
+            }
+        }
+        return $organizations;
+    }
+
+    public function getCurrentUserOrganisationWithPrivilege(string $privilege){
+        static $organizationsWithPrivilege;
+
+        if( $organizationsWithPrivilege === null ) $organizationsWithPrivilege = [];
+
+        if( !array_key_exists($privilege, $organizationsWithPrivilege) ){
+            $organizationsWithPrivilege[$privilege] = [];
+            /** @var OrganizationPerson $organizationPerson */
+            foreach ($this->getCurrentPerson()->getOrganizations() as $organizationPerson) {
+                if( !$organizationPerson->isOutOfDate() && $organizationPerson->getRoleObj()->isPrincipal() && $organizationPerson->getRoleObj()->hasPrivilege($privilege) ){
+                    $organizationsWithPrivilege[$privilege][$organizationPerson->getOrganization()->getId()] = $organizationPerson->getOrganization();
+                }
+            }
+        }
+
+        return $organizationsWithPrivilege[$privilege];
+    }
+
     /**
      * Retourne la liste des rôles.
      *
@@ -601,10 +630,24 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      */
     public function check($privilege, $entity = null)
     {
-        $this->getLoggerService()->debug('Test ' . $privilege);
         if (!$this->hasPrivileges($privilege, $entity)) {
             throw new UnAuthorizedException('Droits insuffisants');
         }
+    }
+
+    /**
+     * Evalue le privilège au niveau application et organisation.
+     *
+     * @param $privilege
+     * @return bool
+     * @throws \Exception
+     */
+    public function checkWithorganizationDeep( $privilege ){
+        if (!$this->hasPrivileges($privilege)) {
+            if( !$this->hasPrivilegeInOrganizations($privilege))
+                throw new UnAuthorizedException('Droits insuffisants');
+        }
+        return true;
     }
 
     /**

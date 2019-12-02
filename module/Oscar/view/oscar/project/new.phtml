@@ -52,6 +52,31 @@
                     <?php echo $this->formElementErrors($form->get('description')); ?>
                 </div>
             </div>
+            <?php if($organizations) :?>
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Rôle de vos structures</span>
+                    <p class="alert alert-info">
+                        <?= ngettext("Choisissez un rôle pour votre structure.", "Choisisser au moins un rôle pour une de vos structures", count($organizations)) ?><br>
+                    </p>
+                    <?php foreach ($organizations as $organization): ?>
+                    <div>
+                    <?= $organization ?> :
+                    <select name="organizationsRoles[<?= $organization->getId() ?>]">
+                        <option value="">Ne pas associer à ce projet</option>
+                        <?php foreach ($organizationRoles as $role): ?>
+                            <option value="<?= $role->getId() ?>"><?= $role ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php endforeach; ?>
+                        <?php if( $organizationRolesError ): ?>
+                        <p class="alert-danger alert"><?= $organizationRolesError ?></p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+
         </div>
         <hr/>
         <nav class="text-center">

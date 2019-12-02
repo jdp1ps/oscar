@@ -1876,7 +1876,6 @@ class Activity implements ResourceInterface
 
         return $datas;
 
-
     }
 
     public function csv($dateFormat='Y-m-d')
@@ -2131,5 +2130,21 @@ class Activity implements ResourceInterface
         return false;
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private $tmpOrganizationsWithRoleForm = [];
+
+    public function setOrganizationsWithRoleForm( $formName, $formValue ){
+        var_dump($formName);
+        var_dump($formValue);
+    }
+
+    public function getOrganizationsWithRoleForm( $formName ){
+        if( array_key_exists($formName) ){
+            return $this->tmpOrganizationsWithRoleForm[$formName];
+        } else {
+            return '';
+        }
+    }
 
 }

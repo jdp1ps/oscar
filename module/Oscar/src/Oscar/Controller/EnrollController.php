@@ -38,6 +38,7 @@ use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
+use Oscar\Utils\DateTimeUtils;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Zend\View\Model\ViewModel;
 
@@ -474,6 +475,20 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         $datas['idenroll']  = $idEnroll = $this->params()->fromRoute('idenroll');
         $datas['enroll']    = $enroll = $this->getEntityManager()->getRepository($type)->find($idEnroll);
 
+        $postDateStart = $this->params()->fromPost('dateStart', null);
+        $dateStart = null;
+        if( $postDateStart != null ){
+            $dateStart = DateTimeUtils::toDatetime($postDateStart);
+        }
+        $datas['dateStart'] = $dateStart;
+
+        $postDateEnd = $this->params()->fromPost('dateEnd', null);
+        $dateEnd = null;
+        if( $postDateEnd != null ){
+            $dateEnd = DateTimeUtils::toDatetime($postDateEnd);
+        }
+        $datas['dateEnd'] = $dateEnd;
+
         switch ($type) {
 
             case ProjectPartner::class:
@@ -767,29 +782,133 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         }
     }
 
-    public function organizationActivityDeleteAction()
+    public function activityOrganizationDeleteAction()
     {
         try {
-            /** @var ActivityOrganization $organizationActivity */
-            $organizationActivity = $this->getEntityManager()->getRepository(ActivityOrganization::class)->find($this->params()->fromRoute('idenroll'));
+            $organizationActivity = $this->getPostedActivityOrganization();
             $activity = $organizationActivity->getActivity();
-
-            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $organizationActivity->getActivity());
-            $this->getActivityService()->organizationActivityRemove($organizationActivity);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
+            $this->getActivityService()->activityOrganizationRemove($organizationActivity);
             return $this->redirect()->toRoute( 'contract/show', ['id'=>$activity->getId()]);
         } catch (\Exception $e) {
             return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne dans l'activité : " . $e->getMessage());
         }
-
-//        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $this->getActivityEntity());
-//        return $this->deleteEnroll(ActivityOrganization::class);
     }
 
-    public function organizationActivityEditAction()
+    public function activityOrganizationEditAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $this->getActivityEntity());
-        return $this->editEnroll(ActivityOrganization::class);
+        try {
+            // Récupération des données
+            $organizationActivity = $this->getPostedActivityOrganization();
+
+            // Accès
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $organizationActivity->getActivity());
+
+            $this->getProjectGrantService()->organizationActivityEdit($organizationActivity, $this->getPostedOrganizationRole(), $this->getDateStartPosted(), $this->getDateEndPosted());
+            return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible de modifier l'affectation de cette organisation dans l'activité : " . $e->getMessage());
+        }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Récupération des données postées
+    ///
+
+    /**
+     * @return ActivityOrganization
+     * @throws OscarException
+     */
+    public function getPostedActivityOrganization(){
+        return $this->getPostedEnroll(ActivityOrganization::class);
+    }
+
+    public function getPostedEnroll($type){
+        $idEnroll = $this->params()->fromRoute('idenroll');
+        try {
+            return $this->getEntityManager()->getRepository($type)->find($idEnroll);
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf(_("Impossible de charger l'affectation [%s]%s : %s", $idEnroll, $type, $e->getMessage())));
+        }
+    }
+
+
+    /**
+     * @return Role
+     * @throws OscarException
+     */
+    public function getPostedRole(){
+        $role = $this->params()->fromRoute('role');
+        try {
+            if( !$role )
+                throw new \Exception("Vous devez choisir un rôle.");
+            return $this->getEntityManager()->getRepository(Role::class)->find($role);
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf(_("Impossible de charger le rôle '%s' : %s.", $role, $e->getMessage())));
+        }
+    }
+
+    /**
+     * @return OrganizationRole
+     * @throws OscarException
+     */
+    public function getPostedOrganizationRole(){
+        $role = $this->params()->fromRoute('role');
+        try {
+            if( !$role )
+                throw new \Exception("Vous devez choisir un rôle.");
+            return $this->getEntityManager()->getRepository(OrganizationRole::class)->find($role);
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf(_("Impossible de charger le rôle '%s' : %s.", $role, $e->getMessage())));
+        }
+    }
+
+    /**
+     * @param $field
+     * @return \DateTime
+     * @throws OscarException
+     */
+    public function getPostedDateTime($field){
+        $strVal = $this->params()->fromRoute($field);
+        try {
+            if( !$strVal )
+                return null;
+
+            if( $datetime = \DateTime::createFromFormat('Y-m-d', $strVal) ){
+                return $datetime;
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf(_("Problème d'extraction de date : %s", $e->getMessage())));
+        }
+    }
+
+    public function getDateStartPosted(){
+        return $this->getPostedDateTime('dateStart');
+    }
+
+    public function detDateEndPosted(){
+        return $this->getPostedDateTime('dateEnd');
+    }
+
+
+//    public function getPosted($type){
+//        $idEnroll = $this->params()->fromRoute('idenroll');
+//        try {
+//            return $this->getEntityManager()->getRepository($type)->find($idEnroll);
+//        } catch (\Exception $e) {
+//            throw new OscarException(sprintf(_("Impossible de charger l'affectation [%s]%s : %s", $idEnroll, $type, $e->getMessage())));
+//        }
+//    }
+
+
+
+//    public function organizationActivityEditAction()
+//    {
+//        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $this->getActivityEntity());
+//        return $this->editEnroll(ActivityOrganization::class);
+//    }
 
     ////////////////////////////////////////////////////////////////////////////
     // Fin des rôles

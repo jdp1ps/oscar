@@ -22,10 +22,33 @@
         <?php endif; ?>
     </h1>
     <div class="form">
-        <h3><?= $this->translate("Informations") ?></h3>
+        <h3>
+            <i class="icon-info-circled"></i>
+            <?= $this->translate("Informations") ?>
+        </h3>
         <?= $this->form()->openTag($form->prepare()); ?>
         <?= $this->formControlGroup($form->get('label')); ?>
         <?= $this->formControlGroup($form->get('description')); ?>
+
+
+        <?php if( $withOrganization ): ?>
+            <h3><?= $this->translate("Rôle de votre structure") ?></h3>
+            <?php if($errorRoles): ?>
+            <p class="alert alert-danger"><?= $errorRoles ?></p>
+            <?php endif; ?>
+            <p class="alert alert-info">
+                <?= ngettext("Choisissez un rôle pour votre structure.", "Choisisser au moins un rôle pour une de vos structures", count($organizations)) ?><br>
+            </p>
+            <?php foreach ($withOrganization as $org): ?>
+                <label for="organization[<?= $org->getId() ?>]"><?= $org ?></label>
+                <select name="roles[<?= $org->getId() ?>]" >
+                    <option value=""></option>
+                    <?php foreach ($organizationRoles as $id=>$roleOrganization): ?>
+                        <option value="<?= $id ?>"><?= $roleOrganization ?></option>
+                    <?php endforeach; ?>
+                </select>
+            <?php endforeach; ?>
+        <?php endif; ?>
 
         <h3><?= $this->translate("Données administratives") ?></h3>
 

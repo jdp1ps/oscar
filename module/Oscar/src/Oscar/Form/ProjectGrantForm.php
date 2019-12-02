@@ -31,6 +31,9 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
     private $numbers;
     private $editable;
 
+    private $organizations = false;
+    private $organizationRoles = null;
+
     public function setNumbers($numbers, $editable){
         $this->numbers = $numbers;
         $this->editable = $editable;
@@ -43,10 +46,16 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
+    public function addOrganizationsLeader($organizations, $organizationRoles){
+        $this->organizations = $organizations;
+        $this->organizationRoles = $organizationRoles;
+    }
+
     public function init()
     {
         $hydrator = new ProjectGrantFormHydrator();
         $hydrator->setNumbers($this->numbers);
+        $hydrator->addOrganizationsLeader($this->organizations, $this->organizationRoles);
         $hydrator->setServiceContainer($this->getServiceContainer());
         $this->setHydrator($hydrator);
 
@@ -57,6 +66,24 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'type' => 'Hidden',
             'name' => 'id'
         ]);
+
+//        if( $this->organizations ){
+//            foreach ($this->organizations as $organization) {
+//                // Status
+//                $this->add([
+//                    'name'   => 'organization[' . $organization->getId() .']',
+//                    'label' => (string)$organization,
+//                    'options' => [
+//                        'label' => 'Rôle de ' . (string)$organization,
+//                        'value_options' => $this->organizationRoles
+//                    ],
+//                    'attributes' => [
+//                        'class' => 'form-control'
+//                    ],
+//                    'type'=>'Select'
+//                ]);
+//            }
+//        }
 
         // LABEL
         $label = _("Intitulé de l'activité");

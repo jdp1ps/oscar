@@ -20,7 +20,7 @@
                 <small>Sans projet</small>
             <?php endif; ?>
         </h2>
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT) ): ?>
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $entity) ): ?>
             <div class="dropdown" style="position: absolute; right: 12px; top: 12px">
                 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
                         data-toggle="dropdown"
@@ -29,7 +29,7 @@
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT)): ?>
+                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT, $entity)): ?>
                         <li class="dropdown-header"><i class="icon-cubes"></i> Projet</li>
                         <li>
                             <a href="<?= $this->url('contract/moveToProject', ['id'=>$entity->getId()]) ?>">
@@ -37,7 +37,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?= $this->url('contract/createProject', ['id'=>$entity->getId()]) ?>">
+                            <a href="<?= $this->url('project/new') ?>?ids=<?= $entity->getId() ?>">
                                 Créer un nouveau projet à partir de cette activité
                             </a>
                         </li>

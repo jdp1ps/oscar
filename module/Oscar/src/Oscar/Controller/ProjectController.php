@@ -14,6 +14,7 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Project;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ProjectMember;
@@ -187,12 +188,59 @@ class ProjectController extends AbstractOscarController
      */
     public function newAction()
     {
+
+        // Récupération de/des activités à associer
+        $activitiesIds = $this->params()->fromQuery('ids', null);
+        $activities = [];
+
+        if( $activitiesIds ){
+            // Récupération des activités et évaluation des droits d'accès
+            $ids = explode(',', $activitiesIds);
+
+            $activities = $this->getProjectGrantService()->getActivitiesByIds($ids);
+
+            if( count($ids) != count($activities) ){
+                return $this->getResponseInternalError("Une ou plusieurs activités sont manquantes");
+            }
+
+            foreach ($activities as $activity) {
+                if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CHANGE_PROJECT, $activity) ){
+                    throw new UnAuthorizedException(_("Vous n'avez les les droits suffisant pour modifier le projet de l'activité '%s'", $activity));
+                }
+                $activities[] = $activity;
+            }
+        }
+
+
         $entity = new Project();
         $form = new ProjectIdentificationForm();
         $form->init();
         $form->bind($entity);
 
-        $this->getOscarUserContext()->check(Privileges::PROJECT_EDIT);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        $organizations = [];
+        $organizationRoles = [];
+        $organizationRolesError = null;
+
+
+        // ACCÈS GÉNÉRALE
+        if( ! $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_CREATE) ){
+            // VIA ORGANISATION
+            if( !$this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::PROJECT_CREATE) ){
+                throw new UnAuthorizedException(_("Vous n'avez pas les droits pour créer des nouveau projets"));
+            }
+
+            // Liste des organisations de l'utilisateur
+            $organizations = $this->getOscarUserContextService()->getCurrentUserOrganisationWithPrivilege(Privileges::PROJECT_CREATE);
+
+            foreach ($this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(['principal' => true]) as $role) {
+                if ($role->isPrincipal()) {
+                    $organizationRoles[$role->getId()] = $role;
+                }
+            }
+        }
+
 
         /** @var Request $request */
         $request = $this->getRequest();
@@ -201,32 +249,75 @@ class ProjectController extends AbstractOscarController
             $form->setData($request->getPost());
 
             if($form->isValid()) {
-                $em = $this->getProjectService()->getEntityManager();
-                $em->persist($entity);
 
-                $entity->setDateUpdated(new \DateTime())
-                    ->setDateCreated(new \DateTime());
+                $assoDatas = [];
 
-                $em->flush();
+                if( $organizations ){
+                    $organizationRolesError = "Vous devez selectionner un rôle.";
 
-                $this->getActivityLogService()->addUserInfo(
-                    sprintf('a créé le projet %s', $entity->log()),
-                    'Project',
-                    $entity->getId(),
-                    LogActivity::LEVEL_INCHARGE
-                );
+                    foreach ($this->params()->fromPost('organizationsRoles') as $idOrganization=>$idRole) {
+                        if( $idRole ){
+                            $assoDatas[] = [
+                                'organization' => $organizations[$idOrganization],
+                                'role' => $organizationRoles[$idRole],
+                            ];
+                        }
+                    }
 
-                $this->flashMessenger()->addSuccessMessage(sprintf("Le projet '%s' a bien été créé.",
-                    $entity->log()));
+                    if( count($assoDatas) )
+                        $organizationRolesError = "";
 
-                return $this->redirect()->toRoute('project/show',
-                    array('id' => $entity->getId()));
+                }
+
+                if( !$organizationRolesError ) {
+                    $em = $this->getProjectService()->getEntityManager();
+                    $em->persist($entity);
+
+                    $entity->setDateUpdated(new \DateTime())
+                        ->setDateCreated(new \DateTime());
+
+                    $em->flush();
+
+                    foreach ($assoDatas as $ass) {
+                        $projectOrg = new ProjectPartner();
+                        $em->persist($projectOrg);
+
+                        $projectOrg->setRoleObj($ass['role'])
+                            ->setOrganization($ass['organization'])
+                            ->setProject($entity);
+
+                        $em->flush($projectOrg);
+                    }
+
+                    /** @var Activity $activity */
+                    foreach ($activities as $activity) {
+                        $activity->setProject($entity);
+                    }
+
+                    $this->getEntityManager()->flush($activities);
+
+                    $this->getActivityLogService()->addUserInfo(
+                        sprintf('a créé le projet %s', $entity->log()),
+                        'Project',
+                        $entity->getId(),
+                        LogActivity::LEVEL_INCHARGE
+                    );
+
+                    $this->flashMessenger()->addSuccessMessage(sprintf("Le projet '%s' a bien été créé.",
+                        $entity->log()));
+
+                    return $this->redirect()->toRoute('project/show',
+                        array('id' => $entity->getId()));
+                }
             }
         }
 
         return array(
+            'organizations' => $organizations,
+            'organizationRoles' => $organizationRoles,
             'entity' => $entity,
             'form' => $form,
+            'organizationRolesError' => $organizationRolesError,
         );
     }
 
@@ -484,6 +575,13 @@ class ProjectController extends AbstractOscarController
      */
     public function searchAction()
     {
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CHANGE_PROJECT) ){
+            if( !$this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_CHANGE_PROJECT) ){
+                return $this->getResponseUnauthorized("Vous n'avez pas accès à la liste des projets.");
+            }
+        }
+
+
         $search = $this->params()->fromQuery('q', '');
         if (strlen($search) < 2) {
             return $this->getResponseBadRequest("Not enough chars (4 required");

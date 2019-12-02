@@ -115,6 +115,16 @@ $this->headScript();
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) || $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) ): ?>
                                     <li><a href="<?= $this->url('requestactivity') ?>"><i class="icon-cube"></i> <?= $this->translate("Demande d'activité") ?></a></li>
                                 <?php endif; ?>
+
+                                <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_CREATE) || $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::PROJECT_CREATE)) : ?>
+                                    <li role="presentation" class="dropdown-header"><i class="icon-cog"></i> Gestions des activités</li>
+                                <?php endif; ?>
+                                <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_CREATE)) : ?>
+                                    <li><a href="<?= $this->url('contract/new') ?>"><i class="icon-cube"></i> <?= $this->translate("Nouvelle activité") ?></a></li>
+                                <?php endif; ?>
+                                <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::PROJECT_CREATE)) : ?>
+                                    <li><a href="<?= $this->url('project/new') ?>"><i class="icon-cubes"></i> <?= $this->translate("Nouveau projet") ?></a></li>
+                                <?php endif; ?>
                             </ul>
                         </li>
                     <?php endif; ?>

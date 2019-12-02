@@ -22,6 +22,9 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
     use UseServiceContainerTrait;
 
     private $numbers;
+    private $organizations;
+    private $organizationRoles;
+
 
     public function setNumbers($numbers){
         $this->numbers = $numbers;
@@ -37,6 +40,11 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
         $in = trim($in);
         $in = str_replace(' ', '', $in);
         return doubleval(str_replace(',', '.', $in));
+    }
+
+    public function addOrganizationsLeader( $organizations, $organizationRoles ){
+        $this->organizations = $organizations;
+        $this->organizationRoles = $organizationRoles;
     }
 
     /**
@@ -98,8 +106,6 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
     {
         return Activity::getFinancialImpactValues()[$index];
     }
-
-
 
     protected function getType( $typeId )
     {

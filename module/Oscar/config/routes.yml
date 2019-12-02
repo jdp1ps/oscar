@@ -1045,7 +1045,7 @@ organizationactivity:
             options:
                 route: /edit/:idenroll
                 defaults:
-                    action: organizationActivityEdit
+                    action: activityOrganizationEdit
 
 # Person <> Organisation
 organizationperson:

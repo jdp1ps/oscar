@@ -84,7 +84,7 @@ return array(
                 // PROJET
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Project',
-                    'action' => ['show'],
+                    'action' => ['show', 'new', 'edit', 'search', 'makeProject'],
                     'roles' => ['user'],
                 ],
                 [   'controller' =>   'Project',
@@ -93,7 +93,7 @@ return array(
                     'roles' => ['user'],
                 ],
                 [   'controller' =>   'Project',
-                    'action' => ['index', 'new', 'edit', 'rebuildIndex', 'simplifyPartners', 'simplifyMembers', 'fusion', 'search'],
+                    'action' => ['index', 'rebuildIndex', 'simplifyPartners', 'simplifyMembers', 'fusion'],
                     'privileges' => \Oscar\Provider\Privileges::PROJECT_INDEX
                 ],
                 [   'controller' =>   'Project',
@@ -109,8 +109,8 @@ return array(
                 // ACTIVITÉS
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Activity',
-                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations',
-                        'delete', 'visualization', 'documentsJson', 'activitiesOrganizations',
+                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations', 'makeProject',
+                        'delete', 'visualization', 'documentsJson', 'activitiesOrganizations', 'changeProject',
                         'notifications', 'generateNotifications', 'generatedDocument', 'requestFor', 'adminDemande', 'api', 'gant', 'estimatedSpent', 'spentList', 'newInStructure'],
                     'roles' => ['user'],
                 ],
@@ -119,7 +119,7 @@ return array(
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
                 ],
                 [ 'controller' =>   'Activity',
-                    'action' => ['makeProject', 'changeProject', 'orphans'],
+                    'action' => ['orphans'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
                 ],
                 [ 'controller' =>   'Activity',
@@ -181,11 +181,7 @@ return array(
 
                 // DOCUMENTS
                 ['controller' => 'ContractDocument', // --- Upload
-                    'action' => ['upload', 'delete', 'changeType'],
-                    'roles' => ['user']
-                ],
-                ['controller' => 'ContractDocument',
-                    'action' => ['index','show','download'],
+                    'action' => ['upload', 'delete', 'changeType', 'index','show','download'],
                     'roles' => ['user']
                 ],
 
@@ -240,7 +236,7 @@ return array(
                         'personProjectNew', 'personProjectDelete', 'personProjectEdit',
                         'organizationPersonNew', 'organizationPersonDelete', 'organizationPersonEdit',
                         'personActivityNew', 'personActivityDelete', 'personActivityEdit',
-                        'organizationActivityNew', 'organizationActivityDelete', 'organizationActivityEdit',
+                        'organizationActivityNew', 'organizationActivityDelete', 'activityOrganizationEdit',
                         'personProjectNew', 'personProjectDelete', 'personProjectEdit',
                         'organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit', 'organizationPersonClose'
 

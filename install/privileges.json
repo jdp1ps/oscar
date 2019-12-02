@@ -63,6 +63,14 @@
     "fullcode": "ACTIVITY-INDEX"
   },
 
+  "ACTIVITY-CREATE": {
+    "category_id": 2,
+    "spot": 4,
+    "code": "CREATE",
+    "libelle": "Créer une nouvelle activité de recherche",
+    "fullcode": "ACTIVITY-INDEX"
+  },
+
   "ACTIVITY-EXPORT": {
     "category_id": 2,
     "spot": 4,

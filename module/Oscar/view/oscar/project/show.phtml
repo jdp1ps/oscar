@@ -22,13 +22,16 @@ h2.tv-serie-label { border-bottom: none; }
                 <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
                     <li class="dropdown-header">Administration</li>
                     <li><a href="<?= $this->url('project/edit', ['id'=>$project->getId()]) ?>"><i class="icon-tag"></i> Modifier les informations</a></li>
+                    <?php if( $this->grant()->privilegeDeep(\Oscar\Provider\Privileges::ACTIVITY_CREATE)): ?>
                     <li><a href="<?= $this->url('contract/new', ['projectid' => $project->getId()]) ?>"><i class="icon-cube"></i>Ajouter une activité</a></li>
+                    <?php endif; ?>
                     <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
                         <li>
                             <a href="<?= $this->url('project/delete', ['id' => $project->getId()]) ?>"><i
                                     class="icon-trash"></i> Supprimer
                                 définitivement ce projet</a></li>
                     <?php endif; ?>
+
                     <li><a href="#"><i class="icon-group"></i> Ajouter un membre</a></li>
                     <li class="dropdown-header">Consolidation des données</li>
                     <li><a href="<?= $this->url('project/simplify-partners', ['id'=>$project->getId()]) ?>"><i class="icon-building-filled"></i> Simplifier les partenaires</a></li>

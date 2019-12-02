@@ -780,8 +780,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $activity = $this->getActivityFromRoute();
 
         // Contrôle des droits
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_CHANGE_PROJECT,
-            $activity);
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_CREATE)) {
+            if( !$this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::PROJECT_CREATE) ){
+
+            }
+        }
+        $this->getOscarUserContextService()->checkWithorganizationDeep(Privileges::PROJECT_CREATE);
+
+        die("ICI");
 
         // Création du projet
         $project = new Project();
@@ -1108,18 +1114,41 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Récupération du projet (si précisé)
         $projectId = $this->params()->fromRoute('projectid', null);
 
+
+        $withOrganization = false;
+        $rolesOrganizations = null;
+
         $hidden = $this->getOscarConfigurationService()->getConfiguration('activity_hidden_fields');
 
         // Contrôle des droits
         if ($projectId) {
             $project = $this->getProjectService()->getProject($projectId);
-            $this->getOscarUserContextService()->check(Privileges::PROJECT_EDIT,
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_ACTIVITY_ADD,
                 $project);
         } else {
             $project = null;
-            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT);
         }
 
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CREATE) ){
+            if( !$this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_CREATE) ){
+                throw new UnAuthorizedException(_("Vous n'avez pas les droits pour créer une nouvelle activité"));
+            }
+            $organisationsUser = $this->getOscarUserContextService()->getCurrentUserOrganisationWithPrivilege(Privileges::ACTIVITY_CREATE);
+            if( count( $organisationsUser )){
+                $withOrganization = $organisationsUser;
+                $rolesOrganizations = [];
+                /** @var OrganizationRole $role */
+                foreach ($this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(['principal' => true]) as $role) {
+                    if ($role->isPrincipal()) {
+                        $rolesOrganizations[$role->getId()] = $role;
+                    }
+                }
+                $rolesOrganizations[''] = 'Pas de rôle pour cette organisation';
+                $this->getOscarUserContextService()->getRolesOrganisationLeader();
+            }
+        }
+
+        $errorRoles = "";
         $projectGrant = new Activity();
         $projectGrant->setProject($project);
 
@@ -1128,6 +1157,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $form = new ProjectGrantForm();
         $form->setServiceContainer($this->getServiceContainer());
+        $form->addOrganizationsLeader($withOrganization, $rolesOrganizations);
         $form->setNumbers($numerotationKeys, $numerotationEditable);
         $form->init();
         ///////////////////////////////////////////////////////////////
@@ -1140,11 +1170,39 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var Request $request */
         $request = $this->getRequest();
         if ($request->isPost()) {
+
+            $validOrganizationForm = true;
+
+            if( $withOrganization ){
+                $validOrganizationForm = false;
+                $postedOrganizationsRoles = $this->params()->fromPost('roles');
+                $organizationsDatas = [];
+
+                foreach ($postedOrganizationsRoles as $idOrganization=>$idRole) {
+                    if (!array_key_exists($idOrganization, $withOrganization)) {
+                        return $this->getResponseBadRequest("Erreur de transmission des données pour l'organisation");
+                    }
+                    if ($idRole) {
+                        if( !array_key_exists($idRole, $rolesOrganizations) ){
+                            return $this->getResponseBadRequest("Erreur de transmission des données pour le rôle");
+                        }
+                        $organizationsDatas[] = [
+                            'organization' => $withOrganization[$idOrganization],
+                            'role' => $rolesOrganizations[$idRole]
+                        ];
+                        $validOrganizationForm = true;
+                    }
+                }
+                if(!$validOrganizationForm){
+                    $errorRoles = "Vous devez selectionner un rôle d'organisation";
+                }
+            }
+
             $form->setData($request->getPost());
             $form->getHydrator()->hydrate($request->getPost()->toArray(),
                 $projectGrant);
 
-            if ($form->isValid()) {
+            if ($form->isValid() && $validOrganizationForm) {
                 if ($projectGrant->getId()) {
                     $projectGrant->setDateUpdated(new \DateTime());
                 }
@@ -1152,7 +1210,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 if ($project) {
                     $project->touch();
                 }
+
                 $this->getEntityManager()->flush($projectGrant);
+
+                if( $organizationsDatas ){
+                    foreach ($organizationsDatas as $organizationsData) {
+                        $this->getActivityService()->organizationActivityAdd($organizationsData['organization'], $projectGrant, $organizationsData['role']);
+                    }
+                }
 
                 // Mise à jour de l'index de recherche
                 $this->getActivityService()->searchUpdate($projectGrant);
@@ -1163,6 +1228,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
 
         $view = new ViewModel([
+            'withOrganization' => $withOrganization,
+            'errorRoles' => $errorRoles,
+            'organizationRoles' => $rolesOrganizations,
             'form' => $form,
             'hidden' => $hidden,
             'activity' => $projectGrant,

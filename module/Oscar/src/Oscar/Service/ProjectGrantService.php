@@ -1677,7 +1677,33 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     }
 
 
-    public function organizationActivityAdd( Organization $organization, Activity $activity, OrganizationRole $roleOrganization, $dateStart = null, $dateEnd = null, $buildIndex = false ){
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Affectation ORGANISATION <> ACTIVITÉ
+
+    public function deleteActivityPerson( ActivityPerson $activityPerson ){
+
+    }
+
+    public function organizationActivityEdit(ActivityOrganization $activityorganization, OrganizationRole $roleOrganization, $dateStart = null, $dateEnd = null, $buildIndex = true ){
+        try {
+
+            $activityorganization->setRoleObj($roleOrganization);
+            $this->getEntityManager()->flush($activityorganization);
+
+            if( $buildIndex ){
+                $this->searchUpdate($activityorganization->getActivity());
+                $this->getOrganizationService()->updateIndex($activityorganization->getOrganization());
+            }
+
+        } catch (\Exception $e){
+            throw new OscarException(sprintf(_("Impossible de mettre à jour le rôle de l'organisation %s comme %s dans %s : %s", $activityorganization->getOrganization(), $roleOrganization, $activityorganization->getActivity(), $e->getMessage())));
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Affectation ORGANISATION <> ACTIVITÉ
+
+    public function organizationActivityAdd( Organization $organization, Activity $activity, OrganizationRole $roleOrganization, $dateStart = null, $dateEnd = null, $buildIndex = true ){
         try {
 
             // TODO Date de début/fin
@@ -1700,7 +1726,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         }
     }
 
-    public function organizationActivityRemove( ActivityOrganization $activityOrganization ){
+    public function activityOrganizationRemove(ActivityOrganization $activityOrganization ){
         try {
             $activity = $activityOrganization->getActivity();
             $organization = $activityOrganization->getOrganization();
@@ -1712,6 +1738,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             throw new OscarException(sprintf(_("Impossible de supprimer %s de l'activité %s : %s", $organization, $activity, $e->getMessage())));
         }
     }
+
+
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1743,10 +1771,5 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $qb->setParameter('dateRef', new \DateTime());
 
         return $qb;
-    }
-
-
-    public function deleteActivityPerson( ActivityPerson $activityPerson ){
-
     }
 }

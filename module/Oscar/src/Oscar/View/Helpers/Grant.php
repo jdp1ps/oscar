@@ -75,6 +75,16 @@ class Grant extends AbstractHtmlElement implements UseOscarUserContextService
         return $this->getOscarUserContextService()->hasPrivileges($privilege, $resource);
     }
 
+    public function privilegeDeep( $privilege, $resource = null )
+    {
+        try {
+            $this->getOscarUserContextService()->checkWithorganizationDeep($privilege);
+            return true;
+        } catch (\Exception $e ){
+            return false;
+        }
+    }
+
     public function hasPrivilegeInOrganizations($privilege){
         return $this->getOscarUserContextService()->hasPrivilegeInOrganizations($privilege);
     }
