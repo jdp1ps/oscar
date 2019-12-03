@@ -1039,7 +1039,7 @@ organizationactivity:
             options:
                 route: /delete/:idenroll
                 defaults:
-                    action: organizationActivityDelete
+                    action: activityOrganizationDelete
         edit:
             type: segment
             options:

@@ -1144,7 +1144,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     }
                 }
                 $rolesOrganizations[''] = 'Pas de rôle pour cette organisation';
-                $this->getOscarUserContextService()->getRolesOrganisationLeader();
+            }
+            else {
+                return $this->getResponseInternalError("Données sur les organisations incohérentes");
             }
         }
 
@@ -1201,6 +1203,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $form->setData($request->getPost());
             $form->getHydrator()->hydrate($request->getPost()->toArray(),
                 $projectGrant);
+
 
             if ($form->isValid() && $validOrganizationForm) {
                 if ($projectGrant->getId()) {

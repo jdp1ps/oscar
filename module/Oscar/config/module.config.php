@@ -236,7 +236,7 @@ return array(
                         'personProjectNew', 'personProjectDelete', 'personProjectEdit',
                         'organizationPersonNew', 'organizationPersonDelete', 'organizationPersonEdit',
                         'personActivityNew', 'personActivityDelete', 'personActivityEdit',
-                        'organizationActivityNew', 'organizationActivityDelete', 'activityOrganizationEdit',
+                        'organizationActivityNew', 'activityOrganizationDelete', 'activityOrganizationEdit',
                         'personProjectNew', 'personProjectDelete', 'personProjectEdit',
                         'organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit', 'organizationPersonClose'
 
