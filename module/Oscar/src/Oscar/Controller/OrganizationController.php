@@ -8,6 +8,7 @@
  */
 namespace Oscar\Controller;
 
+use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\Query;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
@@ -85,7 +86,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
     public function indexAction()
     {
 
-
+        $format = $this->getRequestFormat();
         $allow = false;
         $justXHR = true;
 
@@ -130,6 +131,8 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         } catch (BadRequest400Exception $e) {
             $error = _("Expression de recherche incorrecte");
         }
+
+
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             $result = [ 'datas' => []];
@@ -237,6 +240,14 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
      */
     public function searchAction()
     {
+
+        if(
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::PROJECT_ORGANIZATION_MANAGE) &&
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_ORGANIZATION_MANAGE)
+        ){
+            return $this->getResponseUnauthorized("Vous n'avez pas l'authorisation d'accéder à la  liste des organisations");
+        }
+
         $page = (int) $this->params()->fromQuery('page', 1);
         $search = $this->params()->fromQuery('q', '');
         if (strlen($search) < 3) {

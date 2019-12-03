@@ -28,17 +28,17 @@ return array(
                 ////////////////////////////////////////////////////////////////////////
                 // PUBLIC
                 [ 'controller' =>  'Public',
-                    'action' => ['index', 'gitlog'],
+                    'action' => ['index', ],
                     'roles' => [],
                 ],
+
                 [ 'controller' =>  'Public',
-                    'action' => ['documentation', 'parameters'],
+                    'action' => ['documentation', 'parameters', 'gitlog'],
                     'roles' => ['user'],
                 ],
 
                 [ 'controller' =>  'Notification',
-                    'action' => ['indexPerson', 'index', 'test',
-                        'notifyPerson', 'history'],
+                    'action' => ['indexPerson', 'index', 'test', 'notifyPerson', 'history'],
                     'roles' => ['user'],
                 ],
 
@@ -214,11 +214,11 @@ return array(
                 // PERSON
                 ///////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Person',
-                    'action' => ['personnel', 'access', 'delete', 'index', 'show'],
+                    'action' => ['personnel', 'access', 'delete', 'index', 'show', 'search'],
                     'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',
-                    'action' => ['search', 'synchronize', 'boss'],
+                    'action' => ['synchronize', 'boss'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
                 ],
                 [ 'controller' =>   'Person',
@@ -248,13 +248,9 @@ return array(
                 // ORGANIZATION
                 ////////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Organization',
-                    'action' => ['delete', 'index'],
+                    'action' => ['delete', 'index', 'search'],
                     'roles' => ['user']
 
-                ],
-                [ 'controller' =>   'Organization',
-                    'action' => ['search'],
-                    'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_INDEX
                 ],
 
                 [ 'controller' =>   'Organization',

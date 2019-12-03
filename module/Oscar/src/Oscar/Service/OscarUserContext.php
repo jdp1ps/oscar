@@ -1098,7 +1098,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @return bool
      * @throws \Exception
      */
-    public function hasPrivileges($privilege, $ressource = null)
+    public function hasPrivileges(string $privilege, $ressource = null) :bool
     {
         try {
             // On commence par évaluer les privilèges issus du rôle niveau application
@@ -1119,12 +1119,28 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return false;
     }
 
-    public function hasPrivilegeInOrganizations($privilege){
+    /**
+     * @param string $privilege
+     * @return bool
+     */
+    public function hasPrivilegeDeep(string $privilege) :bool
+    {
+        if( !$this->hasPrivileges($privilege) ){
+            return $this->hasPrivilegeInOrganizations($privilege);
+        }
+        return true;
+    }
+
+    /**
+     * @param string $privilege
+     * @return bool
+     */
+    public function hasPrivilegeInOrganizations(string $privilege) :bool
+    {
         $person = $this->getCurrentPerson();
 
-        if( !$person ){
+        if( !$person )
             return false;
-        }
 
         /** @var OrganizationPerson $personOrganization */
         foreach ($person->getOrganizations() as $personOrganization) {

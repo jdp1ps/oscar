@@ -4,7 +4,6 @@
         <i class="icon-cube"></i>
         <?= $this->translate("Activités de recherche dans vos structures") ?> :
     </h1>
-
     <?php else: ?>
     <h1><i class="icon-cube"></i><?= $this->translate("Activités de recherche") ?> <?= ($projectview ? ' (Projets)' : '') ?></h1>
     <?php endif; ?>
@@ -312,10 +311,10 @@
             </p>
             <hr>
             <nav>
-            <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_EDIT)) : ?>
+            <?php if( $this->grant()->privilegeDeep(\Oscar\Provider\Privileges::ACTIVITY_CREATE)) : ?>
                 <a class="btn btn-primary" href="<?= $this->url('contract/new') ?>"><i class="icon-cube"></i> <?= $this->translate("Nouvelle activité") ?></a>
             <?php endif; ?>
-            <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::PROJECT_EDIT)) : ?>
+            <?php if( $this->grant()->privilegeDeep(\Oscar\Provider\Privileges::PROJECT_CREATE)) : ?>
                 <a class="btn btn-primary" href="<?= $this->url('project/new') ?>"><i class="icon-cubes"></i> <?= $this->translate("Nouveau projet") ?></a>
             <?php endif; ?>
             </nav>

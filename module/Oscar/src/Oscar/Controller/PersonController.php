@@ -519,7 +519,15 @@ class PersonController extends AbstractOscarController implements UsePersonServi
      */
     public function searchAction()
     {
+        if(
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_PERSON_MANAGE) &&
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::PROJECT_PERSON_MANAGE) &&
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ORGANIZATION_EDIT)
+        )
+            return $this->getResponseUnauthorized("Vous n'avez pas accès à la liste des personnes");
+
         $search = $this->params()->fromQuery('q', '');
+
         if (strlen($search) < 2) {
             return $this->getResponseBadRequest("Not enough chars (2 required");
         }

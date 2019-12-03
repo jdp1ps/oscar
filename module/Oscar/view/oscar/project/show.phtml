@@ -94,7 +94,7 @@ h2.tv-serie-label { border-bottom: none; }
     <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_SHOW, $project)): ?>
     <section id="activities" class="has-btn">
 
-        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ACTIVITY_ADD, $project)): ?>
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ACTIVITY_ADD, $project) && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CREATE)): ?>
         <div class="btn-area">
             <a href="<?= $this->url('contract/new', ['projectid' => $project->getId()]) ?>" class="smoke">
                 <i class="icon-cube"></i>

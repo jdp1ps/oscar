@@ -61,6 +61,22 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
     use UseOscarConfigurationServiceTrait, UseOscarUserContextServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait, UseActivityLogServiceTrait;
 
 
+    /**
+     * Retourne le format de la requête sous la forme d'une chaîne.
+     * NB:  Pour le moment, sert uniquement à detecter le format JSON.
+     *
+     * @return string
+     */
+    public function getRequestFormat() :string
+    {
+        if( $this->getRequest()->isXmlHttpRequest() )
+            $format = 'json';
+        else
+            $format = $this->params()->fromQuery('format', '');
+
+        return $format;
+    }
+
     public function oscarRest( $default, $get, $post=null, $delete=null)
     {
         $format = $this->params()->fromQuery('format', 'html');
