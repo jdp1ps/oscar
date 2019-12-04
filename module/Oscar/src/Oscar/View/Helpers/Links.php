@@ -269,8 +269,8 @@ class Links extends AbstractHtmlElement implements ServiceLocatorAwareInterface
             return '<span class="invalid-data">Données invalide</span>';
         }
         $css = 'cartouche-default';
-        if( $affectation->idLeader() ){
-            $css .= ' secondary1';
+        if( $affectation->isPrincipal() ){
+            $css .= ' primary';
         }
         return sprintf('<span class="cartouche organization %s">%s<span class="addon">%s</span></span>',
             $css,
