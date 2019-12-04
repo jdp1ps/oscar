@@ -559,6 +559,11 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     private function deleteEnroll($type)
     {
         $idEnroll = $this->params()->fromRoute('idenroll');
+
+        if( !$idEnroll ){
+            throw new OscarException("IDENROLL manquant");
+        }
+
         $enroll = $this->getEntityManager()->getRepository($type)->find($idEnroll);
 
         switch ($type) {
@@ -638,21 +643,29 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         }
     }
 
-    private function getProjectEntity()
+    private function getProjectEntity() :Project
     {
         $idProject = $this->params()->fromRoute('idenroller');
         $project = $this->getProjectService()->getProject($idProject);
         return $project;
     }
 
-    private function getActivityEntity()
+    private function getActivityEntity() :Activity
     {
         $id = $this->params()->fromRoute('idenroller');
         $enroller = $this->getProjectGrantService()->getGrant($id);
         return $enroller;
     }
 
-    private function getOrganizationRoleEntity(){
+    private function getOrganizationEntity() :Organization
+    {
+        $id =  $this->params()->fromRoute('idenroller');
+        $enrolled = $this->getOrganizationService()->getOrganization($id);
+        return $enrolled;
+    }
+
+    private function getOrganizationRoleEntity() :OrganizationRole
+    {
         $id = $this->params()->fromPost('role');
         $role = $this->getProjectGrantService()->getRoleOrganizationById($id);
         return $role;
@@ -716,7 +729,10 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     public function organizationPersonDeleteAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $this->getOrganizationEntity());
+        /** @var OrganizationPerson $organizationPerson */
+        $organizationPerson = $this->getEntityManager()->getRepository(OrganizationPerson::class)->find($this->params()->fromRoute('idenroll'));
+
+        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $organizationPerson->getOrganization());
         return $this->deleteEnroll(OrganizationPerson::class);
     }
 
