@@ -88,7 +88,7 @@ apt-get install \
     php7.3-intl \
     php7.3-ldap \
     php7.3-mbstring \
-    php7.3-mcrypt \
+    php-mcrypt \
     php7.3-pgsql \
     php7.3-xml \
     php7.3-zip
@@ -301,7 +301,22 @@ php public/index.php oscar patch checkPrivilegesJSON
 
 Lors de l'étape de configuration de la base de donnée, vous avez créé un fichier `config/autoload/local.php`.
 
+
 Ce fichier contient les paramètres métier de l'application. Ces paramètres sont détaillés dans le fichier [Configuration métier](./configuration.md)
+
+Créez également le fichier `config/autoload/oscar-editable.yml` :
+
+```bash
+touch config/autoload/oscar-editable.yml
+```
+
+Puis donner les droits d'accès en écriture :
+
+```bash
+chmod 777 config/autoload/oscar-editable.yml
+```
+
+Ce fichier est utilisé pour les paramètres administrable depuis l'interface (Administration > Options). 
 
 
 ### Tester la configuration
