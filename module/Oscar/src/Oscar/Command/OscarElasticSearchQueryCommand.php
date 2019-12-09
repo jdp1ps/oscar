@@ -106,6 +106,8 @@ class OscarElasticSearchQueryCommand extends OscarCommandAbstract
             ]
         ];
 
+        print_r($params);
+
         $response = $this->getClient()->search($params);
         return $response;
     }
