@@ -63,31 +63,6 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         return $this->elasticSearchClient;
     }
 
-    public function search($search)
-    {
-        $params = [
-            'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'body' => [
-                'size' => 10000,
-                'query' => [
-                    'query_string' => [
-                        'query' => $search
-                    ]
-                ]
-            ]
-        ];
-
-        $response = $this->getClient()->search($params);
-        $ids = [];
-        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
-            foreach ($response['hits']['hits'] as $hit) {
-                $ids[] = $hit["_id"];
-            }
-        }
-        return $ids;
-    }
-
     public function addActivity(Activity $activity)
     {
         $params = ['body' => []];
@@ -187,6 +162,31 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         ];
     }
 
+    public function search($search)
+    {
+        $params = [
+            'index' => $this->getIndex(),
+            'type' => $this->getType(),
+            'body' => [
+                'size' => 10000,
+                'query' => [
+                    'query_string' => [
+                        'query' => sprintf('%s OR  %s*', $search, $search)
+                    ]
+                ]
+            ]
+        ];
+
+        $response = $this->getClient()->search($params);
+        $ids = [];
+        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
+            foreach ($response['hits']['hits'] as $hit) {
+                $ids[] = $hit["_id"];
+            }
+        }
+        return $ids;
+    }
+
     public function searchProject($what)
     {
         $params = [
@@ -196,7 +196,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
                 'size' => 10000,
                 'query' => [
                     'query_string' => [
-                        'query' => $what
+                        'query' => sprintf('%s OR  %s*', $what, $what)
                     ]
                 ]
             ]

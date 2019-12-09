@@ -581,7 +581,6 @@ class ProjectController extends AbstractOscarController
             }
         }
 
-
         $search = $this->params()->fromQuery('q', '');
         if (strlen($search) < 2) {
             return $this->getResponseBadRequest("Not enough chars (4 required");
