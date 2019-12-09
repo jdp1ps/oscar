@@ -1,6 +1,25 @@
 <style>
     <?php include __DIR__.'/common.css'; ?>
 </style>
+<?php
+
+$duration = function($value) {
+    return $this->duration($value);
+};
+
+
+
+$durationRounded = function( $duration ) {
+    $roundStep = 5;
+    $heures = floor($duration);
+    $minutes = round(($duration - $heures)*60 / $roundStep)*$roundStep;
+    if( $minutes < 10 ){
+        $minutes = '0'.$minutes;
+    }
+    return sprintf('%s:%s', $heures, $minutes);
+};
+?>
+
 <table>
     <thead>
     <tr>
@@ -116,9 +135,9 @@
                         $value = $value == 0 ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?> research"><?= $this->duration($value) ?></td>
+                    <td class="<?= $class ?> research"><?= $duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal research"><?= $this->duration($dataGroup['total']) ?></td>
+                <td class="soustotal research"><?= $durationRounded($dataGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -140,9 +159,9 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?> research"><?= $this->duration($value) ?></td>
+                    <td class="<?= $class ?> research"><?= $duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal research"><?= $this->duration($dataGroup['total']) ?></td>
+                <td class="soustotal research"><?= $durationRounded($dataGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -163,9 +182,9 @@
                 $value = $value == '0' ? '.' : $value;
             }
             ?>
-            <td class="<?= $class ?> research"><?= $this->duration($value) ?></td>
+            <td class="<?= $class ?> research"><?= $durationRounded($value) ?></td>
         <?php endforeach; ?>
-        <td class="soustotal research"><?= $this->duration($totalGroup['research']['total']) ?></td>
+        <td class="soustotal research"><?= $durationRounded($totalGroup['research']['total']) ?></td>
     </tr>
 
     <tr class="group">
@@ -189,9 +208,9 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $this->duration($value) ?></td>
+                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $durationRounded($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= $this->duration($dataOtherGroup['total']) ?></td>
+                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= $durationRounded($dataOtherGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -213,9 +232,9 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $this->duration($value) ?></td>
+                    <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $durationRounded($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal" style="border-bottom: solid black 2px"><?= $this->duration($active['total']) ?></td>
+                <td class="soustotal" style="border-bottom: solid black 2px"><?= $durationRounded($active['total']) ?></td>
             </tr>
     <tr class="group">
         <th class="" colspan="<?= $width ?>">Inactivité</th>
@@ -237,9 +256,9 @@
                         $value = $value == '0' ? '.' : $value;
                     }
                     ?>
-                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $this->duration($value) ?></td>
+                    <td class="<?= $class ?> <?= $dataOtherGroup['group'] ?>"><?= $duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= $this->duration($dataOtherGroup['total']) ?></td>
+                <td class="soustotal <?= $dataOtherGroup['group'] ?>"><?= $durationRounded($dataOtherGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -258,9 +277,9 @@
                 $value = $value == '0' ? '.' : $value;
             }
             ?>
-            <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $this->duration($value) ?></td>
+            <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $durationRounded($value) ?></td>
         <?php endforeach; ?>
-        <td class="total" style="border-bottom: solid black 2px"><?= $this->duration($total) ?></td>
+        <td class="total" style="border-bottom: solid black 2px"><?= $durationRounded($total) ?></td>
     </tr>
 
     </tbody>

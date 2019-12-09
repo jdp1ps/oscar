@@ -74,10 +74,11 @@ class PersonElasticSearch implements PersonSearchStrategy
                 'size' => $limit,
                 'query' => [
                     'multi_match' => [
-                        'fields' => ['fullname^3','lastname^5', 'firstname^2', 'email', 'affectation', 'location', 'organizations', 'activities', 'connectors'],
                         'query' => $search,
-                        'max_expansions' => 20,
-                        'fuzziness' => 'AUTO'
+                        'type' => 'phrase_prefix',
+                        'fields' => ['fullname^3','lastname^5', 'firstname^2', 'email', 'affectation^3', 'location^3', 'organizations', 'activities', 'connectors'],
+                       /* 'max_expansions' => 20,*/
+                        /*'fuzziness' => 1*/
                     ]
                 ]
             ]

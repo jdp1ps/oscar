@@ -107,6 +107,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         if( $this->getOptionPurge() ){
             $exist = $personRepository->getUidsConnector($this->getName());
         }
+        echo count($exist); die();
 
         $repport = new ConnectorRepport();
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
@@ -224,10 +225,12 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                         }
 
                         if( count($activeIn) == 0 ){
+                            echo "Suppression de $uid\n";
                             $personRepository->removePerson($personOscarToDelete);
                             $repport->addremoved("Suppression de $personOscarToDelete");
                             $personRepository->flush($personOscarToDelete);
                         } else {
+                            echo "$uid non supprimé\n";
                             $repport->addwarning("$personOscarToDelete n'a pas été supprimé car il est actif dans : " . implode(', ', $activeIn));
                         }
 
