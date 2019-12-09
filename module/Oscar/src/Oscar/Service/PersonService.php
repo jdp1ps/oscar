@@ -999,7 +999,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     $ids = $this->getSearchEngineStrategy()->search($search);
 
                     if( array_key_exists('ids', $filters) ){
-                        array_intersect($filters['ids'], $ids);
+                        $filters['ids'] = array_intersect($filters['ids'], $ids);
                     } else {
                         $filters['ids'] = $ids;
                     }
