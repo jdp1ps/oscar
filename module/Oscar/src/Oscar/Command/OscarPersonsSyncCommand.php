@@ -54,6 +54,7 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
 
         $connectorName = $input->getArgument('connectorname');
 
+
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
 

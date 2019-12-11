@@ -1123,8 +1123,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Contrôle des droits
         if ($projectId) {
             $project = $this->getProjectService()->getProject($projectId);
-            $this->getOscarUserContextService()->check(Privileges::PROJECT_ACTIVITY_ADD,
-                $project);
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_ACTIVITY_ADD, $project);
         } else {
             $project = null;
         }
