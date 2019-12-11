@@ -24,8 +24,23 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     private $_cacheSelectebleRolesOrganisation;
 
 
+    public function removePersonById(int $personId){
+        $sql = "DELETE FROM person WHERE id = :id";
+        $params = array('id'=>$personId);
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        return $stmt->execute($params);
+    }
+
+
     public function removePerson(Person $person){
         $this->getEntityManager()->remove($person);
+    }
+
+    public function removePersons( array $ids ){
+        return $this->createQueryBuilder('p')->delete()->where('p.id IN(:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->execute();
     }
 
     public function getPersonsByIds( array $ids ){
@@ -38,17 +53,18 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 
     public function getUidsConnector($connector){
         $qb = $this->getEntityManager()->createQueryBuilder();
+        $search = sprintf('s:%s:"%s";s:', strlen($connector), $connector);
+
         $qb->select('p.connectors')
             ->from(Person::class, 'p')
             ->where('p.connectors LIKE :search')
-            ->setParameter('search', '%"' . $connector . '";s:%');
+            ->setParameter('search', "%$search%");
 
         $uids = [];
         foreach ($qb->getQuery()->getArrayResult() as $a){
 
             $uids[] = $a['connectors'][$connector];
         }
-
         return $uids;
     }
 
