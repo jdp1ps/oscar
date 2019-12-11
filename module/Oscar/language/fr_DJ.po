@@ -370,6 +370,9 @@ msgstr "Accord"
 msgid "Nouvelle activité de recherche"
 msgstr "Nouvel accord"
 
+msgid "Nouvelle activité"
+msgstr "Nouvel accord"
+
 #: ../view/oscar/project-grant/form.phtml:25
 msgid "Informations"
 msgstr ""

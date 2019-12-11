@@ -1057,7 +1057,8 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                     $this->getDefaultContext(), $person->getId(),
                     LogActivity::LEVEL_INCHARGE
                 );
-                $this->getPersonService()->getSearchEngineStrategy()->update($person);
+                //$this->getPersonService()->getSearchEngineStrategy()->update($person);
+                $this->getPersonService()->jobIndexPerson($person);
                 $this->flashMessenger()->addSuccessMessage(_('Données sauvegardées.'));
                 $this->redirect()->toRoute('person/show', ['id'=>$person->getId()]);
             }

@@ -1174,6 +1174,29 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             ->getResult();
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// JOBS
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public function jobIndexPerson(Person $person){
+        $client = new \GearmanClient();
+        $client->addServer();
+        $client->doBackground('indexPerson', json_encode(['id' => $person->getId()]), sprintf('personindex-%s', $person->getId()));
+    }
+
+    public function jobNotificationActivityPerson(Activity $activity, Person $person){
+        $client = new \GearmanClient();
+        $client->addServer();
+        $client->doBackground('notificationActivityPerson', json_encode([
+            'activityid' => $activity->getId(),
+            'personid' => $person->getId(),
+        ]),
+            sprintf('notificationactivity-%s-%s', $activity->getId(), $person->getId())
+        );
+    }
 
 
     /**
@@ -1297,7 +1320,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     if( $oa->isPrincipal() ){
                         $this->getLoggerService()->info("Activités, rôle principal");
                         $this->getEntityManager()->refresh($oa->getActivity());
-                        $this->getNotificationService()->generateNotificationsForActivity($oa->getActivity(), $person);
+                        $this->jobNotificationActivityPerson($oa->getActivity(), $person);
                     }
                 }
                 foreach ($organization->getProjects() as $op){
@@ -1306,13 +1329,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                         foreach ($op->getProject()->getActivities() as $a){
                             $this->getLoggerService()->info("Project > Activités, rôle principal");
                             $this->getEntityManager()->refresh($a);
-                            $this->getNotificationService()->generateNotificationsForActivity($a, $person);
+                            $this->jobNotificationActivityPerson($a, $person);
+//                            $this->getNotificationService()->generateNotificationsForActivity($a, $person);
                         }
                     }
                 }
             }
         }
     }
+
+
 
     public function personOrganizationRemove( OrganizationPerson $organizationPerson ){
         if( $organizationPerson->isPrincipal() ){

@@ -263,7 +263,7 @@ class NotificationService implements UseServiceContainer
         $activityId = $activity->getId();
 
         if (!array_key_exists($activityId, $this->_object_privilege_persons)) {
-            $_object_privilege_persons[$activityId] = [];
+            $this->_object_privilege_persons[$activityId] = [];
         }
 
         if (!array_key_exists($privilege, $this->_object_privilege_persons[$activityId])) {
@@ -276,10 +276,10 @@ class NotificationService implements UseServiceContainer
             /** @var Person[] $persons Liste des personnes impliquées ayant un accès aux Jalons */
             $persons = $personsService->getAllPersonsWithPrivilegeInActivity($privilege, $activity);
 
-            $_object_privilege_persons[$activityId][$privilege] = $persons;
+            $this->_object_privilege_persons[$activityId][$privilege] = $persons;
         }
 
-        return $_object_privilege_persons[$activityId][$privilege];
+        return $this->_object_privilege_persons[$activityId][$privilege];
     }
 
 

@@ -88,7 +88,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
 
 
-        $modulesRequires = ['bz2', 'curl', 'fileinfo', 'gd', 'iconv', 'json', 'ldap', 'mbstring', 'openssl', 'pdo_pgsql', 'posix', 'Reflection', 'session', 'xml', 'zip'];
+        $modulesRequires = ['bz2', 'curl', 'fileinfo', 'gd', 'gearman', 'iconv', 'json', 'ldap', 'mbstring', 'openssl', 'pdo_pgsql', 'posix', 'Reflection', 'session', 'xml', 'zip'];
         foreach ($modulesRequires as $moduleName) {
             $row[] = $this->checkModule($moduleName, $io);
         }

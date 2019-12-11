@@ -76,7 +76,7 @@ class UserUIHelper extends AbstractHtmlElement implements ServiceLocatorAwareInt
             ['projectid' => $project->getId()]) ?>" class="item">
             <i class="icon-cube"></i>
                 <span class="item-label">
-                    Nouvelle activité de recherche
+                    <?= _('Nouvelle activité') ?>
                 </span>
         </a>
         <?php endif; ?>
