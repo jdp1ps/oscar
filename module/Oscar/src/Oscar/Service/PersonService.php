@@ -1345,8 +1345,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             /** @var OrganizationService $os */
             $os = $this->getOrganizationService();
 
+
+
             foreach ( $os->getOrganizationActivititiesPrincipalActive($organizationPerson->getOrganization()) as $activity ){
-                $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $organizationPerson->getPerson());
+                // $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $organizationPerson->getPerson());
+                $this->getNotificationService()->jobNotificationsPersonActivity($activity, $organizationPerson->getPerson());
             }
         }
         $this->getEntityManager()->remove($organizationPerson);

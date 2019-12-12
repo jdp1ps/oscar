@@ -47,7 +47,7 @@ class SpentTypeGroupRepository extends EntityRepository{
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function count(){
+    public function count(array $criteria){
         $qb = $this->createQueryBuilder('t')
             ->select('count(t.id)');
 

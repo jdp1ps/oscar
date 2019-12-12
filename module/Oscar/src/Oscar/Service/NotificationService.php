@@ -468,6 +468,24 @@ class NotificationService implements UseServiceContainer
 
     }
 
+    /**
+     * Supprime les notification d'une personne dans une activité
+     *
+     * @param Activity $activity
+     * @param Person $person
+     */
+    public function jobNotificationsPersonActivity(Activity $activity, Person $person){
+        $client = new \GearmanClient();
+        $client->addServer();
+
+        $client->doBackground('purgeNotificationsPersonActivity', json_encode([
+            'activityid' => $activity->getId(),
+            'personid' => $person->getId(),
+
+        ]), 'purgeNotificationsPersonActivity-'.$activity->getId().'-'.$person->getId());
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// PROJET

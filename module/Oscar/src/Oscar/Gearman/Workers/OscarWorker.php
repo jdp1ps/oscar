@@ -15,6 +15,7 @@ $worker = new GearmanWorker();
 $worker->addServer();
 $worker->addFunction('indexPerson', 'oscarJob_indexPerson');
 $worker->addFunction('notificationActivityPerson', 'oscarJob_notificationActivityPerson');
+$worker->addFunction('purgeNotificationsPersonActivity', 'oscarJob_purgeNotificationsPersonActivity');
 
 echo "OSCAR WORKER STARTED " . \Oscar\OscarVersion::getBuild() ."\n";
 
@@ -70,6 +71,38 @@ function oscarJob_notificationActivityPerson(GearmanJob $job){
 
         echo date('y-m-d H:i:s')." Notification Activity Person [$activityId, $personId] $activity >  $person\n";
         $notificationService->generateNotificationsForActivity($activity, $person);
+
+    } catch (Exception $e) {
+        echo "[ERR] " . $e->getMessage() ."\n";
+    }
+}
+
+
+function oscarJob_purgeNotificationsPersonActivity(GearmanJob $job){
+    $params = json_decode($job->workload());
+
+    try {
+        if( !property_exists($params, 'personid') || !property_exists($params, 'activityid') ){
+            throw new Exception("Paramètres manquant ID");
+        }
+
+        /** @var \Oscar\Service\ProjectGrantService $projectGrantService */
+        $projectGrantService = getServiceManager()->get(\Oscar\Service\ProjectGrantService::class);
+
+        /** @var \Oscar\Service\PersonService $personService */
+        $personService = getServiceManager()->get(\Oscar\Service\PersonService::class);
+
+        /** @var \Oscar\Service\NotificationService $notificationService */
+        $notificationService = getServiceManager()->get(\Oscar\Service\NotificationService::class);
+
+        $personId = $params->personid;
+        $person = $personService->getPerson($personId);
+
+        $activityId = $params->activityid;
+        $activity = $projectGrantService->getActivityById($activityId);
+
+        echo date('y-m-d H:i:s')." PURGE Notification Activity Person [$activityId, $personId] $activity >  $person\n";
+        $notificationService->purgeNotificationsPersonActivity($activity, $person);
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() ."\n";
