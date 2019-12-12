@@ -47,7 +47,7 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * @return Person
      */
     public function getCurrentPerson(){
-        return $this->getOscarUserContextServiceService()->getCurrentPerson();
+        return $this->getOscarUserContextService()->getCurrentPerson();
     }
 
     /**
