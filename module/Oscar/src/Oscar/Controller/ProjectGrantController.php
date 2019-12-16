@@ -724,7 +724,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $form->setData($request->getPost());
             if ($form->isValid()) {
                 $this->getEntityManager()->flush($projectGrant);
-                $this->getActivityService()->searchUpdate($projectGrant);
+                $this->getActivityService()->jobSearchUpdate($projectGrant);
                 $this->redirect()->toRoute(
                     'contract/show',
                     ['id' => $projectGrant->getId()]
@@ -1080,7 +1080,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
 
                 // Mise à jour de l'index de recherche
-                $this->getActivityService()->searchUpdate($projectGrant);
+                $this->getActivityService()->jobSearchUpdate($projectGrant);
                 $this->getActivityLogService()->addUserInfo("a créé l'activité ",'Activity', $projectGrant->getId());
 
 
@@ -1222,7 +1222,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
 
                 // Mise à jour de l'index de recherche
-                $this->getActivityService()->searchUpdate($projectGrant);
+                $this->getActivityService()->jobSearchUpdate($projectGrant);
 
                 $this->redirect()->toRoute('contract/show',
                     ['id' => $projectGrant->getId()]);

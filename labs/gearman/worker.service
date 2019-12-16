@@ -1,0 +1,8 @@
+[Unit]
+Description=OSCAR Worker
+After=gearmand.service
+[Service]
+Restart=on-failure
+Type=simple
+User=bouvry
+ExecStart=/usr/bin/php  /home/bouvry/Projects/Unicaen/oscar/labs/gearman/worker.php

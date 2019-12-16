@@ -293,7 +293,7 @@ class ProjectService implements UseServiceContainer
         $activityService = $this->getProjectGrantService();
 
         foreach($project->getActivities() as $activity ){
-            $activityService->searchUpdate($activity);
+            $activityService->jobSearchUpdate($activity);
         }
     }
 

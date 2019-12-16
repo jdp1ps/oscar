@@ -219,7 +219,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
                 case ActivityPerson::class :
                     $urlEnrollerShow = 'contract/show';
-                    $this->getNotificationService()->generateNotificationsForActivity($enroll->getActivity(), $enroll->getPerson());
+                    $this->getNotificationService()->jobNotificationsPersonActivity($enroll->getActivity(), $enroll->getPerson());
                     break;
 
                 case ActivityOrganization::class :
@@ -636,7 +636,8 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             if( $enroller->getProject() ){
                 $this->getProjectService()->searchUpdate($enroller->getProject());
             } else {
-                $this->getProjectGrantService()->searchUpdate($enroller);
+                $this->getProjectGrantService()->jobSearchUpdate($enroller);
+//                $this->getProjectGrantService()->searchUpdate($enroller);
             }
         } else {
             $this->getLoggerService()->error(sprintf("Impossible d'actualiser %s avec le context '%s", $enroller, $context));
@@ -683,7 +684,11 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     public function personProjectDeleteAction()
     {
         try {
-            $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $this->getProjectEntity());
+            $rolledId = $this->params()->fromRoute('idenroll');
+            /** @var ProjectMember $rolled */
+            $rolled = $this->getEntityManager()->getRepository(ProjectMember::class)->find($rolledId);
+            $project = $rolled->getProject();
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $project);
             return $this->deleteEnroll(ProjectMember::class);
         } catch (\Exception $e) {
             return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne : " . $e->getMessage());

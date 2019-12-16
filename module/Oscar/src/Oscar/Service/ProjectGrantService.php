@@ -829,6 +829,17 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $this->getSearchEngineStrategy()->searchUpdate($activity);
     }
 
+    public function jobSearchUpdate( Activity $activity )
+    {
+        $client = new \GearmanClient();
+        $client->addServer();
+        $client->doBackground('activitySearchUpdate', json_encode([
+            'activityid' => $activity->getId()
+        ]),
+            sprintf('activitysearchupdate-%s', $activity->getId())
+        );
+    }
+
     public function searchIndex_reset()
     {
         $this->getSearchEngineStrategy()->resetIndex();
@@ -1691,7 +1702,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $this->getEntityManager()->flush($activityorganization);
 
             if( $buildIndex ){
-                $this->searchUpdate($activityorganization->getActivity());
+                $this->jobSearchUpdate($activityorganization->getActivity());
                 $this->getOrganizationService()->updateIndex($activityorganization->getOrganization());
             }
 
@@ -1716,7 +1727,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $this->getEntityManager()->flush($organizationActivity);
 
             if( $buildIndex ){
-                $this->searchUpdate($activity);
+                $this->jobSearchUpdate($activity);
                 $this->getOrganizationService()->updateIndex($organization);
             }
 
@@ -1732,7 +1743,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $organization = $activityOrganization->getOrganization();
             $this->getEntityManager()->remove($activityOrganization);
             $this->getEntityManager()->flush($activityOrganization);
-            $this->searchUpdate($activity);
+            $this->jobSearchUpdate($activity);
             $this->getOrganizationService()->updateIndex($organization);
         } catch (\Exception $e) {
             throw new OscarException(sprintf(_("Impossible de supprimer %s de l'activité %s : %s", $organization, $activity, $e->getMessage())));

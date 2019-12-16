@@ -478,11 +478,11 @@ class NotificationService implements UseServiceContainer
         $client = new \GearmanClient();
         $client->addServer();
 
-        $client->doBackground('purgeNotificationsPersonActivity', json_encode([
+        $client->doBackground('notificationActivityPerson', json_encode([
             'activityid' => $activity->getId(),
             'personid' => $person->getId(),
 
-        ]), 'purgeNotificationsPersonActivity-'.$activity->getId().'-'.$person->getId());
+        ]), 'notificationActivityPerson-'.$activity->getId().'-'.$person->getId());
     }
 
 

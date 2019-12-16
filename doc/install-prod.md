@@ -85,6 +85,7 @@ apt-get install \
     php7.3-curl \
     php7.3-dom \
     php7.3-gd \
+    php7.3-gearman \
     php7.3-intl \
     php7.3-ldap \
     php7.3-mbstring \
@@ -193,6 +194,59 @@ composer install --prefer-dist
 ```
 
 Composer se chargera d'installer les dépendances PHP tel de définies dans le fichier `composer.json`.
+
+
+## Gestionnaire de tâche (via Gearman)
+
+Gearman est un *daemon* qui se chargera de gérer les tâches Oscar.
+
+
+```bash
+# Installation de Gearman
+apt install gearman-job-server
+
+# Status du deamon
+service gearman-job-server status
+
+# Surveiller les tâches en attentes
+watch "gearadmin --status | sort -n | column -t"
+```
+
+Ensuite il faut configurer le *Worker Oscar* qui se chargera de réaliser les tâches disponibles sur le serveur : 
+
+```bash
+# on copie le gabarit de configuration du service
+cp install/oscarworker.dist.service config/oscarworker.service
+
+# On édite le service
+nano config/oscarworker.service
+```
+
+> Dans le fichier `config/oscarworker.service`, vous devez simplement indiquer le chemin complet vers le fichier PHP **bin/oscarworker.php**.
+
+On va ensuite ajouter le *worker oscar* au service du système.
+
+```bash
+# Passage en root
+sudo su
+
+# On va dans le dossier des service
+cd /etc/systemd/system
+
+# On ajoute la configuration du service dans SYSTEMD avec un lien symbolique
+ln -S /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
+
+# On lance le service
+service oscarworker start
+
+# On regarde si tout est OK
+journalctl -u oscarworker.service -f
+
+# On active le service
+service enable oscarworker
+```
+
+
 
 
 ## Installation de la base de données

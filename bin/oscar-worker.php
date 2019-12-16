@@ -1,23 +1,28 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jacksay
- * Date: 11/12/19
- * Time: 15:31
- */
+// Chemin "simplifié"
+chdir(dirname(__DIR__));
 
-require __DIR__.'/../../../../../../vendor/autoload.php';
+// Autoload & Co
+require __DIR__.'/../vendor/autoload.php';
 
-$conf = require __DIR__.'/../../../../../../config/application.config.php';
-$app = Zend\Mvc\Application::init($conf);
+// Configuration
+$conf = require 'config/application.config.php';
 
+// App
+$app = Zend\Mvc\Application::init(require 'config/application.config.php');
+
+// Worker
 $worker = new GearmanWorker();
 $worker->addServer();
 $worker->addFunction('indexPerson', 'oscarJob_indexPerson');
+$worker->addFunction('personSearchUpdate', 'oscarJob_indexPerson');
+$worker->addFunction('indexActivity', 'oscarJob_indexActivity');
+$worker->addFunction('activitySearchUpdate', 'oscarJob_indexActivity');
 $worker->addFunction('notificationActivityPerson', 'oscarJob_notificationActivityPerson');
 $worker->addFunction('purgeNotificationsPersonActivity', 'oscarJob_purgeNotificationsPersonActivity');
 
-echo "OSCAR WORKER STARTED " . \Oscar\OscarVersion::getBuild() ."\n";
+// Affiche dans le journalctl -u oscarworker.service -f
+echo "OSCAR WORKER STARTED\n";
 
 while($worker->work());
 
@@ -26,17 +31,37 @@ function getServiceManager(){
     return $app->getServiceManager();
 }
 
+function oscarJob_indexActivity(GearmanJob $job){
+    $params = json_decode($job->workload());
+
+    try {
+        if( !property_exists($params, 'activityid') ){
+            throw new Exception("Paramètres manquant ID");
+        }
+        /** @var \Oscar\Service\ProjectGrantService $activityService */
+        $activityService = getServiceManager()->get(\Oscar\Service\ProjectGrantService::class);
+
+        $activityid = $params->activityid;
+        $activity = $activityService->getActivityById($activityid);
+        echo date('y-m-d H:i:s')." Rebuid Index [$activityid] $activity\n";
+        $activityService->searchUpdate($activity);
+
+    } catch (Exception $e) {
+        echo "[ERR] " . $e->getMessage() ."\n";
+    }
+}
+
 function oscarJob_indexPerson(GearmanJob $job){
     $params = json_decode($job->workload());
 
     try {
-        if( !property_exists($params, 'id') ){
+        if( !property_exists($params, 'personid') ){
             throw new Exception("Paramètres manquant ID");
         }
         /** @var \Oscar\Service\PersonService $personService */
         $personService = getServiceManager()->get(\Oscar\Service\PersonService::class);
 
-        $personId = $params->id;
+        $personId = $params->personid;
         $person = $personService->getPerson($personId);
         echo date('y-m-d H:i:s')." Rebuid Index [$personId] $person\n";
         $personService->getSearchEngineStrategy()->update($person);

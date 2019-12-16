@@ -16,6 +16,8 @@ Cette mise à niveau permet de bénéficier des dernières mise à jour de sécu
 
  - **Nouveau projet / nouvelle activité** : Le privilège permettant de créer des activités/projets été initialement réservé au niveau application (et donc effectif uniquement pour les rôles déterminé au sein de l'application). Ce privilège à maintenant été étendu aux rôles liès aux organisations afin de permettre une meilleur décentralisation de l'ajout de projet/activité. Pour les droits obtenu via l'organisation, un zone de saisie supplémentaire sera visible dans les formulaires pour y renseigner le rôle de l'organisation de rattachement (la liste des rôles sera limitée aux rôles donnant un accès NB: c'est cette affectation qui par la suite donnera accès à l'activié/projet créé).
  
+ - **Gearman** Utilisation d'un serveur de gestion des tâches (**Gearman**) afin d'optimiser certaines opérations : Génération des notifications, planification de la reconstruction/optimisation des indices de recherche.
+ 
 ## Correctifs
 
  -

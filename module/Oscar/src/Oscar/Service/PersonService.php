@@ -125,6 +125,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $this->getSearchEngineStrategy()->update($person);
     }
 
+    public function jobSearchUpdate( Person $person )
+    {
+        $client = new \GearmanClient();
+        $client->addServer();
+        $client->doBackground('personSearchUpdate', json_encode([
+            'personid' => $person->getId()
+        ]),
+            sprintf('personsearchupdate-%s', $person->getId())
+        );
+    }
+
     /**
      * Remise à zéro de l'index
      */
@@ -1184,7 +1195,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     public function jobIndexPerson(Person $person){
         $client = new \GearmanClient();
         $client->addServer();
-        $client->doBackground('indexPerson', json_encode(['id' => $person->getId()]), sprintf('personindex-%s', $person->getId()));
+        $client->doBackground('indexPerson', json_encode(['personid' => $person->getId()]), sprintf('personsearchupdate-%s', $person->getId()));
     }
 
     public function jobNotificationActivityPerson(Activity $activity, Person $person){
@@ -1422,8 +1433,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             // Si le rôle est principal, on actualise les notifications de la personne
             if( $role->isPrincipal() ){
                 $this->getEntityManager()->refresh($activity);
-                $this->getNotificationService()->generateNotificationsForActivity($activity, $person);
+                $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
             }
+
+            $this->getProjectGrantService()->jobSearchUpdate($activity);
         }
     }
 
@@ -1445,8 +1458,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         if( $updateNotification ){
             $this->getEntityManager()->refresh($activity);
             $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
-            $this->getNotificationService()->generateNotificationsForActivity($activity, $person);
+            $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
         }
+
+        $this->jobSearchUpdate($person);
     }
 
     public function personActivityChangeRole( ActivityPerson $activityPerson, Role $newRole )
@@ -1466,8 +1481,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         if( $updateNotification ){
             $this->getEntityManager()->refresh($activity);
             $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
-            $this->getNotificationService()->generateNotificationsForActivity($activity, $person);
+            $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
         }
+
+        $this->jobSearchUpdate($person);
     }
 
     // PROJECT
@@ -1491,9 +1508,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $this->getEntityManager()->refresh($project);
                 foreach ($project->getActivities() as $activity) {
                     $this->getEntityManager()->refresh($activity);
-                    $this->getNotificationService()->generateNotificationsForActivity($activity, $person);
+                    $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
                 }
             }
+
+            $this->jobSearchUpdate($person);
         }
     }
 
