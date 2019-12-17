@@ -18,6 +18,13 @@ Cette mise à niveau permet de bénéficier des dernières mise à jour de sécu
  
  - **Gearman** Utilisation d'un serveur de gestion des tâches (**Gearman**) afin d'optimiser certaines opérations : Génération des notifications, planification de la reconstruction/optimisation des indices de recherche.
  
+ - **Dépense** (expérimental) Les écrans et la connexion SIFAC est toujours en court, les accès aux écrans de synchronisation des dépenses basé sur le journal des pièces sont disponibles (Avec les privilèges associés). Propose pour le moment des données brute
+ 
+ - **Écran de budget** (UI uniquement) Sera à préciser quand la partie dépense sera plus avancées
+ 
+ - **Plan comptable** Écran de gestion du plan comptable à utiliser dans l'écran du budget
+ 
 ## Correctifs
 
- -
+ - Augmentation des résultats des recherches pour les organisations
+ - Augmentation des résultats des recherches pour les personnes
