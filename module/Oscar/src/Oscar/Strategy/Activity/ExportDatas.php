@@ -183,7 +183,6 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
         $computed = $this->getProjectGrantService()->getExportComputedFields();
         foreach ($computed as $key=>$headerInfos) {
             $header = $headerInfos['label'];
-            //die("$header");
             if( $keep === true || in_array($header, $keep) ){
                 $columns[$header] = true;
                 $headers[] = $header;
@@ -279,8 +278,10 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
                 }
 
                 foreach ( $computedValues as $col=>$value ){
-                    //if( $columns[$col] === true )
-                    $datas[] = $value;
+
+                    if( $columns[$col] === true ) {
+                        $datas[] = $value;
+                    }
                 }
 
                 $outputDatas[] = $datas;
