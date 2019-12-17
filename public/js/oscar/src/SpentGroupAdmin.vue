@@ -102,9 +102,11 @@
                 <p>... choisissez l'emplacement où le déplacer.</p>
             </div>
         </transition>
+        <pre>{{ masses }}</pre>
         <div class="card-content spentarea">
             <spenttypeitem v-for="s in tree"
-                       :spenttypegroup="s" :annexes="masses"
+                       :spenttypegroup="s"
+                       :annexes="masses"
                        :key="s.id"
                        :selection="selection"
                        :mode="mode"
@@ -146,7 +148,8 @@
                 spenttypegroups: [],
                 confirm: "",
                 confirmHandler: null,
-                waitdrop: false
+                waitdrop: false,
+                masses: {}
             }
         },
 
@@ -311,6 +314,7 @@
             fetch(){
                 this.$http.get().then(
                     ok => {
+                        console.log(ok.data);
                         this.spenttypegroups = ok.data.spenttypegroups;
                         this.masses = ok.data.masses;
                     },
