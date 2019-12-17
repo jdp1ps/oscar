@@ -1152,8 +1152,6 @@ personproject:
                 defaults:
                     action: personProjectEdit
 
-
-
 ################################################################################
 ### Relation : Organization<>Projet
 
