@@ -454,6 +454,8 @@ class NotificationService implements UseServiceContainer
     public function purgeNotificationsPersonActivity(Activity $activity, Person $person){
         // objectid = $activityId
         // object = activity
+
+        // TODO Faire une requête native
         $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
             ->createQueryBuilder('p')
             ->innerJoin('p.notification', 'n')
@@ -485,6 +487,12 @@ class NotificationService implements UseServiceContainer
         ]), 'notificationActivityPerson-'.$activity->getId().'-'.$person->getId());
     }
 
+    public function jobNotificationsPersonProject( Project $project, Person $person ){
+        /** @var Activity $activity */
+        foreach ($project->getActivities() as $activity) {
+            $this->jobNotificationsPersonActivity($activity, $person);
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///

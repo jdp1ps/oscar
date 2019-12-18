@@ -1335,7 +1335,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     }
                 }
                 foreach ($organization->getProjects() as $op){
-                    $this->getLoggerService()->info("Projet : " . $op->getProject);
+                    $this->getLoggerService()->info("Projet : " . $op->getProject());
                     if( $op->isPrincipal() ){
                         foreach ($op->getProject()->getActivities() as $a){
                             $this->getLoggerService()->info("Project > Activités, rôle principal");
@@ -1488,6 +1488,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     // PROJECT
+
+    /**
+     * @param Project $project
+     * @param Person $person
+     * @param Role $role
+     * @param null $dateStart
+     * @param null $dateEnd
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function personProjectAdd( Project $project, Person $person, Role $role, $dateStart=null, $dateEnd=null ){
         if( !$project->hasPerson($person, $role, $dateStart, $dateEnd) ){
 
@@ -1505,9 +1515,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             // Si le rôle est principal, on actualise les notifications de la personne
             if( $role->isPrincipal() ){
-                $this->getEntityManager()->refresh($project);
+//                $this->getEntityManager()->refresh($project);
                 foreach ($project->getActivities() as $activity) {
-                    $this->getEntityManager()->refresh($activity);
+//                    $this->getEntityManager()->refresh($activity);
                     $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
                 }
             }
@@ -1535,7 +1545,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         if( $updateNotification ){
             $this->getEntityManager()->refresh($project);
             $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
-            $this->getNotificationService()->generateNotificationsForProject($project, $person);
+            $this->getNotificationService()->jobNotificationsPersonProject($project, $person);
+
         }
     }
 
