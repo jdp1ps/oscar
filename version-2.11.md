@@ -2,7 +2,7 @@
 
 ## Upgrade : Zend Framework 3
 
-La version *MacClane* fait suite à la mise à jour précédente (Passage à PHP 7.3). Oscar est maintenant basé sur la version 3 du framework **Zend**. Malgrès de nombreuses vérification, pensez à prévoir une phase de test pour vérifier que toutes les fonctionnalités sont bien opérationnelles sur votre système.
+La version *MacClane* fait suite à la mise à jour précédente (Passage à PHP 7.3). Oscar est maintenant basé sur la version 3 du framework **Zend**. Malgrès de nombreuses vérifications, pensez à prévoir une phase de test pour vérifier que toutes les fonctionnalités sont bien opérationnelles sur votre système.
 
 Cette mise à niveau permet de bénéficier des dernières mises à jour de sécurité des systèmes linux, et rend Oscar compatible avec Postgresql 10.
 
