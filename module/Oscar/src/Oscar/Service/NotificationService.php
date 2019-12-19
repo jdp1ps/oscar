@@ -46,6 +46,9 @@ class NotificationService implements UseServiceContainer
 //$s->setEntityManager($container->get(EntityManager::class));
 //$s->setOrganizationService($container->get(OrganizationService::class));
 
+    /**
+     * @return Logger
+     */
     public function getLoggerService(){
         return $this->getServiceContainer()->get('Logger');
     }
@@ -361,7 +364,13 @@ class NotificationService implements UseServiceContainer
         }
 
         // Si le jalon est passé, on passe
-        if ($milestone->getDateStart() < new \DateTime('now')) {
+        $now = new \DateTime('now');
+        $now->setTime(0,0,0);
+
+
+
+        if ($milestone->getDateStart() < $now) {
+            error_log("$milestone est passé par rapport à " . $now->format("Y-m-d H:i:s"));
             return;
         }
 
@@ -426,6 +435,8 @@ class NotificationService implements UseServiceContainer
                 return;
             } else {
                 $persons = [$person];
+                if( count($persons) == 0 )
+                    return;
             }
         }
 
@@ -461,6 +472,21 @@ class NotificationService implements UseServiceContainer
             ->innerJoin('p.notification', 'n')
             ->where('p.person = :person AND n.object = :object AND n.objectId = :activityid')
             ->setParameters(['person' => $person->getId(), 'activityid' => $activity->getId(), 'object' => Notification::OBJECT_ACTIVITY]);
+
+        /** @var NotificationPerson $r */
+        foreach ($query->getQuery()->getResult() as $r ){
+            $this->getEntityManager()->remove($r);
+        }
+        $this->getEntityManager()->flush();
+
+    }
+
+    public function purgeNotificationsActivity(Activity $activity){
+        $query = $this->getEntityManager()->getRepository(NotificationPerson::class)
+            ->createQueryBuilder('p')
+            ->innerJoin('p.notification', 'n')
+            ->where('n.object = :object AND n.objectId = :activityid')
+            ->setParameters(['activityid' => $activity->getId(), 'object' => Notification::OBJECT_ACTIVITY]);
 
         /** @var NotificationPerson $r */
         foreach ($query->getQuery()->getResult() as $r ){

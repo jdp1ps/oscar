@@ -91,6 +91,23 @@ class Moment extends AbstractHtmlElement
         return $from->getRelative();
     }
 
+    public function sinceDays($from='now')
+    {
+        if ($this->moment === null) {
+            return '';
+        }
+        if ($from instanceof \DateTime) {
+            $from = $from->format('c');
+        }
+
+        if( $from->format('Y-m-d') == date('Y-m-d') ){
+            return "Aujourd'hui";
+        }
+
+        $from = $this->moment->from($from);
+        return $from->getRelative();
+    }
+
     /**
      * Retourne le texte complet sous la forme DATE, DEPUIS NOW
      * @return string
@@ -98,6 +115,11 @@ class Moment extends AbstractHtmlElement
     public function full()
     {
         return $this->__toString(). ($this->moment !== null ? ', ' . $this->since() : '');
+    }
+
+    public function fullDay()
+    {
+        return $this->__toString(). ($this->moment !== null ? ', ' . $this->sinceDays() : '');
     }
 
     /**

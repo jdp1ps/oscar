@@ -642,6 +642,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             return $persons;
 
+
         } catch ( \Exception $e ){
             throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
         }
@@ -1440,6 +1441,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
     }
 
+    public function getProjectGrantService(): ProjectGrantService
+    {
+        return $this->getServiceContainer()->get(ProjectGrantService::class);
+    }
+
     public function personActivityRemove( ActivityPerson $activityPerson )
     {
         $person = $activityPerson->getPerson();
@@ -1456,9 +1462,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         // Si le rôle est principal, on actualise les notifications de la personne
         if( $updateNotification ){
-            $this->getEntityManager()->refresh($activity);
             $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
-            $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
+            //$this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
         }
 
         $this->jobSearchUpdate($person);
@@ -1515,13 +1520,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             // Si le rôle est principal, on actualise les notifications de la personne
             if( $role->isPrincipal() ){
-//                $this->getEntityManager()->refresh($project);
                 foreach ($project->getActivities() as $activity) {
-//                    $this->getEntityManager()->refresh($activity);
                     $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
                 }
             }
-
             $this->jobSearchUpdate($person);
         }
     }
@@ -1545,8 +1547,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         if( $updateNotification ){
             $this->getEntityManager()->refresh($project);
             $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
-            $this->getNotificationService()->jobNotificationsPersonProject($project, $person);
-
         }
     }
 

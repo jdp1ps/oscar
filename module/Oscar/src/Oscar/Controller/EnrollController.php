@@ -712,7 +712,8 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     public function organizationProjectDeleteAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $this->getProjectEntity());
+        $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find($this->params()->fromRoute('idenroll'));
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $enroll->getProject());
         return $this->deleteEnroll(ProjectPartner::class);
     }
 
