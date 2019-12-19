@@ -142,21 +142,23 @@ Vous pouvez executer le **worker**, il traitera les JOBS en attente, et les nouv
 
 Configuration pour **systemctl** pour exécuter le *worker* en tant que service système : 
 
-```bash
-# /etc/systemd/system/monworker.service
+``` bash
 [Unit]
-Description=MONWORKER Service
-
-# Dépendant de Gearman
+Description=AtoM worker
 After=gearmand.service
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
 
 [Service]
-Restart=on-failure
 Type=simple
-
-# Paramètres à mettre à jour
 User=Utilisateur
 ExecStart=/usr/bin/php /path/to/gearman-worker.php
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+RestartSec=30
 ```
 
 Puis lancer le service : 
