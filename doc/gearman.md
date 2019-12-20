@@ -7,7 +7,7 @@
 
 ## Serveur de Job GEARMAN
 
-Le serveur Gearman est un *daemon* qui va gérer la liste des **jobs** en attente. C'est un application indépendante disponible nativement dans les paquets officiels Debian.
+Le serveur Gearman est un *daemon* qui va gérer la liste des **jobs** en attente. C'est une application indépendante disponible nativement dans les paquets officiels Debian.
 
 ### Installation
 
@@ -25,8 +25,8 @@ Par défaut, il sera activé en tant que service.
 Vous pouvez vérifier l'état du *daemon* avec la commande :  
 
 ```bash
-# Status du deamon
-service gearman-job-server status
+# Status du daemon
+systemctl status gearman-job-server
 ```
 
 ```
@@ -45,7 +45,7 @@ déc. 12 12:05:44 bouvry-Precision-7520 systemd[1]: Started gearman job control 
 
 ### Monitoring du serveur
 
-Le paquet **gearman-tool** contient l'utilitaire **gearadmin** qui permet de surveiller l'état du serveur. pour les la liste des JOBS en attente : 
+Le paquet **gearman-tool** contient l'utilitaire **gearadmin** qui permet de surveiller l'état du serveur. pour la liste des JOBS en attente : 
 
 ```bash
 gearadmin --status | sort -n | column -t
@@ -53,7 +53,7 @@ gearadmin --status | sort -n | column -t
 
 > Les pipes (`| sort -n | column -t`) servent uniquement à rendre la sortie plus facile à lire.
 
-A noter que dans le cadre de test ou pour vérifier le bon fonctionnement du système - vérifier que le client envoi bien les job au serveur, on peut utiliser une *watcher* : 
+A noter que dans le cadre de tests ou pour vérifier le bon fonctionnement du système - vérifier que le client envoie bien les jobs au serveur, on peut utiliser un *watcher* : 
 
 ```bash
 watch "gearadmin --status | sort -n | column -t"
@@ -67,14 +67,14 @@ autreJob   0  0  1
 fooJob     50 1  1
 ```
 
-Chaque ligne représente un **job** avec dans le première colonne, le nombre de job en attente, dans le seconde, les job en cours de traitement, et dans la dernière, le nombre de *workers* assignés aux jobs.
+Chaque ligne représente un **job** avec dans la première colonne, le nombre de jobs en attente, dans la seconde, les jobs en cours de traitement, et dans la dernière, le nombre de *workers* assignés aux jobs.
 
 
 
 
 ## Module PHP
 
-La partie PHP va se charger de 2 choses : Envoyer des **JOBS** à faire au serveur (Classe PHP `GearmanClient`) et traiter des ces jobs en créant des **workers** (Classe `GearmanWorker`). On aura donc 2 utilisations distinctes, **Client** et **Worker**.
+La partie PHP va se charger de 2 choses : Envoyer des **JOBS** à faire au serveur (Classe PHP `GearmanClient`) et traiter des ces jobs en créant des **workers** (Classe `GearmanWorker`). On aura donc 2 applications distinctes, **Client** et **Worker**.
 
 On commence par installer le module PHP
 
@@ -84,7 +84,7 @@ apt install php7.3-gearman
 
 ### Client
 
-Le **Client** va soumettre au *deamon* Gearman des **Jobs** à faire.
+Le **Client** va soumettre au *deamon* Gearman des **Jobs** à traiter.
 
 ```php
 // gearman-client.php
@@ -100,14 +100,14 @@ php gearman-client.php
 ```
 
 
-> Pour voir les jobs sur le *deamon* Gearman, vous pouvez utiliser la commande : 
+> Pour voir les jobs sur le *daemon* Gearman, vous pouvez utiliser la commande : 
 > cela affichera : 
 > ```Every 2,0s: gearadmin --status | sort -n |...  ed209: Fri Dec 13 14:25:30 2019
 > .
 > fonctionJob  1  0  0
 > ```
 
-Si vous rééxécuté à nouveau le script, vous verrez s'incrémenter dans la liste des jobs en attente.
+Si vous rééxécutez à nouveau le script, vous verrez s'incrémenter le nombre de jobs en attente.
 
 > ```
 > .
@@ -116,7 +116,7 @@ Si vous rééxécuté à nouveau le script, vous verrez s'incrémenter dans la l
 
 ### Worker
 
-Le **Worker** est un processus qui aura la charge de traiter les **jobs** en attente sur les *deamon* Gearman.
+Le **Worker** est un processus qui aura la charge de traiter les **jobs** en attente sur les *deamons* Gearman.
 
 ```php
 // gearman-worker.php
@@ -131,7 +131,7 @@ function maFonctionJob(GearmanJob $job) {
 }
 ```
 
-Vous pouvez executer le worker, il traitera les JOBS en attente, et les nouveaux dès qu'il sont envoyés au *deamon Gearman*.
+Vous pouvez executer le **worker**, il traitera les JOBS en attente, et les nouveaux dès qu'ils sont envoyés au *deamon Gearman*.
 
 
 ### GearmanWorker
@@ -140,23 +140,25 @@ Vous pouvez executer le worker, il traitera les JOBS en attente, et les nouveaux
 
 ### Worker en tant que service (systemctl)
 
-Configuration pour **systemctl** pour exécuter le worker en tant que service système : 
+Configuration pour **systemctl** pour exécuter le *worker* en tant que service système : 
 
-```bash
-# /etc/systemd/system/monworker.service
+``` bash
 [Unit]
-Description=MONWORKER Service
-
-# Dépendant de Gearman
+Description=AtoM worker
 After=gearmand.service
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
 
 [Service]
-Restart=on-failure
 Type=simple
-
-# Paramètres à mettre à jour
 User=Utilisateur
 ExecStart=/usr/bin/php /path/to/gearman-worker.php
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+RestartSec=30
 ```
 
 Puis lancer le service : 
@@ -165,7 +167,7 @@ Puis lancer le service :
 systemctl start monworker.service
 ```
 
-Vous pouvez surveiller la sortie du worker et vérifier que tout se passe correctement : 
+Vous pouvez surveiller la sortie du *worker* et vérifier que tout se passe correctement : 
 
 ```bash
 journalctl -u monworker.service -f
