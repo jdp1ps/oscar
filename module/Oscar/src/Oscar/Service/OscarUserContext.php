@@ -1164,7 +1164,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             return false;
         }
         /** @var PersonService $personService */
-        $personService = $this->getServiceLocator()->get('PersonService');
+        $personService = $this->getPersonService();
         $organizations = $personService->getPersonOrganizations($person, true, true);
         $result = [];
 

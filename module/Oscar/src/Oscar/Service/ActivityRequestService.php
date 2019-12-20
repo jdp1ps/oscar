@@ -24,6 +24,16 @@ use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
@@ -33,9 +43,9 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  * Class ActivityRequestService
  * @package Oscar\Service
  */
-class ActivityRequestService implements UseEntityManager {
+class ActivityRequestService implements UseEntityManager, UsePersonService, UseOscarConfigurationService, UseNotificationService, UseProjectGrantService, UseLoggerService {
 
-    use UseEntityManagerTrait;
+    use UseEntityManagerTrait, UsePersonServiceTrait, UseOscarConfigurationServiceTrait, UseNotificationServiceTrait, UseProjectGrantServiceTrait, UseLoggerServiceTrait;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// RÉCUPÉRATION DES DONNÉES
@@ -125,13 +135,13 @@ class ActivityRequestService implements UseEntityManager {
         }
 
         /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get("NotificationService");
+        $notificationService = $this->getNotificationService();
 
         /** @var ProjectGrantService $notificationService */
-        $activityService = $this->getServiceLocator()->get("ActivityService");
+        $activityService = $this->getProjectGrantService();
 
         $currency = $this->getEntityManager()->getRepository(Currency::class)->findOneBy([
-            'label' => $this->getServiceLocator()->get('OscarConfig')->getConfiguration('defaultCurrency')
+            'label' => $this->getOscarConfigurationService()->getConfiguration('defaultCurrency')
         ]);
 
         $activity = new Activity();
@@ -143,10 +153,10 @@ class ActivityRequestService implements UseEntityManager {
             ->setDateEnd($activityRequest->getDateEnd())
             ->setCurrency($currency);
 
-        $person = $this->getServiceLocator()->get('PersonService')->getPersonById($activityRequest->getCreatedBy()->getId(), true);
+        $person = $this->getPersonService()->getPersonById($activityRequest->getCreatedBy()->getId(), true);
 
         if( $personsDatas ){
-            $rolePerson = $this->getServiceLocator()->get('PersonService')->getRolePersonById($personsDatas['roleid'], false);
+            $rolePerson = $this->getPersonService()->getRolePersonById($personsDatas['roleid'], false);
             $activityPerson = new ActivityPerson();
             $this->getEntityManager()->persist($activityPerson);
             $activityPerson->setPerson($person)
@@ -163,8 +173,8 @@ class ActivityRequestService implements UseEntityManager {
                 ->setRoleObj($roleOrganization);
         }
 
-        $dirSource = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_request');
-        $dirDest = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_oscar');
+        $dirSource = $this->getOscarConfigurationService()->getConfiguration('paths.document_request');
+        $dirDest = $this->getOscarConfigurationService()->getConfiguration('paths.document_oscar');
 
         foreach ($activityRequest->getFilesArray() as $file) {
             $contractDocument = new ContractDocument();
@@ -190,7 +200,7 @@ class ActivityRequestService implements UseEntityManager {
 
             // déplacement du fichier
             if( !rename($from, $to) ){
-                $this->getServiceLocator()->get('Logger')->error("Impossibe de déplacer le fichier $from vers $to");
+                $this->getLoggerService()->error("Impossibe de déplacer le fichier $from vers $to");
             }
             $contractDocument->setPath($realName);
         }
@@ -235,10 +245,10 @@ class ActivityRequestService implements UseEntityManager {
         }
 
         /** @var NotificationService $notificationService */
-        $notificationService = $this->getServiceLocator()->get("NotificationService");
+        $notificationService = $this->getNotificationService();
 
         // TODO Suppression des fichiers envoyés
-//        $dirSource = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_request');
+//        $dirSource = $this->>$this->getOscarConfigurationService()->getConfiguration('paths.document_request');
 //
 //        foreach ($activityRequest->getFilesArray() as $file) {
 //            $contractDocument = new ContractDocument();
@@ -264,7 +274,7 @@ class ActivityRequestService implements UseEntityManager {
 //
 //            // déplacement du fichier
 //            if( !rename($from, $to) ){
-//                $this->getServiceLocator()->get('Logger')->error("Impossibe de déplacer le fichier $from vers $to");
+//                $this->>getLoggerService()->error("Impossibe de déplacer le fichier $from vers $to");
 //            }
 //            $contractDocument->setPath($realName);
 //        }
@@ -314,7 +324,7 @@ class ActivityRequestService implements UseEntityManager {
 
 
         // Suppression des fichiers
-        $dir = $this->getServiceLocator()->get('OscarConfig')->getConfiguration('paths.document_request');
+        $dir = $this->getOscarConfigurationService()->getConfiguration('paths.document_request');
 
         // Suppression des fichiers
         foreach ($activityRequest->getFilesArray() as $fileInfos){

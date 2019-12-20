@@ -194,17 +194,17 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                 $this->getLoggerService()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
             }
 
+                $serviceDemandeActivite = $this->getActivityRequestService();
 
             try {
                 /** @var ActivityRequestService $serviceDemandeActivite */
-                $serviceDemandeActivite = $this->getServiceLocator()->get('ActivityRequestService');
                 $requests = null;
 
                 // Accès globale
-                if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
+                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
                     $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft();
                 }
-                elseif ( count($organizations = $this->getOscarUserContext()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE)) > 0 ){
+                elseif ( count($organizations = $this->getOscarUserContextService()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE)) > 0 ){
                     $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft($organizations);
                 }
 
@@ -213,7 +213,8 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                     $requestValidations = count($requests);
                 }
 
-            } catch (\Exception $e) {
+           } catch (\Exception $e) {
+                die($e->getMessage());
                 $this->getLoggerService()->error("Impossible de charger les demandes d'activité pour $person : " . $e->getMessage());
             }
         }
