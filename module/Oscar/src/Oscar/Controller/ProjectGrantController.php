@@ -1804,6 +1804,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'pm' => "Impliquant une de ces personnes",
                 'ao' => "Impliquant l'organisation",
                 'so' => "N'impliquant pas l'organisation",
+                'om' => "Impliquant une des organisations",
                 'as' => 'Ayant le statut',
                 'ss' => 'N\'ayant pas le statut',
                 'cnt' => "Pays (d'une organisation)",
@@ -1892,6 +1893,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $filterStatus = [];
             $filterNoStatus = [];
             $filterPersons = [];
+            $filterOrganizations = [];
 
             $organizations = [];
             $persons = [];
@@ -1949,6 +1951,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ->leftJoin('p.members', 'm1')
                 ->leftJoin('a.persons', 'm2')
                 ->where('((o1.organization = :id AND o1.roleObj = :roleObj) OR (o2.organization = :id AND o2.roleObj = :roleObj))');
+
+            $queryOrganisations = $this->getEntityManager()->createQueryBuilder()
+                ->select('a.id')
+                ->from(Activity::class, 'a', 'a.id')
+                ->leftJoin('a.project', 'p')
+                ->leftJoin('p.partners', 'o1')
+                ->leftJoin('a.organizations', 'o2')
+                ->leftJoin('p.members', 'm1')
+                ->leftJoin('a.persons', 'm2')
+                ->where('(o1.organization in(:ids) OR o2.organization IN(:ids))');
+
 
             // Paramètres de la requête finale
             $parameters = [];
@@ -2064,7 +2077,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         case 'pp' :
                             $qb->andWhere('c.project IS NULL');
                             break;
-                        // Personne
+                        // Personne (plusieurs)
                         case 'pm' :
                             $value1 = explode(',', $params[1]);
                             $crit['val1'] = $value1;
@@ -2080,6 +2093,23 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                             $ids = array_keys($queryPersons->setParameter('ids',
                                 $value1)->getQuery()->getArrayResult());
+                            break;
+                        // Organisations (plusieurs)
+                        case 'om' :
+
+
+                            $value1 = explode(',', $params[1]);
+                            $crit['val1'] = $value1;
+                            $organisationsRequire = $this->getOrganizationService()->getOrganizationsByIds($value1);
+
+                            /** @var Organization $organisation */
+                            foreach ( $organisationsRequire as $organisation) {
+                                $filterOrganizations[$organisation->getId()] = (string)$organisation;
+                            }
+
+                            $ids = array_keys($queryOrganisations->setParameter('ids',
+                                $value1)->getQuery()->getArrayResult());
+
                             break;
                         case 'ap' :
                         case 'sp' :
@@ -2216,7 +2246,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             break;
                     }
                     $criterias[] = $crit;
-                    if ($type == 'ap' || $type == 'ao' || $type == 'pm' ) {
+                    if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om' ) {
 
                         if ($filterIds === null) {
                             $filterIds = $ids;
@@ -2319,6 +2349,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'activities' => $activities,
                 'search' => $search,
                 'filterPersons' => $filterPersons,
+                'filterOrganizations' => $filterOrganizations,
                 'include' => $include,
                 'organizationsPerimeter' => $this->getOrganizationPerimeter(),
                 'sort' => $sort,

@@ -57,6 +57,25 @@
         </article>
     </script>
 
+    <script type="text/x-handlebars" id="organizations-criteria-tpl">
+        <article class="criteria date card">
+            <div class="icon-building-filled"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+
+            <select class="select2organizations changer val1" multiple>
+                <?php foreach($filterOrganizations as $id=>$label): ?>
+                <option value="<?= $id ?>" selected><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
     <script type="text/x-handlebars" id="date-criteria-tpl">
         <article class="criteria date card">
             <div class="icon-calendar"></div>
@@ -623,6 +642,7 @@
                     };
 
                 var addcriterie = function (datas) {
+                    console.log("ADD", datas);
                     datas.typeLabel = (labelsType[datas.type]);
                     datas.criteria = datas.type + ";" + datas.val1 + ";" + datas.val2;
 
@@ -658,6 +678,9 @@
                     }
                     else if(datas.type == 'mp' ) {
                         dom = $(tplNumber(datas));
+                    }
+                    else if(datas.type == 'om' ) {
+                        dom = $(tplOrganizations(datas));
                     }
                     else if(datas.type == 'pm' ) {
                         dom = $(tplPersons(datas));
@@ -735,6 +758,38 @@
                         }
                     );
 
+                    dom.find('.select2organizations').select2({
+                            placeholder: 'Rechercher une organisation...',
+                            width: '100%',
+                            allowClear: true,
+                            ajax: {
+                                url: '<?= $this->url('organization/search') ?>',
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                    return {
+                                        q: params.term, // search term
+                                        page: params.page
+                                    };
+                                },
+                                processResults: function (data, page) {
+                                    return {results: data.datas};
+                                },
+                                cache: true
+                            },
+                            escapeMarkup: function (markup) {
+                                return markup;
+                            },
+                            minimumInputLength: 3,
+                            id: function (dt) {
+                                console.log("id(",dt,")");
+                                return dt.uid;
+                            },
+                            templateResult: formatRepo, // omitted for brevity, see the source of this page
+                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                        }
+                    );
+
                     if( datas.val2 ){
                         dom.find('.role').val(datas.val2);
                     }
@@ -791,6 +846,7 @@
                     tplStatic = Handlebars.compile($('#static-criteria-tpl').html()),
                     tplNumber = Handlebars.compile($('#number-criteria-tpl').html()),
                     tplPersons = Handlebars.compile($('#persons-criteria-tpl').html()),
+                    tplOrganizations= Handlebars.compile($('#organizations-criteria-tpl').html()),
                     tplMilestone = Handlebars.compile($('#milestones-criteria-tpl').html()),
                     id = 1;
 
