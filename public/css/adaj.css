@@ -5743,7 +5743,7 @@ html body {
       .has-btn .btn-area a.ninja {
         color: rgba(0, 0, 0, 0); }
       .has-btn .btn-area a.smoke {
-        color: rgba(0, 0, 0, 0.15); }
+        color: rgba(0, 0, 0, 0.5); }
       .has-btn .btn-area a:hover {
         color: rgba(0, 0, 0, 0.75); }
   .has-btn:hover .btn-area > a {
