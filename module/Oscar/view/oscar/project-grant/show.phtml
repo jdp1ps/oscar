@@ -124,7 +124,7 @@
         </p>
 
         <p class="texthighlight baseline">
-            N° Oscar : <strong><?= $entity->getOscarNum() ?></strong><br/>
+            <?= $this->translate("N° Oscar") ?> : <strong><?= $entity->getOscarNum() ?></strong><br/>
             PFI :
             <?php if( $entity->getCodeEOTP() ): ?>
                 <strong><?= $entity->getCodeEOTP() ?></strong> -

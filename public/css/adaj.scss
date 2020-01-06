@@ -10,7 +10,7 @@ $brand-primary: #24587A !default;
 $brand-complementary: #472B83 !default;
 $bg-image: 'adaj.jpg' !default;
 
-//rgb(255 - red($brand-primary), 255 - green($brand-primary), 255 - blue($brand-primary));
+
 $brand-secondary1: #290671;
 $brand-secondary2: #369100;
 $brand-success: #5cb85c !default;
@@ -37,6 +37,7 @@ $colorGreyDark: #555;
 $colorGreyBlack: #222;
 
 @import "_common.scss";
+//
 
 body {
   background: #f2f3eb;

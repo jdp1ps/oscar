@@ -420,7 +420,7 @@ msgstr "Votre compte n'est associé à aucun projet/accord"
 
 #: ../view/oscar/public/index.phtml:87
 msgid "Voir mes projets"
-msgstr ""
+msgstr "Voir mes accords"
 
 #: ../view/partials/menu-administration.phtml:56
 msgid "Feuille de temps"
@@ -473,6 +473,12 @@ msgstr ""
 #: ../view/partials/menu-project-activity.phtml:54
 msgid "Jalons"
 msgstr ""
+
+msgid "N° Oscar"
+msgstr "N° ADAJ"
+
+msgid "Rechercher dans les activités un PFI, un N°, la vie, l'univers ou le reste&hellip;"
+msgstr "Rechercher dans les accords"
 
 #~ msgid ">Projets sans activité<"
 #~ msgstr "Projet sans accord"
@@ -574,11 +580,14 @@ msgstr ""
 #~ msgstr "Organisation et Suivi des Contrats et des Activités de Recherche"
 
 # Authentification
-#~ msgid "Votre identifiant"
-#~ msgstr "Votre identifiant"
+msgid "Username"
+msgstr "Identifiant"
 
-#~ msgid "Votre mot de passe"
-#~ msgstr "Votre mot de passe"
+msgid "Password"
+msgstr "Votre mot de passe"
 
-#~ msgid "Connexion"
-#~ msgstr "Connexion"
+msgid "Connexion"
+msgstr "Connexion (persopass)"
+
+msgid "Sign In"
+msgstr "Se connecter"
