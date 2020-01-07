@@ -98,6 +98,8 @@ class Moment extends AbstractHtmlElement
         }
         if ($from instanceof \DateTime) {
             $from = $from->format('c');
+        } else {
+            $from = new \DateTime($from);
         }
 
         if( $from->format('Y-m-d') == date('Y-m-d') ){
