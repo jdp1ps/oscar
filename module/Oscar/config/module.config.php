@@ -211,7 +211,7 @@ return array(
                 ],
 
                 ['controller' => 'Api',
-                    'action' => ['help','persons','organizations','roles'],
+                    'action' => ['help','persons','organizations','roles','adminManageAccess'],
                     'roles' => []
                 ],
 

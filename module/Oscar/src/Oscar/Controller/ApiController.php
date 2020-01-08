@@ -7,10 +7,13 @@ use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\PersonToJsonConnectorFormatter;
 use Oscar\OscarVersion;
+use Oscar\Provider\Privileges;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Zend\Http\Response;
@@ -19,67 +22,133 @@ use Zend\View\Model\JsonModel;
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
-class ApiController extends AbstractOscarController implements UseOscarConfigurationService, UsePersonService, UseLoggerService
+class ApiController extends AbstractOscarController implements UseOscarUserContextService, UseOscarConfigurationService, UsePersonService, UseLoggerService
 {
-    use UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseLoggerServiceTrait;
+    use UseOscarUserContextServiceTrait, UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseLoggerServiceTrait;
 
-    public function personsAction(){
+    /**
+     * Gestion des accès aux API : création de compte et configuration
+     */
+    public function adminManageAccessAction(){
+        $this->getOscarUserContextService()->check(Privileges::DROIT_API_ACCESS);
+        $apis = [
+            'persons' => "Personnes",
+            'organizations' => "Organisations",
+            'roles' => "Affectations",
+            'activities' => "Activités",
+        ];
+
+
+        if( $this->isAjax() ){
+            $datas = $this->getOscarConfigurationService()->getEditableConfKey('apiaccess', []);
+            switch ($this->getHttpXMethod()) {
+                case "GET" :
+                    $output = [
+                        'datas' => $datas,
+                    ];
+                    return $this->jsonOutput($output);
+                    break;
+
+                case "POST" :
+                    $login = $this->params()->fromPost('login');
+                    $pass = $this->params()->fromPost('pass');
+                    $apis = $this->params()->fromPost('apis');
+
+                    if( !array_key_exists($login, $datas) ){
+                        $datas[$login] = ['pass' => $pass, 'apis' => explode(',', $apis)];
+                        $this->getOscarConfigurationService()->saveEditableConfKey('apiaccess', $datas);
+                        return $this->getResponseOk();
+                    } else {
+                        return $this->getResponseInternalError("La clef  '$login' existe déjà");
+                    }
+
+                    break;
+
+                case "DELETE" :
+                    $id = $this->params()->fromQuery('id');
+                    if( array_key_exists($id, $datas) ){
+                        unset($datas[$id]);
+                        $this->getOscarConfigurationService()->saveEditableConfKey('apiaccess', $datas);
+                        return $this->getResponseOk();
+                    }
+                    return $this->getResponseInternalError("Impossible de supprimer cet accès");
+                    break;
+            }
+        }
+
+        return [
+            'apis' => $apis
+        ];
+    }
+
+
+    protected function checkApiAcces($api){
         if (!isset($_SERVER['PHP_AUTH_USER'])) {
             header('WWW-Authenticate: Basic realm="Oscar');
             header('HTTP/1.0 401 Unauthorized');
             echo "Accès à l'API Oscar limitée";
             exit;
-        } else {
-
-            // Vérification accès
-            try {
-                $apiaccess = $this->getOscarConfigurationService()->getConfiguration('apiaccess');
-
-                if( is_array($apiaccess) ){
-                    $user = $_SERVER['PHP_AUTH_USER'];
-                    $pass = md5($_SERVER['PHP_AUTH_PW']);
-
-                    if( !array_key_exists($user, $apiaccess) ){
-                        return $this->getResponseUnauthorized("Accès interdit l'API Oscar");
-                    }
-
-                    if( $apiaccess[$user]['pass'] != $pass ){
-                        return $this->getResponseUnauthorized("Accès interdit l'API Oscar");
-                    }
-
-                    if( !in_array('persons', $apiaccess[$user]['api']) ){
-                        return $this->getResponseUnauthorized("Accès interdit l'API Oscar");
-                    }
-
-                    $persons = [];
-                    $personToJsonFormatter = new PersonToJsonConnectorFormatter();
-
-                    /** @var Person $p */
-                    foreach( $this->getPersonService()->getPersons() as $p ){
-                        $persons[] = $personToJsonFormatter->format($p);
-                    }
-
-                    $datas = [
-                      "version"         => OscarVersion::getBuild(),
-                      "datecreated"     => date('c'),
-                      'persons'         => $persons
-                    ];
-
-
-                    return $this->jsonOutput($datas);
-
-
-
-                } else {
-                    throw new OscarException("L'accès à l'API Oscar est mal configuré");
-                }
-            } catch (OscarException $e) {
-                return $this->getResponseInternalError(_("Oscar n'est pas configurer pour authoriser les accès à son API"));
-            } catch (\Exception $e) {
-                return $this->getResponseInternalError(sprintf(_("Erreur inconnue : %s"),$e->getMessage()));
-            }
         }
-        die("TODO");
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $this->getLoggerService()->info("[API OSCAR] access /$api from $ip");
+
+        // Vérification accès
+        try {
+            $apiaccess = $this->getOscarConfigurationService()->getEditableConfKey('apiaccess');
+
+            if( is_array($apiaccess) ){
+                $user = $_SERVER['PHP_AUTH_USER'];
+                $pass = $_SERVER['PHP_AUTH_PW'];
+
+                if( !array_key_exists($user, $apiaccess) ){
+                    $this->getLoggerService()->error("[API OSCAR] Identifiant inconnnu $user.");
+                    throw new OscarException("Accès interdit l'API Oscar");
+                }
+
+                if( $apiaccess[$user]['pass'] != $pass ){
+                    $this->getLoggerService()->error("[API OSCAR] Mot de passe incorrect pour $user.");
+                    throw new OscarException("Accès interdit l'API Oscar");
+                }
+
+                if( !in_array('persons', $apiaccess[$user]['apis']) ){
+                    $this->getLoggerService()->error("[API OSCAR] $user n'a pas accès à l'API $api.");
+                    throw new OscarException("Accès interdit l'API Oscar");
+                }
+            } else {
+                $this->getLoggerService()->error("[API OSCAR] L'API oscar n'est pas configurée");
+                throw new OscarException("L'accès à l'API Oscar est mal configuré");
+            }
+        } catch (OscarException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            $this->getLoggerService()->error("[OSCAR API] Erreur inconnue : " . $e->getMessage());
+            throw new OscarException("Accès interdit l'API Oscar");
+        }
+
+    }
+
+    public function personsAction(){
+        try {
+            $this->checkApiAcces('persons');
+            $persons = [];
+            $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+
+            /** @var Person $p */
+            foreach( $this->getPersonService()->getPersons() as $p ){
+                $persons[] = $personToJsonFormatter->format($p);
+            }
+
+            $datas = [
+                "version"         => OscarVersion::getBuild(),
+                "datecreated"     => date('c'),
+                'persons'         => $persons
+            ];
+
+            return $this->jsonOutput($datas);
+        } catch (\Exception $e) {
+            return $this->getResponseUnauthorized($e->getMessage());
+        }
+
     }
 
     public function helpAction(){

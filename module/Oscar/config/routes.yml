@@ -48,6 +48,13 @@ api:
             controller: Api
     may_terminate: true
     child_routes:
+        manage-acces:
+            type: segment
+            options:
+                route: /manage-access
+                defaults:
+                    action: adminManageAccess
+
         # Déclarations d'une personne pour une activité
         help:
             type: segment

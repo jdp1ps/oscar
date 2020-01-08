@@ -31,6 +31,15 @@
     "fullcode": "droit-privilege-edition"
   },
 
+  "droit-API_ACCESS": {
+    "spot": 4,
+    "category_id": 7,
+    "code": "API_ACCESS",
+    "libelle": "Gérer les accès à l'API",
+    "fullcode": "droit-API_ACCESS"
+  },
+
+
   "ACTIVITY-REQUEST": {
     "category_id": 2,
     "spot": 4,

@@ -363,5 +363,23 @@
                 Gestion des rôles disponibles lors de l'association d'un organisation à une activité de recherche.
             </p>
         </article>
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-database"></i>
+                    Accès à l'API</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_API_ACCESS) ):?>
+                    <a href="<?= $this->url('api/manage-acces') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>
+                Vous permet de créer des accès distants aux donnnées (Personnes)
+            </p>
+        </article>
     </section>
 </div>
