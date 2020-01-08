@@ -210,6 +210,11 @@ return array(
                     'roles' => ['Administrateur']
                 ],
 
+                ['controller' => 'Api',
+                    'action' => ['help','persons','organizations','roles'],
+                    'roles' => []
+                ],
+
                 ////////////////////////////////////////////////////////////////
                 // PERSON
                 ///////////////////////////////////////////////////////////////
@@ -831,6 +836,7 @@ return array(
             'ActivityDate' => \Oscar\Controller\ActivityDateControllerFactory::class,
             'ActivityPayment' => \Oscar\Controller\ActivityPaymentControllerFactory::class,
             'ActivityType' => \Oscar\Controller\ActivityTypeControllerFactory::class,
+            'Api' => \Oscar\Controller\ApiControllerFactory::class,
             'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
             'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentControllerFactory::class,
             'DateType' => \Oscar\Controller\DateTypeControllerFactory::class,

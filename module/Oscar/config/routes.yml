@@ -37,6 +37,31 @@ gitlog:
             controller: Public
             action: gitlog
 
+
+################################################################################
+# ACCÈS aux DONNÉES
+api:
+    type: literal
+    options:
+        route: /api
+        defaults:
+            controller: Api
+    may_terminate: true
+    child_routes:
+        # Déclarations d'une personne pour une activité
+        help:
+            type: segment
+            options:
+                route: /help
+                defaults:
+                    action: help
+        persons:
+            type: segment
+            options:
+                route: /persons
+                defaults:
+                    action: persons
+
 ################################################################################
 # NOTIFICATIONS
 notification:

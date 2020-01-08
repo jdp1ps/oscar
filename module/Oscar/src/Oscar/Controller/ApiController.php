@@ -2,15 +2,91 @@
 
 namespace Oscar\Controller;
 
+use Oscar\Entity\Person;
 use Oscar\Entity\ProjectPartner;
+use Oscar\Exception\OscarException;
+use Oscar\Formatter\PersonToJsonConnectorFormatter;
+use Oscar\OscarVersion;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
 use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
 
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
-class ApiController extends AbstractOscarController
+class ApiController extends AbstractOscarController implements UseOscarConfigurationService, UsePersonService, UseLoggerService
 {
+    use UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseLoggerServiceTrait;
+
+    public function personsAction(){
+        if (!isset($_SERVER['PHP_AUTH_USER'])) {
+            header('WWW-Authenticate: Basic realm="Oscar');
+            header('HTTP/1.0 401 Unauthorized');
+            echo "Accès à l'API Oscar limitée";
+            exit;
+        } else {
+
+            // Vérification accès
+            try {
+                $apiaccess = $this->getOscarConfigurationService()->getConfiguration('apiaccess');
+
+                if( is_array($apiaccess) ){
+                    $user = $_SERVER['PHP_AUTH_USER'];
+                    $pass = md5($_SERVER['PHP_AUTH_PW']);
+
+                    if( !array_key_exists($user, $apiaccess) ){
+                        return $this->getResponseUnauthorized("Accès interdit l'API Oscar");
+                    }
+
+                    if( $apiaccess[$user]['pass'] != $pass ){
+                        return $this->getResponseUnauthorized("Accès interdit l'API Oscar");
+                    }
+
+                    if( !in_array('persons', $apiaccess[$user]['api']) ){
+                        return $this->getResponseUnauthorized("Accès interdit l'API Oscar");
+                    }
+
+                    $persons = [];
+                    $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+
+                    /** @var Person $p */
+                    foreach( $this->getPersonService()->getPersons() as $p ){
+                        $persons[] = $personToJsonFormatter->format($p);
+                    }
+
+                    $datas = [
+                      "version"         => OscarVersion::getBuild(),
+                      "datecreated"     => date('c'),
+                      'persons'         => $persons
+                    ];
+
+
+                    return $this->jsonOutput($datas);
+
+
+
+                } else {
+                    throw new OscarException("L'accès à l'API Oscar est mal configuré");
+                }
+            } catch (OscarException $e) {
+                return $this->getResponseInternalError(_("Oscar n'est pas configurer pour authoriser les accès à son API"));
+            } catch (\Exception $e) {
+                return $this->getResponseInternalError(sprintf(_("Erreur inconnue : %s"),$e->getMessage()));
+            }
+        }
+        die("TODO");
+    }
+
+    public function helpAction(){
+        die("Consultez l'aide technique pour obtenir");
+    }
+
+
     public function apiAction()
     {
         $action = $this->params()->fromQuery('a');
