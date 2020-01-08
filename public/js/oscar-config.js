@@ -93,7 +93,8 @@ requirejs.config({
         'EstimatedSpentActivityItem': 'oscar/dist/EstimatedSpentActivityItem',
         'Referent': 'oscar/dist/Referent',
         'ReferentUI': 'oscar/dist/ReferentUI',
-        'EntityWithRole': 'oscar/dist/EntityWithRole'
+        'EntityWithRole': 'oscar/dist/EntityWithRole',
+        'APIAccess': 'oscar/dist/APIAccess'
     },
     shim: {
         "bootstrap": {

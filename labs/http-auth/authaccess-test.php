@@ -7,8 +7,8 @@
  */
 $additionalHeaders = '';
 $payloadName = '';
-$username = 'ddd';
-$password = 'azerty';
+$username = 'oscar-test';
+$password = 'ùLDWbàaf95OG3Àê5ÜuÀâééÈÙZbBJlqê5';
 $host = 'http://localhost:8080/api/persons';
 $ch = curl_init($host);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml', $additionalHeaders));

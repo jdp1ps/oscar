@@ -1,0 +1,25 @@
+<div class="container">
+    <h1>Accès à l'API</h1>
+    <div id="app"></div>
+    <script>
+        require(['vue', 'vue-resource', 'APIAccess'], function(Vue, VueResource, APIAccess){
+            Vue.use(VueResource);
+
+            Vue.http.options.emulateJSON = true;
+            Vue.http.options.emulateHTTP = true;
+
+            new Vue({
+                el: "#app",
+                render(h){
+
+                    return h(APIAccess.default, {
+                        props: {
+                            url: '<?= $this->url('api/manage-acces') ?>',
+                            apis: <?= json_encode($apis) ?>
+                        }
+                    });
+                }
+            })
+        })
+    </script>
+</div>
