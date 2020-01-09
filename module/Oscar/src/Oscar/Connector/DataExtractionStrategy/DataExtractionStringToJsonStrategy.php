@@ -9,7 +9,12 @@
 namespace Oscar\Connector\DataExtractionStrategy;
 
 
-class StringToJson
-{
+use Oscar\Utils\PhpPolyfill;
 
+class DataExtractionStringToJsonStrategy implements IDataExtractionStrategy
+{
+    public function extract($from)
+    {
+        return PhpPolyfill::jsonDecode($from);
+    }
 }

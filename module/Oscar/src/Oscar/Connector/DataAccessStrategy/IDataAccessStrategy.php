@@ -9,7 +9,10 @@
 namespace Oscar\Connector\DataAccessStrategy;
 
 
+use Oscar\Connector\IConnectorOscar;
+
 interface IDataAccessStrategy
 {
-
+    public function getData( string $url );
+    public function getConnector() :IConnectorOscar;
 }

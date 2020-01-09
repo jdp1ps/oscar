@@ -250,6 +250,10 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         $this->getEntityManager()->flush($mixed);
     }
 
+    /**
+     * @return Person
+     * @throws \Doctrine\ORM\ORMException
+     */
     public function newPersistantPerson()
     {
         $person = new Person();

@@ -18,8 +18,8 @@ class PersonToJsonConnectorFormatter
         return array(
             'uid' => $person->getId(),
             'login' => $person->getLadapLogin(),
-            'firstName' => $person->getFirstname(),
-            'lastName' => $person->getLastname(),
+            'firstname' => $person->getFirstname(),
+            'lastname' => $person->getLastname(),
             'displayname' => $person->getDisplayName(),
             'mail' => $person->getEmail(),
             'civilite' => "",

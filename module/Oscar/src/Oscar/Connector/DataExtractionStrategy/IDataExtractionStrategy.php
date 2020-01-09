@@ -9,7 +9,7 @@
 namespace Oscar\Connector\DataExtractionStrategy;
 
 
-class IDataExtractionStrategy
+interface IDataExtractionStrategy
 {
-
+    public function extract($from);
 }

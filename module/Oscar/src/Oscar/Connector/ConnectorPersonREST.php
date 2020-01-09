@@ -159,10 +159,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             $repport->addnotice(count($personsDatas). " résultat(s) a traiter.");
             ////////////////////////////////////
 
-
-
-            echo 'Persons obtenues du CONNECTOR : ' . $nbrPersonsConnector . "\n";
-
             foreach( $personsDatas as $personData ){
 
                 if( ! property_exists($personData, 'uid') ){

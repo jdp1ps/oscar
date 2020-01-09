@@ -123,7 +123,7 @@ class ConnectorPersonHydrator
             $personOscar = $this->factory()->hydrateWithDatas($personOscar, $personData, $connectorName);
         } catch (OscarException $e ){
             $this->repport->adderror($e->getMessage());
-            return;
+            throw $e;
         }
 
 
