@@ -64,11 +64,9 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
         if( !is_array($personsDatas) ){
             throw new \Exception("L'API n'a pas retourné un tableau de donnée");
         }
-        $nbrPersonsConnector = count($personsDatas);
-        $report->addnotice(count($personsDatas). " résultat(s) a traiter.");
 
         // ...
-        $this->syncPersons($personsDatas, $this->getPersonRepository(), $report, true);
+        $this->syncPersons($personsDatas, $this->getPersonRepository(), $report, $this->getOption('force', false));
 
         return $report;
     }
@@ -107,25 +105,25 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
 
         if( $this->getOptionPurge() ){
             $exist = $personRepository->getUidsConnector($this->getName());
-            $repport->addnotice(sprintf(_("Il y'a %s personne(s) référencées dans Oscar."), count($exist)));
+            $repport->addnotice(sprintf(_("Il y'a %s personne(s) référencées dans Oscar pour le connecteur '%s'."), count($exist), $this->getName()));
+    //        var_dump($exist);
         }
+
+        $repport->addnotice(count($personsDatas). " résultat(s) reçus vont être traité.");
+
 
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
 
 
         $nbrPersonsConnector        = 0;
-        $nbrPersonsOscar            = count($exist);
+        //$nbrPersonsOscar            = count($exist);
         $nbrPersonsDeleted          = 0;
         $nbrPersonsUseAndDeletable  = 0;
-
-
+        $do = false;
 
         /////////////////////////////////////
         ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
-
-            $repport->addnotice(count($personsDatas). " résultat(s) a traiter.");
-            ////////////////////////////////////
 
             foreach( $personsDatas as $personData ){
 
@@ -154,6 +152,9 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
                     $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
                     continue;
                 }
+
+//                $repport->addnotice($action . " - " . $personData->uid);
+
 
                 if( $personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null

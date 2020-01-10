@@ -51,9 +51,16 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     }
 
 
+    /**
+     * Retourne la liste des UIDS des personnes issues d'une synchronisation dans
+     * Oscar pour le connector $connector.
+     *
+     * @param $connector
+     * @return array
+     */
     public function getUidsConnector($connector){
         $qb = $this->getEntityManager()->createQueryBuilder();
-        $search = sprintf('s:%s:"%s";s:', strlen($connector), $connector);
+        $search = sprintf('s:%s:"%s";', strlen($connector), $connector);
 
         $qb->select('p.connectors')
             ->from(Person::class, 'p')
@@ -62,7 +69,6 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 
         $uids = [];
         foreach ($qb->getQuery()->getArrayResult() as $a){
-
             $uids[] = $a['connectors'][$connector];
         }
         return $uids;
@@ -332,10 +338,11 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     public function getPersonByConnectorQuery($connector, $value)
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
+        $search = sprintf('{s:%s:"%s";s:%s:"%s";}', strlen($connector), $connector, strlen($value), $value);
         $qb->select('p')
             ->from(Person::class, 'p')
             ->where('p.connectors LIKE :search')
-            ->setParameter('search', '%"' . $connector . '";s:'.strlen($value).':"' . $value . '";%');
+            ->setParameter('search', "%$search%");
         return $qb;
     }
 

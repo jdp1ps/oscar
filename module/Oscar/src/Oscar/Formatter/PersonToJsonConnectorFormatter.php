@@ -16,7 +16,7 @@ class PersonToJsonConnectorFormatter
     public function format(Person $person)
     {
         return array(
-            'uid' => $person->getId(),
+            'uid' => (string)$person->getId(),
             'login' => $person->getLadapLogin(),
             'firstname' => $person->getFirstname(),
             'lastname' => $person->getLastname(),
