@@ -1186,6 +1186,18 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             ->getResult();
     }
 
+    /**
+     * @param $connectorName Nom de connecteur
+     * @param $uid Valeur dans ce connecteur
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getPersonByConnectorUid($connectorName, $uid)
+    {
+        return $this->getPersonRepository()->getPersonByConnectorID($connectorName, $uid);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///

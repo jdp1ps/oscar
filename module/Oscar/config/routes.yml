@@ -69,6 +69,13 @@ api:
                 defaults:
                     action: persons
 
+        person:
+            type: segment
+            options:
+                route: /persons/:id
+                defaults:
+                    action: person
+
 ################################################################################
 # NOTIFICATIONS
 notification:

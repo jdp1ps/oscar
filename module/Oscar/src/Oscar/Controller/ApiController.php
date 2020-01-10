@@ -30,6 +30,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
      * Gestion des accès aux API : création de compte et configuration
      */
     public function adminManageAccessAction(){
+
         $this->getOscarUserContextService()->check(Privileges::DROIT_API_ACCESS);
         $apis = [
             'persons' => "Personnes",
@@ -130,6 +131,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
     public function personsAction(){
         try {
             $this->checkApiAcces('persons');
+
             $persons = [];
             $personToJsonFormatter = new PersonToJsonConnectorFormatter();
 
@@ -148,7 +150,30 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         } catch (\Exception $e) {
             return $this->getResponseUnauthorized($e->getMessage());
         }
+    }
 
+    public function personAction(){
+        try {
+            $this->checkApiAcces('persons');
+            $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+            $uid = $this->params()->fromRoute("id");
+            try {
+                $person = $this->getPersonService()->getPerson($uid);
+            } catch (\Exception $e) {
+                return $this->getResponseNotFound(_("Personne non trouvée"));
+            }
+
+            $datas = [
+                "version"         => OscarVersion::getBuild(),
+                "datecreated"     => date('c'),
+                "uid"             => $uid,
+                "person"          => $personToJsonFormatter->format($person)
+            ];
+
+            return $this->jsonOutput($datas);
+        } catch (\Exception $e) {
+            return $this->getResponseUnauthorized($e->getMessage());
+        }
     }
 
     public function helpAction(){
