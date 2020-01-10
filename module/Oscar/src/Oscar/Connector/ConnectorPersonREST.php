@@ -104,9 +104,8 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
      */
     function syncPersons(PersonRepository $personRepository, $force)
     {
-        if( $this->getOptionPurge() ){
-            $exist = $personRepository->getUidsConnector($this->getName());
-        }
+        $exist = [];
+        $exist = $personRepository->getUidsConnector($this->getName());
 
         $repport = new ConnectorRepport();
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
@@ -117,7 +116,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
         $nbrPersonsConnector        = 0;
         $nbrPersonsOscar            = count($exist);
-        echo 'Persons dans OSCAR : ' . $nbrPersonsOscar . "\n";
+        $repport->addnotice(sprintf("Il y'a déjà %s personne(s) synchronisée(s) pour le connector '%s'", count($exist), $this->getName()));
         $nbrPersonsDeleted          = 0;
         $nbrPersonsUseAndDeletable  = 0;
 
@@ -172,9 +171,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                         array_splice($exist, $index, 1);
                     }
                 }
-
-                // TEST
-                continue;
 
                 try {
                     /** @var Person $personOscar */
@@ -282,7 +278,7 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
             if( false === $return ){
                 $message = sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName());
-                $this->getLogger()->error($message . " - " . cubrid_error_msg());
+                $this->getLogger()->error($message . " - " . curl_error($curl));
                 throw new ConnectorException($message);
             }
 
@@ -292,6 +288,11 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 $message = sprintf("Aucune données retournée par le connecteur%s.", $this->getName());
                 $this->getLogger()->error($message . " - " . print_r($return, true));
                 throw new ConnectorException($message);
+            }
+
+            // Fix : Nouveau format
+            if( property_exists($personData, 'person') ){
+                $personData = $personData->person;
             }
 
             return $this->getPersonHydrator()->hydratePerson($person, $personData, $this->getName());

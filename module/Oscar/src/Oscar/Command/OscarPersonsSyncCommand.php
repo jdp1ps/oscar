@@ -84,8 +84,6 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
             $io->error($e->getMessage());
         }
 
-
-
         $io->section("Reconstruction de l'index de recherche : ");
         if( !$input->getOption('no-rebuild') ){
             /** @var PersonService $personService */

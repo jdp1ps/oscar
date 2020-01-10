@@ -11,23 +11,32 @@ namespace Oscar\Controller;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ConnectorService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseOscarUserContextService;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 use UnicaenCode\Controller\Controller;
 use Zend\Http\Request;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 
-class ConnectorController extends AbstractOscarController
+class ConnectorController extends AbstractOscarController implements UseOscarUserContextService, UsePersonService, UseServiceContainer
 {
+    use UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait;
+    
     public function personAction()
     {
 
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
         /** @var Request $request */
         $request = $this->getRequest();
 
         $connectorName = $request->getQuery('c');
         $personId = $request->getQuery('v');
 
-        $connectorsAvailabled = array_keys($this->getConfiguration('oscar.connectors.person'));
+        $connectorsAvailabled = array_keys($this->getOscarConfigurationService()->getConfiguration('connectors.person'));
 
         if( ! in_array($connectorName, $connectorsAvailabled) ){
             return $this->getResponseBadRequest('Connecteur indisponible');
@@ -37,8 +46,8 @@ class ConnectorController extends AbstractOscarController
 
             if( count($persons) == 1 ){
                 $person = $persons[0];
-                $class = $this->getConfiguration('oscar.connectors.person')[$connectorName]['class'];
-                $connector = $this->getServiceLocator()->get('ConnectorService')->getConnector('person.' . $connectorName);
+                $class = $this->getOscarConfigurationService()->getConfiguration('connectors.person')[$connectorName]['class'];
+                $connector = $this->getServiceContainer()->get(ConnectorService::class)->getConnector('person.' . $connectorName);
                 $connector->syncPerson($person);
                 $this->getEntityManager()->flush();
                 return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
