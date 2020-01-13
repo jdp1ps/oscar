@@ -64,12 +64,20 @@ apt -y install lsb-release apt-transport-https ca-certificates
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php7.3.list
 ```
+Sous ubuntu il sera certainement nécessaire d'ajouter ces éléments
+```
+apt install software-properties-common
+add-apt-repository ppa:ondrej/php
+apt update
+apt install php7.3
+php -v
+```
 
 Mettre à jour les sources  : 
 
 ```bash
 # Installation de APACHE2
-apt update apache2
+apt update
 ```
 
 ```bash
@@ -77,31 +85,22 @@ apt update apache2
 apt-get install apache2
 
 # PHP + Modules PHP
-apt-get install \
-    php7.3 \
-    php-bcmath  \
-    php7.3-bz2 \
-    php7.3-cli \
-    php7.3-curl \
-    php7.3-dom \
-    php7.3-gd \
-    php7.3-gearman \
-    php7.3-intl \
-    php7.3-ldap \
-    php7.3-mbstring \
-    php-mcrypt \
-    php7.3-pdo-pgsql \
-    php7.3-xml \ 
-    php7.3-zip
+apt-get install php7.3
+apt-get install php-bcmath
+apt-get install php7.3-bz2
+apt-get install php7.3-cli
+apt-get install php7.3-curl
+apt-get install php7.3-dom
+apt-get install php7.3-gd
+apt-get install php7.3-gearman
+apt-get install php7.3-intl
+apt-get install php7.3-ldap
+apt-get install php7.3-mbstring
+apt-get install php-mcrypt
+apt-get install php7.3-pdo-pgsql
+apt-get install php7.3-xml 
+apt-get install php7.3-zip
 ```
-
-Installez également le client postgresql qui sera necessaire pour importer la structure initale de la base de donnée :
-
-```bash
-# Postgresql (ou autre selon le client de BDD utilisé)
-apt-get install postgresql postgresql-client postgresql-client-common
-```
-
 
 ### Installation de la base de donnée
 
@@ -110,9 +109,39 @@ Si la base de données est sur la même machine, installation du serveur **Postg
 ```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
 apt-get install postgresql-server
-
+```
+En cas de soucis sur Ubuntu il est possible de procéder ainsi :
+```
+wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -
+sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+apt update
+apt-get install postgresql postgresql-contrib
+sudo su - postgres
+```
+Une fois connecté :
+```
+psql
+postgres-# \conninfo
+résultat :
+Vous êtes connecté à la base de données « postgres » en tant qu'utilisateur « postgres » via le socket dans « /var/run/postgresql » via le port « 5432 ».
+```
+CTRL D (deux fois)
+```
+postgres=# \q
+xxx@zzzz:~$ déconnexion
 ```
 
+Installez également le client postgresql qui sera necessaire pour importer la structure initale de la base de donnée :
+
+```bash
+# Postgresql (ou autre selon le client de BDD utilisé)
+apt-get install postgresql postgresql-client postgresql-client-common
+```
+Vérification du bon fonctionnement
+```
+sudo -i -u postgres
+```
+CTRL D (pour quitter)
 
 ## Installation de la copie de Oscar
 
@@ -155,6 +184,14 @@ mv composer.phar /bin/composer
 #On donne les droit d'accès
 chmod +x /bin/composer
 ```
+Il est aussi possible aussi d'utiliser cette procédure pour composer :
+```
+apt-get install composer
+```
+Version officielle supportée donc pas forcément la dernière
+NB : Faire attention au groupe (user) auquel appartient composer,
+sinon il faudra le déplacer dans le dossier user local pour éviter de le lancer en root
+```
 
 Vous pouvez tester le bon déroulement de l'installation de **composer** en saisissant la commande `composer`, vous devriez obtenir l'invite en ligne de commande :
 
@@ -195,6 +232,11 @@ composer install --prefer-dist
 
 Composer se chargera d'installer les dépendances PHP tel de définies dans le fichier `composer.json`.
 
+Sous Ubuntu il est possible que ce paquet bcmath bloque, dans ce cas, ajouter cette commande
+```
+apt install php7.*-bcmath
+```
+
 
 ## Gestionnaire de tâche (via Gearman)
 
@@ -211,45 +253,6 @@ service gearman-job-server status
 # Surveiller les tâches en attentes
 watch "gearadmin --status | sort -n | column -t"
 ```
-
-Ensuite il faut configurer le *Worker Oscar* qui se chargera de réaliser les tâches disponibles sur le serveur : 
-
-```bash
-# on copie le gabarit de configuration du service
-cp install/oscarworker.dist.service config/oscarworker.service
-
-# On édite le service
-nano config/oscarworker.service
-```
-
-> Dans le fichier `config/oscarworker.service`, vous devez simplement indiquer le chemin complet vers le fichier PHP **bin/oscarworker.php**.
-
-On va ensuite ajouter le *worker oscar* au service du système.
-
-```bash
-# Passage en root
-sudo su
-
-# On va dans le dossier des service
-cd /etc/systemd/system
-
-# On ajoute la configuration du service dans SYSTEMD avec un lien symbolique
-ln -S /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
-
-# On lance le service
-service oscarworker start
-
-# On regarde si tout est OK
-journalctl -u oscarworker.service -f
-
-# On active le service
-service enable oscarworker
-```
-
-
-
-
-## Installation de la base de données
 
 ### Création de la base de données vide
 
@@ -282,6 +285,39 @@ psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 
 > La structure initiale n'est pas forcement à jour, vous devez donc procéder à la **Mise à jour du modèle** présenté dans le point suivant.
 
+Ensuite il faut configurer le *Worker Oscar* qui se chargera de réaliser les tâches disponibles sur le serveur : 
+
+```bash
+# on copie le gabarit de configuration du service
+cp install/oscarworker.dist.service config/oscarworker.service
+
+# On édite le service
+nano config/oscarworker.service
+```
+
+> Dans le fichier `config/oscarworker.service`, vous devez simplement indiquer le chemin complet vers le fichier PHP **bin/oscarworker.php**.
+
+Ajouter le *worker oscar* au service du système.
+
+```bash
+# Passage en root
+sudo su
+
+# On va dans le dossier des service
+cd /etc/systemd/system
+
+# On ajoute la configuration du service dans SYSTEMD avec un lien symbolique
+ln -s /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
+
+# On lance le service
+service oscarworker start
+
+# On regarde si tout est OK
+journalctl -u oscarworker.service -f
+
+# On active le service
+service enable oscarworker
+```
 
 
 ## Configuration d'oscar
@@ -297,7 +333,7 @@ touch config/autoload/oscar-editable.yml
 Assurez vous qu'il est accessible en écriture
 
 
-### Base de données
+### Base de données paramètres
 
 Oscar est conçu pour fonctionner avec une base de données *Postgresql*.
 
@@ -385,6 +421,11 @@ chmod 777 config/autoload/oscar-editable.yml
 ```
 
 Ce fichier est utilisé pour les paramètres administrable depuis l'interface (Administration > Options). 
+
+
+
+
+-------------------------- Elastic Search ICI TODO ------------------------
 
 
 ### Tester la configuration
