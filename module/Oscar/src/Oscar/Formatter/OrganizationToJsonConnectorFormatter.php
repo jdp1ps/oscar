@@ -15,6 +15,8 @@ class OrganizationToJsonConnectorFormatter
 {
     public function format(Organization $organization)
     {
+
+
         return array(
             'uid' => (string)$organization->getId(),
             'code' => $organization->getCode(),
@@ -29,7 +31,11 @@ class OrganizationToJsonConnectorFormatter
                 "city" => $organization->getCity(),
                 "country" => $organization->getCountry(),
             ],
-            'dateupdated' => $organization->getDateUpdated(),
+
+            "datecreated" => $organization->getDateCreatedStr(),
+            "dateupdated" => $organization->getDateUpdatedStr(),
+            "datecached" => $organization->getDateCachedStr(),
+
             'phone' => $organization->getPhone(),
             'url' => $organization->getUrl(),
             'email' => $organization->getEmail(),
