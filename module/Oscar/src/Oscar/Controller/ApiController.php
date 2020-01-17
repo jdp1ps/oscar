@@ -58,15 +58,9 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
                     $pass = $this->params()->fromPost('pass');
                     $apis = $this->params()->fromPost('apis');
 
-                    if( !array_key_exists($login, $datas) ){
-                        $datas[$login] = ['pass' => $pass, 'apis' => explode(',', $apis)];
-                        $this->getOscarConfigurationService()->saveEditableConfKey('apiaccess', $datas);
-                        return $this->getResponseOk();
-                    } else {
-                        return $this->getResponseInternalError("La clef  '$login' existe déjà");
-                    }
-
-                    break;
+                    $datas[$login] = ['pass' => $pass, 'apis' => explode(',', $apis)];
+                    $this->getOscarConfigurationService()->saveEditableConfKey('apiaccess', $datas);
+                    return $this->getResponseOk();
 
                 case "DELETE" :
                     $id = $this->params()->fromQuery('id');
