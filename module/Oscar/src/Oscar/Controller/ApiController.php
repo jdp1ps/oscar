@@ -5,11 +5,14 @@ namespace Oscar\Controller;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\OrganizationToJsonConnectorFormatter;
 use Oscar\Formatter\PersonToJsonConnectorFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOrganizationService;
+use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
@@ -22,9 +25,9 @@ use Zend\View\Model\JsonModel;
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
-class ApiController extends AbstractOscarController implements UseOscarUserContextService, UseOscarConfigurationService, UsePersonService, UseLoggerService
+class ApiController extends AbstractOscarController implements UseOscarUserContextService, UseOscarConfigurationService, UsePersonService, UseLoggerService, UseOrganizationService
 {
-    use UseOscarUserContextServiceTrait, UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseLoggerServiceTrait;
+    use UseOscarUserContextServiceTrait, UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseLoggerServiceTrait, UseOrganizationServiceTrait;
 
     /**
      * Gestion des accès aux API : création de compte et configuration
@@ -83,6 +86,11 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
     }
 
 
+    /**
+     * Contrôle d'accès à l'API. Pour le moment, utilise AuthBasic
+     * @param $api
+     * @throws OscarException
+     */
     protected function checkApiAcces($api){
         if (!isset($_SERVER['PHP_AUTH_USER'])) {
             header('WWW-Authenticate: Basic realm="Oscar');
@@ -127,6 +135,11 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         }
 
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    ///                         ~ API ~
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function personsAction(){
         try {
@@ -176,10 +189,57 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         }
     }
 
+    public function organizationsAction(){
+        try {
+            $this->checkApiAcces('organizations');
+
+            $organizations = [];
+            $organizationToJsonFormatter = new OrganizationToJsonConnectorFormatter();
+
+            /** @var Person $p */
+            foreach( $this->getOrganizationService()->getOrganizations() as $o ){
+                $organizations[] = $organizationToJsonFormatter->format($o);
+            }
+
+            $datas = [
+                "version"         => OscarVersion::getBuild(),
+                "datecreated"     => date('c'),
+                'organizations'         => $organizations
+            ];
+
+            return $this->jsonOutput($datas);
+        } catch (\Exception $e) {
+            return $this->getResponseUnauthorized($e->getMessage());
+        }
+    }
+
+    public function organizationAction(){
+        try {
+            $this->checkApiAcces('organizations');
+            $organizationToJsonFormatter = new OrganizationToJsonConnectorFormatter();
+            $uid = $this->params()->fromRoute("id");
+            try {
+                $organization = $this->getOrganizationService()->getOrganization($uid);
+            } catch (\Exception $e) {
+                return $this->getResponseNotFound(_("Organisation non trouvée"));
+            }
+
+            $datas = [
+                "version"         => OscarVersion::getBuild(),
+                "datecreated"     => date('c'),
+                "uid"             => $uid,
+                "person"          => $organizationToJsonFormatter->format($organization)
+            ];
+
+            return $this->jsonOutput($datas);
+        } catch (\Exception $e) {
+            return $this->getResponseUnauthorized($e->getMessage());
+        }
+    }
+
     public function helpAction(){
         die("Consultez l'aide technique pour obtenir");
     }
-
 
     public function apiAction()
     {

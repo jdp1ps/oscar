@@ -9,12 +9,24 @@
 namespace Oscar\Formatter;
 
 
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 
 class PersonToJsonConnectorFormatter
 {
     public function format(Person $person)
     {
+        $roles = [];
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($person->getOrganizations() as $personOrganization){
+            $structureKey = (string)$personOrganization->getOrganization()->getId();
+            $roleStr = $personOrganization->getRoleObj()->getRoleId();
+            if( !array_key_exists($structureKey, $roles) ){
+                $roles[$structureKey] = [];
+            }
+            $roles[$structureKey][] = $roleStr;
+        }
+
         return array(
             'uid' => (string)$person->getId(),
             'login' => $person->getLadapLogin(),
@@ -52,8 +64,8 @@ class PersonToJsonConnectorFormatter
                 "city" => "",
                 "country" => ""
             ],
-            "groups" => [],
-            "roles" => []
+            "groups" => $person->getLdapMemberOf(),
+            "roles" => $roles
         );
     }
 
