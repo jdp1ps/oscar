@@ -49,7 +49,8 @@ class HttpAuthBasicStrategy implements IDataAccessStrategy
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payloadName);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         $return = curl_exec($ch);
-        if( $return === FALSE ){
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if( $return === FALSE || $httpcode != 200 ){
             throw new \Exception(curl_error($ch));
         }
         curl_close($ch);

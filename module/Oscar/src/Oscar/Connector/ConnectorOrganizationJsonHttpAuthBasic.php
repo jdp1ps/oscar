@@ -14,12 +14,25 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
 use Oscar\Connector\DataExtractionStrategy\DataExtractionStringToJsonStrategy;
-use Oscar\Entity\Person;
-use Oscar\Entity\PersonRepository;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRepository;
+use Oscar\Factory\JsonToOrganization;
 
-class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
+class ConnectorOrganizationJsonHttpAuthBasic extends AbstractConnectorOscar
 {
-    private $personHydrator;
+    private $organizationHydrator;
+
+
+    /**
+     * @return OrganizationRepository
+     */
+    public function getOrganizationRepository(){
+        return $this->getEntityManager()->getRepository(Organization::class);
+    }
+
+    public function getEntityManager(){
+        return $this->getServiceManager()->get(EntityManager::class);
+    }
 
     function execute($force = true)
     {
@@ -28,7 +41,7 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
         $report                     = new ConnectorRepport();
 
         try {
-            $url = $this->getParameter('url_persons');
+            $url = $this->getParameter('url_organizations');
         } catch (\Exception $e) {
             $report->adderror("Erreur de configuration : " . $e->getMessage());
             return $report;
@@ -43,7 +56,7 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
             $report->addnotice("$msg : OK ( ". strlen($datas) ." chars extract)");
         } catch (\Exception $e) {
             $report->adderror("$msg : ERROR (" . $e->getMessage() . ")");
-            throw new \Exception("Impossible de charger des données depuis $url : " . $e->getMessage());
+            throw new \Exception("Impossible de charger des données depuis $url  : " . $e->getMessage());
         }
 
         // Conversion
@@ -51,189 +64,120 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
         try {
             $json = $dataExtractionStrategy->extract($datas);
             // Autorise la présence d'une clef 'persons' au premier niveau (facultatif)
-            if( is_object($json) && property_exists($json, 'persons') ){
-                $personsDatas = $json->persons;
+            if( is_object($json) && property_exists($json, 'organizations') ){
+                $organizationsDatas = $json->organizations;
             } else {
-                $personsDatas = $json;
+                $organizationsDatas = $json;
             }
         } catch (\Exception $e) {
             $report->adderror("$msg : ERROR (" . $e->getMessage() . ")");
-            throw new \Exception("Impossible de convertir les données depuis $url : " . $e->getMessage());
+            throw new \Exception("Impossible de convertir les données depuis $url (".strlen($datas)." : ". substr($datas, 0, 100) .") : " . $e->getMessage());
         }
 
-        if( !is_array($personsDatas) ){
+        if( !is_array($organizationsDatas) ){
             throw new \Exception("L'API n'a pas retourné un tableau de donnée");
         }
 
         // ...
-        $this->syncPersons($personsDatas, $this->getPersonRepository(), $report, $this->getOption('force', false));
+        $this->syncAll($organizationsDatas, $this->getOrganizationRepository(), $report, $this->getOption('force', false));
 
         return $report;
     }
 
     /**
-     * @return ConnectorPersonHydrator
+     * @return JsonToOrganization
      */
-    public function getPersonHydrator()
+    protected function factory(){
+        static $factory;
+        if( $factory === null )
+            $factory = new JsonToOrganization();
+        return $factory;
+    }
+
+    /**
+     * @param OrganizationRepository $repository
+     * @param bool $force
+     * @return ConnectorRepport
+     * @throws \Oscar\Exception\OscarException
+     */
+    function syncAll($organizationsDatas, OrganizationRepository $repository, ConnectorRepport $repport, $force)
     {
-        if( $this->personHydrator === null ){
-            $this->personHydrator = new ConnectorPersonHydrator(
-                $this->getEntityManager()
-            );
-            $this->personHydrator->setPurge($this->getOptionPurge());
-        }
-        return $this->personHydrator;
-    }
 
-    /**
-     * @return PersonRepository
-     */
-    public function getPersonRepository(){
-        return $this->getEntityManager()->getRepository(Person::class);
-    }
-
-    /**
-     * @return EntityManager
-     */
-    public function getEntityManager(){
-        return $this->getServiceManager()->get('Doctrine\ORM\EntityManager');
-    }
-
-
-    public function syncPersons($personsDatas, PersonRepository $personRepository, ConnectorRepport &$repport, $force) {
-
-
-        if( $this->getOptionPurge() ){
-            $exist = $personRepository->getUidsConnector($this->getName());
-            $repport->addnotice(sprintf(_("Il y'a %s personne(s) référencées dans Oscar pour le connecteur '%s'."), count($exist), $this->getName()));
-    //        var_dump($exist);
-        }
-
-        $repport->addnotice(count($personsDatas). " résultat(s) reçus vont être traité.");
-
-
-        $this->getPersonHydrator()->setPurge($this->getOptionPurge());
-
-
-        $nbrPersonsConnector        = 0;
-        //$nbrPersonsOscar            = count($exist);
-        $nbrPersonsDeleted          = 0;
-        $nbrPersonsUseAndDeletable  = 0;
-        $do = false;
 
         /////////////////////////////////////
         ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
 
-            foreach( $personsDatas as $personData ){
-
-                if( ! property_exists($personData, 'uid') ){
-                    $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData, true)));
-                    continue;
-                }
-
-                if( $this->getOptionPurge() ){
-                    $uid = $personData->uid;
-                    if( ($index = array_search($uid, $exist)) >= 0 ){
-                        array_splice($exist, $index, 1);
-                    }
-                }
-
+            foreach( $organizationsDatas as $data ){
                 try {
                     /** @var Person $personOscar */
-                    $personOscar = $personRepository->getPersonByConnectorID($this->getName(), $personData->uid);
+                    $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
                     $action = "update";
-
                 } catch( NoResultException $e ){
-                    $personOscar = $personRepository->newPersistantPerson();
+                    $organization = $repository->newPersistantObject();
                     $action = "add";
-
-                } catch( NonUniqueResultException $e ){
-                    $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
-                    continue;
                 }
-
-//                $repport->addnotice($action . " - " . $personData->uid);
-
-
-                if( $personData->dateupdated == null
-                    || $personOscar->getDateSyncLdap() == null
-                    || $personOscar->getDateSyncLdap()->format('Y-m-d') < $personData->dateupdated
-                    || $force == true )
-                {
-                    $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
-                    if( $personOscar == null ){
-                        throw new \Exception("WTF $action");
-                    }
-
-                    $repport->addRepport($this->getPersonHydrator()->getRepport());
-
-                    $personRepository->flush($personOscar);
-
-                    if( $action == 'add' ){
-                        $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
-                    } else {
-                        $repport->addupdated(sprintf("%s a été mis à jour.", $personOscar->log()));
-                    }
+                if( !property_exists($data, 'dateupdated') ){
+                    $dateupdated = date('Y-m-d H:i:s');
                 } else {
-                    $repport->addnotice(sprintf("%s est à jour.", $personOscar->log()));
+                    if( $data->dateupdated == null )
+                        $data->dateupdated = "";
+                    else
+                        $dateupdated = $data->dateupdated;
                 }
-            }
+                if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
 
+                    $organization = $this->hydrateWithDatas($organization, $data);
+                    if( property_exists($data, 'type') )
+                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
 
-            if( $this->getOptionPurge() ){
-
-                $idsToDelete = [];
-
-
-
-                foreach ($exist as $uid){
-                    try {
-                        /** @var Person $personOscarToDelete */
-                        $personOscarToDelete = $personRepository->getPersonByConnectorID($this->getName(), $uid);
-
-                        $activeIn = [];
-
-                        if( count($personOscarToDelete->getActivities()) > 0 ){
-                            $activeIn[] = "activité";
-                        }
-                        if( count($personOscarToDelete->getProjectAffectations()) > 0 ){
-                            $activeIn[] = "projet";
-                        }
-                        if( count($personOscarToDelete->getOrganizations()) > 0 ){
-                            $activeIn[] = "organisation";
-                        }
-
-                        if( count($activeIn) == 0 ){
-                            $idsToDelete[] = $personOscarToDelete->getId();
-                        } else {
-                            $repport->addwarning("$personOscarToDelete n'a pas été supprimé car il est actif dans : " . implode(', ', $activeIn));
-                        }
-
-                    } catch (\Exception $e){
-                        $repport->adderror("$personOscarToDelete n'a pas été supprimé car il est actif dans les activités : " . $e->getMessage());
+                    $repository->flush($organization);
+                    if( $action == 'add' ){
+                        $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
+                    } else {
+                        $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
                     }
+
+                } else {
+                    $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
                 }
-
-
-                foreach ($idsToDelete as $idPerson) {
-                    try {
-                        $personRepository->removePersonById($idPerson);
-                        $repport->addremoved("Suppression de person $idPerson : ");
-                    } catch (\Exception $e) {
-                        $repport->adderror("Immpossible de suprimer la person $idPerson : " . $e->getMessage());
-                    }
-                }
-
             }
         } catch (\Exception $e ){
-            throw new \Exception("Impossible de synchroniser les personnes : " . $e->getMessage());
+            $repport->adderror($e->getMessage());
         }
 
-        $personRepository->flush(null);
 
+        $repport->addnotice("FIN du traitement...");
         return $repport;
     }
 
+    private function hydrateWithDatas( Organization $organization, $data ){
+        return $this->factory()->hydrateWithDatas($organization, $data, $this->getName());
+    }
+
+    function syncOrganization(Organization $organization)
+    {
+        if ($organization->getConnectorID($this->getName())) {
+
+            $url = sprintf($this->getParameter('url_organization'), $organization->getConnectorID($this->getName()));
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_COOKIESESSION, true);
+            $return = curl_exec($curl);
+            curl_close($curl);
+
+            try {
+                $organizationData = PhpPolyfill::jsonDecode($return);
+                return $this->hydrateWithDatas($organization, $organizationData);
+            } catch (\Exception $e) {
+                throw new \Exception("Impossible de traiter des données : " . $e->getMessage());
+            }
+
+        } else {
+            throw new \Exception('Impossible de synchroniser la structure ' . $organization);
+        }
+
+    }
 
 }
