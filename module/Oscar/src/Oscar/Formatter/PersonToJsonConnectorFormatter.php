@@ -19,11 +19,12 @@ class PersonToJsonConnectorFormatter
         $roles = [];
         /** @var OrganizationPerson $personOrganization */
         foreach ($person->getOrganizations() as $personOrganization){
-            $structureKey = (string)$personOrganization->getOrganization()->getId();
-            $roleStr = $personOrganization->getRoleObj()->getRoleId();
+            $structureKey = (string)$personOrganization->getOrganization()->getCode();
+            if( !$structureKey ) continue;
             if( !array_key_exists($structureKey, $roles) ){
                 $roles[$structureKey] = [];
             }
+            $roleStr = $personOrganization->getRoleObj()->getRoleId();
             $roles[$structureKey][] = $roleStr;
         }
 
