@@ -62,6 +62,21 @@ api:
                 route: /help
                 defaults:
                     action: help
+
+        organizations:
+            type: segment
+            options:
+                route: /organizations
+                defaults:
+                    action: organizations
+
+        organization:
+            type: segment
+            options:
+                route: /organizations/:id
+                defaults:
+                    action: organization
+
         persons:
             type: segment
             options:
