@@ -136,6 +136,8 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function personsAction(){
+        $start = microtime(true);
+
         try {
             $this->checkApiAcces('persons');
 
@@ -150,6 +152,8 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
             $datas = [
                 "version"         => OscarVersion::getBuild(),
                 "datecreated"     => date('c'),
+                'time'            => (microtime(true) - $start),
+                'total'           => count($persons),
                 'persons'         => $persons
             ];
 
@@ -161,6 +165,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
 
     public function personAction(){
         try {
+            $start = microtime(true);
             $this->checkApiAcces('persons');
             $personToJsonFormatter = new PersonToJsonConnectorFormatter();
             $uid = $this->params()->fromRoute("id");
@@ -173,6 +178,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
             $datas = [
                 "version"         => OscarVersion::getBuild(),
                 "datecreated"     => date('c'),
+                'time'            => (microtime(true) - $start),
                 "uid"             => $uid,
                 "person"          => $personToJsonFormatter->format($person)
             ];
@@ -186,7 +192,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
     public function organizationsAction(){
         try {
             $this->checkApiAcces('organizations');
-
+            $start = microtime(true);
             $organizations = [];
             $organizationToJsonFormatter = new OrganizationToJsonConnectorFormatter();
 
@@ -198,6 +204,8 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
             $datas = [
                 "version"         => OscarVersion::getBuild(),
                 "datecreated"     => date('c'),
+                'time'            => (microtime(true) - $start),
+                'total'           => count($organizations),
                 'organizations'         => $organizations
             ];
 
@@ -210,6 +218,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
     public function organizationAction(){
         try {
             $this->checkApiAcces('organizations');
+            $start = microtime(true);
             $organizationToJsonFormatter = new OrganizationToJsonConnectorFormatter();
             $uid = $this->params()->fromRoute("id");
             try {
@@ -221,6 +230,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
             $datas = [
                 "version"         => OscarVersion::getBuild(),
                 "datecreated"     => date('c'),
+                'time'            => (microtime(true) - $start),
                 "uid"             => $uid,
                 "person"          => $organizationToJsonFormatter->format($organization)
             ];

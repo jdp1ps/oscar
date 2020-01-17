@@ -896,12 +896,21 @@ class Person implements ResourceInterface
         return self::class;
     }
 
+    private $cGetDateCreated;
+    private $cGetDateUpdated;
+
     public function getDateCreatedStr(){
-        return $this->getDateCreated() ? $this->getDateCreated()->format('c') : "";
+        if( $this->cGetDateCreated == null ){
+            $this->cGetDateCreated = $this->getDateCreated() ? $this->getDateCreated()->format('c') : "";
+        }
+        return $this->cGetDateCreated;
     }
 
     public function getDateUpdatedStr(){
-        return $this->getDateUpdated() ? $this->getDateUpdated()->format('c') : $this->getDateCreatedStr();
+        if( $this->cGetDateUpdated == null ){
+            $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format('c') : $this->getDateCreatedStr();
+        }
+        return $this->cGetDateUpdated;
     }
 
     public function getDateCachedStr(){
