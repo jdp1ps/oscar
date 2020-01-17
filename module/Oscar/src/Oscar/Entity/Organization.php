@@ -1018,4 +1018,16 @@ class Organization implements ResourceInterface, IConnectedObject
     {
         return self::class;
     }
+
+    public function getDateCreatedStr(){
+        return $this->getDateCreated() ? $this->getDateCreated()->format('c') : "";
+    }
+
+    public function getDateUpdatedStr(){
+        return $this->getDateUpdated() ? $this->getDateUpdated()->format('c') : $this->getDateCreatedStr();
+    }
+
+    public function getDateCachedStr(){
+        return $this->getDateUpdatedStr();
+    }
 }

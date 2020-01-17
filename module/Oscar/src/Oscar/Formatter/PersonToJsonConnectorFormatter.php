@@ -45,9 +45,9 @@ class PersonToJsonConnectorFormatter
 
             'birthday' => '',
             'datefininscription' => '',
-            "datecreated" => "YYYY-MM-DD",
-            "dateupdated" => "YYYY-MM-DD",
-            "datecached" => "YYYY-MM-DD",
+            "datecreated" => $person->getDateCreatedStr(),
+            "dateupdated" => $person->getDateUpdatedStr(),
+            "datecached" => $person->getDateCachedStr(),
 
             'text' => $person->getDisplayName(),
             'phone' => $person->getPhone(),
@@ -55,15 +55,6 @@ class PersonToJsonConnectorFormatter
             'mailMd5' => md5($person->getEmail()),
             'ucbnSiteLocalisation' => $person->getLdapSiteLocation() ? $person->getLdapSiteLocation() : "",
             'affectation' => $person->getLdapAffectation() ? $person->getLdapAffectation() : "",
-
-            "address" => [
-                "address1" => "",
-                "address2" => "",
-                "address3" => "",
-                "zipcode" => "",
-                "city" => "",
-                "country" => ""
-            ],
             "groups" => $person->getLdapMemberOf(),
             "roles" => $roles
         );
