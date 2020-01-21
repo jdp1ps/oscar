@@ -121,6 +121,20 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
                 $this->getLoggerService()->error("[API OSCAR] L'API oscar n'est pas configurée");
                 throw new OscarException("L'accès à l'API Oscar est mal configuré");
             }
+
+            if( array_key_exists("strategy", $apiaccess[$user]) ){
+                $stategy = $apiaccess[$user]['strategy'];
+            } else {
+                $stategy = null;
+            }
+
+
+
+            return [
+               'access'     => 'granted',
+               'user'       => $user,
+               'strategy'   => $stategy
+            ];
         } catch (OscarException $e) {
             throw $e;
         } catch (\Exception $e) {
@@ -139,10 +153,16 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         $start = microtime(true);
 
         try {
-            $this->checkApiAcces('persons');
+            $granted = $this->checkApiAcces('persons');
+
+            var_dump($granted);
 
             $persons = [];
-            $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+            if( $granted['strategy'] == null ){
+                $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+            } else {
+                die("ICI");
+            }
 
             /** @var Person $p */
             foreach( $this->getPersonService()->getPersons() as $p ){
@@ -166,8 +186,13 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
     public function personAction(){
         try {
             $start = microtime(true);
-            $this->checkApiAcces('persons');
-            $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+            $granted = $this->checkApiAcces('persons');
+
+            if( $granted['strategy'] == null ){
+                $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+            } else {
+                $personToJsonFormatter = new $granted['strategy'];
+            }
             $uid = $this->params()->fromRoute("id");
             try {
                 $person = $this->getPersonService()->getPerson($uid);
