@@ -11,6 +11,7 @@
                         <label for="form_label">Intitulé</label>
                         <input type="text" class="form-control lg" name="login" v-model="formData.login" id="form_label" />
                     </div>
+
                     <hr>
                     <div>
                         <label for="form_label"><i class="icon-lock-1"></i>  Mot de passe</label>
@@ -23,7 +24,7 @@
                             </div>
                             <div class="col-md-3">
                                 <button class="btn btn-default" @click="newPassword" type="button">
-                                    <i class="icon-cw-outline"></i> Générer une nouvelle clef
+                                    <i class="icon-cw-outline"></i> Générer un nouveau mot de passe
                                 </button>
                             </div>
                         </div>
@@ -34,11 +35,15 @@
                             <label>
                                 <input type="checkbox" name="apis[]" @change="handleToogleApi(k)" :checked="formData.apis.indexOf(k) >= 0" />
                                 {{ a }} <small>({{k}})</small>
+                                <select v-if="formats[k]" v-model="formData.strategies[k]">
+                                    <option value="">Normal</option>
+                                    <option :value="label" v-for="classe, label in formats[k]">{{ label }} ({{classe}})</option>
+                                </select>
                             </label>
                         </li>
                     </ul>
                     <nav>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" :class="{ 'disabled' : formData.label == '' }" >
                             <i class="icon-floppy"></i>
                             Enregistrer
                         </button>
@@ -122,7 +127,8 @@
 
     export default {
         props: {
-            apis: { required: true }
+            apis: { required: true },
+            formats: { required: true }
         },
 
         data(){
@@ -173,6 +179,7 @@
                 data.append('login', this.formData.login);
                 data.append('pass', this.formData.pass);
                 data.append('apis', this.formData.apis.join(','));
+                data.append('strategies', JSON.stringify(this.formData.strategies));
 
                 this.$http.post('?', data).then(
                     ok => {
@@ -191,6 +198,12 @@
                     login: "",
                     exist: "",
                     pass: makeid(32),
+                    strategies:{
+                        persons: "",
+                        organizations: "",
+                        activities: "",
+                        roles: "",
+                    },
                     apis:[],
                     active: false
                 };

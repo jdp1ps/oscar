@@ -8,5 +8,5 @@
 namespace Oscar\Formatter;
 
 interface IFormatter {
-    public function format( $payment );
+    public function format( $options );
 }

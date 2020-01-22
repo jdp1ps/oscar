@@ -15,7 +15,8 @@
                     return h(APIAccess.default, {
                         props: {
                             url: '<?= $this->url('api/manage-acces') ?>',
-                            apis: <?= json_encode($apis) ?>
+                            apis: <?= json_encode($apis) ?>,
+                            formats: <?= json_encode($formats) ?>
                         }
                     });
                 }

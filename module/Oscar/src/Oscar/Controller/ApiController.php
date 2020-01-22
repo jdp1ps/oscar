@@ -57,8 +57,14 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
                     $login = $this->params()->fromPost('login');
                     $pass = $this->params()->fromPost('pass');
                     $apis = $this->params()->fromPost('apis');
+                    $strategies = json_decode($this->params()->fromPost('strategies'), JSON_OBJECT_AS_ARRAY);
 
-                    $datas[$login] = ['pass' => $pass, 'apis' => explode(',', $apis)];
+                    $datas[$login] = [
+                        'pass' => $pass,
+                        'apis' => explode(',', $apis),
+                        'strategies' => $strategies
+                    ];
+
                     $this->getOscarConfigurationService()->saveEditableConfKey('apiaccess', $datas);
                     return $this->getResponseOk();
 
@@ -75,7 +81,8 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         }
 
         return [
-            'apis' => $apis
+            'apis' => $apis,
+            'formats' => $this->getOscarConfigurationService()->getConfiguration('api.formats')
         ];
     }
 
@@ -122,18 +129,16 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
                 throw new OscarException("L'accès à l'API Oscar est mal configuré");
             }
 
-            if( array_key_exists("strategy", $apiaccess[$user]) ){
-                $stategy = $apiaccess[$user]['strategy'];
+            if( array_key_exists("strategies", $apiaccess[$user]) ){
+                $stategy = $apiaccess[$user]['strategies'];
             } else {
                 $stategy = null;
             }
 
-
-
             return [
                'access'     => 'granted',
                'user'       => $user,
-               'strategy'   => $stategy
+               'strategies'   => $stategy
             ];
         } catch (OscarException $e) {
             throw $e;
@@ -141,7 +146,20 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
             $this->getLoggerService()->error("[OSCAR API] Erreur inconnue : " . $e->getMessage());
             throw new OscarException("Accès interdit l'API Oscar");
         }
+    }
 
+
+
+    protected function getStrategy($api){
+        $config = $this->getOscarConfigurationService()->getConfiguration('api.formats.persons');
+        $granted = $this->checkApiAcces('persons');
+
+        if( array_key_exists('strategies', $granted) && array_key_exists($api, $granted['strategies']) && $granted['strategies'][$api] != 'Normal'){
+            $class = $config[$granted['strategies']['persons']];
+        } else {
+            $class = PersonToJsonConnectorFormatter::class;
+        }
+        return $class;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
@@ -154,15 +172,9 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
 
         try {
             $granted = $this->checkApiAcces('persons');
-
-            var_dump($granted);
-
+            $strategy = $this->getStrategy('persons');
+            $personToJsonFormatter = new $strategy;
             $persons = [];
-            if( $granted['strategy'] == null ){
-                $personToJsonFormatter = new PersonToJsonConnectorFormatter();
-            } else {
-                die("ICI");
-            }
 
             /** @var Person $p */
             foreach( $this->getPersonService()->getPersons() as $p ){
@@ -187,11 +199,13 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         try {
             $start = microtime(true);
             $granted = $this->checkApiAcces('persons');
+            $config = $this->getOscarConfigurationService()->getConfiguration('api.formats.persons');
 
-            if( $granted['strategy'] == null ){
-                $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+            if( array_key_exists('strategies', $granted) && array_key_exists('persons', $granted['strategies']) && $granted['strategies']['persons'] != 'Normal'){
+                $class = $config[$granted['strategies']['persons']];
+                $personToJsonFormatter = new $class;
             } else {
-                $personToJsonFormatter = new $granted['strategy'];
+                $personToJsonFormatter = new PersonToJsonConnectorFormatter();
             }
             $uid = $this->params()->fromRoute("id");
             try {
