@@ -6,6 +6,10 @@ La version *MacClane* fait suite à la mise à jour précédente (Passage à PHP
 
 Cette mise à niveau permet de bénéficier des dernières mises à jour de sécurité des systèmes linux, et rend Oscar compatible avec Postgresql 10.
 
+## Nettoyage du dépôt GIT
+
+L'historique du dépôt GIT a été modifié afin d'en supprimer des archives volumineuses et inutiles depuis plusieurs version (< Creed). **Vous devriez donc au moment du *fetch* constater que vous avez sur votre copie locale plusieurs milliers de *commits* en attente**. C'est normal. L'utilisation d'un *reset* à la place d'un *pull* réglera le problème.
+
 ## Nouveautés
 
  - **Feuille de temps > déclarant** :  Modification du système de saisie des commentaires. Le déclarant peut maintenant saisir son commentaire au fil de l'eau depuis la vue mois. Cette modification permet de simplifier la gestion des commentaires, et de ne pas perdre les commentaires en cas d'annulation d'une déclaration.
@@ -16,7 +20,87 @@ Cette mise à niveau permet de bénéficier des dernières mises à jour de séc
 
  - **Nouveau projet / nouvelle activité** : Le privilège permettant de créer des activités/projets était initialement réservé au niveau application (et donc effectif uniquement pour les rôles déterminés au sein de l'application). Ce privilège a maintenant été étendu aux rôles liès aux organisations afin de permettre une meilleure décentralisation de l'ajout de projet/activité. Pour les droits obtenus via l'organisation, une zone de saisie supplémentaire sera visible dans les formulaires pour y renseigner le rôle de l'organisation de rattachement (la liste des rôles sera limitée aux rôles donnant un accès NB: c'est cette affectation qui par la suite donnera accès à l'activié/projet créé).
  
+ - **Oscar API** : Première version de l'API Oscar. Cette API permet à d'autre  application du SI d'accéder à Oscar en lecture
+ 
  - **Gearman** Utilisation d'un serveur de gestion des tâches (**Gearman**) afin d'optimiser certaines opérations : Génération des notifications, planification de la reconstruction/optimisation des indices de recherche.
+ 
+## Procédure de mise à jour
+
+### Préparation et Pull des sources
+
+Commencez par faire une sauvegarde de vos données ainsi que de l'installation Oscar avant de mettre à jour les sources
+
+> **Attention**, la maintenance du dépôt GIT va provoquer des conflits si vous utiliser `git pull`.
+
+Puis récupérer les sources
+
+```bash
+# Actualisation du dépôt local
+git fetch
+
+# Basculez sur la branche "Macclane"
+git checkout maccclane
+
+# On force la récupération des sources
+git reset --hard HEAD~ 
+```
+
+Puis lancer l'installation des librairies PHP
+
+```bash
+# Installation des libs PHP
+composer install
+```
+
+### Gearman
+ 
+**Installationn de Gearman** : [Installation de Gearman pour PHP7.3](doc/gearman.md)
+
+Une fois le serveur **Gearman** et le **module Gearman PHP** installés, on installe le service Oscar chargé de traiter les tâches en attente.
+
+ ```bash
+ # on copie le gabarit de configuration du service
+ cp install/oscarworker.dist.service config/oscarworker.service
+ 
+ # On édite le service
+ nano config/oscarworker.service
+ ```
+ 
+ > Dans le fichier `config/oscarworker.service`, vous devez simplement indiquer le chemin complet vers le fichier PHP **bin/oscarworker.php**.
+ 
+ On va ensuite ajouter le *worker oscar* au service du système.
+ 
+```bash
+# Passage en root
+sudo su
+
+# On va dans le dossier des service
+cd /etc/systemd/system
+
+# On ajoute la configuration du service dans SYSTEMD avec un lien symbolique
+ln -s /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
+
+# On active le service
+service enable oscarworker
+
+# On lance le service
+service oscarworker start
+```
+
+Vous pouvez surveiller le *Worker Oscar* avec la commande : 
+
+```bash
+# On regarde si tout est OK
+journalctl -u oscarworker.service -f
+```
+
+A cette étape, le serveur Gearman est opérationnnel et le Worker Oscar est installé.
+
+### 
+ 
+## En cours
+
+ - *Dockerisation* Des travaux sont en cours afin de rendre possible d'utiliser **docker** pour le déploiement de Oscar. Docker permet de simplifier grandement (et d'automatiser) le déploiement des applications et de garantir leurs compatibilités sous différents systèmes..
  
  - **Dépense** (expérimental) Les écrans et la connexion SIFAC sont toujours en cours, les accès aux écrans de synchronisation des dépenses basé sur le journal des pièces sont disponibles (Avec les privilèges associés). Propose pour le moment des données brute
  
