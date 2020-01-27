@@ -26,7 +26,7 @@ L'historique du dépôt GIT a été modifié afin d'en supprimer des archives vo
  
 ## Procédure de mise à jour
 
-### Préparation et Pull des sources
+### Préparation et mise à jour des sources
 
 Commencez par faire une sauvegarde de vos données ainsi que de l'installation Oscar avant de mettre à jour les sources
 
@@ -38,12 +38,15 @@ Puis récupérer les sources
 # Actualisation du dépôt local
 git fetch
 
+# Réinitialiser la copie local à partir de la source distante
+git reset --hard origin/creed
+
 # Basculez sur la branche "Macclane"
 git checkout maccclane
-
-# On force la récupération des sources
-git reset --hard HEAD~ 
 ```
+
+
+### Mise à jour des librairies tiers PHP
 
 Puis lancer l'installation des librairies PHP
 
@@ -52,28 +55,66 @@ Puis lancer l'installation des librairies PHP
 composer install
 ```
 
+
 ### Gearman
+
+Le serveur Gearman permet de différer l'execution de certaines opérations couteuse. Il faut commencer par installer le serveur de JOB sur le système : 
+
+```bash
+apt install gearman-job-server
+ ```
  
-**Installationn de Gearman** : [Installation de Gearman pour PHP7.3](doc/gearman.md)
+Vous pouvez vérifier que le serveur est bien lancé avec la commande : 
+
+```bash
+systemctl status gearman-job-server
+ ```
+ 
+Résultat : 
+
+ ```
+● gearman-job-server.service - gearman job control server
+   Loaded: loaded (/lib/systemd/system/gearman-job-server.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2019-12-12 12:05:44 CET; 2min 23s ago
+     Docs: http://gearman.info/
+ Main PID: 16302 (gearmand)
+    Tasks: 7 (limit: 4915)
+   CGroup: /system.slice/gearman-job-server.service
+            └─16302 /usr/sbin/gearmand --pid-file=/run/gearman/gearmand.pid --listen=localhost -daemon --log-file=/var/log/gearman-job-server/gearmand.log
+
+déc. 12 12:05:44 bouvry-Precision-7520 systemd[1]: Starting gearman job control server...
+déc. 12 12:05:44 bouvry-Precision-7520 systemd[1]: Started gearman job control server.
+ ```
+
+On installe ensuite le **module Gearman de PHP** : 
+
+```bash
+# Installation du module Gearman PHP
+apt install php7.3-gearman
+```
+
+Par défaut, l'extension *Gearman* n'est pas activée dans le `php.ini`. Éditez les fichier **/etc/php/7.3/cli/php.ini** et **/etc/php/7.3/apache2/php.ini** en ajoutant la ligne : 
+
+```ini
+; /etc/php/7.3/apache2php.ini - /etc/php/7.3/apache2php.ini
+extension=gearman
+```
 
 Une fois le serveur **Gearman** et le **module Gearman PHP** installés, on installe le service Oscar chargé de traiter les tâches en attente.
 
- ```bash
- # on copie le gabarit de configuration du service
- cp install/oscarworker.dist.service config/oscarworker.service
- 
- # On édite le service
- nano config/oscarworker.service
- ```
- 
- > Dans le fichier `config/oscarworker.service`, vous devez simplement indiquer le chemin complet vers le fichier PHP **bin/oscarworker.php**.
- 
- On va ensuite ajouter le *worker oscar* au service du système.
- 
 ```bash
-# Passage en root
-sudo su
+# on copie le gabarit de configuration du service
+cp install/oscarworker.dist.service config/oscarworker.service
 
+# On édite le service
+nano config/oscarworker.service
+```
+
+> Dans le fichier `config/oscarworker.service`, vous devez simplement indiquer le chemin complet vers le fichier PHP **bin/oscarworker.php**.
+
+On va ensuite ajouter le *worker oscar* au service du système.
+
+```bash
 # On va dans le dossier des service
 cd /etc/systemd/system
 
@@ -96,7 +137,20 @@ journalctl -u oscarworker.service -f
 
 A cette étape, le serveur Gearman est opérationnnel et le Worker Oscar est installé.
 
-### 
+### Mise à jour du modèle
+
+Puis on mets à jour le modèle : 
+
+```bash
+php vendor/bin/doctrine-module orm:schema-tool:update --force
+```
+
+### Mise à jour des privilèges
+ 
+```bash
+php bin/oscar.php check:privileges
+``` 
+
  
 ## En cours
 

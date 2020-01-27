@@ -1,12 +1,23 @@
 [Unit]
 Description=OSCAR Worker
 After=gearmand.service
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
 
 [Service]
 Restart=on-failure
 Type=simple
-ExecStart=/usr/bin/php  /var/OscarApp/oscar/bin/oscar-worker.php
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+RestartSec=30
 
-### > MODIFIER USER
-User=USER
+# Mettre le chemin complet vers <DOSSIER-OSCOR>/bin/oscar-worker.php
+ExecStart=/usr/bin/php /path/to/oscar/bin/oscar-worker.php
+
+# Root
+User=root
+
 
