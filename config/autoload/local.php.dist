@@ -255,6 +255,13 @@ return array(
                 'type' => 'sendmail',
                 'cmd' => '/usr/sbin/sendmail -bs',
             ],
+            /****
+
+            /**** TRANSPORT (exim)
+            'transport' => [
+                'type' => 'sendmail',
+                'cmd' => '/usr/sbin/exim -bs',
+            ],
             /****/
 
             /**** TRANSPORT (file)
