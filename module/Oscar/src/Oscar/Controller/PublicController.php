@@ -122,7 +122,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                         $this->getUserParametersService()->performChangeFrequency($this->params()->fromPost('frequency', null));
                         return $this->getResponseOk();
                     } catch ( OscarException $e ){
-                        return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier le mode de déclaration'), $e->getMessage()));
+                        return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier la fréquence des notifications'), $e->getMessage()));
                     }
                     break;
 

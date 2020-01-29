@@ -168,7 +168,7 @@ return array(
             /**** TRANSPORT (sendmail) ****/
             'transport' => [
                 'type' => 'sendmail',
-                'cmd' => '/usr/sbin/sendmail -bs',
+                'cmd' => '/usr/sbin/sendmail -t',
                 // EXIM
                 // 'cmd' => '/usr/sbin/exim -bs',
             ],

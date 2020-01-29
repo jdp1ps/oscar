@@ -53,6 +53,7 @@ use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Log\Logger;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\View\Renderer\PhpRenderer;
 
 /**
  * Gestion des Personnes :
@@ -509,7 +510,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
 
         $url = $this->getServiceContainer()
-            ->get('viewhelpermanager')
+            ->get('ViewHelperManager')
             ->get('url');
 
         $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
@@ -535,7 +536,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         //  TODO vérifier que ça fonctionne
         /** @var MailingService $mailer */
-        $mailer = $this->getServiceLocator()->get("mailingService");
+        $mailer = $this->getServiceContainer()->get(MailingService::class);
         $to = $person->getEmail();
         $content .= "</ul>\n";
         $mail = $mailer->newMessage("Notifications en attente sur Oscar", ['body' => $content]);
