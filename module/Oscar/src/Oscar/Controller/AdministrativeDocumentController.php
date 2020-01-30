@@ -162,7 +162,7 @@ class AdministrativeDocumentController extends AbstractOscarController implement
             }
             $documentService = $this->getVersionnedDocumentService();
 
-            $documentService->performRequest($this->getRequest(), $docReplaced,
+            $response = $documentService->performRequest($this->getRequest(), $docReplaced,
                 function (AbstractVersionnedDocument $document) {
 
                     $this->getActivityLogService()->addUserInfo(
@@ -175,6 +175,7 @@ class AdministrativeDocumentController extends AbstractOscarController implement
                 },
 
                 function( AdministrativeDocument $document, $datas ) use ($documentService, $section, $person){
+                    var_dump($datas);
                     $sec = null;
                     $secInit = $section ? $section->getId() : null;
                     $secId = null;
@@ -198,6 +199,9 @@ class AdministrativeDocumentController extends AbstractOscarController implement
                     $document->setPerson($person);
                     return $document;
                 });
+            if( $response && $response['error'] ){
+                throw new OscarException($response['error']);
+            }
             return [
                 "defaultSection" => $defaultSection,
                 "sections" => $this->getEntityManager()->getRepository(AdministrativeDocumentSection::class)->findAll()

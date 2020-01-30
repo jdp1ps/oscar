@@ -16,6 +16,7 @@ use Jacksay\PhpFileExtension\Dictonary\OfficeDocumentDictonary;
 use Jacksay\PhpFileExtension\Exception\NotFoundExtension;
 use Jacksay\PhpFileExtension\PhpFileExtension;
 use Jacksay\PhpFileExtension\Strategy\MimeProvider;
+use mysql_xdevapi\Exception;
 use Oscar\Entity\AbstractVersionnedDocument;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
@@ -130,6 +131,14 @@ class VersionnedDocumentService {
             $datas = $request->getPost()->toArray();
             $datas["error"] = null;
             $file = $request->getFiles('file');
+            if( !$file ){
+                $lastError = error_get_last();
+                $error = "Erreur inconnue";
+                if( is_array($lastError) && array_key_exists('message', $lastError) ){
+                   $error = $lastError['message'];
+                }
+                throw new OscarException(sprintf(_('Fichier incorrect : %s'), $error));
+            }
 
             if( $file['error'] != 0 ){
                 $errors = [
@@ -141,7 +150,7 @@ class VersionnedDocumentService {
                     UPLOAD_ERR_CANT_WRITE => "Échec de l'écriture du fichier sur le disque.",
                     UPLOAD_ERR_EXTENSION => "Envoi interrompu pour une extension PHP, laquelle ? On n'sait pas trop pour le coup.",
                 ];
-                $result['error'] = $errors[$file['error']];
+                $datas['error'] = $errors[$file['error']];
             } else {
                 if( $file['size'] <= 0 ){
                     $datas['error'] = "Votre fichier a un poids nul, curieux...";
