@@ -98,3 +98,12 @@ where
     and measure = '014CG019'
 ;
 ```
+
+
+Requête OSCAR : 
+
+```sql
+SELECT numpiece, numpiece, MAX(datecomptable) as datecomptable, SUM(montant) as Total FROM spentline 
+WHERE pfi = '014CG019' GROUP BY numpiece
+ORDER BY datecomptable
+```

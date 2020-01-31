@@ -1489,7 +1489,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $activity = $this->getActivityService()->getActivityById($this->params()->fromRoute('id'));
         $msg = "";
         $error = "";
-        $spents = $this->getSpentService()->getSpentsByPFI($activity->getCodeEOTP());
+        $spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
 
         if( $action && $action == 'update' ) {
             if( count($spents) > 0 ){

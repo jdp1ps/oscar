@@ -151,7 +151,6 @@ class AdministrativeDocumentController extends AbstractOscarController implement
             $defaultSection = null;
             $person = $this->getOscarUserContextService()->getCurrentPerson();
 
-
             if ($docId) {
                 /** @var AdministrativeDocument $doc */
                 if ($doc = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->find($docId)) {
@@ -175,7 +174,6 @@ class AdministrativeDocumentController extends AbstractOscarController implement
                 },
 
                 function( AdministrativeDocument $document, $datas ) use ($documentService, $section, $person){
-                    var_dump($datas);
                     $sec = null;
                     $secInit = $section ? $section->getId() : null;
                     $secId = null;

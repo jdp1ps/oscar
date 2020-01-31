@@ -11,20 +11,54 @@
     <table class="table table-condensed table-bordered table-condensed card">
         <thead>
             <tr>
-                <?php foreach (\Oscar\Entity\SpentLine::getDetailsHeaders() as $h): ?>
-                    <th><?= $h ?></th>
-                <?php endforeach; ?>
+                <th>N°</th>
+                <th>Ligne(s)</th>
+                <th>Description</th>
+                <th>Montant</th>
+                <th>Compte</th>
+                <th>Date comptable</th>
+                <th>Date paiement</th>
+                <th>Année</th>
             </tr>
         </thead>
         <?php
+        $total = 0.0;
         /** @var \Oscar\Entity\SpentLine $spentLine */
         foreach ($spents as $spentLine): ?>
             <tr>
-                <?php foreach ($spentLine->getDetailsDatas() as $d): ?>
-                    <td><?= $d ?></td>
-                <?php endforeach; ?>
+                <td><?= $spentLine['refPiece'] ?></td>
+                <td><?= count($spentLine['details']) ?></td>
+                <td><?= implode(', ', $spentLine['text']) ?></td>
+                <td><?= number_format($spentLine['montant'], 2) ?></td>
+                <td><?= implode(', ', $spentLine['compteBudgetaire']) ?></td>
+                <td><?= $spentLine['datecomptable'] ?></td>
+                <td><?= $spentLine['datepaiement'] ?></td>
+                <td><?= $spentLine['annee'] ?></td>
+                <!-- <td><pre><?php var_dump($spentLine) ?></pre></td> -->
             </tr>
+
+            <?php
+            /** @var \Oscar\Entity\SpentLine $line */
+            foreach ($spentLine['details'] as $line) :?>
+            <tr class="text-small">
+                <td>&nbsp;</td>
+                <td><?= $line->getSyncId() ?></td>
+                <td><?= $line->getTexteFacture() ?:$line->getDesignation() ?></td>
+                <td><?= $line->getMontant() ?></td>
+                <td><?= $line->getCompteBudgetaire() ?></td>
+                <td><?= $line->getDateComptable() ?></td>
+                <td><?= $line->getDatePaiement() ?></td>
+                <td><?= $line->getDateAnneeExercice() ?></td>
+            </tr>
+            <?php endforeach; ?>
+            <?php $total += $spentLine['montant'] ?>
         <?php endforeach; ?>
+        <tfoot>
+            <tr>
+                <td colspan="3">&nbsp;</td>
+                <td><?= number_format($total,2) ?></td>
+            </tr>
+        </tfoot>
     </table>
     <?php else: ?>
         <form action="" method="post">

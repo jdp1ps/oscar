@@ -60,7 +60,7 @@ gjahr as dateAnneeExercice,
 zhldt AS datePaiement, 
 PSOBT AS dateServiceFait
 
-from sapsr3.v_fmifi where measure = '%s' AND rldnr='9A'", $pfi));
+from sapsr3.v_fmifi where measure = '%s' AND rldnr='9A' AND MANDT='430' AND BTART='0250'", $pfi));
 
             if( !$stid ){
                 throw new \Exception("ORACLE - PARSE ERROR : " . oci_error());

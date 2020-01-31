@@ -93,7 +93,7 @@ class SpentLine
     private $typeDocument;
 
     /**
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $montant;
 
@@ -315,7 +315,7 @@ class SpentLine
      */
     public function getDesignation()
     {
-        return $this->designation;
+        return trim($this->designation);
     }
 
     /**
@@ -331,7 +331,7 @@ class SpentLine
      */
     public function getTexteFacture()
     {
-        return $this->texteFacture;
+        return trim($this->texteFacture);
     }
 
     /**

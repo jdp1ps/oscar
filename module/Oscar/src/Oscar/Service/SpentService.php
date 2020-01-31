@@ -44,6 +44,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 {
     use UseEntityManagerTrait, UseOscarConfigurationServiceTrait, UseLoggerServiceTrait;
 
+
     public function getAllArray(){
         $array = [];
         /** @var SpentTypeGroup $spendTypeGroup */
@@ -505,7 +506,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
     }
     public function getSpentsByPFI( $pfi ){
-        return $this->getEntityManager()->getRepository(SpentLine::class)->findBy(['pfi' => $pfi], ['dateComptable' => 'DESC']);
+        return $this->getEntityManager()->getRepository(SpentLine::class)->findBy(['pfi' => $pfi], ['datePaiement' => 'ASC']);
     }
 
     public function syncSpentsByEOTP( $eotp ){
@@ -513,6 +514,55 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             throw new OscarException("Pas d'EOTP");
         }
         return $this->getConnector()->sync($eotp);
+    }
+
+    public function getGroupedSpentsDatas($pfi){
+        $spents = $this->getSpentsByPFI($pfi);
+        $out = [];
+        $grouped = [];
+        /** @var SpentLine $spent */
+        foreach ($spents as $spent) {
+            $numPiece = $spent->getNumPiece();
+            $compteBudg = $spent->getCompteBudgetaire();
+
+            if( !array_key_exists($numPiece, $grouped) ){
+                $grouped[$numPiece] = [
+                    'ids' => [],
+                    'syncIds' => [],
+                    'text' => [],
+                    'montant' => 0.0,
+                    'compteBudgetaire' => [],
+                    'datecomptable' => $spent->getDateComptable(),
+                    'datepaiement' => $spent->getDatePaiement(),
+                    'annee' => $spent->getDateAnneeExercice(),
+                    'refPiece' => $spent->getPieceRef(),
+                    'details' => []
+                ];
+            }
+
+
+
+            if( $compteBudg == 'PG_REM' ){
+                $grouped[$numPiece]['refPiece'] = $spent->getPieceRef();
+            }
+
+            if( $spent->getDesignation() && !in_array($spent->getDesignation(), $grouped[$numPiece]['text']) ){
+                $grouped[$numPiece]['text'][] = $spent->getDesignation();
+            }
+            if( $spent->getTexteFacture() && !in_array($spent->getTexteFacture(), $grouped[$numPiece]['text']) ){
+                $grouped[$numPiece]['text'][] = $spent->getTexteFacture();
+            }
+            if( $spent->getCompteBudgetaire() && !in_array($spent->getCompteBudgetaire(), $grouped[$numPiece]['compteBudgetaire']) ){
+                $grouped[$numPiece]['compteBudgetaire'][] = $spent->getCompteBudgetaire();
+            }
+
+            $grouped[$numPiece]['ids'][] = $spent->getId();
+            $grouped[$numPiece]['syncIds'][] = $spent->getSyncId();
+            $grouped[$numPiece]['montant'] += $spent->getMontant();
+            $grouped[$numPiece]['details'][] = $spent;
+        }
+
+        return $grouped;
     }
 
     public function getConnector(){
