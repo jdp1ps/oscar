@@ -592,6 +592,7 @@ class SpentLine
             // Infos
             'montant' => $this->getMontant(),
             'compteBudgetaire' => $this->getCompteBudgetaire(),
+            'centreProfit' => $this->getCentreDeProfit(),
             'compteGeneral' => $this->getCompteGeneral(),
             'centreFinancier' => $this->getCentreFinancier(),
 

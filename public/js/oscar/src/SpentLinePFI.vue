@@ -2,8 +2,6 @@
     <section class="spentlines">
         <h2><i class="icon-calculator"></i>Dépenses</h2>
 
-        <pre>{{ spentlines }}</pre>
-
         <transition name="fade">
             <div class="error overlay" v-if="error">
                 <div class="overlay-content">
@@ -26,12 +24,70 @@
             </div>
         </transition>
 
-        <section class="list" v-if="spentlines != null">
+        <div class="overlay" v-if="details">
+            <div class="overlay-content">
+                <h3><i class="icon-zoom-in-outline"></i>Détails des entrées comptables</h3>
+                <button class="btn btn-default" @click="details = null">Fermer</button>
 
-            <article v-for="line in spentlines">
-                <pre>{{ line }}</pre>
-            </article>
-        </section>
+                <table class="list table table-condensed table-bordered table-condensed card">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Montant</th>
+                        <th>Compte Budgetaire</th>
+                        <th>Centre de profit</th>
+                        <th>Compte général</th>
+                        <th>Date comptable</th>
+                        <th>Date paiement</th>
+                        <th>Année</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                <tr class="text-small" v-for="d in details.details">
+                    <td>{{ d.syncid }}</td>
+                    <td>{{ d.texteFacture|d.designation }}</td>
+                    <td style="text-align: right">{{ d.montant.toFixed(2) }}</td>
+                    <td>{{ d.compteBudgetaire }}</td>
+                    <td>{{ d.centreFinancier }}</td>
+                    <td>{{ d.compteGeneral }}</td>
+                    <td>{{ d.dateComptable }}</td>
+                    <td>{{ d.datePaiement }}</td>
+                    <td>{{ d.dateAnneeExercice }}</td>
+                </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <table class="list table table-condensed table-bordered table-condensed card" v-if="spentlines != null">
+            <thead>
+            <tr>
+                <th>N°</th>
+                <th>Ligne(s)</th>
+                <th>Description</th>
+                <th>Montant</th>
+                <th>Compte</th>
+                <th>Date comptable</th>
+                <th>Date paiement</th>
+                <th>Année</th>
+            </tr>
+            </thead>
+            <tbody v-for="l in spentlines">
+
+
+            <tr>
+                <td>{{ l.refPiece }}</td>
+                <td><button @click="details = l" class="btn btn-default">{{ l.details.length }}</button></td>
+                <td>{{ l.text.join(', ') }}</td>
+                <td style="text-align: right">{{ l.montant.toFixed(2) }}</td>
+                <td>{{ l.compteBudgetaire.join(', ') }}</td>
+                <td>{{ l.datecomptable }}</td>
+                <td>{{ l.datepaiement }}</td>
+                <td>{{ l.annee }}</td>
+            </tr>
+            </tbody>
+        </table>
     </section>
 
 </template>
@@ -46,7 +102,8 @@
             return {
                 error: null,
                 pendingMsg: "",
-                spentlines: null
+                spentlines: null,
+                details: null
             }
         },
 
