@@ -539,7 +539,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $mailer = $this->getServiceContainer()->get(MailingService::class);
         $to = $person->getEmail();
         $content .= "</ul>\n";
-        $mail = $mailer->newMessage("Notifications en attente sur Oscar", ['body' => $content]);
+        $mail = $mailer->newMessage("Notifications en attente", ['body' => $content]);
         $mail->setTo([$to => (string) $person]);
         $mailer->send($mail);
     }
