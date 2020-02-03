@@ -1,12 +1,35 @@
 
 <section class="container-fluid">
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
+
+
+    <div id="spentlines"></div>
+    <script>
+        require(['vue', 'vue-resource', 'SpentLinePFI'], function(Vue, VueResource, SpentLinePFI){
+            console.log("DONE");
+            Vue.use(VueResource);
+            new Vue({
+                el: "#spentlines",
+                render(h){
+                    return h(SpentLinePFI.default, { props: {
+                            url: "<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>"
+                        }});
+                }
+
+            });
+        })
+    </script>
+
     <?php if($msg): ?>
     <div class="alert alert-info"><?= $msg ?></div>
     <?php endif; ?>
     <?php if($error): ?>
         <div class="alert alert-danger"><?= $error ?></div>
     <?php endif; ?>
+
+
+
+
     <?php if( count($spents) ): ?>
     <table class="table table-condensed table-bordered table-condensed card">
         <thead>
@@ -42,13 +65,13 @@
             foreach ($spentLine['details'] as $line) :?>
             <tr class="text-small">
                 <td>&nbsp;</td>
-                <td><?= $line->getSyncId() ?></td>
-                <td><?= $line->getTexteFacture() ?:$line->getDesignation() ?></td>
-                <td><?= $line->getMontant() ?></td>
-                <td><?= $line->getCompteBudgetaire() ?></td>
-                <td><?= $line->getDateComptable() ?></td>
-                <td><?= $line->getDatePaiement() ?></td>
-                <td><?= $line->getDateAnneeExercice() ?></td>
+                <td><?= $line['syncid'] ?></td>
+                <td><?= $line['texteFacture'] ?:$line['designation'] ?></td>
+                <td><?= number_format($line['montant'], 2) ?></td>
+                <td><?= $line['compteBudgetaire'] ?></td>
+                <td><?= $line['dateComptable'] ?></td>
+                <td><?= $line['datePaiement'] ?></td>
+                <td><?= $line['dateAnneeExercice'] ?></td>
             </tr>
             <?php endforeach; ?>
             <?php $total += $spentLine['montant'] ?>

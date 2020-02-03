@@ -579,4 +579,33 @@ class SpentLine
         ];
     }
 
+    public function toArray()
+    {
+        return [
+            // IDs / Numéros
+            'id' => $this->getId(),
+            'syncid' => $this->getSyncId(),
+            'pfi' => $this->getPfi(),
+            'numSifac' => $this->getNumSifac(),
+            'numPiece' => $this->getNumPiece(),
+
+            // Infos
+            'montant' => $this->getMontant(),
+            'compteBudgetaire' => $this->getCompteBudgetaire(),
+            'compteGeneral' => $this->getCompteGeneral(),
+            'centreFinancier' => $this->getCentreFinancier(),
+
+            'texteFacture' => $this->getTexteFacture(),
+            'designation' => $this->getDesignation(),
+
+            //Dates
+            'dateAnneeExercice' => $this->getDateAnneeExercice(),
+            'datePaiement' => $this->getDatePaiement(),
+            'datePiece' => $this->getDatePiece(),
+            'dateComptable' => $this->getDateComptable(),
+
+            //
+        ];
+    }
+
 }

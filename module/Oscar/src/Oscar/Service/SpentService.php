@@ -559,7 +559,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $grouped[$numPiece]['ids'][] = $spent->getId();
             $grouped[$numPiece]['syncIds'][] = $spent->getSyncId();
             $grouped[$numPiece]['montant'] += $spent->getMontant();
-            $grouped[$numPiece]['details'][] = $spent;
+            $grouped[$numPiece]['details'][] = $spent->toArray();
         }
 
         return $grouped;

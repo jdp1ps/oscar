@@ -130,7 +130,7 @@ return array(
                 // DEPENSES
                 // --- VERSEMENTS
                 [ 'controller' =>   'Depense',
-                    'action' => ['activity', 'manageSpendTypeGroup'],
+                    'action' => ['activity', 'manageSpendTypeGroup', 'activityApi'],
                     'roles' => ['user'],
                 ],
 

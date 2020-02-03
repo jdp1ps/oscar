@@ -94,7 +94,8 @@ requirejs.config({
         'Referent': 'oscar/dist/Referent',
         'ReferentUI': 'oscar/dist/ReferentUI',
         'EntityWithRole': 'oscar/dist/EntityWithRole',
-        'APIAccess': 'oscar/dist/APIAccess'
+        'APIAccess': 'oscar/dist/APIAccess',
+        'SpentLinePFI': 'oscar/dist/SpentLinePFI'
     },
     shim: {
         "bootstrap": {
