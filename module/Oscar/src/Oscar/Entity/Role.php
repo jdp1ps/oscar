@@ -142,6 +142,12 @@ class Role implements HierarchicalRoleInterface
      */
     protected $privileges;
 
+    /**
+     * @var boolean
+     * @ORM\Column(name="accessible_exterieur", type="boolean", nullable=false, options={"default" : true})
+     */
+    protected $accessibleExterieur = true;
+
 
 
 
@@ -154,6 +160,24 @@ class Role implements HierarchicalRoleInterface
     {
         return $this->privileges;
     }
+
+    /**
+     * @return bool
+     */
+    public function isAccessibleExterieur(): bool
+    {
+        return $this->accessibleExterieur;
+    }
+
+    /**
+     * @param bool $accessibleExterieur
+     */
+    public function setAccessibleExterieur(bool $accessibleExterieur): void
+    {
+        $this->accessibleExterieur = $accessibleExterieur;
+    }
+
+
 
     /**
      * Test si le rôle dispose du privilège.
