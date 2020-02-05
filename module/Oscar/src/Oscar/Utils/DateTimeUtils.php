@@ -70,6 +70,14 @@ class DateTimeUtils {
      * @return array
      */
     public static function allperiodsBetweenTwo( $from, $to ){
+
+        if( get_class($from) == \DateTime::class ){
+            $from = $from->format('Y-m');
+        }
+        if( get_class($to) == \DateTime::class ){
+            $to = $to->format('Y-m');
+        }
+
         $start = new \DateTime($from.'-01');
         $end = new \DateTime($to.'-01');
 
