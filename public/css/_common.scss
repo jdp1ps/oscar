@@ -3501,9 +3501,9 @@ form {
     }
   }
 
-  &.finished {
+  &.valided {
     border-left-color: $colorGreen;
-    background: lighten($colorGreen, 60%);
+    background: lighten($colorGreen, 50%);
     text-shadow: -1px 1px 0 rgba(255, 255, 255, .25);
 
     &:before {
@@ -3511,6 +3511,29 @@ form {
       font-family: fontello;
     }
   }
+  &.canceled {
+    border-left-color: $colorDark;
+    background: lighten($colorDark, 80%);
+    text-shadow: -1px 1px 0 rgba(255, 255, 255, .25);
+
+    &:before {
+      content: '\e879 ';
+      font-family: fontello;
+    }
+  }
+  &.refused {
+
+    border-left-color: $colorRed;
+    background: lighten($colorOrange, 50%);
+    text-shadow: -1px 1px 0 rgba(255, 255, 255, .25);
+
+    &:before {
+      content: '\e889 ';
+      font-family: fontello;
+    }
+  }
+
+  //
 
   &.payment:before {
     content: '\e875';

@@ -134,6 +134,28 @@
             </div>
         </transition>
 
+        <transition name="fade">
+            <div class="inprogressconfirm overlay" v-if="actionMessage">
+                <div class="overlay-content">
+                    <h3>
+                        <i class="icon-help-circled"></i>
+                        {{ actionMessage }} ?
+                    </h3>
+                    <p>Les jalons marqués comme terminés (Validé, refusé ou sans suite) ne feront pas l'objet de notifications ou d'alertes</p>
+                    <nav>
+                        <button class="btn btn-default" @click="performValid(action)">
+                            <i class="icon-cw-outline"></i>
+                            {{ actionMessage }}
+                        </button>
+                        <button class="btn btn-default" @click="handlerActionCancel">
+                            <i class="icon-cancel-outline"></i>
+                            Annuler
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </transition>
+
 
 
         <transition name="fade">
@@ -164,6 +186,8 @@
                     @valid="handlerValid"
                     @unvalid="handlerUnvalid"
                     @inprogress="handlerInProgress"
+                    @cancel="handlerActionConfirm($event, 'cancel','Marquer ce jalon comme sans suite')"
+                    @refused="handlerActionConfirm($event, 'refused','Marquer ce jalon comme refusé')"
                     @remove="handlerRemove"
                     @edit="handlerEdit"
             />
@@ -203,8 +227,15 @@
                 deleteMilestone: null,
                 editMilestone: null,
                 validMilestone: null,
+                cancelMilestone: null,
+                refusedMilestone: null,
                 unvalidMilestone: null,
-                inProgressMilestone: null
+                inProgressMilestone: null,
+
+                //
+                action: null,
+                actionMessage: "",
+                actionMilestone: null
             }
         },
 
@@ -324,6 +355,22 @@
                 this.unvalidMilestone = milestone;
             },
 
+            handlerActionConfirm(milestone, action, actionMessage){
+                this.actionMilestone = milestone;
+                this.action = action;
+                this.actionMessage = actionMessage;
+            },
+
+            handlerActionCancel(){
+                this.actionMilestone = null;
+                this.action = null;
+                this.actionMessage = "";
+            },
+
+            handlerCancel(milestone) {
+                this.unvalidMilestone = milestone;
+            },
+
             /**
              * Demande de suppression
              */
@@ -385,10 +432,12 @@
              * Marquer le jalon comme terminé.
              */
             performValid(action){
-                var datas = new FormData(),
 
-                    // Donnèes à traiter
+                console.log(action);
+
+                var datas = new FormData(),
                     milestone;
+
 
                 switch (action) {
                     case 'valid':
@@ -406,14 +455,24 @@
                         milestone = this.inProgressMilestone;
                         break;
 
+                    case 'cancel':
+                    case 'refused':
+                        milestone = this.actionMilestone;
+                        break;
+
                     default :
                         this.error = "Action incorrecte";
                         return;
                         break;
                 }
 
+
                 datas.append('id', milestone.id)
                 datas.append('action', action)
+
+                this.action = null;
+                this.actionMessage = "";
+                this.actionMilestone = null;
 
                 this.$http.post(this.url, datas).then(
                     success => {
@@ -440,7 +499,6 @@
                 datas.append('type', this.formData.type.id)
                 datas.append('comment', this.formData.comment)
                 datas.append('dateStart', this.formData.dateStart)
-
                 datas.append('action', this.formData.id ?'update' : 'create')
 
                 this.pendingMsg = this.formData.id ? "Enregistrement des modifications" : "Création du nouveau jalon";

@@ -138,7 +138,7 @@ class ActivityDateController extends AbstractOscarController
 
                         ////////////////////////////////////////////////////////////
                         // Marquer le jalon comme terminé / non-terminé
-                        if ($action == 'valid' || $action == 'unvalid' || $action == 'inprogress') {
+                        if ($action == ActivityDate::PROGRESSION_VALID || $action == ActivityDate::PROGRESSION_UNVALID || $action == ActivityDate::PROGRESSION_INPROGRESS || $action == ActivityDate::PROGRESSION_CANCEL || $action == ActivityDate::PROGRESSION_REFUSED) {
                             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
 
                             $this->getActivityLogService()->addUserInfo(
@@ -172,7 +172,7 @@ class ActivityDateController extends AbstractOscarController
 
                             return $this->ajaxResponse($milestone->toArray());
                         } else {
-                            return $this->getResponseBadRequest("Cette action n'est pas supportée.");
+                            return $this->getResponseBadRequest("L'action $action action n'est pas supportée.");
                         }
                         break;
                     default:
