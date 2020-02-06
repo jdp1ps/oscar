@@ -204,7 +204,7 @@
 
 </template>
 <script>
-    // nodejs node_modules/.bin/poi watch --format umd --moduleName  Milestones --filename.css milestones.css --filename.js Milestones.js --dist public/js/oscar/dist public/js/oscar/src/Milestones.vue
+    // nodejs node_modules/.bin/poi watch --format umd --moduleName  Milestones --filename.js Milestones.js --dist public/js/oscar/dist public/js/oscar/src/Milestones.vue
 
     //////////////////////////////////////////////////////////////
     import MilestoneItem from './MilestoneItem.vue'
