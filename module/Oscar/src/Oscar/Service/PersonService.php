@@ -493,6 +493,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         /** @var ConfigurationParser $configOscar */
         $configOscar = $this->getOscarConfigurationService();
 
+        $conf = $this->getOscarConfigurationService()->getConfigArray();
+        $appName = $conf['unicaen-app']['app_infos']['nom'];
+
         if( $debug ){
             $log = function($msg){
                 $this->getLoggerService()->debug($msg);
@@ -516,7 +519,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
 
         $content = "Bonjour $person, <br>\n";
-        $content .= "Vous avez des notifications non-lues sur Oscar : \n";
+        $content .= "Vous avez des notifications non-lues sur $appName : \n";
         $content .= "<ul>\n";
 
         Moment::setLocale('fr_FR');
