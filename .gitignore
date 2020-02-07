@@ -25,6 +25,8 @@ prototype/timesheet/*
 
 # Fichiers générés mais inutiles (POI)
 public/js/oscar/dist/index.html
+public/js/oscar/dist/client.css
+public/js/oscar/dist/client.css.map
 
 doc/*.html
 
