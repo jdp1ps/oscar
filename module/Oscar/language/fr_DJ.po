@@ -588,3 +588,6 @@ msgstr "Connexion (persopass)"
 
 msgid "Sign In"
 msgstr "Se connecter"
+
+msgid "Activités de ma-mes structure-s"
+msgstr "Accords de ma-mes structure-s"
