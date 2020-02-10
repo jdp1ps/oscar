@@ -14,7 +14,7 @@ L'historique du dépôt GIT a été modifié afin d'en supprimer des archives vo
 
  - **Feuille de temps > déclarant** :  Modification du système de saisie des commentaires. Le déclarant peut maintenant saisir son commentaire au fil de l'eau depuis la vue mois. Cette modification permet de simplifier la gestion des commentaires, et de ne pas perdre les commentaires en cas d'annulation d'une déclaration.
 
- - **Export des activités > Champs calculés** : L'administrateur peut maintenant configurer des champs calculés pour les sorties Excel/CSV. Exemple disponible dans [Configurer les champs calculés dans les export OSCAR](doc/activities-export.md)
+ - **Export des activités > Champs calculés** : L'administrateur peut maintenant configurer des champs calculés pour les sorties Excel/CSV. Exemple disponible dans [Configurer les champs calculés dans les export OSCAR](../activities-export.md)
 
  - **Utilitaire en ligne de commande** : Les commandes Oscar (php public/index.php) ont commencé à être migrées progressivement vers le nouveau système de commande (basé sur le composant "Console" de Symfony, tel que recommandé par l'équipe Zend). La liste des commandes disponibles est accessible via la commande (php bin/oscar.php).
 
@@ -58,84 +58,7 @@ composer install
 
 ### Gearman
 
-Le serveur Gearman permet de différer l'execution de certaines opérations couteuse. Il faut commencer par installer le serveur de JOB sur le système : 
-
-```bash
-apt install gearman-job-server
- ```
- 
-Vous pouvez vérifier que le serveur est bien lancé avec la commande : 
-
-```bash
-systemctl status gearman-job-server
- ```
- 
-Résultat : 
-
- ```
-● gearman-job-server.service - gearman job control server
-   Loaded: loaded (/lib/systemd/system/gearman-job-server.service; enabled; vendor preset: enabled)
-   Active: active (running) since Thu 2019-12-12 12:05:44 CET; 2min 23s ago
-     Docs: http://gearman.info/
- Main PID: 16302 (gearmand)
-    Tasks: 7 (limit: 4915)
-   CGroup: /system.slice/gearman-job-server.service
-            └─16302 /usr/sbin/gearmand --pid-file=/run/gearman/gearmand.pid --listen=localhost -daemon --log-file=/var/log/gearman-job-server/gearmand.log
-
-déc. 12 12:05:44 bouvry-Precision-7520 systemd[1]: Starting gearman job control server...
-déc. 12 12:05:44 bouvry-Precision-7520 systemd[1]: Started gearman job control server.
- ```
-
-On installe ensuite le **module Gearman de PHP** : 
-
-```bash
-# Installation du module Gearman PHP
-apt install php7.3-gearman
-```
-
-Par défaut, l'extension *Gearman* n'est pas activée dans le `php.ini`. Éditez les fichier **/etc/php/7.3/cli/php.ini** et **/etc/php/7.3/apache2/php.ini** en ajoutant la ligne : 
-
-```ini
-; /etc/php/7.3/apache2php.ini - /etc/php/7.3/apache2php.ini
-extension=gearman
-```
-
-Une fois le serveur **Gearman** et le **module Gearman PHP** installés, on installe le service Oscar chargé de traiter les tâches en attente.
-
-```bash
-# on copie le gabarit de configuration du service
-cp install/oscarworker.dist.service config/oscarworker.service
-
-# On édite le service
-nano config/oscarworker.service
-```
-
-> Dans le fichier `config/oscarworker.service`, vous devez simplement indiquer le chemin complet vers le fichier PHP **bin/oscarworker.php**.
-
-On va ensuite ajouter le *worker oscar* au service du système.
-
-```bash
-# On va dans le dossier des service
-cd /etc/systemd/system
-
-# On ajoute la configuration du service dans SYSTEMD avec un lien symbolique
-ln -s /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
-
-# On active le service
-service enable oscarworker
-
-# On lance le service
-service oscarworker start
-```
-
-Vous pouvez surveiller le *Worker Oscar* avec la commande : 
-
-```bash
-# On regarde si tout est OK
-journalctl -u oscarworker.service -f
-```
-
-A cette étape, le serveur Gearman est opérationnnel et le Worker Oscar est installé.
+Suivez la procédure : [installation et configuration de Gearman](../config-gearman.md)
 
 ### Mise à jour du modèle
 

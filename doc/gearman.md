@@ -70,8 +70,6 @@ fooJob     50 1  1
 Chaque ligne représente un **job** avec dans la première colonne, le nombre de jobs en attente, dans la seconde, les jobs en cours de traitement, et dans la dernière, le nombre de *workers* assignés aux jobs.
 
 
-
-
 ## Module PHP
 
 La partie PHP va se charger de 2 choses : Envoyer des **JOBS** à faire au serveur (Classe PHP `GearmanClient`) et traiter des ces jobs en créant des **workers** (Classe `GearmanWorker`). On aura donc 2 applications distinctes, **Client** et **Worker**.

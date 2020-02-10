@@ -1,13 +1,13 @@
 # version 2.5.x (Juin 2018)
 
-Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
+Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](../update.md)
 
 
 ## Générale
 
  - L'interface des paramètres utilisateur a été améliorée, elle affiche les créneaux automatiques, le bouton enregistrement se verrouille automatiquement si besoin et les messages d'informations ont été mis à jour.
  - La constitution des corpus pour l'indexeur prend maintenant en compte les disciplines des activités
- - Les notifications peuvent maintenant être envoyées par emails [Documentation des notifications](doc/notifications.md)
+ - Les notifications peuvent maintenant être envoyées par emails [Documentation des notifications](../config-notifications.md)
 
 
 ## Administration 
@@ -18,9 +18,9 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
  - Le fichier de configuration d'exemple a été mis à jour
  - Par défaut, la configuration des connecteurs est vide pour éviter les erreurs d'affichage si rien n'est configuré dans la configuration local.php
  - Une interface d'administration a été ajoutée pour gérer les disciplines (un privilège a été ajouté pour autoriser l'accès à cette vue)
- - Un paramètre a été ajouté pour forcer l'envoi de notification par mail [Documentation des notifications](doc/notifications.md)
+ - Un paramètre a été ajouté pour forcer l'envoi de notification par mail [Documentation des notifications](../config-notifications.md)
  - La liste des commandes de *Oscar Command Line* a été mise à jour
- - Mise à jour de la commande `test:mailer` [voir documentation du mailer](doc/mailer.md)
+ - Mise à jour de la commande `test:mailer` [voir documentation du mailer](../config-mailer.md)
  - Ajout d'un paramètre **urlAbsolute** pour la génération des mails (requis pour générer des mails avec des liens vers l'application)
  - Ajout d'un système de distribution de mail **FILE**, il permet de générer des mails physiques pour tester la mise en forme des mails à partir de fichier EML standards, permettra par la suite de concevoir un système de *spool*
  - Le mailer dispose maintenant d'un paramètre d'exclusion. Quand l'envoi des mails est désactivée, ce paramètre permet de configurer des mails d'exception qui seront distribués malgrès tout (utile lors des phases de test ou pour les versions en préprod).
@@ -29,7 +29,7 @@ Pour appliquer cette mise à jour, suivre la procédure standard détaillée dan
 
 ## Importation des données
  
- - Le convertisseur CSV > JSON pour les activités de recherche autorise maintenant une configuration "avancée" pour extraire des données multiples séparées par un séparateur ([Voir documentation](./doc/activity-import.md#donnèes-multiples-personsorganizations-25x))
+ - Le convertisseur CSV > JSON pour les activités de recherche autorise maintenant une configuration "avancée" pour extraire des données multiples séparées par un séparateur ([Voir documentation](../activity-import.md#donnèes-multiples-personsorganizations-25x))
  - Le test d'existence des organisations teste maintenant UNIQUEMENT le nom complet pour éviter le rejet d'organisation aux noms courts proches.
 
 

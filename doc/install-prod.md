@@ -16,7 +16,7 @@ Matériel (Recommandation)
  - Espace disque 20G (Application seule, hors documents)
 
 
-> Prévoyez plus d'espace si vous stoquez des documents directement sur la machine hébergeant Oscar.  
+> Prévoyez plus d'espace si vous stoquez des documents directement sur la machine hébergeant Oscar.
 
 
 ## Installation du système
@@ -60,12 +60,12 @@ apt-get install git-core wget
 Commencez par ajouter les dépôts PHP 7.3 (Merci à Damien pour les informations) :
 
 ```bash
-apt -y install lsb-release apt-transport-https ca-certificates 
+apt -y install lsb-release apt-transport-https ca-certificates
 wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php7.3.list
 ```
 
-Mettre à jour les sources  : 
+Mettre à jour les sources  :
 
 ```bash
 # Installation de APACHE2
@@ -91,7 +91,7 @@ apt-get install \
     php7.3-mbstring \
     php-mcrypt \
     php7.3-pdo-pgsql \
-    php7.3-xml \ 
+    php7.3-xml \
     php7.3-zip
 ```
 
@@ -187,7 +187,7 @@ etc...
 
 #### Installation des dépendances avec composer
 
-L'installation des dépendances se fait avec la commande :  
+L'installation des dépendances se fait avec la commande :
 
 ```bash
 composer install --prefer-dist
@@ -198,54 +198,7 @@ Composer se chargera d'installer les dépendances PHP tel de définies dans le f
 
 ## Gestionnaire de tâche (via Gearman)
 
-Gearman est un *daemon* qui se chargera de gérer les tâches Oscar.
-
-
-```bash
-# Installation de Gearman
-apt install gearman-job-server
-
-# Status du deamon
-service gearman-job-server status
-
-# Surveiller les tâches en attentes
-watch "gearadmin --status | sort -n | column -t"
-```
-
-Ensuite il faut configurer le *Worker Oscar* qui se chargera de réaliser les tâches disponibles sur le serveur : 
-
-```bash
-# on copie le gabarit de configuration du service
-cp install/oscarworker.dist.service config/oscarworker.service
-
-# On édite le service
-nano config/oscarworker.service
-```
-
-> Dans le fichier `config/oscarworker.service`, vous devez simplement indiquer le chemin complet vers le fichier PHP **bin/oscarworker.php**.
-
-On va ensuite ajouter le *worker oscar* au service du système.
-
-```bash
-# Passage en root
-sudo su
-
-# On va dans le dossier des service
-cd /etc/systemd/system
-
-# On ajoute la configuration du service dans SYSTEMD avec un lien symbolique
-ln -S /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
-
-# On lance le service
-service oscarworker start
-
-# On regarde si tout est OK
-journalctl -u oscarworker.service -f
-
-# On active le service
-service enable oscarworker
-```
-
+Etape détaillée dans [Installation de Gearman](./install-gearman.md)
 
 
 
@@ -286,7 +239,7 @@ psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 
 ## Configuration d'oscar
 
-### Configuration éditable 
+### Configuration éditable
 
 création du fichier **config/autoload/oscar-editable.yml**
 
@@ -311,7 +264,7 @@ cp config/autoload/local.php.dist config/autoload/local.php
 vi !$
 ```
 
-Dans un premier temps, configurez simplement l'accès à la base de donnée : 
+Dans un premier temps, configurez simplement l'accès à la base de donnée :
 
 ```php
 <?php
@@ -342,7 +295,7 @@ Une fois oscar configuré pour accéder à la base de données, il **faut mettre
 
 #### Mise à jour du modèle
 
-Oscar est basé sur l'ORM **Doctrine**, la mise à jour du modèle s'effectue en ligne de commande avec la commande : 
+Oscar est basé sur l'ORM **Doctrine**, la mise à jour du modèle s'effectue en ligne de commande avec la commande :
 
 ```bash
 php vendor/bin/doctrine-module orm:schema-tool:update --force
@@ -355,7 +308,7 @@ Les droits d'accès au fonctionnalités sont gérés en base de données via des
 
 Il faut donc à chaque mise à jour mettre à jour ces privilèges en base de données.
 
-Pour **mettre à jour les privilèges**, executez la commande : 
+Pour **mettre à jour les privilèges**, executez la commande :
 
 ```bash
 php public/index.php oscar patch checkPrivilegesJSON
@@ -369,8 +322,17 @@ php public/index.php oscar patch checkPrivilegesJSON
 Lors de l'étape de configuration de la base de donnée, vous avez créé un fichier `config/autoload/local.php`.
 
 
-Ce fichier contient les paramètres métier de l'application. Ces paramètres sont détaillés dans le fichier [Configuration métier](./configuration.md)
+Ce fichier contient les paramètres métier de l'application. Ces paramètres sont détaillés dans les parties suivantes : 
 
+- [Configuration des documents](config-documents.md)
+- [Configuration du moteur de recherche](config-elasticsearch.md)
+- [Installation et configuration de Gearman (serveur de tâche)](config-gearman.md)
+- [Configuration du PFI](config-pfi.md)
+- [Configuration de la distribution des courriels](config-mailer.md)
+- [Configuration des notifications](config-notifications.md)
+- [Configuration de la numérotation OSCAR](config-numerotation.md)
+
+dans le fichier [Configuration métier](./configuration.md)
 
 Créez également le fichier `config/autoload/oscar-editable.yml` :
 
@@ -384,7 +346,7 @@ Puis donner les droits d'accès en écriture :
 chmod 777 config/autoload/oscar-editable.yml
 ```
 
-Ce fichier est utilisé pour les paramètres administrable depuis l'interface (Administration > Options). 
+Ce fichier est utilisé pour les paramètres administrable depuis l'interface (Administration > Options).
 
 
 ### Tester la configuration
@@ -400,7 +362,7 @@ Assurez vous que les modules PHP requis sont bien détectés avec la mention "In
 
 ### Configurer les mails
 
-[Documentation du mailer](./mailer.md)
+[Documentation du mailer](config-mailer.md)
 
 
 ### Configurer le serveur web (Apache)
@@ -502,7 +464,7 @@ Puis compléter la configuration :
 <?php
 //config/autoload/unicaen-app.local.php
 $settings = array(
-  // LDAP    
+  // LDAP
   'ldap' => array(
     'connection' => array(
       'default' => array(
@@ -526,7 +488,7 @@ NOTE : Concernant le filtre `accountFilterFormat`, si votre LDAP est non supann,
 
 #### Authentification LDAP : Non-Supann
 
-Pour les LDAP **non-spann**, il est possible que le champ utilisé pour l'autentification soit différent de **supannaliaslogin**, généralement le champ **uid**. Si c'est la cas, vous pouvez éditer le fichier **config/autoload/unicaen-auth.local.php** en renseignant la clef `ldap_username` : 
+Pour les LDAP **non-spann**, il est possible que le champ utilisé pour l'autentification soit différent de **supannaliaslogin**, généralement le champ **uid**. Si c'est la cas, vous pouvez éditer le fichier **config/autoload/unicaen-auth.local.php** en renseignant la clef `ldap_username` :
 
 ```php
 <?php
@@ -543,7 +505,7 @@ return array(
 );
 ```
 
-Vous devrez également adapter les filtres LDAP en conséquence dans le fichier **config/autoload/unicaen-app.local.php** : 
+Vous devrez également adapter les filtres LDAP en conséquence dans le fichier **config/autoload/unicaen-app.local.php** :
 
 ```php
 <?php
@@ -559,7 +521,7 @@ $settings = array(
             'UTILISATEURS_DESACTIVES_BASE_DN'       => 'ou=deactivated,dc=domain,dc=fr',
             'GROUPS_BASE_DN'                        => 'ou=groups,dc=domain,dc=fr',
         ],
-        
+
         'filters' => [
             'LOGIN_FILTER'                          => '(uid=%s)',
             'UTILISATEUR_STD_FILTER'                => '(|(uid=p*)(&(uid=e*)(eduPersonAffiliation=student)))',
@@ -578,13 +540,13 @@ return array(
 );
 ```
 
-Pensez également à corriger la clef `accountFilterFormat` dans la connexion LDAP renseignée dans le fichier `config/autoload/unicaen-app.local.php` : 
+Pensez également à corriger la clef `accountFilterFormat` dans la connexion LDAP renseignée dans le fichier `config/autoload/unicaen-app.local.php` :
 
 ```php
 <?php
 //config/autoload/unicaen-app.local.php
 $settings = array(
-  // LDAP    
+  // LDAP
   'ldap' => array(
     'connection' => array(
       'default' => array(
@@ -638,7 +600,7 @@ return array(
 
 ### Relation Person / Authentification
 
-Une option a été ajouté pour force Oscar à ignorer la casse lorsque il établit la relation entre l'indentifiant de connexion et le login de la fiche personne. Par défaut cette option est ignorée, pour l'activier, éditer le fichier de configuration local : 
+Une option a été ajouté pour force Oscar à ignorer la casse lorsque il établit la relation entre l'indentifiant de connexion et le login de la fiche personne. Par défaut cette option est ignorée, pour l'activier, éditer le fichier de configuration local :
 
 ```php
 <?php

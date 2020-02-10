@@ -1,6 +1,6 @@
 # version 2.2.x
 
-Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
+Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](../update.md)
 
 ## Import des activités
 
@@ -33,7 +33,7 @@ Dans cette version, la recherche dans les activités a été découplée et prop
  - **Zend Lucene**, une implémentation du moteur Lucene en PHP (Technologie utilisée à l'origine)
  - **Elastic Search**, Un server dédié à la recherche *plain text** (Plus performant et rapide)
  
-Cette évolution nécessite d'adapter la configuration dans Oscar, tout est détaillé dans le fichier [Configuration](./doc/configuration.md#recherche-des-activit%C3%A9s)  
+Cette évolution nécessite d'adapter la configuration dans Oscar, tout est détaillé dans le fichier [Configuration](../configuration.md#recherche-des-activit%C3%A9s)  
 
 ## Type d'organisation
 

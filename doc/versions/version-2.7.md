@@ -1,6 +1,6 @@
 # version 2.7 "Lewis" (Juin-Septembre 2018)
 
-Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
+Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](../update.md)
 
 
 ## Générale
