@@ -1,6 +1,10 @@
 # MVC
 
-Ce document permet de débuter le développement dans l'application Oscar, il ne peut se substituer à une formation Zend3, mais permet malgrès cela de s'en passer
+Ce document permet de débuter le développement dans l'application Oscar, il ne peut se substituer à une formation Zend3, mais permet malgrès cela de s'en passer.
+
+##Nouveau module Zend3
+
+Cette étape n'est pas forcement necessaire. Si vous souhaitez produire une fonctionnalité supplémentaire
 
 ## Créer un nouveau contrôleur
 
@@ -131,12 +135,13 @@ return array(
 		// ...
 		'guards' => array(
 			UnicaenAuth\Guard\PrivilegeController::class => [
-                		// ...
-                		[ 
-                			'controller' =>  'Demo',
-                			'action' => ['foo', ],	
-                			'roles' => [],
-                		],
+                // ...
+                [ 
+                    'controller' =>  'Demo',
+                    'action' => ['foo', ],	
+                    'roles' => [],
+                ],
+            ]
 		),
 	]
 );
