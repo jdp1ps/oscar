@@ -5,5 +5,3 @@ nav:
 
 docs_dir: doc/
 theme: readthedocs
-site_dir: public/documentation/
-

@@ -506,7 +506,26 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
     }
     public function getSpentsByPFI( $pfi ){
-        return $this->getEntityManager()->getRepository(SpentLine::class)->findBy(['pfi' => $pfi], ['datePaiement' => 'ASC']);
+        $qb = $this->getEntityManager()->getRepository(SpentLine::class)->createQueryBuilder('s');
+        $qb->where('s.pfi = :pfi');
+        $qb->orderBy('s.datePaiement', 'ASC');
+
+        $filtreCompte = $this->getOscarConfigurationService()->getSpentAccountFilter();
+
+        if( $filtreCompte ){
+            $qb->andWhere('s.compteBudgetaire NOT IN(:filtreCompte)')
+                ->setParameter('filtreCompte', $filtreCompte);
+        }
+
+        return $qb->getQuery()->setParameter('pfi', $pfi)->getResult();
+    }
+
+    public function getSpentsTypes(){
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('t')
+            ->from(SpentTypeGroup::class, 't', 't.code');
+        //$qb = $this->getEntityManager()->getRepository(SpentTypeGroup::class)->createQueryBuilder('t')->indexBy('t.code', 'code');
+        return $qb->getQuery()->getArrayResult();
     }
 
     public function syncSpentsByEOTP( $eotp ){
@@ -516,20 +535,65 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $this->getConnector()->sync($eotp);
     }
 
+    protected function reduceZero($str){
+        $r = intval(strrev($str));
+        $rstr = "".intval($r);
+        return intval(strrev($rstr));
+    }
+
+    protected function getNearestType( $code, $original="" ){
+        static $types;
+        static $assoc;
+        if( $types === null )
+            $types = $this->getSpentsTypes();
+
+        if( $assoc === null ){
+            $assoc = [];
+        }
+
+        $typeInt = $this->reduceZero($code);
+        if( array_key_exists($typeInt, $types) ){
+            return $types[$typeInt]['label'] . ($original ? sprintf(' (%s)', $original) : '');
+        } else {
+            $base = $original ? $original : $code;
+            $reduceCode = substr($code,0, strlen($code)-1);
+            return $this->getNearestType($reduceCode, $base);
+        }
+    }
+
+    protected function getTypeByCode( $code ){
+        static $assoc;
+        if( $assoc == null ){
+            $assoc = [];
+        }
+
+        if( !array_key_exists($code, $assoc) ){
+            $assoc[$code] = $this->getNearestType($code);
+        }
+
+        return $assoc[$code];
+    }
+
     public function getGroupedSpentsDatas($pfi){
+        $re = '/^(0*)([0-9]*)$/m';
         $spents = $this->getSpentsByPFI($pfi);
         $out = [];
         $grouped = [];
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
+
             $numPiece = $spent->getNumPiece();
             $compteBudg = $spent->getCompteBudgetaire();
+
+            $type = $this->getTypeByCode($spent->getCompteGeneral());
+
 
             if( !array_key_exists($numPiece, $grouped) ){
                 $grouped[$numPiece] = [
                     'ids' => [],
                     'syncIds' => [],
                     'text' => [],
+                    'types' => [],
                     'montant' => 0.0,
                     'compteBudgetaire' => [],
                     'datecomptable' => $spent->getDateComptable(),
@@ -558,8 +622,12 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
             $grouped[$numPiece]['ids'][] = $spent->getId();
             $grouped[$numPiece]['syncIds'][] = $spent->getSyncId();
+            $grouped[$numPiece]['types'][] = $type;
             $grouped[$numPiece]['montant'] += $spent->getMontant();
-            $grouped[$numPiece]['details'][] = $spent->toArray();
+
+            $details = $spent->toArray();
+            $details['codeStr'] = $type;
+            $grouped[$numPiece]['details'][] = $details;
         }
 
         return $grouped;

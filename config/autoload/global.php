@@ -24,7 +24,7 @@ return array(
 
         /////////////////////////////////////////////////////////////////////////////////// oscar_num_separator [string]
         /// Permet de modifier le formalisme de la numérotation automatique dans Oscar, il faut également modifier
-        ///  la fonction Postgresql associée (doc/numerotation.md)
+        ///  la fonction Postgresql associée (doc/config-numerotation.md)
         ///
         'oscar_num_separator' => 'DRI',
 

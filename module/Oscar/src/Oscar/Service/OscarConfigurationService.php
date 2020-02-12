@@ -10,6 +10,7 @@ namespace Oscar\Service;
 
 
 use Oscar\Exception\OscarException;
+use Oscar\Import\Data\DataStringArray;
 use Oscar\OscarVersion;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
@@ -23,6 +24,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     const allow_numerotation_custom     = 'allow_numerotation_custom';
     const organization_leader_role      = 'organization_leader_role';
+    const spents_account_filter          = 'spents_account_filter';
+
     const theme = 'theme';
 
     protected function getConfig(){
@@ -194,5 +197,15 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function setExportDateFormat( $string ){
         $this->saveEditableConfKey('export_dateformat', $string);
+    }
+
+    public function getSpentAccountFilter(){
+        return $this->getEditableConfKey(self::spents_account_filter, []);
+    }
+
+    public function setSpentAccountFilter( $stringArray ){
+        $extract = new DataStringArray();
+        $data = $extract->extract($stringArray);
+        $this->saveEditableConfKey(self::spents_account_filter, $data);
     }
 }

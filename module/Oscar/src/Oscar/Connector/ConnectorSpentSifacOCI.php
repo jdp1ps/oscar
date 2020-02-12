@@ -20,21 +20,7 @@ class ConnectorSpentSifacOCI
     /** @var array */
     private $sifacAccess;
 
-    /**
-     * ConnectorSpentSifacOCI constructor.
-     * @param SpentService $spentService
-     * @param array $sifacAccess
-     */
-    public function __construct(SpentService $spentService, array $sifacAccess)
-    {
-        $this->spentService = $spentService;
-        $this->sifacAccess = $sifacAccess;
-    }
-
-    public function sync( $pfi ){
-        $c = $this->getConnection();
-        if( $c ){
-            $stid = oci_parse($c, sprintf("select 
+    const SPENT_QUERY = "select 
 MEASURE AS pfi, 
 RLDNR as AB9,
 STUNR as idsync, 
@@ -60,7 +46,23 @@ gjahr as dateAnneeExercice,
 zhldt AS datePaiement, 
 PSOBT AS dateServiceFait
 
-from sapsr3.v_fmifi where measure = '%s' AND rldnr='9A' AND MANDT='430' AND BTART='0250'", $pfi));
+from sapsr3.v_fmifi where measure = '%s' AND rldnr='9A' AND MANDT='430' AND BTART='0250'";
+
+    /**
+     * ConnectorSpentSifacOCI constructor.
+     * @param SpentService $spentService
+     * @param array $sifacAccess
+     */
+    public function __construct(SpentService $spentService, array $sifacAccess)
+    {
+        $this->spentService = $spentService;
+        $this->sifacAccess = $sifacAccess;
+    }
+
+    public function sync( $pfi ){
+        $c = $this->getConnection();
+        if( $c ){
+            $stid = oci_parse($c, sprintf($this->sifacAccess['spent_query'], $pfi));
 
             if( !$stid ){
                 throw new \Exception("ORACLE - PARSE ERROR : " . oci_error());
@@ -91,6 +93,4 @@ from sapsr3.v_fmifi where measure = '%s' AND rldnr='9A' AND MANDT='430' AND BTAR
         $c = oci_connect($this->sifacAccess['username'],$this->sifacAccess['password'], sprintf("%s:%s/%s", $this->sifacAccess['hostname'], $this->sifacAccess['port'], $this->sifacAccess['SID']));
         return $c;
     }
-
-
 }

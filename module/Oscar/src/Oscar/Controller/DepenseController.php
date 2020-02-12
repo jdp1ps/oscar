@@ -42,8 +42,6 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
-
-
     /**
      * @return OscarUserContext
      */
@@ -188,6 +186,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         } catch (\Exception $e){
             return $this->getResponseInternalError("Impossible de charger l'activité : " . $e->getMessage());
         }
+
         $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $activity);
 
         try {

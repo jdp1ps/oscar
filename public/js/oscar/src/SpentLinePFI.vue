@@ -50,7 +50,7 @@
                     <td style="text-align: right">{{ d.montant.toFixed(2) }}</td>
                     <td>{{ d.compteBudgetaire }}</td>
                     <td>{{ d.centreFinancier }}</td>
-                    <td>{{ d.compteGeneral }}</td>
+                    <td><strong>{{ d.compteGeneral }}</strong> : {{ d.codeStr }}</td>
                     <td>{{ d.dateComptable }}</td>
                     <td>{{ d.datePaiement }}</td>
                     <td>{{ d.dateAnneeExercice }}</td>

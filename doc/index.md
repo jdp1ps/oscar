@@ -22,11 +22,12 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
  - [Configuration des notifications](config-notifications.md)
  - [Configuration de la numérotation automatique OSCAR](config-numerotation.md)
  - [Configuration des feuilles de temps](timesheet.md)
- 
+ - [Configuration des dépenses (SIFAC)](config-sifac.md)
+
 ### Synchronisation au Système d'Information
  - [Connectors Oscar](connectors.md) : Connecter Oscar au système d'information
  - [Importer des activités](activity-import.md) Synchroniser les activités de recherche depuis une source Excel.
- 
+
 ### Utilitaires et utilisation avancée
  - [Administrer Oscar en ligne de commande](oscar-commands.md)
  - [Oscar API](config-api.md) Configurer Oscar pour permettre son accès via une API Rest
@@ -49,7 +50,3 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
  - [Ajouter des actions,vues,controlleurs,service dans Zend Framework 3](devnote/mvc.md)
  - [Créer un composant d'interface VUEJS](devnote/vuejs.md)
  - [Installer les drivers Oracle OCI](install-oracle-pp.md)
-
-
-
-

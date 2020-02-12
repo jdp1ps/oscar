@@ -170,6 +170,25 @@
                     <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
                 </form>
             </article>
+
+            <h2><i class="icon-sort"></i>Dépense : Comptes filtrés</h2>
+
+            &nbsp;<article class="card">
+                <h3><i class="icon-eye"></i>Aperçu</h3>
+                <p class="help-message">
+                    <i class="icon-help-circled"></i>
+                    Cette option va exclure les <strong>dépenses</strong> appartenant à un des comptes renseigné (séparé les comptes par une virgule).
+                </p>
+                <form action="" method="post" class="form">
+                    <label for="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter  ?>">Comptes</label>
+                    <input name="parameter_name" type="hidden" value="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>" />
+                    <input type="text" name="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
+                           name="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
+                           id="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
+                           value="<?= $spents_account_filter ?>" class="form-control input-lg" />
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
         </div>
     </section>
 </div>
