@@ -71,10 +71,10 @@ class DateTimeUtils {
      */
     public static function allperiodsBetweenTwo( $from, $to ){
 
-        if( get_class($from) == \DateTime::class ){
+        if( is_object($from) && get_class($from) == \DateTime::class ){
             $from = $from->format('Y-m');
         }
-        if( get_class($to) == \DateTime::class ){
+        if( is_object($to) && get_class($to) == \DateTime::class ){
             $to = $to->format('Y-m');
         }
 
