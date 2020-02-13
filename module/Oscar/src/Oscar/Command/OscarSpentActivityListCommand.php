@@ -29,16 +29,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class OscarSpentListCommand extends OscarCommandAbstract
+class OscarSpentActivityListCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'spent:list';
-    const pfi = 'PFI';
+    protected static $defaultName = 'spent:activitylist';
 
     protected function configure()
     {
         $this
-            ->setDescription("Affiche la liste des dépenses")
-            ->addArgument(self::pfi, InputArgument::REQUIRED, "PFI")
+            ->setDescription("Affiche la liste des dépenses des activités")
         ;
     }
 
@@ -49,12 +47,8 @@ class OscarSpentListCommand extends OscarCommandAbstract
         /** @var OscarUserContext $oscaruserContext */
         $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
 
+        /** @var SymfonyStyle $io */
         $io = new SymfonyStyle($input, $output);
-
-        $pfi = $input->getArgument(self::pfi);
-
-        $io->title("Dépenses pour $pfi");
-
 
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
@@ -63,26 +57,13 @@ class OscarSpentListCommand extends OscarCommandAbstract
         $spentService = $this->getServicemanager()->get(SpentService::class);
 
         try {
+            $datas = $spentService->getDatasActivitiesSpents();
 
-            $grouped = $spentService->getGroupedSpentsDatas($pfi);
-
-            foreach ($grouped as $numPiece=>$infos) {
-                $out[] = [
-                    $numPiece,
-                    //implode(',', $infos['syncIds']),
-                    implode(',', $infos['text']),
-                    $infos['montant'],
-                    implode(',', $infos['compteBudgetaire']),
-                    $infos['datecomptable'],
-                    $infos['datepaiement'],
-                    $infos['annee'],
-                    $infos['refPiece'],
-                    $infos['ids'][0].' +'.count($infos['ids']),
-                ];
-            }
-            $headers = ['N°Pièce', /*'SIFACID',*/ 'Description', 'Montant', 'Date Comptable', 'Date Paiement', 'Année', 'N° Réf Pièce', 'IDs'];
+            /*
+            $headers = ['N°Pièce', 'Description', 'Montant', 'Date Comptable', 'Date Paiement', 'Année', 'N° Réf Pièce', 'IDs'];
 
             $io->table($headers, $out);
+            */
 //            $repport = $connector->execute();
 //            foreach ($repport->getRepportStates() as $type => $out) {
 //                $short = substr($type, 0, 3);

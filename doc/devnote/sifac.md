@@ -107,3 +107,26 @@ SELECT numpiece, numpiece, MAX(datecomptable) as datecomptable, SUM(montant) as 
 WHERE pfi = '014CG019' GROUP BY numpiece
 ORDER BY datecomptable
 ```
+
+## Récupération d'un listing des dépenses
+
+```sql
+SELECT 
+	MAX(a.id), 
+	a.codeEOTP, 
+	max(a.amount) AS budget,
+	SUM(s.montant) AS depences
+	
+FROM activity a
+
+LEFT JOIN project p ON p.id = a.project_id 
+LEFT JOIN spentline s ON s.pfi = a.codeEOTP 
+WHERE 
+	codeEOTP IS NOT NULL AND codeEOTP != '' 
+	AND s.compteBudgetaire NOT IN('RG_RPRO','TECH_BIL','TECH_PRODUITS') 
+--	AND EXTRACT(year from a.dateEnd) = 2019 
+--	AND EXTRACT(year from a.datestart) = 2017 
+	
+GROUP BY a.codeEOTP 
+ORDER BY codeEoTP
+```

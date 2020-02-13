@@ -574,6 +574,44 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $assoc[$code];
     }
 
+    public function getDatasActivitiesSpents(){
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('a.id', 'a.codeEOTP', 'a.label')
+            ->from(Activity::class, 'a')
+
+            ->where('a.codeEOTP IS NOT NULL AND a.codeEOTP != \'\'')
+        ;
+
+        $total = 0;
+
+        foreach ($qb->getQuery()->getArrayResult() as $row) {
+            $total++;
+            echo $row['id'] . "\t"
+                . ' [' . $row['codeEOTP'] . "]\t"
+                . ' ' . substr($row['label'], 0, 20)
+                ."\n"
+            ;
+        }
+        echo "Total : $total";
+    }
+
+    public function getPFIList(){
+        $qb = $this->getEntityManager()->createQueryBuilder('a')
+            ->select('DISTINCT a.codeEOTP')
+            ->where('a.codeEOTP IS NOT NULL')
+            ->from(Activity::class, 'a');
+        return array_column($qb->getQuery()->getArrayResult(), 'codeEOTP');
+    }
+
+    public function getSpentsSyncIdByPFI($pfi){
+        $qb = $this->getEntityManager()->createQueryBuilder('s')
+            ->select('s.syncId')
+            ->from(SpentLine::class, 's')
+            ->where('s.pfi = :pfi')
+            ->setParameter('pfi', $pfi);
+        return array_column($qb->getQuery()->getArrayResult(), 'syncId');
+    }
+
     public function getGroupedSpentsDatas($pfi){
         $re = '/^(0*)([0-9]*)$/m';
         $spents = $this->getSpentsByPFI($pfi);

@@ -26,16 +26,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Zend\Crypt\Password\Bcrypt;
 use Zend\ServiceManager\ServiceManager;
 
-class OscarSpentSyncCommand extends OscarCommandAbstract
+class OscarSpentSyncAllCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'spent:sync';
+    protected static $defaultName = 'spent:syncall';
 
     protected function configure()
     {
         $this
-            ->setDescription("Permet d'obtenir les dépenses")
+            ->setDescription("Synchronisation des dépenses")
             ->setHelp("")
-            ->addArgument('pfi', InputArgument::OPTIONAL, "PFI à synchroniser")
         ;
     }
 
@@ -52,17 +51,6 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
 
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
-
-        $pfi = $input->getArgument('pfi');
-
-        if($pfi){
-            $io->writeln("PFI : $pfi");
-        } else  {
-            $q = new Question("Synchroniser toutes les dépenses ?");
-            $io->askQuestion($q);
-            $io->error("Pas encore disponible");
-            return;
-        }
 
         try {
             $connectorConfig = $oscarConfig->getConfiguration('connectors.spent');
@@ -84,7 +72,7 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
                 /** @var ConnectorSpentSifacOCI $instance */
                 $instance = $factory->newInstanceArgs([$this->getServicemanager()->get(SpentService::class), $conf['params']]);
 
-                $result = $instance->sync($pfi, $io);
+                $result = $instance->syncAll($io);
                 $io->write($result);
             }
 
