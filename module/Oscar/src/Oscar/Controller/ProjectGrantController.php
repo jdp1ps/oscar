@@ -292,13 +292,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $dl = $this->params()->fromQuery('dl');
         if( $dl ){
             /** @var ActivityRequestService $activityRequestService */
-            $activityRequestService = $this->getServiceLocator()->get('ActivityRequestService');
+            $activityRequestService = $this->getActivityRequestService();
 
             /** @var ActivityRequest $request */
             $demande = $activityRequestService->getActivityRequest($this->params()->fromQuery('id'));
 
             $fileInfo = $demande->getFileInfosByFile($dl);
-            $filepath = $this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
+            $filepath = $this->getOscarConfigurationService()->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
             $filename = $fileInfo['name'];
             $filetype = $fileInfo['type'];
             $size = filesize($filepath);
