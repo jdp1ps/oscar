@@ -19,6 +19,9 @@ return array(
     'oscar' => [
         // Oscar Live
         'socket' => $socket,
+        
+        // gearman
+        'gearman-job-server-host' => 'localhost',
 
         ////////////////////////////////////////////////////////////////////////
         // ! EXPERIMENTAL !
