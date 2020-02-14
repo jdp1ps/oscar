@@ -10,6 +10,7 @@ namespace Oscar\Strategy\Activity;
 
 
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityDate;
 use Oscar\Entity\DateType;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Role;
@@ -235,11 +236,24 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
                         $dn = "";
                         if( $mil->isFinishable() ){
                             $dn = "non";
-                            if( $mil->getFinished() > 0 ){
-                                $dn = "en cours";
-                            }
-                            if( $mil->isFinished() ){
-                                $dn = $mil->getDateFinish() ? $mil->getDateFinish()->format($dateFormat) : 'oui';
+
+                            // État de complétude
+                            switch ($mil->getFinished()) {
+                                case ActivityDate::VALUE_TODO :
+                                    $dn = 'non';
+                                    break;
+                                case ActivityDate::VALUE_INPROGRESS :
+                                    $dn = 'en cours';
+                                    break;
+                                case ActivityDate::VALUE_VALIDED :
+                                    $dn = 'Validé';
+                                    break;
+                                case ActivityDate::VALUE_CANCELED :
+                                    $dn = 'Sans suite';
+                                    break;
+                                case ActivityDate::VALUE_REFUSED :
+                                    $dn = 'Refusée';
+                                    break;
                             }
                         }
                         $jalonsFaitCurrent[$jalonKey][] = $dn;

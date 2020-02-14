@@ -37,6 +37,6 @@ return array(
 );
 ```
 
-## Filtre le compte général
+## Filtrer le compte général
 
 ## Plan comptable et qualification des masses
