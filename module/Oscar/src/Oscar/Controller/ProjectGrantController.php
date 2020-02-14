@@ -289,6 +289,28 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             throw new UnAuthorizedException("Vous n'avez pas l'autorisation d'accéder à ces informations");
         }
 
+        $dl = $this->params()->fromQuery('dl');
+        if( $dl ){
+            /** @var ActivityRequestService $activityRequestService */
+            $activityRequestService = $this->getServiceLocator()->get('ActivityRequestService');
+
+            /** @var ActivityRequest $request */
+            $demande = $activityRequestService->getActivityRequest($this->params()->fromQuery('id'));
+
+            $fileInfo = $demande->getFileInfosByFile($dl);
+            $filepath = $this->getServiceLocator()->get('OscarConfig')->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
+            $filename = $fileInfo['name'];
+            $filetype = $fileInfo['type'];
+            $size = filesize($filepath);
+            $content = file_get_contents($filepath);
+
+            header('Content-Disposition: attachment; filename=' . $filename);
+            header('Content-Length: ' . $size);
+            header('Content-type: '.$filetype);
+            echo $content;
+            die();
+        }
+
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();
             switch ($method) {
