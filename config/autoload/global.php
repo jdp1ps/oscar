@@ -42,6 +42,8 @@ return array(
             'computedFields' => []
         ],
 
+        'gearman-job-server-host' => 'localhost',
+
 
 //        'export' => [
 //            'payments' => [

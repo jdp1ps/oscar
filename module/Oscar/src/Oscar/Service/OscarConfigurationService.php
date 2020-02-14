@@ -187,6 +187,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getConfiguration('export.computedFields', []);
     }
 
+    public function getGearmanHost(){
+        return $this->getConfiguration('gearman-job-server-host');
+    }
+
     public function setExportSeparator( $string ){
         $this->saveEditableConfKey('export_format', $string);
     }

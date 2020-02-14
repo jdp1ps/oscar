@@ -129,7 +129,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     public function jobSearchUpdate( Person $person )
     {
         $client = new \GearmanClient();
-        $client->addServer();
+        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('personSearchUpdate', json_encode([
             'personid' => $person->getId()
         ]),
@@ -1211,13 +1211,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public function jobIndexPerson(Person $person){
         $client = new \GearmanClient();
-        $client->addServer();
+        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('indexPerson', json_encode(['personid' => $person->getId()]), sprintf('personsearchupdate-%s', $person->getId()));
     }
 
     public function jobNotificationActivityPerson(Activity $activity, Person $person){
         $client = new \GearmanClient();
-        $client->addServer();
+        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('notificationActivityPerson', json_encode([
             'activityid' => $activity->getId(),
             'personid' => $person->getId(),

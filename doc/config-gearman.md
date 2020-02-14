@@ -85,3 +85,20 @@ journalctl -u oscarworker.service -f
 ```
 
 A cette étape, le serveur Gearman est opérationnnel et le Worker Oscar est installé.
+
+## Modifier l'URL du serveur de job Gearman
+
+Oscar permet si besoin de modifier l'URL du serveur GEARMAN, pour cela, ajouter dans la configuration Oscar `config/autoload/local.php` une clef **gearman-job-server-host** dans la section **oscar** : 
+
+```php
+<?php
+return [
+    // ...
+    'oscar' => [
+        // Paramètre utilisé en PHP avec la méthode addServer(<ICI>)
+        'gearman-job-server-host' => 'localhost'
+    ]
+];
+```
+
+      

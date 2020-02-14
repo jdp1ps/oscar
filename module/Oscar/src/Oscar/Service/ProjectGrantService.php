@@ -832,7 +832,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     public function jobSearchUpdate( Activity $activity )
     {
         $client = new \GearmanClient();
-        $client->addServer();
+        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('activitySearchUpdate', json_encode([
             'activityid' => $activity->getId()
         ]),
