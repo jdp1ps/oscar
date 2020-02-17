@@ -88,7 +88,14 @@ A cette étape, le serveur Gearman est opérationnnel et le Worker Oscar est ins
 
 ## Contôler le worker depuis Oscar
 
-Depuis le menu **Administration>Maintenance>Status OSCARWORKER** : 
+
+La commande `php bin/oscar.php check:config` inclus un test de la communication entre Oscar et le serveur Gearman, ainsi qu'un test de retour du Worker. La commande indiquera si le problème vient du serveur Gearman ou du Worker.
+
+```bash
+php bin/oscar.php check:config
+```
+
+Vous pouvez également vérifier l'état du worker depuis l'interface depuis le menu **Administration>Maintenance>Status OSCARWORKER** : 
 ![OscarWorker](images/admin-oscarworker.png)
 
 Vous disposerez d'un écran de contrôle pour vous assurer que *OscarWorker* est bien actif : 
