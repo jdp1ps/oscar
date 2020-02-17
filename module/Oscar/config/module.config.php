@@ -59,6 +59,7 @@ return array(
                         'organizationRole',
                         'organizationRoleApi',
                         'organizationType',
+                        'oscarWorkerStatus',
                         'tva',
                         'connectorsConfig',
                         'connectorTest',

@@ -1518,6 +1518,14 @@ administration:
 
 
     child_routes:
+        oscarworker:
+            type: segment
+            may_terminate: true
+            options:
+                route: /status-oscarworker
+                defaults:
+                    action: oscarWorkerStatus
+
         documents-sections:
             type: segment
             may_terminate: true

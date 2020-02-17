@@ -178,6 +178,23 @@
         <article class="card xs">
             <h3 class="card-title">
                 <strong>
+                    <i class="icon-signal"></i>
+                    Status : OSCARWORKER</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ):?>
+                    <a href="<?= $this->url('administration/oscarworker') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <small><i class="icon-lock"></i> Privilège insuffisant</small>
+                <?php endif; ?>
+            </h3>
+            <p>Affichage des <strong>logs</strong> du <em>OscarWorker</em>.</p>
+        </article>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
                     <i class="icon-building-filled"></i>
                     Fusion des organisations</strong>
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT) ):?>
