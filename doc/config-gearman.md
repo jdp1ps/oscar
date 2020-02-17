@@ -86,6 +86,16 @@ journalctl -u oscarworker.service -f
 
 A cette étape, le serveur Gearman est opérationnnel et le Worker Oscar est installé.
 
+## Contôler le worker depuis Oscar
+
+Depuis le menu **Administration>Maintenance>Status OSCARWORKER** : 
+![OscarWorker](images/admin-oscarworker.png)
+
+Vous disposerez d'un écran de contrôle pour vous assurer que *OscarWorker* est bien actif : 
+![OscarWorker](images/admin-oscarworker-apercu.png)
+
+
+
 ## Modifier l'URL du serveur de job Gearman
 
 Oscar permet si besoin de modifier l'URL du serveur GEARMAN, pour cela, ajouter dans la configuration Oscar `config/autoload/local.php` une clef **gearman-job-server-host** dans la section **oscar** : 
