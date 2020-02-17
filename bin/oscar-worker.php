@@ -11,9 +11,12 @@ $conf = require 'config/application.config.php';
 // App
 $app = Zend\Mvc\Application::init(require 'config/application.config.php');
 
+/** @var \Oscar\Service\OscarConfigurationService $oscarConfigurationService */
+$oscarConfigurationService = $app->getServiceManager()->get(\Oscar\Service\OscarConfigurationService::class);
+
 // Worker
 $worker = new GearmanWorker();
-$worker->addServer();
+$worker->addServer($oscarConfigurationService->getGearmanHost());
 $worker->addFunction('indexPerson', 'oscarJob_indexPerson');
 $worker->addFunction('personSearchUpdate', 'oscarJob_indexPerson');
 $worker->addFunction('indexActivity', 'oscarJob_indexActivity');
