@@ -4,29 +4,46 @@
         <transition name="fade">
             <div class="overlay" v-if="formData">
                 <form action="" @submit.prevent="handlerSubmit">
-                    <h1>Nouvel accès</h1>
-
+                    <h1 v-if="formData.exist == ''">Nouvel accès</h1>
+                    <h1 v-else>Modification de <strong>{{ formData.exist }}</strong></h1>
+                    <input type="hidden" name="id" :value="formData.id" />
                     <div>
                         <label for="form_label">Intitulé</label>
                         <input type="text" class="form-control lg" name="login" v-model="formData.login" id="form_label" />
                     </div>
+
                     <hr>
                     <div>
                         <label for="form_label"><i class="icon-lock-1"></i>  Mot de passe</label>
                         <input type="hidden" name="pass" :value="formData.pass">
-                        <pre class="alert alert-info">{{ formData.pass }}</pre>
+                        <div class="row">
+                            <div class="col-md-9">
+                                <pre class="alert alert-info">
+                                    {{ formData.pass }}
+                                </pre>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-default" @click="newPassword" type="button">
+                                    <i class="icon-cw-outline"></i> Générer un nouveau mot de passe
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <ul>
                         <li v-for="a,k in apis">
                             <label>
-                                <input type="checkbox" name="apis[]" @change="handleToogleApi(k)" :checked="formData.apis.indexOf(a) >= 0" />
-                                {{ a }}
+                                <input type="checkbox" name="apis[]" @change="handleToogleApi(k)" :checked="formData.apis.indexOf(k) >= 0" />
+                                {{ a }} <small>({{k}})</small>
+                                <select v-if="formats[k]" v-model="formData.strategies[k]">
+                                    <option value="">Normal</option>
+                                    <option :value="label" v-for="classe, label in formats[k]">{{ label }} ({{classe}})</option>
+                                </select>
                             </label>
                         </li>
                     </ul>
                     <nav>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" :class="{ 'disabled' : formData.label == '' }" >
                             <i class="icon-floppy"></i>
                             Enregistrer
                         </button>
@@ -79,6 +96,9 @@
                     <a href="#" @click.prevent="handlerDelete(id)">
                         <i class="icon-trash"></i>
                         Supprimer</a>
+                    <a href="#" @click.prevent="handlerEdit(a, id)">
+                        <i class="icon-pencil-1"></i>
+                        Modifier</a>
                 </small>
             </h3>
             <pre class="card-content">Code : <strong>{{ a.pass }}</strong></pre>
@@ -91,7 +111,8 @@
     </section>
 </template>
 <script>
-    // poi watch --format umd --moduleName  APIAccess --filename.css APIAccess.css --filename.js APIAccess.js --dist public/js/oscar/dist public/js/oscar/src/APIAccess.vue
+    // node node_modules/.bin/poi build --format umd --moduleName  APIAccess --filename.css APIAccess.css --filename.js APIAccess.js --dist public/js/oscar/dist public/js/oscar/src/APIAccess.vue
+
 
     function makeid(length) {
         var result           = '';
@@ -106,7 +127,8 @@
 
     export default {
         props: {
-            apis: { required: true }
+            apis: { required: true },
+            formats: { required: true }
         },
 
         data(){
@@ -120,6 +142,10 @@
         },
 
         methods:{
+            newPassword(){
+                this.formData.pass = makeid(32)
+            },
+
             handleToogleApi(key){
                 let index = this.formData.apis.indexOf(key);
 
@@ -147,9 +173,13 @@
             handlerSubmit(){
                 let data = new FormData();
 
+                if( this.formData.id )
+                    data.append('id', this.formData.id);
+
                 data.append('login', this.formData.login);
                 data.append('pass', this.formData.pass);
                 data.append('apis', this.formData.apis.join(','));
+                data.append('strategies', JSON.stringify(this.formData.strategies));
 
                 this.$http.post('?', data).then(
                     ok => {
@@ -165,11 +195,24 @@
 
             handlerNew(){
                 this.formData = {
-                    login: "Identifiant",
+                    login: "",
+                    exist: "",
                     pass: makeid(32),
+                    strategies:{
+                        persons: "",
+                        organizations: "",
+                        activities: "",
+                        roles: "",
+                    },
                     apis:[],
                     active: false
                 };
+            },
+
+            handlerEdit(a, key){
+                this.formData = a;
+                this.formData.exist = key;
+                this.formData.login = key;
             },
 
             handlerCancelForm(){

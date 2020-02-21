@@ -65,6 +65,15 @@ class ConnectorPersonHydrator
     }
 
     /**
+     * @param $organisationCode
+     * @return mixed
+     */
+    protected function getOrganisationByConnectorId($uid)
+    {
+        return $this->getOrganizationRepository()->getOrganisationByCode($uid);
+    }
+
+    /**
      * @return array|null
      */
     protected function getRolesOscarByRoleId()
@@ -146,7 +155,6 @@ class ConnectorPersonHydrator
         if (property_exists($personData, 'roles')) {
 
             foreach ($personData->roles as $organizationCode => $roles) {
-
                 try {
                     /** @var Organization $organization */
                     $organization = $this->getOrganisationByCode($organizationCode);

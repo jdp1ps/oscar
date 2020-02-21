@@ -82,6 +82,15 @@ On commence par installer le module PHP
 apt install php7.3-gearman
 ```
 
+Par défaut, l'extension *Gearman* n'est pas activée dans le `php.ini`. Éditez les fichier **/etc/php/7.3/cli/php.ini** et **/etc/php/7.3/apache2/php.ini** en ajoutant la ligne : 
+
+```ini
+; /etc/php/7.3/apache2php.ini - /etc/php/7.3/apache2php.ini
+extension=gearman
+```
+
+Pensez à recharger apache avec la commande `serice apache2 restart` pour prendre en compte la configuration.
+
 ### Client
 
 Le **Client** va soumettre au *deamon* Gearman des **Jobs** à traiter.

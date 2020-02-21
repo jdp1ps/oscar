@@ -1281,7 +1281,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
 
             } catch (\Exception $e) {
-                $this->getLoggerService()->err("ERROR : " . $e->getMessage());
+                $this->getLoggerService()->error("ERROR : " . $e->getMessage());
             }
         }
 
@@ -2359,7 +2359,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         /** @var ValidationPeriod $validationPeriod */
         foreach ($query->getQuery()->getResult() as $validationPeriod) {
             if (array_key_exists($validationPeriod->getPeriodKey(), $result)) {
-                $this->getLoggerService()->err(sprintf("L'objet ValidationPeriod %s a un doublon !", $validationPeriod));
+                $this->getLoggerService()->error(sprintf("L'objet ValidationPeriod %s a un doublon !", $validationPeriod));
             }
             $result[$validationPeriod->getPeriodKey()] = $validationPeriod;
         }

@@ -5,11 +5,14 @@ namespace Oscar\Controller;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\OrganizationToJsonConnectorFormatter;
 use Oscar\Formatter\PersonToJsonConnectorFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseOrganizationService;
+use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
@@ -22,9 +25,9 @@ use Zend\View\Model\JsonModel;
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
-class ApiController extends AbstractOscarController implements UseOscarUserContextService, UseOscarConfigurationService, UsePersonService, UseLoggerService
+class ApiController extends AbstractOscarController implements UseOscarUserContextService, UseOscarConfigurationService, UsePersonService, UseLoggerService, UseOrganizationService
 {
-    use UseOscarUserContextServiceTrait, UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseLoggerServiceTrait;
+    use UseOscarUserContextServiceTrait, UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseLoggerServiceTrait, UseOrganizationServiceTrait;
 
     /**
      * Gestion des accès aux API : création de compte et configuration
@@ -54,16 +57,16 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
                     $login = $this->params()->fromPost('login');
                     $pass = $this->params()->fromPost('pass');
                     $apis = $this->params()->fromPost('apis');
+                    $strategies = json_decode($this->params()->fromPost('strategies'), JSON_OBJECT_AS_ARRAY);
 
-                    if( !array_key_exists($login, $datas) ){
-                        $datas[$login] = ['pass' => $pass, 'apis' => explode(',', $apis)];
-                        $this->getOscarConfigurationService()->saveEditableConfKey('apiaccess', $datas);
-                        return $this->getResponseOk();
-                    } else {
-                        return $this->getResponseInternalError("La clef  '$login' existe déjà");
-                    }
+                    $datas[$login] = [
+                        'pass' => $pass,
+                        'apis' => explode(',', $apis),
+                        'strategies' => $strategies
+                    ];
 
-                    break;
+                    $this->getOscarConfigurationService()->saveEditableConfKey('apiaccess', $datas);
+                    return $this->getResponseOk();
 
                 case "DELETE" :
                     $id = $this->params()->fromQuery('id');
@@ -78,11 +81,17 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         }
 
         return [
-            'apis' => $apis
+            'apis' => $apis,
+            'formats' => $this->getOscarConfigurationService()->getConfiguration('api.formats')
         ];
     }
 
 
+    /**
+     * Contrôle d'accès à l'API. Pour le moment, utilise AuthBasic
+     * @param $api
+     * @throws OscarException
+     */
     protected function checkApiAcces($api){
         if (!isset($_SERVER['PHP_AUTH_USER'])) {
             header('WWW-Authenticate: Basic realm="Oscar');
@@ -119,21 +128,53 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
                 $this->getLoggerService()->error("[API OSCAR] L'API oscar n'est pas configurée");
                 throw new OscarException("L'accès à l'API Oscar est mal configuré");
             }
+
+            if( array_key_exists("strategies", $apiaccess[$user]) ){
+                $stategy = $apiaccess[$user]['strategies'];
+            } else {
+                $stategy = null;
+            }
+
+            return [
+               'access'     => 'granted',
+               'user'       => $user,
+               'strategies'   => $stategy
+            ];
         } catch (OscarException $e) {
             throw $e;
         } catch (\Exception $e) {
             $this->getLoggerService()->error("[OSCAR API] Erreur inconnue : " . $e->getMessage());
             throw new OscarException("Accès interdit l'API Oscar");
         }
-
     }
 
-    public function personsAction(){
-        try {
-            $this->checkApiAcces('persons');
 
+
+    protected function getStrategy($api){
+        $config = $this->getOscarConfigurationService()->getConfiguration('api.formats.persons');
+        $granted = $this->checkApiAcces('persons');
+
+        if( array_key_exists('strategies', $granted) && array_key_exists($api, $granted['strategies']) && $granted['strategies'][$api] != 'Normal'){
+            $class = $config[$granted['strategies']['persons']];
+        } else {
+            $class = PersonToJsonConnectorFormatter::class;
+        }
+        return $class;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    ///                         ~ API ~
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public function personsAction(){
+        $start = microtime(true);
+
+        try {
+            $granted = $this->checkApiAcces('persons');
+            $strategy = $this->getStrategy('persons');
+            $personToJsonFormatter = new $strategy;
             $persons = [];
-            $personToJsonFormatter = new PersonToJsonConnectorFormatter();
 
             /** @var Person $p */
             foreach( $this->getPersonService()->getPersons() as $p ){
@@ -143,6 +184,8 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
             $datas = [
                 "version"         => OscarVersion::getBuild(),
                 "datecreated"     => date('c'),
+                'time'            => (microtime(true) - $start),
+                'total'           => count($persons),
                 'persons'         => $persons
             ];
 
@@ -154,8 +197,16 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
 
     public function personAction(){
         try {
-            $this->checkApiAcces('persons');
-            $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+            $start = microtime(true);
+            $granted = $this->checkApiAcces('persons');
+            $config = $this->getOscarConfigurationService()->getConfiguration('api.formats.persons');
+
+            if( array_key_exists('strategies', $granted) && array_key_exists('persons', $granted['strategies']) && $granted['strategies']['persons'] != 'Normal'){
+                $class = $config[$granted['strategies']['persons']];
+                $personToJsonFormatter = new $class;
+            } else {
+                $personToJsonFormatter = new PersonToJsonConnectorFormatter();
+            }
             $uid = $this->params()->fromRoute("id");
             try {
                 $person = $this->getPersonService()->getPerson($uid);
@@ -166,8 +217,61 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
             $datas = [
                 "version"         => OscarVersion::getBuild(),
                 "datecreated"     => date('c'),
+                'time'            => (microtime(true) - $start),
                 "uid"             => $uid,
                 "person"          => $personToJsonFormatter->format($person)
+            ];
+
+            return $this->jsonOutput($datas);
+        } catch (\Exception $e) {
+            return $this->getResponseUnauthorized($e->getMessage());
+        }
+    }
+
+    public function organizationsAction(){
+        try {
+            $this->checkApiAcces('organizations');
+            $start = microtime(true);
+            $organizations = [];
+            $organizationToJsonFormatter = new OrganizationToJsonConnectorFormatter();
+
+            /** @var Person $p */
+            foreach( $this->getOrganizationService()->getOrganizations() as $o ){
+                $organizations[] = $organizationToJsonFormatter->format($o);
+            }
+
+            $datas = [
+                "version"         => OscarVersion::getBuild(),
+                "datecreated"     => date('c'),
+                'time'            => (microtime(true) - $start),
+                'total'           => count($organizations),
+                'organizations'         => $organizations
+            ];
+
+            return $this->jsonOutput($datas);
+        } catch (\Exception $e) {
+            return $this->getResponseUnauthorized($e->getMessage());
+        }
+    }
+
+    public function organizationAction(){
+        try {
+            $this->checkApiAcces('organizations');
+            $start = microtime(true);
+            $organizationToJsonFormatter = new OrganizationToJsonConnectorFormatter();
+            $uid = $this->params()->fromRoute("id");
+            try {
+                $organization = $this->getOrganizationService()->getOrganization($uid);
+            } catch (\Exception $e) {
+                return $this->getResponseNotFound(_("Organisation non trouvée"));
+            }
+
+            $datas = [
+                "version"         => OscarVersion::getBuild(),
+                "datecreated"     => date('c'),
+                'time'            => (microtime(true) - $start),
+                "uid"             => $uid,
+                "person"          => $organizationToJsonFormatter->format($organization)
             ];
 
             return $this->jsonOutput($datas);
@@ -179,7 +283,6 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
     public function helpAction(){
         die("Consultez l'aide technique pour obtenir");
     }
-
 
     public function apiAction()
     {

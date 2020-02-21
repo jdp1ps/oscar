@@ -1,20 +1,43 @@
 #!/bin/bash
 
 ## Accès à la base de données en production pour faire le backup des données
-PROD_HOST=servername
-PROD_USER=username
-PROD_BASE=database
-BACKUP=backup/oscar-prod-backup.sql
+SOURCE_HOST=host.domain.ext
+SOURCE_USER=identifiant
+SOURCE_BASE=base
+SOURCE_PASS=p@$$
+
+# Fichier où seront stoqués les données dumpées
+BACKUP=backup/copy-test-backup.sql
 
 ## Accès local
-LOCAL_HOST=localhost
-LOCAL_USER=oscar
-LOCAL_BASE=oscar_dev
+DESTINATION_HOST=localhost
+DESTINATION_USER=oscar
+DESTINATION_BASE=oscar_dev
+DESTINATION_PASS=azerty
 
-## DUMP vers fichier
-echo "DUMP PROD $PROD_USER@$PROD_HOST/$PROD_BASE to $BACKUP"
-pg_dump --clean --no-owner -h $PROD_HOST -U $PROD_USER $PROD_BASE > $BACKUP
 
-## Chargement depuis le fichier
-echo "LOAD BACKUP FROM $BACKUP TO $USER@$HOST/$BASE"
-psql -h $LOCAL_HOST -U $LOCAL_USER $LOCAL_BASE < $BACKUP
+COPYTOLOCAL=0   # Active la copie des données dans la base de donnée de destination
+NODUMP=0        # Réalise le backup des données
+
+case "$1" in
+     --nodump) COPYTOLOCAL=1;
+         NODUMP=1
+         shift;
+esac
+
+if [ $NODUMP == "0" ]; then
+    echo "START DUMP de $SOURCE_USER@$SOURCE_HOST/$SOURCE_BASE vers $BACKUP...";
+    PGPASSWORD="$SOURCE_PASS";
+    pg_dump --clean --no-owner -h $SOURCE_HOST -U $SOURCE_USER $SOURCE_BASE > $BACKUP
+    echo "END DUMP"
+fi
+
+case "$1" in
+    -h) usage;
+        exit 0;;
+     --tolocal) COPYTOLOCAL=1;
+             echo "COPY $BACKUP IN $DESTINATION_USER@$DESTINATION_HOST/$DESTINATION_BASE...";
+             PGPASSWORD="$DESTINATION_PASS";
+             psql -h $DESTINATION_HOST -U $DESTINATION_USER $DESTINATION_BASE < $BACKUP
+             shift;
+esac

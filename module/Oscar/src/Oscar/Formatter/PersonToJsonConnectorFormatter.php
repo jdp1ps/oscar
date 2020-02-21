@@ -9,12 +9,25 @@
 namespace Oscar\Formatter;
 
 
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 
 class PersonToJsonConnectorFormatter
 {
     public function format(Person $person)
     {
+        $roles = [];
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($person->getOrganizations() as $personOrganization){
+            $structureKey = (string)$personOrganization->getOrganization()->getCode();
+            if( !$structureKey ) continue;
+            if( !array_key_exists($structureKey, $roles) ){
+                $roles[$structureKey] = [];
+            }
+            $roleStr = $personOrganization->getRoleObj()->getRoleId();
+            $roles[$structureKey][] = $roleStr;
+        }
+
         return array(
             'uid' => (string)$person->getId(),
             'login' => $person->getLadapLogin(),
@@ -33,9 +46,9 @@ class PersonToJsonConnectorFormatter
 
             'birthday' => '',
             'datefininscription' => '',
-            "datecreated" => "YYYY-MM-DD",
-            "dateupdated" => "YYYY-MM-DD",
-            "datecached" => "YYYY-MM-DD",
+            "datecreated" => $person->getDateCreatedStr(),
+            "dateupdated" => $person->getDateUpdatedStr(),
+            "datecached" => $person->getDateCachedStr(),
 
             'text' => $person->getDisplayName(),
             'phone' => $person->getPhone(),
@@ -43,17 +56,8 @@ class PersonToJsonConnectorFormatter
             'mailMd5' => md5($person->getEmail()),
             'ucbnSiteLocalisation' => $person->getLdapSiteLocation() ? $person->getLdapSiteLocation() : "",
             'affectation' => $person->getLdapAffectation() ? $person->getLdapAffectation() : "",
-
-            "address" => [
-                "address1" => "",
-                "address2" => "",
-                "address3" => "",
-                "zipcode" => "",
-                "city" => "",
-                "country" => ""
-            ],
-            "groups" => [],
-            "roles" => []
+            "groups" => $person->getLdapMemberOf(),
+            "roles" => $roles
         );
     }
 
