@@ -684,21 +684,18 @@
                 </div>
                 <nav class="buttons-bar">
                     <button class="btn btn-primary" style="margin-left: auto" v-if="ts.submitable"
-                            :class="{ 'disabled': !ts.submitable, 'enabled': ts.submitable }"
-                            @click="sendMonth()">
-                        <i class="icon-upload"></i>
-                        <i class="icon-spinner animate-spin" v-show="loading"></i>
-                        <span>
-                                    Soumettre mes déclarations
-                                </span>
+                            :class="{ 'disabled': !ts.submitable, 'enabled': ts.submitable && !loading}"
+                            @click="validateMonth()">
+                        <i class="icon-spinner animate-spin" v-if="loading"></i>
+                        <i class="icon-upload" v-else></i>
+                        <span v-if="ts.hasConflict">Réenvoyer</span>
+                        <span v-else>Soumettre mes déclarations</span>
                     </button>
-                    <button class="btn btn-primary" v-else-if="ts.hasConflict" @click="reSendPeriod()">
-                        Réenvoyer
-                    </button>
+
                     <span v-else>
-                            Vous ne pouvez pas soumettre cette période<br>
-                                <small>{{ ts.submitableInfos }}</small>
-                            </span>
+                        Vous ne pouvez pas soumettre cette période<br>
+                        <small>{{ ts.submitableInfos }}</small>
+                    </span>
                 </nav>
             </section>
 
@@ -1028,9 +1025,8 @@
             defaultYear: {default: defaultDate.getFullYear()},
             defaultDayLength: {default: 8.0},
             urlimport: {default: null},
-            url:{
-                required: true
-            }
+            urlValidation: { required: true },
+            url:{ required: true }
         },
 
         components: {
@@ -1516,7 +1512,27 @@
             },
 
             reSendPeriod(periodValidation) {
-                this.sendMonth("resend");
+                this.validateMonth("resend");
+            },
+
+            /**
+             * Déclenchement de la validation côté serveur pour vérifier si les créneaux saisis sont conformes.
+             */
+            validateMonth(action="sendmonth"){
+                this.loading = true;
+                this.$http.get(this.urlValidation +'?year=' + this.ts.year + '&month=' + this.ts.month).then(
+                    ok => {
+                        console.log("OK");
+                        this.sendMonth(action);
+                    },
+                    ko => {
+                        console.log(ko);
+                        this.error = ko.body;
+                    }
+                ).then(foo => {
+                    this.selectedWeek = null;
+                    this.loading = false;
+                });
             },
 
 

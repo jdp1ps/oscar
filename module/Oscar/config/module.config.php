@@ -203,7 +203,7 @@ return array(
                         'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
                         'importIcal', 'declarations', 'resumeActivity',
                         'resolveInvalidLabels', 'syntheseActivity', 'synthesisAll', 'synthesisActivityPeriod',
-                        'exportActivityDates'
+                        'exportActivityDates', 'checkperiod'
                     ],
                     'roles' => ['user']
                 ],

@@ -1935,7 +1935,7 @@ class TimesheetController extends AbstractOscarController
                 // On contrôle le code
                 if( !$other ){
                     $msg = sprintf("Ce type de créneau '%s' n'est pas pris en charge dans cette version", $code);
-                    $this->getLogger()->error($msg);
+                    $this->getLoggerService()->error($msg);
                     return $this->getResponseBadRequest($msg);
                 }
             }
@@ -1953,7 +1953,7 @@ class TimesheetController extends AbstractOscarController
 
                 if( !$wp ){
                     $msg = sprintf("Le lot de travail 'N°%s' n'existe plus", $wpId);
-                    $this->getLogger()->error($msg);
+                    $this->getLoggerService()->error($msg);
                     return $this->getResponseInternalError($msg);
                 }
 
@@ -1970,7 +1970,7 @@ class TimesheetController extends AbstractOscarController
 
                 /** @var ValidationPeriod $vp */
                 foreach ($validationPeriods as $vp) {
-                    $this->getLogger()->debug("$vp");
+                    $this->getLoggerService()->debug("$vp");
                     if( $vp->getStatus() == ValidationPeriod::STATUS_CONFLICT ){
                         $unauthorizedError = "Vous ne pouvez pas modifier une déclaration en cours de validation. Seul les créneaux marqués en erreur peuvent être modifiés";
                         $hasConflict = true;
@@ -2020,6 +2020,26 @@ class TimesheetController extends AbstractOscarController
 
         return $this->getResponseOk();
 
+    }
+
+    public function checkperiodAction(){
+        $today = new \DateTime();
+        $year = (int)$this->params()->fromQuery('year', $today->format('Y'));
+        $month = (int)$this->params()->fromQuery('month', $today->format('m'));
+
+        $declarerId = $this->getCurrentPerson()->getId();
+
+        /** @var Person $currentPerson */
+        $currentPerson = $this->getPersonService()->getPersonById($declarerId); //$this->getCurrentPerson();
+
+        try {
+            $this->getTimesheetService()->verificationPeriod($currentPerson, $year, $month);
+            return $this->getResponseOk("Déclaration valide");
+        } catch (\Exception $e ){
+            return $this->getResponseInternalError("Déclaration invalide : " . $e->getMessage());
+        }
+
+        return $this->getResponseUnauthorized("Pas encore disponible");
     }
 
     /**
@@ -2190,18 +2210,18 @@ class TimesheetController extends AbstractOscarController
                     $declarer = $this->getPersonService()->getPersonById($this->params()->fromPost('person'), true);
                     $validator = $this->getPersonService()->getPersonById($this->params()->fromPost('validatorId'), true);
                     try {
-                        $this->getLogger()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
+                        $this->getLoggerService()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
                         $this->getPersonService()->addReferentToDeclarerHorsLot($declarer, $validator, true);
                     } catch (\Exception $e){
-                        $this->getLogger()->error($e->getMessage());
+                        $this->getLoggerService()->error($e->getMessage());
                         $this->flashMessenger()->addErrorMessage("$validator n'a pas été ajouté aux déclarations : " . $e->getMessage());
                     }
 
                     try {
-                        $this->getLogger()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
+                        $this->getLoggerService()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
                         $this->getPersonService()->addReferent($validator->getId(), $declarer->getId());
                     } catch ( \Exception $e ){
-                        $this->getLogger()->error($e->getMessage());
+                        $this->getLoggerService()->error($e->getMessage());
                         $this->flashMessenger()->addErrorMessage("$validator n'a pas été assigné comme validateur Hors-Lot pour $declarer : " . $e->getMessage());
 
                     }
