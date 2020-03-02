@@ -1518,6 +1518,13 @@ administration:
 
 
     child_routes:
+        gestionprivilege:
+            type: segment
+            may_terminate: true
+            options:
+                route: /privileges2
+                defaults:
+                    action: privileges2
         oscarworker:
             type: segment
             may_terminate: true

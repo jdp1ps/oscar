@@ -70,6 +70,7 @@ return array(
                         'typeDocumentApi',
                         'numerotation',
                         'parameters',
+                        'privileges2',
                         'access',
                         'planComptableLoaded'
                     ],
