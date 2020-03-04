@@ -102,7 +102,6 @@
                 <p>... choisissez l'emplacement où le déplacer.</p>
             </div>
         </transition>
-        <pre>{{ masses }}</pre>
         <div class="card-content spentarea">
             <spenttypeitem v-for="s in tree"
                        :spenttypegroup="s"

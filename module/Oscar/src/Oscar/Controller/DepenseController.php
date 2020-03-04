@@ -87,6 +87,12 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
         $format = $this->params()->fromQuery('format', 'html');
 
+        try {
+            $masses = $this->getOscarConfigurationService()->getConfiguration('spenttypeannexes');
+        } catch (\Exception $e) {
+            throw new OscarException("La configuration des masses budgetaire (spenttypeannexes) est necessaire");
+        }
+
         $method = $this->getHttpXMethod();
 
         $this->getLogger()->debug("SPENTTYPE - $method");
@@ -172,7 +178,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         if( $format == 'json' || $this->isAjax() ){
             return $this->jsonOutput([
                 'spenttypegroups' => $this->getSpentService()->getAllArray(),
-                'masses' => $this->getOscarConfigurationService()->getConfiguration('spenttypeannexes')
+                'masses' => $masses,
             ]);
         } else {
             return [];

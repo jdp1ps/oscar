@@ -1549,6 +1549,14 @@ administration:
                 defaults:
                     action: documentSections
 
+        testconfig:
+            type: segment
+            may_terminate: true
+            options:
+                route: /testconfig
+                defaults:
+                    action: testconfig
+
         plan-comptable-loader:
             type: segment
             may_terminate: true

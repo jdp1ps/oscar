@@ -60,6 +60,7 @@ return array(
                         'organizationRoleApi',
                         'organizationType',
                         'oscarWorkerStatus',
+                        'testconfig',
                         'tva',
                         'connectorsConfig',
                         'connectorTest',

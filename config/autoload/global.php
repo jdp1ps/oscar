@@ -44,7 +44,6 @@ return array(
 
         'gearman-job-server-host' => 'localhost',
 
-
 //        'export' => [
 //            'payments' => [
 //                'separator' => '$$',
