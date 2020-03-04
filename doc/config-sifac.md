@@ -91,10 +91,54 @@ return array(
 );
 ```
 
-### Configurer le Plan Comptable
+Une fois l'accès configuré, vous pourrez, depuis la fiche activité, accéder à l'écran de visualisation des dépenses pour charger les dépenses depuis SIFAC. **Les dépenses s'appuient sur le PFI uniquement**.
 
-## Filtrer le compte général
+La liste des dépenses s'appuis sur le plan comptable pour gérer certains intitulés, si ce dernier est manquant ou incomplet, certaines informations peuvent être manquantes ou érronées.
 
+### Exclure certains comptes des résultats depuis Oscar
 
+Depuis le menu **Administration>Configuration et maintenance>Options>Comptes filtrés**.
 
-## Plan comptable et qualification des masses
+![Filtrer certains comptes dans l'affichage des dépense](./images/depenses-filtres-comptes.png)
+
+Cette option va exclure certains résultats.
+
+### Personnaliser la requète des dépenses
+
+Dans la configuration de l'accès SIFAC, vous pouvez personnaliser/adapter la requète de chargement des données. La requête initiale est formalisée ainsi par défaut : 
+
+```sql
+select  
+    MEASURE AS pfi,  
+    RLDNR as AB9, 
+    STUNR as idsync,  
+    awref AS numSifac, 
+    vrefbn as numCommandeAff, 
+    vobelnr as numPiece, 
+    LIFNR as numFournisseur, 
+    KNBELNR as pieceRef, 
+    fikrs AS codeSociete, 
+    BLART AS codeServiceFait, 
+    FAREA AS codeDomaineFonct, 
+    sgtxt AS designation, 
+    BKTXT as texteFacture, 
+    wrttp as typeDocument, 
+    TRBTR as montant, 
+    fistl as centreDeProfit, 
+    fipex as compteBudgetaire, 
+    prctr AS centreFinancier, 
+    HKONT AS compteGeneral, 
+    budat as datePiece, 
+    bldat as dateComptable, 
+    gjahr as dateAnneeExercice, 
+    zhldt AS datePaiement,  
+    PSOBT AS dateServiceFait 
+from sapsr3.v_fmifi 
+where 
+    measure = '%s' 
+    AND rldnr='9A' 
+    AND MANDT='430' 
+    AND BTART='0250'
+```
+
+Il est possible qu'il faille modifier la clause `MANDT='430'` qui correspond à SIFAC formation.
