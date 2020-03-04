@@ -1,9 +1,5 @@
 <?php
-
-use Monolog\Handler\StdoutHandler;
-use Oscar\Controller\PersonController;
 use Oscar\Service\AccessResolverService;
-use Oscar\Service\LoggerStdoutColor;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\PersonnelService;
 use Oscar\Service\PersonService;
@@ -868,7 +864,6 @@ return array(
 
             'Logger' => function ($sm) {
                 $logger = new \Monolog\Logger('main');
-                $logger->pushHandler(new StdoutHandler());
                 $logger->pushHandler(new \Monolog\Handler\StreamHandler(realpath(dirname(__FILE__).'/../../../logs').'/oscar.log'));
                 return $logger;
             },
