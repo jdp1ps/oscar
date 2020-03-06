@@ -43,6 +43,28 @@
         </div>
 
         <div class="col-md-6">
+            <h2><i class="icon-cube"></i><?= $this->translate("Demande d'activité") ?></h2>
+            <article class="card">
+                <h3><i class="icon-calculator"></i> Limiter le nombre de demande</h3>
+                <p class="help-message">La valeur <strong>-1</strong> permet de ne pas limiter le nombre de demande.</p>
+                <form action="" method="post" class="form">
+                    <div class="row">
+                        <div class="col-md-7 col-md-push-1">
+                            <strong>Nombre de demande maximum</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="material-switch">
+                                <input name="parameter_name" type="hidden" value="activity_request_limit" />
+                                <input type="number" name="parameter_value" value="<?= $activity_request_limit ?>" id="" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
+
+
             <h2><i class="icon-tags"></i>Apparence</h2>
             <article class="card">
                 <h3><i class="icon-pencil-1"></i>Thème</h3>

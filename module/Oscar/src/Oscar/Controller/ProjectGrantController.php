@@ -491,7 +491,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             try {
                 switch ($method) {
                     case "GET" :
-                        $limit = 5;
+                        $limit = $this->getOscarConfigurationService()->getActivityRequestLimit();
 
                         $statusTxt = $this->params()->fromQuery('status', '');
                         if( trim($statusTxt) == '' ){
@@ -502,7 +502,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                         $demandes = $activityRequestService->getActivityRequestPerson($this->getCurrentPerson(), 'json', $status);
 
-                        if( count($demandes) >= $limit ){
+                        if( $limit > 0 && count($demandes) >= $limit ){
                             $lockMessage[] = "Vous avez atteint la limite des demandes autorisées.";
                         }
 
