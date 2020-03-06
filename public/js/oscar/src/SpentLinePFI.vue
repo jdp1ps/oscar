@@ -65,6 +65,7 @@
             <tr>
                 <th>N°</th>
                 <th>Ligne(s)</th>
+                <th>Type</th>
                 <th>Description</th>
                 <th>Montant</th>
                 <th>Compte</th>
@@ -79,6 +80,7 @@
             <tr>
                 <td>{{ l.refPiece }}</td>
                 <td><button @click="details = l" class="btn btn-default">{{ l.details.length }}</button></td>
+                <td>{{ l.types ? l.types.join(',') : '' }}</td>
                 <td>{{ l.text.join(', ') }}</td>
                 <td style="text-align: right">{{ l.montant.toFixed(2) }}</td>
                 <td>{{ l.compteBudgetaire.join(', ') }}</td>
@@ -139,7 +141,7 @@
                         if( error.status == 403 ){
                             this.error = "Vous n'avez pas l'autorisation d'accès à ces informations.";
                         } else {
-                            this.error = "Impossible de charger les dépenses pour ce PFI : " + error
+                            this.error = "Impossible de charger les dépenses pour ce PFI : " + error.data
                         }
                     }
                 ).then(n => { this.pendingMsg = ""; });

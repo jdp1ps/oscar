@@ -128,6 +128,8 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const PERSON_SHOW_INM = 'PERSON-SYNC_LDA';
 
     const DEPENSE_SHOW = 'DEPENSE-SHOW';
+    const DEPENSE_SYNC = 'DEPENSE-SYNC';
+    const DEPENSE_DOWNLOAD = 'DEPENSE-DOWNLOAD';
 
     public static function getResourceId($privilege)
     {

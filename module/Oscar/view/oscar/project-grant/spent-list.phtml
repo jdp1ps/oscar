@@ -1,11 +1,35 @@
 
 <section class="container-fluid">
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
+    <nav>
+        <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $activity)): ?>
+        <form action="<?= $this->url('contract/list-spent', ['id' => $activity->getId()]) ?>" method="post" class="form-inline">
+            <input type="hidden" name="action" value="update" />
+            <button type="submit" class="btn btn-primary">
+                <i class="icon-file-excel"></i>
+                Mettre à jour les données depuis SIFAC
+            </button>
+        </form>
+        <?php endif; ?>
+
+        <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_DOWNLOAD, $activity)): ?>
+        <a class="btn btn-default" href="<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>?format=excel">
+            <i class="icon-file-excel"></i>
+            Télécharger les dépenses (Excel)
+        </a>
+        <?php endif; ?>
+
+        <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_DOWNLOAD, $activity)): ?>
+        <a class="btn btn-default" href="<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>?format=excel&mode=details">
+            <i class="icon-file-excel"></i>
+            Télécharger les dépenses version détaillées (Excel)
+        </a>
+        <?php endif; ?>
+    </nav>
     <?php if( count($spents) ): ?>
         <div id="spentlines"></div>
         <script>
             require(['vue', 'vue-resource', 'SpentLinePFI'], function(Vue, VueResource, SpentLinePFI){
-                console.log("DONE");
                 Vue.use(VueResource);
                 new Vue({
                     el: "#spentlines",
