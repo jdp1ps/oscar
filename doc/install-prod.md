@@ -116,7 +116,7 @@ wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key a
 sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
 apt update
 apt-get install postgresql postgresql-contrib
-sudo su - postgres
+
 ```
 Une fois connecté :
 ```
@@ -304,7 +304,7 @@ Ajouter le *worker oscar* au service du système.
 sudo su
 
 # On va dans le dossier des service
-cd /etc/systemd/system
+cd /etc/systemd/system  
 
 # On ajoute la configuration du service dans SYSTEMD avec un lien symbolique
 ln -s /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
