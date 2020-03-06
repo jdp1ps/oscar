@@ -2,7 +2,7 @@
 
 ## Appliquer cette mise à jour depuis Oscar 2.8
 
-Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](./doc/update.md)
+Pour appliquer cette mise à jour, suivre la procédure standard détaillée dans le fichier [Procédure de mise à jour Oscar](../update.md)
 
 
 ## Hotfix 
@@ -42,7 +42,7 @@ return array(
 
 La version 2.9 de Oscar introduit une nouvelle fonctionnalité : Les demandes d'activités. Elle propose d'activer via les privilèges d'autoriser des demandes d'activité. Ces demandes peuvent ensuite être validées ou refusées pour créer des activités de recherche.
 
-Détails sur cette fonctionnalité : [Demande d'activités](doc/activity-request.md)
+Détails sur cette fonctionnalité : [Demande d'activités](../activity-request.md)
 
 
 
@@ -106,19 +106,19 @@ L'interface d'importation mémorise maintenant localement (dans le navigateur) l
 
 ## Documents générés (experimental)
 
-Voir [Documents générés](doc/generated-documents.md)
+Voir [Documents générés](../generated-documents.md)
 
 ## Autres améliorations
  
  - Export des activités : L'UI permet maintenant de sélectionner/déselectionner les champs à exporter par groupe.
- - Database : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](doc/numerotation.md)) @JulienDary
+ - Database : La fonction de numérotation automatique a été optimisée ([Numérotation automatique](../config-numerotation.md)) @JulienDary
  - Admin : Refonte de l'interface de gestion des types de documents et **ajout d'un privilège** pour les gérer
  - Admin : Certaines listes dans les écrans de configuration des nomenclatures sont maintenant affichées dans l'ordre alphabétique
  - Gestion des lots : le bouton enregistrer n'est réactif que si le code est renseigné
  - DOC : Une requète Postgresql a été ajoutée dans la documentation pour automatiser les changements de formalisme des numérotations
  - Recherche dans les activités : La mise en page des résultats de la recherche a été améliorée pour mieux distinguer l'état des activités.
  - UP : Le système d'invalidation des feuilles de temps s'applique maintenant à la période entière plutôt qu'à un type de créneau. Les messages d'erreur en page d'accueil sont donc maintenant regroupés par période.
- - Le schéma de la base a été ajouté dans la documentation technique [Schéma de la BDD](./doc/schema_bdd.png)
+ - Le schéma de la base a été ajouté dans la documentation technique [Schéma de la BDD](../schema_bdd.png)
  - Les "paramètres éditables" sont un mécanisme qui permettra de gérer certains paramètres de configuration directement depuis l'interface. Ce dispositif sera dédié à la gestion des options "facultatives" et va créer une fichier **config/autoload/oscar-editable.yml** non versionné et absent par défaut (il arrive que l'absence du fichier déclenche une erreur).
  
 ## Fix

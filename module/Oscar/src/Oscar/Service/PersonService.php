@@ -53,6 +53,7 @@ use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Log\Logger;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\View\Renderer\PhpRenderer;
 
 /**
  * Gestion des Personnes :
@@ -128,7 +129,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     public function jobSearchUpdate( Person $person )
     {
         $client = new \GearmanClient();
-        $client->addServer();
+        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('personSearchUpdate', json_encode([
             'personid' => $person->getId()
         ]),
@@ -492,6 +493,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         /** @var ConfigurationParser $configOscar */
         $configOscar = $this->getOscarConfigurationService();
 
+        $conf = $this->getOscarConfigurationService()->getConfigArray();
+        $appName = $conf['unicaen-app']['app_infos']['nom'];
+
         if( $debug ){
             $log = function($msg){
                 $this->getLoggerService()->debug($msg);
@@ -509,13 +513,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
 
         $url = $this->getServiceContainer()
-            ->get('viewhelpermanager')
+            ->get('ViewHelperManager')
             ->get('url');
 
         $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
 
         $content = "Bonjour $person, <br>\n";
-        $content .= "Vous avez des notifications non-lues sur Oscar : \n";
+        $content .= "Vous avez des notifications non-lues sur $appName : \n";
         $content .= "<ul>\n";
 
         Moment::setLocale('fr_FR');
@@ -535,10 +539,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         //  TODO vérifier que ça fonctionne
         /** @var MailingService $mailer */
-        $mailer = $this->getServiceLocator()->get("mailingService");
+        $mailer = $this->getServiceContainer()->get(MailingService::class);
         $to = $person->getEmail();
         $content .= "</ul>\n";
-        $mail = $mailer->newMessage("Notifications en attente sur Oscar", ['body' => $content]);
+        $mail = $mailer->newMessage("Notifications en attente", ['body' => $content]);
         $mail->setTo([$to => (string) $person]);
         $mailer->send($mail);
     }
@@ -1207,13 +1211,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public function jobIndexPerson(Person $person){
         $client = new \GearmanClient();
-        $client->addServer();
+        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('indexPerson', json_encode(['personid' => $person->getId()]), sprintf('personsearchupdate-%s', $person->getId()));
     }
 
     public function jobNotificationActivityPerson(Activity $activity, Person $person){
         $client = new \GearmanClient();
-        $client->addServer();
+        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('notificationActivityPerson', json_encode([
             'activityid' => $activity->getId(),
             'personid' => $person->getId(),

@@ -11,10 +11,14 @@ use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Oscar\Entity\Activity;
 use Oscar\Entity\SpentTypeGroup;
+use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Service\SpentService;
+use Oscar\Traits\UseActivityService;
+use Oscar\Traits\UseActivityServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Zend\Http\Request;
@@ -29,6 +33,13 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
      */
     public function getSpentService(){
         return $this->getServiceContainer()->get(SpentService::class);
+    }
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService(){
+        return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
     /**
@@ -165,6 +176,29 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
             ]);
         } else {
             return [];
+        }
+    }
+
+    public function activityApiAction(){
+        try {
+            $idactivity = $this->params()->fromRoute('id');
+            $activity = $this->getProjectGrantService()->getActivityById($idactivity);
+        } catch (\Exception $e){
+            return $this->getResponseInternalError("Impossible de charger l'activité : " . $e->getMessage());
+        }
+
+        $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $activity);
+
+        try {
+            if( !$activity->getCodeEOTP() ){
+                throw new OscarException(sprintf(_("Cette activité n'a pas de PFI")));
+            }
+            $spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
+            $datas = $this->baseJsonResponse();
+            $datas['spents'] = $spents;
+            return $this->jsonOutput($datas);
+        } catch (\Exception $e){
+            return $this->getResponseInternalError("Impossible de charger l'activité : " . $e->getMessage());
         }
     }
 }

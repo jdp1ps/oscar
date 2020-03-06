@@ -761,6 +761,21 @@ generate:
             action: generate
     may_terminate: true
 
+spent:
+    type: literal
+    options:
+        route: /depenses
+        defaults:
+            controller: Depense
+
+    may_terminate: false
+    child_routes:
+        activity-api:
+            type: segment
+            options:
+                route: /api/activity/:id
+                defaults:
+                    action: activityApi
 
 ################################################################################
 # GESTION des CONTRACTS
@@ -1503,6 +1518,14 @@ administration:
 
 
     child_routes:
+        oscarworker:
+            type: segment
+            may_terminate: true
+            options:
+                route: /status-oscarworker
+                defaults:
+                    action: oscarWorkerStatus
+
         documents-sections:
             type: segment
             may_terminate: true

@@ -1,0 +1,7 @@
+site_name: OSCAR DOC
+nav:
+  - Accueil: index.md
+
+
+docs_dir: doc/
+theme: readthedocs

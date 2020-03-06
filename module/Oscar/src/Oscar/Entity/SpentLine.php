@@ -93,7 +93,7 @@ class SpentLine
     private $typeDocument;
 
     /**
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $montant;
 
@@ -315,7 +315,7 @@ class SpentLine
      */
     public function getDesignation()
     {
-        return $this->designation;
+        return trim($this->designation);
     }
 
     /**
@@ -331,7 +331,7 @@ class SpentLine
      */
     public function getTexteFacture()
     {
-        return $this->texteFacture;
+        return trim($this->texteFacture);
     }
 
     /**
@@ -576,6 +576,36 @@ class SpentLine
             $this->getMontant(),
             $this->getNumCommandeAff(),
             $this->getNumFournisseur(),
+        ];
+    }
+
+    public function toArray()
+    {
+        return [
+            // IDs / Numéros
+            'id' => $this->getId(),
+            'syncid' => $this->getSyncId(),
+            'pfi' => $this->getPfi(),
+            'numSifac' => $this->getNumSifac(),
+            'numPiece' => $this->getNumPiece(),
+
+            // Infos
+            'montant' => $this->getMontant(),
+            'compteBudgetaire' => $this->getCompteBudgetaire(),
+            'centreProfit' => $this->getCentreDeProfit(),
+            'compteGeneral' => $this->getCompteGeneral(),
+            'centreFinancier' => $this->getCentreFinancier(),
+
+            'texteFacture' => $this->getTexteFacture(),
+            'designation' => $this->getDesignation(),
+
+            //Dates
+            'dateAnneeExercice' => $this->getDateAnneeExercice(),
+            'datePaiement' => $this->getDatePaiement(),
+            'datePiece' => $this->getDatePiece(),
+            'dateComptable' => $this->getDateComptable(),
+
+            //
         ];
     }
 

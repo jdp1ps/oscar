@@ -64,9 +64,6 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
             return;
         }
 
-        //
-
-
         try {
             $connectorConfig = $oscarConfig->getConfiguration('connectors.spent');
 
@@ -87,7 +84,8 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
                 /** @var ConnectorSpentSifacOCI $instance */
                 $instance = $factory->newInstanceArgs([$this->getServicemanager()->get(SpentService::class), $conf['params']]);
 
-                $instance->sync($pfi, $io);
+                $result = $instance->sync($pfi, $io);
+                $io->write($result);
             }
 
         } catch (\Exception $e ){

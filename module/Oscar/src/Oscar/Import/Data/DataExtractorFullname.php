@@ -20,7 +20,7 @@ class DataExtractorFullname extends AbstractDataExtractor
         if( !is_string($data) )
             return null;
 
-        $re = '/([\w-]*)( |\.)([\w- \']*)(<(.*@.*)>)?/mu';
+        $re = '/([\w\-]*)( |\.)([\w\- \']*)(<(.*@.*)>)?/mu';
 
         if( preg_match($re, $data, $matches) ){
 

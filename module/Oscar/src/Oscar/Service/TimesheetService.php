@@ -2042,8 +2042,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $dayOfWeek = $dayIndex +1;
 
             $duration = array_key_exists($dayOfWeek, $daysDetails['days']) ? $daysDetails['days'][$dayOfWeek] : 0;
-            $maxlength = $daysDetails['max'];
-            $minlength = $daysDetails['min'];
+            $maxlength = $duration * $amplitudeMax; //$daysDetails['max'];
+            $minlength =$duration * $amplitudeMin; // $daysDetails['min'];
 
             $amplitudemax = $duration * $amplitudeMax;
             $amplidudemin = $duration * $amplitudeMin;
@@ -2131,8 +2131,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $errors[] = "- Les heures déclarées le jour " . $dayData['i'] . " dépassent la durée autorisée !";
             }
 
-            if ($min > 0.0 && $duration == 0.0) {
-                $errors[] = "- Il doit y avoir des heures de déclarées le jour " . $dayData['i'] . " (" . $min . ") !";
+            if ($min > 0.0 && $duration < $min) {
+                $errors[] = "- Le nombre d'heures déclarées le jour " . $dayData['i'] . " est insuffisant ( $duration / " . $min . ") !";
             }
 
 

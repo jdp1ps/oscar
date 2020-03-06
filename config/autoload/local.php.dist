@@ -19,6 +19,9 @@ return array(
     'oscar' => [
         // Oscar Live
         'socket' => $socket,
+        
+        // gearman
+        'gearman-job-server-host' => 'localhost',
 
         ////////////////////////////////////////////////////////////////////////
         // ! EXPERIMENTAL !
@@ -254,6 +257,13 @@ return array(
             'transport' => [
                 'type' => 'sendmail',
                 'cmd' => '/usr/sbin/sendmail -bs',
+            ],
+            /****
+
+            /**** TRANSPORT (exim)
+            'transport' => [
+                'type' => 'sendmail',
+                'cmd' => '/usr/sbin/exim -bs',
             ],
             /****/
 

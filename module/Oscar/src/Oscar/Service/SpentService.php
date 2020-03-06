@@ -44,6 +44,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 {
     use UseEntityManagerTrait, UseOscarConfigurationServiceTrait, UseLoggerServiceTrait;
 
+
     public function getAllArray(){
         $array = [];
         /** @var SpentTypeGroup $spendTypeGroup */
@@ -505,7 +506,26 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
     }
     public function getSpentsByPFI( $pfi ){
-        return $this->getEntityManager()->getRepository(SpentLine::class)->findBy(['pfi' => $pfi], ['dateComptable' => 'DESC']);
+        $qb = $this->getEntityManager()->getRepository(SpentLine::class)->createQueryBuilder('s');
+        $qb->where('s.pfi = :pfi');
+        $qb->orderBy('s.datePaiement', 'ASC');
+
+        $filtreCompte = $this->getOscarConfigurationService()->getSpentAccountFilter();
+
+        if( $filtreCompte ){
+            $qb->andWhere('s.compteBudgetaire NOT IN(:filtreCompte)')
+                ->setParameter('filtreCompte', $filtreCompte);
+        }
+
+        return $qb->getQuery()->setParameter('pfi', $pfi)->getResult();
+    }
+
+    public function getSpentsTypes(){
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('t')
+            ->from(SpentTypeGroup::class, 't', 't.code');
+        //$qb = $this->getEntityManager()->getRepository(SpentTypeGroup::class)->createQueryBuilder('t')->indexBy('t.code', 'code');
+        return $qb->getQuery()->getArrayResult();
     }
 
     public function syncSpentsByEOTP( $eotp ){
@@ -513,6 +533,142 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             throw new OscarException("Pas d'EOTP");
         }
         return $this->getConnector()->sync($eotp);
+    }
+
+    protected function reduceZero($str){
+        $r = intval(strrev($str));
+        $rstr = "".intval($r);
+        return intval(strrev($rstr));
+    }
+
+    protected function getNearestType( $code, $original="" ){
+        static $types;
+        static $assoc;
+        if( $types === null )
+            $types = $this->getSpentsTypes();
+
+        if( $assoc === null ){
+            $assoc = [];
+        }
+
+        $typeInt = $this->reduceZero($code);
+        if( array_key_exists($typeInt, $types) ){
+            return $types[$typeInt]['label'] . ($original ? sprintf(' (%s)', $original) : '');
+        } else {
+            $base = $original ? $original : $code;
+            $reduceCode = substr($code,0, strlen($code)-1);
+            return $this->getNearestType($reduceCode, $base);
+        }
+    }
+
+    protected function getTypeByCode( $code ){
+        static $assoc;
+        if( $assoc == null ){
+            $assoc = [];
+        }
+
+        if( !array_key_exists($code, $assoc) ){
+            $assoc[$code] = $this->getNearestType($code);
+        }
+
+        return $assoc[$code];
+    }
+
+    public function getDatasActivitiesSpents(){
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('a.id', 'a.codeEOTP', 'a.label')
+            ->from(Activity::class, 'a')
+
+            ->where('a.codeEOTP IS NOT NULL AND a.codeEOTP != \'\'')
+        ;
+
+        $total = 0;
+
+        foreach ($qb->getQuery()->getArrayResult() as $row) {
+            $total++;
+            echo $row['id'] . "\t"
+                . ' [' . $row['codeEOTP'] . "]\t"
+                . ' ' . substr($row['label'], 0, 20)
+                ."\n"
+            ;
+        }
+        echo "Total : $total";
+    }
+
+    public function getPFIList(){
+        $qb = $this->getEntityManager()->createQueryBuilder('a')
+            ->select('DISTINCT a.codeEOTP')
+            ->where('a.codeEOTP IS NOT NULL')
+            ->from(Activity::class, 'a');
+        return array_column($qb->getQuery()->getArrayResult(), 'codeEOTP');
+    }
+
+    public function getSpentsSyncIdByPFI($pfi){
+        $qb = $this->getEntityManager()->createQueryBuilder('s')
+            ->select('s.syncId')
+            ->from(SpentLine::class, 's')
+            ->where('s.pfi = :pfi')
+            ->setParameter('pfi', $pfi);
+        return array_column($qb->getQuery()->getArrayResult(), 'syncId');
+    }
+
+    public function getGroupedSpentsDatas($pfi){
+        $re = '/^(0*)([0-9]*)$/m';
+        $spents = $this->getSpentsByPFI($pfi);
+        $out = [];
+        $grouped = [];
+        /** @var SpentLine $spent */
+        foreach ($spents as $spent) {
+
+            $numPiece = $spent->getNumPiece();
+            $compteBudg = $spent->getCompteBudgetaire();
+
+            $type = $this->getTypeByCode($spent->getCompteGeneral());
+
+
+            if( !array_key_exists($numPiece, $grouped) ){
+                $grouped[$numPiece] = [
+                    'ids' => [],
+                    'syncIds' => [],
+                    'text' => [],
+                    'types' => [],
+                    'montant' => 0.0,
+                    'compteBudgetaire' => [],
+                    'datecomptable' => $spent->getDateComptable(),
+                    'datepaiement' => $spent->getDatePaiement(),
+                    'annee' => $spent->getDateAnneeExercice(),
+                    'refPiece' => $spent->getPieceRef(),
+                    'details' => []
+                ];
+            }
+
+
+
+            if( $compteBudg == 'PG_REM' ){
+                $grouped[$numPiece]['refPiece'] = $spent->getPieceRef();
+            }
+
+            if( $spent->getDesignation() && !in_array($spent->getDesignation(), $grouped[$numPiece]['text']) ){
+                $grouped[$numPiece]['text'][] = $spent->getDesignation();
+            }
+            if( $spent->getTexteFacture() && !in_array($spent->getTexteFacture(), $grouped[$numPiece]['text']) ){
+                $grouped[$numPiece]['text'][] = $spent->getTexteFacture();
+            }
+            if( $spent->getCompteBudgetaire() && !in_array($spent->getCompteBudgetaire(), $grouped[$numPiece]['compteBudgetaire']) ){
+                $grouped[$numPiece]['compteBudgetaire'][] = $spent->getCompteBudgetaire();
+            }
+
+            $grouped[$numPiece]['ids'][] = $spent->getId();
+            $grouped[$numPiece]['syncIds'][] = $spent->getSyncId();
+            $grouped[$numPiece]['types'][] = $type;
+            $grouped[$numPiece]['montant'] += $spent->getMontant();
+
+            $details = $spent->toArray();
+            $details['codeStr'] = $type;
+            $grouped[$numPiece]['details'][] = $details;
+        }
+
+        return $grouped;
     }
 
     public function getConnector(){

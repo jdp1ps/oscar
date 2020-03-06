@@ -2,7 +2,7 @@
 
 Le **Mailer** est le système permettant de configurer et gérer la distribution des messages électroniques par *Oscar*.
 
-Depuis la version **2.4.x**, les mails envoient la liste des notifications non-lues dans l'application. [Système de notification](./notifications.md)
+Depuis la version **2.4.x**, les mails envoient la liste des notifications non-lues dans l'application. [Système de notification](config-notifications.md)
 
 ## Configuration
 
@@ -168,7 +168,7 @@ return array(
             /**** TRANSPORT (sendmail) ****/
             'transport' => [
                 'type' => 'sendmail',
-                'cmd' => '/usr/sbin/sendmail -bs',
+                'cmd' => '/usr/sbin/sendmail -t',
                 // EXIM
                 // 'cmd' => '/usr/sbin/exim -bs',
             ],

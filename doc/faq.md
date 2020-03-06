@@ -15,7 +15,7 @@ Ce document regroupe les questions récurentes concernant l'installation et la m
 
 ## Comment personnaliser la numérotation automatique des activités ?
 
-[Personnaliser la numérotation automatique dans Oscar](numerotation.md)
+[Personnaliser la numérotation automatique dans Oscar](config-numerotation.md)
 
 
 ## Comment configurer les taux de TVA proposés dans la fiche activité ?

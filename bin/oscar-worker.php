@@ -1,4 +1,15 @@
 <?php
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+///
+///  OSCAR WORKER
+///
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+/// Usage : Voir documentation
+/// Surveiller :
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Chemin "simplifié"
 chdir(dirname(__DIR__));
 
@@ -11,15 +22,19 @@ $conf = require 'config/application.config.php';
 // App
 $app = Zend\Mvc\Application::init(require 'config/application.config.php');
 
+/** @var \Oscar\Service\OscarConfigurationService $oscarConfigurationService */
+$oscarConfigurationService = $app->getServiceManager()->get(\Oscar\Service\OscarConfigurationService::class);
+
 // Worker
 $worker = new GearmanWorker();
-$worker->addServer();
+$worker->addServer($oscarConfigurationService->getGearmanHost());
 $worker->addFunction('indexPerson', 'oscarJob_indexPerson');
 $worker->addFunction('personSearchUpdate', 'oscarJob_indexPerson');
 $worker->addFunction('indexActivity', 'oscarJob_indexActivity');
 $worker->addFunction('activitySearchUpdate', 'oscarJob_indexActivity');
 $worker->addFunction('notificationActivityPerson', 'oscarJob_notificationActivityPerson');
 $worker->addFunction('purgeNotificationsPersonActivity', 'oscarJob_purgeNotificationsPersonActivity');
+$worker->addFunction('hello', 'oscarJob_hello');
 
 // Affiche dans le journalctl -u oscarworker.service -f
 echo "OSCAR WORKER STARTED\n";
@@ -131,5 +146,29 @@ function oscarJob_purgeNotificationsPersonActivity(GearmanJob $job){
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() ."\n";
+    }
+}
+
+function oscarJob_hello(GearmanJob $job){
+    $params = json_decode($job->workload());
+
+    try {
+
+
+        /** @var \Oscar\Service\ProjectGrantService $projectGrantService */
+        $projectGrantService = getServiceManager()->get(\Oscar\Service\ProjectGrantService::class);
+
+        /** @var \Oscar\Service\PersonService $personService */
+        $personService = getServiceManager()->get(\Oscar\Service\PersonService::class);
+
+        /** @var \Oscar\Service\NotificationService $notificationService */
+        $notificationService = getServiceManager()->get(\Oscar\Service\NotificationService::class);
+
+        echo "Hello with " . print_r($params) . "\n";
+
+        $job->sendComplete("TRAITEMENT RÉUSSI");
+
+    } catch (Exception $e) {
+        $job->sendException("[ERR] HELLO FAIL : " . $e->getMessage());
     }
 }

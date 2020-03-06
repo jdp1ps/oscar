@@ -18,6 +18,21 @@ class ActivityDate implements ITrackable
 {
     use TraitTrackable;
 
+    const PROGRESSION_VALID         = 'valid';
+    const PROGRESSION_UNVALID       = 'unvalid';
+    const PROGRESSION_CANCEL        = 'cancel';
+    const PROGRESSION_REFUSED       = 'refused';
+    const PROGRESSION_INPROGRESS    = 'inprogress';
+
+
+    // Jalon terminé
+    const VALUE_TODO        = 0;
+    const VALUE_INPROGRESS  = 50;
+    const VALUE_VALIDED     = 100;
+    const VALUE_CANCELED    = 200;
+    const VALUE_REFUSED     = 400;
+
+
     /**
      * Données (la date)
      *
@@ -71,11 +86,11 @@ class ActivityDate implements ITrackable
     private $dateFinish;
 
 
-    const FINISH_VALUE = 100;
+
 
     public function finish( $value = 100, $date = null ){
         $this->finished = $value;
-        if( $this->finished >= self::FINISH_VALUE ){
+        if( $this->finished >= self::VALUE_VALIDED ){
             $this->dateFinish = $date === null ? new \DateTime() : $date;
         }
     }
@@ -107,7 +122,7 @@ class ActivityDate implements ITrackable
 
 
     public function isFinished(){
-        return $this->getFinished() == self::FINISH_VALUE;
+        return $this->getFinished() >= self::VALUE_VALIDED;
     }
 
     /**

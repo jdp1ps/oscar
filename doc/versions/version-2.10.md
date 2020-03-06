@@ -59,17 +59,17 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 Cette version inclue des outils pour générer des feuilles de temps au format PDF à partir des saisies utilisateur. 
 
 Feuille de temps personnel (par personne / par mois)
-![Feuille de temps mensuelle d'une personne](./doc/images/feuille-de-temps-personne.png)
+![Feuille de temps mensuelle d'une personne](../images/feuille-de-temps-personne.png)
 
 
 Document de synthèse mensuelle pour une activité
-![Document de synthèse mensuelle d'une activité](doc/images/feuille-de-temps-activite-mensuelle.png)
+![Document de synthèse mensuelle d'une activité](../images/feuille-de-temps-activite-mensuelle.png)
 
 Une ligne de sous-total **Activité effective** qui exclue les créneaux Hors-Lot du groupe **abs** a été ajoutée
 
 La modification des gabarits de mise en page a été simplifiée.
 
-Plus d'information [Feuilles de temps dans Oscar](doc/timesheet.md)
+Plus d'information [Feuilles de temps dans Oscar](../timesheet.md)
 
 
 ### Gestion des N+1 (2019/09)
@@ -149,13 +149,13 @@ return array(
 );
 ```
 
-La documentation des feuilles de temps est à jour [Configuration des feuilles de temps](./doc/timesheet.md)
+La documentation des feuilles de temps est à jour [Configuration des feuilles de temps](../timesheet.md)
 
 ### Système de recherche des Personnes (2019/05)
 
 Cette option **implique des changements dans la configuration !**
 
-Le système de recherche des personnes a été améliorée et permet maintenant de configurer **ElasticSearch** pour les recherches. [Configuration de la recherche des personnes](./doc/configuration.md#recherche-des-personnes)
+Le système de recherche des personnes a été améliorée et permet maintenant de configurer **ElasticSearch** pour les recherches. [Configuration de la recherche des personnes](../configuration.md#recherche-des-personnes)
 
 Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
 
@@ -167,7 +167,7 @@ php public/index.php oscar persons:search:build
 
 Cette option **implique des changements dans la configuration !**
 
-Le système de recherche des organisations a été amélioré et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des organisations](./doc/configuration.md#recherche-des-organisations)
+Le système de recherche des organisations a été amélioré et permet maintenant de configurer ElasticSearch pour les recherches. [Configuration de la recherche des organisations](../configuration.md#recherche-des-organisations)
 
 Pensez à utiliser l'utilitaire en ligne de commande pour reconstruire l'index de recherche.
 
@@ -179,11 +179,11 @@ php public/index.php oscar organizations:search:build
 
 Une option de **synthèse générale (v2)** est accessible depuis la fiche d'une activité. Elle offre une vision globale aux chargés de valorisation sur l'état des heures déclarées pour un projet, par période et par personne, elle permet de contrôler rapidement le cumul des heures :
 
-![Synthèse des heures](./doc/images/synthes-2-001.png)
+![Synthèse des heures](../images/synthes-2-001.png)
 
 En cliquant sur **Détails**, une vue plus précise permet de voir la répartition déclarée par la personne pour la période choisie :
 
-![Synthèse des heures](./doc/images/synthes-2-002.png)
+![Synthèse des heures](../images/synthes-2-002.png)
 
 Une version excel de la synthèse est disponible.
 

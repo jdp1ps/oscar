@@ -4,7 +4,7 @@ Avant de déclencher une mise à jour, pensez là lire les patchnotes des versio
 
 ## Sauvegarde
 
-Faites une sauvegarde de l'application en copiant le dossier oscar : 
+Faites une sauvegarde de l'application en copiant le dossier oscar :
 
 ```bash
 cp -r /path/to/oscar /tmp/oscar_save
@@ -44,7 +44,7 @@ git reset --hard origin/master
 
 ## Mise à jour des vendors (Librairies tiers)
 
-En utilisant **composer** : 
+En utilisant **composer** :
 
 ```bash
 composer install
@@ -66,28 +66,25 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 
 ## Vérifier la configuration
 
-Selon la mise à jour, la configuration peut avoir été mise à jour, contrôler le fichier `./config/autoload/local.php.dist`. Si une mise à jour implique des changements plus spécifiques, ces derniers seront documentés en détails dans un document dédié.
+> Selon la mise à jour, la configuration peut avoir été mise à jour, contrôler le fichier `./config/autoload/local.php.dist`. Si une mise à jour implique des changements plus spécifiques, ces derniers seront documentés en détails dans un document dédié.
 
-La commande : 
+Vous pouvez utiliser la commande de diagnostique `php bin/oscar.php check:config`, elle va vérifier les éléments principaux de la configuration pour s'assurer que rien ne manque :
 
 ```bash
 # Test de la configuration
-php public/index.php oscar test:config
+php bin/oscar.php check:config
 ```
-
-va réaliser un diagnostique à partir de la configuration et détecter d'éventuels oublis.
-
 
 ## Mise à jour des privilèges
 
-Lors d'ajout de fonctionnalité, les privilèges sont généralement enrichis, pour les mettre à jour : 
+Lors d'ajout de fonctionnalité, les privilèges sont généralement enrichis, pour les mettre à jour :
 
 ```bash
 # Mise à jour des privileges
-php public/index.php oscar patch checkPrivilegesJSON
+php bin/oscar.php check:privileges
 ```
 
-Pour des raisons techniques, cette commande doit être exécutée plusieurs fois jusqu'à obtenir un message : 
+Pour des raisons techniques, cette commande doit être exécutée plusieurs fois jusqu'à obtenir un message :
 
 **Les privilèges sont à jour**
 
@@ -99,8 +96,14 @@ Pour des raisons techniques, cette commande doit être exécutée plusieurs fois
 rm MAINTENANCE
 ```
 
+## Recalculer les séquences de numérotation automatiquement
 
-> Cette commande executera automatiquement la requète de mise à jour de la séquence d'index des privilèges : `select setval('privilege_id_seq',(select max(id)+1 from privilege), false)`.
+Après des dumps/backups de données, il est souhaitable de lancer un recaclule de la séquence des IDS des tables :
+
+```bash
+# Recalculer les séquences d'ID
+php bin/oscar.php check:sequences-num
+```
 
 
 
@@ -108,28 +111,40 @@ rm MAINTENANCE
 
 # ANNEXE : Requêtes de maintenance
 
-> Les requêtes ici ne sont utilisées que dans le cadre du développement 
+> Les requêtes ici ne sont utilisées que dans le cadre du développement
 
-Supprimer les jointures activité > Personnes orphelines : 
+Supprimer les jointures activité > Personnes orphelines :
 
 ```sql
-DELETE FROM activityperson 
+DELETE FROM activityperson
 WHERE id IN (
-  SELECT ap.id FROM activityperson ap 
-  LEFT JOIN activity a 
+  SELECT ap.id FROM activityperson ap
+  LEFT JOIN activity a
   ON a.id = ap.activity_id WHERE a.id IS NULL
 );
 ```
 
-Supprimer les partenaires orphelins : 
+Supprimer les partenaires orphelins :
 
 
 ```sql
-DELETE FROM activityorganization WHERE id IN (SELECT ao.id FROM activityorganization ao LEFT JOIN activity a ON a.id = ao.activity_id WHERE a.id IS NULL);
+DELETE FROM activityorganization
+  WHERE id IN (
+    SELECT ao.id
+      FROM activityorganization ao
+      LEFT JOIN activity a ON a.id = ao.activity_id
+      WHERE a.id IS NULL
+  );
 ```
 
 ```sql
-DELETE FROM activitypayment WHERE id IN (SELECT j.id FROM activitypayment j LEFT JOIN activity a ON j.id = j.activity_id WHERE a.id IS NULL);
+DELETE FROM activitypayment
+  WHERE id IN (
+    SELECT j.id
+      FROM activitypayment j
+      LEFT JOIN activity a ON j.id = j.activity_id
+      WHERE a.id IS NULL
+  );
 ```
 
 

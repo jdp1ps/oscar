@@ -59,6 +59,7 @@ return array(
                         'organizationRole',
                         'organizationRoleApi',
                         'organizationType',
+                        'oscarWorkerStatus',
                         'tva',
                         'connectorsConfig',
                         'connectorTest',
@@ -130,7 +131,7 @@ return array(
                 // DEPENSES
                 // --- VERSEMENTS
                 [ 'controller' =>   'Depense',
-                    'action' => ['activity', 'manageSpendTypeGroup'],
+                    'action' => ['activity', 'manageSpendTypeGroup', 'activityApi'],
                     'roles' => ['user'],
                 ],
 

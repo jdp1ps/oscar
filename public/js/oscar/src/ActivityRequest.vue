@@ -17,7 +17,7 @@
                             </span>
                         </div>
                         <div class="col-md-6">
-                            <strong>Oragnisme référent : </strong><br>
+                            <strong>Organisme référent : </strong><br>
                             <p v-if="organisations.length == 0" class="alert alert-info">
                                 Vous n'êtes associé à aucun organisme.
                             </p>

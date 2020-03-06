@@ -130,6 +130,12 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
         }
     }
 
+    protected function baseJsonResponse(){
+        return [
+            'version' => OscarVersion::getBuild()
+        ];
+    }
+
     protected function getYamlConfigPath(){
         $dir = realpath(__DIR__.'/../../../../../config/autoload/');
         $file = $dir.'/oscar-editable.yml';

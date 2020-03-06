@@ -237,12 +237,12 @@ return array(
 
 ## Mailer
 
-[Configuration du mailer](./mailer.md)
+[Configuration du mailer](config-mailer.md)
 
 
 ## Notifications
 
-[Configurer les notifications](./notifications.md)
+[Configurer les notifications](config-notifications.md)
 
 ## Feuilles de temps
 
@@ -255,7 +255,7 @@ Configuration des options pour la feuille de temps
 
 Pour modifier les numéros qui sont sous la forme **2018DRI00001**.
 
-[Modifier le formalisme de la numérotation Oscar](./numerotation.md)
+[Modifier le formalisme de la numérotation Oscar](config-numerotation.md)
 
 
 ## Activité > Formulaire de saisie

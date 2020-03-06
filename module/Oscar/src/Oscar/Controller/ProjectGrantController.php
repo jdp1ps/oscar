@@ -289,6 +289,28 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             throw new UnAuthorizedException("Vous n'avez pas l'autorisation d'accéder à ces informations");
         }
 
+        $dl = $this->params()->fromQuery('dl');
+        if( $dl ){
+            /** @var ActivityRequestService $activityRequestService */
+            $activityRequestService = $this->getActivityRequestService();
+
+            /** @var ActivityRequest $request */
+            $demande = $activityRequestService->getActivityRequest($this->params()->fromQuery('id'));
+
+            $fileInfo = $demande->getFileInfosByFile($dl);
+            $filepath = $this->getOscarConfigurationService()->getCOnfiguration('paths.document_request').'/'.$fileInfo['file'];
+            $filename = $fileInfo['name'];
+            $filetype = $fileInfo['type'];
+            $size = filesize($filepath);
+            $content = file_get_contents($filepath);
+
+            header('Content-Disposition: attachment; filename=' . $filename);
+            header('Content-Length: ' . $size);
+            header('Content-type: '.$filetype);
+            echo $content;
+            die();
+        }
+
         if( $this->isAjax() ){
             $method = $this->getHttpXMethod();
             switch ($method) {
@@ -1489,7 +1511,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $activity = $this->getActivityService()->getActivityById($this->params()->fromRoute('id'));
         $msg = "";
         $error = "";
-        $spents = $this->getSpentService()->getSpentsByPFI($activity->getCodeEOTP());
+        $spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
 
         if( $action && $action == 'update' ) {
             if( count($spents) > 0 ){

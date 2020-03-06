@@ -44,7 +44,7 @@ class UserParametersService implements UseOscarConfigurationService, UseEntityMa
      */
     public function performChangeDeclarationMode( $userInput )
     {
-        if( !$this->getOscarConfigurationService()->getConfiguration('oscar.declarationsHoursOverwriteByAuth', false) ){
+        if( !$this->getOscarConfigurationService()->getConfiguration('declarationsHoursOverwriteByAuth', false) ){
             throw new OscarException(_('Cette option ne peut pas être modifiée'));
         }
 
@@ -64,7 +64,7 @@ class UserParametersService implements UseOscarConfigurationService, UseEntityMa
 
     public function performChangeFrequency( $userInput )
     {
-        if( !$this->getOscarConfigurationService()->getConfiguration('oscar.notifications.override', false) ){
+        if( !$this->getOscarConfigurationService()->getConfiguration('notifications.override', false) ){
             throw new OscarException(_('Cette option ne peut pas être modifiée'));
         }
 

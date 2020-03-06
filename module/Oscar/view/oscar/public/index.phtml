@@ -89,7 +89,7 @@
                             <?php if( $this->grant()->isBoss() ): ?>
                                <a href="<?= $this->url('project/structure') ?>" class="btn btn-primary">
                                    <i class="icon-building-filled"></i>
-                                   Activités de ma-mes structure-s
+                                   <?= $this->translate('Activités de ma-mes structure-s') ?>
                                </a>
                             <?php endif; ?>
 
@@ -97,11 +97,11 @@
                                 && $this->grant()->isDeclarer()): ?>
                                 <a class="btn btn-primary" href="<?= $this->url('timesheet/declarant') ?>">
                                     <i class="icon-pencil"></i>
-                                    Déclarer des heures
+                                    <?= $this->translate('Déclarer des heures') ?>
                                 </a>
                                 <a class="btn btn-primary" href="<?= $this->url('timesheet/resume') ?>">
                                     <i class="icon-calendar"></i>
-                                    Voir mes feuilles de temps
+                                    <?= $this->translate('Voir mes feuilles de temps') ?>
                                 </a>
                             <?php endif; ?>
 

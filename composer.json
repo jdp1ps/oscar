@@ -30,7 +30,8 @@
     "ext-gettext": "*"
   },
   "require-dev": {
-    "zendframework/zend-developer-tools": "^1.2"
+    "zendframework/zend-developer-tools": "^1.2",
+    "phpunit/phpunit": "^9.0"
   },
   "config": {
     "github-protocols": ["https", "ssh"],

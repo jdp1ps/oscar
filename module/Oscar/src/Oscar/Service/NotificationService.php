@@ -504,7 +504,7 @@ class NotificationService implements UseServiceContainer
      */
     public function jobNotificationsPersonActivity(Activity $activity, Person $person){
         $client = new \GearmanClient();
-        $client->addServer();
+        $client->addServer($this->getOrganizationService()->getOscarConfigurationService()->getGearmanHost());
 
         $client->doBackground('notificationActivityPerson', json_encode([
             'activityid' => $activity->getId(),

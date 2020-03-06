@@ -3501,9 +3501,9 @@ form {
     }
   }
 
-  &.finished {
+  &.valided {
     border-left-color: $colorGreen;
-    background: lighten($colorGreen, 60%);
+    background: lighten($colorGreen, 50%);
     text-shadow: -1px 1px 0 rgba(255, 255, 255, .25);
 
     &:before {
@@ -3511,6 +3511,29 @@ form {
       font-family: fontello;
     }
   }
+  &.canceled {
+    border-left-color: $colorDark;
+    background: lighten($colorDark, 80%);
+    text-shadow: -1px 1px 0 rgba(255, 255, 255, .25);
+
+    &:before {
+      content: '\e879 ';
+      font-family: fontello;
+    }
+  }
+  &.refused {
+
+    border-left-color: $colorRed;
+    background: lighten($colorOrange, 50%);
+    text-shadow: -1px 1px 0 rgba(255, 255, 255, .25);
+
+    &:before {
+      content: '\e889 ';
+      font-family: fontello;
+    }
+  }
+
+  //
 
   &.payment:before {
     content: '\e875';
@@ -5119,3 +5142,33 @@ pre.alert-danger, pre.alert-info {
   }
 }
 
+.terminal {
+  &.loading {
+    .terminal-header {
+      background: #ccc;
+      color: #555;
+      .icon-hourglass-3 {
+        opacity: 1;
+      }
+    }
+  }
+
+  background: #333;
+  color: #EEE;
+  .terminal-header {
+    transition: all .5s;
+    text-shadow: -1px -1px 1px rgba(0,0,0,.8) 1px 1px 1px rgba(255,255,255,.5);
+    background: #555;
+    color: #bbb;
+    padding: .5em 1em;
+    .icon-hourglass-3 {
+      opacity: 0;
+      transition: all .25s;
+      color: #000;
+    }
+  }
+  .terminal-content {
+    padding: .3em .5em;
+    font-size: .8em;
+  }
+}

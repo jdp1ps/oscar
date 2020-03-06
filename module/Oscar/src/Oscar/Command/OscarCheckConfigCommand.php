@@ -322,6 +322,22 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         } catch ( OscarException $e ){
             $io->warning(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
         }
+
+        $io->section(" ### GEARMAN : ");
+        $io->write(sprintf("* Envoi d'un job 'HELLO' à Gearman sur '%s' : ", $oscarConfig->getGearmanHost()));
+        $client = new \GearmanClient();
+        try {
+            $client->addServer($oscarConfig->getGearmanHost());
+            $client->setTimeout(1000);
+            if( !($response = @$client->doHigh('hello', json_encode(['message' => 'Check Config Oscar']),'check-config') )){
+                $io->error("LE WORKER NE RÉAGIT PAS, Vérifiez qu'il est bien lancé, si vous avez réalisé une mise à jour, pensez à relancer le service.\n Gearman a répondu : " . $client->error());
+            } else {
+                $io->writeln("OscarWorker a répondu : '<green>$response</green>'");
+            }
+        } catch (\Exception $e) {
+            $io->error("GEARMAN FAIL, Impossible de se connecter au serveur Gearman '".$oscarConfig->getGearmanHost()."' : \n Erreur : " . $client->error());
+
+        }
     }
 
     protected function checkPath(SymfonyStyle $io, $path, $text, $level = 'error', $allowed = 'rw'){

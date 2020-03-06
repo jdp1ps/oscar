@@ -11,6 +11,10 @@
             <div class="col-md-6">
                 <label for="file">Fichier</label>
                 <input type="file" class="form-control" name="file" id="file" />
+                <div class="alert alert-info">
+                    <i class="icon-help-circled"></i>
+                    La taille du fichier est limitée à <strong><?= ini_get('upload_max_filesize') ?></strong>.
+                </div>
             </div>
 
             <div class="col-md-6">

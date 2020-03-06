@@ -1,31 +1,30 @@
 
 <section class="container-fluid">
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
+    <?php if( count($spents) ): ?>
+        <div id="spentlines"></div>
+        <script>
+            require(['vue', 'vue-resource', 'SpentLinePFI'], function(Vue, VueResource, SpentLinePFI){
+                console.log("DONE");
+                Vue.use(VueResource);
+                new Vue({
+                    el: "#spentlines",
+                    render(h){
+                        return h(SpentLinePFI.default, { props: {
+                                url: "<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>"
+                            }});
+                    }
+
+                });
+            })
+        </script>
+
     <?php if($msg): ?>
-    <div class="alert alert-info"><?= $msg ?></div>
+        <div class="alert alert-info"><?= $msg ?></div>
     <?php endif; ?>
     <?php if($error): ?>
         <div class="alert alert-danger"><?= $error ?></div>
     <?php endif; ?>
-    <?php if( count($spents) ): ?>
-    <table class="table table-condensed table-bordered table-condensed card">
-        <thead>
-            <tr>
-                <?php foreach (\Oscar\Entity\SpentLine::getDetailsHeaders() as $h): ?>
-                    <th><?= $h ?></th>
-                <?php endforeach; ?>
-            </tr>
-        </thead>
-        <?php
-        /** @var \Oscar\Entity\SpentLine $spentLine */
-        foreach ($spents as $spentLine): ?>
-            <tr>
-                <?php foreach ($spentLine->getDetailsDatas() as $d): ?>
-                    <td><?= $d ?></td>
-                <?php endforeach; ?>
-            </tr>
-        <?php endforeach; ?>
-    </table>
     <?php else: ?>
         <form action="" method="post">
             <button type="submit" name="action" value="update">Synchroniser</button>

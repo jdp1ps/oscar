@@ -125,6 +125,8 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
      * @return string
      */
     public function getBodyTemplate( $body, $title=""){
+        $conf = $this->getOscarConfigurationService()->getConfigArray();
+        $appName = $conf['unicaen-app']['app_infos']['nom'];
         ob_start();
         include $this->getOscarConfigurationService()->getConfiguration('mailer.template');
         return ob_get_clean();

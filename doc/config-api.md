@@ -31,6 +31,52 @@ Les données seront accessibles via les URL :
 
 Les formatteurs permettent de personnaliser la sortie d'une ou plusieurs API.
 
+Le formatteur de base est **\Oscar\Formatter\PersonToJsonConnectorBasicFormatter**, il produit une sortie au format JSON sous la forme : 
+
+```json
+{
+  "version": "v2.11.1-macclane#dcf4a55e \u0022Macclaine\u0022 (2020-02-17 10:02:49)",
+  "datecreated": "2020-02-17T12:04:44+01:00",
+  "time": 0.00012345789,
+  "total": 2,
+  "persons": [
+    {
+      "uid": "6357",
+      "login": "einstein",
+      "firstname": "Albert",
+      "lastname": "Einstein",
+      "displayname": "Albert Einstein",
+      "mail": "albert.einstein@berne-university.de",
+      "affectation": "Bureau des brevets",
+      "structure": "",
+      "datecreated": "2015-11-05T15:33:08+01:00",
+      "dateupdated": "2017-07-13T11:26:41+02:00",
+      "datecached": "2017-07-13T11:26:41+02:00"
+    },
+    {
+      "uid": "9038",
+      "login": "tenseurman",
+      "firstname": "Marcel",
+      "lastname": "Grossmann",
+      "displayname": "Marcel Grossmann",
+      "mail": "marcel.grossmann@mathman.de",
+      "affectation": "Berne University",
+      "structure": "",
+      "datecreated": "2016-07-07T16:48:13+02:00",
+      "dateupdated": "2017-07-13T11:26:03+02:00",
+      "datecached": "2017-07-13T11:26:03+02:00"
+    }
+  ]
+}
+```
+
+Si besoin, vous pouvez développer vos propres formatteurs, des classes PHP qui assureront le traitement des données depuis Oscar vers le format de sortie souhaité.
+
+**[A VENIR] Développer un formatteur pour l'API Oscar**
+
+
+### Configurer les formatteurs disponibles
+
 La première étape necessite d'identifier les formateurs disponible de la fichier de configuration générale : 
 
 ```php
@@ -52,7 +98,7 @@ return array(
 );
 ```
 
-Vous pourrez ensuite
+Vous pourrez ensuite depuis l'interface de gestion des accès à l'API choisir parmi les formatteurs configurer celui à utiliser lors de l'accès à l'API.
 
 ## Évolutions prévues
 

@@ -1,5 +1,6 @@
 <template>
     <article class="card xs jalon" :class="cssClass">
+        <strong> {{ statutText }}</strong>
         <time :datetime="milestone.dateStart">
             {{ milestone.dateStart | moment }}
         </time>
@@ -28,6 +29,18 @@
                title="Marquer comme terminé"
                @click.prevent="$emit('valid', milestone)">
                 <i class="icon-ok-circled"></i>
+            </a>
+
+            <a href="#" v-if="finishable"
+               title="Marquer comme sans suite"
+               @click.prevent="$emit('cancel', milestone)">
+                <i class="icon-archive"></i>
+            </a>
+
+            <a href="#" v-if="finishable"
+               title="Marquer comme refusé"
+               @click.prevent="$emit('refused', milestone)">
+                <i class="icon-block"></i>
             </a>
 
             <a href="#"
@@ -69,6 +82,22 @@
                 return "";
             },
 
+            statutText(){
+                if( !this.milestone.type.finishable ) return "";
+                switch( this.milestone.finished ) {
+                    case 0 :
+                    case null :
+                        if( this.milestone.past )
+                            return 'EN RETARD';
+                        return 'A FAIRE';
+                    case 50 : return 'EN COURS';
+                    case 100 : return 'Validé';
+                    case 200 : return 'Sans suite';
+                    case 400 : return 'Refusé';
+                    default : return '';
+                }
+            },
+
             owner(){
                 if( this.finishedPerson  ){
                     return finishedPerson[2]
@@ -102,7 +131,7 @@
             },
 
             finished(){
-                return this.milestone.type.finishable == true && this.milestone.finished == 100
+                return this.milestone.type.finishable == true && this.milestone.finished >= 100
             },
 
             late(){
@@ -119,6 +148,9 @@
                     'finished': this.finished || this.milestone.done,
                     'late': this.late || this.milestone.late,
                     'inprogress': this.inProgress,
+                    'canceled': this.milestone.finished == 200,
+                    'refused' : this.milestone.finished == 400,
+                    'valided' : this.milestone.finished == 100,
                     'past': this.past,
                 };
                 css[this.milestone.type.facet] = true;

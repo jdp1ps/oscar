@@ -229,14 +229,30 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
     }
 
     public function setMilestoneProgression( ActivityDate $milestone, $progressionName ){
-        if( $progressionName == 'valid' )
-            $milestone->setFinished(ActivityDate::FINISH_VALUE)->setFinishedBy($this->getCurrentPersonText());
 
-        else if ($progressionName == 'unvalid')
-            $milestone->setFinished(0)->setFinishedBy('');
 
-        else
-            $milestone->setFinished(50)->setFinishedBy($this->getCurrentPersonText());
+        switch ($progressionName ){
+            case ActivityDate::PROGRESSION_VALID:
+                $milestone->setFinished(ActivityDate::VALUE_VALIDED)->setFinishedBy($this->getCurrentPersonText());
+                break;
+
+            case ActivityDate::PROGRESSION_UNVALID:
+                $milestone->setFinished(ActivityDate::VALUE_TODO)->setFinishedBy('');
+                break;
+
+            case ActivityDate::PROGRESSION_INPROGRESS:
+                $milestone->setFinished(ActivityDate::VALUE_INPROGRESS)->setFinishedBy($this->getCurrentPersonText());
+                break;
+
+            case ActivityDate::PROGRESSION_REFUSED:
+                $milestone->setFinished(ActivityDate::VALUE_REFUSED)->setFinishedBy($this->getCurrentPersonText());
+                break;
+
+            case ActivityDate::PROGRESSION_CANCEL:
+                $milestone->setFinished(ActivityDate::VALUE_CANCELED)->setFinishedBy($this->getCurrentPersonText());
+                break;
+
+        }
 
         $this->getEntityManager()->flush($milestone);
         $this->getNotificationService()->purgeNotificationMilestone($milestone);

@@ -102,6 +102,14 @@ apt-get install php7.3-xml
 apt-get install php7.3-zip
 ```
 
+Installez également le client postgresql qui sera necessaire pour importer la structure initale de la base de donnée :
+
+```bash
+# Postgresql (ou autre selon le client de BDD utilisé)
+apt-get install postgresql postgresql-client postgresql-client-common
+```
+
+
 ### Installation de la base de donnée
 
 Si la base de données est sur la même machine, installation du serveur **Postgresql** :
@@ -224,7 +232,7 @@ etc...
 
 #### Installation des dépendances avec composer
 
-L'installation des dépendances se fait avec la commande :  
+L'installation des dépendances se fait avec la commande :
 
 ```bash
 composer install --prefer-dist
@@ -319,6 +327,44 @@ journalctl -u oscarworker.service -f
 service enable oscarworker
 ```
 
+Etape détaillée dans [Installation de Gearman](./install-gearman.md)
+
+
+
+## Installation de la base de données
+
+### Création de la base de données vide
+
+Création de l'utilisateur/bdd locale si besoin :
+
+```bash
+su - postgres
+psql
+```
+
+### Création de l'utilisateur
+
+Puis création de l'utilisateur/bdd :
+
+```sql
+CREATE USER oscar WITH PASSWORD 'azerty';
+CREATE DATABASE oscar_dev;
+GRANT ALL PRIVILEGES ON DATABASE oscar_dev to oscar;
+\q
+```
+
+### Structure de données initiales
+
+Les données "de base" sont à disposition dans
+le dépôt dans le fichier : `install/oscar-install.sql`.
+
+```bash
+psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
+```
+
+> La structure initiale n'est pas forcement à jour, vous devez donc procéder à la **Mise à jour du modèle** présenté dans le point suivant.
+
+
 
 ## Configuration d'oscar
 
@@ -333,7 +379,7 @@ touch config/autoload/oscar-editable.yml
 Assurez vous qu'il est accessible en écriture
 
 
-### Base de données paramètres
+### Base de données
 
 Oscar est conçu pour fonctionner avec une base de données *Postgresql*.
 
@@ -347,7 +393,7 @@ cp config/autoload/local.php.dist config/autoload/local.php
 vi !$
 ```
 
-Dans un premier temps, configurez simplement l'accès à la base de donnée : 
+Dans un premier temps, configurez simplement l'accès à la base de donnée :
 
 ```php
 <?php
@@ -405,8 +451,17 @@ php public/index.php oscar patch checkPrivilegesJSON
 Lors de l'étape de configuration de la base de donnée, vous avez créé un fichier `config/autoload/local.php`.
 
 
-Ce fichier contient les paramètres métier de l'application. Ces paramètres sont détaillés dans le fichier [Configuration métier](./configuration.md)
+Ce fichier contient les paramètres métier de l'application. Ces paramètres sont détaillés dans les parties suivantes : 
 
+- [Configuration des documents](config-documents.md)
+- [Configuration du moteur de recherche](config-elasticsearch.md)
+- [Installation et configuration de Gearman (serveur de tâche)](config-gearman.md)
+- [Configuration du PFI](config-pfi.md)
+- [Configuration de la distribution des courriels](config-mailer.md)
+- [Configuration des notifications](config-notifications.md)
+- [Configuration de la numérotation OSCAR](config-numerotation.md)
+
+dans le fichier [Configuration métier](./configuration.md)
 
 Créez également le fichier `config/autoload/oscar-editable.yml` :
 
@@ -421,11 +476,6 @@ chmod 777 config/autoload/oscar-editable.yml
 ```
 
 Ce fichier est utilisé pour les paramètres administrable depuis l'interface (Administration > Options). 
-
-
-
-
--------------------------- Elastic Search ICI TODO ------------------------
 
 
 ### Tester la configuration
