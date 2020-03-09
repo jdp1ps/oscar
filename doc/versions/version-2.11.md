@@ -78,6 +78,8 @@ php bin/oscar.php check:privileges
 
 La version **Macclane** propose en *experimental* la configuration SIFAC pour chargé depuis une source SIFAC(Oracle) les informations sur les dépenses des activités de recherche basée sur le journal des pièces.
 
+Vous pouvez commencer à tester cette fonctionnalité [Configurer l'accès à SIFAC](../config-sifac.md) 
+
 
 
  
