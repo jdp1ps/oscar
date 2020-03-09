@@ -23,6 +23,25 @@ class DateTimeUtils {
         return $datetime ? $datetime->format($format) : '';
     }
 
+    public static function periodInside($periodStr, \DateTime $from, \DateTime $to) {
+        $start = new \DateTime($from->format(\DateTime::W3C));
+        $start->setTime(0,0,0);
+        $startInt = $start->getTimestamp();
+
+        $end = new \DateTime($to->format(\DateTime::W3C));
+        $end->setTime(23,59,59);
+        $endInt = $end->getTimestamp();
+
+        $period = new \DateTime($periodStr.'-15 12:00:00');
+        $periodInt = $period->getTimestamp();
+
+        $test = $periodInt >= $startInt && $periodInt <= $endInt;
+
+        //echo "\n$startInt <= $periodInt <= $endInt : " . ($test?'TRUE':'FALSE');
+
+        return $test;
+    }
+
     public static function periodBounds( $period, $daysDetails = false ){
 
         $dateRef = new \DateTime(sprintf('%s-01', $period));

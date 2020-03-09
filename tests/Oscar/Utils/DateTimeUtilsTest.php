@@ -10,6 +10,7 @@ namespace Oscar\Utils;
 
 use Oscar\Exception\OscarException;
 use PHPUnit\Framework\TestCase;
+use Zend\Db\Sql\Ddl\Column\Datetime;
 
 class DateTimeUtilsTest extends TestCase
 {
@@ -48,6 +49,15 @@ class DateTimeUtilsTest extends TestCase
         $this->assertEquals(13, count($periods));
         $this->assertEquals('2018-06', $periods[0]);
         $this->assertEquals('2019-06', $periods[12]);
+    }
+
+    public function testPeriodInside(){
+
+        $period = '2019-07';
+        $this->assertTrue(DateTimeUtils::periodInside('2019-07', new \DateTime('2019-01-01'), new \DateTime('2019-12-31')))  ;
+        $this->assertTrue(DateTimeUtils::periodInside('2019-01', new \DateTime('2019-01-01'), new \DateTime('2019-01-31')))  ;
+        $this->assertFalse(DateTimeUtils::periodInside('2019-07', new \DateTime('2020-01-01'), new \DateTime('2020-12-31')))  ;
+       // $this->assertTrue(DateTimeUtils::periodInside('2019-07', new \DateTime('2019-01-01'), new \DateTime('2019-12-31')))  ;
     }
 
 

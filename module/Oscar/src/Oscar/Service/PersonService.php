@@ -1002,7 +1002,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             try {
                 $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery($connector, $connectorValue);
             }catch( \Exception $e ){
-                $this->getLoggerService()->err("Requête sur le connecteur : " . $e->getMessage());
+                $this->getLoggerService()->error("Requête sur le connecteur : " . $e->getMessage());
                 throw new OscarException("Impossible d'obtenir les personnes via l'UI de connector");
             }
         }
@@ -1020,7 +1020,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                         $filters['ids'] = $ids;
                     }
                 } catch( \Exception $e ){
-                    $this->getLoggerService()->err(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
+                    $this->getLoggerService()->error(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
                     // Ancienne méthode
                     $searchR = str_replace('*', '%', $search);
                     $query->where('lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search')
@@ -1071,7 +1071,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 }
 
             } catch(\Exception $e ){
-                $this->getLoggerService()->err("Impossible de charger les personnes via les rôles des authentifications : " . $e->getMessage());
+                $this->getLoggerService()->error("Impossible de charger les personnes via les rôles des authentifications : " . $e->getMessage());
                 throw new OscarException("Erreur de chargement des rôles via l'authentification");
             }
 
@@ -1101,7 +1101,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                         $ids[] = $row['person_id'];
                     }
                 } catch (\Exception $e) {
-                    $this->getLoggerService()->err("Impossible de charger les personnes via les filtres LDAP : " . $e->getMessage());
+                    $this->getLoggerService()->error("Impossible de charger les personnes via les filtres LDAP : " . $e->getMessage());
                     throw new OscarException("Impossible de charger les personnes via les filtres LDAP");
                 }
             }
@@ -1133,7 +1133,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 };
             } catch(\Exception $e ){
                 $msg = "Impossible de charger les personnes via leur implication dans les organisations/activités";
-                $this->getLoggerService()->err("$msg : " . $e->getMessage());
+                $this->getLoggerService()->error("$msg : " . $e->getMessage());
                 throw new OscarException($msg);
             }
 

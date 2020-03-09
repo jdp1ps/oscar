@@ -184,6 +184,10 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 } catch( NonUniqueResultException $e ){
                     $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
                     continue;
+                } catch(\Exception $e){
+                    // FIX : Erreur de conversion de type survenue
+                    $repport->adderror(sprintf("La personne avec l'ID %s provoque une exception : %s - %s.", $personData->uid, $e->getMessage(), $e->getTraceAsString()));
+                    continue;
                 }
 
                 if( $personData->dateupdated == null

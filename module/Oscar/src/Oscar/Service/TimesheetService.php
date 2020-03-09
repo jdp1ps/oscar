@@ -3,6 +3,7 @@
 namespace Oscar\Service;
 
 use Cocur\Slugify\Slugify;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
@@ -4567,5 +4568,69 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'person' => $person,
             ]);
         return $query->getQuery()->getResult();
+    }
+
+
+    /**
+     * Evalue si la personne est déclarant.
+     *
+     * @param $idDeclarant
+     * @param $periodStr
+     */
+    public function personIsDeclarantPeriod($idDeclarant, $periodStr) {
+        try {
+            /** @var Person $person */
+            $person = $this->getPersonService()->getPerson($idDeclarant);
+        } catch (NoResultException $e) {
+            throw new OscarException("La personnes n'existe pas");
+        } catch (\Exception $e) {
+            throw new OscarException("Une erreur est survenue lors du chargement de la personne");
+        }
+
+        /** @var WorkPackagePerson $personWorkPackage */
+        foreach ($person->getWorkPackages() as $personWorkPackage) {
+            if( DateTimeUtils::periodInside($periodStr, $personWorkPackage->getWorkPackage()->getDateStart(), $personWorkPackage->getWorkPackage()->getDateEnd())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    public function personDeclarationState($declarantId, $periodStr) {
+        $person = $this->getPersonService()->getPerson($declarantId);
+        $datas = $this->getTimesheetDatasPersonPeriod($person, $periodStr);
+
+        echo "$periodStr - $person\n";
+
+        if( count($datas['workpackages']) == 0 ){
+            throw new OscarException("$person n'est pas identifiée sur des lots de travail pour la période $periodStr");
+        }
+
+        if( $datas['periodFutur'] == true ){
+            return "PERIOD_FUTUR";
+        }
+
+        if( $datas['periodFinished'] == true ){
+
+            if( $datas['hasConflict'] == true ){
+                return "PERIOD_CONFICT";
+            }
+
+            if( count($datas['periodsValidations']) == 0 ){
+                var_dump($datas['periodsValidations']);
+                return "PERIOD_NODECLARATION";
+            } else {
+                return "PERIOD_DECLARATION_TODO";
+            }
+
+        } else {
+            return "PERIOD_UNFINISHED";
+        }
+
+        var_dump($datas);
+
+        return $datas;
     }
 }

@@ -41,6 +41,7 @@ class OscarTimesheetDeclarersListCommand extends OscarCommandAbstract
         $this
             ->setDescription("Affiche la liste des déclarants")
             ->addArgument(self::ARG_DECLARANT, InputArgument::OPTIONAL, "Identifiant du déclarant", null)
+    //        ->addOption('period', 'p', InputOption::VALUE_OPTIONAL, "Période sous la forme ANNEE-MOIS")
         ;
     }
 
