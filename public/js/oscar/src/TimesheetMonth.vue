@@ -654,7 +654,7 @@
                         <div class="week-header">
                                 <span>
                                     <strong class="text-big text-xxl">Total</strong><br>
-                                    <small>Pour les activités soumisses aux déclarations</small>
+                                    <small>Pour les activités soumises aux déclarations</small>
                                 </span>
                             <small>
                                 <strong class="text-large">{{ ts.periodDeclarations | duration2(monthLength)

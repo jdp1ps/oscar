@@ -75,10 +75,8 @@ class OscarTimesheetDeclarersListCommand extends OscarCommandAbstract
             $io->title("Déclarant <bold>$person</bold>");
             $headers = ['Projet', 'Lot', 'Début', 'Fin', 'Intitulé'];
             $lines = [];
-
             $start = null;
             $end = null;
-
 
             $io->section("Lots identifiés");
 
@@ -112,9 +110,6 @@ class OscarTimesheetDeclarersListCommand extends OscarCommandAbstract
             $rows = [];
             foreach ($periodsOpen as $period) {
                 $periodDatas = $timesheetService->getTimesheetDatasPersonPeriod($person, $period);
-//                if( $period == "2017-01" )
-//                    var_dump($periodDatas);
-
                 $rows[] = [
                     $period,
                     $periodDatas['hasConflict']?'Oui':'Non',

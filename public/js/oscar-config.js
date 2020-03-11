@@ -91,6 +91,7 @@ requirejs.config({
         "EstimatedSpentActivity": "oscar/dist/EstimatedSpentActivity",
         "EstimatedSpentActivityItem": "oscar/dist/EstimatedSpentActivityItem",
         "Referent": "oscar/dist/Referent",
+        "Declarers": "oscar/dist/Declarers",
         "ReferentUI": "oscar/dist/ReferentUI",
         "EntityWithRole": "oscar/dist/EntityWithRole",
         "APIAccess": "oscar/dist/APIAccess",

@@ -633,6 +633,13 @@ person:
                 defaults:
                     action: new
 
+        declarers:
+            type: literal
+            options:
+                route: /declarers
+                defaults:
+                    action: declarers
+
 
 
 ################################################################################

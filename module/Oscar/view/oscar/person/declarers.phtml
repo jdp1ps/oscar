@@ -1,0 +1,15 @@
+<div class="container">
+    <h1><i class="icon-users"></i> Déclarants</h1>
+    <div id="declarers"></div>
+    <script>
+        require(['vue', 'vue-resource', 'Declarers'], function(Vue, VueResource, Declarers){
+            Vue.use(VueResource);
+            new Vue({
+                el: '#declarers',
+                render(h){
+                    return h(Declarers.default);
+                }
+            })
+        })
+    </script>
+</div>

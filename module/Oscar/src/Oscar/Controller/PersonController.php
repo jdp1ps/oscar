@@ -51,6 +51,7 @@ use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Traits\UseTimesheetService;
 use Oscar\Traits\UseTimesheetServiceTrait;
+use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
@@ -625,6 +626,43 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         } else {
             return $this->getResponseNotFound('Personne introuvable');
         }
+    }
+
+    public function declarersAction(){
+
+        $format = $this->params()->fromQuery('f', null);
+        if( $this->isAjax() || $format == 'json'){
+            $method = $this->getHttpXMethod();
+            switch ($method) {
+                case "GET":
+                    $output = $this->baseJsonResponse();
+                    /////////////////////////////////////////////////////////////////////
+                    $period = DateTimeUtils::extractPeriodDatasFromString($this->params()->fromQuery('period', date('Y-m')));
+                    $output['period'] = $period;
+
+                    /////////////////////////////////////////////////////////////////////
+                    $declarers = [];
+
+                    try {
+                        foreach( $this->getTimesheetService()->getDeclarersAtPeriod($period['periodCode']) as $declarer ) {
+                            $entry = $declarer;
+                            $entry['details'] = $this->getTimesheetService()->personDeclarationState($declarer['id'], $period['periodCode']);
+                            $declarers[] = $entry;
+
+                        }
+                        //    $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
+                        $output['declarers'] = $declarers;
+
+                        return $this->jsonOutput($output);
+                    } catch (\Exception $e) {
+                        return $this->getResponseInternalError($e->getMessage());
+                    }
+
+                default:
+                    return $this->getResponseNotFound();
+            }
+        }
+        return [];
     }
 
     /**
