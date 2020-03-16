@@ -31,7 +31,11 @@ if(
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
                 <li><a href="<?= $this->url('person/new') ?>">Ajouter une personne</a></li>
             <?php endif; ?>
+        <?php endif; ?>
 
+        <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW)): ?>
+            <li role="presentation" class="dropdown-header"><i class="icon-group"></i> Déclarants</li>
+            <li><a href="<?= $this->url('person/declarers') ?>">Liste des déclarants</a></li>
         <?php endif; ?>
 
 

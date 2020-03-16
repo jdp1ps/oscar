@@ -4653,7 +4653,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $validations = [];
         foreach ($datas['periodsValidations'] as $validation) {
-            $validations[] = $validation['status'];
+            $validationStatus = $validation['status'];
+            if( !in_array($validationStatus, $validations) )
+                $validations[] = $validationStatus;
         }
         $output['validations'] = $validations;
 
@@ -4670,7 +4672,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         if( $datas['periodFinished'] == true ){
 
             if( $datas['hasConflict'] == true ){
-                $output['state'] =  "PERIOD_CONFICT";
+                $output['state'] =  "PERIOD_CONFLICT";
                 $output['stateText'] =  "Conflit en cours de résolution";
                 return $output;
             }
@@ -4680,8 +4682,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $output['stateText'] =  "Aucune déclaration envoyée";
                 return $output;
             } else {
-                $output['state'] =  "PERIOD_DECLARATION_TODO";
-                $output['stateText'] =  explode(',', $output['validations']);
+                if( count($output['validations']) == 1 && $output['validations'][0] == 'valid' ){
+                    $output['state'] =  "PERIOD_VALID";
+                    $output['stateText'] =  "Validée";
+                } else {
+                    $output['state'] =  "PERIOD_DECLARATION_TODO";
+                    $output['stateText'] =  "En attente de validation";
+                }
                 return $output;
             }
 
