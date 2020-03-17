@@ -3,9 +3,7 @@
 <link rel="stylesheet" href="/js/oscar/dist/milestones.css" />
 <link rel="stylesheet" href="/js/oscar/dist/Payments.css" />
 
-
 <div class="container activity-full">
-
     <nav>
         <a href="javascript:history.back()">
             <i class=" icon-angle-left"></i>Retour</a>
@@ -385,17 +383,18 @@
                 })
             </script>
             <?php endif; ?>
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
-                <nav>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
-                    <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
-                    <?php endif; ?>
-                    <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a>
-                </nav>
-            <?php endif; ?>
+
 
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
                 <div id="payments"></div>
+
+                <nav>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
+                        <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
+                    <?php endif; ?>
+                    <!-- <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a> -->
+                </nav>
+
                 <div>
                     
                     <h3>Assiette Subventionnable : <strong><?= $entity->getAssietteSubventionnable() ?></strong></h3>
