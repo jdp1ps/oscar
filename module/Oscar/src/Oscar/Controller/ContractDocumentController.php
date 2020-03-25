@@ -8,6 +8,7 @@
 namespace Oscar\Controller;
 
 use Jacksay\PhpFileExtension\Strategy\MimeProvider;
+use Oscar\Constantes\Constantes;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\TypeDocument;
@@ -18,11 +19,19 @@ use Oscar\Service\ContractDocumentService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
+use Oscar\Strategy\Upload\conventionSignee;
+use Oscar\Strategy\Upload\ServiceContextUpload;
+use Oscar\Strategy\Upload\StrategyGedUpload;
+use Oscar\Strategy\Upload\StrategyOscarUpload;
+use Oscar\Strategy\Upload\StrategyTypeInterface;
+use Oscar\Strategy\Upload\TypeGed;
+use Oscar\Strategy\Upload\TypeOscar;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Request;
 use Zend\Json\Server\Exception\HttpException;
+use Zend\Mvc\Controller\Plugin\Redirect;
 use Zend\View\Model\JsonModel;
 
 
@@ -89,10 +98,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     }
 
     /**
-     * Retourne le service pour gérer les documents.
-     *
      * @return VersionnedDocumentService
+     * @throws \Exception
+     * @annotations Retourne le service pour gérer les documents
      */
+
     protected function getVersionnedDocumentService(){
         if( null === $this->versionnedDocumentService ){
             $this->versionnedDocumentService = new VersionnedDocumentService(
@@ -184,9 +194,9 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     }
 
     /**
-     * Procédure générique pour l'envoi des fichiers.
-     *
      * @return array
+     * @throws OscarException
+     * @annotations Procédure générique pour l'envoi des fichiers.
      */
     public function uploadAction() {
         $datas = [
@@ -196,9 +206,79 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         ];
         $idActivity = $this->params()->fromRoute('idactivity');
         $activity = $this->getActivityService()->getGrant($idActivity);
-
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
+        
+        /**
+         * ******************************************
+         * Début tests new code
+         */
+        try {
+            //ATTENTION JACK SE SERT DES POSTS POUR SAVOIR SI IL UPLOAD OU PAS... ?
+            //Pour info Il faudra récup la section ici (évolution en cours), passer cette section au ServiceContextUpload pour faire traitement et choisir la stratégie adaptée d'upload
+            //Exemple récup possible
+            //$section = $this->params()->fromQuery('section,' null);
+            //Il faudra récupérer le type pour choisir stratégie dans le service serviceUpload pareil que section (évolution prévue sous peu)
+            //Exemple récup possible
+            //$typeDocument = this->params()->fromQuery('type', null);
+            // Get ID pour remplacement ou ajout
+            $docId = $this->params()->fromQuery('id', null);
+            // Les injecions de service nécessaires pour le service de traitement upload (une factory pourrait être envisagée).
+            $documentService = $this->getVersionnedDocumentService();
+            $oscarUserContext = $this->getOscarUserContext();
+            $notificationService = $this->getNotificationService();
+            $activityLogService = $this->getActivityLogService();
 
+            /** new code $serviceUpload instanciation */
+            $serviceUpload = new ServiceContextUpload
+            (
+                $this->getRequest(),
+                $docId,
+                $documentService,
+                $datas,
+                $idActivity,
+                $activity,
+                $oscarUserContext,
+                $notificationService,
+                $activityLogService
+            );
+            $serviceUpload->treatementUpload();
+
+            // IF TRUE -> POSTS
+            if(true == $serviceUpload->treatementUpload())
+            {
+                //echo "Nous avons des posts il a donc eu traitement ! se servir des ETATS de la stratégie pour savoir quoi faire";
+                // Nous avons des posts donc nous allons traiter et nous devons aller chercher les infos dont nous avons besoin pour retour
+                //var_dump($serviceUpload->getStrategy()->getDatas() );
+                die("Avant switch");
+                switch ($serviceUpload->getStrategy()->getEtat()){
+                    case 3:
+                        echo "success !";
+                        var_dump($serviceUpload->getStrategy()->getDatas());
+                        die("here");
+                        $this->redirect()->toRoute('contract/show', ['id' => $serviceUpload->getStrategy()->getDatas()['activityId']]);
+                        break;
+                    default:
+                        echo "pas normal d'arrivé là... !";
+                        break;
+                }
+                //die("stop");
+            }
+
+            return [
+                'activity' => $activity,
+                'data'  => $datas,
+                'types' => $this->getContractDocumentService()->getContractDocumentTypes()
+            ];
+
+        }catch (\Exception $e){
+            die($e->getMessage());
+        }
+        /**
+         * ******************************************
+         * Fin nouveau code
+         */
+
+        /** Ancien code en cours de reprise */
         try {
             $docId = $this->params()->fromQuery('id', null);
             $docReplaced = null;
@@ -208,7 +288,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 }
             }
             $documentService = $this->getVersionnedDocumentService();
-
 
             $datas = $documentService->performRequest($this->getRequest(), $docReplaced,
                 function (ContractDocument $document) use( $activity ) {
