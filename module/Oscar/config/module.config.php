@@ -1,13 +1,8 @@
 <?php
 
 use Monolog\Handler\StdoutHandler;
-use Oscar\Controller\PersonController;
 use Oscar\Service\AccessResolverService;
-use Oscar\Service\LoggerStdoutColor;
-use Oscar\Service\OrganizationService;
 use Oscar\Service\PersonnelService;
-use Oscar\Service\PersonService;
-use Oscar\Service\ProjectService;
 use Oscar\Service\SearchService;
 use Oscar\View\Helpers\DateRenderer;
 use Oscar\View\Helpers\UnicaenDoctrinePaginatorHelper;
@@ -31,7 +26,6 @@ return array(
                     'action' => ['index', ],
                     'roles' => [],
                 ],
-
                 [ 'controller' =>  'Public',
                     'action' => ['documentation', 'parameters', 'gitlog'],
                     'roles' => ['user'],
@@ -531,6 +525,9 @@ return array(
                     ],
                 ],
 
+
+
+
                 // -------------------------------------------------------------
 
                 'oscar_search_update' => array(
@@ -829,7 +826,6 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
-            'Sync' => CentaureSync\Controller\SyncController::class,
         ),
         'factories' => [
             'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
