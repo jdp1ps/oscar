@@ -207,7 +207,7 @@ class OrganizationController extends AbstractOscarController
         if (strlen($search) < 3) {
             return $this->getResponseBadRequest("Not enough chars (3 required)");
         }
-        $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search.'*', $page);
+        $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search, $page);
 
         $result = [ 'datas' => []];
         foreach ($organizations as $data) {
