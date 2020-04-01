@@ -93,9 +93,9 @@ class ServiceContextUpload
                 $this->notificationService,
                 $this->activityLogService
             );
-            $strategy = new StrategyOscarUpload($typeDocumentGedOscar);
-            $strategy->setEtat($strategy::$postUpload);
-            $this->upload($strategy);
+            $this->strategy = new StrategyOscarUpload($typeDocumentGedOscar);
+            $this->strategy->setEtat(1);
+            $this->upload($this->strategy);
         }
         return $isPost;
     }
@@ -105,8 +105,9 @@ class ServiceContextUpload
     {
         // Nous ne savons pas quelle stratégie est utilisée (design pattern stratégie plus ou moins) mais c'est l'objectif
         //echo "je passe par upload du service ";
-        $this->strategy = $strategy;
-        $this->strategy->uploadDocument();
+        //$this->strategy = $strategy;
+        //$this->strategy->uploadDocument();
+        $strategy->uploadDocument();
     }
 
     /**

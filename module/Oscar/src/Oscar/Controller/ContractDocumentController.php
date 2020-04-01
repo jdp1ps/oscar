@@ -246,22 +246,19 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             // IF TRUE -> POSTS
             if(true == $serviceUpload->treatementUpload())
             {
-                //echo "Nous avons des posts il a donc eu traitement ! se servir des ETATS de la stratégie pour savoir quoi faire";
                 // Nous avons des posts donc nous allons traiter et nous devons aller chercher les infos dont nous avons besoin pour retour
-                //var_dump($serviceUpload->getStrategy()->getDatas() );
-                die("Avant switch");
+                //echo "Nous avons des posts il a donc eu traitement ! se servir des ETATS de la stratégie pour savoir quoi faire";
                 switch ($serviceUpload->getStrategy()->getEtat()){
-                    case 3:
-                        echo "success !";
-                        var_dump($serviceUpload->getStrategy()->getDatas());
-                        die("here");
+                    case true:
+                        // Infos juste pour xdebug
+                        $infos = $serviceUpload->getStrategy()->getDatas();
                         $this->redirect()->toRoute('contract/show', ['id' => $serviceUpload->getStrategy()->getDatas()['activityId']]);
+                        echo "success !";
                         break;
                     default:
                         echo "pas normal d'arrivé là... !";
                         break;
                 }
-                //die("stop");
             }
 
             return [

@@ -307,4 +307,13 @@ class VersionnedDocumentService {
 //            ->leftJoin('d.grant', 'g');
     }
 
+    /**
+     * @return string
+     */
+    public function getEffectiveClass(): string
+    {
+        return $this->effectiveClass;
+    }
+
+
 }
