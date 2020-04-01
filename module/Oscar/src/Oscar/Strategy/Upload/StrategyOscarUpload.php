@@ -19,10 +19,6 @@ class StrategyOscarUpload implements StrategyTypeInterface
     const DATE_SEND                 = "dateSend";
     const NAME_INPUT_FILE           = "file";
 
-    public static $noPostUpload     = 0;
-    public static $postUpload       = 1;
-    public static $errorsUpload     = 2;
-    public static $succesUpload     = 3;
     private $etat;
 
     private $document;
@@ -32,7 +28,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
     public function __construct(TypeDocumentInterface $document)
     {
         $this->document= $document;
-        $this->etat = self::$noPostUpload;
+        $this->etat = false;
     }
 
     public function uploadDocument(): void
@@ -85,8 +81,8 @@ class StrategyOscarUpload implements StrategyTypeInterface
 
                 if(false === $fileExtension){
                     $this->datas[self::ERROR_FILE] = sprintf("Le fichier '%s' est un type de fichier %s (%s) non-supporté dans Oscar.", $fileName, $fileExtension, $fileMime);
-                    var_dump($fileName . "---".$fileExtension . "----". $fileMime);
                 } else {
+
                     /** @var AbstractVersionnedDocument $document */
                     $nameClass = $this->document->getDocumentService()->getEffectiveClass();
                     $document = new $nameClass;
@@ -104,7 +100,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
                         ->setGrant($this->getDocument()->getActivity())
                         ->setDateDeposit($this->datas[self::DATE_DEPOSIT] ? new \DateTime($this->datas[self::DATE_DEPOSIT]):null)
                         ->setDateSend($this->datas[SELF::DATE_SEND] ? new \DateTime($this->datas[self::DATE_SEND]):null);
-                        $this->etat = self::$succesUpload;
+                        $this->etat = true;
                         $this->datas ["activityId" ] = $this->getDocument()->getActivity()->getId();
                     if ( $this->getDocument()->getDocumentService()->createDocument($file['tmp_name'], $document) ){
                             $this->getDocument()->getNotificationService()->generateActivityDocumentUploaded($document);
@@ -113,11 +109,9 @@ class StrategyOscarUpload implements StrategyTypeInterface
                                 'Activity', $this->getDocument()->getActivity()->getId()
                             );
                             $this->datas ["activityId" ] = $this->getDocument()->getActivity()->getId();
-                            //var_dump($this->getDocument()->getActivity()->getId());
-                            $this->etat = self::$succesUpload;
-                            //die("here");
+                            $this->etat = true;
                     } else {
-                        $this->etat = self::$errorsUpload;
+                        $this->etat = false;
                         $this->datas[self::ERROR_FILE] = "Un problème est survenu lors de la copie du document.";
                     }
                 }
@@ -139,15 +133,15 @@ class StrategyOscarUpload implements StrategyTypeInterface
     /**
      * @return int
      */
-    public function getEtat(): int
+    public function getEtat(): bool
     {
         return $this->etat;
     }
 
     /**
-     * @param int $etat
+     * @param bool $etat
      */
-    public function setEtat(int $etat): void
+    public function setEtat(bool $etat): void
     {
         $this->etat = $etat;
     }
