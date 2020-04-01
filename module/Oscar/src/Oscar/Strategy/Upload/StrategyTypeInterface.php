@@ -13,7 +13,7 @@ interface StrategyTypeInterface
 
     public function getDatas(): array;
 
-    public function getEtat(): int;
+    public function getEtat(): bool;
 
-    public function setEtat(int $etat): void;
+    public function setEtat(bool $etat): void;
 }
