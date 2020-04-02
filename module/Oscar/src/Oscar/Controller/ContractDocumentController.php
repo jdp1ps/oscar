@@ -243,6 +243,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             );
             $treatementUpload = $serviceUpload->treatementUpload();
 
+
+
             // IF TRUE -> POSTS
             if(true == $treatementUpload)
             {
@@ -252,8 +254,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                     case true:
                         // Infos juste pour xdebug
                         $infos = $serviceUpload->getStrategy()->getDatas();
-                        $this->redirect()->toRoute('contract/show', ['id' => $serviceUpload->getStrategy()->getDatas()['activityId']]);
-                        echo "success !";
+                        if( $infos['error'] ){
+                            $datas['error'] = $infos['error'];
+                        } else {
+                            $this->redirect()->toRoute('contract/show', ['id' => $serviceUpload->getStrategy()->getDatas()['activityId']]);
+                        }
                         break;
                     default:
                         echo "pas normal d'arrivé là... !";

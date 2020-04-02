@@ -33,16 +33,12 @@ class StrategyOscarUpload implements StrategyTypeInterface
 
     public function uploadDocument(): void
     {
-        //Echo "je suis dans la stratégie GED OSCAR ! method uploadDocument";
-        $this->datas = [
-            "error" => null
-        ];
-        $this->datas ["activityId"] = null;
+
         // Traitement des données envoyées utilisation System file Oscar interne à Oscar donc pas de Ged générique ici
         $this->datas = $this->document->getRequest()->getPost()->toArray();
-        $this->datas["error"] = null;
+        $this->datas[self::ERROR_FILE] = null;
         $file = $this->document->getRequest()->getFiles(self::NAME_INPUT_FILE);
-        //var_dump($file);
+
         // OK file récup
         if( !$file ){
             //die("J'ai une erreur pas de fichier !");
@@ -51,7 +47,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
             if( is_array($lastError) && array_key_exists('message', $lastError) ){
                 $error = $lastError['message'];
             }
-            throw new OscarException(sprintf(_('Fichier incorrect : %s'), $error));
+            $this->datas[self::ERROR_FILE] = sprintf(_('Fichier incorrect : %s'), $error);
         }
 
         if( $file[self::ERROR_FILE] != 0 ){
@@ -117,6 +113,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
                 }
             }
         }
+        die('fini');
         //return $this->datas;
     }
 
