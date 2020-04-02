@@ -74,6 +74,12 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 php bin/oscar.php check:privileges
 ``` 
 
+### SIFAC (Experimental)
+
+La version **Macclane** propose en *experimental* la configuration SIFAC pour chargé depuis une source SIFAC(Oracle) les informations sur les dépenses des activités de recherche basée sur le journal des pièces.
+
+
+
  
 ## En cours
 

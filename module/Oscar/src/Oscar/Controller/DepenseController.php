@@ -12,6 +12,8 @@ use Monolog\Logger;
 use Oscar\Entity\Activity;
 use Oscar\Entity\SpentTypeGroup;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\Spent\SpentActivityDetailsExcelFormater;
+use Oscar\Formatter\Spent\SpentActivityExcelFormater;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
@@ -86,6 +88,12 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
 
         $this->getOscarUserContext()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
         $format = $this->params()->fromQuery('format', 'html');
+
+        try {
+            $masses = $this->getOscarConfigurationService()->getConfiguration('spenttypeannexes');
+        } catch (\Exception $e) {
+            throw new OscarException("La configuration des masses budgetaire (spenttypeannexes) est necessaire");
+        }
 
         $method = $this->getHttpXMethod();
 
@@ -172,7 +180,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         if( $format == 'json' || $this->isAjax() ){
             return $this->jsonOutput([
                 'spenttypegroups' => $this->getSpentService()->getAllArray(),
-                'masses' => $this->getOscarConfigurationService()->getConfiguration('spenttypeannexes')
+                'masses' => $masses,
             ]);
         } else {
             return [];
@@ -180,6 +188,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
     }
 
     public function activityApiAction(){
+
         try {
             $idactivity = $this->params()->fromRoute('id');
             $activity = $this->getProjectGrantService()->getActivityById($idactivity);
@@ -194,9 +203,39 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
                 throw new OscarException(sprintf(_("Cette activité n'a pas de PFI")));
             }
             $spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
-            $datas = $this->baseJsonResponse();
-            $datas['spents'] = $spents;
-            return $this->jsonOutput($datas);
+            $format = $this->params()->fromQuery('format', 'json');
+            switch($format){
+                case 'json' :
+                    $datas = $this->baseJsonResponse();
+                    $datas['spents'] = $spents;
+                    return $this->jsonOutput($datas);
+                    break;
+
+                case 'excel':
+                    $this->getOscarUserContextService()->check(Privileges::DEPENSE_DOWNLOAD, $activity);
+                    $mode = $this->params()->fromQuery('mode', 'normal');
+                    if( $mode == 'normal' ){
+                        $formatter = new SpentActivityExcelFormater($spents, $activity);
+                        $content = $formatter->format(['download' => true]);
+                        die();
+                    }
+                    elseif( $mode == 'details' ){
+                        $formatter = new SpentActivityDetailsExcelFormater($spents, $activity);
+                        $content = $formatter->format(['download' => true]);
+                        die("Pas encore disponible");
+                    }
+                    else {
+                        throw new OscarException("Impossible de télécharger les dépenses, le mode $mode n'est pas disponible.");
+                    }
+
+                    break;
+
+                default:
+                    throw new OscarException("Format demandé non-pris en charge");
+                    break;
+            }
+
+
         } catch (\Exception $e){
             return $this->getResponseInternalError("Impossible de charger l'activité : " . $e->getMessage());
         }

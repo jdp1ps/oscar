@@ -59,8 +59,9 @@
                         defaultMonth: <?= $month ?>,
                         moment: moment,
                         bootbox: bootbox,
-                        url: '<?= $this->url('timesheet/declarant').($usurpation?"?person=$usurpation":"?") ?>'
-                        ,urlimport: '<?= $this->options()->importEnable() ? $this->url('timesheet/import_ical'). ($usurpation?"?person=$usurpation":"?") : '' ?>'
+                        url: '<?= $this->url('timesheet/declarant').($usurpation?"?person=$usurpation":"?") ?>',
+                        urlValidation: '<?= $this->url('timesheet/checkperiod')  ?>',
+                        urlimport: '<?= $this->options()->importEnable() ? $this->url('timesheet/import_ical'). ($usurpation?"?person=$usurpation":"?") : '' ?>'
                     }
                 });
             }

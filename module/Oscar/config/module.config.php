@@ -60,6 +60,7 @@ return array(
                         'organizationRoleApi',
                         'organizationType',
                         'oscarWorkerStatus',
+                        'testconfig',
                         'tva',
                         'connectorsConfig',
                         'connectorTest',
@@ -70,6 +71,7 @@ return array(
                         'typeDocumentApi',
                         'numerotation',
                         'parameters',
+                        'privileges2',
                         'access',
                         'planComptableLoaded'
                     ],
@@ -202,7 +204,7 @@ return array(
                         'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
                         'importIcal', 'declarations', 'resumeActivity',
                         'resolveInvalidLabels', 'syntheseActivity', 'synthesisAll', 'synthesisActivityPeriod',
-                        'exportActivityDates'
+                        'exportActivityDates', 'checkperiod'
                     ],
                     'roles' => ['user']
                 ],

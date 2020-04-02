@@ -26,6 +26,7 @@ class TimesheetServiceFactory extends OscarServiceFactory implements FactoryInte
         $s->setOrganizationService($container->get(OrganizationService::class));
         $s->setActivityService($container->get(ProjectGrantService::class));
         $s->setNotificationService($container->get(NotificationService::class));
+        $s->setActivityLogService($container->get(ActivityLogService::class));
         return $s;
     }
 }

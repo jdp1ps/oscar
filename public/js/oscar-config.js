@@ -3,188 +3,188 @@
  *
  * Created by jacksay on 17/09/15.
  */
-
 requirejs.config({
-    baseUrl: '/js/',
+    baseUrl: "/js/",
     paths: {
-        'bootbox': 'vendor/bootbox/bootbox',
-        'vis': 'vendor/vis/dist/vis.min',
-        'modalform': 'oscar-modal-form',
-        'backbone': 'vendor/backbone/backbone-min',
-        'Backbone': 'vendor/backbone/backbone-min',
-        'text': 'vendor/requirejs-text/text',
-        'domReady': 'vendor/requirejs-domready/domReady',
-        'handlebars': 'vendor/handlebars/handlebars.min',
-        'jquery': 'vendor/jquery/dist/jquery.min',
-        'jqueryui': 'vendor/jqueryui/jquery-ui.min',
-        'jqueryui-core': 'vendor/jqueryui/ui/core',
-        'jqueryui-widget': 'vendor/jqueryui/ui/widget',
-        'jquery-serialize': 'vendor/jquery-serialize-object/dist/jquery.serialize-object.min',
-        'moment': 'vendor/momentjs/min/moment-with-locales.min',
-        'moment-tz': 'vendor/moment-timezone/builds/moment-timezone-with-data.min',
-        'moment-timezone': 'vendor/moment-timezone/builds/moment-timezone-with-data',
-        'underscore': 'vendor/underscore/underscore-min',
-        'bt-datepicker': 'vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min',
-        'timepicker': 'vendor/bootstrap-timepicker/js/bootstrap-timepicker',
-        'bootstrap': 'vendor/bootstrap/dist/js/bootstrap.min',
-        'bootstrapLnf': 'vendor/bootstrap-lnf/dist/js/bootstrap-lnf',
-        'select2': 'vendor/select2/dist/js/select2.min',
-        'timewalker': 'vendor/timewalker/src/js/TimeViewer',
-        'oscar-auto': 'oscar-auto',
-        'OscarUI': 'oscar-ui',
-        'vue': 'vendor/vue/dist/vue.min',
-        'vue-resource': 'vendor/vue-resource/dist/vue-resource',
-        'vue-router': 'vendor/vue-router/dist/vue-router',
-        'LocalDB': 'LocalDB/LocalDB',
-        'OscarDepenses': 'OscarDepenses',
-        'privileges': 'components/build/privileges',
-        'organizationrole': 'oscar/dist/OrganizationRole',
-        'roles': 'components/build/roles',
-        'ical': 'vendor/ical.js/build/ical.min',
-        'timesheet': 'components/build/timesheet',
-        'in-the-box' : 'vendor/in-the-box/build/InTheBox',
-        'papa-parse' : 'vendor/papa-parse/papaparse.min',
-        'colorpicker' : 'vendor/bootstrapcolorpicker/dist/js/bootstrap-colorpicker.min',
-        'calendar' : 'modules/unicaen/dist/js/calendar',
-        'calendar2' : 'oscar/dist/Calendar',
-        'CalendarModel' : 'oscar/dist/CalendarModel',
-        'EventDT' : 'modules/unicaen/dist/js/EventDT',
-        'ICalAnalyser' : 'modules/unicaen/dist/js/ICalAnalyser',
-        'Datepicker' : 'modules/unicaen/dist/js/Datepicker',
-        'KeySelectEditor' : 'components/build/KeySelectEditor',
-        'ActivitiesExport' : 'oscar/dist/ActivitiesExport',
-        'io' : 'http://127.0.0.1:3000/socket.io/socket.io.js',
-        'notifications' : 'oscar/dist/Notification',
-        'activity' : 'components/build/activity',
-        'TypeDocument' : 'oscar/dist/TypeDocument',
-        'milestones' : 'oscar/dist/Milestones',
-        'authentification' : 'oscar/dist/Authentification',
-        'payments' : 'oscar/dist/Payments',
-        'Datepicker2' : 'oscar/dist/Datepicker',
-        'activityclone' : 'oscar/dist/Activityclone',
-        'polyfill' : 'oscar/dist/Polyfill',
-        'ActivitySearchUi' : 'oscar/dist/ActivitySearchUi',
-        'VueFilters' : 'oscar/dist/VueFilters',
-        'OrganizationType' : 'oscar/dist/OrganizationType',
-        'DisciplineUI' : 'oscar/dist/DisciplineUI',
-        'TimesheetMonth' : 'oscar/dist/TimesheetMonth',
-        'ValidationActivityVue' : 'oscar/dist/ValidationActivityVue',
-        'ValidationPeriod' : 'oscar/dist/ValidationPeriod',
-        'DeclarersList' : 'oscar/dist/DeclarersList',
-        'ImportIcalUI' : 'oscar/dist/ImportIcalUI',
-        'PeriodSelector' : 'oscar/dist/PeriodSelector',
-        'TimesheetDeclarationsList' : 'oscar/dist/TimesheetDeclarationsList',
-        'PersonSchedule' : 'oscar/dist/PersonSchedule',
-        'TimesheetPersonResume' : 'oscar/dist/TimesheetPersonResume',
-        'ResumeActivity' : 'oscar/dist/ResumeActivity',
-        'PersonsList' : 'oscar/dist/PersonsList',
-        'Tva': 'oscar/dist/Tva',
-        'ActivityRequest': 'oscar/dist/ActivityRequest',
-        'ActivityRequestAdmin': 'oscar/dist/ActivityRequestAdmin',
-        'Workpackage': 'oscar/dist/WorkpackageUI',
-        'ConfigStringList': 'oscar/dist/ConfigStringList',
-        'ActivityPersons': 'oscar/dist/ActivityPersons',
-        'ActivityGant': 'oscar/dist/ActivityGant',
-        'Keyvalue': 'oscar/dist/Keyvalue',
-        'DocumentSectionAdmin': 'oscar/dist/DocumentSectionAdmin',
-        'SpentGroupAdmin': 'oscar/dist/SpentGroupAdmin',
-        'SpentGroupItem': 'oscar/dist/SpentGroupItem',
-        'EstimatedSpentActivity': 'oscar/dist/EstimatedSpentActivity',
-        'EstimatedSpentActivityItem': 'oscar/dist/EstimatedSpentActivityItem',
-        'Referent': 'oscar/dist/Referent',
-        'ReferentUI': 'oscar/dist/ReferentUI',
-        'EntityWithRole': 'oscar/dist/EntityWithRole',
-        'APIAccess': 'oscar/dist/APIAccess',
-        'SpentLinePFI': 'oscar/dist/SpentLinePFI'
+        "bootbox": "vendor/bootbox/bootbox",
+        "vis": "vendor/vis/dist/vis.min",
+        "modalform": "oscar-modal-form",
+        "backbone": "vendor/backbone/backbone-min",
+        "Backbone": "vendor/backbone/backbone-min",
+        "text": "vendor/requirejs-text/text",
+        "domReady": "vendor/requirejs-domready/domReady",
+        "handlebars": "vendor/handlebars/handlebars.min",
+        "jquery": "vendor/jquery/dist/jquery.min",
+        "jqueryui": "vendor/jqueryui/jquery-ui.min",
+        "jqueryui-core": "vendor/jqueryui/ui/core",
+        "jqueryui-widget": "vendor/jqueryui/ui/widget",
+        "jquery-serialize": "vendor/jquery-serialize-object/dist/jquery.serialize-object.min",
+        "moment": "vendor/momentjs/min/moment-with-locales.min",
+        "moment-tz": "vendor/moment-timezone/builds/moment-timezone-with-data.min",
+        "moment-timezone": "vendor/moment-timezone/builds/moment-timezone-with-data",
+        "underscore": "vendor/underscore/underscore-min",
+        "bt-datepicker": "vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min",
+        "timepicker": "vendor/bootstrap-timepicker/js/bootstrap-timepicker",
+        "bootstrap": "vendor/bootstrap/dist/js/bootstrap.min",
+        "bootstrapLnf": "vendor/bootstrap-lnf/dist/js/bootstrap-lnf",
+        "select2": "vendor/select2/dist/js/select2.min",
+        "timewalker": "vendor/timewalker/src/js/TimeViewer",
+        "oscar-auto": "oscar-auto",
+        "OscarUI": "oscar-ui",
+        "vue": "vendor/vue/dist/vue.min",
+        "vue-resource": "vendor/vue-resource/dist/vue-resource",
+        "vue-router": "vendor/vue-router/dist/vue-router",
+        "LocalDB": "LocalDB/LocalDB",
+        "OscarDepenses": "OscarDepenses",
+        "privileges": "components/build/privileges",
+        "organizationrole": "oscar/dist/OrganizationRole",
+        "roles": "components/build/roles",
+        "ical": "vendor/ical.js/build/ical.min",
+        "timesheet": "components/build/timesheet",
+        "in-the-box" : "vendor/in-the-box/build/InTheBox",
+        "papa-parse" : "vendor/papa-parse/papaparse.min",
+        "colorpicker" : "vendor/bootstrapcolorpicker/dist/js/bootstrap-colorpicker.min",
+        "calendar" : "modules/unicaen/dist/js/calendar",
+        "calendar2" : "oscar/dist/Calendar",
+        "CalendarModel" : "oscar/dist/CalendarModel",
+        "EventDT" : "modules/unicaen/dist/js/EventDT",
+        "ICalAnalyser" : "modules/unicaen/dist/js/ICalAnalyser",
+        "Datepicker" : "modules/unicaen/dist/js/Datepicker",
+        "KeySelectEditor" : "components/build/KeySelectEditor",
+        "ActivitiesExport" : "oscar/dist/ActivitiesExport",
+        "io" : "http://127.0.0.1:3000/socket.io/socket.io.js",
+        "notifications" : "oscar/dist/Notification",
+        "activity" : "components/build/activity",
+        "TypeDocument" : "oscar/dist/TypeDocument",
+        "milestones" : "oscar/dist/Milestones",
+        "authentification" : "oscar/dist/Authentification",
+        "payments" : "oscar/dist/Payments",
+        "Datepicker2" : "oscar/dist/Datepicker",
+        "activityclone" : "oscar/dist/Activityclone",
+        "polyfill" : "oscar/dist/Polyfill",
+        "ActivitySearchUi" : "oscar/dist/ActivitySearchUi",
+        "VueFilters" : "oscar/dist/VueFilters",
+        "OrganizationType" : "oscar/dist/OrganizationType",
+        "DisciplineUI" : "oscar/dist/DisciplineUI",
+        "TimesheetMonth" : "oscar/dist/TimesheetMonth",
+        "ValidationActivityVue" : "oscar/dist/ValidationActivityVue",
+        "ValidationPeriod" : "oscar/dist/ValidationPeriod",
+        "DeclarersList" : "oscar/dist/DeclarersList",
+        "ImportIcalUI" : "oscar/dist/ImportIcalUI",
+        "PeriodSelector" : "oscar/dist/PeriodSelector",
+        "TimesheetDeclarationsList" : "oscar/dist/TimesheetDeclarationsList",
+        "PersonSchedule" : "oscar/dist/PersonSchedule",
+        "TimesheetPersonResume" : "oscar/dist/TimesheetPersonResume",
+        "ResumeActivity" : "oscar/dist/ResumeActivity",
+        "PersonsList" : "oscar/dist/PersonsList",
+        "Tva": "oscar/dist/Tva",
+        "ActivityRequest": "oscar/dist/ActivityRequest",
+        "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin",
+        "Workpackage": "oscar/dist/WorkpackageUI",
+        "ConfigStringList": "oscar/dist/ConfigStringList",
+        "ActivityPersons": "oscar/dist/ActivityPersons",
+        "ActivityGant": "oscar/dist/ActivityGant",
+        "Keyvalue": "oscar/dist/Keyvalue",
+        "DocumentSectionAdmin": "oscar/dist/DocumentSectionAdmin",
+        "SpentGroupAdmin": "oscar/dist/SpentGroupAdmin",
+        "SpentGroupItem": "oscar/dist/SpentGroupItem",
+        "EstimatedSpentActivity": "oscar/dist/EstimatedSpentActivity",
+        "EstimatedSpentActivityItem": "oscar/dist/EstimatedSpentActivityItem",
+        "Referent": "oscar/dist/Referent",
+        "ReferentUI": "oscar/dist/ReferentUI",
+        "EntityWithRole": "oscar/dist/EntityWithRole",
+        "APIAccess": "oscar/dist/APIAccess",
+        "SpentLinePFI": "oscar/dist/SpentLinePFI",
+        "gestionprivileges": "oscar/dist/GestionPrivileges"
     },
     shim: {
         "bootstrap": {
-            deps: ['jquery']
+            deps: ["jquery"]
         },
         "oscar-auto": {
-            deps: ['bootstrap']
+            deps: ["bootstrap"]
         },
         "CalendarModel": {
-            exports: 'CalendarModel'
+            exports: "CalendarModel"
         },
         "modalform": {
-            deps: ['bootstrap']
+            deps: ["bootstrap"]
         },
-        backbone: {
-            deps: ['underscore'],
-            exports: 'Backbone'
+        "backbone": {
+            deps: ["underscore"],
+            exports: "Backbone"
         },
-        jquery: {
-            exports: '$'
+        "jquery": {
+            exports: "$"
         },
-        'jquery-serialize': {
-            deps: ['jquery'],
-            exports: '$.fn.serialize'
+        "jquery-serialize": {
+            deps: ["jquery"],
+            exports: "$.fn.serialize"
         },
-        handlebars: {
-            exports: 'Handlebars'
+        "handlebars": {
+            exports: "Handlebars"
         },
-        underscore: {
-            exports: '_'
+        "underscore": {
+            exports: "_"
         },
-        moment: {
-            exports: 'moment'
+        "moment": {
+            exports: "moment"
         },
-        'bt-datepicker': {
-            deps: ['bootstrap']
-        },
-
-        datepicker: {
-            deps: ['bootstrap']
+        "bt-datepicker": {
+            deps: ["bootstrap"]
         },
 
-        timepicker: {
-            deps: ['bootstrap']
+        "datepicker": {
+            deps: ["bootstrap"]
         },
 
-        colorpicker: {
-            deps: ['bootstrap']
+        "timepicker": {
+            deps: ["bootstrap"]
         },
-        select2: {
-            deps: ['jquery']
+
+        "colorpicker": {
+            deps: ["bootstrap"]
         },
-        bootstrap: {
-            deps: ['jquery']
+        "select2": {
+            deps: ["jquery"]
         },
-        bootstrapLnf: {
-            deps: ['bootstrap']
+        "bootstrap": {
+            deps: ["jquery"]
         },
-        ical: {
-            export: 'ICAL'
+        "bootstrapLnf": {
+            deps: ["bootstrap"]
         },
-        'moment-tz': {
-            deps: ['moment']
+        "ical": {
+            export: "ICAL"
         },
-        'calendar': {
-            deps: ['EventDT', 'vue', 'ICalAnalyser', 'Datepicker', 'bootbox']
+        "moment-tz": {
+            deps: ["moment"]
         },
-        'calendar2': {
-            deps: ['moment', 'EventDT', 'vue', 'ICalAnalyser', 'Datepicker', 'bootbox']
+        "calendar": {
+            deps: ["EventDT", "vue", "ICalAnalyser", "Datepicker", "bootbox"]
         },
-        'Datepicker': {
-            deps: ['moment-tz']
+        "calendar2": {
+            deps: ["moment", "EventDT", "vue", "ICalAnalyser", "Datepicker", "bootbox"]
         },
-        'ICalAnalyser': {
-            deps: ['ical', 'moment-timezone']
+        "Datepicker": {
+            deps: ["moment-tz"]
         },
-        'moment-timezone': {
-//            exports: 'tz',
-            deps: ['moment']
+        "ICalAnalyser": {
+            deps: ["ical", "moment-timezone"]
         },
-        'EventDT': {
-            deps: ['moment'],
-            exports: 'EventDT'
+        "moment-timezone": {
+//            exports: "tz",
+            deps: ["moment"]
+        },
+        "EventDT": {
+            deps: ["moment"],
+            exports: "EventDT"
         }
     }
 });
 
-define('datepicker', ['jquery', 'bootstrap', 'bt-datepicker'], function ($) {
-    $.fn.datepicker.dates['fr'] = {
+define("datepicker", ["jquery", "bootstrap", "bt-datepicker"], function ($) {
+    $.fn.datepicker.dates["fr"] = {
         days: ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Diamanche"],
         daysShort: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
         daysMin: ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"],
@@ -197,9 +197,8 @@ define('datepicker', ['jquery', 'bootstrap', 'bt-datepicker'], function ($) {
     };
 });
 
-define('mm', ['moment-tz'], function (moment) {
-    console.log('Require MOMENT');
-    moment.locale('fr');
+define("mm", ["moment-tz"], function (moment) {
+    moment.locale("fr");
     return moment;
 });
 
@@ -213,7 +212,7 @@ function formatCurrency( amount ){
     value = amount.toFixed(decimal).toString();
 
     // split
-    split = value.split('.');
+    split = value.split(".");
     unit = split[0];
     fraction = split[1];
     formattedUnits = "";
@@ -231,11 +230,11 @@ function formatCurrency( amount ){
     return formattedUnits+decimalSeparator+fraction;
 }
 
-define('hbs', ['handlebars', 'mm'], function (Handlebars, moment) {
+define("hbs", ["handlebars", "mm"], function (Handlebars, moment) {
     // Mise en forme des dates
-    Handlebars.registerHelper('dateFormat', function (context, block) {
+    Handlebars.registerHelper("dateFormat", function (context, block) {
         if (moment) {
-            var f = block.hash.format || 'D MMMM YYYY';
+            var f = block.hash.format || "D MMMM YYYY";
             return moment(context).format(f);
         } else {
             return context;
@@ -243,26 +242,26 @@ define('hbs', ['handlebars', 'mm'], function (Handlebars, moment) {
     });
 
     // Mise en forme des dates (Null)
-    Handlebars.registerHelper('dateFormatNull', function (context, block) {
+    Handlebars.registerHelper("dateFormatNull", function (context, block) {
         if (moment) {
             var str;
             if( context && context.date ){
-                var f = block.hash.format || 'D MMMM YYYY';
-                str = '<time datetime="'+ context.date +'">' + moment(context.date).format(f) + '</time>';
+                var f = block.hash.format || "D MMMM YYYY";
+                str = "<time datetime=\""+ context.date +"\">" + moment(context.date).format(f) + "</time>";
             } else {
-                str = '<time class="date-missing">Pas de date</time>';
+                str = "<time class=\"date-missing\">Pas de date</time>";
             }
             return new Handlebars.SafeString(str);
         } else {
-            return 'Moment is missing';
+            return "Moment is missing";
         }
     });
 
-    Handlebars.registerHelper('past', function(context, options){
+    Handlebars.registerHelper("past", function(context, options){
 
         if(context.status == 1){
             if( !context.datePredicted )
-                return 'error';
+                return "error";
 
             if( context.datePredicted.date < new Date().toISOString() )
                 return "past";
@@ -270,11 +269,11 @@ define('hbs', ['handlebars', 'mm'], function (Handlebars, moment) {
         return "";
     });
 
-    Handlebars.registerHelper('currency', function (context, block) {
+    Handlebars.registerHelper("currency", function (context, block) {
         return formatCurrency(context);
     });
 
-    Handlebars.registerHelper('equal', function (v1, v2, options) {
+    Handlebars.registerHelper("equal", function (v1, v2, options) {
         if (v1 === v2) {
             return options.fn(this);
         }
@@ -282,7 +281,7 @@ define('hbs', ['handlebars', 'mm'], function (Handlebars, moment) {
     });
 
     // CSS en fonction des Rôles
-    Handlebars.registerHelper('cssRole', function (context) {
+    Handlebars.registerHelper("cssRole", function (context) {
         if (context.isLeader) {
             return "primary bordered";
         }
@@ -298,8 +297,8 @@ define('hbs', ['handlebars', 'mm'], function (Handlebars, moment) {
 
 
 (function () {
-    require(['jquery', 'bootstrap'], function () {
-        require(['oscar-auto'], function () {
+    require(["jquery", "bootstrap"], function () {
+        require(["oscar-auto"], function () {
             Initer.isReady();
             return {};
         });

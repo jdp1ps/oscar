@@ -1,0 +1,16 @@
+
+<div class="container"><div id="privileges">ICI</div>
+    <script>
+        require(['vue', 'vue-resource', 'gestionprivileges'], function(Vue, VueResource, GestionPrivileges){
+
+            Vue.use(VueResource);
+
+            new Vue({
+                el: '#privileges',
+                render(h){
+                    return h(GestionPrivileges.default, {props: { url: '<?= $this->url('administration/privileges') ?>' }})
+                }
+            });
+        });
+    </script>
+</div>

@@ -89,6 +89,20 @@ class AdministrationController extends AbstractOscarController implements UsePro
         );
     }
 
+    public function testconfigAction(){
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+        var_dump($this->getOscarConfigurationService()->getConfigArray()['oscar']);
+        die();
+    }
+
+    public function privileges2Action(){
+        $this->getOscarUserContextService()->check(Privileges::DROIT_ROLE_VISUALISATION);
+        if( $this->isAjax() ){
+
+        }
+        return [];
+    }
+
     public function oscarWorkerStatusAction(){
 
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
@@ -682,7 +696,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     }
 
                     return $this->ajaxResponse($out);
-
             }
         }
 

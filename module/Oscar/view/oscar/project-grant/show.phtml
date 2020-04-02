@@ -387,7 +387,9 @@
             <?php endif; ?>
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
                 <nav>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
                     <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
+                    <?php endif; ?>
                     <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a>
                 </nav>
             <?php endif; ?>

@@ -608,6 +608,22 @@
     "fullcode": "DEPENSE-SHOW"
   },
 
+  "DEPENSE-SYNC": {
+    "category_id": 9,
+    "spot": 7,
+    "code": "SYNC",
+    "libelle": "Peut forcer la synchronisation des dépenses",
+    "fullcode": "DEPENSE-SYNC"
+  },
+
+  "DEPENSE-DOWNLOAD": {
+    "category_id": 9,
+    "spot": 7,
+    "code": "DOWNLOAD",
+    "libelle": "Peut télécharger les dépenses (Excel/CSV)",
+    "fullcode": "DEPENSE-DOWNLOAD"
+  },
+
   "MAINTENANCE-SPENDTYPEGROUP_MANAGE": {
     "category_id": 6,
     "spot": 7,

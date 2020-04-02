@@ -544,6 +544,10 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     protected function getNearestType( $code, $original="" ){
         static $types;
         static $assoc;
+
+        // Fix : Pas de type chargé en base de donnée
+        if( $code === false ) return "0";
+
         if( $types === null )
             $types = $this->getSpentsTypes();
 
