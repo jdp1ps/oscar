@@ -113,7 +113,6 @@ class StrategyOscarUpload implements StrategyTypeInterface
                 }
             }
         }
-        die('fini');
         //return $this->datas;
     }
 
