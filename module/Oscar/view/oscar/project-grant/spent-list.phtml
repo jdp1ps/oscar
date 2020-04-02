@@ -22,7 +22,7 @@
         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_DOWNLOAD, $activity)): ?>
         <a class="btn btn-default" href="<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>?format=excel&mode=details">
             <i class="icon-file-excel"></i>
-            Télécharger les dépenses version détaillées (Excel)
+            Télécharger les dépenses détaillées (Excel)
         </a>
         <?php endif; ?>
     </nav>

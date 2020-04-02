@@ -9,6 +9,7 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Oscar\Utils\DateTimeUtils;
 
 /**
  * Class ActivityRepository
@@ -54,5 +55,43 @@ class ActivityRepository extends EntityRepository
             ;
         $result  = $qb->getQuery()->getResult();
         return $result;
+    }
+
+
+    /**
+     * Retourne la liste des activités à la période donnée.
+     *
+     * @param $periodeCodeStr
+     * @return mixed
+     */
+    public function getActivitiesAtPeriod($periodeCodeStr){
+        $periodInfos = DateTimeUtils::periodBounds($periodeCodeStr);
+        $query = $this->createQueryBuilder('a')
+            ->where('a.dateStart <= :start AND a.dateEnd >= :end')
+            ->setParameters([
+                'start' => $periodInfos['start'],
+                'end'=> $periodInfos['end'],
+            ]);
+        $activities = $query->getQuery()->getResult();
+        return $activities;
+    }
+
+    /**
+     * Retourne la liste des activités à la période donnée.
+     *
+     * @param $periodeCodeStr
+     * @return mixed
+     */
+    public function getActivitiesAtPeriodWithWorkPackage($periodeCodeStr){
+        $periodInfos = DateTimeUtils::periodBounds($periodeCodeStr);
+        $query = $this->createQueryBuilder('a')
+            ->where('a.dateStart <= :start AND a.dateEnd >= :end')
+            ->innerJoin('a.workPackages', 'w')
+            ->setParameters([
+                'start' => $periodInfos['start'],
+                'end'=> $periodInfos['end'],
+            ]);
+        $activities = $query->getQuery()->getResult();
+        return $activities;
     }
 }

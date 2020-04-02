@@ -86,7 +86,7 @@ class ConnectorPersonJSON implements ConnectorInterface
                 $repport->adderror($message . " a échoué : " . $e->getMessage());
             }
         }
-        $this->flush();
+        // $this->entityManager->flush();
         return $repport;
     }
 

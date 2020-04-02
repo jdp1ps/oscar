@@ -3,12 +3,14 @@
 namespace Oscar\Service;
 
 use Cocur\Slugify\Slugify;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
+use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Referent;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\TimesheetCommentPeriod;
@@ -2849,11 +2851,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
 
         if( is_string($activityOrKey) ){
-            $this->getLoggerService()->debug("Récupération pour le hors-lot $activityOrKey");
             $query->andWhere('c.object = :code');
             $parameters['code'] = $activityOrKey;
         } else {
-            $this->getLoggerService()->debug("Récupération pour l'activité $activityOrKey");
             $query->andWhere('c.object_id = :id');
             $parameters['id'] = $activityOrKey;
         }
@@ -3374,6 +3374,33 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     public function getDeclarerDetails(Person $person)
     {
         throw new OscarException("PAS FAIT");
+    }
+
+    public function getDeclarersAtPeriod($periodCodeStr){
+        /** @var ProjectGrantRepository $activityRepository */
+        $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
+
+        $declarers = [];
+        try {
+            $activitiesAtPeriod = $activityRepository->getActivitiesAtPeriodWithWorkPackage($periodCodeStr);
+
+            /** @var Activity $activity */
+            foreach ($activitiesAtPeriod as $activity) {
+                foreach ($activity->getDeclarers() as $declarer) {
+                    $declarer_id = $declarer->getId();
+                    if( !array_key_exists($declarer_id, $declarers) ){
+                        $declarers[$declarer_id] = $declarer->toArray();
+                        $declarers[$declarer_id]['projects'] = [];
+                    }
+                    if( !in_array($activity->getAcronym(), $declarers[$declarer_id]['projects']) ){
+                        $declarers[$declarer_id]['projects'][] = $activity->getAcronym();
+                    }
+                }
+            }
+        } catch (\Exception $e){
+            throw new OscarException("Impossible de charger les déclarants pour cette période : " . $e->getMessage());
+        }
+        return $declarers;
     }
 
 
@@ -4567,5 +4594,110 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'person' => $person,
             ]);
         return $query->getQuery()->getResult();
+    }
+
+
+    /**
+     * Evalue si la personne est déclarant.
+     *
+     * @param $idDeclarant
+     * @param $periodStr
+     */
+    public function personIsDeclarantPeriod($idDeclarant, $periodStr) {
+        try {
+            /** @var Person $person */
+            $person = $this->getPersonService()->getPerson($idDeclarant);
+        } catch (NoResultException $e) {
+            throw new OscarException("La personnes n'existe pas");
+        } catch (\Exception $e) {
+            throw new OscarException("Une erreur est survenue lors du chargement de la personne");
+        }
+
+        /** @var WorkPackagePerson $personWorkPackage */
+        foreach ($person->getWorkPackages() as $personWorkPackage) {
+            if( DateTimeUtils::periodInside($periodStr, $personWorkPackage->getWorkPackage()->getDateStart(), $personWorkPackage->getWorkPackage()->getDateEnd())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    public function personDeclarationState($declarantId, $periodStr) {
+        $person = $this->getPersonService()->getPerson($declarantId);
+        $datas = $this->getTimesheetDatasPersonPeriod($person, $periodStr);
+
+        $output = [
+            'datas' => $datas,
+            'person'        => (string)$person,
+            'person_id'     => $person->getId(),
+            'period'        => $periodStr,
+            'state'         => 'UNDEFINED',
+            'hasConflict'   => $datas['hasConflict'],
+            'periodFutur'   => $datas['periodFutur'],
+            'periodFinished'   => $datas['periodFinished'],
+            'periodCurrent'   => $datas['periodCurrent'],
+            'submitable'   => $datas['submitable'],
+            'editable'   => $datas['editable'],
+            'dayNbr'   => $datas['dayNbr'],
+            'total'   => $datas['total'],
+            'periodsValidations'   => count($datas['periodsValidations']),
+        ];
+
+        $waitingTotal = 0.0;
+        foreach ($datas['days'] as $day ){
+            $waitingTotal += $day['dayLength'];
+        }
+        $output['waitingTotal'] = $waitingTotal;
+
+        $validations = [];
+        foreach ($datas['periodsValidations'] as $validation) {
+            $validationStatus = $validation['status'];
+            if( !in_array($validationStatus, $validations) )
+                $validations[] = $validationStatus;
+        }
+        $output['validations'] = $validations;
+
+        if( count($datas['workpackages']) == 0 ){
+            throw new OscarException("$person n'est pas identifiée sur des lots de travail pour la période $periodStr");
+        }
+
+        if( $datas['periodFutur'] == true ){
+            $output['state'] =  "PERIOD_FUTUR";
+            $output['stateText'] =  "Période à venir";
+            return $output;
+        }
+
+        if( $datas['periodFinished'] == true ){
+
+            if( $datas['hasConflict'] == true ){
+                $output['state'] =  "PERIOD_CONFLICT";
+                $output['stateText'] =  "Conflit en cours de résolution";
+                return $output;
+            }
+
+            if( count($datas['periodsValidations']) == 0 ){
+                $output['state'] =  "PERIOD_NODECLARATION";
+                $output['stateText'] =  "Aucune déclaration envoyée";
+                return $output;
+            } else {
+                if( count($output['validations']) == 1 && $output['validations'][0] == 'valid' ){
+                    $output['state'] =  "PERIOD_VALID";
+                    $output['stateText'] =  "Validée";
+                } else {
+                    $output['state'] =  "PERIOD_DECLARATION_TODO";
+                    $output['stateText'] =  "En attente de validation";
+                }
+                return $output;
+            }
+
+        } else {
+            $output['state'] =  "PERIOD_UNFINISHED";
+            $output['stateText'] =  "La période n'est pas terminée";
+            return $output;
+        }
+
+        return $datas;
     }
 }

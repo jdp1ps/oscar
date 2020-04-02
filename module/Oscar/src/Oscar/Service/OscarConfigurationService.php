@@ -24,7 +24,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     const allow_numerotation_custom     = 'allow_numerotation_custom';
     const organization_leader_role      = 'organization_leader_role';
-    const spents_account_filter          = 'spents_account_filter';
+    const spents_account_filter         = 'spents_account_filter';
+    const activity_request_limit        = 'activity_request_limit';
 
     const theme = 'theme';
 
@@ -211,5 +212,13 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         $extract = new DataStringArray();
         $data = $extract->extract($stringArray);
         $this->saveEditableConfKey(self::spents_account_filter, $data);
+    }
+
+    public function getActivityRequestLimit(){
+        return $this->getEditableConfKey(self::activity_request_limit, 5);
+    }
+
+    public function setActivityRequestLimit( int $value ){
+        $this->saveEditableConfKey(self::activity_request_limit, $value);
     }
 }

@@ -38,7 +38,6 @@ class DataStringArrayTest extends TestCase
         $input = " ";
         $converter = new DataStringArray();
         $output = $converter->extract($input);
-        var_dump($output);
         $this->assertIsArray($output);
         $this->assertEquals(0, count($output));
     }

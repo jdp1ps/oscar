@@ -137,6 +137,10 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
     error_log($msg);
 
     if($codeStr == 'ERROR'){
+        $errorDisplayed = "Une erreur est survenue...";
+        if( DEBUG_OSCAR ){
+            $errorDisplayed = $msg;
+        }
         if( array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) ){
             echo $msg;
         } else {
@@ -146,7 +150,8 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
                     <h1>
                         Erreur d'execution PHP
                     </h1>
-                    <pre><?= $msg ?></pre>
+
+                    <pre><?= $errorDisplayed ?></pre>
                     <p>
                         <small>Vous pouvez transmettre ce message à l'administateur Oscar pour l'aider à résoudre le
                             problème.

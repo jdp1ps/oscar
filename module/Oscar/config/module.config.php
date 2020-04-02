@@ -1,14 +1,5 @@
 <?php
-
-use Monolog\Handler\StdoutHandler;
-use Oscar\Controller\PersonController;
 use Oscar\Service\AccessResolverService;
-use Oscar\Service\LoggerStdoutColor;
-use Oscar\Service\OrganizationService;
-use Oscar\Service\PersonnelService;
-use Oscar\Service\PersonService;
-use Oscar\Service\ProjectService;
-use Oscar\Service\SearchService;
 use Oscar\View\Helpers\DateRenderer;
 use Oscar\View\Helpers\UnicaenDoctrinePaginatorHelper;
 
@@ -222,7 +213,7 @@ return array(
                 // PERSON
                 ///////////////////////////////////////////////////////////////
                 [ 'controller' =>   'Person',
-                    'action' => ['personnel', 'access', 'delete', 'index', 'show', 'search'],
+                    'action' => ['personnel', 'access', 'delete', 'index', 'show', 'search', 'declarers'],
                     'roles' => ['user']
                 ],
                 [ 'controller' =>   'Person',
@@ -831,7 +822,6 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'LogActivity' => \Oscar\Controller\ActivityLogController::class,
-            'Sync' => CentaureSync\Controller\SyncController::class,
         ),
         'factories' => [
             'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,

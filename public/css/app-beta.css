@@ -6326,6 +6326,21 @@ body::-webkit-scrollbar-thumb {
   height: 28px;
   position: relative; }
 
+.cartouche.PERIOD_UNFINISHED, .cartouche.PERIOD_NODECLARATION {
+  background: #999; }
+  .cartouche.PERIOD_UNFINISHED .addon, .cartouche.PERIOD_NODECLARATION .addon {
+    background: #d9d9d9; }
+
+.cartouche.PERIOD_CONFLICT {
+  background: #DD423E; }
+  .cartouche.PERIOD_CONFLICT .addon {
+    background: #f0acaa; }
+
+.cartouche.PERIOD_VALID {
+  background: #499D1F; }
+  .cartouche.PERIOD_VALID .addon {
+    background: #88df5d; }
+
 .activity-span .project-link {
   font-weight: 100;
   font-size: .75em; }

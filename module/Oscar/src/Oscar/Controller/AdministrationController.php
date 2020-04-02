@@ -177,6 +177,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->getOscarConfigurationService()->setSpentAccountFilter($value);
                     return $this->redirect()->toRoute('administration/parameters');
 
+                case OscarConfigurationService::activity_request_limit:
+                    $value = intval($this->params()->fromPost('parameter_value'));
+                    $this->getOscarConfigurationService()->setActivityRequestLimit($value);
+                    return $this->redirect()->toRoute('administration/parameters');
+
 
                 default:
                     return $this->getResponseBadRequest("Paramètres non-reconnue");
@@ -185,6 +190,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         return [
             OscarConfigurationService::spents_account_filter => implode(', ', $this->getOscarConfigurationService()->getSpentAccountFilter()),
+            OscarConfigurationService::activity_request_limit => $this->getOscarConfigurationService()->getActivityRequestLimit(),
             'timesheet_preview' => $this->getOscarConfigurationService()->getTimesheetPreview(),
             'timesheet_excel' => $this->getOscarConfigurationService()->getTimesheetExcel(),
             'allow_numerotation_custom' => $this->getOscarConfigurationService()->getNumerotationEditable(),

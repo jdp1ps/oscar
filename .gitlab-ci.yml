@@ -1,4 +1,4 @@
-image: unicaen-dev-php7.3-apache
+image: localhost:5000/unicaen-dev-php7.3-apache
 before_script:
   - export http_proxy=http://10.14.128.99:3128
   - export https_proxy=http://10.14.128.99:3128

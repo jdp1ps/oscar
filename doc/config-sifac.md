@@ -2,6 +2,8 @@
 
 Oscar permet de synchroniser depuis le SI(Système d'Information) **les dépenses** effectuées dans le cadre des activités de recherche. Cette synchronisation s'appuie sur le journal des pièces de SIFAC.
 
+> Vous pouvez gérer les accès à cette fonctionnalités depuis la gestion des privilèges.
+
 ## SIFAC
 
 Pour activer l'affichage des dépenses, vous devez accorder le privilèges **Voir les dépenses**, configurer les masses et le plan comptable par défaut.
@@ -27,6 +29,7 @@ return array(
     ]
 );
 ```
+
 
 ### Plan comptable initial
 
@@ -59,6 +62,7 @@ Ce plan sera utilisé par la suite pour renseigner les dépenses prévisionnelle
 Le premier connecteur disponible est une connection directe à la base de donnée.
 
 SIFAC utilise une base de donnée ORACLE, il faudra donc installer les drivers OCI8 pour PHP pour permettre la connection à la base de données SIFAC. [Installer le drivers OCI8 pour PHP7](./install-oracle-pp.md).
+
 
 ### Configuration de l'accès à la base de données SIFAC
 

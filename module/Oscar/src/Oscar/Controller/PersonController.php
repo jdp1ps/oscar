@@ -51,6 +51,7 @@ use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Traits\UseTimesheetService;
 use Oscar\Traits\UseTimesheetServiceTrait;
+use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
@@ -625,6 +626,57 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         } else {
             return $this->getResponseNotFound('Personne introuvable');
         }
+    }
+
+    /**
+     * Retourne un tableau de données avec la liste des déclarants pour la période.
+     *
+     * @return array|Response|JsonModel
+     * @throws OscarException
+     */
+    public function declarersAction(){
+
+        $format = $this->params()->fromQuery('f', null);
+        $period = $this->params()->fromQuery('period', date('Y-m'));
+
+        if( $this->isAjax() || $format == 'json'){
+            $method = $this->getHttpXMethod();
+            switch ($method) {
+                case "GET":
+                    $declarerId = (int)$this->params()->fromQuery('declarer_id', 0);
+                    if( $declarerId ){
+                        // Détails pour le déclarant
+                        return $this->getResponseNotImplemented("Fonctionnalité à venir");
+                    }
+                    else {
+                        $output = $this->baseJsonResponse();
+                        $period = DateTimeUtils::extractPeriodDatasFromString($this->params()->fromQuery('period', date('Y-m')));
+                        $output['period'] = $period;
+                        $declarers = [];
+                        try {
+                            foreach( $this->getTimesheetService()->getDeclarersAtPeriod($period['periodCode']) as $declarer ) {
+                                $entry = $declarer;
+                                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW) ){
+                                    $entry['url_person'] = $this->url()->fromRoute('person/show', ['id' => $declarer['id']]);
+                                }
+                                $entry['url_details'] = $this->url()->fromRoute('timesheet/synthesis') . '?format=json&person_id=' . $declarer['id'] . '&period=' . $period['periodCode'];
+                                $entry['details'] = $this->getTimesheetService()->personDeclarationState($declarer['id'], $period['periodCode']);
+                                $declarers[] = $entry;
+                            }
+                            $output['declarers'] = $declarers;
+                            return $this->jsonOutput($output);
+                        } catch (\Exception $e) {
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
+                    }
+
+                default:
+                    return $this->getResponseNotFound();
+            }
+        }
+        return [
+            'period' => $period
+        ];
     }
 
     /**

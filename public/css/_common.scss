@@ -1370,6 +1370,27 @@ $twRadius: 4px;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// CARTOUCHE pour l'état des déclaration
+.cartouche.PERIOD_UNFINISHED, .cartouche.PERIOD_NODECLARATION {
+  background: $colorGreyMedium;
+  .addon {
+    background: lighten($colorGreyMedium,25%);
+  }
+}
+.cartouche.PERIOD_CONFLICT {
+  background: $colorRed;
+  .addon {
+    background: lighten($colorRed,25%);
+  }
+}
+.cartouche.PERIOD_VALID {
+  background: $colorGreen;
+  .addon {
+    background: lighten($colorGreen,25%);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // X. Liens PROJET/ACTIVITÉ
 ////////////////////////////////////////////////////////////////////////////////
 .activity-span {
