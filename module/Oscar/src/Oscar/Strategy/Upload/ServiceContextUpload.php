@@ -71,7 +71,7 @@ class ServiceContextUpload
         $isPost = false;
         if ($this->docId) {
             $doc = new ContractDocument();
-            if ($doc = $this->getEntityManager()->getRepository(ContractDocument::class)->find($this->docId)) {
+            if ($doc = $this->documentService->getDocument($this->docId)->getQuery()->getSingleResult()) {
                 $this->docReplaced = $doc->getFileName();
             }
         }
