@@ -33,37 +33,37 @@ class StrategyOscarUpload implements StrategyTypeInterface
 
     public function uploadDocument(): void
     {
-        //Echo "je suis dans la stratégie GED OSCAR ! method uploadDocument";
-        $this->datas = [
-            "error" => null
-        ];
-        $this->datas ["activityId"] = null;
+
         // Traitement des données envoyées utilisation System file Oscar interne à Oscar donc pas de Ged générique ici
         $this->datas = $this->document->getRequest()->getPost()->toArray();
-        $this->datas["error"] = null;
+        $this->datas[self::ERROR_FILE] = null;
         $file = $this->document->getRequest()->getFiles(self::NAME_INPUT_FILE);
-        //var_dump($file);
+
+        // Permet de détecter le dépassement des données postées (post_max_size)
+        $lastError = error_get_last();
+        if( $lastError ){
+            $this->datas[self::ERROR_FILE] = array_key_exists('message', $lastError) ? $lastError['message'] : "Erreur inattendue";
+            return;
+        }
         // OK file récup
         if( !$file ){
-            //die("J'ai une erreur pas de fichier !");
-            $lastError = error_get_last();
-            $error = "Erreur inconnue";
+            $error = "Beaucoup de chose restent inexpliquées, cette erreur en fait partie...";
             if( is_array($lastError) && array_key_exists('message', $lastError) ){
                 $error = $lastError['message'];
             }
-            throw new OscarException(sprintf(_('Fichier incorrect : %s'), $error));
+            $this->datas[self::ERROR_FILE] = sprintf(_('Erreur : %s'), $error);
         }
 
         if( $file[self::ERROR_FILE] != 0 ){
             //var_dump($datas); // Errors dans le fichier uploadé genre taille trop grande etc...
             $errors = [
-                UPLOAD_ERR_INI_SIZE => 'Le fichier dépasse la taille autorisée par le serveur',
+                UPLOAD_ERR_INI_SIZE => 'Le fichier dépasse la taille autorisée par le serveur ('.ini_get('upload_max_filesize').')',
                 UPLOAD_ERR_FORM_SIZE => 'Le fichier dépasse la taille autorisée par le formulaire',
                 UPLOAD_ERR_PARTIAL => "Le fichier n'a été que partiellement téléchargé.",
-                UPLOAD_ERR_NO_FILE => "Aucun fichier n'a été téléchargé.",
+                UPLOAD_ERR_NO_FILE => "Aucun fichier n'a été téléversé (vérifier que vous avez bien selectionné un fichier).",
                 UPLOAD_ERR_NO_TMP_DIR => "Le dossier temporaire est manquant.",
                 UPLOAD_ERR_CANT_WRITE => "Échec de l'écriture du fichier sur le disque.",
-                UPLOAD_ERR_EXTENSION => "Envoi interrompu pour une extension PHP, laquelle ? On n'sait pas trop pour le coup.",
+                UPLOAD_ERR_EXTENSION => "Envoi interrompu par une extension PHP, laquelle ? On n'sait pas trop pour le coup.",
             ];
             $this->datas[self::ERROR_FILE] = $errors[$file[self::ERROR_FILE]];
         } else {
