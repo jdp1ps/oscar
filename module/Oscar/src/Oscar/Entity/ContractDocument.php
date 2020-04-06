@@ -230,6 +230,6 @@ class ContractDocument extends AbstractVersionnedDocument
     ////////////////////////////////////////////////////////////////////////////
     function __toString()
     {
-        return $this->getFileName();
+        return "" . ($this->getFileName()?:"sans-nom");
     }
 }

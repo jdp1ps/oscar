@@ -127,7 +127,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     public function deleteAction()
     {
-
         $em = $this->getEntityManager()->getRepository(ContractDocument::class);
 
         /** @var ContractDocument $document */
@@ -157,6 +156,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         foreach( $documents as $doc ){
             $this->getEntityManager()->remove($doc);
         }
+        $this->getEntityManager()->flush();
 
         $this->getActivityLogService()->addUserInfo(
             sprintf("a supprimé le document '%s' dans l'activité %s.", $document, $document->getGrant()->log()),
@@ -164,7 +164,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             $activity->getId()
         );
 
-        $this->getEntityManager()->flush();
         $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
     }
 
