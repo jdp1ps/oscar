@@ -22,7 +22,6 @@ class StrategyOscarUpload implements StrategyTypeInterface
     private $etat;
 
     private $document;
-    //private $replaceName;
     private $datas;
 
     public function __construct(TypeDocumentInterface $document)
@@ -76,7 +75,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
                     $fileMime = $file[self::TYPE_FILE];
                 }
                 $fileExtension = $this->document->getDocumentService()->checkMime($fileMime);
-                $fileName = $this->getDocument()->getDocReplaced() ? $this->replaceName : $file[self::NAME_FILE];
+                $fileName = $this->getDocument()->getDocReplaced() ? $this->getDocument()->getDocReplaced(): $file[self::NAME_FILE];
                 $fileSize = $file[self::SIZE_FILE];
 
                 if(false === $fileExtension){

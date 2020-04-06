@@ -241,10 +241,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $notificationService,
                 $activityLogService
             );
+
             $treatementUpload = $serviceUpload->treatementUpload();
-
-
-
             // IF TRUE -> POSTS
             if(true == $treatementUpload)
             {
