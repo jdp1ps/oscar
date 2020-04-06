@@ -29,6 +29,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
+use Oscar\Entity\SpentLine;
 use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
@@ -1518,7 +1519,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         if( $action && $action == 'update' ) {
             $this->getOscarUserContextService()->check(Privileges::DEPENSE_SYNC, $activity);
-            // TODO Tester le droit d'accès à la mise à jour des privilèges
             try {
                 $msg = $this->getSpentService()->syncSpentsByEOTP($activity->getCodeEOTP());
                 $spents = $this->getSpentService()->getSpentsByPFI($activity->getCodeEOTP());

@@ -224,6 +224,22 @@ class Activity implements ResourceInterface
     private $amount = 0;
 
     /**
+     * Total des dépenses
+     *
+     * @var float
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $totalSpent = 0.0;
+
+    /**
+     * Datetime de synchronisation des dépenses
+     *
+     * @var datetime
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $dateTotalSpent = null;
+
+    /**
      * Date de début de la subvension.
      *
      * @var datetime
@@ -379,6 +395,39 @@ class Activity implements ResourceInterface
     public function isActive()
     {
         return $this->getStatus() == self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return float
+     */
+    public function getTotalSpent()
+    {
+        return $this->totalSpent;
+    }
+
+    /**
+     * @param float $totalSpent
+     */
+    public function setTotalSpent($totalSpent)
+    {
+        $this->totalSpent = $totalSpent;
+    }
+
+    /**
+     * @return datetime
+     */
+    public function getDateTotalSpent()
+    {
+        return $this->dateTotalSpent;
+    }
+
+    /**
+     * @param \DateTime|null $dateTotalSpent
+     */
+    public function setDateTotalSpent($dateTotalSpent)
+    {
+        $this->dateTotalSpent = $dateTotalSpent;
+        return $this;
     }
 
     /**

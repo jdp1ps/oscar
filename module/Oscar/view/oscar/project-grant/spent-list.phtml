@@ -2,6 +2,10 @@
 <section class="container-fluid">
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
     <nav>
+        <a class="btn btn-default" href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
+            <i class="icon-cube"></i>
+            Revenir sur la fiche <strong><?= $activity ?></strong>
+        </a>
         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $activity)): ?>
         <form action="<?= $this->url('contract/list-spent', ['id' => $activity->getId()]) ?>" method="post" class="form-inline">
             <input type="hidden" name="action" value="update" />

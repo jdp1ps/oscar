@@ -532,6 +532,29 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         if( !$eotp ){
             throw new OscarException("Pas d'EOTP");
         }
+
+        // TODO (optimiser ça avec une requête native propre)
+        $activities = $this->getEntityManager()->getRepository(Activity::class)->findBy([
+            'codeEOTP' => $eotp
+        ]);
+
+        if( count($activities)>0 ){
+            $spents = $this->getSpentsByPFI($eotp);
+            $total = 0.0;
+            /** @var SpentLine $spent */
+            foreach ($spents as $spent) {
+                $total += (floatval($spent->getMontant()));
+            }
+
+            /** @var Activity $activity */
+            foreach ($activities as $activity) {
+                $activity->setTotalSpent($total);
+                $activity->setDateTotalSpent(new \DateTime());
+            }
+
+            $this->getEntityManager()->flush($activities);
+        }
+
         return $this->getConnector()->sync($eotp);
     }
 

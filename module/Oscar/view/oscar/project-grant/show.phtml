@@ -386,14 +386,8 @@
 
 
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
-                <div id="payments"></div>
 
-                <nav>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
-                        <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
-                    <?php endif; ?>
-                    <!-- <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a> -->
-                </nav>
+                <div id="payments"></div>
 
                 <div>
                     
@@ -435,6 +429,31 @@
                         }).$mount('#payments')
                     });
                 </script>
+            <?php endif; ?>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
+            <section>
+            <h2><i class="icon-book"></i> Dépenses</h2>
+            <?php if( $entity->getTotalSpent() ): ?>
+            <h1>
+                <strong><?= $entity->getTotalSpent() ?></strong> €<br>
+            </h1>
+                <small>Update : <strong><?= $this->moment($entity->getDateTotalSpent())->full() ?></strong></small>
+            <?php endif; ?>
+            <nav>
+                <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
+                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $entity)): ?>
+                    <form action="<?= $this->url('contract/list-spent', ['id' => $entity->getId()]) ?>" method="post" class="form-inline">
+                        <input type="hidden" name="action" value="update" />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="icon-file-excel"></i>
+                            Mettre à jour les données depuis SIFAC
+                        </button>
+                    </form>
+                <?php endif; ?>
+                <!-- <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a> -->
+            </nav>
+            </section>
             <?php endif; ?>
         </div>
     </div>
