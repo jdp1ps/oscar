@@ -80,20 +80,19 @@ La version **Macclane** propose en *experimental* la configuration SIFAC pour ch
 
 Vous pouvez commencer à tester cette fonctionnalité [Configurer l'accès à SIFAC](../config-sifac.md) 
 
+### Docker  (déploiment rapide)
 
-
- 
-## En cours
-
- - *Dockerisation* Des travaux sont en cours afin de rendre possible d'utiliser **docker** pour le déploiement de Oscar. Docker permet de simplifier grandement (et d'automatiser) le déploiement des applications et de garantir leurs compatibilités sous différents systèmes..
- 
- - **Dépense** (expérimental) Les écrans et la connexion SIFAC sont toujours en cours, les accès aux écrans de synchronisation des dépenses basé sur le journal des pièces sont disponibles (Avec les privilèges associés). Propose pour le moment des données brute
- 
- - **Écran de budget** (UI uniquement) Sera à préciser quand la partie dépense sera plus avancée
- 
- - **Plan comptable** Écran de gestion du plan comptable à utiliser dans l'écran du budget
+Dans la perspective de démo / test rapide (Version préprod par exemple). Oscar est disponible en version DOCKER. **Ce système sera amélioré pour permettre le déploiment en production**.
  
 ## Correctifs
 
  - Augmentation des résultats des recherches pour les organisations
  - Augmentation des résultats des recherches pour les personnes
+ 
+## En cours
+
+ - **Dépense** (expérimental) Les écrans et la connexion SIFAC sont toujours en cours, les accès aux écrans de synchronisation des dépenses basé sur le journal des pièces sont disponibles (Avec les privilèges associés). Propose pour le moment des données brute
+ 
+ - **Écran de budget** (UI uniquement) Sera à préciser quand la partie dépense sera plus avancée
+ 
+ - **Plan comptable** Écran de gestion du plan comptable à utiliser dans l'écran du budget
