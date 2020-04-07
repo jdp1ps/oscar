@@ -23,31 +23,14 @@ class AdministrativeDocumentController extends AbstractOscarController implement
 
     use UseServiceContainerTrait;
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private $versionnedDocumentService;
 
-
-
-
-
-
     /**
-     * Retourne l'emplacement où sont stoqués les documents depuis le fichier
-     * de configuration local.php
-     *
-     * @return mixed
+     * @return string
      */
     protected function getDropLocation(){
-        static $publicdoclocation;
-        if( $publicdoclocation == null ){
-            $conf = $this->getOscarConfigurationService()->getConfiguration('paths.document_admin_oscar');
-            if( !file_exists($conf) || !is_writable($conf) ){
-                throw new OscarException("L'emplacement des documents n'est pas un dossier accessible en écriture");
-            }
-            $publicdoclocation = $conf.'/';
-        }
-        return $publicdoclocation;
+        return $this->getOscarConfigurationService()->getDocumentPublicPath();
     }
 
     /**
@@ -156,7 +139,8 @@ class AdministrativeDocumentController extends AbstractOscarController implement
                 if ($doc = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->find($docId)) {
                     $docReplaced = $doc->getFileName();
                     $section = $doc->getSection();
-                    $defaultSection = $section->getId();
+                    if( $section )
+                        $defaultSection = $section->getId();
                 }
             }
             $documentService = $this->getVersionnedDocumentService();
