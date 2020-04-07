@@ -269,6 +269,24 @@
 
             if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity) ): ?>
                 <section id="documents" class="has-btn">
+                    <h2>DOC 2</h2>
+                    <div id="docv2"></div>
+                    <script>
+                        requirejs(['vue', 'vue-resource', 'moment', 'documentsactivity'], function(Vue, VueResource, moment, DocumentsActivity){
+                            console.log("NEW DOC", Vue, VueResource, DocumentsActivity);
+                            new Vue({
+                                el: "#docv2",
+                                render(h) {
+                                    return h(DocumentsActivity.default, {
+                                        props: {
+                                            url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>',
+                                            moment: moment
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    </script>
                     <h2><i class="icon-book"></i> Documents</h2>
 
                     <?php if( $manage ): ?>

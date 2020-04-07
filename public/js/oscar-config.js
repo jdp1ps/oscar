@@ -96,7 +96,8 @@ requirejs.config({
         "EntityWithRole": "oscar/dist/EntityWithRole",
         "APIAccess": "oscar/dist/APIAccess",
         "SpentLinePFI": "oscar/dist/SpentLinePFI",
-        "gestionprivileges": "oscar/dist/GestionPrivileges"
+        "gestionprivileges": "oscar/dist/GestionPrivileges",
+        "documentsactivity": "oscar/dist/DocumentsActivity"
     },
     shim: {
         "bootstrap": {
