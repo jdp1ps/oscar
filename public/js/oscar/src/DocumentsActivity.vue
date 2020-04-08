@@ -1,63 +1,93 @@
 <template>
-    <section style="background: red">
-        <h1>DOCUMENT version 2.0</h1>
-        <p>TOTO TATA</p>
+    <section>
+        <div>
+            <div class="oscar-sorter">
+                <i class=" icon-sort"></i>
+                Tier les résultats par :
+                <a @click.prevent="order('dateUpload')" href="#" :class="cssSort('dateUpload')" class="oscar-sorter-item">
+                    Date d'upload
+                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
+                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
+                </a>
+                <a @click.prevent="order('fileName')" href="#" :class="cssSort('fileName')" class="oscar-sorter-item">
+                    Nom du fichier
+                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
+                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
+                </a>
+                <a @click.prevent="order('categoryText')" href="#" :class="cssSort('categoryText')" class="oscar-sorter-item">
+                    Type de document
+                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
+                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
+                </a>
+            </div>
 
-        <!--<transition name="fade">-->
-            <!--<div class="overlay" v-if="formData">-->
-                <!--UPLOAD-->
-            <!--</div>-->
-        <!--</transition>-->
+        </div>
 
-        <!--<transition name="fade">-->
-            <!--<div class="overlay" v-if="error">-->
-                <!--<div class="alert alert-danger">-->
-                    <!--<h3>Erreur-->
-                        <!--<a href="#" @click.prevent="error =null" class="float-right">-->
-                            <!--<i class="icon-cancel-outline"></i>-->
-                        <!--</a>-->
-                    <!--</h3>-->
-                    <!--<p>{{ error }}</p>-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</transition>-->
 
-        <!--<transition name="fade">-->
-            <!--<div class="overlay" v-if="deleteData">-->
-                <!--<div class="alert alert-danger">-->
-                    <!--<h3>Supprimer ? ?</h3>-->
-                    <!--&lt;!&ndash;-->
-                    <!--<nav>-->
-                        <!--<button type="reset" class="btn btn-danger" @click.prevent="deleteData = null">-->
-                            <!--<i class="icon-cancel-outline"></i>-->
-                            <!--Annuler-->
-                        <!--</button>-->
-                        <!--<button type="submit" class="btn btn-success" @click.prevent="performDelete">-->
-                            <!--<i class="icon-ok-circled"></i>-->
-                            <!--Confirmer-->
-                        <!--</button>-->
-                    <!--</nav>-->
-                    <!--&ndash;&gt;-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</transition>-->
+        <article class="card xs" v-for="document in documentsPacked">
+            <div class="card-title">
+                <i class="picto icon-doc" :class="'doc' + document.extension"></i>
 
-        <!--<article v-for="d in documents" class="card">-->
-            <!--<h3 class="card-title">-->
-                <!--<span>-->
-                    <!--[{{d.id}}]-->
-                    <!--{{ d.label }}-->
-                <!--</span>-->
-            <!--</h3>-->
-            <!--<div class="card-content">-->
-                <!--content-->
-            <!--</div>-->
-        <!--</article>-->
-        <!--<hr>-->
-        <!--<button type="button" class="btn btn-primary" @click.prevent="handlerNew">-->
-            <!--<i class="icon-plus-circled"></i>-->
-            <!--Nouveau document-->
-        <!--</button>-->
+                <template v-if="document.editmode">
+                    <select @change="changeTypeDocument(document, $event)" @blur="document.editmode = false">
+                        <option :value="key" v-for="(documentType, key) in documentTypes" :selected="document.categoryText == documentType">{{ documentType }}</option>
+                    </select>
+                </template>
+                <template v-else>
+                    <small class="text-light" @dblclick="document.editmode = true">{{ document.categoryText }} ~ </small>
+                </template>
+
+
+                <strong>{{document.fileName}}</strong>
+                <small class="text-light" :title="document.fileSize + ' octet(s)'">&nbsp;({{document.fileSize | filesize}})</small>
+            </div>
+            <p>
+                {{ document.information }}
+            </p>
+            <div class="card-content">
+                <p class="text-highlight">
+                    Fichier <strong>{{ document.extension}}</strong>
+                    version {{ document.version }},
+                    téléversé le <time>{{ document.dateUpload | dateFull }}</time>
+                    par <strong>{{ document.uploader.displayname }}</strong>
+                </p>
+                <div class="exploder" v-if="document.previous.length" @click="document.explode = !document.explode">
+                    Versions précédentes <i class="icon-angle-down" v-show="!document.explode"></i>
+                    <i class="icon-angle-up" v-show="document.explode"></i>
+                </div>
+                <div v-if="document.previous.length" v-show="document.explode">
+                    <article v-for="sub in document.previous" class="subdoc text-highlight">
+                        <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
+
+                        <strong>{{ sub.fileName }}</strong>
+                        version <em>{{ sub.version }} </em>,
+                        téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>,
+                        par <strong>{{ sub.uploader.displayname }}</strong>
+
+                        <a :href="sub.urlDownload">
+                            <i class="icon-download-outline"></i>
+                            Télécharger cette version
+                        </a>
+                    </article>
+                </div>
+                <nav class="text-right show-over">
+                    <a class="btn btn-default btn-xs" :href="document.urlDownload">
+                        <i class="icon-download-outline"></i>
+                        Télécharger le fichier
+                    </a>
+
+                    <a class="btn btn-default btn-xs" :href="document.urlReupload">
+                        <i class="icon-download-outline"></i>
+                        Nouvelle version
+                    </a>
+
+                    <a class="btn btn-default btn-xs" data-confirm="Êtes-vous sûr de vouloir supprimer ce document ?" :data-href="document.urlDelete">
+                        <i class="icon-trash"></i>
+                        supprimer le fichier
+                    </a>
+                </nav>
+            </div>
+        </article>
     </section>
 </template>
 <script>
@@ -66,109 +96,103 @@
 
     export default {
         props: {
-            disc: {
-                default: []
-            },
-            url: {
-                default: ""
-            }
+            url: { required: true },
+            documentTypes: { required: true },
+            urlDocumentType: { required: true }
         },
+
         data(){
             return {
                 formData: null,
                 error: null,
                 deleteData: null,
-                documents: null
+                documents: [],
+                loading: true,
+                sortField: 'dateUpload',
+                sortDirection: -1,
+                editable: true
             }
         },
 
         computed:{
+            /**
+             * Retourne les documents triés.
+             * @returns {Array}
+             */
             documentsPacked(){
-                return this.documents;
+                var out = this.documents.sort( function(a,b) {
+                    if( a[this.sortField] < b[this.sortField] )
+                        return -1 * this.sortDirection;
+                    if( a[this.sortField] > b[this.sortField] )
+                        return 1 * this.sortDirection;
+                    return 0;
+                }.bind(this));
+                return out;
             }
         },
 
         methods:{
-//            handlerSubmit(){
-//                let data = new FormData(), send;
-//                data.append('label', this.formData.label);
-//                if( this.formData.id ){
-//                    data.append('id', this.formData.id);
-//                    send = this.$http.post('?', data);
-//                    send.then(ok => {
-//
-//                        for( let i=0; i<this.disciplines.length; i++ ){
-//                            if( this.disciplines[i].id == this.formData.id ){
-//                                this.disciplines[i].label = ok.body.discipline.label;
-//                            }
-//                        }
-//
-//                    })
-//                } else {
-//                    send = this.$http.put('?', data);
-//                    send.then(ok => {
-//                        this.disciplines.push(ok.body.discipline);
-//                        this.disciplines.sort( (a, b) => (a.label < b.label ? -1 : (a.label == b.label ? 0 : 1)));
-//                    })
-//                }
-//
-//                send.catch(
-//                    ko => {
-//                        this.error = ko.body;
-//                    }
-//                ).finally( foo => {
-//                    console.log('FINAL');
-//                    this.formData = null;
-//                });
-//            },
-//
-//            handlerNew(){
-//                this.formData = {
-//                    id: null,
-//                    label: "",
-//                    original: null
-//                };
-//            },
-//
-//            handlerEdit( discipline ){
-//                this.formData = {
-//                    id: discipline.id,
-//                    label: discipline.label,
-//                    original: discipline.label
-//                };
-//            },
-//
-//            handlerCancelForm(){
-//                this.formData = null;
-//            },
-//
-//
-//            handlerDelete( discipline ){
-//                this.deleteData = discipline;
-//            },
-//
-//            performDelete(){
-//                let discipline = this.deleteData;
-//                this.$http.delete('?id=' + discipline.id).then(
-//                    ok => {
-//                        let disciplines = [];
-//
-//                        this.disciplines.forEach( item => {
-//                            if( item.id != discipline.id )
-//                                disciplines.push(item);
-//                        });
-//
-//                        this.disc = disciplines;
-////                        this.deleteData = null;
-//                    },
-//                    ko => {
-//                        this.error = ko.body;
-//                    }
-//                ).then( foo => this.deleteData = null );
-//            }
+            order: function (field) {
+                if( this.sortField == field ){
+                    this.sortDirection *= -1;
+                } else {
+                    this.sortField = field;
+                }
+            },
+            cssSort: function(compare){
+                return compare == this.sortField ? "active" : "";
+            },
+
+            changeTypeDocument: function( document, event ){
+                var newType = $(event.target.selectedOptions[0]).text();
+
+                $.post(this.urlDocumentType, {
+                    documentId: document.id,
+                    type: newType
+                }).then(ok => {
+                    flashMessage('success', 'Le document a bien été modifié');
+                    document.categoryText = newType;
+                    document.editMode = false;
+                    this.$forceUpdate();
+                    //this.$forceUpdate();
+                }, error => {
+                    flashMessage('error', 'Erreur' + error.responseText);
+                    document.editMode = false;
+                });
+            },
+
+            fetch(){
+                this.$http.get(this.url).then(
+                    ok => {
+                        let data = ok.data;
+                        let documentsOrdered = [];
+                        let documents = {};
+
+                        data.forEach(function(doc){
+                            doc.categoryText = doc.category ? doc.category.label : "";
+                            doc.editmode = false;
+                            doc.explode = false;
+                            var filename = doc.fileName;
+                            if( ! documents[filename] ){
+                                documents[filename] = doc;
+                                documents[filename].previous = [];
+                                documentsOrdered.push(doc);
+                            } else {
+                                documents[filename].previous.push(doc);
+                            }
+                        });
+                        this.documents = documentsOrdered;
+                    },
+                    ko => {
+                        console.log("ERROR", ko);
+                    }
+                )
+
+            }
         },
         mounted(){
             console.log("DEBUG");
+            this.fetch();
         }
     }
 </script>

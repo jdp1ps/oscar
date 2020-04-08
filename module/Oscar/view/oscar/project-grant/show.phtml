@@ -269,24 +269,8 @@
 
             if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity) ): ?>
                 <section id="documents" class="has-btn">
-                    <h2>DOC 2</h2>
-                    <div id="docv2"></div>
-                    <script>
-                        requirejs(['vue', 'vue-resource', 'moment', 'documentsactivity'], function(Vue, VueResource, moment, DocumentsActivity){
-                            console.log("NEW DOC", Vue, VueResource, DocumentsActivity);
-                            new Vue({
-                                el: "#docv2",
-                                render(h) {
-                                    return h(DocumentsActivity.default, {
-                                        props: {
-                                            url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>',
-                                            moment: moment
-                                        }
-                                    });
-                                }
-                            });
-                        });
-                    </script>
+
+
                     <h2><i class="icon-book"></i> Documents</h2>
 
                     <?php if( $manage ): ?>
@@ -306,52 +290,40 @@
                         <?php endforeach; ?>
                     </nav>
 
-
-                    <script id="documents-list-template" type="text/x-template">
-                        <div>
-                            <div class="oscar-sorter">
-                                <i class=" icon-sort"></i>
-                                Tier les résultats par :
-                                <a @click.prevent="order('dateUpload')" href="#" :class="cssSort('dateUpload')" class="oscar-sorter-item">
-                                    Date d'upload
-                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-                                </a>
-                                <a @click.prevent="order('fileName')" href="#" :class="cssSort('fileName')" class="oscar-sorter-item">
-                                    Nom du fichier
-                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-                                </a>
-                                <a @click.prevent="order('categoryText')" href="#" :class="cssSort('categoryText')" class="oscar-sorter-item">
-                                    Type de document
-                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-                                </a>
-                            </div>
-                            <document v-for="document in sortedDocument" :document="document" :documentTypes="documentTypes"></document>
-                        </div>
-                    </script>
-
-                    <section id="documents-list" class="lc pending">
-                        <div class="lc-mask">
-                            <div class="lc-alert">
-                                Error message
-                            </div>
-                            <div class="lc-loader">
-                                <span class="text">Chargement</span>
-                            </div>
-                            <div class="lc-content"></div>
-                        </div>
-                    </section>
-
+                    <div id="docv2"></div>
                     <script>
-                        require(['Documents'], function(OscarDocument) {
-                            OscarDocument({
-                                urlDocumentType: '<?= $this->url('contractdocument/document-change-type') ?>',
-                                el: '#documents-list',
-                                documentTypes: <?= $documentTypes ?>,
-                                template: "#documents-list-template",
-                                url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>'
+                        requirejs(['vue', 'vue-resource', 'moment', 'documentsactivity'], function(Vue, VueResource, moment, DocumentsActivity){
+                            Vue.use(VueResource);
+
+                            Vue.filter('dateFull', function(date) {
+                                var m = moment(date);
+                                return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
+                            });
+
+                            Vue.filter('dateFullSort', function(date) {
+                                var m = moment(date);
+                                return m.format('D MMMM YYYY') + ', ' + moment(date).fromNow();
+                            });
+
+                            Vue.filter('filesize', function(octets) {
+                                var sizes = ['Octets', 'KB', 'MB', 'GB', 'TB'];
+                                if (octets == 0) return '0 Octet';
+                                var i = parseInt(Math.floor(Math.log(octets) / Math.log(1024)));
+                                return Math.round(octets / Math.pow(1024, i), 2) + ' ' + sizes[i];
+                            });
+
+                            new Vue({
+                                el: "#docv2",
+                                render(h) {
+                                    return h(DocumentsActivity.default, {
+                                        props: {
+                                            url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>',
+                                            urlDocumentType: '<?= $this->url('contractdocument/document-change-type') ?>',
+                                            documentTypes: <?= $documentTypes ?>,
+                                            moment: moment
+                                        }
+                                    });
+                                }
                             });
                         });
                     </script>
