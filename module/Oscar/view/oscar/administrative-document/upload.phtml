@@ -10,11 +10,11 @@
 
             <div class="col-md-6">
                 <label for="file">Fichier</label>
-                <input type="file" class="form-control" name="file" id="file" />
                 <div class="alert alert-info">
                     <i class="icon-help-circled"></i>
                     La taille du fichier est limitée à <strong><?= ini_get('upload_max_filesize') ?></strong>.
                 </div>
+                <input type="file" class="form-control" name="file" id="file" />
             </div>
 
             <div class="col-md-6">
@@ -37,7 +37,7 @@
         <div class="row">
             <div class="col-md-8 col-md-push-4">
                 <div class="btn-group">
-                    <a href="javascript: history.back()" class="btn btn-default">Retour à l'activité</a>
+                    <a href="javascript: history.back()" class="btn btn-default">Retour à la liste des documents</a>
                     <button type="submit" class="btn btn-primary">Envoyer</button>
 
                 </div>
