@@ -74,6 +74,31 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 php bin/oscar.php check:privileges
 ``` 
 
+### Commandes de synchronisations modifiées
+
+**ATTENTION**, les commandes sont en cours de migrations. Vous pouvez dresser la liste des commandes avec la ligne de commande : 
+
+```bash
+php bin/oscar.php
+```
+
+Parmis les commandes modifiées, les commandes de synchronisation des PERSONNES et des ORGANISATIONS ont changé.
+
+
+Pour les personnes : 
+
+```bash
+# Anciennement php public/index.php oscar persons:sync rest
+php bin/oscar.php persons:sync rest
+```
+
+Pour les organisations : 
+
+```bash
+# Anciennement php public/index.php oscar organizations:sync rest
+php bin/oscar.php organizations:sync rest
+```
+
 ### SIFAC (Experimental)
 
 La version **Macclane** propose en *experimental* la configuration SIFAC pour chargé depuis une source SIFAC(Oracle) les informations sur les dépenses des activités de recherche basée sur le journal des pièces.
