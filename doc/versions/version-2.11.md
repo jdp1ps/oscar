@@ -74,6 +74,26 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 php bin/oscar.php check:privileges
 ``` 
 
+**ATTENTION** Le privilège **création d'une activité** a évoluer, il faut penser à le réactiver aux rôles idoines.
+
+### Création de Projet/Activité
+
+La fonctionnalité permettant de créer des Activitès/Projet a évolué. Initialement, ces fonctionnalités étaient réservées à des rôles APPLICATIF.
+
+Désormais, vous pourrez attribuer ces privilèges à des rôles ORGANISATIONNELS pour permettre aux personnes disposant de ce rôle de créer des activités/projets pour leurs structures. 
+
+Au moment de la création d'une activité/projet, l'utilisateur devra affecter un rôle à une de ces structures dans l'activité créé. A noter que l'accès de la personne à cette activité est calculé selon son rôle dans l'organisation renseignée.
+
+Par exemple, Nadine a le rôle **Directeur** dans la structure **OSCORP**,
+Le rôle **Directeur** est autorisé à voir/modifier/créer une activité de recherche
+Le rôle de structure **Laboratoire** est un rôle **principale**
+
+Depuis Oscar, Nadine pourra créer une nouvelle activité. Dans la fiche création, elle pourra affecter sa structure (OSCOP) avec un des rôles de structure (principal) configurés dans Oscar, parmis ces rôles figurera le rôle **Laboratoire**.
+
+Si la personne ne choisi pas de rôle pour sa structure, l'activité n'est pas créée (un message d'erreur indique qu'il faut choisir un rôle à la structure).
+
+Ce changement permet à Oscar de mieux prendre en charge des fonctionnements plus décentralisés de certains établissements.
+
 ### Commandes de synchronisations modifiées
 
 **ATTENTION**, les commandes sont en cours de migrations. Vous pouvez dresser la liste des commandes avec la ligne de commande : 
