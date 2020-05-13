@@ -65,8 +65,6 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
      */
     public function hydrate(array $data, $object)
     {
-
-        // On retire les nombres vides
         $numbers = [];
         foreach ($data['numbers'] as $key=>$value) {
             if( trim($value) != '' ){

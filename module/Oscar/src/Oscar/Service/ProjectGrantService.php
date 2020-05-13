@@ -154,7 +154,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     }
 
     public function getActivityTypeById( $activityTypeId ){
-        $this->getEntityManager()->getRepository(ActivityType::class)->find($activityTypeId);
+        return $this->getEntityManager()->getRepository(ActivityType::class)->find($activityTypeId);
     }
 
 
