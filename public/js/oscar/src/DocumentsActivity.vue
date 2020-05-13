@@ -20,7 +20,6 @@
                     <i class="icon-angle-up" v-show="sortDirection == -1"></i>
                 </a>
             </div>
-
         </div>
 
 
@@ -49,7 +48,9 @@
                     Fichier <strong>{{ document.extension}}</strong>
                     version {{ document.version }},
                     téléversé le <time>{{ document.dateUpload | dateFull }}</time>
-                    par <strong>{{ document.uploader.displayname }}</strong>
+                    <span v-if="document.uploader">
+                        par <strong>{{ document.uploader.displayname }}</strong>
+                    </span>
                 </p>
                 <div class="exploder" v-if="document.previous.length" @click="document.explode = !document.explode">
                     Versions précédentes <i class="icon-angle-down" v-show="!document.explode"></i>
@@ -61,8 +62,10 @@
 
                         <strong>{{ sub.fileName }}</strong>
                         version <em>{{ sub.version }} </em>,
-                        téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>,
+                        téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
+                        <span v-if="sub.uploader">
                         par <strong>{{ sub.uploader.displayname }}</strong>
+                        </span>
 
                         <a :href="sub.urlDownload">
                             <i class="icon-download-outline"></i>
