@@ -7,6 +7,9 @@
  */
 require __DIR__.'/../vendor/autoload.php';
 
+// Fix PATH problems
+chdir(dirname(__DIR__));
+
 $console = new \Symfony\Component\Console\Application();
 $conf = require __DIR__.'/../config/application.config.php';
 $app = Zend\Mvc\Application::init($conf);
