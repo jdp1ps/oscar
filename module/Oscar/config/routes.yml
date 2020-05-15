@@ -869,6 +869,13 @@ contract:
                 defaults:
                     action: spentList
 
+        spent-synthesis:
+            type: segment
+            options:
+                route: /synthese-depenses/:id
+                defaults:
+                    action: spentSynthesisActivity
+
         requestadmin:
             type: literal
             options:

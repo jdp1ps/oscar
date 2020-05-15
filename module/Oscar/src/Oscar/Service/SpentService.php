@@ -34,6 +34,7 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Utils\StringUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Log\Logger;
@@ -505,6 +506,65 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             throw new OscarException(_("Le champ code doit être renseigné"));
         }
     }
+
+    private $_cacheCompte = [];
+    private $cachePlan;
+
+    public function getPlanComptable(){
+        static $cachePlanComptableCG;
+        if( $cachePlanComptableCG == null ){
+            $out = [];
+            $plan = $this->getEntityManager()->getRepository(SpentTypeGroup::class)->findAll();
+            /** @var SpentTypeGroup $l */
+            foreach ($plan as $l){
+                $out['00'.StringUtils::feedString($l->getCode())] = $l;
+            }
+            return $out;
+        }
+        return $cachePlanComptableCG;
+    }
+
+    public function getCompte($code){
+
+        static $cacheCompte;
+
+
+        if( $cacheCompte == null ){
+            $cacheCompte = [];
+        }
+
+        if( !array_key_exists($code, $cacheCompte) ){
+
+            $plan = $this->getPlanComptable();
+            $find = null;
+            $reduce = strval($code);
+            $out = [];
+
+            for ($i = strlen($reduce) - 1; $find == null && $i > 0; $i--) {
+                if (array_key_exists($reduce, $plan)) {
+                    $out['label'] = $plan[$reduce]->getLabel();
+                    $out['code'] = $plan[$reduce]->getCode();
+                    $out['annexe'] = $plan[$reduce]->getAnnexe();
+                    $find = $out;
+                }
+                $reduce[$i] = '0';
+            }
+
+            if( $find == null ){
+                $cacheCompte[$code] = [
+                    'label' => '',
+                    'code' => '',
+                    'annexe' => ''
+                ];
+            }
+            else {
+                $cacheCompte[$code] = $out;
+            }
+        }
+
+        return $cacheCompte[$code];
+    }
+
     public function getSpentsByPFI( $pfi ){
         $qb = $this->getEntityManager()->getRepository(SpentLine::class)->createQueryBuilder('s');
         $qb->where('s.pfi = :pfi');
@@ -518,6 +578,51 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
 
         return $qb->getQuery()->setParameter('pfi', $pfi)->getResult();
+    }
+
+    /**
+     * Retourne les données de synthèse des dépenses pour un PFI donné sous la forme d'un tableau :
+     * [
+     *  'masse1'    => float,
+     *  'masse2'    => float,
+     *  'masseN'    => float,
+     *  'N.B'       => float,
+     *  'total'     => float
+     * ]
+     *
+     * @param $pfi
+     */
+    public function getSynthesisDatasPFI( $pfi ){
+
+        // Récupération des dépenses
+        $spents = $this->getSpentsByPFI($pfi);
+
+        // Récupération des Masses comptable configurées dans config
+        $masses = $this->getOscarConfigurationService()->getMasses();
+
+        // Structuration du tableau de retour
+        $out = [];
+        foreach ($masses as $key=>$label){
+            $out[$key] = 0.0;
+        }
+
+        $out['N.B'] = 0.0;
+        $out['entries'] = count($spents);
+        $out['total'] = 0.0;
+
+        // Aggrégation des données
+        /** @var SpentLine $spent */
+        foreach ($spents as $spent) {
+            $compte = $this->getCompte($spent->getCompteGeneral());
+            $annexe = $compte['annexe'];
+            if( $annexe == '' ){
+                $annexe = 'N.B';
+            }
+            $out[$annexe] += floatval($spent->getMontant());
+            $out['total'] += floatval($spent->getMontant());
+        }
+
+        return $out;
     }
 
     public function getSpentsTypes(){

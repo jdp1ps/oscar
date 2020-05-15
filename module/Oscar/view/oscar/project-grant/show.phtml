@@ -424,14 +424,30 @@
             <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
             <section>
             <h2><i class="icon-book"></i> Dépenses</h2>
-            <?php if( $entity->getTotalSpent() ): ?>
-            <h1>
-                <strong><?= $entity->getTotalSpent() ?></strong> €<br>
-            </h1>
-                <small>Update : <strong><?= $this->moment($entity->getDateTotalSpent())->full() ?></strong></small>
-            <?php endif; ?>
+
+            <div id="depenses">DÉPENSES</div>
+                <script>
+                    require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function(Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment){
+                        Vue.use(VueResource);
+                        Vue.filter('money', VueFilters.default.money);
+                        Vue.filter('dateFull', function(date) {
+                            var m = moment(date);
+                            return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
+                        });
+                        new Vue({
+                            el: "#depenses",
+                            render:function(h){
+                                return h(ActivitySpendSynthesis.default, {"props":
+                                        {
+                                            "url": "<?= $this->url('contract/spent-synthesis', ['id' => $entity->getId()]) ?>"
+                                        }
+                                });
+                            }
+                        })
+                    })
+                </script>
             <nav>
-                <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
+                <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir le détail des dépenses</a>
                 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $entity)): ?>
                     <form action="<?= $this->url('contract/list-spent', ['id' => $entity->getId()]) ?>" method="post" class="form-inline">
                         <input type="hidden" name="action" value="update" />

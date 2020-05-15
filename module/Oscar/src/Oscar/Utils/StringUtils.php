@@ -28,4 +28,29 @@ class StringUtils
         }
         return implode(', ', $mails);
     }
+
+    /**
+     * Outil pour compléter les chaînes de caractères.
+     *
+     * @param $string
+     * @param string $pattern
+     * @return string
+     */
+    public static function feedString($string, $pattern="00000000"){
+        $string = strval($string);
+        for( $i=0; $i<strlen($pattern); $i++ ){
+            if( strlen($string) > $i && $string[$i] != $pattern[$i] ){
+                $pattern[$i] = $string[$i];
+            }
+        }
+        return $pattern;
+    }
+
+    public static function purgeZero($code){
+        // Zero start
+        $purge = preg_replace('/0*([[0-9]*)/', '$1', $code);
+        // Zero end
+        $purge = preg_replace('/([0-9]*)0*/', '$1', $purge);
+        return $purge;
+    }
 }

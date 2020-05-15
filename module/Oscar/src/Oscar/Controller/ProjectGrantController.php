@@ -1408,6 +1408,40 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    public function spentSynthesisActivityAction(){
+        // Identifiant de l'activité
+        $id = $this->params()->fromRoute('id');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $entity);
+
+
+        $pfi = $entity->getCodeEOTP();
+
+        if( !$pfi ){
+            return $this->getResponseInternalError("Cette activité n'a pas de PFI");
+        }
+
+        $out = $this->baseJsonResponse();
+        $out['error'] = null;
+        try {
+            $this->spentService->syncSpentsByEOTP($pfi);
+        } catch (\Exception $e) {
+            $out['error'] = $e->getMessage();
+        }
+
+
+        $out['masses'] = $this->getOscarConfigurationService()->getMasses();
+        $out['dateUpdated'] = $entity->getDateTotalSpent();
+        $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI($pfi);
+
+        return $this->jsonOutput($out);
+
+    }
+
     /**
      * Fiche pour une activité de recherche.
      */

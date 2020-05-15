@@ -97,7 +97,8 @@ requirejs.config({
         "APIAccess": "oscar/dist/APIAccess",
         "SpentLinePFI": "oscar/dist/SpentLinePFI",
         "gestionprivileges": "oscar/dist/GestionPrivileges",
-        "documentsactivity": "oscar/dist/DocumentsActivity"
+        "documentsactivity": "oscar/dist/DocumentsActivity",
+        "activityspentsynthesis": "oscar/dist/ActivitySpentSynthesis"
     },
     shim: {
         "bootstrap": {

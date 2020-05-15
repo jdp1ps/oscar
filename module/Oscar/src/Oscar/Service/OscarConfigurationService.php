@@ -237,4 +237,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function setActivityRequestLimit( int $value ){
         $this->saveEditableConfKey(self::activity_request_limit, $value);
     }
+
+    public function getMasses(){
+        return $this->getConfiguration('spenttypeannexes');
+    }
 }
