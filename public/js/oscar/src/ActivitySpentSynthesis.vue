@@ -2,10 +2,18 @@
     <section>
 
         <transition name="fade">
-            <div class="error" v-if="error">
-                <i class="icon-warning-empty"></i>
-                Les données affichées peuvent ne pas être à jour : 
+            <div class="alert alert-danger" v-if="error">
+                <i class="icon-attention-1"></i>
+                Il y'a eut un problème lors de la récupération des données financières :
                 {{ error }}
+            </div>
+        </transition>
+
+        <transition name="fade">
+            <div class="alert-warning alert" v-if="warning">
+                <i class="icon-warning-empty"></i>
+                Les données affichées peuvent ne pas être à jour :
+                {{ warning }}
             </div>
         </transition>
 
@@ -48,6 +56,7 @@
         data() {
             return {
                 error: null,
+                warning: null,
                 pendingMsg: "",
                 synthesis: [],
                 masses: {},
@@ -85,6 +94,7 @@
                         this.masses = success.data.masses;
                         this.dateUpdated = success.data.dateUpdated;
                         this.error = success.data.error;
+                        this.warning = success.data.warning;
                     },
                     error => {
                         if( error.status == 403 ){

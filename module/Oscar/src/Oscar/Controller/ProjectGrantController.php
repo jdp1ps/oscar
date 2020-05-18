@@ -1426,14 +1426,20 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
 
         $out = $this->baseJsonResponse();
-        $out['error'] = null;
-        try {
-            $this->spentService->syncSpentsByEOTP($pfi);
-        } catch (\Exception $e) {
-            $out['error'] = $e->getMessage();
+        $out['error'] = null; // Affiche les erreurs survenue lors de la récupération/synchronisation des données
+        $out['warning'] = null; // Affiche les avertissements
+
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity) ){
+            $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
+        } else {
+            try {
+                $this->spentService->syncSpentsByEOTP($pfi);
+            } catch (\Exception $e) {
+                $out['error'] = $e->getMessage();
+            }
         }
 
-
+        // Construction des données de dépense
         $out['masses'] = $this->getOscarConfigurationService()->getMasses();
         $out['dateUpdated'] = $entity->getDateTotalSpent();
         $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI($pfi);
