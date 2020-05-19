@@ -769,6 +769,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
             $numPiece = $spent->getNumPiece();
             $compteBudg = $spent->getCompteBudgetaire();
+            $compte = $this->getCompte($spent->getCompteGeneral());
+            $masse = $compte['annexe'];
 
             $type = $this->getTypeByCode($spent->getCompteGeneral());
 
@@ -781,6 +783,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                     'types' => [],
                     'montant' => 0.0,
                     'compteBudgetaire' => [],
+                    'compteGenerale' => [],
+                    'masse' => [],
                     'datecomptable' => $spent->getDateComptable(),
                     'datepaiement' => $spent->getDatePaiement(),
                     'annee' => $spent->getDateAnneeExercice(),
@@ -804,6 +808,12 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             if( $spent->getCompteBudgetaire() && !in_array($spent->getCompteBudgetaire(), $grouped[$numPiece]['compteBudgetaire']) ){
                 $grouped[$numPiece]['compteBudgetaire'][] = $spent->getCompteBudgetaire();
             }
+            if( $spent->getCompteGeneral() && !in_array($spent->getCompteGeneral(), $grouped[$numPiece]['compteGenerale']) ){
+                $grouped[$numPiece]['compteGenerale'][] = $spent->getCompteGeneral();
+                if( !in_array($masse, $grouped[$numPiece]['masse']) ){
+                    $grouped[$numPiece]['masse'][] = $masse;
+                }
+            }
 
             $grouped[$numPiece]['ids'][] = $spent->getId();
             $grouped[$numPiece]['syncIds'][] = $spent->getSyncId();
@@ -811,6 +821,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $grouped[$numPiece]['montant'] += $spent->getMontant();
 
             $details = $spent->toArray();
+            $details['annexe'] = $masse;
+            $details['compteGeneralLabel'] = $compte['label'];
             $details['codeStr'] = $type;
             $grouped[$numPiece]['details'][] = $details;
         }
