@@ -1573,6 +1573,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         }
         return [
+            'masses'    => $this->getOscarConfigurationService()->getMasses(),
             'activity'  => $activity,
             'spents'    => $spents,
             'msg'       => $msg,

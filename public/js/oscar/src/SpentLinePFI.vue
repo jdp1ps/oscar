@@ -60,7 +60,8 @@
             </div>
         </div>
 
-        <table class="list table table-condensed table-bordered table-condensed card" v-if="spentlines != null">
+
+        <table class="list table table-condensed table-bordered table-condensed card" v-if="spentlines != null && state == 'pack'">
             <thead>
             <tr>
                 <th>N°</th>
@@ -90,6 +91,90 @@
             </tr>
             </tbody>
         </table>
+
+        <div v-else-if="state == 'masse' && spentlines != null">
+
+            <div v-if="byMasse.datas['N.B']">
+                <h2>Dépenses Hors-Masse</h2>
+                <table class="list table table-condensed table-bordered table-condensed card">
+                    <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Ligne(s)</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th style="width: 8%">Montant</th>
+                        <th style="width: 8%">Compte</th>
+                        <th style="width: 8%">Date comptable</th>
+                        <th style="width: 8%">Date paiement</th>
+                        <th style="width: 8%">Année</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="l in byMasse.datas['N.B']">
+                        <td>{{ l.refPiece }}</td>
+                        <td><button @click="details = l" class="btn btn-default">{{ l.details.length }}</button></td>
+                        <td>{{ l.types ? l.types.join(',') : '' }}</td>
+                        <td>{{ l.text.join(', ') }}</td>
+                        <td style="text-align: right">{{ l.montant.toFixed(2) }}</td>
+                        <td>{{ l.compteBudgetaire.join(', ') }}</td>
+                        <td>{{ l.datecomptable }}</td>
+                        <td>{{ l.datepaiement }}</td>
+                        <td>{{ l.annee }}</td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr style="font-weight: bold; font-size: 1.2em">
+                        <td colspan="4" style="text-align: right">Total : </td>
+                        <td style="text-align: right">{{ byMasse.totaux['N.B'].toFixed(2) }}</td>
+                        <td colspan="2">&nbsp;</td>
+                    </tr>
+                    </tfoot>
+                </table>
+                <div class="alert alert-info">
+                    Les comptes des dépenses ci-dessus ne sont pas qualifiés sur les masses attendues.
+                </div>
+            </div>
+
+            <div v-for="masse, k in masses">
+                <h2>{{ masse }}</h2>
+                <table class="list table table-condensed table-bordered table-condensed card">
+                        <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Ligne(s)</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th style="width: 8%">Montant</th>
+                            <th style="width: 8%">Compte</th>
+                            <th style="width: 8%">Date comptable</th>
+                            <th style="width: 8%">Date paiement</th>
+                            <th style="width: 8%">Année</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="l in byMasse.datas[k]">
+                            <td>{{ l.refPiece }}</td>
+                            <td><button @click="details = l" class="btn btn-default">{{ l.details.length }}</button></td>
+                            <td>{{ l.types ? l.types.join(',') : '' }}</td>
+                            <td>{{ l.text.join(', ') }}</td>
+                            <td style="text-align: right">{{ l.montant.toFixed(2) }}</td>
+                            <td>{{ l.compteBudgetaire.join(', ') }}</td>
+                            <td>{{ l.datecomptable }}</td>
+                            <td>{{ l.datepaiement }}</td>
+                            <td>{{ l.annee }}</td>
+                        </tr>
+                        </tbody>
+                    <tfoot>
+                        <tr style="font-weight: bold; font-size: 1.2em">
+                            <td colspan="4" style="text-align: right">Total : </td>
+                            <td style="text-align: right">{{ byMasse.totaux[k].toFixed(2) }}</td>
+                            <td colspan="2">&nbsp;</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
     </section>
 
 </template>
@@ -98,10 +183,11 @@
 
 
     export default {
-        props: ['moment', 'url'],
+        props: ['moment', 'url', 'masses'],
 
         data() {
             return {
+                state: "masse",
                 error: null,
                 pendingMsg: "",
                 spentlines: null,
@@ -110,7 +196,36 @@
         },
 
         computed: {
+            byMasse(){
+                let out = {
+                    datas: {
+                        'N.B': []
+                    },
+                    totaux: {
+                        'N.B': 0.0
+                    }
+                };
 
+                for( let k in this.masses ){
+                    out.datas[k] = [];
+                    out.totaux[k] = 0.0;
+                }
+
+                for( let s in this.spentlines ){
+                    let groupedLine = this.spentlines[s];
+
+                    for( let indexAnnexe in groupedLine.masse ){
+                        let annexe = groupedLine.masse[indexAnnexe];
+                        if( !annexe )
+                            annexe = 'N.B';
+
+                        out.datas[annexe].push(groupedLine);
+                        out.totaux[annexe] += groupedLine.montant;
+                    }
+                }
+
+                return out;
+            }
         },
 
         methods: {
