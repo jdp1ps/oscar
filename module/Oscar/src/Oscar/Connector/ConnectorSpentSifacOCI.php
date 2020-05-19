@@ -47,6 +47,9 @@ class ConnectorSpentSifacOCI
 
         $exists = $this->spentService->getSpentsSyncIdByPFI($pfi);
 
+        // Limite de 5 secondes pour cette requête
+        oci_set_call_timeout($c, 5000);
+
         if( $c ){
             $stid = oci_parse($c, sprintf($this->sifacAccess['spent_query'], $pfi));
             if( !$stid ){

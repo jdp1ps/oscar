@@ -59,6 +59,7 @@ class OscarSpentInfosCommand extends OscarCommandAbstract
         $spentService = $this->getServicemanager()->get(SpentService::class);
 
         $datas = $spentService->getSynthesisDatasPFI($pfi);
+
         $masses = $oscarConfig->getMasses();
 
         $headers = ["Annexe", "Total"];
@@ -75,5 +76,12 @@ class OscarSpentInfosCommand extends OscarCommandAbstract
         $rows[] = ["TOTAL", $datas['total']];
 
         $io->table($headers, $rows);
+
+        if( count($datas['details']['N.B']) > 0 ){
+            $io->title("Compte Générale dont la masse n'est pas renseignée : ");
+            foreach( $datas['details']['N.B'] as $compte){
+                $io->text( " - <bold>$compte</bold>");
+            }
+        }
     }
 }

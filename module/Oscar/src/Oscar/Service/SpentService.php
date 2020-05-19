@@ -602,24 +602,39 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
         // Structuration du tableau de retour
         $out = [];
-        foreach ($masses as $key=>$label){
-            $out[$key] = 0.0;
-        }
 
         $out['N.B'] = 0.0;
         $out['entries'] = count($spents);
         $out['total'] = 0.0;
+        $out['details'] = [];
+        $out['totals'] = [];
+        $out['totals']['N.B'] = 0.0;
+        $out['details']['N.B'] = [];
+
+        foreach ($masses as $key=>$label){
+            $out[$key] = 0.0;
+            $out['totals'][$key] = 0.0;
+            $out['details'][$key] = [];
+        }
+
+
 
         // Aggrégation des données
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
-            $compte = $this->getCompte($spent->getCompteGeneral());
-            $annexe = $compte['annexe'];
+            $compte = $spent->getCompteGeneral();
+            $compteInfos = $this->getCompte($compte);
+            $annexe = $compteInfos['annexe'];
+
             if( $annexe == '' ){
                 $annexe = 'N.B';
+                if( !in_array($compte, $out['details'][$annexe]))
+                    $out['details'][$annexe][] = $compte;
             }
             $out[$annexe] += floatval($spent->getMontant());
             $out['total'] += floatval($spent->getMontant());
+            $out['totals'][$annexe] += floatval($spent->getMontant());
+
         }
 
         return $out;
