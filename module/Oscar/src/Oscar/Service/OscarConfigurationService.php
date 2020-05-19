@@ -241,4 +241,11 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getMasses(){
         return $this->getConfiguration('spenttypeannexes');
     }
+
+    /**
+     * @return bool
+     */
+    public function getAutoUpdateSpent(){
+        return $this->getOptionalConfiguration("autorefreshspents", false);
+    }
 }

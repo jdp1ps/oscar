@@ -1364,28 +1364,26 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
-     * Fiche pour une activité de recherche.
+     * Détail des dépenses pour une activité de recherche
      */
     public function estimatedSpentAction()
     {
         // Identifiant de l'activité
         $id = $this->params()->fromRoute('id');
 
+
         /** @var Activity $entity */
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
         // Check access
-       // $this->getOscarUserContext()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
+        $this->getOscarUserContext()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
 
 
         $spentService = $this->getSpentService();
 
         $lines = $spentService->getLinesByMasse();
         $masses = $spentService->getMasses();
-        /*
-        echo "<pre>"; var_dump($lines);
-        die();
-        */
+
         $types = $spentService->getTypesTree();
         $years = $spentService->getYearsListActivity($entity);
 
@@ -1398,7 +1396,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
         }
 
-
         return [
             'lines' => $lines,
             'masses' => $masses,
@@ -1408,6 +1405,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    /**
+     * Retourne les données de synthèse des dépenses d'une activité de recherche.
+     *
+     * @return \Zend\Http\Response|JsonModel
+     * @throws \Exception
+     */
     public function spentSynthesisActivityAction(){
         // Identifiant de l'activité
         $id = $this->params()->fromRoute('id');
@@ -1429,13 +1432,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $out['error'] = null; // Affiche les erreurs survenue lors de la récupération/synchronisation des données
         $out['warning'] = null; // Affiche les avertissements
 
-        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity) ){
-            $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
-        } else {
-            try {
-                $this->spentService->syncSpentsByEOTP($pfi);
-            } catch (\Exception $e) {
-                $out['error'] = $e->getMessage();
+        if( $this->getOscarConfigurationService()->getAutoUpdateSpent() ){
+            if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity) ){
+                $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
+            } else {
+                try {
+                    $this->spentService->syncSpentsByEOTP($pfi);
+                } catch (\Exception $e) {
+                    $out['error'] = $e->getMessage();
+                }
             }
         }
 
