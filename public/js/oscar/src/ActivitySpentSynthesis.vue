@@ -29,29 +29,36 @@
         <table class="table table-condensed" v-if="!pendingMsg">
             <tr v-for="m,k in masses">
                 <th>{{ m }}</th>
-                <td style="text-align: right">{{ synthesis[k] | money  }} €</td>
+                <td style="text-align: right; white-space: nowrap">{{ synthesis[k] | money  }}&nbsp;€</td>
             </tr>
             <tr style="border-top: solid #000 thin" v-if="synthesis['N.B']">
-                <th>Hors masse</th>
-                <td style="text-align: right">{{ synthesis['N.B'] | money  }} €</td>
+                <th>
+                    Hors masse<br>
+                    <small style="font-weight: 300" class="error-block"><i class="icon-attention"></i> Les annexes de certains comptes ne sont pas renseignés :
+                        <ul>
+                            <li v-for="c in synthesis.details['N.B']"><strong>{{c}}</strong></li>
+                        </ul>
+                        <a :href="manageDepense" v-if="manageDepense" class="btn btn-xs btn-default"> <i class="icon-cog"></i>Gérer les types de dépense</a>
+                        <span v-else>Merci de contacter un administrateur pour que les annexes des comptes soient configurés.</span>
+                    </small>
+                </th>
+                <td style="text-align: right; white-space: nowrap">{{ synthesis['N.B'] | money  }}&nbsp;€</td>
             </tr>
             <tr style="border-top: solid #000 thin; font-size: 1.6em">
                 <th>TOTAL : </th>
-                <td style="text-align: right">{{ synthesis['total'] | money }} €</td>
+                <td style="text-align: right; white-space: nowrap">{{ synthesis['total'] | money }}&nbsp;€</td>
             </tr>
         </table>
 
         <small>Données mise à jour : <strong v-if="dateUpdated">{{ dateUpdated.date | dateFull }}</strong></small>
-
     </section>
-
 </template>
 <script>
     // nodejs node_modules/.bin/poi watch --format umd --moduleName  ActivitySpentSynthesis --filename.js ActivitySpentSynthesis.js --dist public/js/oscar/dist public/js/oscar/src/ActivitySpentSynthesis.vue
 
 
     export default {
-        props: ['url'],
+        props: ['url', 'manageDepense'],
 
         data() {
             return {

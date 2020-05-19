@@ -629,7 +629,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             if( $annexe == '' ){
                 $annexe = 'N.B';
                 if( !in_array($compte, $out['details'][$annexe]))
-                    $out['details'][$annexe][] = $compte;
+                    $out['details'][$annexe][] = $compte . ' (' . $compteInfos['label'] . ')';
             }
             $out[$annexe] += floatval($spent->getMontant());
             $out['total'] += floatval($spent->getMontant());

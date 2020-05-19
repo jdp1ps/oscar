@@ -3527,6 +3527,16 @@ body .tv {
   }
 }
 
+.error-block {
+  display: block;
+  padding: .25em .5em;
+  border-radius: 4px;
+  background: $colorRed;
+  color: white;
+  text-shadow: -1px 1px 0 rgba(0,0,0,.5);
+  box-shadow: 0 0 .5em rgba(0,0,0,.3);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // FORMULAIRE

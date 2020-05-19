@@ -439,6 +439,7 @@
                             render:function(h){
                                 return h(ActivitySpendSynthesis.default, {"props":
                                         {
+                                            "manageDepense": '<?= $this->grant(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ? $this->url('depense/manage') : "null" ?>',
                                             "url": "<?= $this->url('contract/spent-synthesis', ['id' => $entity->getId()]) ?>"
                                         }
                                 });
