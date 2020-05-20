@@ -94,6 +94,7 @@
 
         <div v-else-if="state == 'masse' && spentlines != null">
 
+            <!-- Données HORS-MASSE -->
             <div v-if="byMasse.datas['N.B']">
                 <h2>Dépenses Hors-Masse</h2>
                 <table class="list table table-condensed table-bordered table-condensed card">
@@ -136,10 +137,11 @@
                 </div>
             </div>
 
+            <!-- MASSE DISPONIBLES -->
             <div v-for="masse, k in masses">
                 <h2>{{ masse }}</h2>
-                <table class="list table table-condensed table-bordered table-condensed card">
-                        <thead>
+                <table class="list table table-condensed table-bordered table-condensed card" v-if="byMasse.datas[k].length > 0">
+                    <thead>
                         <tr>
                             <th>N°</th>
                             <th>Ligne(s)</th>
@@ -151,8 +153,8 @@
                             <th style="width: 8%">Date paiement</th>
                             <th style="width: 8%">Année</th>
                         </tr>
-                        </thead>
-                        <tbody>
+                    </thead>
+                    <tbody>
                         <tr v-for="l in byMasse.datas[k]">
                             <td>{{ l.refPiece }}</td>
                             <td><button @click="details = l" class="btn btn-default">{{ l.details.length }}</button></td>
@@ -164,7 +166,7 @@
                             <td>{{ l.datepaiement }}</td>
                             <td>{{ l.annee }}</td>
                         </tr>
-                        </tbody>
+                    </tbody>
                     <tfoot>
                         <tr style="font-weight: bold; font-size: 1.2em">
                             <td colspan="4" style="text-align: right">Total : </td>
@@ -173,6 +175,9 @@
                         </tr>
                     </tfoot>
                 </table>
+                <div v-else class="alert alert-info">
+                    Aucune entrée.
+                </div>
             </div>
         </div>
     </section>
