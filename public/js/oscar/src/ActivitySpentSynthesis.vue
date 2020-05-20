@@ -36,7 +36,7 @@
                     Hors masse<br>
                     <small style="font-weight: 300" class="error-block"><i class="icon-attention"></i> Les annexes de certains comptes ne sont pas renseignés :
                         <ul>
-                            <li v-for="c in synthesis.details['N.B']"><strong>{{c}}</strong></li>
+                            <li v-for="c in getNoMasse"><strong>{{c}}</strong></li>
                         </ul>
                         <a :href="manageDepense" v-if="manageDepense" class="btn btn-xs btn-default"> <i class="icon-cog"></i>Gérer les types de dépense</a>
                         <span v-else>Merci de contacter un administrateur pour que les annexes des comptes soient configurés.</span>
@@ -72,6 +72,15 @@
         },
 
         computed: {
+            getNoMasse(){
+                let out = [];
+                for( let m in this.synthesis.details['N.B'] ){
+                    let labelCompte = this.synthesis.details['N.B'][m];
+                    if( out.indexOf(labelCompte) < 0 )
+                        out.push(labelCompte);
+                }
+                return out;
+            }
 
         },
 
