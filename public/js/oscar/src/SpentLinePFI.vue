@@ -95,7 +95,7 @@
         <div v-else-if="state == 'masse' && spentlines != null">
 
             <!-- Données HORS-MASSE -->
-            <div v-if="byMasse.datas['N.B']">
+            <div v-if="byMasse.datas['N.B'].length">
                 <h2>Dépenses Hors-Masse</h2>
                 <table class="list table table-condensed table-bordered table-condensed card">
                     <thead>
