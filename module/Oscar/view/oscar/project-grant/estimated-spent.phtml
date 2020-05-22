@@ -1,40 +1,75 @@
 <div class="container-fluid">
     <h1>Dépenses prévisionnelles</h1>
-
-
-
     <div id="app" style="display: none">
+        <transition name="fade">
+            <div class="error overlay" v-if="error">
+                <div class="overlay-content">
+                    <h3>
+                        <i class="icon-warning-empty"></i> Impossible d'enregistrer les données
+                    </h3>
+                    <pre>
+                        Le serveur a répondu :
+                        {{ error }}
+                    </pre>
+                    <a href="#" @click="error = null" class="btn btn-sm btn-default btn-xs">
+                        <i class="icon-cancel-circled"></i>
+                        Fermer</a>
+                </div>
+            </div>
+        </transition>
+
+        <transition name="fade">
+            <div class="pending overlay" v-if="loadingMsg">
+                <div class="overlay-content">
+                    <i class="icon-spinner animate-spin"></i>
+                    {{ loadingMsg }}
+                </div>
+            </div>
+        </transition>
+
         <section class="previsionnel" v-if="values">
-            <header class="line" >
-                <span class="cell cell-code">
-                        <code class="code">code</code>
-                    </span>
-                <strong class="cell">Intitulé</strong>
-                <span class="year cell" v-for="year in years">
-                        {{ year }}
-                    </span>
-                <span class="total cell"> TOTAL</span>
-            </header>
-            <section class="masse" v-for="masse, keyMasse in masses">
-                <h1>{{ masse }}</h1>
-
-                <article v-for="line in lines" v-if="line.annexe == keyMasse" class="line" >
+            <form action="" method="post" @submit.prevent="handlerSave">
+                <header class="line" >
                     <span class="cell cell-code">
-                        <code class="code">{{ line.code }}</code>
-                    </span>
-                    <strong class="cell">{{ line.label }}</strong>
-<!--                    <span>{{ values[line.id] }}</span>-->
+                            <code class="code">code</code>
+                        </span>
+                    <strong class="cell">Intitulé</strong>
                     <span class="year cell" v-for="year in years">
-                        <input type="text" @change="handlerChange($event, line.id, year)"
-                               :name="'previsionnel[' +line.code +'][' +year +']'"
-                                :value="values[line.id] ? values[line.id][year] : 'unknow'"
-                               class="form-control"
-                               placeholder="0.0" style="display: inline-block"/>
-                    </span>
-                    <span class="total cell"> {{ totaux[line.id] }}</span>
-                </article>
+                            {{ year }}
+                        </span>
+                    <span class="total cell"> TOTAL</span>
+                </header>
 
-            </section>
+                <section class="masse" v-for="masse in byMasse">
+                    <article class="line">
+                        <span class="cell cell-code">{{ masse.code }}</span>
+                        <strong class="cell cell-label">{{ masse.label }}</strong>
+                        <span class="year cell" v-for="year in years">
+                            {{ year }}
+                        </span>
+                        <span class="total cell">{{ totaux[masse.code] }}</span>
+                    </article>
+
+                    <article class="line" v-for="compte in masse.comptes" :class="'marge-' + compte.code.length">
+                        <span class="cell cell-code">{{ compte.code }}</span>
+                        <strong class="cell cell-label">{{ compte.label }}</strong>
+                        <span class="year cell" v-for="year in compte.years">
+                            <input type="text" :name="'previsionnel['+compte.code+']['+year.label+']'"
+                                   @change="handlerChange($event, compte.code, year.label)"
+                                   class="form-control total"
+                                   :value="year.value"
+                                   :placeholder="'Total pour ' + year.label" style="display: inline-block"/>
+                        </span>
+                        <span class="total cell">{{ total(compte.code) }}</span>
+                    </article>
+
+
+                </section>
+
+                <nav>
+                    <button><i class="icon-floppy"></i>Enregistrer</button>
+                </nav>
+            </form>
         </section>
     </div>
     <style>
@@ -53,6 +88,14 @@
             padding: 0 .2em;
         }
 
+        .cell input {
+            text-align: right;
+        }
+
+        input.total {
+            font-weight: 600;
+        }
+
         header .cell {
             font-weight: 900;
         }
@@ -69,13 +112,26 @@
         .line .cell.year { flex: 0 0 7em;}
         .line .cell.total { flex: 0 0 10em; text-align: right }
 
+        .marge-2 .cell-label { padding-left: 1em }
+        .marge-3 .cell-label { padding-left: 1.4em; font-size: .9em; font-weight: 400 }
+        .marge-4 .cell-label { padding-left: 1.8em; font-size: .8em; font-weight: 200 }
+        .marge-5 .cell-label { padding-left: 2.2em; font-size: .7em; font-weight: 100 }
+
+        .marge-2 .cell-code { padding-left: 1em }
+        .marge-3 .cell-code { padding-left: 1.4em; font-size: .9em; font-weight: 400 }
+        .marge-4 .cell-code { padding-left: 1.8em; font-size: .8em; font-weight: 200 }
+        .marge-5 .cell-code { padding-left: 2.2em; font-size: .7em; font-weight: 100 }
+
         .cell-code code { font-weight: 100}
     </style>
     <script>
-        require(["vue"], function(Vue){
+        require(["vue", 'vue-resource'], function(Vue, VueResource){
+            Vue.use(VueResource);
            new Vue({
                el: "#app",
                data: {
+                   loadingMsg: "",
+                   error: "",
                    masses: <?= json_encode($masses) ?>,
                    lines: <?= json_encode($lines) ?>,
                    years: <?= json_encode($years) ?>,
@@ -83,38 +139,85 @@
                    totaux: {}
                },
 
+               computed: {
+                   byMasse(){
+                       let out = [];
+                       for( let masse in this.masses ){
+                           let group = {
+                               label: this.masses[masse],
+                               code : masse,
+                               comptes: []
+                           };
+
+                           for( compte in this.lines ){
+
+                               let line = this.lines[compte]; // Données du compte
+                               let code = line.code; // CODE du compte
+                               let values = this.values[code]; // Valeurs pour le compte
+
+                               // On filtre les comptes selon la MASSE
+                               if( line.annexe == masse ){
+                                   let compteObj = {
+                                       code: line.code,
+                                       label: line.label,
+                                       years: []
+                                   };
+
+                                   for( let year in this.years ){
+                                       let y = this.years[year];    // Année
+                                       let value = values && values[y] ? values[y] : '0'; // Valeur pour cette année
+                                       compteObj.years.push({
+                                           label: y,
+                                           value: value
+                                       });
+                                   }
+                                   group.comptes.push(compteObj);
+                               }
+                           }
+                           out.push(group);
+                       }
+                       return out;
+                   }
+               },
+
                methods: {
+                   handlerSave(event){
+                       console.log("Enregistrement...");
+                       let formData = new FormData(event.target);
+                       this.$http.post('', formData).then(
+                           ok => {
+                               console.error(ok);
+                           },
+                           ko => {
+                               console.error(ko);
+                               this.error = ko.body;
+                           }
+                       ).then( foo => {
+                           this.loadingMsg = "";
+                       });
+                   },
+
                    handlerChange(evt, code, year){
+                       console.log("UPDATE", code, year, evt.target.value);
                        var value = parseFloat(evt.target.value)?parseFloat(evt.target.value):0;
                        if( !this.values.hasOwnProperty(code) ){
                            this.values[code] = {};
                        }
                        this.values[code][year] = value;
-
-                       var total = 0.0;
-                       Object.keys(this.values[code]).forEach( k => {
-                           console.log(code, k);
-                           total += this.values[code][k];
-                       });
-                       this.totaux[code] = total;
-
-
-
-                       console.log(this.values, this.totaux);
-
                    },
 
-                   value(code, year){
-                       var total = 0.0;
-
-                       try {
-                           total = this.values[code][year];
-                       } catch (e) {
-                           total = '';
+                   total(code) {
+                       console.log(code, this.values[code], this.values);
+                       let total = 0.0;
+                       if( this.values[code] ){
+                           for( let i in this.values[code] ){
+                               console.log(i);
+                               total += parseFloat(this.values[code][i]);
+                           }
                        }
-
                        return total;
                    }
+
                },
 
                created: function(){

@@ -17,6 +17,7 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\EstimatedSpentLine;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\OrganizationPerson;
@@ -793,8 +794,6 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                 ];
             }
 
-
-
             if( $compteBudg == 'PG_REM' ){
                 $grouped[$numPiece]['refPiece'] = $spent->getPieceRef();
             }
@@ -802,12 +801,15 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             if( $spent->getDesignation() && !in_array($spent->getDesignation(), $grouped[$numPiece]['text']) ){
                 $grouped[$numPiece]['text'][] = $spent->getDesignation();
             }
+
             if( $spent->getTexteFacture() && !in_array($spent->getTexteFacture(), $grouped[$numPiece]['text']) ){
                 $grouped[$numPiece]['text'][] = $spent->getTexteFacture();
             }
+
             if( $spent->getCompteBudgetaire() && !in_array($spent->getCompteBudgetaire(), $grouped[$numPiece]['compteBudgetaire']) ){
                 $grouped[$numPiece]['compteBudgetaire'][] = $spent->getCompteBudgetaire();
             }
+
             if( $spent->getCompteGeneral() && !in_array($spent->getCompteGeneral(), $grouped[$numPiece]['compteGenerale']) ){
                 $grouped[$numPiece]['compteGenerale'][] = $spent->getCompteGeneral();
                 if( !in_array($masse, $grouped[$numPiece]['masse']) ){
@@ -828,6 +830,29 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
 
         return $grouped;
+    }
+
+    public function getPrevisionnalSpentsByPfi( $pfi, $justValue=false ){
+        $out = [];
+
+        $query = $this->getEntityManager()->getRepository(EstimatedSpentLine::class)
+            ->createQueryBuilder('e')
+            ->where('e.pfi = :pfi')
+            ->getQuery();
+
+        $estimatedSpents = $query->setParameter('pfi', $pfi)->getResult();
+
+        /** @var EstimatedSpentLine $estimatedSpent */
+        foreach ($estimatedSpents as $estimatedSpent) {
+            $account = (string)$estimatedSpent->getAccount();
+            $year = (string)$estimatedSpent->getYear();
+            if( !array_key_exists($account, $out) ){
+                $out[$account] = [];
+            }
+            $out[$account][$year] = $justValue ? $estimatedSpent->getAmount() : $estimatedSpent;
+        }
+
+        return $out;
     }
 
     public function getConnector(){

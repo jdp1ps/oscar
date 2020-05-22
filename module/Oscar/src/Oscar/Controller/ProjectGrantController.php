@@ -20,6 +20,7 @@ use Oscar\Entity\ActivityRequestRepository;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
+use Oscar\Entity\EstimatedSpentLine;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Notification;
 use Oscar\Entity\Organization;
@@ -30,6 +31,7 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\SpentLine;
+use Oscar\Entity\SpentTypeGroup;
 use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
@@ -1371,29 +1373,94 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Identifiant de l'activité
         $id = $this->params()->fromRoute('id');
 
-
         /** @var Activity $entity */
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
         // Check access
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
 
+        // PFI
+        $pfi = $entity->getCodeEOTP();
 
+        if( !$pfi ){
+            throw new OscarException("Impossible de gérer un budget prévisionnel sans PFI");
+        }
+
+        // Method
+        $method = $this->getHttpXMethod();
+
+        // Services
         $spentService = $this->getSpentService();
 
+        // Datas visualization
         $lines = $spentService->getLinesByMasse();
         $masses = $spentService->getMasses();
-
         $types = $spentService->getTypesTree();
         $years = $spentService->getYearsListActivity($entity);
 
-        $values = [];
+        if( $method == 'GET' ){
+            // Get Value
+            $values = $out = $spentService->getPrevisionnalSpentsByPfi($pfi, true);
 
-        foreach( $this->getSpentService()->getAllArray() as $spent ){
-            $values[$spent['id']] = [];
-            foreach ($years as $year) {
-                $values[$spent['id']][$year] = 0.0;
+            foreach( $masses as $masseCode=>$masse ){
+                $values[$masseCode] = [];
+                foreach ($years as $year) {
+                    $values[$masseCode][$year] = 0.0;
+                }
             }
+
+            /** @var SpentTypeGroup $spent */
+            foreach( $this->getSpentService()->getAllArray() as $spent ){
+                if( !$spent['annexe'] ) continue;
+                $compte = (string)$spent['code'];
+                if (!array_key_exists($compte, $values))
+                    $values[$compte] = [];
+
+                foreach ($years as $year) {
+                    if (!array_key_exists($year, $values[$compte]))
+                        $values[$compte][$year] = 0.0;
+                }
+            }
+        }
+
+        elseif ($method == 'POST') {
+            $masses         = $_POST['masses'];
+            $previsionnals  = $_POST['previsionnel'];
+
+            // Récupération du prévisionnel existant
+            $out = $spentService->getPrevisionnalSpentsByPfi($pfi);
+
+            foreach ($previsionnals as $compte=>$compteDatas) {
+                foreach ($compteDatas as $year=>$amount) {
+                    $this->getLoggerService()->notice("$compte ($year) : $amount");
+                    $amount = (float)$amount;
+
+                    if ($amount > 0) {
+                        if( !array_key_exists($compte, $out) ){
+                            $out[$compte] = [];
+                        }
+                        if( !array_key_exists($year, $out[$compte]) ){
+                            $out[$compte][$year] = new EstimatedSpentLine();
+                            $this->getEntityManager()->persist($out[$compte][$year]);
+                        }
+                        $out[$compte][$year]->setAmount($amount);
+                        $out[$compte][$year]->setYear($year);
+                        $out[$compte][$year]->setPfi($pfi);
+                        $out[$compte][$year]->setAccount($compte);
+
+                    } else {
+                        if( array_key_exists($compte, $out) && array_key_exists($year, $out[$compte]) ){
+                            $this->getEntityManager()->remove($out[$compte][$year]);
+                        }
+                    }
+                }
+            }
+            try {
+                $this->getEntityManager()->flush();
+            } catch (\Exception $e) {
+                return $this->getResponseInternalError("Impossible d'enregistrer le budget prévisionnel : " . $e->getMessage());
+            }
+            return $this->getResponseOk();
         }
 
         return [

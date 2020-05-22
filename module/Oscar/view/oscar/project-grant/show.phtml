@@ -458,7 +458,10 @@
                         </button>
                     </form>
                 <?php endif; ?>
-                <!-- <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a> -->
+
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW) ): ?>
+                    <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a>
+                <?php endif; ?>
             </nav>
             </section>
             <?php endif; ?>
