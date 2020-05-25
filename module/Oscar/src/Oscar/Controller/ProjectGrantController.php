@@ -1382,10 +1382,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // PFI
         $pfi = $entity->getCodeEOTP();
 
-        if( !$pfi ){
-            throw new OscarException("Impossible de gérer un budget prévisionnel sans PFI");
-        }
-
         // Method
         $method = $this->getHttpXMethod();
 
@@ -1400,12 +1396,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         if( $method == 'GET' ){
             // Get Value
-            $values = $out = $spentService->getPrevisionnalSpentsByPfi($pfi, true);
+            if( $pfi )
+                $values = $out = $spentService->getPrevisionnalSpentsByPfi($pfi, true);
+            else
+                $values = [];
 
             foreach( $masses as $masseCode=>$masse ){
-                $values[$masseCode] = [];
+
+                if (!array_key_exists($masseCode, $values))
+                    $values[$masseCode] = [];
+
                 foreach ($years as $year) {
-                    $values[$masseCode][$year] = 0.0;
+                    if (!array_key_exists($year, $values[$masseCode]))
+                        $values[$masseCode][$year] = 0.0;
                 }
             }
 
@@ -1464,6 +1467,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
 
         return [
+            'activity' => $entity,
             'lines' => $lines,
             'masses' => $masses,
             'years' => $years,

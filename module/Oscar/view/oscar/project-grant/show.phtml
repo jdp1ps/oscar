@@ -421,51 +421,57 @@
                 </script>
             <?php endif; ?>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
             <section>
-            <h2><i class="icon-book"></i> Dépenses</h2>
+                <h2><i class="icon-book"></i> Dépenses</h2>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
 
-            <div id="depenses">DÉPENSES</div>
-                <script>
-                    require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function(Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment){
-                        Vue.use(VueResource);
-                        Vue.filter('money', VueFilters.default.money);
-                        Vue.filter('dateFull', function(date) {
-                            var m = moment(date);
-                            return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
-                        });
-                        new Vue({
-                            el: "#depenses",
-                            render:function(h){
-                                return h(ActivitySpendSynthesis.default, {"props":
-                                        {
-                                            "manageDepense": '<?= $this->grant(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ? $this->url('depense/manage') : "null" ?>',
-                                            "url": "<?= $this->url('contract/spent-synthesis', ['id' => $entity->getId()]) ?>"
-                                        }
-                                });
-                            }
+                <?php if( !$this->entity->getCodeEOTP() ): ?>
+                <div class="alert alert-warning">
+                    L'activité doit avoir un PFI pour le suivi des dépenses
+                </div>
+                <?php else: ?>
+                <div id="depenses">DÉPENSES</div>
+                    <script>
+                        require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function(Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment){
+                            Vue.use(VueResource);
+                            Vue.filter('money', VueFilters.default.money);
+                            Vue.filter('dateFull', function(date) {
+                                var m = moment(date);
+                                return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
+                            });
+                            new Vue({
+                                el: "#depenses",
+                                render:function(h){
+                                    return h(ActivitySpendSynthesis.default, {"props":
+                                            {
+                                                "manageDepense": '<?= $this->grant(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ? $this->url('depense/manage') : "null" ?>',
+                                                "url": "<?= $this->url('contract/spent-synthesis', ['id' => $entity->getId()]) ?>"
+                                            }
+                                    });
+                                }
+                            })
                         })
-                    })
-                </script>
-            <nav>
-                <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir le détail des dépenses</a>
-                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $entity)): ?>
-                    <form action="<?= $this->url('contract/list-spent', ['id' => $entity->getId()]) ?>" method="post" class="form-inline">
-                        <input type="hidden" name="action" value="update" />
-                        <button type="submit" class="btn btn-primary">
-                            <i class="icon-file-excel"></i>
-                            Mettre à jour les données depuis SIFAC
-                        </button>
-                    </form>
+                    </script>
+                <nav>
+                    <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir le détail des dépenses</a>
+                    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $entity)): ?>
+                        <form action="<?= $this->url('contract/list-spent', ['id' => $entity->getId()]) ?>" method="post" class="form-inline">
+                            <input type="hidden" name="action" value="update" />
+                            <button type="submit" class="btn btn-primary">
+                                <i class="icon-file-excel"></i>
+                                Mettre à jour les données depuis SIFAC
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </nav>
+                </section>
                 <?php endif; ?>
 
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW) ): ?>
                     <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a>
                 <?php endif; ?>
-            </nav>
-            </section>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
     </div>
     <hr>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
