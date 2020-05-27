@@ -13,7 +13,7 @@ Les colonnes calculées permettent de configurer des colonnes supplémentaires. 
 
 ### Exemple : Configuration utilisée à Caen
 
-Cette configuration permet d'ajouter une colonne *Multilaboratoire* qui affichera le code du seul labo ou "Multilaboratoire" si l'activité a plusieurs laboratoires impliqués et ajoute une colonne avenant qui indique si l'activité est un avenant (sen se basant sur la présente textuelle du terme avenant dans l'intitulé) : 
+Cette configuration permet d'ajouter une colonne *Multilaboratoire* qui affichera le code du seul labo ou "Multilaboratoire" si l'activité a plusieurs laboratoires impliqués et ajoute une colonne avenant qui indique si l'activité est un avenant (en se basant sur la présente textuelle du terme avenant dans l'intitulé) : 
 
 ```php
 // config/autoload/local.php
